@@ -1,0 +1,110 @@
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - oci.oracle.com
+  resources:
+  - autonomousdatabases
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - oci.oracle.com
+  resources:
+  - autonomousdatabases/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - oci.oracle.com
+  resources:
+  - autonomousdatabases/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - oci.oracle.com
+  resources:
+  - mysqldbsystems
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - oci.oracle.com
+  resources:
+  - mysqldbsystems/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - oci.oracle.com
+  resources:
+  - mysqldbsystems/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - oci.oracle.com
+  resources:
+  - streams
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - oci.oracle.com
+  resources:
+  - streams/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - oci.oracle.com
+  resources:
+  - streams/status
+  verbs:
+  - get
+  - patch
+  - update

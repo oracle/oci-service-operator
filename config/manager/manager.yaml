@@ -1,0 +1,110 @@
+#
+# Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    control-plane: controller-manager
+  name: system
+---
+apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: osokconfig
+data:
+  useinstanceprincipal: dHJ1ZQ==
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: controller-manager
+  namespace: system
+  labels:
+    control-plane: controller-manager
+spec:
+  selector:
+    matchLabels:
+      control-plane: controller-manager
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        control-plane: controller-manager
+    spec:
+      securityContext:
+        runAsUser: 65532
+      containers:
+      - command:
+        - /manager
+        args:
+        - --leader-elect
+        image: controller:latest
+        imagePullPolicy: Always
+        name: manager
+        securityContext:
+          allowPrivilegeEscalation: false
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8081
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8081
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+          limits:
+            cpu: 100m
+            memory: 30Mi
+          requests:
+            cpu: 100m
+            memory: 20Mi
+        env:
+          - name: USER
+            valueFrom:
+              secretKeyRef:
+                name: ocicredentials
+                key: user
+                optional: true
+          - name: TENANCY
+            valueFrom:
+              secretKeyRef:
+                name: ocicredentials
+                key: tenancy
+                optional: true
+          - name: REGION
+            valueFrom:
+              secretKeyRef:
+                name: ocicredentials
+                key: region
+                optional: true
+          - name: FINGERPRINT
+            valueFrom:
+              secretKeyRef:
+                name: ocicredentials
+                key: fingerprint
+                optional: true
+          - name: PASSPHRASE
+            valueFrom:
+              secretKeyRef:
+                name: ocicredentials
+                key: passphrase
+                optional: true
+          - name: PRIVATEKEY
+            valueFrom:
+              secretKeyRef:
+                name: ocicredentials
+                key: privatekey
+                optional: true
+          - name: USEINSTANCEPRINCIPAL
+            valueFrom:
+              secretKeyRef:
+                name: osokconfig
+                key: useinstanceprincipal
+      terminationGracePeriodSeconds: 10

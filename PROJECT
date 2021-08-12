@@ -1,0 +1,39 @@
+domain: oracle.com
+layout:
+- go.kubebuilder.io/v3
+plugins:
+  manifests.sdk.operatorframework.io/v2: {}
+  scorecard.sdk.operatorframework.io/v2: {}
+projectName: oci-service-operator
+repo: github.com/oracle/oci-service-operator
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: oracle.com
+  group: oci
+  kind: AutonomousDatabases
+  path: github.com/oracle/oci-service-operator/api/v1beta1
+  version: v1beta1
+  webhooks:
+    webhookVersion: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: oracle.com
+  group: oci
+  kind: Stream
+  path: github.com/oracle/oci-service-operator/api/v1beta1
+  version: v1beta1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: oracle.com
+  group: oci
+  kind: MySqlDbSystem
+  path: github.com/oracle/oci-service-operator/api/v1beta1
+  version: v1beta1
+version: "3"

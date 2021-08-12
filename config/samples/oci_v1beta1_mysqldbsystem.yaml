@@ -1,0 +1,28 @@
+#
+# Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+apiVersion: oci.oracle.com/v1beta1
+kind: MySqlDbSystem
+metadata:
+  name: mysqldbsystem-sample
+spec:
+  compartmentId: ocid1.compartment.oc1..aaaaaaaaXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+  displayName: SampleDB
+  shapeName: MySQL.VM.Standard.E3.1.8GB
+  subnetId: ocid1.subnet.oc1.<region-shot-code>.aaaaaaaaXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+  configuration:
+    id: ocid1.mysqlconfiguration.oc1..aaaaaaaaXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+  availabilityDomain: XXXX:US-ASHBURN-AD-1
+  isHighlyAvailable: false
+  adminUsername:
+    secret:
+      secretName: admin-secret
+  adminPassword:
+    secret:
+      secretName: admin-secret
+  description: Creating a Sample DB MySqlDbSystem using operators
+  dataStorageSizeInGBs: 50
+  port: 3306
+  portX: 33060

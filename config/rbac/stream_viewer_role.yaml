@@ -1,0 +1,25 @@
+#
+# Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+# permissions for end users to view streams.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: stream-viewer-role
+rules:
+- apiGroups:
+  - oci.oracle.com
+  resources:
+  - streams
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - oci.oracle.com
+  resources:
+  - streams/status
+  verbs:
+  - get

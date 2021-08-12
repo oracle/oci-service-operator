@@ -1,0 +1,16 @@
+#
+# Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+apiVersion: oci.oracle.com/v1beta1
+kind: Stream
+metadata:
+  name: sample-stream
+spec:
+  # compartmentId: ocid1.compartment.oc1..aaaaaaaaXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+  name: SampleStream
+  streamPoolId: ocid1.streampool.oc1.iad.XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+  partitions: 1
+  retentionInHours: 24
+  # Id: ocid1.stream.oc1.<region_code>.XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

@@ -1,0 +1,234 @@
+
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.4.1
+  creationTimestamp: null
+  name: mysqldbsystems.oci.oracle.com
+spec:
+  group: oci.oracle.com
+  names:
+    kind: MySqlDbSystem
+    listKind: MySqlDbSystemList
+    plural: mysqldbsystems
+    singular: mysqldbsystem
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the MySqlDbSystem
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the MySqlDbSystem
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: MySqlDbSystem is the Schema for the mysqldbsystems API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: MySqlDbSystemSpec defines the desired state of MySqlDbSystem
+            properties:
+              adminPassword:
+                properties:
+                  secret:
+                    properties:
+                      secretName:
+                        type: string
+                    type: object
+                type: object
+              adminUsername:
+                properties:
+                  secret:
+                    properties:
+                      secretName:
+                        type: string
+                    type: object
+                type: object
+              availabilityDomain:
+                type: string
+              backupPolicy:
+                properties:
+                  definedTags:
+                    additionalProperties:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    type: object
+                  freeformTags:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  isEnabled:
+                    description: Specifies if automatic backups are enabled.
+                    type: boolean
+                  retentionInDays:
+                    description: Number of days to retain an automatic backup.
+                    type: integer
+                  windowStartTime:
+                    description: The start of a 30-minute window of time in which
+                      daily, automated backups occur. This should be in the format
+                      of the "Time" portion of an RFC3339-formatted timestamp. Any
+                      second or sub-second time data will be truncated to zero. At
+                      some point in the window, the system may incur a brief service
+                      disruption as the backup is performed.
+                    type: string
+                type: object
+              compartmentId:
+                type: string
+              configuration:
+                description: CreateConfigurationDetails The Configuration for the
+                  DB System.
+                properties:
+                  id:
+                    description: Configuration Id
+                    type: string
+                type: object
+              dataStorageSizeInGBs:
+                maximum: 65536
+                minimum: 50
+                type: integer
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                type: object
+              description:
+                maxLength: 400
+                minLength: 1
+                type: string
+              displayName:
+                type: string
+              faultDomain:
+                default: FAULT-DOMAIN-1
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                type: object
+              hostnameLabel:
+                type: string
+              id:
+                type: string
+              ipAddress:
+                type: string
+              isHighlyAvailable:
+                type: boolean
+              maintenance:
+                description: CreateMaintenanceDetails The Maintenance Policy for the
+                  DB System.
+                properties:
+                  windowStartTime:
+                    description: 'The start of the 2 hour maintenance window. This
+                      string is of the format: "{day-of-week} {time-of-day}". "{day-of-week}"
+                      is a case-insensitive string like "mon", "tue", &c. "{time-of-day}"
+                      is the "Time" portion of an RFC3339-formatted timestamp. Any
+                      second or sub-second time data will be truncated to zero.'
+                    type: string
+                type: object
+              mysqlVersion:
+                type: string
+              port:
+                maximum: 65535
+                minimum: 1024
+                type: integer
+              portX:
+                maximum: 65535
+                minimum: 1024
+                type: integer
+              shapeName:
+                type: string
+              source:
+                description: CreateDbSystemSourceDetails Parameters detailing how
+                  to provision the initial data of the system.
+                properties:
+                  jsonData:
+                    type: string
+                  sourceType:
+                    type: string
+                type: object
+              subnetId:
+                type: string
+            type: object
+          status:
+            description: MySqlDbSystemStatus defines the observed state of MySqlDbSystem
+            properties:
+              status:
+                properties:
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
