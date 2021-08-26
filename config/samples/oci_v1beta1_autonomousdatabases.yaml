@@ -8,17 +8,10 @@ kind: AutonomousDatabases
 metadata:
   name: autonomousdatabases-sample
 spec:
-<<<<<<< HEAD
 #  Id: ocid1.autonomousdatabase.oc1.<region-code>.aaaaXXXXXXXXXXXXXXXXXXXX
   compartmentId: ocid1.compartment.oc1..aaaaaaaaXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
   displayName: SampleADB
   dbName: sampleadb
-=======
-#  Id: ocid1.autonomousdatabase.oc1.ap-mumbai-1.abrg6ljr46czi5qqfdauf3awd5yo27dpm2vlxxe3oeurfgmesulkzn6bwsnq
-  compartmentId: ocid1.compartment.oc1..aaaaaaaa5fm6q5imrlm2enuu42ybbqj6i7gy7lcrolzu2syu5gn2aosvyxsq
-  displayName: OSOKTesting
-  dbName: osokTest
->>>>>>> Initial commit
   dbWorkload: OLTP
   isDedicated: false
   dbVersion: 19c
@@ -31,11 +24,7 @@ spec:
   isFreeTier: false
   licenseModel: BRING_YOUR_OWN_LICENSE
   wallet:
-<<<<<<< HEAD
     walletName: sampleadb-wallet
-=======
-    walletName: osoktest-wallet
->>>>>>> Initial commit
     walletPassword:
       secret:
         secretName: wallet-password
@@ -44,8 +33,3 @@ spec:
  # definedTags:
  #   test:
  #     key1: value1
-<<<<<<< HEAD
-=======
-
-
->>>>>>> Initial commit

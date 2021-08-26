@@ -22,11 +22,7 @@ The Operator SDK installation is documented in detail by the operator-sdk projec
 
 Install the OLM from the operator-sdk, you can use the following command:
 ```bash
-<<<<<<< HEAD
 $ operator-sdk olm install
-=======
-$ operator-sdk olm install 
->>>>>>> Initial commit
 ...
 ...
 INFO[0079] Successfully installed OLM version "latest"
@@ -73,28 +69,17 @@ system:controller:operator-lifecycle-manager                 ClusterRole        
 
 ### Enable Instance Principal
 
-<<<<<<< HEAD
 The OCI Service Operator for Kuberentes needs OCI Instance Principal details to provision and manage OCI services/resources in the customer tenancy. This is the recommended approach for running OSOK within OCI.
-=======
-The OCI Service Operator for Kuberentes needs OCI Instance Principal details to provision and manage OCI services/resources in the customer tenancy. This is the recommended approach for running OSOK within OCI. 
->>>>>>> Initial commit
 
 The customer is required to create a OCI dynamic group as detailed [here](https://docs.oracle.com/en-us/iaas/Content/Identity/Tasks/managingdynamicgroups.htm#Managing_Dynamic_Groups).
 
 Once the dynamic group is created, below sample matching rule can be added to the dynamic group
 ```
 #### Below rule matches the kubernetes worker instance ocid or the compartment where the worker instances are running
-<<<<<<< HEAD
 
 Any {instance.id = 'ocid1.instance.oc1.iad..exampleuniqueid1', instance.compartment.id = 'ocid1.compartment.oc1..exampleuniqueid2'}
 
 ```
-=======
- 
-Any {instance.id = 'ocid1.instance.oc1.iad..exampleuniqueid1', instance.compartment.id = 'ocid1.compartment.oc1..exampleuniqueid2'}
-
-``` 
->>>>>>> Initial commit
 
 Customer needs to create an OCI Policy that can be tenancy wide or in the compartment for the dynamic group created above.
 
@@ -104,31 +89,18 @@ Allow dynamic-group <DYNAMICGROUP_NAME> to manage <OCI_SERVICE_1> in tenancy
 Allow dynamic-group <DYNAMICGROUP_NAME> to manage <OCI_SERVICE_2> in tenancy
 Allow dynamic-group <DYNAMICGROUP_NAME> to manage <OCI_SERVICE_3> in tenancy
 Allow dynamic-group <DYNAMICGROUP_NAME> to manage <OCI_SERVICE_4> in tenancy
-<<<<<<< HEAD
 
-=======
- 
->>>>>>> Initial commit
 ### Compartment based OCI Policy for the dynamic group
 Allow dynamic-group <DYNAMICGROUP_NAME> to manage <OCI_SERVICE_1> in compartment <NAME_OF_THE_COMPARTMENT>
 Allow dynamic-group <DYNAMICGROUP_NAME> to manage <OCI_SERVICE_2> in compartment <NAME_OF_THE_COMPARTMENT>
 Allow dynamic-group <DYNAMICGROUP_NAME> to manage <OCI_SERVICE_3> in compartment <NAME_OF_THE_COMPARTMENT>
 Allow dynamic-group <DYNAMICGROUP_NAME> to manage <OCI_SERVICE_4> in compartment <NAME_OF_THE_COMPARTMENT>
-<<<<<<< HEAD
 ```
 Note: the <OCI_SERVICE_1>, <OCI_SERVICE_2> represents in the OCI Services like "autonomous-database-family", "instance_family", etc.
 
 ### Enable User Principal
 
 The OCI Service Operator for Kubernetes needs OCI user credentials details to provision and manage OCI services/resources in the customer tenancy. This approach is recommended when OSOK is deployed outside OCI.
-=======
-``` 
-Note: the <OCI_SERVICE_1>, <OCI_SERVICE_2> represents in the OCI Services like "autonomous-database-family", "instance_family", etc.
-
-### Enable User Principal 
-
-The OCI Service Operator for Kubernetes needs OCI user credentials details to provision and manage OCI services/resources in the customer tenancy. This approach is recommended when OSOK is deployed outside OCI. 
->>>>>>> Initial commit
 
 The users required to create a Kubernetes secret as detailed below.
 
@@ -182,11 +154,7 @@ Allow group <OSOK_OPERATOR_GROUP> to manage <OCI_SERVICE_1> in tenancy
 Allow group <OSOK_OPERATOR_GROUP> to manage <OCI_SERVICE_2> in tenancy
 Allow group <OSOK_OPERATOR_GROUP> to manage <OCI_SERVICE_3> in tenancy
 Allow group <OSOK_OPERATOR_GROUP> to manage <OCI_SERVICE_4> in tenancy
-<<<<<<< HEAD
 
-=======
- 
->>>>>>> Initial commit
 ### Compartment based OCI Policy for user
 Allow group <OSOK_OPERATOR_GROUP> to manage <OCI_SERVICE_1> in compartment <NAME_OF_THE_COMPARTMENT>
 Allow group <OSOK_OPERATOR_GROUP> to manage <OCI_SERVICE_2> in compartment <NAME_OF_THE_COMPARTMENT>
@@ -200,46 +168,27 @@ Note: the <OCI_SERVICE_1>, <OCI_SERVICE_2> represents in the OCI Services like "
 The OCI Service Operator for Kubernetes is packaged as Operator Lifecycle Manager (OLM) Bundle for making it easy to install in Kubernetes Clusters. The bundle can be downloaded as docker image using below command.
 
 ```bash
-<<<<<<< HEAD
 $ docker pull iad.ocir.io/oracle/oci-service-operator-bundle:1.0.0
-=======
-$ docker pull iad.ocir.io/oracle/oci-service-operator-bundle:0.0.2
->>>>>>> Initial commit
 ```
 
 The OSOK OLM bundle contains all the required details like CRDs, RBACs, Configmaps, deployment which will install the OSOK in the kubernetes cluster.
 
 
-<<<<<<< HEAD
 Install the OSOK Operator in the Kubernetes Cluster using below command
 
 ```bash
 $ operator-sdk run bundle iad.ocir.io/oracle/oci-service-operator-bundle:1.0.0
-=======
-Install the OSOK Operator in the Kubernetes Cluster using below command 
-
-```bash
-$ operator-sdk run bundle iad.ocir.io/oracle/oci-service-operator-bundle:0.0.2
->>>>>>> Initial commit
 ```
 
 Upgrade the OSOK Operator in the Kubernetes Cluster using below command
 
 ```bash
-<<<<<<< HEAD
 $ operator-sdk run bundle-upgrade iad.ocir.io/oracle/oci-service-operator-bundle:1.0.0
-=======
-$ operator-sdk run bundle-upgrade iad.ocir.io/oracle/oci-service-operator-bundle:0.0.2
->>>>>>> Initial commit
 ```
 
 The successful installation of the OSOK in your cluster will provide the final message as below:
 ```bash
-<<<<<<< HEAD
 INFO[0040] OLM has successfully installed "oci-service-operator.v1.0.0"
-=======
-INFO[0040] OLM has successfully installed "oci-service-operator.v0.0.2"
->>>>>>> Initial commit
 ```
 
 ### Undeploy OSOK
@@ -248,8 +197,4 @@ The OCI Service Operator for Kubernetes can be undeployed easily using the OLM
 
 ```bash
 $ operator-sdk cleanup oci-service-operator
-<<<<<<< HEAD
 ```
-=======
-```
->>>>>>> Initial commit
