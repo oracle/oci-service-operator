@@ -168,7 +168,7 @@ Note: the <OCI_SERVICE_1>, <OCI_SERVICE_2> represents in the OCI Services like "
 The OCI Service Operator for Kubernetes is packaged as Operator Lifecycle Manager (OLM) Bundle for making it easy to install in Kubernetes Clusters. The bundle can be downloaded as docker image using below command.
 
 ```bash
-$ docker pull iad.ocir.io/oracle/oci-service-operator-bundle:0.0.2
+$ docker pull iad.ocir.io/oracle/oci-service-operator-bundle:1.0.0
 ```
 
 The OSOK OLM bundle contains all the required details like CRDs, RBACs, Configmaps, deployment which will install the OSOK in the kubernetes cluster.
@@ -177,18 +177,18 @@ The OSOK OLM bundle contains all the required details like CRDs, RBACs, Configma
 Install the OSOK Operator in the Kubernetes Cluster using below command 
 
 ```bash
-$ operator-sdk run bundle iad.ocir.io/oracle/oci-service-operator-bundle:0.0.2
+$ operator-sdk run bundle iad.ocir.io/oracle/oci-service-operator-bundle:1.0.0
 ```
 
 Upgrade the OSOK Operator in the Kubernetes Cluster using below command
 
 ```bash
-$ operator-sdk run bundle-upgrade iad.ocir.io/oracle/oci-service-operator-bundle:0.0.2
+$ operator-sdk run bundle-upgrade iad.ocir.io/oracle/oci-service-operator-bundle:1.0.0
 ```
 
 The successful installation of the OSOK in your cluster will provide the final message as below:
 ```bash
-INFO[0040] OLM has successfully installed "oci-service-operator.v0.0.2"
+INFO[0040] OLM has successfully installed "oci-service-operator.v1.0.0"
 ```
 
 ### Undeploy OSOK
