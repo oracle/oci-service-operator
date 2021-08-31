@@ -17,4 +17,8 @@ kind: Kustomization
 images:
 - name: controller
   newName: iad.ocir.io/oracle/oci-service-operator
+<<<<<<< HEAD
+  newTag: 1.0.0
+=======
   newTag: 0.0.2
+>>>>>>> Initial commit

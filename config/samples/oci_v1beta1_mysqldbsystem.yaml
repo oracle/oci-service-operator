@@ -6,6 +6,7 @@
 apiVersion: oci.oracle.com/v1beta1
 kind: MySqlDbSystem
 metadata:
+<<<<<<< HEAD
   name: mysqldbsystem-sample
 spec:
   compartmentId: ocid1.compartment.oc1..aaaaaaaaXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -15,6 +16,17 @@ spec:
   configuration:
     id: ocid1.mysqlconfiguration.oc1..aaaaaaaaXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
   availabilityDomain: XXXX:US-ASHBURN-AD-1
+=======
+  name: create-mysqldbsystem
+spec:
+  compartmentId: ocid1.compartment.oc1..aaaaaaaaq7y26khzcf7d5jdaakmrsuqtqfyqk7itv3zubkjizsbln6pnmoxa
+  displayName: BusyBoxDb
+  shapeName: MySQL.VM.Standard.E3.1.8GB
+  subnetId: ocid1.subnet.oc1.iad.aaaaaaaapuqci3e7gb4spkx7qk2lip2pmtv6ojmtor7ht2raen3n33fypkpq
+  configuration:
+    id: ocid1.mysqlconfiguration.oc1..aaaaaaaalwzc2a22xqm56fwjwfymixnulmbq3v77p5v4lcbb6qhkftxf2trq
+  availabilityDomain: zkJl:US-ASHBURN-AD-1
+>>>>>>> Initial commit
   isHighlyAvailable: false
   adminUsername:
     secret:
@@ -22,7 +34,11 @@ spec:
   adminPassword:
     secret:
       secretName: admin-secret
+<<<<<<< HEAD
   description: Creating a Sample DB MySqlDbSystem using operators
+=======
+  description: Creating a BusyBox Database using operators
+>>>>>>> Initial commit
   dataStorageSizeInGBs: 50
   port: 3306
   portX: 33060
