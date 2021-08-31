@@ -24,7 +24,7 @@ See the [Documentation](docs/README.md#oci-service-operator-for-kubernetes) for 
 The OCI Service Operator for Kubernetes is packaged as Operator Lifecycle Manager (OLM) Bundle for making it easy to install in Kubernetes Clusters. The bundle can be downloaded as docker image using below command.
 
 ```
-docker pull iad.ocir.io/oracle/oci-service-operator-bundle:0.0.2
+docker pull iad.ocir.io/oracle/oci-service-operator-bundle:1.0.0
 ```
 
 ## Samples

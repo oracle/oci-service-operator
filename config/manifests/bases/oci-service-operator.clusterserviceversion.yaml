@@ -4,7 +4,7 @@ metadata:
   annotations:
     alm-examples: '[]'
     capabilities: Basic Install
-  name: oci-service-operator.v0.0.0
+  name: oci-service-operator.v1.0.0
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
@@ -52,4 +52,4 @@ spec:
   provider:
     name: Oracle Cloud Infrastructure
     url: https://www.oracle.com/cloud/
-  version: 0.0.0
+  version: 1.0.0
