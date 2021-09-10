@@ -22,7 +22,7 @@ The Operator SDK installation is documented in detail by the operator-sdk projec
 
 Install the OLM from the operator-sdk, you can use the following command:
 ```bash
-$ operator-sdk olm install 
+$ operator-sdk olm install
 ...
 ...
 INFO[0079] Successfully installed OLM version "latest"
@@ -69,17 +69,17 @@ system:controller:operator-lifecycle-manager                 ClusterRole        
 
 ### Enable Instance Principal
 
-The OCI Service Operator for Kuberentes needs OCI Instance Principal details to provision and manage OCI services/resources in the customer tenancy. This is the recommended approach for running OSOK within OCI. 
+The OCI Service Operator for Kuberentes needs OCI Instance Principal details to provision and manage OCI services/resources in the customer tenancy. This is the recommended approach for running OSOK within OCI.
 
 The customer is required to create a OCI dynamic group as detailed [here](https://docs.oracle.com/en-us/iaas/Content/Identity/Tasks/managingdynamicgroups.htm#Managing_Dynamic_Groups).
 
 Once the dynamic group is created, below sample matching rule can be added to the dynamic group
 ```
 #### Below rule matches the kubernetes worker instance ocid or the compartment where the worker instances are running
- 
+
 Any {instance.id = 'ocid1.instance.oc1.iad..exampleuniqueid1', instance.compartment.id = 'ocid1.compartment.oc1..exampleuniqueid2'}
 
-``` 
+```
 
 Customer needs to create an OCI Policy that can be tenancy wide or in the compartment for the dynamic group created above.
 
@@ -89,18 +89,18 @@ Allow dynamic-group <DYNAMICGROUP_NAME> to manage <OCI_SERVICE_1> in tenancy
 Allow dynamic-group <DYNAMICGROUP_NAME> to manage <OCI_SERVICE_2> in tenancy
 Allow dynamic-group <DYNAMICGROUP_NAME> to manage <OCI_SERVICE_3> in tenancy
 Allow dynamic-group <DYNAMICGROUP_NAME> to manage <OCI_SERVICE_4> in tenancy
- 
+
 ### Compartment based OCI Policy for the dynamic group
 Allow dynamic-group <DYNAMICGROUP_NAME> to manage <OCI_SERVICE_1> in compartment <NAME_OF_THE_COMPARTMENT>
 Allow dynamic-group <DYNAMICGROUP_NAME> to manage <OCI_SERVICE_2> in compartment <NAME_OF_THE_COMPARTMENT>
 Allow dynamic-group <DYNAMICGROUP_NAME> to manage <OCI_SERVICE_3> in compartment <NAME_OF_THE_COMPARTMENT>
 Allow dynamic-group <DYNAMICGROUP_NAME> to manage <OCI_SERVICE_4> in compartment <NAME_OF_THE_COMPARTMENT>
-``` 
+```
 Note: the <OCI_SERVICE_1>, <OCI_SERVICE_2> represents in the OCI Services like "autonomous-database-family", "instance_family", etc.
 
-### Enable User Principal 
+### Enable User Principal
 
-The OCI Service Operator for Kubernetes needs OCI user credentials details to provision and manage OCI services/resources in the customer tenancy. This approach is recommended when OSOK is deployed outside OCI. 
+The OCI Service Operator for Kubernetes needs OCI user credentials details to provision and manage OCI services/resources in the customer tenancy. This approach is recommended when OSOK is deployed outside OCI.
 
 The users required to create a Kubernetes secret as detailed below.
 
@@ -154,7 +154,7 @@ Allow group <OSOK_OPERATOR_GROUP> to manage <OCI_SERVICE_1> in tenancy
 Allow group <OSOK_OPERATOR_GROUP> to manage <OCI_SERVICE_2> in tenancy
 Allow group <OSOK_OPERATOR_GROUP> to manage <OCI_SERVICE_3> in tenancy
 Allow group <OSOK_OPERATOR_GROUP> to manage <OCI_SERVICE_4> in tenancy
- 
+
 ### Compartment based OCI Policy for user
 Allow group <OSOK_OPERATOR_GROUP> to manage <OCI_SERVICE_1> in compartment <NAME_OF_THE_COMPARTMENT>
 Allow group <OSOK_OPERATOR_GROUP> to manage <OCI_SERVICE_2> in compartment <NAME_OF_THE_COMPARTMENT>
@@ -174,7 +174,7 @@ $ docker pull iad.ocir.io/oracle/oci-service-operator-bundle:1.0.0
 The OSOK OLM bundle contains all the required details like CRDs, RBACs, Configmaps, deployment which will install the OSOK in the kubernetes cluster.
 
 
-Install the OSOK Operator in the Kubernetes Cluster using below command 
+Install the OSOK Operator in the Kubernetes Cluster using below command
 
 ```bash
 $ operator-sdk run bundle iad.ocir.io/oracle/oci-service-operator-bundle:1.0.0

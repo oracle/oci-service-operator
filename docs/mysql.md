@@ -1,9 +1,9 @@
-# Mysql DbSystem Services
+# Oracle MySQL Database Service
 
 - [Introduction](#introduction)
-- [Mysql DbSystem Pre-requisites](#pre-requisites-for-setting-up-mysql-dbsystems)
-- [Mysql DbSystem Specification Parameters](#mysql-dbsystem-specification-parameters)
-- [Mysql DbSystem Status Parameters](#mysql-dbsystem-status-parameters)
+- [MySQL DB System Pre-requisites](#pre-requisites-for-setting-up-mysql-dbsystems)
+- [MySQL DB System Specification Parameters](#mysql-dbsystem-specification-parameters)
+- [MySQL DB System Status Parameters](#mysql-dbsystem-status-parameters)
 - [Provision](#provisioning-a-mysql-dbsystem)
 - [Bind](#binding-to-an-existing-mysql-dbsystem)
 - [Update](#updating-a-mysql-dbsystem)
@@ -11,10 +11,10 @@
 
 ## Introduction
 
-[Oracle MySQL Database Service](https://www.oracle.com/mysql/) is a fully managed database service that lets developers quickly develop and deploy secure, cloud native applications using the world’s most popular open source database. Oracle MySQL Database Service is also offered via OCI Service Operator thereby making it easy for applications to provision and integrate seamlessly with Mysql databases.
+[Oracle MySQL Database Service](https://www.oracle.com/mysql/) is a fully managed database service that lets developers quickly develop and deploy secure, cloud native applications using the world’s most popular open source database. Oracle MySQL Database Service is also offered via the OCI Service Operator for Kubernetes, making it easy for applications to provision and integrate seamlessly with MySQL databases.
 
 
-## Pre-requisites for setting up Mysql DbSystems
+## Pre-requisites for setting up MySQL DB Systems
 
 If this is your first time using MySQL Database Service, ensure your tenancy administrator has performed the following tasks:
 
@@ -28,7 +28,7 @@ If this is your first time using MySQL Database Service, ensure your tenancy adm
 Create policies in the root compartment with the following statements [Policy Setup Documentation](https://docs.oracle.com/en-us/iaas/mysql-database/doc/policy-details-mysql-database-service.html#GUID-2D9D3C84-07A3-4BEE-82C7-B5A72A943F53)
 
 **For Instance Principle**
-The Dynamic group for OCI Service Operator should have permission `manage` for resource type `mysql-family`.
+The OCI Service Operator dynamic group should have the `manage` permission for the `mysql-family` resource type. 
 
 **Sample Policy:**
 
@@ -43,7 +43,7 @@ Allow dynamic-group <OSOK_DYNAMIC_GROUP> to use tag-namespaces in tenancy
 ```
 
 **For User Principle**
-The OCI OSOK user for OCI Service Operator should have permission `manage` for resource type `mysql-family`.
+The OCI Service Operator user should have the `manage` permission for the `mysql-family` resource type. 
 
 **Sample Policy:**
 
@@ -60,9 +60,9 @@ Allow group <OSOK_GROUP> to use tag-namespaces in tenancy
 
 Without these policies, the service will not function correctly.
 
-## Mysql DbSystem Specification Parameters
+## MySQL DB System Specification Parameters
 
-The Complete Specification of the `mysqldbsystems` Custom Resource is as detailed below:
+The Complete Specification of the `mysqldbsystems` Custom Resource (CR) is as detailed below:
 
 | Parameter                          | Description                                                         | Type   | Mandatory |
 | ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
@@ -89,7 +89,7 @@ The Complete Specification of the `mysqldbsystems` Custom Resource is as detaile
 
 
 
-## Mysql DbSystem Status Parameters
+## MySQL DB System Status Parameters
 
 | Parameter                                         | Description                                                         | Type   | Mandatory |
 | --------------------------------------------------| ------------------------------------------------------------------- | ------ | --------- |
@@ -106,9 +106,9 @@ The Complete Specification of the `mysqldbsystems` Custom Resource is as detaile
 | `status.osokstatus.requestedAt`                   | Requested time of the CR.          | string | no |
 | `status.osokstatus.deletedAt`                     | Deleted time of the CR.            | string | no | 
 
-## Provisioning a Mysql DbSystem
+## Provisioning a MySQL DB System
 
-Provisioning of a Mysql DbSystem requires the customer to input the admin username and admin password as a Kubernetes Secret, the OSOK acquires the admin usernmame and admin password from the kubernetes secret whose name is provided in the `spec`. 
+Provisioning of a MySQL DB System requires the user to input the admin username and admin password as a Kubernetes secret. OSOK acquires the admin usernmame and admin password from the Kubernetes secret whose name is provided in the `spec`. 
 The Kubernetes secret should contain the admin username in `username` field. 
 The Kubernetes secret should contain the admin password in `password` field. 
 
@@ -128,9 +128,9 @@ Run the following command to create a secret for the Mysql DbSystem:
 kubectl apply -f <CREATE_SECRET>.yaml
 ```
 
-The Mysql DbSystem can be accessed from the Secret which will be persisted as part of the provision/bind operation of the CR.
+The MySQL DB System can be accessed from the Secret which will be persisted as part of the provision/bind operation of the CR.
 
-The OSOK Mysql DbSystem controller automatically provisions a Mysql DbSystem when customer provides mandatory fields to the `spec`. Following is a sample CR yaml for Mysql DbSystem.
+The OSOK MySqlDbSystem controller automatically provisions a MySQL DB System when you provide mandatory fields to the `spec`. The following is a sample CR yaml for MySqlDbSystem.
 
 - SUBNET_OCID - OCID of the subnet created in the pre-requisites step
 - CONFIGURATION_ID - [More info about Configurations](https://docs.oracle.com/en-us/iaas/mysql-database/doc/db-systems.html#GUID-E2A83218-9700-4A49-B55D-987867D81871) Get your [Configuration_id](https://console.us-ashburn-1.oraclecloud.com/mysqlaas/configurations) 
@@ -173,16 +173,16 @@ Run the following command to create a CR to the cluster:
 kubectl apply -f <CREATE_YAML>.yaml
 ```
 
-Once the CR is created, OSOK will Reconcile and creates a Mysql DbSystem. OSOK will ensure the Mysql DbSystem instance is Available.
+Once the CR is created, OSOK will Reconcile and creates a MySQL DB System. OSOK will ensure the MySQL DB System instance is Available.
 
-The Mysql DbSystem CR can list the DbSystems in the cluster as below: 
+The MySqlDbSystem CR can list the MySQL DB Systems in the cluster: 
 ```sh
 $ kubectl get mysqldbsystems
 NAME                       STATUS         AGE
 mysqldbsystems-sample      Active         4d
 ```
 
-The Mysql DbSystem CR can list the DbSystems in the cluster with detailed information as below: 
+The MySqlDbSystem CR can list the MySQL DB Systems in the cluster with detailed information: 
 ```sh
 $ kubectl get mysqldbsystems -o wide
 NAME                         DISPLAYNAME     STATUS         OCID                                   AGE
@@ -194,9 +194,9 @@ The MysqlDbSystem CR can be described as below:
 $ kubectl describe mysqldbsystems <NAME_OF_CR_OBJECT>
 ```
 
-## Binding to an Existing Mysql DbSystem
+## Binding to an Existing MySQL DB System
 
-OSOK allows customers to bind to an existing Mysql DbSystem. In this case, `Id` is the only required field in the CR `spec`.
+OSOK allows you to bind to an existing MySQL DB System. In this case, `Id` is the only required field in the CR `spec`.
 
 ```yaml
 apiVersion: oci.oracle.com/v1beta1
@@ -207,14 +207,14 @@ spec:
   id: <MYSQLDBSYSTEM_OCID>
 ```
 
-Run the following command to create a CR that binds to an existing Mysql DbSystem:
+Run the following command to create a CR that binds to an existing MySQL DB System:
 ```sh
 kubectl apply -f <BIND_YAML>.yaml
 ```
 
-## Updating a Mysql DbSystem
+## Updating a MySQL DB System
 
-Customers can update the Mysql DbSystem. [Few parameters](https://docs.oracle.com/en-us/iaas/mysql-database/doc/managing-db-system.html#GUID-24D56090-C7E8-4A21-B450-BCBFAD231911) can be updated in this case.
+You can also update a number of [parameters](https://docs.oracle.com/en-us/iaas/mysql-database/doc/managing-db-system.html#GUID-24D56090-C7E8-4A21-B450-BCBFAD231911) of the MySQL DB System.
 ```yaml
 apiVersion: oci.oracle.com/v1beta1
 kind: MySqlDbSystem
@@ -233,16 +233,16 @@ spec:
       <KEY1>: <VALUE1>
 ```
 
-Run the following command to create a CR that updates an existing Mysql DbSystem:
+Run the following command to create a CR that updates an existing MySQL DB System. 
 ```sh
 kubectl apply -f <UPDATE_YAML>.yaml
 ```
 
 ## Access Information in Kubernetes Secrets
 
-The Access information of a OCI Service or Resource will be created as a Kubernetes secret to manage the Mysql DbSystem. The name of the secret can be provided in the CR yaml or by default the name of the CR will be used.
+The Access information of a OCI Service or Resource will be created as a Kubernetes secret to manage the MySQL DB System. The name of the secret can be provided in the CR yaml or by default the name of the CR will be used.
 
-Customer will get the access information as Kubernetes Secret to use the Mysql DbSystem. The following files/details will be made available to the user:
+You will get the access information as Kubernetes Secret to use the MySQL DB System. The following files/details will be made available to you:
 
 | Parameter           | Description                                                              | Type   |
 | ------------------  | ------------------------------------------------------------------------ | ------ |

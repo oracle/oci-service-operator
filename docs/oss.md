@@ -1,22 +1,22 @@
 # Oracle Streaming Service
 
 - [Introduction](#introduction)
-- [OCI Permission requirement](#oci-permission-requirement)
+- [Create Policies](#create-policies)
 - [Streams Service Specification Parameters](#streams-service-specification-parameters)
 - [Streams Service Status Parameters](#streams-service-status-parameters)
-- [Create Stream](#create-stream)
+- [Create a Stream](#create-a-stream)
 - [Bind](#binding-to-an-existing-stream)
 - [Update](#updating-stream)
 - [Delete](#delete-stream)
 
 ## Introduction
 
-The [OCI Streaming service](https://docs.oracle.com/en-us/iaas/Content/Streaming/Concepts/streamingoverview.htm) provides a fully managed, scalable, and durable solution for ingesting and consuming high-volume data streams in real-time. Streaming service is also offered via OCI Service Operator thereby making it easy for applications to provision and integrate seamlessly with `streams`.
+The [Oracle Streaming service](https://docs.oracle.com/en-us/iaas/Content/Streaming/Concepts/streamingoverview.htm) provides a fully managed, scalable, and durable solution for ingesting and consuming high-volume data streams in real-time. The Oracle Streaming Service is offered via the OCI Service Operator for Kubernetes (OSOK), making it easy for applications to provision and integrate seamlessly.
 
-## OCI Permission requirement
+## Create Policies
 
 **For Instance Principle** 
-The Dynamic group for OCI Service Operator should have permission `manage` for resource type `stream-family` and `streampools`.
+The OCI Service Operator dynamic group should have the `manage` permission for the `stream-family` and `streampools` resource types.
 
 **Sample Policy:**
 
@@ -26,7 +26,7 @@ Allow dynamic-group <OSOK_DYNAMIC_GROUP> to manage streampools in compartment <C
 ```
 
 **For User Principle** 
-The OCI OSOK user for OCI Service Operator should have permission `manage` for resource type `stream-family` and `streampools`.
+The OCI Service Operator user should have the `manage` permission for resource type `stream-family` and `streampools`.
 
 **Sample Policy:**
 
@@ -37,7 +37,7 @@ Allow group <SERVICE_BROKER_GROUP> to manage streampools in compartment <COMPART
 
 ## Streams Service Specification Parameters
 
-The Complete Specification of the `streams` Custom Resource is as detailed below:
+The Complete Specification of the `Streams` Custom Resource (CR) is as detailed below:
 
 | Parameter                          | Description                                                         | Type   | Mandatory |
 | ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
@@ -67,9 +67,9 @@ The Complete Specification of the `streams` Custom Resource is as detailed below
 | `status.osokstatus.requestedAt`                   | Requested time of the CR.          | string | no |
 | `status.osokstatus.deletedAt`                     | Deleted time of the CR.            | string | no | 
 
-## Create Stream
+## Create a Stream
 
-The OSOK Stream controller automatically provisions a Stream when customer provides mandatory fields to the `spec`. The Message endpoint of the stream created will be created as a secret.
+The OSOK Stream controller provisions a stream when customer provides mandatory fields to the `spec`. The Message endpoint of the stream created will be created as a secret.
 
 Following is a sample CR yaml for Stream.
 
@@ -97,30 +97,30 @@ Run the following command to create a CR to the cluster:
 kubectl apply -f <CREATE_YAML>.yaml
 ```
 
-Once the CR is created, the OSOK will Reconcile and creates a Stream. The OSOK will ensure the Stream instance is Available.
+Once the CR is created, OSOK will reconcile and create a stream. OSOK will ensure the stream instance is available.
 
-The Stream CR can list the streams in the cluster as below: 
+The Stream CR can list the streams in the cluster: 
 ```sh
 $ kubectl get streams
 NAME                         STATUS         AGE
 stream-sample             Active         4d
 ```
 
-The Stream CR can list the streams in the cluster with detailed information as below: 
+The Stream CR can list the streams in the cluster with detailed information: 
 ```sh
 $ kubectl get streams -o wide
 NAME                         DISPLAYNAME   STATUS         OCID                                   AGE
 streams-sample             StreamTest    Active         ocid1.streams.oc1........   4d
 ```
 
-The Stream CR can be describe as below:
+The Stream CR can be described:
 ```sh
 $ kubectl describe stream <NAME_OF_CR_OBJECT>
 ```
 
 ## Binding to an Existing Stream
 
-The OSOK allows customers to binds to an existing Stream instance. In this case, `Id` is the only required field in the CR `spec`. The message endpoint of the stream will be created as a secret.
+OSOK allows you to bind to an existing stream instance. In this case, `Id` is the only required field in the CR `spec`. The message endpoint of the stream will be created as a secret.
 
 ```yaml
 apiVersion: oci.oracle.com/v1beta1
@@ -131,7 +131,7 @@ spec:
   Id: <STREAM_OCID>
 ```
 
-Run the following command to create a CR that binds to an existing Stream instance:
+Run the following command to create a CR that binds to an existing stream instance:
 
 ```sh
 kubectl apply -f <BIND_YAML>.yaml
@@ -139,7 +139,7 @@ kubectl apply -f <BIND_YAML>.yaml
 
 ## Updating Stream
 
-Customers can update the Stream instance. Only `streamPoolId`, `freeFormTags` and `definedTags` can be updated in this case.
+You can update `streamPoolId`, `freeFormTags`, and `definedTags` of the stream instance.
 
 ```yaml
 apiVersion: oci.oracle.com/v1beta1
@@ -156,7 +156,7 @@ spec:
         <KEY1>: <VALUE1>
 ```
 
-Run the following command to create a CR that updates an existing Stream instance:
+Run the following command to create a CR that updates an existing stream instance:
 
 ```sh
 kubectl apply -f <UPDATE_YAML>.yaml
@@ -164,7 +164,7 @@ kubectl apply -f <UPDATE_YAML>.yaml
 
 ## Delete Stream
 
-Customers can delete the Stream instance when they delete the CR.
+You can delete the stream instance when they delete the CR.
 
 ```sh
 $ kubectl delete stream <CR_OBJECT_NAME>

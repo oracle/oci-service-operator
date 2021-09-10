@@ -1,4 +1,4 @@
-# Autonomous Databases Service
+# Oracle Autonomous Database Service
 
 - [Introduction](#introduction)
 - [OCI Permission requirement](#oci-permission-requirement)
@@ -11,12 +11,12 @@
 
 ## Introduction
 
-[Oracle Autonomous Database](https://www.oracle.com/in/autonomous-database/) technology to deliver automated patching, upgrades, and tuning, including performing all routine database maintenance tasks while the system is running, without human intervention. Autonomous Database service is also offered via OCI Service Operator thereby making it easy for applications to provision and integrate seamlessly with ADB.
+[Oracle Autonomous Database Service](https://docs.oracle.com/en-us/iaas/Content/Database/Concepts/adboverview.htm) is a fully managed, preconfigured database environment. It delivers automated patching, upgrades, and tuning, including performing all routine database maintenance tasks while the system is running, without human intervention. Autonomous Database service is also offered via the OCI Service Operator for Kubernetes (OSOK), making it easy for applications to provision and integrate seamlessly.
 
 ## OCI Permission requirement
 
 **For Instance Principle** 
-The Dynamic group for OCI Service Operator should have permission `manage` for resource type `autonomous-database`.
+The OCI Service Operator dynamic group should have the `manage` permission for the `autonomous-database` resource type.
 
 **Sample Policy:**
 
@@ -25,17 +25,17 @@ Allow dynamic-group <OSOK_DYNAMIC_GROUP> to manage autonomous-database in compar
 ```
 
 **For User Principle** 
-The OCI OSOK user for OCI Service Operator should have permission `manage` for resource type `autonomous-database`.
+The OCI Service Operator user should have the `manage` permission for the `autonomous-database` resource type.
 
 **Sample Policy:**
 
 ```plain
-Allow group <SERVICE_BROKER_GROUP> to manage autonomous-database in compartment <COMPARTMENT_NAME>
+Allow group <OSOK_GROUP> to manage autonomous-database in compartment <COMPARTMENT_NAME>
 ```
 
 ## Autonomous Database Specification Parameters
 
-The Complete Specification of the `autonomousDatabase` Custom Resource is as detailed below:
+The Complete Specification of the `AutonomousDatabase` Custom Resource (CR) is as detailed below:
 
 | Parameter                          | Description                                                         | Type   | Mandatory |
 | ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
@@ -74,21 +74,21 @@ The Complete Specification of the `autonomousDatabase` Custom Resource is as det
 | `status.osokstatus.requestedAt`                   | Requested time of the CR.          | string | no |
 | `status.osokstatus.deletedAt`                     | Deleted time of the CR.            | string | no | 
 
-## Provisioning an ADB
+## Provisioning an Autonomous Database
 
-Provisioning of an ADB requires the customer to input the admin password as a Kubernetes Secret, the OSOK acquires the admin password from the kubernetes secret whose name is provided in the `spec`. 
+Provisioning of an Autonomous Database requires you to input the admin password as a Kubernetes secret. OSOK acquires the admin password from the Kubernetes secret provided in the `spec`. 
 The Kubernetes secret should contain the admin password in `password` field. 
 ```sh
 kubectl create secret generic <ADMIN-PASSWORD-SECRET-NAME> --from-literal=password=<ADMIN-PASSWORD>
 ```
 
-The ADB can be accessed from the wallet which will be downloaded as part of the provision/bind operation of the CR. The OSOK acquires the wallet password from the kubernetes secret whose name is provided in the `spec`. Also, we can configure the name of the wallet in the `spec`.
+The Autonomous Database can be accessed using the details in the wallet which will be downloaded as part of the provision/bind operation of the CR. OSOK acquires the wallet password from the Kubernetes secret whose name is provided in the `spec`. Also, we can configure the name of the wallet in the `spec`.
 
 ```sh
 kubectl create secret generic <WALLET-PASSWORD-SECRET-NAME> --from-literal=walletpassword=<WALLET-PASSWORD>
 ```
 
-The OSOK ADB controller automatically provisions an ADB when customer provides mandatory fields to the `spec`. Following is a sample CR yaml for Autonomous Database.
+The OSOK AutonomousDatabases controller automatically provisions an Autonomous Database when you provides mandatory fields to the `spec`. the following is a sample YAML for Autonomous Database.
 
 ```yaml
 apiVersion: oci.oracle.com/v1beta1
@@ -122,35 +122,35 @@ spec:
       <KEY1>: <VALUE1>
 ```
 
-Run the following command to create a CR to the cluster:
+Run the following command to create a CR in the cluster:
 ```sh
 kubectl apply -f <CREATE_YAML>.yaml
 ```
 
-Once the CR is created, the OSOK will Reconcile and creates an ADB. The OSOK will ensure the ADB instance is Available.
+Once the CR is created, OSOK will reconcile and create an Autonomous Database. OSOK will ensure the Autonomous Database instance is available.
 
-The ADB CR can list the ADBs in the cluster as below: 
+The AutonomousDatabases CR can list the Autonomous Databases in the cluster as below: 
 ```sh
 $ kubectl get autonomousdatabases
 NAME                         DBWORKLOAD   STATUS         AGE
 autonomousdatabases-sample   OLTP         Active         4d
 ```
 
-The ADB CR can list the ADBs in the cluster with detailed information as below: 
+The AutonomousDatabases CR can list the Autonomous Databases in the cluster with detailed information as below: 
 ```sh
 $ kubectl get autonomousdatabases -o wide
 NAME                         DISPLAYNAME   DBWORKLOAD   STATUS         OCID                                   AGE
 autonomousdatabases-sample   ADBTest       OLTP         Active         ocid1.autonomousdatabase.oc1........   4d
 ```
 
-The ADB CR can be describe as below:
+The AutonomousDatabases CR can be describe as below:
 ```sh
 $ kubectl describe autonomousdatabases <NAME_OF_CR_OBJECT>
 ```
 
-## Binding to an Existing ADB
+## Binding to an Existing Autonomous Database
 
-The OSOK allows customers to binds to an existing ADB instance. In this case, `Id` is the only required field in the CR `spec`. The wallet information can be provided to obtain the access information of the ADB instance.
+The OSOK allows you to bind to an existing Autonomous Database instance. In this case, `Id` is the only required field in the CR `spec`. The wallet information can be provided to obtain the access information of the Autonomous Database instance.
 
 ```yaml
 apiVersion: oci.oracle.com/v1beta1
@@ -158,7 +158,7 @@ kind: AutonomousDatabases
 metadata:
   name: <CR_OBJECT_NAME>
 spec:
-  id: <ADB_OCID>
+  id: <AUTONOMOUS_DATABASE_OCID>
   wallet:
     walletName: <WALLET_SECRET_NAME>
     walletPassword:
@@ -171,16 +171,16 @@ Run the following command to create a CR that binds to an existing DB instance:
 kubectl apply -f <BIND_YAML>.yaml
 ```
 
-## Updating an ADB
+## Updating an Autonomous Database
 
-Customers can update the ADB instance. [Few parameters](https://docs.oracle.com/en-us/iaas/api/#/en/database/20160918/datatypes/UpdateAutonomousDatabaseDetails) can be updated in this case.
+Customers can also update a number of [parameters](https://docs.oracle.com/en-us/iaas/api/#/en/database/20160918/datatypes/UpdateAutonomousDatabaseDetails) of the Autonomous Database instance.
 ```yaml
 apiVersion: oci.oracle.com/v1beta1
 kind: AutonomousDatabases
 metadata:
   name: <CR_OBJECT_NAME>
 spec:
-  id: <ADB_OCID>
+  id: <AUTONOMOUS_DATABASE_OCID>
   displayName: <DISPLAY_NAME>
   dbName: <DB_NAME>
   dbWorkload: <OLTP/DW>
@@ -206,16 +206,16 @@ spec:
       <KEY1>: <VALUE1>
 ```
 
-Run the following command to create a CR that updates an existing DB instance:
+Run the following command to create a CR that updates an existing Autonomous Database instance:
 ```sh
 kubectl apply -f <UPDATE_YAML>.yaml
 ```
 
 ## Access Information in Kubernetes Secrets
 
-The Access information of a OCI Service or Resource will be created as a Kubernetes secret to manage the Autonomous Database. The name of the secret can be provided in the CR yaml or by default the name of the CR will be used.
+The Access information of a OCI Service or resource will be created as a Kubernetes secret to manage the Autonomous Database. The name of the secret can be provided in the CR yaml or by default the name of the CR will be used.
 
-Customer will get the access information as Kubernetes Secret to use the ADB. The following files/details will be made available to the user:
+Customer will get the access information as Kubernetes secret to use the Autonomous Database. The following files/details will be made available to the user:
 
 | Parameter          | Description                                                              | Type   |
 | ------------------ | ------------------------------------------------------------------------ | ------ |
