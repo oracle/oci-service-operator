@@ -85,7 +85,7 @@ kubectl create secret generic <ADMIN-PASSWORD-SECRET-NAME> --from-literal=passwo
 The Autonomous Database can be accessed using the details in the wallet which will be downloaded as part of the provision/bind operation of the CR. OSOK acquires the wallet password from the Kubernetes secret whose name is provided in the `spec`. Also, we can configure the name of the wallet in the `spec`.
 
 ```sh
-kubectl create secret generic <WALLET-PASSWORD-SECRET-NAME> --from-literal=walletpassword=<WALLET-PASSWORD>
+kubectl create secret generic <WALLET-PASSWORD-SECRET-NAME> --from-literal=walletPassword=<WALLET-PASSWORD>
 ```
 
 The OSOK AutonomousDatabases controller automatically provisions an Autonomous Database when you provides mandatory fields to the `spec`. the following is a sample YAML for Autonomous Database.
