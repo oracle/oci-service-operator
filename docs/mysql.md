@@ -27,8 +27,8 @@ If this is your first time using MySQL Database Service, ensure your tenancy adm
 
 Create policies in the root compartment with the following statements [Policy Setup Documentation](https://docs.oracle.com/en-us/iaas/mysql-database/doc/policy-details-mysql-database-service.html#GUID-2D9D3C84-07A3-4BEE-82C7-B5A72A943F53)
 
-**For Instance Principle**
-The OCI Service Operator dynamic group should have the `manage` permission for the `mysql-family` resource type. 
+**When using Instance Principals**
+The OCI Service Operator dynamic group should have the `manage` permission for the `mysql-family` resource type. Use this approach when levraging Instance Principals for OSOK. This the recommended approach for running OSOK within OCI.
 
 **Sample Policy:**
 
@@ -42,8 +42,9 @@ Allow dynamic-group <OSOK_DYNAMIC_GROUP> to manage mysql-family in [ tenancy | c
 Allow dynamic-group <OSOK_DYNAMIC_GROUP> to use tag-namespaces in tenancy
 ```
 
-**For User Principle**
-The OCI Service Operator user should have the `manage` permission for the `mysql-family` resource type. 
+**When using User Principals**
+The OCI Service Operator user should have the `manage` permission for the `mysql-family` resource type. Use this approach when levraging User Principals for OSOK. This the recommended approach for running OSOK outside OCI.
+
 
 **Sample Policy:**
 
