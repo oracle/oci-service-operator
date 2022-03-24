@@ -169,7 +169,7 @@ bundle-push: ## Push the bundle image.
 	$(MAKE) docker-push IMG=$(BUNDLE_IMG)
 
 .PHONY: update-bundle-image-version
-update-bundle-image-version: ## Updates versioning info in bundle/manifests/mesh-k8s-operator.clusterserviceversion.yaml.
+update-bundle-image-version: ## Updates versioning info in bundle/manifests/oci-service-operator.clusterserviceversion.yaml.
 	sed -i "s/name: oci-service-operator.v0.0.1/name: oci-service-operator.v${VERSION}/g" bundle/manifests/oci-service-operator.clusterserviceversion.yaml
 	sed -i "s/oci-service-operator:v0.0.2/oci-service-operator:${VERSION}/g" bundle/manifests/oci-service-operator.clusterserviceversion.yaml
 	sed -i "s/version: 0.0.1/version: ${VERSION}/g" bundle/manifests/oci-service-operator.clusterserviceversion.yaml

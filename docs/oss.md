@@ -54,16 +54,16 @@ The Complete Specification of the `Streams` Custom Resource (CR) is as detailed 
 
 | Parameter                                         | Description                                                         | Type   | Mandatory |
 | --------------------------------------------------| ------------------------------------------------------------------- | ------ | --------- |
-| `status.osokstatus.conditions.type`               | Lifecycle state of the Autonomous Database Service. The following values are valid: <ul><li>**Provisioning** - indicates an Autonomous database is provisioning. </li><li>**Active** - indicates an Autonomous Data Service is Active. </li><li>**Failed** - indicates an Autonomous Data Service failed provisioning. </li><li>**Terminating** - indicates an Autonomous Data Service is Deleting. </li></ul>|  string  |  no  |
-| `status.osokstatus.conditions.status`             | Status of the Autonomous Database Custom Resource during the condition update. |  string  |  no  |
-| `status.osokstatus.conditions.lastTransitionTime` | Last time the Autonomous Database CR was Updated. |  string  |  no  | 
+| `status.osokstatus.conditions.type`               | Lifecycle state of the Streams Service. The following values are valid: <ul><li>**Provisioning** - indicates a Stream is provisioning. </li><li>**Active** - indicates a Stream is Active. </li><li>**Failed** - indicates a Stream failed provisioning. </li><li>**Terminating** - indicates a Stream is Deleting. </li></ul>|  string  |  no  |
+| `status.osokstatus.conditions.status`             | Status of the Stream Custom Resource during the condition update. |  string  |  no  |
+| `status.osokstatus.conditions.lastTransitionTime` | Last time the Stream CR was Updated. |  string  |  no  | 
 | `status.osokstatus.conditions.message`            | Message of the status condition of the CR. | string | no | 
 | `status.osokstatus.conditions.reason`             | Resource if any of status condition of the CR. | string | no |
-| `status.osokstatus.ocid`                          | The Autonomous Database [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm). |  string  | yes |
+| `status.osokstatus.ocid`                          | The Stream [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm). |  string  | yes |
 | `status.osokstatus.message`                       | Overall status message of the CR.  |  string  | no  |
 | `status.osokstatus.reason`                        | Overall status reason of the CR.   | string | no |
-| `status.osokstatus.createdAt`                     | Created time of the Autonomous Database Service.            | string | no |  
-| `status.osokstatus.updatedAt`                     | Updated time of the Autonomous Database Service.            | string | no |
+| `status.osokstatus.createdAt`                     | Created time of the Streams Service.            | string | no |  
+| `status.osokstatus.updatedAt`                     | Updated time of the Streams Service.            | string | no |
 | `status.osokstatus.requestedAt`                   | Requested time of the CR.          | string | no |
 | `status.osokstatus.deletedAt`                     | Deleted time of the CR.            | string | no | 
 
