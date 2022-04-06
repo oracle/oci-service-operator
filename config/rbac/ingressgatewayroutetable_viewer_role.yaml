@@ -1,0 +1,20 @@
+# permissions for end users to view ingressgatewayroutetables.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: ingressgatewayroutetable-viewer-role
+rules:
+- apiGroups:
+  - servicemesh.oci.oracle.com
+  resources:
+  - ingressgatewayroutetables
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - servicemesh.oci.oracle.com
+  resources:
+  - ingressgatewayroutetables/status
+  verbs:
+  - get

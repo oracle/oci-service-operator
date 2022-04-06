@@ -14,6 +14,8 @@ type OSOKConditionType string
 
 type MapValue map[string]string
 
+// +kubebuilder:validation:MaxLength=255
+// +kubebuilder:validation:MinLength=1
 type OCID string
 
 const (

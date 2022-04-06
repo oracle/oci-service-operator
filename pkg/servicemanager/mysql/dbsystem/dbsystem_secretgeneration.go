@@ -10,7 +10,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/oracle/oci-go-sdk/v41/mysql"
+	"github.com/oracle/oci-go-sdk/v65/mysql"
 	"strconv"
 )
 

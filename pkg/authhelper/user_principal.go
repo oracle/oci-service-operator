@@ -5,7 +5,7 @@
 
 package authhelper
 
-import "github.com/oracle/oci-go-sdk/v41/common"
+import "github.com/oracle/oci-go-sdk/v65/common"
 
 type UserPrincipal struct {
 	UserId      string `json:"userId"`

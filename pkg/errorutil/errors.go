@@ -7,7 +7,7 @@ package errorutil
 
 import (
 	"fmt"
-	"github.com/oracle/oci-go-sdk/v41/common"
+	"github.com/oracle/oci-go-sdk/v65/common"
 )
 
 type ocierrors struct {

@@ -9,12 +9,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/oracle/oci-go-sdk/v41/common"
-	"github.com/oracle/oci-go-sdk/v41/mysql"
+
+	"github.com/oracle/oci-go-sdk/v65/common"
+	"github.com/oracle/oci-go-sdk/v65/mysql"
 	ociv1beta1 "github.com/oracle/oci-service-operator/api/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/credhelper"
 	"github.com/oracle/oci-service-operator/pkg/errorutil"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
+	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	"github.com/oracle/oci-service-operator/pkg/util"
 	v1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -43,12 +45,12 @@ func NewDbSystemServiceManager(provider common.ConfigurationProvider, credClient
 	}
 }
 
-func (c *DbSystemServiceManager) CreateOrUpdate(ctx context.Context, obj runtime.Object, req ctrl.Request) (bool, error) {
+func (c *DbSystemServiceManager) CreateOrUpdate(ctx context.Context, obj runtime.Object, req ctrl.Request) (servicemanager.OSOKResponse, error) {
 
 	mysqlDbSystem, err := c.convert(obj)
 	if err != nil {
 		c.Log.ErrorLog(err, "Conversion of object failed")
-		return false, err
+		return servicemanager.OSOKResponse{IsSuccessful: false}, err
 	}
 
 	var mySqlDbSystemInstance *mysql.DbSystem
@@ -58,7 +60,7 @@ func (c *DbSystemServiceManager) CreateOrUpdate(ctx context.Context, obj runtime
 
 		mySqlDbSystemOcid, err := c.GetMySqlDbSystemOcid(ctx, *mysqlDbSystem)
 		if err != nil {
-			return false, err
+			return servicemanager.OSOKResponse{IsSuccessful: false}, err
 		}
 
 		if mySqlDbSystemOcid == nil {
@@ -67,26 +69,26 @@ func (c *DbSystemServiceManager) CreateOrUpdate(ctx context.Context, obj runtime
 			unameMap, err := c.CredentialClient.GetSecret(ctx, mysqlDbSystem.Spec.AdminUsername.Secret.SecretName, req.Namespace)
 			if err != nil {
 				c.Log.ErrorLog(err, "Error while getting the admin secret")
-				return false, err
+				return servicemanager.OSOKResponse{IsSuccessful: false}, err
 			}
 
 			uname, ok := unameMap["username"]
 			if !ok {
 				c.Log.ErrorLog(err, "username key in admin secret is not found")
-				return false, errors.New("username key in admin secret is not found")
+				return servicemanager.OSOKResponse{IsSuccessful: false}, errors.New("username key in admin secret is not found")
 			}
 
 			c.Log.DebugLog("Getting Admin password from Secret")
 			pwdMap, err := c.CredentialClient.GetSecret(ctx, mysqlDbSystem.Spec.AdminPassword.Secret.SecretName, req.Namespace)
 			if err != nil {
 				c.Log.ErrorLog(err, "Error while getting the admin secret")
-				return false, err
+				return servicemanager.OSOKResponse{IsSuccessful: false}, err
 			}
 
 			pwd, ok := pwdMap["password"]
 			if !ok {
 				c.Log.ErrorLog(err, "password key in admin secret is not found")
-				return false, errors.New("password key in admin secret is not found")
+				return servicemanager.OSOKResponse{IsSuccessful: false}, errors.New("password key in admin secret is not found")
 			}
 
 			resp, err := c.CreateDbSystem(ctx, *mysqlDbSystem, string(uname), string(pwd))
@@ -95,11 +97,11 @@ func (c *DbSystemServiceManager) CreateOrUpdate(ctx context.Context, obj runtime
 					ociv1beta1.Failed, v1.ConditionFalse, "", err.Error(), c.Log)
 				if _, ok := err.(errorutil.BadRequestOciError); !ok {
 					c.Log.ErrorLog(err, "Assertion Error for BadRequestOciError")
-					return false, err
+					return servicemanager.OSOKResponse{IsSuccessful: false}, err
 				} else {
 					mysqlDbSystem.Status.OsokStatus.Message = err.(common.ServiceError).GetCode()
 					c.Log.ErrorLog(err, "Create MySqlDbSystem failed")
-					return false, err
+					return servicemanager.OSOKResponse{IsSuccessful: false}, err
 				}
 			}
 			c.Log.InfoLog(fmt.Sprintf("MySqlDbSystem %s is Provisioning", mysqlDbSystem.Spec.DisplayName))
@@ -111,14 +113,14 @@ func (c *DbSystemServiceManager) CreateOrUpdate(ctx context.Context, obj runtime
 			mySqlDbSystemInstance, err = c.GetMySqlDbSystem(ctx, ociv1beta1.OCID(*resp.Id), &retryPolicy)
 			if err != nil {
 				c.Log.ErrorLog(err, "Error while getting MySqlDbSystem")
-				return false, err
+				return servicemanager.OSOKResponse{IsSuccessful: false}, err
 			}
 		} else {
 			c.Log.InfoLog(fmt.Sprintf("Getting MySqlDbSystem %s", *mySqlDbSystemOcid))
 			mySqlDbSystemInstance, err = c.GetMySqlDbSystem(ctx, *mySqlDbSystemOcid, nil)
 			if err != nil {
 				c.Log.ErrorLog(err, "Error while getting MySqlDbSystem database")
-				return false, err
+				return servicemanager.OSOKResponse{IsSuccessful: false}, err
 
 			}
 		}
@@ -132,13 +134,13 @@ func (c *DbSystemServiceManager) CreateOrUpdate(ctx context.Context, obj runtime
 		mySqlDbSystemInstance, err = c.GetMySqlDbSystem(ctx, mysqlDbSystem.Spec.MySqlDbSystemId, nil)
 		if err != nil {
 			c.Log.ErrorLog(err, "Error while getting the MySqlDbSystem")
-			return false, err
+			return servicemanager.OSOKResponse{IsSuccessful: false}, err
 		}
 
 		if isValidUpdate(*mysqlDbSystem, *mySqlDbSystemInstance) {
 			if err = c.UpdateMySqlDbSystem(ctx, mysqlDbSystem); err != nil {
 				c.Log.ErrorLog(err, "Error while updating MysqlDbSystem")
-				return false, err
+				return servicemanager.OSOKResponse{IsSuccessful: false}, err
 			}
 			mysqlDbSystem.Status.OsokStatus = util.UpdateOSOKStatusCondition(mysqlDbSystem.Status.OsokStatus,
 				ociv1beta1.Active, v1.ConditionTrue, "", "MysqlDbSystem update success", c.Log)
@@ -167,14 +169,14 @@ func (c *DbSystemServiceManager) CreateOrUpdate(ctx context.Context, obj runtime
 		_, err := c.addToSecret(ctx, mysqlDbSystem.Namespace, mysqlDbSystem.Name, *mySqlDbSystemInstance)
 		if err != nil {
 			if apierrors.IsAlreadyExists(err) {
-				return true, nil
+				return servicemanager.OSOKResponse{IsSuccessful: true}, nil
 			}
 			c.Log.InfoLog(fmt.Sprintf("Secret creation failed"))
-			return false, err
+			return servicemanager.OSOKResponse{IsSuccessful: false}, err
 		}
 	}
 
-	return true, nil
+	return servicemanager.OSOKResponse{IsSuccessful: true}, nil
 }
 
 func isValidUpdate(dbSystem ociv1beta1.MySqlDbSystem, mySqlDbInstance mysql.DbSystem) bool {

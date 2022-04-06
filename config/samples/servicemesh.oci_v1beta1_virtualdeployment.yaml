@@ -1,0 +1,25 @@
+#
+# Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+apiVersion: servicemesh.oci.oracle.com/v1beta1
+kind: VirtualDeployment
+metadata:
+  name: productpage-version1
+  namespace: bookinfo-demo
+spec:
+  compartmentId: ocid1.compartment.oc1..aaaaaaaac3qtlvrctsjwjwil7h2yakpwteosoaxlilifou6gsbzwv6gu6i2q
+  name: product-v1
+  description: This is Virtual Deployment
+  virtualService:
+    ref:
+      name: productpage
+  accessLogging:
+    isEnabled: true
+  serviceDiscovery:
+    type: DNS
+    hostname: productpage-version1.oracle.com
+  listener:
+    - port: 9080
+      protocol: HTTP

@@ -1,0 +1,28 @@
+#
+# Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+apiVersion: servicemesh.oci.oracle.com/v1beta1
+kind: IngressGatewayRouteTable
+metadata:
+  name: bookinfo-ingress-gateway-route-table
+  namespace: bookinfo-demo
+spec:
+  compartmentId: ocid1.compartment.oc1..aaaaaaaac3qtlvrctsjwjwil7h2yakpwteosoaxlilifou6gsbzwv6gu6i2q
+  name: bookinfo-igrt
+  description: This is Ingress Gateway Route Table
+  ingressGateway:
+    ref:
+      name: bookinfo-ingress-gateway
+  routeRules:
+    - httpRoute:
+        ingressGatewayHost:
+          name: bookinfoHost
+        path: /foo
+        pathType: PREFIX
+        isGrpc: false
+        destinations:
+          - virtualService:
+              ref:
+                name: productpage

@@ -10,6 +10,7 @@ OSOK is based on the [Operator Framework](https://operatorframework.io/), an ope
 1. [Autonomous Database Service](https://www.oracle.com/in/autonomous-database/)
 1. [Oracle Streaming Service](https://docs.cloud.oracle.com/iaas/Content/Streaming/Concepts/streamingoverview.htm)
 1. [MySQL DB System Service](https://www.oracle.com/mysql/)
+1. [Service Mesh Service](https://preview.content.oci.oracleiaas.com/en-us/iaas/Content/service-mesh/home.htm?bundle=8067)
 
 ## Installation
 
@@ -24,7 +25,7 @@ See the [Documentation](docs/README.md#oci-service-operator-for-kubernetes) for 
 The OCI Service Operator for Kubernetes is packaged as Operator Lifecycle Manager (OLM) Bundle for making it easy to install in Kubernetes Clusters. The bundle can be downloaded as docker image using below command.
 
 ```
-docker pull iad.ocir.io/oracle/oci-service-operator-bundle:1.0.0
+docker pull iad.ocir.io/oracle/oci-service-operator-bundle:1.1.0
 ```
 
 ## Samples

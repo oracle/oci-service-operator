@@ -1,0 +1,46 @@
+#
+# Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+apiVersion: servicemesh.oci.oracle.com/v1beta1
+kind: IngressGateway
+metadata:
+  name: bookinfo-ingress-gateway
+  namespace: bookinfo-demo
+spec:
+  compartmentId: ocid1.compartment.oc1..aaaaaaaac3qtlvrctsjwjwil7h2yakpwteosoaxlilifou6gsbzwv6gu6i2q
+  name: bookinfo-ig
+  description: This is Ingress Gateway
+  mesh:
+    ref:
+      name: bookinfo-mesh
+  hosts:
+    - name: bookinfoHost
+      hostnames:
+        - bookinfo.com
+        - www.bookinfo.com
+      listeners:
+        - port: 8080
+          protocol: HTTP
+          tls:
+            mode: MUTUAL_TLS
+            serverCertificate:
+              ociTlsCertificate:
+                certificateId: ocid1.certificate.dummy
+            clientValidation:
+              trustedCaBundle:
+                ociCaBundle:
+                  caBundleId: ocid1.caBundle.dummy
+              subjectAlternateNames:
+                - authorized1.client
+                - authorized2.client
+        - port: 9090
+          protocol: HTTP
+          tls:
+            mode: TLS
+            serverCertificate:
+              kubeSecretTlsCertificate:
+                secretName: dummyCertSecretName
+  accessLogging:
+    isEnabled: true

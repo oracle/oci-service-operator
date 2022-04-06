@@ -56,8 +56,12 @@ spec:
               Id:
                 description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
                   Important: Run "make" to regenerate code after modifying this file'
+                maxLength: 255
+                minLength: 1
                 type: string
               compartmentId:
+                maxLength: 255
+                minLength: 1
                 type: string
               definedTags:
                 additionalProperties:
@@ -79,6 +83,8 @@ spec:
                 minimum: 24
                 type: integer
               streamPoolId:
+                maxLength: 255
+                minLength: 1
                 type: string
             type: object
           status:
@@ -117,6 +123,8 @@ spec:
                   message:
                     type: string
                   ocid:
+                    maxLength: 255
+                    minLength: 1
                     type: string
                   reason:
                     type: string

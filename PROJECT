@@ -1,6 +1,7 @@
 domain: oracle.com
 layout:
 - go.kubebuilder.io/v3
+multigroup: true
 plugins:
   manifests.sdk.operatorframework.io/v2: {}
   scorecard.sdk.operatorframework.io/v2: {}
@@ -36,4 +37,116 @@ resources:
   kind: MySqlDbSystem
   path: github.com/oracle/oci-service-operator/api/v1beta1
   version: v1beta1
+- group: core
+  kind: Pod
+  path: k8s.io/api/core/v1
+  version: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: oracle.com
+  group: servicemesh.oci
+  kind: Mesh
+  path: github.com/oracle/oci-service-operator/apis/servicemesh.oci/v1beta1
+  version: v1beta1
+  webhooks:
+    validation: true
+    webhookVersion: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: oracle.com
+  group: servicemesh.oci
+  kind: VirtualService
+  path: github.com/oracle/oci-service-operator/apis/servicemesh.oci/v1beta1
+  version: v1beta1
+  webhooks:
+    validation: true
+    webhookVersion: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: oracle.com
+  group: servicemesh.oci
+  kind: VirtualDeployment
+  path: github.com/oracle/oci-service-operator/apis/servicemesh.oci/v1beta1
+  version: v1beta1
+  webhooks:
+    validation: true
+    webhookVersion: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: oracle.com
+  group: servicemesh.oci
+  kind: VirtualServiceRouteTable
+  path: github.com/oracle/oci-service-operator/apis/servicemesh.oci/v1beta1
+  version: v1beta1
+  webhooks:
+    validation: true
+    webhookVersion: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: oracle.com
+  group: servicemesh.oci
+  kind: VirtualDeploymentBinding
+  path: github.com/oracle/oci-service-operator/apis/servicemesh.oci/v1beta1
+  version: v1beta1
+  webhooks:
+    validation: true
+    webhookVersion: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: oracle.com
+  group: servicemesh.oci
+  kind: AccessPolicy
+  path: github.com/oracle/oci-service-operator/apis/servicemesh.oci/v1beta1
+  version: v1beta1
+  webhooks:
+    validation: true
+    webhookVersion: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: oracle.com
+  group: servicemesh.oci
+  kind: IngressGateway
+  path: github.com/oracle/oci-service-operator/apis/servicemesh.oci/v1beta1
+  version: v1beta1
+  webhooks:
+    validation: true
+    webhookVersion: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: oracle.com
+  group: servicemesh.oci
+  kind: IngressGatewayDeployment
+  path: github.com/oracle/oci-service-operator/apis/servicemesh.oci/v1beta1
+  version: v1beta1
+  webhooks:
+    validation: true
+    webhookVersion: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: oracle.com
+  group: servicemesh.oci
+  kind: IngressGatewayRouteTable
+  path: github.com/oracle/oci-service-operator/apis/servicemesh.oci/v1beta1
+  version: v1beta1
+  webhooks:
+    validation: true
+    webhookVersion: v1
 version: "3"

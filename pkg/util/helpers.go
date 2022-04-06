@@ -17,12 +17,12 @@ import (
 )
 
 func RequeueWithError(err error, duration time.Duration, log loggerutil.OSOKLogger) (ctrl.Result, error) {
-	log.InfoLog("requeue after", "error", err, "duration", duration)
+	log.InfoLog("requeue after", "error", err.Error(), "duration", duration.String())
 	return ctrl.Result{RequeueAfter: duration}, nil
 }
 
 func RequeueWithoutError(duration time.Duration, log loggerutil.OSOKLogger) (ctrl.Result, error) {
-	log.InfoLog("requeue after", "duration", duration)
+	log.InfoLog("requeue after", "duration", duration.String())
 	return ctrl.Result{RequeueAfter: duration}, nil
 }
 

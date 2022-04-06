@@ -7,14 +7,16 @@ package authhelper
 
 import (
 	"context"
+	"reflect"
 
-	"github.com/oracle/oci-go-sdk/v41/common"
-	"github.com/oracle/oci-go-sdk/v41/common/auth"
-	"github.com/oracle/oci-go-sdk/v41/identity"
+	"github.com/oracle/oci-go-sdk/v65/common"
+	"github.com/oracle/oci-go-sdk/v65/common/auth"
+	"github.com/oracle/oci-go-sdk/v65/identity"
+	"github.com/pkg/errors"
+
 	. "github.com/oracle/oci-service-operator/pkg/config"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
-	"github.com/pkg/errors"
-	"reflect"
+	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/conversions"
 )
 
 type AuthConfigProvider struct {
@@ -74,6 +76,10 @@ func (configProvider *AuthConfigProvider) authValidate(ctx context.Context, prov
 		configProvider.Log.ErrorLog(err, "unable to validate the authentication provider.")
 		return false
 	}
-	configProvider.Log.InfoLog("The ADs obtained during validation", "ADs", r.Items)
+	if len(r.Items) > 0 {
+		configProvider.Log.InfoLog("The ADs obtained during validation", "ADs", conversions.DeRefString(r.Items[0].Name))
+	} else {
+		configProvider.Log.InfoLog("No ADs obtained during validation")
+	}
 	return true
 }

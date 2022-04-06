@@ -1,0 +1,24 @@
+# permissions for end users to edit accesspolicies.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: accesspolicy-editor-role
+rules:
+- apiGroups:
+  - servicemesh.oci.oracle.com
+  resources:
+  - accesspolicies
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - servicemesh.oci.oracle.com
+  resources:
+  - accesspolicies/status
+  verbs:
+  - get
