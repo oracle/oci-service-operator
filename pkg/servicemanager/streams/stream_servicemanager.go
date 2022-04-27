@@ -11,14 +11,16 @@ import (
 	"github.com/oracle/oci-service-operator/pkg/errorutil"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/metrics"
+	"github.com/oracle/oci-service-operator/pkg/servicemanager"
+
 	"github.com/pkg/errors"
 	"math"
 	"reflect"
 	"strings"
 	"time"
 
-	"github.com/oracle/oci-go-sdk/v41/common"
-	"github.com/oracle/oci-go-sdk/v41/streaming"
+	"github.com/oracle/oci-go-sdk/v65/common"
+	"github.com/oracle/oci-go-sdk/v65/streaming"
 	ociv1beta1 "github.com/oracle/oci-service-operator/api/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/credhelper"
 	"github.com/oracle/oci-service-operator/pkg/util"
@@ -47,13 +49,13 @@ func NewStreamServiceManager(provider common.ConfigurationProvider, credClient c
 	}
 }
 
-func (c *StreamServiceManager) CreateOrUpdate(ctx context.Context, obj runtime.Object, req ctrl.Request) (bool, error) {
+func (c *StreamServiceManager) CreateOrUpdate(ctx context.Context, obj runtime.Object, req ctrl.Request) (servicemanager.OSOKResponse, error) {
 	streamObject, err := c.convert(obj)
 
 	// if error happen while object conversion
 	if err != nil {
 		c.Log.ErrorLog(err, "Conversion of object failed")
-		return false, err
+		return servicemanager.OSOKResponse{IsSuccessful: false}, err
 	}
 
 	var streamInstance *streaming.Stream
@@ -61,7 +63,7 @@ func (c *StreamServiceManager) CreateOrUpdate(ctx context.Context, obj runtime.O
 	if strings.TrimSpace(string(streamObject.Spec.StreamId)) == "" {
 
 		if streamObject.Spec.Name == "" {
-			return false, errors.New("Can't able to create the stream")
+			return servicemanager.OSOKResponse{IsSuccessful: false}, errors.New("Can't able to create the stream")
 		}
 
 		// check for whether same name stream exists or not in ACTIVE, UPDATING OR CREATING Phase
@@ -70,7 +72,7 @@ func (c *StreamServiceManager) CreateOrUpdate(ctx context.Context, obj runtime.O
 			c.Log.ErrorLog(err, "Error while getting Stream using Id")
 			c.Metrics.AddCRFaultMetrics(obj.GetObjectKind().GroupVersionKind().Kind,
 				"Failed to get the Stream", req.Name, req.Namespace)
-			return false, err
+			return servicemanager.OSOKResponse{IsSuccessful: false}, err
 		}
 
 		if streamOcid != nil {
@@ -80,14 +82,14 @@ func (c *StreamServiceManager) CreateOrUpdate(ctx context.Context, obj runtime.O
 				c.Log.ErrorLog(err, "Error while getting Stream")
 				c.Metrics.AddCRFaultMetrics(obj.GetObjectKind().GroupVersionKind().Kind,
 					"Error while getting Stream", req.Name, req.Namespace)
-				return false, err
+				return servicemanager.OSOKResponse{IsSuccessful: false}, err
 			}
 			if isValidUpdate(*streamObject, *streamInstance) {
 				if err = c.UpdateStream(ctx, streamObject); err != nil {
 					c.Log.ErrorLog(err, "Error while updating Stream")
 					c.Metrics.AddCRFaultMetrics(obj.GetObjectKind().GroupVersionKind().Kind,
 						"Error while updating Stream", req.Name, req.Namespace)
-					return false, err
+					return servicemanager.OSOKResponse{IsSuccessful: false}, err
 				}
 				streamObject.Status.OsokStatus = util.UpdateOSOKStatusCondition(streamObject.Status.OsokStatus,
 					ociv1beta1.Updating, v1.ConditionTrue, "", "Stream Update success", c.Log)
@@ -106,10 +108,10 @@ func (c *StreamServiceManager) CreateOrUpdate(ctx context.Context, obj runtime.O
 				_, err := errorutil.OciErrorTypeResponse(err)
 				if _, ok := err.(errorutil.BadRequestOciError); !ok {
 					c.Log.ErrorLog(err, "Assertion error for BadRequestOciError")
-					return false, err
+					return servicemanager.OSOKResponse{IsSuccessful: false}, err
 				} else {
 					streamObject.Status.OsokStatus.Message = err.(common.ServiceError).GetCode()
-					return false, err
+					return servicemanager.OSOKResponse{IsSuccessful: false}, err
 				}
 			}
 
@@ -125,7 +127,7 @@ func (c *StreamServiceManager) CreateOrUpdate(ctx context.Context, obj runtime.O
 				c.Log.ErrorLog(err, "Error while getting Stream")
 				c.Metrics.AddCRFaultMetrics(obj.GetObjectKind().GroupVersionKind().Kind,
 					"Error while getting Stream", req.Name, req.Namespace)
-				return false, err
+				return servicemanager.OSOKResponse{IsSuccessful: false}, err
 			}
 
 		}
@@ -138,7 +140,7 @@ func (c *StreamServiceManager) CreateOrUpdate(ctx context.Context, obj runtime.O
 			c.Log.ErrorLog(err, "Error while getting Stream")
 			c.Metrics.AddCRFaultMetrics(obj.GetObjectKind().GroupVersionKind().Kind,
 				"Error while getting Stream", req.Name, req.Namespace)
-			return false, err
+			return servicemanager.OSOKResponse{IsSuccessful: false}, err
 		}
 
 		if isValidUpdate(*streamObject, *streamInstance) {
@@ -146,7 +148,7 @@ func (c *StreamServiceManager) CreateOrUpdate(ctx context.Context, obj runtime.O
 				c.Log.ErrorLog(err, "Error while updating Stream")
 				c.Metrics.AddCRFaultMetrics(c.Metrics.ServiceName,
 					"Error while updating Stream", req.Name, req.Namespace)
-				return false, err
+				return servicemanager.OSOKResponse{IsSuccessful: false}, err
 			}
 			streamObject.Status.OsokStatus = util.UpdateOSOKStatusCondition(streamObject.Status.OsokStatus,
 				ociv1beta1.Updating, v1.ConditionTrue, "", "Stream Update success", c.Log)
@@ -185,11 +187,11 @@ func (c *StreamServiceManager) CreateOrUpdate(ctx context.Context, obj runtime.O
 		_, err := c.addToSecret(ctx, streamObject.Namespace, streamObject.Name, *streamInstance)
 		if err != nil {
 			c.Log.InfoLog(fmt.Sprintf("Secret creation got failed"))
-			return false, err
+			return servicemanager.OSOKResponse{IsSuccessful: false}, err
 		}
 	}
 
-	return true, nil
+	return servicemanager.OSOKResponse{IsSuccessful: true}, nil
 }
 
 func isValidUpdate(streamObject ociv1beta1.Stream, streamInstance streaming.Stream) bool {

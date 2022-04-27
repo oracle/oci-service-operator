@@ -9,6 +9,26 @@ rules:
 - apiGroups:
   - ""
   resources:
+  - configmaps
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - configmaps/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - ""
+  resources:
   - events
   verbs:
   - create
@@ -21,6 +41,46 @@ rules:
 - apiGroups:
   - ""
   resources:
+  - namespaces
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - namespaces/status
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - pods/eviction
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - pods/status
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resources:
   - secrets
   verbs:
   - create
@@ -30,6 +90,80 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - services/status
+  verbs:
+  - get
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - deployments/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - autoscaling
+  resources:
+  - horizontalpodautoscalers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - autoscaling
+  resources:
+  - horizontalpodautoscalers/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - services/status
+  verbs:
+  - get
+  - patch
+  - update
 - apiGroups:
   - oci.oracle.com
   resources:
@@ -104,6 +238,240 @@ rules:
   - oci.oracle.com
   resources:
   - streams/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - servicemesh.oci.oracle.com
+  resources:
+  - accesspolicies
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - servicemesh.oci.oracle.com
+  resources:
+  - accesspolicies/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - servicemesh.oci.oracle.com
+  resources:
+  - accesspolicies/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - servicemesh.oci.oracle.com
+  resources:
+  - ingressgatewaydeployments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - servicemesh.oci.oracle.com
+  resources:
+  - ingressgatewaydeployments/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - servicemesh.oci.oracle.com
+  resources:
+  - ingressgatewaydeployments/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - servicemesh.oci.oracle.com
+  resources:
+  - ingressgatewayroutetables
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - servicemesh.oci.oracle.com
+  resources:
+  - ingressgatewayroutetables/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - servicemesh.oci.oracle.com
+  resources:
+  - ingressgatewayroutetables/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - servicemesh.oci.oracle.com
+  resources:
+  - ingressgateways
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - servicemesh.oci.oracle.com
+  resources:
+  - ingressgateways/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - servicemesh.oci.oracle.com
+  resources:
+  - ingressgateways/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - servicemesh.oci.oracle.com
+  resources:
+  - meshes
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - servicemesh.oci.oracle.com
+  resources:
+  - meshes/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - servicemesh.oci.oracle.com
+  resources:
+  - meshes/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - servicemesh.oci.oracle.com
+  resources:
+  - virtualdeploymentbindings
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - servicemesh.oci.oracle.com
+  resources:
+  - virtualdeploymentbindings/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - servicemesh.oci.oracle.com
+  resources:
+  - virtualdeploymentbindings/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - servicemesh.oci.oracle.com
+  resources:
+  - virtualdeployments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - servicemesh.oci.oracle.com
+  resources:
+  - virtualdeployments/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - servicemesh.oci.oracle.com
+  resources:
+  - virtualdeployments/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - servicemesh.oci.oracle.com
+  resources:
+  - virtualserviceroutetables
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - servicemesh.oci.oracle.com
+  resources:
+  - virtualserviceroutetables/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - servicemesh.oci.oracle.com
+  resources:
+  - virtualserviceroutetables/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - servicemesh.oci.oracle.com
+  resources:
+  - virtualservices
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - servicemesh.oci.oracle.com
+  resources:
+  - virtualservices/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - servicemesh.oci.oracle.com
+  resources:
+  - virtualservices/status
   verbs:
   - get
   - patch

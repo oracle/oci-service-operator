@@ -8,11 +8,9 @@ package core
 import (
 	"context"
 	"fmt"
-	"github.com/oracle/oci-service-operator/api/v1beta1"
-	"github.com/oracle/oci-service-operator/pkg/loggerutil"
-	"github.com/oracle/oci-service-operator/pkg/metrics"
-	"github.com/oracle/oci-service-operator/pkg/servicemanager"
-	"github.com/oracle/oci-service-operator/pkg/util"
+	"strings"
+	"time"
+
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -21,7 +19,12 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-	"time"
+
+	"github.com/oracle/oci-service-operator/api/v1beta1"
+	"github.com/oracle/oci-service-operator/pkg/loggerutil"
+	"github.com/oracle/oci-service-operator/pkg/metrics"
+	"github.com/oracle/oci-service-operator/pkg/servicemanager"
+	"github.com/oracle/oci-service-operator/pkg/util"
 )
 
 const (
@@ -31,12 +34,13 @@ const (
 
 type BaseReconciler struct {
 	client.Client
-	OSOKServiceManager servicemanager.OSOKServiceManager
-	Finalizer          Finalizer
-	Log                loggerutil.OSOKLogger
-	Metrics            *metrics.Metrics
-	Recorder           record.EventRecorder
-	Scheme             *runtime.Scheme
+	OSOKServiceManager   servicemanager.OSOKServiceManager
+	Finalizer            Finalizer
+	Log                  loggerutil.OSOKLogger
+	Metrics              *metrics.Metrics
+	Recorder             record.EventRecorder
+	Scheme               *runtime.Scheme
+	AdditionalFinalizers []string
 }
 
 func (r *BaseReconciler) Reconcile(ctx context.Context, req ctrl.Request, obj client.Object) (result ctrl.Result, err error) {
@@ -69,7 +73,7 @@ func (r *BaseReconciler) Reconcile(ctx context.Context, req ctrl.Request, obj cl
 				return util.RequeueWithError(err, defaultRequeueTime, r.Log)
 			}
 			if delSuc {
-				if err := r.removeFinalizer(ctx, obj, req.Name, req.Namespace); err != nil {
+				if err := r.removeFinalizer(ctx, obj, strings.Join(r.AdditionalFinalizers, " "), OSOKFinalizerName); err != nil {
 					r.Log.ErrorLog(err, "Failed to remove the finalizer")
 					r.Recorder.Event(obj, v1.EventTypeWarning, "Failed",
 						fmt.Sprintf("Failed to remove the finalizer: %s", err.Error()))
@@ -90,14 +94,12 @@ func (r *BaseReconciler) Reconcile(ctx context.Context, req ctrl.Request, obj cl
 		}
 	}
 
-	if !controllerutil.ContainsFinalizer(obj, OSOKFinalizerName) {
-		if err := r.addFinalizer(ctx, obj, req.Name, req.Namespace); err != nil {
-			r.Log.ErrorLog(err, "Error adding finalizer to Custom Resource.")
-			r.Metrics.AddReconcileFaultMetrics(obj.GetObjectKind().GroupVersionKind().Kind,
-				"Error adding finalizer to Custom Resource.", req.Name, req.Namespace)
-			r.Recorder.Event(obj, v1.EventTypeWarning, "Failed", "Failed to add finalizer")
-			return util.RequeueWithError(err, defaultRequeueTime, r.Log)
-		}
+	if err := r.addFinalizer(ctx, obj, strings.Join(r.AdditionalFinalizers, " "), OSOKFinalizerName); err != nil {
+		r.Log.ErrorLog(err, "Error adding finalizer to Custom Resource.")
+		r.Metrics.AddReconcileFaultMetrics(obj.GetObjectKind().GroupVersionKind().Kind,
+			"Error adding finalizer to Custom Resource.", req.Name, req.Namespace)
+		r.Recorder.Event(obj, v1.EventTypeWarning, "Failed", "Failed to add finalizer")
+		return util.RequeueWithError(err, defaultRequeueTime, r.Log)
 	}
 
 	r.Log.InfoLog("Reconcile the resource")
@@ -123,7 +125,7 @@ func (r *BaseReconciler) ReconcileResource(ctx context.Context, obj client.Objec
 	r.Log.FixedLogs["namespace"] = req.Namespace
 
 	oldObj := obj.DeepCopyObject()
-	sucFlag, err := r.OSOKServiceManager.CreateOrUpdate(ctx, obj, req)
+	OSOKResponse, err := r.OSOKServiceManager.CreateOrUpdate(ctx, obj, req)
 	if err != nil {
 		r.Log.ErrorLog(err, "Create Or Update failed in the Service Manager with error")
 		r.Metrics.AddReconcileFaultMetrics(obj.GetObjectKind().GroupVersionKind().Kind,
@@ -142,17 +144,24 @@ func (r *BaseReconciler) ReconcileResource(ctx context.Context, obj client.Objec
 	}
 	r.Metrics.AddCRCountMetrics(r.Metrics.ServiceName, "Created an Custom resource "+r.Metrics.ServiceName,
 		req.Name, req.Namespace)
-	if sucFlag {
+
+	if OSOKResponse.IsSuccessful {
 		r.Log.InfoLog("Reconcile Completed")
 		r.Metrics.AddReconcileSuccessMetrics(obj.GetObjectKind().GroupVersionKind().Kind,
 			"Create or Update of resource succeeded", req.Name, req.Namespace)
 		r.Recorder.Event(obj, v1.EventTypeNormal, "Success", "Create or Update of resource succeeded")
+		if OSOKResponse.ShouldRequeue {
+			return util.RequeueWithoutError(OSOKResponse.RequeueDuration, r.Log)
+		}
 		return util.DoNotRequeue()
 	} else {
 		r.Log.InfoLog("Reconcile Failed")
 		r.Metrics.AddReconcileFaultMetrics(obj.GetObjectKind().GroupVersionKind().Kind,
 			"Failed to create or update resource", req.Name, req.Namespace)
 		r.Recorder.Event(obj, v1.EventTypeWarning, "Failed", "Failed to create or update resource")
+		if OSOKResponse.ShouldRequeue {
+			return ctrl.Result{Requeue: true}, err
+		}
 		return util.DoNotRequeue()
 	}
 }
@@ -181,15 +190,34 @@ func (r *BaseReconciler) DeleteResource(ctx context.Context, obj client.Object, 
 	return delSucc, nil
 }
 
-func (r *BaseReconciler) addFinalizer(ctx context.Context, obj client.Object, name string, ns string) error {
-	controllerutil.AddFinalizer(obj, OSOKFinalizerName)
+func (r *BaseReconciler) addFinalizer(ctx context.Context, obj client.Object, finalizers ...string) error {
+	needsUpdate := false
+	for _, finalizer := range finalizers {
+		if finalizer != "" && !controllerutil.ContainsFinalizer(obj, finalizer) {
+			controllerutil.AddFinalizer(obj, finalizer)
+			needsUpdate = true
+		}
+	}
+	if !needsUpdate {
+		return nil
+	}
 	r.Log.InfoLog("Added Finalizer to the resource.")
 	r.Recorder.Event(obj, v1.EventTypeNormal, "Success", "Finalizer is added to the object")
 	return r.Update(ctx, obj)
 }
 
-func (r *BaseReconciler) removeFinalizer(ctx context.Context, obj client.Object, name string, ns string) error {
-	r.Log.InfoLog("Removing Finalizer to the resource.")
-	controllerutil.RemoveFinalizer(obj, OSOKFinalizerName)
+func (r *BaseReconciler) removeFinalizer(ctx context.Context, obj client.Object, finalizers ...string) error {
+	needsUpdate := false
+	for _, finalizer := range finalizers {
+		if finalizer != "" && controllerutil.ContainsFinalizer(obj, finalizer) {
+			controllerutil.RemoveFinalizer(obj, finalizer)
+			needsUpdate = true
+		}
+	}
+	if !needsUpdate {
+		return nil
+	}
+	r.Log.InfoLog("Removing Finalizer from the resource.")
+	r.Recorder.Event(obj, v1.EventTypeNormal, "Success", "Finalizer is removed from the object")
 	return r.Update(ctx, obj)
 }

@@ -4,6 +4,7 @@
 #
 resources:
 - manifests.yaml
+- podmutator.yaml
 - service.yaml
 
 configurations:

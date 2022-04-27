@@ -1,0 +1,28 @@
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  creationTimestamp: null
+  name: servicemesh-mutating-webhook-configuration
+webhooks:
+  - admissionReviewVersions:
+      - v1
+      - v1beta1
+    clientConfig:
+      service:
+        name: webhook-service
+        namespace: system
+        path: /mutate-pod
+    failurePolicy: Ignore
+    name: proxy-injector.servicemesh.oci.oracle.com
+    rules:
+      - operations: [ "CREATE" ]
+        apiGroups: [""]
+        apiVersions: ["v1"]
+        resources: ["pods"]
+    sideEffects: None
+    namespaceSelector:
+      matchExpressions:
+        - key: "servicemesh.oci.oracle.com/sidecar-injection"
+          operator: "In"
+          values: ["enabled", "disabled"]

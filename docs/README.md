@@ -34,7 +34,13 @@
     - [Bind](mysql.md##binding-to-an-existing-mysql-dbsystem)
     - [Update](mysql.md##updating-a-mysql-dbsystem)
     - [Access Information in Kubernetes Secret](mysql.md##access-information-in-kubernetes-secrets)
-  
+  - [Service Mesh Service](service-mesh.md)
+    - [Introduction](service-mesh.md#introduction)
+    - [Service Mesh Permission requirement](service-mesh.md#create-policies)
+    - [Service Mesh Resources](service-mesh.md#service-mesh-resources)
+    - [Install cert manager](service-mesh.md#install-cert-manager)
+    - [Install metrics server](service-mesh.md#install-metrics-server)
+
 ## Introduction
 
 The OCI Service Operator for Kuberentes (OSOK) simplifies the process and provide a seamless experience for the container-native application in managing and connecting to OCI services/resources. 

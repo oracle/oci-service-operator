@@ -1,0 +1,346 @@
+
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.4.1
+  creationTimestamp: null
+  name: virtualdeploymentbindings.servicemesh.oci.oracle.com
+spec:
+  group: servicemesh.oci.oracle.com
+  names:
+    kind: VirtualDeploymentBinding
+    listKind: VirtualDeploymentBindingList
+    plural: virtualdeploymentbindings
+    singular: virtualdeploymentbinding
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: status of virtual deployment binding
+      jsonPath: .status.conditions[1].status
+      name: Active
+      type: string
+    - description: status of virtual deployment binding dependencies
+      jsonPath: .status.conditions[0].status
+      name: DependenciesActive
+      priority: 1
+      type: string
+    - description: ocid of virtual deployment
+      jsonPath: .status.virtualDeploymentId
+      name: VirtualDeploymentOcid
+      priority: 1
+      type: string
+    - description: name of virtual deployment
+      jsonPath: .status.virtualDeploymentName
+      name: VirtualDeploymentName
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: VirtualDeploymentBinding is the Schema for the virtualdeploymentbindings
+          API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: VirtualDeploymentBindingSpec defines the desired state of
+              VirtualDeploymentBinding
+            properties:
+              resources:
+                description: ResourceRequirements describes the compute resource requirements.
+                properties:
+                  limits:
+                    additionalProperties:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                      x-kubernetes-int-or-string: true
+                    description: 'Limits describes the maximum amount of compute resources
+                      allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                    type: object
+                  requests:
+                    additionalProperties:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                      x-kubernetes-int-or-string: true
+                    description: 'Requests describes the minimum amount of compute
+                      resources required. If Requests is omitted for a container,
+                      it defaults to Limits if that is explicitly specified, otherwise
+                      to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                    type: object
+                type: object
+              target:
+                description: Target identifies the Virtual Deployment for a Virtual
+                  Deployment Binding
+                properties:
+                  service:
+                    description: A reference to Service that a resource belongs to.
+                    properties:
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        description: matchLabels is a map of {key,value} pairs.
+                        type: object
+                      ref:
+                        description: Type representing the reference to a CR
+                        properties:
+                          name:
+                            description: Name of the referenced CR
+                            maxLength: 255
+                            minLength: 1
+                            type: string
+                          namespace:
+                            description: Namespace of the referenced CR If unspecified,
+                              defaults to the referencing object's namespace
+                            minLength: 1
+                            type: string
+                        required:
+                        - name
+                        type: object
+                    required:
+                    - ref
+                    type: object
+                required:
+                - service
+                type: object
+              virtualDeployment:
+                description: INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+                properties:
+                  id:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  ref:
+                    description: Type representing the reference to a CR
+                    properties:
+                      name:
+                        description: Name of the referenced CR
+                        maxLength: 255
+                        minLength: 1
+                        type: string
+                      namespace:
+                        description: Namespace of the referenced CR If unspecified,
+                          defaults to the referencing object's namespace
+                        minLength: 1
+                        type: string
+                    required:
+                    - name
+                    type: object
+                type: object
+            required:
+            - target
+            - virtualDeployment
+            type: object
+          status:
+            properties:
+              accessPolicyId:
+                maxLength: 255
+                minLength: 1
+                type: string
+              conditions:
+                items:
+                  description: Indicates the condition of the Service mesh resource
+                  properties:
+                    lastTransitionTime:
+                      description: lastTransitionTime is the last time the condition
+                        transitioned from one status to another.
+                      format: date-time
+                      type: string
+                    message:
+                      description: message is a human readable message indicating
+                        details about the transition. This may be an empty string.
+                      maxLength: 32768
+                      type: string
+                    observedGeneration:
+                      description: observedGeneration represents the .metadata.generation
+                        that the condition was set based upon. For instance, if .metadata.generation
+                        is currently 12, but the .status.conditions[x].observedGeneration
+                        is 9, the condition is out of date with respect to the current
+                        state of the instance.
+                      format: int64
+                      minimum: 0
+                      type: integer
+                    reason:
+                      description: reason contains a programmatic identifier indicating
+                        the reason for the condition's last transition. The value
+                        should be a CamelCase string. This field may not be empty.
+                      maxLength: 1024
+                      minLength: 1
+                      pattern: ^[A-Za-z]([A-Za-z0-9_,:]*[A-Za-z0-9_])?$
+                      type: string
+                    status:
+                      description: status of the condition, one of True, False, Unknown.
+                      enum:
+                      - "True"
+                      - "False"
+                      - Unknown
+                      type: string
+                    type:
+                      description: Type of Service mesh condition.
+                      enum:
+                      - ServiceMeshActive
+                      - ServiceMeshDependenciesActive
+                      - ServiceMeshConfigured
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - message
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+              ingressGatewayId:
+                maxLength: 255
+                minLength: 1
+                type: string
+              ingressGatewayMtls:
+                description: IngressGatewayMutualTransportLayerSecurity sets mTLS
+                  settings used when sending requests to virtual services within the
+                  mesh.
+                properties:
+                  certificateId:
+                    description: The OCID of the certificate resource that will be
+                      used for mTLS authentication with other virtual services in
+                      the mesh.
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                required:
+                - certificateId
+                type: object
+              ingressGatewayName:
+                description: Name of the resource
+                maxLength: 255
+                minLength: 1
+                type: string
+              ingressGatewayRouteTableId:
+                maxLength: 255
+                minLength: 1
+                type: string
+              lastUpdatedTime:
+                format: date-time
+                type: string
+              meshId:
+                maxLength: 255
+                minLength: 1
+                type: string
+              meshMtls:
+                description: MeshMutualTransportLayerSecurity sets a minimum level
+                  of mTLS authentication for all virtual services within the mesh
+                properties:
+                  minimum:
+                    description: 'DISABLED: No minimum, virtual services within this
+                      mesh can use any mTLS authentication mode. PERMISSIVE: Virtual
+                      services within this mesh can use either PERMISSIVE or STRICT
+                      modes. STRICT: All virtual services within this mesh must use
+                      STRICT mode.'
+                    enum:
+                    - DISABLED
+                    - PERMISSIVE
+                    - STRICT
+                    type: string
+                required:
+                - minimum
+                type: object
+              opcRetryToken:
+                type: string
+              refIdForRules:
+                items:
+                  additionalProperties:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  type: object
+                type: array
+              virtualDeploymentId:
+                maxLength: 255
+                minLength: 1
+                type: string
+              virtualDeploymentIdForRules:
+                items:
+                  items:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  type: array
+                type: array
+              virtualDeploymentName:
+                description: Name of the resource
+                maxLength: 255
+                minLength: 1
+                type: string
+              virtualServiceId:
+                maxLength: 255
+                minLength: 1
+                type: string
+              virtualServiceIdForRules:
+                items:
+                  items:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  type: array
+                type: array
+              virtualServiceMtls:
+                description: VirtualServiceMutualTransportLayerSecurity sets mTLS
+                  settings used when communicating with other virtual services within
+                  the mesh.
+                properties:
+                  certificateId:
+                    description: The OCID of the certificate resource that will be
+                      used for mTLS authentication with other virtual services in
+                      the mesh.
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  mode:
+                    description: Describes the Mutual Transport Layer Security mode
+                      for a resource Only one of the following mode should be present
+                    enum:
+                    - DISABLED
+                    - PERMISSIVE
+                    - STRICT
+                    type: string
+                required:
+                - mode
+                type: object
+              virtualServiceName:
+                description: Name of the resource
+                maxLength: 255
+                minLength: 1
+                type: string
+              virtualServiceRouteTableId:
+                maxLength: 255
+                minLength: 1
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

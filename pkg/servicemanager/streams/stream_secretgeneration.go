@@ -8,7 +8,7 @@ package streams
 import (
 	"context"
 	"fmt"
-	"github.com/oracle/oci-go-sdk/v41/streaming"
+	"github.com/oracle/oci-go-sdk/v65/streaming"
 )
 
 func (c *StreamServiceManager) addToSecret(ctx context.Context, namespace string, streamName string,

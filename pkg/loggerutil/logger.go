@@ -6,8 +6,9 @@
 package loggerutil
 
 import (
-	"github.com/go-logr/logr"
 	"strings"
+
+	"github.com/go-logr/logr"
 )
 
 type OSOKLogger struct {
@@ -74,9 +75,9 @@ func (ol *OSOKLogger) ErrorLog(err error, message string, keysAndValues ...inter
 		fixedMessage = strings.Join(fixedMessageArray, " , ")
 	}
 
-	res, err := extractKeyValuePairs(keysAndValues)
-	if err != nil {
-		ol.Logger.Error(err, "Passed Key value are not string only string allowed")
+	res, extractErr := extractKeyValuePairs(keysAndValues)
+	if extractErr != nil {
+		ol.Logger.Error(extractErr, "Passed Key value are not string only string allowed")
 		return
 	}
 

@@ -25,6 +25,55 @@ spec:
       kind: Stream
       name: streams.oci.oracle.com
       version: v1beta1
+    - description: AccessPolicy is the Schema for the accesspolicies API
+      displayName: Access Policy
+      kind: AccessPolicy
+      name: accesspolicies.servicemesh.oci.oracle.com
+      version: v1beta1
+    - description: IngressGatewayDeployment is the Schema for the ingressgatewaydeployments
+        API
+      displayName: Ingress Gateway Deployment
+      kind: IngressGatewayDeployment
+      name: ingressgatewaydeployments.servicemesh.oci.oracle.com
+      version: v1beta1
+    - description: IngressGatewayRouteTable is the Schema for the ingressgatewayroutetables
+        API
+      displayName: Ingress Gateway Route Table
+      kind: IngressGatewayRouteTable
+      name: ingressgatewayroutetables.servicemesh.oci.oracle.com
+      version: v1beta1
+    - description: IngressGateway is the Schema for the ingressgateways API
+      displayName: Ingress Gateway
+      kind: IngressGateway
+      name: ingressgateways.servicemesh.oci.oracle.com
+      version: v1beta1
+    - description: Mesh is the Schema for the meshes API
+      displayName: Mesh
+      kind: Mesh
+      name: meshes.servicemesh.oci.oracle.com
+      version: v1beta1
+    - description: VirtualDeploymentBinding is the Schema for the virtualdeploymentbindings
+        API
+      displayName: Virtual Deployment Binding
+      kind: VirtualDeploymentBinding
+      name: virtualdeploymentbindings.servicemesh.oci.oracle.com
+      version: v1beta1
+    - description: VirtualDeployment is the Schema for the virtualdeployments API
+      displayName: Virtual Deployment
+      kind: VirtualDeployment
+      name: virtualdeployments.servicemesh.oci.oracle.com
+      version: v1beta1
+    - description: VirtualServiceRouteTable is the Schema for the virtualserviceroutetables
+        API
+      displayName: Virtual Service Route Table
+      kind: VirtualServiceRouteTable
+      name: virtualserviceroutetables.servicemesh.oci.oracle.com
+      version: v1beta1
+    - description: VirtualService is the Schema for the virtualservices API
+      displayName: Virtual Service
+      kind: VirtualService
+      name: virtualservices.servicemesh.oci.oracle.com
+      version: v1beta1
   description: OCI Service Operator for Kubernetes
   displayName: oci-service-operator
   icon:

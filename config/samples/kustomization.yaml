@@ -8,4 +8,13 @@ resources:
 - oci_v1beta1_autonomousdatabases.yaml
 - oci_v1beta1_stream.yaml
 - oci_v1beta1_mysqldbsystem.yaml
+- servicemesh.oci_v1beta1_mesh.yaml
+- servicemesh.oci_v1beta1_virtualservice.yaml
+- servicemesh.oci_v1beta1_virtualdeployment.yaml
+- servicemesh.oci_v1beta1_virtualserviceroutetable.yaml
+- servicemesh.oci_v1beta1_virtualdeploymentbinding.yaml
+- servicemesh.oci_v1beta1_accesspolicy.yaml
+- servicemesh.oci_v1beta1_ingressgateway.yaml
+- servicemesh.oci_v1beta1_ingressgatewaydeployment.yaml
+- servicemesh.oci_v1beta1_ingressgatewayroutetable.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

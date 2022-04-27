@@ -1,0 +1,18 @@
+#
+# Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+apiVersion: servicemesh.oci.oracle.com/v1beta1
+kind: Mesh
+metadata:
+  name: bookinfo-mesh
+  namespace: bookinfo-demo
+spec:
+  compartmentId: ocid1.compartment.oc1..aaaaaaaac3qtlvrctsjwjwil7h2yakpwteosoaxlilifou6gsbzwv6gu6i2q
+  displayName: bookinfo-mesh
+  description: This is Mesh
+  mtls:
+    minimum: STRICT
+  certificateAuthorities:
+    - id: ocid1.certificateauthority.oc1.iad.amaaaaaazueyztqaj2izlvvlirx3wzhkxrc5j6jxa3konp77a5f5pqx47mja

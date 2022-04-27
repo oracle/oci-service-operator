@@ -9,15 +9,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/oracle/oci-go-sdk/v41/common"
+	"github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
+	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	"github.com/oracle/oci-service-operator/pkg/util"
 	"math"
 	"reflect"
 	"strings"
 	"time"
 
-	"github.com/oracle/oci-go-sdk/v41/database"
+	"github.com/oracle/oci-go-sdk/v65/database"
 	ociv1beta1 "github.com/oracle/oci-service-operator/api/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/credhelper"
 	v1 "k8s.io/api/core/v1"
@@ -43,12 +44,12 @@ func NewAdbServiceManager(provider common.ConfigurationProvider, credClient cred
 	}
 }
 
-func (c *AdbServiceManager) CreateOrUpdate(ctx context.Context, obj runtime.Object, req ctrl.Request) (bool, error) {
+func (c *AdbServiceManager) CreateOrUpdate(ctx context.Context, obj runtime.Object, req ctrl.Request) (servicemanager.OSOKResponse, error) {
 
 	autonomousDatabases, err := c.convert(obj)
 	if err != nil {
 		c.Log.ErrorLog(err, "Conversion of object failed")
-		return false, err
+		return servicemanager.OSOKResponse{IsSuccessful: false}, err
 	}
 
 	var adbInstance *database.AutonomousDatabase
@@ -58,7 +59,7 @@ func (c *AdbServiceManager) CreateOrUpdate(ctx context.Context, obj runtime.Obje
 
 		adbOcid, err := c.GetAdbOcid(ctx, *autonomousDatabases)
 		if err != nil {
-			return false, err
+			return servicemanager.OSOKResponse{IsSuccessful: false}, err
 		}
 
 		if adbOcid == nil {
@@ -67,13 +68,13 @@ func (c *AdbServiceManager) CreateOrUpdate(ctx context.Context, obj runtime.Obje
 			pwdMap, err := c.CredentialClient.GetSecret(ctx, autonomousDatabases.Spec.AdminPassword.Secret.SecretName, req.Namespace)
 			if err != nil {
 				c.Log.ErrorLog(err, "Error while getting the admin password secret")
-				return false, err
+				return servicemanager.OSOKResponse{IsSuccessful: false}, err
 			}
 
 			pwd, ok := pwdMap["password"]
 			if !ok {
 				c.Log.ErrorLog(err, "password key in admin password secret is not found")
-				return false, errors.New("password key in admin password secret is not found")
+				return servicemanager.OSOKResponse{IsSuccessful: false}, errors.New("password key in admin password secret is not found")
 			}
 
 			resp, err := c.CreateAdb(ctx, *autonomousDatabases, string(pwd))
@@ -83,9 +84,9 @@ func (c *AdbServiceManager) CreateOrUpdate(ctx context.Context, obj runtime.Obje
 				if err.(common.ServiceError).GetHTTPStatusCode() == 400 && err.(common.ServiceError).GetCode() == "InvalidParameter" {
 					autonomousDatabases.Status.OsokStatus.Message = err.(common.ServiceError).GetCode()
 					c.Log.ErrorLog(err, "Create AutonomousDatabase failed")
-					return false, nil
+					return servicemanager.OSOKResponse{IsSuccessful: false}, nil
 				}
-				return false, err
+				return servicemanager.OSOKResponse{IsSuccessful: false}, err
 			}
 
 			c.Log.InfoLog(fmt.Sprintf("AutonomousDatabase %s is Provisioning", autonomousDatabases.Spec.DisplayName))
@@ -96,14 +97,14 @@ func (c *AdbServiceManager) CreateOrUpdate(ctx context.Context, obj runtime.Obje
 			adbInstance, err = c.GetAdb(ctx, ociv1beta1.OCID(*resp.Id), &retryPolicy)
 			if err != nil {
 				c.Log.ErrorLog(err, "Error while getting Autonomous database")
-				return false, err
+				return servicemanager.OSOKResponse{IsSuccessful: false}, err
 			}
 		} else {
 			c.Log.InfoLog(fmt.Sprintf("Getting Autonomous Database %s", *adbOcid))
 			adbInstance, err = c.GetAdb(ctx, *adbOcid, nil)
 			if err != nil {
 				c.Log.ErrorLog(err, "Error while getting Autonomous database")
-				return false, err
+				return servicemanager.OSOKResponse{IsSuccessful: false}, err
 			}
 		}
 		autonomousDatabases.Status.OsokStatus = util.UpdateOSOKStatusCondition(autonomousDatabases.Status.OsokStatus,
@@ -122,13 +123,13 @@ func (c *AdbServiceManager) CreateOrUpdate(ctx context.Context, obj runtime.Obje
 		adbInstance, err = c.GetAdb(ctx, autonomousDatabases.Spec.AdbId, nil)
 		if err != nil {
 			c.Log.ErrorLog(err, "Error while getting Autonomous database")
-			return false, err
+			return servicemanager.OSOKResponse{IsSuccessful: false}, err
 		}
 
 		if isValidUpdate(*autonomousDatabases, *adbInstance) {
 			if err = c.UpdateAdb(ctx, autonomousDatabases); err != nil {
 				c.Log.ErrorLog(err, "Error while updating Autonomous database")
-				return false, err
+				return servicemanager.OSOKResponse{IsSuccessful: false}, err
 			}
 			autonomousDatabases.Status.OsokStatus = util.UpdateOSOKStatusCondition(autonomousDatabases.Status.OsokStatus,
 				ociv1beta1.Active, v1.ConditionTrue, "", "AutonomousDatabase Update success", c.Log)
@@ -151,14 +152,15 @@ func (c *AdbServiceManager) CreateOrUpdate(ctx context.Context, obj runtime.Obje
 
 	if autonomousDatabases.Spec.Wallet.WalletPassword.Secret.SecretName != "" {
 		c.Log.InfoLog(fmt.Sprintf("Wallet Password Secret Name provided for %s Autonomous Database", autonomousDatabases.Spec.DisplayName))
-		return c.GenerateWallet(ctx, *adbInstance.Id, *adbInstance.DisplayName, autonomousDatabases.Spec.Wallet.WalletPassword.Secret.SecretName,
+		response, err := c.GenerateWallet(ctx, *adbInstance.Id, *adbInstance.DisplayName, autonomousDatabases.Spec.Wallet.WalletPassword.Secret.SecretName,
 			autonomousDatabases.Namespace, autonomousDatabases.Spec.Wallet.WalletName, autonomousDatabases.Name)
+		return servicemanager.OSOKResponse{IsSuccessful: response}, err
 	} else {
 		c.Log.InfoLog(fmt.Sprintf("Wallet Password Secret Name is empty. Not creating wallet for %s Autonomous Database",
 			autonomousDatabases.Spec.DisplayName))
 	}
 
-	return true, nil
+	return servicemanager.OSOKResponse{IsSuccessful: true}, nil
 }
 
 func isValidUpdate(autonomousDatabases ociv1beta1.AutonomousDatabases, adbInstance database.AutonomousDatabase) bool {

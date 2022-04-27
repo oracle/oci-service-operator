@@ -1,0 +1,28 @@
+#
+# Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+apiVersion: servicemesh.oci.oracle.com/v1beta1
+kind: IngressGatewayDeployment
+metadata:
+  name: bookinfo-ingress-gateway-deployment
+  namespace: bookinfo-demo
+  annotations:
+    servicemesh.oci.oracle.com/proxy-log-level: debug
+spec:
+  ingressGateway:
+    ref:
+      name: bookinfo-ingress-gateway
+  deployment:
+    autoscaling:
+      minPods: 1
+      maxPods: 1
+  ports:
+    - protocol: TCP
+      port: 8080
+      serviceport: 80
+  service:
+    type: LoadBalancer
+  secrets:
+    - secretName: bookinfo-tls-secret

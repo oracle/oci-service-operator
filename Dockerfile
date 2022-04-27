@@ -17,6 +17,7 @@ COPY go.sum go.sum
 # Copy the go source
 #COPY main.go main.go
 #COPY api/ api/
+#COPY apis/ apis/
 #COPY controllers/ controllers/
 
 COPY . ./
@@ -32,6 +33,7 @@ COPY --from=builder /workspace/manager .
 
 # Copy CRDs
 COPY --from=builder /workspace/bundle/manifests/oci.oracle.com_*.yaml /
+COPY --from=builder /workspace/bundle/manifests/servicemesh.oci.oracle.com_*.yaml /
 
 # Copy vendor directory
 COPY --from=builder /workspace/vendor vendor

@@ -10,8 +10,8 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"github.com/go-logr/logr"
-	"github.com/oracle/oci-go-sdk/v41/common"
-	"github.com/oracle/oci-go-sdk/v41/vault"
+	"github.com/oracle/oci-go-sdk/v65/common"
+	"github.com/oracle/oci-go-sdk/v65/vault"
 	"github.com/pkg/errors"
 )
 

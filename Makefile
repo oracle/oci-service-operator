@@ -53,6 +53,8 @@ else
 GOBIN=$(shell go env GOBIN)
 endif
 
+MOCKS_DIR = $(CURDIR)/test/mocks
+
 all: build
 
 ##@ General
@@ -85,11 +87,25 @@ fmt: ## Run go fmt against code.
 vet: ## Run go vet against code.
 	go vet ./...
 
+$(MOCKS_DIR):
+	mkdir -p $(MOCKS_DIR)
+
+mocks: $(MOCKS_DIR) ## Generate mock objects.
+	mockgen -source=pkg/servicemanager/servicemesh/services/servicemesh_client.go -destination=$(MOCKS_DIR)/servicemesh/servicemesh_client.go -package mocks
+	mockgen -source=pkg/servicemanager/servicemesh/references/resolver.go -destination=$(MOCKS_DIR)/servicemesh/resolver.go -package mocks
+	mockgen -source=pkg/servicemanager/servicemesh/k8s/cache/cache_manager.go -destination=$(MOCKS_DIR)/servicemesh/custom_cache.go -package mocks
+
+
 ENVTEST_ASSETS_DIR=$(shell pwd)/testbin/$(shell uname)
 test: manifests generate fmt vet ## Run tests.
 	mkdir -p ${ENVTEST_ASSETS_DIR}
 	test -f ${ENVTEST_ASSETS_DIR}/setup-envtest.sh || curl -sSLo ${ENVTEST_ASSETS_DIR}/setup-envtest.sh https://raw.githubusercontent.com/kubernetes-sigs/controller-runtime/v0.7.2/hack/setup-envtest.sh
-	source ${ENVTEST_ASSETS_DIR}/setup-envtest.sh; fetch_envtest_tools $(ENVTEST_ASSETS_DIR); setup_envtest_env $(ENVTEST_ASSETS_DIR); go test -v  ./... -coverprofile cover.out -args
+	source ${ENVTEST_ASSETS_DIR}/setup-envtest.sh; fetch_envtest_tools $(ENVTEST_ASSETS_DIR); setup_envtest_env $(ENVTEST_ASSETS_DIR); go test ./api/... ./apis/... ./pkg/... -coverprofile cover.out | tee unittests.cover; go tool cover -func cover.out | grep total | awk '{print substr($$3, 1, length($$3)-1)}' > unittests.percent
+
+functionaltest: manifests generate mocks ## Run functionaltest.
+	mkdir -p ${ENVTEST_ASSETS_DIR}
+	test -f ${ENVTEST_ASSETS_DIR}/setup-envtest.sh || curl -sSLo ${ENVTEST_ASSETS_DIR}/setup-envtest.sh https://raw.githubusercontent.com/kubernetes-sigs/controller-runtime/v0.7.2/hack/setup-envtest.sh
+	source ${ENVTEST_ASSETS_DIR}/setup-envtest.sh; fetch_envtest_tools $(ENVTEST_ASSETS_DIR); setup_envtest_env $(ENVTEST_ASSETS_DIR); go test -v -p 1 -timeout 15m ./test/servicemesh/functional... -coverprofile=cover.out -coverpkg=./api/...,./apis/...,./pkg/...,./controllers/...; go tool cover -func cover.out | grep total | awk '{print substr($$3, 1, length($$3)-1)}' > functionaltests.percent
 
 ##@ Build Service
 
@@ -214,3 +230,35 @@ catalog-build: opm ## Build a catalog image.
 .PHONY: catalog-push
 catalog-push: ## Push a catalog image.
 	$(MAKE) docker-push IMG=$(CATALOG_IMG)
+
+delete-crds:
+	kubectl delete crd virtualdeploymentbindings.servicemesh.oci.oracle.com &
+	kubectl delete crd ingressgatewaydeployments.servicemesh.oci.oracle.com &
+	kubectl delete crd ingressgatewayroutetables.servicemesh.oci.oracle.com &
+	kubectl delete crd ingressgateways.servicemesh.oci.oracle.com &
+	kubectl delete crd accesspolicies.servicemesh.oci.oracle.com &
+	kubectl delete crd virtualserviceroutetables.servicemesh.oci.oracle.com &
+	kubectl delete crd virtualdeployments.servicemesh.oci.oracle.com &
+	kubectl delete crd virtualservices.servicemesh.oci.oracle.com &
+	kubectl delete crd meshes.servicemesh.oci.oracle.com &
+	kubectl delete crd autonomousdatabases.oci.oracle.com &
+	kubectl delete crd mysqldbsystems.oci.oracle.com &
+	kubectl delete crd streams.oci.oracle.com &
+
+delete-operator:
+	kubectl delete ns $(OPERATOR_NAMESPACE)
+
+.PHONY: delete-crds-force
+delete-crds-force:
+	kubectl patch crd/virtualdeploymentbindings.servicemesh.oci.oracle.com -p '{"metadata":{"finalizers":[]}}' --type=merge &
+	kubectl patch crd/ingressgatewaydeployments.servicemesh.oci.oracle.com -p '{"metadata":{"finalizers":[]}}' --type=merge &
+	kubectl patch crd/ingressgatewayroutetables.servicemesh.oci.oracle.com -p '{"metadata":{"finalizers":[]}}' --type=merge &
+	kubectl patch crd/ingressgateways.servicemesh.oci.oracle.com -p '{"metadata":{"finalizers":[]}}' --type=merge &
+	kubectl patch crd/accesspolicies.servicemesh.oci.oracle.com -p '{"metadata":{"finalizers":[]}}' --type=merge &
+	kubectl patch crd/virtualserviceroutetables.servicemesh.oci.oracle.com -p '{"metadata":{"finalizers":[]}}' --type=merge &
+	kubectl patch crd/virtualdeployments.servicemesh.oci.oracle.com -p '{"metadata":{"finalizers":[]}}' --type=merge &
+	kubectl patch crd/virtualservices.servicemesh.oci.oracle.com -p '{"metadata":{"finalizers":[]}}' --type=merge &
+	kubectl patch crd/meshes.servicemesh.oci.oracle.com -p '{"metadata":{"finalizers":[]}}' --type=merge &
+	kubectl patch crd/autonomousdatabases.oci.oracle.com -p '{"metadata":{"finalizers":[]}}' --type=merge &
+	kubectl patch crd/mysqldbsystems.oci.oracle.com -p '{"metadata":{"finalizers":[]}}' --type=merge &
+	kubectl patch crd/streams.oci.oracle.com -p '{"metadata":{"finalizers":[]}}' --type=merge

@@ -1,0 +1,24 @@
+# permissions for end users to edit ingressgatewayroutetables.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: ingressgatewayroutetable-editor-role
+rules:
+- apiGroups:
+  - servicemesh.oci.oracle.com
+  resources:
+  - ingressgatewayroutetables
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - servicemesh.oci.oracle.com
+  resources:
+  - ingressgatewayroutetables/status
+  verbs:
+  - get

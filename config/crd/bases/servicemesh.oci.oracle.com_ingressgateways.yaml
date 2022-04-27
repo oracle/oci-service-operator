@@ -1,0 +1,457 @@
+
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.4.1
+  creationTimestamp: null
+  name: ingressgateways.servicemesh.oci.oracle.com
+spec:
+  group: servicemesh.oci.oracle.com
+  names:
+    kind: IngressGateway
+    listKind: IngressGatewayList
+    plural: ingressgateways
+    singular: ingressgateway
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: status of ingress gateway
+      jsonPath: .status.conditions[2].status
+      name: Active
+      type: string
+    - description: status of ingress gateway configured
+      jsonPath: .status.conditions[1].status
+      name: Configured
+      priority: 1
+      type: string
+    - description: status of ingress gateway dependencies
+      jsonPath: .status.conditions[0].status
+      name: DependenciesActive
+      priority: 1
+      type: string
+    - description: ocid of ingress gateway
+      jsonPath: .status.ingressGatewayId
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: IngressGateway is the Schema for the ingressgateways API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: IngressGatewaySpec defines the desired state of IngressGateway
+            properties:
+              accessLogging:
+                description: AccessLogging information
+                properties:
+                  isEnabled:
+                    description: Checks whether access path is enabled
+                    type: boolean
+                type: object
+              compartmentId:
+                maxLength: 255
+                minLength: 1
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                type: object
+              description:
+                description: Description of the resource
+                maxLength: 400
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                type: object
+              hosts:
+                items:
+                  description: IngressGatewayHost Host for the ingress gateway
+                  properties:
+                    hostnames:
+                      description: Hostnames of the host. Wildcard hostnames are supported
+                        in the prefix form. Examples of valid hostnames are www.example.com,
+                        *.example.com, *.com Applicable only for HTTP and TLS_PASSTHROUGH
+                        listeners.
+                      items:
+                        type: string
+                      type: array
+                    listeners:
+                      description: The listeners for the ingress host
+                      items:
+                        description: Listener configuration for ingress gateway host
+                        properties:
+                          port:
+                            description: Port in which resource is running
+                            format: int32
+                            maximum: 65535
+                            minimum: 1
+                            type: integer
+                          protocol:
+                            description: Type of protocol used in resource
+                            enum:
+                            - HTTP
+                            - TCP
+                            - TLS_PASSTHROUGH
+                            type: string
+                          tls:
+                            description: IngressListenerTlsConfig TLS enforcement
+                              config for the ingress listener
+                            properties:
+                              clientValidation:
+                                description: IngressHostClientValidationConfig Resource
+                                  representing the TLS configuration used for validating
+                                  client certificates.
+                                properties:
+                                  subjectAlternateNames:
+                                    description: A list of alternate names to verify
+                                      the subject identity in the certificate presented
+                                      by the client.
+                                    items:
+                                      type: string
+                                    type: array
+                                  trustedCaBundle:
+                                    description: CaBundle Resource representing the
+                                      CA bundle
+                                    properties:
+                                      kubeSecretCaBundle:
+                                        description: KubeSecretCaBundle CA Bundle
+                                          from kubernetes secrets
+                                        properties:
+                                          secretName:
+                                            description: The name of the kubernetes
+                                              secret for CA Bundle resource.
+                                            type: string
+                                        required:
+                                        - secretName
+                                        type: object
+                                      ociCaBundle:
+                                        description: OciCaBundle CA Bundle from OCI
+                                          Certificates service
+                                        properties:
+                                          caBundleId:
+                                            description: The OCID of the CA Bundle
+                                              resource.
+                                            maxLength: 255
+                                            minLength: 1
+                                            type: string
+                                        required:
+                                        - caBundleId
+                                        type: object
+                                    type: object
+                                type: object
+                              mode:
+                                description: 'DISABLED: Connection can only be plaintext
+                                  PERMISSIVE: Connection can be either plaintext or
+                                  TLS/mTLS. If the clientValidation.trustedCaBundle
+                                  property is configured for the listener, mTLS will
+                                  be performed and the client''s certificates will
+                                  be validated by the gateway. TLS: Connection can
+                                  only be TLS MUTUAL_TLS: Connection can only be MTLS'
+                                enum:
+                                - DISABLED
+                                - PERMISSIVE
+                                - TLS
+                                - MUTUAL_TLS
+                                type: string
+                              serverCertificate:
+                                description: TlsCertificate Resource representing
+                                  the location of the TLS certificate
+                                properties:
+                                  kubeSecretTlsCertificate:
+                                    description: KubeSecretTlsCertificate TLS certificate
+                                      from kubernetes secrets
+                                    properties:
+                                      secretName:
+                                        description: The name of the leaf certificate
+                                          kubernetes secret.
+                                        type: string
+                                    required:
+                                    - secretName
+                                    type: object
+                                  ociTlsCertificate:
+                                    description: OciTlsCertificate TLS certificate
+                                      from OCI Certificates service
+                                    properties:
+                                      certificateId:
+                                        description: The OCID of the leaf certificate
+                                          resource.
+                                        maxLength: 255
+                                        minLength: 1
+                                        type: string
+                                    required:
+                                    - certificateId
+                                    type: object
+                                type: object
+                            required:
+                            - mode
+                            type: object
+                        required:
+                        - port
+                        - protocol
+                        type: object
+                      minItems: 1
+                      type: array
+                    name:
+                      description: A user-friendly name for the host. The name must
+                        be unique within the same ingress gateway. This name can be
+                        used in the ingress gateway route table resource to attach
+                        a route to this host.
+                      maxLength: 255
+                      minLength: 1
+                      type: string
+                  required:
+                  - listeners
+                  - name
+                  type: object
+                minItems: 1
+                type: array
+              mesh:
+                description: A reference to CR that a resource belongs to
+                properties:
+                  id:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  ref:
+                    description: Type representing the reference to a CR
+                    properties:
+                      name:
+                        description: Name of the referenced CR
+                        maxLength: 255
+                        minLength: 1
+                        type: string
+                      namespace:
+                        description: Namespace of the referenced CR If unspecified,
+                          defaults to the referencing object's namespace
+                        minLength: 1
+                        type: string
+                    required:
+                    - name
+                    type: object
+                type: object
+              name:
+                description: Name of the resource
+                maxLength: 255
+                minLength: 1
+                type: string
+            required:
+            - compartmentId
+            - hosts
+            - mesh
+            type: object
+          status:
+            properties:
+              accessPolicyId:
+                maxLength: 255
+                minLength: 1
+                type: string
+              conditions:
+                items:
+                  description: Indicates the condition of the Service mesh resource
+                  properties:
+                    lastTransitionTime:
+                      description: lastTransitionTime is the last time the condition
+                        transitioned from one status to another.
+                      format: date-time
+                      type: string
+                    message:
+                      description: message is a human readable message indicating
+                        details about the transition. This may be an empty string.
+                      maxLength: 32768
+                      type: string
+                    observedGeneration:
+                      description: observedGeneration represents the .metadata.generation
+                        that the condition was set based upon. For instance, if .metadata.generation
+                        is currently 12, but the .status.conditions[x].observedGeneration
+                        is 9, the condition is out of date with respect to the current
+                        state of the instance.
+                      format: int64
+                      minimum: 0
+                      type: integer
+                    reason:
+                      description: reason contains a programmatic identifier indicating
+                        the reason for the condition's last transition. The value
+                        should be a CamelCase string. This field may not be empty.
+                      maxLength: 1024
+                      minLength: 1
+                      pattern: ^[A-Za-z]([A-Za-z0-9_,:]*[A-Za-z0-9_])?$
+                      type: string
+                    status:
+                      description: status of the condition, one of True, False, Unknown.
+                      enum:
+                      - "True"
+                      - "False"
+                      - Unknown
+                      type: string
+                    type:
+                      description: Type of Service mesh condition.
+                      enum:
+                      - ServiceMeshActive
+                      - ServiceMeshDependenciesActive
+                      - ServiceMeshConfigured
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - message
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+              ingressGatewayId:
+                maxLength: 255
+                minLength: 1
+                type: string
+              ingressGatewayMtls:
+                description: IngressGatewayMutualTransportLayerSecurity sets mTLS
+                  settings used when sending requests to virtual services within the
+                  mesh.
+                properties:
+                  certificateId:
+                    description: The OCID of the certificate resource that will be
+                      used for mTLS authentication with other virtual services in
+                      the mesh.
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                required:
+                - certificateId
+                type: object
+              ingressGatewayName:
+                description: Name of the resource
+                maxLength: 255
+                minLength: 1
+                type: string
+              ingressGatewayRouteTableId:
+                maxLength: 255
+                minLength: 1
+                type: string
+              lastUpdatedTime:
+                format: date-time
+                type: string
+              meshId:
+                maxLength: 255
+                minLength: 1
+                type: string
+              meshMtls:
+                description: MeshMutualTransportLayerSecurity sets a minimum level
+                  of mTLS authentication for all virtual services within the mesh
+                properties:
+                  minimum:
+                    description: 'DISABLED: No minimum, virtual services within this
+                      mesh can use any mTLS authentication mode. PERMISSIVE: Virtual
+                      services within this mesh can use either PERMISSIVE or STRICT
+                      modes. STRICT: All virtual services within this mesh must use
+                      STRICT mode.'
+                    enum:
+                    - DISABLED
+                    - PERMISSIVE
+                    - STRICT
+                    type: string
+                required:
+                - minimum
+                type: object
+              opcRetryToken:
+                type: string
+              refIdForRules:
+                items:
+                  additionalProperties:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  type: object
+                type: array
+              virtualDeploymentId:
+                maxLength: 255
+                minLength: 1
+                type: string
+              virtualDeploymentIdForRules:
+                items:
+                  items:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  type: array
+                type: array
+              virtualDeploymentName:
+                description: Name of the resource
+                maxLength: 255
+                minLength: 1
+                type: string
+              virtualServiceId:
+                maxLength: 255
+                minLength: 1
+                type: string
+              virtualServiceIdForRules:
+                items:
+                  items:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  type: array
+                type: array
+              virtualServiceMtls:
+                description: VirtualServiceMutualTransportLayerSecurity sets mTLS
+                  settings used when communicating with other virtual services within
+                  the mesh.
+                properties:
+                  certificateId:
+                    description: The OCID of the certificate resource that will be
+                      used for mTLS authentication with other virtual services in
+                      the mesh.
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  mode:
+                    description: Describes the Mutual Transport Layer Security mode
+                      for a resource Only one of the following mode should be present
+                    enum:
+                    - DISABLED
+                    - PERMISSIVE
+                    - STRICT
+                    type: string
+                required:
+                - mode
+                type: object
+              virtualServiceName:
+                description: Name of the resource
+                maxLength: 255
+                minLength: 1
+                type: string
+              virtualServiceRouteTableId:
+                maxLength: 255
+                minLength: 1
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

@@ -7,13 +7,22 @@ package servicemanager
 
 import (
 	"context"
-	"github.com/oracle/oci-service-operator/api/v1beta1"
+	"time"
+
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
+
+	"github.com/oracle/oci-service-operator/api/v1beta1"
 )
 
+type OSOKResponse struct {
+	IsSuccessful    bool
+	ShouldRequeue   bool
+	RequeueDuration time.Duration
+}
+
 type OSOKServiceManager interface {
-	CreateOrUpdate(ctx context.Context, obj runtime.Object, req ctrl.Request) (bool, error)
+	CreateOrUpdate(ctx context.Context, obj runtime.Object, req ctrl.Request) (OSOKResponse, error)
 
 	Delete(ctx context.Context, obj runtime.Object) (bool, error)
 

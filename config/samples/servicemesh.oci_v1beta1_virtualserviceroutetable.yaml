@@ -1,0 +1,27 @@
+#
+# Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+apiVersion: servicemesh.oci.oracle.com/v1beta1
+kind: VirtualServiceRouteTable
+metadata:
+  name: products-route-table
+  namespace: bookinfo-demo
+spec:
+  compartmentId: ocid1.compartment.oc1..aaaaaaaac3qtlvrctsjwjwil7h2yakpwteosoaxlilifou6gsbzwv6gu6i2q
+  name: product-routes
+  description: This is Virtual Service Route Table
+  virtualService:
+    ref:
+      name: productpage
+  routeRules:
+    - httpRoute:
+        destinations:
+          - virtualDeployment:
+              ref:
+                name: productpage-version1
+            weight: 100
+        isGrpc: false
+        path: /foo,
+        pathType: PREFIX
