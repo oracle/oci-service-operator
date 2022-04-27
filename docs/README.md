@@ -38,7 +38,6 @@
     - [Introduction](service-mesh.md#introduction)
     - [Service Mesh Permission requirement](service-mesh.md#create-policies)
     - [Service Mesh Resources](service-mesh.md#service-mesh-resources)
-    - [Install cert manager](service-mesh.md#install-cert-manager)
     - [Install metrics server](service-mesh.md#install-metrics-server)
 
 ## Introduction

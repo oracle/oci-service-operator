@@ -8,7 +8,7 @@
 
 ## Introduction
 
-[Service Mesh](https://preview.content.oci.oracleiaas.com/en-us/iaas/Content/service-mesh/home.htm?bundle=8067) is a product offering on Oracle Cloud Infrastructure (OCI) platform which provides logging, metrics, security, and traffic management features for micro-service deployments.
+[Service Mesh](https://docs.oracle.com/iaas/Content/service-mesh/home.htm) is a product offering on Oracle Cloud Infrastructure (OCI) platform which provides logging, metrics, security, and traffic management features for micro-service deployments.
 OCI Service Mesh allows customers to add a set of capabilities that enables microservices within a cloud native application to communicate with each other in a centrally managed and secure manner.
 
 ## Create Policies
