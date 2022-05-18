@@ -54,18 +54,18 @@ func NewDefaultResourceHandler(
 //   3.3 Else add outdated proxy annotation to the pod
 func (h *defaultResourceHandler) Reconcile(ctx context.Context, configMap *corev1.ConfigMap) error {
 	newProxyVersion, newProxyVersionPresent := configMap.Data[commons.ProxyLabelInMeshConfigMap]
-	h.log.InfoLog("Proxy version have been updated", "New Proxy Version", newProxyVersion)
+	h.log.InfoLogWithFixedMessage(ctx, "Proxy version have been updated", "New Proxy Version", newProxyVersion)
 	if !newProxyVersionPresent {
-		h.log.InfoLog("No sidecar image found in mesh config map")
+		h.log.InfoLogWithFixedMessage(ctx, "No sidecar image found in mesh config map")
 		return nil
 	}
 	serviceMeshEnabledNamespaces, err := namespaceUtil.ListServiceMeshEnabledNamespaces(ctx, h.client)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			h.log.InfoLog("No mesh enabled namespace found")
+			h.log.InfoLogWithFixedMessage(ctx, "No mesh enabled namespace found")
 			return nil
 		}
-		h.log.ErrorLog(err, "Error in listing mesh enabled namespaces")
+		h.log.ErrorLogWithFixedMessage(ctx, err, "Error in listing mesh enabled namespaces")
 		return merrors.NewRequeueOnError(err)
 	}
 	notEvictedNamespaces := 0
@@ -74,10 +74,10 @@ func (h *defaultResourceHandler) Reconcile(ctx context.Context, configMap *corev
 		podList, err := podUtil.ListPods(ctx, h.client, namespace.Name)
 		if err != nil {
 			if errors.IsNotFound(err) {
-				h.log.InfoLog("Pods not found", "namespace", namespace.Name)
+				h.log.InfoLogWithFixedMessage(ctx, "Pods not found", "namespace", namespace.Name)
 				continue
 			}
-			h.log.ErrorLog(err, "Error in listing the pods", "namespace", namespace.Name)
+			h.log.ErrorLogWithFixedMessage(ctx, err, "Error in listing the pods", "namespace", namespace.Name)
 			notEvictedNamespaces += 1
 			continue
 		}
@@ -98,7 +98,7 @@ func (h *defaultResourceHandler) Reconcile(ctx context.Context, configMap *corev
 			err = vdbUtil.GetVDB(ctx, h.client, vdbRefNsName.Namespace, vdbRefNsName.Name, &vdb)
 			if err != nil {
 				if errors.IsNotFound(err) {
-					h.log.InfoLog("VDB not found", "namespace", vdbRefNsName.Namespace, "name", vdbRefNsName.Name)
+					h.log.InfoLogWithFixedMessage(ctx, "VDB not found", "namespace", vdbRefNsName.Namespace, "name", vdbRefNsName.Name)
 					continue
 				}
 				notEvictedPods += 1
@@ -107,17 +107,17 @@ func (h *defaultResourceHandler) Reconcile(ctx context.Context, configMap *corev
 
 			// TODO: Move it to a separate go routine to improve perf
 			if err := podUtil.EvictPod(ctx, h.clientSet, &podList.Items[i]); err != nil {
-				h.log.ErrorLog(err, "Error in eviction", "pod", podList.Items[i].Name, "Namespace", podList.Items[i].Namespace)
+				h.log.ErrorLogWithFixedMessage(ctx, err, "Error in eviction", "pod", podList.Items[i].Name, "Namespace", podList.Items[i].Namespace)
 				notEvictedPods += 1
 			} else {
-				h.log.InfoLog("Pod evicted successfully", "name", podList.Items[i].Name, "Namespace", podList.Items[i].Namespace)
+				h.log.InfoLogWithFixedMessage(ctx, "Pod evicted successfully", "name", podList.Items[i].Name, "Namespace", podList.Items[i].Namespace)
 			}
 		}
 	}
 	if notEvictedNamespaces > 0 || notEvictedPods > 0 {
-		h.log.InfoLog("Pods are yet to be evicted, Reconciling after a minute", "NamespaceCount", notEvictedNamespaces, "PodsCount", strconv.Itoa(notEvictedPods))
+		h.log.InfoLogWithFixedMessage(ctx, "Pods are yet to be evicted, Reconciling after a minute", "NamespaceCount", notEvictedNamespaces, "PodsCount", strconv.Itoa(notEvictedPods))
 		return merrors.NewRequeueAfter(time.Minute)
 	}
-	h.log.InfoLog("All pods are upgraded successfully to latest proxy version")
+	h.log.InfoLogWithFixedMessage(ctx, "All pods are upgraded successfully to latest proxy version")
 	return nil
 }

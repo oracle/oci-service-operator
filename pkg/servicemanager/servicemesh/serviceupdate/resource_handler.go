@@ -64,7 +64,7 @@ func (h *defaultResourceHandler) Reconcile(ctx context.Context, service *corev1.
 
 	filteredVDBs := vdbUtil.FilterVDBsByServiceRef(vdbs, service.Name, service.Namespace)
 	if len(filteredVDBs) == 0 {
-		h.log.InfoLog("No VDB found with serviceRef")
+		h.log.InfoLogWithFixedMessage(ctx, "No VDB found with serviceRef")
 		return nil
 	}
 
@@ -75,7 +75,7 @@ func (h *defaultResourceHandler) Reconcile(ctx context.Context, service *corev1.
 		}
 		return merrors.NewRequeueOnError(err)
 	}
-	h.log.InfoLog("Fetched pods for the service", "number of pods fetched", len(pods.Items))
+	h.log.InfoLogWithFixedMessage(ctx, "Fetched pods for the service", "number of pods fetched", strconv.Itoa(len(pods.Items)))
 
 	return h.evictPods(ctx, pods, filteredVDBs, namespaceInjectionLabel)
 }
@@ -129,16 +129,16 @@ func (h *defaultResourceHandler) evictPods(ctx context.Context, pods *corev1.Pod
 			matchedVDB := vdbUtil.GetVDBForPod(filteredVDBs, podLabels)
 			if matchedVDB != nil {
 				if err := podUtil.EvictPod(ctx, h.clientSet, pod); err != nil {
-					h.log.ErrorLog(err, "Error in eviction", "pod", pod.Name)
+					h.log.ErrorLogWithFixedMessage(ctx, err, "Error in eviction", "pod", pod.Name)
 					notEvictedPods += 1
 				} else {
-					h.log.InfoLog("Pod eviction successful", "name", pod.Name)
+					h.log.InfoLogWithFixedMessage(ctx, "Pod eviction successful", "name", pod.Name)
 				}
 			}
 		}
 	}
 	if notEvictedPods > 0 {
-		h.log.InfoLog("Pods are yet to be evicted, Reconciling after a minute", "count", strconv.Itoa(notEvictedPods))
+		h.log.InfoLogWithFixedMessage(ctx, "Pods are yet to be evicted, Reconciling after a minute", "count", strconv.Itoa(notEvictedPods))
 		return merrors.NewRequeueAfter(time.Minute)
 	}
 	return nil

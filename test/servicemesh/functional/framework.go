@@ -64,7 +64,7 @@ var (
 	stopChan      context.Context
 	cancel        context.CancelFunc
 	testEnv       *envtest.Environment
-	setupLog      = loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("setup"), FixedLogs: make(map[string]string)}
+	setupLog      = loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("setup")}
 	metricsClient *metrics.Metrics
 )
 
@@ -133,7 +133,7 @@ func (f *defaultTestEnvFramework) SetupTestFramework(t *testing.T, config *rest.
 	hookServer := k8sManager.GetWebhookServer()
 
 	// Register controllers
-	meshLogger := loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("Mesh"), FixedLogs: make(map[string]string)}
+	meshLogger := loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("Mesh")}
 	meshResourceManager := mesh.NewMeshResourceManager(k8sClient, meshClient, meshLogger)
 	meshServiceMeshManager := serviceMeshManager.NewServiceMeshServiceManager(k8sClient, meshLogger, meshResourceManager)
 	if err = (&servicemeshoci.ServiceMeshReconciler{
@@ -168,14 +168,14 @@ func (f *defaultTestEnvFramework) SetupTestFramework(t *testing.T, config *rest.
 			ValidationManager: meshServiceValidationManager,
 		}})
 
-	virtualServiceResourceManager := virtualservice.NewVirtualServiceResourceManager(k8sClient, meshClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("VirtualService"), FixedLogs: make(map[string]string)}, referenceResolver)
+	virtualServiceResourceManager := virtualservice.NewVirtualServiceResourceManager(k8sClient, meshClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("VirtualService")}, referenceResolver)
 	virtualServiceServiceMeshManager := serviceMeshManager.NewServiceMeshServiceManager(k8sClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("VirtualService")}, virtualServiceResourceManager)
 	if err = (&servicemeshoci.ServiceMeshReconciler{
 		Reconciler: &core.BaseReconciler{
 			Client:               k8sClient,
 			OSOKServiceManager:   virtualServiceServiceMeshManager,
 			Finalizer:            core.NewBaseFinalizer(k8sClient, ctrl.Log),
-			Log:                  loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("VirtualService"), FixedLogs: make(map[string]string)},
+			Log:                  loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("VirtualService")},
 			Metrics:              metricsClient,
 			Recorder:             k8sManager.GetEventRecorderFor("VirtualService"),
 			Scheme:               scheme.Scheme,
@@ -193,20 +193,20 @@ func (f *defaultTestEnvFramework) SetupTestFramework(t *testing.T, config *rest.
 	hookServer.Register("/validate-servicemesh-oci-oracle-com-v1beta1-virtualservice",
 		&webhook.Admission{Handler: &serviceMeshManager.BaseValidator{
 			Client:            k8sClient,
-			Log:               loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Validator").WithName("VirtualService"), FixedLogs: make(map[string]string)},
+			Log:               loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Validator").WithName("VirtualService")},
 			Metrics:           metricsClient,
 			Recorder:          k8sManager.GetEventRecorderFor("VirtualServiceValidator"),
 			ValidationManager: virtualServiceServiceValidationManager,
 		}})
 
-	virtualDeploymentResourceManager := virtualdeployment.NewVirtualDeploymentResourceManager(k8sClient, meshClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("VirtualService"), FixedLogs: make(map[string]string)}, referenceResolver)
+	virtualDeploymentResourceManager := virtualdeployment.NewVirtualDeploymentResourceManager(k8sClient, meshClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("VirtualService")}, referenceResolver)
 	virtualDeploymentServiceMeshManager := serviceMeshManager.NewServiceMeshServiceManager(k8sClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("VirtualDeployment")}, virtualDeploymentResourceManager)
 	if err = (&servicemeshoci.ServiceMeshReconciler{
 		Reconciler: &core.BaseReconciler{
 			Client:               k8sClient,
 			OSOKServiceManager:   virtualDeploymentServiceMeshManager,
 			Finalizer:            core.NewBaseFinalizer(k8sClient, ctrl.Log),
-			Log:                  loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("VirtualDeployment"), FixedLogs: make(map[string]string)},
+			Log:                  loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("VirtualDeployment")},
 			Metrics:              metricsClient,
 			Recorder:             k8sManager.GetEventRecorderFor("VirtualDeployment"),
 			Scheme:               scheme.Scheme,
@@ -223,20 +223,20 @@ func (f *defaultTestEnvFramework) SetupTestFramework(t *testing.T, config *rest.
 	hookServer.Register("/validate-servicemesh-oci-oracle-com-v1beta1-virtualdeployment",
 		&webhook.Admission{Handler: &serviceMeshManager.BaseValidator{
 			Client:            k8sClient,
-			Log:               loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Validator").WithName("VirtualDeployment"), FixedLogs: make(map[string]string)},
+			Log:               loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Validator").WithName("VirtualDeployment")},
 			Metrics:           metricsClient,
 			Recorder:          k8sManager.GetEventRecorderFor("VirtualDeploymentValidator"),
 			ValidationManager: virtualDeploymentServiceValidationManager,
 		}})
 
-	virtualServiceRouteTableResourceManager := virtualserviceroutetable.NewVirtualServiceRouteTableResourceManager(k8sClient, meshClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("VirtualServiceRouteTable"), FixedLogs: make(map[string]string)}, referenceResolver)
+	virtualServiceRouteTableResourceManager := virtualserviceroutetable.NewVirtualServiceRouteTableResourceManager(k8sClient, meshClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("VirtualServiceRouteTable")}, referenceResolver)
 	virtualServiceRouteTableServiceMeshManager := serviceMeshManager.NewServiceMeshServiceManager(k8sClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("VirtualServiceRouteTable")}, virtualServiceRouteTableResourceManager)
 	if err = (&servicemeshoci.ServiceMeshReconciler{
 		Reconciler: &core.BaseReconciler{
 			Client:               k8sClient,
 			OSOKServiceManager:   virtualServiceRouteTableServiceMeshManager,
 			Finalizer:            core.NewBaseFinalizer(k8sClient, ctrl.Log),
-			Log:                  loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("VirtualServiceRouteTable"), FixedLogs: make(map[string]string)},
+			Log:                  loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("VirtualServiceRouteTable")},
 			Metrics:              metricsClient,
 			Recorder:             k8sManager.GetEventRecorderFor("VirtualServiceRouteTable"),
 			Scheme:               scheme.Scheme,
@@ -253,20 +253,20 @@ func (f *defaultTestEnvFramework) SetupTestFramework(t *testing.T, config *rest.
 	hookServer.Register("/validate-servicemesh-oci-oracle-com-v1beta1-virtualserviceroutetable",
 		&webhook.Admission{Handler: &serviceMeshManager.BaseValidator{
 			Client:            k8sClient,
-			Log:               loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Validator").WithName("VirtualServiceRouteTable"), FixedLogs: make(map[string]string)},
+			Log:               loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Validator").WithName("VirtualServiceRouteTable")},
 			Metrics:           metricsClient,
 			Recorder:          k8sManager.GetEventRecorderFor("VirtualServiceRouteTableValidator"),
 			ValidationManager: virtualServiceRouteTableServiceValidationManager,
 		}})
 
-	accessPolicyResourceManager := accesspolicy.NewAccessPolicyResourceManager(k8sClient, meshClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("AccessPolicy"), FixedLogs: make(map[string]string)}, referenceResolver)
+	accessPolicyResourceManager := accesspolicy.NewAccessPolicyResourceManager(k8sClient, meshClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("AccessPolicy")}, referenceResolver)
 	accessPolicyServiceMeshManager := serviceMeshManager.NewServiceMeshServiceManager(k8sClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("AccessPolicy")}, accessPolicyResourceManager)
 	if err = (&servicemeshoci.ServiceMeshReconciler{
 		Reconciler: &core.BaseReconciler{
 			Client:               k8sClient,
 			OSOKServiceManager:   accessPolicyServiceMeshManager,
 			Finalizer:            core.NewBaseFinalizer(k8sClient, ctrl.Log),
-			Log:                  loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("AccessPolicy"), FixedLogs: make(map[string]string)},
+			Log:                  loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("AccessPolicy")},
 			Metrics:              metricsClient,
 			Recorder:             k8sManager.GetEventRecorderFor("AccessPolicy"),
 			Scheme:               scheme.Scheme,
@@ -283,20 +283,20 @@ func (f *defaultTestEnvFramework) SetupTestFramework(t *testing.T, config *rest.
 	hookServer.Register("/validate-servicemesh-oci-oracle-com-v1beta1-accesspolicy",
 		&webhook.Admission{Handler: &serviceMeshManager.BaseValidator{
 			Client:            k8sClient,
-			Log:               loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Validator").WithName("AccessPolicy"), FixedLogs: make(map[string]string)},
+			Log:               loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Validator").WithName("AccessPolicy")},
 			Metrics:           metricsClient,
 			Recorder:          k8sManager.GetEventRecorderFor("AccessPolicyValidator"),
 			ValidationManager: accessPolicyServiceValidationManager,
 		}})
 
-	ingressGatewayResourceManager := ingressgateway.NewIngressGatewayResourceManager(k8sClient, meshClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("IngressGateway"), FixedLogs: make(map[string]string)}, referenceResolver)
+	ingressGatewayResourceManager := ingressgateway.NewIngressGatewayResourceManager(k8sClient, meshClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("IngressGateway")}, referenceResolver)
 	ingressGatewayServiceMeshManager := serviceMeshManager.NewServiceMeshServiceManager(k8sClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("IngressGateway")}, ingressGatewayResourceManager)
 	if err = (&servicemeshoci.ServiceMeshReconciler{
 		Reconciler: &core.BaseReconciler{
 			Client:               k8sClient,
 			OSOKServiceManager:   ingressGatewayServiceMeshManager,
 			Finalizer:            core.NewBaseFinalizer(k8sClient, ctrl.Log),
-			Log:                  loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("IngressGateway"), FixedLogs: make(map[string]string)},
+			Log:                  loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("IngressGateway")},
 			Metrics:              metricsClient,
 			Recorder:             k8sManager.GetEventRecorderFor("IngressGateway"),
 			Scheme:               scheme.Scheme,
@@ -313,20 +313,20 @@ func (f *defaultTestEnvFramework) SetupTestFramework(t *testing.T, config *rest.
 	hookServer.Register("/validate-servicemesh-oci-oracle-com-v1beta1-ingressgateway",
 		&webhook.Admission{Handler: &serviceMeshManager.BaseValidator{
 			Client:            k8sClient,
-			Log:               loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Validator").WithName("IngressGateway"), FixedLogs: make(map[string]string)},
+			Log:               loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Validator").WithName("IngressGateway")},
 			Metrics:           metricsClient,
 			Recorder:          k8sManager.GetEventRecorderFor("IngressGatewayValidator"),
 			ValidationManager: ingressGatewayServiceValidationManager,
 		}})
 
 	// TODO: Pass the OSOKServiceManager during implementation of VDB CRD
-	virtualDeploymentBindingResourceManager := virtualdeploymentbinding.NewVirtualDeploymentBindingServiceManager(k8sClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("VirtualDeploymentBinding"), FixedLogs: make(map[string]string)}, k8sClientset, referenceResolver, meshClient)
+	virtualDeploymentBindingResourceManager := virtualdeploymentbinding.NewVirtualDeploymentBindingServiceManager(k8sClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("VirtualDeploymentBinding")}, k8sClientset, referenceResolver, meshClient)
 	if err = (&servicemeshoci.ServiceMeshReconciler{
 		Reconciler: &core.BaseReconciler{
 			Client:               k8sClient,
 			OSOKServiceManager:   virtualDeploymentBindingResourceManager,
 			Finalizer:            core.NewBaseFinalizer(k8sClient, ctrl.Log),
-			Log:                  loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("VirtualDeploymentBinding"), FixedLogs: make(map[string]string)},
+			Log:                  loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("VirtualDeploymentBinding")},
 			Metrics:              metricsClient,
 			Recorder:             k8sManager.GetEventRecorderFor("VirtualDeploymentBinding"),
 			Scheme:               scheme.Scheme,
@@ -343,20 +343,20 @@ func (f *defaultTestEnvFramework) SetupTestFramework(t *testing.T, config *rest.
 	hookServer.Register("/validate-servicemesh-oci-oracle-com-v1beta1-virtualdeploymentbinding",
 		&webhook.Admission{Handler: &serviceMeshManager.BaseValidator{
 			Client:            k8sClient,
-			Log:               loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Validator").WithName("VirtualDeploymentBinding"), FixedLogs: make(map[string]string)},
+			Log:               loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Validator").WithName("VirtualDeploymentBinding")},
 			Metrics:           metricsClient,
 			Recorder:          k8sManager.GetEventRecorderFor("VirtualDeploymentBinding"),
 			ValidationManager: virtualDeploymentBindingServiceValidationManager,
 		}})
 
-	ingressGatewayRouteTableResourceManager := ingressgatewayroutetable.NewIngressGatewayRouteTableResourceManager(k8sClient, meshClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("IngressGatewayRouteTable"), FixedLogs: make(map[string]string)}, referenceResolver)
+	ingressGatewayRouteTableResourceManager := ingressgatewayroutetable.NewIngressGatewayRouteTableResourceManager(k8sClient, meshClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("IngressGatewayRouteTable")}, referenceResolver)
 	ingressGatewayRouteTableServiceMeshManager := serviceMeshManager.NewServiceMeshServiceManager(k8sClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("IngressGatewayRouteTable")}, ingressGatewayRouteTableResourceManager)
 	if err = (&servicemeshoci.ServiceMeshReconciler{
 		Reconciler: &core.BaseReconciler{
 			Client:               k8sClient,
 			OSOKServiceManager:   ingressGatewayRouteTableServiceMeshManager,
 			Finalizer:            core.NewBaseFinalizer(k8sClient, ctrl.Log),
-			Log:                  loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("IngressGatewayRouteTable"), FixedLogs: make(map[string]string)},
+			Log:                  loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("IngressGatewayRouteTable")},
 			Metrics:              metricsClient,
 			Recorder:             k8sManager.GetEventRecorderFor("IngressGatewayRouteTable"),
 			Scheme:               scheme.Scheme,
@@ -373,7 +373,7 @@ func (f *defaultTestEnvFramework) SetupTestFramework(t *testing.T, config *rest.
 	hookServer.Register("/validate-servicemesh-oci-oracle-com-v1beta1-ingressgatewayroutetable",
 		&webhook.Admission{Handler: &serviceMeshManager.BaseValidator{
 			Client:            k8sClient,
-			Log:               loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Validator").WithName("IngressGatewayRouteTable"), FixedLogs: make(map[string]string)},
+			Log:               loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Validator").WithName("IngressGatewayRouteTable")},
 			Metrics:           metricsClient,
 			Recorder:          k8sManager.GetEventRecorderFor("IngressGatewayRouteTableValidator"),
 			ValidationManager: ingressGatewayRouteTableServiceValidationManager,
@@ -389,13 +389,13 @@ func (f *defaultTestEnvFramework) SetupTestFramework(t *testing.T, config *rest.
 			EventHandler: enqueueRequestsForConfigmapEvents,
 		},
 	}
-	ingressGatewayDeploymentResourceManager := ingressgatewaydeployment.NewIngressGatewayDeploymentServiceManager(k8sClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("IngressGatewayDeployment"), FixedLogs: make(map[string]string)}, k8sClientset, referenceResolver, meshCacheManager, meshCommons.OsokNamespace)
+	ingressGatewayDeploymentResourceManager := ingressgatewaydeployment.NewIngressGatewayDeploymentServiceManager(k8sClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("IngressGatewayDeployment")}, k8sClientset, referenceResolver, meshCacheManager, meshCommons.OsokNamespace)
 	if err = (&servicemeshoci.ServiceMeshReconciler{
 		Reconciler: &core.BaseReconciler{
 			Client:               k8sClient,
 			OSOKServiceManager:   ingressGatewayDeploymentResourceManager,
 			Finalizer:            core.NewBaseFinalizer(k8sClient, ctrl.Log),
-			Log:                  loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("IngressGatewayDeployment"), FixedLogs: make(map[string]string)},
+			Log:                  loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("IngressGatewayDeployment")},
 			Metrics:              metricsClient,
 			Recorder:             k8sManager.GetEventRecorderFor("IngressGatewayDeployment"),
 			Scheme:               scheme.Scheme,
@@ -413,26 +413,26 @@ func (f *defaultTestEnvFramework) SetupTestFramework(t *testing.T, config *rest.
 	hookServer.Register("/validate-servicemesh-oci-oracle-com-v1beta1-ingressgatewaydeployment",
 		&webhook.Admission{Handler: &serviceMeshManager.BaseValidator{
 			Client:            k8sClient,
-			Log:               loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Validator").WithName("IngressGatewayDeployment"), FixedLogs: make(map[string]string)},
+			Log:               loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Validator").WithName("IngressGatewayDeployment")},
 			Metrics:           metricsClient,
 			Recorder:          k8sManager.GetEventRecorderFor("IngressGatewayDeployment"),
 			ValidationManager: ingressGatewayDeploymentServiceValidationManager,
 		}})
 
-	injectProxyResourceHandler := injectproxy.NewDefaultResourceHandler(k8sClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Resource Handler").WithName("InjectProxy"), FixedLogs: make(map[string]string)}, k8sClientset, meshCommons.OsokNamespace)
+	injectProxyResourceHandler := injectproxy.NewDefaultResourceHandler(k8sClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Resource Handler").WithName("InjectProxy")}, k8sClientset, meshCommons.OsokNamespace)
 	if err = customControllers.NewInjectProxyReconciler(
 		k8sClient,
-		loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("InjectProxy"), FixedLogs: make(map[string]string)},
+		loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("InjectProxy")},
 		injectProxyResourceHandler,
 	).SetupWithManager(k8sManager); err != nil {
 		setupLog.ErrorLog(err, "unable to create controller", "controller", "InjectProxy")
 		os.Exit(1)
 	}
 
-	upgradeProxyResourceHandler := upgradeproxy.NewDefaultResourceHandler(k8sClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Resource Handler").WithName("UpgradeProxy"), FixedLogs: make(map[string]string)}, k8sClientset)
+	upgradeProxyResourceHandler := upgradeproxy.NewDefaultResourceHandler(k8sClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Resource Handler").WithName("UpgradeProxy")}, k8sClientset)
 	if err = customControllers.NewUpgradeProxyReconciler(
 		k8sClient,
-		loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("UpgradeProxy"), FixedLogs: make(map[string]string)},
+		loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("UpgradeProxy")},
 		upgradeProxyResourceHandler,
 		meshCommons.OsokNamespace,
 	).SetupWithManager(k8sManager); err != nil {
@@ -440,9 +440,9 @@ func (f *defaultTestEnvFramework) SetupTestFramework(t *testing.T, config *rest.
 		os.Exit(1)
 	}
 
-	serviceUpdateResourceHandler := serviceupdate.NewDefaultResourceHandler(k8sClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Resource Handler").WithName("Services"), FixedLogs: make(map[string]string)}, k8sClientset)
+	serviceUpdateResourceHandler := serviceupdate.NewDefaultResourceHandler(k8sClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Resource Handler").WithName("Services")}, k8sClientset)
 	if err = customControllers.NewServiceReconciler(
-		loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("Services"), FixedLogs: make(map[string]string)},
+		loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("Services")},
 		serviceUpdateResourceHandler,
 	).SetupWithManager(k8sManager); err != nil {
 		setupLog.ErrorLog(err, "unable to create controller", "controller", "Services")
@@ -553,7 +553,7 @@ func (f *Framework) DeleteNamespace(ctx context.Context, namespaceName string) {
 
 func getMetricsClient() *metrics.Metrics {
 	if metricsClient == nil {
-		metricsClient = metrics.Init("osok", loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("metrics"), FixedLogs: make(map[string]string)})
+		metricsClient = metrics.Init("osok", loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("metrics")})
 	}
 	return metricsClient
 }

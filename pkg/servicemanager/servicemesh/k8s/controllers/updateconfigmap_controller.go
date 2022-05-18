@@ -41,7 +41,7 @@ func (c *UpdateConfigMapController) UpdateClientHostEndpoints(ctx context.Contex
 	serviceMeshConfigMap := &corev1.ConfigMap{}
 	err := c.client.Get(ctx, types.NamespacedName{Namespace: c.namespace, Name: commons.MeshConfigMapName}, serviceMeshConfigMap)
 	if err != nil {
-		c.log.ErrorLog(err, "Error while fetching the configmap")
+		c.log.ErrorLogWithFixedMessage(ctx, err, "Error while fetching the configmap")
 		return
 	}
 	c.handler.UpdateServiceMeshClientHost(serviceMeshConfigMap)
@@ -52,14 +52,14 @@ func (c *UpdateConfigMapController) PollServiceMeshProxyDetailEndpoint(ctx conte
 	serviceMeshConfigMap := &corev1.ConfigMap{}
 	err := c.client.Get(ctx, types.NamespacedName{Namespace: c.namespace, Name: commons.MeshConfigMapName}, serviceMeshConfigMap)
 	if err != nil {
-		c.log.ErrorLog(err, "Error while fetching the configmap")
+		c.log.ErrorLogWithFixedMessage(ctx, err, "Error while fetching the configmap")
 		return err
 	}
-	c.log.InfoLog("Configmap", "Current proxy version", serviceMeshConfigMap.Data[commons.ProxyLabelInMeshConfigMap])
+	c.log.InfoLogWithFixedMessage(ctx, "Configmap", "Current proxy version", serviceMeshConfigMap.Data[commons.ProxyLabelInMeshConfigMap])
 
 	err = c.handler.UpdateLatestProxyVersion(ctx, serviceMeshConfigMap)
 	if err != nil {
-		c.log.ErrorLog(err, "Error in updating Configmap with new proxy version")
+		c.log.ErrorLogWithFixedMessage(ctx, err, "Error in updating Configmap with new proxy version")
 		return err
 	}
 	return nil

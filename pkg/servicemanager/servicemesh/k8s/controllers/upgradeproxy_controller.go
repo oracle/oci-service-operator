@@ -44,7 +44,7 @@ func NewUpgradeProxyReconciler(
 // Polls data plane endpoint for latest proxy versions, and updates the configmap if there is a version mismatch
 // If configmap is deleted, it recreates it.
 func (r *UpgradeProxyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	return merrors.HandleErrorAndRequeue(r.reconcileProxy(ctx, req), r.log)
+	return merrors.HandleErrorAndRequeue(ctx, r.reconcileProxy(ctx, req), r.log)
 }
 
 func (r *UpgradeProxyReconciler) reconcileProxy(ctx context.Context, req ctrl.Request) error {
@@ -55,14 +55,14 @@ func (r *UpgradeProxyReconciler) reconcileProxy(ctx context.Context, req ctrl.Re
 	err := r.client.Get(ctx, req.NamespacedName, configMap)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			r.log.InfoLog("configMap is deleted, creating one...")
+			r.log.InfoLogWithFixedMessage(ctx, "configMap is deleted, creating one...")
 			return nil
 		}
-		r.log.ErrorLog(err, "Error in reading config map object")
+		r.log.ErrorLogWithFixedMessage(ctx, err, "Error in reading config map object")
 		return merrors.NewRequeueOnError(err)
 	}
 	if !configMap.DeletionTimestamp.IsZero() {
-		r.log.InfoLog("ConfigMap is about to be deleted, creating one...")
+		r.log.InfoLogWithFixedMessage(ctx, "ConfigMap is about to be deleted, creating one...")
 		return nil
 	}
 	return r.handler.Reconcile(ctx, configMap)

@@ -61,13 +61,13 @@ func (m *ResourceManager) GetResource(ctx context.Context, object client.Object,
 		details.ApDetails.SdkAp = sdkAccessPolicy
 		return nil
 	}
-	m.log.InfoLog("accessPolicy did not sync to the control plane", "name", accessPolicy.ObjectMeta.Name)
+	m.log.InfoLogWithFixedMessage(ctx, "accessPolicy did not sync to the control plane", "name", accessPolicy.ObjectMeta.Name)
 	return nil
 }
 
 func (m *ResourceManager) CreateResource(ctx context.Context, object client.Object, details *manager.ResourceDetails) (bool, error) {
 	if details.ApDetails.SdkAp == nil {
-		m.log.InfoLog("creating accessPolicy...", "name", object.GetName(), "OpcRetryToken", *details.OpcRetryToken)
+		m.log.InfoLogWithFixedMessage(ctx, "creating accessPolicy...", "name", object.GetName(), "OpcRetryToken", *details.OpcRetryToken)
 		sdkAccessPolicy, err := m.serviceMeshClient.CreateAccessPolicy(ctx, details.ApDetails.BuildSdkAp, details.OpcRetryToken)
 		if err != nil {
 			return false, err
@@ -79,7 +79,7 @@ func (m *ResourceManager) CreateResource(ctx context.Context, object client.Obje
 }
 
 func (m *ResourceManager) UpdateResource(ctx context.Context, object client.Object, details *manager.ResourceDetails) error {
-	m.log.InfoLog("updating accessPolicy...", "name", object.GetName())
+	m.log.InfoLogWithFixedMessage(ctx, "updating accessPolicy...", "name", object.GetName())
 	details.ApDetails.SdkAp.LifecycleState = sdk.AccessPolicyLifecycleStateUpdating
 	return m.serviceMeshClient.UpdateAccessPolicy(ctx, details.ApDetails.BuildSdkAp)
 }
@@ -89,7 +89,7 @@ func (m *ResourceManager) ChangeCompartment(ctx context.Context, object client.O
 	if err != nil {
 		return err
 	}
-	m.log.InfoLog("Moving accessPolicy to new compartment", "Name", object.GetName())
+	m.log.InfoLogWithFixedMessage(ctx, "Moving accessPolicy to new compartment", "Name", object.GetName())
 	// sdkAccessPolicy state would be Active here, hence update the state to updating for correct status
 	details.ApDetails.SdkAp.LifecycleState = sdk.AccessPolicyLifecycleStateUpdating
 	return m.serviceMeshClient.ChangeAccessPolicyCompartment(ctx, &accessPolicy.Status.AccessPolicyId, &accessPolicy.Spec.CompartmentId)
@@ -103,7 +103,7 @@ func (m *ResourceManager) DeleteResource(ctx context.Context, object client.Obje
 	if len(accessPolicy.Status.AccessPolicyId) == 0 {
 		return nil
 	}
-	m.log.InfoLog("Deleting access policy", "Name", object.GetName())
+	m.log.InfoLogWithFixedMessage(ctx, "Deleting access policy", "Name", object.GetName())
 	return m.serviceMeshClient.DeleteAccessPolicy(ctx, &accessPolicy.Status.AccessPolicyId)
 }
 
@@ -267,4 +267,8 @@ func getAccessPolicy(object client.Object) (*servicemeshapi.AccessPolicy, error)
 		return nil, errors.New("object is not a access policy")
 	}
 	return accessPolicy, nil
+}
+
+func (m *ResourceManager) HasSdk(details *manager.ResourceDetails) bool {
+	return details.ApDetails.SdkAp != nil
 }

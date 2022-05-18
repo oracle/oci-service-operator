@@ -59,6 +59,7 @@ type SdkOperations interface {
 	HasCompartmentIdChanged(object client.Object, details *ResourceDetails) (bool, error)
 	GetLifecycleState(details *ResourceDetails) string
 	GetMessage(details *ResourceDetails) string
+	HasSdk(details *ResourceDetails) bool
 }
 
 type CustomResourceHandler interface {
@@ -176,23 +177,24 @@ func (c *ServiceMeshServiceManager) CreateOrUpdate(ctx context.Context, obj runt
 	}
 
 	// Reuses the opcRetryToken if the previous request fails, otherwise create a new opcRetryToken
-	opcRetryToken, err := c.getOpcRetryToken(ctx, object)
+	opcRetryToken, err := c.getOpcRetryToken(object)
 	if err != nil {
 		return meshErrors.GetOsokResponseByHandlingReconcileError(err)
 	}
 	resourceDetails.OpcRetryToken = opcRetryToken
+	if !c.handler.HasSdk(resourceDetails) {
+		c.UpdateOpcRetryToken(ctx, object, resourceDetails.OpcRetryToken)
+	}
+
 	resourceCreated, resourceCreationErr := c.handler.CreateResource(ctx, object, resourceDetails)
 	hasChanged := false
-	hasResourceUpdatedInCp := false
-	if resourceCreated {
-		hasResourceUpdatedInCp = c.hasResourceUpdatedInCp(object, resourceDetails)
-	}
+	hasResourceUpdatedInCp := c.hasResourceUpdatedInCp(object, resourceDetails)
 	if !resourceCreated {
 		_ = c.UpdateServiceMeshConfiguredStatus(ctx, object, resourceCreationErr)
 		if resourceCreationErr != nil {
-			if meshErrors.IsNetworkErrorOrInternalError(resourceCreationErr) {
-				// Stores the opc retry token to status if the request fails
-				_ = c.UpdateOpcRetryToken(ctx, object, resourceDetails.OpcRetryToken)
+			if !meshErrors.IsNetworkErrorOrInternalError(resourceCreationErr) {
+				// Clears the opcRetryToken if the request didn't fail for network or internal error
+				_ = c.UpdateOpcRetryToken(ctx, object, nil)
 			}
 			return meshErrors.GetOsokResponseByHandlingReconcileError(resourceCreationErr)
 		}
@@ -247,6 +249,10 @@ func (c *ServiceMeshServiceManager) hasResourceUpdatedInCp(object client.Object,
 	}
 
 	if !isResourceActiveWithStatusTrue(serviceMeshStatus) {
+		return false
+	}
+
+	if serviceMeshStatus.LastUpdatedTime == nil {
 		return false
 	}
 
@@ -381,7 +387,7 @@ func (c *ServiceMeshServiceManager) Delete(ctx context.Context, obj runtime.Obje
 		return false, err
 	}
 	if core.HasFinalizer(object, c.handler.GetFinalizer()) {
-		c.log.InfoLog("Checking dependencies")
+		c.log.InfoLogWithFixedMessage(ctx, "Checking dependencies")
 		err := c.handler.Finalize(ctx, object)
 		c.UpdateServiceMeshDependenciesActiveStatus(ctx, object, err)
 		if err != nil {
@@ -393,7 +399,7 @@ func (c *ServiceMeshServiceManager) Delete(ctx context.Context, obj runtime.Obje
 	}
 
 	if core.HasFinalizer(object, core.OSOKFinalizerName) {
-		c.log.InfoLog("Attempting to delete the resource in the control plane")
+		c.log.InfoLogWithFixedMessage(ctx, "Attempting to delete the resource in the control plane")
 		err := c.handler.DeleteResource(ctx, object)
 		if err != nil {
 			c.UpdateServiceMeshActiveStatus(ctx, object, err)
@@ -436,7 +442,7 @@ func (c *ServiceMeshServiceManager) UpdateOpcRetryToken(ctx context.Context, obj
 	return c.client.Status().Patch(ctx, obj, client.MergeFrom(oldObj))
 }
 
-func (c *ServiceMeshServiceManager) getOpcRetryToken(ctx context.Context, obj client.Object) (*string, error) {
+func (c *ServiceMeshServiceManager) getOpcRetryToken(obj client.Object) (*string, error) {
 	serviceMeshStatus, err := c.handler.GetServiceMeshStatus(obj)
 	if err != nil {
 		return nil, err

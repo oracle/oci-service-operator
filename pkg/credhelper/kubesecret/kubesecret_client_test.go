@@ -34,8 +34,8 @@ var _ = Describe("Kube Secrets Client", func() {
 			ctx := context.Background()
 			client := &KubeSecretClient{
 				Client:  k8sClient,
-				Log:     loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("kubesecret_client_test"), FixedLogs: make(map[string]string)},
-				Metrics: metrics.Init("KubeSecret", loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("kubesecret_client_test"), FixedLogs: make(map[string]string)}),
+				Log:     loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("kubesecret_client_test")},
+				Metrics: metrics.Init("KubeSecret", loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("kubesecret_client_test")}),
 			}
 
 			Context("creating secret with secret client", func() {

@@ -60,13 +60,13 @@ func (m *ResourceManager) GetResource(ctx context.Context, object client.Object,
 		details.MeshDetails.SdkMesh = sdkMesh
 		return nil
 	}
-	m.log.InfoLog("mesh did not sync to the control plane", "name", mesh.ObjectMeta.Name)
+	m.log.InfoLogWithFixedMessage(ctx, "mesh did not sync to the control plane", "name", mesh.ObjectMeta.Name)
 	return nil
 }
 
 func (m *ResourceManager) CreateResource(ctx context.Context, object client.Object, details *manager.ResourceDetails) (bool, error) {
 	if details.MeshDetails.SdkMesh == nil {
-		m.log.InfoLog("creating mesh...", "name", object.GetName(), "OpcRetryToken", *details.OpcRetryToken)
+		m.log.InfoLogWithFixedMessage(ctx, "creating mesh...", "name", object.GetName(), "OpcRetryToken", *details.OpcRetryToken)
 		sdkMesh, err := m.serviceMeshClient.CreateMesh(ctx, details.MeshDetails.BuildSdkMesh, details.OpcRetryToken)
 		if err != nil {
 			return false, err
@@ -78,7 +78,7 @@ func (m *ResourceManager) CreateResource(ctx context.Context, object client.Obje
 }
 
 func (m *ResourceManager) UpdateResource(ctx context.Context, object client.Object, details *manager.ResourceDetails) error {
-	m.log.InfoLog("updating mesh...", "name", object.GetName())
+	m.log.InfoLogWithFixedMessage(ctx, "updating mesh...", "name", object.GetName())
 	details.MeshDetails.SdkMesh.LifecycleState = sdk.MeshLifecycleStateUpdating
 	return m.serviceMeshClient.UpdateMesh(ctx, details.MeshDetails.BuildSdkMesh)
 }
@@ -92,7 +92,7 @@ func (m *ResourceManager) ChangeCompartment(ctx context.Context, object client.O
 	if err != nil {
 		return err
 	}
-	m.log.InfoLog("Moving mesh to new compartment", "Name", object.GetName())
+	m.log.InfoLogWithFixedMessage(ctx, "Moving mesh to new compartment", "Name", object.GetName())
 	// sdkMesh state would be Active here, hence update the state to updating for correct status
 	details.MeshDetails.SdkMesh.LifecycleState = sdk.MeshLifecycleStateUpdating
 	return m.serviceMeshClient.ChangeMeshCompartment(ctx, &mesh.Status.MeshId, &mesh.Spec.CompartmentId)
@@ -106,7 +106,7 @@ func (m *ResourceManager) DeleteResource(ctx context.Context, object client.Obje
 	if len(mesh.Status.MeshId) == 0 {
 		return nil
 	}
-	m.log.InfoLog("Deleting mesh", "Name", object.GetName())
+	m.log.InfoLogWithFixedMessage(ctx, "Deleting mesh", "Name", object.GetName())
 	return m.serviceMeshClient.DeleteMesh(ctx, &mesh.Status.MeshId)
 }
 
@@ -319,4 +319,8 @@ func getMesh(object client.Object) (*servicemeshapi.Mesh, error) {
 		return nil, errors.New("object is not a mesh")
 	}
 	return mesh, nil
+}
+
+func (m *ResourceManager) HasSdk(details *manager.ResourceDetails) bool {
+	return details.MeshDetails.SdkMesh != nil
 }

@@ -39,7 +39,7 @@ func (h *MutateHandler) Inject(pod *corev1.Pod) error {
 
 	if !sidecarOk {
 		err := errors.New(string(commons.NoSidecarImageFound))
-		logger.ErrorLog(err, string(commons.NoSidecarImageFound))
+		logger.ErrorLogWithFixedMessage(nil, err, string(commons.NoSidecarImageFound))
 		return err
 	}
 
@@ -50,11 +50,11 @@ func (h *MutateHandler) Inject(pod *corev1.Pod) error {
 	}
 
 	for _, mutator := range mutators {
-		logger.InfoLog("Attempting to mutate", "vd", (string)(h.vdb.Status.VirtualDeploymentId), "vs",
+		logger.InfoLogWithFixedMessage(nil, "Attempting to mutate", "vd", (string)(h.vdb.Status.VirtualDeploymentId), "vs",
 			(string)(h.vdb.Status.VirtualServiceId))
 		err := mutator.mutate(pod)
 		if err != nil {
-			logger.ErrorLog(err, "failed to mutate the pod")
+			logger.ErrorLogWithFixedMessage(nil, err, "failed to mutate the pod")
 			return err
 		}
 	}

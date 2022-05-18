@@ -314,7 +314,7 @@ func Test_defaultResourceHandler_evictPods(t *testing.T) {
 			m := &defaultResourceHandler{
 				k8sClient: testFramework.K8sClient,
 				clientSet: testFramework.K8sClientset,
-				log:       loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("ServiceUpdateHandler"), FixedLogs: make(map[string]string)},
+				log:       loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("ServiceUpdateHandler")},
 			}
 
 			testProxyController.UpdateResources(ctx, testFramework, tt.args.testControllerArgs, t)

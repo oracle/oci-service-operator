@@ -94,7 +94,7 @@ func (c *defaultServiceMeshClient) GetMesh(ctx context.Context, meshId *api.OCID
 	getMeshRequest.RequestMetadata.RetryPolicy = commons.GetServiceMeshRetryPolicy(commons.Mesh)
 	response, err := c.client.GetMesh(ctx, getMeshRequest)
 	if err != nil {
-		c.log.ErrorLog(err, "failed to get mesh from control plane", "meshId", conversions.DeRefString((*string)(meshId)))
+		c.log.ErrorLogWithFixedMessage(ctx, err, "failed to get mesh from control plane", "meshId", conversions.DeRefString((*string)(meshId)))
 		return nil, err
 	}
 	return &response.Mesh, nil
@@ -114,7 +114,7 @@ func (c *defaultServiceMeshClient) CreateMesh(ctx context.Context, mesh *sdk.Mes
 		OpcRetryToken: opcRetryToken})
 
 	if err != nil {
-		c.log.ErrorLog(err, "failed to create mesh in ControlPlane", "meshName", conversions.DeRefString(mesh.DisplayName))
+		c.log.ErrorLogWithFixedMessage(ctx, err, "failed to create mesh in ControlPlane", "meshName", conversions.DeRefString(mesh.DisplayName))
 		return nil, err
 	}
 
@@ -134,7 +134,7 @@ func (c *defaultServiceMeshClient) UpdateMesh(ctx context.Context, mesh *sdk.Mes
 	})
 
 	if err != nil {
-		c.log.ErrorLog(err, "failed to update mesh in ControlPlane", "meshId", conversions.DeRefString(mesh.Id))
+		c.log.ErrorLogWithFixedMessage(ctx, err, "failed to update mesh in ControlPlane", "meshId", conversions.DeRefString(mesh.Id))
 		return err
 	}
 
@@ -145,7 +145,7 @@ func (c *defaultServiceMeshClient) DeleteMesh(ctx context.Context, meshId *api.O
 	_, err := c.client.DeleteMesh(ctx, sdk.DeleteMeshRequest{
 		MeshId: (*string)(meshId),
 	})
-	return meshErrors.IsDeleted(err, c.log)
+	return meshErrors.IsDeleted(ctx, err, c.log)
 }
 
 func (c *defaultServiceMeshClient) ChangeMeshCompartment(ctx context.Context, meshId *api.OCID, compartmentId *api.OCID) error {
@@ -157,7 +157,7 @@ func (c *defaultServiceMeshClient) ChangeMeshCompartment(ctx context.Context, me
 	})
 
 	if err != nil {
-		c.log.ErrorLog(err, "Failed to change mesh compartmentId in ControlPlane")
+		c.log.ErrorLogWithFixedMessage(ctx, err, "Failed to change mesh compartmentId in ControlPlane")
 		return err
 	}
 
@@ -169,7 +169,7 @@ func (c *defaultServiceMeshClient) GetVirtualService(ctx context.Context, virtua
 	getVirtualServiceRequest.RequestMetadata.RetryPolicy = commons.GetServiceMeshRetryPolicy(commons.VirtualService)
 	response, err := c.client.GetVirtualService(ctx, getVirtualServiceRequest)
 	if err != nil {
-		c.log.ErrorLog(err, "Failed to get VirtualService from ControlPlane")
+		c.log.ErrorLogWithFixedMessage(ctx, err, "Failed to get VirtualService from ControlPlane")
 		return nil, err
 	}
 	return &response.VirtualService, nil
@@ -195,7 +195,7 @@ func (c *defaultServiceMeshClient) CreateVirtualService(ctx context.Context, vir
 		OpcRetryToken:               opcRetryToken,
 	})
 	if err != nil {
-		c.log.ErrorLog(err, "Failed to create VirtualService in ControlPlane")
+		c.log.ErrorLogWithFixedMessage(ctx, err, "Failed to create VirtualService in ControlPlane")
 		return nil, err
 	}
 
@@ -219,7 +219,7 @@ func (c *defaultServiceMeshClient) UpdateVirtualService(ctx context.Context, vir
 		UpdateVirtualServiceDetails: updateVirtualServiceDetails,
 	})
 	if err != nil {
-		c.log.ErrorLog(err, "Failed to update VirtualService in ControlPlane")
+		c.log.ErrorLogWithFixedMessage(ctx, err, "Failed to update VirtualService in ControlPlane")
 		return err
 	}
 
@@ -228,7 +228,7 @@ func (c *defaultServiceMeshClient) UpdateVirtualService(ctx context.Context, vir
 
 func (c *defaultServiceMeshClient) DeleteVirtualService(ctx context.Context, virtualServiceId *api.OCID) error {
 	_, err := c.client.DeleteVirtualService(ctx, sdk.DeleteVirtualServiceRequest{VirtualServiceId: (*string)(virtualServiceId)})
-	return meshErrors.IsDeleted(err, c.log)
+	return meshErrors.IsDeleted(ctx, err, c.log)
 }
 
 func (c *defaultServiceMeshClient) ChangeVirtualServiceCompartment(ctx context.Context, virtualServiceId *api.OCID, compartmentId *api.OCID) error {
@@ -240,7 +240,7 @@ func (c *defaultServiceMeshClient) ChangeVirtualServiceCompartment(ctx context.C
 	})
 
 	if err != nil {
-		c.log.ErrorLog(err, "Failed to change virtual service compartmentId in ControlPlane")
+		c.log.ErrorLogWithFixedMessage(ctx, err, "Failed to change virtual service compartmentId in ControlPlane")
 		return err
 	}
 
@@ -252,7 +252,7 @@ func (c *defaultServiceMeshClient) GetVirtualDeployment(ctx context.Context, vir
 	getVirtualDeploymentRequest.RequestMetadata.RetryPolicy = commons.GetServiceMeshRetryPolicy(commons.VirtualDeployment)
 	response, err := c.client.GetVirtualDeployment(ctx, getVirtualDeploymentRequest)
 	if err != nil {
-		c.log.ErrorLog(err, "Failed to get VirtualDeployment from ControlPlane")
+		c.log.ErrorLogWithFixedMessage(ctx, err, "Failed to get VirtualDeployment from ControlPlane")
 		return nil, err
 	}
 	return &response.VirtualDeployment, nil
@@ -274,7 +274,7 @@ func (c *defaultServiceMeshClient) CreateVirtualDeployment(ctx context.Context, 
 		OpcRetryToken: opcRetryToken,
 	})
 	if err != nil {
-		c.log.ErrorLog(err, "Failed to create VirtualDeployment in ControlPlane")
+		c.log.ErrorLogWithFixedMessage(ctx, err, "Failed to create VirtualDeployment in ControlPlane")
 		return nil, err
 	}
 
@@ -294,7 +294,7 @@ func (c *defaultServiceMeshClient) UpdateVirtualDeployment(ctx context.Context, 
 		VirtualDeploymentId: vd.Id,
 	})
 	if err != nil {
-		c.log.ErrorLog(err, "Failed to update VirtualDeployment in ControlPlane")
+		c.log.ErrorLogWithFixedMessage(ctx, err, "Failed to update VirtualDeployment in ControlPlane")
 		return err
 	}
 
@@ -303,7 +303,7 @@ func (c *defaultServiceMeshClient) UpdateVirtualDeployment(ctx context.Context, 
 
 func (c *defaultServiceMeshClient) DeleteVirtualDeployment(ctx context.Context, vd *api.OCID) error {
 	_, err := c.client.DeleteVirtualDeployment(ctx, sdk.DeleteVirtualDeploymentRequest{VirtualDeploymentId: (*string)(vd)})
-	return meshErrors.IsDeleted(err, c.log)
+	return meshErrors.IsDeleted(ctx, err, c.log)
 }
 
 func (c *defaultServiceMeshClient) ChangeVirtualDeploymentCompartment(ctx context.Context, vd *api.OCID, compartmentId *api.OCID) error {
@@ -315,7 +315,7 @@ func (c *defaultServiceMeshClient) ChangeVirtualDeploymentCompartment(ctx contex
 	})
 
 	if err != nil {
-		c.log.ErrorLog(err, "Failed to change virtual deployment compartmentId in ControlPlane")
+		c.log.ErrorLogWithFixedMessage(ctx, err, "Failed to change virtual deployment compartmentId in ControlPlane")
 		return err
 	}
 
@@ -327,7 +327,7 @@ func (c *defaultServiceMeshClient) GetVirtualServiceRouteTable(ctx context.Conte
 	getVirtualServiceRouteTableRequest.RequestMetadata.RetryPolicy = commons.GetServiceMeshRetryPolicy(commons.VirtualServiceRouteTable)
 	response, err := c.client.GetVirtualServiceRouteTable(ctx, getVirtualServiceRouteTableRequest)
 	if err != nil {
-		c.log.ErrorLog(err, "Failed to get virtual service route table from ControlPlane")
+		c.log.ErrorLogWithFixedMessage(ctx, err, "Failed to get virtual service route table from ControlPlane")
 		return nil, err
 	}
 	return &response.VirtualServiceRouteTable, nil
@@ -348,7 +348,7 @@ func (c *defaultServiceMeshClient) CreateVirtualServiceRouteTable(ctx context.Co
 		OpcRetryToken: opcRetryToken,
 	})
 	if err != nil {
-		c.log.ErrorLog(err, "Failed to create virtual service route table in ControlPlane")
+		c.log.ErrorLogWithFixedMessage(ctx, err, "Failed to create virtual service route table in ControlPlane")
 		return nil, err
 	}
 
@@ -365,7 +365,7 @@ func (c *defaultServiceMeshClient) UpdateVirtualServiceRouteTable(ctx context.Co
 			DefinedTags:  vsrt.DefinedTags,
 		}})
 	if err != nil {
-		c.log.ErrorLog(err, "Failed to update virtual service route table in ControlPlane")
+		c.log.ErrorLogWithFixedMessage(ctx, err, "Failed to update virtual service route table in ControlPlane")
 		return err
 	}
 	return nil
@@ -373,7 +373,7 @@ func (c *defaultServiceMeshClient) UpdateVirtualServiceRouteTable(ctx context.Co
 
 func (c *defaultServiceMeshClient) DeleteVirtualServiceRouteTable(ctx context.Context, vsrtId *api.OCID) error {
 	_, err := c.client.DeleteVirtualServiceRouteTable(ctx, sdk.DeleteVirtualServiceRouteTableRequest{VirtualServiceRouteTableId: (*string)(vsrtId)})
-	return meshErrors.IsDeleted(err, c.log)
+	return meshErrors.IsDeleted(ctx, err, c.log)
 }
 
 func (c *defaultServiceMeshClient) ChangeVirtualServiceRouteTableCompartment(ctx context.Context, vsrtId *api.OCID, compartmentId *api.OCID) error {
@@ -385,7 +385,7 @@ func (c *defaultServiceMeshClient) ChangeVirtualServiceRouteTableCompartment(ctx
 	})
 
 	if err != nil {
-		c.log.ErrorLog(err, "Failed to change virtual service route table compartmentId in ControlPlane")
+		c.log.ErrorLogWithFixedMessage(ctx, err, "Failed to change virtual service route table compartmentId in ControlPlane")
 		return err
 	}
 
@@ -397,7 +397,7 @@ func (c *defaultServiceMeshClient) GetAccessPolicy(ctx context.Context, accessPo
 	getAccessPolicyRequest.RequestMetadata.RetryPolicy = commons.GetServiceMeshRetryPolicy(commons.AccessPolicy)
 	response, err := c.client.GetAccessPolicy(ctx, getAccessPolicyRequest)
 	if err != nil {
-		c.log.ErrorLog(err, "Failed to get AccessPolicy from ControlPlane")
+		c.log.ErrorLogWithFixedMessage(ctx, err, "Failed to get AccessPolicy from ControlPlane")
 		return nil, err
 	}
 	return &response.AccessPolicy, nil
@@ -417,7 +417,7 @@ func (c *defaultServiceMeshClient) CreateAccessPolicy(ctx context.Context, acces
 		OpcRetryToken: opcRetryToken,
 	})
 	if err != nil {
-		c.log.ErrorLog(err, "Failed to create AccessPolicy in ControlPlane")
+		c.log.ErrorLogWithFixedMessage(ctx, err, "Failed to create AccessPolicy in ControlPlane")
 		return nil, err
 	}
 
@@ -434,7 +434,7 @@ func (c *defaultServiceMeshClient) UpdateAccessPolicy(ctx context.Context, acces
 			DefinedTags:  accessPolicy.DefinedTags,
 		}})
 	if err != nil {
-		c.log.ErrorLog(err, "Failed to update AccessPolicy in ControlPlane")
+		c.log.ErrorLogWithFixedMessage(ctx, err, "Failed to update AccessPolicy in ControlPlane")
 		return err
 	}
 
@@ -443,7 +443,7 @@ func (c *defaultServiceMeshClient) UpdateAccessPolicy(ctx context.Context, acces
 
 func (c *defaultServiceMeshClient) DeleteAccessPolicy(ctx context.Context, accessPolicyId *api.OCID) error {
 	_, err := c.client.DeleteAccessPolicy(ctx, sdk.DeleteAccessPolicyRequest{AccessPolicyId: (*string)(accessPolicyId)})
-	return meshErrors.IsDeleted(err, c.log)
+	return meshErrors.IsDeleted(ctx, err, c.log)
 }
 
 func (c *defaultServiceMeshClient) ChangeAccessPolicyCompartment(ctx context.Context, accessPolicyId *api.OCID, compartmentId *api.OCID) error {
@@ -452,7 +452,7 @@ func (c *defaultServiceMeshClient) ChangeAccessPolicyCompartment(ctx context.Con
 		ChangeAccessPolicyCompartmentDetails: sdk.ChangeAccessPolicyCompartmentDetails{CompartmentId: (*string)(compartmentId)},
 	})
 	if err != nil {
-		c.log.ErrorLog(err, "Failed to change access policy compartmentId in ControlPlane")
+		c.log.ErrorLogWithFixedMessage(ctx, err, "Failed to change access policy compartmentId in ControlPlane")
 		return err
 	}
 	return nil
@@ -463,7 +463,7 @@ func (c *defaultServiceMeshClient) GetIngressGateway(ctx context.Context, ingres
 	getIngressGatewayRequest.RequestMetadata.RetryPolicy = commons.GetServiceMeshRetryPolicy(commons.IngressGateway)
 	response, err := c.client.GetIngressGateway(ctx, getIngressGatewayRequest)
 	if err != nil {
-		c.log.ErrorLog(err, "Failed to get IngressGateway from ControlPlane")
+		c.log.ErrorLogWithFixedMessage(ctx, err, "Failed to get IngressGateway from ControlPlane")
 		return nil, err
 	}
 	return &response.IngressGateway, nil
@@ -484,7 +484,7 @@ func (c *defaultServiceMeshClient) CreateIngressGateway(ctx context.Context, ing
 		OpcRetryToken: opcRetryToken,
 	})
 	if err != nil {
-		c.log.ErrorLog(err, "Failed to create IngressGateway in ControlPlane")
+		c.log.ErrorLogWithFixedMessage(ctx, err, "Failed to create IngressGateway in ControlPlane")
 		return nil, err
 	}
 
@@ -503,7 +503,7 @@ func (c *defaultServiceMeshClient) UpdateIngressGateway(ctx context.Context, ing
 		},
 	})
 	if err != nil {
-		c.log.ErrorLog(err, "Failed to update IngressGateway in ControlPlane")
+		c.log.ErrorLogWithFixedMessage(ctx, err, "Failed to update IngressGateway in ControlPlane")
 		return err
 	}
 
@@ -512,7 +512,7 @@ func (c *defaultServiceMeshClient) UpdateIngressGateway(ctx context.Context, ing
 
 func (c *defaultServiceMeshClient) DeleteIngressGateway(ctx context.Context, ingressGatewayId *api.OCID) error {
 	_, err := c.client.DeleteIngressGateway(ctx, sdk.DeleteIngressGatewayRequest{IngressGatewayId: (*string)(ingressGatewayId)})
-	return meshErrors.IsDeleted(err, c.log)
+	return meshErrors.IsDeleted(ctx, err, c.log)
 }
 
 func (c *defaultServiceMeshClient) ChangeIngressGatewayCompartment(ctx context.Context, ingressGatewayId *api.OCID, compartmentId *api.OCID) error {
@@ -524,7 +524,7 @@ func (c *defaultServiceMeshClient) ChangeIngressGatewayCompartment(ctx context.C
 	})
 
 	if err != nil {
-		c.log.ErrorLog(err, "Failed to change IngressGateway compartmentId in ControlPlane")
+		c.log.ErrorLogWithFixedMessage(ctx, err, "Failed to change IngressGateway compartmentId in ControlPlane")
 		return err
 	}
 
@@ -536,7 +536,7 @@ func (c *defaultServiceMeshClient) GetIngressGatewayRouteTable(ctx context.Conte
 	getIngressGatewayRouteTableRequest.RequestMetadata.RetryPolicy = commons.GetServiceMeshRetryPolicy(commons.IngressGatewayRouteTable)
 	response, err := c.client.GetIngressGatewayRouteTable(ctx, getIngressGatewayRouteTableRequest)
 	if err != nil {
-		c.log.ErrorLog(err, "failed to get ingressGatewayRouteTable from ControlPlane", "ingressGatewayRouteTableId", igrtId)
+		c.log.ErrorLogWithFixedMessage(ctx, err, "failed to get ingressGatewayRouteTable from ControlPlane", "ingressGatewayRouteTableId", igrtId)
 		return nil, err
 	}
 	return &response.IngressGatewayRouteTable, nil
@@ -557,7 +557,7 @@ func (c *defaultServiceMeshClient) CreateIngressGatewayRouteTable(ctx context.Co
 	})
 
 	if err != nil {
-		c.log.ErrorLog(err, "failed to create ingressGatewayRouteTable in ControlPlane", "ingressGatewayRouteTableName", igrt.Name)
+		c.log.ErrorLogWithFixedMessage(ctx, err, "failed to create ingressGatewayRouteTable in ControlPlane", "ingressGatewayRouteTableName", igrt.Name)
 		return nil, err
 	}
 
@@ -576,7 +576,7 @@ func (c *defaultServiceMeshClient) UpdateIngressGatewayRouteTable(ctx context.Co
 	})
 
 	if err != nil {
-		c.log.ErrorLog(err, "failed to update ingressGatewayRouteTable in ControlPlane", "ingressGatewayRouteTableId", igrt.Id)
+		c.log.ErrorLogWithFixedMessage(ctx, err, "failed to update ingressGatewayRouteTable in ControlPlane", "ingressGatewayRouteTableId", igrt.Id)
 		return err
 	}
 
@@ -587,7 +587,7 @@ func (c *defaultServiceMeshClient) DeleteIngressGatewayRouteTable(ctx context.Co
 	_, err := c.client.DeleteIngressGatewayRouteTable(ctx, sdk.DeleteIngressGatewayRouteTableRequest{
 		IngressGatewayRouteTableId: (*string)(igrtId),
 	})
-	return meshErrors.IsDeleted(err, c.log)
+	return meshErrors.IsDeleted(ctx, err, c.log)
 }
 
 func (c *defaultServiceMeshClient) ChangeIngressGatewayRouteTableCompartment(ctx context.Context, igrtId *api.OCID, compartmentId *api.OCID) error {
@@ -599,7 +599,7 @@ func (c *defaultServiceMeshClient) ChangeIngressGatewayRouteTableCompartment(ctx
 	})
 
 	if err != nil {
-		c.log.ErrorLog(err, "Failed to change ingressGatewayRouteTable compartmentId in ControlPlane")
+		c.log.ErrorLogWithFixedMessage(ctx, err, "Failed to change ingressGatewayRouteTable compartmentId in ControlPlane")
 		return err
 	}
 
@@ -616,7 +616,7 @@ func (c *defaultServiceMeshClient) SetClientHost(cpEndpoint string) {
 func (c *defaultServiceMeshClient) GetProxyDetails(ctx context.Context) (*string, error) {
 	response, err := c.client.GetProxyDetails(ctx, sdk.GetProxyDetailsRequest{})
 	if err != nil {
-		c.log.ErrorLog(err, "failed to get proxy details")
+		c.log.ErrorLogWithFixedMessage(ctx, err, "failed to get proxy details")
 		return nil, err
 	}
 	proxyImage := response.ProxyDetails.ProxyImage

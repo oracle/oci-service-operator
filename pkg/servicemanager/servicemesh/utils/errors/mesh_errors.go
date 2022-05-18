@@ -6,6 +6,7 @@
 package errors
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -116,18 +117,18 @@ func GetErrorMessage(err common.ServiceError) string {
 	return fmt.Sprintf("%s (opc-request-id: %s )", err.GetMessage(), err.GetOpcRequestID())
 }
 
-func IsDeleted(err error, log loggerutil.OSOKLogger) error {
+func IsDeleted(ctx context.Context, err error, log loggerutil.OSOKLogger) error {
 	if err == nil {
 		return nil
 	}
 
 	if serviceError, ok := err.(common.ServiceError); ok {
 		if serviceError.GetHTTPStatusCode() == http.StatusNotFound {
-			log.ErrorLog(err, "Entity not found. Maybe it was already deleted.")
+			log.ErrorLogWithFixedMessage(ctx, err, "Entity not found. Maybe it was already deleted.")
 			return nil
 		}
 	}
-	log.ErrorLog(err, "Failed to delete entity from control plane")
+	log.ErrorLogWithFixedMessage(ctx, err, "Failed to delete entity from control plane")
 	return err
 }
 
@@ -144,7 +145,7 @@ func (e *DoNotRequeue) Error() string {
 
 var _ error = &DoNotRequeue{}
 
-func HandleErrorAndRequeue(err error, log loggerutil.OSOKLogger) (ctrl.Result, error) {
+func HandleErrorAndRequeue(ctx context.Context, err error, log loggerutil.OSOKLogger) (ctrl.Result, error) {
 	// Do not requeue the request if there is no error or error is of type DoNotRequeue
 	var doNotRequeue *DoNotRequeue
 	if err == nil || errors.As(err, &doNotRequeue) {
@@ -154,7 +155,7 @@ func HandleErrorAndRequeue(err error, log loggerutil.OSOKLogger) (ctrl.Result, e
 	// Requeue the request right away with rate limiting if there are errors. A nil error will reset the backoff.
 	var requeueOnError *RequeueOnError
 	if errors.As(err, &requeueOnError) {
-		log.InfoLog("requeue due to error", "error", requeueOnError.err.Error())
+		log.InfoLogWithFixedMessage(ctx, "requeue due to error", "error", requeueOnError.err.Error())
 		return ctrl.Result{Requeue: true}, nil
 	}
 
@@ -163,15 +164,15 @@ func HandleErrorAndRequeue(err error, log loggerutil.OSOKLogger) (ctrl.Result, e
 	var requeueAfterErr *RequeueAfterError
 	if errors.As(err, &requeueAfterErr) {
 		if requeueAfterErr.err == nil {
-			log.InfoLog("requeue after for periodical syncing", "duration", requeueAfterErr.duration.String())
+			log.InfoLogWithFixedMessage(ctx, "requeue after for periodical syncing", "duration", requeueAfterErr.duration.String())
 			return ctrl.Result{RequeueAfter: requeueAfterErr.duration}, nil
 		}
-		log.InfoLog("requeue after due to error", "duration", requeueAfterErr.duration.String(), "error", requeueAfterErr.err.Error())
+		log.InfoLogWithFixedMessage(ctx, "requeue after due to error", "duration", requeueAfterErr.duration.String(), "error", requeueAfterErr.err.Error())
 		return ctrl.Result{RequeueAfter: requeueAfterErr.duration}, nil
 	}
 
 	// Requeue a Request if there is an error and continue processing items with exponential backoff
-	log.InfoLog("request failed due to error: ", "error", err.Error())
+	log.InfoLogWithFixedMessage(ctx, "request failed due to error: ", "error", err.Error())
 	return ctrl.Result{}, err
 }
 
