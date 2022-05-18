@@ -61,13 +61,13 @@ func (m *ResourceManager) GetResource(ctx context.Context, object client.Object,
 		details.VsDetails.SdkVs = sdkVirtualService
 		return nil
 	}
-	m.log.InfoLog("virtualService did not sync to the control plane", "name", virtualService.ObjectMeta.Name)
+	m.log.InfoLogWithFixedMessage(ctx, "virtualService did not sync to the control plane", "name", virtualService.ObjectMeta.Name)
 	return nil
 }
 
 func (m *ResourceManager) CreateResource(ctx context.Context, object client.Object, details *manager.ResourceDetails) (bool, error) {
 	if details.VsDetails.SdkVs == nil {
-		m.log.InfoLog("creating virtualService...", "name", object.GetName(), "OpcRetryToken", *details.OpcRetryToken)
+		m.log.InfoLogWithFixedMessage(ctx, "creating virtualService...", "name", object.GetName(), "OpcRetryToken", *details.OpcRetryToken)
 		sdkVirtualService, err := m.serviceMeshClient.CreateVirtualService(ctx, details.VsDetails.BuildSdkVs, details.OpcRetryToken)
 		if err != nil {
 			return false, err
@@ -79,7 +79,7 @@ func (m *ResourceManager) CreateResource(ctx context.Context, object client.Obje
 }
 
 func (m *ResourceManager) UpdateResource(ctx context.Context, object client.Object, details *manager.ResourceDetails) error {
-	m.log.InfoLog("updating virtualService...", "name", object.GetName())
+	m.log.InfoLogWithFixedMessage(ctx, "updating virtualService...", "name", object.GetName())
 	details.VsDetails.SdkVs.LifecycleState = sdk.VirtualServiceLifecycleStateUpdating
 	return m.serviceMeshClient.UpdateVirtualService(ctx, details.VsDetails.BuildSdkVs)
 }
@@ -89,7 +89,7 @@ func (m *ResourceManager) ChangeCompartment(ctx context.Context, object client.O
 	if err != nil {
 		return err
 	}
-	m.log.InfoLog("Moving virtualService to new compartment", "Name", object.GetName())
+	m.log.InfoLogWithFixedMessage(ctx, "Moving virtualService to new compartment", "Name", object.GetName())
 	// sdkVirtualService state would be Active here, hence update the state to updating for correct status
 	details.VsDetails.SdkVs.LifecycleState = sdk.VirtualServiceLifecycleStateUpdating
 	return m.serviceMeshClient.ChangeVirtualServiceCompartment(ctx, &virtualService.Status.VirtualServiceId, &virtualService.Spec.CompartmentId)
@@ -103,7 +103,7 @@ func (m *ResourceManager) DeleteResource(ctx context.Context, object client.Obje
 	if len(virtualService.Status.VirtualServiceId) == 0 {
 		return nil
 	}
-	m.log.InfoLog("Deleting virtual service", "Name", object.GetName())
+	m.log.InfoLogWithFixedMessage(ctx, "Deleting virtual service", "Name", object.GetName())
 	return m.serviceMeshClient.DeleteVirtualService(ctx, &virtualService.Status.VirtualServiceId)
 }
 
@@ -277,7 +277,7 @@ func (m *ResourceManager) hasVirtualServiceRouteTables(ctx context.Context, virt
 	vsrtList := &servicemeshapi.VirtualServiceRouteTableList{}
 
 	if err := m.client.List(ctx, vsrtList); err != nil {
-		m.log.InfoLog("unable to list virtualServiceRouteTables for virtual service", "name", virtualService.Name, "namespace", virtualService.Namespace)
+		m.log.InfoLogWithFixedMessage(ctx, "unable to list virtualServiceRouteTables for virtual service", "name", virtualService.Name, "namespace", virtualService.Namespace)
 		return false, err
 	}
 
@@ -295,7 +295,7 @@ func (m *ResourceManager) hasIngressGatewayRouteTables(ctx context.Context, virt
 	igrtList := &servicemeshapi.IngressGatewayRouteTableList{}
 
 	if err := m.client.List(ctx, igrtList); err != nil {
-		m.log.InfoLog("unable to list ingressGatewayRouteTables for virtual service", "name", virtualService.Name, "namespace", virtualService.Namespace)
+		m.log.InfoLogWithFixedMessage(ctx, "unable to list ingressGatewayRouteTables for virtual service", "name", virtualService.Name, "namespace", virtualService.Namespace)
 		return false, err
 	}
 
@@ -316,7 +316,7 @@ func (m *ResourceManager) hasAccessPolicies(ctx context.Context, virtualService 
 	aplist := &servicemeshapi.AccessPolicyList{}
 
 	if err := m.client.List(ctx, aplist); err != nil {
-		m.log.InfoLog("unable to list accessPolicies for virtual service", "name", virtualService.Name, "namespace", virtualService.Namespace)
+		m.log.InfoLogWithFixedMessage(ctx, "unable to list accessPolicies for virtual service", "name", virtualService.Name, "namespace", virtualService.Namespace)
 		return false, err
 	}
 
@@ -337,7 +337,7 @@ func (m *ResourceManager) hasVirtualDeployments(ctx context.Context, virtualServ
 	vdList := &servicemeshapi.VirtualDeploymentList{}
 
 	if err := m.client.List(ctx, vdList); err != nil {
-		m.log.InfoLog("unable to list virtualDeployments for virtual service", "name", virtualService.Name, "namespace", virtualService.Namespace)
+		m.log.InfoLogWithFixedMessage(ctx, "unable to list virtualDeployments for virtual service", "name", virtualService.Name, "namespace", virtualService.Namespace)
 		return false, err
 	}
 
@@ -357,4 +357,8 @@ func getVirtualService(object client.Object) (*servicemeshapi.VirtualService, er
 		return nil, errors.New("object is not a virtual service")
 	}
 	return virtualService, nil
+}
+
+func (m *ResourceManager) HasSdk(details *manager.ResourceDetails) bool {
+	return details.VsDetails.SdkVs != nil
 }

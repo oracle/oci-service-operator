@@ -7,6 +7,7 @@ package util
 
 import (
 	"archive/zip"
+	"context"
 	"github.com/oracle/oci-service-operator/api/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"io/ioutil"
@@ -16,13 +17,13 @@ import (
 	"time"
 )
 
-func RequeueWithError(err error, duration time.Duration, log loggerutil.OSOKLogger) (ctrl.Result, error) {
-	log.InfoLog("requeue after", "error", err.Error(), "duration", duration.String())
+func RequeueWithError(ctx context.Context, err error, duration time.Duration, log loggerutil.OSOKLogger) (ctrl.Result, error) {
+	log.InfoLogWithFixedMessage(ctx, "requeue after", "error", err.Error(), "duration", duration.String())
 	return ctrl.Result{RequeueAfter: duration}, nil
 }
 
-func RequeueWithoutError(duration time.Duration, log loggerutil.OSOKLogger) (ctrl.Result, error) {
-	log.InfoLog("requeue after", "duration", duration.String())
+func RequeueWithoutError(ctx context.Context, duration time.Duration, log loggerutil.OSOKLogger) (ctrl.Result, error) {
+	log.InfoLogWithFixedMessage(ctx, "requeue after", "duration", duration.String())
 	return ctrl.Result{RequeueAfter: duration}, nil
 }
 

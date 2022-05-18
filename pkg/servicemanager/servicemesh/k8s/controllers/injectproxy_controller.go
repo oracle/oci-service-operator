@@ -37,7 +37,7 @@ func NewInjectProxyReconciler(
 
 // Reconcile will keep a watch on namespaces with proxy injection label present and inject proxies initially by evicting the pods
 func (r *InjectProxyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	return merrors.HandleErrorAndRequeue(r.reconcileProxy(ctx, req), r.log)
+	return merrors.HandleErrorAndRequeue(ctx, r.reconcileProxy(ctx, req), r.log)
 }
 
 func (r *InjectProxyReconciler) reconcileProxy(ctx context.Context, req ctrl.Request) error {
@@ -45,14 +45,14 @@ func (r *InjectProxyReconciler) reconcileProxy(ctx context.Context, req ctrl.Req
 	err := r.client.Get(ctx, req.NamespacedName, namespace)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			r.log.InfoLog("Namespace deleted")
+			r.log.InfoLogWithFixedMessage(ctx, "Namespace deleted")
 			return nil
 		}
-		r.log.ErrorLog(err, "Error in reading Namespace object")
+		r.log.ErrorLogWithFixedMessage(ctx, err, "Error in reading Namespace object")
 		return merrors.NewRequeueOnError(err)
 	}
 	if !namespace.DeletionTimestamp.IsZero() {
-		r.log.InfoLog("Namespace DeletionTimestamp is set, about to be deleted")
+		r.log.InfoLogWithFixedMessage(ctx, "Namespace DeletionTimestamp is set, about to be deleted")
 		return nil
 	}
 	return r.handler.Reconcile(ctx, namespace)

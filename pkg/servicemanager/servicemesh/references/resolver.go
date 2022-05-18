@@ -106,7 +106,7 @@ func (r *defaultResolver) ResolveMeshId(ctx context.Context, resourceRef *servic
 func (r *defaultResolver) ResolveMeshReference(ctx context.Context, ref *servicemeshapi.ResourceRef) (*servicemeshapi.Mesh, error) {
 	mesh := &servicemeshapi.Mesh{}
 	if err := r.directReader.Get(ctx, types.NamespacedName{Namespace: ref.Namespace, Name: string(ref.Name)}, mesh); err != nil {
-		r.log.ErrorLog(err, "unable to fetch mesh", "name", string(ref.Name), "namespace", ref.Namespace)
+		r.log.ErrorLogWithFixedMessage(ctx, err, "unable to fetch mesh", "name", string(ref.Name), "namespace", ref.Namespace)
 		return nil, err
 	}
 	return mesh, nil
@@ -151,7 +151,7 @@ func (r *defaultResolver) ResolveVirtualServiceIdAndName(ctx context.Context, re
 func (r *defaultResolver) ResolveVirtualServiceReference(ctx context.Context, ref *servicemeshapi.ResourceRef) (*servicemeshapi.VirtualService, error) {
 	virtualService := &servicemeshapi.VirtualService{}
 	if err := r.directReader.Get(ctx, types.NamespacedName{Namespace: ref.Namespace, Name: string(ref.Name)}, virtualService); err != nil {
-		r.log.ErrorLog(err, "unable to fetch virtual service", "name", string(ref.Name), "namespace", ref.Namespace)
+		r.log.ErrorLogWithFixedMessage(ctx, err, "unable to fetch virtual service", "name", string(ref.Name), "namespace", ref.Namespace)
 		return nil, err
 	}
 
@@ -189,7 +189,7 @@ func (r *defaultResolver) ResolveVirtualDeploymentId(ctx context.Context, resour
 func (r *defaultResolver) ResolveVirtualDeploymentReference(ctx context.Context, ref *servicemeshapi.ResourceRef) (*servicemeshapi.VirtualDeployment, error) {
 	virtualDeployment := &servicemeshapi.VirtualDeployment{}
 	if err := r.directReader.Get(ctx, types.NamespacedName{Namespace: ref.Namespace, Name: string(ref.Name)}, virtualDeployment); err != nil {
-		r.log.ErrorLog(err, "unable to fetch virtual deployment", "name", string(ref.Name), "namespace", ref.Namespace)
+		r.log.ErrorLogWithFixedMessage(ctx, err, "unable to fetch virtual deployment", "name", string(ref.Name), "namespace", ref.Namespace)
 		return nil, err
 	}
 	return virtualDeployment, nil
@@ -234,7 +234,7 @@ func (r *defaultResolver) ResolveIngressGatewayIdAndNameAndMeshId(ctx context.Co
 func (r *defaultResolver) ResolveIngressGatewayReference(ctx context.Context, ref *servicemeshapi.ResourceRef) (*servicemeshapi.IngressGateway, error) {
 	ingressGateway := &servicemeshapi.IngressGateway{}
 	if err := r.directReader.Get(ctx, types.NamespacedName{Namespace: ref.Namespace, Name: string(ref.Name)}, ingressGateway); err != nil {
-		r.log.ErrorLog(err, "unable to fetch ingress gateway", "name", string(ref.Name), "namespace", ref.Namespace)
+		r.log.ErrorLogWithFixedMessage(ctx, err, "unable to fetch ingress gateway", "name", string(ref.Name), "namespace", ref.Namespace)
 		return nil, err
 	}
 
@@ -263,7 +263,7 @@ func (r *defaultResolver) ResolveVirtualServiceListByNamespace(ctx context.Conte
 	listOptions.Namespace = namespace
 	virtualServiceList := &servicemeshapi.VirtualServiceList{}
 	if err := r.directReader.List(ctx, virtualServiceList, &listOptions); err != nil {
-		r.log.ErrorLog(err, "unable to fetch virtual service list for ", "namespace", namespace)
+		r.log.ErrorLogWithFixedMessage(ctx, err, "unable to fetch virtual service list for ", "namespace", namespace)
 		return servicemeshapi.VirtualServiceList{}, err
 	}
 	return *virtualServiceList, nil
@@ -285,7 +285,7 @@ func (r *defaultResolver) ResolveVirtualServiceRefById(ctx context.Context, virt
 func (r *defaultResolver) ResolveServiceReference(ctx context.Context, ref *servicemeshapi.ResourceRef) (*corev1.Service, error) {
 	service, err := r.cache.GetServiceByKey(ref.Namespace + "/" + string(ref.Name))
 	if err != nil {
-		r.log.ErrorLog(err, "unable to fetch service", "name", string(ref.Name), "namespace", ref.Namespace)
+		r.log.ErrorLogWithFixedMessage(ctx, err, "unable to fetch service", "name", string(ref.Name), "namespace", ref.Namespace)
 		return nil, err
 	}
 	return service, nil
@@ -294,7 +294,7 @@ func (r *defaultResolver) ResolveServiceReference(ctx context.Context, ref *serv
 func (r *defaultResolver) ResolveServiceReferenceWithApiReader(ctx context.Context, ref *servicemeshapi.ResourceRef) (*corev1.Service, error) {
 	service := &corev1.Service{}
 	if err := r.directReader.Get(ctx, types.NamespacedName{Namespace: ref.Namespace, Name: string(ref.Name)}, service); err != nil {
-		r.log.ErrorLog(err, "unable to fetch service", "name", string(ref.Name), "namespace", ref.Namespace)
+		r.log.ErrorLogWithFixedMessage(ctx, err, "unable to fetch service", "name", string(ref.Name), "namespace", ref.Namespace)
 		return nil, err
 
 	}

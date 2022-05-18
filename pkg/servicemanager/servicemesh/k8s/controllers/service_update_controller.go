@@ -41,7 +41,7 @@ func NewServiceReconciler(
 // This reconcile is to handle a case where label selectors on the service are changed
 // if existing pods appear to have matched the VDBs for the updated service this controller will evict such pods
 func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	return merrors.HandleErrorAndRequeue(r.reconcile(ctx, req), r.log)
+	return merrors.HandleErrorAndRequeue(ctx, r.reconcile(ctx, req), r.log)
 }
 
 func (r *ServiceReconciler) reconcile(ctx context.Context, req ctrl.Request) error {

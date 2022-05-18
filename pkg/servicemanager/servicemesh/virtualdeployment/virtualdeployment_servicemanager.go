@@ -60,13 +60,13 @@ func (m *ResourceManager) GetResource(ctx context.Context, object client.Object,
 		details.VdDetails.SdkVd = sdkVirtualDeployment
 		return nil
 	}
-	m.log.InfoLog("virtualDeployment did not sync to the control plane", "name", virtualDeployment.ObjectMeta.Name)
+	m.log.InfoLogWithFixedMessage(ctx, "virtualDeployment did not sync to the control plane", "name", virtualDeployment.ObjectMeta.Name)
 	return nil
 }
 
 func (m *ResourceManager) CreateResource(ctx context.Context, object client.Object, details *manager.ResourceDetails) (bool, error) {
 	if details.VdDetails.SdkVd == nil {
-		m.log.InfoLog("creating virtualDeployment..", "name", object.GetName(), "OpcRetryToken", *details.OpcRetryToken)
+		m.log.InfoLogWithFixedMessage(ctx, "creating virtualDeployment..", "name", object.GetName(), "OpcRetryToken", *details.OpcRetryToken)
 		sdkVirtualDeployment, err := m.serviceMeshClient.CreateVirtualDeployment(ctx, details.VdDetails.BuildSdkVd, details.OpcRetryToken)
 		if err != nil {
 			return false, err
@@ -78,7 +78,7 @@ func (m *ResourceManager) CreateResource(ctx context.Context, object client.Obje
 }
 
 func (m *ResourceManager) UpdateResource(ctx context.Context, object client.Object, details *manager.ResourceDetails) error {
-	m.log.InfoLog("updating virtualDeployment...", "name", object.GetName())
+	m.log.InfoLogWithFixedMessage(ctx, "updating virtualDeployment...", "name", object.GetName())
 	details.VdDetails.SdkVd.LifecycleState = sdk.VirtualDeploymentLifecycleStateUpdating
 	return m.serviceMeshClient.UpdateVirtualDeployment(ctx, details.VdDetails.BuildSdkVd)
 }
@@ -88,7 +88,7 @@ func (m *ResourceManager) ChangeCompartment(ctx context.Context, object client.O
 	if err != nil {
 		return err
 	}
-	m.log.InfoLog("Moving virtualDeployment to new compartment", "Name", object.GetName())
+	m.log.InfoLogWithFixedMessage(ctx, "Moving virtualDeployment to new compartment", "Name", object.GetName())
 	// sdkVirtualDeployment state would be Active here, hence update the state to updating for correct status
 	details.VdDetails.SdkVd.LifecycleState = sdk.VirtualDeploymentLifecycleStateUpdating
 	return m.serviceMeshClient.ChangeVirtualDeploymentCompartment(ctx, &virtualDeployment.Status.VirtualDeploymentId, &virtualDeployment.Spec.CompartmentId)
@@ -102,7 +102,7 @@ func (m *ResourceManager) DeleteResource(ctx context.Context, object client.Obje
 	if len(virtualDeployment.Status.VirtualDeploymentId) == 0 {
 		return nil
 	}
-	m.log.InfoLog("Deleting virtual deployment", "Name", object.GetName())
+	m.log.InfoLogWithFixedMessage(ctx, "Deleting virtual deployment", "Name", object.GetName())
 	return m.serviceMeshClient.DeleteVirtualDeployment(ctx, &virtualDeployment.Status.VirtualDeploymentId)
 }
 
@@ -250,7 +250,7 @@ func (m *ResourceManager) hasVirtualDeploymentBindings(ctx context.Context, virt
 	vdbList := &servicemeshapi.VirtualDeploymentBindingList{}
 
 	if err := m.client.List(ctx, vdbList); err != nil {
-		m.log.InfoLog("unable to list virtualDeploymentBindings associated with virtualDeployment", "name", virtualDeployment.Name, "namespace", virtualDeployment.Namespace)
+		m.log.InfoLogWithFixedMessage(ctx, "unable to list virtualDeploymentBindings associated with virtualDeployment", "name", virtualDeployment.Name, "namespace", virtualDeployment.Namespace)
 		return false, err
 	}
 
@@ -267,7 +267,7 @@ func (m *ResourceManager) hasVirtualServiceRouteTables(ctx context.Context, virt
 	vsrtList := &servicemeshapi.VirtualServiceRouteTableList{}
 
 	if err := m.client.List(ctx, vsrtList); err != nil {
-		m.log.InfoLog("unable to list virtualServiceRouteTables for virtualDeployment", "name", virtualDeployment.Name, "namespace", virtualDeployment.Namespace)
+		m.log.InfoLogWithFixedMessage(ctx, "unable to list virtualServiceRouteTables for virtualDeployment", "name", virtualDeployment.Name, "namespace", virtualDeployment.Namespace)
 		return false, err
 	}
 
@@ -291,4 +291,8 @@ func getVirtualDeployment(object client.Object) (*servicemeshapi.VirtualDeployme
 		return nil, errors.New("object is not a virtual deployment")
 	}
 	return virtualDeployment, nil
+}
+
+func (m *ResourceManager) HasSdk(details *manager.ResourceDetails) bool {
+	return details.VdDetails.SdkVd != nil
 }

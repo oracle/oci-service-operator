@@ -75,7 +75,7 @@ func SetOutdatedProxyAnnotation(ctx context.Context, cl client.Client, pod *core
 	} else {
 		_, ok := annotations[commons.OutdatedProxyAnnotation]
 		if ok {
-			logger.InfoLog("contains outdated-proxy annotation", "Pod", pod.Name, "Namespace", pod.Namespace)
+			logger.InfoLogWithFixedMessage(ctx, "contains outdated-proxy annotation", "Pod", pod.Name, "Namespace", pod.Namespace)
 			return true
 		}
 	}
@@ -87,10 +87,10 @@ func SetOutdatedProxyAnnotation(ctx context.Context, cl client.Client, pod *core
 func updatePodAnnotation(ctx context.Context, cl client.Client, newPod *corev1.Pod, pod *corev1.Pod) (valid bool) {
 	err := cl.Status().Patch(ctx, newPod, client.MergeFrom(pod))
 	if err != nil {
-		logger.ErrorLog(err, "Error in updating pod annotation", "Pod", pod.Name, "Namespace", pod.Namespace)
+		logger.ErrorLogWithFixedMessage(ctx, err, "Error in updating pod annotation", "Pod", pod.Name, "Namespace", pod.Namespace)
 		return
 	}
-	logger.InfoLog("Successfully updated pod annotation", "Pod", pod.Name, "Namespace", pod.Namespace)
+	logger.InfoLogWithFixedMessage(ctx, "Successfully updated pod annotation", "Pod", pod.Name, "Namespace", pod.Namespace)
 	return true
 }
 
@@ -123,7 +123,7 @@ func GetVDBForPod(ctx context.Context, cl client.Reader, pod *corev1.Pod, vdbs *
 	for i := range vdbs.Items {
 		if IsPodBelongsToVDB(ctx, cl, pod, &vdbs.Items[i]) {
 			// return the first matched VDB
-			logger.InfoLog(fmt.Sprintf("Pod: %s in Namespace: %s matches VirtualDeploymentBinding", pod.Name, pod.Namespace))
+			logger.InfoLogWithFixedMessage(ctx, fmt.Sprintf("Pod: %s in Namespace: %s matches VirtualDeploymentBinding", pod.Name, pod.Namespace))
 			return &vdbs.Items[i]
 		}
 	}
@@ -146,7 +146,7 @@ func IsPodBelongsToVDB(ctx context.Context, cl client.Reader, pod *corev1.Pod, v
 
 	service := corev1.Service{}
 	if err := serviceUtil.GetKubernetesService(ctx, cl, serviceRef, &service); err != nil {
-		logger.InfoLog(fmt.Sprintf("Error in fetching service for Name: %s Namespace: %s", serviceRef.Name, serviceRef.Namespace))
+		logger.InfoLogWithFixedMessage(ctx, fmt.Sprintf("Error in fetching service for Name: %s Namespace: %s", serviceRef.Name, serviceRef.Namespace))
 		return
 	}
 	serviceSelectorLabels := labels.Set(service.Spec.Selector)

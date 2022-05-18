@@ -56,7 +56,7 @@ func (h *defaultResourceHandler) UpdateLatestProxyVersion(ctx context.Context, c
 	updateProxyVersion, updateProxyVersionPresent := configMap.Data[commons.AutoUpdateProxyVersion]
 
 	if updateProxyVersionPresent && strings.ToLower(updateProxyVersion) == falseStr && oldProxyVersionPresent {
-		h.log.InfoLog("AutoUpdate is set to false. Keeping old version " + oldProxyVersion)
+		h.log.InfoLogWithFixedMessage(ctx, "AutoUpdate is set to false. Keeping old version "+oldProxyVersion)
 		return nil
 	}
 
@@ -66,7 +66,7 @@ func (h *defaultResourceHandler) UpdateLatestProxyVersion(ctx context.Context, c
 	}
 
 	newProxyVersion := *res
-	h.log.InfoLog("Configmap", "Latest Proxy version", newProxyVersion)
+	h.log.InfoLogWithFixedMessage(ctx, "Configmap", "Latest Proxy version", newProxyVersion)
 
 	// If proxy version is outdated, the config map is updated with the latest version
 	if oldProxyVersion != newProxyVersion {
@@ -77,10 +77,10 @@ func (h *defaultResourceHandler) UpdateLatestProxyVersion(ctx context.Context, c
 		newConfigMap.Data[commons.ProxyLabelInMeshConfigMap] = newProxyVersion
 
 		if err := h.client.Patch(ctx, newConfigMap, client.MergeFrom(configMap)); err != nil {
-			h.log.ErrorLog(err, "Error in updating Configmap with new proxy version")
+			h.log.ErrorLogWithFixedMessage(ctx, err, "Error in updating Configmap with new proxy version")
 			return err
 		}
-		h.log.InfoLog("ConfigMap successfully updated with new proxy version")
+		h.log.InfoLogWithFixedMessage(ctx, "ConfigMap successfully updated with new proxy version")
 	}
 
 	return nil

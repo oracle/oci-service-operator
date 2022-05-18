@@ -61,13 +61,13 @@ func (m *ResourceManager) GetResource(ctx context.Context, object client.Object,
 		details.IgDetails.SdkIg = sdkIngressGateway
 		return nil
 	}
-	m.log.InfoLog("ingressGateway did not sync to the control plane", "name", ingressGateway.ObjectMeta.Name)
+	m.log.InfoLogWithFixedMessage(ctx, "ingressGateway did not sync to the control plane", "name", ingressGateway.ObjectMeta.Name)
 	return nil
 }
 
 func (m *ResourceManager) CreateResource(ctx context.Context, object client.Object, details *manager.ResourceDetails) (bool, error) {
 	if details.IgDetails.SdkIg == nil {
-		m.log.InfoLog("creating IngressGateway...", "name", object.GetName(), "OpcRetryToken", *details.OpcRetryToken)
+		m.log.InfoLogWithFixedMessage(ctx, "creating IngressGateway...", "name", object.GetName(), "OpcRetryToken", *details.OpcRetryToken)
 		sdkIngressGateway, err := m.serviceMeshClient.CreateIngressGateway(ctx, details.IgDetails.BuildSdkIg, details.OpcRetryToken)
 		if err != nil {
 			return false, err
@@ -79,7 +79,7 @@ func (m *ResourceManager) CreateResource(ctx context.Context, object client.Obje
 }
 
 func (m *ResourceManager) UpdateResource(ctx context.Context, object client.Object, details *manager.ResourceDetails) error {
-	m.log.InfoLog("updating IngressGateway...", "name", object.GetName())
+	m.log.InfoLogWithFixedMessage(ctx, "updating IngressGateway...", "name", object.GetName())
 	details.IgDetails.SdkIg.LifecycleState = sdk.IngressGatewayLifecycleStateUpdating
 	return m.serviceMeshClient.UpdateIngressGateway(ctx, details.IgDetails.BuildSdkIg)
 }
@@ -89,7 +89,7 @@ func (m *ResourceManager) ChangeCompartment(ctx context.Context, object client.O
 	if err != nil {
 		return err
 	}
-	m.log.InfoLog("Moving IngressGateway to new compartment", "Name", object.GetName())
+	m.log.InfoLogWithFixedMessage(ctx, "Moving IngressGateway to new compartment", "Name", object.GetName())
 	// sdkIngressGateway state would be Active here, hence update the state to updating for correct status
 	details.IgDetails.SdkIg.LifecycleState = sdk.IngressGatewayLifecycleStateUpdating
 	return m.serviceMeshClient.ChangeIngressGatewayCompartment(ctx, &ingressGateway.Status.IngressGatewayId, &ingressGateway.Spec.CompartmentId)
@@ -103,7 +103,7 @@ func (m *ResourceManager) DeleteResource(ctx context.Context, object client.Obje
 	if len(ingressGateway.Status.IngressGatewayId) == 0 {
 		return nil
 	}
-	m.log.InfoLog("Deleting ingress gateway", "Name", object.GetName())
+	m.log.InfoLogWithFixedMessage(ctx, "Deleting ingress gateway", "Name", object.GetName())
 	return m.serviceMeshClient.DeleteIngressGateway(ctx, &ingressGateway.Status.IngressGatewayId)
 }
 
@@ -255,7 +255,7 @@ func (m *ResourceManager) hasIngressGatewayDeployments(ctx context.Context, ingr
 	igdList := &servicemeshapi.IngressGatewayDeploymentList{}
 
 	if err := m.client.List(ctx, igdList); err != nil {
-		m.log.InfoLog("unable to list ingressGatewayDeployments associated with ingressGateway", "name", ingressGateway.Name, "namespace", ingressGateway.Namespace)
+		m.log.InfoLogWithFixedMessage(ctx, "unable to list ingressGatewayDeployments associated with ingressGateway", "name", ingressGateway.Name, "namespace", ingressGateway.Namespace)
 		return false, err
 	}
 
@@ -272,7 +272,7 @@ func (m *ResourceManager) hasIngressGatewayRouteTables(ctx context.Context, ig *
 	igrtList := &servicemeshapi.IngressGatewayRouteTableList{}
 
 	if err := m.client.List(ctx, igrtList); err != nil {
-		m.log.InfoLog("unable to list ingressGatewayRouteTables for ingressGateway", "name", ig.Name, "namespace", ig.Namespace)
+		m.log.InfoLogWithFixedMessage(ctx, "unable to list ingressGatewayRouteTables for ingressGateway", "name", ig.Name, "namespace", ig.Namespace)
 		return false, err
 	}
 
@@ -290,7 +290,7 @@ func (m *ResourceManager) hasAccessPolicies(ctx context.Context, ingressGateway 
 	apList := &servicemeshapi.AccessPolicyList{}
 
 	if err := m.client.List(ctx, apList); err != nil {
-		m.log.InfoLog("unable to list accessPolicies for ingressGateway", "name", ingressGateway.Name, "namespace", ingressGateway.Namespace)
+		m.log.InfoLogWithFixedMessage(ctx, "unable to list accessPolicies for ingressGateway", "name", ingressGateway.Name, "namespace", ingressGateway.Namespace)
 		return false, err
 	}
 
@@ -313,4 +313,8 @@ func getIngressGateway(object client.Object) (*servicemeshapi.IngressGateway, er
 		return nil, errors.New("object is not an ingress gateway")
 	}
 	return ingressGateway, nil
+}
+
+func (m *ResourceManager) HasSdk(details *manager.ResourceDetails) bool {
+	return details.IgDetails.SdkIg != nil
 }

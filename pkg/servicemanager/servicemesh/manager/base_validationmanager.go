@@ -49,15 +49,15 @@ func (c *BaseValidator) Handle(ctx context.Context, req admission.Request) admis
 	case v1.Create:
 		err := c.Decoder.Decode(req, object)
 		if err != nil {
-			c.Log.ErrorLog(err, "Failed to decode create request")
-			c.Metrics.AddCRDeleteFaultMetrics(object.GetObjectKind().GroupVersionKind().Kind,
+			c.Log.ErrorLogWithFixedMessage(ctx, err, "Failed to decode create request")
+			c.Metrics.AddCRDeleteFaultMetrics(ctx, object.GetObjectKind().GroupVersionKind().Kind,
 				"Failed to decode create request", req.Name, req.Namespace)
 			c.Recorder.Event(object, corev1.EventTypeWarning, "Failed", "Failed to decode create request")
 			return admission.Errored(http.StatusBadRequest, err)
 		}
 		admissionResponse := c.ValidationManager.ValidateCreateRequest(ctx, object)
 		if !admissionResponse.Allowed {
-			c.Metrics.AddCRDeleteFaultMetrics(object.GetObjectKind().GroupVersionKind().Kind,
+			c.Metrics.AddCRDeleteFaultMetrics(ctx, object.GetObjectKind().GroupVersionKind().Kind,
 				"Failed to validate create request", req.Name, req.Namespace)
 			c.Recorder.Event(object, corev1.EventTypeWarning, "Failed", "Failed to validate create request")
 		}
@@ -65,8 +65,8 @@ func (c *BaseValidator) Handle(ctx context.Context, req admission.Request) admis
 	case v1.Update:
 		err := c.Decoder.Decode(req, object)
 		if err != nil {
-			c.Log.ErrorLog(err, "Failed to update existing request")
-			c.Metrics.AddCRDeleteFaultMetrics(object.GetObjectKind().GroupVersionKind().Kind,
+			c.Log.ErrorLogWithFixedMessage(ctx, err, "Failed to update existing request")
+			c.Metrics.AddCRDeleteFaultMetrics(ctx, object.GetObjectKind().GroupVersionKind().Kind,
 				"Failed to update existing request", req.Name, req.Namespace)
 			c.Recorder.Event(object, corev1.EventTypeWarning, "Failed", "Failed to update existing request")
 			return admission.Errored(http.StatusBadRequest, err)
@@ -74,15 +74,15 @@ func (c *BaseValidator) Handle(ctx context.Context, req admission.Request) admis
 		oldObject := c.ValidationManager.GetObject()
 		err = c.Decoder.DecodeRaw(req.OldObject, oldObject)
 		if err != nil {
-			c.Log.ErrorLog(err, "Failed to decode update request")
-			c.Metrics.AddCRDeleteFaultMetrics(object.GetObjectKind().GroupVersionKind().Kind,
+			c.Log.ErrorLogWithFixedMessage(ctx, err, "Failed to decode update request")
+			c.Metrics.AddCRDeleteFaultMetrics(ctx, object.GetObjectKind().GroupVersionKind().Kind,
 				"Failed to decode update request", req.Name, req.Namespace)
 			c.Recorder.Event(object, corev1.EventTypeWarning, "Failed", "Failed to decode update request")
 			return admission.Errored(http.StatusBadRequest, err)
 		}
 		admissionResponse := c.ValidationManager.ValidateUpdateRequest(ctx, object, oldObject)
 		if !admissionResponse.Allowed {
-			c.Metrics.AddCRDeleteFaultMetrics(object.GetObjectKind().GroupVersionKind().Kind,
+			c.Metrics.AddCRDeleteFaultMetrics(ctx, object.GetObjectKind().GroupVersionKind().Kind,
 				"Failed to validate update request", req.Name, req.Namespace)
 			c.Recorder.Event(object, corev1.EventTypeWarning, "Failed", "Failed to validate update request")
 		}
@@ -90,21 +90,21 @@ func (c *BaseValidator) Handle(ctx context.Context, req admission.Request) admis
 	case v1.Delete:
 		if err := c.Client.Get(ctx, types.NamespacedName{Namespace: req.Namespace, Name: req.Name}, object); err != nil {
 			if k8Errors.IsNotFound(err) {
-				c.Log.ErrorLog(err, "Failed to find the required object")
-				c.Metrics.AddCRDeleteFaultMetrics(object.GetObjectKind().GroupVersionKind().Kind,
+				c.Log.ErrorLogWithFixedMessage(ctx, err, "Failed to find the required object")
+				c.Metrics.AddCRDeleteFaultMetrics(ctx, object.GetObjectKind().GroupVersionKind().Kind,
 					"Failed to find the required object", req.Name, req.Namespace)
 				c.Recorder.Event(object, corev1.EventTypeWarning, "Failed", "Failed to find the required object")
 				return admission.Errored(http.StatusBadRequest, errors.New("resource not found"))
 			}
-			c.Log.ErrorLog(err, "Failed to get required object")
-			c.Metrics.AddCRDeleteFaultMetrics(object.GetObjectKind().GroupVersionKind().Kind,
+			c.Log.ErrorLogWithFixedMessage(ctx, err, "Failed to get required object")
+			c.Metrics.AddCRDeleteFaultMetrics(ctx, object.GetObjectKind().GroupVersionKind().Kind,
 				"Failed to get required object", req.Name, req.Namespace)
 			c.Recorder.Event(object, corev1.EventTypeWarning, "Failed", "Failed to get required object")
 			return admission.Errored(http.StatusBadRequest, err)
 		}
 		admissionResponse := c.ValidationManager.ValidateDeleteRequest(ctx, object)
 		if !admissionResponse.Allowed {
-			c.Metrics.AddCRDeleteFaultMetrics(object.GetObjectKind().GroupVersionKind().Kind,
+			c.Metrics.AddCRDeleteFaultMetrics(ctx, object.GetObjectKind().GroupVersionKind().Kind,
 				"Failed to validate delete request", req.Name, req.Namespace)
 			c.Recorder.Event(object, corev1.EventTypeWarning, "Failed", "Failed to validate delete request")
 		}

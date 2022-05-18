@@ -9,18 +9,18 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"net/http"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"strings"
 
 	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/k8s/inject"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/commons"
 
-	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 
 	customCache "github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/k8s/cache"
@@ -58,7 +58,11 @@ func NewDefaultPodMutatorHandler(
 //+kubebuilder:rbac:groups="",resources=configmaps/status,verbs=get;update;patch
 
 func (p *PodMutatorHandler) Handle(ctx context.Context, req admission.Request) admission.Response {
-	var logger = logf.Log.WithValues("podMutator", req.Namespace)
+	var logger = loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("podMutator").WithName(req.Namespace)}
+	fixedLogMap := make(map[string]string)
+	fixedLogMap["name"] = req.Name
+	fixedLogMap["namespace"] = req.Namespace
+	ctx = context.WithValue(ctx, loggerutil.FixedLogMapCtxKey, fixedLogMap)
 	pod := &corev1.Pod{}
 	err := p.decoder.Decode(req, pod)
 	if err != nil {
@@ -71,7 +75,7 @@ func (p *PodMutatorHandler) Handle(ctx context.Context, req admission.Request) a
 	// Fetch Namespace from Cache
 	namespace, keyerr := p.Caches.GetNamespaceByKey(req.Namespace)
 	if keyerr != nil {
-		logger.Error(err, "Failed to fetch namespace")
+		logger.ErrorLogWithFixedMessage(ctx, err, "Failed to fetch namespace")
 		return admission.Errored(http.StatusInternalServerError, keyerr)
 	}
 
@@ -87,7 +91,7 @@ func (p *PodMutatorHandler) Handle(ctx context.Context, req admission.Request) a
 
 	virtualDeploymentBindingList, err := virtualDeploymentBindingUtil.ListVDB(ctx, p.directReader)
 	if err != nil {
-		logger.Error(err, "Error in listing virtualDeploymentBinding")
+		logger.ErrorLogWithFixedMessage(ctx, err, "Error in listing virtualDeploymentBinding")
 		return admission.Errored(http.StatusInternalServerError, err)
 	}
 
@@ -95,21 +99,23 @@ func (p *PodMutatorHandler) Handle(ctx context.Context, req admission.Request) a
 	matchingVDB := podUtil.GetVDBForPod(ctx, p.directReader, pod, virtualDeploymentBindingList)
 
 	if matchingVDB == nil {
-		logger.Info("Pod did not match Virtual Deployment Binding for side car injection")
+		logger.InfoLogWithFixedMessage(ctx, "Pod did not match Virtual Deployment Binding for side car injection")
 		return admission.Allowed("Pod did not match Virtual Deployment Binding for side car injection")
 	}
-	logger = logger.WithValues("virtualDeploymentBindingName", matchingVDB.Name)
+	fixedLogMap["virtualDeploymentBindingName"] = matchingVDB.Name
+	ctx = context.WithValue(ctx, loggerutil.FixedLogMapCtxKey, fixedLogMap)
 
 	if !virtualDeploymentBindingUtil.IsVirtualDeploymentBindingActive(matchingVDB) {
-		logger.Info("Virtual Deployment Binding with name = %s namespace = %s is not active", matchingVDB.Name, matchingVDB.Namespace)
+		logger.InfoLogWithFixedMessage(ctx, "Virtual Deployment Binding with name = %s namespace = %s is not active", matchingVDB.Name, matchingVDB.Namespace)
 		return admission.Allowed("Virtual Deployment Binding is not active yet")
 	}
 
-	logger = logger.WithValues("virtualDeploymentId", matchingVDB.Status.VirtualDeploymentId)
+	fixedLogMap["virtualDeploymentId"] = string(matchingVDB.Status.VirtualDeploymentId)
+	ctx = context.WithValue(ctx, loggerutil.FixedLogMapCtxKey, fixedLogMap)
 	// Fetch latest global Config to inject init and side car containers
 	configMap, keyerr := p.Caches.GetConfigMapByKey(p.configMap)
 	if keyerr != nil {
-		logger.Error(keyerr, "Failed to fetch configmap")
+		logger.ErrorLogWithFixedMessage(ctx, keyerr, "Failed to fetch configmap")
 		return admission.Errored(http.StatusInternalServerError, keyerr)
 	}
 
@@ -118,7 +124,7 @@ func (p *PodMutatorHandler) Handle(ctx context.Context, req admission.Request) a
 	mutateHandler := inject.NewMutateHandler(configMap, *matchingVDB)
 	err = mutateHandler.Inject(pod)
 	if err != nil {
-		logger.Error(err, "Failed to mutate pod")
+		logger.ErrorLogWithFixedMessage(ctx, err, "Failed to mutate pod")
 		return admission.Errored(http.StatusInternalServerError, err)
 	}
 
@@ -131,11 +137,11 @@ func (p *PodMutatorHandler) Handle(ctx context.Context, req admission.Request) a
 
 	marshaledPod, err := json.Marshal(pod)
 	if err != nil {
-		logger.Error(err, "Failed to serialize pod operations")
+		logger.ErrorLogWithFixedMessage(ctx, err, "Failed to serialize pod operations")
 		return admission.Errored(http.StatusInternalServerError, err)
 
 	}
-	logger.Info("Side car Injected successfully")
+	logger.InfoLogWithFixedMessage(ctx, "Side car Injected successfully")
 	// Create Patch from request and mutated pod
 	return admission.PatchResponseFromRaw(req.Object.Raw, marshaledPod)
 }
@@ -147,17 +153,17 @@ func (p *PodMutatorHandler) InjectDecoder(d *admission.Decoder) error {
 
 // mutateAllHttpProbes rotates on all containers and mutates all HttpProbes
 // s.a: Startup, Readiness and Liveness by using method 'mutateProbe'
-func mutateAllHttpProbes(pod *corev1.Pod, logger logr.Logger) {
-	logger.Info("Starting to mutate all HTTP Probes...")
+func mutateAllHttpProbes(pod *corev1.Pod, logger loggerutil.OSOKLogger) {
+	logger.InfoLog("Starting to mutate all HTTP Probes...")
 	for _, container := range pod.Spec.Containers {
 		if container.Name != commons.ProxyContainerName {
 			mutatedStartupProbe := mutateProbe(container.StartupProbe, "Startup", container.Ports, logger)
 			mutatedReadinessProbe := mutateProbe(container.ReadinessProbe, "Readiness", container.Ports, logger)
 			mutatedLivenessProbe := mutateProbe(container.LivenessProbe, "Liveness", container.Ports, logger)
 			if mutatedStartupProbe || mutatedReadinessProbe || mutatedLivenessProbe {
-				logger.Info("Successfully mutated all Http Probes for '" + container.Name + "' container.")
+				logger.InfoLog("Successfully mutated all Http Probes for '" + container.Name + "' container.")
 			} else {
-				logger.Info("No Http Probes were found for '" + container.Name + "' container.")
+				logger.InfoLog("No Http Probes were found for '" + container.Name + "' container.")
 			}
 		}
 	}
@@ -165,10 +171,10 @@ func mutateAllHttpProbes(pod *corev1.Pod, logger logr.Logger) {
 
 // mutateProbe preserves the http components (scheme, host, port, path) and appends
 // them to the http headers, and points the probe to the health proxy endpoint
-func mutateProbe(probe *corev1.Probe, probeName string, containerPorts []corev1.ContainerPort, logger logr.Logger) bool {
-	logger.Info("Mutating " + probeName + " probe...")
+func mutateProbe(probe *corev1.Probe, probeName string, containerPorts []corev1.ContainerPort, logger loggerutil.OSOKLogger) bool {
+	logger.InfoLog("Mutating " + probeName + " probe...")
 	if probe == nil || probe.HTTPGet == nil {
-		logger.Info("No HTTPGet " + probeName + " probe was found.")
+		logger.InfoLog("No HTTPGet " + probeName + " probe was found.")
 		return false
 	}
 
