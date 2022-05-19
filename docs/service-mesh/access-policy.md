@@ -28,32 +28,89 @@ The Complete Specification of the `AccessPolicy` Custom Resource (CR) is as deta
 
 | Parameter                          | Description                                                         | Type   | Mandatory |
 | ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
-| `spec.Name` | The user-friendly name for the AccessPolicy. The name has to be unique within the same mesh. | string | yes       |
+| `spec.name` | The user-friendly name for the AccessPolicy. The name has to be unique within the same mesh. | string | no       |
 | `spec.compartmentId` | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment of the AccessPolicy. | string | yes       |
-| `spec.description` | Access policies enable administrators to restrict the access of certain services.  | string | no       |
-| `spec.mesh.RefOrId` | The ResourceRef(name,namespace of mesh)/Name of the service mesh in which this access policy is created.  | struct | yes       |
-| `spec.rules.action`| An enum to specify whether access is `ALLOW` or `DENY` | enum    | yes       |
-| `spec.rules.source`| Source resource such as `ALL_VIRTUAL_SERVICES`,`VIRTUAL_SERVICE`, `EXTERNAL_SERVICE` or `INGRESS_GATEWAY`  | struct    | yes       |
-| `spec.rules.destination`| Destination resource such as `ALL_VIRTUAL_SERVICES`, `VIRTUAL_SERVICE`, `EXTERNAL_SERVICE`, `INGRESS_GATEWAY` | struct    | yes       |
+| `spec.description` | The description of the AccessPolicy.  | string | no       |
+| `spec.mesh` | The service mesh in which this access policy is created. Either `id` or `ref` should be provided. | [RefOrId](#reforid) | yes       |
+| `spec.rules`| A list of applicable rules. | [][AccessPolicyRule](#accesspolicyrule)    | no       |
 | `spec.freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see [Resource Tags](https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). `Example: {"Department": "Finance"}` | map[string]string  | no |
 | `spec.definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see [Resource Tags](https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). | map[string]map[string]string | no |
 
+### RefOrId
+| Parameter                          | Description                                                         | Type   | Mandatory |
+| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
+| `ref` | The reference of the resource. | [ResourceRef](#resourceref) | no       |
+| `id` | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the resource. | string | no       |
+
+### ResourceRef
+| Parameter                          | Description                                                         | Type   | Mandatory |
+| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
+| `namespace` | The namespace of the resource. By default, if namespace is not provided, it will use the current referring resource namespace.  | string | no       |
+| `name` | The name of the resource. | string | yes       |
+
+### AccessPolicyRule
+| Parameter                          | Description                                                         | Type   | Mandatory |
+| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
+| `action` | The namespace the service mesh in which this access policy is created. By default, if namespace is not provided, it will use the current resource namespace.  | string | yes       |
+| `source` | The source of the traffic this access policy applies to, one of `allVirtualServices`, `virtualService` or `ingressGateway` should be provided. | [TrafficTarget](#traffictarget) | yes       |
+| `destination` | The destination for the traffic this access policy applies to, one of `allVirtualServices`, `virtualService` or `externalService` should be provided. | [TrafficTarget](#traffictarget) | yes       |
+
+### TrafficTarget
+| Parameter                          | Description                                                         | Type   | Mandatory |
+| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
+| `allVirtualServices` | Access policy rule will apply to all virtual services.  | [AllVirtualServices](#allvirtualservices) | no       |
+| `virtualService` | Access policy rule will apply to target virtual service. | [RefOrId](#reforid) | no       |
+| `ingressGateway` | Access policy rule will apply to target ingress gateway. | [RefOrId](#reforid) | no       |
+| `externalService` | Access policy rule will apply to target external service. One of `tcpExternalService`, `httpExternalService` or `httpsExternalService` should be provided. | [ExternalService](#externalservice) |  no       |
+
+### AllVirtualServices
+| Parameter                          | Description                                                         | Type   | Mandatory |
+| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
+
+### ExternalService
+| Parameter                          | Description                                                         | Type   | Mandatory |
+| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
+| `tcpExternalService` | External service with TCP protocol.  | [TcpExternalService](#tcpexternalservice) | no       |
+| `httpExternalService` | External service with HTTP protocol. | [HttpExternalService](#httpexternalservice) | no       |
+| `httpsExternalService` | External service with HTTPS protocol. | [HttpsExternalService](#httpsexternalservice) | no       |
+
+### TcpExternalService
+| Parameter                          | Description                                                         | Type   | Mandatory |
+| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
+| `ipAddresses` | IpAddresses of the external service in CIDR notation.  | []string | yes       |
+| `ports` | Ports exposed by the external service. If left empty all ports will be allowed. | []int32 | no       |
+
+### HttpExternalService
+| Parameter                          | Description                                                         | Type   | Mandatory |
+| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
+| `hostnames` | Host names of the external service.  | []string | yes       |
+| `ports` | Ports exposed by the external service. If left empty all ports will be allowed. | []int32 | no       |
+
+### HttpsExternalService
+| Parameter                          | Description                                                         | Type   | Mandatory |
+| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
+| `hostnames` | Host names of the external service.  | []string | yes       |
+| `ports` | Ports exposed by the external service. If left empty all ports will be allowed. | []int32 | no       |
 
 ## Access Policy Status Parameters
 
 | Parameter                          | Description                                                         | Type   | Mandatory |
 | ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
-| `status.servicemeshstatus.meshId` | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of Mesh resources | string | yes       |
-| `spec.servicemeshstatus.accessPolicyId` | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Access Policy resource | string | yes       |
-| `spec.servicemeshstatus.Conditions.ServiceMeshConditionType` | Indicates status of the service mesh resource in the control-plane. Allowed values are [`ServiceMeshActive`, `ServiceMeshDependenciesActive`,`ServiceMeshConfigured`] | enum | yes       |
-| `spec.servicemeshstatus.Conditions.ResourceCondition.Status` | status of the condition, one of True, False, Unknown. | string | yes       |
-| `spec.servicemeshstatus.Conditions.ResourceCondition.ObservedGeneration` | observedGeneration represents the .metadata.generation that the condition was set based upon. For instance, if metadata.generation is currently 12, but the status.conditions[x].observedGeneration is 9, the condition is out of date with respect to the current state of the instance. | int | yes       |
-| `spec.servicemeshstatus.Conditions.ResourceCondition.LastTransitionTime` | lastTransitionTime is the last time the condition transitioned from one status to another. | struct | yes       |
-| `spec.servicemeshstatus.Conditions.ResourceCondition.Reason` | reason contains a programmatic identifier indicating the reason for the condition's last transition. | string | yes       |
-| `spec.servicemeshstatus.Conditions.ResourceCondition.Message` | message is a human readable message indicating details about the transition. | string | yes       |
-| `spec.servicemeshstatus.RefIdForRules` | Reference for Rules in mesh | []map[string] | yes       |
-| `spec.servicemeshstatus.LastUpdatedTime` | Time when resource was last updated in operator | time.Time     | no       |
+| `status.meshId` | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of Mesh resources | string | yes       |
+| `status.accessPolicyId` | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Access Policy resource | string | yes       |
+| `status.conditions` | Indicates the condition of the Service mesh resource | [][ServiceMeshCondition](#servicemeshcondition) | yes       |
+| `status.refIdForRules` | Reference for Rules in mesh | []map[string] | yes       |
+| `status.lastUpdatedTime` | Time when resource was last updated in operator | time.Time     | no       |
 
+### ServiceMeshCondition
+| Parameter                          | Description                                                         | Type   | Mandatory |
+| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
+| `type` | Indicates status of the service mesh resource in the control-plane. Allowed values are [`ServiceMeshActive`, `ServiceMeshDependenciesActive`,`ServiceMeshConfigured`] | enum | yes       |
+| `status` | status of the condition, one of True, False, Unknown. | string | yes       |
+| `observedGeneration` | observedGeneration represents the .metadata.generation that the condition was set based upon. For instance, if metadata.generation is currently 12, but the status.conditions[x].observedGeneration is 9, the condition is out of date with respect to the current state of the instance. | int | yes       |
+| `lastTransitionTime` | lastTransitionTime is the last time the condition transitioned from one status to another. | struct | yes       |
+| `reason` | reason contains a programmatic identifier indicating the reason for the condition's last transition. | string | yes       |
+| `message` | message is a human readable message indicating details about the transition. | string | yes       |
 
 ### Create Resource
 
@@ -71,14 +128,14 @@ spec:
     ref:
       name: <sample-mesh>
   rules:
-    - action: <action_type> [ALLOW,DENY]
+    - action: ALLOW
       source:
         virtualService:
           ref:
-            name: <vs-sample-page>
+            name: <sample-virtual-service>
       destination:
           allVirtualServices: {}
-    - action: <action_type> [ALLOW,DENY]
+    - action: ALLOW
       source:
         ingressGateway:
           ref:
@@ -86,7 +143,20 @@ spec:
       destination:
         virtualService:
           ref:
-            name: <vs-sample-page>
+            name: <sample-virtual-service>
+    - action: ALLOW
+      source:
+        virtualService:
+          ref:
+            name: <sample-virtual-service>
+      destination:
+        externalService:
+            httpsExternalService:
+                hostnames:
+                    - <sample-hostname>
+                ports:
+                    - <sample-port>
+      
   freeformTags:
     <KEY1>: <VALUE1>
   definedTags:
@@ -144,15 +214,15 @@ spec:
     ref:
       name: <updated-sample-mesh>
   rules:
-    - action: <action_type> [ALLOW,DENY]
+    - action: ALLOW
       source:
         virtualService:
           ref:
-            name: <updated-vs-sample-page>
+            name: <updated-virtual-service>
       destination:
         type:  
           allVirtualServices: {}
-    - action: <action_type> [ALLOW,DENY]
+    - action: ALLOW
       source:
         ingressGateway:
           ref:
@@ -160,7 +230,19 @@ spec:
       destination:
         virtualService:
           ref:
-            name: <updated-vs-sample-page>
+            name: <updated-virtual-service>
+    - action: ALLOW
+      source:
+        virtualService:
+          ref:
+            name: <updated-virtual-service>
+      destination:
+        externalService:
+            httpsExternalService:
+                hostnames:
+                    - <updated-hostname>
+                ports:
+                    - <updated-port>
 
 ```
 

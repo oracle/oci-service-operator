@@ -27,41 +27,79 @@ The Complete Specification of the `VirtualServiceRouteTable` Custom Resource (CR
 
 | Parameter                          | Description                                                         | Type   | Mandatory |
 | ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
-| `spec.Name` | The user-friendly name for the VirtualServiceRouteTable. The name has to be unique within the same Mesh. | string | yes       |
-| `spec.compartmentId` | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment of the VirtualServiceRouteTable. | string | yes       |
-| `spec.description` |  This field stores description of a particular VirtualServiceRouteTable  | string | no       |
-| `spec.VirtualService.RefOrId` | The ResourceRef(name,namespace of mesh)/Name of virtual service in which this virtual deployment is created.  | struct | yes       |
-| `spec.Priority` | The priority of the route table. A lower value means a higher priority. The routes are declared based on the priority. | int | no       |
-| `spec.RouteRules.VirtualServiceTrafficRouteRule.HttpVirtualServiceTrafficRouteRule.Destinations.VirtualDeployment.RefOrId` | The ResourceRef(name,namespace of mesh)/Name of VirtualDeployment to which routing is done  | struct | no       |
-| `spec.RouteRules.VirtualServiceTrafficRouteRule.HttpVirtualServiceTrafficRouteRule.Destinations.Weight` | Weight of routing destination  | int | no       |
-| `spec.RouteRules.VirtualServiceTrafficRouteRule.HttpVirtualServiceTrafficRouteRule.Destinations.Port` | Destination Service Port  | int | no       |
-| `spec.RouteRules.VirtualServiceTrafficRouteRule.HttpVirtualServiceTrafficRouteRule.Path` | Route to match | string | no       |
-| `spec.RouteRules.VirtualServiceTrafficRouteRule.HttpVirtualServiceTrafficRouteRule.IsGrpc` | If true, the rule will check that the content-type header has a application/grpc  | string | no       |
-| `spec.RouteRules.VirtualServiceTrafficRouteRule.HttpVirtualServiceTrafficRouteRule.PathType` | Match type for the route [PREFIX]   | enum | no       |
-| `spec.RouteRules.VirtualServiceTrafficRouteRule.TcpVirtualServiceTrafficRouteRule.Destinations.VirtualDeployment.RefOrId` | The ResourceRef(name,namespace of mesh)/Name of VirtualDeployment to which routing is done  | struct | no       |
-| `spec.RouteRules.VirtualServiceTrafficRouteRule.TcpVirtualServiceTrafficRouteRule.Destinations.Weight` | Weight of routing destination | int | no       |
-| `spec.RouteRules.VirtualServiceTrafficRouteRule.TcpVirtualServiceTrafficRouteRule.Destinations.Port` | Destination Service Port   | int | no       |
-| `spec.RouteRules.VirtualServiceTrafficRouteRule.TlsPassthroughVirtualServiceTrafficRouteRule.Destinations.VirtualDeployment.RefOrId` | The ResourceRef(name,namespace of mesh)/Name of VirtualDeployment to which routing is done  | struct | no       |
-| `spec.RouteRules.VirtualServiceTrafficRouteRule.TlsPassthroughVirtualServiceTrafficRouteRule.Destinations.Weight` | Weight of routing destination  | int | no       |
-| `spec.RouteRules.VirtualServiceTrafficRouteRule.TlsPassthroughVirtualServiceTrafficRouteRule.Destinations.Port` | Destination Service Port   | int | no       |
+| `spec.name` | The user-friendly name for the VirtualServiceRouteTable. The name has to be unique within the same Mesh. | string | no       |
+| `spec.compartmentId` | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment of the Virtual Service Route Table. | string | yes       |
+| `spec.description` | Description of the virtual service route table  | string | no       |
+| `spec.virtualService` | The Virtual Service in which this Virtual Service Route Table is created. Either `spec.virtualService.id` or `spec.virtualService.ref` should be provided. | [RefOrId](#reforid) | yes       |
+| `spec.priority` | The priority of the Virtual Service Route Table. A lower value means a higher priority. The routes are declared based on the priority. | int | no       |
+| `spec.routeRules` | A list of rules for routing incoming Virtual Service traffic to Virtual Deployments. A minimum of 1 rule must be specified. One of `httpRoute`, `tcpRoute` or `tlsPassthroughRoute` should be provided. | [][RouteRule](#routerule) | yes       |
 | `spec.freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see [Resource Tags](https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). `Example: {"Department": "Finance"}` | map[string]string  | no |
 | `spec.definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see [Resource Tags](https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). | map[string]map[string]string | no |
+
+### RefOrId
+| Parameter                          | Description                                                         | Type   | Mandatory |
+| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
+| `ref` | The reference of the resource. | [ResourceRef](#resourceref) | no       |
+| `id` | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the resource. | string | no       |
+
+### ResourceRef
+| Parameter                          | Description                                                         | Type   | Mandatory |
+| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
+| `namespace` | The namespace of the resource. By default, if namespace is not provided, it will use the current referring resource namespace.  | string | no       |
+| `name` | The name of the resource. | string | yes       |
+
+### RouteRule
+| Parameter                          | Description                                                         | Type   | Mandatory |
+| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
+| `httpRoute` | Rule for routing incoming Virtual Service traffic with HTTP protocol. | [HttpRoute](#httproute) | no       |
+| `tcpRoute` | Rule for routing incoming Virtual Service traffic with TCP protocol. | [TcpRoute](#tcproute) | no       |
+| `tlsPassthroughRoute` | Incoming encrypted traffic is passed "as is" to the application which manages TLS on its own. | [TlsPassthroughRoute](#tlspassthroughroute) | no       |
+
+### HttpRoute
+| Parameter                          | Description                                                         | Type   | Mandatory |
+| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
+| `destinations` | The destination of the request. At least 1 destination must be specified. | [][Destination](#destination) | yes       |
+| `isGrpc` | If true, the rule will check that the content-type header has a application/grpc or one of the various application/grpc+ values. | boolean | no       |
+| `path` | Http route to match. | string | no       |
+| `pathType` | Match type for the route. Only PREFIX is supported. | enum | no       |
+
+### TcpRoute
+| Parameter                          | Description                                                         | Type   | Mandatory |
+| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
+| `destinations` | The destination of the request. At least 1 destination must be specified. | [][Destination](#destination) | yes       |
+
+### TlsPassthroughRoute
+| Parameter                          | Description                                                         | Type   | Mandatory |
+| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
+| `destinations` | The destination of the request. At least 1 destination must be specified. | [][Destination](#destination) | yes       |
+
+### Destination
+| Parameter                          | Description                                                         | Type   | Mandatory |
+| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
+| `port` | Destination service port. | int | no       |
+| `virtualDeployment` | The Virtual Deployment for the target destination. Either `spec.virtualDeployment.id` or `spec.virtualDeployment.ref` should be provided. | [RefOrId](#reforid) | yes       |
+| `weight` | Weight of routing destination. Value can be 0 - 100 but sum of weight destinations should equal 100. | int | yes       |
 
 ## Virtual Service Route Table Status Parameters
 
 | Parameter                          | Description                                                         | Type   | Mandatory |
 | ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
-| `spec.servicemeshstatus.virtualServiceId` | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Virtual Service resource | string | yes       |
-| `spec.servicemeshstatus.virtualServiceName` | The name of the Virtual Service resource | string | yes       |
-| `spec.servicemeshstatus.virtualServiceRouteTableId` | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Virtual Service Route Table resource | string | yes       |
-| `spec.servicemeshstatus.Conditions.ServiceMeshConditionType` | Indicates status of the service mesh resource in the control-plane. Allowed values are [`ServiceMeshActive`, `ServiceMeshDependenciesActive`,`ServiceMeshConfigured`] | enum | yes       |
-| `spec.servicemeshstatus.Conditions.ResourceCondition.Status` | status of the condition, one of True, False, Unknown. | string | yes       |
-| `spec.servicemeshstatus.Conditions.ResourceCondition.ObservedGeneration` | observedGeneration represents the .metadata.generation that the condition was set based upon. For instance, if metadata.generation is currently 12, but the status.conditions[x].observedGeneration is 9, the condition is out of date with respect to the current state of the instance. | int | yes       |
-| `spec.servicemeshstatus.Conditions.ResourceCondition.LastTransitionTime` | lastTransitionTime is the last time the condition transitioned from one status to another. | struct | yes       |
-| `spec.servicemeshstatus.Conditions.ResourceCondition.Reason` | reason contains a programmatic identifier indicating the reason for the condition's last transition. | string | yes       |
-| `spec.servicemeshstatus.Conditions.ResourceCondition.Message` | message is a human readable message indicating details about the transition. | string | yes       |
-| `spec.servicemeshstatus.VirtualDeploymentIdForRules` | Reference for rules in virtual deployment | [][]string | yes       |
-| `spec.servicemeshstatus.LastUpdatedTime` | Time when resource was last updated in operator | time.Time | no       |
+| `status.virtualServiceId` | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Virtual Service resource | string | yes       |
+| `status.virtualServiceName` | The name of the Virtual Service resource | string | yes       |
+| `status.virtualServiceRouteTableId` | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Virtual Service Route Table resource | string | yes       |
+| `status.VirtualDeploymentIdForRules` | Reference for rules in virtual deployment | [][]string | yes       |
+| `status.conditions` | Indicates the condition of the Service mesh resource | [][ServiceMeshCondition](#servicemeshcondition) | yes       |
+| `status.LastUpdatedTime` | Time when resource was last updated in operator | time.Time | no       |
+
+### ServiceMeshCondition
+| Parameter                          | Description                                                         | Type   | Mandatory |
+| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
+| `type` | Indicates status of the service mesh resource in the control-plane. Allowed values are [`ServiceMeshActive`, `ServiceMeshDependenciesActive`,`ServiceMeshConfigured`] | enum | yes       |
+| `status` | status of the condition, one of True, False, Unknown. | string | yes       |
+| `observedGeneration` | observedGeneration represents the .metadata.generation that the condition was set based upon. For instance, if metadata.generation is currently 12, but the status.conditions[x].observedGeneration is 9, the condition is out of date with respect to the current state of the instance. | int | yes       |
+| `lastTransitionTime` | lastTransitionTime is the last time the condition transitioned from one status to another. | struct | yes       |
+| `reason` | reason contains a programmatic identifier indicating the reason for the condition's last transition. | string | yes       |
+| `message` | message is a human readable message indicating details about the transition. | string | yes       |
 
 
 ### Create Resource
