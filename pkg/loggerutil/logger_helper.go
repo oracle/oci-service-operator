@@ -6,9 +6,12 @@
 package loggerutil
 
 import (
+	"context"
 	"github.com/pkg/errors"
 	"strings"
 )
+
+const FixedLogMapCtxKey = LogMapCtxKey("fixedLogMap")
 
 func extractKeyValuePairs(keyValues []interface{}) (string, error) {
 
@@ -56,14 +59,19 @@ func finalMessageBuilder(message string, fixedMessage string, extraParameters st
 	return buildingMessage
 }
 
-func fixedMessageBuilder(ol *OSOKLogger) string {
+func fixedMessageBuilder(ctx context.Context) string {
+	if ctx != nil && ctx.Value(FixedLogMapCtxKey) != nil {
+		fixedLogMap, ok := ctx.Value(FixedLogMapCtxKey).(map[string]string)
+		if ok && len(fixedLogMap) != 0 {
+			fixedMessageArray := make([]string, 0, len(fixedLogMap))
 
-	fixedMessageArray := make([]string, 0, len(ol.FixedLogs))
+			for key, value := range fixedLogMap {
+				entry := key + ": " + value
+				fixedMessageArray = append(fixedMessageArray, entry)
+			}
 
-	for key, value := range ol.FixedLogs {
-		entry := key + ": " + value
-		fixedMessageArray = append(fixedMessageArray, entry)
+			return strings.Join(fixedMessageArray, " , ")
+		}
 	}
-
-	return strings.Join(fixedMessageArray, " , ")
+	return ""
 }

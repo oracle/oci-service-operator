@@ -57,7 +57,7 @@ func (c *KubeSecretClient) CreateSecret(ctx context.Context, secretName string, 
 		if err = c.Client.Create(ctx, newSecret); err != nil {
 			return false, err
 		}
-		c.Metrics.AddSecretCountMetrics("kubesecretclient", "New Secret got created", secretName, secretNamespace)
+		c.Metrics.AddSecretCountMetrics(ctx, "kubesecretclient", "New Secret got created", secretName, secretNamespace)
 		c.Log.InfoLog("Secret Created successfully", "Secret Name", newSecret.Name)
 		return true, nil
 	} else {

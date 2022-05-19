@@ -34,7 +34,7 @@ func BeforeSuite(t *testing.T) {
 	ctx = context.Background()
 	testFramework = framework.NewTestEnvClientFramework(t)
 	injectProxyResourceHandler = NewDefaultResourceHandler(testFramework.K8sClient,
-		loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("InjectProxyResourceHandler"), FixedLogs: make(map[string]string)},
+		loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("InjectProxyResourceHandler")},
 		testFramework.K8sClientset, commons.OsokNamespace)
 }
 
@@ -242,7 +242,7 @@ func TestInjectProxyReconcile(t *testing.T) {
 			for i := 0; i < times; i++ {
 				err = injectProxyResourceHandler.Reconcile(ctx, testProxyController.TestNamespace)
 				if err != nil {
-					_, err = merrors.HandleErrorAndRequeue(err, testFramework.Log)
+					_, err = merrors.HandleErrorAndRequeue(ctx, err, testFramework.Log)
 				}
 				if tt.args.DeletePDB && i == 0 {
 					if err != nil {

@@ -6,6 +6,7 @@
 package metrics
 
 import (
+	"context"
 	"fmt"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/prometheus/client_golang/prometheus"
@@ -94,62 +95,61 @@ func Init(serviceName string, log loggerutil.OSOKLogger) *Metrics {
 	}
 }
 
-func (m *Metrics) AddReconcileSuccessMetrics(component string, msg string, resourceName string, namespace string) {
-	m.Logger.FixedLogs["name"] = resourceName
-	m.Logger.FixedLogs["namespace"] = namespace
-	m.Logger.InfoLog(fmt.Sprintf("Recording the reconcile success metrics for %s", resourceName))
+func (m *Metrics) AddReconcileSuccessMetrics(ctx context.Context, component string, msg string, resourceName string, namespace string) {
+	ctx = AddFixedLogMapEntries(ctx, resourceName, namespace)
+	m.Logger.InfoLogWithFixedMessage(ctx, fmt.Sprintf("Recording the reconcile success metrics for %s", resourceName))
 	reconcileSuccess.WithLabelValues(component, resourceName, namespace, "Success", msg).Inc()
 }
 
-func (m *Metrics) AddReconcileFaultMetrics(component string, msg string, resourceName string, namespace string) {
-	m.Logger.FixedLogs["name"] = resourceName
-	m.Logger.FixedLogs["namespace"] = namespace
-	m.Logger.InfoLog(fmt.Sprintf("Recording the reconcile fault metrics for %s", resourceName))
+func (m *Metrics) AddReconcileFaultMetrics(ctx context.Context, component string, msg string, resourceName string, namespace string) {
+	ctx = AddFixedLogMapEntries(ctx, resourceName, namespace)
+	m.Logger.InfoLogWithFixedMessage(ctx, fmt.Sprintf("Recording the reconcile fault metrics for %s", resourceName))
 	reconcileFault.WithLabelValues(component, resourceName, namespace, "Fault", msg).Inc()
 }
 
-func (m *Metrics) AddCRSuccessMetrics(component string, msg string, resourceName string, namespace string) {
-	m.Logger.FixedLogs["name"] = resourceName
-	m.Logger.FixedLogs["namespace"] = namespace
-	m.Logger.InfoLog(fmt.Sprintf("Recording the cr success metrics for %s", resourceName))
+func (m *Metrics) AddCRSuccessMetrics(ctx context.Context, component string, msg string, resourceName string, namespace string) {
+	ctx = AddFixedLogMapEntries(ctx, resourceName, namespace)
+	m.Logger.InfoLogWithFixedMessage(ctx, fmt.Sprintf("Recording the cr success metrics for %s", resourceName))
 	crSuccessCounter.WithLabelValues(component, resourceName, namespace, "Success", msg).Inc()
 }
 
-func (m *Metrics) AddCRFaultMetrics(component string, msg string, resourceName string, namespace string) {
-	m.Logger.FixedLogs["name"] = resourceName
-	m.Logger.FixedLogs["namespace"] = namespace
-	m.Logger.InfoLog(fmt.Sprintf("Recording the cr fault metrics for %s", resourceName))
+func (m *Metrics) AddCRFaultMetrics(ctx context.Context, component string, msg string, resourceName string, namespace string) {
+	ctx = AddFixedLogMapEntries(ctx, resourceName, namespace)
+	m.Logger.InfoLogWithFixedMessage(ctx, fmt.Sprintf("Recording the cr fault metrics for %s", resourceName))
 	crFaultCounter.WithLabelValues(component, resourceName, namespace, "Fault", msg).Inc()
 }
 
-func (m *Metrics) AddCRDeleteFaultMetrics(component string, msg string, resourceName string, namespace string) {
-	m.Logger.FixedLogs["name"] = resourceName
-	m.Logger.FixedLogs["namespace"] = namespace
-	m.Logger.InfoLog(fmt.Sprintf("Recording the cr delete fault metrics for %s", resourceName))
+func (m *Metrics) AddCRDeleteFaultMetrics(ctx context.Context, component string, msg string, resourceName string, namespace string) {
+	ctx = AddFixedLogMapEntries(ctx, resourceName, namespace)
+	m.Logger.InfoLogWithFixedMessage(ctx, fmt.Sprintf("Recording the cr delete fault metrics for %s", resourceName))
 	crDeleteFaultCounter.WithLabelValues(component, resourceName, namespace, "Fault", msg).Inc()
 }
 
-func (m *Metrics) AddCRDeleteSuccessMetrics(component string, msg string, resourceName string, namespace string) {
-	m.Logger.FixedLogs["name"] = resourceName
-	m.Logger.FixedLogs["namespace"] = namespace
-	m.Logger.InfoLog(fmt.Sprintf("Recording the cr delete success metrics for %s", resourceName))
+func (m *Metrics) AddCRDeleteSuccessMetrics(ctx context.Context, component string, msg string, resourceName string, namespace string) {
+	ctx = AddFixedLogMapEntries(ctx, resourceName, namespace)
+	m.Logger.InfoLogWithFixedMessage(ctx, fmt.Sprintf("Recording the cr delete success metrics for %s", resourceName))
 	crDeleteSuccessCounter.WithLabelValues(component, resourceName, namespace, "Success", msg).Inc()
 }
 
-func (m *Metrics) AddCRCountMetrics(component string, msg string, resourceName string, namespace string) {
-	m.Logger.FixedLogs["name"] = resourceName
-	m.Logger.FixedLogs["namespace"] = namespace
-	m.Logger.InfoLog(fmt.Sprintf("Recording the cr count metrics for %s", resourceName))
+func (m *Metrics) AddCRCountMetrics(ctx context.Context, component string, msg string, resourceName string, namespace string) {
+	ctx = AddFixedLogMapEntries(ctx, resourceName, namespace)
+	m.Logger.InfoLogWithFixedMessage(ctx, fmt.Sprintf("Recording the cr count metrics for %s", resourceName))
 	crCountCounter.WithLabelValues(component, resourceName, namespace, "Success", msg).Inc()
 }
 
-func (m *Metrics) AddSecretCountMetrics(component string, msg string, resourceName string, namespace string) {
-	m.Logger.FixedLogs["name"] = resourceName
-	m.Logger.FixedLogs["namespace"] = namespace
-	m.Logger.InfoLog(fmt.Sprintf("Recording the secret count metrics for %s", resourceName))
+func (m *Metrics) AddSecretCountMetrics(ctx context.Context, component string, msg string, resourceName string, namespace string) {
+	ctx = AddFixedLogMapEntries(ctx, resourceName, namespace)
+	m.Logger.InfoLogWithFixedMessage(ctx, fmt.Sprintf("Recording the secret count metrics for %s", resourceName))
 	secretCounter.WithLabelValues(component, resourceName, namespace, "Success", msg).Inc()
 }
 
 func sendPresentEpcoh() string {
 	return strconv.FormatInt(time.Now().UnixNano()/1000000, 10)
+}
+
+func AddFixedLogMapEntries(ctx context.Context, name string, namespace string) context.Context {
+	fixedLogMap := make(map[string]string)
+	fixedLogMap["name"] = name
+	fixedLogMap["namespace"] = namespace
+	return context.WithValue(ctx, loggerutil.FixedLogMapCtxKey, fixedLogMap)
 }

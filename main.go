@@ -74,7 +74,7 @@ import (
 
 var (
 	scheme   = runtime.NewScheme()
-	setupLog = loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("setup"), FixedLogs: make(map[string]string)}
+	setupLog = loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("setup")}
 )
 
 func init() {
@@ -153,14 +153,14 @@ func main() {
 	}
 
 	if initOSOKResources {
-		util.InitOSOK(mgr.GetConfig(), loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("setup").WithName("initOSOK"), FixedLogs: make(map[string]string)})
+		util.InitOSOK(mgr.GetConfig(), loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("setup").WithName("initOSOK")})
 	}
 
 	setupLog.InfoLog("Getting the config details")
-	osokCfg := config.GetConfigDetails(loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("setup").WithName("config"), FixedLogs: make(map[string]string)})
+	osokCfg := config.GetConfigDetails(loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("setup").WithName("config")})
 
 	authConfigProvider := &authhelper.AuthConfigProvider{
-		Log: loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("setup").WithName("config"), FixedLogs: make(map[string]string)}}
+		Log: loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("setup").WithName("config")}}
 
 	provider, err := authConfigProvider.GetAuthProvider(osokCfg)
 	if err != nil {
@@ -168,20 +168,20 @@ func main() {
 		os.Exit(1)
 	}
 
-	metricsClient := metrics.Init("osok", loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("metrics"), FixedLogs: make(map[string]string)})
+	metricsClient := metrics.Init("osok", loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("metrics")})
 
 	credClient := &kubesecret.KubeSecretClient{
 		Client:  mgr.GetClient(),
-		Log:     loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("credential-helper").WithName("KubeSecretClient"), FixedLogs: make(map[string]string)},
+		Log:     loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("credential-helper").WithName("KubeSecretClient")},
 		Metrics: metricsClient,
 	}
 
 	if err = (&controllers.AutonomousDatabasesReconciler{
 		Reconciler: &core.BaseReconciler{
 			Client:             mgr.GetClient(),
-			OSOKServiceManager: adb.NewAdbServiceManager(provider, credClient, scheme, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("AutonomousDatabases"), FixedLogs: make(map[string]string)}),
+			OSOKServiceManager: adb.NewAdbServiceManager(provider, credClient, scheme, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("AutonomousDatabases")}),
 			Finalizer:          core.NewBaseFinalizer(mgr.GetClient(), ctrl.Log),
-			Log:                loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("AutonomousDatabases"), FixedLogs: make(map[string]string)},
+			Log:                loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("AutonomousDatabases")},
 			Metrics:            metricsClient,
 			Recorder:           mgr.GetEventRecorderFor("AutonomousDatabases"),
 			Scheme:             scheme,
@@ -198,10 +198,10 @@ func main() {
 	if err = (&controllers.StreamReconciler{
 		Reconciler: &core.BaseReconciler{
 			Client: mgr.GetClient(),
-			OSOKServiceManager: streams.NewStreamServiceManager(provider, credClient, scheme, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("Streams"), FixedLogs: make(map[string]string)},
+			OSOKServiceManager: streams.NewStreamServiceManager(provider, credClient, scheme, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("Streams")},
 				metricsClient),
 			Finalizer: core.NewBaseFinalizer(mgr.GetClient(), ctrl.Log),
-			Log:       loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("Streams"), FixedLogs: make(map[string]string)},
+			Log:       loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("Streams")},
 			Metrics:   metricsClient,
 			Recorder:  mgr.GetEventRecorderFor("Streams"),
 			Scheme:    scheme,
@@ -213,9 +213,9 @@ func main() {
 	if err = (&controllers.MySqlDBsystemReconciler{
 		Reconciler: &core.BaseReconciler{
 			Client:             mgr.GetClient(),
-			OSOKServiceManager: dbsystem.NewDbSystemServiceManager(provider, credClient, scheme, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("MySqlDbSystem"), FixedLogs: make(map[string]string)}),
+			OSOKServiceManager: dbsystem.NewDbSystemServiceManager(provider, credClient, scheme, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("MySqlDbSystem")}),
 			Finalizer:          core.NewBaseFinalizer(mgr.GetClient(), ctrl.Log),
-			Log:                loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("MySqlDbSystem"), FixedLogs: make(map[string]string)},
+			Log:                loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("MySqlDbSystem")},
 			Metrics:            metricsClient,
 			Recorder:           mgr.GetEventRecorderFor("MySqlDbSystem"),
 			Scheme:             scheme,
@@ -233,7 +233,7 @@ func main() {
 
 	updateMeshConfigmapResourceHandler := updateconfigmap.NewDefaultResourceHandler(mgr.GetClient(), serviceMeshClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Resource Handler").WithName("UpdateMeshConfigMap")})
 	if err = customControllers.NewUpdateConfigMapController(mgr.GetClient(), updateMeshConfigmapResourceHandler,
-		loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("UpdateConfigMap"), FixedLogs: make(map[string]string)}, operatorNamespace).SetupWithManager(mgr); err != nil {
+		loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("UpdateConfigMap")}, operatorNamespace).SetupWithManager(mgr); err != nil {
 		setupLog.ErrorLog(err, "unable to create controller", "controller", "UpdateConfigMap")
 		os.Exit(1)
 	}
@@ -248,14 +248,14 @@ func main() {
 	referenceResolver := references.NewDefaultResolver(mgr.GetClient(), serviceMeshClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("Resolver")}, meshCacheManager, mgr.GetAPIReader())
 	hookServer := mgr.GetWebhookServer()
 
-	meshResourceManager := mesh.NewMeshResourceManager(mgr.GetClient(), serviceMeshClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("Mesh"), FixedLogs: make(map[string]string)})
+	meshResourceManager := mesh.NewMeshResourceManager(mgr.GetClient(), serviceMeshClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("Mesh")})
 	meshServiceMeshManager := serviceMeshManager.NewServiceMeshServiceManager(mgr.GetClient(), loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("Mesh")}, meshResourceManager)
 	if err = (&servicemeshcontrollers.ServiceMeshReconciler{
 		Reconciler: &core.BaseReconciler{
 			Client:               mgr.GetClient(),
 			OSOKServiceManager:   meshServiceMeshManager,
 			Finalizer:            core.NewBaseFinalizer(mgr.GetClient(), ctrl.Log),
-			Log:                  loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("Mesh"), FixedLogs: make(map[string]string)},
+			Log:                  loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("Mesh")},
 			Metrics:              metricsClient,
 			Recorder:             mgr.GetEventRecorderFor("Mesh"),
 			Scheme:               scheme,
@@ -276,20 +276,20 @@ func main() {
 		&webhook.Admission{Handler: &serviceMeshManager.BaseValidator{
 			Client:            mgr.GetClient(),
 			Reader:            mgr.GetAPIReader(),
-			Log:               loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Validator").WithName("Mesh"), FixedLogs: make(map[string]string)},
+			Log:               loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Validator").WithName("Mesh")},
 			Metrics:           metricsClient,
 			Recorder:          mgr.GetEventRecorderFor("MeshValidator"),
 			ValidationManager: meshServiceValidationManager,
 		}})
 
-	virtualServiceResourceManager := virtualservice.NewVirtualServiceResourceManager(mgr.GetClient(), serviceMeshClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("VirtualService"), FixedLogs: make(map[string]string)}, referenceResolver)
+	virtualServiceResourceManager := virtualservice.NewVirtualServiceResourceManager(mgr.GetClient(), serviceMeshClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("VirtualService")}, referenceResolver)
 	virtualServiceServiceMeshManager := serviceMeshManager.NewServiceMeshServiceManager(mgr.GetClient(), loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("VirtualService")}, virtualServiceResourceManager)
 	if err = (&servicemeshcontrollers.ServiceMeshReconciler{
 		Reconciler: &core.BaseReconciler{
 			Client:               mgr.GetClient(),
 			OSOKServiceManager:   virtualServiceServiceMeshManager,
 			Finalizer:            core.NewBaseFinalizer(mgr.GetClient(), ctrl.Log),
-			Log:                  loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("VirtualService"), FixedLogs: make(map[string]string)},
+			Log:                  loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("VirtualService")},
 			Metrics:              metricsClient,
 			Recorder:             mgr.GetEventRecorderFor("VirtualService"),
 			Scheme:               scheme,
@@ -308,20 +308,20 @@ func main() {
 		&webhook.Admission{Handler: &serviceMeshManager.BaseValidator{
 			Reader:            mgr.GetAPIReader(),
 			Client:            mgr.GetClient(),
-			Log:               loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Validator").WithName("VirtualService"), FixedLogs: make(map[string]string)},
+			Log:               loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Validator").WithName("VirtualService")},
 			Metrics:           metricsClient,
 			Recorder:          mgr.GetEventRecorderFor("VirtualServiceValidator"),
 			ValidationManager: virtualServiceServiceValidationManager,
 		}})
 
-	virtualDeploymentResourceManager := virtualdeployment.NewVirtualDeploymentResourceManager(mgr.GetClient(), serviceMeshClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("VirtualService"), FixedLogs: make(map[string]string)}, referenceResolver)
+	virtualDeploymentResourceManager := virtualdeployment.NewVirtualDeploymentResourceManager(mgr.GetClient(), serviceMeshClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("VirtualService")}, referenceResolver)
 	virtualDeploymentServiceMeshManager := serviceMeshManager.NewServiceMeshServiceManager(mgr.GetClient(), loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("VirtualDeployment")}, virtualDeploymentResourceManager)
 	if err = (&servicemeshcontrollers.ServiceMeshReconciler{
 		Reconciler: &core.BaseReconciler{
 			Client:               mgr.GetClient(),
 			OSOKServiceManager:   virtualDeploymentServiceMeshManager,
 			Finalizer:            core.NewBaseFinalizer(mgr.GetClient(), ctrl.Log),
-			Log:                  loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("VirtualDeployment"), FixedLogs: make(map[string]string)},
+			Log:                  loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("VirtualDeployment")},
 			Metrics:              metricsClient,
 			Recorder:             mgr.GetEventRecorderFor("VirtualDeployment"),
 			Scheme:               scheme,
@@ -339,20 +339,20 @@ func main() {
 		&webhook.Admission{Handler: &serviceMeshManager.BaseValidator{
 			Reader:            mgr.GetAPIReader(),
 			Client:            mgr.GetClient(),
-			Log:               loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Validator").WithName("VirtualDeployment"), FixedLogs: make(map[string]string)},
+			Log:               loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Validator").WithName("VirtualDeployment")},
 			Metrics:           metricsClient,
 			Recorder:          mgr.GetEventRecorderFor("VirtualDeploymentValidator"),
 			ValidationManager: virtualDeploymentServiceValidationManager,
 		}})
 
-	virtualServiceRouteTableResourceManager := virtualserviceroutetable.NewVirtualServiceRouteTableResourceManager(mgr.GetClient(), serviceMeshClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("VirtualServiceRouteTable"), FixedLogs: make(map[string]string)}, referenceResolver)
+	virtualServiceRouteTableResourceManager := virtualserviceroutetable.NewVirtualServiceRouteTableResourceManager(mgr.GetClient(), serviceMeshClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("VirtualServiceRouteTable")}, referenceResolver)
 	virtualServiceRouteTableServiceMeshManager := serviceMeshManager.NewServiceMeshServiceManager(mgr.GetClient(), loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("VirtualServiceRouteTable")}, virtualServiceRouteTableResourceManager)
 	if err = (&servicemeshcontrollers.ServiceMeshReconciler{
 		Reconciler: &core.BaseReconciler{
 			Client:               mgr.GetClient(),
 			OSOKServiceManager:   virtualServiceRouteTableServiceMeshManager,
 			Finalizer:            core.NewBaseFinalizer(mgr.GetClient(), ctrl.Log),
-			Log:                  loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("VirtualServiceRouteTable"), FixedLogs: make(map[string]string)},
+			Log:                  loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("VirtualServiceRouteTable")},
 			Metrics:              metricsClient,
 			Recorder:             mgr.GetEventRecorderFor("VirtualServiceRouteTable"),
 			Scheme:               scheme,
@@ -370,20 +370,20 @@ func main() {
 		&webhook.Admission{Handler: &serviceMeshManager.BaseValidator{
 			Reader:            mgr.GetAPIReader(),
 			Client:            mgr.GetClient(),
-			Log:               loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Validator").WithName("VirtualServiceRouteTable"), FixedLogs: make(map[string]string)},
+			Log:               loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Validator").WithName("VirtualServiceRouteTable")},
 			Metrics:           metricsClient,
 			Recorder:          mgr.GetEventRecorderFor("VirtualServiceRouteTableValidator"),
 			ValidationManager: virtualServiceRouteTableServiceValidationManager,
 		}})
 
-	accessPolicyResourceManager := accessPolicy.NewAccessPolicyResourceManager(mgr.GetClient(), serviceMeshClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("AccessPolicy"), FixedLogs: make(map[string]string)}, referenceResolver)
+	accessPolicyResourceManager := accessPolicy.NewAccessPolicyResourceManager(mgr.GetClient(), serviceMeshClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("AccessPolicy")}, referenceResolver)
 	accessPolicyServiceMeshManager := serviceMeshManager.NewServiceMeshServiceManager(mgr.GetClient(), loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("AccessPolicy")}, accessPolicyResourceManager)
 	if err = (&servicemeshcontrollers.ServiceMeshReconciler{
 		Reconciler: &core.BaseReconciler{
 			Client:               mgr.GetClient(),
 			OSOKServiceManager:   accessPolicyServiceMeshManager,
 			Finalizer:            core.NewBaseFinalizer(mgr.GetClient(), ctrl.Log),
-			Log:                  loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("AccessPolicy"), FixedLogs: make(map[string]string)},
+			Log:                  loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("AccessPolicy")},
 			Metrics:              metricsClient,
 			Recorder:             mgr.GetEventRecorderFor("AccessPolicy"),
 			Scheme:               scheme,
@@ -401,20 +401,20 @@ func main() {
 		&webhook.Admission{Handler: &serviceMeshManager.BaseValidator{
 			Reader:            mgr.GetAPIReader(),
 			Client:            mgr.GetClient(),
-			Log:               loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Validator").WithName("AccessPolicy"), FixedLogs: make(map[string]string)},
+			Log:               loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Validator").WithName("AccessPolicy")},
 			Metrics:           metricsClient,
 			Recorder:          mgr.GetEventRecorderFor("AccessPolicyValidator"),
 			ValidationManager: accessPolicyServiceValidationManager,
 		}})
 
-	ingressGatewayResourceManager := ingressgateway.NewIngressGatewayResourceManager(mgr.GetClient(), serviceMeshClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("IngressGateway"), FixedLogs: make(map[string]string)}, referenceResolver)
+	ingressGatewayResourceManager := ingressgateway.NewIngressGatewayResourceManager(mgr.GetClient(), serviceMeshClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("IngressGateway")}, referenceResolver)
 	ingressGatewayServiceMeshManager := serviceMeshManager.NewServiceMeshServiceManager(mgr.GetClient(), loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("IngressGateway")}, ingressGatewayResourceManager)
 	if err = (&servicemeshcontrollers.ServiceMeshReconciler{
 		Reconciler: &core.BaseReconciler{
 			Client:               mgr.GetClient(),
 			OSOKServiceManager:   ingressGatewayServiceMeshManager,
 			Finalizer:            core.NewBaseFinalizer(mgr.GetClient(), ctrl.Log),
-			Log:                  loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("IngressGateway"), FixedLogs: make(map[string]string)},
+			Log:                  loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("IngressGateway")},
 			Metrics:              metricsClient,
 			Recorder:             mgr.GetEventRecorderFor("IngressGateway"),
 			Scheme:               scheme,
@@ -432,19 +432,19 @@ func main() {
 		&webhook.Admission{Handler: &serviceMeshManager.BaseValidator{
 			Reader:            mgr.GetAPIReader(),
 			Client:            mgr.GetClient(),
-			Log:               loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Validator").WithName("IngressGateway"), FixedLogs: make(map[string]string)},
+			Log:               loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Validator").WithName("IngressGateway")},
 			Metrics:           metricsClient,
 			Recorder:          mgr.GetEventRecorderFor("IngressGatewayValidator"),
 			ValidationManager: ingressGatewayServiceValidationManager,
 		}})
 
-	virtualDeploymentBindingResourceManager := virtualdeploymentbinding.NewVirtualDeploymentBindingServiceManager(mgr.GetClient(), loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("VirtualDeploymentBinding"), FixedLogs: make(map[string]string)}, clientset, referenceResolver, serviceMeshClient)
+	virtualDeploymentBindingResourceManager := virtualdeploymentbinding.NewVirtualDeploymentBindingServiceManager(mgr.GetClient(), loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("VirtualDeploymentBinding")}, clientset, referenceResolver, serviceMeshClient)
 	if err = (&servicemeshcontrollers.ServiceMeshReconciler{
 		Reconciler: &core.BaseReconciler{
 			Client:               mgr.GetClient(),
 			OSOKServiceManager:   virtualDeploymentBindingResourceManager,
 			Finalizer:            core.NewBaseFinalizer(mgr.GetClient(), ctrl.Log),
-			Log:                  loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("VirtualDeploymentBinding"), FixedLogs: make(map[string]string)},
+			Log:                  loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("VirtualDeploymentBinding")},
 			Metrics:              metricsClient,
 			Recorder:             mgr.GetEventRecorderFor("VirtualDeploymentBinding"),
 			Scheme:               scheme,
@@ -462,20 +462,20 @@ func main() {
 		&webhook.Admission{Handler: &serviceMeshManager.BaseValidator{
 			Reader:            mgr.GetAPIReader(),
 			Client:            mgr.GetClient(),
-			Log:               loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Validator").WithName("VirtualDeploymentBinding"), FixedLogs: make(map[string]string)},
+			Log:               loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Validator").WithName("VirtualDeploymentBinding")},
 			Metrics:           metricsClient,
 			Recorder:          mgr.GetEventRecorderFor("VirtualDeploymentBinding"),
 			ValidationManager: virtualDeploymentBindingServiceValidationManager,
 		}})
 
-	ingressGatewayRouteTableResourceManager := ingressgatewayroutetable.NewIngressGatewayRouteTableResourceManager(mgr.GetClient(), serviceMeshClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("IngressGatewayRouteTable"), FixedLogs: make(map[string]string)}, referenceResolver)
+	ingressGatewayRouteTableResourceManager := ingressgatewayroutetable.NewIngressGatewayRouteTableResourceManager(mgr.GetClient(), serviceMeshClient, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("IngressGatewayRouteTable")}, referenceResolver)
 	ingressGatewayRouteTableServiceMeshManager := serviceMeshManager.NewServiceMeshServiceManager(mgr.GetClient(), loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("IngressGatewayRouteTable")}, ingressGatewayRouteTableResourceManager)
 	if err = (&servicemeshcontrollers.ServiceMeshReconciler{
 		Reconciler: &core.BaseReconciler{
 			Client:               mgr.GetClient(),
 			OSOKServiceManager:   ingressGatewayRouteTableServiceMeshManager,
 			Finalizer:            core.NewBaseFinalizer(mgr.GetClient(), ctrl.Log),
-			Log:                  loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("IngressGatewayRouteTable"), FixedLogs: make(map[string]string)},
+			Log:                  loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("IngressGatewayRouteTable")},
 			Metrics:              metricsClient,
 			Recorder:             mgr.GetEventRecorderFor("IngressGatewayRouteTable"),
 			Scheme:               scheme,
@@ -493,7 +493,7 @@ func main() {
 		&webhook.Admission{Handler: &serviceMeshManager.BaseValidator{
 			Reader:            mgr.GetAPIReader(),
 			Client:            mgr.GetClient(),
-			Log:               loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Validator").WithName("IngressGatewayRouteTable"), FixedLogs: make(map[string]string)},
+			Log:               loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Validator").WithName("IngressGatewayRouteTable")},
 			Metrics:           metricsClient,
 			Recorder:          mgr.GetEventRecorderFor("IngressGatewayRouteTableValidator"),
 			ValidationManager: ingressGatewayRouteTableServiceValidationManager,
@@ -509,13 +509,13 @@ func main() {
 			EventHandler: enqueueRequestsForConfigmapEvents,
 		},
 	}
-	ingressGatewayDeploymentResourceManager := ingressgatewaydeployment.NewIngressGatewayDeploymentServiceManager(mgr.GetClient(), loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("IngressGatewayDeployment"), FixedLogs: make(map[string]string)}, clientset, referenceResolver, meshCacheManager, operatorNamespace)
+	ingressGatewayDeploymentResourceManager := ingressgatewaydeployment.NewIngressGatewayDeploymentServiceManager(mgr.GetClient(), loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("IngressGatewayDeployment")}, clientset, referenceResolver, meshCacheManager, operatorNamespace)
 	if err = (&servicemeshcontrollers.ServiceMeshReconciler{
 		Reconciler: &core.BaseReconciler{
 			Client:               mgr.GetClient(),
 			OSOKServiceManager:   ingressGatewayDeploymentResourceManager,
 			Finalizer:            core.NewBaseFinalizer(mgr.GetClient(), ctrl.Log),
-			Log:                  loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("IngressGatewayDeployment"), FixedLogs: make(map[string]string)},
+			Log:                  loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("IngressGatewayDeployment")},
 			Metrics:              metricsClient,
 			Recorder:             mgr.GetEventRecorderFor("IngressGatewayDeployment"),
 			Scheme:               scheme,
@@ -534,35 +534,35 @@ func main() {
 		&webhook.Admission{Handler: &serviceMeshManager.BaseValidator{
 			Reader:            mgr.GetAPIReader(),
 			Client:            mgr.GetClient(),
-			Log:               loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Validator").WithName("IngressGatewayDeployment"), FixedLogs: make(map[string]string)},
+			Log:               loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Validator").WithName("IngressGatewayDeployment")},
 			Metrics:           metricsClient,
 			Recorder:          mgr.GetEventRecorderFor("IngressGatewayDeployment"),
 			ValidationManager: ingressGatewayDeploymentServiceValidationManager,
 		}})
 
-	serviceUpdateResourceHandler := serviceupdate.NewDefaultResourceHandler(mgr.GetClient(), loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Resource Handler").WithName("Services"), FixedLogs: make(map[string]string)}, clientset)
+	serviceUpdateResourceHandler := serviceupdate.NewDefaultResourceHandler(mgr.GetClient(), loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Resource Handler").WithName("Services")}, clientset)
 	if err = customControllers.NewServiceReconciler(
-		loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("Services"), FixedLogs: make(map[string]string)},
+		loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("Services")},
 		serviceUpdateResourceHandler,
 	).SetupWithManager(mgr); err != nil {
 		setupLog.ErrorLog(err, "unable to create controller", "controller", "Services")
 		os.Exit(1)
 	}
 
-	injectProxyResourceHandler := injectproxy.NewDefaultResourceHandler(mgr.GetClient(), loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Resource Handler").WithName("InjectProxy"), FixedLogs: make(map[string]string)}, clientset, operatorNamespace)
+	injectProxyResourceHandler := injectproxy.NewDefaultResourceHandler(mgr.GetClient(), loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Resource Handler").WithName("InjectProxy")}, clientset, operatorNamespace)
 	if err = customControllers.NewInjectProxyReconciler(
 		mgr.GetClient(),
-		loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("InjectProxy"), FixedLogs: make(map[string]string)},
+		loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("InjectProxy")},
 		injectProxyResourceHandler,
 	).SetupWithManager(mgr); err != nil {
 		setupLog.ErrorLog(err, "unable to create controller", "controller", "InjectProxy")
 		os.Exit(1)
 	}
 
-	upgradeProxyResourceHandler := upgradeproxy.NewDefaultResourceHandler(mgr.GetClient(), loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Resource Handler").WithName("UpgradeProxy"), FixedLogs: make(map[string]string)}, clientset)
+	upgradeProxyResourceHandler := upgradeproxy.NewDefaultResourceHandler(mgr.GetClient(), loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("Resource Handler").WithName("UpgradeProxy")}, clientset)
 	if err = customControllers.NewUpgradeProxyReconciler(
 		mgr.GetClient(),
-		loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("UpgradeProxy"), FixedLogs: make(map[string]string)},
+		loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("UpgradeProxy")},
 		upgradeProxyResourceHandler,
 		operatorNamespace,
 	).SetupWithManager(mgr); err != nil {

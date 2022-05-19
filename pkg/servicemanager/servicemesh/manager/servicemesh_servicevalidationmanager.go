@@ -52,7 +52,7 @@ func (v *ServiceMeshValidationManager) ValidateCreateRequest(ctx context.Context
 		return admission.ValidationResponse(false, errors.GetValidationErrorMessage(object, reason))
 	}
 
-	v.log.InfoLog("Create Request Passes Validation", "Type", object.GetObjectKind().GroupVersionKind().Kind, "Name", object.GetName(), "Namespace", object.GetNamespace())
+	v.log.InfoLogWithFixedMessage(ctx, "Create Request Passes Validation", "Type", object.GetObjectKind().GroupVersionKind().Kind, "Name", object.GetName(), "Namespace", object.GetNamespace())
 	return admission.ValidationResponse(true, "")
 }
 
@@ -89,7 +89,7 @@ func (v *ServiceMeshValidationManager) ValidateUpdateRequest(ctx context.Context
 	}
 
 	// Additional validating condition can be added here
-	v.log.InfoLog("Resource Update Request passes validation", "Type", object.GetObjectKind().GroupVersionKind().Kind, "Name", object.GetName(), "Namespace", object.GetNamespace())
+	v.log.InfoLogWithFixedMessage(ctx, "Resource Update Request passes validation", "Type", object.GetObjectKind().GroupVersionKind().Kind, "Name", object.GetName(), "Namespace", object.GetNamespace())
 	return admission.ValidationResponse(true, "")
 }
 
@@ -106,7 +106,7 @@ func (v *ServiceMeshValidationManager) ValidateDeleteRequest(ctx context.Context
 	}
 
 	// Additional validating condition can be added here
-	v.log.InfoLog("Resource Delete Request passes validation", "Type", object.GetObjectKind().GroupVersionKind().Kind, "Name", object.GetName(), "Namespace", object.GetNamespace())
+	v.log.InfoLogWithFixedMessage(ctx, "Resource Delete Request passes validation", "Type", object.GetObjectKind().GroupVersionKind().Kind, "Name", object.GetName(), "Namespace", object.GetNamespace())
 	return admission.ValidationResponse(true, "")
 }
 

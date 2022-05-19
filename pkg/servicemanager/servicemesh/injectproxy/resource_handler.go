@@ -73,40 +73,40 @@ func (h *defaultResourceHandler) Reconcile(ctx context.Context, namespace *corev
 	configMap := &corev1.ConfigMap{}
 	err := h.client.Get(ctx, types.NamespacedName{Namespace: h.configMapNamespace, Name: commons.MeshConfigMapName}, configMap)
 	if err != nil {
-		h.log.ErrorLog(err, "Error while fetching the configmap")
+		h.log.ErrorLogWithFixedMessage(ctx, err, "Error while fetching the configmap")
 		return merrors.NewRequeueOnError(err)
 	}
 	sidecarImage, sidecarOk := configMap.Data[commons.ProxyLabelInMeshConfigMap]
 	if !sidecarOk || len(sidecarImage) == 0 {
 		err := errors.New("No sidecar image found in config map")
-		h.log.ErrorLog(err, "No sidecar image found in config map")
+		h.log.ErrorLogWithFixedMessage(ctx, err, "No sidecar image found in config map")
 		return merrors.NewRequeueOnError(err)
 	}
 
 	namespaceName := namespace.Name
 	namespaceLabels := labels.Set(namespace.Labels)
 	if !namespaceLabels.Has(commons.ProxyInjectionLabel) {
-		h.log.InfoLog("Namespace does not have required labels", "label", commons.ProxyInjectionLabel)
+		h.log.InfoLogWithFixedMessage(ctx, "Namespace does not have required labels", "label", commons.ProxyInjectionLabel)
 		return merrors.NewRequeueAfter(time.Minute)
 	}
 	namespaceInjectionLabel := namespaceLabels.Get(commons.ProxyInjectionLabel)
 	pods, err := podUtil.ListPods(ctx, h.client, namespaceName)
 	if err != nil {
 		if kerrors.IsNotFound(err) {
-			h.log.InfoLog("Pods not found", "namespace", namespaceName)
+			h.log.InfoLogWithFixedMessage(ctx, "Pods not found", "namespace", namespaceName)
 			return nil
 		}
-		h.log.ErrorLog(err, "Error in listing the pods")
+		h.log.ErrorLogWithFixedMessage(ctx, err, "Error in listing the pods")
 		return merrors.NewRequeueOnError(err)
 	}
 
 	virtualDeploymentBindingList, err := vdbUtil.ListVDB(ctx, h.client)
 	if err != nil {
 		if kerrors.IsNotFound(err) {
-			h.log.InfoLog("VDBs not present")
+			h.log.InfoLogWithFixedMessage(ctx, "VDBs not present")
 			return nil
 		}
-		h.log.ErrorLog(err, "Error in listing virtualDeploymentBinding")
+		h.log.ErrorLogWithFixedMessage(ctx, err, "Error in listing virtualDeploymentBinding")
 		return merrors.NewRequeueOnError(err)
 	}
 
@@ -125,16 +125,16 @@ func (h *defaultResourceHandler) Reconcile(ctx context.Context, namespace *corev
 			if matchedVDB != nil {
 				// TODO: Move it to a separate go routine to improve perf
 				if err := podUtil.EvictPod(ctx, h.clientSet, &pods.Items[i]); err != nil {
-					h.log.ErrorLog(err, "Error in eviction", "pod", pods.Items[i].Name)
+					h.log.ErrorLogWithFixedMessage(ctx, err, "Error in eviction", "pod", pods.Items[i].Name)
 					notEvictedPods += 1
 				} else {
-					h.log.InfoLog("Pod eviction successful", "name", pods.Items[i].Name)
+					h.log.InfoLogWithFixedMessage(ctx, "Pod eviction successful", "name", pods.Items[i].Name)
 				}
 			}
 		}
 	}
 	if notEvictedPods > 0 {
-		h.log.InfoLog("Pods are yet to be evicted, Reconciling after a minute", "count", strconv.Itoa(notEvictedPods))
+		h.log.InfoLogWithFixedMessage(ctx, "Pods are yet to be evicted, Reconciling after a minute", "count", strconv.Itoa(notEvictedPods))
 		return merrors.NewRequeueAfter(time.Minute)
 	}
 

@@ -65,11 +65,14 @@ func InitOSOK(config *rest.Config, log loggerutil.OSOKLogger) {
 			log.ErrorLog(err, "failed reading data from file")
 			os.Exit(1)
 		}
-		log.FixedLogs["fileName"] = file.Name()
-		log.InfoLog("Installing resource present in file")
+		fixedLogMap := make(map[string]string)
+		fixedLogMap["fileName"] = file.Name()
+		ctx := context.Background()
+		ctx = context.WithValue(ctx, loggerutil.FixedLogMapCtxKey, fixedLogMap)
+		log.InfoLogWithFixedMessage(ctx, "Installing resource present in file")
 		err = installResource(context.TODO(), data, mapper, dynamicClient)
 		if err != nil {
-			log.ErrorLog(err, "error in installing resource")
+			log.ErrorLogWithFixedMessage(ctx, err, "error in installing resource")
 		}
 
 	}

@@ -254,7 +254,7 @@ func (h *VirtualDeploymentBindingServiceManager) updateServiceMeshConditionWithS
 }
 
 func (h *VirtualDeploymentBindingServiceManager) evictPodsForVirtualDeploymentBinding(ctx context.Context, vdb *servicemeshapi.VirtualDeploymentBinding, service *corev1.Service) (servicemanager.OSOKResponse, error) {
-	h.log.InfoLog("evicting pods for vdb")
+	h.log.InfoLogWithFixedMessage(ctx, "evicting pods for vdb")
 	namespaceName := vdb.Spec.Target.Service.ServiceRef.Namespace
 	if namespaceName == "" {
 		namespaceName = vdb.Namespace
@@ -263,16 +263,16 @@ func (h *VirtualDeploymentBindingServiceManager) evictPodsForVirtualDeploymentBi
 	namespace := &corev1.Namespace{}
 	if err := h.client.Get(ctx, types.NamespacedName{Name: namespaceName, Namespace: ""}, namespace); err != nil {
 		if kerrors.IsNotFound(err) {
-			h.log.InfoLog("Namespace was deleted", "namespaceName", namespaceName)
+			h.log.InfoLogWithFixedMessage(ctx, "Namespace was deleted", "namespaceName", namespaceName)
 			return servicemanager.OSOKResponse{IsSuccessful: true, ShouldRequeue: true, RequeueDuration: meshCommons.RequeueSyncDuration}, nil
 		}
-		h.log.ErrorLog(err, "Error reading Namespace object", "namespaceName", namespaceName)
+		h.log.ErrorLogWithFixedMessage(ctx, err, "Error reading Namespace object", "namespaceName", namespaceName)
 		return meshErrors.GetOsokResponseByHandlingReconcileError(meshErrors.NewRequeueOnError(err))
 	}
 
 	namespaceLabels := labels.Set(namespace.Labels)
 	if !namespaceLabels.Has(meshCommons.ProxyInjectionLabel) {
-		h.log.InfoLog("Service not part of a mesh enabled namespace")
+		h.log.InfoLogWithFixedMessage(ctx, "Service not part of a mesh enabled namespace")
 		return servicemanager.OSOKResponse{IsSuccessful: true, ShouldRequeue: true, RequeueDuration: meshCommons.RequeueSyncDuration}, nil
 	}
 	namespaceInjectionLabel := namespaceLabels.Get(meshCommons.ProxyInjectionLabel)
@@ -281,10 +281,10 @@ func (h *VirtualDeploymentBindingServiceManager) evictPodsForVirtualDeploymentBi
 	podList, err := podpkg.ListPodsWithLabels(ctx, h.client, namespaceName, &labelSelectors)
 	if err != nil {
 		if kerrors.IsNotFound(err) {
-			h.log.InfoLog("no pods found for the VDB")
+			h.log.InfoLogWithFixedMessage(ctx, "no pods found for the VDB")
 			return servicemanager.OSOKResponse{IsSuccessful: true, ShouldRequeue: true, RequeueDuration: meshCommons.RequeueSyncDuration}, nil
 		}
-		h.log.ErrorLog(err, "error reading pods for VDB")
+		h.log.ErrorLogWithFixedMessage(ctx, err, "error reading pods for VDB")
 		return meshErrors.GetOsokResponseByHandlingReconcileError(meshErrors.NewRequeueOnError(err))
 	}
 
@@ -298,15 +298,15 @@ func (h *VirtualDeploymentBindingServiceManager) evictPodsForVirtualDeploymentBi
 		podInjectionLabel := podpkg.GetPodInjectionLabelValue(&podLabels)
 		if podpkg.IsInjectionLabelEnabled(namespaceInjectionLabel, podInjectionLabel) {
 			if err := podpkg.EvictPod(ctx, h.clientSet, &pod); err != nil {
-				h.log.ErrorLog(err, "Error in eviction", "pod", pod.Name)
+				h.log.ErrorLogWithFixedMessage(ctx, err, "Error in eviction", "pod", pod.Name)
 				notEvictedPods += 1
 			} else {
-				h.log.InfoLog("pod eviction successful", "name", pod.Name)
+				h.log.InfoLogWithFixedMessage(ctx, "pod eviction successful", "name", pod.Name)
 			}
 		}
 	}
 	if notEvictedPods > 0 {
-		h.log.InfoLog("Pods are yet to be evicted, Reconciling after a minute", "count", strconv.Itoa(notEvictedPods))
+		h.log.InfoLogWithFixedMessage(ctx, "Pods are yet to be evicted, Reconciling after a minute", "count", strconv.Itoa(notEvictedPods))
 		return servicemanager.OSOKResponse{IsSuccessful: true, ShouldRequeue: true, RequeueDuration: time.Minute}, nil
 	}
 	return servicemanager.OSOKResponse{IsSuccessful: true, ShouldRequeue: true, RequeueDuration: meshCommons.RequeueSyncDuration}, nil

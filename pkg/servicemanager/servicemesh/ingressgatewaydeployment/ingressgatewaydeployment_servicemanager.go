@@ -94,18 +94,18 @@ func (h *IngressGatewayDeploymentServiceManager) CreateOrUpdate(ctx context.Cont
 		MeshId: igd.Status.MeshId,
 	}
 
-	h.log.InfoLog("Start Reconcile")
+	h.log.InfoLogWithFixedMessage(ctx, "Start Reconcile")
 
 	if ingressGatewayRef.Id == "" {
 		gatewayRef, err := h.referenceResolver.ResolveIngressGatewayIdAndNameAndMeshId(ctx, &igd.Spec.IngressGateway, &igd.ObjectMeta)
 		h.UpdateServiceMeshDependenciesActiveStatus(ctx, igd, err)
 		if err != nil {
-			h.log.ErrorLog(err, "Failed to resolve Ingress gateway")
+			h.log.ErrorLogWithFixedMessage(ctx, err, "Failed to resolve Ingress gateway")
 			return meshErrors.GetOsokResponseByHandlingReconcileError(err)
 		}
 		ingressGatewayRef = *gatewayRef
 	}
-	h.log.InfoLog("Create Deployment")
+	h.log.InfoLogWithFixedMessage(ctx, "Create Deployment")
 
 	deployment := appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -118,7 +118,7 @@ func (h *IngressGatewayDeploymentServiceManager) CreateOrUpdate(ctx context.Cont
 	opResult, err := controllerutil.CreateOrUpdate(ctx, h.client, &deployment, func() error {
 		deploymentSpec, err := h.createDeploymentSpec(igd, ingressGatewayRef)
 		if err != nil {
-			h.log.ErrorLog(err, "Failed to build Deployment Spec")
+			h.log.ErrorLogWithFixedMessage(ctx, err, "Failed to build Deployment Spec")
 			h.UpdateServiceMeshActiveStatus(ctx, igd, err)
 			return err
 		}
@@ -128,12 +128,12 @@ func (h *IngressGatewayDeploymentServiceManager) CreateOrUpdate(ctx context.Cont
 	})
 
 	if err != nil {
-		h.log.ErrorLog(err, "Failed to create or update Deployment")
+		h.log.ErrorLogWithFixedMessage(ctx, err, "Failed to create or update Deployment")
 		h.UpdateServiceMeshActiveStatus(ctx, igd, err)
 		return meshErrors.GetOsokResponseByHandlingReconcileError(err)
 	}
-	h.log.InfoLog("Deployment ", "Status", string(opResult))
-	h.log.InfoLog("Creating Horizontal Pod Auto scalar")
+	h.log.InfoLogWithFixedMessage(ctx, "Deployment ", "Status", string(opResult))
+	h.log.InfoLogWithFixedMessage(ctx, "Creating Horizontal Pod Auto scalar")
 
 	autoscaler := autoscalingv1.HorizontalPodAutoscaler{
 		ObjectMeta: metav1.ObjectMeta{
@@ -146,7 +146,7 @@ func (h *IngressGatewayDeploymentServiceManager) CreateOrUpdate(ctx context.Cont
 	opResult, err = controllerutil.CreateOrUpdate(ctx, h.client, &autoscaler, func() error {
 		podScalerSpec, err := h.createPodAutoScalerSpec(igd, deployment.Name)
 		if err != nil {
-			h.log.ErrorLog(err, "Failed to build Pod Scalar Object")
+			h.log.ErrorLogWithFixedMessage(ctx, err, "Failed to build Pod Scalar Object")
 			h.UpdateServiceMeshActiveStatus(ctx, igd, err)
 			return err
 		}
@@ -155,15 +155,15 @@ func (h *IngressGatewayDeploymentServiceManager) CreateOrUpdate(ctx context.Cont
 		return nil
 	})
 	if err != nil {
-		h.log.ErrorLog(err, "Failed to create or update  Horizontal Pod Auto scalar")
+		h.log.ErrorLogWithFixedMessage(ctx, err, "Failed to create or update  Horizontal Pod Auto scalar")
 		h.UpdateServiceMeshActiveStatus(ctx, igd, err)
 		return meshErrors.GetOsokResponseByHandlingReconcileError(err)
 	}
-	h.log.InfoLog("Created  Horizontal Pod Auto scalar", "Status", string(opResult))
+	h.log.InfoLogWithFixedMessage(ctx, "Created  Horizontal Pod Auto scalar", "Status", string(opResult))
 
 	// Create service if IGD has service object
 	if igd.Spec.Service != nil {
-		h.log.InfoLog("Creating Service")
+		h.log.InfoLogWithFixedMessage(ctx, "Creating Service")
 		service := corev1.Service{
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace:       igd.Namespace,
@@ -174,7 +174,7 @@ func (h *IngressGatewayDeploymentServiceManager) CreateOrUpdate(ctx context.Cont
 		opResult, err := controllerutil.CreateOrUpdate(ctx, h.client, &service, func() error {
 			portSlice, err := h.getServicePorts(igd)
 			if err != nil {
-				h.log.ErrorLog(err, "Failed to build service Object "+string(opResult))
+				h.log.ErrorLogWithFixedMessage(ctx, err, "Failed to build service Object "+string(opResult))
 				h.UpdateServiceMeshActiveStatus(ctx, igd, err)
 				return err
 			}
@@ -188,13 +188,13 @@ func (h *IngressGatewayDeploymentServiceManager) CreateOrUpdate(ctx context.Cont
 			return nil
 		})
 		if err != nil {
-			h.log.ErrorLog(err, "Failed to create or update Service "+string(opResult))
+			h.log.ErrorLogWithFixedMessage(ctx, err, "Failed to create or update Service "+string(opResult))
 			h.UpdateServiceMeshActiveStatus(ctx, igd, err)
 			return meshErrors.GetOsokResponseByHandlingReconcileError(err)
 		}
 	}
 
-	h.log.InfoLog("Created Service ", "Status", string(opResult))
+	h.log.InfoLogWithFixedMessage(ctx, "Created Service ", "Status", string(opResult))
 	return h.updateCR(ctx, igd, oldIgd, ingressGatewayRef)
 }
 
@@ -241,7 +241,7 @@ func (h *IngressGatewayDeploymentServiceManager) getServicePorts(ingressGatewayD
 	if ingressGatewayDeployment.Spec.Service == nil {
 		return nil, nil
 	}
-	h.log.InfoLog("Creation of Service for Ingress is in Progress")
+	h.log.InfoLogWithFixedMessage(nil, "Creation of Service for Ingress is in Progress")
 
 	portMap := make(map[corev1.Protocol][]corev1.ServicePort)
 	for _, port := range ingressGatewayDeployment.Spec.Ports {
@@ -309,7 +309,7 @@ func (h *IngressGatewayDeploymentServiceManager) createPodAutoScalerSpec(ingress
 func (h *IngressGatewayDeploymentServiceManager) createDeploymentSpec(ingressGatewayDeployment *servicemeshapi.IngressGatewayDeployment, ingressGatewayRef meshCommons.ResourceRef) (*appsv1.DeploymentSpec, error) {
 	configMap, keyerr := h.Caches.GetConfigMapByKey(h.namespace + "/" + meshCommons.MeshConfigMapName)
 	if keyerr != nil {
-		h.log.ErrorLog(keyerr, "Failed to fetch configmap")
+		h.log.ErrorLogWithFixedMessage(nil, keyerr, "Failed to fetch configmap")
 		return nil, keyerr
 	}
 	envoyImage, envoyImagePresent := configMap.Data[meshCommons.ProxyLabelInMeshConfigMap]

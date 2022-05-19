@@ -6,23 +6,64 @@
 package loggerutil
 
 import (
-	"strings"
-
+	"context"
 	"github.com/go-logr/logr"
 )
 
 type OSOKLogger struct {
-	Logger    logr.Logger
-	FixedLogs map[string]string
+	Logger logr.Logger
 }
 
+type LogMapCtxKey string
+
 func (ol *OSOKLogger) DebugLog(message string, keysAndValues ...interface{}) {
-
-	fixedMessage := ""
-
-	if len(ol.FixedLogs) != 0 {
-		fixedMessage = fixedMessageBuilder(ol)
+	res, err := extractKeyValuePairs(keysAndValues)
+	if err != nil {
+		ol.Logger.Error(err, "Passed Key value are not string only string allowed")
+		return
 	}
+
+	finalMessage := finalMessageBuilder(message, "", res)
+	if len(finalMessage) == 0 {
+		return
+	}
+
+	ol.Logger.V(1).Info(finalMessage)
+}
+
+func (ol *OSOKLogger) InfoLog(message string, keysAndValues ...interface{}) {
+	res, err := extractKeyValuePairs(keysAndValues)
+	if err != nil {
+		ol.Logger.Error(err, "Passed Key value are not string only string allowed")
+		return
+	}
+
+	finalMessage := finalMessageBuilder(message, "", res)
+	if len(finalMessage) == 0 {
+		return
+	}
+
+	ol.Logger.Info(finalMessage)
+}
+
+func (ol *OSOKLogger) ErrorLog(err error, message string, keysAndValues ...interface{}) {
+	res, extractErr := extractKeyValuePairs(keysAndValues)
+	if extractErr != nil {
+		ol.Logger.Error(extractErr, "Passed Key value are not string only string allowed")
+		return
+	}
+
+	finalMessage := finalMessageBuilder(message, "", res)
+	if len(finalMessage) == 0 {
+		return
+	}
+
+	ol.Logger.Error(err, finalMessage)
+}
+
+func (ol *OSOKLogger) DebugLogWithFixedMessage(ctx context.Context, message string, keysAndValues ...interface{}) {
+
+	fixedMessage := fixedMessageBuilder(ctx)
 
 	res, err := extractKeyValuePairs(keysAndValues)
 	if err != nil {
@@ -38,13 +79,9 @@ func (ol *OSOKLogger) DebugLog(message string, keysAndValues ...interface{}) {
 	ol.Logger.V(1).Info(finalMessage)
 }
 
-func (ol *OSOKLogger) InfoLog(message string, keysAndValues ...interface{}) {
+func (ol *OSOKLogger) InfoLogWithFixedMessage(ctx context.Context, message string, keysAndValues ...interface{}) {
 
-	fixedMessage := ""
-
-	if len(ol.FixedLogs) != 0 {
-		fixedMessage = fixedMessageBuilder(ol)
-	}
+	fixedMessage := fixedMessageBuilder(ctx)
 
 	res, err := extractKeyValuePairs(keysAndValues)
 	if err != nil {
@@ -60,20 +97,9 @@ func (ol *OSOKLogger) InfoLog(message string, keysAndValues ...interface{}) {
 	ol.Logger.Info(finalMessage)
 }
 
-func (ol *OSOKLogger) ErrorLog(err error, message string, keysAndValues ...interface{}) {
+func (ol *OSOKLogger) ErrorLogWithFixedMessage(ctx context.Context, err error, message string, keysAndValues ...interface{}) {
 
-	fixedMessage := ""
-
-	if len(ol.FixedLogs) != 0 {
-		fixedMessageArray := make([]string, 0, len(ol.FixedLogs))
-
-		for key, value := range ol.FixedLogs {
-			entry := key + ": " + value
-			fixedMessageArray = append(fixedMessageArray, entry)
-		}
-
-		fixedMessage = strings.Join(fixedMessageArray, " , ")
-	}
+	fixedMessage := fixedMessageBuilder(ctx)
 
 	res, extractErr := extractKeyValuePairs(keysAndValues)
 	if extractErr != nil {

@@ -33,7 +33,7 @@ func BeforeSuite(t *testing.T) {
 	ctx = context.Background()
 	testFramework = framework.NewTestEnvClientFramework(t)
 	upgradeProxyResourceHandler = NewDefaultResourceHandler(testFramework.K8sClient,
-		loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("UpgradeProxyResourceHandler"), FixedLogs: make(map[string]string)},
+		loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("UpgradeProxyResourceHandler")},
 		testFramework.K8sClientset)
 }
 
@@ -183,7 +183,7 @@ func TestUpgradeProxyReconcile(t *testing.T) {
 			for i := 0; i < times; i++ {
 				err = upgradeProxyResourceHandler.Reconcile(ctx, testProxyController.MeshConfigMap)
 				if err != nil {
-					_, err = merrors.HandleErrorAndRequeue(err, testFramework.Log)
+					_, err = merrors.HandleErrorAndRequeue(ctx, err, testFramework.Log)
 				}
 				if tt.args.DeletePDB && i == 0 {
 					if err != nil {

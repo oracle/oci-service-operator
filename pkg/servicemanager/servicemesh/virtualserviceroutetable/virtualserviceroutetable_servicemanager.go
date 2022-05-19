@@ -61,13 +61,13 @@ func (m *ResourceManager) GetResource(ctx context.Context, object client.Object,
 		details.VsrtDetails.SdkVsrt = sdkVsrt
 		return nil
 	}
-	m.log.InfoLog("virtual service route table did not sync to the control plane", "name", vsrt.ObjectMeta.Name)
+	m.log.InfoLogWithFixedMessage(ctx, "virtual service route table did not sync to the control plane", "name", vsrt.ObjectMeta.Name)
 	return nil
 }
 
 func (m *ResourceManager) CreateResource(ctx context.Context, object client.Object, details *manager.ResourceDetails) (bool, error) {
 	if details.VsrtDetails.SdkVsrt == nil {
-		m.log.InfoLog("creating virtualServiceRouteTable...", "name", object.GetName(), "OpcRetryToken", *details.OpcRetryToken)
+		m.log.InfoLogWithFixedMessage(ctx, "creating virtualServiceRouteTable...", "name", object.GetName(), "OpcRetryToken", *details.OpcRetryToken)
 		sdkVsrt, err := m.serviceMeshClient.CreateVirtualServiceRouteTable(ctx, details.VsrtDetails.BuildSdkVsrt, details.OpcRetryToken)
 		if err != nil {
 			return false, err
@@ -79,7 +79,7 @@ func (m *ResourceManager) CreateResource(ctx context.Context, object client.Obje
 }
 
 func (m *ResourceManager) UpdateResource(ctx context.Context, object client.Object, details *manager.ResourceDetails) error {
-	m.log.InfoLog("updating virtualServiceRouteTable...", "name", object.GetName())
+	m.log.InfoLogWithFixedMessage(ctx, "updating virtualServiceRouteTable...", "name", object.GetName())
 	details.VsrtDetails.SdkVsrt.LifecycleState = sdk.VirtualServiceRouteTableLifecycleStateUpdating
 	return m.serviceMeshClient.UpdateVirtualServiceRouteTable(ctx, details.VsrtDetails.BuildSdkVsrt)
 }
@@ -89,7 +89,7 @@ func (m *ResourceManager) ChangeCompartment(ctx context.Context, object client.O
 	if err != nil {
 		return err
 	}
-	m.log.InfoLog("Moving virtual service route table to new compartment", "Name", object.GetName())
+	m.log.InfoLogWithFixedMessage(ctx, "Moving virtual service route table to new compartment", "Name", object.GetName())
 	// sdkVirtualServiceRouteTable state would be Active here, hence update the state to updating for correct status
 	details.VsrtDetails.SdkVsrt.LifecycleState = sdk.VirtualServiceRouteTableLifecycleStateUpdating
 	return m.serviceMeshClient.ChangeVirtualServiceRouteTableCompartment(ctx, &vsrt.Status.VirtualServiceRouteTableId, &vsrt.Spec.CompartmentId)
@@ -103,7 +103,7 @@ func (m *ResourceManager) DeleteResource(ctx context.Context, object client.Obje
 	if len(vsrt.Status.VirtualServiceRouteTableId) == 0 {
 		return nil
 	}
-	m.log.InfoLog("Deleting virtual service route table", "Name", object.GetName())
+	m.log.InfoLogWithFixedMessage(ctx, "Deleting virtual service route table", "Name", object.GetName())
 	return m.serviceMeshClient.DeleteVirtualServiceRouteTable(ctx, &vsrt.Status.VirtualServiceRouteTableId)
 }
 
@@ -284,4 +284,8 @@ func getVirtualServiceRouteTable(object client.Object) (*servicemeshapi.VirtualS
 		return nil, errors.New("object is not a virtual service route table")
 	}
 	return vsrt, nil
+}
+
+func (m *ResourceManager) HasSdk(details *manager.ResourceDetails) bool {
+	return details.VsrtDetails.SdkVsrt != nil
 }

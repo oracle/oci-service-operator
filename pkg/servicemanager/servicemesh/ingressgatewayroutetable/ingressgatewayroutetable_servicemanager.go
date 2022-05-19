@@ -61,13 +61,13 @@ func (m *ResourceManager) GetResource(ctx context.Context, object client.Object,
 		details.IgrtDetails.SdkIgrt = sdkIgrt
 		return nil
 	}
-	m.log.InfoLog("ingress gateway route table did not sync to the control plane", "name", igrt.ObjectMeta.Name)
+	m.log.InfoLogWithFixedMessage(ctx, "ingress gateway route table did not sync to the control plane", "name", igrt.ObjectMeta.Name)
 	return nil
 }
 
 func (m *ResourceManager) CreateResource(ctx context.Context, object client.Object, details *manager.ResourceDetails) (bool, error) {
 	if details.IgrtDetails.SdkIgrt == nil {
-		m.log.InfoLog("creating IngressGatewayRouteTable...", "name", object.GetName(), "OpcRetryToken", *details.OpcRetryToken)
+		m.log.InfoLogWithFixedMessage(ctx, "creating IngressGatewayRouteTable...", "name", object.GetName(), "OpcRetryToken", *details.OpcRetryToken)
 		sdkIgrt, err := m.serviceMeshClient.CreateIngressGatewayRouteTable(ctx, details.IgrtDetails.BuildSdkIgrt, details.OpcRetryToken)
 		if err != nil {
 			return false, err
@@ -79,7 +79,7 @@ func (m *ResourceManager) CreateResource(ctx context.Context, object client.Obje
 }
 
 func (m *ResourceManager) UpdateResource(ctx context.Context, object client.Object, details *manager.ResourceDetails) error {
-	m.log.InfoLog("updating IngressGatewayRouteTable...", "name", object.GetName())
+	m.log.InfoLogWithFixedMessage(ctx, "updating IngressGatewayRouteTable...", "name", object.GetName())
 	details.IgrtDetails.SdkIgrt.LifecycleState = sdk.IngressGatewayRouteTableLifecycleStateUpdating
 	return m.serviceMeshClient.UpdateIngressGatewayRouteTable(ctx, details.IgrtDetails.BuildSdkIgrt)
 }
@@ -89,7 +89,7 @@ func (m *ResourceManager) ChangeCompartment(ctx context.Context, object client.O
 	if err != nil {
 		return err
 	}
-	m.log.InfoLog("Moving ingress gateway route table to new compartment", "Name", object.GetName())
+	m.log.InfoLogWithFixedMessage(ctx, "Moving ingress gateway route table to new compartment", "Name", object.GetName())
 	// sdkIngressGatewayRouteTable state would be Active here, hence update the state to updating for correct status
 	details.IgrtDetails.SdkIgrt.LifecycleState = sdk.IngressGatewayRouteTableLifecycleStateUpdating
 	return m.serviceMeshClient.ChangeIngressGatewayRouteTableCompartment(ctx, &igrt.Status.IngressGatewayRouteTableId, &igrt.Spec.CompartmentId)
@@ -103,7 +103,7 @@ func (m *ResourceManager) DeleteResource(ctx context.Context, object client.Obje
 	if len(igrt.Status.IngressGatewayRouteTableId) == 0 {
 		return nil
 	}
-	m.log.InfoLog("Deleting ingress gateway route table", "Name", object.GetName())
+	m.log.InfoLogWithFixedMessage(ctx, "Deleting ingress gateway route table", "Name", object.GetName())
 	return m.serviceMeshClient.DeleteIngressGatewayRouteTable(ctx, &igrt.Status.IngressGatewayRouteTableId)
 }
 
@@ -287,4 +287,8 @@ func getIngressGatewayRouteTable(object client.Object) (*servicemeshapi.IngressG
 		return nil, errors.New("object is not an ingress gateway route table")
 	}
 	return igrt, nil
+}
+
+func (m *ResourceManager) HasSdk(details *manager.ResourceDetails) bool {
+	return details.IgrtDetails.SdkIgrt != nil
 }
