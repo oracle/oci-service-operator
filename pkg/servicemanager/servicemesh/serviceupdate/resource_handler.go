@@ -12,22 +12,19 @@ import (
 
 	servicemeshapi "github.com/oracle/oci-service-operator/apis/servicemesh.oci/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
-
 	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/commons"
-
+	merrors "github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/errors"
+	podUtil "github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/pod"
+	serviceUtil "github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/service"
+	vdbUtil "github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/virtualdeploymentbinding"
+	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	merrors "github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/errors"
-	podUtil "github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/pod"
-	vdbUtil "github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/virtualdeploymentbinding"
-
-	serviceUtil "github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/service"
 )
 
 type ResourceHandler interface {
@@ -56,7 +53,7 @@ func NewDefaultResourceHandler(
 func (h *defaultResourceHandler) Reconcile(ctx context.Context, service *corev1.Service, namespaceInjectionLabel string) error {
 	vdbs, err := vdbUtil.ListVDB(ctx, h.k8sClient)
 	if err != nil {
-		if errors.IsNotFound(err) {
+		if k8serrors.IsNotFound(err) {
 			return nil
 		}
 		return merrors.NewRequeueOnError(err)
@@ -70,7 +67,7 @@ func (h *defaultResourceHandler) Reconcile(ctx context.Context, service *corev1.
 
 	pods, err := serviceUtil.GetPodsForService(ctx, h.k8sClient, service)
 	if err != nil {
-		if errors.IsNotFound(err) {
+		if k8serrors.IsNotFound(err) {
 			return nil
 		}
 		return merrors.NewRequeueOnError(err)
@@ -83,7 +80,7 @@ func (h *defaultResourceHandler) Reconcile(ctx context.Context, service *corev1.
 func (h *defaultResourceHandler) FetchNamespaceInjectionLabel(ctx context.Context, req ctrl.Request, namespaceInjectionLabel *string) (bool, error) {
 	namespace := &corev1.Namespace{}
 	if err := h.k8sClient.Get(ctx, types.NamespacedName{Name: req.Namespace}, namespace); err != nil {
-		if errors.IsNotFound(err) {
+		if k8serrors.IsNotFound(err) {
 			return false, nil
 		}
 		return false, merrors.NewRequeueOnError(err)
@@ -100,14 +97,14 @@ func (h *defaultResourceHandler) FetchNamespaceInjectionLabel(ctx context.Contex
 func (h *defaultResourceHandler) FetchService(ctx context.Context, namespacedName types.NamespacedName) (*corev1.Service, error) {
 	service := &corev1.Service{}
 	if err := h.k8sClient.Get(ctx, namespacedName, service); err != nil {
-		if errors.IsNotFound(err) {
-			return nil, merrors.NewDoNotRequeue()
+		if k8serrors.IsNotFound(err) {
+			return nil, merrors.NewDoNotRequeueError(err)
 		}
 		return nil, merrors.NewRequeueOnError(err)
 	}
 
 	if !service.DeletionTimestamp.IsZero() {
-		return nil, merrors.NewDoNotRequeue()
+		return nil, merrors.NewDoNotRequeueError(errors.New("service is deleted"))
 	}
 	return service, nil
 }

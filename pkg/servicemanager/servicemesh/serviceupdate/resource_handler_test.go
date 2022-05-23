@@ -7,6 +7,7 @@ package serviceupdate
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
@@ -164,7 +165,7 @@ func Test_defaultResourceHandler_FetchService(t *testing.T) {
 				service: nil,
 			},
 			want: want{
-				err:     merrors.NewDoNotRequeue(),
+				err:     merrors.NewDoNotRequeueError(errors.New("services \"my-service\" not found")),
 				service: nil,
 			},
 		},
@@ -184,7 +185,7 @@ func Test_defaultResourceHandler_FetchService(t *testing.T) {
 				},
 			},
 			want: want{
-				err:     merrors.NewDoNotRequeue(),
+				err:     merrors.NewDoNotRequeueError(errors.New("service is deleted")),
 				service: nil,
 			},
 		},

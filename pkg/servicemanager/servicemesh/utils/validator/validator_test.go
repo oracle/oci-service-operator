@@ -9,13 +9,11 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	sdk "github.com/oracle/oci-go-sdk/v65/servicemesh"
-
 	servicemeshapi "github.com/oracle/oci-service-operator/apis/servicemesh.oci/v1beta1"
 	meshErrors "github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/errors"
+	"github.com/stretchr/testify/assert"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestValidateMeshK8s(t *testing.T) {
@@ -205,6 +203,20 @@ func TestValidateMeshCp(t *testing.T) {
 				LifecycleState: sdk.MeshLifecycleStateCreating,
 			},
 			wantErr: errors.New("mesh is not active yet"),
+		},
+		{
+			name: "mesh is deleted",
+			mesh: &sdk.Mesh{
+				LifecycleState: sdk.MeshLifecycleStateDeleted,
+			},
+			wantErr: errors.New("mesh is deleted or failed"),
+		},
+		{
+			name: "mesh is failed",
+			mesh: &sdk.Mesh{
+				LifecycleState: sdk.MeshLifecycleStateFailed,
+			},
+			wantErr: errors.New("mesh is deleted or failed"),
 		},
 	}
 
@@ -402,6 +414,20 @@ func TestValidateVSCp(t *testing.T) {
 			},
 			wantErr: meshErrors.NewRequeueOnError(errors.New("virtual service is not active yet")),
 		},
+		{
+			name: "virtual service is deleted",
+			virtualService: &sdk.VirtualService{
+				LifecycleState: sdk.VirtualServiceLifecycleStateDeleted,
+			},
+			wantErr: meshErrors.NewRequeueOnError(errors.New("virtual service is deleted or failed")),
+		},
+		{
+			name: "virtual service is failed",
+			virtualService: &sdk.VirtualService{
+				LifecycleState: sdk.VirtualServiceLifecycleStateFailed,
+			},
+			wantErr: meshErrors.NewRequeueOnError(errors.New("virtual service is deleted or failed")),
+		},
 	}
 
 	for _, tt := range tests {
@@ -598,6 +624,20 @@ func TestValidateVDCp(t *testing.T) {
 			},
 			wantErr: meshErrors.NewRequeueOnError(errors.New("virtual deployment is not active yet")),
 		},
+		{
+			name: "virtual deployment is deleted",
+			virtualDeployment: &sdk.VirtualDeployment{
+				LifecycleState: sdk.VirtualDeploymentLifecycleStateDeleted,
+			},
+			wantErr: meshErrors.NewRequeueOnError(errors.New("virtual deployment is deleted or failed")),
+		},
+		{
+			name: "virtual deployment is failed",
+			virtualDeployment: &sdk.VirtualDeployment{
+				LifecycleState: sdk.VirtualDeploymentLifecycleStateFailed,
+			},
+			wantErr: meshErrors.NewRequeueOnError(errors.New("virtual deployment is deleted or failed")),
+		},
 	}
 
 	for _, tt := range tests {
@@ -793,6 +833,20 @@ func TestValidateIGCp(t *testing.T) {
 				LifecycleState: sdk.IngressGatewayLifecycleStateCreating,
 			},
 			wantErr: meshErrors.NewRequeueOnError(errors.New("ingress gateway is not active yet")),
+		},
+		{
+			name: "ingress gateway is deleted",
+			ingressGateway: &sdk.IngressGateway{
+				LifecycleState: sdk.IngressGatewayLifecycleStateDeleted,
+			},
+			wantErr: meshErrors.NewRequeueOnError(errors.New("ingress gateway is deleted or failed")),
+		},
+		{
+			name: "ingress gateway is failed",
+			ingressGateway: &sdk.IngressGateway{
+				LifecycleState: sdk.IngressGatewayLifecycleStateFailed,
+			},
+			wantErr: meshErrors.NewRequeueOnError(errors.New("ingress gateway is deleted or failed")),
 		},
 	}
 

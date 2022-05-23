@@ -8,6 +8,7 @@ package manager
 import (
 	"context"
 	"errors"
+
 	"github.com/oracle/oci-go-sdk/v65/common"
 	sdk "github.com/oracle/oci-go-sdk/v65/servicemesh"
 	api "github.com/oracle/oci-service-operator/api/v1beta1"
@@ -164,10 +165,10 @@ func (c *ServiceMeshServiceManager) CreateOrUpdate(ctx context.Context, obj runt
 		status := c.handler.GetConditionStatus(resourceDetails)
 		message := c.handler.GetMessage(resourceDetails)
 		updateErr := c.UpdateServiceMeshCondition(ctx, object, status, string(meshCommons.LifecycleStateChanged), message, servicemeshapi.ServiceMeshActive)
-		if verifyResourceErr != nil {
-			return meshErrors.GetOsokResponseByHandlingReconcileError(verifyResourceErr)
+		if updateErr != nil {
+			return meshErrors.GetOsokResponseByHandlingReconcileError(updateErr)
 		}
-		return meshErrors.GetOsokResponseByHandlingReconcileError(updateErr)
+		return meshErrors.GetOsokResponseByHandlingReconcileError(verifyResourceErr)
 	}
 
 	// Build object

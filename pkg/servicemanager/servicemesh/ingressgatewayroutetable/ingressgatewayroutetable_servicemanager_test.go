@@ -8,34 +8,33 @@ package ingressgatewayroutetable
 import (
 	"context"
 	"errors"
-	sdkcommons "github.com/oracle/oci-go-sdk/v65/common"
 	"sort"
 	"testing"
 	"time"
 
+	"github.com/golang/mock/gomock"
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
+	sdkcommons "github.com/oracle/oci-go-sdk/v65/common"
 	sdk "github.com/oracle/oci-go-sdk/v65/servicemesh"
-	"k8s.io/apimachinery/pkg/runtime"
-	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
-	ctrl "sigs.k8s.io/controller-runtime"
-	testclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
-
 	api "github.com/oracle/oci-service-operator/api/v1beta1"
 	servicemeshapi "github.com/oracle/oci-service-operator/apis/servicemesh.oci/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/core"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
+	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/manager"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/commons"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/conversions"
 	meshMocks "github.com/oracle/oci-service-operator/test/mocks/servicemesh"
 	meshErrors "github.com/oracle/oci-service-operator/test/servicemesh/errors"
 	"github.com/oracle/oci-service-operator/test/servicemesh/framework"
-
-	"github.com/golang/mock/gomock"
-	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
+	ctrl "sigs.k8s.io/controller-runtime"
+	testclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
 var (
@@ -473,6 +472,7 @@ func TestCreateOrUpdate(t *testing.T) {
 		expectedErr                         error
 		expectOpcRetryToken                 bool
 		wantErr                             error
+		doNotRequeue                        bool
 	}{
 		{
 			name: "failed to resolve dependencies",
@@ -1044,7 +1044,8 @@ func TestCreateOrUpdate(t *testing.T) {
 					},
 				},
 			},
-			expectedErr: nil,
+			expectedErr:  errors.New("ingress gateway route table in the control plane is deleted or failed"),
+			doNotRequeue: true,
 		},
 		{
 			name: "Resolve dependencies error on create",
@@ -1153,7 +1154,8 @@ func TestCreateOrUpdate(t *testing.T) {
 					},
 				},
 			},
-			expectedErr: nil,
+			expectedErr:  errors.New("ingress gateway route table in the control plane is deleted or failed"),
+			doNotRequeue: true,
 		},
 		{
 			name: "update sdk igrt compartment id",
@@ -1412,11 +1414,12 @@ func TestCreateOrUpdate(t *testing.T) {
 
 			key := types.NamespacedName{Name: igrtName}
 			assert.NoError(t, f.K8sClient.Create(ctx, tt.igrt))
-			_, err := m.CreateOrUpdate(ctx, tt.igrt, ctrl.Request{})
+			var response servicemanager.OSOKResponse
+			response, err := m.CreateOrUpdate(ctx, tt.igrt, ctrl.Request{})
 
 			if tt.fields.GetIngressGatewayRouteTableNewCompartment != nil {
 				meshClient.EXPECT().GetIngressGatewayRouteTable(gomock.Any(), gomock.Any()).DoAndReturn(tt.fields.GetIngressGatewayRouteTableNewCompartment).Times(1)
-				_, err = m.CreateOrUpdate(ctx, tt.igrt, ctrl.Request{})
+				response, err = m.CreateOrUpdate(ctx, tt.igrt, ctrl.Request{})
 			}
 
 			curIngressGatewayRouteTable := &servicemeshapi.IngressGatewayRouteTable{}
@@ -1450,6 +1453,7 @@ func TestCreateOrUpdate(t *testing.T) {
 			} else {
 				assert.Nil(t, err)
 			}
+			assert.Equal(t, !tt.doNotRequeue, response.ShouldRequeue)
 		})
 	}
 }

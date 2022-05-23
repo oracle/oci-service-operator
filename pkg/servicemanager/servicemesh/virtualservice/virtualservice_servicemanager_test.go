@@ -8,22 +8,14 @@ package virtualservice
 import (
 	"context"
 	"errors"
-	sdkcommons "github.com/oracle/oci-go-sdk/v65/common"
 	"testing"
 	"time"
 
 	"github.com/golang/mock/gomock"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+	sdkcommons "github.com/oracle/oci-go-sdk/v65/common"
 	sdk "github.com/oracle/oci-go-sdk/v65/servicemesh"
-	"github.com/stretchr/testify/assert"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
-	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
-	ctrl "sigs.k8s.io/controller-runtime"
-	testclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
-
 	api "github.com/oracle/oci-service-operator/api/v1beta1"
 	servicemeshapi "github.com/oracle/oci-service-operator/apis/servicemesh.oci/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/core"
@@ -36,6 +28,13 @@ import (
 	meshMocks "github.com/oracle/oci-service-operator/test/mocks/servicemesh"
 	meshErrors "github.com/oracle/oci-service-operator/test/servicemesh/errors"
 	"github.com/oracle/oci-service-operator/test/servicemesh/framework"
+	"github.com/stretchr/testify/assert"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
+	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
+	ctrl "sigs.k8s.io/controller-runtime"
+	testclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
 var (
@@ -1426,6 +1425,7 @@ func TestCreateOrUpdate(t *testing.T) {
 		wantErr             error
 		times               int
 		expectOpcRetryToken bool
+		doNotRequeue        bool
 	}{
 		{
 			name: "virtual service create without error",
@@ -1641,8 +1641,9 @@ func TestCreateOrUpdate(t *testing.T) {
 				UpdateVs:            nil,
 				ChangeVsCompartment: nil,
 			},
-			times:   1,
-			wantErr: nil,
+			times:        1,
+			wantErr:      errors.New("virtual service in the control plane is deleted or failed"),
+			doNotRequeue: true,
 		},
 		{
 			name: "sdk vs is failed",
@@ -1661,8 +1662,9 @@ func TestCreateOrUpdate(t *testing.T) {
 				UpdateVs:            nil,
 				ChangeVsCompartment: nil,
 			},
-			times:   1,
-			wantErr: nil,
+			times:        1,
+			wantErr:      errors.New("virtual service in the control plane is deleted or failed"),
+			doNotRequeue: true,
 		},
 		{
 			name: "virtual service change compartment with other updates",
@@ -1733,13 +1735,14 @@ func TestCreateOrUpdate(t *testing.T) {
 				meshClient.EXPECT().ChangeVirtualServiceCompartment(gomock.Any(), gomock.Any(), gomock.Any()).DoAndReturn(tt.fields.ChangeVsCompartment)
 			}
 
+			var response servicemanager.OSOKResponse
 			for i := 0; i < tt.times; i++ {
-				_, err = m.CreateOrUpdate(ctx, tt.vs, ctrl.Request{})
+				response, err = m.CreateOrUpdate(ctx, tt.vs, ctrl.Request{})
 			}
 
 			if tt.fields.GetVsNewCompartment != nil {
 				meshClient.EXPECT().GetVirtualService(gomock.Any(), gomock.Any()).DoAndReturn(tt.fields.GetVsNewCompartment).Times(1)
-				_, err = m.CreateOrUpdate(ctx, tt.vs, ctrl.Request{})
+				response, err = m.CreateOrUpdate(ctx, tt.vs, ctrl.Request{})
 			}
 
 			key := types.NamespacedName{Name: "my-virtualservice", Namespace: "my-namespace"}
@@ -1757,6 +1760,7 @@ func TestCreateOrUpdate(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 			}
+			assert.Equal(t, !tt.doNotRequeue, response.ShouldRequeue)
 		})
 	}
 }
