@@ -15,23 +15,6 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
-	appsv1 "k8s.io/api/apps/v1"
-	autoscalingv1 "k8s.io/api/autoscaling/v1"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
-	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/kubernetes/scheme"
-	"k8s.io/client-go/rest"
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-	"sigs.k8s.io/controller-runtime/pkg/envtest"
-	"sigs.k8s.io/controller-runtime/pkg/healthz"
-	"sigs.k8s.io/controller-runtime/pkg/source"
-	"sigs.k8s.io/controller-runtime/pkg/webhook"
-
 	api "github.com/oracle/oci-service-operator/apis/servicemesh.oci/v1beta1"
 	servicemeshapi "github.com/oracle/oci-service-operator/apis/servicemesh.oci/v1beta1"
 	servicemeshoci "github.com/oracle/oci-service-operator/controllers/servicemesh.oci"
@@ -58,6 +41,22 @@ import (
 	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/virtualserviceroutetable"
 	mocks "github.com/oracle/oci-service-operator/test/mocks/servicemesh"
 	testK8s "github.com/oracle/oci-service-operator/test/servicemesh/k8s"
+	appsv1 "k8s.io/api/apps/v1"
+	autoscalingv1 "k8s.io/api/autoscaling/v1"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/kubernetes/scheme"
+	"k8s.io/client-go/rest"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/envtest"
+	"sigs.k8s.io/controller-runtime/pkg/healthz"
+	"sigs.k8s.io/controller-runtime/pkg/source"
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
 )
 
 var (
@@ -148,7 +147,7 @@ func (f *defaultTestEnvFramework) SetupTestFramework(t *testing.T, config *rest.
 			AdditionalFinalizers: []string{meshCommons.MeshFinalizer},
 		},
 		ResourceObject: new(servicemeshapi.Mesh),
-	}).SetupWithManager(k8sManager); err != nil {
+	}).SetupWithManagerWithMaxDelay(k8sManager, meshCommons.MaxDelay); err != nil {
 		setupLog.ErrorLog(err, "unable to create controller", "controller", "Mesh")
 		os.Exit(1)
 	}
@@ -182,7 +181,7 @@ func (f *defaultTestEnvFramework) SetupTestFramework(t *testing.T, config *rest.
 			AdditionalFinalizers: []string{meshCommons.VirtualServiceFinalizer},
 		},
 		ResourceObject: new(servicemeshapi.VirtualService),
-	}).SetupWithManager(k8sManager); err != nil {
+	}).SetupWithManagerWithMaxDelay(k8sManager, meshCommons.MaxDelay); err != nil {
 		setupLog.ErrorLog(err, "unable to create controller", "controller", "VirtualService")
 		os.Exit(1)
 	}
@@ -213,7 +212,7 @@ func (f *defaultTestEnvFramework) SetupTestFramework(t *testing.T, config *rest.
 			AdditionalFinalizers: []string{meshCommons.VirtualDeploymentFinalizer},
 		},
 		ResourceObject: new(servicemeshapi.VirtualDeployment),
-	}).SetupWithManager(k8sManager); err != nil {
+	}).SetupWithManagerWithMaxDelay(k8sManager, meshCommons.MaxDelay); err != nil {
 		setupLog.ErrorLog(err, "unable to create controller", "controller", "VirtualDeployment")
 		os.Exit(1)
 	}
@@ -243,7 +242,7 @@ func (f *defaultTestEnvFramework) SetupTestFramework(t *testing.T, config *rest.
 			AdditionalFinalizers: []string{meshCommons.VirtualServiceRouteTableFinalizer},
 		},
 		ResourceObject: new(servicemeshapi.VirtualServiceRouteTable),
-	}).SetupWithManager(k8sManager); err != nil {
+	}).SetupWithManagerWithMaxDelay(k8sManager, meshCommons.MaxDelay); err != nil {
 		setupLog.ErrorLog(err, "unable to create controller", "controller", "VirtualServiceRouteTable")
 		os.Exit(1)
 	}
@@ -273,7 +272,7 @@ func (f *defaultTestEnvFramework) SetupTestFramework(t *testing.T, config *rest.
 			AdditionalFinalizers: []string{meshCommons.AccessPolicyFinalizer},
 		},
 		ResourceObject: new(servicemeshapi.AccessPolicy),
-	}).SetupWithManager(k8sManager); err != nil {
+	}).SetupWithManagerWithMaxDelay(k8sManager, meshCommons.MaxDelay); err != nil {
 		setupLog.ErrorLog(err, "unable to create controller", "controller", "AccessPolicy")
 		os.Exit(1)
 	}
@@ -303,7 +302,7 @@ func (f *defaultTestEnvFramework) SetupTestFramework(t *testing.T, config *rest.
 			AdditionalFinalizers: []string{meshCommons.IngressGatewayFinalizer},
 		},
 		ResourceObject: new(servicemeshapi.IngressGateway),
-	}).SetupWithManager(k8sManager); err != nil {
+	}).SetupWithManagerWithMaxDelay(k8sManager, meshCommons.MaxDelay); err != nil {
 		setupLog.ErrorLog(err, "unable to create controller", "controller", "IngressGateway")
 		os.Exit(1)
 	}
@@ -333,7 +332,7 @@ func (f *defaultTestEnvFramework) SetupTestFramework(t *testing.T, config *rest.
 			AdditionalFinalizers: []string{meshCommons.VirtualDeploymentBindingFinalizer},
 		},
 		ResourceObject: new(servicemeshapi.VirtualDeploymentBinding),
-	}).SetupWithManager(k8sManager); err != nil {
+	}).SetupWithManagerWithMaxDelay(k8sManager, meshCommons.MaxDelay); err != nil {
 		setupLog.ErrorLog(err, "unable to create controller", "controller", "VirtualDeploymentBinding")
 		os.Exit(1)
 	}
@@ -363,7 +362,7 @@ func (f *defaultTestEnvFramework) SetupTestFramework(t *testing.T, config *rest.
 			AdditionalFinalizers: []string{meshCommons.IngressGatewayRouteTableFinalizer},
 		},
 		ResourceObject: new(servicemeshapi.IngressGatewayRouteTable),
-	}).SetupWithManager(k8sManager); err != nil {
+	}).SetupWithManagerWithMaxDelay(k8sManager, meshCommons.MaxDelay); err != nil {
 		setupLog.ErrorLog(err, "unable to create controller", "controller", "IngressGatewayRouteTable")
 		os.Exit(1)
 	}
@@ -403,7 +402,7 @@ func (f *defaultTestEnvFramework) SetupTestFramework(t *testing.T, config *rest.
 		},
 		ResourceObject: new(servicemeshapi.IngressGatewayDeployment),
 		CustomWatches:  igdCustomWatches,
-	}).SetupWithManager(k8sManager); err != nil {
+	}).SetupWithManagerWithMaxDelay(k8sManager, meshCommons.MaxDelay); err != nil {
 		setupLog.ErrorLog(err, "unable to create controller", "controller", "IngressGatewayDeployment")
 		os.Exit(1)
 	}

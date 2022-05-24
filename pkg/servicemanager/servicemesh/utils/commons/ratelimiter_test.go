@@ -13,7 +13,7 @@ import (
 )
 
 func TestDefaultControllerRateLimiter(t *testing.T) {
-	limiter := DefaultControllerRateLimiter()
+	limiter := DefaultControllerRateLimiter(10 * time.Second)
 
 	assert.Equal(t, 5*time.Millisecond, limiter.When("one"))
 	assert.Equal(t, 10*time.Millisecond, limiter.When("one"))

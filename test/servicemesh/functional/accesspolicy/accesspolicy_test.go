@@ -13,17 +13,17 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/google/go-cmp/cmp"
 	sdk "github.com/oracle/oci-go-sdk/v65/servicemesh"
-	"github.com/stretchr/testify/assert"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/rest"
-	"sigs.k8s.io/controller-runtime/pkg/envtest"
-
 	api "github.com/oracle/oci-service-operator/api/v1beta1"
 	servicemeshapi "github.com/oracle/oci-service-operator/apis/servicemesh.oci/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/commons"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/equality"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/namespace"
 	"github.com/oracle/oci-service-operator/test/servicemesh/functional"
+	"github.com/stretchr/testify/assert"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/wait"
+	"k8s.io/client-go/rest"
+	"sigs.k8s.io/controller-runtime/pkg/envtest"
 )
 
 var (
@@ -293,6 +293,7 @@ func TestAccessPolicy(t *testing.T) {
 				accessPolicy.Spec.CompartmentId = api.OCID(tt.args.compartmentId)
 				err := framework.K8sAPIs.Update(ctx, accessPolicy, oldAccessPolicy)
 				assert.NoError(t, err)
+				assert.NoError(t, waitUntilSettled(ctx, framework, accessPolicy))
 			}
 
 			// Update freeformTags
@@ -312,6 +313,7 @@ func TestAccessPolicy(t *testing.T) {
 				accessPolicy.Spec.FreeFormTags = tt.args.freeformTags
 				err := framework.K8sAPIs.Update(ctx, accessPolicy, oldAccessPolicy)
 				assert.NoError(t, err)
+				assert.NoError(t, waitUntilSettled(ctx, framework, accessPolicy))
 			}
 
 			// Update definedTags
@@ -331,6 +333,7 @@ func TestAccessPolicy(t *testing.T) {
 				accessPolicy.Spec.DefinedTags = tt.args.definedTags
 				err := framework.K8sAPIs.Update(ctx, accessPolicy, oldAccessPolicy)
 				assert.NoError(t, err)
+				assert.NoError(t, waitUntilSettled(ctx, framework, accessPolicy))
 			}
 
 			curAccessPolicy := &servicemeshapi.AccessPolicy{}
@@ -347,4 +350,18 @@ func TestAccessPolicy(t *testing.T) {
 		})
 		afterEach(framework)
 	}
+}
+
+func waitUntilSettled(ctx context.Context, framework *functional.Framework, accessPolicy *servicemeshapi.AccessPolicy) error {
+	observedAccessPolicy := &servicemeshapi.AccessPolicy{}
+	key := namespace.NewNamespacedName(accessPolicy)
+	return wait.PollImmediateUntil(commons.PollInterval, func() (bool, error) {
+		if err := framework.K8sClient.Get(ctx, key, observedAccessPolicy); err != nil {
+			return false, err
+		}
+		if observedAccessPolicy != nil && commons.GetServiceMeshCondition(&observedAccessPolicy.Status, servicemeshapi.ServiceMeshActive).Status == metav1.ConditionTrue {
+			return true, nil
+		}
+		return false, nil
+	}, ctx.Done())
 }

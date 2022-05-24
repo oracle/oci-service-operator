@@ -579,7 +579,8 @@ func TestCreateOrUpdate(t *testing.T) {
 					},
 				},
 			},
-			expectedErr: meshErrors.NewServiceError(400, "MissingParameter", "Missing Parameter in the body", "12-35-89"),
+			expectedErr:  meshErrors.NewServiceError(400, "MissingParameter", "Missing Parameter in the body", "12-35-89"),
+			doNotRequeue: true,
 		},
 		{
 			name: "failed to create igrt",
@@ -629,7 +630,8 @@ func TestCreateOrUpdate(t *testing.T) {
 					},
 				},
 			},
-			expectedErr: meshErrors.NewServiceError(400, "MissingParameter", "Missing Parameter in the body", "12-35-89"),
+			expectedErr:  meshErrors.NewServiceError(400, "MissingParameter", "Missing Parameter in the body", "12-35-89"),
+			doNotRequeue: true,
 		},
 		{
 			name: "failed to create igrt and store retry token",

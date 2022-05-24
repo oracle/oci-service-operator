@@ -61,7 +61,7 @@ func (r *InjectProxyReconciler) reconcileProxy(ctx context.Context, req ctrl.Req
 func (r *InjectProxyReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		WithOptions(controller.Options{
-			RateLimiter: commons.DefaultControllerRateLimiter(),
+			RateLimiter: commons.DefaultControllerRateLimiter(commons.MaxDelay),
 		}).
 		For(&corev1.Namespace{}).
 		Complete(r)

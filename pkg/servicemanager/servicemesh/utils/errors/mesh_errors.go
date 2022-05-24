@@ -14,6 +14,7 @@ import (
 
 	"github.com/iancoleman/strcase"
 	"github.com/oracle/oci-go-sdk/v65/common"
+	"github.com/oracle/oci-service-operator/pkg/errorutil"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/commons"
@@ -83,8 +84,34 @@ func GetOsokResponseByHandlingReconcileError(err error) (servicemanager.OSOKResp
 		return servicemanager.OSOKResponse{ShouldRequeue: true}, nil
 	}
 
+	// Do not requeue if are customer mistakes
+	if serviceError, ok := common.IsServiceError(err); ok {
+		return servicemanager.OSOKResponse{ShouldRequeue: shouldRequeueServiceError(serviceError)}, err
+	}
+
 	// Requeue a Request if there is an error and continue processing items with exponential backoff
 	return servicemanager.OSOKResponse{ShouldRequeue: true}, err
+}
+
+func shouldRequeueServiceError(err common.ServiceError) bool {
+	if err.GetHTTPStatusCode() != 400 {
+		return true
+	}
+
+	switch err.GetCode() {
+	case errorutil.InvalidParameter:
+		return false
+	case errorutil.InvalidParameters:
+		return false
+	case errorutil.MissingParameter:
+		return false
+	case errorutil.MissingParameters:
+		return false
+	case errorutil.CannotParseRequest:
+		return false
+	default:
+		return true
+	}
 }
 
 func GetValidationErrorMessage(object client.Object, reason string) string {

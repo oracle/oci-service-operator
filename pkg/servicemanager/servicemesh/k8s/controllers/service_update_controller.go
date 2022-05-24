@@ -62,7 +62,7 @@ func (r *ServiceReconciler) reconcile(ctx context.Context, req ctrl.Request) err
 func (r *ServiceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		WithOptions(controller.Options{
-			RateLimiter: commons.DefaultControllerRateLimiter(),
+			RateLimiter: commons.DefaultControllerRateLimiter(commons.MaxDelay),
 		}).
 		For(&corev1.Service{}).
 		Complete(r)
