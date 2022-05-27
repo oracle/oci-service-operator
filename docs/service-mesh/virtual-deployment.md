@@ -22,34 +22,67 @@ A virtual deployment is a version of a virtual service in the mesh. Conceptually
 ## Virtual Deployment Specification Parameters
 The Complete Specification of the `VirtualDeployment` Custom Resource (CR) is as detailed below:
 
-| Parameter                          | Description                                                         | Type   | Mandatory |
-| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
-| `spec.Name` | The user-friendly name for the VirtualDeployment. The name has to be unique within the same Mesh. | string | yes       |
-| `spec.compartmentId` | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment of the VirtualDeployment. | string | yes       |
-| `spec.description` |  This field stores description of a particular Virtual Deployment  | string | no       |
-| `spec.accessLogging.isEnabled`| This configuration determines if logging is enabled  | boolean    | no       |
-| `spec.VirtualService.RefOrId` | The ResourceRef(name,namespace of mesh)/Name of virtual service in which this virtual deployment is created.  | struct | yes       |
-| `spec.ServiceDiscovery.ServiceDiscoveryType` | Describes the ServiceDiscoveryType for Virtual Deployment. [`DNS`] | enum | yes       |
-| `spec.Listener.VirtualDeploymentListener.Protocol` | Type of protocol used in Virtual Deployment. [HTTP, HTTP2, GRPC, TCP, TLS_PASSTHROUGH] | enum | yes       |
-| `spec.Listener.VirtualDeploymentListener.Port` | Port on which Virtual Deployment is running.  | int | yes       |
-| `spec.freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see [Resource Tags](https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). `Example: {"Department": "Finance"}` | map[string]string  | no |
-| `spec.definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see [Resource Tags](https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). | map[string]map[string]string | no |
+| Parameter               | Description                                                                                                                                                                                                                                                                | Type                                  | Mandatory |
+|-------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------|-----------|
+| `spec.name`             | The user-friendly name for the VirtualDeployment. The name has to be unique within the same Mesh                                                                                                                                                                           | string                                | no        |
+| `spec.compartmentId`    | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment of the VirtualDeployment                                                                                                                                             | string                                | yes       |
+| `spec.description`      | Description of the Virtual Deployment                                                                                                                                                                                                                                      | string                                | no        |
+| `spec.virtualService`   | The virtual service in which this Virtual Deployment is created. Either `spec.virtualService.id` or `spec.virtualService.ref` should be provided                                                                                                                           | [RefOrId](#reforid)                   | yes       |
+| `spec.accessLogging`    | Access Logging configuration for the Virtual Deployment                                                                                                                                                                                                                    | [accessLogging](#accesslogging)       | no        |
+| `spec.serviceDiscovery` | Service Discovery configuration for the Virtual Deployment                                                                                                                                                                                                                 | [serviceDiscovery](#servicediscovery) | yes       |
+| `spec.listener`         | Listeners for the Virtual Deployment                                                                                                                                                                                                                                       | [][listener](#listener)               | yes       |
+| `spec.freeformTags`     | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see [Resource Tags](https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). `Example: {"Department": "Finance"}` | map[string]string                     | no        |
+| `spec.definedTags`      | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see [Resource Tags](https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm)                                                                        | map[string]map[string]string          | no        |
+
+### RefOrId
+| Parameter | Description                                                                                        | Type                        | Mandatory |
+|-----------|----------------------------------------------------------------------------------------------------|-----------------------------|-----------|
+| `ref`     | The reference of the resource                                                                      | [ResourceRef](#resourceref) | no        |
+| `id`      | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the resource | string                      | no        |
+
+### ResourceRef
+| Parameter   | Description                                                                                                                   | Type   | Mandatory |
+|-------------|-------------------------------------------------------------------------------------------------------------------------------|--------|-----------|
+| `namespace` | The namespace of the resource. By default, if namespace is not provided, it will use the current referring resource namespace | string | no        |
+| `name`      | The name of the resource.                                                                                                     | string | yes       |
+
+### AccessLogging
+| Parameter   | Description                                                             | Type | Mandatory |
+|-------------|-------------------------------------------------------------------------|------|-----------|
+| `isEnabled` | boolean value to enable or disable access logging on virtual deployment | bool | no        |
+
+
+### ServiceDiscovery
+| Parameter  | Description                                            | Type   | Mandatory |
+|------------|--------------------------------------------------------|--------|-----------|
+| `type`     | Type of service discovery for virtual deployment [DNS] | enum   | yes       |
+| `hostname` | host name for the Virtual Deployment                   | string | yes       |
+
+### Listener
+| Parameter  | Description                                                                       | Type | Mandatory |
+|------------|-----------------------------------------------------------------------------------|------|-----------|
+| `protocol` | communication protocol for the listener [HTTP, HTTP2, GRPC, TCP, TLS_PASSTHROUGH] | enum | yes       |
+| `port`     | port value for the listener on Virtual Deployment                                 | int  | yes       |
 
 ## Virtual Deployment Status Parameters
+| Parameter                    | Description                                                                                                       | Type                                            | Mandatory |
+|------------------------------|-------------------------------------------------------------------------------------------------------------------|-------------------------------------------------|-----------|
+| `status.meshId`              | [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of Mesh resource                   | string                                          | yes       |
+| `status.virtualServiceId`    | [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Virtual Service resource    | string                                          | yes       |
+| `status.virtualServiceName`  | Name of the Virtual Service resource                                                                              | string                                          | yes       |
+| `status.virtualDeploymentId` | [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Virtual Deployment resource | string                                          | yes       |
+| `status.conditions`          | Indicates the condition of the Virtual Deployment resource                                                        | [][ServiceMeshCondition](#servicemeshcondition) | yes       |
+| `status.lastUpdatedTime`     | Time when resource was last updated in operator                                                                   | time.Time                                       | no        |
 
-| Parameter                          | Description                                                         | Type   | Mandatory |
-| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
-| `status.servicemeshstatus.meshId` | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of Mesh resources | string | yes       |
-| `spec.servicemeshstatus.virtualServiceId` | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Virtual Service resource | string | yes       |
-| `spec.servicemeshstatus.virtualServiceName` | The name of the Virtual Service resource | string | yes       |
-| `spec.servicemeshstatus.virtualDeploymentId` | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Virtual Deployment resource | string | yes       |
-| `spec.servicemeshstatus.Conditions.ServiceMeshConditionType` | Indicates status of the service mesh resource in the control-plane. Allowed values are [`ServiceMeshActive`, `ServiceMeshDependenciesActive`,`ServiceMeshConfigured`] | enum | yes       |
-| `spec.servicemeshstatus.Conditions.ResourceCondition.Status` | status of the condition, one of True, False, Unknown. | string | yes       |
-| `spec.servicemeshstatus.Conditions.ResourceCondition.ObservedGeneration` | observedGeneration represents the .metadata.generation that the condition was set based upon. For instance, if metadata.generation is currently 12, but the status.conditions[x].observedGeneration is 9, the condition is out of date with respect to the current state of the instance. | int | yes       |
-| `spec.servicemeshstatus.Conditions.ResourceCondition.LastTransitionTime` | lastTransitionTime is the last time the condition transitioned from one status to another. | struct | yes       |
-| `spec.servicemeshstatus.Conditions.ResourceCondition.Reason` | reason contains a programmatic identifier indicating the reason for the condition's last transition. | string | yes       |
-| `spec.servicemeshstatus.Conditions.ResourceCondition.Message` | message is a human readable message indicating details about the transition. | string | yes       |
-| `spec.servicemeshstatus.LastUpdatedTime` | Time when resource was last updated in operator | time.Time | no       |
+### ServiceMeshCondition
+| Parameter            | Description                                                                                                                                                                                                                                                      | Type   | Mandatory |
+|----------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|-----------|
+| `type`               | Indicates status of the service mesh resource in the control-plane. Allowed values are [`ServiceMeshActive`, `ServiceMeshDependenciesActive`,`ServiceMeshConfigured`]                                                                                            | enum   | yes       |
+| `status`             | Current status of the condition, one of True, False, Unknown.                                                                                                                                                                                                    | string | yes       |
+| `observedGeneration` | the last `metadata.generation` that the condition was set upon. For instance, if `metadata.generation` is currently 12 but the status.conditions[x].observedGeneration is 9 then the condition is out of date with respect to the current state of the instance. | int    | yes       |
+| `lastTransitionTime` | Time when the condition last transitioned from one status to another.                                                                                                                                                                                            | struct | yes       |
+| `reason`             | A programmatic identifier indicating the reason for the condition's last transition.                                                                                                                                                                             | string | yes       |
+| `message`            | A human readable message indicating details about the transition.                                                                                                                                                                                                | string | yes       |
 
 
 ### Create Resource

@@ -16,43 +16,63 @@
 
 - [Delete Resource](#delete-resource)
 
-
 ## Introduction
 A virtual deployment binding associates the pods in your cluster to a virtual deployment in their mesh. 
 This binding resource allows enabling automatic sidecar injection, discover pods backing the virtual deployment for service discovery and automatically upgrading pods that are running an older version of the proxy software.
 
-
 ## Virtual Deployment Binding Specification Parameters
 The Complete Specification of the `VirtualDeploymentBinding` Custom Resource (CR) is as detailed below:
 
-| Parameter                          | Description                                                         | Type   | Mandatory |
-| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
-| `spec.VirtualDeployment.RefOrId` | The ResourceRef(name,namespace of mesh)/Name  Reference to virtual deployment id by ocid or name | struct | yes       |
-| `spec.Target.Service.Ref.Name` | A reference to service name the binding belongs to. | string | yes       |
-| `spec.Target.Service.Ref.Namespace` | A reference to service name the binding belongs to. | string | yes       |
-| `spec.Target.Service.matchLabels` | A set of key value pairs used to match the target | map[string]string | no       |
-| `spec.ResourceRequirements.Limits.ResourceList` |  Resource CPU and memory requirements map of resource to Quantity. It has information in resource to Quantity format  | map[string][int] | no       |
-| `spec.ResourceRequirements.Requests` |  Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. It has information in resource to Quantity format | map[string][int] | no       |
+| Parameter                | Description                                                                                                                             | Type                                          | Mandatory |
+|--------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------|-----------|
+| `spec.virtualDeployment` | The virtual deployment to bind the resource with. Either `spec.virtualDeployment.id` or `spec.virtualDeployment.ref` should be provided | [RefOrId](#reforid)                           | yes       |
+| `spec.target`            | A target kubernetes service to bind the resource with                                                                                   | string                                        | yes       |
+| `spec.resources`         | minimum and maximum compute resource requirements for the sidecar container                                                             | [ResourceRequirements](#resourcerequirements) | no        |
 
+### RefOrId
+| Parameter | Description                                                                                        | Type                        | Mandatory |
+|-----------|----------------------------------------------------------------------------------------------------|-----------------------------|-----------|
+| `ref`     | The reference of the resource                                                                      | [ResourceRef](#resourceref) | no        |
+| `id`      | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the resource | string                      | no        |
+
+### Target
+| Parameter     | Description                                                                                        | Type                        | Mandatory |
+|---------------|----------------------------------------------------------------------------------------------------|-----------------------------|-----------|
+| `service.ref` | The kubernetes service reference to bind the resource with                                         | [ResourceRef](#resourceref) | yes       |
+
+### ResourceRef
+| Parameter   | Description                                                                                                                   | Type   | Mandatory |
+|-------------|-------------------------------------------------------------------------------------------------------------------------------|--------|-----------|
+| `namespace` | The namespace of the resource. By default, if namespace is not provided, it will use the current referring resource namespace | string | no        |
+| `name`      | The name of the resource.                                                                                                     | string | yes       |
+
+### ResourceRequirements
+| Parameter  | Description                                                | Type              | Mandatory |
+|------------|------------------------------------------------------------|-------------------|-----------|
+| `limits`   | describes the maximum amount of compute resources allowed  | map[enum]quantity | no        |
+| `requests` | describes the minimum amount of compute resources required | map[enum]quantity | no        |
+ResourceRequirements on a virtualDeploymentBinding can be set in the same way as set on a normal pod container: (Requests and limits)[https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits]
 
 ## Virtual Deployment Binding Status Parameters
+| Parameter                      | Description                                                                                                       | Type                                            | Mandatory |
+|--------------------------------|-------------------------------------------------------------------------------------------------------------------|-------------------------------------------------|-----------|
+| `status.meshId`                | [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of Mesh resource                   | string                                          | yes       |
+| `status.virtualServiceId`      | [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Virtual Service resource    | string                                          | yes       |
+| `status.virtualServiceName`    | Name of the Virtual Service resource                                                                              | string                                          | yes       |
+| `status.virtualDeploymentId`   | [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Virtual Deployment resource | string                                          | yes       |
+| `status.virtualDeploymentName` | Name of the Virtual Deployment resource                                                                           | string                                          | yes       |
+| `status.conditions`            | Indicates the condition of the Virtual Deployment resource                                                        | [][ServiceMeshCondition](#servicemeshcondition) | yes       |
+| `status.lastUpdatedTime`       | Time when resource was last updated in operator                                                                   | time.Time                                       | no        |
 
-| Parameter                          | Description                                                         | Type   | Mandatory |
-| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
-| `status.servicemeshstatus.meshId` | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of Mesh resources | string | yes       |
-| `spec.servicemeshstatus.virtualServiceId` | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Virtual Service resource | string | yes       |
-| `spec.servicemeshstatus.virtualServiceName` | The name of the Virtual Service resource | string | yes       |
-| `spec.servicemeshstatus.virtualDeploymentId` | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Virtual Deployment resource | string | yes       |
-| `spec.servicemeshstatus.virtualDeploymentName` | The name of the Virtual Deployment | string | yes       |
-| `spec.servicemeshstatus.Conditions.ServiceMeshConditionType` | Indicates status of the service mesh resource in the control-plane. Allowed values are [`ServiceMeshActive`, `ServiceMeshDependenciesActive`,`ServiceMeshConfigured`] | enum | yes       |
-| `spec.servicemeshstatus.Conditions.ResourceCondition.Status` | status of the condition, one of True, False, Unknown. | string | yes       |
-| `spec.servicemeshstatus.Conditions.ResourceCondition.ObservedGeneration` | observedGeneration represents the .metadata.generation that the condition was set based upon. For instance, if metadata.generation is currently 12, but the status.conditions[x].observedGeneration is 9, the condition is out of date with respect to the current state of the instance. | int | yes       |
-| `spec.servicemeshstatus.Conditions.ResourceCondition.LastTransitionTime` | lastTransitionTime is the last time the condition transitioned from one status to another. | struct | yes       |
-| `spec.servicemeshstatus.Conditions.ResourceCondition.Reason` | reason contains a programmatic identifier indicating the reason for the condition's last transition. | string | yes       |
-| `spec.servicemeshstatus.Conditions.ResourceCondition.Message` | message is a human readable message indicating details about the transition. | string | yes       |
-| `spec.servicemeshstatus.LastUpdatedTime` | Time when resource was last updated in operator | time.Time | no       |
-
-
+### ServiceMeshCondition
+| Parameter            | Description                                                                                                                                                                                                                                                      | Type   | Mandatory |
+|----------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|-----------|
+| `type`               | Indicates status of the service mesh resource in the control-plane. Allowed values are [`ServiceMeshActive`, `ServiceMeshDependenciesActive`,`ServiceMeshConfigured`]                                                                                            | enum   | yes       |
+| `status`             | Current status of the condition, one of True, False, Unknown.                                                                                                                                                                                                    | string | yes       |
+| `observedGeneration` | the last `metadata.generation` that the condition was set upon. For instance, if `metadata.generation` is currently 12 but the status.conditions[x].observedGeneration is 9 then the condition is out of date with respect to the current state of the instance. | int    | yes       |
+| `lastTransitionTime` | Time when the condition last transitioned from one status to another.                                                                                                                                                                                            | struct | yes       |
+| `reason`             | A programmatic identifier indicating the reason for the condition's last transition.                                                                                                                                                                             | string | yes       |
+| `message`            | A human readable message indicating details about the transition.                                                                                                                                                                                                | string | yes       |
 
 ### Create Resource
 Resource can be created either by referencing virtual deployment name or virtual deployment OCID.
@@ -69,14 +89,19 @@ spec:
   podUpgradeEnabled: true
   virtualDeployment:
     ref:
-      name: <vd-name>-version1 # Virtual Deployment Name
+      name: <vd-name> # Virtual Deployment Name
   target:
     service:
       ref:
         name: <kubernetes-service-name> # Name of Kubernetes Service
         namespace: <kubernetes-service-namespace> # Name of Kubernetes Service namespace
-      matchLabels: # Labels for the Kubernetes service
-        version: v1
+  resources:
+    requests:
+      memory: "64Mi"
+      cpu: "250m"
+    limits:
+      memory: "128Mi"
+      cpu: "500m"
 ```
 
 - Create your virtual deployment binding using the virtual deployment OCID.
@@ -96,8 +121,13 @@ spec:
       ref:
         name: <kubernetes-service-name> # Name of Kubernetes Service
         namespace: <kubernetes-service-namespace> # Name of Kubernetes Service namespace
-      matchLabels: # Labels for the Kubernetes service
-        version: v1
+  resources:
+    requests:
+      memory: "64Mi"
+      cpu: "250m"
+    limits:
+      memory: "128Mi"
+      cpu: "500m"
 ```
 
 Run the following command to create a CR in the cluster:
@@ -143,14 +173,12 @@ spec:
   podUpgradeEnabled: <true/false>
   virtualDeployment:
     ref:
-      name: <updated-vd-name>-version1 # Updated Virtual Deployment Name
+      name: <updated-vd-name> # Updated Virtual Deployment Name
   target:
     service:
       ref:
         name: <kubernetes-service-name> # Name of Kubernetes Service
         namespace: <kubernetes-service-namespace> # Name of Kubernetes Service namespace
-      matchLabels: # Labels for the Kubernetes service
-        version: v1
 ```
 
 ```sh

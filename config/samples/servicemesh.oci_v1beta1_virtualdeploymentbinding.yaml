@@ -17,5 +17,3 @@ spec:
       ref:
         name: productpage
         namespace: bookinfo
-      matchLabels:
-        version: v1
