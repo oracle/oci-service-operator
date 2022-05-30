@@ -27,32 +27,82 @@ The Complete Specification of the `IngressGatewayDeployment` Custom Resource (CR
 
 | Parameter                          | Description                                                         | Type   | Mandatory |
 | ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
-| `spec.IngressGateway.RefOrId` | The OCID/name of Ingress Gateway. Either name or Id is required | string | yes       |
-| `spec.IngressDeployment.Autoscaling.MinPods` | Minimum number of pods in Ingress Deployment | int | yes       |
-| `spec.IngressDeployment.Autoscaling.MaxPods` | Maximum number of pods in Ingress Deployment | int | yes       |
-| `spec.GatewayListener.Protocol` | Name of protocol | string | yes       |
-| `spec.GatewayListener.Port` | Port of Gateway | int | yes       |
-| `spec.GatewayListener.ServicePort` | ServicePort in Ingress Deployment | int | no       |
-| `spec.GatewayListener.Name` |  An Optional name in Ingress Gateway Deployment for the Listener  | string | no       |
-| `spec.IngressGatewayService.Name` | An enum specifying the type of Service ['NodePort', 'LoadBalancer', 'ClusterIP'] | enum | no       |
-| `spec.IngressGatewayService.Labels` | Map of string keys and values that can be used to organize and categorize (scope and select) objects. May match selectors of replication controllers and services. |  map[string]string  | no       |
-| `spec.IngressGatewayService.Annotations` | an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata.  | map[string]string | no       |
-| `spec.Secrets.SecretName` |  Reference to kubernetes secret containing tls certificates/trust-chains for ingress gateway.   | string | no       |
+| `spec.ingressGateway` | The Ingress Gateway for which this Ingress Gateway Deployment is created. Either `spec.ingressGateway.id` or `spec.ingressGateway.ref` should be provided. | [RefOrId](#reforid) | yes       |
+| `spec.deployment` | Deployment configuration for this Ingress Gateway Deployment | [Deployment](#deployment) | yes      |
+| `spec.port` | Port configuration of Ingress Gateway Deployment | [][Port](#port) | yes       |
+| `spec.secrect` | Reference to kubernetes secret containing tls certificates/trust-chains for ingress gateway | [][Secret](#secret) | no        |
+| `spec.service` | Configuration for service in Ingress Gateway Deployment | [Service](#service) | no        |
+
+### RefOrId
+| Parameter                          | Description                                                         | Type   | Mandatory |
+| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
+| `ref` | The reference of the resource. | [ResourceRef](#resourceref) | no       |
+| `id` | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the resource. | string | no       |
+
+### ResourceRef
+| Parameter                          | Description                                                         | Type   | Mandatory |
+| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
+| `namespace` | The namespace of the resource. By default, if namespace is not provided, it will use the current referring resource namespace.  | string | no       |
+| `name` | The name of the resource. | string | yes       |
+
+### Deployment
+| Parameter                          | Description                                                         | Type   | Mandatory |
+| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
+| `autoscaling` | Contains information about min and max replicas for Ingress Gateway Deployment Resource | [Autoscaling](#autoscaling) | yes       |
+| `labels` | Additional label information for Ingress Gateway Deployment | string | no        |
+
+### Autoscaling
+| Parameter                          | Description                                                         | Type   | Mandatory |
+| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
+| `maxPods` | Maximum number of pods available for Ingress Gateway Deployment Resource | integer | yes       |
+| `minPods` | Minimum number of pods available for Ingress Gateway Deployment Resource | integer | yes       |
+| `resources` | ResourceRequirements describes the compute resource requirements. | [Resources](#resources) | no        |
+
+### Resources
+| Parameter                          | Description                                                         | Type   | Mandatory |
+| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
+| `limits` | Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/ | map[string]integer | no       |
+| `requests` | Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/ | map[string]integer | no        |
+
+### Port
+| Parameter                          | Description                                                         | Type   | Mandatory |
+| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
+| `name` | An optional name in Ingress Gateway Deployment for the listener. | string | no        |
+| `port` | The port of the Ingress Gateway Deployment. | integer | yes       |
+| `protocol` | Type of protocol used in resource. Default value is 'TCP'. | string | yes       |
+| `serviceport` | The service port in the Ingress Gateway Deployment. | integer | no        |
+
+### Secret
+| Parameter                          | Description                                                         | Type   | Mandatory |
+| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
+| `secrectName` | name of the secret, this secret should reside in the same namespace as the gateway | string | yes       |
+
+### Service
+| Parameter                          | Description                                                         | Type   | Mandatory |
+| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
+| `type` | An enum specifying the ingress methods for a service ['NodePort', 'LoadBalancer', 'ClusterIP'] | enum | yes       |
+| `annotation` | Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects. More info: http://kubernetes.io/docs/user-guide/annotations | map[string]string | no       |
+| `labels` | Map of string keys and values that can be used to organize and categorize (scope and select) objects. May match selectors of replication controllers and services. More info: http://kubernetes.io/docs/user-guide/labels |  map[string]string  | no       |
 
 ## Ingress Gateway Deployment Status Parameters
 
 | Parameter                          | Description                                                         | Type   | Mandatory |
 | ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
-| `status.servicemeshstatus.meshId` | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of Mesh resources | string | yes       |
-| `spec.servicemeshstatus.ingressGatewayId` | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Ingress Gateway resource | string | yes       |
-| `spec.servicemeshstatus.ingressGatewayName` | The name of the Ingress Gateway resource | string | yes       |
-| `spec.servicemeshstatus.Conditions.ServiceMeshConditionType` | Indicates status of the service mesh resource in the control-plane. Allowed values are [`ServiceMeshActive`, `ServiceMeshDependenciesActive`,`ServiceMeshConfigured`] | enum | yes       |
-| `spec.servicemeshstatus.Conditions.ResourceCondition.Status` | status of the condition, one of True, False, Unknown. | string | yes       |
-| `spec.servicemeshstatus.Conditions.ResourceCondition.ObservedGeneration` | observedGeneration represents the .metadata.generation that the condition was set based upon. For instance, if metadata.generation is currently 12, but the status.conditions[x].observedGeneration is 9, the condition is out of date with respect to the current state of the instance. | int | yes       |
-| `spec.servicemeshstatus.Conditions.ResourceCondition.LastTransitionTime` | lastTransitionTime is the last time the condition transitioned from one status to another. | struct | yes       |
-| `spec.servicemeshstatus.Conditions.ResourceCondition.Reason` | reason contains a programmatic identifier indicating the reason for the condition's last transition. | string | yes       |
-| `spec.servicemeshstatus.Conditions.ResourceCondition.Message` | message is a human readable message indicating details about the transition. | string | yes       |
-| `spec.servicemeshstatus.LastUpdatedTime` | Time when resource was last updated in operator | time.Time | no       |
+| `status.meshId` | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of Mesh resources | string | yes       |
+| `status.ingressGatewayId` | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Ingress Gateway resource | string | yes       |
+| `status.ingressGatewayName` | The name of the Ingress Gateway resource | string | yes       |
+| `status.conditions` | Indicates the condition of the Service mesh resource | [][ServiceMeshCondition](#servicemeshcondition) | yes       |
+| `status.LastUpdatedTime` | Time when resource was last updated in operator | time.Time | no       |
+
+### ServiceMeshCondition
+| Parameter                          | Description                                                         | Type   | Mandatory |
+| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
+| `type` | Indicates status of the service mesh resource in the control-plane. Allowed values are [`ServiceMeshActive`, `ServiceMeshDependenciesActive`,`ServiceMeshConfigured`] | enum | yes       |
+| `status` | status of the condition, one of True, False, Unknown. | string | yes       |
+| `observedGeneration` | observedGeneration represents the .metadata.generation that the condition was set based upon. For instance, if metadata.generation is currently 12, but the status.conditions[x].observedGeneration is 9, the condition is out of date with respect to the current state of the instance. | int | yes       |
+| `lastTransitionTime` | lastTransitionTime is the last time the condition transitioned from one status to another. | struct | yes       |
+| `reason` | reason contains a programmatic identifier indicating the reason for the condition's last transition. | string | yes       |
+| `message` | message is a human readable message indicating details about the transition. | string | yes       |
 
 
 ### Create Resource
