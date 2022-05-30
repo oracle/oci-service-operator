@@ -34,7 +34,7 @@ The Complete Specification of the `IngressGateway` Custom Resource (CR) is as de
 | `spec.description` |  The description of the IngressGateway  | string | no       |
 | `spec.mesh` | The service mesh in which this ingress gateway is created. Either `id` or `ref` should be provided. | [RefOrId](#reforid) | yes       |
 | `spec.hosts` | An array of hostnames and their listener configuration that this ingress gateway will bind to | [Hosts](#hosts) | yes       |
-| `spec.accessLogging.isEnabled`| This configuration determines if logging is enabled  | boolean    | no       |
+| `spec.accessLogging`| AccessLogging information  | [AccessLogging](#accessLogging) | no       |
 | `spec.freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see [Resource Tags](https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). `Example: {"Department": "Finance"}` | map[string]string  | no |
 | `spec.definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see [Resource Tags](https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). | map[string]map[string]string | no |
 
@@ -108,6 +108,12 @@ The Complete Specification of the `IngressGateway` Custom Resource (CR) is as de
 | Parameter                          | Description                                                         | Type   | Mandatory |
 | ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
 | `certificateId` | The OCID of the leaf certificate resource. | string | yes       |
+
+### AccessLogging
+| Parameter                          | Description                                                         | Type   | Mandatory |
+| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
+| `isEnabled`| This configuration determines if logging is enabled  | boolean    | no       |
+
 
 ## Ingress Gateway Status Parameters
 
