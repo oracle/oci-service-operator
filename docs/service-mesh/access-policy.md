@@ -64,8 +64,7 @@ The Complete Specification of the `AccessPolicy` Custom Resource (CR) is as deta
 | `externalService` | Access policy rule will apply to target external service. One of `tcpExternalService`, `httpExternalService` or `httpsExternalService` should be provided. | [ExternalService](#externalservice) |  no       |
 
 ### AllVirtualServices
-| Parameter                          | Description                                                         | Type   | Mandatory |
-| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
+No parameter for AllVirtualServices
 
 ### ExternalService
 | Parameter                          | Description                                                         | Type   | Mandatory |
