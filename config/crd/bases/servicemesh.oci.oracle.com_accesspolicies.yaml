@@ -119,8 +119,12 @@ spec:
                       type: string
                     destination:
                       description: Describes the target of the traffic. This can either
-                        be the source or the destination of the traffic. Only 1 of
-                        the following fields can be specified.
+                        be the source or the destination of the traffic. The source
+                        of traffic can be defined by specifying only one of the "allVirtualServices",
+                        "virtualService" or "ingressGateway" property. The destination
+                        of the traffic can be defined by specifying only one of the
+                        "allVirtualServices", "virtualService" or "externalService"
+                        property.
                       properties:
                         allVirtualServices:
                           description: AllVirtualServices represents all virtual services
@@ -133,8 +137,7 @@ spec:
                             httpExternalService:
                               properties:
                                 hostnames:
-                                  description: IpAddresses of the external service
-                                    in CIDR notation.
+                                  description: Host names of the external service.
                                   items:
                                     type: string
                                   minItems: 1
@@ -152,8 +155,7 @@ spec:
                             httpsExternalService:
                               properties:
                                 hostnames:
-                                  description: IpAddresses of the external service
-                                    in CIDR notation.
+                                  description: Host names of the external service.
                                   items:
                                     type: string
                                   minItems: 1
@@ -239,8 +241,12 @@ spec:
                       type: object
                     source:
                       description: Describes the target of the traffic. This can either
-                        be the source or the destination of the traffic. Only 1 of
-                        the following fields can be specified.
+                        be the source or the destination of the traffic. The source
+                        of traffic can be defined by specifying only one of the "allVirtualServices",
+                        "virtualService" or "ingressGateway" property. The destination
+                        of the traffic can be defined by specifying only one of the
+                        "allVirtualServices", "virtualService" or "externalService"
+                        property.
                       properties:
                         allVirtualServices:
                           description: AllVirtualServices represents all virtual services
@@ -253,8 +259,7 @@ spec:
                             httpExternalService:
                               properties:
                                 hostnames:
-                                  description: IpAddresses of the external service
-                                    in CIDR notation.
+                                  description: Host names of the external service.
                                   items:
                                     type: string
                                   minItems: 1
@@ -272,8 +277,7 @@ spec:
                             httpsExternalService:
                               properties:
                                 hostnames:
-                                  description: IpAddresses of the external service
-                                    in CIDR notation.
+                                  description: Host names of the external service.
                                   items:
                                     type: string
                                   minItems: 1
