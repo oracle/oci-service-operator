@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/). This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2022-05-23
+### Added
+- Removed 'FixedLogs' in OSOKLogger
+- Pass fixed log information to OSOKLogger through context of a request
+- Save retry token before sending request to control-plane
+
 ## [1.1.0] - 2022-04-27
 ### Added
 - Support for Service Mesh Service
