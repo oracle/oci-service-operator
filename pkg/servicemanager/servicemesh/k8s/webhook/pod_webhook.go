@@ -191,7 +191,7 @@ func mutateProbe(probe *corev1.Probe, probeName string, containerPorts []corev1.
 		if host == "" {
 			host = commons.LocalHost
 		}
-		logger.InfoLog("Setting HTTPGet values" + " meshUserScheme " + meshUserScheme + " meshUserPort " + meshUserPort + " meshUserPath " + meshUserPath + " host " + host)
+		_ = fmt.Sprintf("Setting HTTPGet values meshUserScheme:%s meshUserPort:%s meshUserPath:%s host:%s", meshUserScheme, meshUserPort, meshUserPath, host)
 	} else if probe.TCPSocket != nil {
 		meshUserScheme = "tcp"
 		meshUserPort = probe.TCPSocket.Port.String()
@@ -199,7 +199,7 @@ func mutateProbe(probe *corev1.Probe, probeName string, containerPorts []corev1.
 		if host == "" {
 			host = commons.LocalHost
 		}
-		logger.InfoLog("Setting TCP values" + " meshUserScheme " + meshUserScheme + " meshUserPort " + meshUserPort + " host " + host)
+		_ = fmt.Sprintf("Setting TCP values meshUserScheme:%s meshUserPort:%s host:%s ", meshUserScheme, meshUserPort, host)
 		// after extraction point tcp socket to nil
 		probe.TCPSocket = nil
 
