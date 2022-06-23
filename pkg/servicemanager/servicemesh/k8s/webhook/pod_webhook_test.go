@@ -124,6 +124,7 @@ func TestMutateWebhook(t *testing.T) {
 		matchServiceSelector bool
 		createConfigMap      bool
 		activeVDB            bool
+		typeOfProbe          string
 	}
 	type expected struct {
 		hasSidecar       bool
@@ -142,6 +143,28 @@ func TestMutateWebhook(t *testing.T) {
 		want expected
 	}{
 		{
+			name: "TCP probe",
+			args: args{
+				namespaceLabel:       commons.Enabled,
+				podLabel:             commons.Enabled,
+				matchServiceSelector: true,
+				createConfigMap:      true,
+				activeVDB:            true,
+				typeOfProbe:          commons.Tcp,
+			},
+			want: expected{
+				hasSidecar:       true,
+				hasAnnotation:    false,
+				isAllowed:        true,
+				hasInitContainer: true,
+				hasScheme:        false,
+				hasPath:          false,
+				hasPort:          false,
+				hasHttpHeaders:   false,
+				patchsize:        7,
+			},
+		},
+		{
 			name: "Create patch",
 			args: args{
 				namespaceLabel:       commons.Enabled,
@@ -149,6 +172,7 @@ func TestMutateWebhook(t *testing.T) {
 				matchServiceSelector: true,
 				createConfigMap:      true,
 				activeVDB:            true,
+				typeOfProbe:          commons.Http,
 			},
 			want: expected{
 				hasSidecar:       true,
@@ -170,6 +194,7 @@ func TestMutateWebhook(t *testing.T) {
 				matchServiceSelector: true,
 				createConfigMap:      false,
 				activeVDB:            false,
+				typeOfProbe:          commons.Http,
 			},
 			want: expected{
 				hasSidecar:       false,
@@ -187,6 +212,7 @@ func TestMutateWebhook(t *testing.T) {
 				podLabel:             commons.Enabled,
 				matchServiceSelector: false,
 				createConfigMap:      false,
+				typeOfProbe:          commons.Http,
 			},
 			want: expected{
 				hasSidecar:       false,
@@ -203,6 +229,7 @@ func TestMutateWebhook(t *testing.T) {
 				namespaceLabel:       commons.Enabled,
 				podLabel:             commons.Disabled,
 				matchServiceSelector: true,
+				typeOfProbe:          commons.Http,
 			},
 			want: expected{
 				hasSidecar:       false,
@@ -219,6 +246,7 @@ func TestMutateWebhook(t *testing.T) {
 				namespaceLabel:       commons.Disabled,
 				podLabel:             commons.Disabled,
 				matchServiceSelector: true,
+				typeOfProbe:          commons.Http,
 			},
 			want: expected{
 				hasSidecar:       false,
@@ -237,6 +265,7 @@ func TestMutateWebhook(t *testing.T) {
 				matchServiceSelector: true,
 				createConfigMap:      true,
 				activeVDB:            true,
+				typeOfProbe:          commons.Http,
 			},
 			want: expected{
 				hasSidecar:       true,
@@ -259,6 +288,7 @@ func TestMutateWebhook(t *testing.T) {
 				matchServiceSelector: true,
 				createConfigMap:      false,
 				activeVDB:            false,
+				typeOfProbe:          commons.Http,
 			},
 			want: expected{
 				hasSidecar:       false,
@@ -274,6 +304,7 @@ func TestMutateWebhook(t *testing.T) {
 			args: args{
 				podLabel:             commons.Disabled,
 				matchServiceSelector: true,
+				typeOfProbe:          commons.Http,
 			},
 			want: expected{
 				hasSidecar:       false,
@@ -316,33 +347,10 @@ func TestMutateWebhook(t *testing.T) {
 			}
 		}
 
-		for i, container := range pod.Spec.Containers {
-			if container.Name == "test" {
-				pod.Spec.Containers[i].Ports = []corev1.ContainerPort{{Name: "http", ContainerPort: 8080, Protocol: corev1.ProtocolTCP}}
-				pod.Spec.Containers[i].LivenessProbe = &corev1.Probe{
-					Handler: corev1.Handler{
-						HTTPGet: &corev1.HTTPGetAction{
-							Path: commons.LivenessProbeEndpointPath,
-							Port: intstr.IntOrString{
-								Type:   intstr.Int,
-								IntVal: 8080,
-							},
-						},
-					},
-					InitialDelaySeconds: commons.LivenessProbeInitialDelaySeconds,
-				}
-				pod.Spec.Containers[i].ReadinessProbe = &corev1.Probe{
-					Handler: corev1.Handler{
-						HTTPGet: &corev1.HTTPGetAction{
-							Path: "/ready",
-							Port: intstr.IntOrString{
-								Type:   intstr.String,
-								StrVal: "http",
-							},
-						},
-					},
-				}
-			}
+		if tt.args.typeOfProbe == commons.Http {
+			setHTTPProbes(pod)
+		} else if tt.args.typeOfProbe == commons.Tcp {
+			setTCPProbes(pod)
 		}
 
 		podRaw, rawErr := json.Marshal(pod)
@@ -396,5 +404,67 @@ func TestMutateWebhook(t *testing.T) {
 		}
 		assert.Equal(t, tt.want.patchsize, len(response.Patches))
 		AfterTest(t)
+	}
+}
+
+func setTCPProbes(pod *corev1.Pod) {
+	for i, container := range pod.Spec.Containers {
+		if container.Name == "test" {
+			pod.Spec.Containers[i].Ports = []corev1.ContainerPort{{Name: "http", ContainerPort: 8080, Protocol: corev1.ProtocolTCP}}
+			pod.Spec.Containers[i].LivenessProbe = &corev1.Probe{
+				Handler: corev1.Handler{
+					TCPSocket: &corev1.TCPSocketAction{
+						Port: intstr.IntOrString{
+							Type:   intstr.Int,
+							IntVal: 8080,
+						},
+						Host: "localhost",
+					},
+				},
+				InitialDelaySeconds: commons.LivenessProbeInitialDelaySeconds,
+			}
+			pod.Spec.Containers[i].ReadinessProbe = &corev1.Probe{
+				Handler: corev1.Handler{
+					TCPSocket: &corev1.TCPSocketAction{
+						Port: intstr.IntOrString{
+							Type:   intstr.String,
+							StrVal: "http",
+						},
+						Host: "localhost",
+					},
+				},
+			}
+		}
+	}
+}
+
+func setHTTPProbes(pod *corev1.Pod) {
+	for i, container := range pod.Spec.Containers {
+		if container.Name == "test" {
+			pod.Spec.Containers[i].Ports = []corev1.ContainerPort{{Name: "http", ContainerPort: 8080, Protocol: corev1.ProtocolTCP}}
+			pod.Spec.Containers[i].LivenessProbe = &corev1.Probe{
+				Handler: corev1.Handler{
+					HTTPGet: &corev1.HTTPGetAction{
+						Path: commons.LivenessProbeEndpointPath,
+						Port: intstr.IntOrString{
+							Type:   intstr.Int,
+							IntVal: 8080,
+						},
+					},
+				},
+				InitialDelaySeconds: commons.LivenessProbeInitialDelaySeconds,
+			}
+			pod.Spec.Containers[i].ReadinessProbe = &corev1.Probe{
+				Handler: corev1.Handler{
+					HTTPGet: &corev1.HTTPGetAction{
+						Path: "/ready",
+						Port: intstr.IntOrString{
+							Type:   intstr.String,
+							StrVal: "http",
+						},
+					},
+				},
+			}
+		}
 	}
 }
