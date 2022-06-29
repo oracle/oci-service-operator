@@ -68,6 +68,9 @@ const (
 	MetadataNameMaxLength = 190
 
 	DeploymentAPIVersion = "apps/v1"
+
+	Http = "http"
+	Tcp  = "tcp"
 )
 
 type SidecarResourceRequirements string
