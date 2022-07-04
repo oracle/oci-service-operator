@@ -38,8 +38,10 @@ const (
 	InitContainerName  = "init"
 	ProxyContainerName = "oci-sm-proxy"
 
-	// Net Admin Capability
+	// linux capabilities
+	AllCapabilites     = "ALL"
 	NetAdminCapability = "NET_ADMIN"
+	NetRawCapability   = "NET_RAW"
 
 	OsokNamespace              = "oci-service-operator-system"
 	ProxyLabelInMeshConfigMap  = "SIDECAR_IMAGE"
@@ -206,7 +208,8 @@ type ProxyEnvVars string
 const (
 	DeploymentId  ProxyEnvVars = "DEPLOYMENT_ID"
 	ProxyLogLevel ProxyEnvVars = "PROXY_LOG_LEVEL"
-	IPAddress     ProxyEnvVars = "IP_ADDRESS"
+	IPAddress     ProxyEnvVars = "IP_ADDRESS" // this is deprecated in favor of POD_IP
+	PodIp         ProxyEnvVars = "POD_IP"
 	StatsPort     int32        = 15006
 )
 
