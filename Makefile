@@ -125,7 +125,7 @@ build: generate fmt vet ## Build manager binary.
 run: manifests generate fmt vet ## Run a controller from your host.
 	go run ./main.go
 
-docker-build: bundle ## Build docker image with the manager and CRDs
+docker-build: test bundle ## Build docker image with the manager and CRDs
 	docker build -t ${IMG} .
 
 docker-push: ## Push docker image with the manager.

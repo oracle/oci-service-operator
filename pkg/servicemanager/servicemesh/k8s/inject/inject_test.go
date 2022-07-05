@@ -6,6 +6,7 @@
 package inject
 
 import (
+	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/conversions"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -54,9 +55,20 @@ func Test_inject(t *testing.T) {
 				Spec: corev1.PodSpec{
 					InitContainers: []corev1.Container{
 						{
-							Name:            commons.InitContainerName,
-							Image:           proxyImageValue,
-							SecurityContext: &corev1.SecurityContext{Capabilities: &corev1.Capabilities{Add: []corev1.Capability{commons.NetAdminCapability}}},
+							Name:  commons.InitContainerName,
+							Image: proxyImageValue,
+							SecurityContext: &corev1.SecurityContext{
+								Capabilities: &corev1.Capabilities{
+									Drop: []corev1.Capability{commons.AllCapabilites},
+									Add:  []corev1.Capability{commons.NetAdminCapability, commons.NetRawCapability},
+								},
+								Privileged:               conversions.Bool(false),
+								RunAsUser:                conversions.Int64(0),
+								RunAsGroup:               conversions.Int64(0),
+								RunAsNonRoot:             conversions.Bool(false),
+								ReadOnlyRootFilesystem:   conversions.Bool(true),
+								AllowPrivilegeEscalation: conversions.Bool(false),
+							},
 							Env: []corev1.EnvVar{
 								{
 									Name:  string(commons.ConfigureIpTablesEnvName),
@@ -66,6 +78,14 @@ func Test_inject(t *testing.T) {
 									Name:  string(commons.EnvoyPortEnvVarName),
 									Value: string(commons.EnvoyPortEnvVarValue),
 								},
+								{
+									Name: string(commons.PodIp),
+									ValueFrom: &corev1.EnvVarSource{
+										FieldRef: &corev1.ObjectFieldSelector{
+											FieldPath: "status.podIP",
+										},
+									},
+								},
 							},
 						},
 					},
@@ -73,6 +93,17 @@ func Test_inject(t *testing.T) {
 						{
 							Name:  commons.ProxyContainerName,
 							Image: proxyImageValue,
+							SecurityContext: &corev1.SecurityContext{
+								Capabilities: &corev1.Capabilities{
+									Drop: []corev1.Capability{commons.AllCapabilites},
+								},
+								Privileged:               conversions.Bool(false),
+								RunAsUser:                conversions.Int64(0),
+								RunAsGroup:               conversions.Int64(0),
+								RunAsNonRoot:             conversions.Bool(false),
+								ReadOnlyRootFilesystem:   conversions.Bool(false),
+								AllowPrivilegeEscalation: conversions.Bool(false),
+							},
 							Ports: []corev1.ContainerPort{
 								{
 									ContainerPort: commons.StatsPort,
@@ -88,6 +119,14 @@ func Test_inject(t *testing.T) {
 								},
 								{
 									Name: string(commons.IPAddress),
+									ValueFrom: &corev1.EnvVarSource{
+										FieldRef: &corev1.ObjectFieldSelector{
+											FieldPath: "status.podIP",
+										},
+									},
+								},
+								{
+									Name: string(commons.PodIp),
 									ValueFrom: &corev1.EnvVarSource{
 										FieldRef: &corev1.ObjectFieldSelector{
 											FieldPath: "status.podIP",

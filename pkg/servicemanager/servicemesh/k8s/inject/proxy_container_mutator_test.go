@@ -6,6 +6,7 @@
 package inject
 
 import (
+	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/conversions"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -57,6 +58,17 @@ func Test_proxy_container_mutate(t *testing.T) {
 						{
 							Name:  commons.ProxyContainerName,
 							Image: proxyImageValue,
+							SecurityContext: &corev1.SecurityContext{
+								Capabilities: &corev1.Capabilities{
+									Drop: []corev1.Capability{commons.AllCapabilites},
+								},
+								Privileged:               conversions.Bool(false),
+								RunAsUser:                conversions.Int64(0),
+								RunAsGroup:               conversions.Int64(0),
+								RunAsNonRoot:             conversions.Bool(false),
+								ReadOnlyRootFilesystem:   conversions.Bool(false),
+								AllowPrivilegeEscalation: conversions.Bool(false),
+							},
 							Ports: []corev1.ContainerPort{
 								{
 									ContainerPort: commons.StatsPort,
@@ -72,6 +84,14 @@ func Test_proxy_container_mutate(t *testing.T) {
 								},
 								{
 									Name: string(commons.IPAddress),
+									ValueFrom: &corev1.EnvVarSource{
+										FieldRef: &corev1.ObjectFieldSelector{
+											FieldPath: "status.podIP",
+										},
+									},
+								},
+								{
+									Name: string(commons.PodIp),
 									ValueFrom: &corev1.EnvVarSource{
 										FieldRef: &corev1.ObjectFieldSelector{
 											FieldPath: "status.podIP",
@@ -136,6 +156,17 @@ func Test_proxy_container_mutate(t *testing.T) {
 						{
 							Name:  commons.ProxyContainerName,
 							Image: proxyImageValue,
+							SecurityContext: &corev1.SecurityContext{
+								Capabilities: &corev1.Capabilities{
+									Drop: []corev1.Capability{commons.AllCapabilites},
+								},
+								Privileged:               conversions.Bool(false),
+								RunAsUser:                conversions.Int64(0),
+								RunAsGroup:               conversions.Int64(0),
+								RunAsNonRoot:             conversions.Bool(false),
+								ReadOnlyRootFilesystem:   conversions.Bool(false),
+								AllowPrivilegeEscalation: conversions.Bool(false),
+							},
 							Ports: []corev1.ContainerPort{
 								{
 									ContainerPort: commons.StatsPort,
@@ -151,6 +182,14 @@ func Test_proxy_container_mutate(t *testing.T) {
 								},
 								{
 									Name: string(commons.IPAddress),
+									ValueFrom: &corev1.EnvVarSource{
+										FieldRef: &corev1.ObjectFieldSelector{
+											FieldPath: "status.podIP",
+										},
+									},
+								},
+								{
+									Name: string(commons.PodIp),
 									ValueFrom: &corev1.EnvVarSource{
 										FieldRef: &corev1.ObjectFieldSelector{
 											FieldPath: "status.podIP",
@@ -218,6 +257,17 @@ func Test_proxy_container_mutate(t *testing.T) {
 						{
 							Name:  commons.ProxyContainerName,
 							Image: proxyImageValue,
+							SecurityContext: &corev1.SecurityContext{
+								Capabilities: &corev1.Capabilities{
+									Drop: []corev1.Capability{commons.AllCapabilites},
+								},
+								Privileged:               conversions.Bool(false),
+								RunAsUser:                conversions.Int64(0),
+								RunAsGroup:               conversions.Int64(0),
+								RunAsNonRoot:             conversions.Bool(false),
+								ReadOnlyRootFilesystem:   conversions.Bool(false),
+								AllowPrivilegeEscalation: conversions.Bool(false),
+							},
 							Ports: []corev1.ContainerPort{
 								{
 									ContainerPort: commons.StatsPort,
@@ -233,6 +283,14 @@ func Test_proxy_container_mutate(t *testing.T) {
 								},
 								{
 									Name: string(commons.IPAddress),
+									ValueFrom: &corev1.EnvVarSource{
+										FieldRef: &corev1.ObjectFieldSelector{
+											FieldPath: "status.podIP",
+										},
+									},
+								},
+								{
+									Name: string(commons.PodIp),
 									ValueFrom: &corev1.EnvVarSource{
 										FieldRef: &corev1.ObjectFieldSelector{
 											FieldPath: "status.podIP",
@@ -304,6 +362,17 @@ func Test_proxy_container_mutate(t *testing.T) {
 						{
 							Name:  commons.ProxyContainerName,
 							Image: proxyImageValue,
+							SecurityContext: &corev1.SecurityContext{
+								Capabilities: &corev1.Capabilities{
+									Drop: []corev1.Capability{commons.AllCapabilites},
+								},
+								Privileged:               conversions.Bool(false),
+								RunAsUser:                conversions.Int64(0),
+								RunAsGroup:               conversions.Int64(0),
+								RunAsNonRoot:             conversions.Bool(false),
+								ReadOnlyRootFilesystem:   conversions.Bool(false),
+								AllowPrivilegeEscalation: conversions.Bool(false),
+							},
 							Ports: []corev1.ContainerPort{
 								{
 									ContainerPort: commons.StatsPort,
@@ -320,6 +389,14 @@ func Test_proxy_container_mutate(t *testing.T) {
 								},
 								{
 									Name: string(commons.IPAddress),
+									ValueFrom: &corev1.EnvVarSource{
+										FieldRef: &corev1.ObjectFieldSelector{
+											FieldPath: "status.podIP",
+										},
+									},
+								},
+								{
+									Name: string(commons.PodIp),
 									ValueFrom: &corev1.EnvVarSource{
 										FieldRef: &corev1.ObjectFieldSelector{
 											FieldPath: "status.podIP",
