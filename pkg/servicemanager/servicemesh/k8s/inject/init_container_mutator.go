@@ -27,12 +27,10 @@ func (mctx *initMutator) mutate(pod *corev1.Pod) error {
 				Drop: []corev1.Capability{commons.AllCapabilites},
 				Add:  []corev1.Capability{commons.NetAdminCapability, commons.NetRawCapability},
 			},
-			Privileged:               conversions.Bool(false),
-			RunAsUser:                conversions.Int64(0),
-			RunAsGroup:               conversions.Int64(0),
-			RunAsNonRoot:             conversions.Bool(false),
-			ReadOnlyRootFilesystem:   conversions.Bool(true),
-			AllowPrivilegeEscalation: conversions.Bool(false),
+			Privileged:   conversions.Bool(false),
+			RunAsUser:    conversions.Int64(0),
+			RunAsGroup:   conversions.Int64(0),
+			RunAsNonRoot: conversions.Bool(false),
 		},
 		Env: []corev1.EnvVar{
 			{

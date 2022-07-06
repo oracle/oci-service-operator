@@ -6,8 +6,9 @@
 package inject
 
 import (
-	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/conversions"
 	"testing"
+
+	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/conversions"
 
 	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/commons"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/equality"
@@ -64,12 +65,10 @@ func Test_init_container_mutate(t *testing.T) {
 									Drop: []corev1.Capability{commons.AllCapabilites},
 									Add:  []corev1.Capability{commons.NetAdminCapability, commons.NetRawCapability},
 								},
-								Privileged:               conversions.Bool(false),
-								RunAsUser:                conversions.Int64(0),
-								RunAsGroup:               conversions.Int64(0),
-								RunAsNonRoot:             conversions.Bool(false),
-								ReadOnlyRootFilesystem:   conversions.Bool(true),
-								AllowPrivilegeEscalation: conversions.Bool(false),
+								Privileged:   conversions.Bool(false),
+								RunAsUser:    conversions.Int64(0),
+								RunAsGroup:   conversions.Int64(0),
+								RunAsNonRoot: conversions.Bool(false),
 							},
 							Env: []corev1.EnvVar{
 								{

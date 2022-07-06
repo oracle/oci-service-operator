@@ -6,8 +6,9 @@
 package inject
 
 import (
-	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/conversions"
 	"testing"
+
+	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/conversions"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
@@ -62,12 +63,11 @@ func Test_proxy_container_mutate(t *testing.T) {
 								Capabilities: &corev1.Capabilities{
 									Drop: []corev1.Capability{commons.AllCapabilites},
 								},
-								Privileged:               conversions.Bool(false),
-								RunAsUser:                conversions.Int64(0),
-								RunAsGroup:               conversions.Int64(0),
-								RunAsNonRoot:             conversions.Bool(false),
-								ReadOnlyRootFilesystem:   conversions.Bool(false),
-								AllowPrivilegeEscalation: conversions.Bool(false),
+								Privileged:             conversions.Bool(false),
+								RunAsUser:              conversions.Int64(0),
+								RunAsGroup:             conversions.Int64(0),
+								RunAsNonRoot:           conversions.Bool(false),
+								ReadOnlyRootFilesystem: conversions.Bool(false),
 							},
 							Ports: []corev1.ContainerPort{
 								{
@@ -160,12 +160,11 @@ func Test_proxy_container_mutate(t *testing.T) {
 								Capabilities: &corev1.Capabilities{
 									Drop: []corev1.Capability{commons.AllCapabilites},
 								},
-								Privileged:               conversions.Bool(false),
-								RunAsUser:                conversions.Int64(0),
-								RunAsGroup:               conversions.Int64(0),
-								RunAsNonRoot:             conversions.Bool(false),
-								ReadOnlyRootFilesystem:   conversions.Bool(false),
-								AllowPrivilegeEscalation: conversions.Bool(false),
+								Privileged:             conversions.Bool(false),
+								RunAsUser:              conversions.Int64(0),
+								RunAsGroup:             conversions.Int64(0),
+								RunAsNonRoot:           conversions.Bool(false),
+								ReadOnlyRootFilesystem: conversions.Bool(false),
 							},
 							Ports: []corev1.ContainerPort{
 								{
@@ -261,12 +260,11 @@ func Test_proxy_container_mutate(t *testing.T) {
 								Capabilities: &corev1.Capabilities{
 									Drop: []corev1.Capability{commons.AllCapabilites},
 								},
-								Privileged:               conversions.Bool(false),
-								RunAsUser:                conversions.Int64(0),
-								RunAsGroup:               conversions.Int64(0),
-								RunAsNonRoot:             conversions.Bool(false),
-								ReadOnlyRootFilesystem:   conversions.Bool(false),
-								AllowPrivilegeEscalation: conversions.Bool(false),
+								Privileged:             conversions.Bool(false),
+								RunAsUser:              conversions.Int64(0),
+								RunAsGroup:             conversions.Int64(0),
+								RunAsNonRoot:           conversions.Bool(false),
+								ReadOnlyRootFilesystem: conversions.Bool(false),
 							},
 							Ports: []corev1.ContainerPort{
 								{
@@ -366,12 +364,11 @@ func Test_proxy_container_mutate(t *testing.T) {
 								Capabilities: &corev1.Capabilities{
 									Drop: []corev1.Capability{commons.AllCapabilites},
 								},
-								Privileged:               conversions.Bool(false),
-								RunAsUser:                conversions.Int64(0),
-								RunAsGroup:               conversions.Int64(0),
-								RunAsNonRoot:             conversions.Bool(false),
-								ReadOnlyRootFilesystem:   conversions.Bool(false),
-								AllowPrivilegeEscalation: conversions.Bool(false),
+								Privileged:             conversions.Bool(false),
+								RunAsUser:              conversions.Int64(0),
+								RunAsGroup:             conversions.Int64(0),
+								RunAsNonRoot:           conversions.Bool(false),
+								ReadOnlyRootFilesystem: conversions.Bool(false),
 							},
 							Ports: []corev1.ContainerPort{
 								{

@@ -115,12 +115,11 @@ func (mctx *proxyMutator) mutate(pod *corev1.Pod) error {
 			Capabilities: &corev1.Capabilities{
 				Drop: []corev1.Capability{commons.AllCapabilites},
 			},
-			Privileged:               conversions.Bool(false),
-			RunAsUser:                conversions.Int64(0),
-			RunAsGroup:               conversions.Int64(0),
-			RunAsNonRoot:             conversions.Bool(false),
-			ReadOnlyRootFilesystem:   conversions.Bool(false),
-			AllowPrivilegeEscalation: conversions.Bool(false),
+			Privileged:             conversions.Bool(false),
+			RunAsUser:              conversions.Int64(0),
+			RunAsGroup:             conversions.Int64(0),
+			RunAsNonRoot:           conversions.Bool(false),
+			ReadOnlyRootFilesystem: conversions.Bool(false),
 		},
 	}
 	if mctx.mdsEndpoint != "" {
