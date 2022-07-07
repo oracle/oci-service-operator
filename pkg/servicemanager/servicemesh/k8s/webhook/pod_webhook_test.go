@@ -428,7 +428,7 @@ func setTCPProbes(pod *corev1.Pod) {
 					TCPSocket: &corev1.TCPSocketAction{
 						Port: intstr.IntOrString{
 							Type:   intstr.String,
-							StrVal: "http",
+							StrVal: "tcp",
 						},
 						Host: "localhost",
 					},
