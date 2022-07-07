@@ -193,7 +193,7 @@ func mutateProbe(probe *corev1.Probe, probeName string, containerPorts []corev1.
 		}
 		_ = fmt.Sprintf("Setting HTTPGet values meshUserScheme:%s meshUserPort:%s meshUserPath:%s host:%s", meshUserScheme, meshUserPort, meshUserPath, host)
 	} else if probe.TCPSocket != nil {
-		meshUserScheme = "tcp"
+		meshUserScheme = commons.Tcp
 		meshUserPort = probe.TCPSocket.Port.String()
 		host = probe.TCPSocket.Host
 		if host == "" {

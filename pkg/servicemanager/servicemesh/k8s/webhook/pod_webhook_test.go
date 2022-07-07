@@ -441,7 +441,7 @@ func setTCPProbes(pod *corev1.Pod) {
 func setHTTPProbes(pod *corev1.Pod) {
 	for i, container := range pod.Spec.Containers {
 		if container.Name == "test" {
-			pod.Spec.Containers[i].Ports = []corev1.ContainerPort{{Name: "http", ContainerPort: 8080, Protocol: corev1.ProtocolHTTP}}
+			pod.Spec.Containers[i].Ports = []corev1.ContainerPort{{Name: "http", ContainerPort: 8080, Protocol: corev1.ProtocolTCP}}
 			pod.Spec.Containers[i].LivenessProbe = &corev1.Probe{
 				Handler: corev1.Handler{
 					HTTPGet: &corev1.HTTPGetAction{
