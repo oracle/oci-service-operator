@@ -62,8 +62,7 @@ func Test_init_container_mutate(t *testing.T) {
 							Image: proxyImageValue,
 							SecurityContext: &corev1.SecurityContext{
 								Capabilities: &corev1.Capabilities{
-									Drop: []corev1.Capability{commons.AllCapabilites},
-									Add:  []corev1.Capability{commons.NetAdminCapability, commons.NetRawCapability},
+									Add: []corev1.Capability{commons.NetAdminCapability},
 								},
 								Privileged:   conversions.Bool(false),
 								RunAsUser:    conversions.Int64(0),

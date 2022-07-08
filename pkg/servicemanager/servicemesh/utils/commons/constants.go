@@ -39,9 +39,7 @@ const (
 	ProxyContainerName = "oci-sm-proxy"
 
 	// linux capabilities
-	AllCapabilites     = "ALL"
 	NetAdminCapability = "NET_ADMIN"
-	NetRawCapability   = "NET_RAW"
 
 	OsokNamespace              = "oci-service-operator-system"
 	ProxyLabelInMeshConfigMap  = "SIDECAR_IMAGE"

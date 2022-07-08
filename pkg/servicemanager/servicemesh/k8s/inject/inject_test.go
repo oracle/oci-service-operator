@@ -60,8 +60,7 @@ func Test_inject(t *testing.T) {
 							Image: proxyImageValue,
 							SecurityContext: &corev1.SecurityContext{
 								Capabilities: &corev1.Capabilities{
-									Drop: []corev1.Capability{commons.AllCapabilites},
-									Add:  []corev1.Capability{commons.NetAdminCapability, commons.NetRawCapability},
+									Add: []corev1.Capability{commons.NetAdminCapability},
 								},
 								Privileged:   conversions.Bool(false),
 								RunAsUser:    conversions.Int64(0),
@@ -93,9 +92,6 @@ func Test_inject(t *testing.T) {
 							Name:  commons.ProxyContainerName,
 							Image: proxyImageValue,
 							SecurityContext: &corev1.SecurityContext{
-								Capabilities: &corev1.Capabilities{
-									Drop: []corev1.Capability{commons.AllCapabilites},
-								},
 								Privileged:             conversions.Bool(false),
 								RunAsUser:              conversions.Int64(0),
 								RunAsGroup:             conversions.Int64(0),

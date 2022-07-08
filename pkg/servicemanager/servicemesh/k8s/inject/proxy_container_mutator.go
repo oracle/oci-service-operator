@@ -112,9 +112,6 @@ func (mctx *proxyMutator) mutate(pod *corev1.Pod) error {
 			InitialDelaySeconds: commons.LivenessProbeInitialDelaySeconds,
 		},
 		SecurityContext: &corev1.SecurityContext{
-			Capabilities: &corev1.Capabilities{
-				Drop: []corev1.Capability{commons.AllCapabilites},
-			},
 			Privileged:             conversions.Bool(false),
 			RunAsUser:              conversions.Int64(0),
 			RunAsGroup:             conversions.Int64(0),

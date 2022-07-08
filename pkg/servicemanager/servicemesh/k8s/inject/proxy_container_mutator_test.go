@@ -60,9 +60,6 @@ func Test_proxy_container_mutate(t *testing.T) {
 							Name:  commons.ProxyContainerName,
 							Image: proxyImageValue,
 							SecurityContext: &corev1.SecurityContext{
-								Capabilities: &corev1.Capabilities{
-									Drop: []corev1.Capability{commons.AllCapabilites},
-								},
 								Privileged:             conversions.Bool(false),
 								RunAsUser:              conversions.Int64(0),
 								RunAsGroup:             conversions.Int64(0),
@@ -157,9 +154,6 @@ func Test_proxy_container_mutate(t *testing.T) {
 							Name:  commons.ProxyContainerName,
 							Image: proxyImageValue,
 							SecurityContext: &corev1.SecurityContext{
-								Capabilities: &corev1.Capabilities{
-									Drop: []corev1.Capability{commons.AllCapabilites},
-								},
 								Privileged:             conversions.Bool(false),
 								RunAsUser:              conversions.Int64(0),
 								RunAsGroup:             conversions.Int64(0),
@@ -257,9 +251,6 @@ func Test_proxy_container_mutate(t *testing.T) {
 							Name:  commons.ProxyContainerName,
 							Image: proxyImageValue,
 							SecurityContext: &corev1.SecurityContext{
-								Capabilities: &corev1.Capabilities{
-									Drop: []corev1.Capability{commons.AllCapabilites},
-								},
 								Privileged:             conversions.Bool(false),
 								RunAsUser:              conversions.Int64(0),
 								RunAsGroup:             conversions.Int64(0),
@@ -361,9 +352,6 @@ func Test_proxy_container_mutate(t *testing.T) {
 							Name:  commons.ProxyContainerName,
 							Image: proxyImageValue,
 							SecurityContext: &corev1.SecurityContext{
-								Capabilities: &corev1.Capabilities{
-									Drop: []corev1.Capability{commons.AllCapabilites},
-								},
 								Privileged:             conversions.Bool(false),
 								RunAsUser:              conversions.Int64(0),
 								RunAsGroup:             conversions.Int64(0),
