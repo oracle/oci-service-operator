@@ -173,6 +173,59 @@ func TestConvertCrdMeshToSdkMesh(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "Patch crd tags with existing sdk tags",
+			args: args{
+				crdObj: &v1beta1.Mesh{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "my-mesh",
+						Namespace: "my-namespace",
+					},
+					Spec: v1beta1.MeshSpec{
+						TagResources: api.TagResources{
+							FreeFormTags: map[string]string{"freeformTag1": "value1"},
+							DefinedTags: map[string]api.MapValue{
+								"definedTag1": {"foo1": "bar1"},
+							},
+						},
+						DisplayName:   &meshDisplayName,
+						CompartmentId: "my-compartment",
+						CertificateAuthorities: []v1beta1.CertificateAuthority{
+							{
+								Id: *OCID(certificateAuthorityId),
+							},
+						},
+					},
+					Status: v1beta1.ServiceMeshStatus{
+						MeshId: "my-mesh-id",
+					},
+				},
+				sdkObj: &sdk.Mesh{
+					FreeformTags: map[string]string{"freeformTag2": "value2"},
+					DefinedTags: map[string]map[string]interface{}{
+						"definedTag2": {"foo2": "bar2"},
+					},
+				},
+			},
+			wantSDKObj: &sdk.Mesh{
+				Id:            String("my-mesh-id"),
+				CompartmentId: String("my-compartment"),
+				DisplayName:   String("my-mesh"),
+				CertificateAuthorities: []sdk.CertificateAuthority{
+					{
+						Id: String(certificateAuthorityId),
+					},
+				},
+				FreeformTags: map[string]string{
+					"freeformTag1": "value1",
+					"freeformTag2": "value2",
+				},
+				DefinedTags: map[string]map[string]interface{}{
+					"definedTag1": {"foo1": "bar1"},
+					"definedTag2": {"foo2": "bar2"},
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

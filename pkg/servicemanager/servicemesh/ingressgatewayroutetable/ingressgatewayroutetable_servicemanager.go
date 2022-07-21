@@ -185,6 +185,10 @@ func (m *ResourceManager) GetMessage(details *manager.ResourceDetails) string {
 
 func (m *ResourceManager) BuildSdk(object client.Object, details *manager.ResourceDetails) error {
 	buildSdkIgrt := &sdk.IngressGatewayRouteTable{}
+	if details.IgrtDetails.SdkIgrt != nil {
+		buildSdkIgrt.FreeformTags = details.IgrtDetails.SdkIgrt.FreeformTags
+		buildSdkIgrt.DefinedTags = details.IgrtDetails.SdkIgrt.DefinedTags
+	}
 	igrt, err := getIngressGatewayRouteTable(object)
 	if err != nil {
 		return err

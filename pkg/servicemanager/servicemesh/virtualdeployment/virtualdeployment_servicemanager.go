@@ -178,6 +178,10 @@ func (m *ResourceManager) GetMessage(details *manager.ResourceDetails) string {
 
 func (m *ResourceManager) BuildSdk(object client.Object, details *manager.ResourceDetails) error {
 	buildSdkVirtualDeployment := &sdk.VirtualDeployment{}
+	if details.VdDetails.SdkVd != nil {
+		buildSdkVirtualDeployment.FreeformTags = details.VdDetails.SdkVd.FreeformTags
+		buildSdkVirtualDeployment.DefinedTags = details.VdDetails.SdkVd.DefinedTags
+	}
 	virtualDeployment, err := getVirtualDeployment(object)
 	if err != nil {
 		return err

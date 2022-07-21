@@ -24,10 +24,9 @@ func ConvertCrdIngressGatewayToSdkIngressGateway(crdObj *v1beta1.IngressGateway,
 	sdkObj.AccessLogging = convertCrdAccessLoggingToSdkAccessLogging(crdObj.Spec.AccessLogging)
 
 	if crdObj.Spec.FreeFormTags != nil {
-		sdkObj.FreeformTags = crdObj.Spec.FreeFormTags
+		ConvertCrdFreeformTagsToSdkFreeformTags(&crdObj.Spec.FreeFormTags, &sdkObj.FreeformTags)
 	}
 	if crdObj.Spec.DefinedTags != nil {
-		sdkObj.DefinedTags = map[string]map[string]interface{}{}
 		ConvertCrdDefinedTagsToSdkDefinedTags(&crdObj.Spec.DefinedTags, &sdkObj.DefinedTags)
 	}
 }

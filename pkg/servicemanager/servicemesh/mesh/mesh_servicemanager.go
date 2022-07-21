@@ -195,6 +195,10 @@ func (m *ResourceManager) BuildSdk(object client.Object, details *manager.Resour
 		return err
 	}
 	buildSdkMesh := &sdk.Mesh{}
+	if details.MeshDetails.SdkMesh != nil {
+		buildSdkMesh.FreeformTags = details.MeshDetails.SdkMesh.FreeformTags
+		buildSdkMesh.DefinedTags = details.MeshDetails.SdkMesh.DefinedTags
+	}
 	conversionErr := meshConversions.ConvertCrdMeshToSdkMesh(mesh, buildSdkMesh)
 	if conversionErr != nil {
 		return conversionErr

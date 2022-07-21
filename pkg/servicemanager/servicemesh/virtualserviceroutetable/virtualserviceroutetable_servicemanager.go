@@ -183,6 +183,10 @@ func (m *ResourceManager) GetMessage(details *manager.ResourceDetails) string {
 
 func (m *ResourceManager) BuildSdk(object client.Object, details *manager.ResourceDetails) error {
 	buildSdkVsrt := &sdk.VirtualServiceRouteTable{}
+	if details.VsrtDetails.SdkVsrt != nil {
+		buildSdkVsrt.FreeformTags = details.VsrtDetails.SdkVsrt.FreeformTags
+		buildSdkVsrt.DefinedTags = details.VsrtDetails.SdkVsrt.DefinedTags
+	}
 	vsrt, err := getVirtualServiceRouteTable(object)
 	if err != nil {
 		return err

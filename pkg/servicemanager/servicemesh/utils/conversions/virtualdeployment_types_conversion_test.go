@@ -77,7 +77,12 @@ func TestConvert_CRD_VirtualDeployment_To_SDK_VirtualDeployment(t *testing.T) {
 			name: "Happy Path",
 			args: args{
 				crdObj: &defaultCrdVirtualDeployment,
-				sdkObj: &sdk.VirtualDeployment{},
+				sdkObj: &sdk.VirtualDeployment{
+					FreeformTags: map[string]string{"freeformTag2": "value2"},
+					DefinedTags: map[string]map[string]interface{}{
+						"definedTag2": {"key": "val"},
+					},
+				},
 			},
 			wantSDKObj: &sdk.VirtualDeployment{
 				Id:               conversions.String("vdId"),
@@ -94,9 +99,13 @@ func TestConvert_CRD_VirtualDeployment_To_SDK_VirtualDeployment(t *testing.T) {
 				ServiceDiscovery: sdk.DnsServiceDiscoveryConfiguration{
 					Hostname: conversions.String("oracle.com"),
 				},
-				FreeformTags: map[string]string{"freeformTag1": "value1"},
+				FreeformTags: map[string]string{
+					"freeformTag1": "value1",
+					"freeformTag2": "value2",
+				},
 				DefinedTags: map[string]map[string]interface{}{
 					"definedTag1": {"foo": "bar"},
+					"definedTag2": {"key": "val"},
 				},
 				AccessLogging: &sdk.AccessLoggingConfiguration{
 					IsEnabled: &isLoggingEnabled,

@@ -23,10 +23,9 @@ func ConvertCrdMeshToSdkMesh(crdMesh *v1beta1.Mesh, sdkMesh *sdk.Mesh) error {
 		return err
 	}
 	if crdMesh.Spec.FreeFormTags != nil {
-		sdkMesh.FreeformTags = crdMesh.Spec.FreeFormTags
+		ConvertCrdFreeformTagsToSdkFreeformTags(&crdMesh.Spec.FreeFormTags, &sdkMesh.FreeformTags)
 	}
 	if crdMesh.Spec.DefinedTags != nil {
-		sdkMesh.DefinedTags = map[string]map[string]interface{}{}
 		ConvertCrdDefinedTagsToSdkDefinedTags(&crdMesh.Spec.DefinedTags, &sdkMesh.DefinedTags)
 	}
 	return nil

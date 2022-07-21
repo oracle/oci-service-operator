@@ -187,6 +187,10 @@ func (m *ResourceManager) GetMessage(details *manager.ResourceDetails) string {
 
 func (m *ResourceManager) BuildSdk(object client.Object, details *manager.ResourceDetails) error {
 	buildSdkVirtualService := &sdk.VirtualService{}
+	if details.VsDetails.SdkVs != nil {
+		buildSdkVirtualService.FreeformTags = details.VsDetails.SdkVs.FreeformTags
+		buildSdkVirtualService.DefinedTags = details.VsDetails.SdkVs.DefinedTags
+	}
 	virtualService, err := getVirtualService(object)
 	if err != nil {
 		return err

@@ -182,6 +182,10 @@ func (m *ResourceManager) GetMessage(details *manager.ResourceDetails) string {
 
 func (m *ResourceManager) BuildSdk(object client.Object, details *manager.ResourceDetails) error {
 	buildSdkAccessPolicy := &sdk.AccessPolicy{}
+	if details.ApDetails.SdkAp != nil {
+		buildSdkAccessPolicy.FreeformTags = details.ApDetails.SdkAp.FreeformTags
+		buildSdkAccessPolicy.DefinedTags = details.ApDetails.SdkAp.DefinedTags
+	}
 	accessPolicy, err := getAccessPolicy(object)
 	if err != nil {
 		return err
