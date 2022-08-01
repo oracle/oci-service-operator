@@ -96,6 +96,30 @@ func (mctx *proxyMutator) mutate(pod *corev1.Pod) error {
 					},
 				},
 			},
+			{
+				Name: string(commons.PodUId),
+				ValueFrom: &corev1.EnvVarSource{
+					FieldRef: &corev1.ObjectFieldSelector{
+						FieldPath: "metadata.uid",
+					},
+				},
+			},
+			{
+				Name: string(commons.PodName),
+				ValueFrom: &corev1.EnvVarSource{
+					FieldRef: &corev1.ObjectFieldSelector{
+						FieldPath: "metadata.name",
+					},
+				},
+			},
+			{
+				Name: string(commons.PodNamespace),
+				ValueFrom: &corev1.EnvVarSource{
+					FieldRef: &corev1.ObjectFieldSelector{
+						FieldPath: "metadata.namespace",
+					},
+				},
+			},
 		},
 		Resources: resourceRequests,
 

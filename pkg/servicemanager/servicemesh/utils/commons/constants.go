@@ -208,6 +208,9 @@ const (
 	ProxyLogLevel ProxyEnvVars = "PROXY_LOG_LEVEL"
 	IPAddress     ProxyEnvVars = "IP_ADDRESS" // this is deprecated in favor of POD_IP
 	PodIp         ProxyEnvVars = "POD_IP"
+	PodUId        ProxyEnvVars = "POD_UID"
+	PodName       ProxyEnvVars = "POD_NAME"
+	PodNamespace  ProxyEnvVars = "POD_NAMESPACE"
 	StatsPort     int32        = 15006
 )
 

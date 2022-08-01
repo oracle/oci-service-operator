@@ -892,10 +892,14 @@ func TestCreateDeployment(t *testing.T) {
 		for i := 0; i < len(envVars); i++ {
 			envMap[envVars[i].Name] = envVars[i]
 		}
-		assert.Equal(t, len(envMap), 4)
+		assert.Equal(t, len(envMap), 8)
 		assert.Equal(t, "ig1", envMap[string(commons.DeploymentId)].Value)
 		assert.Equal(t, string(tt.want.loggerLevel), envMap[string(commons.ProxyLogLevel)].Value)
 		assert.Equal(t, "status.podIP", envMap[string(commons.IPAddress)].ValueFrom.FieldRef.FieldPath)
+		assert.Equal(t, "status.podIP", envMap[string(commons.PodIp)].ValueFrom.FieldRef.FieldPath)
+		assert.Equal(t, "metadata.uid", envMap[string(commons.PodUId)].ValueFrom.FieldRef.FieldPath)
+		assert.Equal(t, "metadata.name", envMap[string(commons.PodName)].ValueFrom.FieldRef.FieldPath)
+		assert.Equal(t, "metadata.namespace", envMap[string(commons.PodNamespace)].ValueFrom.FieldRef.FieldPath)
 		if tt.args.resources == nil {
 			assert.True(t, resources.Requests.Cpu().Equal(resource.MustParse(string(commons.IngressCPURequestSize))))
 			assert.True(t, resources.Requests.Memory().Equal(resource.MustParse(string(commons.IngressMemoryRequestSize))))

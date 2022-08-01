@@ -128,6 +128,30 @@ func Test_inject(t *testing.T) {
 									},
 								},
 								{
+									Name: string(commons.PodUId),
+									ValueFrom: &corev1.EnvVarSource{
+										FieldRef: &corev1.ObjectFieldSelector{
+											FieldPath: "metadata.uid",
+										},
+									},
+								},
+								{
+									Name: string(commons.PodName),
+									ValueFrom: &corev1.EnvVarSource{
+										FieldRef: &corev1.ObjectFieldSelector{
+											FieldPath: "metadata.name",
+										},
+									},
+								},
+								{
+									Name: string(commons.PodNamespace),
+									ValueFrom: &corev1.EnvVarSource{
+										FieldRef: &corev1.ObjectFieldSelector{
+											FieldPath: "metadata.namespace",
+										},
+									},
+								},
+								{
 									Name:  commons.MdsEndpointInMeshConfigMap,
 									Value: mdsEndpointValue,
 								},
