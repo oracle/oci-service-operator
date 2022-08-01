@@ -15,6 +15,8 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
+	"github.com/oracle/oci-go-sdk/v65/common"
+
 	servicemeshcontrollers "github.com/oracle/oci-service-operator/controllers/servicemesh.oci"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/injectproxy"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/serviceupdate"
@@ -86,6 +88,9 @@ func init() {
 }
 
 func main() {
+	// Allow OCI go sdk to use instance metadata service for region lookup
+	common.EnableInstanceMetadataServiceLookup()
+
 	var configFile string
 	flag.StringVar(&configFile, "config", "",
 		"The controller will load its initial configuration from this file. "+

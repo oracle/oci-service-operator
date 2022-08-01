@@ -23,11 +23,12 @@ This binding resource allows enabling automatic sidecar injection, discover pods
 ## Virtual Deployment Binding Specification Parameters
 The Complete Specification of the `VirtualDeploymentBinding` Custom Resource (CR) is as detailed below:
 
-| Parameter                | Description                                                                                                                             | Type                                          | Mandatory |
-|--------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------|-----------|
-| `spec.virtualDeployment` | The virtual deployment to bind the resource with. Either `spec.virtualDeployment.id` or `spec.virtualDeployment.ref` should be provided | [RefOrId](#reforid)                           | yes       |
-| `spec.target`            | A target kubernetes service to bind the resource with                                                                                   | string                                        | yes       |
-| `spec.resources`         | minimum and maximum compute resource requirements for the sidecar container                                                             | [ResourceRequirements](#resourcerequirements) | no        |
+| Parameter                            | Description                                                                                                                             | Type                                          | Mandatory |
+|--------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------|-----------|
+| `spec.virtualDeployment`             | The virtual deployment to bind the resource with. Either `spec.virtualDeployment.id` or `spec.virtualDeployment.ref` should be provided | [RefOrId](#reforid)                           | yes       |
+| `spec.target`                        | A target kubernetes service to bind the resource with                                                                                   | string                                        | yes       |
+| `spec.resources`                     | minimum and maximum compute resource requirements for the sidecar container                                                             | [ResourceRequirements](#resourcerequirements) | no        |
+| `spec.mountCertificateChainFromHost` | Indicates whether to mount `/etc/pki` host path to the sidecar container                                                                | bool                                          | no        |
 
 ### RefOrId
 | Parameter | Description                                                                                        | Type                        | Mandatory |
@@ -102,6 +103,7 @@ spec:
     limits:
       memory: "128Mi"
       cpu: "500m"
+  mountCertificateChainFromHost: true
 ```
 
 - Create your virtual deployment binding using the virtual deployment OCID.
@@ -128,6 +130,7 @@ spec:
     limits:
       memory: "128Mi"
       cpu: "500m"
+  mountCertificateChainFromHost: true
 ```
 
 Run the following command to create a CR in the cluster:
@@ -179,6 +182,7 @@ spec:
       ref:
         name: <kubernetes-service-name> # Name of Kubernetes Service
         namespace: <kubernetes-service-namespace> # Name of Kubernetes Service namespace
+  mountCertificateChainFromHost: false
 ```
 
 ```sh

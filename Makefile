@@ -186,9 +186,9 @@ bundle-push: ## Push the bundle image.
 
 .PHONY: update-bundle-image-version
 update-bundle-image-version: ## Updates versioning info in bundle/manifests/oci-service-operator.clusterserviceversion.yaml.
-	sed -i "s/name: oci-service-operator.v0.0.1/name: oci-service-operator.v${VERSION}/g" bundle/manifests/oci-service-operator.clusterserviceversion.yaml
-	sed -i "s/oci-service-operator:v0.0.2/oci-service-operator:${VERSION}/g" bundle/manifests/oci-service-operator.clusterserviceversion.yaml
-	sed -i "s/version: 0.0.1/version: ${VERSION}/g" bundle/manifests/oci-service-operator.clusterserviceversion.yaml
+	sed -i "s/name: oci-service-operator.v1.0.0/name: oci-service-operator.v${VERSION}/g" bundle/manifests/oci-service-operator.clusterserviceversion.yaml
+	sed -i "s#iad.ocir.io/oracle/oci-service-operator:1.0.0#${IMAGE_TAG_BASE}:${VERSION}#g" bundle/manifests/oci-service-operator.clusterserviceversion.yaml
+	sed -i "s/version: 1.0.0/version: ${VERSION}/g" bundle/manifests/oci-service-operator.clusterserviceversion.yaml
 
 .PHONY: opm
 OPM = ./bin/opm

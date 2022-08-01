@@ -25,11 +25,12 @@ import (
 
 func Test_inject(t *testing.T) {
 	tests := []struct {
-		name      string
-		configmap *corev1.ConfigMap
-		pod       *corev1.Pod
-		want      *corev1.Pod
-		wantError string
+		name                          string
+		configmap                     *corev1.ConfigMap
+		mountCertificateChainFromHost bool
+		pod                           *corev1.Pod
+		want                          *corev1.Pod
+		wantError                     string
 	}{
 		{
 			name: "Test inject with sidecarImage supplied",
@@ -184,6 +185,176 @@ func Test_inject(t *testing.T) {
 			},
 		},
 		{
+			name: "Test inject with sidecarImage supplied and mounted pki directory",
+			configmap: NewConfigMap(commons.OsokNamespace, commons.MeshConfigMapName,
+				map[string]string{commons.ProxyLabelInMeshConfigMap: proxyImageValue,
+					commons.MdsEndpointInMeshConfigMap: mdsEndpointValue}),
+			mountCertificateChainFromHost: true,
+			pod: &corev1.Pod{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "product-v1-binding",
+					Namespace: "product",
+					Labels: map[string]string{
+						"app": "name",
+					},
+				},
+			},
+			want: &corev1.Pod{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "product-v1-binding",
+					Namespace: "product",
+					Labels: map[string]string{
+						"app": "name",
+					},
+				},
+				Spec: corev1.PodSpec{
+					InitContainers: []corev1.Container{
+						{
+							Name:  commons.InitContainerName,
+							Image: proxyImageValue,
+							SecurityContext: &corev1.SecurityContext{
+								Capabilities: &corev1.Capabilities{
+									Add: []corev1.Capability{commons.NetAdminCapability},
+								},
+								Privileged:   conversions.Bool(false),
+								RunAsUser:    conversions.Int64(0),
+								RunAsGroup:   conversions.Int64(0),
+								RunAsNonRoot: conversions.Bool(false),
+							},
+							Env: []corev1.EnvVar{
+								{
+									Name:  string(commons.ConfigureIpTablesEnvName),
+									Value: string(commons.ConfigureIpTablesEnvValue),
+								},
+								{
+									Name:  string(commons.EnvoyPortEnvVarName),
+									Value: string(commons.EnvoyPortEnvVarValue),
+								},
+								{
+									Name: string(commons.PodIp),
+									ValueFrom: &corev1.EnvVarSource{
+										FieldRef: &corev1.ObjectFieldSelector{
+											FieldPath: "status.podIP",
+										},
+									},
+								},
+							},
+						},
+					},
+					Containers: []corev1.Container{
+						{
+							Name:  commons.ProxyContainerName,
+							Image: proxyImageValue,
+							SecurityContext: &corev1.SecurityContext{
+								Privileged:             conversions.Bool(false),
+								RunAsUser:              conversions.Int64(0),
+								RunAsGroup:             conversions.Int64(0),
+								RunAsNonRoot:           conversions.Bool(false),
+								ReadOnlyRootFilesystem: conversions.Bool(false),
+							},
+							Ports: []corev1.ContainerPort{
+								{
+									ContainerPort: commons.StatsPort,
+								},
+							},
+							Env: []corev1.EnvVar{
+								{
+									Name: string(commons.DeploymentId),
+								},
+								{
+									Name:  string(commons.ProxyLogLevel),
+									Value: string(commons.ProxyLogLevelError),
+								},
+								{
+									Name: string(commons.IPAddress),
+									ValueFrom: &corev1.EnvVarSource{
+										FieldRef: &corev1.ObjectFieldSelector{
+											FieldPath: "status.podIP",
+										},
+									},
+								},
+								{
+									Name: string(commons.PodIp),
+									ValueFrom: &corev1.EnvVarSource{
+										FieldRef: &corev1.ObjectFieldSelector{
+											FieldPath: "status.podIP",
+										},
+									},
+								},
+								{
+									Name: string(commons.PodUId),
+									ValueFrom: &corev1.EnvVarSource{
+										FieldRef: &corev1.ObjectFieldSelector{
+											FieldPath: "metadata.uid",
+										},
+									},
+								},
+								{
+									Name: string(commons.PodName),
+									ValueFrom: &corev1.EnvVarSource{
+										FieldRef: &corev1.ObjectFieldSelector{
+											FieldPath: "metadata.name",
+										},
+									},
+								},
+								{
+									Name: string(commons.PodNamespace),
+									ValueFrom: &corev1.EnvVarSource{
+										FieldRef: &corev1.ObjectFieldSelector{
+											FieldPath: "metadata.namespace",
+										},
+									},
+								},
+								{
+									Name:  commons.MdsEndpointInMeshConfigMap,
+									Value: mdsEndpointValue,
+								},
+							},
+							Resources: corev1.ResourceRequirements{
+								Requests: map[corev1.ResourceName]resource.Quantity{
+									corev1.ResourceCPU:    resource.MustParse(string(commons.SidecarCPURequestSize)),
+									corev1.ResourceMemory: resource.MustParse(string(commons.SidecarMemoryRequestSize)),
+								},
+								Limits: map[corev1.ResourceName]resource.Quantity{
+									corev1.ResourceCPU:    resource.MustParse(string(commons.SidecarCPULimitSize)),
+									corev1.ResourceMemory: resource.MustParse(string(commons.SidecarMemoryLimitSize)),
+								},
+							},
+							LivenessProbe: &corev1.Probe{
+								Handler: corev1.Handler{
+									HTTPGet: &corev1.HTTPGetAction{
+										Path: commons.LivenessProbeEndpointPath,
+										Port: intstr.IntOrString{
+											Type:   intstr.Int,
+											IntVal: commons.LivenessProbeEndpointPort,
+										},
+									},
+								},
+								InitialDelaySeconds: commons.LivenessProbeInitialDelaySeconds,
+							},
+							VolumeMounts: []corev1.VolumeMount{
+								{
+									Name:      "pki",
+									MountPath: "/etc/pki",
+									ReadOnly:  true,
+								},
+							},
+						},
+					},
+					Volumes: []corev1.Volume{
+						{
+							Name: "pki",
+							VolumeSource: corev1.VolumeSource{
+								HostPath: &corev1.HostPathVolumeSource{
+									Path: "/etc/pki",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
 			name: "Test inject with no sidecarImage",
 			configmap: NewConfigMap(commons.OsokNamespace, commons.MeshConfigMapName,
 				map[string]string{commons.MdsEndpointInMeshConfigMap: mdsEndpointValue}),
@@ -201,6 +372,8 @@ func Test_inject(t *testing.T) {
 	}
 	for _, tt := range tests {
 		vdb := NewVdbWithVdRef("product-v1-binding", "product", "product", "test")
+		vdb.Spec.MountCertificateChainFromHost = &tt.mountCertificateChainFromHost
+
 		m := NewMutateHandler(tt.configmap, *vdb)
 		err := m.Inject(tt.pod)
 		if tt.want != nil {

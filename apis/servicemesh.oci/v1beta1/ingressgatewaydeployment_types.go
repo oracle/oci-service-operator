@@ -79,6 +79,10 @@ type IngressDeployment struct {
 
 	// +optional
 	Labels map[string]string `json:"labels,omitempty" protobuf:"bytes,11,rep,name=labels"`
+
+	// indicates whether to mount `/etc/pki` host path to the container.
+	// +optional
+	MountCertificateChainFromHost *bool `json:"mountCertificateChainFromHost,omitempty"`
 }
 
 // Reference to kubernetes secret containing tls certificates/trust-chains for ingress gateway

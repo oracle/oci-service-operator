@@ -17,3 +17,4 @@ spec:
       ref:
         name: productpage
         namespace: bookinfo
+  mountCertificateChainFromHost: true

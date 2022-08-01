@@ -147,6 +147,12 @@ func (mctx *proxyMutator) mutate(pod *corev1.Pod) error {
 		envoy.Env = append(envoy.Env, corev1.EnvVar{Name: commons.MdsEndpointInMeshConfigMap, Value: mctx.mdsEndpoint})
 	}
 
+	if mctx.vdb.Spec.MountCertificateChainFromHost != nil &&
+		*mctx.vdb.Spec.MountCertificateChainFromHost {
+		pod.Spec.Volumes = append(pod.Spec.Volumes, commons.PkiVolume)
+		envoy.VolumeMounts = []corev1.VolumeMount{commons.PkiVolumeMount}
+	}
+
 	pod.Spec.Containers = append(pod.Spec.Containers, envoy)
 	return nil
 }

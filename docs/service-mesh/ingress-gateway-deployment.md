@@ -46,10 +46,11 @@ The Complete Specification of the `IngressGatewayDeployment` Custom Resource (CR
 | `name` | The name of the resource. | string | yes       |
 
 ### Deployment
-| Parameter                          | Description                                                         | Type   | Mandatory |
-| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
-| `autoscaling` | Contains information about min and max replicas for Ingress Gateway Deployment Resource | [Autoscaling](#autoscaling) | yes       |
-| `labels` | Additional label information for Ingress Gateway Deployment | string | no        |
+| Parameter                       | Description                                                                             | Type                        | Mandatory |
+|---------------------------------|-----------------------------------------------------------------------------------------|-----------------------------|-----------|
+| `autoscaling`                   | Contains information about min and max replicas for Ingress Gateway Deployment Resource | [Autoscaling](#autoscaling) | yes       |
+| `labels`                        | Additional label information for Ingress Gateway Deployment                             | string                      | no        |
+| `mountCertificateChainFromHost` | Indicates whether to mount `/etc/pki` host path to the container                        | bool                        | no        |
 
 ### Autoscaling
 | Parameter                          | Description                                                         | Type   | Mandatory |
@@ -123,6 +124,7 @@ spec:
     autoscaling:
       minPods: 1
       maxPods: 1
+    mountCertificateChainFromHost: true
   ports:
     - protocol: TCP
       port: 8080
@@ -148,6 +150,7 @@ spec:
     autoscaling:
       minPods: 1
       maxPods: 1
+    mountCertificateChainFromHost: true
   ports:
     - protocol: TCP
       port: 8080
@@ -204,6 +207,7 @@ spec:
     autoscaling:
       minPods: <updated-min-pod-count>
       maxPods: <updated-min-pod-count>
+    mountCertificateChainFromHost: false
   ports:
     - protocol: <updated-protocol>
       port: <updated-port>
