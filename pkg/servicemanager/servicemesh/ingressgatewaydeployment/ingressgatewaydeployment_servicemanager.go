@@ -184,6 +184,8 @@ func (h *IngressGatewayDeploymentServiceManager) CreateOrUpdate(ctx context.Cont
 			service.Spec.Selector = map[string]string{
 				meshCommons.IngressName: igd.Name,
 			}
+			service.Annotations = igd.Spec.Service.Annotations
+			service.Labels = igd.Spec.Service.Labels
 
 			return nil
 		})

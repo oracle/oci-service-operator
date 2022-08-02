@@ -95,6 +95,8 @@ func TestReconcile(t *testing.T) {
 
 	type args struct {
 		hasService                              bool
+		serviceAnnotations                      map[string]string
+		serviceLabels                           map[string]string
 		servicePortCount                        int
 		differentProtocols                      bool
 		totalPortCount                          int
@@ -123,7 +125,14 @@ func TestReconcile(t *testing.T) {
 		{
 			name: "Create Deployment, HPA and Service",
 			args: args{
-				hasService:         true,
+				hasService: true,
+				serviceAnnotations: map[string]string{
+					"oci.oraclecloud.com/load-balancer-type":                "lb",
+					"service.beta.kubernetes.io/oci-load-balancer-internal": "true",
+				},
+				serviceLabels: map[string]string{
+					"some-key": "some-value",
+				},
 				servicePortCount:   3,
 				times:              3,
 				differentProtocols: false,
@@ -429,7 +438,9 @@ func TestReconcile(t *testing.T) {
 
 		if tt.args.hasService {
 			igd.Spec.Service = &servicemeshapi.IngressGatewayService{
-				Type: corev1.ServiceTypeLoadBalancer,
+				Type:        corev1.ServiceTypeLoadBalancer,
+				Annotations: tt.args.serviceAnnotations,
+				Labels:      tt.args.serviceLabels,
 			}
 		}
 
@@ -474,6 +485,8 @@ func TestReconcile(t *testing.T) {
 			assert.Equal(t, len(service.Spec.Ports), tt.want.servicePortCount)
 			assert.Equal(t, igd.Name+string(commons.NativeService), service.Name)
 			assert.Equal(t, igd.Namespace, service.Namespace)
+			assert.Equal(t, igd.Spec.Service.Labels, service.Labels)
+			assert.Equal(t, igd.Spec.Service.Annotations, service.Annotations)
 		}
 
 		derr := k8sClient.Get(ctx, types.NamespacedName{Namespace: igd.Namespace, Name: igd.Name + string(commons.NativeDeployment)}, &deployment)

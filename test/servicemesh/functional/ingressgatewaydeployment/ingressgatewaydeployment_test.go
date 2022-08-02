@@ -61,6 +61,8 @@ func TestIngressGatewayDeployment(t *testing.T) {
 		deleteHPA           bool
 		hasUpdate           bool
 		hasService          bool
+		serviceAnnotations  map[string]string
+		serviceLabels       map[string]string
 		deleteService       bool
 		servicePortCount    int
 		totalPortCount      int
@@ -82,6 +84,13 @@ func TestIngressGatewayDeployment(t *testing.T) {
 			name: "create ingressGatewayDeployment with service",
 			args: args{
 				hasService: true,
+				serviceAnnotations: map[string]string{
+					"oci.oraclecloud.com/load-balancer-type":                "lb",
+					"service.beta.kubernetes.io/oci-load-balancer-internal": "true",
+				},
+				serviceLabels: map[string]string{
+					"some-key": "some-value",
+				},
 			},
 			expectedStatus: &servicemeshapi.ServiceMeshStatus{
 				Conditions: []servicemeshapi.ServiceMeshCondition{
@@ -319,6 +328,8 @@ func TestIngressGatewayDeployment(t *testing.T) {
 			if tt.args.hasService {
 				ingressGatewayDeployment.Spec.Service = &servicemeshapi.IngressGatewayService{
 					Type: corev1.ServiceTypeLoadBalancer,
+					Annotations: tt.args.serviceAnnotations,
+					Labels: tt.args.serviceLabels,
 				}
 			}
 
@@ -507,6 +518,14 @@ func TestIngressGatewayDeployment(t *testing.T) {
 					opts := equality.IgnoreFakeClientPopulatedFields()
 					key := ns.NewNamespacedName(ingressGatewayDeployment)
 					assert.NoError(t, framework.K8sAPIs.Get(ctx, key, curIngressGatewayDeployment))
+
+					if tt.args.hasService {
+						service := corev1.Service{}
+						assert.NoError(t, framework.K8sAPIs.Get(ctx, types.NamespacedName{Namespace: ingressGatewayDeployment.Namespace, Name: ingressGatewayDeployment.Name + string(commons.NativeService)}, &service))
+						assert.Equal(t, tt.args.serviceLabels, service.Labels)
+						assert.Equal(t, tt.args.serviceAnnotations, service.Annotations)
+					}
+
 					if tt.expectedStatus != nil {
 						assert.True(t, cmp.Equal(*tt.expectedStatus, curIngressGatewayDeployment.Status, opts), "diff", cmp.Diff(*tt.expectedStatus, curIngressGatewayDeployment.Status, opts))
 					}
