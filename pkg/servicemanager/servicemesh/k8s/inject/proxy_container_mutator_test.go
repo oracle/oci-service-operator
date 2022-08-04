@@ -8,6 +8,8 @@ package inject
 import (
 	"testing"
 
+	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/conversions"
+
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
@@ -57,6 +59,13 @@ func Test_proxy_container_mutate(t *testing.T) {
 						{
 							Name:  commons.ProxyContainerName,
 							Image: proxyImageValue,
+							SecurityContext: &corev1.SecurityContext{
+								Privileged:             conversions.Bool(false),
+								RunAsUser:              conversions.Int64(0),
+								RunAsGroup:             conversions.Int64(0),
+								RunAsNonRoot:           conversions.Bool(false),
+								ReadOnlyRootFilesystem: conversions.Bool(false),
+							},
 							Ports: []corev1.ContainerPort{
 								{
 									ContainerPort: commons.StatsPort,
@@ -79,6 +88,39 @@ func Test_proxy_container_mutate(t *testing.T) {
 									},
 								},
 								{
+									Name: string(commons.PodIp),
+									ValueFrom: &corev1.EnvVarSource{
+										FieldRef: &corev1.ObjectFieldSelector{
+											FieldPath: "status.podIP",
+										},
+									},
+								},
+								{
+									Name: string(commons.PodUId),
+									ValueFrom: &corev1.EnvVarSource{
+										FieldRef: &corev1.ObjectFieldSelector{
+											FieldPath: "metadata.uid",
+										},
+									},
+								},
+								{
+									Name: string(commons.PodName),
+									ValueFrom: &corev1.EnvVarSource{
+										FieldRef: &corev1.ObjectFieldSelector{
+											FieldPath: "metadata.name",
+										},
+									},
+								},
+								{
+									Name: string(commons.PodNamespace),
+									ValueFrom: &corev1.EnvVarSource{
+										FieldRef: &corev1.ObjectFieldSelector{
+											FieldPath: "metadata.namespace",
+										},
+									},
+								},
+								{
+
 									Name:  commons.MdsEndpointInMeshConfigMap,
 									Value: mdsEndpointValue,
 								},
@@ -136,6 +178,13 @@ func Test_proxy_container_mutate(t *testing.T) {
 						{
 							Name:  commons.ProxyContainerName,
 							Image: proxyImageValue,
+							SecurityContext: &corev1.SecurityContext{
+								Privileged:             conversions.Bool(false),
+								RunAsUser:              conversions.Int64(0),
+								RunAsGroup:             conversions.Int64(0),
+								RunAsNonRoot:           conversions.Bool(false),
+								ReadOnlyRootFilesystem: conversions.Bool(false),
+							},
 							Ports: []corev1.ContainerPort{
 								{
 									ContainerPort: commons.StatsPort,
@@ -154,6 +203,38 @@ func Test_proxy_container_mutate(t *testing.T) {
 									ValueFrom: &corev1.EnvVarSource{
 										FieldRef: &corev1.ObjectFieldSelector{
 											FieldPath: "status.podIP",
+										},
+									},
+								},
+								{
+									Name: string(commons.PodIp),
+									ValueFrom: &corev1.EnvVarSource{
+										FieldRef: &corev1.ObjectFieldSelector{
+											FieldPath: "status.podIP",
+										},
+									},
+								},
+								{
+									Name: string(commons.PodUId),
+									ValueFrom: &corev1.EnvVarSource{
+										FieldRef: &corev1.ObjectFieldSelector{
+											FieldPath: "metadata.uid",
+										},
+									},
+								},
+								{
+									Name: string(commons.PodName),
+									ValueFrom: &corev1.EnvVarSource{
+										FieldRef: &corev1.ObjectFieldSelector{
+											FieldPath: "metadata.name",
+										},
+									},
+								},
+								{
+									Name: string(commons.PodNamespace),
+									ValueFrom: &corev1.EnvVarSource{
+										FieldRef: &corev1.ObjectFieldSelector{
+											FieldPath: "metadata.namespace",
 										},
 									},
 								},
@@ -218,6 +299,13 @@ func Test_proxy_container_mutate(t *testing.T) {
 						{
 							Name:  commons.ProxyContainerName,
 							Image: proxyImageValue,
+							SecurityContext: &corev1.SecurityContext{
+								Privileged:             conversions.Bool(false),
+								RunAsUser:              conversions.Int64(0),
+								RunAsGroup:             conversions.Int64(0),
+								RunAsNonRoot:           conversions.Bool(false),
+								ReadOnlyRootFilesystem: conversions.Bool(false),
+							},
 							Ports: []corev1.ContainerPort{
 								{
 									ContainerPort: commons.StatsPort,
@@ -236,6 +324,38 @@ func Test_proxy_container_mutate(t *testing.T) {
 									ValueFrom: &corev1.EnvVarSource{
 										FieldRef: &corev1.ObjectFieldSelector{
 											FieldPath: "status.podIP",
+										},
+									},
+								},
+								{
+									Name: string(commons.PodIp),
+									ValueFrom: &corev1.EnvVarSource{
+										FieldRef: &corev1.ObjectFieldSelector{
+											FieldPath: "status.podIP",
+										},
+									},
+								},
+								{
+									Name: string(commons.PodUId),
+									ValueFrom: &corev1.EnvVarSource{
+										FieldRef: &corev1.ObjectFieldSelector{
+											FieldPath: "metadata.uid",
+										},
+									},
+								},
+								{
+									Name: string(commons.PodName),
+									ValueFrom: &corev1.EnvVarSource{
+										FieldRef: &corev1.ObjectFieldSelector{
+											FieldPath: "metadata.name",
+										},
+									},
+								},
+								{
+									Name: string(commons.PodNamespace),
+									ValueFrom: &corev1.EnvVarSource{
+										FieldRef: &corev1.ObjectFieldSelector{
+											FieldPath: "metadata.namespace",
 										},
 									},
 								},
@@ -304,6 +424,13 @@ func Test_proxy_container_mutate(t *testing.T) {
 						{
 							Name:  commons.ProxyContainerName,
 							Image: proxyImageValue,
+							SecurityContext: &corev1.SecurityContext{
+								Privileged:             conversions.Bool(false),
+								RunAsUser:              conversions.Int64(0),
+								RunAsGroup:             conversions.Int64(0),
+								RunAsNonRoot:           conversions.Bool(false),
+								ReadOnlyRootFilesystem: conversions.Bool(false),
+							},
 							Ports: []corev1.ContainerPort{
 								{
 									ContainerPort: commons.StatsPort,
@@ -323,6 +450,38 @@ func Test_proxy_container_mutate(t *testing.T) {
 									ValueFrom: &corev1.EnvVarSource{
 										FieldRef: &corev1.ObjectFieldSelector{
 											FieldPath: "status.podIP",
+										},
+									},
+								},
+								{
+									Name: string(commons.PodIp),
+									ValueFrom: &corev1.EnvVarSource{
+										FieldRef: &corev1.ObjectFieldSelector{
+											FieldPath: "status.podIP",
+										},
+									},
+								},
+								{
+									Name: string(commons.PodUId),
+									ValueFrom: &corev1.EnvVarSource{
+										FieldRef: &corev1.ObjectFieldSelector{
+											FieldPath: "metadata.uid",
+										},
+									},
+								},
+								{
+									Name: string(commons.PodName),
+									ValueFrom: &corev1.EnvVarSource{
+										FieldRef: &corev1.ObjectFieldSelector{
+											FieldPath: "metadata.name",
+										},
+									},
+								},
+								{
+									Name: string(commons.PodNamespace),
+									ValueFrom: &corev1.EnvVarSource{
+										FieldRef: &corev1.ObjectFieldSelector{
+											FieldPath: "metadata.namespace",
 										},
 									},
 								},

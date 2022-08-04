@@ -414,7 +414,12 @@ func TestConvert_CRD_AccessPolicy_To_SDK_AccessPolicy(t *testing.T) {
 						AccessPolicyId: "my-accesspolicy-id",
 					},
 				},
-				sdkObj: &sdk.AccessPolicy{},
+				sdkObj: &sdk.AccessPolicy{
+					FreeformTags: map[string]string{"freeformTag2": "value2"},
+					DefinedTags: map[string]map[string]interface{}{
+						"definedTag2": {"key": "val"},
+					},
+				},
 				dependencies: &AccessPolicyDependencies{
 					MeshId: "my-mesh-id",
 					RefIdForRules: []map[string]api.OCID{
@@ -462,9 +467,13 @@ func TestConvert_CRD_AccessPolicy_To_SDK_AccessPolicy(t *testing.T) {
 						},
 					},
 				},
-				FreeformTags: map[string]string{"freeformTag1": "value1"},
+				FreeformTags: map[string]string{
+					"freeformTag1": "value1",
+					"freeformTag2": "value2",
+				},
 				DefinedTags: map[string]map[string]interface{}{
 					"definedTag1": {"foo": "bar"},
+					"definedTag2": {"key": "val"},
 				},
 			},
 		},

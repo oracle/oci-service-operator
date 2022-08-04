@@ -87,7 +87,12 @@ func TestConvertCrdIgrtToSdkIgrt(t *testing.T) {
 						IngressGatewayRouteTableId: "my-igrt-id",
 					},
 				},
-				sdkObj: &sdk.IngressGatewayRouteTable{},
+				sdkObj: &sdk.IngressGatewayRouteTable{
+					FreeformTags: map[string]string{"freeformTag2": "value2"},
+					DefinedTags: map[string]map[string]interface{}{
+						"definedTag2": {"key": "val"},
+					},
+				},
 				dependencies: &IGRTDependencies{
 					IngressGatewayId: "my-ig-id",
 					VsIdForRules:     [][]api.OCID{{"my-vs-id"}},
@@ -115,10 +120,14 @@ func TestConvertCrdIgrtToSdkIgrt(t *testing.T) {
 						},
 					},
 				},
-				Priority:     Integer(0),
-				FreeformTags: map[string]string{"freeformTag1": "value1"},
+				Priority: Integer(0),
+				FreeformTags: map[string]string{
+					"freeformTag1": "value1",
+					"freeformTag2": "value2",
+				},
 				DefinedTags: map[string]map[string]interface{}{
 					"definedTag1": {"foo": "bar"},
+					"definedTag2": {"key": "val"},
 				},
 			},
 		},

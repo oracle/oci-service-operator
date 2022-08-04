@@ -8,14 +8,23 @@ package virtualdeployment
 import (
 	"context"
 	"errors"
-	sdkcommons "github.com/oracle/oci-go-sdk/v65/common"
 	"testing"
 	"time"
 
 	"github.com/golang/mock/gomock"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+	sdkcommons "github.com/oracle/oci-go-sdk/v65/common"
 	sdk "github.com/oracle/oci-go-sdk/v65/servicemesh"
+	api "github.com/oracle/oci-service-operator/api/v1beta1"
+	servicemeshapi "github.com/oracle/oci-service-operator/apis/servicemesh.oci/v1beta1"
+	"github.com/oracle/oci-service-operator/pkg/loggerutil"
+	"github.com/oracle/oci-service-operator/pkg/servicemanager"
+	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/manager"
+	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/commons"
+	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/conversions"
+	mocks "github.com/oracle/oci-service-operator/test/mocks/servicemesh"
+	meshErrors "github.com/oracle/oci-service-operator/test/servicemesh/errors"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -23,15 +32,6 @@ import (
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 	testclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
-
-	api "github.com/oracle/oci-service-operator/api/v1beta1"
-	servicemeshapi "github.com/oracle/oci-service-operator/apis/servicemesh.oci/v1beta1"
-	"github.com/oracle/oci-service-operator/pkg/loggerutil"
-	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/manager"
-	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/commons"
-	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/conversions"
-	mocks "github.com/oracle/oci-service-operator/test/mocks/servicemesh"
-	meshErrors "github.com/oracle/oci-service-operator/test/servicemesh/errors"
 )
 
 var (
@@ -66,6 +66,7 @@ func Test_CreateUpdateChangeCompartmentForVD(t *testing.T) {
 		times               int
 		wantErr             error
 		expectOpcRetryToken bool
+		doNotRequeue        bool
 	}{
 		{
 			name: "happy create path",
@@ -265,8 +266,9 @@ func Test_CreateUpdateChangeCompartmentForVD(t *testing.T) {
 					}, nil
 				},
 			},
-			times:   1,
-			wantErr: nil,
+			times:        1,
+			wantErr:      errors.New("virtual deployment in the control plane is deleted or failed"),
+			doNotRequeue: true,
 		},
 		{
 			name: "change compartment with access logging",
@@ -365,13 +367,14 @@ func Test_CreateUpdateChangeCompartmentForVD(t *testing.T) {
 				meshClient.EXPECT().GetVirtualDeployment(gomock.Any(), gomock.Any()).DoAndReturn(tt.functions.get).Times(tt.times)
 			}
 
+			var response servicemanager.OSOKResponse
 			for i := 0; i < tt.times; i++ {
-				_, err = m.CreateOrUpdate(ctx, tt.vd, ctrl.Request{})
+				response, err = m.CreateOrUpdate(ctx, tt.vd, ctrl.Request{})
 			}
 
 			if tt.functions.getNewCompartment != nil {
 				meshClient.EXPECT().GetVirtualDeployment(gomock.Any(), gomock.Any()).DoAndReturn(tt.functions.getNewCompartment).Times(1)
-				_, err = m.CreateOrUpdate(ctx, tt.vd, ctrl.Request{})
+				response, err = m.CreateOrUpdate(ctx, tt.vd, ctrl.Request{})
 			}
 
 			key := types.NamespacedName{Name: "test"}
@@ -389,6 +392,7 @@ func Test_CreateUpdateChangeCompartmentForVD(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 			}
+			assert.Equal(t, !tt.doNotRequeue, response.ShouldRequeue)
 		})
 	}
 }

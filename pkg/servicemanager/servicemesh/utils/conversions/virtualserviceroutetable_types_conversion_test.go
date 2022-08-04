@@ -141,7 +141,12 @@ func TestConvertCrdVsrtToSdkVsrt(t *testing.T) {
 						VirtualServiceRouteTableId: "my-vsrt-id",
 					},
 				},
-				sdkObj: &sdk.VirtualServiceRouteTable{},
+				sdkObj: &sdk.VirtualServiceRouteTable{
+					FreeformTags: map[string]string{"freeformTag2": "value2"},
+					DefinedTags: map[string]map[string]interface{}{
+						"definedTag2": {"key": "val"},
+					},
+				},
 				dependencies: &VSRTDependencies{
 					VirtualServiceId: "my-vs-id",
 					VdIdForRules:     [][]api.OCID{{"my-vd-id"}, {"my-vd-id2", "my-vd-id"}, {"my-vd-3"}, {"my-vd-3"}},
@@ -201,9 +206,13 @@ func TestConvertCrdVsrtToSdkVsrt(t *testing.T) {
 						},
 					},
 				},
-				FreeformTags: map[string]string{"freeformTag1": "value1"},
+				FreeformTags: map[string]string{
+					"freeformTag1": "value1",
+					"freeformTag2": "value2",
+				},
 				DefinedTags: map[string]map[string]interface{}{
 					"definedTag1": {"foo": "bar"},
+					"definedTag2": {"key": "val"},
 				},
 				Priority: Integer(1),
 			},

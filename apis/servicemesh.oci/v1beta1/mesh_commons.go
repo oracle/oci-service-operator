@@ -92,7 +92,7 @@ type TcpExternalService struct {
 }
 
 type HttpExternalService struct {
-	// IpAddresses of the external service in CIDR notation.
+	// Host names of the external service.
 	// +kubebuilder:validation:MinItems=1
 	Hostnames []string `json:"hostnames,omitempty"`
 	// Ports exposed by the external service. If left empty all ports will be allowed.
@@ -101,7 +101,7 @@ type HttpExternalService struct {
 }
 
 type HttpsExternalService struct {
-	// IpAddresses of the external service in CIDR notation.
+	// Host names of the external service.
 	// +kubebuilder:validation:MinItems=1
 	Hostnames []string `json:"hostnames,omitempty"`
 	// Ports exposed by the external service. If left empty all ports will be allowed.
@@ -111,7 +111,8 @@ type HttpsExternalService struct {
 
 // Describes the target of the traffic.
 // This can either be the source or the destination of the traffic.
-// Only 1 of the following fields can be specified.
+// The source of traffic can be defined by specifying only one of the "allVirtualServices", "virtualService" or "ingressGateway" property.
+// The destination of the traffic can be defined by specifying only one of the "allVirtualServices", "virtualService" or "externalService" property.
 type TrafficTarget struct {
 	// +optional
 	AllVirtualServices *AllVirtualServices `json:"allVirtualServices,omitempty"`

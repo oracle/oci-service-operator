@@ -184,6 +184,8 @@ func (h *IngressGatewayDeploymentServiceManager) CreateOrUpdate(ctx context.Cont
 			service.Spec.Selector = map[string]string{
 				meshCommons.IngressName: igd.Name,
 			}
+			service.Annotations = igd.Spec.Service.Annotations
+			service.Labels = igd.Spec.Service.Labels
 
 			return nil
 		})
@@ -389,11 +391,44 @@ func (h *IngressGatewayDeploymentServiceManager) createDeploymentSpec(ingressGat
 				Name:  string(meshCommons.ProxyLogLevel),
 				Value: strings.ToLower(proxyLogLevel),
 			},
+			// this environment variable is deprecated in favor of POD_IP due to name being very generic
 			{
 				Name: string(meshCommons.IPAddress),
 				ValueFrom: &corev1.EnvVarSource{
 					FieldRef: &corev1.ObjectFieldSelector{
 						FieldPath: "status.podIP",
+					},
+				},
+			},
+			{
+				Name: string(meshCommons.PodIp),
+				ValueFrom: &corev1.EnvVarSource{
+					FieldRef: &corev1.ObjectFieldSelector{
+						FieldPath: "status.podIP",
+					},
+				},
+			},
+			{
+				Name: string(meshCommons.PodUId),
+				ValueFrom: &corev1.EnvVarSource{
+					FieldRef: &corev1.ObjectFieldSelector{
+						FieldPath: "metadata.uid",
+					},
+				},
+			},
+			{
+				Name: string(meshCommons.PodName),
+				ValueFrom: &corev1.EnvVarSource{
+					FieldRef: &corev1.ObjectFieldSelector{
+						FieldPath: "metadata.name",
+					},
+				},
+			},
+			{
+				Name: string(meshCommons.PodNamespace),
+				ValueFrom: &corev1.EnvVarSource{
+					FieldRef: &corev1.ObjectFieldSelector{
+						FieldPath: "metadata.namespace",
 					},
 				},
 			},

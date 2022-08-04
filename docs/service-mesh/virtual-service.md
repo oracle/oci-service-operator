@@ -28,30 +28,57 @@ The Complete Specification of the `VirtualService` Custom Resource (CR) is as de
 
 | Parameter                          | Description                                                         | Type   | Mandatory |
 | ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
-| `spec.Name` | The user-friendly name for the Virtual Service. The name has to be unique within the same Mesh.  | string | yes       |
+| `spec.name` | The user-friendly name for the Virtual Service. The name has to be unique within the same Mesh.  | string | no       |
 | `spec.compartmentId` | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment of the Virtual Service. | string | yes       |
-| `spec.description` | Description of the virtual service  | string | no       |
-| `spec.mesh.RefOrId` | The ResourceRef(name,namespace of mesh)/Name  of the service mesh in which this virtual service is created.  | struct | yes       |
-| `spec.Hosts` | The DNS hostnames of the virtual service that is used by its callers. Wildcard hostnames are supported in the prefix form.  | []string | yes       |
-| `spec.RoutingPolicy` | Type of the virtual service routing policy. [`ROUND ROBIN`, `DENY`] | enum | no       |
-| `spec.Mtls.CreateMutualTransportLayerSecurityDetails` | The mTLS authentication mode to use when receiving requests from other virtual services or ingress gateways within the mesh. [`DISABLED`, `PERMISSIVE`, `STRICT`] | enum | no       |
+| `spec.description` | Description of the Virtual Service  | string | no       |
+| `spec.mesh` | The service mesh in which this Virtual Service is created. Either `spec.mesh.id` or `spec.mesh.ref` should be provided. | [RefOrId](#reforid) | yes       |
+| `spec.hosts` | The DNS hostnames of the Virtual Service that is used by its callers. Wildcard hostnames are supported in the prefix form.  | []string | yes       |
+| `spec.defaultRoutingPolicy` | Routing policy for the Virtual Service. | [DefaultRoutingPolicy](#defaultroutingpolicy) | no       |
+| `spec.mtls` | The mTLS authentication mode to use when receiving requests from other Virtual Services or Ingress Gateways within the mesh. | [Mtls](#mtls) | no       |
 | `spec.freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see [Resource Tags](https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). `Example: {"Department": "Finance"}` | map[string]string  | no |
 | `spec.definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see [Resource Tags](https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). | map[string]map[string]string | no |
+
+### RefOrId
+| Parameter                          | Description                                                         | Type   | Mandatory |
+| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
+| `ref` | The reference of the resource. | [ResourceRef](#resourceref) | no       |
+| `id` | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the resource. | string | no       |
+
+### ResourceRef
+| Parameter                          | Description                                                         | Type   | Mandatory |
+| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
+| `namespace` | The namespace of the resource. By default, if namespace is not provided, it will use the current referring resource namespace.  | string | no       |
+| `name` | The name of the resource. | string | yes       |
+
+### DefaultRoutingPolicy
+| Parameter                          | Description                                                         | Type   | Mandatory |
+| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
+| `type` | Type of the Virtual Service routing policy. Either `ROUND ROBIN` or `DENY` should be provided.  | enum | yes       |
+
+### Mtls
+| Parameter                          | Description                                                         | Type   | Mandatory |
+| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
+| `mode` | `DISABLED`: Connection is not tunneled. `PERMISSIVE`: Connection can be either plaintext or an mTLS tunnel. `STRICT`: Connection is an mTLS tunnel. Clients without a valid certificate will be rejected.' | enum | yes       |
 
 ## Virtual Service Status Parameters
 
 | Parameter                          | Description                                                         | Type   | Mandatory |
 | ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
-| `status.servicemeshstatus.meshId` | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of Mesh resources | string | yes       |
-| `spec.servicemeshstatus.virtualServiceId` | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Virtual Service resource | string | yes       |
-| `spec.servicemeshstatus.VirtualServiceMtls` | sets mTLS settings used when communicating with other virtual services within the mesh. [`DISABLED`, `PERMISSIVE`, `STRICT`] | enum | yes       |
-| `spec.servicemeshstatus.Conditions.ServiceMeshConditionType` | Indicates status of the service mesh resource in the control-plane. Allowed values are [`ServiceMeshActive`, `ServiceMeshDependenciesActive`,`ServiceMeshConfigured`] | enum | yes       |
-| `spec.servicemeshstatus.Conditions.ResourceCondition.Status` | status of the condition, one of True, False, Unknown. | string | yes       |
-| `spec.servicemeshstatus.Conditions.ResourceCondition.ObservedGeneration` | observedGeneration represents the .metadata.generation that the condition was set based upon. For instance, if metadata.generation is currently 12, but the status.conditions[x].observedGeneration is 9, the condition is out of date with respect to the current state of the instance. | int | yes       |
-| `spec.servicemeshstatus.Conditions.ResourceCondition.LastTransitionTime` | lastTransitionTime is the last time the condition transitioned from one status to another. | struct | yes       |
-| `spec.servicemeshstatus.Conditions.ResourceCondition.Reason` | reason contains a programmatic identifier indicating the reason for the condition's last transition. | string | yes       |
-| `spec.servicemeshstatus.Conditions.ResourceCondition.Message` | message is a human readable message indicating details about the transition. | string | yes       |
-| `spec.servicemeshstatus.LastUpdatedTime` | Time when resource was last updated in operator | time.Time | no       |
+| `status.meshId` | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of Mesh resources | string | yes       |
+| `status.virtualServiceId` | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Virtual Service resource | string | yes       |
+| `status.VirtualServiceMtls` | sets mTLS settings used when communicating with other virtual services within the mesh. [`DISABLED`, `PERMISSIVE`, `STRICT`] | enum | yes       |
+| `status.conditions` | Indicates the condition of the Service mesh resource | [][ServiceMeshCondition](#servicemeshcondition) | yes       |
+| `status.LastUpdatedTime` | Time when resource was last updated in operator | time.Time | no       |
+
+### ServiceMeshCondition
+| Parameter                          | Description                                                         | Type   | Mandatory |
+| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
+| `type` | Indicates status of the service mesh resource in the control-plane. Allowed values are [`ServiceMeshActive`, `ServiceMeshDependenciesActive`,`ServiceMeshConfigured`] | enum | yes       |
+| `status` | status of the condition, one of True, False, Unknown. | string | yes       |
+| `observedGeneration` | observedGeneration represents the .metadata.generation that the condition was set based upon. For instance, if metadata.generation is currently 12, but the status.conditions[x].observedGeneration is 9, the condition is out of date with respect to the current state of the instance. | int | yes       |
+| `lastTransitionTime` | lastTransitionTime is the last time the condition transitioned from one status to another. | struct | yes       |
+| `reason` | reason contains a programmatic identifier indicating the reason for the condition's last transition. | string | yes       |
+| `message` | message is a human readable message indicating details about the transition. | string | yes       |
 
 
 ### Create Resource

@@ -8,6 +8,8 @@ package inject
 import (
 	"testing"
 
+	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/conversions"
+
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
@@ -54,9 +56,17 @@ func Test_inject(t *testing.T) {
 				Spec: corev1.PodSpec{
 					InitContainers: []corev1.Container{
 						{
-							Name:            commons.InitContainerName,
-							Image:           proxyImageValue,
-							SecurityContext: &corev1.SecurityContext{Capabilities: &corev1.Capabilities{Add: []corev1.Capability{commons.NetAdminCapability}}},
+							Name:  commons.InitContainerName,
+							Image: proxyImageValue,
+							SecurityContext: &corev1.SecurityContext{
+								Capabilities: &corev1.Capabilities{
+									Add: []corev1.Capability{commons.NetAdminCapability},
+								},
+								Privileged:   conversions.Bool(false),
+								RunAsUser:    conversions.Int64(0),
+								RunAsGroup:   conversions.Int64(0),
+								RunAsNonRoot: conversions.Bool(false),
+							},
 							Env: []corev1.EnvVar{
 								{
 									Name:  string(commons.ConfigureIpTablesEnvName),
@@ -66,6 +76,14 @@ func Test_inject(t *testing.T) {
 									Name:  string(commons.EnvoyPortEnvVarName),
 									Value: string(commons.EnvoyPortEnvVarValue),
 								},
+								{
+									Name: string(commons.PodIp),
+									ValueFrom: &corev1.EnvVarSource{
+										FieldRef: &corev1.ObjectFieldSelector{
+											FieldPath: "status.podIP",
+										},
+									},
+								},
 							},
 						},
 					},
@@ -73,6 +91,13 @@ func Test_inject(t *testing.T) {
 						{
 							Name:  commons.ProxyContainerName,
 							Image: proxyImageValue,
+							SecurityContext: &corev1.SecurityContext{
+								Privileged:             conversions.Bool(false),
+								RunAsUser:              conversions.Int64(0),
+								RunAsGroup:             conversions.Int64(0),
+								RunAsNonRoot:           conversions.Bool(false),
+								ReadOnlyRootFilesystem: conversions.Bool(false),
+							},
 							Ports: []corev1.ContainerPort{
 								{
 									ContainerPort: commons.StatsPort,
@@ -91,6 +116,38 @@ func Test_inject(t *testing.T) {
 									ValueFrom: &corev1.EnvVarSource{
 										FieldRef: &corev1.ObjectFieldSelector{
 											FieldPath: "status.podIP",
+										},
+									},
+								},
+								{
+									Name: string(commons.PodIp),
+									ValueFrom: &corev1.EnvVarSource{
+										FieldRef: &corev1.ObjectFieldSelector{
+											FieldPath: "status.podIP",
+										},
+									},
+								},
+								{
+									Name: string(commons.PodUId),
+									ValueFrom: &corev1.EnvVarSource{
+										FieldRef: &corev1.ObjectFieldSelector{
+											FieldPath: "metadata.uid",
+										},
+									},
+								},
+								{
+									Name: string(commons.PodName),
+									ValueFrom: &corev1.EnvVarSource{
+										FieldRef: &corev1.ObjectFieldSelector{
+											FieldPath: "metadata.name",
+										},
+									},
+								},
+								{
+									Name: string(commons.PodNamespace),
+									ValueFrom: &corev1.EnvVarSource{
+										FieldRef: &corev1.ObjectFieldSelector{
+											FieldPath: "metadata.namespace",
 										},
 									},
 								},

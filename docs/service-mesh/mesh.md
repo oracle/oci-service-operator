@@ -28,29 +28,43 @@ The Complete Specification of the `Mesh` Custom Resource (CR) is as detailed bel
 
 | Parameter                          | Description                                                         | Type   | Mandatory |
 | ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
-| `spec.Name` | The user-friendly name for the Mesh. The name has to be unique within the same namespace. | string | yes       |
+| `spec.displayName` | The user-friendly name for the Mesh. The name has to be unique within the same namespace. | string | no       |
 | `spec.compartmentId` | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment of the Mesh. | string | yes       |
-| `spec.description` | The mesh resource is the top-level container that represents the logical boundary of application traffic between the services and deployments that reside within it.  | string | no       |
-| `spec.mtls.minimum` | A minimum level of mTLS authentication for all virtual services within the mesh. Accepts DISABLED, PERMISSIVE and STRICT.  | enum | yes       |
-| `spec.certificateAuthorities`| An array of certificate authority resources to use for creating leaf certificates. | []string    | yes       |
+| `spec.description` | The description of the Mesh.  | string | no       |
+| `spec.mtls` | The mTLS authentication for all virtual services within the mesh.  | [MeshMutualTransportLayerSecurity](#meshmutualtransportlayersecurity) | yes       |
+| `spec.certificateAuthorities`| An array of certificate authority resources to use for creating leaf certificates. | [][CertificateAuthority](#certificateauthority)    | yes       |
 | `spec.freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see [Resource Tags](https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). `Example: {"Department": "Finance"}` | map[string]string  | no |
 | `spec.definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see [Resource Tags](https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). | map[string]map[string]string | no |
+
+### MeshMutualTransportLayerSecurity
+| Parameter                          | Description                                                         | Type   | Mandatory |
+| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
+| `minimum` | A minimum level of mTLS authentication for all virtual services within the mesh. Accepts `DISABLED`, `PERMISSIVE` and `STRICT`.  | enum | yes       |
+
+### CertificateAuthority
+| Parameter                          | Description                                                         | Type   | Mandatory |
+| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
+| `id`| The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the certificate authority. | string    | yes       |
 
 ## Mesh Status Parameters
 
 | Parameter                          | Description                                                         | Type   | Mandatory |
 | ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
-| `status.servicemeshstatus.meshId` | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of Mesh resources | string | yes       |
-| `spec.servicemeshstatus.MeshMtls` | sets a minimum level of mTLS authentication for all virtual services within the mesh. [`DISABLED`, `PERMISSIVE`, `STRICT`] | enum | yes       |
-| `spec.servicemeshstatus.Conditions.ServiceMeshConditionType` | Indicates status of the service mesh resource in the control-plane. Allowed values are [`ServiceMeshActive`, `ServiceMeshDependenciesActive`,`ServiceMeshConfigured`] | enum | yes       |
-| `spec.servicemeshstatus.Conditions.ResourceCondition.Status` | status of the condition, one of True, False, Unknown. | string | yes       |
-| `spec.servicemeshstatus.Conditions.ResourceCondition.ObservedGeneration` | observedGeneration represents the .metadata.generation that the condition was set based upon. For instance, if metadata.generation is currently 12, but the status.conditions[x].observedGeneration is 9, the condition is out of date with respect to the current state of the instance. | int | yes       |
-| `spec.servicemeshstatus.Conditions.ResourceCondition.LastTransitionTime` | lastTransitionTime is the last time the condition transitioned from one status to another. | struct | yes       |
-| `spec.servicemeshstatus.Conditions.ResourceCondition.Reason` | reason contains a programmatic identifier indicating the reason for the condition's last transition. | string | yes       |
-| `spec.servicemeshstatus.Conditions.ResourceCondition.Message` | message is a human readable message indicating details about the transition. | string | yes       |
-| `spec.servicemeshstatus.OpcRetryToken` | Unique token for the request sent for fetching the mesh status | string | yes       |
-| `spec.servicemeshstatus.LastUpdatedTime` | Time when resource was last updated in operator | time.Time | no       |
+| `status.meshId` | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of Mesh resources | string | yes       |
+| `status.meshMtls` | Sets a minimum level of mTLS authentication for all virtual services within the mesh. [`DISABLED`, `PERMISSIVE`, `STRICT`] | enum | yes       |
+| `status.conditions` | Indicates the condition of the Service mesh resource | [][ServiceMeshCondition](#servicemeshcondition) | yes       |
+| `status.opcRetryToken` | Unique token for the request sent for fetching the mesh status | string | yes       |
+| `status.lastUpdatedTime` | Time when resource was last updated in operator | time.Time | no       |
 
+### ServiceMeshCondition
+| Parameter                          | Description                                                         | Type   | Mandatory |
+| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
+| `type` | Indicates status of the service mesh resource in the control-plane. Allowed values are [`ServiceMeshActive`, `ServiceMeshDependenciesActive`,`ServiceMeshConfigured`] | enum | yes       |
+| `status` | status of the condition, one of True, False, Unknown. | string | yes       |
+| `observedGeneration` | observedGeneration represents the .metadata.generation that the condition was set based upon. For instance, if metadata.generation is currently 12, but the status.conditions[x].observedGeneration is 9, the condition is out of date with respect to the current state of the instance. | int | yes       |
+| `lastTransitionTime` | lastTransitionTime is the last time the condition transitioned from one status to another. | struct | yes       |
+| `reason` | reason contains a programmatic identifier indicating the reason for the condition's last transition. | string | yes       |
+| `message` | message is a human readable message indicating details about the transition. | string | yes       |
 
 ### Create Resource
 

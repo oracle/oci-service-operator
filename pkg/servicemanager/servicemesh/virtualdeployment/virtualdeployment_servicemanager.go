@@ -8,13 +8,9 @@ package virtualdeployment
 import (
 	"context"
 	"errors"
+
 	"github.com/oracle/oci-go-sdk/v65/common"
-
 	sdk "github.com/oracle/oci-go-sdk/v65/servicemesh"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-
 	api "github.com/oracle/oci-service-operator/api/v1beta1"
 	servicemeshapi "github.com/oracle/oci-service-operator/apis/servicemesh.oci/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
@@ -24,6 +20,9 @@ import (
 	meshCommons "github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/commons"
 	meshConversions "github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/conversions"
 	meshErrors "github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type ResourceManager struct {
@@ -120,8 +119,9 @@ func (m *ResourceManager) VerifyResourceStatus(details *manager.ResourceDetails)
 	}
 
 	state := details.VdDetails.SdkVd.LifecycleState
+	// Terminate the reconcile request if resource in the control plane is deleted or failed
 	if state == sdk.VirtualDeploymentLifecycleStateDeleted || state == sdk.VirtualDeploymentLifecycleStateFailed {
-		return false, nil
+		return false, meshErrors.NewDoNotRequeueError(errors.New("virtual deployment in the control plane is deleted or failed"))
 	}
 
 	return false, meshErrors.NewRequeueOnError(errors.New(meshCommons.UnknownStatus))
@@ -178,6 +178,10 @@ func (m *ResourceManager) GetMessage(details *manager.ResourceDetails) string {
 
 func (m *ResourceManager) BuildSdk(object client.Object, details *manager.ResourceDetails) error {
 	buildSdkVirtualDeployment := &sdk.VirtualDeployment{}
+	if details.VdDetails.SdkVd != nil {
+		buildSdkVirtualDeployment.FreeformTags = details.VdDetails.SdkVd.FreeformTags
+		buildSdkVirtualDeployment.DefinedTags = details.VdDetails.SdkVd.DefinedTags
+	}
 	virtualDeployment, err := getVirtualDeployment(object)
 	if err != nil {
 		return err

@@ -13,12 +13,6 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/google/go-cmp/cmp"
 	sdk "github.com/oracle/oci-go-sdk/v65/servicemesh"
-	"github.com/stretchr/testify/assert"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/wait"
-	"k8s.io/client-go/rest"
-	"sigs.k8s.io/controller-runtime/pkg/envtest"
-
 	api "github.com/oracle/oci-service-operator/api/v1beta1"
 	servicemeshapi "github.com/oracle/oci-service-operator/apis/servicemesh.oci/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/commons"
@@ -26,6 +20,11 @@ import (
 	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/namespace"
 	"github.com/oracle/oci-service-operator/test/servicemesh/errors"
 	"github.com/oracle/oci-service-operator/test/servicemesh/functional"
+	"github.com/stretchr/testify/assert"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/wait"
+	"k8s.io/client-go/rest"
+	"sigs.k8s.io/controller-runtime/pkg/envtest"
 )
 
 var (
@@ -371,6 +370,7 @@ func TestIngressGateway(t *testing.T) {
 				ingressGateway.Spec.CompartmentId = api.OCID(tt.args.compartmentId)
 				err := framework.K8sAPIs.Update(ctx, ingressGateway, oldIngressGateway)
 				assert.NoError(t, err)
+				assert.NoError(t, waitUntilSettled(ctx, framework, ingressGateway))
 			}
 
 			// Update freeformTags
@@ -390,6 +390,7 @@ func TestIngressGateway(t *testing.T) {
 				ingressGateway.Spec.FreeFormTags = tt.args.freeformTags
 				err := framework.K8sAPIs.Update(ctx, ingressGateway, oldIngressGateway)
 				assert.NoError(t, err)
+				assert.NoError(t, waitUntilSettled(ctx, framework, ingressGateway))
 			}
 
 			// Update definedTags
@@ -409,6 +410,7 @@ func TestIngressGateway(t *testing.T) {
 				ingressGateway.Spec.DefinedTags = tt.args.definedTags
 				err := framework.K8sAPIs.Update(ctx, ingressGateway, oldIngressGateway)
 				assert.NoError(t, err)
+				assert.NoError(t, waitUntilSettled(ctx, framework, ingressGateway))
 			}
 
 			curIngressGateway := &servicemeshapi.IngressGateway{}
@@ -479,6 +481,20 @@ func waitUntilStatusChanged(ctx context.Context, framework *functional.Framework
 			return true, nil
 		}
 		if observedIngressGateway != nil && commons.GetServiceMeshCondition(&observedIngressGateway.Status, servicemeshapi.ServiceMeshDependenciesActive).Status != oldDependenciesStatus {
+			return true, nil
+		}
+		return false, nil
+	}, ctx.Done())
+}
+
+func waitUntilSettled(ctx context.Context, framework *functional.Framework, ingressGateway *servicemeshapi.IngressGateway) error {
+	observedIngressGateway := &servicemeshapi.IngressGateway{}
+	key := namespace.NewNamespacedName(ingressGateway)
+	return wait.PollImmediateUntil(commons.PollInterval, func() (bool, error) {
+		if err := framework.K8sClient.Get(ctx, key, observedIngressGateway); err != nil {
+			return false, err
+		}
+		if observedIngressGateway != nil && commons.GetServiceMeshCondition(&observedIngressGateway.Status, servicemeshapi.ServiceMeshActive).Status == metav1.ConditionTrue {
 			return true, nil
 		}
 		return false, nil

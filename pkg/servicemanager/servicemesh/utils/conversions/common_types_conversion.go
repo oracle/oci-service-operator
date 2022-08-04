@@ -23,6 +23,10 @@ func Integer(i int) *int {
 	return &i
 }
 
+func Int64(i int64) *int64 {
+	return &i
+}
+
 func Bool(b bool) *bool {
 	return &b
 }
@@ -57,12 +61,24 @@ func PortToInt(port *v1beta1.Port) *int {
 }
 
 func ConvertCrdDefinedTagsToSdkDefinedTags(crdObj *map[string]api.MapValue, sdkObj *map[string]map[string]interface{}) {
+	if *sdkObj == nil {
+		*sdkObj = map[string]map[string]interface{}{}
+	}
 	for k1, v1 := range *crdObj {
 		values := map[string]interface{}{}
 		for k2, v2 := range v1 {
 			values[k2] = v2
 		}
 		(*sdkObj)[k1] = values
+	}
+}
+
+func ConvertCrdFreeformTagsToSdkFreeformTags(crdObj *map[string]string, sdkObj *map[string]string) {
+	if *sdkObj == nil {
+		*sdkObj = map[string]string{}
+	}
+	for k1, v1 := range *crdObj {
+		(*sdkObj)[k1] = v1
 	}
 }
 

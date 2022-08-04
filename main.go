@@ -451,7 +451,7 @@ func main() {
 			AdditionalFinalizers: []string{meshCommons.VirtualDeploymentBindingFinalizer},
 		},
 		ResourceObject: new(servicemeshapi.VirtualDeploymentBinding),
-	}).SetupWithManager(mgr); err != nil {
+	}).SetupWithManagerWithMaxDelay(mgr, meshCommons.MaxDelay); err != nil {
 		setupLog.ErrorLog(err, "unable to create controller", "controller", "VirtualDeploymentBinding")
 		os.Exit(1)
 	}
@@ -523,7 +523,7 @@ func main() {
 		},
 		ResourceObject: new(servicemeshapi.IngressGatewayDeployment),
 		CustomWatches:  igdCustomWatches,
-	}).SetupWithManager(mgr); err != nil {
+	}).SetupWithManagerWithMaxDelay(mgr, meshCommons.MaxDelay); err != nil {
 		setupLog.ErrorLog(err, "unable to create controller", "controller", "IngressGatewayDeployment")
 		os.Exit(1)
 	}

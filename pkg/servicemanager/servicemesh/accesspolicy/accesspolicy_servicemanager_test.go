@@ -8,14 +8,25 @@ package accesspolicy
 import (
 	"context"
 	"errors"
-	sdkcommons "github.com/oracle/oci-go-sdk/v65/common"
 	"testing"
 	"time"
 
 	"github.com/golang/mock/gomock"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+	sdkcommons "github.com/oracle/oci-go-sdk/v65/common"
 	sdk "github.com/oracle/oci-go-sdk/v65/servicemesh"
+	api "github.com/oracle/oci-service-operator/api/v1beta1"
+	servicemeshapi "github.com/oracle/oci-service-operator/apis/servicemesh.oci/v1beta1"
+	"github.com/oracle/oci-service-operator/pkg/core"
+	"github.com/oracle/oci-service-operator/pkg/loggerutil"
+	"github.com/oracle/oci-service-operator/pkg/servicemanager"
+	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/manager"
+	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/commons"
+	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/conversions"
+	meshMocks "github.com/oracle/oci-service-operator/test/mocks/servicemesh"
+	meshErrors "github.com/oracle/oci-service-operator/test/servicemesh/errors"
+	"github.com/oracle/oci-service-operator/test/servicemesh/framework"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -23,17 +34,6 @@ import (
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 	testclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
-
-	api "github.com/oracle/oci-service-operator/api/v1beta1"
-	servicemeshapi "github.com/oracle/oci-service-operator/apis/servicemesh.oci/v1beta1"
-	"github.com/oracle/oci-service-operator/pkg/core"
-	"github.com/oracle/oci-service-operator/pkg/loggerutil"
-	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/manager"
-	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/commons"
-	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/conversions"
-	meshMocks "github.com/oracle/oci-service-operator/test/mocks/servicemesh"
-	meshErrors "github.com/oracle/oci-service-operator/test/servicemesh/errors"
-	"github.com/oracle/oci-service-operator/test/servicemesh/framework"
 )
 
 var (
@@ -1406,6 +1406,7 @@ func TestCreateOrUpdate(t *testing.T) {
 		times               int
 		wantErr             error
 		expectOpcRetryToken bool
+		doNotRequeue        bool
 	}{
 		{
 			name:         "AP Create without error",
@@ -1748,8 +1749,9 @@ func TestCreateOrUpdate(t *testing.T) {
 				UpdateAccessPolicy:            nil,
 				ChangeAccessPolicyCompartment: nil,
 			},
-			times:   1,
-			wantErr: nil,
+			times:        1,
+			wantErr:      errors.New("access policy in the control plane is deleted or failed"),
+			doNotRequeue: true,
 		},
 		{
 			name:         "sdk accessPolicy is failed",
@@ -1782,8 +1784,9 @@ func TestCreateOrUpdate(t *testing.T) {
 				UpdateAccessPolicy:            nil,
 				ChangeAccessPolicyCompartment: nil,
 			},
-			times:   1,
-			wantErr: nil,
+			times:        1,
+			wantErr:      errors.New("access policy in the control plane is deleted or failed"),
+			doNotRequeue: true,
 		},
 		{
 			name:         "AP Update with new compartment",
@@ -1872,13 +1875,14 @@ func TestCreateOrUpdate(t *testing.T) {
 			assert.NoError(t, f.K8sClient.Create(ctx, tt.accessPolicy))
 
 			var err error
+			var response servicemanager.OSOKResponse
 			for i := 0; i < tt.times; i++ {
-				_, err = m.CreateOrUpdate(ctx, tt.accessPolicy, ctrl.Request{})
+				response, err = m.CreateOrUpdate(ctx, tt.accessPolicy, ctrl.Request{})
 			}
 
 			if tt.fields.GetAccessPolicyNewCompartment != nil {
 				meshClient.EXPECT().GetAccessPolicy(gomock.Any(), gomock.Any()).DoAndReturn(tt.fields.GetAccessPolicyNewCompartment).Times(1)
-				_, err = m.CreateOrUpdate(ctx, tt.accessPolicy, ctrl.Request{})
+				response, err = m.CreateOrUpdate(ctx, tt.accessPolicy, ctrl.Request{})
 			}
 
 			key := types.NamespacedName{Name: "my-accessPolicy", Namespace: "my-namespace"}
@@ -1895,6 +1899,7 @@ func TestCreateOrUpdate(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 			}
+			assert.Equal(t, !tt.doNotRequeue, response.ShouldRequeue)
 		})
 	}
 }

@@ -173,20 +173,52 @@ func mutateAllHttpProbes(pod *corev1.Pod, logger loggerutil.OSOKLogger) {
 // them to the http headers, and points the probe to the health proxy endpoint
 func mutateProbe(probe *corev1.Probe, probeName string, containerPorts []corev1.ContainerPort, logger loggerutil.OSOKLogger) bool {
 	logger.InfoLog("Mutating " + probeName + " probe...")
-	if probe == nil || probe.HTTPGet == nil {
-		logger.InfoLog("No HTTPGet " + probeName + " probe was found.")
+	if probe == nil {
+		logger.InfoLog(probeName + " probe not found.")
+		return false
+	}
+	// select host, scheme, path and ports based on HTTP Get or TCP health check
+	var host string
+	var meshUserScheme string
+	var meshUserPort string
+	var meshUserPath string
+
+	if probe.HTTPGet != nil {
+		meshUserScheme = strings.ToLower(string(probe.HTTPGet.Scheme))
+		meshUserPort = toPortString(probe.HTTPGet.Port, containerPorts)
+		meshUserPath = probe.HTTPGet.Path
+		host = probe.HTTPGet.Host
+		if host == "" {
+			host = commons.LocalHost
+		}
+		_ = fmt.Sprintf("Setting HTTPGet values meshUserScheme:%s meshUserPort:%s meshUserPath:%s host:%s", meshUserScheme, meshUserPort, meshUserPath, host)
+	} else if probe.TCPSocket != nil {
+		meshUserScheme = commons.Tcp
+		meshUserPort = probe.TCPSocket.Port.String()
+		host = probe.TCPSocket.Host
+		if host == "" {
+			host = commons.LocalHost
+		}
+		_ = fmt.Sprintf("Setting TCP values meshUserScheme:%s meshUserPort:%s host:%s ", meshUserScheme, meshUserPort, host)
+		// after extraction point tcp socket to nil
+		probe.TCPSocket = nil
+
+	} else {
+		// This can be extended when gRPC is needed
+		logger.InfoLog("No HTTPGet or TCP " + probeName + " probe was found.")
 		return false
 	}
 
-	host := probe.HTTPGet.Host
-	if host == "" {
-		host = commons.LocalHost
+	probe.HTTPGet = &corev1.HTTPGetAction{
+		Scheme: corev1.URISchemeHTTP,
+		Port:   intstr.FromInt(int(commons.LivenessProbeEndpointPort)),
+		Path:   commons.HealthProxyEndpointPath,
 	}
 
 	probe.HTTPGet.HTTPHeaders = append(probe.HTTPGet.HTTPHeaders,
 		corev1.HTTPHeader{
 			Name:  string(commons.MeshUserScheme),
-			Value: strings.ToLower(string(probe.HTTPGet.Scheme)),
+			Value: meshUserScheme,
 		},
 		corev1.HTTPHeader{
 			Name:  string(commons.MeshUserHost),
@@ -194,16 +226,13 @@ func mutateProbe(probe *corev1.Probe, probeName string, containerPorts []corev1.
 		},
 		corev1.HTTPHeader{
 			Name:  string(commons.MeshUserPort),
-			Value: toPortString(probe.HTTPGet.Port, containerPorts),
+			Value: meshUserPort,
 		},
 		corev1.HTTPHeader{
 			Name:  string(commons.MeshUserPath),
-			Value: probe.HTTPGet.Path,
+			Value: meshUserPath,
 		})
 
-	probe.HTTPGet.Scheme = corev1.URISchemeHTTP
-	probe.HTTPGet.Port = intstr.FromInt(int(commons.LivenessProbeEndpointPort))
-	probe.HTTPGet.Path = commons.HealthProxyEndpointPath
 	return true
 }
 

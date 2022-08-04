@@ -8,35 +8,33 @@ package mesh
 import (
 	"context"
 	"errors"
+	"testing"
+	"time"
+
 	"github.com/golang/mock/gomock"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	sdkcommons "github.com/oracle/oci-go-sdk/v65/common"
 	sdk "github.com/oracle/oci-go-sdk/v65/servicemesh"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
-	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
-	testclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
-	"testing"
-	"time"
-
-	"github.com/stretchr/testify/assert"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	ctrl "sigs.k8s.io/controller-runtime"
-
 	api "github.com/oracle/oci-service-operator/api/v1beta1"
 	servicemeshapi "github.com/oracle/oci-service-operator/apis/servicemesh.oci/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/core"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/manager"
-	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/commons"
 	meshCommons "github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/commons"
 	meshConversions "github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/conversions"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/equality"
 	meshMocks "github.com/oracle/oci-service-operator/test/mocks/servicemesh"
 	meshErrors "github.com/oracle/oci-service-operator/test/servicemesh/errors"
 	"github.com/oracle/oci-service-operator/test/servicemesh/framework"
+	"github.com/stretchr/testify/assert"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
+	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
+	ctrl "sigs.k8s.io/controller-runtime"
+	testclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
 var (
@@ -575,6 +573,7 @@ func TestCreateOrUpdateMesh(t *testing.T) {
 		expectedErr         error
 		response            *servicemanager.OSOKResponse
 		expectOpcRetryToken bool
+		doNotRequeue        bool
 	}{
 		{
 			name: "sdk mesh not created",
@@ -832,7 +831,8 @@ func TestCreateOrUpdateMesh(t *testing.T) {
 					Minimum: servicemeshapi.MutualTransportLayerSecurityModeStrict,
 				},
 			},
-			expectedErr: nil,
+			expectedErr:  errors.New("mesh in the control plane is deleted or failed"),
+			doNotRequeue: true,
 		},
 		{
 			name: "update sdk mesh compartment id",
@@ -1023,7 +1023,7 @@ func TestCreateOrUpdateMesh(t *testing.T) {
 							Type: servicemeshapi.ServiceMeshDependenciesActive,
 							ResourceCondition: servicemeshapi.ResourceCondition{
 								Status:             metav1.ConditionTrue,
-								Reason:             string(commons.Successful),
+								Reason:             string(meshCommons.Successful),
 								Message:            "Dependencies resolved successfully",
 								ObservedGeneration: 1,
 							},

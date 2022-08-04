@@ -10,18 +10,17 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"time"
-
-	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/iancoleman/strcase"
 	"github.com/oracle/oci-go-sdk/v65/common"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
+	"github.com/oracle/oci-service-operator/pkg/errorutil"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/commons"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // RequeueOnError is to used when a request needs to be requeued immediately due to an error.
@@ -74,14 +73,45 @@ func (e *RequeueOnError) Error() string {
 var _ error = &RequeueOnError{}
 
 func GetOsokResponseByHandlingReconcileError(err error) (servicemanager.OSOKResponse, error) {
-	// Requeue the request right away with rate limiting if there are errors. A nil error will reset the backoff.
+	var doNotRequeue *DoNotRequeueError
+	if errors.As(err, &doNotRequeue) {
+		return servicemanager.OSOKResponse{ShouldRequeue: false}, err
+	}
 
+	// Requeue the request right away with rate limiting if there are errors. A nil error will reset the backoff.
 	var requeueOnError *RequeueOnError
 	if errors.As(err, &requeueOnError) {
 		return servicemanager.OSOKResponse{ShouldRequeue: true}, nil
 	}
+
+	// Do not requeue if are customer mistakes
+	if serviceError, ok := common.IsServiceError(err); ok {
+		return servicemanager.OSOKResponse{ShouldRequeue: shouldRequeueServiceError(serviceError)}, err
+	}
+
 	// Requeue a Request if there is an error and continue processing items with exponential backoff
 	return servicemanager.OSOKResponse{ShouldRequeue: true}, err
+}
+
+func shouldRequeueServiceError(err common.ServiceError) bool {
+	if err.GetHTTPStatusCode() != 400 {
+		return true
+	}
+
+	switch err.GetCode() {
+	case errorutil.InvalidParameter:
+		return false
+	case errorutil.InvalidParameters:
+		return false
+	case errorutil.MissingParameter:
+		return false
+	case errorutil.MissingParameters:
+		return false
+	case errorutil.CannotParseRequest:
+		return false
+	default:
+		return true
+	}
 }
 
 func GetValidationErrorMessage(object client.Object, reason string) string {
@@ -132,24 +162,30 @@ func IsDeleted(ctx context.Context, err error, log loggerutil.OSOKLogger) error 
 	return err
 }
 
-type DoNotRequeue struct {
+type DoNotRequeueError struct {
+	err error
 }
 
-func NewDoNotRequeue() *DoNotRequeue {
-	return &DoNotRequeue{}
+func NewDoNotRequeueError(err error) *DoNotRequeueError {
+	return &DoNotRequeueError{
+		err: err,
+	}
 }
 
-func (e *DoNotRequeue) Error() string {
-	return ""
+func (e *DoNotRequeueError) Error() string {
+	if e.err == nil {
+		return ""
+	}
+	return e.err.Error()
 }
 
-var _ error = &DoNotRequeue{}
+var _ error = &DoNotRequeueError{}
 
 func HandleErrorAndRequeue(ctx context.Context, err error, log loggerutil.OSOKLogger) (ctrl.Result, error) {
 	// Do not requeue the request if there is no error or error is of type DoNotRequeue
-	var doNotRequeue *DoNotRequeue
+	var doNotRequeue *DoNotRequeueError
 	if err == nil || errors.As(err, &doNotRequeue) {
-		return ctrl.Result{}, nil
+		return ctrl.Result{}, err
 	}
 
 	// Requeue the request right away with rate limiting if there are errors. A nil error will reset the backoff.

@@ -38,7 +38,7 @@ const (
 	InitContainerName  = "init"
 	ProxyContainerName = "oci-sm-proxy"
 
-	// Net Admin Capability
+	// linux capabilities
 	NetAdminCapability = "NET_ADMIN"
 
 	OsokNamespace              = "oci-service-operator-system"
@@ -68,6 +68,9 @@ const (
 	MetadataNameMaxLength = 190
 
 	DeploymentAPIVersion = "apps/v1"
+
+	Http = "http"
+	Tcp  = "tcp"
 )
 
 type SidecarResourceRequirements string
@@ -203,7 +206,11 @@ type ProxyEnvVars string
 const (
 	DeploymentId  ProxyEnvVars = "DEPLOYMENT_ID"
 	ProxyLogLevel ProxyEnvVars = "PROXY_LOG_LEVEL"
-	IPAddress     ProxyEnvVars = "IP_ADDRESS"
+	IPAddress     ProxyEnvVars = "IP_ADDRESS" // this is deprecated in favor of POD_IP
+	PodIp         ProxyEnvVars = "POD_IP"
+	PodUId        ProxyEnvVars = "POD_UID"
+	PodName       ProxyEnvVars = "POD_NAME"
+	PodNamespace  ProxyEnvVars = "POD_NAMESPACE"
 	StatsPort     int32        = 15006
 )
 

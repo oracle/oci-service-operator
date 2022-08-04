@@ -7,6 +7,7 @@ package servicemeshoci
 
 import (
 	"context"
+	"time"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -15,9 +16,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
-	meshCommons "github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/commons"
-
 	"github.com/oracle/oci-service-operator/pkg/core"
+	meshCommons "github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/commons"
 )
 
 // ServiceMeshReconciler reconciles a ServiceMesh CRD object
@@ -37,11 +37,11 @@ func (r *ServiceMeshReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 }
 
 // SetupWithManager sets up the controller with the Manager.
-func (r *ServiceMeshReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *ServiceMeshReconciler) SetupWithManagerWithMaxDelay(mgr ctrl.Manager, maxDelay time.Duration) error {
 	pred := predicate.GenerationChangedPredicate{}
 	builder := ctrl.NewControllerManagedBy(mgr).
 		WithOptions(controller.Options{
-			RateLimiter: meshCommons.DefaultControllerRateLimiter(),
+			RateLimiter: meshCommons.DefaultControllerRateLimiter(maxDelay),
 		}).
 		For(r.ResourceObject).
 		WithEventFilter(pred)
@@ -52,4 +52,9 @@ func (r *ServiceMeshReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		}
 	}
 	return builder.Complete(r)
+}
+
+// SetupWithManager sets up the controller with the Manager.
+func (r *ServiceMeshReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	return r.SetupWithManagerWithMaxDelay(mgr, meshCommons.MaxControllerDelay)
 }
