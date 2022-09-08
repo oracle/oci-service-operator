@@ -18,6 +18,7 @@ spec:
     autoscaling:
       minPods: 1
       maxPods: 1
+    mountCertificateChainFromHost: true
   ports:
     - protocol: TCP
       port: 8080

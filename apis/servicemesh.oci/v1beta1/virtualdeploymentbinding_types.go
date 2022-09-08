@@ -21,6 +21,10 @@ type VirtualDeploymentBindingSpec struct {
 
 	// +optional
 	Resources *corev1.ResourceRequirements `json:"resources,omitempty"`
+
+	// indicates whether to mount `/etc/pki` host path to the container.
+	// +optional
+	MountCertificateChainFromHost *bool `json:"mountCertificateChainFromHost,omitempty"`
 }
 
 // Target identifies the Virtual Deployment for a Virtual Deployment Binding

@@ -352,6 +352,13 @@ func (h *IngressGatewayDeploymentServiceManager) createDeploymentSpec(ingressGat
 		})
 	}
 
+	volumes := secretVolumes
+	if ingressGatewayDeployment.Spec.Deployment.MountCertificateChainFromHost != nil &&
+		*ingressGatewayDeployment.Spec.Deployment.MountCertificateChainFromHost {
+		volumes = append(secretVolumes, meshCommons.PkiVolume)
+		volumeMounts = append(volumeMounts, meshCommons.PkiVolumeMount)
+	}
+
 	resourceRequests := corev1.ResourceRequirements{
 		Requests: map[corev1.ResourceName]resource.Quantity{
 			corev1.ResourceCPU:    resource.MustParse(string(meshCommons.IngressCPURequestSize)),
@@ -458,7 +465,7 @@ func (h *IngressGatewayDeploymentServiceManager) createDeploymentSpec(ingressGat
 				Containers: []corev1.Container{
 					proxyContainer,
 				},
-				Volumes: secretVolumes,
+				Volumes: volumes,
 			},
 		},
 	}

@@ -6,6 +6,8 @@
 package commons
 
 import (
+	corev1 "k8s.io/api/core/v1"
+
 	servicemeshapi "github.com/oracle/oci-service-operator/apis/servicemesh.oci/v1beta1"
 )
 
@@ -268,3 +270,18 @@ const (
 	IngressGatewayDeployment MeshResources = "IngressGatewayDeployment"
 	VirtualDeploymentBinding MeshResources = "VirtualDeploymentBinding"
 )
+
+var PkiVolume = corev1.Volume{
+	Name: "pki",
+	VolumeSource: corev1.VolumeSource{
+		HostPath: &corev1.HostPathVolumeSource{
+			Path: "/etc/pki",
+		},
+	},
+}
+
+var PkiVolumeMount = corev1.VolumeMount{
+	Name:      "pki",
+	ReadOnly:  true,
+	MountPath: "/etc/pki",
+}

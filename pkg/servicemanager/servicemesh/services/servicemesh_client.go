@@ -426,7 +426,7 @@ func (c *defaultServiceMeshClient) CreateAccessPolicy(ctx context.Context, acces
 
 func (c *defaultServiceMeshClient) UpdateAccessPolicy(ctx context.Context, accessPolicy *sdk.AccessPolicy) error {
 	if accessPolicy.Rules == nil {
-		accessPolicy.Rules = [] sdk.AccessPolicyRule{}
+		accessPolicy.Rules = []sdk.AccessPolicyRule{}
 	}
 	_, err := c.client.UpdateAccessPolicy(ctx, sdk.UpdateAccessPolicyRequest{
 		AccessPolicyId: accessPolicy.Id,

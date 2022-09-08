@@ -106,16 +106,18 @@ func TestReconcile(t *testing.T) {
 		updateScalar                            bool
 		secrets                                 []string
 		updateSecrets                           []string
+		mountCertificateChainFromHost           bool
 		ResolveIngressGatewayIdAndNameAndMeshId func(ctx context.Context, igRef *servicemeshapi.RefOrId, crdObj *metav1.ObjectMeta) (*commons.ResourceRef, error)
 	}
 	type expected struct {
-		hasService          bool
-		hasDeployment       bool
-		hasPodAutoscalar    bool
-		hasError            bool
-		deploymentPortCount int
-		servicePortCount    int
-		wantErr             error
+		hasService              bool
+		hasDeployment           bool
+		hasPodAutoscalar        bool
+		hasError                bool
+		hasHostCertificateChain bool
+		deploymentPortCount     int
+		servicePortCount        int
+		wantErr                 error
 	}
 	tests := []struct {
 		name string
@@ -411,6 +413,98 @@ func TestReconcile(t *testing.T) {
 				wantErr:             nil,
 			},
 		},
+		{
+			name: "Create Deployment with pki mounts",
+			args: args{
+				hasService:                    true,
+				servicePortCount:              3,
+				times:                         3,
+				differentProtocols:            false,
+				totalPortCount:                3,
+				useConfigMap:                  true,
+				mountCertificateChainFromHost: true,
+				ResolveIngressGatewayIdAndNameAndMeshId: func(ctx context.Context, igRef *servicemeshapi.RefOrId, crdObj *metav1.ObjectMeta) (*commons.ResourceRef, error) {
+					ResourceRef := commons.ResourceRef{
+						Id:     api.OCID("ingress-id"),
+						Name:   servicemeshapi.Name("ingress-name"),
+						MeshId: api.OCID("my-mesh-id"),
+					}
+					return &ResourceRef, nil
+				},
+			},
+			want: expected{
+				hasService:              true,
+				hasDeployment:           true,
+				hasPodAutoscalar:        true,
+				hasError:                false,
+				hasHostCertificateChain: true,
+				deploymentPortCount:     4,
+				servicePortCount:        3,
+				wantErr:                 nil,
+			},
+		},
+		{
+			name: "Create Deployment with kube secrets and pki mounts",
+			args: args{
+				hasService:                    true,
+				servicePortCount:              3,
+				times:                         3,
+				differentProtocols:            false,
+				totalPortCount:                3,
+				useConfigMap:                  true,
+				secrets:                       []string{"bookinfo-tls-secret", "bookinfo-cabundle-secret"},
+				mountCertificateChainFromHost: true,
+				ResolveIngressGatewayIdAndNameAndMeshId: func(ctx context.Context, igRef *servicemeshapi.RefOrId, crdObj *metav1.ObjectMeta) (*commons.ResourceRef, error) {
+					ResourceRef := commons.ResourceRef{
+						Id:     api.OCID("ingress-id"),
+						Name:   servicemeshapi.Name("ingress-name"),
+						MeshId: api.OCID("my-mesh-id"),
+					}
+					return &ResourceRef, nil
+				},
+			},
+			want: expected{
+				hasService:              true,
+				hasDeployment:           true,
+				hasPodAutoscalar:        true,
+				hasError:                false,
+				hasHostCertificateChain: true,
+				deploymentPortCount:     4,
+				servicePortCount:        3,
+				wantErr:                 nil,
+			},
+		},
+		{
+			name: "Update Deployment with kube secrets and pki mounts",
+			args: args{
+				hasService:                    true,
+				servicePortCount:              3,
+				times:                         3,
+				differentProtocols:            false,
+				totalPortCount:                3,
+				useConfigMap:                  true,
+				updateSecrets:                 []string{"bookinfo-tls-secret", "bookinfo-cabundle-secret"},
+				mountCertificateChainFromHost: true,
+				ResolveIngressGatewayIdAndNameAndMeshId: func(ctx context.Context, igRef *servicemeshapi.RefOrId, crdObj *metav1.ObjectMeta) (*commons.ResourceRef, error) {
+					ResourceRef := commons.ResourceRef{
+						Id:     api.OCID("ingress-id"),
+						Name:   servicemeshapi.Name("ingress-name"),
+						MeshId: api.OCID("my-mesh-id"),
+					}
+					return &ResourceRef, nil
+				},
+			},
+			want: expected{
+				hasService:              true,
+				hasDeployment:           true,
+				hasPodAutoscalar:        true,
+				hasError:                false,
+				hasHostCertificateChain: true,
+				deploymentPortCount:     4,
+				servicePortCount:        3,
+				wantErr:                 nil,
+			},
+		},
 	}
 	BeforeSuite(t)
 	for i, tt := range tests {
@@ -428,6 +522,7 @@ func TestReconcile(t *testing.T) {
 		igd.APIVersion = igdAPIVersion
 		igd.Name = igdName
 		igd.Namespace = testNamespace.Name
+		igd.Spec.Deployment.MountCertificateChainFromHost = &tt.args.mountCertificateChainFromHost
 
 		igd.Spec.IngressGateway = servicemeshapi.RefOrId{
 			ResourceRef: &servicemeshapi.ResourceRef{
@@ -498,6 +593,10 @@ func TestReconcile(t *testing.T) {
 		}
 
 		validateSecrets(t, tt.args.secrets, &deployment.Spec)
+
+		if tt.want.hasHostCertificateChain {
+			validateHostCertificateChainMountPresent(t, &deployment.Spec)
+		}
 
 		herr := k8sClient.Get(ctx, types.NamespacedName{Namespace: igd.Namespace, Name: igd.Name + string(commons.NativeHorizontalPodAutoScalar)}, &hpa)
 		assert.Equal(t, tt.want.hasPodAutoscalar, herr == nil)
@@ -619,6 +718,29 @@ func validateSecrets(t *testing.T, secrets []string, deployment *appsv1.Deployme
 		}
 		assert.Truef(t, volumeMountPresent, "volumeMount missing for secret %s", secret)
 	}
+}
+
+func validateHostCertificateChainMountPresent(t *testing.T, deployment *appsv1.DeploymentSpec) {
+	volumePresent := false
+	for _, volume := range deployment.Template.Spec.Volumes {
+		if volume.Name == "pki" {
+			volumePresent = true
+			break
+		}
+	}
+	assert.Truef(t, volumePresent, "volume missing for host certificates")
+
+	volumeMountPresent := false
+	for _, volumeMount := range deployment.Template.Spec.Containers[0].VolumeMounts {
+		if volumeMount.Name == "pki" {
+			assert.Equal(t, true, volumeMount.ReadOnly)
+			assert.Equal(t, "/etc/pki", volumeMount.MountPath)
+			volumeMountPresent = true
+			break
+		}
+	}
+
+	assert.Truef(t, volumeMountPresent, "volumeMount missing for host certificates")
 }
 
 func TestCreateService(t *testing.T) {

@@ -200,3 +200,10 @@ The OCI Service Operator for Kubernetes can be undeployed easily using the OLM
 ```bash
 $ operator-sdk cleanup oci-service-operator
 ```
+
+### Customize CA trust bundle
+
+The OCI Service Operator for Kubernetes by default mounts the `/etc/pki` host path so that the host
+certificate chains can be used for TLS verification. The default container image is built on top of
+Oracle Linux 7 which has the default CA trust bundle under `/etc/pki`. A new container image can be
+created with a custom CA trust bundle.

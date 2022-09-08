@@ -115,6 +115,10 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
+                  mountCertificateChainFromHost:
+                    description: indicates whether to mount `/etc/pki` host path to
+                      the container.
+                    type: boolean
                 required:
                 - autoscaling
                 type: object

@@ -118,4 +118,12 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
+        volumeMounts:
+          - name: pki
+            mountPath: /etc/pki
+            readOnly: true
+      volumes:
+        - name: pki
+          hostPath:
+            path: /etc/pki
       terminationGracePeriodSeconds: 10
