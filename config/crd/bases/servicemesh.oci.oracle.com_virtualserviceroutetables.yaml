@@ -142,6 +142,7 @@ spec:
                             - virtualDeployment
                             - weight
                             type: object
+                          maxItems: 15
                           minItems: 1
                           type: array
                         isGrpc:
@@ -210,6 +211,7 @@ spec:
                             - virtualDeployment
                             - weight
                             type: object
+                          maxItems: 15
                           minItems: 1
                           type: array
                       required:
@@ -264,12 +266,14 @@ spec:
                             - virtualDeployment
                             - weight
                             type: object
+                          maxItems: 15
                           minItems: 1
                           type: array
                       required:
                       - destinations
                       type: object
                   type: object
+                maxItems: 15
                 minItems: 1
                 type: array
               virtualService:

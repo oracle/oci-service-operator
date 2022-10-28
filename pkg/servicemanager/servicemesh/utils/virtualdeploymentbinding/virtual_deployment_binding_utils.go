@@ -65,7 +65,7 @@ func GetVDBForPod(vdbs []servicemeshapi.VirtualDeploymentBinding, podLabels labe
 }
 
 func IsVirtualDeploymentBindingActive(virtualDeploymentBinding *servicemeshapi.VirtualDeploymentBinding) bool {
-	if virtualDeploymentBinding.Status.Conditions == nil {
+	if virtualDeploymentBinding.Status.Conditions == nil || len(virtualDeploymentBinding.Status.Conditions) != 2 {
 		return false
 	}
 	for _, condition := range virtualDeploymentBinding.Status.Conditions {

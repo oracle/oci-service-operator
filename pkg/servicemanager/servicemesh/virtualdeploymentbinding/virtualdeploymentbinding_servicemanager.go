@@ -8,6 +8,7 @@ package virtualdeploymentbinding
 import (
 	"context"
 	"errors"
+	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/validator"
 	"strconv"
 	"time"
 
@@ -118,7 +119,7 @@ func (h *VirtualDeploymentBindingServiceManager) reconcileK8s(ctx context.Contex
 		_ = h.updateServiceMeshConditionWithVirtualDeploymentK8s(ctx, vdb, meshCommons.GetConditionStatusFromK8sError(err), string(meshCommons.DependenciesNotResolved), err.Error())
 		return meshErrors.GetOsokResponseByHandlingReconcileError(err)
 	}
-	if err := h.validateVirtualDeploymentK8s(vd); err != nil {
+	if err := validator.ValidateVDK8s(vd); err != nil {
 		_ = h.updateServiceMeshConditionWithVirtualDeploymentK8s(ctx, vdb, vdpkg.GetVDActiveStatus(vd), string(meshCommons.DependenciesNotResolved), err.Error())
 		return meshErrors.GetOsokResponseByHandlingReconcileError(err)
 	}
@@ -193,17 +194,6 @@ func (h *VirtualDeploymentBindingServiceManager) updateCRStatus(ctx context.Cont
 	if serviceError, ok := err.(common.ServiceError); ok {
 		_ = h.updateServiceMeshConditionWithVDCondition(ctx, vdb, meshErrors.GetConditionStatus(serviceError), meshErrors.ResponseStatusText(serviceError), meshErrors.GetErrorMessage(serviceError))
 	}
-}
-
-func (h *VirtualDeploymentBindingServiceManager) validateVirtualDeploymentK8s(vd *servicemeshapi.VirtualDeployment) error {
-	if !vdpkg.IsVdActiveK8s(vd) {
-		return meshErrors.NewRequeueOnError(errors.New("virtual deployment is not active yet"))
-	}
-	// if vdId not set, trigger reconcile again
-	if vd.Status.VirtualDeploymentId == "" {
-		return meshErrors.NewRequeueOnError(errors.New("virtualDeployment active, and virtualDeploymentId is not set"))
-	}
-	return nil
 }
 
 func (h *VirtualDeploymentBindingServiceManager) validateVirtualDeploymentCp(vd *sdk.VirtualDeployment) error {

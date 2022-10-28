@@ -175,7 +175,7 @@ func TestCreateOrUpdate(t *testing.T) {
 						ResourceCondition: servicemeshapi.ResourceCondition{
 							Status:             metav1.ConditionUnknown,
 							Reason:             string(commons.DependenciesNotResolved),
-							Message:            "virtual deployment is not active yet",
+							Message:            "virtual deployment status condition is not yet satisfied",
 							ObservedGeneration: 1,
 						},
 					},
@@ -510,76 +510,6 @@ func TestResolveVdK8s(t *testing.T) {
 		})
 	}
 
-}
-
-func TestValidateVdK8s(t *testing.T) {
-	tests := []struct {
-		name    string
-		vd      *servicemeshapi.VirtualDeployment
-		wantErr error
-	}{
-		{
-			name: "virtualDeployment active",
-			vd: &servicemeshapi.VirtualDeployment{
-				Status: servicemeshapi.ServiceMeshStatus{
-					VirtualDeploymentId: "vd",
-					Conditions: []servicemeshapi.ServiceMeshCondition{
-						{
-							Type: servicemeshapi.ServiceMeshActive,
-							ResourceCondition: servicemeshapi.ResourceCondition{
-								Status: metav1.ConditionTrue,
-							},
-						},
-					},
-				},
-			},
-			wantErr: nil,
-		},
-		{
-			name: "virtualDeployment inactive",
-			vd: &servicemeshapi.VirtualDeployment{
-				Status: servicemeshapi.ServiceMeshStatus{
-					Conditions: []servicemeshapi.ServiceMeshCondition{
-						{
-							Type: servicemeshapi.ServiceMeshActive,
-							ResourceCondition: servicemeshapi.ResourceCondition{
-								Status: metav1.ConditionFalse,
-							},
-						},
-					},
-				},
-			},
-			wantErr: errors.New("virtual deployment is not active yet"),
-		},
-		{
-			name: "virtualDeployment active without virtual Deployment Id",
-			vd: &servicemeshapi.VirtualDeployment{
-				Status: servicemeshapi.ServiceMeshStatus{
-					Conditions: []servicemeshapi.ServiceMeshCondition{
-						{
-							Type: servicemeshapi.ServiceMeshActive,
-							ResourceCondition: servicemeshapi.ResourceCondition{
-								Status: metav1.ConditionTrue,
-							},
-						},
-					},
-				},
-			},
-			wantErr: errors.New("virtualDeployment active, and virtualDeploymentId is not set"),
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			h := &VirtualDeploymentBindingServiceManager{}
-			err := h.validateVirtualDeploymentK8s(tt.vd)
-			if tt.wantErr != nil {
-				assert.EqualError(t, err, tt.wantErr.Error())
-			} else {
-				assert.NoError(t, err)
-			}
-		})
-	}
 }
 
 func TestValidateVdCp(t *testing.T) {

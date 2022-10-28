@@ -140,6 +140,7 @@ spec:
                                   description: Host names of the external service.
                                   items:
                                     type: string
+                                  maxItems: 10
                                   minItems: 1
                                   type: array
                                 ports:
@@ -150,7 +151,10 @@ spec:
                                     maximum: 65535
                                     minimum: 1
                                     type: integer
+                                  maxItems: 10
                                   type: array
+                              required:
+                              - hostnames
                               type: object
                             httpsExternalService:
                               properties:
@@ -158,6 +162,7 @@ spec:
                                   description: Host names of the external service.
                                   items:
                                     type: string
+                                  maxItems: 10
                                   minItems: 1
                                   type: array
                                 ports:
@@ -168,7 +173,10 @@ spec:
                                     maximum: 65535
                                     minimum: 1
                                     type: integer
+                                  maxItems: 10
                                   type: array
+                              required:
+                              - hostnames
                               type: object
                             tcpExternalService:
                               properties:
@@ -177,6 +185,7 @@ spec:
                                     in CIDR notation.
                                   items:
                                     type: string
+                                  maxItems: 10
                                   minItems: 1
                                   type: array
                                 ports:
@@ -187,7 +196,10 @@ spec:
                                     maximum: 65535
                                     minimum: 1
                                     type: integer
+                                  maxItems: 10
                                   type: array
+                              required:
+                              - ipAddresses
                               type: object
                           type: object
                         ingressGateway:
@@ -262,6 +274,7 @@ spec:
                                   description: Host names of the external service.
                                   items:
                                     type: string
+                                  maxItems: 10
                                   minItems: 1
                                   type: array
                                 ports:
@@ -272,7 +285,10 @@ spec:
                                     maximum: 65535
                                     minimum: 1
                                     type: integer
+                                  maxItems: 10
                                   type: array
+                              required:
+                              - hostnames
                               type: object
                             httpsExternalService:
                               properties:
@@ -280,6 +296,7 @@ spec:
                                   description: Host names of the external service.
                                   items:
                                     type: string
+                                  maxItems: 10
                                   minItems: 1
                                   type: array
                                 ports:
@@ -290,7 +307,10 @@ spec:
                                     maximum: 65535
                                     minimum: 1
                                     type: integer
+                                  maxItems: 10
                                   type: array
+                              required:
+                              - hostnames
                               type: object
                             tcpExternalService:
                               properties:
@@ -299,6 +319,7 @@ spec:
                                     in CIDR notation.
                                   items:
                                     type: string
+                                  maxItems: 10
                                   minItems: 1
                                   type: array
                                 ports:
@@ -309,7 +330,10 @@ spec:
                                     maximum: 65535
                                     minimum: 1
                                     type: integer
+                                  maxItems: 10
                                   type: array
+                              required:
+                              - ipAddresses
                               type: object
                           type: object
                         ingressGateway:
@@ -366,11 +390,13 @@ spec:
                   - destination
                   - source
                   type: object
+                maxItems: 50
                 minItems: 1
                 type: array
             required:
             - compartmentId
             - mesh
+            - rules
             type: object
           status:
             properties:

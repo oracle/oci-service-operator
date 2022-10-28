@@ -23,6 +23,7 @@ type VirtualServiceRouteTableSpec struct {
 	// +optional
 	Description    *Description `json:"description,omitempty"`
 	VirtualService RefOrId      `json:"virtualService"`
+	// +kubebuilder:validation:MaxItems=15
 	// +kubebuilder:validation:MinItems=1
 	RouteRules []VirtualServiceTrafficRouteRule `json:"routeRules"`
 	// +optional
@@ -43,6 +44,7 @@ type VirtualServiceTrafficRouteRule struct {
 type HttpVirtualServiceTrafficRouteRule struct {
 
 	// The destination of the request.
+	// +kubebuilder:validation:MaxItems=15
 	// +kubebuilder:validation:MinItems=1
 	Destinations []VirtualDeploymentTrafficRuleTarget `json:"destinations"`
 
@@ -83,12 +85,14 @@ const (
 
 type TcpVirtualServiceTrafficRouteRule struct {
 	// The destination of the request.
+	// +kubebuilder:validation:MaxItems=15
 	// +kubebuilder:validation:MinItems=1
 	Destinations []VirtualDeploymentTrafficRuleTarget `json:"destinations"`
 }
 
 type TlsPassthroughVirtualServiceTrafficRouteRule struct {
 	// The destination of the request.
+	// +kubebuilder:validation:MaxItems=15
 	// +kubebuilder:validation:MinItems=1
 	Destinations []VirtualDeploymentTrafficRuleTarget `json:"destinations"`
 }

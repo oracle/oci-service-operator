@@ -22,6 +22,7 @@ type IngressGatewayRouteTableSpec struct {
 	// +optional
 	Description    *Description `json:"description,omitempty"`
 	IngressGateway RefOrId      `json:"ingressGateway"`
+	// +kubebuilder:validation:MaxItems=15
 	// +kubebuilder:validation:MinItems=1
 	RouteRules []IngressGatewayTrafficRouteRule `json:"routeRules"`
 	// +optional
@@ -46,6 +47,7 @@ type HttpIngressGatewayTrafficRouteRule struct {
 	IngressGatewayHost *IngressGatewayHostRef `json:"ingressGatewayHost,omitempty"`
 
 	// The destination of the request.
+	// +kubebuilder:validation:MaxItems=1
 	// +kubebuilder:validation:MinItems=1
 	Destinations []VirtualServiceTrafficRuleTarget `json:"destinations"`
 
@@ -81,6 +83,7 @@ type TcpIngressGatewayTrafficRouteRule struct {
 	IngressGatewayHost *IngressGatewayHostRef `json:"ingressGatewayHost,omitempty"`
 
 	// The destination of the request.
+	// +kubebuilder:validation:MaxItems=1
 	// +kubebuilder:validation:MinItems=1
 	Destinations []VirtualServiceTrafficRuleTarget `json:"destinations"`
 }
@@ -92,6 +95,7 @@ type TlsPassthroughIngressGatewayTrafficRouteRule struct {
 	IngressGatewayHost *IngressGatewayHostRef `json:"ingressGatewayHost,omitempty"`
 
 	// The destination of the request.
+	// +kubebuilder:validation:MaxItems=1
 	// +kubebuilder:validation:MinItems=1
 	Destinations []VirtualServiceTrafficRuleTarget `json:"destinations"`
 }

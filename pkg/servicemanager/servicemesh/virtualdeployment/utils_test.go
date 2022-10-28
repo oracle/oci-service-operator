@@ -8,96 +8,12 @@ package virtualdeployment
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	sdk "github.com/oracle/oci-go-sdk/v65/servicemesh"
 
 	servicemeshapi "github.com/oracle/oci-service-operator/apis/servicemesh.oci/v1beta1"
 )
-
-func TestIsServiceMeshActive(t *testing.T) {
-	type args struct {
-		virtualDeployment *servicemeshapi.VirtualDeployment
-	}
-	tests := []struct {
-		name string
-		args args
-		want bool
-	}{
-		{
-			name: "virtualDeployment has true ServiceMeshActive condition",
-			args: args{
-				virtualDeployment: &servicemeshapi.VirtualDeployment{
-					Status: servicemeshapi.ServiceMeshStatus{
-						Conditions: []servicemeshapi.ServiceMeshCondition{
-							{
-								Type: servicemeshapi.ServiceMeshActive,
-								ResourceCondition: servicemeshapi.ResourceCondition{
-									Status: metav1.ConditionTrue,
-								},
-							},
-						},
-					},
-				},
-			},
-			want: true,
-		},
-		{
-			name: "virtualDeployment has false ServiceMeshActive condition",
-			args: args{
-				virtualDeployment: &servicemeshapi.VirtualDeployment{
-					Status: servicemeshapi.ServiceMeshStatus{
-						Conditions: []servicemeshapi.ServiceMeshCondition{
-							{
-								Type: servicemeshapi.ServiceMeshActive,
-								ResourceCondition: servicemeshapi.ResourceCondition{
-									Status: metav1.ConditionFalse,
-								},
-							},
-						},
-					},
-				},
-			},
-			want: false,
-		},
-		{
-			name: "virtualDeployment has unknown ServiceMeshActive condition",
-			args: args{
-				virtualDeployment: &servicemeshapi.VirtualDeployment{
-					Status: servicemeshapi.ServiceMeshStatus{
-						Conditions: []servicemeshapi.ServiceMeshCondition{
-							{
-								Type: servicemeshapi.ServiceMeshActive,
-								ResourceCondition: servicemeshapi.ResourceCondition{
-									Status: metav1.ConditionUnknown,
-								},
-							},
-						},
-					},
-				},
-			},
-			want: false,
-		},
-		{
-			name: "virtualDeployment doesn't have ServiceMeshActive condition",
-			args: args{
-				virtualDeployment: &servicemeshapi.VirtualDeployment{
-					Status: servicemeshapi.ServiceMeshStatus{
-						Conditions: []servicemeshapi.ServiceMeshCondition{},
-					},
-				},
-			},
-			want: false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := IsVdActiveK8s(tt.args.virtualDeployment)
-			assert.Equal(t, tt.want, got)
-		})
-	}
-}
 
 func TestGetVDActiveStatus(t *testing.T) {
 	type args struct {

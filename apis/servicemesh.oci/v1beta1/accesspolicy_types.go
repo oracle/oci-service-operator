@@ -23,8 +23,9 @@ type AccessPolicySpec struct {
 	// +optional
 	Description *Description `json:"description,omitempty"`
 	// Access Policy Rules
+	// +kubebuilder:validation:MaxItems=50
 	// +kubebuilder:validation:MinItems=1
-	Rules []AccessPolicyRule `json:"rules,omitempty"`
+	Rules []AccessPolicyRule `json:"rules"`
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 }
 

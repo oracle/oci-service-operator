@@ -21,6 +21,7 @@ type MeshSpec struct {
 	// +optional
 	Description *Description `json:"description,omitempty"`
 	// +kubebuilder:validation:MinItems=1
+	// +kubebuilder:validation:MaxItems=1
 	CertificateAuthorities []CertificateAuthority `json:"certificateAuthorities"`
 	// +optional
 	Mtls *MeshMutualTransportLayerSecurity `json:"mtls,omitempty"`

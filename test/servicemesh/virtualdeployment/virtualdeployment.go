@@ -90,6 +90,24 @@ func NewTestEnvVd(name string, namespace string) *servicemeshapi.VirtualDeployme
 						Message:            "",
 					},
 				},
+				{
+					Type: servicemeshapi.ServiceMeshDependenciesActive,
+					ResourceCondition: servicemeshapi.ResourceCondition{
+						Status:             metav1.ConditionTrue,
+						LastTransitionTime: &now,
+						Reason:             "Successful",
+						Message:            "",
+					},
+				},
+				{
+					Type: servicemeshapi.ServiceMeshConfigured,
+					ResourceCondition: servicemeshapi.ResourceCondition{
+						Status:             metav1.ConditionTrue,
+						LastTransitionTime: &now,
+						Reason:             "Successful",
+						Message:            "",
+					},
+				},
 			},
 		},
 	}

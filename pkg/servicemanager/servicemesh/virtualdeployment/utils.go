@@ -13,17 +13,6 @@ import (
 	servicemeshapi "github.com/oracle/oci-service-operator/apis/servicemesh.oci/v1beta1"
 )
 
-// IsVdActiveK8s tests whether given virtual deployment is active.
-// virtual deployment is active when its VirtualDeploymentActive condition equals true.
-func IsVdActiveK8s(vd *servicemeshapi.VirtualDeployment) bool {
-	for _, condition := range vd.Status.Conditions {
-		if condition.Type == servicemeshapi.ServiceMeshActive {
-			return condition.Status == metav1.ConditionTrue
-		}
-	}
-	return false
-}
-
 // GetVDActiveStatus returns the current status of the VD
 func GetVDActiveStatus(vd *servicemeshapi.VirtualDeployment) metav1.ConditionStatus {
 	for _, condition := range vd.Status.Conditions {
