@@ -17,7 +17,7 @@
 - [Delete Resource](#delete-resource)
 
 ## Introduction
-A table that contains a list of routing rules which are used managing the ingress traffic to an Ingress Gateway.
+A table that contains a list of routing rules which are used for managing the ingress traffic to an Ingress Gateway.
 
 ## Ingress Gateway Route Table Specification Parameters
 

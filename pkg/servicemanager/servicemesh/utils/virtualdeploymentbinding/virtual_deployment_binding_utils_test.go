@@ -232,6 +232,12 @@ func TestIsVirtualDeploymentBindingActive(t *testing.T) {
 									Status: metav1.ConditionTrue,
 								},
 							},
+							{
+								Type: servicemeshapi.ServiceMeshActive,
+								ResourceCondition: servicemeshapi.ResourceCondition{
+									Status: metav1.ConditionTrue,
+								},
+							},
 						},
 					},
 				},

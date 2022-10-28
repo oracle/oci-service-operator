@@ -84,27 +84,33 @@ type ExternalService struct {
 
 type TcpExternalService struct {
 	// IpAddresses of the external service in CIDR notation.
+	// +kubebuilder:validation:MaxItems=10
 	// +kubebuilder:validation:MinItems=1
-	IpAddresses []string `json:"ipAddresses,omitempty"`
+	IpAddresses []string `json:"ipAddresses"`
 	// Ports exposed by the external service. If left empty all ports will be allowed.
+	// +kubebuilder:validation:MaxItems=10
 	// +optional
 	Ports []Port `json:"ports,omitempty"`
 }
 
 type HttpExternalService struct {
 	// Host names of the external service.
+	// +kubebuilder:validation:MaxItems=10
 	// +kubebuilder:validation:MinItems=1
-	Hostnames []string `json:"hostnames,omitempty"`
+	Hostnames []string `json:"hostnames"`
 	// Ports exposed by the external service. If left empty all ports will be allowed.
+	// +kubebuilder:validation:MaxItems=10
 	// +optional
 	Ports []Port `json:"ports,omitempty"`
 }
 
 type HttpsExternalService struct {
 	// Host names of the external service.
+	// +kubebuilder:validation:MaxItems=10
 	// +kubebuilder:validation:MinItems=1
-	Hostnames []string `json:"hostnames,omitempty"`
+	Hostnames []string `json:"hostnames"`
 	// Ports exposed by the external service. If left empty all ports will be allowed.
+	// +kubebuilder:validation:MaxItems=10
 	// +optional
 	Ports []Port `json:"ports,omitempty"`
 }

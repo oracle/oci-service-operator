@@ -18,9 +18,7 @@
 
 
 ## Introduction
-Mesh is the top level container resource that represents the logical boundary of application traffic between the services and deployments that reside within it. 
-A mesh can span across multiple platforms such as OKE, OCI VM/BM, Kubernetes on OCI, On-premise VMs, OCI Container Instances and OCI Serverless Kubernetes. 
-It also provides a unit of access control.
+Mesh is the top level container resource that represents the logical boundary of application traffic between the services and deployments that reside within it and also provides a unit of access control.
 
 
 ## Mesh Specification Parameters

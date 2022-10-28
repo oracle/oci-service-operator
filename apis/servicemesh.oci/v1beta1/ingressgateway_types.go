@@ -24,6 +24,7 @@ type IngressGatewaySpec struct {
 	Description *Description `json:"description,omitempty"`
 	// +optional
 	AccessLogging *AccessLogging `json:"accessLogging,omitempty"`
+	// +kubebuilder:validation:MaxItems=5
 	// +kubebuilder:validation:MinItems=1
 	Hosts []IngressGatewayHost `json:"hosts"`
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
@@ -38,9 +39,11 @@ type IngressGatewayHost struct {
 	// Wildcard hostnames are supported in the prefix form.
 	// Examples of valid hostnames are www.example.com, *.example.com, *.com
 	// Applicable only for HTTP and TLS_PASSTHROUGH listeners.
+	// +kubebuilder:validation:MaxItems=10
 	// +optional
 	Hostnames []string `json:"hostnames,omitempty"`
 	// The listeners for the ingress host
+	// +kubebuilder:validation:MaxItems=10
 	// +kubebuilder:validation:MinItems=1
 	Listeners []IngressGatewayListener `json:"listeners"`
 }
@@ -105,6 +108,7 @@ type IngressHostClientValidationConfig struct {
 	TrustedCaBundle *CaBundle `json:"trustedCaBundle,omitempty"`
 
 	// A list of alternate names to verify the subject identity in the certificate presented by the client.
+	// +kubebuilder:validation:MaxItems=10
 	// +optional
 	SubjectAlternateNames []string `json:"subjectAlternateNames,omitempty"`
 }

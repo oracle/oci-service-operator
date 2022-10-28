@@ -71,6 +71,7 @@ spec:
                   required:
                   - id
                   type: object
+                maxItems: 1
                 minItems: 1
                 type: array
               compartmentId:

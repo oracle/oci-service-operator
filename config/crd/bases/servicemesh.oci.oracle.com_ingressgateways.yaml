@@ -95,6 +95,7 @@ spec:
                         listeners.
                       items:
                         type: string
+                      maxItems: 10
                       type: array
                     listeners:
                       description: The listeners for the ingress host
@@ -129,6 +130,7 @@ spec:
                                       by the client.
                                     items:
                                       type: string
+                                    maxItems: 10
                                     type: array
                                   trustedCaBundle:
                                     description: CaBundle Resource representing the
@@ -210,6 +212,7 @@ spec:
                         - port
                         - protocol
                         type: object
+                      maxItems: 10
                       minItems: 1
                       type: array
                     name:
@@ -224,6 +227,7 @@ spec:
                   - listeners
                   - name
                   type: object
+                maxItems: 5
                 minItems: 1
                 type: array
               mesh:

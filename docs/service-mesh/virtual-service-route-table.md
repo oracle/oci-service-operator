@@ -18,8 +18,7 @@
 
 
 ## Introduction
-A table that contains a list of routing rules which are used managing the ingress traffic to a virtual service. It is used to route requests to specific virtual deployments of a virtual service. 
-This allows the Application Developer to split traffic based on protocol parameters like HTTP headers, query parameters or gRPC attributes and specify the configuration for retries, timeouts and fault injection on those routes.
+A table that contains a list of routing rules which are used for managing the ingress traffic to a virtual service. It is used to route requests to specific virtual deployments of a virtual service.
 
 
 ## Virtual Service Route Table Specification Parameters
