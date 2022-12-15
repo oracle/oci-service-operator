@@ -60,8 +60,8 @@ type VirtualServiceSpec struct {
 	// The DNS hostnames of the virtual service that is used by its callers.
 	// Wildcard hostnames are supported in the prefix form.
 	// Examples of valid hostnames are www.example.com, *.example.com, *.com
-	// +kubebuilder:validation:MinItems=1
-	Hosts []string `json:"hosts"`
+	// +optional
+	Hosts []string `json:"hosts,omitempty"`
 	// +optional
 	Mtls *CreateVirtualServiceMutualTransportLayerSecurity `json:"mtls,omitempty"`
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster

@@ -107,7 +107,7 @@ spec:
                   - port
                   - protocol
                   type: object
-                minItems: 1
+                maxItems: 10
                 type: array
               name:
                 description: Name of the resource
@@ -124,6 +124,7 @@ spec:
                       Only one of the following type should be present.
                     enum:
                     - DNS
+                    - DISABLED
                     type: string
                 required:
                 - type
@@ -154,8 +155,6 @@ spec:
                 type: object
             required:
             - compartmentId
-            - listener
-            - serviceDiscovery
             - virtualService
             type: object
           status:

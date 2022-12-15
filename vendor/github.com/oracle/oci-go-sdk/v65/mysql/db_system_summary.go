@@ -42,8 +42,7 @@ type DbSystemSummary struct {
 	// The OCID of the compartment the DB System belongs in.
 	CompartmentId *string `mandatory:"false" json:"compartmentId"`
 
-	// If the policy is to enable high availability of the instance, by
-	// maintaining secondary/failover capacity as necessary.
+	// Specifies if the DB System is highly available.
 	IsHighlyAvailable *bool `mandatory:"false" json:"isHighlyAvailable"`
 
 	CurrentPlacement *DbSystemPlacement `mandatory:"false" json:"currentPlacement"`
@@ -85,6 +84,15 @@ type DbSystemSummary struct {
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
 	// Example: `{"foo-namespace": {"bar-key": "value"}}`
 	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
+
+	BackupPolicy *BackupPolicy `mandatory:"false" json:"backupPolicy"`
+
+	// The shape of the primary instances of the DB System. The shape
+	// determines resources allocated to a DB System - CPU cores
+	// and memory for VM shapes; CPU cores, memory and storage for non-VM
+	// (or bare metal) shapes. To get a list of shapes, use (the
+	// ListShapes operation.
+	ShapeName *string `mandatory:"false" json:"shapeName"`
 
 	// Whether to run the DB System with InnoDB Redo Logs and the Double Write Buffer enabled or disabled,
 	// and whether to enable or disable syncing of the Binary Logs.

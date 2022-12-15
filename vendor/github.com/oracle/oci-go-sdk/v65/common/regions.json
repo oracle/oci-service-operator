@@ -244,5 +244,29 @@
         "realmDomainComponent": "oraclecloud10.com",
         "regionIdentifier": "ap-dcc-canberra-1",
         "realmKey": "oc10"
+    },
+    {
+        "regionKey": "cdg",
+        "realmDomainComponent": "oraclecloud.com",
+        "regionIdentifier": "eu-paris-1",
+        "realmKey": "oc1"
+    },
+    {
+        "regionKey": "qro",
+        "realmDomainComponent": "oraclecloud.com",
+        "regionIdentifier": "mx-queretaro-1",
+        "realmKey": "oc1"
+    },
+    {
+        "regionKey": "mad",
+        "realmDomainComponent": "oraclecloud.com",
+        "regionIdentifier": "eu-madrid-1",
+        "realmKey": "oc1"
+    },
+    {
+        "regionKey": "bgy",
+        "realmDomainComponent": "oraclecloud14.com",
+        "regionIdentifier": "eu-dcc-milan-1",
+        "realmKey": "oc14"
     }
 ]

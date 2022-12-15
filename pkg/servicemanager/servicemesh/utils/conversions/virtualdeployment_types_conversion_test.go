@@ -49,7 +49,7 @@ func TestConvert_CRD_VirtualDeployment_To_SDK_VirtualDeployment(t *testing.T) {
 			AccessLogging: &v1beta1.AccessLogging{
 				IsEnabled: true,
 			},
-			ServiceDiscovery: v1beta1.ServiceDiscovery{
+			ServiceDiscovery: &v1beta1.ServiceDiscovery{
 				Type:     v1beta1.ServiceDiscoveryTypeDns,
 				Hostname: "oracle.com",
 			},
@@ -133,7 +133,7 @@ func TestConvert_CRD_VirtualDeployment_To_SDK_VirtualDeployment(t *testing.T) {
 								Port:     80,
 							},
 						},
-						ServiceDiscovery: v1beta1.ServiceDiscovery{
+						ServiceDiscovery: &v1beta1.ServiceDiscovery{
 							Type:     v1beta1.ServiceDiscoveryTypeDns,
 							Hostname: "oracle.com",
 						},
@@ -190,7 +190,7 @@ func TestConvert_CRD_VirtualDeployment_To_SDK_VirtualDeployment(t *testing.T) {
 								Port:     80,
 							},
 						},
-						ServiceDiscovery: v1beta1.ServiceDiscovery{
+						ServiceDiscovery: &v1beta1.ServiceDiscovery{
 							Type:     v1beta1.ServiceDiscoveryTypeDns,
 							Hostname: "oracle.com",
 						},

@@ -509,9 +509,11 @@ func Test_ValidateUpdateRequest(t *testing.T) {
 		oldVirtualService *servicemeshapi.VirtualService
 	}
 	type fields struct {
-		ResolveResourceRef   func(resourceRef *servicemeshapi.ResourceRef, crdObj *metav1.ObjectMeta) *servicemeshapi.ResourceRef
-		ResolveMeshReference func(ctx context.Context, ref *servicemeshapi.ResourceRef) (*servicemeshapi.Mesh, error)
-		ResolveMeshRefById   func(ctx context.Context, meshId *api.OCID) (*commons.MeshRef, error)
+		ResolveResourceRef                      func(resourceRef *servicemeshapi.ResourceRef, crdObj *metav1.ObjectMeta) *servicemeshapi.ResourceRef
+		ResolveMeshReference                    func(ctx context.Context, ref *servicemeshapi.ResourceRef) (*servicemeshapi.Mesh, error)
+		ResolveMeshRefById                      func(ctx context.Context, meshId *api.OCID) (*commons.MeshRef, error)
+		ResolveVirtualServiceIdAndName          func(ctx context.Context, virtualServiceRef *servicemeshapi.RefOrId, crdObj *metav1.ObjectMeta) (*commons.ResourceRef, error)
+		ResolveHasVirtualDeploymentWithListener func(ctx context.Context, compartmentId *api.OCID, virtualServiceId *api.OCID) (bool, error)
 	}
 	type expectation struct {
 		allowed bool
@@ -709,6 +711,173 @@ func Test_ValidateUpdateRequest(t *testing.T) {
 				},
 			},
 			wantErr: expectation{false, string(commons.MeshReferenceIsImmutable)},
+		},
+		{
+			name: "Update to delete hostname when there's virtual deployment has hostname and listeners",
+			args: args{
+				virtualService: &servicemeshapi.VirtualService{
+					ObjectMeta: metav1.ObjectMeta{Generation: 2},
+					Spec: servicemeshapi.VirtualServiceSpec{
+						Mesh: servicemeshapi.RefOrId{
+							ResourceRef: &servicemeshapi.ResourceRef{
+								Namespace: "my-namespace",
+								Name:      "my-mesh",
+							},
+						},
+						CompartmentId: "my.compartmentid",
+					},
+				},
+				oldVirtualService: &servicemeshapi.VirtualService{
+					ObjectMeta: metav1.ObjectMeta{Generation: 1},
+					Spec: servicemeshapi.VirtualServiceSpec{
+						Mesh: servicemeshapi.RefOrId{
+							ResourceRef: &servicemeshapi.ResourceRef{
+								Namespace: "my-namespace",
+								Name:      "my-mesh",
+							},
+						},
+						CompartmentId: "my.compartmentid",
+						Hosts:         []string{"hostname"},
+					},
+					Status: servicemeshapi.ServiceMeshStatus{
+						Conditions: []servicemeshapi.ServiceMeshCondition{
+							{
+								Type: servicemeshapi.ServiceMeshActive,
+								ResourceCondition: servicemeshapi.ResourceCondition{
+									Status: metav1.ConditionTrue,
+								},
+							},
+							{
+								Type: servicemeshapi.ServiceMeshDependenciesActive,
+								ResourceCondition: servicemeshapi.ResourceCondition{
+									Status: metav1.ConditionTrue,
+								},
+							},
+						},
+					},
+				},
+			},
+			fields: fields{
+				ResolveVirtualServiceIdAndName: func(ctx context.Context, resourceRef *servicemeshapi.RefOrId, crdObj *metav1.ObjectMeta) (*commons.ResourceRef, error) {
+					virtualServiceRef := commons.ResourceRef{
+						Id:     api.OCID("vs-id"),
+						Name:   servicemeshapi.Name("vs"),
+						MeshId: api.OCID("mesh-id"),
+					}
+					return &virtualServiceRef, nil
+				},
+				ResolveHasVirtualDeploymentWithListener: func(ctx context.Context, compartmentId *api.OCID, virtualServiceId *api.OCID) (bool, error) {
+					return true, nil
+				},
+			},
+			wantErr: expectation{false, "virtualservice hosts should not be empty when there's virtual deployment has listeners and hostname"},
+		},
+		{
+			name: "Update to delete hostname when there's no virtual deployment has hostname and listeners",
+			args: args{
+				virtualService: &servicemeshapi.VirtualService{
+					ObjectMeta: metav1.ObjectMeta{Generation: 2},
+					Spec: servicemeshapi.VirtualServiceSpec{
+						Mesh: servicemeshapi.RefOrId{
+							ResourceRef: &servicemeshapi.ResourceRef{
+								Namespace: "my-namespace",
+								Name:      "my-mesh",
+							},
+						},
+						CompartmentId: "my.compartmentid",
+					},
+				},
+				oldVirtualService: &servicemeshapi.VirtualService{
+					ObjectMeta: metav1.ObjectMeta{Generation: 1},
+					Spec: servicemeshapi.VirtualServiceSpec{
+						Mesh: servicemeshapi.RefOrId{
+							ResourceRef: &servicemeshapi.ResourceRef{
+								Namespace: "my-namespace",
+								Name:      "my-mesh",
+							},
+						},
+						CompartmentId: "my.compartmentid",
+						Hosts:         []string{"hostname"},
+					},
+					Status: servicemeshapi.ServiceMeshStatus{
+						Conditions: []servicemeshapi.ServiceMeshCondition{
+							{
+								Type: servicemeshapi.ServiceMeshActive,
+								ResourceCondition: servicemeshapi.ResourceCondition{
+									Status: metav1.ConditionTrue,
+								},
+							},
+							{
+								Type: servicemeshapi.ServiceMeshDependenciesActive,
+								ResourceCondition: servicemeshapi.ResourceCondition{
+									Status: metav1.ConditionTrue,
+								},
+							},
+						},
+					},
+				},
+			},
+			fields: fields{
+				ResolveVirtualServiceIdAndName: func(ctx context.Context, resourceRef *servicemeshapi.RefOrId, crdObj *metav1.ObjectMeta) (*commons.ResourceRef, error) {
+					virtualServiceRef := commons.ResourceRef{
+						Id:     api.OCID("vs-id"),
+						Name:   servicemeshapi.Name("vs"),
+						MeshId: api.OCID("mesh-id"),
+					}
+					return &virtualServiceRef, nil
+				},
+				ResolveHasVirtualDeploymentWithListener: func(ctx context.Context, compartmentId *api.OCID, virtualServiceId *api.OCID) (bool, error) {
+					return false, nil
+				},
+			},
+			wantErr: expectation{true, ""},
+		},
+		{
+			name: "Update to add hostname",
+			args: args{
+				virtualService: &servicemeshapi.VirtualService{
+					ObjectMeta: metav1.ObjectMeta{Generation: 2},
+					Spec: servicemeshapi.VirtualServiceSpec{
+						Mesh: servicemeshapi.RefOrId{
+							ResourceRef: &servicemeshapi.ResourceRef{
+								Namespace: "my-namespace",
+								Name:      "my-mesh",
+							},
+						},
+						CompartmentId: "my.compartmentid",
+						Hosts:         []string{"hostname"},
+					},
+				},
+				oldVirtualService: &servicemeshapi.VirtualService{
+					ObjectMeta: metav1.ObjectMeta{Generation: 1},
+					Spec: servicemeshapi.VirtualServiceSpec{
+						Mesh: servicemeshapi.RefOrId{
+							ResourceRef: &servicemeshapi.ResourceRef{
+								Namespace: "my-namespace",
+								Name:      "my-mesh",
+							},
+						},
+						CompartmentId: "my.compartmentid",
+					},
+					Status: servicemeshapi.ServiceMeshStatus{
+						Conditions: []servicemeshapi.ServiceMeshCondition{
+							{
+								Type: servicemeshapi.ServiceMeshActive,
+								ResourceCondition: servicemeshapi.ResourceCondition{
+									Status: metav1.ConditionTrue,
+								},
+							},
+							{
+								Type: servicemeshapi.ServiceMeshDependenciesActive,
+								ResourceCondition: servicemeshapi.ResourceCondition{
+									Status: metav1.ConditionTrue,
+								},
+							},
+						},
+					},
+				},
+			},
+			wantErr: expectation{true, ""},
 		},
 		{
 			name: "Update when spec is not changed",
@@ -1113,6 +1282,7 @@ func Test_ValidateUpdateRequest(t *testing.T) {
 						},
 						CompartmentId: "my.compartmentid",
 						Name:          &vsName,
+						Hosts:         []string{"my-hostname"},
 					},
 					Status: servicemeshapi.ServiceMeshStatus{
 						Conditions: []servicemeshapi.ServiceMeshCondition{
@@ -1570,6 +1740,14 @@ func Test_ValidateUpdateRequest(t *testing.T) {
 
 			if tt.fields.ResolveMeshRefById != nil {
 				resolver.EXPECT().ResolveMeshRefById(gomock.Any(), gomock.Any()).DoAndReturn(tt.fields.ResolveMeshRefById).AnyTimes()
+			}
+
+			if tt.fields.ResolveHasVirtualDeploymentWithListener != nil {
+				resolver.EXPECT().ResolveHasVirtualDeploymentWithListener(gomock.Any(), gomock.Any(), gomock.Any()).DoAndReturn(tt.fields.ResolveHasVirtualDeploymentWithListener).AnyTimes()
+			}
+
+			if tt.fields.ResolveVirtualServiceIdAndName != nil {
+				resolver.EXPECT().ResolveVirtualServiceIdAndName(gomock.Any(), gomock.Any(), gomock.Any()).DoAndReturn(tt.fields.ResolveVirtualServiceIdAndName).AnyTimes()
 			}
 			response := meshServiceValidationManager.ValidateUpdateRequest(ctx, tt.args.virtualService, tt.args.oldVirtualService)
 			if tt.wantErr.reason != "" {

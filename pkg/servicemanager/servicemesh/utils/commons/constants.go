@@ -170,13 +170,16 @@ const (
 	VirtualServiceReferenceIsNotUnique                 ValidationWebhookError = "spec.virtualService cannot contain both ref and id"
 	VirtualServiceReferenceIsDeleting                  ValidationWebhookError = "spec.virtualService is being deleted"
 	VirtualServiceReferenceNotFound                    ValidationWebhookError = "spec.virtualService has been deleted or does not exist"
+	VirtualServiceHostNotFound                         ValidationWebhookError = "parent virtualService doesn't have any host"
 	VirtualDeploymentReferenceIsEmpty                  ValidationWebhookError = "spec.virtualDeployment cannot be empty, should contain one of ref or id"
 	VirtualDeploymentReferenceIsNotUnique              ValidationWebhookError = "spec.virtualDeployment cannot contain both ref and id"
 	VirtualDeploymentReferenceIsDeleting               ValidationWebhookError = "spec.virtualDeployment is being deleted"
 	VirtualDeploymentReferenceNotFound                 ValidationWebhookError = "spec.virtualDeployment has been deleted or does not exist"
+	VirtualDeploymentOnlyHaveHostnameOrListener        ValidationWebhookError = "service discovery and listeners should be provided together or be both empty"
 	KubernetesServiceReferenceIsDeleting               ValidationWebhookError = "spec.service is being deleted"
 	KubernetesServiceReferenceNotFound                 ValidationWebhookError = "spec.service has been deleted or does not exist"
 	HostNameIsEmptyForDNS                              ValidationWebhookError = "hostname cannot be empty when service discovery type is DNS"
+	HostNameShouldBeEmptyForDISABLED                   ValidationWebhookError = "hostname should be empty when service discovery type is DISABLED"
 	IngressGatewayDeploymentPortsWithMultipleProtocols ValidationWebhookError = "ingressgatewaydeployment.spec cannot have multiple protocols."
 	IngressGatewayDeploymentWithMultiplePortEmptyName  ValidationWebhookError = "ingressgatewaydeployment.spec.ports.name is required when multiple ports are specified"
 	IngressGatewayDeploymentPortsWithNonUniqueNames    ValidationWebhookError = "ingressgatewaydeployment.spec.ports.name must be unique"
@@ -184,6 +187,7 @@ const (
 	IngressGatewayDeploymentRedundantServicePorts      ValidationWebhookError = "ingressgatewaydeployment.spec has target ports without service "
 	VirtualServiceMtlsNotSatisfied                     ValidationWebhookError = "virtualservice mtls mode does not meet the minimum level set on parent mesh"
 	MeshMtlsNotSatisfied                               ValidationWebhookError = "mtls mode of dependent virtual services does not meet the minimum level being set on mesh"
+	VirtualServiceHostsShouldNotBeEmpty                ValidationWebhookError = "virtualservice hosts should not be empty when there's virtual deployment has listeners and hostname"
 )
 
 type InformerCacheType string

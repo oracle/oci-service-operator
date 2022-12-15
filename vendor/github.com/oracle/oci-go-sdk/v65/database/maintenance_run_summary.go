@@ -220,6 +220,7 @@ const (
 	MaintenanceRunSummaryTargetResourceTypeExaccInfrastructure             MaintenanceRunSummaryTargetResourceTypeEnum = "EXACC_INFRASTRUCTURE"
 	MaintenanceRunSummaryTargetResourceTypeAutonomousVmCluster             MaintenanceRunSummaryTargetResourceTypeEnum = "AUTONOMOUS_VM_CLUSTER"
 	MaintenanceRunSummaryTargetResourceTypeAutonomousDatabase              MaintenanceRunSummaryTargetResourceTypeEnum = "AUTONOMOUS_DATABASE"
+	MaintenanceRunSummaryTargetResourceTypeCloudAutonomousVmCluster        MaintenanceRunSummaryTargetResourceTypeEnum = "CLOUD_AUTONOMOUS_VM_CLUSTER"
 )
 
 var mappingMaintenanceRunSummaryTargetResourceTypeEnum = map[string]MaintenanceRunSummaryTargetResourceTypeEnum{
@@ -230,6 +231,7 @@ var mappingMaintenanceRunSummaryTargetResourceTypeEnum = map[string]MaintenanceR
 	"EXACC_INFRASTRUCTURE":              MaintenanceRunSummaryTargetResourceTypeExaccInfrastructure,
 	"AUTONOMOUS_VM_CLUSTER":             MaintenanceRunSummaryTargetResourceTypeAutonomousVmCluster,
 	"AUTONOMOUS_DATABASE":               MaintenanceRunSummaryTargetResourceTypeAutonomousDatabase,
+	"CLOUD_AUTONOMOUS_VM_CLUSTER":       MaintenanceRunSummaryTargetResourceTypeCloudAutonomousVmCluster,
 }
 
 var mappingMaintenanceRunSummaryTargetResourceTypeEnumLowerCase = map[string]MaintenanceRunSummaryTargetResourceTypeEnum{
@@ -240,6 +242,7 @@ var mappingMaintenanceRunSummaryTargetResourceTypeEnumLowerCase = map[string]Mai
 	"exacc_infrastructure":              MaintenanceRunSummaryTargetResourceTypeExaccInfrastructure,
 	"autonomous_vm_cluster":             MaintenanceRunSummaryTargetResourceTypeAutonomousVmCluster,
 	"autonomous_database":               MaintenanceRunSummaryTargetResourceTypeAutonomousDatabase,
+	"cloud_autonomous_vm_cluster":       MaintenanceRunSummaryTargetResourceTypeCloudAutonomousVmCluster,
 }
 
 // GetMaintenanceRunSummaryTargetResourceTypeEnumValues Enumerates the set of values for MaintenanceRunSummaryTargetResourceTypeEnum
@@ -261,6 +264,7 @@ func GetMaintenanceRunSummaryTargetResourceTypeEnumStringValues() []string {
 		"EXACC_INFRASTRUCTURE",
 		"AUTONOMOUS_VM_CLUSTER",
 		"AUTONOMOUS_DATABASE",
+		"CLOUD_AUTONOMOUS_VM_CLUSTER",
 	}
 }
 
@@ -317,30 +321,33 @@ type MaintenanceRunSummaryMaintenanceSubtypeEnum string
 
 // Set of constants representing the allowable values for MaintenanceRunSummaryMaintenanceSubtypeEnum
 const (
-	MaintenanceRunSummaryMaintenanceSubtypeQuarterly      MaintenanceRunSummaryMaintenanceSubtypeEnum = "QUARTERLY"
-	MaintenanceRunSummaryMaintenanceSubtypeHardware       MaintenanceRunSummaryMaintenanceSubtypeEnum = "HARDWARE"
-	MaintenanceRunSummaryMaintenanceSubtypeCritical       MaintenanceRunSummaryMaintenanceSubtypeEnum = "CRITICAL"
-	MaintenanceRunSummaryMaintenanceSubtypeInfrastructure MaintenanceRunSummaryMaintenanceSubtypeEnum = "INFRASTRUCTURE"
-	MaintenanceRunSummaryMaintenanceSubtypeDatabase       MaintenanceRunSummaryMaintenanceSubtypeEnum = "DATABASE"
-	MaintenanceRunSummaryMaintenanceSubtypeOneoff         MaintenanceRunSummaryMaintenanceSubtypeEnum = "ONEOFF"
+	MaintenanceRunSummaryMaintenanceSubtypeQuarterly       MaintenanceRunSummaryMaintenanceSubtypeEnum = "QUARTERLY"
+	MaintenanceRunSummaryMaintenanceSubtypeHardware        MaintenanceRunSummaryMaintenanceSubtypeEnum = "HARDWARE"
+	MaintenanceRunSummaryMaintenanceSubtypeCritical        MaintenanceRunSummaryMaintenanceSubtypeEnum = "CRITICAL"
+	MaintenanceRunSummaryMaintenanceSubtypeInfrastructure  MaintenanceRunSummaryMaintenanceSubtypeEnum = "INFRASTRUCTURE"
+	MaintenanceRunSummaryMaintenanceSubtypeDatabase        MaintenanceRunSummaryMaintenanceSubtypeEnum = "DATABASE"
+	MaintenanceRunSummaryMaintenanceSubtypeOneoff          MaintenanceRunSummaryMaintenanceSubtypeEnum = "ONEOFF"
+	MaintenanceRunSummaryMaintenanceSubtypeSecurityMonthly MaintenanceRunSummaryMaintenanceSubtypeEnum = "SECURITY_MONTHLY"
 )
 
 var mappingMaintenanceRunSummaryMaintenanceSubtypeEnum = map[string]MaintenanceRunSummaryMaintenanceSubtypeEnum{
-	"QUARTERLY":      MaintenanceRunSummaryMaintenanceSubtypeQuarterly,
-	"HARDWARE":       MaintenanceRunSummaryMaintenanceSubtypeHardware,
-	"CRITICAL":       MaintenanceRunSummaryMaintenanceSubtypeCritical,
-	"INFRASTRUCTURE": MaintenanceRunSummaryMaintenanceSubtypeInfrastructure,
-	"DATABASE":       MaintenanceRunSummaryMaintenanceSubtypeDatabase,
-	"ONEOFF":         MaintenanceRunSummaryMaintenanceSubtypeOneoff,
+	"QUARTERLY":        MaintenanceRunSummaryMaintenanceSubtypeQuarterly,
+	"HARDWARE":         MaintenanceRunSummaryMaintenanceSubtypeHardware,
+	"CRITICAL":         MaintenanceRunSummaryMaintenanceSubtypeCritical,
+	"INFRASTRUCTURE":   MaintenanceRunSummaryMaintenanceSubtypeInfrastructure,
+	"DATABASE":         MaintenanceRunSummaryMaintenanceSubtypeDatabase,
+	"ONEOFF":           MaintenanceRunSummaryMaintenanceSubtypeOneoff,
+	"SECURITY_MONTHLY": MaintenanceRunSummaryMaintenanceSubtypeSecurityMonthly,
 }
 
 var mappingMaintenanceRunSummaryMaintenanceSubtypeEnumLowerCase = map[string]MaintenanceRunSummaryMaintenanceSubtypeEnum{
-	"quarterly":      MaintenanceRunSummaryMaintenanceSubtypeQuarterly,
-	"hardware":       MaintenanceRunSummaryMaintenanceSubtypeHardware,
-	"critical":       MaintenanceRunSummaryMaintenanceSubtypeCritical,
-	"infrastructure": MaintenanceRunSummaryMaintenanceSubtypeInfrastructure,
-	"database":       MaintenanceRunSummaryMaintenanceSubtypeDatabase,
-	"oneoff":         MaintenanceRunSummaryMaintenanceSubtypeOneoff,
+	"quarterly":        MaintenanceRunSummaryMaintenanceSubtypeQuarterly,
+	"hardware":         MaintenanceRunSummaryMaintenanceSubtypeHardware,
+	"critical":         MaintenanceRunSummaryMaintenanceSubtypeCritical,
+	"infrastructure":   MaintenanceRunSummaryMaintenanceSubtypeInfrastructure,
+	"database":         MaintenanceRunSummaryMaintenanceSubtypeDatabase,
+	"oneoff":           MaintenanceRunSummaryMaintenanceSubtypeOneoff,
+	"security_monthly": MaintenanceRunSummaryMaintenanceSubtypeSecurityMonthly,
 }
 
 // GetMaintenanceRunSummaryMaintenanceSubtypeEnumValues Enumerates the set of values for MaintenanceRunSummaryMaintenanceSubtypeEnum
@@ -361,6 +368,7 @@ func GetMaintenanceRunSummaryMaintenanceSubtypeEnumStringValues() []string {
 		"INFRASTRUCTURE",
 		"DATABASE",
 		"ONEOFF",
+		"SECURITY_MONTHLY",
 	}
 }
 

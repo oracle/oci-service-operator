@@ -53,8 +53,7 @@ type DbSystem struct {
 	// User-provided data about the DB System.
 	Description *string `mandatory:"false" json:"description"`
 
-	// If the policy is to enable high availability of the instance, by
-	// maintaining secondary/failover capacity as necessary.
+	// Specifies if the DB System is highly available.
 	IsHighlyAvailable *bool `mandatory:"false" json:"isHighlyAvailable"`
 
 	CurrentPlacement *DbSystemPlacement `mandatory:"false" json:"currentPlacement"`
@@ -136,6 +135,8 @@ type DbSystem struct {
 	// Whether to run the DB System with InnoDB Redo Logs and the Double Write Buffer enabled or disabled,
 	// and whether to enable or disable syncing of the Binary Logs.
 	CrashRecovery CrashRecoveryStatusEnum `mandatory:"false" json:"crashRecovery,omitempty"`
+
+	PointInTimeRecoveryDetails *PointInTimeRecoveryDetails `mandatory:"false" json:"pointInTimeRecoveryDetails"`
 }
 
 func (m DbSystem) String() string {
@@ -186,6 +187,7 @@ func (m *DbSystem) UnmarshalJSON(data []byte) (e error) {
 		FreeformTags               map[string]string                 `json:"freeformTags"`
 		DefinedTags                map[string]map[string]interface{} `json:"definedTags"`
 		CrashRecovery              CrashRecoveryStatusEnum           `json:"crashRecovery"`
+		PointInTimeRecoveryDetails *PointInTimeRecoveryDetails       `json:"pointInTimeRecoveryDetails"`
 		Id                         *string                           `json:"id"`
 		DisplayName                *string                           `json:"displayName"`
 		CompartmentId              *string                           `json:"compartmentId"`
@@ -263,6 +265,8 @@ func (m *DbSystem) UnmarshalJSON(data []byte) (e error) {
 	m.DefinedTags = model.DefinedTags
 
 	m.CrashRecovery = model.CrashRecovery
+
+	m.PointInTimeRecoveryDetails = model.PointInTimeRecoveryDetails
 
 	m.Id = model.Id
 

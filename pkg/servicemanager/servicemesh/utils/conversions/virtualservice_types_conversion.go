@@ -18,7 +18,11 @@ func ConvertCrdVirtualServiceToSdkVirtualService(crdObj *v1beta1.VirtualService,
 	sdkObj.Name = GetSpecName(crdObj.Spec.Name, &crdObj.ObjectMeta)
 	sdkObj.Description = (*string)(crdObj.Spec.Description)
 	sdkObj.MeshId = (*string)(meshId)
-	sdkObj.Hosts = crdObj.Spec.Hosts
+	if crdObj.Spec.Hosts != nil {
+		sdkObj.Hosts = crdObj.Spec.Hosts
+	} else {
+		sdkObj.Hosts = make([]string, 0)
+	}
 
 	if crdObj.Spec.DefaultRoutingPolicy != nil {
 		sdkObj.DefaultRoutingPolicy = &sdk.DefaultVirtualServiceRoutingPolicy{

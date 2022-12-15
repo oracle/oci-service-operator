@@ -15,6 +15,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	sdk "github.com/oracle/oci-go-sdk/v65/servicemesh"
 	api "github.com/oracle/oci-service-operator/api/v1beta1"
 	servicemeshapi "github.com/oracle/oci-service-operator/apis/servicemesh.oci/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
@@ -39,12 +40,16 @@ type Resolver interface {
 	ResolveVirtualServiceIdAndName(ctx context.Context, virtualServiceRef *servicemeshapi.RefOrId, crdObj *metav1.ObjectMeta) (*commons.ResourceRef, error)
 	// ResolveVirtualServiceRefById returns VirtualServiceRef for a given virtualServiceId
 	ResolveVirtualServiceRefById(ctx context.Context, virtualServiceId *api.OCID) (*commons.ResourceRef, error)
+	// ResolveVirtualServiceById returns a virtual service sdk based on OCID
+	ResolveVirtualServiceById(ctx context.Context, virtualServiceId *api.OCID) (*sdk.VirtualService, error)
 	// ResolveVirtualServiceList resolves all the virtual services under a given namespace
 	ResolveVirtualServiceListByNamespace(ctx context.Context, namespace string) (servicemeshapi.VirtualServiceList, error)
 	// ResolveVirtualDeploymentReference returns a virtual deployment CR based on ref
 	ResolveVirtualDeploymentReference(ctx context.Context, ref *servicemeshapi.ResourceRef) (*servicemeshapi.VirtualDeployment, error)
 	// ResolveVirtualDeploymentId returns VirtualDeploymentId for a given VirtualDeploymentRefOrId
 	ResolveVirtualDeploymentId(ctx context.Context, virtualDeploymentRef *servicemeshapi.RefOrId, crdObj *metav1.ObjectMeta) (*api.OCID, error)
+	// ResolveHasVirtualDeploymentWithListener returns bool that indicate if the virtual service is referred by any virtual deployment that has listeners
+	ResolveHasVirtualDeploymentWithListener(ctx context.Context, compartmentId *api.OCID, virtualServiceId *api.OCID) (bool, error)
 	// ResolveIngressGatewayReference returns a ingress gateway CR based on ref
 	ResolveIngressGatewayReference(ctx context.Context, ref *servicemeshapi.ResourceRef) (*servicemeshapi.IngressGateway, error)
 	// ResolveIngressGatewayIdAndNameAndMeshId returns IngressGatewayRef for a given IngressGatewayRefOrId
@@ -195,6 +200,25 @@ func (r *defaultResolver) ResolveVirtualDeploymentReference(ctx context.Context,
 	return virtualDeployment, nil
 }
 
+func (r *defaultResolver) ResolveHasVirtualDeploymentWithListener(ctx context.Context, compartmentId *api.OCID, virtualServiceId *api.OCID) (bool, error) {
+	var listOptions client.ListOptions
+	virtualDeploymentList := &servicemeshapi.VirtualDeploymentList{}
+	if err := r.directReader.List(ctx, virtualDeploymentList, &listOptions); err != nil {
+		r.log.ErrorLogWithFixedMessage(ctx, err, "unable to fetch virtual deployment list for ")
+		return false, err
+	}
+
+	for _, vd := range virtualDeploymentList.Items {
+		if vd.DeletionTimestamp.IsZero() {
+			if vd.Spec.Listener != nil && len(vd.Spec.Listener) > 0 {
+				return true, nil
+			}
+		}
+	}
+
+	return false, nil
+}
+
 func (r *defaultResolver) ResolveIngressGatewayIdAndNameAndMeshId(ctx context.Context, resourceRef *servicemeshapi.RefOrId, crdObj *metav1.ObjectMeta) (*commons.ResourceRef, error) {
 	ingressGatewayRef := commons.ResourceRef{
 		Id:     api.OCID(""),
@@ -280,6 +304,14 @@ func (r *defaultResolver) ResolveVirtualServiceRefById(ctx context.Context, virt
 		MeshId: api.OCID(*virtualServiceCp.MeshId),
 	}
 	return &virtualServiceRef, nil
+}
+
+func (r *defaultResolver) ResolveVirtualServiceById(ctx context.Context, virtualServiceId *api.OCID) (*sdk.VirtualService, error) {
+	virtualServiceCp, err := r.meshClient.GetVirtualService(ctx, virtualServiceId)
+	if err != nil {
+		return nil, err
+	}
+	return virtualServiceCp, nil
 }
 
 func (r *defaultResolver) ResolveServiceReference(ctx context.Context, ref *servicemeshapi.ResourceRef) (*corev1.Service, error) {

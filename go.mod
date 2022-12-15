@@ -16,7 +16,7 @@ require (
 	github.com/iancoleman/strcase v0.2.0
 	github.com/onsi/ginkgo v1.16.3
 	github.com/onsi/gomega v1.13.0
-	github.com/oracle/oci-go-sdk/v65 v65.3.0
+	github.com/oracle/oci-go-sdk/v65 v65.28.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.10.0
 	github.com/stretchr/testify v1.6.1

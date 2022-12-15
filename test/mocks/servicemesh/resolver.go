@@ -9,6 +9,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
+	servicemesh "github.com/oracle/oci-go-sdk/v65/servicemesh"
 	v1beta1 "github.com/oracle/oci-service-operator/api/v1beta1"
 	v1beta10 "github.com/oracle/oci-service-operator/apis/servicemesh.oci/v1beta1"
 	commons "github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/commons"
@@ -37,6 +38,21 @@ func NewMockResolver(ctrl *gomock.Controller) *MockResolver {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockResolver) EXPECT() *MockResolverMockRecorder {
 	return m.recorder
+}
+
+// ResolveHasVirtualDeploymentWithListener mocks base method.
+func (m *MockResolver) ResolveHasVirtualDeploymentWithListener(ctx context.Context, compartmentId, virtualServiceId *v1beta1.OCID) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ResolveHasVirtualDeploymentWithListener", ctx, compartmentId, virtualServiceId)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ResolveHasVirtualDeploymentWithListener indicates an expected call of ResolveHasVirtualDeploymentWithListener.
+func (mr *MockResolverMockRecorder) ResolveHasVirtualDeploymentWithListener(ctx, compartmentId, virtualServiceId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResolveHasVirtualDeploymentWithListener", reflect.TypeOf((*MockResolver)(nil).ResolveHasVirtualDeploymentWithListener), ctx, compartmentId, virtualServiceId)
 }
 
 // ResolveIngressGatewayIdAndNameAndMeshId mocks base method.
@@ -186,6 +202,21 @@ func (m *MockResolver) ResolveVirtualDeploymentReference(ctx context.Context, re
 func (mr *MockResolverMockRecorder) ResolveVirtualDeploymentReference(ctx, ref interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResolveVirtualDeploymentReference", reflect.TypeOf((*MockResolver)(nil).ResolveVirtualDeploymentReference), ctx, ref)
+}
+
+// ResolveVirtualServiceById mocks base method.
+func (m *MockResolver) ResolveVirtualServiceById(ctx context.Context, virtualServiceId *v1beta1.OCID) (*servicemesh.VirtualService, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ResolveVirtualServiceById", ctx, virtualServiceId)
+	ret0, _ := ret[0].(*servicemesh.VirtualService)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ResolveVirtualServiceById indicates an expected call of ResolveVirtualServiceById.
+func (mr *MockResolverMockRecorder) ResolveVirtualServiceById(ctx, virtualServiceId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResolveVirtualServiceById", reflect.TypeOf((*MockResolver)(nil).ResolveVirtualServiceById), ctx, virtualServiceId)
 }
 
 // ResolveVirtualServiceIdAndName mocks base method.

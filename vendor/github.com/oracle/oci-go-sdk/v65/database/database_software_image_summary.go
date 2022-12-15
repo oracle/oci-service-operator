@@ -63,13 +63,13 @@ type DatabaseSoftwareImageSummary struct {
 	// List of one-off patches for Database Homes.
 	DatabaseSoftwareImageIncludedPatches []string `mandatory:"false" json:"databaseSoftwareImageIncludedPatches"`
 
-	// The patches included in the image and the version of the image
+	// The patches included in the image and the version of the image.
 	IncludedPatchesSummary *string `mandatory:"false" json:"includedPatchesSummary"`
 
 	// List of one-off patches for Database Homes.
 	DatabaseSoftwareImageOneOffPatches []string `mandatory:"false" json:"databaseSoftwareImageOneOffPatches"`
 
-	// output from lsinventory which will get passed as a string
+	// The output from the OPatch lsInventory command, which is passed as a string.
 	LsInventory *string `mandatory:"false" json:"lsInventory"`
 
 	// True if this Database software image is supported for Upgrade.

@@ -109,6 +109,13 @@ func (v *VirtualServiceValidator) ValidateOnUpdate(context context.Context, obje
 		}
 	}
 
+	// validate if there's no virtual deployment has listeners when customer empty the hosts
+	oldHasHosts := oldVs.Spec.Hosts != nil && len(oldVs.Spec.Hosts) > 0
+	hasHosts := vs.Spec.Hosts != nil && len(vs.Spec.Hosts) > 0
+	if oldHasHosts && !hasHosts && v.HasVDWithListeners(context, oldVs) {
+		return false, string(commons.VirtualServiceHostsShouldNotBeEmpty)
+	}
+
 	return true, ""
 }
 
@@ -153,4 +160,13 @@ func (v *VirtualServiceValidator) getMeshMode(ctx context.Context, virtualServic
 
 func (v *VirtualServiceValidator) GetEntityType() client.Object {
 	return &servicemeshapi.VirtualService{}
+}
+
+func (v *VirtualServiceValidator) HasVDWithListeners(ctx context.Context, vs *servicemeshapi.VirtualService) bool {
+	hasVdWithListeners, err := v.resolver.ResolveHasVirtualDeploymentWithListener(ctx, &vs.Spec.CompartmentId, &vs.Status.VirtualServiceId)
+	if err != nil {
+		v.log.ErrorLog(err, "Failed to resolve the virtual deployments under virtual service")
+	}
+
+	return hasVdWithListeners
 }

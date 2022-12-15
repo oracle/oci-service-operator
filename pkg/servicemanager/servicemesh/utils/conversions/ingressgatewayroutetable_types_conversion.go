@@ -122,3 +122,57 @@ func convertCrdIngressGatewayHostToSdkIngressGatewayHost(crdIngressGatewayHost *
 	}
 	return &sdkIngressGatewayHostRef
 }
+
+func ConvertSdkVirtualServiceTrafficRuleTargetToTrafficRuleTargetDetails(ruleTargets []sdk.VirtualServiceTrafficRuleTarget) []sdk.VirtualServiceTrafficRuleTargetDetails {
+	if ruleTargets == nil {
+		return nil
+	}
+
+	ruleDetails := make([]sdk.VirtualServiceTrafficRuleTargetDetails, len(ruleTargets))
+	for i, rule := range ruleTargets {
+		ruleDetails[i] = sdk.VirtualServiceTrafficRuleTargetDetails{
+			VirtualServiceId: rule.VirtualServiceId,
+			Port:             rule.Port,
+			Weight:           rule.Weight,
+		}
+	}
+
+	return ruleDetails
+}
+
+func ConvertSdkIngressGatewayTrafficRouteRuleToTrafficRouteRuleDetails(rules []sdk.IngressGatewayTrafficRouteRule) []sdk.IngressGatewayTrafficRouteRuleDetails {
+	if rules == nil {
+		return nil
+	}
+
+	ruleDetails := make([]sdk.IngressGatewayTrafficRouteRuleDetails, len(rules))
+	for i, rule := range rules {
+		switch rule.(type) {
+		case sdk.HttpIngressGatewayTrafficRouteRule:
+			httpRouteRule := rule.(sdk.HttpIngressGatewayTrafficRouteRule)
+			ruleDetails[i] = sdk.HttpIngressGatewayTrafficRouteRuleDetails{
+				Destinations:         ConvertSdkVirtualServiceTrafficRuleTargetToTrafficRuleTargetDetails(httpRouteRule.Destinations),
+				IngressGatewayHost:   httpRouteRule.IngressGatewayHost,
+				Path:                 httpRouteRule.Path,
+				IsGrpc:               httpRouteRule.IsGrpc,
+				IsHostRewriteEnabled: httpRouteRule.IsHostRewriteEnabled,
+				IsPathRewriteEnabled: httpRouteRule.IsPathRewriteEnabled,
+				PathType:             sdk.HttpIngressGatewayTrafficRouteRuleDetailsPathTypeEnum(httpRouteRule.PathType),
+			}
+		case sdk.TcpIngressGatewayTrafficRouteRule:
+			tcpRouteRule := rule.(sdk.TcpIngressGatewayTrafficRouteRule)
+			ruleDetails[i] = sdk.TcpIngressGatewayTrafficRouteRuleDetails{
+				Destinations:       ConvertSdkVirtualServiceTrafficRuleTargetToTrafficRuleTargetDetails(tcpRouteRule.Destinations),
+				IngressGatewayHost: tcpRouteRule.IngressGatewayHost,
+			}
+		case sdk.TlsPassthroughIngressGatewayTrafficRouteRule:
+			tlsRouteRule := rule.(sdk.TlsPassthroughIngressGatewayTrafficRouteRule)
+			ruleDetails[i] = sdk.TlsPassthroughIngressGatewayTrafficRouteRuleDetails{
+				Destinations:       ConvertSdkVirtualServiceTrafficRuleTargetToTrafficRuleTargetDetails(tlsRouteRule.Destinations),
+				IngressGatewayHost: tlsRouteRule.IngressGatewayHost,
+			}
+		}
+	}
+
+	return ruleDetails
+}

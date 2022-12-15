@@ -15,6 +15,7 @@ import (
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/commons"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/conversions"
+	meshConversions "github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/conversions"
 	meshErrors "github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/errors"
 )
 
@@ -187,7 +188,7 @@ func (c *defaultServiceMeshClient) CreateVirtualService(ctx context.Context, vir
 		DefinedTags:          virtualService.DefinedTags,
 	}
 	if virtualService.Mtls != nil {
-		createVirtualServiceDetails.Mtls = &sdk.CreateMutualTransportLayerSecurityDetails{Mode: virtualService.Mtls.Mode}
+		createVirtualServiceDetails.Mtls = &sdk.VirtualServiceMutualTransportLayerSecurityDetails{Mode: virtualService.Mtls.Mode}
 	}
 
 	response, err := c.client.CreateVirtualService(ctx, sdk.CreateVirtualServiceRequest{
@@ -211,7 +212,7 @@ func (c *defaultServiceMeshClient) UpdateVirtualService(ctx context.Context, vir
 		DefinedTags:          virtualService.DefinedTags,
 	}
 	if virtualService.Mtls != nil {
-		updateVirtualServiceDetails.Mtls = &sdk.CreateMutualTransportLayerSecurityDetails{Mode: virtualService.Mtls.Mode}
+		updateVirtualServiceDetails.Mtls = &sdk.VirtualServiceMutualTransportLayerSecurityDetails{Mode: virtualService.Mtls.Mode}
 	}
 
 	_, err := c.client.UpdateVirtualService(ctx, sdk.UpdateVirtualServiceRequest{
@@ -337,7 +338,7 @@ func (c *defaultServiceMeshClient) CreateVirtualServiceRouteTable(ctx context.Co
 	response, err := c.client.CreateVirtualServiceRouteTable(ctx, sdk.CreateVirtualServiceRouteTableRequest{
 		CreateVirtualServiceRouteTableDetails: sdk.CreateVirtualServiceRouteTableDetails{
 			VirtualServiceId: vsrt.VirtualServiceId,
-			RouteRules:       vsrt.RouteRules,
+			RouteRules:       meshConversions.ConvertSdkVirtualServiceTrafficRouteRuleToTrafficRouteRuleDetails(vsrt.RouteRules),
 			CompartmentId:    vsrt.CompartmentId,
 			Name:             vsrt.Name,
 			Description:      vsrt.Description,
@@ -360,7 +361,7 @@ func (c *defaultServiceMeshClient) UpdateVirtualServiceRouteTable(ctx context.Co
 		VirtualServiceRouteTableId: vsrt.Id,
 		UpdateVirtualServiceRouteTableDetails: sdk.UpdateVirtualServiceRouteTableDetails{
 			Description:  vsrt.Description,
-			RouteRules:   vsrt.RouteRules,
+			RouteRules:   meshConversions.ConvertSdkVirtualServiceTrafficRouteRuleToTrafficRouteRuleDetails(vsrt.RouteRules),
 			FreeformTags: vsrt.FreeformTags,
 			DefinedTags:  vsrt.DefinedTags,
 		}})
@@ -410,7 +411,7 @@ func (c *defaultServiceMeshClient) CreateAccessPolicy(ctx context.Context, acces
 			Name:          accessPolicy.Name,
 			Description:   accessPolicy.Description,
 			MeshId:        accessPolicy.MeshId,
-			Rules:         accessPolicy.Rules,
+			Rules:         meshConversions.ConvertSdkAccessPolicyRuleToSdkAccessPolicyRuleDetails(accessPolicy.Rules),
 			FreeformTags:  accessPolicy.FreeformTags,
 			DefinedTags:   accessPolicy.DefinedTags,
 		},
@@ -429,7 +430,7 @@ func (c *defaultServiceMeshClient) UpdateAccessPolicy(ctx context.Context, acces
 		AccessPolicyId: accessPolicy.Id,
 		UpdateAccessPolicyDetails: sdk.UpdateAccessPolicyDetails{
 			Description:  accessPolicy.Description,
-			Rules:        accessPolicy.Rules,
+			Rules:        meshConversions.ConvertSdkAccessPolicyRuleToSdkAccessPolicyRuleDetails(accessPolicy.Rules),
 			FreeformTags: accessPolicy.FreeformTags,
 			DefinedTags:  accessPolicy.DefinedTags,
 		}})
@@ -546,7 +547,7 @@ func (c *defaultServiceMeshClient) CreateIngressGatewayRouteTable(ctx context.Co
 	response, err := c.client.CreateIngressGatewayRouteTable(ctx, sdk.CreateIngressGatewayRouteTableRequest{
 		CreateIngressGatewayRouteTableDetails: sdk.CreateIngressGatewayRouteTableDetails{
 			IngressGatewayId: igrt.IngressGatewayId,
-			RouteRules:       igrt.RouteRules,
+			RouteRules:       meshConversions.ConvertSdkIngressGatewayTrafficRouteRuleToTrafficRouteRuleDetails(igrt.RouteRules),
 			CompartmentId:    igrt.CompartmentId,
 			Name:             igrt.Name,
 			Description:      igrt.Description,
@@ -569,7 +570,7 @@ func (c *defaultServiceMeshClient) UpdateIngressGatewayRouteTable(ctx context.Co
 		IngressGatewayRouteTableId: igrt.Id,
 		UpdateIngressGatewayRouteTableDetails: sdk.UpdateIngressGatewayRouteTableDetails{
 			Description:  igrt.Description,
-			RouteRules:   igrt.RouteRules,
+			RouteRules:   meshConversions.ConvertSdkIngressGatewayTrafficRouteRuleToTrafficRouteRuleDetails(igrt.RouteRules),
 			FreeformTags: igrt.FreeformTags,
 			DefinedTags:  igrt.DefinedTags,
 		},
