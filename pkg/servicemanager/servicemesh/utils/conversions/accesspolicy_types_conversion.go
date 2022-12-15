@@ -100,3 +100,33 @@ func convertToSdkPorts(crdPorts []v1beta1.Port) []int {
 	}
 	return sdkPorts
 }
+
+func ConvertSdkAccessPolicyTargetToAccessPolicyTargetDetails(target sdk.AccessPolicyTarget) sdk.AccessPolicyTargetDetails {
+	switch target.(type) {
+	case sdk.AllVirtualServicesAccessPolicyTarget:
+		return sdk.AllVirtualServicesAccessPolicyTargetDetails{}
+	case sdk.VirtualServiceAccessPolicyTarget:
+		return sdk.VirtualServiceAccessPolicyTargetDetails{VirtualServiceId: target.(sdk.VirtualServiceAccessPolicyTarget).VirtualServiceId}
+	case sdk.IngressGatewayAccessPolicyTarget:
+		return sdk.IngressGatewayAccessPolicyTargetDetails{IngressGatewayId: target.(sdk.IngressGatewayAccessPolicyTarget).IngressGatewayId}
+	}
+
+	return target
+}
+
+func ConvertSdkAccessPolicyRuleToSdkAccessPolicyRuleDetails(rules []sdk.AccessPolicyRule) []sdk.AccessPolicyRuleDetails {
+	if rules == nil {
+		return nil
+	}
+
+	ruleDetails := make([]sdk.AccessPolicyRuleDetails, len(rules))
+	for i, rule := range rules {
+		ruleDetails[i] = sdk.AccessPolicyRuleDetails{
+			Action:      sdk.AccessPolicyRuleDetailsActionEnum(rule.Action),
+			Source:      ConvertSdkAccessPolicyTargetToAccessPolicyTargetDetails(rule.Source),
+			Destination: ConvertSdkAccessPolicyTargetToAccessPolicyTargetDetails(rule.Destination),
+		}
+	}
+
+	return ruleDetails
+}

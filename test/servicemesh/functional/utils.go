@@ -179,7 +179,7 @@ func GetApiVirtualDeployment() *servicemeshapi.VirtualDeployment {
 			AccessLogging: &servicemeshapi.AccessLogging{
 				IsEnabled: true,
 			},
-			ServiceDiscovery: servicemeshapi.ServiceDiscovery{
+			ServiceDiscovery: &servicemeshapi.ServiceDiscovery{
 				Type:     servicemeshapi.ServiceDiscoveryTypeDns,
 				Hostname: "my-host",
 			},

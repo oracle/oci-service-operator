@@ -20,23 +20,26 @@ type VirtualDeploymentSpec struct {
 	Name          *Name    `json:"name,omitempty"`
 	CompartmentId api.OCID `json:"compartmentId"`
 	// +optional
-	Description      *Description     `json:"description,omitempty"`
-	VirtualService   RefOrId          `json:"virtualService"`
-	ServiceDiscovery ServiceDiscovery `json:"serviceDiscovery"`
+	Description    *Description `json:"description,omitempty"`
+	VirtualService RefOrId      `json:"virtualService"`
+	// +optional
+	ServiceDiscovery *ServiceDiscovery `json:"serviceDiscovery,omitempty"`
 	// +optional
 	AccessLogging *AccessLogging `json:"accessLogging,omitempty"`
-	// +kubebuilder:validation:MinItems=1
-	Listener []Listener `json:"listener"`
+	// +optional
+	// +kubebuilder:validation:MaxItems=10
+	Listener []Listener `json:"listener,omitempty"`
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 }
 
 // Describes the ServiceDiscoveryType for Virtual Deployment
 // Only one of the following type should be present.
-// +kubebuilder:validation:Enum=DNS;
+// +kubebuilder:validation:Enum=DNS;DISABLED;
 type ServiceDiscoveryType string
 
 const (
-	ServiceDiscoveryTypeDns ServiceDiscoveryType = "DNS"
+	ServiceDiscoveryTypeDns      ServiceDiscoveryType = "DNS"
+	ServiceDiscoveryTypeDisabled ServiceDiscoveryType = "DISABLED"
 )
 
 // ServiceDiscovery configuration for Virtual Deployment

@@ -97,7 +97,6 @@ spec:
                   *.com
                 items:
                   type: string
-                minItems: 1
                 type: array
               mesh:
                 description: A reference to CR that a resource belongs to
@@ -148,7 +147,6 @@ spec:
                 type: string
             required:
             - compartmentId
-            - hosts
             - mesh
             type: object
           status:

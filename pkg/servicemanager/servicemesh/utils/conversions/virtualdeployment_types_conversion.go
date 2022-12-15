@@ -21,14 +21,8 @@ func ConvertCrdVirtualDeploymentToSdkVirtualDeployment(crdObj *v1beta1.VirtualDe
 	sdkObj.VirtualServiceId = (*string)(vsId)
 	sdkObj.AccessLogging = convertCrdAccessLoggingToSdkAccessLogging(crdObj.Spec.AccessLogging)
 
-	listener := ConvertCrdVirtualDeploymentListenerToSdkVirtualDeploymentListener(crdObj.Spec.Listener)
-	sdkObj.Listeners = listener
-	// TODO: check validation in webhook
-	if crdObj.Spec.ServiceDiscovery.Type == v1beta1.ServiceDiscoveryTypeDns {
-		sdkObj.ServiceDiscovery = sdk.DnsServiceDiscoveryConfiguration{
-			Hostname: &crdObj.Spec.ServiceDiscovery.Hostname,
-		}
-	}
+	sdkObj.Listeners = ConvertCrdVirtualDeploymentListenerToSdkVirtualDeploymentListener(crdObj.Spec.Listener)
+	sdkObj.ServiceDiscovery = ConvertCrdVirtualDeploymentServiceDiscoveryToSdkVirtualDeploymentServiceDiscovery(crdObj.Spec.ServiceDiscovery)
 
 	// TODO: AccessLogging.  Waiting for PR review.
 	if crdObj.Spec.FreeFormTags != nil {
@@ -52,4 +46,17 @@ func ConvertCrdVirtualDeploymentListenerToSdkVirtualDeploymentListener(crdListen
 	}
 
 	return sdkListeners
+}
+
+func ConvertCrdVirtualDeploymentServiceDiscoveryToSdkVirtualDeploymentServiceDiscovery(crdServiceDiscovery *v1beta1.ServiceDiscovery) (sdkServiceDiscovery sdk.ServiceDiscoveryConfiguration) {
+	if crdServiceDiscovery == nil || crdServiceDiscovery.Type == v1beta1.ServiceDiscoveryTypeDisabled {
+		return sdk.DisabledServiceDiscoveryConfiguration{}
+	}
+	if crdServiceDiscovery.Type == v1beta1.ServiceDiscoveryTypeDns {
+		return sdk.DnsServiceDiscoveryConfiguration{
+			Hostname: &crdServiceDiscovery.Hostname,
+		}
+	}
+
+	return nil
 }

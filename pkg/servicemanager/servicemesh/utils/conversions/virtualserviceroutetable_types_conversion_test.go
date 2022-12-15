@@ -464,3 +464,330 @@ func TestConvertCrdVsrtToSdkVsrt(t *testing.T) {
 		})
 	}
 }
+
+func TestConvert_VS_Rule_To_Rule_Details(t *testing.T) {
+	type args struct {
+		rules []sdk.VirtualServiceTrafficRouteRule
+	}
+	tests := []struct {
+		name            string
+		args            args
+		wantRuleDetails []sdk.VirtualServiceTrafficRouteRuleDetails
+	}{
+		{
+			name: "convert list",
+			args: args{
+				rules: []sdk.VirtualServiceTrafficRouteRule{
+					sdk.HttpVirtualServiceTrafficRouteRule{
+						Destinations: []sdk.VirtualDeploymentTrafficRuleTarget{
+							{
+								VirtualDeploymentId: String("my-vd-id2"),
+								Weight:              Integer(50),
+							},
+							{
+								VirtualDeploymentId: String("my-vd-id"),
+								Weight:              Integer(50),
+								Port:                Integer(8080),
+							},
+						},
+						IsGrpc:   Bool(grpcDisabled),
+						PathType: sdk.HttpVirtualServiceTrafficRouteRulePathTypePrefix,
+						Path:     String(path),
+					},
+					sdk.TcpVirtualServiceTrafficRouteRule{
+						Destinations: []sdk.VirtualDeploymentTrafficRuleTarget{
+							{
+								VirtualDeploymentId: String("my-vd-3"),
+								Weight:              Integer(100),
+								Port:                Integer(8080),
+							},
+						},
+					},
+					sdk.TlsPassthroughVirtualServiceTrafficRouteRule{
+						Destinations: []sdk.VirtualDeploymentTrafficRuleTarget{
+							{
+								VirtualDeploymentId: String("my-vd-3"),
+								Weight:              Integer(100),
+								Port:                Integer(8081),
+							},
+						},
+					},
+				},
+			},
+			wantRuleDetails: []sdk.VirtualServiceTrafficRouteRuleDetails{
+				sdk.HttpVirtualServiceTrafficRouteRuleDetails{
+					Destinations: []sdk.VirtualDeploymentTrafficRuleTargetDetails{
+						{
+							VirtualDeploymentId: String("my-vd-id2"),
+							Weight:              Integer(50),
+						},
+						{
+							VirtualDeploymentId: String("my-vd-id"),
+							Weight:              Integer(50),
+							Port:                Integer(8080),
+						},
+					},
+					IsGrpc:   Bool(grpcDisabled),
+					PathType: sdk.HttpVirtualServiceTrafficRouteRuleDetailsPathTypePrefix,
+					Path:     String(path),
+				},
+				sdk.TcpVirtualServiceTrafficRouteRuleDetails{
+					Destinations: []sdk.VirtualDeploymentTrafficRuleTargetDetails{
+						{
+							VirtualDeploymentId: String("my-vd-3"),
+							Weight:              Integer(100),
+							Port:                Integer(8080),
+						},
+					},
+				},
+				sdk.TlsPassthroughVirtualServiceTrafficRouteRuleDetails{
+					Destinations: []sdk.VirtualDeploymentTrafficRuleTargetDetails{
+						{
+							VirtualDeploymentId: String("my-vd-3"),
+							Weight:              Integer(100),
+							Port:                Integer(8081),
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "convert empty list",
+			args: args{
+				rules: []sdk.VirtualServiceTrafficRouteRule{},
+			},
+			wantRuleDetails: []sdk.VirtualServiceTrafficRouteRuleDetails{},
+		},
+		{
+			name: "convert nil",
+			args: args{
+				rules: nil,
+			},
+			wantRuleDetails: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ruleDetails := ConvertSdkVirtualServiceTrafficRouteRuleToTrafficRouteRuleDetails(tt.args.rules)
+			assert.Equal(t, tt.wantRuleDetails, ruleDetails)
+		})
+	}
+}
+
+func TestConvert_VS_Rule_To_Rule_Details(t *testing.T) {
+	type args struct {
+		rules []sdk.VirtualServiceTrafficRouteRule
+	}
+	tests := []struct {
+		name            string
+		args            args
+		wantRuleDetails []sdk.VirtualServiceTrafficRouteRuleDetails
+	}{
+		{
+			name: "convert list",
+			args: args{
+				rules: []sdk.VirtualServiceTrafficRouteRule{
+					sdk.HttpVirtualServiceTrafficRouteRule{
+						Destinations: []sdk.VirtualDeploymentTrafficRuleTarget{
+							{
+								VirtualDeploymentId: String("my-vd-id2"),
+								Weight:              Integer(50),
+							},
+							{
+								VirtualDeploymentId: String("my-vd-id"),
+								Weight:              Integer(50),
+								Port:                Integer(8080),
+							},
+						},
+						IsGrpc:   Bool(grpcDisabled),
+						PathType: sdk.HttpVirtualServiceTrafficRouteRulePathTypePrefix,
+						Path:     String(path),
+					},
+					sdk.TcpVirtualServiceTrafficRouteRule{
+						Destinations: []sdk.VirtualDeploymentTrafficRuleTarget{
+							{
+								VirtualDeploymentId: String("my-vd-3"),
+								Weight:              Integer(100),
+								Port:                Integer(8080),
+							},
+						},
+					},
+					sdk.TlsPassthroughVirtualServiceTrafficRouteRule{
+						Destinations: []sdk.VirtualDeploymentTrafficRuleTarget{
+							{
+								VirtualDeploymentId: String("my-vd-3"),
+								Weight:              Integer(100),
+								Port:                Integer(8081),
+							},
+						},
+					},
+				},
+			},
+			wantRuleDetails: []sdk.VirtualServiceTrafficRouteRuleDetails{
+				sdk.HttpVirtualServiceTrafficRouteRuleDetails{
+					Destinations: []sdk.VirtualDeploymentTrafficRuleTargetDetails{
+						{
+							VirtualDeploymentId: String("my-vd-id2"),
+							Weight:              Integer(50),
+						},
+						{
+							VirtualDeploymentId: String("my-vd-id"),
+							Weight:              Integer(50),
+							Port:                Integer(8080),
+						},
+					},
+					IsGrpc:   Bool(grpcDisabled),
+					PathType: sdk.HttpVirtualServiceTrafficRouteRuleDetailsPathTypePrefix,
+					Path:     String(path),
+				},
+				sdk.TcpVirtualServiceTrafficRouteRuleDetails{
+					Destinations: []sdk.VirtualDeploymentTrafficRuleTargetDetails{
+						{
+							VirtualDeploymentId: String("my-vd-3"),
+							Weight:              Integer(100),
+							Port:                Integer(8080),
+						},
+					},
+				},
+				sdk.TlsPassthroughVirtualServiceTrafficRouteRuleDetails{
+					Destinations: []sdk.VirtualDeploymentTrafficRuleTargetDetails{
+						{
+							VirtualDeploymentId: String("my-vd-3"),
+							Weight:              Integer(100),
+							Port:                Integer(8081),
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "convert empty list",
+			args: args{
+				rules: []sdk.VirtualServiceTrafficRouteRule{},
+			},
+			wantRuleDetails: []sdk.VirtualServiceTrafficRouteRuleDetails{},
+		},
+		{
+			name: "convert nil",
+			args: args{
+				rules: nil,
+			},
+			wantRuleDetails: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ruleDetails := ConvertSdkVirtualServiceTrafficRouteRuleToTrafficRouteRuleDetails(tt.args.rules)
+			assert.Equal(t, tt.wantRuleDetails, ruleDetails)
+		})
+	}
+}
+
+func TestConvert_VS_Rule_To_Rule_Details(t *testing.T) {
+	type args struct {
+		rules []sdk.VirtualServiceTrafficRouteRule
+	}
+	tests := []struct {
+		name            string
+		args            args
+		wantRuleDetails []sdk.VirtualServiceTrafficRouteRuleDetails
+	}{
+		{
+			name: "convert list",
+			args: args{
+				rules: []sdk.VirtualServiceTrafficRouteRule{
+					sdk.HttpVirtualServiceTrafficRouteRule{
+						Destinations: []sdk.VirtualDeploymentTrafficRuleTarget{
+							{
+								VirtualDeploymentId: String("my-vd-id2"),
+								Weight:              Integer(50),
+							},
+							{
+								VirtualDeploymentId: String("my-vd-id"),
+								Weight:              Integer(50),
+								Port:                Integer(8080),
+							},
+						},
+						IsGrpc:   Bool(grpcDisabled),
+						PathType: sdk.HttpVirtualServiceTrafficRouteRulePathTypePrefix,
+						Path:     String(path),
+					},
+					sdk.TcpVirtualServiceTrafficRouteRule{
+						Destinations: []sdk.VirtualDeploymentTrafficRuleTarget{
+							{
+								VirtualDeploymentId: String("my-vd-3"),
+								Weight:              Integer(100),
+								Port:                Integer(8080),
+							},
+						},
+					},
+					sdk.TlsPassthroughVirtualServiceTrafficRouteRule{
+						Destinations: []sdk.VirtualDeploymentTrafficRuleTarget{
+							{
+								VirtualDeploymentId: String("my-vd-3"),
+								Weight:              Integer(100),
+								Port:                Integer(8081),
+							},
+						},
+					},
+				},
+			},
+			wantRuleDetails: []sdk.VirtualServiceTrafficRouteRuleDetails{
+				sdk.HttpVirtualServiceTrafficRouteRuleDetails{
+					Destinations: []sdk.VirtualDeploymentTrafficRuleTargetDetails{
+						{
+							VirtualDeploymentId: String("my-vd-id2"),
+							Weight:              Integer(50),
+						},
+						{
+							VirtualDeploymentId: String("my-vd-id"),
+							Weight:              Integer(50),
+							Port:                Integer(8080),
+						},
+					},
+					IsGrpc:   Bool(grpcDisabled),
+					PathType: sdk.HttpVirtualServiceTrafficRouteRuleDetailsPathTypePrefix,
+					Path:     String(path),
+				},
+				sdk.TcpVirtualServiceTrafficRouteRuleDetails{
+					Destinations: []sdk.VirtualDeploymentTrafficRuleTargetDetails{
+						{
+							VirtualDeploymentId: String("my-vd-3"),
+							Weight:              Integer(100),
+							Port:                Integer(8080),
+						},
+					},
+				},
+				sdk.TlsPassthroughVirtualServiceTrafficRouteRuleDetails{
+					Destinations: []sdk.VirtualDeploymentTrafficRuleTargetDetails{
+						{
+							VirtualDeploymentId: String("my-vd-3"),
+							Weight:              Integer(100),
+							Port:                Integer(8081),
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "convert empty list",
+			args: args{
+				rules: []sdk.VirtualServiceTrafficRouteRule{},
+			},
+			wantRuleDetails: []sdk.VirtualServiceTrafficRouteRuleDetails{},
+		},
+		{
+			name: "convert nil",
+			args: args{
+				rules: nil,
+			},
+			wantRuleDetails: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ruleDetails := ConvertSdkVirtualServiceTrafficRouteRuleToTrafficRouteRuleDetails(tt.args.rules)
+			assert.Equal(t, tt.wantRuleDetails, ruleDetails)
+		})
+	}
+}

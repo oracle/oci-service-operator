@@ -122,7 +122,7 @@ github.com/onsi/gomega/matchers/support/goraph/edge
 github.com/onsi/gomega/matchers/support/goraph/node
 github.com/onsi/gomega/matchers/support/goraph/util
 github.com/onsi/gomega/types
-# github.com/oracle/oci-go-sdk/v65 v65.3.0
+# github.com/oracle/oci-go-sdk/v65 v65.28.0
 ## explicit
 github.com/oracle/oci-go-sdk/v65/common
 github.com/oracle/oci-go-sdk/v65/common/auth

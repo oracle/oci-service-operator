@@ -9,6 +9,7 @@ import (
 	"context"
 
 	"github.com/google/go-cmp/cmp"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	servicemeshapi "github.com/oracle/oci-service-operator/apis/servicemesh.oci/v1beta1"
@@ -41,15 +42,16 @@ func (v *VirtualDeploymentValidator) ValidateOnCreate(context context.Context, o
 		return false, reason
 	}
 
-	if !v.validateHostName(vd) {
-		return false, string(commons.HostNameIsEmptyForDNS)
-	}
-
 	if len(vd.Spec.VirtualService.Id) == 0 {
 		allowed, reason = validations.IsVSPresent(v.resolver, context, vd.Spec.VirtualService.ResourceRef, &vd.ObjectMeta)
 		if !allowed {
 			return false, reason
 		}
+	}
+
+	allowed, reason = v.validateHostName(vd, context)
+	if !allowed {
+		return allowed, reason
 	}
 
 	return true, ""
@@ -99,22 +101,66 @@ func (v *VirtualDeploymentValidator) ValidateOnUpdate(context context.Context, o
 		return false, string(commons.NameIsImmutable)
 	}
 
-	if !v.validateHostName(vd) {
-		return false, string(commons.HostNameIsEmptyForDNS)
+	allowed, reason := v.validateHostName(vd, context)
+	if !allowed {
+		return allowed, reason
 	}
 
 	return true, ""
 }
 
-func (v *VirtualDeploymentValidator) validateHostName(virtualDeployment *servicemeshapi.VirtualDeployment) bool {
+func (v *VirtualDeploymentValidator) validateServiceDiscovery(virtualDeployment *servicemeshapi.VirtualDeployment) (bool, string) {
 	// TODO: Current implementation of MeshRegistry does not expect any fields.
 	// If host name is needed for MeshRegistry, remove this and add a kube-validation instead
-	if virtualDeployment.Spec.ServiceDiscovery.Type == servicemeshapi.ServiceDiscoveryTypeDns && len(virtualDeployment.Spec.ServiceDiscovery.Hostname) == 0 {
-		return false
+
+	if virtualDeployment.Spec.ServiceDiscovery == nil {
+		return true, ""
 	}
-	return true
+
+	hasHostname := len(virtualDeployment.Spec.ServiceDiscovery.Hostname) > 0
+	if virtualDeployment.Spec.ServiceDiscovery.Type == servicemeshapi.ServiceDiscoveryTypeDns && !hasHostname {
+		return false, string(commons.HostNameIsEmptyForDNS)
+	}
+	if virtualDeployment.Spec.ServiceDiscovery != nil && virtualDeployment.Spec.ServiceDiscovery.Type == servicemeshapi.ServiceDiscoveryTypeDisabled && hasHostname {
+		return false, string(commons.HostNameShouldBeEmptyForDISABLED)
+	}
+
+	return true, ""
+}
+
+func (v *VirtualDeploymentValidator) validateHostName(virtualDeployment *servicemeshapi.VirtualDeployment, ctx context.Context) (bool, string) {
+	hasServiceDiscovery := virtualDeployment.Spec.ServiceDiscovery != nil && virtualDeployment.Spec.ServiceDiscovery.Type != servicemeshapi.ServiceDiscoveryTypeDisabled
+	hasHostname := hasServiceDiscovery && len(virtualDeployment.Spec.ServiceDiscovery.Hostname) > 0
+	hasListener := virtualDeployment.Spec.Listener != nil && len(virtualDeployment.Spec.Listener) > 0
+
+	if hasHostname && hasListener {
+		if v.HasVSHost(ctx, &virtualDeployment.Spec.VirtualService, &virtualDeployment.ObjectMeta) {
+			return true, ""
+		}
+		return false, string(commons.VirtualServiceHostNotFound)
+	} else {
+		isValid, reason := v.validateServiceDiscovery(virtualDeployment)
+		if !isValid {
+			return isValid, reason
+		}
+		if hasHostname || hasListener {
+			return false, string(commons.VirtualDeploymentOnlyHaveHostnameOrListener)
+		}
+		return true, ""
+	}
 }
 
 func (v *VirtualDeploymentValidator) GetEntityType() client.Object {
 	return &servicemeshapi.VirtualDeployment{}
+}
+
+func (v *VirtualDeploymentValidator) HasVSHost(ctx context.Context, resource *servicemeshapi.RefOrId, objectMeta *metav1.ObjectMeta) bool {
+	if len(resource.Id) == 0 {
+		resourceRef := v.resolver.ResolveResourceRef(resource.ResourceRef, objectMeta)
+		referredVirtualService, _ := v.resolver.ResolveVirtualServiceReference(ctx, resourceRef)
+		return referredVirtualService.Spec.Hosts != nil && len(referredVirtualService.Spec.Hosts) > 0
+	} else {
+		virtualService, _ := v.resolver.ResolveVirtualServiceById(ctx, &resource.Id)
+		return virtualService.Hosts != nil && len(virtualService.Hosts) > 0
+	}
 }

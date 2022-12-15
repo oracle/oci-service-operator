@@ -691,3 +691,156 @@ func TestConvert_Crd_TrafficTarget_To_Sdk_AccessPolicyTarget(t *testing.T) {
 		})
 	}
 }
+
+func TestConvert_AP_Rule_To_Rule_Details(t *testing.T) {
+	type args struct {
+		rules []sdk.AccessPolicyRule
+	}
+	tests := []struct {
+		name            string
+		args            args
+		wantRuleDetails []sdk.AccessPolicyRuleDetails
+	}{
+		{
+			name: "convert list",
+			args: args{
+				rules: []sdk.AccessPolicyRule{{
+					Action: sdk.AccessPolicyRuleActionAllow,
+					Source: sdk.IngressGatewayAccessPolicyTarget{
+						IngressGatewayId: String("my-ingressgateway-id"),
+					},
+					Destination: sdk.AllVirtualServicesAccessPolicyTarget{},
+				}},
+			},
+			wantRuleDetails: []sdk.AccessPolicyRuleDetails{{
+				Action: sdk.AccessPolicyRuleDetailsActionAllow,
+				Source: sdk.IngressGatewayAccessPolicyTargetDetails{
+					IngressGatewayId: String("my-ingressgateway-id"),
+				},
+				Destination: sdk.AllVirtualServicesAccessPolicyTargetDetails{},
+			}},
+		},
+		{
+			name: "convert empty list",
+			args: args{
+				rules: []sdk.AccessPolicyRule{},
+			},
+			wantRuleDetails: []sdk.AccessPolicyRuleDetails{},
+		},
+		{
+			name: "convert nil",
+			args: args{
+				rules: nil,
+			},
+			wantRuleDetails: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ruleDetails := ConvertSdkAccessPolicyRuleToSdkAccessPolicyRuleDetails(tt.args.rules)
+			assert.Equal(t, tt.wantRuleDetails, ruleDetails)
+		})
+	}
+}
+
+func TestConvert_AP_Rule_To_Rule_Details(t *testing.T) {
+	type args struct {
+		rules []sdk.AccessPolicyRule
+	}
+	tests := []struct {
+		name            string
+		args            args
+		wantRuleDetails []sdk.AccessPolicyRuleDetails
+	}{
+		{
+			name: "convert list",
+			args: args{
+				rules: []sdk.AccessPolicyRule{{
+					Action: sdk.AccessPolicyRuleActionAllow,
+					Source: sdk.IngressGatewayAccessPolicyTarget{
+						IngressGatewayId: String("my-ingressgateway-id"),
+					},
+					Destination: sdk.AllVirtualServicesAccessPolicyTarget{},
+				}},
+			},
+			wantRuleDetails: []sdk.AccessPolicyRuleDetails{{
+				Action: sdk.AccessPolicyRuleDetailsActionAllow,
+				Source: sdk.IngressGatewayAccessPolicyTargetDetails{
+					IngressGatewayId: String("my-ingressgateway-id"),
+				},
+				Destination: sdk.AllVirtualServicesAccessPolicyTargetDetails{},
+			}},
+		},
+		{
+			name: "convert empty list",
+			args: args{
+				rules: []sdk.AccessPolicyRule{},
+			},
+			wantRuleDetails: []sdk.AccessPolicyRuleDetails{},
+		},
+		{
+			name: "convert nil",
+			args: args{
+				rules: nil,
+			},
+			wantRuleDetails: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ruleDetails := ConvertSdkAccessPolicyRuleToSdkAccessPolicyRuleDetails(tt.args.rules)
+			assert.Equal(t, tt.wantRuleDetails, ruleDetails)
+		})
+	}
+}
+
+func TestConvert_AP_Rule_To_Rule_Details(t *testing.T) {
+	type args struct {
+		rules []sdk.AccessPolicyRule
+	}
+	tests := []struct {
+		name            string
+		args            args
+		wantRuleDetails []sdk.AccessPolicyRuleDetails
+	}{
+		{
+			name: "convert list",
+			args: args{
+				rules: []sdk.AccessPolicyRule{{
+					Action: sdk.AccessPolicyRuleActionAllow,
+					Source: sdk.IngressGatewayAccessPolicyTarget{
+						IngressGatewayId: String("my-ingressgateway-id"),
+					},
+					Destination: sdk.AllVirtualServicesAccessPolicyTarget{},
+				}},
+			},
+			wantRuleDetails: []sdk.AccessPolicyRuleDetails{{
+				Action: sdk.AccessPolicyRuleDetailsActionAllow,
+				Source: sdk.IngressGatewayAccessPolicyTargetDetails{
+					IngressGatewayId: String("my-ingressgateway-id"),
+				},
+				Destination: sdk.AllVirtualServicesAccessPolicyTargetDetails{},
+			}},
+		},
+		{
+			name: "convert empty list",
+			args: args{
+				rules: []sdk.AccessPolicyRule{},
+			},
+			wantRuleDetails: []sdk.AccessPolicyRuleDetails{},
+		},
+		{
+			name: "convert nil",
+			args: args{
+				rules: nil,
+			},
+			wantRuleDetails: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ruleDetails := ConvertSdkAccessPolicyRuleToSdkAccessPolicyRuleDetails(tt.args.rules)
+			assert.Equal(t, tt.wantRuleDetails, ruleDetails)
+		})
+	}
+}

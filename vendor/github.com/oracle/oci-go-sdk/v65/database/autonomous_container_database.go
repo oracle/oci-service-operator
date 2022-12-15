@@ -93,7 +93,7 @@ type AutonomousContainerDatabase struct {
 	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
 	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
 
-	// The role of the Autonomous Data Guard-enabled Autonomous Container Database.
+	// The Data Guard role of the Autonomous Container Database or Autonomous Database, if Autonomous Data Guard is enabled.
 	Role AutonomousContainerDatabaseRoleEnum `mandatory:"false" json:"role,omitempty"`
 
 	// The availability domain of the Autonomous Container Database.
@@ -112,6 +112,18 @@ type AutonomousContainerDatabase struct {
 
 	// The amount of memory (in GBs) enabled per each OCPU core in Autonomous VM Cluster.
 	MemoryPerOracleComputeUnitInGBs *int `mandatory:"false" json:"memoryPerOracleComputeUnitInGBs"`
+
+	// Sum of OCPUs available on the Autonomous VM Cluster + Sum of reclaimable OCPUs available in the Autonomous Container Database.
+	AvailableCpus *float32 `mandatory:"false" json:"availableCpus"`
+
+	// The number of CPU cores allocated to the Autonomous VM cluster.
+	TotalCpus *int `mandatory:"false" json:"totalCpus"`
+
+	// CPU cores that continue to be included in the count of OCPUs available to the Autonomous Container Database even after one of its Autonomous Database is terminated or scaled down. You can release them to the available OCPUs at its parent AVMC level by restarting the Autonomous Container Database.
+	ReclaimableCpus *float32 `mandatory:"false" json:"reclaimableCpus"`
+
+	// An array of CPU values that can be used to successfully provision a single Autonomous Database.
+	ProvisionableCpus []float32 `mandatory:"false" json:"provisionableCpus"`
 }
 
 func (m AutonomousContainerDatabase) String() string {

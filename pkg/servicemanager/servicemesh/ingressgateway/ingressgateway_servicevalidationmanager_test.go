@@ -597,6 +597,43 @@ func Test_IngressGatewayValidateCreate(t *testing.T) {
 			},
 			wantErr: expectation{true, ""},
 		},
+		{
+			name: "Listener port less than 1024",
+			args: args{
+				ingressGateway: &servicemeshapi.IngressGateway{
+					Spec: servicemeshapi.IngressGatewaySpec{
+						CompartmentId: "my-comp",
+						Mesh: servicemeshapi.RefOrId{
+							ResourceRef: &servicemeshapi.ResourceRef{
+								Namespace: "my-namespace",
+								Name:      "my-mesh",
+							},
+						},
+						Hosts: []servicemeshapi.IngressGatewayHost{{
+							Name: "testHost",
+							Listeners: []servicemeshapi.IngressGatewayListener{{
+								Protocol: servicemeshapi.IngressGatewayListenerProtocolTcp,
+								Port:     80,
+							}},
+						}},
+					},
+				},
+			},
+			fields: fields{
+				ResolveResourceRef: func(resourceRef *servicemeshapi.ResourceRef, crdObj *metav1.ObjectMeta) *servicemeshapi.ResourceRef {
+					return resourceRef
+				},
+				ResolveMeshReference: func(ctx context.Context, ref *servicemeshapi.ResourceRef) (*servicemeshapi.Mesh, error) {
+					meshRef := &servicemeshapi.Mesh{
+						ObjectMeta: metav1.ObjectMeta{
+							DeletionTimestamp: nil,
+						},
+					}
+					return meshRef, nil
+				},
+			},
+			wantErr: expectation{false, "listener port must be greater than or equal to 1024"},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -1129,7 +1166,7 @@ func Test_IngressGatewayValidateUpdate(t *testing.T) {
 								Hostnames: []string{"test.com"},
 								Listeners: []servicemeshapi.IngressGatewayListener{{
 									Protocol: servicemeshapi.IngressGatewayListenerProtocolHttp,
-									Port:     80,
+									Port:     8080,
 								}},
 							},
 						},
@@ -1185,7 +1222,7 @@ func Test_IngressGatewayValidateUpdate(t *testing.T) {
 								Hostnames: []string{"test.com"},
 								Listeners: []servicemeshapi.IngressGatewayListener{{
 									Protocol: servicemeshapi.IngressGatewayListenerProtocolHttp,
-									Port:     80,
+									Port:     1024,
 								}},
 							},
 						},

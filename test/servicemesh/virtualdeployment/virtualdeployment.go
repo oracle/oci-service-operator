@@ -68,7 +68,7 @@ func NewTestEnvVd(name string, namespace string) *servicemeshapi.VirtualDeployme
 			AccessLogging: &servicemeshapi.AccessLogging{
 				IsEnabled: true,
 			},
-			ServiceDiscovery: servicemeshapi.ServiceDiscovery{
+			ServiceDiscovery: &servicemeshapi.ServiceDiscovery{
 				Type: servicemeshapi.ServiceDiscoveryTypeDns,
 			},
 			TagResources: api.TagResources{

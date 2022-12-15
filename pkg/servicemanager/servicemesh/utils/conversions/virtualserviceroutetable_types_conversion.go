@@ -106,3 +106,52 @@ func ConvertCrdTrafficRouteRuleDestinationToSdkTrafficRouteRuleDestination(crdOb
 	sdkObj.Weight = &crdObj.Weight
 	sdkObj.Port = PortToInt(crdObj.Port)
 }
+
+func ConvertSdkVirtualDeploymentTrafficRuleTargetToTrafficRuleTargetDetails(ruleTargets []sdk.VirtualDeploymentTrafficRuleTarget) []sdk.VirtualDeploymentTrafficRuleTargetDetails {
+	if ruleTargets == nil {
+		return nil
+	}
+
+	ruleDetails := make([]sdk.VirtualDeploymentTrafficRuleTargetDetails, len(ruleTargets))
+	for i, rule := range ruleTargets {
+		ruleDetails[i] = sdk.VirtualDeploymentTrafficRuleTargetDetails{
+			VirtualDeploymentId: rule.VirtualDeploymentId,
+			Port:                rule.Port,
+			Weight:              rule.Weight,
+		}
+	}
+
+	return ruleDetails
+}
+
+func ConvertSdkVirtualServiceTrafficRouteRuleToTrafficRouteRuleDetails(rules []sdk.VirtualServiceTrafficRouteRule) []sdk.VirtualServiceTrafficRouteRuleDetails {
+	if rules == nil {
+		return nil
+	}
+
+	ruleDetails := make([]sdk.VirtualServiceTrafficRouteRuleDetails, len(rules))
+	for i, rule := range rules {
+		switch rule.(type) {
+		case sdk.HttpVirtualServiceTrafficRouteRule:
+			httpRouteRule := rule.(sdk.HttpVirtualServiceTrafficRouteRule)
+			ruleDetails[i] = sdk.HttpVirtualServiceTrafficRouteRuleDetails{
+				Destinations: ConvertSdkVirtualDeploymentTrafficRuleTargetToTrafficRuleTargetDetails(httpRouteRule.Destinations),
+				Path:         httpRouteRule.Path,
+				IsGrpc:       httpRouteRule.IsGrpc,
+				PathType:     sdk.HttpVirtualServiceTrafficRouteRuleDetailsPathTypeEnum(httpRouteRule.PathType),
+			}
+		case sdk.TcpVirtualServiceTrafficRouteRule:
+			tcpRouteRule := rule.(sdk.TcpVirtualServiceTrafficRouteRule)
+			ruleDetails[i] = sdk.TcpVirtualServiceTrafficRouteRuleDetails{
+				Destinations: ConvertSdkVirtualDeploymentTrafficRuleTargetToTrafficRuleTargetDetails(tcpRouteRule.Destinations),
+			}
+		case sdk.TlsPassthroughVirtualServiceTrafficRouteRule:
+			tlsRouteRule := rule.(sdk.TlsPassthroughVirtualServiceTrafficRouteRule)
+			ruleDetails[i] = sdk.TlsPassthroughVirtualServiceTrafficRouteRuleDetails{
+				Destinations: ConvertSdkVirtualDeploymentTrafficRuleTargetToTrafficRuleTargetDetails(tlsRouteRule.Destinations),
+			}
+		}
+	}
+
+	return ruleDetails
+}

@@ -59,6 +59,18 @@ type CreateCloudVmClusterDetails struct {
 	// The number of OCPU cores to enable for a cloud VM cluster. Only 1 decimal place is allowed for the fractional part.
 	OcpuCount *float32 `mandatory:"false" json:"ocpuCount"`
 
+	// The memory to be allocated in GBs.
+	MemorySizeInGBs *int `mandatory:"false" json:"memorySizeInGBs"`
+
+	// The local node storage to be allocated in GBs.
+	DbNodeStorageSizeInGBs *int `mandatory:"false" json:"dbNodeStorageSizeInGBs"`
+
+	// The data disk group size to be allocated in TBs.
+	DataStorageSizeInTBs *float64 `mandatory:"false" json:"dataStorageSizeInTBs"`
+
+	// The list of Db servers.
+	DbServers []string `mandatory:"false" json:"dbServers"`
+
 	// The cluster name for cloud VM cluster. The cluster name must begin with an alphabetic character, and may contain hyphens (-). Underscores (_) are not permitted. The cluster name can be no longer than 11 characters and is not case sensitive.
 	ClusterName *string `mandatory:"false" json:"clusterName"`
 
@@ -90,9 +102,9 @@ type CreateCloudVmClusterDetails struct {
 	// The TCPS Single Client Access Name (SCAN) port. The default port is 2484.
 	ScanListenerPortTcpSsl *int `mandatory:"false" json:"scanListenerPortTcpSsl"`
 
-	// A list of the OCIDs (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the network security groups (NSGs) that this resource belongs to. Setting this to an empty array after the list is created removes the resource from all NSGs. For more information about NSGs, see Security Rules (https://docs.cloud.oracle.com/Content/Network/Concepts/securityrules.htm).
+	// The list of OCIDs (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) for the network security groups (NSGs) to which this resource belongs. Setting this to an empty list removes all resources from all NSGs. For more information about NSGs, see Security Rules (https://docs.cloud.oracle.com/Content/Network/Concepts/securityrules.htm).
 	// **NsgIds restrictions:**
-	// - Autonomous Databases with private access require at least 1 Network Security Group (NSG). The nsgIds array cannot be empty.
+	// - A network security group (NSG) is optional for Autonomous Databases with private access. The nsgIds list can be empty.
 	NsgIds []string `mandatory:"false" json:"nsgIds"`
 
 	// A list of the OCIDs (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the network security groups (NSGs) that the backup network of this DB system belongs to. Setting this to an empty array after the list is created removes the resource from all NSGs. For more information about NSGs, see Security Rules (https://docs.cloud.oracle.com/Content/Network/Concepts/securityrules.htm). Applicable only to Exadata systems.
@@ -106,6 +118,8 @@ type CreateCloudVmClusterDetails struct {
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
 	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
 	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
+
+	DataCollectionOptions *DataCollectionOptions `mandatory:"false" json:"dataCollectionOptions"`
 }
 
 func (m CreateCloudVmClusterDetails) String() string {

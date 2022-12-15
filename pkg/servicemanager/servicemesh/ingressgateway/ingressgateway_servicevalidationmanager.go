@@ -116,6 +116,10 @@ func (v *IngressGatewayValidator) validateHosts(hosts []servicemeshapi.IngressGa
 			if !allowed {
 				return allowed, reason
 			}
+			allowed, reason = validateListenerPort(listener.Port)
+			if !allowed {
+				return allowed, reason
+			}
 			allowed, reason = validateTlsConfig(listener.Tls)
 			if !allowed {
 				return allowed, reason
@@ -130,6 +134,13 @@ func validateProtocol(protocol servicemeshapi.IngressGatewayListenerProtocolEnum
 		if len(host.Hostnames) == 0 {
 			return false, "hostnames is mandatory for a host with HTTP or TLS_PASSTHROUGH listener"
 		}
+	}
+	return true, ""
+}
+
+func validateListenerPort(listenerPort servicemeshapi.Port) (bool, string) {
+	if listenerPort < 1024 {
+		return false, "listener port must be greater than or equal to 1024"
 	}
 	return true, ""
 }
