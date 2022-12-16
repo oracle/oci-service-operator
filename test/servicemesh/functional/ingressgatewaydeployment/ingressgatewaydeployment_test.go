@@ -327,9 +327,9 @@ func TestIngressGatewayDeployment(t *testing.T) {
 			// service, if any
 			if tt.args.hasService {
 				ingressGatewayDeployment.Spec.Service = &servicemeshapi.IngressGatewayService{
-					Type: corev1.ServiceTypeLoadBalancer,
+					Type:        corev1.ServiceTypeLoadBalancer,
 					Annotations: tt.args.serviceAnnotations,
-					Labels: tt.args.serviceLabels,
+					Labels:      tt.args.serviceLabels,
 				}
 			}
 

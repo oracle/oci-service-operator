@@ -230,39 +230,6 @@ func Test_VirtualDeploymentValidateCreate(t *testing.T) {
 			wantErr: expectation{true, ""},
 		},
 		{
-			name: "Spec contains disabled service discovery and empty listener",
-			args: args{
-				virtualDeployment: &servicemeshapi.VirtualDeployment{
-					Spec: servicemeshapi.VirtualDeploymentSpec{
-						VirtualService: servicemeshapi.RefOrId{
-							Id: "my-vs-ocid",
-						},
-						Listener: []servicemeshapi.Listener{},
-						ServiceDiscovery: &servicemeshapi.ServiceDiscovery{
-							Type: "DISABLED",
-						},
-					},
-				},
-			},
-			fields: fields{
-				ResolveResourceRef: func(resourceRef *servicemeshapi.ResourceRef, crdObj *metav1.ObjectMeta) *servicemeshapi.ResourceRef {
-					return resourceRef
-				},
-				ResolveVirtualServiceReference: func(ctx context.Context, ref *servicemeshapi.ResourceRef) (*servicemeshapi.VirtualService, error) {
-					vsRef := &servicemeshapi.VirtualService{
-						ObjectMeta: metav1.ObjectMeta{
-							DeletionTimestamp: nil,
-						},
-						Spec: servicemeshapi.VirtualServiceSpec{
-							Hosts: []string{"host"},
-						},
-					}
-					return vsRef, nil
-				},
-			},
-			wantErr: expectation{true, ""},
-		},
-		{
 			name: "Spec contains empty hostname and empty listener for type DNS",
 			args: args{
 				virtualDeployment: &servicemeshapi.VirtualDeployment{
@@ -272,106 +239,6 @@ func Test_VirtualDeploymentValidateCreate(t *testing.T) {
 						},
 						ServiceDiscovery: &servicemeshapi.ServiceDiscovery{
 							Type: "DNS",
-						},
-					},
-				},
-			},
-			fields: fields{
-				ResolveResourceRef: func(resourceRef *servicemeshapi.ResourceRef, crdObj *metav1.ObjectMeta) *servicemeshapi.ResourceRef {
-					return resourceRef
-				},
-				ResolveVirtualServiceById: func(ctx context.Context, virtualServiceId *api.OCID) (*sdk.VirtualService, error) {
-					vsId := "vs-1"
-					compartmentId := "compartment-id"
-					meshId := "mesh-id"
-					vs := &sdk.VirtualService{Id: &vsId, CompartmentId: &compartmentId, MeshId: &meshId}
-					return vs, nil
-				},
-			},
-			wantErr: expectation{false, "parent virtualService doesn't have any host"},
-		},
-		{
-			name: "Spec contains hostname for type DNS without listener",
-			args: args{
-				virtualDeployment: &servicemeshapi.VirtualDeployment{
-					Spec: servicemeshapi.VirtualDeploymentSpec{
-						VirtualService: servicemeshapi.RefOrId{
-							Id: "my-vs-ocid",
-						},
-						ServiceDiscovery: &servicemeshapi.ServiceDiscovery{
-							Type:     "DNS",
-							Hostname: "my-hostname",
-						},
-					},
-				},
-			},
-			fields: fields{
-				ResolveResourceRef: func(resourceRef *servicemeshapi.ResourceRef, crdObj *metav1.ObjectMeta) *servicemeshapi.ResourceRef {
-					return resourceRef
-				},
-				ResolveVirtualServiceReference: func(ctx context.Context, ref *servicemeshapi.ResourceRef) (*servicemeshapi.VirtualService, error) {
-					vsRef := &servicemeshapi.VirtualService{
-						ObjectMeta: metav1.ObjectMeta{
-							DeletionTimestamp: nil,
-						},
-						Spec: servicemeshapi.VirtualServiceSpec{
-							Hosts: []string{"my-hostname"},
-						},
-					}
-					return vsRef, nil
-				},
-			},
-			wantErr: expectation{false, "service discovery and listeners should be provided together or be both empty"},
-		},
-		{
-			name: "Spec contains listener without service discovery",
-			args: args{
-				virtualDeployment: &servicemeshapi.VirtualDeployment{
-					Spec: servicemeshapi.VirtualDeploymentSpec{
-						VirtualService: servicemeshapi.RefOrId{
-							Id: "my-vs-ocid",
-						},
-						Listener: []servicemeshapi.Listener{
-							{
-								Protocol: "HTTP",
-								Port:     9080,
-							},
-						},
-					},
-				},
-			},
-			fields: fields{
-				ResolveResourceRef: func(resourceRef *servicemeshapi.ResourceRef, crdObj *metav1.ObjectMeta) *servicemeshapi.ResourceRef {
-					return resourceRef
-				},
-				ResolveVirtualServiceReference: func(ctx context.Context, ref *servicemeshapi.ResourceRef) (*servicemeshapi.VirtualService, error) {
-					vsRef := &servicemeshapi.VirtualService{
-						ObjectMeta: metav1.ObjectMeta{
-							DeletionTimestamp: nil,
-						},
-					}
-					return vsRef, nil
-				},
-			},
-			wantErr: expectation{false, "service discovery and listeners should be provided together or be both empty"},
-		},
-		{
-			name: "Spec contains hostname for type DNS with VS contains matching host",
-			args: args{
-				virtualDeployment: &servicemeshapi.VirtualDeployment{
-					Spec: servicemeshapi.VirtualDeploymentSpec{
-						VirtualService: servicemeshapi.RefOrId{
-							Id: "my-vs-ocid",
-						},
-						ServiceDiscovery: &servicemeshapi.ServiceDiscovery{
-							Type:     "DNS",
-							Hostname: "my-hostname",
-						},
-						Listener: []servicemeshapi.Listener{
-							{
-								Protocol: "HTTP",
-								Port:     9080,
-							},
 						},
 					},
 				},
@@ -415,119 +282,10 @@ func Test_VirtualDeploymentValidateCreate(t *testing.T) {
 				ResolveResourceRef: func(resourceRef *servicemeshapi.ResourceRef, crdObj *metav1.ObjectMeta) *servicemeshapi.ResourceRef {
 					return resourceRef
 				},
-				ResolveVirtualServiceById: func(ctx context.Context, virtualServiceId *api.OCID) (*sdk.VirtualService, error) {
-					vsId := "vs-1"
-					compartmentId := "compartment-id"
-					meshId := "mesh-id"
-					vs := &sdk.VirtualService{Id: &vsId, CompartmentId: &compartmentId, MeshId: &meshId}
-					return vs, nil
-				},
-			},
-			wantErr: expectation{false, "parent virtualService doesn't have any host"},
-		},
-		{
-			name: "Spec contains hostname for type DNS without listener",
-			args: args{
-				virtualDeployment: &servicemeshapi.VirtualDeployment{
-					Spec: servicemeshapi.VirtualDeploymentSpec{
-						VirtualService: servicemeshapi.RefOrId{
-							Id: "my-vs-ocid",
-						},
-						ServiceDiscovery: &servicemeshapi.ServiceDiscovery{
-							Type:     "DNS",
-							Hostname: "my-hostname",
-						},
-						Listener: []servicemeshapi.Listener{
-							{
-								Protocol: "HTTP",
-								Port:     9080,
-							},
-						},
-					},
-				},
-			},
-			fields: fields{
-				ResolveResourceRef: func(resourceRef *servicemeshapi.ResourceRef, crdObj *metav1.ObjectMeta) *servicemeshapi.ResourceRef {
-					return resourceRef
-				},
 				ResolveVirtualServiceReference: func(ctx context.Context, ref *servicemeshapi.ResourceRef) (*servicemeshapi.VirtualService, error) {
 					vsRef := &servicemeshapi.VirtualService{
 						ObjectMeta: metav1.ObjectMeta{
 							DeletionTimestamp: nil,
-						},
-						Spec: servicemeshapi.VirtualServiceSpec{
-							Hosts: []string{"my-hostname"},
-						},
-					}
-					return vsRef, nil
-				},
-			},
-			wantErr: expectation{false, "service discovery and listeners should be provided together or be both empty"},
-		},
-		{
-			name: "Spec contains listener without service discovery",
-			args: args{
-				virtualDeployment: &servicemeshapi.VirtualDeployment{
-					Spec: servicemeshapi.VirtualDeploymentSpec{
-						VirtualService: servicemeshapi.RefOrId{
-							Id: "my-vs-ocid",
-						},
-						Listener: []servicemeshapi.Listener{
-							{
-								Protocol: "HTTP",
-								Port:     9080,
-							},
-						},
-					},
-				},
-			},
-			fields: fields{
-				ResolveResourceRef: func(resourceRef *servicemeshapi.ResourceRef, crdObj *metav1.ObjectMeta) *servicemeshapi.ResourceRef {
-					return resourceRef
-				},
-				ResolveVirtualServiceReference: func(ctx context.Context, ref *servicemeshapi.ResourceRef) (*servicemeshapi.VirtualService, error) {
-					vsRef := &servicemeshapi.VirtualService{
-						ObjectMeta: metav1.ObjectMeta{
-							DeletionTimestamp: nil,
-						},
-					}
-					return vsRef, nil
-				},
-			},
-			wantErr: expectation{false, "service discovery and listeners should be provided together or be both empty"},
-		},
-		{
-			name: "Spec contains hostname for type DNS with VS contains matching host",
-			args: args{
-				virtualDeployment: &servicemeshapi.VirtualDeployment{
-					Spec: servicemeshapi.VirtualDeploymentSpec{
-						VirtualService: servicemeshapi.RefOrId{
-							Id: "my-vs-ocid",
-						},
-						ServiceDiscovery: &servicemeshapi.ServiceDiscovery{
-							Type:     "DNS",
-							Hostname: "my-hostname",
-						},
-						Listener: []servicemeshapi.Listener{
-							{
-								Protocol: "HTTP",
-								Port:     9080,
-							},
-						},
-					},
-				},
-			},
-			fields: fields{
-				ResolveResourceRef: func(resourceRef *servicemeshapi.ResourceRef, crdObj *metav1.ObjectMeta) *servicemeshapi.ResourceRef {
-					return resourceRef
-				},
-				ResolveVirtualServiceReference: func(ctx context.Context, ref *servicemeshapi.ResourceRef) (*servicemeshapi.VirtualService, error) {
-					vsRef := &servicemeshapi.VirtualService{
-						ObjectMeta: metav1.ObjectMeta{
-							DeletionTimestamp: nil,
-						},
-						Spec: servicemeshapi.VirtualServiceSpec{
-							Hosts: []string{"my-hostname"},
 						},
 					}
 					return vsRef, nil
@@ -617,12 +375,6 @@ func Test_VirtualDeploymentValidateCreate(t *testing.T) {
 						ServiceDiscovery: &servicemeshapi.ServiceDiscovery{
 							Type:     "DNS",
 							Hostname: "my-hostname",
-						},
-						Listener: []servicemeshapi.Listener{
-							{
-								Protocol: "HTTP",
-								Port:     9080,
-							},
 						},
 					},
 				},
@@ -1039,19 +791,6 @@ func Test_VirtualDeploymentValidateUpdate(t *testing.T) {
 					},
 				},
 			},
-			fields: fields{
-				ResolveResourceRef: func(resourceRef *servicemeshapi.ResourceRef, crdObj *metav1.ObjectMeta) *servicemeshapi.ResourceRef {
-					return resourceRef
-				},
-				ResolveVirtualServiceReference: func(ctx context.Context, ref *servicemeshapi.ResourceRef) (*servicemeshapi.VirtualService, error) {
-					vsRef := &servicemeshapi.VirtualService{
-						ObjectMeta: metav1.ObjectMeta{
-							DeletionTimestamp: nil,
-						},
-					}
-					return vsRef, nil
-				},
-			},
 			wantErr: expectation{true, ""},
 		},
 		{
@@ -1216,18 +955,6 @@ func Test_VirtualDeploymentValidateUpdate(t *testing.T) {
 					},
 				},
 			},
-			fields: fields{
-				ResolveResourceRef: func(resourceRef *servicemeshapi.ResourceRef, crdObj *metav1.ObjectMeta) *servicemeshapi.ResourceRef {
-					return resourceRef
-				},
-				ResolveVirtualServiceById: func(ctx context.Context, virtualServiceId *api.OCID) (*sdk.VirtualService, error) {
-					vsId := "vs-1"
-					compartmentId := "compartment-id"
-					meshId := "mesh-id"
-					vs := &sdk.VirtualService{Id: &vsId, CompartmentId: &compartmentId, MeshId: &meshId, Hosts: []string{"my-host"}}
-					return vs, nil
-				},
-			},
 			wantErr: expectation{true, ""},
 		},
 		{
@@ -1319,16 +1046,6 @@ func Test_VirtualDeploymentValidateUpdate(t *testing.T) {
 							Id: "my-vs-id-1",
 						},
 						CompartmentId: "my-compId",
-						ServiceDiscovery: &servicemeshapi.ServiceDiscovery{
-							Type:     "DNS",
-							Hostname: "old-host-name",
-						},
-						Listener: []servicemeshapi.Listener{
-							{
-								Protocol: "HTTP",
-								Port:     9080,
-							},
-						},
 					},
 					Status: servicemeshapi.ServiceMeshStatus{
 						Conditions: []servicemeshapi.ServiceMeshCondition{
@@ -1515,16 +1232,6 @@ func Test_VirtualDeploymentValidateUpdate(t *testing.T) {
 							Id: "my-vs-id-1",
 						},
 						CompartmentId: "my-compId",
-						ServiceDiscovery: &servicemeshapi.ServiceDiscovery{
-							Type:     "DNS",
-							Hostname: "old-host-name",
-						},
-						Listener: []servicemeshapi.Listener{
-							{
-								Protocol: "HTTP",
-								Port:     8080,
-							},
-						},
 					},
 					Status: servicemeshapi.ServiceMeshStatus{
 						Conditions: []servicemeshapi.ServiceMeshCondition{
@@ -1672,18 +1379,6 @@ func Test_VirtualDeploymentValidateUpdate(t *testing.T) {
 					},
 				},
 			},
-			fields: fields{
-				ResolveResourceRef: func(resourceRef *servicemeshapi.ResourceRef, crdObj *metav1.ObjectMeta) *servicemeshapi.ResourceRef {
-					return resourceRef
-				},
-				ResolveVirtualServiceById: func(ctx context.Context, virtualServiceId *api.OCID) (*sdk.VirtualService, error) {
-					vsId := "vs-1"
-					compartmentId := "compartment-id"
-					meshId := "mesh-id"
-					vs := &sdk.VirtualService{Id: &vsId, CompartmentId: &compartmentId, MeshId: &meshId, Hosts: []string{"my-host"}}
-					return vs, nil
-				},
-			},
 			wantErr: expectation{true, ""},
 		},
 		{
@@ -1715,16 +1410,6 @@ func Test_VirtualDeploymentValidateUpdate(t *testing.T) {
 							Id: "my-vs-id-1",
 						},
 						CompartmentId: "my-compId",
-						ServiceDiscovery: &servicemeshapi.ServiceDiscovery{
-							Type:     "DNS",
-							Hostname: "old-host-name",
-						},
-						Listener: []servicemeshapi.Listener{
-							{
-								Protocol: "HTTP",
-								Port:     9080,
-							},
-						},
 					},
 					Status: servicemeshapi.ServiceMeshStatus{
 						Conditions: []servicemeshapi.ServiceMeshCondition{
@@ -1850,16 +1535,6 @@ func Test_VirtualDeploymentValidateUpdate(t *testing.T) {
 							Id: "my-vs-id-1",
 						},
 						CompartmentId: "my-compId",
-						ServiceDiscovery: &servicemeshapi.ServiceDiscovery{
-							Type:     "DNS",
-							Hostname: "old-host-name",
-						},
-						Listener: []servicemeshapi.Listener{
-							{
-								Protocol: "HTTP",
-								Port:     8080,
-							},
-						},
 					},
 					Status: servicemeshapi.ServiceMeshStatus{
 						Conditions: []servicemeshapi.ServiceMeshCondition{
@@ -1994,18 +1669,6 @@ func Test_VirtualDeploymentValidateUpdate(t *testing.T) {
 					},
 				},
 			},
-			fields: fields{
-				ResolveResourceRef: func(resourceRef *servicemeshapi.ResourceRef, crdObj *metav1.ObjectMeta) *servicemeshapi.ResourceRef {
-					return resourceRef
-				},
-				ResolveVirtualServiceById: func(ctx context.Context, virtualServiceId *api.OCID) (*sdk.VirtualService, error) {
-					vsId := "vs-1"
-					compartmentId := "compartment-id"
-					meshId := "mesh-id"
-					vs := &sdk.VirtualService{Id: &vsId, CompartmentId: &compartmentId, MeshId: &meshId, Hosts: []string{"my-host"}}
-					return vs, nil
-				},
-			},
 			wantErr: expectation{true, ""},
 		},
 		{
@@ -2076,15 +1739,9 @@ func Test_VirtualDeploymentValidateDelete(t *testing.T) {
 		allowed bool
 		reason  string
 	}
-	type fields struct {
-		ResolveResourceRef             func(resourceRef *servicemeshapi.ResourceRef, crdObj *metav1.ObjectMeta) *servicemeshapi.ResourceRef
-		ResolveVirtualServiceReference func(ctx context.Context, ref *servicemeshapi.ResourceRef) (*servicemeshapi.VirtualService, error)
-		ResolveVirtualServiceById      func(ctx context.Context, virtualServiceId *api.OCID) (*sdk.VirtualService, error)
-	}
 	tests := []struct {
 		name    string
 		args    args
-		fields  fields
 		wantErr expectation
 	}{
 		{
@@ -2115,19 +1772,6 @@ func Test_VirtualDeploymentValidateDelete(t *testing.T) {
 					},
 				},
 			},
-			fields: fields{
-				ResolveResourceRef: func(resourceRef *servicemeshapi.ResourceRef, crdObj *metav1.ObjectMeta) *servicemeshapi.ResourceRef {
-					return resourceRef
-				},
-				ResolveVirtualServiceReference: func(ctx context.Context, ref *servicemeshapi.ResourceRef) (*servicemeshapi.VirtualService, error) {
-					vsRef := &servicemeshapi.VirtualService{
-						ObjectMeta: metav1.ObjectMeta{
-							DeletionTimestamp: nil,
-						},
-					}
-					return vsRef, nil
-				},
-			},
 			wantErr: expectation{true, ""},
 		},
 		{
@@ -2156,18 +1800,6 @@ func Test_VirtualDeploymentValidateDelete(t *testing.T) {
 							},
 						},
 					},
-				},
-			},
-			fields: fields{
-				ResolveResourceRef: func(resourceRef *servicemeshapi.ResourceRef, crdObj *metav1.ObjectMeta) *servicemeshapi.ResourceRef {
-					return resourceRef
-				},
-				ResolveVirtualServiceById: func(ctx context.Context, virtualServiceId *api.OCID) (*sdk.VirtualService, error) {
-					vsId := "vs-1"
-					compartmentId := "compartment-id"
-					meshId := "mesh-id"
-					vs := &sdk.VirtualService{Id: &vsId, CompartmentId: &compartmentId, MeshId: &meshId, Hosts: []string{"my-host"}}
-					return vs, nil
 				},
 			},
 			wantErr: expectation{true, ""},
