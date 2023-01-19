@@ -1,0 +1,22 @@
+apiVersion: servicemesh.oci.oracle.com/v1beta1
+kind: VirtualDeployment
+metadata:
+  name: {{ include "service-mesh-poc.name" . }}-vd-productpage
+  namespace: {{ .Values.serviceMeshPoc.namespace }}
+  labels:
+    {{- include "service-mesh-poc.labels" . | nindent 4 }}
+    version: v1
+spec:
+  compartmentId: {{ .Values.serviceMeshPoc.compartmentId }}
+  description: "This is Productpage Virtual Deployment"
+  virtualService:
+    ref:
+      name: {{ include "service-mesh-poc.name" . }}-vs-productpage
+  accessLogging:
+    isEnabled: true
+  serviceDiscovery:
+    type: DNS
+    hostname: {{ .Values.serviceMeshPoc.virtualDeployment.productpage_v1.host }}
+  listener:
+    - port: {{ .Values.serviceMeshPoc.virtualDeployment.productpage_v1.listener.port }}
+      protocol: {{ .Values.serviceMeshPoc.virtualDeployment.productpage_v1.listener.protocol }}

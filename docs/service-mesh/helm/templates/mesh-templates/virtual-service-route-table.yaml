@@ -1,0 +1,23 @@
+apiVersion: servicemesh.oci.oracle.com/v1beta1
+kind: VirtualServiceRouteTable
+metadata:
+  name: {{ include "service-mesh-poc.name" . }}-vsrt-productpage
+  namespace: {{ .Values.serviceMeshPoc.namespace }}
+  labels:
+    {{- include "service-mesh-poc.labels" . | nindent 4 }}
+spec:
+  compartmentId: {{ .Values.serviceMeshPoc.compartmentId }}
+  description: "This is Productpage Virtual Service Route Table"
+  virtualService:
+    ref:
+      name: {{ include "service-mesh-poc.name" . }}-vs-productpage
+  routeRules:
+    - httpRoute:
+        destinations:
+          - virtualDeployment:
+              ref:
+                name: {{ include "service-mesh-poc.name" . }}-vd-productpage
+            weight: 100
+        isGrpc: {{ .Values.serviceMeshPoc.virtualServiceRouteTable.productpage.routeRule.isGrpc }}
+        path: {{ .Values.serviceMeshPoc.virtualServiceRouteTable.productpage.routeRule.path }}
+        pathType: {{ .Values.serviceMeshPoc.virtualServiceRouteTable.productpage.routeRule.pathType }}

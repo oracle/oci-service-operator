@@ -1,0 +1,21 @@
+apiVersion: servicemesh.oci.oracle.com/v1beta1
+kind: AccessPolicy
+metadata:
+  name: {{ include "service-mesh-poc.name" . }}-accesspolicy
+  namespace: {{ .Values.serviceMeshPoc.namespace }}
+  labels:
+    {{- include "service-mesh-poc.labels" . | nindent 4 }}
+spec:
+  compartmentId: {{ .Values.serviceMeshPoc.compartmentId }}
+  description: "This is Access Policy"
+  mesh:
+    ref:
+      name: {{ include "service-mesh-poc.fullname" . }}-mesh
+  rules:
+    - action: ALLOW
+      source:
+        allVirtualServices:
+          {}
+      destination:
+        allVirtualServices:
+          {}

@@ -1,0 +1,79 @@
+# Default values for service-mesh-poc.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+####service-mesh-poc:
+
+serviceMeshPoc:
+  namespace: test-namespace
+  compartmentId: ocid1.compartment.dummy
+  resourceNamePrefix: bookinfo-
+
+  mesh:
+    caOcid: ocid1.certificateauthority.dummy
+
+  virtualService:
+    productpage:
+      host: productpage.bookinfo.svc.cluster.local
+      mtlsMode: PERMISSIVE
+    details:
+      host: details.bookinfo.svc.cluster.local
+      mtlsMode: STRICT
+
+  virtualDeployment:
+    productpage_v1:
+      host: productpage-version1.oracle.com
+      listener:
+        port: 9080
+        protocol: HTTP
+
+  virtualServiceRouteTable:
+    productpage:
+      routeRule:
+        type: HTTP
+        isGrpc: false
+        pathType: PREFIX
+        path: /foo
+
+  ingressGateway:
+    hostname1: bookinfo.com
+    hostname2: www.bookinfo.com
+    listener:
+      port: 8080
+      protocol: HTTP
+      tlsMode: MUTUAL_TLS
+      serverCertificateId: ocid1.certificate.dummy
+      clientCaBundleId: ocid1.caBundle.dummy
+      subjectAlternateNames: authorized1.client
+
+  ingressGatewayRouteTable:
+    routeRule:
+      type: HTTP
+      path: /foo
+      pathType: PREFIX
+      isGrpc: false
+      destinationVirtualService: productpage
+
+  virtualDeploymentBinding:
+    productpage_v1:
+      target:
+        serviceName: productpage
+        serviceNamespace: bookinfo
+      mountCertificateChainFromHost: true
+
+  ingressGatewayDeployment:
+    minPods: 1
+    maxPods: 1
+    mountCertificateChainFromHost: true
+    protocol: TCP
+    port: 8080
+    serviceport: 80
+    serviceType: LoadBalancer
+    secretName: bookinfo-tls-secret

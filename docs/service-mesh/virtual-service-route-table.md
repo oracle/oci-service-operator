@@ -61,6 +61,7 @@ The Complete Specification of the `VirtualServiceRouteTable` Custom Resource (CR
 | `isGrpc` | If true, the rule will check that the content-type header has a application/grpc or one of the various application/grpc+ values. | boolean | no       |
 | `path` | Http route to match. | string | no       |
 | `pathType` | Match type for the route. Only PREFIX is supported. | enum | no       |
+| `requestTimeoutInMs` | The maximum duration in milliseconds for the target service to respond to a request. If provided, the timeout value overrides the default timeout of 15 seconds for the HTTP based route rules, and disabled (no timeout) when 'isGrpc' is true. The value 0 (zero) indicates that the timeout is disabled. For streaming responses from the target service, consider either keeping the timeout disabled or set a sufficiently high value. | int64 (long) | no       |
 
 ### TcpRoute
 | Parameter                          | Description                                                         | Type   | Mandatory |

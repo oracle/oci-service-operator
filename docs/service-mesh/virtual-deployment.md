@@ -63,6 +63,8 @@ The Complete Specification of the `VirtualDeployment` Custom Resource (CR) is as
 |------------|-----------------------------------------------------------------------------------|------|-----------|
 | `protocol` | communication protocol for the listener [HTTP, HTTP2, GRPC, TCP, TLS_PASSTHROUGH] | enum | yes       |
 | `port`     | port value for the listener on Virtual Deployment                                 | int  | yes       |
+| `requestTimeoutInMs`     | The maximum duration in milliseconds for the deployed service to respond to an incoming request through the listener. If provided, the timeout value overrides the default timeout of 15 seconds for the HTTP/HTTP2 listeners, and disabled (no timeout) for the GRPC listeners. The value 0 (zero) indicates that the timeout is disabled. The timeout cannot be configured for the TCP and TLS_PASSTHROUGH listeners. For streaming responses from the deployed service, consider either keeping the timeout disabled or set a sufficiently high value.                                 | int64 (long)  | no       |
+| `idleTimeoutInMs`     | The maximum duration in milliseconds for which the request's stream may be idle. The value 0 (zero) indicates that the timeout is disabled. Deployment                                 | int64 (long)  | no       |
 
 ## Virtual Deployment Status Parameters
 | Parameter                    | Description                                                                                                       | Type                                            | Mandatory |

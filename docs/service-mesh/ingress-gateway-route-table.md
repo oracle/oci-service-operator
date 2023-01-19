@@ -63,6 +63,7 @@ The Complete Specification of the `IngressGatewayRouteTable` Custom Resource (CR
 | `pathType` | Match type for the route [PREFIX]  | enum | no        |
 | `isHostRewriteEnabled` | If true, the hostname will be rewritten to the target virtual deployment's DNS hostname.  | string | no        |
 | `isPathRewriteEnabled` | If true, the matched path prefix will be rewritten to '/' before being directed to the target virtual deployment.  | string | no        |
+| `requestTimeoutInMs` | The maximum duration in milliseconds for the target service to respond to a request. If provided, the timeout value overrides the default timeout of 15 seconds for the HTTP based route rules, and disabled (no timeout) when 'isGrpc' is true. The value 0 (zero) indicates that the timeout is disabled. For streaming responses from the target service, consider either keeping the timeout disabled or set a sufficiently high value.  | int64 (long) | no        |
 
 ### TcpRoute
 | Parameter                          | Description                                                         | Type   | Mandatory |

@@ -1,0 +1,17 @@
+apiVersion: servicemesh.oci.oracle.com/v1beta1
+kind: VirtualDeploymentBinding
+metadata:
+  name: {{ include "service-mesh-poc.name" . }}-vdb-productpage
+  namespace: {{ .Values.serviceMeshPoc.namespace }}
+  labels:
+    {{- include "service-mesh-poc.labels" . | nindent 4 }}
+spec:
+  virtualDeployment:
+    ref:
+      name: {{ include "service-mesh-poc.name" . }}-vd-productpage
+  target:
+    service:
+      ref:
+        name: {{ .Values.serviceMeshPoc.virtualDeploymentBinding.productpage_v1.target.serviceName }}
+        namespace: {{ .Values.serviceMeshPoc.virtualDeploymentBinding.productpage_v1.target.serviceNamespace }}
+  mountCertificateChainFromHost: {{ .Values.serviceMeshPoc.virtualDeploymentBinding.productpage_v1.mountCertificateChainFromHost }}
