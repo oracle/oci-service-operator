@@ -52,6 +52,7 @@ func TestResolveDependencies(t *testing.T) {
 	type args struct {
 		vsrt *servicemeshapi.VirtualServiceRouteTable
 	}
+	requestTimeout2000 := int64(2000)
 	tests := []struct {
 		name    string
 		fields  fields
@@ -85,9 +86,10 @@ func TestResolveDependencies(t *testing.T) {
 											Weight: 50,
 										},
 									},
-									Path:     &path,
-									IsGrpc:   &grpcEnabled,
-									PathType: servicemeshapi.HttpVirtualServiceTrafficRouteRulePathTypePrefix,
+									Path:               &path,
+									IsGrpc:             &grpcEnabled,
+									PathType:           servicemeshapi.HttpVirtualServiceTrafficRouteRulePathTypePrefix,
+									RequestTimeoutInMs: &requestTimeout2000,
 								},
 							},
 							{
@@ -153,9 +155,10 @@ func TestResolveDependencies(t *testing.T) {
 										Weight: 50,
 									},
 								},
-								Path:     &path,
-								IsGrpc:   &grpcEnabled,
-								PathType: servicemeshapi.HttpVirtualServiceTrafficRouteRulePathTypePrefix,
+								Path:               &path,
+								IsGrpc:             &grpcEnabled,
+								PathType:           servicemeshapi.HttpVirtualServiceTrafficRouteRulePathTypePrefix,
+								RequestTimeoutInMs: &requestTimeout2000,
 							},
 						},
 						{

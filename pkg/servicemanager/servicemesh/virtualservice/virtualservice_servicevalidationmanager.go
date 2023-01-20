@@ -137,7 +137,8 @@ func (v *VirtualServiceValidator) getMeshMode(ctx context.Context, virtualServic
 		resourceRef := v.resolver.ResolveResourceRef(virtualService.Spec.Mesh.ResourceRef, &virtualService.ObjectMeta)
 		referredMesh, err := v.resolver.ResolveMeshReference(ctx, resourceRef)
 		if err != nil {
-			return "", string(commons.MeshReferenceNotFound)
+			// referred Mesh was not found, continuing to create child resource
+			return servicemeshapi.MutualTransportLayerSecurityModeDisabled, ""
 		}
 		if cmp.Equal(referredMesh.Status, servicemeshapi.ServiceMeshStatus{}) || referredMesh.Status.MeshMtls == nil {
 			if referredMesh.Spec.Mtls != nil {
@@ -151,7 +152,7 @@ func (v *VirtualServiceValidator) getMeshMode(ctx context.Context, virtualServic
 	} else {
 		referredMesh, err := v.resolver.ResolveMeshRefById(ctx, &virtualService.Spec.Mesh.Id)
 		if err != nil {
-			return "", string(commons.MeshReferenceNotFound)
+			return "", string(commons.MeshReferenceOCIDNotFound)
 		}
 		referredMeshMode = referredMesh.Mtls.Minimum
 	}

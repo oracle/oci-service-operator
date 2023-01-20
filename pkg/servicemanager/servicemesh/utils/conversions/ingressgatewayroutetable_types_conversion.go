@@ -7,6 +7,7 @@ package conversions
 
 import (
 	"fmt"
+
 	sdk "github.com/oracle/oci-go-sdk/v65/servicemesh"
 
 	api "github.com/oracle/oci-service-operator/api/v1beta1"
@@ -49,6 +50,7 @@ func convertCrdIngressGatewayTrafficRouteRuleToSdkIngressGatewayTrafficRouteRule
 		if err != nil {
 			return err
 		}
+
 		*sdkObj = sdk.HttpIngressGatewayTrafficRouteRule{
 			Destinations:         destinations,
 			IngressGatewayHost:   convertCrdIngressGatewayHostToSdkIngressGatewayHost(route.IngressGatewayHost),
@@ -57,6 +59,7 @@ func convertCrdIngressGatewayTrafficRouteRuleToSdkIngressGatewayTrafficRouteRule
 			PathType:             sdk.HttpIngressGatewayTrafficRouteRulePathTypeEnum(route.PathType),
 			IsHostRewriteEnabled: route.IsHostRewriteEnabled,
 			IsPathRewriteEnabled: route.IsPathRewriteEnabled,
+			RequestTimeoutInMs:   route.RequestTimeoutInMs,
 		}
 	} else if route := crdObj.TcpRoute; route != nil {
 		destinations, err := convertToSdkDestinations(crdObj, vsIds)
@@ -158,6 +161,7 @@ func ConvertSdkIngressGatewayTrafficRouteRuleToTrafficRouteRuleDetails(rules []s
 				IsHostRewriteEnabled: httpRouteRule.IsHostRewriteEnabled,
 				IsPathRewriteEnabled: httpRouteRule.IsPathRewriteEnabled,
 				PathType:             sdk.HttpIngressGatewayTrafficRouteRuleDetailsPathTypeEnum(httpRouteRule.PathType),
+				RequestTimeoutInMs:   httpRouteRule.RequestTimeoutInMs,
 			}
 		case sdk.TcpIngressGatewayTrafficRouteRule:
 			tcpRouteRule := rule.(sdk.TcpIngressGatewayTrafficRouteRule)

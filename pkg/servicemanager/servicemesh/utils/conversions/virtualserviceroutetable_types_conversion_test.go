@@ -490,9 +490,10 @@ func TestConvert_VS_Rule_To_Rule_Details(t *testing.T) {
 								Port:                Integer(8080),
 							},
 						},
-						IsGrpc:   Bool(grpcDisabled),
-						PathType: sdk.HttpVirtualServiceTrafficRouteRulePathTypePrefix,
-						Path:     String(path),
+						IsGrpc:             Bool(grpcDisabled),
+						PathType:           sdk.HttpVirtualServiceTrafficRouteRulePathTypePrefix,
+						Path:               String(path),
+						RequestTimeoutInMs: Int64(2000),
 					},
 					sdk.TcpVirtualServiceTrafficRouteRule{
 						Destinations: []sdk.VirtualDeploymentTrafficRuleTarget{
@@ -527,9 +528,10 @@ func TestConvert_VS_Rule_To_Rule_Details(t *testing.T) {
 							Port:                Integer(8080),
 						},
 					},
-					IsGrpc:   Bool(grpcDisabled),
-					PathType: sdk.HttpVirtualServiceTrafficRouteRuleDetailsPathTypePrefix,
-					Path:     String(path),
+					IsGrpc:             Bool(grpcDisabled),
+					PathType:           sdk.HttpVirtualServiceTrafficRouteRuleDetailsPathTypePrefix,
+					Path:               String(path),
+					RequestTimeoutInMs: Int64(2000),
 				},
 				sdk.TcpVirtualServiceTrafficRouteRuleDetails{
 					Destinations: []sdk.VirtualDeploymentTrafficRuleTargetDetails{

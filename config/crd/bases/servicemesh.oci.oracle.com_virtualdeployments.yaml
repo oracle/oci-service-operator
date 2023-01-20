@@ -88,6 +88,13 @@ spec:
                 items:
                   description: Listener configuration for a resource
                   properties:
+                    idleTimeoutInMs:
+                      description: The maximum duration in milliseconds for which
+                        the request's stream may be idle. The value 0 (zero) indicates
+                        that the timeout is disabled.
+                      format: int64
+                      minimum: 0
+                      type: integer
                     port:
                       description: Port in which resource is running
                       format: int32
@@ -103,6 +110,19 @@ spec:
                       - TCP
                       - TLS_PASSTHROUGH
                       type: string
+                    requestTimeoutInMs:
+                      description: The maximum duration in milliseconds for the deployed
+                        service to respond to an incoming request through the listener.
+                        If provided, the timeout value overrides the default timeout
+                        of 15 seconds for the HTTP/HTTP2 listeners, and disabled (no
+                        timeout) for the GRPC listeners. The value 0 (zero) indicates
+                        that the timeout is disabled. The timeout cannot be configured
+                        for the TCP and TLS_PASSTHROUGH listeners. For streaming responses
+                        from the deployed service, consider either keeping the timeout
+                        disabled or set a sufficiently high value.
+                      format: int64
+                      minimum: 0
+                      type: integer
                   required:
                   - port
                   - protocol

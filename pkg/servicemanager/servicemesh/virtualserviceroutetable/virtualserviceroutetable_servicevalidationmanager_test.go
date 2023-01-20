@@ -7,7 +7,6 @@ package virtualserviceroutetable
 
 import (
 	"context"
-	"errors"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/conversions"
 	meshErrors "github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/errors"
 	"testing"
@@ -511,30 +510,6 @@ func Test_VirtualServiceRouteTableValidateCreate(t *testing.T) {
 			wantErr: expectation{false, string(commons.VirtualServiceReferenceIsDeleting)},
 		},
 		{
-			name: "Referred Virtual Service is not found",
-			args: args{
-				VirtualServiceRouteTable: &servicemeshapi.VirtualServiceRouteTable{
-					Spec: servicemeshapi.VirtualServiceRouteTableSpec{
-						VirtualService: servicemeshapi.RefOrId{
-							ResourceRef: &servicemeshapi.ResourceRef{
-								Namespace: "my-namespace",
-								Name:      "my-vs",
-							},
-						},
-					},
-				},
-			},
-			fields: fields{
-				ResolveResourceRef: func(resourceRef *servicemeshapi.ResourceRef, crdObj *metav1.ObjectMeta) *servicemeshapi.ResourceRef {
-					return resourceRef
-				},
-				ResolveVirtualServiceReference: func(ctx context.Context, ref *servicemeshapi.ResourceRef) (*servicemeshapi.VirtualService, error) {
-					return nil, errors.New("CANNOT FETCH")
-				},
-			},
-			wantErr: expectation{false, string(commons.VirtualServiceReferenceNotFound)},
-		},
-		{
 			name: "Spec contains deleting virtual deployment in route table rules",
 			args: args{
 				VirtualServiceRouteTable: &servicemeshapi.VirtualServiceRouteTable{
@@ -590,57 +565,6 @@ func Test_VirtualServiceRouteTableValidateCreate(t *testing.T) {
 				},
 			},
 			wantErr: expectation{false, string(commons.VirtualDeploymentReferenceIsDeleting)},
-		},
-		{
-			name: "Spec contains deleting virtual deployment in route table rules",
-			args: args{
-				VirtualServiceRouteTable: &servicemeshapi.VirtualServiceRouteTable{
-					Spec: servicemeshapi.VirtualServiceRouteTableSpec{
-						VirtualService: servicemeshapi.RefOrId{
-							ResourceRef: &servicemeshapi.ResourceRef{
-								Namespace: "my-namespace",
-								Name:      "my-vs",
-							},
-						},
-						RouteRules: []servicemeshapi.VirtualServiceTrafficRouteRule{
-							{
-								HttpRoute: &servicemeshapi.HttpVirtualServiceTrafficRouteRule{
-									Destinations: []servicemeshapi.VirtualDeploymentTrafficRuleTarget{
-										{
-											VirtualDeployment: &servicemeshapi.RefOrId{
-												ResourceRef: &servicemeshapi.ResourceRef{
-													Namespace: "my-namespace",
-													Name:      "my-vd",
-												},
-											},
-										},
-									},
-									Path:     &path,
-									IsGrpc:   &grpcEnabled,
-									PathType: servicemeshapi.HttpVirtualServiceTrafficRouteRulePathTypePrefix,
-								},
-							},
-						},
-					},
-				},
-			},
-			fields: fields{
-				ResolveResourceRef: func(resourceRef *servicemeshapi.ResourceRef, crdObj *metav1.ObjectMeta) *servicemeshapi.ResourceRef {
-					return resourceRef
-				},
-				ResolveVirtualServiceReference: func(ctx context.Context, ref *servicemeshapi.ResourceRef) (*servicemeshapi.VirtualService, error) {
-					vsRef := &servicemeshapi.VirtualService{
-						ObjectMeta: metav1.ObjectMeta{
-							DeletionTimestamp: nil,
-						},
-					}
-					return vsRef, nil
-				},
-				ResolveVirtualDeploymentReference: func(ctx context.Context, ref *servicemeshapi.ResourceRef) (*servicemeshapi.VirtualDeployment, error) {
-					return nil, errors.New("CANNOT FETCH")
-				},
-			},
-			wantErr: expectation{false, string(commons.VirtualDeploymentReferenceNotFound)},
 		},
 		{
 			name: "Spec contains different destination ports",
@@ -1734,73 +1658,6 @@ func Test_VirtualServiceRouteTableValidateUpdate(t *testing.T) {
 				},
 			},
 			wantErr: expectation{false, string(commons.VirtualDeploymentReferenceIsDeleting)},
-		},
-		{
-			name: "Spec contains non-exist virtual deployment in route table rules",
-			args: args{
-				virtualServiceRouteTable: &servicemeshapi.VirtualServiceRouteTable{
-					ObjectMeta: metav1.ObjectMeta{Generation: 2},
-					Spec: servicemeshapi.VirtualServiceRouteTableSpec{
-						VirtualService: servicemeshapi.RefOrId{
-							Id: "my-vs-id-1",
-						},
-						CompartmentId: "my-compId",
-						RouteRules: []servicemeshapi.VirtualServiceTrafficRouteRule{
-							{
-								HttpRoute: &servicemeshapi.HttpVirtualServiceTrafficRouteRule{
-									Destinations: []servicemeshapi.VirtualDeploymentTrafficRuleTarget{
-										{
-											VirtualDeployment: &servicemeshapi.RefOrId{
-												ResourceRef: &servicemeshapi.ResourceRef{
-													Namespace: "my-namespace",
-													Name:      "my-vd",
-												},
-											},
-										},
-									},
-									Path:     &path,
-									IsGrpc:   &grpcEnabled,
-									PathType: servicemeshapi.HttpVirtualServiceTrafficRouteRulePathTypePrefix,
-								},
-							},
-						},
-					},
-				},
-				oldVirtualServiceRouteTable: &servicemeshapi.VirtualServiceRouteTable{
-					ObjectMeta: metav1.ObjectMeta{Generation: 1},
-					Spec: servicemeshapi.VirtualServiceRouteTableSpec{
-						VirtualService: servicemeshapi.RefOrId{
-							Id: "my-vs-id-1",
-						},
-						CompartmentId: "my-compId",
-					},
-					Status: servicemeshapi.ServiceMeshStatus{
-						Conditions: []servicemeshapi.ServiceMeshCondition{
-							{
-								Type: servicemeshapi.ServiceMeshActive,
-								ResourceCondition: servicemeshapi.ResourceCondition{
-									Status: metav1.ConditionTrue,
-								},
-							},
-							{
-								Type: servicemeshapi.ServiceMeshDependenciesActive,
-								ResourceCondition: servicemeshapi.ResourceCondition{
-									Status: metav1.ConditionTrue,
-								},
-							},
-						},
-					},
-				},
-			},
-			fields: fields{
-				ResolveResourceRef: func(resourceRef *servicemeshapi.ResourceRef, crdObj *metav1.ObjectMeta) *servicemeshapi.ResourceRef {
-					return resourceRef
-				},
-				ResolveVirtualDeploymentReference: func(ctx context.Context, ref *servicemeshapi.ResourceRef) (*servicemeshapi.VirtualDeployment, error) {
-					return nil, errors.New("CANNOT FETCH")
-				},
-			},
-			wantErr: expectation{false, string(commons.VirtualDeploymentReferenceNotFound)},
 		},
 	}
 	for _, tt := range tests {

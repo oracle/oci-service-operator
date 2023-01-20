@@ -7,6 +7,7 @@ package conversions
 
 import (
 	"fmt"
+
 	sdk "github.com/oracle/oci-go-sdk/v65/servicemesh"
 
 	api "github.com/oracle/oci-service-operator/api/v1beta1"
@@ -48,11 +49,13 @@ func ConvertCrdVsrtTrafficRouteRuleToSdkTrafficRouteRule(crdObj *v1beta1.Virtual
 		if err != nil {
 			return err
 		}
+
 		*sdkObj = sdk.HttpVirtualServiceTrafficRouteRule{
-			Destinations: sdkObjDestinations,
-			Path:         route.Path,
-			IsGrpc:       route.IsGrpc,
-			PathType:     sdk.HttpVirtualServiceTrafficRouteRulePathTypeEnum(route.PathType),
+			Destinations:       sdkObjDestinations,
+			Path:               route.Path,
+			IsGrpc:             route.IsGrpc,
+			PathType:           sdk.HttpVirtualServiceTrafficRouteRulePathTypeEnum(route.PathType),
+			RequestTimeoutInMs: route.RequestTimeoutInMs,
 		}
 	} else if route := crdObj.TcpRoute; route != nil {
 		sdkObjDestinations, err := convertToSdkVirtualDeploymentDestinations(crdObj, vdIds)
@@ -135,10 +138,11 @@ func ConvertSdkVirtualServiceTrafficRouteRuleToTrafficRouteRuleDetails(rules []s
 		case sdk.HttpVirtualServiceTrafficRouteRule:
 			httpRouteRule := rule.(sdk.HttpVirtualServiceTrafficRouteRule)
 			ruleDetails[i] = sdk.HttpVirtualServiceTrafficRouteRuleDetails{
-				Destinations: ConvertSdkVirtualDeploymentTrafficRuleTargetToTrafficRuleTargetDetails(httpRouteRule.Destinations),
-				Path:         httpRouteRule.Path,
-				IsGrpc:       httpRouteRule.IsGrpc,
-				PathType:     sdk.HttpVirtualServiceTrafficRouteRuleDetailsPathTypeEnum(httpRouteRule.PathType),
+				Destinations:       ConvertSdkVirtualDeploymentTrafficRuleTargetToTrafficRuleTargetDetails(httpRouteRule.Destinations),
+				Path:               httpRouteRule.Path,
+				IsGrpc:             httpRouteRule.IsGrpc,
+				PathType:           sdk.HttpVirtualServiceTrafficRouteRuleDetailsPathTypeEnum(httpRouteRule.PathType),
+				RequestTimeoutInMs: httpRouteRule.RequestTimeoutInMs,
 			}
 		case sdk.TcpVirtualServiceTrafficRouteRule:
 			tcpRouteRule := rule.(sdk.TcpVirtualServiceTrafficRouteRule)
