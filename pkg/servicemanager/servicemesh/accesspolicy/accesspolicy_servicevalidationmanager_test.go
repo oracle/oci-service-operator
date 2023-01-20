@@ -7,7 +7,6 @@ package accesspolicy
 
 import (
 	"context"
-	"errors"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -474,30 +473,6 @@ func Test_AccessPolicyValidateCreate(t *testing.T) {
 			wantErr: expectation{false, string(commons.MeshReferenceIsDeleting)},
 		},
 		{
-			name: "Referred Mesh is deleting",
-			args: args{
-				accessPolicy: &servicemeshapi.AccessPolicy{
-					Spec: servicemeshapi.AccessPolicySpec{
-						Mesh: servicemeshapi.RefOrId{
-							ResourceRef: &servicemeshapi.ResourceRef{
-								Namespace: "my-namespace",
-								Name:      "my-mesh",
-							},
-						},
-					},
-				},
-			},
-			fields: fields{
-				ResolveResourceRef: func(resourceRef *servicemeshapi.ResourceRef, crdObj *metav1.ObjectMeta) *servicemeshapi.ResourceRef {
-					return resourceRef
-				},
-				ResolveMeshReference: func(ctx context.Context, ref *servicemeshapi.ResourceRef) (*servicemeshapi.Mesh, error) {
-					return nil, errors.New("CANNOT FETCH")
-				},
-			},
-			wantErr: expectation{false, string(commons.MeshReferenceNotFound)},
-		},
-		{
 			name: "Spec contains traffic targets with deleting virtual service ref in accessPolicyRule",
 			args: args{
 				accessPolicy: &servicemeshapi.AccessPolicy{
@@ -549,53 +524,6 @@ func Test_AccessPolicyValidateCreate(t *testing.T) {
 				},
 			},
 			wantErr: expectation{false, string(commons.VirtualServiceReferenceIsDeleting)},
-		},
-		{
-			name: "Spec contains traffic targets with non-exist virtual service ref in accessPolicyRule",
-			args: args{
-				accessPolicy: &servicemeshapi.AccessPolicy{
-					Spec: servicemeshapi.AccessPolicySpec{
-						Mesh: servicemeshapi.RefOrId{
-							Id: "my-mesh-ocid",
-						},
-						Rules: []servicemeshapi.AccessPolicyRule{
-							{
-								Source: servicemeshapi.TrafficTarget{
-									VirtualService: &servicemeshapi.RefOrId{
-										ResourceRef: &servicemeshapi.ResourceRef{
-											Name: "my-virtualservice1",
-										},
-									},
-								},
-								Destination: servicemeshapi.TrafficTarget{
-									VirtualService: &servicemeshapi.RefOrId{
-										ResourceRef: &servicemeshapi.ResourceRef{
-											Name: "my-virtualservice2",
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-			fields: fields{
-				ResolveResourceRef: func(resourceRef *servicemeshapi.ResourceRef, crdObj *metav1.ObjectMeta) *servicemeshapi.ResourceRef {
-					return resourceRef
-				},
-				ResolveMeshReference: func(ctx context.Context, ref *servicemeshapi.ResourceRef) (*servicemeshapi.Mesh, error) {
-					meshRef := &servicemeshapi.Mesh{
-						ObjectMeta: metav1.ObjectMeta{
-							DeletionTimestamp: nil,
-						},
-					}
-					return meshRef, nil
-				},
-				ResolveVirtualServiceReference: func(ctx context.Context, ref *servicemeshapi.ResourceRef) (*servicemeshapi.VirtualService, error) {
-					return nil, errors.New("CANNOT FETCH")
-				},
-			},
-			wantErr: expectation{false, string(commons.VirtualServiceReferenceNotFound)},
 		},
 		{
 			name: "Spec contains metadata name longer than 190 characters",
@@ -1808,78 +1736,6 @@ func Test_AccessPolicyValidateUpdate(t *testing.T) {
 				},
 			},
 			wantErr: expectation{false, string(commons.VirtualServiceReferenceIsDeleting)},
-		},
-		{
-			name: "Spec contains non-exist virtual service in access policy",
-			args: args{
-				accessPolicy: &servicemeshapi.AccessPolicy{
-					ObjectMeta: metav1.ObjectMeta{Generation: 2},
-					Spec: servicemeshapi.AccessPolicySpec{
-						Mesh: servicemeshapi.RefOrId{
-							ResourceRef: &servicemeshapi.ResourceRef{
-								Namespace: "my-namespace",
-								Name:      "my-mesh",
-							},
-						},
-						CompartmentId: "my.compartmentid",
-						Rules: []servicemeshapi.AccessPolicyRule{
-							{
-								Source: servicemeshapi.TrafficTarget{
-									VirtualService: &servicemeshapi.RefOrId{
-										ResourceRef: &servicemeshapi.ResourceRef{
-											Name: "my-virtualservice1",
-										},
-									},
-								},
-								Destination: servicemeshapi.TrafficTarget{
-									VirtualService: &servicemeshapi.RefOrId{
-										ResourceRef: &servicemeshapi.ResourceRef{
-											Name: "my-virtualservice2",
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-				oldAccessPolicy: &servicemeshapi.AccessPolicy{
-					ObjectMeta: metav1.ObjectMeta{Generation: 1},
-					Spec: servicemeshapi.AccessPolicySpec{
-						Mesh: servicemeshapi.RefOrId{
-							ResourceRef: &servicemeshapi.ResourceRef{
-								Namespace: "my-namespace",
-								Name:      "my-mesh",
-							},
-						},
-						CompartmentId: "my.compartmentid",
-					},
-					Status: servicemeshapi.ServiceMeshStatus{
-						Conditions: []servicemeshapi.ServiceMeshCondition{
-							{
-								Type: servicemeshapi.ServiceMeshActive,
-								ResourceCondition: servicemeshapi.ResourceCondition{
-									Status: metav1.ConditionTrue,
-								},
-							},
-							{
-								Type: servicemeshapi.ServiceMeshDependenciesActive,
-								ResourceCondition: servicemeshapi.ResourceCondition{
-									Status: metav1.ConditionTrue,
-								},
-							},
-						},
-					},
-				},
-			},
-			fields: fields{
-				ResolveResourceRef: func(resourceRef *servicemeshapi.ResourceRef, crdObj *metav1.ObjectMeta) *servicemeshapi.ResourceRef {
-					return resourceRef
-				},
-				ResolveVirtualServiceReference: func(ctx context.Context, ref *servicemeshapi.ResourceRef) (*servicemeshapi.VirtualService, error) {
-					return nil, errors.New("CANNOT FETCH")
-				},
-			},
-			wantErr: expectation{false, string(commons.VirtualServiceReferenceNotFound)},
 		},
 	}
 	for _, tt := range tests {

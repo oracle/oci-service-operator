@@ -7,7 +7,6 @@ package ingressgatewayroutetable
 
 import (
 	"context"
-	"errors"
 	meshErrors "github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/errors"
 	"testing"
 
@@ -533,30 +532,6 @@ func Test_IngressGatewayRouteTableValidateCreate(t *testing.T) {
 			wantErr: expectation{false, string(commons.IngressGatewayReferenceIsDeleting)},
 		},
 		{
-			name: "Referred ingress gateway is not found",
-			args: args{
-				IngressGatewayRouteTable: &servicemeshapi.IngressGatewayRouteTable{
-					Spec: servicemeshapi.IngressGatewayRouteTableSpec{
-						IngressGateway: servicemeshapi.RefOrId{
-							ResourceRef: &servicemeshapi.ResourceRef{
-								Namespace: "my-namespace",
-								Name:      "my-ig",
-							},
-						},
-					},
-				},
-			},
-			fields: fields{
-				ResolveResourceRef: func(resourceRef *servicemeshapi.ResourceRef, crdObj *metav1.ObjectMeta) *servicemeshapi.ResourceRef {
-					return resourceRef
-				},
-				ResolveIngressGatewayReference: func(ctx context.Context, ref *servicemeshapi.ResourceRef) (*servicemeshapi.IngressGateway, error) {
-					return nil, errors.New("CANNOT FETCH")
-				},
-			},
-			wantErr: expectation{false, string(commons.IngressGatewayReferenceNotFound)},
-		},
-		{
 			name: "Spec contains deleting virtual service in route table rules",
 			args: args{
 				IngressGatewayRouteTable: &servicemeshapi.IngressGatewayRouteTable{
@@ -615,60 +590,6 @@ func Test_IngressGatewayRouteTableValidateCreate(t *testing.T) {
 				},
 			},
 			wantErr: expectation{false, string(commons.VirtualServiceReferenceIsDeleting)},
-		},
-		{
-			name: "Spec contains non-exist virtual service in route table rules",
-			args: args{
-				IngressGatewayRouteTable: &servicemeshapi.IngressGatewayRouteTable{
-					Spec: servicemeshapi.IngressGatewayRouteTableSpec{
-						IngressGateway: servicemeshapi.RefOrId{
-							ResourceRef: &servicemeshapi.ResourceRef{
-								Namespace: "my-namespace",
-								Name:      "my-ig",
-							},
-						},
-						RouteRules: []servicemeshapi.IngressGatewayTrafficRouteRule{
-							{
-								HttpRoute: &servicemeshapi.HttpIngressGatewayTrafficRouteRule{
-									Destinations: []servicemeshapi.VirtualServiceTrafficRuleTarget{
-										{
-											VirtualService: &servicemeshapi.RefOrId{
-												ResourceRef: &servicemeshapi.ResourceRef{
-													Namespace: "my-namespace",
-													Name:      "my-vs",
-												},
-											},
-										},
-									},
-									IngressGatewayHost: &servicemeshapi.IngressGatewayHostRef{
-										Name: "testHost",
-									},
-									Path:     &path,
-									IsGrpc:   &grpcEnabled,
-									PathType: servicemeshapi.HttpIngressGatewayTrafficRouteRulePathTypePrefix,
-								},
-							},
-						},
-					},
-				},
-			},
-			fields: fields{
-				ResolveResourceRef: func(resourceRef *servicemeshapi.ResourceRef, crdObj *metav1.ObjectMeta) *servicemeshapi.ResourceRef {
-					return resourceRef
-				},
-				ResolveIngressGatewayReference: func(ctx context.Context, ref *servicemeshapi.ResourceRef) (*servicemeshapi.IngressGateway, error) {
-					igRef := &servicemeshapi.IngressGateway{
-						ObjectMeta: metav1.ObjectMeta{
-							DeletionTimestamp: nil,
-						},
-					}
-					return igRef, nil
-				},
-				ResolveVirtualServiceReference: func(ctx context.Context, ref *servicemeshapi.ResourceRef) (*servicemeshapi.VirtualService, error) {
-					return nil, errors.New("CANNOT FETCH")
-				},
-			},
-			wantErr: expectation{false, string(commons.VirtualServiceReferenceNotFound)},
 		},
 	}
 	for _, tt := range tests {
@@ -1651,74 +1572,6 @@ func Test_IngressGatewayRouteTableValidateUpdate(t *testing.T) {
 				},
 			},
 			wantErr: expectation{false, string(commons.VirtualServiceReferenceIsDeleting)},
-		},
-		{
-			name: "Spec contains non-exist virtual service in route table rules",
-			args: args{
-				IngressGatewayRouteTable: &servicemeshapi.IngressGatewayRouteTable{
-					ObjectMeta: metav1.ObjectMeta{Generation: 2},
-					Spec: servicemeshapi.IngressGatewayRouteTableSpec{
-						IngressGateway: servicemeshapi.RefOrId{
-							Id: "my-ig-id",
-						},
-						RouteRules: []servicemeshapi.IngressGatewayTrafficRouteRule{
-							{
-								HttpRoute: &servicemeshapi.HttpIngressGatewayTrafficRouteRule{
-									Destinations: []servicemeshapi.VirtualServiceTrafficRuleTarget{
-										{
-											VirtualService: &servicemeshapi.RefOrId{
-												ResourceRef: &servicemeshapi.ResourceRef{
-													Namespace: "my-namespace",
-													Name:      "my-vs",
-												},
-											},
-										},
-									},
-									IngressGatewayHost: &servicemeshapi.IngressGatewayHostRef{
-										Name: "testHost",
-									},
-									Path:     &path,
-									IsGrpc:   &grpcEnabled,
-									PathType: servicemeshapi.HttpIngressGatewayTrafficRouteRulePathTypePrefix,
-								},
-							},
-						},
-					},
-				},
-				oldIngressGatewayRouteTable: &servicemeshapi.IngressGatewayRouteTable{
-					ObjectMeta: metav1.ObjectMeta{Generation: 1},
-					Spec: servicemeshapi.IngressGatewayRouteTableSpec{
-						IngressGateway: servicemeshapi.RefOrId{
-							Id: "my-ig-id",
-						},
-					},
-					Status: servicemeshapi.ServiceMeshStatus{
-						Conditions: []servicemeshapi.ServiceMeshCondition{
-							{
-								Type: servicemeshapi.ServiceMeshActive,
-								ResourceCondition: servicemeshapi.ResourceCondition{
-									Status: metav1.ConditionTrue,
-								},
-							},
-							{
-								Type: servicemeshapi.ServiceMeshDependenciesActive,
-								ResourceCondition: servicemeshapi.ResourceCondition{
-									Status: metav1.ConditionTrue,
-								},
-							},
-						},
-					},
-				},
-			},
-			fields: fields{
-				ResolveResourceRef: func(resourceRef *servicemeshapi.ResourceRef, crdObj *metav1.ObjectMeta) *servicemeshapi.ResourceRef {
-					return resourceRef
-				},
-				ResolveVirtualServiceReference: func(ctx context.Context, ref *servicemeshapi.ResourceRef) (*servicemeshapi.VirtualService, error) {
-					return nil, errors.New("CANNOT FETCH")
-				},
-			},
-			wantErr: expectation{false, string(commons.VirtualServiceReferenceNotFound)},
 		},
 	}
 	for _, tt := range tests {

@@ -24,7 +24,6 @@ func ConvertCrdVirtualDeploymentToSdkVirtualDeployment(crdObj *v1beta1.VirtualDe
 	sdkObj.Listeners = ConvertCrdVirtualDeploymentListenerToSdkVirtualDeploymentListener(crdObj.Spec.Listener)
 	sdkObj.ServiceDiscovery = ConvertCrdVirtualDeploymentServiceDiscoveryToSdkVirtualDeploymentServiceDiscovery(crdObj.Spec.ServiceDiscovery)
 
-	// TODO: AccessLogging.  Waiting for PR review.
 	if crdObj.Spec.FreeFormTags != nil {
 		ConvertCrdFreeformTagsToSdkFreeformTags(&crdObj.Spec.FreeFormTags, &sdkObj.FreeformTags)
 	}
@@ -40,8 +39,10 @@ func ConvertCrdVirtualDeploymentListenerToSdkVirtualDeploymentListener(crdListen
 	for _, l := range crdListener {
 		i := int(l.Port)
 		sdkListeners = append(sdkListeners, sdk.VirtualDeploymentListener{
-			Protocol: sdk.VirtualDeploymentListenerProtocolEnum(l.Protocol),
-			Port:     &i,
+			Protocol:           sdk.VirtualDeploymentListenerProtocolEnum(l.Protocol),
+			Port:               &i,
+			RequestTimeoutInMs: l.RequestTimeoutInMs,
+			IdleTimeoutInMs:    l.IdleTimeoutInMs,
 		})
 	}
 

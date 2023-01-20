@@ -74,6 +74,13 @@ type HttpIngressGatewayTrafficRouteRule struct {
 	// +optional
 	// +kubebuilder:default:= false
 	IsPathRewriteEnabled *bool `json:"isPathRewriteEnabled,omitempty"`
+
+	// It is the maximum duration in milliseconds for the upstream service to respond to a request.
+	// If provided, the timeout value overrides the default timeout of 15 seconds. The value 0 (zero) indicates that the timeout is disabled.
+	// For streaming responses from the upstream service, it is suggested to either keep the timeout disabled or set a sufficiently high value.
+	// +optional
+	// +kubebuilder:validation:Minimum=0
+	RequestTimeoutInMs *int64 `json:"requestTimeoutInMs,omitempty"`
 }
 
 // TcpIngressGatewayTrafficRouteRule Rule for routing incoming ingress gateway traffic with TCP protocol

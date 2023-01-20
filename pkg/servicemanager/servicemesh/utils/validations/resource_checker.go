@@ -69,7 +69,8 @@ func IsMeshPresent(resolver references.Resolver, ctx context.Context, resource *
 	resourceRef := resolver.ResolveResourceRef(resource, objectMeta)
 	referredMesh, err := resolver.ResolveMeshReference(ctx, resourceRef)
 	if err != nil {
-		return false, string(commons.MeshReferenceNotFound)
+		// referred Mesh was not found, continuing to create child resource
+		return true, ""
 	}
 	if !referredMesh.DeletionTimestamp.IsZero() {
 		return false, string(commons.MeshReferenceIsDeleting)
@@ -81,7 +82,8 @@ func IsVSPresent(resolver references.Resolver, ctx context.Context, resource *se
 	resourceRef := resolver.ResolveResourceRef(resource, objectMeta)
 	referredVirtualService, err := resolver.ResolveVirtualServiceReference(ctx, resourceRef)
 	if err != nil {
-		return false, string(commons.VirtualServiceReferenceNotFound)
+		// referred VS was not found, continuing to create child resource
+		return true, ""
 	}
 	if !referredVirtualService.DeletionTimestamp.IsZero() {
 		return false, string(commons.VirtualServiceReferenceIsDeleting)
@@ -93,7 +95,8 @@ func IsVDPresent(resolver references.Resolver, ctx context.Context, resource *se
 	resourceRef := resolver.ResolveResourceRef(resource, objectMeta)
 	referredVirtualDeployment, err := resolver.ResolveVirtualDeploymentReference(ctx, resourceRef)
 	if err != nil {
-		return false, string(commons.VirtualDeploymentReferenceNotFound)
+		// referred VD was not found, continuing to create child resource
+		return true, ""
 	}
 	if !referredVirtualDeployment.DeletionTimestamp.IsZero() {
 		return false, string(commons.VirtualDeploymentReferenceIsDeleting)
@@ -105,7 +108,8 @@ func IsIGPresent(resolver references.Resolver, ctx context.Context, resource *se
 	resourceRef := resolver.ResolveResourceRef(resource, objectMeta)
 	referredIngressGateway, err := resolver.ResolveIngressGatewayReference(ctx, resourceRef)
 	if err != nil {
-		return false, string(commons.IngressGatewayReferenceNotFound)
+		// referred IG was not found, continuing to create child resource
+		return true, ""
 	}
 	if !referredIngressGateway.DeletionTimestamp.IsZero() {
 		return false, string(commons.IngressGatewayReferenceIsDeleting)

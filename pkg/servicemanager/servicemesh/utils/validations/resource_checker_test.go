@@ -418,25 +418,6 @@ func Test_IsVSPresent(t *testing.T) {
 			},
 			wantErr: expectation{false, string(commons.VirtualServiceReferenceIsDeleting)},
 		},
-		{
-			name: "VS reference contains only name",
-			args: args{
-				vsRef: &servicemeshapi.ResourceRef{Name: "ref-name"},
-				meta: &metav1.ObjectMeta{
-					Name:      "meta-name",
-					Namespace: "meta-namespace",
-				},
-			},
-			fields: fields{
-				ResolveResourceRef: func(resourceRef *servicemeshapi.ResourceRef, crdObj *metav1.ObjectMeta) *servicemeshapi.ResourceRef {
-					return resourceRef
-				},
-				ResolveVirtualServiceReference: func(ctx context.Context, ref *servicemeshapi.ResourceRef) (*servicemeshapi.VirtualService, error) {
-					return nil, errors.New("CANNOT FETCH")
-				},
-			},
-			wantErr: expectation{false, string(commons.VirtualServiceReferenceNotFound)},
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -528,25 +509,6 @@ func Test_IsVDPresent(t *testing.T) {
 			},
 			wantErr: expectation{false, string(commons.VirtualDeploymentReferenceIsDeleting)},
 		},
-		{
-			name: "VD reference contains only name",
-			args: args{
-				vdRef: &servicemeshapi.ResourceRef{Name: "ref-name"},
-				meta: &metav1.ObjectMeta{
-					Name:      "meta-name",
-					Namespace: "meta-namespace",
-				},
-			},
-			fields: fields{
-				ResolveResourceRef: func(resourceRef *servicemeshapi.ResourceRef, crdObj *metav1.ObjectMeta) *servicemeshapi.ResourceRef {
-					return resourceRef
-				},
-				ResolveVirtualDeploymentReference: func(ctx context.Context, ref *servicemeshapi.ResourceRef) (*servicemeshapi.VirtualDeployment, error) {
-					return nil, errors.New("CANNOT FETCH")
-				},
-			},
-			wantErr: expectation{false, string(commons.VirtualDeploymentReferenceNotFound)},
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -637,25 +599,6 @@ func Test_IsIGPresent(t *testing.T) {
 				},
 			},
 			wantErr: expectation{false, string(commons.IngressGatewayReferenceIsDeleting)},
-		},
-		{
-			name: "IG reference contains only name",
-			args: args{
-				igRef: &servicemeshapi.ResourceRef{Name: "ref-name"},
-				meta: &metav1.ObjectMeta{
-					Name:      "meta-name",
-					Namespace: "meta-namespace",
-				},
-			},
-			fields: fields{
-				ResolveResourceRef: func(resourceRef *servicemeshapi.ResourceRef, crdObj *metav1.ObjectMeta) *servicemeshapi.ResourceRef {
-					return resourceRef
-				},
-				ResolveIngressGatewayReference: func(ctx context.Context, ref *servicemeshapi.ResourceRef) (*servicemeshapi.IngressGateway, error) {
-					return nil, errors.New("CANNOT FETCH")
-				},
-			},
-			wantErr: expectation{false, string(commons.IngressGatewayReferenceNotFound)},
 		},
 	}
 	for _, tt := range tests {

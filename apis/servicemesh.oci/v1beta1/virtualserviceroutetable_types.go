@@ -61,6 +61,13 @@ type HttpVirtualServiceTrafficRouteRule struct {
 	// Match type for the route
 	// +optional
 	PathType HttpVirtualServiceTrafficRouteRulePathTypeEnum `json:"pathType,omitempty"`
+
+	// It is the maximum duration in milliseconds for the target service to respond to a request.
+	// If provided, the timeout value overrides the default timeout of 15 seconds. The value 0 (zero) indicates that the timeout is disabled.
+	// For streaming responses from the target service, it is suggested to either keep the timeout disabled or set a sufficiently high value.
+	// +optional
+	// +kubebuilder:validation:Minimum=0
+	RequestTimeoutInMs *int64 `json:"requestTimeoutInMs,omitempty"`
 }
 
 // Destination of a Virtual Deployment

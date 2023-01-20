@@ -462,6 +462,7 @@ func TestCreateOrUpdate(t *testing.T) {
 		DeleteIngressGatewayRouteTable            func(ctx context.Context, id *api.OCID) error
 		ChangeIngressGatewayRouteTableCompartment func(ctx context.Context, igrtId *api.OCID, compartmentId *api.OCID) error
 	}
+	requestTimeout2000 := int64(2000)
 	tests := []struct {
 		name                                string
 		igrt                                *servicemeshapi.IngressGatewayRouteTable
@@ -891,9 +892,10 @@ func TestCreateOrUpdate(t *testing.T) {
 								IngressGatewayHost: &servicemeshapi.IngressGatewayHostRef{
 									Name: "testHost",
 								},
-								Path:     &path,
-								IsGrpc:   &grpcEnabled,
-								PathType: servicemeshapi.HttpIngressGatewayTrafficRouteRulePathTypePrefix,
+								Path:               &path,
+								IsGrpc:             &grpcEnabled,
+								PathType:           servicemeshapi.HttpIngressGatewayTrafficRouteRulePathTypePrefix,
+								RequestTimeoutInMs: &requestTimeout2000,
 							},
 						},
 					},

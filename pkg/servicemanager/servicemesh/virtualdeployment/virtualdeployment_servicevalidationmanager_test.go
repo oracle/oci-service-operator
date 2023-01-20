@@ -7,11 +7,11 @@ package virtualdeployment
 
 import (
 	"context"
-	"errors"
+	"testing"
+
 	sdk "github.com/oracle/oci-go-sdk/v65/servicemesh"
 	api "github.com/oracle/oci-service-operator/api/v1beta1"
 	meshErrors "github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/errors"
-	"testing"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -44,6 +44,8 @@ func Test_VirtualDeploymentValidateCreate(t *testing.T) {
 		ResolveVirtualServiceReference func(ctx context.Context, ref *servicemeshapi.ResourceRef) (*servicemeshapi.VirtualService, error)
 		ResolveVirtualServiceById      func(ctx context.Context, virtualServiceId *api.OCID) (*sdk.VirtualService, error)
 	}
+	requestTimeout2000 := int64(2000)
+	idleTimeout1000 := int64(1000)
 	tests := []struct {
 		name    string
 		args    args
@@ -443,8 +445,10 @@ func Test_VirtualDeploymentValidateCreate(t *testing.T) {
 						},
 						Listener: []servicemeshapi.Listener{
 							{
-								Protocol: "HTTP",
-								Port:     9080,
+								Protocol:           "HTTP",
+								Port:               9080,
+								RequestTimeoutInMs: &requestTimeout2000,
+								IdleTimeoutInMs:    &idleTimeout1000,
 							},
 						},
 					},
@@ -493,30 +497,6 @@ func Test_VirtualDeploymentValidateCreate(t *testing.T) {
 				},
 			},
 			wantErr: expectation{false, string(commons.VirtualServiceReferenceIsDeleting)},
-		},
-		{
-			name: "Virtual service References cannot found",
-			args: args{
-				virtualDeployment: &servicemeshapi.VirtualDeployment{
-					Spec: servicemeshapi.VirtualDeploymentSpec{
-						VirtualService: servicemeshapi.RefOrId{
-							ResourceRef: &servicemeshapi.ResourceRef{
-								Namespace: "my-namespace",
-								Name:      "my-vs",
-							},
-						},
-					},
-				},
-			},
-			fields: fields{
-				ResolveResourceRef: func(resourceRef *servicemeshapi.ResourceRef, crdObj *metav1.ObjectMeta) *servicemeshapi.ResourceRef {
-					return resourceRef
-				},
-				ResolveVirtualServiceReference: func(ctx context.Context, ref *servicemeshapi.ResourceRef) (*servicemeshapi.VirtualService, error) {
-					return nil, errors.New("CANNOT FETCH")
-				},
-			},
-			wantErr: expectation{false, string(commons.VirtualServiceReferenceNotFound)},
 		},
 	}
 	for _, tt := range tests {

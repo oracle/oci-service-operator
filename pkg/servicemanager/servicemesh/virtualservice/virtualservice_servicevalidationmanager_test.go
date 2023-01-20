@@ -7,7 +7,6 @@ package virtualservice
 
 import (
 	"context"
-	"errors"
 	meshErrors "github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/errors"
 	"testing"
 
@@ -195,30 +194,6 @@ func Test_ValidateCreateRequest(t *testing.T) {
 				},
 			},
 			wantErr: expectation{false, string(commons.MetadataNameLengthExceeded)},
-		},
-		{
-			name: "Referred Mesh is not found",
-			args: args{
-				virtualService: &servicemeshapi.VirtualService{
-					Spec: servicemeshapi.VirtualServiceSpec{
-						Mesh: servicemeshapi.RefOrId{
-							ResourceRef: &servicemeshapi.ResourceRef{
-								Namespace: "my-namespace",
-								Name:      "my-mesh",
-							},
-						},
-					},
-				},
-			},
-			fields: fields{
-				ResolveResourceRef: func(resourceRef *servicemeshapi.ResourceRef, crdObj *metav1.ObjectMeta) *servicemeshapi.ResourceRef {
-					return resourceRef
-				},
-				ResolveMeshReference: func(ctx context.Context, ref *servicemeshapi.ResourceRef) (*servicemeshapi.Mesh, error) {
-					return nil, errors.New("CANNOT FETCH")
-				},
-			},
-			wantErr: expectation{false, string(commons.MeshReferenceNotFound)},
 		},
 		{
 			name: "Spec contains mtls that satisfies minimum when mesh resource ref is supplied",
