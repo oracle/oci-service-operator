@@ -785,3 +785,61 @@ func TestConvert_IG_Rule_To_Rule_Details(t *testing.T) {
 		})
 	}
 }
+
+func TestConvert_IG_Rule_To_Rule_Details_No_RequestTimeout(t *testing.T) {
+	// Tests that if the "requestTimeout" is omitted from the route rule,
+	// then its not set to zero by default
+	type args struct {
+		rules []sdk.IngressGatewayTrafficRouteRule
+	}
+	tests := []struct {
+		name            string
+		args            args
+		wantRuleDetails []sdk.IngressGatewayTrafficRouteRuleDetails
+	}{
+		{
+			name: "convert list",
+			args: args{
+				rules: []sdk.IngressGatewayTrafficRouteRule{
+					sdk.HttpIngressGatewayTrafficRouteRule{
+						Destinations: []sdk.VirtualServiceTrafficRuleTarget{
+							{
+								VirtualServiceId: String("my-vs-id"),
+								Port:             Integer(8080),
+							},
+						},
+						IsGrpc:   Bool(grpcEnabled),
+						PathType: sdk.HttpIngressGatewayTrafficRouteRulePathTypePrefix,
+						Path:     String(path),
+						IngressGatewayHost: &sdk.IngressGatewayHostRef{
+							Name: String("testHost"),
+						},
+					},
+				},
+			},
+			wantRuleDetails: []sdk.IngressGatewayTrafficRouteRuleDetails{
+				sdk.HttpIngressGatewayTrafficRouteRuleDetails{
+					Destinations: []sdk.VirtualServiceTrafficRuleTargetDetails{
+						{
+							VirtualServiceId: String("my-vs-id"),
+							Port:             Integer(8080),
+						},
+					},
+					IsGrpc:   Bool(grpcEnabled),
+					PathType: sdk.HttpIngressGatewayTrafficRouteRuleDetailsPathTypePrefix,
+					Path:     String(path),
+					IngressGatewayHost: &sdk.IngressGatewayHostRef{
+						Name: String("testHost"),
+					},
+					RequestTimeoutInMs: Int64(0), // Unset value should be zero
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ruleDetails := ConvertSdkIngressGatewayTrafficRouteRuleToTrafficRouteRuleDetails(tt.args.rules)
+			assert.NotEqual(t, tt.wantRuleDetails[0], ruleDetails[0])
+		})
+	}
+}

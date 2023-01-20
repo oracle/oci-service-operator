@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2022, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -1432,42 +1432,42 @@ func (client DatabaseClient) ChangeVmClusterCompartment(ctx context.Context, req
 		request.OpcRetryToken = common.String(common.RetryToken())
 	}
 
-	ociResponse, err = common.Retry(ctx, request, client.changeVmClusterCompartment, policy)
+	ociResponse, err = common.Retry(ctx, request, client.configureAutonomousDatabaseVaultKey, policy)
 	if err != nil {
 		if ociResponse != nil {
 			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
 				opcRequestId := httpResponse.Header.Get("opc-request-id")
-				response = ChangeVmClusterCompartmentResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+				response = ConfigureAutonomousDatabaseVaultKeyResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
 			} else {
-				response = ChangeVmClusterCompartmentResponse{}
+				response = ConfigureAutonomousDatabaseVaultKeyResponse{}
 			}
 		}
 		return
 	}
-	if convertedResponse, ok := ociResponse.(ChangeVmClusterCompartmentResponse); ok {
+	if convertedResponse, ok := ociResponse.(ConfigureAutonomousDatabaseVaultKeyResponse); ok {
 		response = convertedResponse
 	} else {
-		err = fmt.Errorf("failed to convert OCIResponse into ChangeVmClusterCompartmentResponse")
+		err = fmt.Errorf("failed to convert OCIResponse into ConfigureAutonomousDatabaseVaultKeyResponse")
 	}
 	return
 }
 
-// changeVmClusterCompartment implements the OCIOperation interface (enables retrying operations)
-func (client DatabaseClient) changeVmClusterCompartment(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+// configureAutonomousDatabaseVaultKey implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) configureAutonomousDatabaseVaultKey(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
 
-	httpRequest, err := request.HTTPRequest(http.MethodPost, "/vmClusters/{vmClusterId}/actions/changeCompartment", binaryReqBody, extraHeaders)
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/autonomousDatabases/{autonomousDatabaseId}/actions/configureAutonomousDatabaseVaultKey", binaryReqBody, extraHeaders)
 	if err != nil {
 		return nil, err
 	}
 
-	var response ChangeVmClusterCompartmentResponse
+	var response ConfigureAutonomousDatabaseVaultKeyResponse
 	var httpResponse *http.Response
 	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/VmCluster/ChangeVmClusterCompartment"
-		err = common.PostProcessServiceError(err, "Database", "ChangeVmClusterCompartment", apiReferenceLink)
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/AutonomousDatabase/ConfigureAutonomousDatabaseVaultKey"
+		err = common.PostProcessServiceError(err, "Database", "ConfigureAutonomousDatabaseVaultKey", apiReferenceLink)
 		return response, err
 	}
 
@@ -7261,7 +7261,7 @@ func (client DatabaseClient) getCloudExadataInfrastructure(ctx context.Context, 
 	return response, err
 }
 
-// GetCloudExadataInfrastructureUnallocatedResources Gets un allocated resources information for the specified Cloud Exadata infrastructure.
+// GetCloudExadataInfrastructureUnallocatedResources Gets unallocated resources information for the specified Cloud Exadata infrastructure.
 //
 // See also
 //
@@ -8997,42 +8997,42 @@ func (client DatabaseClient) GetMaintenanceRunHistory(ctx context.Context, reque
 	if request.RetryPolicy() != nil {
 		policy = *request.RetryPolicy()
 	}
-	ociResponse, err = common.Retry(ctx, request, client.getMaintenanceRunHistory, policy)
+	ociResponse, err = common.Retry(ctx, request, client.getKeyStore, policy)
 	if err != nil {
 		if ociResponse != nil {
 			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
 				opcRequestId := httpResponse.Header.Get("opc-request-id")
-				response = GetMaintenanceRunHistoryResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+				response = GetKeyStoreResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
 			} else {
-				response = GetMaintenanceRunHistoryResponse{}
+				response = GetKeyStoreResponse{}
 			}
 		}
 		return
 	}
-	if convertedResponse, ok := ociResponse.(GetMaintenanceRunHistoryResponse); ok {
+	if convertedResponse, ok := ociResponse.(GetKeyStoreResponse); ok {
 		response = convertedResponse
 	} else {
-		err = fmt.Errorf("failed to convert OCIResponse into GetMaintenanceRunHistoryResponse")
+		err = fmt.Errorf("failed to convert OCIResponse into GetKeyStoreResponse")
 	}
 	return
 }
 
-// getMaintenanceRunHistory implements the OCIOperation interface (enables retrying operations)
-func (client DatabaseClient) getMaintenanceRunHistory(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+// getKeyStore implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) getKeyStore(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
 
-	httpRequest, err := request.HTTPRequest(http.MethodGet, "/maintenanceRunHistory/{maintenanceRunHistoryId}", binaryReqBody, extraHeaders)
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/keyStores/{keyStoreId}", binaryReqBody, extraHeaders)
 	if err != nil {
 		return nil, err
 	}
 
-	var response GetMaintenanceRunHistoryResponse
+	var response GetKeyStoreResponse
 	var httpResponse *http.Response
 	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/MaintenanceRunHistory/GetMaintenanceRunHistory"
-		err = common.PostProcessServiceError(err, "Database", "GetMaintenanceRunHistory", apiReferenceLink)
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/KeyStore/GetKeyStore"
+		err = common.PostProcessServiceError(err, "Database", "GetKeyStore", apiReferenceLink)
 		return response, err
 	}
 
@@ -12398,42 +12398,42 @@ func (client DatabaseClient) ListMaintenanceRuns(ctx context.Context, request Li
 	if request.RetryPolicy() != nil {
 		policy = *request.RetryPolicy()
 	}
-	ociResponse, err = common.Retry(ctx, request, client.listMaintenanceRuns, policy)
+	ociResponse, err = common.Retry(ctx, request, client.listKeyStores, policy)
 	if err != nil {
 		if ociResponse != nil {
 			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
 				opcRequestId := httpResponse.Header.Get("opc-request-id")
-				response = ListMaintenanceRunsResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+				response = ListKeyStoresResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
 			} else {
-				response = ListMaintenanceRunsResponse{}
+				response = ListKeyStoresResponse{}
 			}
 		}
 		return
 	}
-	if convertedResponse, ok := ociResponse.(ListMaintenanceRunsResponse); ok {
+	if convertedResponse, ok := ociResponse.(ListKeyStoresResponse); ok {
 		response = convertedResponse
 	} else {
-		err = fmt.Errorf("failed to convert OCIResponse into ListMaintenanceRunsResponse")
+		err = fmt.Errorf("failed to convert OCIResponse into ListKeyStoresResponse")
 	}
 	return
 }
 
-// listMaintenanceRuns implements the OCIOperation interface (enables retrying operations)
-func (client DatabaseClient) listMaintenanceRuns(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+// listKeyStores implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) listKeyStores(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
 
-	httpRequest, err := request.HTTPRequest(http.MethodGet, "/maintenanceRuns", binaryReqBody, extraHeaders)
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/keyStores", binaryReqBody, extraHeaders)
 	if err != nil {
 		return nil, err
 	}
 
-	var response ListMaintenanceRunsResponse
+	var response ListKeyStoresResponse
 	var httpResponse *http.Response
 	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/MaintenanceRun/ListMaintenanceRuns"
-		err = common.PostProcessServiceError(err, "Database", "ListMaintenanceRuns", apiReferenceLink)
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/KeyStoreSummary/ListKeyStores"
+		err = common.PostProcessServiceError(err, "Database", "ListKeyStores", apiReferenceLink)
 		return response, err
 	}
 

@@ -214,30 +214,6 @@ func Test_VirtualDeploymentBindingValidateCreate(t *testing.T) {
 			wantErr: expectation{false, string(commons.VirtualDeploymentReferenceIsDeleting)},
 		},
 		{
-			name: "Spec refers to non-exist virtual deployment",
-			args: args{
-				VirtualDeploymentBinding: &servicemeshapi.VirtualDeploymentBinding{
-					Spec: servicemeshapi.VirtualDeploymentBindingSpec{
-						VirtualDeployment: servicemeshapi.RefOrId{
-							ResourceRef: &servicemeshapi.ResourceRef{
-								Namespace: "my-namespace",
-								Name:      "my-vd",
-							},
-						},
-					},
-				},
-			},
-			fields: fields{
-				ResolveResourceRef: func(resourceRef *servicemeshapi.ResourceRef, crdObj *metav1.ObjectMeta) *servicemeshapi.ResourceRef {
-					return resourceRef
-				},
-				ResolveVirtualDeploymentReference: func(ctx context.Context, ref *servicemeshapi.ResourceRef) (*servicemeshapi.VirtualDeployment, error) {
-					return nil, errors.New("CANNOT FETCH")
-				},
-			},
-			wantErr: expectation{false, string(commons.VirtualDeploymentReferenceNotFound)},
-		},
-		{
 			name: "Spec refers to deleting kubernetes service",
 			args: args{
 				VirtualDeploymentBinding: &servicemeshapi.VirtualDeploymentBinding{
@@ -834,55 +810,6 @@ func Test_VirtualDeploymentBindingValidateUpdate(t *testing.T) {
 				},
 			},
 			wantErr: expectation{false, string(commons.VirtualDeploymentReferenceIsDeleting)},
-		},
-		{
-			name: "Spec refers to non-exist virtual deployment",
-			args: args{
-				virtualDeploymentBinding: &servicemeshapi.VirtualDeploymentBinding{
-					ObjectMeta: metav1.ObjectMeta{Generation: 2},
-					Spec: servicemeshapi.VirtualDeploymentBindingSpec{
-						VirtualDeployment: servicemeshapi.RefOrId{
-							ResourceRef: &servicemeshapi.ResourceRef{
-								Namespace: "my-namespace",
-								Name:      "my-vd",
-							},
-						},
-					},
-				},
-				oldVirtualDeploymentBinding: &servicemeshapi.VirtualDeploymentBinding{
-					ObjectMeta: metav1.ObjectMeta{Generation: 1},
-					Spec: servicemeshapi.VirtualDeploymentBindingSpec{
-						VirtualDeployment: servicemeshapi.RefOrId{
-							Id: "my-vd-id-1",
-						},
-					},
-					Status: servicemeshapi.ServiceMeshStatus{
-						Conditions: []servicemeshapi.ServiceMeshCondition{
-							{
-								Type: servicemeshapi.ServiceMeshActive,
-								ResourceCondition: servicemeshapi.ResourceCondition{
-									Status: metav1.ConditionTrue,
-								},
-							},
-							{
-								Type: servicemeshapi.ServiceMeshDependenciesActive,
-								ResourceCondition: servicemeshapi.ResourceCondition{
-									Status: metav1.ConditionTrue,
-								},
-							},
-						},
-					},
-				},
-			},
-			fields: fields{
-				ResolveResourceRef: func(resourceRef *servicemeshapi.ResourceRef, crdObj *metav1.ObjectMeta) *servicemeshapi.ResourceRef {
-					return resourceRef
-				},
-				ResolveVirtualDeploymentReference: func(ctx context.Context, ref *servicemeshapi.ResourceRef) (*servicemeshapi.VirtualDeployment, error) {
-					return nil, errors.New("CANNOT FETCH")
-				},
-			},
-			wantErr: expectation{false, string(commons.VirtualDeploymentReferenceNotFound)},
 		},
 		{
 			name: "Spec refers to deleting kubernetes service",

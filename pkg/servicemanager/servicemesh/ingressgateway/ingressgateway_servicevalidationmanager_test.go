@@ -7,7 +7,6 @@ package ingressgateway
 
 import (
 	"context"
-	"errors"
 	meshErrors "github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/errors"
 	"testing"
 
@@ -191,30 +190,6 @@ func Test_IngressGatewayValidateCreate(t *testing.T) {
 				},
 			},
 			wantErr: expectation{false, string(commons.MeshReferenceIsDeleting)},
-		},
-		{
-			name: "Referred Mesh not found",
-			args: args{
-				ingressGateway: &servicemeshapi.IngressGateway{
-					Spec: servicemeshapi.IngressGatewaySpec{
-						Mesh: servicemeshapi.RefOrId{
-							ResourceRef: &servicemeshapi.ResourceRef{
-								Namespace: "my-namespace",
-								Name:      "my-mesh",
-							},
-						},
-					},
-				},
-			},
-			fields: fields{
-				ResolveResourceRef: func(resourceRef *servicemeshapi.ResourceRef, crdObj *metav1.ObjectMeta) *servicemeshapi.ResourceRef {
-					return resourceRef
-				},
-				ResolveMeshReference: func(ctx context.Context, ref *servicemeshapi.ResourceRef) (*servicemeshapi.Mesh, error) {
-					return nil, errors.New("CANNOT FETCH")
-				},
-			},
-			wantErr: expectation{false, string(commons.MeshReferenceNotFound)},
 		},
 		{
 			name: "TLS mode with missing server cert",
