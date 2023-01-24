@@ -1,0 +1,19 @@
+apiVersion: servicemesh.oci.oracle.com/v1beta1
+kind: VirtualService
+metadata:
+  name: {{ include "service-mesh-poc.name" . }}-vs-productpage
+  namespace: {{ .Values.serviceMeshPoc.namespace }}
+  labels:
+    {{- include "service-mesh-poc.labels" . | nindent 4 }}
+spec:
+  compartmentId: {{ .Values.serviceMeshPoc.compartmentId }}
+  description: "This is Productpage Virtual Service"
+  mesh:
+    ref:
+      name: {{ include "service-mesh-poc.fullname" . }}-mesh
+  defaultRoutingPolicy:
+    type: UNIFORM
+  hosts:
+    - {{ .Values.serviceMeshPoc.virtualService.productpage.host }}
+  mtls:
+    mode: {{ .Values.serviceMeshPoc.virtualService.productpage.mtlsMode }}

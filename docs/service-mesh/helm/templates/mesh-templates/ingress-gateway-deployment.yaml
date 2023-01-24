@@ -1,0 +1,26 @@
+apiVersion: servicemesh.oci.oracle.com/v1beta1
+kind: IngressGatewayDeployment
+metadata:
+  name: {{ include "service-mesh-poc.name" . }}-igd
+  namespace: {{ .Values.serviceMeshPoc.namespace }}
+  labels:
+    {{- include "service-mesh-poc.labels" . | nindent 4 }}
+  annotations:
+    servicemesh.oci.oracle.com/proxy-log-level: debug
+spec:
+  ingressGateway:
+    ref:
+      name: {{ include "service-mesh-poc.name" . }}-ig
+  deployment:
+    autoscaling:
+      minPods: {{ .Values.serviceMeshPoc.ingressGatewayDeployment.minPods }}
+      maxPods: {{ .Values.serviceMeshPoc.ingressGatewayDeployment.maxPods }}
+    mountCertificateChainFromHost: {{ .Values.serviceMeshPoc.ingressGatewayDeployment.mountCertificateChainFromHost }}
+  ports:
+    - protocol: {{ .Values.serviceMeshPoc.ingressGatewayDeployment.protocol }}
+      port: {{ .Values.serviceMeshPoc.ingressGatewayDeployment.port }}
+      serviceport: {{ .Values.serviceMeshPoc.ingressGatewayDeployment.serviceport }}
+  service:
+    type: {{ .Values.serviceMeshPoc.ingressGatewayDeployment.serviceType }}
+  secrets:
+    - secretName: {{ .Values.serviceMeshPoc.ingressGatewayDeployment.secretName }}

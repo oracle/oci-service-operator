@@ -1,0 +1,24 @@
+apiVersion: servicemesh.oci.oracle.com/v1beta1
+kind: IngressGatewayRouteTable
+metadata:
+  name: {{ include "service-mesh-poc.name" . }}-igrt
+  namespace: {{ .Values.serviceMeshPoc.namespace }}
+  labels:
+    {{- include "service-mesh-poc.labels" . | nindent 4 }}
+spec:
+  compartmentId: {{ .Values.serviceMeshPoc.compartmentId }}
+  description: "This is Ingress Gateway Route Table"
+  ingressGateway:
+    ref:
+      name: {{ include "service-mesh-poc.fullname" . }}-ig
+  routeRules:
+    - httpRoute:
+        ingressGatewayHost:
+          name: {{ include "service-mesh-poc.fullname" . }}-host
+        path: {{ .Values.serviceMeshPoc.ingressGatewayRouteTable.routeRule.path }}
+        pathType: {{ .Values.serviceMeshPoc.ingressGatewayRouteTable.routeRule.pathType }}
+        isGrpc: {{ .Values.serviceMeshPoc.ingressGatewayRouteTable.routeRule.isGrpc }}
+        destinations:
+          - virtualService:
+              ref:
+                name: {{ include "service-mesh-poc.fullname" . }}-vs-productpage

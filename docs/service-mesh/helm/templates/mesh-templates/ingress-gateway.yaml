@@ -1,0 +1,34 @@
+apiVersion: servicemesh.oci.oracle.com/v1beta1
+kind: IngressGateway
+metadata:
+  name: {{ include "service-mesh-poc.name" . }}-ig
+  namespace: {{ .Values.serviceMeshPoc.namespace }}
+  labels:
+    {{- include "service-mesh-poc.labels" . | nindent 4 }}
+spec:
+  compartmentId: {{ .Values.serviceMeshPoc.compartmentId }}
+  description: "This is Ingress Gateway"
+  mesh:
+    ref:
+      name: {{ include "service-mesh-poc.fullname" . }}-mesh
+  hosts:
+    - name: {{ include "service-mesh-poc.fullname" . }}-host
+      hostnames:
+        - {{ .Values.serviceMeshPoc.ingressGateway.hostname1 }}
+        - {{ .Values.serviceMeshPoc.ingressGateway.hostname2 }}
+      listeners:
+        - port: {{ .Values.serviceMeshPoc.ingressGateway.listener.port }}
+          protocol: {{ .Values.serviceMeshPoc.ingressGateway.listener.protocol }}
+          tls:
+            mode: {{ .Values.serviceMeshPoc.ingressGateway.listener.tlsMode }}
+            serverCertificate:
+              ociTlsCertificate:
+                certificateId: {{ .Values.serviceMeshPoc.ingressGateway.listener.serverCertificateId }}
+            clientValidation:
+              trustedCaBundle:
+                ociCaBundle:
+                  caBundleId: {{ .Values.serviceMeshPoc.ingressGateway.listener.clientCaBundleId }}
+              subjectAlternateNames:
+                - {{ .Values.serviceMeshPoc.ingressGateway.listener.subjectAlternateNames }}
+  accessLogging:
+    isEnabled: true
