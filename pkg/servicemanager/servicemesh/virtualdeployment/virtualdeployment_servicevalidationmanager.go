@@ -157,10 +157,20 @@ func (v *VirtualDeploymentValidator) GetEntityType() client.Object {
 func (v *VirtualDeploymentValidator) HasVSHost(ctx context.Context, resource *servicemeshapi.RefOrId, objectMeta *metav1.ObjectMeta) bool {
 	if len(resource.Id) == 0 {
 		resourceRef := v.resolver.ResolveResourceRef(resource.ResourceRef, objectMeta)
-		referredVirtualService, _ := v.resolver.ResolveVirtualServiceReference(ctx, resourceRef)
+		referredVirtualService, err := v.resolver.ResolveVirtualServiceReference(ctx, resourceRef)
+		if err != nil {
+			// this is the case where the referred VS in VD is not found or not active yet
+			// and to support helm we should bypass this validation
+			return true
+		}
 		return referredVirtualService.Spec.Hosts != nil && len(referredVirtualService.Spec.Hosts) > 0
 	} else {
-		virtualService, _ := v.resolver.ResolveVirtualServiceById(ctx, &resource.Id)
+		virtualService, err := v.resolver.ResolveVirtualServiceById(ctx, &resource.Id)
+		if err != nil {
+			// this is the case where the referred VS in VD is not found or not active yet
+			// and to support helm we should bypass this validation
+			return true
+		}
 		return virtualService.Hosts != nil && len(virtualService.Hosts) > 0
 	}
 }
