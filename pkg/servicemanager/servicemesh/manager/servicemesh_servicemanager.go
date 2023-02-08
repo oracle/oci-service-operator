@@ -150,7 +150,7 @@ func (c *ServiceMeshServiceManager) CreateOrUpdate(ctx context.Context, obj runt
 	if resolveDependenciesErr != nil {
 		return meshErrors.GetOsokResponseByHandlingReconcileError(resolveDependenciesErr)
 	}
-
+	c.log.InfoLogWithFixedMessage(ctx, "dependencies resolved")
 	getResourceErr := c.handler.GetResource(ctx, object, resourceDetails)
 	if getResourceErr != nil {
 		_ = c.UpdateServiceMeshConfiguredStatus(ctx, object, getResourceErr)
@@ -193,6 +193,7 @@ func (c *ServiceMeshServiceManager) CreateOrUpdate(ctx context.Context, obj runt
 	if !resourceCreated {
 		_ = c.UpdateServiceMeshConfiguredStatus(ctx, object, resourceCreationErr)
 		if resourceCreationErr != nil {
+			c.log.InfoLogWithFixedMessage(ctx, "cp error while creating resource", "error", resourceCreationErr)
 			if !meshErrors.IsNetworkErrorOrInternalError(resourceCreationErr) {
 				// Clears the opcRetryToken if the request didn't fail for network or internal error
 				_ = c.UpdateOpcRetryToken(ctx, object, nil)
