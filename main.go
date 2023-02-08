@@ -510,7 +510,6 @@ func main() {
 
 	enqueueRequestsForConfigmapEvents := ingressgatewaydeployment.NewEnqueueRequestsForConfigmapEvents(mgr.GetClient(), ctrl.Log.WithName("controllers").WithName("IngressGatewayDeployment"), operatorNamespace)
 	igdCustomWatches := []servicemeshcontrollers.CustomWatch{
-		ingressgatewaydeployment.GetIngressGatewayDeploymentOwnerWatch(&appsv1.Deployment{}),
 		ingressgatewaydeployment.GetIngressGatewayDeploymentOwnerWatch(&corev1.Service{}),
 		ingressgatewaydeployment.GetIngressGatewayDeploymentOwnerWatch(&autoscalingv1.HorizontalPodAutoscaler{}),
 		{
