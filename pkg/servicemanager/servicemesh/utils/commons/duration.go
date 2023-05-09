@@ -10,8 +10,8 @@ import "time"
 const (
 	// Delay duration parameters for rate limiter exponential back off
 	MaxDelay           = 10 * time.Second
-	MaxControllerDelay = 10 * time.Minute
-	BaseDelay          = 5 * time.Millisecond
+	MaxControllerDelay = 1 * time.Minute
+	BaseDelay          = 500 * time.Millisecond
 
 	PollInterval = time.Second * 5
 

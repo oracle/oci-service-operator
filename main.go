@@ -10,7 +10,6 @@ import (
 	"os"
 	"time"
 
-	appsv1 "k8s.io/api/apps/v1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/source"
@@ -510,7 +509,6 @@ func main() {
 
 	enqueueRequestsForConfigmapEvents := ingressgatewaydeployment.NewEnqueueRequestsForConfigmapEvents(mgr.GetClient(), ctrl.Log.WithName("controllers").WithName("IngressGatewayDeployment"), operatorNamespace)
 	igdCustomWatches := []servicemeshcontrollers.CustomWatch{
-		ingressgatewaydeployment.GetIngressGatewayDeploymentOwnerWatch(&appsv1.Deployment{}),
 		ingressgatewaydeployment.GetIngressGatewayDeploymentOwnerWatch(&corev1.Service{}),
 		ingressgatewaydeployment.GetIngressGatewayDeploymentOwnerWatch(&autoscalingv1.HorizontalPodAutoscaler{}),
 		{
