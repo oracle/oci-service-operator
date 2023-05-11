@@ -18,7 +18,7 @@ require (
 	github.com/onsi/gomega v1.13.0
 	github.com/oracle/oci-go-sdk/v65 v65.28.1
 	github.com/pkg/errors v0.9.1
-	github.com/prometheus/client_golang v1.10.0
+	github.com/prometheus/client_golang v1.11.1
 	github.com/stretchr/testify v1.6.1
 	golang.org/x/time v0.0.0-20220224211638-0e9765cccd65
 	gomodules.xyz/jsonpatch/v2 v2.2.0
