@@ -362,6 +362,7 @@ func (c *defaultServiceMeshClient) UpdateVirtualServiceRouteTable(ctx context.Co
 		UpdateVirtualServiceRouteTableDetails: sdk.UpdateVirtualServiceRouteTableDetails{
 			Description:  vsrt.Description,
 			RouteRules:   meshConversions.ConvertSdkVirtualServiceTrafficRouteRuleToTrafficRouteRuleDetails(vsrt.RouteRules),
+			Priority:     vsrt.Priority,
 			FreeformTags: vsrt.FreeformTags,
 			DefinedTags:  vsrt.DefinedTags,
 		}})
@@ -548,6 +549,7 @@ func (c *defaultServiceMeshClient) CreateIngressGatewayRouteTable(ctx context.Co
 		CreateIngressGatewayRouteTableDetails: sdk.CreateIngressGatewayRouteTableDetails{
 			IngressGatewayId: igrt.IngressGatewayId,
 			RouteRules:       meshConversions.ConvertSdkIngressGatewayTrafficRouteRuleToTrafficRouteRuleDetails(igrt.RouteRules),
+			Priority:         igrt.Priority,
 			CompartmentId:    igrt.CompartmentId,
 			Name:             igrt.Name,
 			Description:      igrt.Description,
@@ -571,6 +573,7 @@ func (c *defaultServiceMeshClient) UpdateIngressGatewayRouteTable(ctx context.Co
 		UpdateIngressGatewayRouteTableDetails: sdk.UpdateIngressGatewayRouteTableDetails{
 			Description:  igrt.Description,
 			RouteRules:   meshConversions.ConvertSdkIngressGatewayTrafficRouteRuleToTrafficRouteRuleDetails(igrt.RouteRules),
+			Priority:     igrt.Priority,
 			FreeformTags: igrt.FreeformTags,
 			DefinedTags:  igrt.DefinedTags,
 		},
