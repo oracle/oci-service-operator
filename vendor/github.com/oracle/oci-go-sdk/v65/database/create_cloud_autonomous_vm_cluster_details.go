@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -36,10 +36,10 @@ type CreateCloudAutonomousVmClusterDetails struct {
 	// The total number of Autonomous Container Databases that can be created.
 	TotalContainerDatabases *int `mandatory:"false" json:"totalContainerDatabases"`
 
-	// The number of OCPU cores to be enabled per VM cluster node.
+	// The number of CPU cores to be enabled per VM cluster node.
 	CpuCoreCountPerNode *int `mandatory:"false" json:"cpuCoreCountPerNode"`
 
-	// The amount of memory (in GBs) to be enabled per each OCPU core.
+	// The amount of memory (in GBs) to be enabled per OCPU or ECPU.
 	MemoryPerOracleComputeUnitInGBs *int `mandatory:"false" json:"memoryPerOracleComputeUnitInGBs"`
 
 	// The data disk group size to be allocated for Autonomous Databases, in TBs.
@@ -48,15 +48,28 @@ type CreateCloudAutonomousVmClusterDetails struct {
 	// The time zone to use for the Cloud Autonomous VM cluster. For details, see DB System Time Zones (https://docs.cloud.oracle.com/Content/Database/References/timezones.htm).
 	ClusterTimeZone *string `mandatory:"false" json:"clusterTimeZone"`
 
+	// The compute model of the Cloud Autonomous VM Cluster. ECPU compute model is the recommended model and OCPU compute model is legacy.
+	ComputeModel CreateCloudAutonomousVmClusterDetailsComputeModelEnum `mandatory:"false" json:"computeModel,omitempty"`
+
+	// Enable mutual TLS(mTLS) authentication for database at time of provisioning a VMCluster. This is applicable to database TLS Certificates only. Default is TLS
+	IsMtlsEnabledVmCluster *bool `mandatory:"false" json:"isMtlsEnabledVmCluster"`
+
 	// The list of database servers.
 	DbServers []string `mandatory:"false" json:"dbServers"`
 
 	MaintenanceWindowDetails *MaintenanceWindow `mandatory:"false" json:"maintenanceWindowDetails"`
 
-	// The Oracle license model that applies to the Oracle Autonomous Database. Bring your own license (BYOL) allows you to apply your current on-premises Oracle software licenses to equivalent, highly automated Oracle PaaS and IaaS services in the cloud.
-	// License Included allows you to subscribe to new Oracle Database software licenses and the Database service.
-	// Note that when provisioning an Autonomous Database on dedicated Exadata infrastructure (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html), this attribute must be null because the attribute is already set at the
-	// Autonomous Exadata Infrastructure level. When using shared Exadata infrastructure (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html), if a value is not specified, the system will supply the value of `BRING_YOUR_OWN_LICENSE`.
+	// The SCAN Listener TLS port. Default is 2484.
+	ScanListenerPortTls *int `mandatory:"false" json:"scanListenerPortTls"`
+
+	// The SCAN Listener Non TLS port. Default is 1521.
+	ScanListenerPortNonTls *int `mandatory:"false" json:"scanListenerPortNonTls"`
+
+	// The Oracle license model that applies to the Oracle Autonomous Database. Bring your own license (BYOL) allows you to apply your current on-premises Oracle software licenses to equivalent, highly automated Oracle services in the cloud.
+	// License Included allows you to subscribe to new Oracle Database software licenses and the Oracle Database service.
+	// Note that when provisioning an Autonomous Database on dedicated Exadata infrastructure (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html), this attribute must be null. It is already set at the
+	// Autonomous Exadata Infrastructure level. When provisioning an Autonomous Database Serverless  (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html) database, if a value is not specified, the system defaults the value to `BRING_YOUR_OWN_LICENSE`. Bring your own license (BYOL) also allows you to select the DB edition using the optional parameter.
+	// This cannot be updated in parallel with any of the following: cpuCoreCount, computeCount, dataStorageSizeInTBs, adminPassword, isMTLSConnectionRequired, dbWorkload, privateEndpointLabel, nsgIds, dbVersion, dbName, scheduledOperations, dbToolsDetails, or isFreeTier.
 	LicenseModel CreateCloudAutonomousVmClusterDetailsLicenseModelEnum `mandatory:"false" json:"licenseModel,omitempty"`
 
 	// The list of OCIDs (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) for the network security groups (NSGs) to which this resource belongs. Setting this to an empty list removes all resources from all NSGs. For more information about NSGs, see Security Rules (https://docs.cloud.oracle.com/Content/Network/Concepts/securityrules.htm).
@@ -84,6 +97,9 @@ func (m CreateCloudAutonomousVmClusterDetails) String() string {
 func (m CreateCloudAutonomousVmClusterDetails) ValidateEnumValue() (bool, error) {
 	errMessage := []string{}
 
+	if _, ok := GetMappingCreateCloudAutonomousVmClusterDetailsComputeModelEnum(string(m.ComputeModel)); !ok && m.ComputeModel != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for ComputeModel: %s. Supported values are: %s.", m.ComputeModel, strings.Join(GetCreateCloudAutonomousVmClusterDetailsComputeModelEnumStringValues(), ",")))
+	}
 	if _, ok := GetMappingCreateCloudAutonomousVmClusterDetailsLicenseModelEnum(string(m.LicenseModel)); !ok && m.LicenseModel != "" {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for LicenseModel: %s. Supported values are: %s.", m.LicenseModel, strings.Join(GetCreateCloudAutonomousVmClusterDetailsLicenseModelEnumStringValues(), ",")))
 	}
@@ -91,6 +107,48 @@ func (m CreateCloudAutonomousVmClusterDetails) ValidateEnumValue() (bool, error)
 		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
 	}
 	return false, nil
+}
+
+// CreateCloudAutonomousVmClusterDetailsComputeModelEnum Enum with underlying type: string
+type CreateCloudAutonomousVmClusterDetailsComputeModelEnum string
+
+// Set of constants representing the allowable values for CreateCloudAutonomousVmClusterDetailsComputeModelEnum
+const (
+	CreateCloudAutonomousVmClusterDetailsComputeModelEcpu CreateCloudAutonomousVmClusterDetailsComputeModelEnum = "ECPU"
+	CreateCloudAutonomousVmClusterDetailsComputeModelOcpu CreateCloudAutonomousVmClusterDetailsComputeModelEnum = "OCPU"
+)
+
+var mappingCreateCloudAutonomousVmClusterDetailsComputeModelEnum = map[string]CreateCloudAutonomousVmClusterDetailsComputeModelEnum{
+	"ECPU": CreateCloudAutonomousVmClusterDetailsComputeModelEcpu,
+	"OCPU": CreateCloudAutonomousVmClusterDetailsComputeModelOcpu,
+}
+
+var mappingCreateCloudAutonomousVmClusterDetailsComputeModelEnumLowerCase = map[string]CreateCloudAutonomousVmClusterDetailsComputeModelEnum{
+	"ecpu": CreateCloudAutonomousVmClusterDetailsComputeModelEcpu,
+	"ocpu": CreateCloudAutonomousVmClusterDetailsComputeModelOcpu,
+}
+
+// GetCreateCloudAutonomousVmClusterDetailsComputeModelEnumValues Enumerates the set of values for CreateCloudAutonomousVmClusterDetailsComputeModelEnum
+func GetCreateCloudAutonomousVmClusterDetailsComputeModelEnumValues() []CreateCloudAutonomousVmClusterDetailsComputeModelEnum {
+	values := make([]CreateCloudAutonomousVmClusterDetailsComputeModelEnum, 0)
+	for _, v := range mappingCreateCloudAutonomousVmClusterDetailsComputeModelEnum {
+		values = append(values, v)
+	}
+	return values
+}
+
+// GetCreateCloudAutonomousVmClusterDetailsComputeModelEnumStringValues Enumerates the set of values in String for CreateCloudAutonomousVmClusterDetailsComputeModelEnum
+func GetCreateCloudAutonomousVmClusterDetailsComputeModelEnumStringValues() []string {
+	return []string{
+		"ECPU",
+		"OCPU",
+	}
+}
+
+// GetMappingCreateCloudAutonomousVmClusterDetailsComputeModelEnum performs case Insensitive comparison on enum value and return the desired enum
+func GetMappingCreateCloudAutonomousVmClusterDetailsComputeModelEnum(val string) (CreateCloudAutonomousVmClusterDetailsComputeModelEnum, bool) {
+	enum, ok := mappingCreateCloudAutonomousVmClusterDetailsComputeModelEnumLowerCase[strings.ToLower(val)]
+	return enum, ok
 }
 
 // CreateCloudAutonomousVmClusterDetailsLicenseModelEnum Enum with underlying type: string

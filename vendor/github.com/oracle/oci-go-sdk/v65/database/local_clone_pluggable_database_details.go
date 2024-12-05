@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -15,7 +15,8 @@ import (
 	"strings"
 )
 
-// LocalClonePluggableDatabaseDetails Parameters for cloning a pluggable database (PDB) within the same database (CDB).
+// LocalClonePluggableDatabaseDetails **Deprecated.** Use CreatePluggableDatabaseDetails for Pluggable Database LocalClone Operation.
+// Parameters for cloning a pluggable database (PDB) within the same database (CDB).
 // **Warning:** Oracle recommends that you avoid using any confidential information when you supply string values using the API.
 type LocalClonePluggableDatabaseDetails struct {
 

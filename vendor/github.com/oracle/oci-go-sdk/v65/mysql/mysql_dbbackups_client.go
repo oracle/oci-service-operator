@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -17,7 +17,7 @@ import (
 	"net/http"
 )
 
-//DbBackupsClient a client for DbBackups
+// DbBackupsClient a client for DbBackups
 type DbBackupsClient struct {
 	common.BaseClient
 	config *common.ConfigurationProvider
@@ -26,6 +26,9 @@ type DbBackupsClient struct {
 // NewDbBackupsClientWithConfigurationProvider Creates a new default DbBackups client with the given configuration provider.
 // the configuration provider will be used for the default signer as well as reading the region
 func NewDbBackupsClientWithConfigurationProvider(configProvider common.ConfigurationProvider) (client DbBackupsClient, err error) {
+	if enabled := common.CheckForEnabledServices("mysql"); !enabled {
+		return client, fmt.Errorf("the Developer Tool configuration disabled this service, this behavior is controlled by OciSdkEnabledServicesMap variables. Please check if your local developer-tool-configuration.json file configured the service you're targeting or contact the cloud provider on the availability of this service")
+	}
 	provider, err := auth.GetGenericConfigurationProvider(configProvider)
 	if err != nil {
 		return client, err
@@ -39,7 +42,8 @@ func NewDbBackupsClientWithConfigurationProvider(configProvider common.Configura
 
 // NewDbBackupsClientWithOboToken Creates a new default DbBackups client with the given configuration provider.
 // The obotoken will be added to default headers and signed; the configuration provider will be used for the signer
-//  as well as reading the region
+//
+//	as well as reading the region
 func NewDbBackupsClientWithOboToken(configProvider common.ConfigurationProvider, oboToken string) (client DbBackupsClient, err error) {
 	baseClient, err := common.NewClientWithOboToken(configProvider, oboToken)
 	if err != nil {
@@ -76,7 +80,7 @@ func (client *DbBackupsClient) setConfigurationProvider(configProvider common.Co
 	region, _ := configProvider.Region()
 	client.SetRegion(region)
 	if client.Host == "" {
-		return fmt.Errorf("Invalid region or Host. Endpoint cannot be constructed without endpointServiceName or serviceEndpointTemplate for a dotted region")
+		return fmt.Errorf("invalid region or Host. Endpoint cannot be constructed without endpointServiceName or serviceEndpointTemplate for a dotted region")
 	}
 	client.config = &configProvider
 	return nil
@@ -90,7 +94,7 @@ func (client *DbBackupsClient) ConfigurationProvider() *common.ConfigurationProv
 // ChangeBackupCompartment Moves a DB System Backup into a different compartment.
 // When provided, If-Match is checked against ETag values of the Backup.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/ChangeBackupCompartment.go.html to see an example of how to use ChangeBackupCompartment API.
 func (client DbBackupsClient) ChangeBackupCompartment(ctx context.Context, request ChangeBackupCompartmentRequest) (response ChangeBackupCompartmentResponse, err error) {
@@ -152,7 +156,7 @@ func (client DbBackupsClient) changeBackupCompartment(ctx context.Context, reque
 
 // CreateBackup Create a backup of a DB System.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/CreateBackup.go.html to see an example of how to use CreateBackup API.
 // A default retry strategy applies to this operation CreateBackup()
@@ -215,7 +219,7 @@ func (client DbBackupsClient) createBackup(ctx context.Context, request common.O
 
 // DeleteBackup Delete a Backup.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/DeleteBackup.go.html to see an example of how to use DeleteBackup API.
 // A default retry strategy applies to this operation DeleteBackup()
@@ -273,7 +277,7 @@ func (client DbBackupsClient) deleteBackup(ctx context.Context, request common.O
 
 // GetBackup Get information about the specified Backup
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/GetBackup.go.html to see an example of how to use GetBackup API.
 // A default retry strategy applies to this operation GetBackup()
@@ -331,7 +335,7 @@ func (client DbBackupsClient) getBackup(ctx context.Context, request common.OCIR
 
 // ListBackups Get a list of DB System backups.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/ListBackups.go.html to see an example of how to use ListBackups API.
 // A default retry strategy applies to this operation ListBackups()
@@ -389,7 +393,7 @@ func (client DbBackupsClient) listBackups(ctx context.Context, request common.OC
 
 // UpdateBackup Update the metadata of a Backup. Metadata such as the displayName or description
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/UpdateBackup.go.html to see an example of how to use UpdateBackup API.
 // A default retry strategy applies to this operation UpdateBackup()

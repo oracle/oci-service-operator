@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -50,12 +50,12 @@ func (m *databaseconnectioncredentials) UnmarshalPolymorphicJSON(data []byte) (i
 
 	var err error
 	switch m.CredentialType {
-	case "NAME_REFERENCE":
-		mm := DatabaseConnectionCredentailsByName{}
-		err = json.Unmarshal(data, &mm)
-		return mm, err
 	case "SSL_DETAILS":
 		mm := DatabaseSslConnectionCredentials{}
+		err = json.Unmarshal(data, &mm)
+		return mm, err
+	case "NAME_REFERENCE":
+		mm := DatabaseConnectionCredentialsByName{}
 		err = json.Unmarshal(data, &mm)
 		return mm, err
 	case "DETAILS":
@@ -63,6 +63,7 @@ func (m *databaseconnectioncredentials) UnmarshalPolymorphicJSON(data []byte) (i
 		err = json.Unmarshal(data, &mm)
 		return mm, err
 	default:
+		common.Logf("Recieved unsupported enum value for DatabaseConnectionCredentials: %s.", m.CredentialType)
 		return *m, nil
 	}
 }

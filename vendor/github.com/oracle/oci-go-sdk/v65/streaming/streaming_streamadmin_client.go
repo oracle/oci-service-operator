@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -17,7 +17,7 @@ import (
 	"net/http"
 )
 
-//StreamAdminClient a client for StreamAdmin
+// StreamAdminClient a client for StreamAdmin
 type StreamAdminClient struct {
 	common.BaseClient
 	config *common.ConfigurationProvider
@@ -26,6 +26,9 @@ type StreamAdminClient struct {
 // NewStreamAdminClientWithConfigurationProvider Creates a new default StreamAdmin client with the given configuration provider.
 // the configuration provider will be used for the default signer as well as reading the region
 func NewStreamAdminClientWithConfigurationProvider(configProvider common.ConfigurationProvider) (client StreamAdminClient, err error) {
+	if enabled := common.CheckForEnabledServices("streaming"); !enabled {
+		return client, fmt.Errorf("the Developer Tool configuration disabled this service, this behavior is controlled by OciSdkEnabledServicesMap variables. Please check if your local developer-tool-configuration.json file configured the service you're targeting or contact the cloud provider on the availability of this service")
+	}
 	provider, err := auth.GetGenericConfigurationProvider(configProvider)
 	if err != nil {
 		return client, err
@@ -39,7 +42,8 @@ func NewStreamAdminClientWithConfigurationProvider(configProvider common.Configu
 
 // NewStreamAdminClientWithOboToken Creates a new default StreamAdmin client with the given configuration provider.
 // The obotoken will be added to default headers and signed; the configuration provider will be used for the signer
-//  as well as reading the region
+//
+//	as well as reading the region
 func NewStreamAdminClientWithOboToken(configProvider common.ConfigurationProvider, oboToken string) (client StreamAdminClient, err error) {
 	baseClient, err := common.NewClientWithOboToken(configProvider, oboToken)
 	if err != nil {
@@ -76,7 +80,7 @@ func (client *StreamAdminClient) setConfigurationProvider(configProvider common.
 	region, _ := configProvider.Region()
 	client.SetRegion(region)
 	if client.Host == "" {
-		return fmt.Errorf("Invalid region or Host. Endpoint cannot be constructed without endpointServiceName or serviceEndpointTemplate for a dotted region")
+		return fmt.Errorf("invalid region or Host. Endpoint cannot be constructed without endpointServiceName or serviceEndpointTemplate for a dotted region")
 	}
 	client.config = &configProvider
 	return nil
@@ -89,7 +93,7 @@ func (client *StreamAdminClient) ConfigurationProvider() *common.ConfigurationPr
 
 // ChangeConnectHarnessCompartment Moves a resource into a different compartment. When provided, If-Match is checked against ETag values of the resource.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/streaming/ChangeConnectHarnessCompartment.go.html to see an example of how to use ChangeConnectHarnessCompartment API.
 // A default retry strategy applies to this operation ChangeConnectHarnessCompartment()
@@ -149,7 +153,7 @@ func (client StreamAdminClient) changeConnectHarnessCompartment(ctx context.Cont
 // When provided, If-Match is checked against ETag values of the resource.
 // The stream will also be moved into the default stream pool in the destination compartment.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/streaming/ChangeStreamCompartment.go.html to see an example of how to use ChangeStreamCompartment API.
 // A default retry strategy applies to this operation ChangeStreamCompartment()
@@ -207,7 +211,7 @@ func (client StreamAdminClient) changeStreamCompartment(ctx context.Context, req
 
 // ChangeStreamPoolCompartment Moves a resource into a different compartment. When provided, If-Match is checked against ETag values of the resource.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/streaming/ChangeStreamPoolCompartment.go.html to see an example of how to use ChangeStreamPoolCompartment API.
 // A default retry strategy applies to this operation ChangeStreamPoolCompartment()
@@ -266,7 +270,7 @@ func (client StreamAdminClient) changeStreamPoolCompartment(ctx context.Context,
 // CreateConnectHarness Starts the provisioning of a new connect harness.
 // To track the progress of the provisioning, you can periodically call ConnectHarness object tells you its current state.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/streaming/CreateConnectHarness.go.html to see an example of how to use CreateConnectHarness API.
 // A default retry strategy applies to this operation CreateConnectHarness()
@@ -333,7 +337,7 @@ func (client StreamAdminClient) createConnectHarness(ctx context.Context, reques
 // To track the progress of the provisioning, you can periodically call GetStream.
 // In the response, the `lifecycleState` parameter of the Stream object tells you its current state.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/streaming/CreateStream.go.html to see an example of how to use CreateStream API.
 // A default retry strategy applies to this operation CreateStream()
@@ -393,7 +397,7 @@ func (client StreamAdminClient) createStream(ctx context.Context, request common
 // To track the progress of the provisioning, you can periodically call GetStreamPool.
 // In the response, the `lifecycleState` parameter of the object tells you its current state.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/streaming/CreateStreamPool.go.html to see an example of how to use CreateStreamPool API.
 // A default retry strategy applies to this operation CreateStreamPool()
@@ -460,7 +464,7 @@ func (client StreamAdminClient) createStreamPool(ctx context.Context, request co
 // lifecycle state as `DELETED`, then the connect harness has been deleted. If the call returns a "404 Not Found" error, that means all records of the
 // connect harness have been deleted.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/streaming/DeleteConnectHarness.go.html to see an example of how to use DeleteConnectHarness API.
 // A default retry strategy applies to this operation DeleteConnectHarness()
@@ -522,7 +526,7 @@ func (client StreamAdminClient) deleteConnectHarness(ctx context.Context, reques
 // lifecycle state as `DELETED`, then the stream has been deleted. If the call returns a "404 Not Found" error, that means all records of the
 // stream have been deleted.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/streaming/DeleteStream.go.html to see an example of how to use DeleteStream API.
 // A default retry strategy applies to this operation DeleteStream()
@@ -581,7 +585,7 @@ func (client StreamAdminClient) deleteStream(ctx context.Context, request common
 // DeleteStreamPool Deletes a stream pool. All containing streams will also be deleted.
 // The default stream pool of a compartment cannot be deleted.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/streaming/DeleteStreamPool.go.html to see an example of how to use DeleteStreamPool API.
 // A default retry strategy applies to this operation DeleteStreamPool()
@@ -639,7 +643,7 @@ func (client StreamAdminClient) deleteStreamPool(ctx context.Context, request co
 
 // GetConnectHarness Gets detailed information about a connect harness.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/streaming/GetConnectHarness.go.html to see an example of how to use GetConnectHarness API.
 // A default retry strategy applies to this operation GetConnectHarness()
@@ -697,7 +701,7 @@ func (client StreamAdminClient) getConnectHarness(ctx context.Context, request c
 
 // GetStream Gets detailed information about a stream, including the number of partitions.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/streaming/GetStream.go.html to see an example of how to use GetStream API.
 // A default retry strategy applies to this operation GetStream()
@@ -755,7 +759,7 @@ func (client StreamAdminClient) getStream(ctx context.Context, request common.OC
 
 // GetStreamPool Gets detailed information about the stream pool, such as Kafka settings.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/streaming/GetStreamPool.go.html to see an example of how to use GetStreamPool API.
 // A default retry strategy applies to this operation GetStreamPool()
@@ -813,7 +817,7 @@ func (client StreamAdminClient) getStreamPool(ctx context.Context, request commo
 
 // ListConnectHarnesses Lists the connectharness.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/streaming/ListConnectHarnesses.go.html to see an example of how to use ListConnectHarnesses API.
 // A default retry strategy applies to this operation ListConnectHarnesses()
@@ -871,7 +875,7 @@ func (client StreamAdminClient) listConnectHarnesses(ctx context.Context, reques
 
 // ListStreamPools List the stream pools for a given compartment ID.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/streaming/ListStreamPools.go.html to see an example of how to use ListStreamPools API.
 // A default retry strategy applies to this operation ListStreamPools()
@@ -932,7 +936,7 @@ func (client StreamAdminClient) listStreamPools(ctx context.Context, request com
 // If the stream pool id is specified, the action will be scoped to that stream pool.
 // The compartment id and stream pool id cannot be specified at the same time.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/streaming/ListStreams.go.html to see an example of how to use ListStreams API.
 // A default retry strategy applies to this operation ListStreams()
@@ -990,7 +994,7 @@ func (client StreamAdminClient) listStreams(ctx context.Context, request common.
 
 // UpdateConnectHarness Updates the tags applied to the connect harness.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/streaming/UpdateConnectHarness.go.html to see an example of how to use UpdateConnectHarness API.
 // A default retry strategy applies to this operation UpdateConnectHarness()
@@ -1048,7 +1052,7 @@ func (client StreamAdminClient) updateConnectHarness(ctx context.Context, reques
 
 // UpdateStream Updates the stream. Only specified values will be updated.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/streaming/UpdateStream.go.html to see an example of how to use UpdateStream API.
 // A default retry strategy applies to this operation UpdateStream()
@@ -1106,7 +1110,7 @@ func (client StreamAdminClient) updateStream(ctx context.Context, request common
 
 // UpdateStreamPool Updates the specified stream pool.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/streaming/UpdateStreamPool.go.html to see an example of how to use UpdateStreamPool API.
 // A default retry strategy applies to this operation UpdateStreamPool()

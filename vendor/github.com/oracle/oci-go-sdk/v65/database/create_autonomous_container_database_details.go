@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -27,11 +27,17 @@ type CreateAutonomousContainerDatabaseDetails struct {
 	// **Deprecated.** The `DB_UNIQUE_NAME` value is set by Oracle Cloud Infrastructure.  Do not specify a value for this parameter. Specifying a value for this field will cause Terraform operations to fail.
 	DbUniqueName *string `mandatory:"false" json:"dbUniqueName"`
 
+	// The Database name for the Autonomous Container Database. The name must be unique within the Cloud Autonomous VM Cluster, starting with an alphabetic character, followed by 1 to 7 alphanumeric characters.
+	DbName *string `mandatory:"false" json:"dbName"`
+
 	// The service level agreement type of the Autonomous Container Database. The default is STANDARD. For an autonomous dataguard Autonomous Container Database, the specified Autonomous Exadata Infrastructure must be associated with a remote Autonomous Exadata Infrastructure.
 	ServiceLevelAgreementType CreateAutonomousContainerDatabaseDetailsServiceLevelAgreementTypeEnum `mandatory:"false" json:"serviceLevelAgreementType,omitempty"`
 
 	// **No longer used.** This parameter is no longer used for Autonomous Database on dedicated Exadata infrasture. Specify a `cloudAutonomousVmClusterId` instead. Using this parameter will cause the operation to fail.
 	AutonomousExadataInfrastructureId *string `mandatory:"false" json:"autonomousExadataInfrastructureId"`
+
+	// The base version for the Autonomous Container Database.
+	DbVersion *string `mandatory:"false" json:"dbVersion"`
 
 	// *No longer used.* This parameter is no longer used for Autonomous Database on dedicated Exadata infrasture. Specify a `peerCloudAutonomousVmClusterId` instead. Using this parameter will cause the operation to fail.
 	PeerAutonomousExadataInfrastructureId *string `mandatory:"false" json:"peerAutonomousExadataInfrastructureId"`
@@ -43,6 +49,9 @@ type CreateAutonomousContainerDatabaseDetails struct {
 	// Oracle Data Guard Protection Modes (http://docs.oracle.com/database/122/SBYDB/oracle-data-guard-protection-modes.htm#SBYDB02000)
 	// in the Oracle Data Guard documentation.
 	ProtectionMode CreateAutonomousContainerDatabaseDetailsProtectionModeEnum `mandatory:"false" json:"protectionMode,omitempty"`
+
+	// The lag time for my preference based on data loss tolerance in seconds.
+	FastStartFailOverLagLimitInSeconds *int `mandatory:"false" json:"fastStartFailOverLagLimitInSeconds"`
 
 	// Indicates whether Automatic Failover is enabled for Autonomous Container Database Dataguard Association
 	IsAutomaticFailoverEnabled *bool `mandatory:"false" json:"isAutomaticFailoverEnabled"`
@@ -77,6 +86,12 @@ type CreateAutonomousContainerDatabaseDetails struct {
 	// This value represents the number of days before scheduled maintenance of the primary database.
 	StandbyMaintenanceBufferInDays *int `mandatory:"false" json:"standbyMaintenanceBufferInDays"`
 
+	// The next maintenance version preference.
+	VersionPreference CreateAutonomousContainerDatabaseDetailsVersionPreferenceEnum `mandatory:"false" json:"versionPreference,omitempty"`
+
+	// Indicates if an automatic DST Time Zone file update is enabled for the Autonomous Container Database. If enabled along with Release Update, patching will be done in a Non-Rolling manner.
+	IsDstFileUpdateEnabled *bool `mandatory:"false" json:"isDstFileUpdateEnabled"`
+
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
 	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
@@ -91,14 +106,26 @@ type CreateAutonomousContainerDatabaseDetails struct {
 	// The OCID of the key container that is used as the master encryption key in database transparent data encryption (TDE) operations.
 	KmsKeyId *string `mandatory:"false" json:"kmsKeyId"`
 
-	// The OCID of the key container version that is used in database transparent data encryption (TDE) operations KMS Key can have multiple key versions. If none is specified, the current key version (latest) of the Key Id is used for the operation.
+	// The OCID of the key container version that is used in database transparent data encryption (TDE) operations KMS Key can have multiple key versions. If none is specified, the current key version (latest) of the Key Id is used for the operation. Autonomous Database Serverless does not use key versions, hence is not applicable for Autonomous Database Serverless instances.
 	KmsKeyVersionId *string `mandatory:"false" json:"kmsKeyVersionId"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Oracle Cloud Infrastructure vault (https://docs.cloud.oracle.com/Content/KeyManagement/Concepts/keyoverview.htm#concepts).
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Oracle Cloud Infrastructure vault (https://docs.cloud.oracle.com/Content/KeyManagement/Concepts/keyoverview.htm#concepts). This parameter and `secretId` are required for Customer Managed Keys.
 	VaultId *string `mandatory:"false" json:"vaultId"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the key store.
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the key store of Oracle Vault.
 	KeyStoreId *string `mandatory:"false" json:"keyStoreId"`
+
+	// The value above which an Autonomous Database will be split across multiple nodes. This value defaults to 16 when the "CPU per VM" value on the Autonomous VM Cluster is greater than 16. Otherwise, it defaults to the "CPU per VM" value.
+	DbSplitThreshold *int `mandatory:"false" json:"dbSplitThreshold"`
+
+	// The percentage of CPUs to reserve for a single node Autonomous Database, in increments of 25.
+	VmFailoverReservation *int `mandatory:"false" json:"vmFailoverReservation"`
+
+	// This option determines whether to open an Autonomous Database across the maximum number of nodes or the least number of nodes. The default will be for the minimum number of VMs.
+	DistributionAffinity CreateAutonomousContainerDatabaseDetailsDistributionAffinityEnum `mandatory:"false" json:"distributionAffinity,omitempty"`
+
+	// Enabling SHARED server architecture enables a database server to allow many client processes to share very few server processes, thereby increasing the number of supported users.
+	NetServicesArchitecture CreateAutonomousContainerDatabaseDetailsNetServicesArchitectureEnum `mandatory:"false" json:"netServicesArchitecture,omitempty"`
 }
 
 func (m CreateAutonomousContainerDatabaseDetails) String() string {
@@ -119,6 +146,15 @@ func (m CreateAutonomousContainerDatabaseDetails) ValidateEnumValue() (bool, err
 	}
 	if _, ok := GetMappingCreateAutonomousContainerDatabaseDetailsProtectionModeEnum(string(m.ProtectionMode)); !ok && m.ProtectionMode != "" {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for ProtectionMode: %s. Supported values are: %s.", m.ProtectionMode, strings.Join(GetCreateAutonomousContainerDatabaseDetailsProtectionModeEnumStringValues(), ",")))
+	}
+	if _, ok := GetMappingCreateAutonomousContainerDatabaseDetailsVersionPreferenceEnum(string(m.VersionPreference)); !ok && m.VersionPreference != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for VersionPreference: %s. Supported values are: %s.", m.VersionPreference, strings.Join(GetCreateAutonomousContainerDatabaseDetailsVersionPreferenceEnumStringValues(), ",")))
+	}
+	if _, ok := GetMappingCreateAutonomousContainerDatabaseDetailsDistributionAffinityEnum(string(m.DistributionAffinity)); !ok && m.DistributionAffinity != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for DistributionAffinity: %s. Supported values are: %s.", m.DistributionAffinity, strings.Join(GetCreateAutonomousContainerDatabaseDetailsDistributionAffinityEnumStringValues(), ",")))
+	}
+	if _, ok := GetMappingCreateAutonomousContainerDatabaseDetailsNetServicesArchitectureEnum(string(m.NetServicesArchitecture)); !ok && m.NetServicesArchitecture != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for NetServicesArchitecture: %s. Supported values are: %s.", m.NetServicesArchitecture, strings.Join(GetCreateAutonomousContainerDatabaseDetailsNetServicesArchitectureEnumStringValues(), ",")))
 	}
 	if len(errMessage) > 0 {
 		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
@@ -249,5 +285,131 @@ func GetCreateAutonomousContainerDatabaseDetailsPatchModelEnumStringValues() []s
 // GetMappingCreateAutonomousContainerDatabaseDetailsPatchModelEnum performs case Insensitive comparison on enum value and return the desired enum
 func GetMappingCreateAutonomousContainerDatabaseDetailsPatchModelEnum(val string) (CreateAutonomousContainerDatabaseDetailsPatchModelEnum, bool) {
 	enum, ok := mappingCreateAutonomousContainerDatabaseDetailsPatchModelEnumLowerCase[strings.ToLower(val)]
+	return enum, ok
+}
+
+// CreateAutonomousContainerDatabaseDetailsVersionPreferenceEnum Enum with underlying type: string
+type CreateAutonomousContainerDatabaseDetailsVersionPreferenceEnum string
+
+// Set of constants representing the allowable values for CreateAutonomousContainerDatabaseDetailsVersionPreferenceEnum
+const (
+	CreateAutonomousContainerDatabaseDetailsVersionPreferenceNextReleaseUpdate   CreateAutonomousContainerDatabaseDetailsVersionPreferenceEnum = "NEXT_RELEASE_UPDATE"
+	CreateAutonomousContainerDatabaseDetailsVersionPreferenceLatestReleaseUpdate CreateAutonomousContainerDatabaseDetailsVersionPreferenceEnum = "LATEST_RELEASE_UPDATE"
+)
+
+var mappingCreateAutonomousContainerDatabaseDetailsVersionPreferenceEnum = map[string]CreateAutonomousContainerDatabaseDetailsVersionPreferenceEnum{
+	"NEXT_RELEASE_UPDATE":   CreateAutonomousContainerDatabaseDetailsVersionPreferenceNextReleaseUpdate,
+	"LATEST_RELEASE_UPDATE": CreateAutonomousContainerDatabaseDetailsVersionPreferenceLatestReleaseUpdate,
+}
+
+var mappingCreateAutonomousContainerDatabaseDetailsVersionPreferenceEnumLowerCase = map[string]CreateAutonomousContainerDatabaseDetailsVersionPreferenceEnum{
+	"next_release_update":   CreateAutonomousContainerDatabaseDetailsVersionPreferenceNextReleaseUpdate,
+	"latest_release_update": CreateAutonomousContainerDatabaseDetailsVersionPreferenceLatestReleaseUpdate,
+}
+
+// GetCreateAutonomousContainerDatabaseDetailsVersionPreferenceEnumValues Enumerates the set of values for CreateAutonomousContainerDatabaseDetailsVersionPreferenceEnum
+func GetCreateAutonomousContainerDatabaseDetailsVersionPreferenceEnumValues() []CreateAutonomousContainerDatabaseDetailsVersionPreferenceEnum {
+	values := make([]CreateAutonomousContainerDatabaseDetailsVersionPreferenceEnum, 0)
+	for _, v := range mappingCreateAutonomousContainerDatabaseDetailsVersionPreferenceEnum {
+		values = append(values, v)
+	}
+	return values
+}
+
+// GetCreateAutonomousContainerDatabaseDetailsVersionPreferenceEnumStringValues Enumerates the set of values in String for CreateAutonomousContainerDatabaseDetailsVersionPreferenceEnum
+func GetCreateAutonomousContainerDatabaseDetailsVersionPreferenceEnumStringValues() []string {
+	return []string{
+		"NEXT_RELEASE_UPDATE",
+		"LATEST_RELEASE_UPDATE",
+	}
+}
+
+// GetMappingCreateAutonomousContainerDatabaseDetailsVersionPreferenceEnum performs case Insensitive comparison on enum value and return the desired enum
+func GetMappingCreateAutonomousContainerDatabaseDetailsVersionPreferenceEnum(val string) (CreateAutonomousContainerDatabaseDetailsVersionPreferenceEnum, bool) {
+	enum, ok := mappingCreateAutonomousContainerDatabaseDetailsVersionPreferenceEnumLowerCase[strings.ToLower(val)]
+	return enum, ok
+}
+
+// CreateAutonomousContainerDatabaseDetailsDistributionAffinityEnum Enum with underlying type: string
+type CreateAutonomousContainerDatabaseDetailsDistributionAffinityEnum string
+
+// Set of constants representing the allowable values for CreateAutonomousContainerDatabaseDetailsDistributionAffinityEnum
+const (
+	CreateAutonomousContainerDatabaseDetailsDistributionAffinityMinimumDistribution CreateAutonomousContainerDatabaseDetailsDistributionAffinityEnum = "MINIMUM_DISTRIBUTION"
+	CreateAutonomousContainerDatabaseDetailsDistributionAffinityMaximumDistribution CreateAutonomousContainerDatabaseDetailsDistributionAffinityEnum = "MAXIMUM_DISTRIBUTION"
+)
+
+var mappingCreateAutonomousContainerDatabaseDetailsDistributionAffinityEnum = map[string]CreateAutonomousContainerDatabaseDetailsDistributionAffinityEnum{
+	"MINIMUM_DISTRIBUTION": CreateAutonomousContainerDatabaseDetailsDistributionAffinityMinimumDistribution,
+	"MAXIMUM_DISTRIBUTION": CreateAutonomousContainerDatabaseDetailsDistributionAffinityMaximumDistribution,
+}
+
+var mappingCreateAutonomousContainerDatabaseDetailsDistributionAffinityEnumLowerCase = map[string]CreateAutonomousContainerDatabaseDetailsDistributionAffinityEnum{
+	"minimum_distribution": CreateAutonomousContainerDatabaseDetailsDistributionAffinityMinimumDistribution,
+	"maximum_distribution": CreateAutonomousContainerDatabaseDetailsDistributionAffinityMaximumDistribution,
+}
+
+// GetCreateAutonomousContainerDatabaseDetailsDistributionAffinityEnumValues Enumerates the set of values for CreateAutonomousContainerDatabaseDetailsDistributionAffinityEnum
+func GetCreateAutonomousContainerDatabaseDetailsDistributionAffinityEnumValues() []CreateAutonomousContainerDatabaseDetailsDistributionAffinityEnum {
+	values := make([]CreateAutonomousContainerDatabaseDetailsDistributionAffinityEnum, 0)
+	for _, v := range mappingCreateAutonomousContainerDatabaseDetailsDistributionAffinityEnum {
+		values = append(values, v)
+	}
+	return values
+}
+
+// GetCreateAutonomousContainerDatabaseDetailsDistributionAffinityEnumStringValues Enumerates the set of values in String for CreateAutonomousContainerDatabaseDetailsDistributionAffinityEnum
+func GetCreateAutonomousContainerDatabaseDetailsDistributionAffinityEnumStringValues() []string {
+	return []string{
+		"MINIMUM_DISTRIBUTION",
+		"MAXIMUM_DISTRIBUTION",
+	}
+}
+
+// GetMappingCreateAutonomousContainerDatabaseDetailsDistributionAffinityEnum performs case Insensitive comparison on enum value and return the desired enum
+func GetMappingCreateAutonomousContainerDatabaseDetailsDistributionAffinityEnum(val string) (CreateAutonomousContainerDatabaseDetailsDistributionAffinityEnum, bool) {
+	enum, ok := mappingCreateAutonomousContainerDatabaseDetailsDistributionAffinityEnumLowerCase[strings.ToLower(val)]
+	return enum, ok
+}
+
+// CreateAutonomousContainerDatabaseDetailsNetServicesArchitectureEnum Enum with underlying type: string
+type CreateAutonomousContainerDatabaseDetailsNetServicesArchitectureEnum string
+
+// Set of constants representing the allowable values for CreateAutonomousContainerDatabaseDetailsNetServicesArchitectureEnum
+const (
+	CreateAutonomousContainerDatabaseDetailsNetServicesArchitectureDedicated CreateAutonomousContainerDatabaseDetailsNetServicesArchitectureEnum = "DEDICATED"
+	CreateAutonomousContainerDatabaseDetailsNetServicesArchitectureShared    CreateAutonomousContainerDatabaseDetailsNetServicesArchitectureEnum = "SHARED"
+)
+
+var mappingCreateAutonomousContainerDatabaseDetailsNetServicesArchitectureEnum = map[string]CreateAutonomousContainerDatabaseDetailsNetServicesArchitectureEnum{
+	"DEDICATED": CreateAutonomousContainerDatabaseDetailsNetServicesArchitectureDedicated,
+	"SHARED":    CreateAutonomousContainerDatabaseDetailsNetServicesArchitectureShared,
+}
+
+var mappingCreateAutonomousContainerDatabaseDetailsNetServicesArchitectureEnumLowerCase = map[string]CreateAutonomousContainerDatabaseDetailsNetServicesArchitectureEnum{
+	"dedicated": CreateAutonomousContainerDatabaseDetailsNetServicesArchitectureDedicated,
+	"shared":    CreateAutonomousContainerDatabaseDetailsNetServicesArchitectureShared,
+}
+
+// GetCreateAutonomousContainerDatabaseDetailsNetServicesArchitectureEnumValues Enumerates the set of values for CreateAutonomousContainerDatabaseDetailsNetServicesArchitectureEnum
+func GetCreateAutonomousContainerDatabaseDetailsNetServicesArchitectureEnumValues() []CreateAutonomousContainerDatabaseDetailsNetServicesArchitectureEnum {
+	values := make([]CreateAutonomousContainerDatabaseDetailsNetServicesArchitectureEnum, 0)
+	for _, v := range mappingCreateAutonomousContainerDatabaseDetailsNetServicesArchitectureEnum {
+		values = append(values, v)
+	}
+	return values
+}
+
+// GetCreateAutonomousContainerDatabaseDetailsNetServicesArchitectureEnumStringValues Enumerates the set of values in String for CreateAutonomousContainerDatabaseDetailsNetServicesArchitectureEnum
+func GetCreateAutonomousContainerDatabaseDetailsNetServicesArchitectureEnumStringValues() []string {
+	return []string{
+		"DEDICATED",
+		"SHARED",
+	}
+}
+
+// GetMappingCreateAutonomousContainerDatabaseDetailsNetServicesArchitectureEnum performs case Insensitive comparison on enum value and return the desired enum
+func GetMappingCreateAutonomousContainerDatabaseDetailsNetServicesArchitectureEnum(val string) (CreateAutonomousContainerDatabaseDetailsNetServicesArchitectureEnum, bool) {
+	enum, ok := mappingCreateAutonomousContainerDatabaseDetailsNetServicesArchitectureEnumLowerCase[strings.ToLower(val)]
 	return enum, ok
 }

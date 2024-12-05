@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -65,11 +65,17 @@ type BackupSummary struct {
 	// The OCID of the key container that is used as the master encryption key in database transparent data encryption (TDE) operations.
 	KmsKeyId *string `mandatory:"false" json:"kmsKeyId"`
 
-	// The OCID of the key container version that is used in database transparent data encryption (TDE) operations KMS Key can have multiple key versions. If none is specified, the current key version (latest) of the Key Id is used for the operation.
+	// The OCID of the key container version that is used in database transparent data encryption (TDE) operations KMS Key can have multiple key versions. If none is specified, the current key version (latest) of the Key Id is used for the operation. Autonomous Database Serverless does not use key versions, hence is not applicable for Autonomous Database Serverless instances.
 	KmsKeyVersionId *string `mandatory:"false" json:"kmsKeyVersionId"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Oracle Cloud Infrastructure vault (https://docs.cloud.oracle.com/Content/KeyManagement/Concepts/keyoverview.htm#concepts).
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Oracle Cloud Infrastructure vault (https://docs.cloud.oracle.com/Content/KeyManagement/Concepts/keyoverview.htm#concepts). This parameter and `secretId` are required for Customer Managed Keys.
 	VaultId *string `mandatory:"false" json:"vaultId"`
+
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the key store of Oracle Vault.
+	KeyStoreId *string `mandatory:"false" json:"keyStoreId"`
+
+	// The wallet name for Oracle Key Vault.
+	KeyStoreWalletName *string `mandatory:"false" json:"keyStoreWalletName"`
 }
 
 func (m BackupSummary) String() string {
@@ -154,6 +160,8 @@ const (
 	BackupSummaryLifecycleStateDeleted   BackupSummaryLifecycleStateEnum = "DELETED"
 	BackupSummaryLifecycleStateFailed    BackupSummaryLifecycleStateEnum = "FAILED"
 	BackupSummaryLifecycleStateRestoring BackupSummaryLifecycleStateEnum = "RESTORING"
+	BackupSummaryLifecycleStateCanceling BackupSummaryLifecycleStateEnum = "CANCELING"
+	BackupSummaryLifecycleStateCanceled  BackupSummaryLifecycleStateEnum = "CANCELED"
 )
 
 var mappingBackupSummaryLifecycleStateEnum = map[string]BackupSummaryLifecycleStateEnum{
@@ -163,6 +171,8 @@ var mappingBackupSummaryLifecycleStateEnum = map[string]BackupSummaryLifecycleSt
 	"DELETED":   BackupSummaryLifecycleStateDeleted,
 	"FAILED":    BackupSummaryLifecycleStateFailed,
 	"RESTORING": BackupSummaryLifecycleStateRestoring,
+	"CANCELING": BackupSummaryLifecycleStateCanceling,
+	"CANCELED":  BackupSummaryLifecycleStateCanceled,
 }
 
 var mappingBackupSummaryLifecycleStateEnumLowerCase = map[string]BackupSummaryLifecycleStateEnum{
@@ -172,6 +182,8 @@ var mappingBackupSummaryLifecycleStateEnumLowerCase = map[string]BackupSummaryLi
 	"deleted":   BackupSummaryLifecycleStateDeleted,
 	"failed":    BackupSummaryLifecycleStateFailed,
 	"restoring": BackupSummaryLifecycleStateRestoring,
+	"canceling": BackupSummaryLifecycleStateCanceling,
+	"canceled":  BackupSummaryLifecycleStateCanceled,
 }
 
 // GetBackupSummaryLifecycleStateEnumValues Enumerates the set of values for BackupSummaryLifecycleStateEnum
@@ -192,6 +204,8 @@ func GetBackupSummaryLifecycleStateEnumStringValues() []string {
 		"DELETED",
 		"FAILED",
 		"RESTORING",
+		"CANCELING",
+		"CANCELED",
 	}
 }
 

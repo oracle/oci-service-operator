@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -76,6 +76,8 @@ type UpdateExadataInfrastructureDetails struct {
 	// using the UpdateExadatainfrastructure API.
 	IsCpsOfflineReportEnabled *bool `mandatory:"false" json:"isCpsOfflineReportEnabled"`
 
+	NetworkBondingModeDetails *NetworkBondingModeDetails `mandatory:"false" json:"networkBondingModeDetails"`
+
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
 	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
@@ -110,24 +112,27 @@ type UpdateExadataInfrastructureDetailsAdditionalComputeSystemModelEnum string
 
 // Set of constants representing the allowable values for UpdateExadataInfrastructureDetailsAdditionalComputeSystemModelEnum
 const (
-	UpdateExadataInfrastructureDetailsAdditionalComputeSystemModelX7  UpdateExadataInfrastructureDetailsAdditionalComputeSystemModelEnum = "X7"
-	UpdateExadataInfrastructureDetailsAdditionalComputeSystemModelX8  UpdateExadataInfrastructureDetailsAdditionalComputeSystemModelEnum = "X8"
-	UpdateExadataInfrastructureDetailsAdditionalComputeSystemModelX8m UpdateExadataInfrastructureDetailsAdditionalComputeSystemModelEnum = "X8M"
-	UpdateExadataInfrastructureDetailsAdditionalComputeSystemModelX9m UpdateExadataInfrastructureDetailsAdditionalComputeSystemModelEnum = "X9M"
+	UpdateExadataInfrastructureDetailsAdditionalComputeSystemModelX7   UpdateExadataInfrastructureDetailsAdditionalComputeSystemModelEnum = "X7"
+	UpdateExadataInfrastructureDetailsAdditionalComputeSystemModelX8   UpdateExadataInfrastructureDetailsAdditionalComputeSystemModelEnum = "X8"
+	UpdateExadataInfrastructureDetailsAdditionalComputeSystemModelX8m  UpdateExadataInfrastructureDetailsAdditionalComputeSystemModelEnum = "X8M"
+	UpdateExadataInfrastructureDetailsAdditionalComputeSystemModelX9m  UpdateExadataInfrastructureDetailsAdditionalComputeSystemModelEnum = "X9M"
+	UpdateExadataInfrastructureDetailsAdditionalComputeSystemModelX10m UpdateExadataInfrastructureDetailsAdditionalComputeSystemModelEnum = "X10M"
 )
 
 var mappingUpdateExadataInfrastructureDetailsAdditionalComputeSystemModelEnum = map[string]UpdateExadataInfrastructureDetailsAdditionalComputeSystemModelEnum{
-	"X7":  UpdateExadataInfrastructureDetailsAdditionalComputeSystemModelX7,
-	"X8":  UpdateExadataInfrastructureDetailsAdditionalComputeSystemModelX8,
-	"X8M": UpdateExadataInfrastructureDetailsAdditionalComputeSystemModelX8m,
-	"X9M": UpdateExadataInfrastructureDetailsAdditionalComputeSystemModelX9m,
+	"X7":   UpdateExadataInfrastructureDetailsAdditionalComputeSystemModelX7,
+	"X8":   UpdateExadataInfrastructureDetailsAdditionalComputeSystemModelX8,
+	"X8M":  UpdateExadataInfrastructureDetailsAdditionalComputeSystemModelX8m,
+	"X9M":  UpdateExadataInfrastructureDetailsAdditionalComputeSystemModelX9m,
+	"X10M": UpdateExadataInfrastructureDetailsAdditionalComputeSystemModelX10m,
 }
 
 var mappingUpdateExadataInfrastructureDetailsAdditionalComputeSystemModelEnumLowerCase = map[string]UpdateExadataInfrastructureDetailsAdditionalComputeSystemModelEnum{
-	"x7":  UpdateExadataInfrastructureDetailsAdditionalComputeSystemModelX7,
-	"x8":  UpdateExadataInfrastructureDetailsAdditionalComputeSystemModelX8,
-	"x8m": UpdateExadataInfrastructureDetailsAdditionalComputeSystemModelX8m,
-	"x9m": UpdateExadataInfrastructureDetailsAdditionalComputeSystemModelX9m,
+	"x7":   UpdateExadataInfrastructureDetailsAdditionalComputeSystemModelX7,
+	"x8":   UpdateExadataInfrastructureDetailsAdditionalComputeSystemModelX8,
+	"x8m":  UpdateExadataInfrastructureDetailsAdditionalComputeSystemModelX8m,
+	"x9m":  UpdateExadataInfrastructureDetailsAdditionalComputeSystemModelX9m,
+	"x10m": UpdateExadataInfrastructureDetailsAdditionalComputeSystemModelX10m,
 }
 
 // GetUpdateExadataInfrastructureDetailsAdditionalComputeSystemModelEnumValues Enumerates the set of values for UpdateExadataInfrastructureDetailsAdditionalComputeSystemModelEnum
@@ -146,6 +151,7 @@ func GetUpdateExadataInfrastructureDetailsAdditionalComputeSystemModelEnumString
 		"X8",
 		"X8M",
 		"X9M",
+		"X10M",
 	}
 }
 

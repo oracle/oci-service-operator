@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -56,7 +56,7 @@ type AutonomousDatabaseBackupSummary struct {
 	// Indicates whether the backup can be used to restore the associated Autonomous Database.
 	IsRestorable *bool `mandatory:"false" json:"isRestorable"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the key store.
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the key store of Oracle Vault.
 	KeyStoreId *string `mandatory:"false" json:"keyStoreId"`
 
 	// The wallet name for Oracle Key Vault.
@@ -65,11 +65,25 @@ type AutonomousDatabaseBackupSummary struct {
 	// The OCID of the key container that is used as the master encryption key in database transparent data encryption (TDE) operations.
 	KmsKeyId *string `mandatory:"false" json:"kmsKeyId"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Oracle Cloud Infrastructure vault (https://docs.cloud.oracle.com/Content/KeyManagement/Concepts/keyoverview.htm#concepts).
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Oracle Cloud Infrastructure vault (https://docs.cloud.oracle.com/Content/KeyManagement/Concepts/keyoverview.htm#concepts). This parameter and `secretId` are required for Customer Managed Keys.
 	VaultId *string `mandatory:"false" json:"vaultId"`
 
-	// The OCID of the key container version that is used in database transparent data encryption (TDE) operations KMS Key can have multiple key versions. If none is specified, the current key version (latest) of the Key Id is used for the operation.
+	// The OCID of the key container version that is used in database transparent data encryption (TDE) operations KMS Key can have multiple key versions. If none is specified, the current key version (latest) of the Key Id is used for the operation. Autonomous Database Serverless does not use key versions, hence is not applicable for Autonomous Database Serverless instances.
 	KmsKeyVersionId *string `mandatory:"false" json:"kmsKeyVersionId"`
+
+	// Retention period, in days, for long-term backups
+	RetentionPeriodInDays *int `mandatory:"false" json:"retentionPeriodInDays"`
+
+	// Timestamp until when the backup will be available
+	TimeAvailableTill *common.SDKTime `mandatory:"false" json:"timeAvailableTill"`
+
+	// A valid Oracle Database version for Autonomous Database.
+	DbVersion *string `mandatory:"false" json:"dbVersion"`
+
+	// The backup size in terrabytes (TB).
+	SizeInTBs *float64 `mandatory:"false" json:"sizeInTBs"`
+
+	BackupDestinationDetails *BackupDestinationDetails `mandatory:"false" json:"backupDestinationDetails"`
 }
 
 func (m AutonomousDatabaseBackupSummary) String() string {
@@ -101,16 +115,19 @@ type AutonomousDatabaseBackupSummaryTypeEnum string
 const (
 	AutonomousDatabaseBackupSummaryTypeIncremental AutonomousDatabaseBackupSummaryTypeEnum = "INCREMENTAL"
 	AutonomousDatabaseBackupSummaryTypeFull        AutonomousDatabaseBackupSummaryTypeEnum = "FULL"
+	AutonomousDatabaseBackupSummaryTypeLongterm    AutonomousDatabaseBackupSummaryTypeEnum = "LONGTERM"
 )
 
 var mappingAutonomousDatabaseBackupSummaryTypeEnum = map[string]AutonomousDatabaseBackupSummaryTypeEnum{
 	"INCREMENTAL": AutonomousDatabaseBackupSummaryTypeIncremental,
 	"FULL":        AutonomousDatabaseBackupSummaryTypeFull,
+	"LONGTERM":    AutonomousDatabaseBackupSummaryTypeLongterm,
 }
 
 var mappingAutonomousDatabaseBackupSummaryTypeEnumLowerCase = map[string]AutonomousDatabaseBackupSummaryTypeEnum{
 	"incremental": AutonomousDatabaseBackupSummaryTypeIncremental,
 	"full":        AutonomousDatabaseBackupSummaryTypeFull,
+	"longterm":    AutonomousDatabaseBackupSummaryTypeLongterm,
 }
 
 // GetAutonomousDatabaseBackupSummaryTypeEnumValues Enumerates the set of values for AutonomousDatabaseBackupSummaryTypeEnum
@@ -127,6 +144,7 @@ func GetAutonomousDatabaseBackupSummaryTypeEnumStringValues() []string {
 	return []string{
 		"INCREMENTAL",
 		"FULL",
+		"LONGTERM",
 	}
 }
 
@@ -146,6 +164,7 @@ const (
 	AutonomousDatabaseBackupSummaryLifecycleStateDeleting AutonomousDatabaseBackupSummaryLifecycleStateEnum = "DELETING"
 	AutonomousDatabaseBackupSummaryLifecycleStateDeleted  AutonomousDatabaseBackupSummaryLifecycleStateEnum = "DELETED"
 	AutonomousDatabaseBackupSummaryLifecycleStateFailed   AutonomousDatabaseBackupSummaryLifecycleStateEnum = "FAILED"
+	AutonomousDatabaseBackupSummaryLifecycleStateUpdating AutonomousDatabaseBackupSummaryLifecycleStateEnum = "UPDATING"
 )
 
 var mappingAutonomousDatabaseBackupSummaryLifecycleStateEnum = map[string]AutonomousDatabaseBackupSummaryLifecycleStateEnum{
@@ -154,6 +173,7 @@ var mappingAutonomousDatabaseBackupSummaryLifecycleStateEnum = map[string]Autono
 	"DELETING": AutonomousDatabaseBackupSummaryLifecycleStateDeleting,
 	"DELETED":  AutonomousDatabaseBackupSummaryLifecycleStateDeleted,
 	"FAILED":   AutonomousDatabaseBackupSummaryLifecycleStateFailed,
+	"UPDATING": AutonomousDatabaseBackupSummaryLifecycleStateUpdating,
 }
 
 var mappingAutonomousDatabaseBackupSummaryLifecycleStateEnumLowerCase = map[string]AutonomousDatabaseBackupSummaryLifecycleStateEnum{
@@ -162,6 +182,7 @@ var mappingAutonomousDatabaseBackupSummaryLifecycleStateEnumLowerCase = map[stri
 	"deleting": AutonomousDatabaseBackupSummaryLifecycleStateDeleting,
 	"deleted":  AutonomousDatabaseBackupSummaryLifecycleStateDeleted,
 	"failed":   AutonomousDatabaseBackupSummaryLifecycleStateFailed,
+	"updating": AutonomousDatabaseBackupSummaryLifecycleStateUpdating,
 }
 
 // GetAutonomousDatabaseBackupSummaryLifecycleStateEnumValues Enumerates the set of values for AutonomousDatabaseBackupSummaryLifecycleStateEnum
@@ -181,6 +202,7 @@ func GetAutonomousDatabaseBackupSummaryLifecycleStateEnumStringValues() []string
 		"DELETING",
 		"DELETED",
 		"FAILED",
+		"UPDATING",
 	}
 }
 

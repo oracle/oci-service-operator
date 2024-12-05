@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -17,49 +17,50 @@ import (
 
 // AutonomousDatabaseConnectionStrings Connection strings to connect to an Oracle Autonomous Database.
 // Example output for connection strings. See DatabaseConnectionStringProfile for additional details:
-//     	"connectionStrings": {
-//         "allConnectionStrings": {
-//           "HIGH": "adb.region.oraclecloud.com:1522/unique_id_databasename_high.adwc.oraclecloud.com",
-//           "LOW": "adb.region.oraclecloud.com:1522/unique_id_databasename_low.adwc.oraclecloud.com",
-//           "MEDIUM": "adb.region.oraclecloud.com:1522/unique_id_databasename_medium.adwc.oraclecloud.com"
-//         },
-//         "profiles": [
-//           {
-//             "displayName": "databasename_high",
-//             "value": "(description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.region.oraclecloud.com))(connect_data=(service_name=unique_id_databasename_high.adwc.oraclecloud.com))(security=(ssl_server_cert_dn="CN=adwc.uscom-east-1.oraclecloud.com,OU=Oracle BMCS US,O=Oracle Corporation,L=Redwood City,ST=California,C=US")))",
-//             "consumerGroup": "HIGH",
-//             "protocol": "TCPS",
-//             "tlsAuthentication": "MUTUAL",
-//             "hostFormat": "FQDN",
-//             "sessionMode": "DIRECT",
-//             "syntaxFormat": "LONG"
-//           },
-//           {
-//             "displayName": "databasename_low",
-//             "value": "(description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.region.oraclecloud.com))(connect_data=(service_name=unique_id_databasename_low.adwc.oraclecloud.com))(security=(ssl_server_cert_dn="CN=adwc.uscom-east-1.oraclecloud.com,OU=Oracle BMCS US,O=Oracle Corporation,L=Redwood City,ST=California,C=US")))",
-//             "consumerGroup": "LOW",
-//             "protocol": "TCPS",
-//             "tlsAuthentication": "MUTUAL",
-//             "hostFormat": "FQDN",
-//             "sessionMode": "DIRECT",
-//             "syntaxFormat": "LONG"
-//           },
-//           {
-//             "displayName": "databasename_medium",
-//             "value": "(description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.region.oraclecloud.com))(connect_data=(service_name=unique_id_databasename_medium.adwc.oraclecloud.com))(security=(ssl_server_cert_dn="CN=adwc.uscom-east-1.oraclecloud.com,OU=Oracle BMCS US,O=Oracle Corporation,L=Redwood City,ST=California,C=US")))",
-//             "consumerGroup": "MEDIUM",
-//             "protocol": "TCPS",
-//             "tlsAuthentication": "MUTUAL",
-//             "hostFormat": "FQDN",
-//             "sessionMode": "DIRECT",
-//             "syntaxFormat": "LONG"
-//           }
-//         ],
-//         "dedicated": null,
-//         "high": "adb.region.oraclecloud.com:1522/unique_id_databasename_high.adwc.oraclecloud.com",
-//         "low": "adb.region.oraclecloud.com:1522/unique_id_databasename_low.adwc.oraclecloud.com",
-//         "medium": "adb.region.oraclecloud.com:1522/unique_id_databasename_medium.adwc.oraclecloud.com"
-//       }
+//
+//	"connectionStrings": {
+//	  "allConnectionStrings": {
+//	    "HIGH": "adb.region.oraclecloud.com:1522/unique_id_databasename_high.adwc.oraclecloud.com",
+//	    "LOW": "adb.region.oraclecloud.com:1522/unique_id_databasename_low.adwc.oraclecloud.com",
+//	    "MEDIUM": "adb.region.oraclecloud.com:1522/unique_id_databasename_medium.adwc.oraclecloud.com"
+//	  },
+//	  "profiles": [
+//	    {
+//	      "displayName": "databasename_high",
+//	      "value": "(description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.region.oraclecloud.com))(connect_data=(service_name=unique_id_databasename_high.adwc.oraclecloud.com))(security=(ssl_server_cert_dn="CN=adwc.uscom-east-1.oraclecloud.com,OU=Oracle BMCS US,O=Oracle Corporation,L=Redwood City,ST=California,C=US")))",
+//	      "consumerGroup": "HIGH",
+//	      "protocol": "TCPS",
+//	      "tlsAuthentication": "MUTUAL",
+//	      "hostFormat": "FQDN",
+//	      "sessionMode": "DIRECT",
+//	      "syntaxFormat": "LONG"
+//	    },
+//	    {
+//	      "displayName": "databasename_low",
+//	      "value": "(description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.region.oraclecloud.com))(connect_data=(service_name=unique_id_databasename_low.adwc.oraclecloud.com))(security=(ssl_server_cert_dn="CN=adwc.uscom-east-1.oraclecloud.com,OU=Oracle BMCS US,O=Oracle Corporation,L=Redwood City,ST=California,C=US")))",
+//	      "consumerGroup": "LOW",
+//	      "protocol": "TCPS",
+//	      "tlsAuthentication": "MUTUAL",
+//	      "hostFormat": "FQDN",
+//	      "sessionMode": "DIRECT",
+//	      "syntaxFormat": "LONG"
+//	    },
+//	    {
+//	      "displayName": "databasename_medium",
+//	      "value": "(description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.region.oraclecloud.com))(connect_data=(service_name=unique_id_databasename_medium.adwc.oraclecloud.com))(security=(ssl_server_cert_dn="CN=adwc.uscom-east-1.oraclecloud.com,OU=Oracle BMCS US,O=Oracle Corporation,L=Redwood City,ST=California,C=US")))",
+//	      "consumerGroup": "MEDIUM",
+//	      "protocol": "TCPS",
+//	      "tlsAuthentication": "MUTUAL",
+//	      "hostFormat": "FQDN",
+//	      "sessionMode": "DIRECT",
+//	      "syntaxFormat": "LONG"
+//	    }
+//	  ],
+//	  "dedicated": null,
+//	  "high": "adb.region.oraclecloud.com:1522/unique_id_databasename_high.adwc.oraclecloud.com",
+//	  "low": "adb.region.oraclecloud.com:1522/unique_id_databasename_low.adwc.oraclecloud.com",
+//	  "medium": "adb.region.oraclecloud.com:1522/unique_id_databasename_medium.adwc.oraclecloud.com"
+//	}
 type AutonomousDatabaseConnectionStrings struct {
 
 	// The High database service provides the highest level of resources to each SQL statement resulting in the highest performance, but supports the fewest number of concurrent SQL statements.

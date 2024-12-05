@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -22,11 +22,14 @@ type GenerateAutonomousDatabaseWalletDetails struct {
 	Password *string `mandatory:"true" json:"password"`
 
 	// The type of wallet to generate.
-	// **Shared Exadata infrastructure usage:**
+	// **Serverless instance usage:**
 	// * `SINGLE` - used to generate a wallet for a single database
 	// * `ALL` - used to generate wallet for all databases in the region
 	// **Dedicated Exadata infrastructure usage:** Value must be `NULL` if attribute is used.
 	GenerateType GenerateAutonomousDatabaseWalletDetailsGenerateTypeEnum `mandatory:"false" json:"generateType,omitempty"`
+
+	// True when requesting regional connection strings in PDB connect info, applicable to cross-region DG only.
+	IsRegional *bool `mandatory:"false" json:"isRegional"`
 }
 
 func (m GenerateAutonomousDatabaseWalletDetails) String() string {

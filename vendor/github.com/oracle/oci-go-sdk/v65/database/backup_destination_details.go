@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -32,6 +32,9 @@ type BackupDestinationDetails struct {
 
 	// Proxy URL to connect to object store.
 	InternetProxy *string `mandatory:"false" json:"internetProxy"`
+
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the DBRS policy used for backup.
+	DbrsPolicyId *string `mandatory:"false" json:"dbrsPolicyId"`
 }
 
 func (m BackupDestinationDetails) String() string {
@@ -62,6 +65,7 @@ const (
 	BackupDestinationDetailsTypeRecoveryAppliance BackupDestinationDetailsTypeEnum = "RECOVERY_APPLIANCE"
 	BackupDestinationDetailsTypeObjectStore       BackupDestinationDetailsTypeEnum = "OBJECT_STORE"
 	BackupDestinationDetailsTypeLocal             BackupDestinationDetailsTypeEnum = "LOCAL"
+	BackupDestinationDetailsTypeDbrs              BackupDestinationDetailsTypeEnum = "DBRS"
 )
 
 var mappingBackupDestinationDetailsTypeEnum = map[string]BackupDestinationDetailsTypeEnum{
@@ -69,6 +73,7 @@ var mappingBackupDestinationDetailsTypeEnum = map[string]BackupDestinationDetail
 	"RECOVERY_APPLIANCE": BackupDestinationDetailsTypeRecoveryAppliance,
 	"OBJECT_STORE":       BackupDestinationDetailsTypeObjectStore,
 	"LOCAL":              BackupDestinationDetailsTypeLocal,
+	"DBRS":               BackupDestinationDetailsTypeDbrs,
 }
 
 var mappingBackupDestinationDetailsTypeEnumLowerCase = map[string]BackupDestinationDetailsTypeEnum{
@@ -76,6 +81,7 @@ var mappingBackupDestinationDetailsTypeEnumLowerCase = map[string]BackupDestinat
 	"recovery_appliance": BackupDestinationDetailsTypeRecoveryAppliance,
 	"object_store":       BackupDestinationDetailsTypeObjectStore,
 	"local":              BackupDestinationDetailsTypeLocal,
+	"dbrs":               BackupDestinationDetailsTypeDbrs,
 }
 
 // GetBackupDestinationDetailsTypeEnumValues Enumerates the set of values for BackupDestinationDetailsTypeEnum
@@ -94,6 +100,7 @@ func GetBackupDestinationDetailsTypeEnumStringValues() []string {
 		"RECOVERY_APPLIANCE",
 		"OBJECT_STORE",
 		"LOCAL",
+		"DBRS",
 	}
 }
 

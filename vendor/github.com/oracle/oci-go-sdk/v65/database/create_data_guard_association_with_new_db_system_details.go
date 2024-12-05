@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -52,7 +52,7 @@ type CreateDataGuardAssociationWithNewDbSystemDetails struct {
 	// To get a list of all shapes, use the ListDbSystemShapes operation.
 	Shape *string `mandatory:"false" json:"shape"`
 
-	// The number of OCPU cores available for AMD-based virtual machine DB systems.
+	// The number of CPU cores available for AMD-based virtual machine DB systems.
 	CpuCoreCount *int `mandatory:"false" json:"cpuCoreCount"`
 
 	// The number of nodes to launch for the DB system of the standby in the Data Guard association. For a 2-node RAC virtual machine DB system, specify either 1 or 2. If you do not supply this parameter, the default is the node count of the primary DB system.
@@ -122,7 +122,7 @@ type CreateDataGuardAssociationWithNewDbSystemDetails struct {
 	// The block storage volume performance level. Valid values are `BALANCED` and `HIGH_PERFORMANCE`. See Block Volume Performance (https://docs.cloud.oracle.com/Content/Block/Concepts/blockvolumeperformance.htm) for more information.
 	StorageVolumePerformanceMode CreateDataGuardAssociationWithNewDbSystemDetailsStorageVolumePerformanceModeEnum `mandatory:"false" json:"storageVolumePerformanceMode,omitempty"`
 
-	// The Oracle license model that applies to all the databases on the dataguard standby DB system. The default is LICENSE_INCLUDED.
+	// The Oracle license model that applies to all the databases on the dataguard standby DB system. The default is LICENSE_INCLUDED. Bring your own license (BYOL) allows you to select the DB edition using the optional parameter, for Autonomous Database Serverless.
 	LicenseModel CreateDataGuardAssociationWithNewDbSystemDetailsLicenseModelEnum `mandatory:"false" json:"licenseModel,omitempty"`
 
 	// The protection mode to set up between the primary and standby databases. For more information, see
@@ -142,37 +142,37 @@ type CreateDataGuardAssociationWithNewDbSystemDetails struct {
 	TransportType CreateDataGuardAssociationDetailsTransportTypeEnum `mandatory:"true" json:"transportType"`
 }
 
-//GetDatabaseSoftwareImageId returns DatabaseSoftwareImageId
+// GetDatabaseSoftwareImageId returns DatabaseSoftwareImageId
 func (m CreateDataGuardAssociationWithNewDbSystemDetails) GetDatabaseSoftwareImageId() *string {
 	return m.DatabaseSoftwareImageId
 }
 
-//GetDatabaseAdminPassword returns DatabaseAdminPassword
+// GetDatabaseAdminPassword returns DatabaseAdminPassword
 func (m CreateDataGuardAssociationWithNewDbSystemDetails) GetDatabaseAdminPassword() *string {
 	return m.DatabaseAdminPassword
 }
 
-//GetProtectionMode returns ProtectionMode
+// GetProtectionMode returns ProtectionMode
 func (m CreateDataGuardAssociationWithNewDbSystemDetails) GetProtectionMode() CreateDataGuardAssociationDetailsProtectionModeEnum {
 	return m.ProtectionMode
 }
 
-//GetTransportType returns TransportType
+// GetTransportType returns TransportType
 func (m CreateDataGuardAssociationWithNewDbSystemDetails) GetTransportType() CreateDataGuardAssociationDetailsTransportTypeEnum {
 	return m.TransportType
 }
 
-//GetIsActiveDataGuardEnabled returns IsActiveDataGuardEnabled
+// GetIsActiveDataGuardEnabled returns IsActiveDataGuardEnabled
 func (m CreateDataGuardAssociationWithNewDbSystemDetails) GetIsActiveDataGuardEnabled() *bool {
 	return m.IsActiveDataGuardEnabled
 }
 
-//GetPeerDbUniqueName returns PeerDbUniqueName
+// GetPeerDbUniqueName returns PeerDbUniqueName
 func (m CreateDataGuardAssociationWithNewDbSystemDetails) GetPeerDbUniqueName() *string {
 	return m.PeerDbUniqueName
 }
 
-//GetPeerSidPrefix returns PeerSidPrefix
+// GetPeerSidPrefix returns PeerSidPrefix
 func (m CreateDataGuardAssociationWithNewDbSystemDetails) GetPeerSidPrefix() *string {
 	return m.PeerSidPrefix
 }

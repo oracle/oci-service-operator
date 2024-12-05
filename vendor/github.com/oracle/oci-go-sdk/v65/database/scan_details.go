@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -21,11 +21,12 @@ type ScanDetails struct {
 	// The SCAN hostname.
 	Hostname *string `mandatory:"true" json:"hostname"`
 
-	// The SCAN TCPIP port. Default is 1521.
-	Port *int `mandatory:"true" json:"port"`
-
 	// The list of SCAN IP addresses. Three addresses should be provided.
 	Ips []string `mandatory:"true" json:"ips"`
+
+	// **Deprecated.** This field is deprecated. You may use 'scanListenerPortTcp' to specify the port.
+	// The SCAN TCPIP port. Default is 1521.
+	Port *int `mandatory:"false" json:"port"`
 
 	// The SCAN TCPIP port. Default is 1521.
 	ScanListenerPortTcp *int `mandatory:"false" json:"scanListenerPortTcp"`

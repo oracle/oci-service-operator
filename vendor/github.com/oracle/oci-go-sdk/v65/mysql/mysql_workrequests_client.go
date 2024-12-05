@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -17,7 +17,7 @@ import (
 	"net/http"
 )
 
-//WorkRequestsClient a client for WorkRequests
+// WorkRequestsClient a client for WorkRequests
 type WorkRequestsClient struct {
 	common.BaseClient
 	config *common.ConfigurationProvider
@@ -26,6 +26,9 @@ type WorkRequestsClient struct {
 // NewWorkRequestsClientWithConfigurationProvider Creates a new default WorkRequests client with the given configuration provider.
 // the configuration provider will be used for the default signer as well as reading the region
 func NewWorkRequestsClientWithConfigurationProvider(configProvider common.ConfigurationProvider) (client WorkRequestsClient, err error) {
+	if enabled := common.CheckForEnabledServices("mysql"); !enabled {
+		return client, fmt.Errorf("the Developer Tool configuration disabled this service, this behavior is controlled by OciSdkEnabledServicesMap variables. Please check if your local developer-tool-configuration.json file configured the service you're targeting or contact the cloud provider on the availability of this service")
+	}
 	provider, err := auth.GetGenericConfigurationProvider(configProvider)
 	if err != nil {
 		return client, err
@@ -39,7 +42,8 @@ func NewWorkRequestsClientWithConfigurationProvider(configProvider common.Config
 
 // NewWorkRequestsClientWithOboToken Creates a new default WorkRequests client with the given configuration provider.
 // The obotoken will be added to default headers and signed; the configuration provider will be used for the signer
-//  as well as reading the region
+//
+//	as well as reading the region
 func NewWorkRequestsClientWithOboToken(configProvider common.ConfigurationProvider, oboToken string) (client WorkRequestsClient, err error) {
 	baseClient, err := common.NewClientWithOboToken(configProvider, oboToken)
 	if err != nil {
@@ -76,7 +80,7 @@ func (client *WorkRequestsClient) setConfigurationProvider(configProvider common
 	region, _ := configProvider.Region()
 	client.SetRegion(region)
 	if client.Host == "" {
-		return fmt.Errorf("Invalid region or Host. Endpoint cannot be constructed without endpointServiceName or serviceEndpointTemplate for a dotted region")
+		return fmt.Errorf("invalid region or Host. Endpoint cannot be constructed without endpointServiceName or serviceEndpointTemplate for a dotted region")
 	}
 	client.config = &configProvider
 	return nil
@@ -89,7 +93,7 @@ func (client *WorkRequestsClient) ConfigurationProvider() *common.ConfigurationP
 
 // GetWorkRequest Gets the status of the work request with the given ID.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/GetWorkRequest.go.html to see an example of how to use GetWorkRequest API.
 // A default retry strategy applies to this operation GetWorkRequest()
@@ -147,7 +151,7 @@ func (client WorkRequestsClient) getWorkRequest(ctx context.Context, request com
 
 // ListWorkRequestErrors Return a (paginated) list of errors for a given work request.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/ListWorkRequestErrors.go.html to see an example of how to use ListWorkRequestErrors API.
 // A default retry strategy applies to this operation ListWorkRequestErrors()
@@ -205,7 +209,7 @@ func (client WorkRequestsClient) listWorkRequestErrors(ctx context.Context, requ
 
 // ListWorkRequestLogs Return a (paginated) list of logs for a given work request.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/ListWorkRequestLogs.go.html to see an example of how to use ListWorkRequestLogs API.
 // A default retry strategy applies to this operation ListWorkRequestLogs()
@@ -263,7 +267,7 @@ func (client WorkRequestsClient) listWorkRequestLogs(ctx context.Context, reques
 
 // ListWorkRequests Lists the work requests in a specified compartment.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/ListWorkRequests.go.html to see an example of how to use ListWorkRequests API.
 // A default retry strategy applies to this operation ListWorkRequests()

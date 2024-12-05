@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -34,7 +34,7 @@ type DatabaseConnectionStringProfile struct {
 	SessionMode DatabaseConnectionStringProfileSessionModeEnum `mandatory:"true" json:"sessionMode"`
 
 	// Specifies whether the connection string is using the long (`LONG`), Easy Connect (`EZCONNECT`), or Easy Connect Plus (`EZCONNECTPLUS`) format.
-	// Autonomous Databases on shared Exadata infrastructure always use the long format.
+	// Autonomous Database Serverless instances always use the long format.
 	SyntaxFormat DatabaseConnectionStringProfileSyntaxFormatEnum `mandatory:"true" json:"syntaxFormat"`
 
 	// Consumer group used by the connection.
@@ -42,6 +42,9 @@ type DatabaseConnectionStringProfile struct {
 
 	// Specifies whether the TLS handshake is using one-way (`SERVER`) or mutual (`MUTUAL`) authentication.
 	TlsAuthentication DatabaseConnectionStringProfileTlsAuthenticationEnum `mandatory:"false" json:"tlsAuthentication,omitempty"`
+
+	// True for a regional connection string, applicable to cross-region DG only.
+	IsRegional *bool `mandatory:"false" json:"isRegional"`
 }
 
 func (m DatabaseConnectionStringProfile) String() string {

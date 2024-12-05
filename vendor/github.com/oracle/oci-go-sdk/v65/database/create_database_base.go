@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -23,22 +23,23 @@ type CreateDatabaseBase interface {
 	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Database Home.
 	GetDbHomeId() *string
 
-	// A valid Oracle Database version. To get a list of supported versions, use the ListDbVersions operation.
+	// A valid Oracle Database version. For a list of supported versions, use the ListDbVersions operation.
+	// This cannot be updated in parallel with any of the following: licenseModel, dbEdition, cpuCoreCount, computeCount, computeModel, adminPassword, whitelistedIps, isMTLSConnectionRequired, openMode, permissionLevel, dbWorkload, privateEndpointLabel, nsgIds, isRefreshable, dbName, scheduledOperations, dbToolsDetails, isLocalDataGuardEnabled, or isFreeTier.
 	GetDbVersion() *string
 
 	// The OCID of the key container that is used as the master encryption key in database transparent data encryption (TDE) operations.
 	GetKmsKeyId() *string
 
-	// The OCID of the key container version that is used in database transparent data encryption (TDE) operations KMS Key can have multiple key versions. If none is specified, the current key version (latest) of the Key Id is used for the operation.
+	// The OCID of the key container version that is used in database transparent data encryption (TDE) operations KMS Key can have multiple key versions. If none is specified, the current key version (latest) of the Key Id is used for the operation. Autonomous Database Serverless does not use key versions, hence is not applicable for Autonomous Database Serverless instances.
 	GetKmsKeyVersionId() *string
 }
 
 type createdatabasebase struct {
 	JsonData        []byte
-	DbHomeId        *string `mandatory:"true" json:"dbHomeId"`
 	DbVersion       *string `mandatory:"false" json:"dbVersion"`
 	KmsKeyId        *string `mandatory:"false" json:"kmsKeyId"`
 	KmsKeyVersionId *string `mandatory:"false" json:"kmsKeyVersionId"`
+	DbHomeId        *string `mandatory:"true" json:"dbHomeId"`
 	Source          string  `json:"source"`
 }
 
@@ -80,28 +81,29 @@ func (m *createdatabasebase) UnmarshalPolymorphicJSON(data []byte) (interface{},
 		err = json.Unmarshal(data, &mm)
 		return mm, err
 	default:
+		common.Logf("Recieved unsupported enum value for CreateDatabaseBase: %s.", m.Source)
 		return *m, nil
 	}
 }
 
-//GetDbHomeId returns DbHomeId
-func (m createdatabasebase) GetDbHomeId() *string {
-	return m.DbHomeId
-}
-
-//GetDbVersion returns DbVersion
+// GetDbVersion returns DbVersion
 func (m createdatabasebase) GetDbVersion() *string {
 	return m.DbVersion
 }
 
-//GetKmsKeyId returns KmsKeyId
+// GetKmsKeyId returns KmsKeyId
 func (m createdatabasebase) GetKmsKeyId() *string {
 	return m.KmsKeyId
 }
 
-//GetKmsKeyVersionId returns KmsKeyVersionId
+// GetKmsKeyVersionId returns KmsKeyVersionId
 func (m createdatabasebase) GetKmsKeyVersionId() *string {
 	return m.KmsKeyVersionId
+}
+
+// GetDbHomeId returns DbHomeId
+func (m createdatabasebase) GetDbHomeId() *string {
+	return m.DbHomeId
 }
 
 func (m createdatabasebase) String() string {

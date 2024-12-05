@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -13,7 +13,7 @@ import (
 
 // ListShapesRequest wrapper for the ListShapes operation
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/ListShapes.go.html to see an example of how to use ListShapesRequest.
 type ListShapesRequest struct {
@@ -111,21 +111,18 @@ type ListShapesIsSupportedForEnum string
 
 // Set of constants representing the allowable values for ListShapesIsSupportedForEnum
 const (
-	ListShapesIsSupportedForDbsystem         ListShapesIsSupportedForEnum = "DBSYSTEM"
-	ListShapesIsSupportedForAnalyticscluster ListShapesIsSupportedForEnum = "ANALYTICSCLUSTER"
-	ListShapesIsSupportedForHeatwavecluster  ListShapesIsSupportedForEnum = "HEATWAVECLUSTER"
+	ListShapesIsSupportedForDbsystem        ListShapesIsSupportedForEnum = "DBSYSTEM"
+	ListShapesIsSupportedForHeatwavecluster ListShapesIsSupportedForEnum = "HEATWAVECLUSTER"
 )
 
 var mappingListShapesIsSupportedForEnum = map[string]ListShapesIsSupportedForEnum{
-	"DBSYSTEM":         ListShapesIsSupportedForDbsystem,
-	"ANALYTICSCLUSTER": ListShapesIsSupportedForAnalyticscluster,
-	"HEATWAVECLUSTER":  ListShapesIsSupportedForHeatwavecluster,
+	"DBSYSTEM":        ListShapesIsSupportedForDbsystem,
+	"HEATWAVECLUSTER": ListShapesIsSupportedForHeatwavecluster,
 }
 
 var mappingListShapesIsSupportedForEnumLowerCase = map[string]ListShapesIsSupportedForEnum{
-	"dbsystem":         ListShapesIsSupportedForDbsystem,
-	"analyticscluster": ListShapesIsSupportedForAnalyticscluster,
-	"heatwavecluster":  ListShapesIsSupportedForHeatwavecluster,
+	"dbsystem":        ListShapesIsSupportedForDbsystem,
+	"heatwavecluster": ListShapesIsSupportedForHeatwavecluster,
 }
 
 // GetListShapesIsSupportedForEnumValues Enumerates the set of values for ListShapesIsSupportedForEnum
@@ -141,7 +138,6 @@ func GetListShapesIsSupportedForEnumValues() []ListShapesIsSupportedForEnum {
 func GetListShapesIsSupportedForEnumStringValues() []string {
 	return []string{
 		"DBSYSTEM",
-		"ANALYTICSCLUSTER",
 		"HEATWAVECLUSTER",
 	}
 }

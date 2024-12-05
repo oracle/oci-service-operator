@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -13,7 +13,7 @@ import (
 
 // ListReplicasRequest wrapper for the ListReplicas operation
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/ListReplicas.go.html to see an example of how to use ListReplicasRequest.
 type ListReplicasRequest struct {
@@ -46,6 +46,13 @@ type ListReplicasRequest struct {
 
 	// The read replica OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm).
 	ReplicaId *string `mandatory:"false" contributesTo:"query" name:"replicaId"`
+
+	// The requested Configuration instance.
+	ConfigurationId *string `mandatory:"false" contributesTo:"query" name:"configurationId"`
+
+	// Filter instances if they are using the latest revision of the
+	// Configuration they are associated with.
+	IsUpToDate *bool `mandatory:"false" contributesTo:"query" name:"isUpToDate"`
 
 	// The field to sort by. You can sort by one field only. By default, the Time field is sorted in descending order and the Display Name field in ascending order.
 	SortBy ListReplicasSortByEnum `mandatory:"false" contributesTo:"query" name:"sortBy" omitEmpty:"true"`

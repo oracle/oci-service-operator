@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -91,16 +91,23 @@ type CloudAutonomousVmCluster struct {
 	// The number of CPU cores on the cloud Autonomous VM cluster. Only 1 decimal place is allowed for the fractional part.
 	OcpuCount *float32 `mandatory:"false" json:"ocpuCount"`
 
-	// The number of OCPU cores enabled per VM cluster node.
+	// The compute model of the Cloud Autonomous VM Cluster. ECPU compute model is the recommended model and OCPU compute model is legacy. See Compute Models in Autonomous Database on Dedicated Exadata #Infrastructure (https://docs.oracle.com/en/cloud/paas/autonomous-database/dedicated/adbak) for more details.
+	ComputeModel CloudAutonomousVmClusterComputeModelEnum `mandatory:"false" json:"computeModel,omitempty"`
+
+	// Enable mutual TLS(mTLS) authentication for database at time of provisioning a VMCluster. This is applicable to database TLS Certificates only. Default is TLS
+	IsMtlsEnabledVmCluster *bool `mandatory:"false" json:"isMtlsEnabledVmCluster"`
+
+	// The number of CPU cores enabled per VM cluster node.
 	CpuCoreCountPerNode *int `mandatory:"false" json:"cpuCoreCountPerNode"`
 
 	// The memory allocated in GBs.
 	MemorySizeInGBs *int `mandatory:"false" json:"memorySizeInGBs"`
 
-	// The Oracle license model that applies to the Oracle Autonomous Database. Bring your own license (BYOL) allows you to apply your current on-premises Oracle software licenses to equivalent, highly automated Oracle PaaS and IaaS services in the cloud.
-	// License Included allows you to subscribe to new Oracle Database software licenses and the Database service.
-	// Note that when provisioning an Autonomous Database on dedicated Exadata infrastructure (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html), this attribute must be null because the attribute is already set at the
-	// Autonomous Exadata Infrastructure level. When using shared Exadata infrastructure (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html), if a value is not specified, the system will supply the value of `BRING_YOUR_OWN_LICENSE`.
+	// The Oracle license model that applies to the Oracle Autonomous Database. Bring your own license (BYOL) allows you to apply your current on-premises Oracle software licenses to equivalent, highly automated Oracle services in the cloud.
+	// License Included allows you to subscribe to new Oracle Database software licenses and the Oracle Database service.
+	// Note that when provisioning an Autonomous Database on dedicated Exadata infrastructure (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html), this attribute must be null. It is already set at the
+	// Autonomous Exadata Infrastructure level. When provisioning an Autonomous Database Serverless  (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html) database, if a value is not specified, the system defaults the value to `BRING_YOUR_OWN_LICENSE`. Bring your own license (BYOL) also allows you to select the DB edition using the optional parameter.
+	// This cannot be updated in parallel with any of the following: cpuCoreCount, computeCount, dataStorageSizeInTBs, adminPassword, isMTLSConnectionRequired, dbWorkload, privateEndpointLabel, nsgIds, dbVersion, dbName, scheduledOperations, dbToolsDetails, or isFreeTier.
 	LicenseModel CloudAutonomousVmClusterLicenseModelEnum `mandatory:"false" json:"licenseModel,omitempty"`
 
 	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the last maintenance run.
@@ -111,6 +118,12 @@ type CloudAutonomousVmCluster struct {
 
 	MaintenanceWindow *MaintenanceWindow `mandatory:"false" json:"maintenanceWindow"`
 
+	// The SCAN Listenenr TLS port. Default is 2484.
+	ScanListenerPortTls *int `mandatory:"false" json:"scanListenerPortTls"`
+
+	// The SCAN Listener Non TLS port. Default is 1521.
+	ScanListenerPortNonTls *int `mandatory:"false" json:"scanListenerPortNonTls"`
+
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
 	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
@@ -120,10 +133,16 @@ type CloudAutonomousVmCluster struct {
 	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
 	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
 
+	// The date and time of Database SSL certificate expiration.
+	TimeDatabaseSslCertificateExpires *common.SDKTime `mandatory:"false" json:"timeDatabaseSslCertificateExpires"`
+
+	// The date and time of ORDS certificate expiration.
+	TimeOrdsCertificateExpires *common.SDKTime `mandatory:"false" json:"timeOrdsCertificateExpires"`
+
 	// CPU cores available for allocation to Autonomous Databases.
 	AvailableCpus *float32 `mandatory:"false" json:"availableCpus"`
 
-	// CPU cores that continue to be included in the count of OCPUs available to the Autonomous Container Database even after one of its Autonomous Database is terminated or scaled down. You can release them to the available OCPUs at its parent AVMC level by restarting the Autonomous Container Database.
+	// CPUs that continue to be included in the count of CPUs available to the Autonomous Container Database even after one of its Autonomous Database is terminated or scaled down. You can release them to the available CPUs at its parent Autonomous VM Cluster level by restarting the Autonomous Container Database.
 	ReclaimableCpus *float32 `mandatory:"false" json:"reclaimableCpus"`
 
 	// The number of Autonomous Container Databases that can be created with the currently available local storage.
@@ -141,8 +160,47 @@ type CloudAutonomousVmCluster struct {
 	// The local node storage allocated in GBs.
 	DbNodeStorageSizeInGBs *int `mandatory:"false" json:"dbNodeStorageSizeInGBs"`
 
-	// The amount of memory (in GBs) enabled per each OCPU core.
+	// The amount of memory (in GBs) enabled per OCPU or ECPU.
 	MemoryPerOracleComputeUnitInGBs *int `mandatory:"false" json:"memoryPerOracleComputeUnitInGBs"`
+
+	// The list of OCIDs (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Db servers.
+	DbServers []string `mandatory:"false" json:"dbServers"`
+
+	// The percentage of total number of CPUs used in an Autonomous VM Cluster.
+	CpuPercentage *float32 `mandatory:"false" json:"cpuPercentage"`
+
+	// The percentage of the data storage used for the Autonomous Databases in an Autonomous VM Cluster.
+	AutonomousDataStoragePercentage *float32 `mandatory:"false" json:"autonomousDataStoragePercentage"`
+
+	// The number of CPUs provisioned in an Autonomous VM Cluster.
+	ProvisionedCpus *float32 `mandatory:"false" json:"provisionedCpus"`
+
+	// The total number of CPUs in an Autonomous VM Cluster.
+	TotalCpus *float32 `mandatory:"false" json:"totalCpus"`
+
+	// The total data disk group size for Autonomous Databases, in TBs.
+	TotalAutonomousDataStorageInTBs *float32 `mandatory:"false" json:"totalAutonomousDataStorageInTBs"`
+
+	// The number of CPUs reserved in an Autonomous VM Cluster.
+	ReservedCpus *float32 `mandatory:"false" json:"reservedCpus"`
+
+	// The number of provisionable Autonomous Container Databases in an Autonomous VM Cluster.
+	ProvisionableAutonomousContainerDatabases *int `mandatory:"false" json:"provisionableAutonomousContainerDatabases"`
+
+	// The number of provisioned Autonomous Container Databases in an Autonomous VM Cluster.
+	ProvisionedAutonomousContainerDatabases *int `mandatory:"false" json:"provisionedAutonomousContainerDatabases"`
+
+	// The number of non-provisionable Autonomous Container Databases in an Autonomous VM Cluster.
+	NonProvisionableAutonomousContainerDatabases *int `mandatory:"false" json:"nonProvisionableAutonomousContainerDatabases"`
+
+	// The lowest value to which exadataStorage (in TBs) can be scaled down.
+	ExadataStorageInTBsLowestScaledValue *float64 `mandatory:"false" json:"exadataStorageInTBsLowestScaledValue"`
+
+	// The lowest value to which ocpus can be scaled down.
+	OcpusLowestScaledValue *int `mandatory:"false" json:"ocpusLowestScaledValue"`
+
+	// The lowest value to which maximum number of ACDs can be scaled down.
+	MaxAcdsLowestScaledValue *int `mandatory:"false" json:"maxAcdsLowestScaledValue"`
 }
 
 func (m CloudAutonomousVmCluster) String() string {
@@ -158,6 +216,9 @@ func (m CloudAutonomousVmCluster) ValidateEnumValue() (bool, error) {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for LifecycleState: %s. Supported values are: %s.", m.LifecycleState, strings.Join(GetCloudAutonomousVmClusterLifecycleStateEnumStringValues(), ",")))
 	}
 
+	if _, ok := GetMappingCloudAutonomousVmClusterComputeModelEnum(string(m.ComputeModel)); !ok && m.ComputeModel != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for ComputeModel: %s. Supported values are: %s.", m.ComputeModel, strings.Join(GetCloudAutonomousVmClusterComputeModelEnumStringValues(), ",")))
+	}
 	if _, ok := GetMappingCloudAutonomousVmClusterLicenseModelEnum(string(m.LicenseModel)); !ok && m.LicenseModel != "" {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for LicenseModel: %s. Supported values are: %s.", m.LicenseModel, strings.Join(GetCloudAutonomousVmClusterLicenseModelEnumStringValues(), ",")))
 	}
@@ -226,6 +287,48 @@ func GetCloudAutonomousVmClusterLifecycleStateEnumStringValues() []string {
 // GetMappingCloudAutonomousVmClusterLifecycleStateEnum performs case Insensitive comparison on enum value and return the desired enum
 func GetMappingCloudAutonomousVmClusterLifecycleStateEnum(val string) (CloudAutonomousVmClusterLifecycleStateEnum, bool) {
 	enum, ok := mappingCloudAutonomousVmClusterLifecycleStateEnumLowerCase[strings.ToLower(val)]
+	return enum, ok
+}
+
+// CloudAutonomousVmClusterComputeModelEnum Enum with underlying type: string
+type CloudAutonomousVmClusterComputeModelEnum string
+
+// Set of constants representing the allowable values for CloudAutonomousVmClusterComputeModelEnum
+const (
+	CloudAutonomousVmClusterComputeModelEcpu CloudAutonomousVmClusterComputeModelEnum = "ECPU"
+	CloudAutonomousVmClusterComputeModelOcpu CloudAutonomousVmClusterComputeModelEnum = "OCPU"
+)
+
+var mappingCloudAutonomousVmClusterComputeModelEnum = map[string]CloudAutonomousVmClusterComputeModelEnum{
+	"ECPU": CloudAutonomousVmClusterComputeModelEcpu,
+	"OCPU": CloudAutonomousVmClusterComputeModelOcpu,
+}
+
+var mappingCloudAutonomousVmClusterComputeModelEnumLowerCase = map[string]CloudAutonomousVmClusterComputeModelEnum{
+	"ecpu": CloudAutonomousVmClusterComputeModelEcpu,
+	"ocpu": CloudAutonomousVmClusterComputeModelOcpu,
+}
+
+// GetCloudAutonomousVmClusterComputeModelEnumValues Enumerates the set of values for CloudAutonomousVmClusterComputeModelEnum
+func GetCloudAutonomousVmClusterComputeModelEnumValues() []CloudAutonomousVmClusterComputeModelEnum {
+	values := make([]CloudAutonomousVmClusterComputeModelEnum, 0)
+	for _, v := range mappingCloudAutonomousVmClusterComputeModelEnum {
+		values = append(values, v)
+	}
+	return values
+}
+
+// GetCloudAutonomousVmClusterComputeModelEnumStringValues Enumerates the set of values in String for CloudAutonomousVmClusterComputeModelEnum
+func GetCloudAutonomousVmClusterComputeModelEnumStringValues() []string {
+	return []string{
+		"ECPU",
+		"OCPU",
+	}
+}
+
+// GetMappingCloudAutonomousVmClusterComputeModelEnum performs case Insensitive comparison on enum value and return the desired enum
+func GetMappingCloudAutonomousVmClusterComputeModelEnum(val string) (CloudAutonomousVmClusterComputeModelEnum, bool) {
+	enum, ok := mappingCloudAutonomousVmClusterComputeModelEnumLowerCase[strings.ToLower(val)]
 	return enum, ok
 }
 
