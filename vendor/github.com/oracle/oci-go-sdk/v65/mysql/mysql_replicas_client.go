@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -17,7 +17,7 @@ import (
 	"net/http"
 )
 
-//ReplicasClient a client for Replicas
+// ReplicasClient a client for Replicas
 type ReplicasClient struct {
 	common.BaseClient
 	config *common.ConfigurationProvider
@@ -26,6 +26,9 @@ type ReplicasClient struct {
 // NewReplicasClientWithConfigurationProvider Creates a new default Replicas client with the given configuration provider.
 // the configuration provider will be used for the default signer as well as reading the region
 func NewReplicasClientWithConfigurationProvider(configProvider common.ConfigurationProvider) (client ReplicasClient, err error) {
+	if enabled := common.CheckForEnabledServices("mysql"); !enabled {
+		return client, fmt.Errorf("the Developer Tool configuration disabled this service, this behavior is controlled by OciSdkEnabledServicesMap variables. Please check if your local developer-tool-configuration.json file configured the service you're targeting or contact the cloud provider on the availability of this service")
+	}
 	provider, err := auth.GetGenericConfigurationProvider(configProvider)
 	if err != nil {
 		return client, err
@@ -39,7 +42,8 @@ func NewReplicasClientWithConfigurationProvider(configProvider common.Configurat
 
 // NewReplicasClientWithOboToken Creates a new default Replicas client with the given configuration provider.
 // The obotoken will be added to default headers and signed; the configuration provider will be used for the signer
-//  as well as reading the region
+//
+//	as well as reading the region
 func NewReplicasClientWithOboToken(configProvider common.ConfigurationProvider, oboToken string) (client ReplicasClient, err error) {
 	baseClient, err := common.NewClientWithOboToken(configProvider, oboToken)
 	if err != nil {
@@ -76,7 +80,7 @@ func (client *ReplicasClient) setConfigurationProvider(configProvider common.Con
 	region, _ := configProvider.Region()
 	client.SetRegion(region)
 	if client.Host == "" {
-		return fmt.Errorf("Invalid region or Host. Endpoint cannot be constructed without endpointServiceName or serviceEndpointTemplate for a dotted region")
+		return fmt.Errorf("invalid region or Host. Endpoint cannot be constructed without endpointServiceName or serviceEndpointTemplate for a dotted region")
 	}
 	client.config = &configProvider
 	return nil
@@ -89,7 +93,7 @@ func (client *ReplicasClient) ConfigurationProvider() *common.ConfigurationProvi
 
 // CreateReplica Creates a DB System read replica.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/CreateReplica.go.html to see an example of how to use CreateReplica API.
 // A default retry strategy applies to this operation CreateReplica()
@@ -152,7 +156,7 @@ func (client ReplicasClient) createReplica(ctx context.Context, request common.O
 
 // DeleteReplica Deletes the specified read replica.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/DeleteReplica.go.html to see an example of how to use DeleteReplica API.
 // A default retry strategy applies to this operation DeleteReplica()
@@ -210,7 +214,7 @@ func (client ReplicasClient) deleteReplica(ctx context.Context, request common.O
 
 // GetReplica Gets the full details of the specified read replica.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/GetReplica.go.html to see an example of how to use GetReplica API.
 // A default retry strategy applies to this operation GetReplica()
@@ -268,7 +272,7 @@ func (client ReplicasClient) getReplica(ctx context.Context, request common.OCIR
 
 // ListReplicas Lists all the read replicas that match the specified filters.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/ListReplicas.go.html to see an example of how to use ListReplicas API.
 // A default retry strategy applies to this operation ListReplicas()
@@ -326,7 +330,7 @@ func (client ReplicasClient) listReplicas(ctx context.Context, request common.OC
 
 // UpdateReplica Updates the properties of the specified read replica.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/UpdateReplica.go.html to see an example of how to use UpdateReplica API.
 // A default retry strategy applies to this operation UpdateReplica()

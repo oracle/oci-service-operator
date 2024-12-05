@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -44,8 +44,15 @@ type UpdateSecretDetails struct {
 
 	SecretContent SecretContentDetails `mandatory:"false" json:"secretContent"`
 
+	RotationConfig *RotationConfig `mandatory:"false" json:"rotationConfig"`
+
 	// A list of rules to control how the secret is used and managed.
 	SecretRules []SecretRule `mandatory:"false" json:"secretRules"`
+
+	SecretGenerationContext SecretGenerationContext `mandatory:"false" json:"secretGenerationContext"`
+
+	// The value of this flag determines whether or not secret content will be generated automatically.
+	EnableAutoGeneration *bool `mandatory:"false" json:"enableAutoGeneration"`
 }
 
 func (m UpdateSecretDetails) String() string {
@@ -67,13 +74,16 @@ func (m UpdateSecretDetails) ValidateEnumValue() (bool, error) {
 // UnmarshalJSON unmarshals from json
 func (m *UpdateSecretDetails) UnmarshalJSON(data []byte) (e error) {
 	model := struct {
-		CurrentVersionNumber *int64                            `json:"currentVersionNumber"`
-		DefinedTags          map[string]map[string]interface{} `json:"definedTags"`
-		Description          *string                           `json:"description"`
-		FreeformTags         map[string]string                 `json:"freeformTags"`
-		Metadata             map[string]interface{}            `json:"metadata"`
-		SecretContent        secretcontentdetails              `json:"secretContent"`
-		SecretRules          []secretrule                      `json:"secretRules"`
+		CurrentVersionNumber    *int64                            `json:"currentVersionNumber"`
+		DefinedTags             map[string]map[string]interface{} `json:"definedTags"`
+		Description             *string                           `json:"description"`
+		FreeformTags            map[string]string                 `json:"freeformTags"`
+		Metadata                map[string]interface{}            `json:"metadata"`
+		SecretContent           secretcontentdetails              `json:"secretContent"`
+		RotationConfig          *RotationConfig                   `json:"rotationConfig"`
+		SecretRules             []secretrule                      `json:"secretRules"`
+		SecretGenerationContext secretgenerationcontext           `json:"secretGenerationContext"`
+		EnableAutoGeneration    *bool                             `json:"enableAutoGeneration"`
 	}{}
 
 	e = json.Unmarshal(data, &model)
@@ -101,6 +111,8 @@ func (m *UpdateSecretDetails) UnmarshalJSON(data []byte) (e error) {
 		m.SecretContent = nil
 	}
 
+	m.RotationConfig = model.RotationConfig
+
 	m.SecretRules = make([]SecretRule, len(model.SecretRules))
 	for i, n := range model.SecretRules {
 		nn, e = n.UnmarshalPolymorphicJSON(n.JsonData)
@@ -113,6 +125,17 @@ func (m *UpdateSecretDetails) UnmarshalJSON(data []byte) (e error) {
 			m.SecretRules[i] = nil
 		}
 	}
+	nn, e = model.SecretGenerationContext.UnmarshalPolymorphicJSON(model.SecretGenerationContext.JsonData)
+	if e != nil {
+		return
+	}
+	if nn != nil {
+		m.SecretGenerationContext = nn.(SecretGenerationContext)
+	} else {
+		m.SecretGenerationContext = nil
+	}
+
+	m.EnableAutoGeneration = model.EnableAutoGeneration
 
 	return
 }

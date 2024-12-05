@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -29,6 +29,14 @@ type UpdateChannelTargetFromDbSystemDetails struct {
 
 	// Replication filter rules to be applied at the DB System Channel target.
 	Filters []ChannelFilter `mandatory:"false" json:"filters"`
+
+	// Specifies the amount of time, in seconds, that the channel waits before
+	// applying a transaction received from the source.
+	DelayInSeconds *int `mandatory:"false" json:"delayInSeconds"`
+
+	// Specifies how a replication channel handles the creation and alteration of tables
+	// that do not have a primary key.
+	TablesWithoutPrimaryKeyHandling ChannelTargetDbSystemTablesWithoutPrimaryKeyHandlingEnum `mandatory:"false" json:"tablesWithoutPrimaryKeyHandling,omitempty"`
 }
 
 func (m UpdateChannelTargetFromDbSystemDetails) String() string {
@@ -41,6 +49,9 @@ func (m UpdateChannelTargetFromDbSystemDetails) String() string {
 func (m UpdateChannelTargetFromDbSystemDetails) ValidateEnumValue() (bool, error) {
 	errMessage := []string{}
 
+	if _, ok := GetMappingChannelTargetDbSystemTablesWithoutPrimaryKeyHandlingEnum(string(m.TablesWithoutPrimaryKeyHandling)); !ok && m.TablesWithoutPrimaryKeyHandling != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for TablesWithoutPrimaryKeyHandling: %s. Supported values are: %s.", m.TablesWithoutPrimaryKeyHandling, strings.Join(GetChannelTargetDbSystemTablesWithoutPrimaryKeyHandlingEnumStringValues(), ",")))
+	}
 	if len(errMessage) > 0 {
 		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
 	}

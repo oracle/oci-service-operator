@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -51,6 +51,9 @@ type AutonomousVmCluster struct {
 	// The number of enabled CPU cores.
 	CpusEnabled *int `mandatory:"false" json:"cpusEnabled"`
 
+	// The compute model of the Autonomous VM Cluster. ECPU compute model is the recommended model and OCPU compute model is legacy. See Compute Models in Autonomous Database on Dedicated Exadata #Infrastructure (https://docs.oracle.com/en/cloud/paas/autonomous-database/dedicated/adbak) for more details.
+	ComputeModel AutonomousVmClusterComputeModelEnum `mandatory:"false" json:"computeModel,omitempty"`
+
 	// The number of enabled OCPU cores.
 	OcpusEnabled *float32 `mandatory:"false" json:"ocpusEnabled"`
 
@@ -60,7 +63,7 @@ type AutonomousVmCluster struct {
 	// The total number of Autonomous Container Databases that can be created.
 	TotalContainerDatabases *int `mandatory:"false" json:"totalContainerDatabases"`
 
-	// The amount of memory (in GBs) enabled per each OCPU core.
+	// The amount of memory (in GBs) to be enabled per OCPU or ECPU.
 	MemoryPerOracleComputeUnitInGBs *int `mandatory:"false" json:"memoryPerOracleComputeUnitInGBs"`
 
 	// The number of CPU cores enabled per VM cluster node.
@@ -77,6 +80,30 @@ type AutonomousVmCluster struct {
 	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the next maintenance run.
 	NextMaintenanceRunId *string `mandatory:"false" json:"nextMaintenanceRunId"`
 
+	// The percentage of total number of CPUs used in an Autonomous VM Cluster.
+	CpuPercentage *float32 `mandatory:"false" json:"cpuPercentage"`
+
+	// The percentage of the data storage used for the Autonomous Databases in an Autonomous VM Cluster.
+	AutonomousDataStoragePercentage *float32 `mandatory:"false" json:"autonomousDataStoragePercentage"`
+
+	// The number of CPUs provisioned in an Autonomous VM Cluster.
+	ProvisionedCpus *float32 `mandatory:"false" json:"provisionedCpus"`
+
+	// The total data disk group size for Autonomous Databases, in TBs.
+	TotalAutonomousDataStorageInTBs *float32 `mandatory:"false" json:"totalAutonomousDataStorageInTBs"`
+
+	// The number of CPUs reserved in an Autonomous VM Cluster.
+	ReservedCpus *float32 `mandatory:"false" json:"reservedCpus"`
+
+	// **Deprecated.** Use field totalContainerDatabases.
+	ProvisionableAutonomousContainerDatabases *int `mandatory:"false" json:"provisionableAutonomousContainerDatabases"`
+
+	// The number of provisioned Autonomous Container Databases in an Autonomous VM Cluster.
+	ProvisionedAutonomousContainerDatabases *int `mandatory:"false" json:"provisionedAutonomousContainerDatabases"`
+
+	// The number of non-provisionable Autonomous Container Databases in an Autonomous VM Cluster.
+	NonProvisionableAutonomousContainerDatabases *int `mandatory:"false" json:"nonProvisionableAutonomousContainerDatabases"`
+
 	// The memory allocated in GBs.
 	MemorySizeInGBs *int `mandatory:"false" json:"memorySizeInGBs"`
 
@@ -92,6 +119,9 @@ type AutonomousVmCluster struct {
 	// **Deprecated.** Use `availableAutonomousDataStorageSizeInTBs` for Autonomous Databases' data storage availability in TBs.
 	AvailableDataStorageSizeInTBs *float64 `mandatory:"false" json:"availableDataStorageSizeInTBs"`
 
+	// The number of nodes in the Autonomous VM Cluster.
+	NodeCount *int `mandatory:"false" json:"nodeCount"`
+
 	// The Oracle license model that applies to the Autonomous VM cluster. The default is LICENSE_INCLUDED.
 	LicenseModel AutonomousVmClusterLicenseModelEnum `mandatory:"false" json:"licenseModel,omitempty"`
 
@@ -104,7 +134,10 @@ type AutonomousVmCluster struct {
 	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
 	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
 
-	// CPU cores that continue to be included in the count of OCPUs available to the Autonomous Container Database even after one of its Autonomous Database is terminated or scaled down. You can release them to the available OCPUs at its parent AVMC level by restarting the Autonomous Container Database.
+	// The list of OCIDs (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Db servers.
+	DbServers []string `mandatory:"false" json:"dbServers"`
+
+	// CPUs that continue to be included in the count of CPUs available to the Autonomous Container Database even after one of its Autonomous Database is terminated or scaled down. You can release them to the available CPUs at its parent Autonomous VM Cluster level by restarting the Autonomous Container Database.
 	ReclaimableCpus *int `mandatory:"false" json:"reclaimableCpus"`
 
 	// The number of Autonomous Container Databases that can be created with the currently available local storage.
@@ -121,6 +154,21 @@ type AutonomousVmCluster struct {
 
 	// Enable mutual TLS(mTLS) authentication for database while provisioning a VMCluster. Default is TLS.
 	IsMtlsEnabled *bool `mandatory:"false" json:"isMtlsEnabled"`
+
+	// The date and time of the Database SSL certificate expiration.
+	TimeDatabaseSslCertificateExpires *common.SDKTime `mandatory:"false" json:"timeDatabaseSslCertificateExpires"`
+
+	// The date and time of the ORDS certificate expiration.
+	TimeOrdsCertificateExpires *common.SDKTime `mandatory:"false" json:"timeOrdsCertificateExpires"`
+
+	// The lowest value to which exadataStorage(in TBs) can be scaled down.
+	ExadataStorageInTBsLowestScaledValue *float64 `mandatory:"false" json:"exadataStorageInTBsLowestScaledValue"`
+
+	// The lowest value to which cpus can be scaled down.
+	CpusLowestScaledValue *int `mandatory:"false" json:"cpusLowestScaledValue"`
+
+	// The lowest value to which maximum number of ACDs can be scaled down.
+	MaxAcdsLowestScaledValue *int `mandatory:"false" json:"maxAcdsLowestScaledValue"`
 }
 
 func (m AutonomousVmCluster) String() string {
@@ -136,6 +184,9 @@ func (m AutonomousVmCluster) ValidateEnumValue() (bool, error) {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for LifecycleState: %s. Supported values are: %s.", m.LifecycleState, strings.Join(GetAutonomousVmClusterLifecycleStateEnumStringValues(), ",")))
 	}
 
+	if _, ok := GetMappingAutonomousVmClusterComputeModelEnum(string(m.ComputeModel)); !ok && m.ComputeModel != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for ComputeModel: %s. Supported values are: %s.", m.ComputeModel, strings.Join(GetAutonomousVmClusterComputeModelEnumStringValues(), ",")))
+	}
 	if _, ok := GetMappingAutonomousVmClusterLicenseModelEnum(string(m.LicenseModel)); !ok && m.LicenseModel != "" {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for LicenseModel: %s. Supported values are: %s.", m.LicenseModel, strings.Join(GetAutonomousVmClusterLicenseModelEnumStringValues(), ",")))
 	}
@@ -204,6 +255,48 @@ func GetAutonomousVmClusterLifecycleStateEnumStringValues() []string {
 // GetMappingAutonomousVmClusterLifecycleStateEnum performs case Insensitive comparison on enum value and return the desired enum
 func GetMappingAutonomousVmClusterLifecycleStateEnum(val string) (AutonomousVmClusterLifecycleStateEnum, bool) {
 	enum, ok := mappingAutonomousVmClusterLifecycleStateEnumLowerCase[strings.ToLower(val)]
+	return enum, ok
+}
+
+// AutonomousVmClusterComputeModelEnum Enum with underlying type: string
+type AutonomousVmClusterComputeModelEnum string
+
+// Set of constants representing the allowable values for AutonomousVmClusterComputeModelEnum
+const (
+	AutonomousVmClusterComputeModelEcpu AutonomousVmClusterComputeModelEnum = "ECPU"
+	AutonomousVmClusterComputeModelOcpu AutonomousVmClusterComputeModelEnum = "OCPU"
+)
+
+var mappingAutonomousVmClusterComputeModelEnum = map[string]AutonomousVmClusterComputeModelEnum{
+	"ECPU": AutonomousVmClusterComputeModelEcpu,
+	"OCPU": AutonomousVmClusterComputeModelOcpu,
+}
+
+var mappingAutonomousVmClusterComputeModelEnumLowerCase = map[string]AutonomousVmClusterComputeModelEnum{
+	"ecpu": AutonomousVmClusterComputeModelEcpu,
+	"ocpu": AutonomousVmClusterComputeModelOcpu,
+}
+
+// GetAutonomousVmClusterComputeModelEnumValues Enumerates the set of values for AutonomousVmClusterComputeModelEnum
+func GetAutonomousVmClusterComputeModelEnumValues() []AutonomousVmClusterComputeModelEnum {
+	values := make([]AutonomousVmClusterComputeModelEnum, 0)
+	for _, v := range mappingAutonomousVmClusterComputeModelEnum {
+		values = append(values, v)
+	}
+	return values
+}
+
+// GetAutonomousVmClusterComputeModelEnumStringValues Enumerates the set of values in String for AutonomousVmClusterComputeModelEnum
+func GetAutonomousVmClusterComputeModelEnumStringValues() []string {
+	return []string{
+		"ECPU",
+		"OCPU",
+	}
+}
+
+// GetMappingAutonomousVmClusterComputeModelEnum performs case Insensitive comparison on enum value and return the desired enum
+func GetMappingAutonomousVmClusterComputeModelEnum(val string) (AutonomousVmClusterComputeModelEnum, bool) {
+	enum, ok := mappingAutonomousVmClusterComputeModelEnumLowerCase[strings.ToLower(val)]
 	return enum, ok
 }
 

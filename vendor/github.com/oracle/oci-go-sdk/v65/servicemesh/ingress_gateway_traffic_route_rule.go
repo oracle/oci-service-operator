@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -27,8 +27,8 @@ type IngressGatewayTrafficRouteRule interface {
 
 type ingressgatewaytrafficrouterule struct {
 	JsonData           []byte
-	Destinations       []VirtualServiceTrafficRuleTarget `mandatory:"true" json:"destinations"`
 	IngressGatewayHost *IngressGatewayHostRef            `mandatory:"false" json:"ingressGatewayHost"`
+	Destinations       []VirtualServiceTrafficRuleTarget `mandatory:"true" json:"destinations"`
 	Type               string                            `json:"type"`
 }
 
@@ -72,18 +72,19 @@ func (m *ingressgatewaytrafficrouterule) UnmarshalPolymorphicJSON(data []byte) (
 		err = json.Unmarshal(data, &mm)
 		return mm, err
 	default:
+		common.Logf("Recieved unsupported enum value for IngressGatewayTrafficRouteRule: %s.", m.Type)
 		return *m, nil
 	}
 }
 
-//GetDestinations returns Destinations
-func (m ingressgatewaytrafficrouterule) GetDestinations() []VirtualServiceTrafficRuleTarget {
-	return m.Destinations
-}
-
-//GetIngressGatewayHost returns IngressGatewayHost
+// GetIngressGatewayHost returns IngressGatewayHost
 func (m ingressgatewaytrafficrouterule) GetIngressGatewayHost() *IngressGatewayHostRef {
 	return m.IngressGatewayHost
+}
+
+// GetDestinations returns Destinations
+func (m ingressgatewaytrafficrouterule) GetDestinations() []VirtualServiceTrafficRuleTarget {
+	return m.Destinations
 }
 
 func (m ingressgatewaytrafficrouterule) String() string {

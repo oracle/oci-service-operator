@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -127,7 +127,7 @@ type LaunchDbSystemFromDbSystemDetails struct {
 	// The OCID of the key container that is used as the master encryption key in database transparent data encryption (TDE) operations.
 	KmsKeyId *string `mandatory:"false" json:"kmsKeyId"`
 
-	// The OCID of the key container version that is used in database transparent data encryption (TDE) operations KMS Key can have multiple key versions. If none is specified, the current key version (latest) of the Key Id is used for the operation.
+	// The OCID of the key container version that is used in database transparent data encryption (TDE) operations KMS Key can have multiple key versions. If none is specified, the current key version (latest) of the Key Id is used for the operation. Autonomous Database Serverless does not use key versions, hence is not applicable for Autonomous Database Serverless instances.
 	KmsKeyVersionId *string `mandatory:"false" json:"kmsKeyVersionId"`
 
 	// The number of nodes to launch for a 2-node RAC virtual machine DB system. Specify either 1 or 2.
@@ -155,137 +155,137 @@ type LaunchDbSystemFromDbSystemDetails struct {
 	StorageVolumePerformanceMode LaunchDbSystemBaseStorageVolumePerformanceModeEnum `mandatory:"false" json:"storageVolumePerformanceMode,omitempty"`
 }
 
-//GetCompartmentId returns CompartmentId
+// GetCompartmentId returns CompartmentId
 func (m LaunchDbSystemFromDbSystemDetails) GetCompartmentId() *string {
 	return m.CompartmentId
 }
 
-//GetFaultDomains returns FaultDomains
+// GetFaultDomains returns FaultDomains
 func (m LaunchDbSystemFromDbSystemDetails) GetFaultDomains() []string {
 	return m.FaultDomains
 }
 
-//GetDisplayName returns DisplayName
+// GetDisplayName returns DisplayName
 func (m LaunchDbSystemFromDbSystemDetails) GetDisplayName() *string {
 	return m.DisplayName
 }
 
-//GetAvailabilityDomain returns AvailabilityDomain
+// GetAvailabilityDomain returns AvailabilityDomain
 func (m LaunchDbSystemFromDbSystemDetails) GetAvailabilityDomain() *string {
 	return m.AvailabilityDomain
 }
 
-//GetSubnetId returns SubnetId
+// GetSubnetId returns SubnetId
 func (m LaunchDbSystemFromDbSystemDetails) GetSubnetId() *string {
 	return m.SubnetId
 }
 
-//GetBackupSubnetId returns BackupSubnetId
+// GetBackupSubnetId returns BackupSubnetId
 func (m LaunchDbSystemFromDbSystemDetails) GetBackupSubnetId() *string {
 	return m.BackupSubnetId
 }
 
-//GetNsgIds returns NsgIds
+// GetNsgIds returns NsgIds
 func (m LaunchDbSystemFromDbSystemDetails) GetNsgIds() []string {
 	return m.NsgIds
 }
 
-//GetBackupNetworkNsgIds returns BackupNetworkNsgIds
+// GetBackupNetworkNsgIds returns BackupNetworkNsgIds
 func (m LaunchDbSystemFromDbSystemDetails) GetBackupNetworkNsgIds() []string {
 	return m.BackupNetworkNsgIds
 }
 
-//GetShape returns Shape
+// GetShape returns Shape
 func (m LaunchDbSystemFromDbSystemDetails) GetShape() *string {
 	return m.Shape
 }
 
-//GetTimeZone returns TimeZone
+// GetTimeZone returns TimeZone
 func (m LaunchDbSystemFromDbSystemDetails) GetTimeZone() *string {
 	return m.TimeZone
 }
 
-//GetDbSystemOptions returns DbSystemOptions
+// GetDbSystemOptions returns DbSystemOptions
 func (m LaunchDbSystemFromDbSystemDetails) GetDbSystemOptions() *DbSystemOptions {
 	return m.DbSystemOptions
 }
 
-//GetStorageVolumePerformanceMode returns StorageVolumePerformanceMode
+// GetStorageVolumePerformanceMode returns StorageVolumePerformanceMode
 func (m LaunchDbSystemFromDbSystemDetails) GetStorageVolumePerformanceMode() LaunchDbSystemBaseStorageVolumePerformanceModeEnum {
 	return m.StorageVolumePerformanceMode
 }
 
-//GetSparseDiskgroup returns SparseDiskgroup
+// GetSparseDiskgroup returns SparseDiskgroup
 func (m LaunchDbSystemFromDbSystemDetails) GetSparseDiskgroup() *bool {
 	return m.SparseDiskgroup
 }
 
-//GetSshPublicKeys returns SshPublicKeys
+// GetSshPublicKeys returns SshPublicKeys
 func (m LaunchDbSystemFromDbSystemDetails) GetSshPublicKeys() []string {
 	return m.SshPublicKeys
 }
 
-//GetHostname returns Hostname
+// GetHostname returns Hostname
 func (m LaunchDbSystemFromDbSystemDetails) GetHostname() *string {
 	return m.Hostname
 }
 
-//GetDomain returns Domain
+// GetDomain returns Domain
 func (m LaunchDbSystemFromDbSystemDetails) GetDomain() *string {
 	return m.Domain
 }
 
-//GetCpuCoreCount returns CpuCoreCount
+// GetCpuCoreCount returns CpuCoreCount
 func (m LaunchDbSystemFromDbSystemDetails) GetCpuCoreCount() *int {
 	return m.CpuCoreCount
 }
 
-//GetClusterName returns ClusterName
+// GetClusterName returns ClusterName
 func (m LaunchDbSystemFromDbSystemDetails) GetClusterName() *string {
 	return m.ClusterName
 }
 
-//GetDataStoragePercentage returns DataStoragePercentage
+// GetDataStoragePercentage returns DataStoragePercentage
 func (m LaunchDbSystemFromDbSystemDetails) GetDataStoragePercentage() *int {
 	return m.DataStoragePercentage
 }
 
-//GetInitialDataStorageSizeInGB returns InitialDataStorageSizeInGB
+// GetInitialDataStorageSizeInGB returns InitialDataStorageSizeInGB
 func (m LaunchDbSystemFromDbSystemDetails) GetInitialDataStorageSizeInGB() *int {
 	return m.InitialDataStorageSizeInGB
 }
 
-//GetKmsKeyId returns KmsKeyId
+// GetKmsKeyId returns KmsKeyId
 func (m LaunchDbSystemFromDbSystemDetails) GetKmsKeyId() *string {
 	return m.KmsKeyId
 }
 
-//GetKmsKeyVersionId returns KmsKeyVersionId
+// GetKmsKeyVersionId returns KmsKeyVersionId
 func (m LaunchDbSystemFromDbSystemDetails) GetKmsKeyVersionId() *string {
 	return m.KmsKeyVersionId
 }
 
-//GetNodeCount returns NodeCount
+// GetNodeCount returns NodeCount
 func (m LaunchDbSystemFromDbSystemDetails) GetNodeCount() *int {
 	return m.NodeCount
 }
 
-//GetFreeformTags returns FreeformTags
+// GetFreeformTags returns FreeformTags
 func (m LaunchDbSystemFromDbSystemDetails) GetFreeformTags() map[string]string {
 	return m.FreeformTags
 }
 
-//GetDefinedTags returns DefinedTags
+// GetDefinedTags returns DefinedTags
 func (m LaunchDbSystemFromDbSystemDetails) GetDefinedTags() map[string]map[string]interface{} {
 	return m.DefinedTags
 }
 
-//GetPrivateIp returns PrivateIp
+// GetPrivateIp returns PrivateIp
 func (m LaunchDbSystemFromDbSystemDetails) GetPrivateIp() *string {
 	return m.PrivateIp
 }
 
-//GetDataCollectionOptions returns DataCollectionOptions
+// GetDataCollectionOptions returns DataCollectionOptions
 func (m LaunchDbSystemFromDbSystemDetails) GetDataCollectionOptions() *DataCollectionOptions {
 	return m.DataCollectionOptions
 }

@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -57,12 +57,6 @@ type DbSystem struct {
 	IsHighlyAvailable *bool `mandatory:"false" json:"isHighlyAvailable"`
 
 	CurrentPlacement *DbSystemPlacement `mandatory:"false" json:"currentPlacement"`
-
-	// DEPRECATED -- please use `isHeatWaveClusterAttached` instead.
-	// If the DB System has an Analytics Cluster attached.
-	IsAnalyticsClusterAttached *bool `mandatory:"false" json:"isAnalyticsClusterAttached"`
-
-	AnalyticsCluster *AnalyticsClusterSummary `mandatory:"false" json:"analyticsCluster"`
 
 	// If the DB System has a HeatWave Cluster attached.
 	IsHeatWaveClusterAttached *bool `mandatory:"false" json:"isHeatWaveClusterAttached"`
@@ -137,6 +131,11 @@ type DbSystem struct {
 	CrashRecovery CrashRecoveryStatusEnum `mandatory:"false" json:"crashRecovery,omitempty"`
 
 	PointInTimeRecoveryDetails *PointInTimeRecoveryDetails `mandatory:"false" json:"pointInTimeRecoveryDetails"`
+
+	// Whether to enable monitoring via the Database Management service.
+	DatabaseManagement DatabaseManagementStatusEnum `mandatory:"false" json:"databaseManagement,omitempty"`
+
+	SecureConnections *SecureConnectionDetails `mandatory:"false" json:"secureConnections"`
 }
 
 func (m DbSystem) String() string {
@@ -155,6 +154,9 @@ func (m DbSystem) ValidateEnumValue() (bool, error) {
 	if _, ok := GetMappingCrashRecoveryStatusEnum(string(m.CrashRecovery)); !ok && m.CrashRecovery != "" {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for CrashRecovery: %s. Supported values are: %s.", m.CrashRecovery, strings.Join(GetCrashRecoveryStatusEnumStringValues(), ",")))
 	}
+	if _, ok := GetMappingDatabaseManagementStatusEnum(string(m.DatabaseManagement)); !ok && m.DatabaseManagement != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for DatabaseManagement: %s. Supported values are: %s.", m.DatabaseManagement, strings.Join(GetDatabaseManagementStatusEnumStringValues(), ",")))
+	}
 	if len(errMessage) > 0 {
 		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
 	}
@@ -167,8 +169,6 @@ func (m *DbSystem) UnmarshalJSON(data []byte) (e error) {
 		Description                *string                           `json:"description"`
 		IsHighlyAvailable          *bool                             `json:"isHighlyAvailable"`
 		CurrentPlacement           *DbSystemPlacement                `json:"currentPlacement"`
-		IsAnalyticsClusterAttached *bool                             `json:"isAnalyticsClusterAttached"`
-		AnalyticsCluster           *AnalyticsClusterSummary          `json:"analyticsCluster"`
 		IsHeatWaveClusterAttached  *bool                             `json:"isHeatWaveClusterAttached"`
 		HeatWaveCluster            *HeatWaveClusterSummary           `json:"heatWaveCluster"`
 		AvailabilityDomain         *string                           `json:"availabilityDomain"`
@@ -188,6 +188,8 @@ func (m *DbSystem) UnmarshalJSON(data []byte) (e error) {
 		DefinedTags                map[string]map[string]interface{} `json:"definedTags"`
 		CrashRecovery              CrashRecoveryStatusEnum           `json:"crashRecovery"`
 		PointInTimeRecoveryDetails *PointInTimeRecoveryDetails       `json:"pointInTimeRecoveryDetails"`
+		DatabaseManagement         DatabaseManagementStatusEnum      `json:"databaseManagement"`
+		SecureConnections          *SecureConnectionDetails          `json:"secureConnections"`
 		Id                         *string                           `json:"id"`
 		DisplayName                *string                           `json:"displayName"`
 		CompartmentId              *string                           `json:"compartmentId"`
@@ -211,10 +213,6 @@ func (m *DbSystem) UnmarshalJSON(data []byte) (e error) {
 	m.IsHighlyAvailable = model.IsHighlyAvailable
 
 	m.CurrentPlacement = model.CurrentPlacement
-
-	m.IsAnalyticsClusterAttached = model.IsAnalyticsClusterAttached
-
-	m.AnalyticsCluster = model.AnalyticsCluster
 
 	m.IsHeatWaveClusterAttached = model.IsHeatWaveClusterAttached
 
@@ -249,15 +247,9 @@ func (m *DbSystem) UnmarshalJSON(data []byte) (e error) {
 	m.PortX = model.PortX
 
 	m.Endpoints = make([]DbSystemEndpoint, len(model.Endpoints))
-	for i, n := range model.Endpoints {
-		m.Endpoints[i] = n
-	}
-
+	copy(m.Endpoints, model.Endpoints)
 	m.Channels = make([]ChannelSummary, len(model.Channels))
-	for i, n := range model.Channels {
-		m.Channels[i] = n
-	}
-
+	copy(m.Channels, model.Channels)
 	m.LifecycleDetails = model.LifecycleDetails
 
 	m.FreeformTags = model.FreeformTags
@@ -267,6 +259,10 @@ func (m *DbSystem) UnmarshalJSON(data []byte) (e error) {
 	m.CrashRecovery = model.CrashRecovery
 
 	m.PointInTimeRecoveryDetails = model.PointInTimeRecoveryDetails
+
+	m.DatabaseManagement = model.DatabaseManagement
+
+	m.SecureConnections = model.SecureConnections
 
 	m.Id = model.Id
 

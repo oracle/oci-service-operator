@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -107,6 +107,9 @@ type DbSystemSummary struct {
 
 	// The Oracle Database version of the DB system.
 	Version *string `mandatory:"false" json:"version"`
+
+	// The most recent OS Patch Version applied on the DB system.
+	OsVersion *string `mandatory:"false" json:"osVersion"`
 
 	// The cluster name for Exadata and 2-node RAC virtual machine DB systems. The cluster name must begin with an alphabetic character, and may contain hyphens (-). Underscores (_) are not permitted. The cluster name can be no longer than 11 characters and is not case sensitive.
 	ClusterName *string `mandatory:"false" json:"clusterName"`

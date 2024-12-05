@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -13,7 +13,7 @@ import (
 
 // ListAutonomousDatabaseCharacterSetsRequest wrapper for the ListAutonomousDatabaseCharacterSets operation
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListAutonomousDatabaseCharacterSets.go.html to see an example of how to use ListAutonomousDatabaseCharacterSetsRequest.
 type ListAutonomousDatabaseCharacterSetsRequest struct {
@@ -21,8 +21,11 @@ type ListAutonomousDatabaseCharacterSetsRequest struct {
 	// Unique identifier for the request.
 	OpcRequestId *string `mandatory:"false" contributesTo:"header" name:"opc-request-id"`
 
-	// Specifies whether this request is for Autonomous Database on Shared infrastructure. By default, this request will be for Autonomous Database on Dedicated Exadata Infrastructure.
+	// Specifies whether this request is for an Autonomous Database Serverless instance. By default, this request will be for Autonomous Database on Dedicated Exadata Infrastructure.
 	IsShared *bool `mandatory:"false" contributesTo:"query" name:"isShared"`
+
+	// Specifies if the request is for an Autonomous Database Dedicated instance. The default request is for an Autonomous Database Dedicated instance.
+	IsDedicated *bool `mandatory:"false" contributesTo:"query" name:"isDedicated"`
 
 	// Specifies whether this request pertains to database character sets or national character sets.
 	CharacterSetType ListAutonomousDatabaseCharacterSetsCharacterSetTypeEnum `mandatory:"false" contributesTo:"query" name:"characterSetType" omitEmpty:"true"`

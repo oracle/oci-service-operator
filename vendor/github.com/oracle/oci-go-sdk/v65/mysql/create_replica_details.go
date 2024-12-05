@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -40,6 +40,8 @@ type CreateReplicaDetails struct {
 	// the DB System is delete protected, read replicas can still be deleted individually if they are not delete
 	// protected themselves.
 	IsDeleteProtected *bool `mandatory:"false" json:"isDeleteProtected"`
+
+	ReplicaOverrides *ReplicaOverrides `mandatory:"false" json:"replicaOverrides"`
 }
 
 func (m CreateReplicaDetails) String() string {

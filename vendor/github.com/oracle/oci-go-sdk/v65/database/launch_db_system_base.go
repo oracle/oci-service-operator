@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -126,7 +126,7 @@ type LaunchDbSystemBase interface {
 	// The OCID of the key container that is used as the master encryption key in database transparent data encryption (TDE) operations.
 	GetKmsKeyId() *string
 
-	// The OCID of the key container version that is used in database transparent data encryption (TDE) operations KMS Key can have multiple key versions. If none is specified, the current key version (latest) of the Key Id is used for the operation.
+	// The OCID of the key container version that is used in database transparent data encryption (TDE) operations KMS Key can have multiple key versions. If none is specified, the current key version (latest) of the Key Id is used for the operation. Autonomous Database Serverless does not use key versions, hence is not applicable for Autonomous Database Serverless instances.
 	GetKmsKeyVersionId() *string
 
 	// The number of nodes to launch for a 2-node RAC virtual machine DB system. Specify either 1 or 2.
@@ -150,13 +150,6 @@ type LaunchDbSystemBase interface {
 
 type launchdbsystembase struct {
 	JsonData                     []byte
-	CompartmentId                *string                                            `mandatory:"true" json:"compartmentId"`
-	AvailabilityDomain           *string                                            `mandatory:"true" json:"availabilityDomain"`
-	SubnetId                     *string                                            `mandatory:"true" json:"subnetId"`
-	Shape                        *string                                            `mandatory:"true" json:"shape"`
-	SshPublicKeys                []string                                           `mandatory:"true" json:"sshPublicKeys"`
-	Hostname                     *string                                            `mandatory:"true" json:"hostname"`
-	CpuCoreCount                 *int                                               `mandatory:"true" json:"cpuCoreCount"`
 	FaultDomains                 []string                                           `mandatory:"false" json:"faultDomains"`
 	DisplayName                  *string                                            `mandatory:"false" json:"displayName"`
 	BackupSubnetId               *string                                            `mandatory:"false" json:"backupSubnetId"`
@@ -177,6 +170,13 @@ type launchdbsystembase struct {
 	DefinedTags                  map[string]map[string]interface{}                  `mandatory:"false" json:"definedTags"`
 	PrivateIp                    *string                                            `mandatory:"false" json:"privateIp"`
 	DataCollectionOptions        *DataCollectionOptions                             `mandatory:"false" json:"dataCollectionOptions"`
+	CompartmentId                *string                                            `mandatory:"true" json:"compartmentId"`
+	AvailabilityDomain           *string                                            `mandatory:"true" json:"availabilityDomain"`
+	SubnetId                     *string                                            `mandatory:"true" json:"subnetId"`
+	Shape                        *string                                            `mandatory:"true" json:"shape"`
+	SshPublicKeys                []string                                           `mandatory:"true" json:"sshPublicKeys"`
+	Hostname                     *string                                            `mandatory:"true" json:"hostname"`
+	CpuCoreCount                 *int                                               `mandatory:"true" json:"cpuCoreCount"`
 	Source                       string                                             `json:"source"`
 }
 
@@ -249,143 +249,144 @@ func (m *launchdbsystembase) UnmarshalPolymorphicJSON(data []byte) (interface{},
 		err = json.Unmarshal(data, &mm)
 		return mm, err
 	default:
+		common.Logf("Recieved unsupported enum value for LaunchDbSystemBase: %s.", m.Source)
 		return *m, nil
 	}
 }
 
-//GetCompartmentId returns CompartmentId
-func (m launchdbsystembase) GetCompartmentId() *string {
-	return m.CompartmentId
-}
-
-//GetAvailabilityDomain returns AvailabilityDomain
-func (m launchdbsystembase) GetAvailabilityDomain() *string {
-	return m.AvailabilityDomain
-}
-
-//GetSubnetId returns SubnetId
-func (m launchdbsystembase) GetSubnetId() *string {
-	return m.SubnetId
-}
-
-//GetShape returns Shape
-func (m launchdbsystembase) GetShape() *string {
-	return m.Shape
-}
-
-//GetSshPublicKeys returns SshPublicKeys
-func (m launchdbsystembase) GetSshPublicKeys() []string {
-	return m.SshPublicKeys
-}
-
-//GetHostname returns Hostname
-func (m launchdbsystembase) GetHostname() *string {
-	return m.Hostname
-}
-
-//GetCpuCoreCount returns CpuCoreCount
-func (m launchdbsystembase) GetCpuCoreCount() *int {
-	return m.CpuCoreCount
-}
-
-//GetFaultDomains returns FaultDomains
+// GetFaultDomains returns FaultDomains
 func (m launchdbsystembase) GetFaultDomains() []string {
 	return m.FaultDomains
 }
 
-//GetDisplayName returns DisplayName
+// GetDisplayName returns DisplayName
 func (m launchdbsystembase) GetDisplayName() *string {
 	return m.DisplayName
 }
 
-//GetBackupSubnetId returns BackupSubnetId
+// GetBackupSubnetId returns BackupSubnetId
 func (m launchdbsystembase) GetBackupSubnetId() *string {
 	return m.BackupSubnetId
 }
 
-//GetNsgIds returns NsgIds
+// GetNsgIds returns NsgIds
 func (m launchdbsystembase) GetNsgIds() []string {
 	return m.NsgIds
 }
 
-//GetBackupNetworkNsgIds returns BackupNetworkNsgIds
+// GetBackupNetworkNsgIds returns BackupNetworkNsgIds
 func (m launchdbsystembase) GetBackupNetworkNsgIds() []string {
 	return m.BackupNetworkNsgIds
 }
 
-//GetTimeZone returns TimeZone
+// GetTimeZone returns TimeZone
 func (m launchdbsystembase) GetTimeZone() *string {
 	return m.TimeZone
 }
 
-//GetDbSystemOptions returns DbSystemOptions
+// GetDbSystemOptions returns DbSystemOptions
 func (m launchdbsystembase) GetDbSystemOptions() *DbSystemOptions {
 	return m.DbSystemOptions
 }
 
-//GetStorageVolumePerformanceMode returns StorageVolumePerformanceMode
+// GetStorageVolumePerformanceMode returns StorageVolumePerformanceMode
 func (m launchdbsystembase) GetStorageVolumePerformanceMode() LaunchDbSystemBaseStorageVolumePerformanceModeEnum {
 	return m.StorageVolumePerformanceMode
 }
 
-//GetSparseDiskgroup returns SparseDiskgroup
+// GetSparseDiskgroup returns SparseDiskgroup
 func (m launchdbsystembase) GetSparseDiskgroup() *bool {
 	return m.SparseDiskgroup
 }
 
-//GetDomain returns Domain
+// GetDomain returns Domain
 func (m launchdbsystembase) GetDomain() *string {
 	return m.Domain
 }
 
-//GetClusterName returns ClusterName
+// GetClusterName returns ClusterName
 func (m launchdbsystembase) GetClusterName() *string {
 	return m.ClusterName
 }
 
-//GetDataStoragePercentage returns DataStoragePercentage
+// GetDataStoragePercentage returns DataStoragePercentage
 func (m launchdbsystembase) GetDataStoragePercentage() *int {
 	return m.DataStoragePercentage
 }
 
-//GetInitialDataStorageSizeInGB returns InitialDataStorageSizeInGB
+// GetInitialDataStorageSizeInGB returns InitialDataStorageSizeInGB
 func (m launchdbsystembase) GetInitialDataStorageSizeInGB() *int {
 	return m.InitialDataStorageSizeInGB
 }
 
-//GetKmsKeyId returns KmsKeyId
+// GetKmsKeyId returns KmsKeyId
 func (m launchdbsystembase) GetKmsKeyId() *string {
 	return m.KmsKeyId
 }
 
-//GetKmsKeyVersionId returns KmsKeyVersionId
+// GetKmsKeyVersionId returns KmsKeyVersionId
 func (m launchdbsystembase) GetKmsKeyVersionId() *string {
 	return m.KmsKeyVersionId
 }
 
-//GetNodeCount returns NodeCount
+// GetNodeCount returns NodeCount
 func (m launchdbsystembase) GetNodeCount() *int {
 	return m.NodeCount
 }
 
-//GetFreeformTags returns FreeformTags
+// GetFreeformTags returns FreeformTags
 func (m launchdbsystembase) GetFreeformTags() map[string]string {
 	return m.FreeformTags
 }
 
-//GetDefinedTags returns DefinedTags
+// GetDefinedTags returns DefinedTags
 func (m launchdbsystembase) GetDefinedTags() map[string]map[string]interface{} {
 	return m.DefinedTags
 }
 
-//GetPrivateIp returns PrivateIp
+// GetPrivateIp returns PrivateIp
 func (m launchdbsystembase) GetPrivateIp() *string {
 	return m.PrivateIp
 }
 
-//GetDataCollectionOptions returns DataCollectionOptions
+// GetDataCollectionOptions returns DataCollectionOptions
 func (m launchdbsystembase) GetDataCollectionOptions() *DataCollectionOptions {
 	return m.DataCollectionOptions
+}
+
+// GetCompartmentId returns CompartmentId
+func (m launchdbsystembase) GetCompartmentId() *string {
+	return m.CompartmentId
+}
+
+// GetAvailabilityDomain returns AvailabilityDomain
+func (m launchdbsystembase) GetAvailabilityDomain() *string {
+	return m.AvailabilityDomain
+}
+
+// GetSubnetId returns SubnetId
+func (m launchdbsystembase) GetSubnetId() *string {
+	return m.SubnetId
+}
+
+// GetShape returns Shape
+func (m launchdbsystembase) GetShape() *string {
+	return m.Shape
+}
+
+// GetSshPublicKeys returns SshPublicKeys
+func (m launchdbsystembase) GetSshPublicKeys() []string {
+	return m.SshPublicKeys
+}
+
+// GetHostname returns Hostname
+func (m launchdbsystembase) GetHostname() *string {
+	return m.Hostname
+}
+
+// GetCpuCoreCount returns CpuCoreCount
+func (m launchdbsystembase) GetCpuCoreCount() *int {
+	return m.CpuCoreCount
 }
 
 func (m launchdbsystembase) String() string {

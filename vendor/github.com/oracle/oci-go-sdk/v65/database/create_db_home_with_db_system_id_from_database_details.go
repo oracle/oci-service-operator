@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -30,7 +30,7 @@ type CreateDbHomeWithDbSystemIdFromDatabaseDetails struct {
 	// The OCID of the key container that is used as the master encryption key in database transparent data encryption (TDE) operations.
 	KmsKeyId *string `mandatory:"false" json:"kmsKeyId"`
 
-	// The OCID of the key container version that is used in database transparent data encryption (TDE) operations KMS Key can have multiple key versions. If none is specified, the current key version (latest) of the Key Id is used for the operation.
+	// The OCID of the key container version that is used in database transparent data encryption (TDE) operations KMS Key can have multiple key versions. If none is specified, the current key version (latest) of the Key Id is used for the operation. Autonomous Database Serverless does not use key versions, hence is not applicable for Autonomous Database Serverless instances.
 	KmsKeyVersionId *string `mandatory:"false" json:"kmsKeyVersionId"`
 
 	// The database software image OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
@@ -49,37 +49,37 @@ type CreateDbHomeWithDbSystemIdFromDatabaseDetails struct {
 	IsDesupportedVersion *bool `mandatory:"false" json:"isDesupportedVersion"`
 }
 
-//GetDisplayName returns DisplayName
+// GetDisplayName returns DisplayName
 func (m CreateDbHomeWithDbSystemIdFromDatabaseDetails) GetDisplayName() *string {
 	return m.DisplayName
 }
 
-//GetKmsKeyId returns KmsKeyId
+// GetKmsKeyId returns KmsKeyId
 func (m CreateDbHomeWithDbSystemIdFromDatabaseDetails) GetKmsKeyId() *string {
 	return m.KmsKeyId
 }
 
-//GetKmsKeyVersionId returns KmsKeyVersionId
+// GetKmsKeyVersionId returns KmsKeyVersionId
 func (m CreateDbHomeWithDbSystemIdFromDatabaseDetails) GetKmsKeyVersionId() *string {
 	return m.KmsKeyVersionId
 }
 
-//GetDatabaseSoftwareImageId returns DatabaseSoftwareImageId
+// GetDatabaseSoftwareImageId returns DatabaseSoftwareImageId
 func (m CreateDbHomeWithDbSystemIdFromDatabaseDetails) GetDatabaseSoftwareImageId() *string {
 	return m.DatabaseSoftwareImageId
 }
 
-//GetFreeformTags returns FreeformTags
+// GetFreeformTags returns FreeformTags
 func (m CreateDbHomeWithDbSystemIdFromDatabaseDetails) GetFreeformTags() map[string]string {
 	return m.FreeformTags
 }
 
-//GetDefinedTags returns DefinedTags
+// GetDefinedTags returns DefinedTags
 func (m CreateDbHomeWithDbSystemIdFromDatabaseDetails) GetDefinedTags() map[string]map[string]interface{} {
 	return m.DefinedTags
 }
 
-//GetIsDesupportedVersion returns IsDesupportedVersion
+// GetIsDesupportedVersion returns IsDesupportedVersion
 func (m CreateDbHomeWithDbSystemIdFromDatabaseDetails) GetIsDesupportedVersion() *bool {
 	return m.IsDesupportedVersion
 }

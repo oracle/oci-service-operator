@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -17,7 +17,7 @@ import (
 	"net/http"
 )
 
-//MysqlaasClient a client for Mysqlaas
+// MysqlaasClient a client for Mysqlaas
 type MysqlaasClient struct {
 	common.BaseClient
 	config *common.ConfigurationProvider
@@ -26,6 +26,9 @@ type MysqlaasClient struct {
 // NewMysqlaasClientWithConfigurationProvider Creates a new default Mysqlaas client with the given configuration provider.
 // the configuration provider will be used for the default signer as well as reading the region
 func NewMysqlaasClientWithConfigurationProvider(configProvider common.ConfigurationProvider) (client MysqlaasClient, err error) {
+	if enabled := common.CheckForEnabledServices("mysql"); !enabled {
+		return client, fmt.Errorf("the Developer Tool configuration disabled this service, this behavior is controlled by OciSdkEnabledServicesMap variables. Please check if your local developer-tool-configuration.json file configured the service you're targeting or contact the cloud provider on the availability of this service")
+	}
 	provider, err := auth.GetGenericConfigurationProvider(configProvider)
 	if err != nil {
 		return client, err
@@ -39,7 +42,8 @@ func NewMysqlaasClientWithConfigurationProvider(configProvider common.Configurat
 
 // NewMysqlaasClientWithOboToken Creates a new default Mysqlaas client with the given configuration provider.
 // The obotoken will be added to default headers and signed; the configuration provider will be used for the signer
-//  as well as reading the region
+//
+//	as well as reading the region
 func NewMysqlaasClientWithOboToken(configProvider common.ConfigurationProvider, oboToken string) (client MysqlaasClient, err error) {
 	baseClient, err := common.NewClientWithOboToken(configProvider, oboToken)
 	if err != nil {
@@ -76,7 +80,7 @@ func (client *MysqlaasClient) setConfigurationProvider(configProvider common.Con
 	region, _ := configProvider.Region()
 	client.SetRegion(region)
 	if client.Host == "" {
-		return fmt.Errorf("Invalid region or Host. Endpoint cannot be constructed without endpointServiceName or serviceEndpointTemplate for a dotted region")
+		return fmt.Errorf("invalid region or Host. Endpoint cannot be constructed without endpointServiceName or serviceEndpointTemplate for a dotted region")
 	}
 	client.config = &configProvider
 	return nil
@@ -89,7 +93,7 @@ func (client *MysqlaasClient) ConfigurationProvider() *common.ConfigurationProvi
 
 // CreateConfiguration Creates a new Configuration.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/CreateConfiguration.go.html to see an example of how to use CreateConfiguration API.
 func (client MysqlaasClient) CreateConfiguration(ctx context.Context, request CreateConfigurationRequest) (response CreateConfigurationResponse, err error) {
@@ -152,7 +156,7 @@ func (client MysqlaasClient) createConfiguration(ctx context.Context, request co
 // DeleteConfiguration Deletes a Configuration.
 // The Configuration must not be in use by any DB Systems.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/DeleteConfiguration.go.html to see an example of how to use DeleteConfiguration API.
 // A default retry strategy applies to this operation DeleteConfiguration()
@@ -210,7 +214,7 @@ func (client MysqlaasClient) deleteConfiguration(ctx context.Context, request co
 
 // GetConfiguration Get the full details of the specified Configuration, including the list of MySQL Variables and their values.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/GetConfiguration.go.html to see an example of how to use GetConfiguration API.
 // A default retry strategy applies to this operation GetConfiguration()
@@ -273,7 +277,7 @@ func (client MysqlaasClient) getConfiguration(ctx context.Context, request commo
 //   - DEFAULT-before-CUSTOM
 //   - displayName ascending
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/ListConfigurations.go.html to see an example of how to use ListConfigurations API.
 // A default retry strategy applies to this operation ListConfigurations()
@@ -334,7 +338,7 @@ func (client MysqlaasClient) listConfigurations(ctx context.Context, request com
 // CPU cores and memory for VM shapes; CPU cores, memory and
 // storage for non-VM (or bare metal) shapes.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/ListShapes.go.html to see an example of how to use ListShapes API.
 // A default retry strategy applies to this operation ListShapes()
@@ -393,7 +397,7 @@ func (client MysqlaasClient) listShapes(ctx context.Context, request common.OCIR
 // ListVersions Get a list of supported and available MySQL database major versions.
 // The list is sorted by version family.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/ListVersions.go.html to see an example of how to use ListVersions API.
 // A default retry strategy applies to this operation ListVersions()
@@ -451,7 +455,7 @@ func (client MysqlaasClient) listVersions(ctx context.Context, request common.OC
 
 // UpdateConfiguration Updates the Configuration details.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/UpdateConfiguration.go.html to see an example of how to use UpdateConfiguration API.
 // A default retry strategy applies to this operation UpdateConfiguration()

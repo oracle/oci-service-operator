@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -17,7 +17,7 @@ import (
 	"net/http"
 )
 
-//DbSystemClient a client for DbSystem
+// DbSystemClient a client for DbSystem
 type DbSystemClient struct {
 	common.BaseClient
 	config *common.ConfigurationProvider
@@ -26,6 +26,9 @@ type DbSystemClient struct {
 // NewDbSystemClientWithConfigurationProvider Creates a new default DbSystem client with the given configuration provider.
 // the configuration provider will be used for the default signer as well as reading the region
 func NewDbSystemClientWithConfigurationProvider(configProvider common.ConfigurationProvider) (client DbSystemClient, err error) {
+	if enabled := common.CheckForEnabledServices("mysql"); !enabled {
+		return client, fmt.Errorf("the Developer Tool configuration disabled this service, this behavior is controlled by OciSdkEnabledServicesMap variables. Please check if your local developer-tool-configuration.json file configured the service you're targeting or contact the cloud provider on the availability of this service")
+	}
 	provider, err := auth.GetGenericConfigurationProvider(configProvider)
 	if err != nil {
 		return client, err
@@ -39,7 +42,8 @@ func NewDbSystemClientWithConfigurationProvider(configProvider common.Configurat
 
 // NewDbSystemClientWithOboToken Creates a new default DbSystem client with the given configuration provider.
 // The obotoken will be added to default headers and signed; the configuration provider will be used for the signer
-//  as well as reading the region
+//
+//	as well as reading the region
 func NewDbSystemClientWithOboToken(configProvider common.ConfigurationProvider, oboToken string) (client DbSystemClient, err error) {
 	baseClient, err := common.NewClientWithOboToken(configProvider, oboToken)
 	if err != nil {
@@ -76,7 +80,7 @@ func (client *DbSystemClient) setConfigurationProvider(configProvider common.Con
 	region, _ := configProvider.Region()
 	client.SetRegion(region)
 	if client.Host == "" {
-		return fmt.Errorf("Invalid region or Host. Endpoint cannot be constructed without endpointServiceName or serviceEndpointTemplate for a dotted region")
+		return fmt.Errorf("invalid region or Host. Endpoint cannot be constructed without endpointServiceName or serviceEndpointTemplate for a dotted region")
 	}
 	client.config = &configProvider
 	return nil
@@ -87,73 +91,9 @@ func (client *DbSystemClient) ConfigurationProvider() *common.ConfigurationProvi
 	return client.config
 }
 
-// AddAnalyticsCluster DEPRECATED -- please use HeatWave API instead.
-// Adds an Analytics Cluster to the DB System.
-//
-// See also
-//
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/AddAnalyticsCluster.go.html to see an example of how to use AddAnalyticsCluster API.
-// A default retry strategy applies to this operation AddAnalyticsCluster()
-func (client DbSystemClient) AddAnalyticsCluster(ctx context.Context, request AddAnalyticsClusterRequest) (response AddAnalyticsClusterResponse, err error) {
-	var ociResponse common.OCIResponse
-	policy := common.DefaultRetryPolicy()
-	if client.RetryPolicy() != nil {
-		policy = *client.RetryPolicy()
-	}
-	if request.RetryPolicy() != nil {
-		policy = *request.RetryPolicy()
-	}
-
-	if !(request.OpcRetryToken != nil && *request.OpcRetryToken != "") {
-		request.OpcRetryToken = common.String(common.RetryToken())
-	}
-
-	ociResponse, err = common.Retry(ctx, request, client.addAnalyticsCluster, policy)
-	if err != nil {
-		if ociResponse != nil {
-			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
-				opcRequestId := httpResponse.Header.Get("opc-request-id")
-				response = AddAnalyticsClusterResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
-			} else {
-				response = AddAnalyticsClusterResponse{}
-			}
-		}
-		return
-	}
-	if convertedResponse, ok := ociResponse.(AddAnalyticsClusterResponse); ok {
-		response = convertedResponse
-	} else {
-		err = fmt.Errorf("failed to convert OCIResponse into AddAnalyticsClusterResponse")
-	}
-	return
-}
-
-// addAnalyticsCluster implements the OCIOperation interface (enables retrying operations)
-func (client DbSystemClient) addAnalyticsCluster(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
-
-	httpRequest, err := request.HTTPRequest(http.MethodPost, "/dbSystems/{dbSystemId}/analyticsCluster/actions/add", binaryReqBody, extraHeaders)
-	if err != nil {
-		return nil, err
-	}
-
-	var response AddAnalyticsClusterResponse
-	var httpResponse *http.Response
-	httpResponse, err = client.Call(ctx, &httpRequest)
-	defer common.CloseBodyIfValid(httpResponse)
-	response.RawResponse = httpResponse
-	if err != nil {
-		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/mysql/20190415/AnalyticsCluster/AddAnalyticsCluster"
-		err = common.PostProcessServiceError(err, "DbSystem", "AddAnalyticsCluster", apiReferenceLink)
-		return response, err
-	}
-
-	err = common.UnmarshalResponse(httpResponse, &response)
-	return response, err
-}
-
 // AddHeatWaveCluster Adds a HeatWave cluster to the DB System.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/AddHeatWaveCluster.go.html to see an example of how to use AddHeatWaveCluster API.
 // A default retry strategy applies to this operation AddHeatWaveCluster()
@@ -216,7 +156,7 @@ func (client DbSystemClient) addHeatWaveCluster(ctx context.Context, request com
 
 // CreateDbSystem Creates and launches a DB System.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/CreateDbSystem.go.html to see an example of how to use CreateDbSystem API.
 // A default retry strategy applies to this operation CreateDbSystem()
@@ -277,70 +217,10 @@ func (client DbSystemClient) createDbSystem(ctx context.Context, request common.
 	return response, err
 }
 
-// DeleteAnalyticsCluster DEPRECATED -- please use HeatWave API instead.
-// Deletes the Analytics Cluster including terminating, detaching, removing, finalizing and
-// otherwise deleting all related resources.
-//
-// See also
-//
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/DeleteAnalyticsCluster.go.html to see an example of how to use DeleteAnalyticsCluster API.
-// A default retry strategy applies to this operation DeleteAnalyticsCluster()
-func (client DbSystemClient) DeleteAnalyticsCluster(ctx context.Context, request DeleteAnalyticsClusterRequest) (response DeleteAnalyticsClusterResponse, err error) {
-	var ociResponse common.OCIResponse
-	policy := common.DefaultRetryPolicy()
-	if client.RetryPolicy() != nil {
-		policy = *client.RetryPolicy()
-	}
-	if request.RetryPolicy() != nil {
-		policy = *request.RetryPolicy()
-	}
-	ociResponse, err = common.Retry(ctx, request, client.deleteAnalyticsCluster, policy)
-	if err != nil {
-		if ociResponse != nil {
-			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
-				opcRequestId := httpResponse.Header.Get("opc-request-id")
-				response = DeleteAnalyticsClusterResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
-			} else {
-				response = DeleteAnalyticsClusterResponse{}
-			}
-		}
-		return
-	}
-	if convertedResponse, ok := ociResponse.(DeleteAnalyticsClusterResponse); ok {
-		response = convertedResponse
-	} else {
-		err = fmt.Errorf("failed to convert OCIResponse into DeleteAnalyticsClusterResponse")
-	}
-	return
-}
-
-// deleteAnalyticsCluster implements the OCIOperation interface (enables retrying operations)
-func (client DbSystemClient) deleteAnalyticsCluster(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
-
-	httpRequest, err := request.HTTPRequest(http.MethodDelete, "/dbSystems/{dbSystemId}/analyticsCluster", binaryReqBody, extraHeaders)
-	if err != nil {
-		return nil, err
-	}
-
-	var response DeleteAnalyticsClusterResponse
-	var httpResponse *http.Response
-	httpResponse, err = client.Call(ctx, &httpRequest)
-	defer common.CloseBodyIfValid(httpResponse)
-	response.RawResponse = httpResponse
-	if err != nil {
-		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/mysql/20190415/AnalyticsCluster/DeleteAnalyticsCluster"
-		err = common.PostProcessServiceError(err, "DbSystem", "DeleteAnalyticsCluster", apiReferenceLink)
-		return response, err
-	}
-
-	err = common.UnmarshalResponse(httpResponse, &response)
-	return response, err
-}
-
 // DeleteDbSystem Delete a DB System, including terminating, detaching,
 // removing, finalizing and otherwise deleting all related resources.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/DeleteDbSystem.go.html to see an example of how to use DeleteDbSystem API.
 // A default retry strategy applies to this operation DeleteDbSystem()
@@ -399,7 +279,7 @@ func (client DbSystemClient) deleteDbSystem(ctx context.Context, request common.
 // DeleteHeatWaveCluster Deletes the HeatWave cluster including terminating, detaching, removing, finalizing and
 // otherwise deleting all related resources.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/DeleteHeatWaveCluster.go.html to see an example of how to use DeleteHeatWaveCluster API.
 // A default retry strategy applies to this operation DeleteHeatWaveCluster()
@@ -455,73 +335,9 @@ func (client DbSystemClient) deleteHeatWaveCluster(ctx context.Context, request 
 	return response, err
 }
 
-// GenerateAnalyticsClusterMemoryEstimate DEPRECATED -- please use HeatWave API instead.
-// Sends a request to estimate the memory footprints of user tables when loaded to Analytics Cluster memory.
-//
-// See also
-//
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/GenerateAnalyticsClusterMemoryEstimate.go.html to see an example of how to use GenerateAnalyticsClusterMemoryEstimate API.
-// A default retry strategy applies to this operation GenerateAnalyticsClusterMemoryEstimate()
-func (client DbSystemClient) GenerateAnalyticsClusterMemoryEstimate(ctx context.Context, request GenerateAnalyticsClusterMemoryEstimateRequest) (response GenerateAnalyticsClusterMemoryEstimateResponse, err error) {
-	var ociResponse common.OCIResponse
-	policy := common.DefaultRetryPolicy()
-	if client.RetryPolicy() != nil {
-		policy = *client.RetryPolicy()
-	}
-	if request.RetryPolicy() != nil {
-		policy = *request.RetryPolicy()
-	}
-
-	if !(request.OpcRetryToken != nil && *request.OpcRetryToken != "") {
-		request.OpcRetryToken = common.String(common.RetryToken())
-	}
-
-	ociResponse, err = common.Retry(ctx, request, client.generateAnalyticsClusterMemoryEstimate, policy)
-	if err != nil {
-		if ociResponse != nil {
-			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
-				opcRequestId := httpResponse.Header.Get("opc-request-id")
-				response = GenerateAnalyticsClusterMemoryEstimateResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
-			} else {
-				response = GenerateAnalyticsClusterMemoryEstimateResponse{}
-			}
-		}
-		return
-	}
-	if convertedResponse, ok := ociResponse.(GenerateAnalyticsClusterMemoryEstimateResponse); ok {
-		response = convertedResponse
-	} else {
-		err = fmt.Errorf("failed to convert OCIResponse into GenerateAnalyticsClusterMemoryEstimateResponse")
-	}
-	return
-}
-
-// generateAnalyticsClusterMemoryEstimate implements the OCIOperation interface (enables retrying operations)
-func (client DbSystemClient) generateAnalyticsClusterMemoryEstimate(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
-
-	httpRequest, err := request.HTTPRequest(http.MethodPost, "/dbSystems/{dbSystemId}/analyticsClusterMemoryEstimate/actions/generate", binaryReqBody, extraHeaders)
-	if err != nil {
-		return nil, err
-	}
-
-	var response GenerateAnalyticsClusterMemoryEstimateResponse
-	var httpResponse *http.Response
-	httpResponse, err = client.Call(ctx, &httpRequest)
-	defer common.CloseBodyIfValid(httpResponse)
-	response.RawResponse = httpResponse
-	if err != nil {
-		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/mysql/20190415/AnalyticsClusterMemoryEstimate/GenerateAnalyticsClusterMemoryEstimate"
-		err = common.PostProcessServiceError(err, "DbSystem", "GenerateAnalyticsClusterMemoryEstimate", apiReferenceLink)
-		return response, err
-	}
-
-	err = common.UnmarshalResponse(httpResponse, &response)
-	return response, err
-}
-
 // GenerateHeatWaveClusterMemoryEstimate Sends a request to estimate the memory footprints of user tables when loaded to HeatWave cluster memory.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/GenerateHeatWaveClusterMemoryEstimate.go.html to see an example of how to use GenerateHeatWaveClusterMemoryEstimate API.
 // A default retry strategy applies to this operation GenerateHeatWaveClusterMemoryEstimate()
@@ -582,128 +398,9 @@ func (client DbSystemClient) generateHeatWaveClusterMemoryEstimate(ctx context.C
 	return response, err
 }
 
-// GetAnalyticsCluster DEPRECATED -- please use HeatWave API instead.
-// Gets information about the Analytics Cluster.
-//
-// See also
-//
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/GetAnalyticsCluster.go.html to see an example of how to use GetAnalyticsCluster API.
-// A default retry strategy applies to this operation GetAnalyticsCluster()
-func (client DbSystemClient) GetAnalyticsCluster(ctx context.Context, request GetAnalyticsClusterRequest) (response GetAnalyticsClusterResponse, err error) {
-	var ociResponse common.OCIResponse
-	policy := common.DefaultRetryPolicy()
-	if client.RetryPolicy() != nil {
-		policy = *client.RetryPolicy()
-	}
-	if request.RetryPolicy() != nil {
-		policy = *request.RetryPolicy()
-	}
-	ociResponse, err = common.Retry(ctx, request, client.getAnalyticsCluster, policy)
-	if err != nil {
-		if ociResponse != nil {
-			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
-				opcRequestId := httpResponse.Header.Get("opc-request-id")
-				response = GetAnalyticsClusterResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
-			} else {
-				response = GetAnalyticsClusterResponse{}
-			}
-		}
-		return
-	}
-	if convertedResponse, ok := ociResponse.(GetAnalyticsClusterResponse); ok {
-		response = convertedResponse
-	} else {
-		err = fmt.Errorf("failed to convert OCIResponse into GetAnalyticsClusterResponse")
-	}
-	return
-}
-
-// getAnalyticsCluster implements the OCIOperation interface (enables retrying operations)
-func (client DbSystemClient) getAnalyticsCluster(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
-
-	httpRequest, err := request.HTTPRequest(http.MethodGet, "/dbSystems/{dbSystemId}/analyticsCluster", binaryReqBody, extraHeaders)
-	if err != nil {
-		return nil, err
-	}
-
-	var response GetAnalyticsClusterResponse
-	var httpResponse *http.Response
-	httpResponse, err = client.Call(ctx, &httpRequest)
-	defer common.CloseBodyIfValid(httpResponse)
-	response.RawResponse = httpResponse
-	if err != nil {
-		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/mysql/20190415/AnalyticsCluster/GetAnalyticsCluster"
-		err = common.PostProcessServiceError(err, "DbSystem", "GetAnalyticsCluster", apiReferenceLink)
-		return response, err
-	}
-
-	err = common.UnmarshalResponse(httpResponse, &response)
-	return response, err
-}
-
-// GetAnalyticsClusterMemoryEstimate DEPRECATED -- please use HeatWave API instead.
-// Gets the most recent Analytics Cluster memory estimate that can be used to determine a suitable
-// Analytics Cluster size.
-//
-// See also
-//
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/GetAnalyticsClusterMemoryEstimate.go.html to see an example of how to use GetAnalyticsClusterMemoryEstimate API.
-// A default retry strategy applies to this operation GetAnalyticsClusterMemoryEstimate()
-func (client DbSystemClient) GetAnalyticsClusterMemoryEstimate(ctx context.Context, request GetAnalyticsClusterMemoryEstimateRequest) (response GetAnalyticsClusterMemoryEstimateResponse, err error) {
-	var ociResponse common.OCIResponse
-	policy := common.DefaultRetryPolicy()
-	if client.RetryPolicy() != nil {
-		policy = *client.RetryPolicy()
-	}
-	if request.RetryPolicy() != nil {
-		policy = *request.RetryPolicy()
-	}
-	ociResponse, err = common.Retry(ctx, request, client.getAnalyticsClusterMemoryEstimate, policy)
-	if err != nil {
-		if ociResponse != nil {
-			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
-				opcRequestId := httpResponse.Header.Get("opc-request-id")
-				response = GetAnalyticsClusterMemoryEstimateResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
-			} else {
-				response = GetAnalyticsClusterMemoryEstimateResponse{}
-			}
-		}
-		return
-	}
-	if convertedResponse, ok := ociResponse.(GetAnalyticsClusterMemoryEstimateResponse); ok {
-		response = convertedResponse
-	} else {
-		err = fmt.Errorf("failed to convert OCIResponse into GetAnalyticsClusterMemoryEstimateResponse")
-	}
-	return
-}
-
-// getAnalyticsClusterMemoryEstimate implements the OCIOperation interface (enables retrying operations)
-func (client DbSystemClient) getAnalyticsClusterMemoryEstimate(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
-
-	httpRequest, err := request.HTTPRequest(http.MethodGet, "/dbSystems/{dbSystemId}/analyticsClusterMemoryEstimate", binaryReqBody, extraHeaders)
-	if err != nil {
-		return nil, err
-	}
-
-	var response GetAnalyticsClusterMemoryEstimateResponse
-	var httpResponse *http.Response
-	httpResponse, err = client.Call(ctx, &httpRequest)
-	defer common.CloseBodyIfValid(httpResponse)
-	response.RawResponse = httpResponse
-	if err != nil {
-		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/mysql/20190415/AnalyticsClusterMemoryEstimate/GetAnalyticsClusterMemoryEstimate"
-		err = common.PostProcessServiceError(err, "DbSystem", "GetAnalyticsClusterMemoryEstimate", apiReferenceLink)
-		return response, err
-	}
-
-	err = common.UnmarshalResponse(httpResponse, &response)
-	return response, err
-}
-
 // GetDbSystem Get information about the specified DB System.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/GetDbSystem.go.html to see an example of how to use GetDbSystem API.
 // A default retry strategy applies to this operation GetDbSystem()
@@ -761,7 +458,7 @@ func (client DbSystemClient) getDbSystem(ctx context.Context, request common.OCI
 
 // GetHeatWaveCluster Gets information about the HeatWave cluster.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/GetHeatWaveCluster.go.html to see an example of how to use GetHeatWaveCluster API.
 // A default retry strategy applies to this operation GetHeatWaveCluster()
@@ -820,7 +517,7 @@ func (client DbSystemClient) getHeatWaveCluster(ctx context.Context, request com
 // GetHeatWaveClusterMemoryEstimate Gets the most recent HeatWave cluster memory estimate that can be used to determine a suitable
 // HeatWave cluster size.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/GetHeatWaveClusterMemoryEstimate.go.html to see an example of how to use GetHeatWaveClusterMemoryEstimate API.
 // A default retry strategy applies to this operation GetHeatWaveClusterMemoryEstimate()
@@ -879,7 +576,7 @@ func (client DbSystemClient) getHeatWaveClusterMemoryEstimate(ctx context.Contex
 // ListDbSystems Get a list of DB Systems in the specified compartment.
 // The default sort order is by timeUpdated, descending.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/ListDbSystems.go.html to see an example of how to use ListDbSystems API.
 // A default retry strategy applies to this operation ListDbSystems()
@@ -935,73 +632,9 @@ func (client DbSystemClient) listDbSystems(ctx context.Context, request common.O
 	return response, err
 }
 
-// RestartAnalyticsCluster DEPRECATED -- please use HeatWave API instead.
-// Restarts the Analytics Cluster.
-//
-// See also
-//
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/RestartAnalyticsCluster.go.html to see an example of how to use RestartAnalyticsCluster API.
-// A default retry strategy applies to this operation RestartAnalyticsCluster()
-func (client DbSystemClient) RestartAnalyticsCluster(ctx context.Context, request RestartAnalyticsClusterRequest) (response RestartAnalyticsClusterResponse, err error) {
-	var ociResponse common.OCIResponse
-	policy := common.DefaultRetryPolicy()
-	if client.RetryPolicy() != nil {
-		policy = *client.RetryPolicy()
-	}
-	if request.RetryPolicy() != nil {
-		policy = *request.RetryPolicy()
-	}
-
-	if !(request.OpcRetryToken != nil && *request.OpcRetryToken != "") {
-		request.OpcRetryToken = common.String(common.RetryToken())
-	}
-
-	ociResponse, err = common.Retry(ctx, request, client.restartAnalyticsCluster, policy)
-	if err != nil {
-		if ociResponse != nil {
-			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
-				opcRequestId := httpResponse.Header.Get("opc-request-id")
-				response = RestartAnalyticsClusterResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
-			} else {
-				response = RestartAnalyticsClusterResponse{}
-			}
-		}
-		return
-	}
-	if convertedResponse, ok := ociResponse.(RestartAnalyticsClusterResponse); ok {
-		response = convertedResponse
-	} else {
-		err = fmt.Errorf("failed to convert OCIResponse into RestartAnalyticsClusterResponse")
-	}
-	return
-}
-
-// restartAnalyticsCluster implements the OCIOperation interface (enables retrying operations)
-func (client DbSystemClient) restartAnalyticsCluster(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
-
-	httpRequest, err := request.HTTPRequest(http.MethodPost, "/dbSystems/{dbSystemId}/analyticsCluster/actions/restart", binaryReqBody, extraHeaders)
-	if err != nil {
-		return nil, err
-	}
-
-	var response RestartAnalyticsClusterResponse
-	var httpResponse *http.Response
-	httpResponse, err = client.Call(ctx, &httpRequest)
-	defer common.CloseBodyIfValid(httpResponse)
-	response.RawResponse = httpResponse
-	if err != nil {
-		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/mysql/20190415/AnalyticsCluster/RestartAnalyticsCluster"
-		err = common.PostProcessServiceError(err, "DbSystem", "RestartAnalyticsCluster", apiReferenceLink)
-		return response, err
-	}
-
-	err = common.UnmarshalResponse(httpResponse, &response)
-	return response, err
-}
-
 // RestartDbSystem Restarts the specified DB System.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/RestartDbSystem.go.html to see an example of how to use RestartDbSystem API.
 // A default retry strategy applies to this operation RestartDbSystem()
@@ -1064,7 +697,7 @@ func (client DbSystemClient) restartDbSystem(ctx context.Context, request common
 
 // RestartHeatWaveCluster Restarts the HeatWave cluster.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/RestartHeatWaveCluster.go.html to see an example of how to use RestartHeatWaveCluster API.
 // A default retry strategy applies to this operation RestartHeatWaveCluster()
@@ -1125,73 +758,9 @@ func (client DbSystemClient) restartHeatWaveCluster(ctx context.Context, request
 	return response, err
 }
 
-// StartAnalyticsCluster DEPRECATED -- please use HeatWave API instead.
-// Starts the Analytics Cluster.
-//
-// See also
-//
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/StartAnalyticsCluster.go.html to see an example of how to use StartAnalyticsCluster API.
-// A default retry strategy applies to this operation StartAnalyticsCluster()
-func (client DbSystemClient) StartAnalyticsCluster(ctx context.Context, request StartAnalyticsClusterRequest) (response StartAnalyticsClusterResponse, err error) {
-	var ociResponse common.OCIResponse
-	policy := common.DefaultRetryPolicy()
-	if client.RetryPolicy() != nil {
-		policy = *client.RetryPolicy()
-	}
-	if request.RetryPolicy() != nil {
-		policy = *request.RetryPolicy()
-	}
-
-	if !(request.OpcRetryToken != nil && *request.OpcRetryToken != "") {
-		request.OpcRetryToken = common.String(common.RetryToken())
-	}
-
-	ociResponse, err = common.Retry(ctx, request, client.startAnalyticsCluster, policy)
-	if err != nil {
-		if ociResponse != nil {
-			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
-				opcRequestId := httpResponse.Header.Get("opc-request-id")
-				response = StartAnalyticsClusterResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
-			} else {
-				response = StartAnalyticsClusterResponse{}
-			}
-		}
-		return
-	}
-	if convertedResponse, ok := ociResponse.(StartAnalyticsClusterResponse); ok {
-		response = convertedResponse
-	} else {
-		err = fmt.Errorf("failed to convert OCIResponse into StartAnalyticsClusterResponse")
-	}
-	return
-}
-
-// startAnalyticsCluster implements the OCIOperation interface (enables retrying operations)
-func (client DbSystemClient) startAnalyticsCluster(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
-
-	httpRequest, err := request.HTTPRequest(http.MethodPost, "/dbSystems/{dbSystemId}/analyticsCluster/actions/start", binaryReqBody, extraHeaders)
-	if err != nil {
-		return nil, err
-	}
-
-	var response StartAnalyticsClusterResponse
-	var httpResponse *http.Response
-	httpResponse, err = client.Call(ctx, &httpRequest)
-	defer common.CloseBodyIfValid(httpResponse)
-	response.RawResponse = httpResponse
-	if err != nil {
-		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/mysql/20190415/AnalyticsCluster/StartAnalyticsCluster"
-		err = common.PostProcessServiceError(err, "DbSystem", "StartAnalyticsCluster", apiReferenceLink)
-		return response, err
-	}
-
-	err = common.UnmarshalResponse(httpResponse, &response)
-	return response, err
-}
-
 // StartDbSystem Start the specified DB System.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/StartDbSystem.go.html to see an example of how to use StartDbSystem API.
 // A default retry strategy applies to this operation StartDbSystem()
@@ -1254,7 +823,7 @@ func (client DbSystemClient) startDbSystem(ctx context.Context, request common.O
 
 // StartHeatWaveCluster Starts the HeatWave cluster.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/StartHeatWaveCluster.go.html to see an example of how to use StartHeatWaveCluster API.
 // A default retry strategy applies to this operation StartHeatWaveCluster()
@@ -1315,74 +884,10 @@ func (client DbSystemClient) startHeatWaveCluster(ctx context.Context, request c
 	return response, err
 }
 
-// StopAnalyticsCluster DEPRECATED -- please use HeatWave API instead.
-// Stops the Analytics Cluster.
-//
-// See also
-//
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/StopAnalyticsCluster.go.html to see an example of how to use StopAnalyticsCluster API.
-// A default retry strategy applies to this operation StopAnalyticsCluster()
-func (client DbSystemClient) StopAnalyticsCluster(ctx context.Context, request StopAnalyticsClusterRequest) (response StopAnalyticsClusterResponse, err error) {
-	var ociResponse common.OCIResponse
-	policy := common.DefaultRetryPolicy()
-	if client.RetryPolicy() != nil {
-		policy = *client.RetryPolicy()
-	}
-	if request.RetryPolicy() != nil {
-		policy = *request.RetryPolicy()
-	}
-
-	if !(request.OpcRetryToken != nil && *request.OpcRetryToken != "") {
-		request.OpcRetryToken = common.String(common.RetryToken())
-	}
-
-	ociResponse, err = common.Retry(ctx, request, client.stopAnalyticsCluster, policy)
-	if err != nil {
-		if ociResponse != nil {
-			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
-				opcRequestId := httpResponse.Header.Get("opc-request-id")
-				response = StopAnalyticsClusterResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
-			} else {
-				response = StopAnalyticsClusterResponse{}
-			}
-		}
-		return
-	}
-	if convertedResponse, ok := ociResponse.(StopAnalyticsClusterResponse); ok {
-		response = convertedResponse
-	} else {
-		err = fmt.Errorf("failed to convert OCIResponse into StopAnalyticsClusterResponse")
-	}
-	return
-}
-
-// stopAnalyticsCluster implements the OCIOperation interface (enables retrying operations)
-func (client DbSystemClient) stopAnalyticsCluster(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
-
-	httpRequest, err := request.HTTPRequest(http.MethodPost, "/dbSystems/{dbSystemId}/analyticsCluster/actions/stop", binaryReqBody, extraHeaders)
-	if err != nil {
-		return nil, err
-	}
-
-	var response StopAnalyticsClusterResponse
-	var httpResponse *http.Response
-	httpResponse, err = client.Call(ctx, &httpRequest)
-	defer common.CloseBodyIfValid(httpResponse)
-	response.RawResponse = httpResponse
-	if err != nil {
-		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/mysql/20190415/AnalyticsCluster/StopAnalyticsCluster"
-		err = common.PostProcessServiceError(err, "DbSystem", "StopAnalyticsCluster", apiReferenceLink)
-		return response, err
-	}
-
-	err = common.UnmarshalResponse(httpResponse, &response)
-	return response, err
-}
-
 // StopDbSystem Stops the specified DB System.
 // A stopped DB System is not billed.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/StopDbSystem.go.html to see an example of how to use StopDbSystem API.
 // A default retry strategy applies to this operation StopDbSystem()
@@ -1445,7 +950,7 @@ func (client DbSystemClient) stopDbSystem(ctx context.Context, request common.OC
 
 // StopHeatWaveCluster Stops the HeatWave cluster.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/StopHeatWaveCluster.go.html to see an example of how to use StopHeatWaveCluster API.
 // A default retry strategy applies to this operation StopHeatWaveCluster()
@@ -1506,65 +1011,6 @@ func (client DbSystemClient) stopHeatWaveCluster(ctx context.Context, request co
 	return response, err
 }
 
-// UpdateAnalyticsCluster DEPRECATED -- please use HeatWave API instead.
-// Updates the Analytics Cluster.
-//
-// See also
-//
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/UpdateAnalyticsCluster.go.html to see an example of how to use UpdateAnalyticsCluster API.
-// A default retry strategy applies to this operation UpdateAnalyticsCluster()
-func (client DbSystemClient) UpdateAnalyticsCluster(ctx context.Context, request UpdateAnalyticsClusterRequest) (response UpdateAnalyticsClusterResponse, err error) {
-	var ociResponse common.OCIResponse
-	policy := common.DefaultRetryPolicy()
-	if client.RetryPolicy() != nil {
-		policy = *client.RetryPolicy()
-	}
-	if request.RetryPolicy() != nil {
-		policy = *request.RetryPolicy()
-	}
-	ociResponse, err = common.Retry(ctx, request, client.updateAnalyticsCluster, policy)
-	if err != nil {
-		if ociResponse != nil {
-			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
-				opcRequestId := httpResponse.Header.Get("opc-request-id")
-				response = UpdateAnalyticsClusterResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
-			} else {
-				response = UpdateAnalyticsClusterResponse{}
-			}
-		}
-		return
-	}
-	if convertedResponse, ok := ociResponse.(UpdateAnalyticsClusterResponse); ok {
-		response = convertedResponse
-	} else {
-		err = fmt.Errorf("failed to convert OCIResponse into UpdateAnalyticsClusterResponse")
-	}
-	return
-}
-
-// updateAnalyticsCluster implements the OCIOperation interface (enables retrying operations)
-func (client DbSystemClient) updateAnalyticsCluster(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
-
-	httpRequest, err := request.HTTPRequest(http.MethodPut, "/dbSystems/{dbSystemId}/analyticsCluster", binaryReqBody, extraHeaders)
-	if err != nil {
-		return nil, err
-	}
-
-	var response UpdateAnalyticsClusterResponse
-	var httpResponse *http.Response
-	httpResponse, err = client.Call(ctx, &httpRequest)
-	defer common.CloseBodyIfValid(httpResponse)
-	response.RawResponse = httpResponse
-	if err != nil {
-		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/mysql/20190415/AnalyticsCluster/UpdateAnalyticsCluster"
-		err = common.PostProcessServiceError(err, "DbSystem", "UpdateAnalyticsCluster", apiReferenceLink)
-		return response, err
-	}
-
-	err = common.UnmarshalResponse(httpResponse, &response)
-	return response, err
-}
-
 // UpdateDbSystem Update the configuration of a DB System.
 // Updating different fields in the DB System will have different results
 // on the uptime of the DB System. For example, changing the displayName of
@@ -1573,7 +1019,7 @@ func (client DbSystemClient) updateAnalyticsCluster(ctx context.Context, request
 // Compute resources, pausing the DB System and migrating storage
 // before making the DB System available again.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/UpdateDbSystem.go.html to see an example of how to use UpdateDbSystem API.
 // A default retry strategy applies to this operation UpdateDbSystem()
@@ -1631,7 +1077,7 @@ func (client DbSystemClient) updateDbSystem(ctx context.Context, request common.
 
 // UpdateHeatWaveCluster Updates the HeatWave cluster.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/UpdateHeatWaveCluster.go.html to see an example of how to use UpdateHeatWaveCluster API.
 // A default retry strategy applies to this operation UpdateHeatWaveCluster()

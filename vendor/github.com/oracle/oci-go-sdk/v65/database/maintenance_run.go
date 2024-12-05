@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -27,7 +27,7 @@ type MaintenanceRun struct {
 	// The user-friendly name for the maintenance run.
 	DisplayName *string `mandatory:"true" json:"displayName"`
 
-	// The current state of the maintenance run. For Autonomous Database on shared Exadata infrastructure, valid states are IN_PROGRESS, SUCCEEDED and FAILED.
+	// The current state of the maintenance run. For Autonomous Database Serverless instances, valid states are IN_PROGRESS, SUCCEEDED, and FAILED.
 	LifecycleState MaintenanceRunLifecycleStateEnum `mandatory:"true" json:"lifecycleState"`
 
 	// The date and time the maintenance run is scheduled to occur.
@@ -59,6 +59,9 @@ type MaintenanceRun struct {
 
 	// Maintenance sub-type.
 	MaintenanceSubtype MaintenanceRunMaintenanceSubtypeEnum `mandatory:"false" json:"maintenanceSubtype,omitempty"`
+
+	// Indicates if an automatic DST Time Zone file update is enabled for the Autonomous Container Database. If enabled along with Release Update, patching will be done in a Non-Rolling manner.
+	IsDstFileUpdateEnabled *bool `mandatory:"false" json:"isDstFileUpdateEnabled"`
 
 	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the maintenance run for the Autonomous Data Guard association's peer container database.
 	PeerMaintenanceRunId *string `mandatory:"false" json:"peerMaintenanceRunId"`
@@ -328,6 +331,7 @@ const (
 	MaintenanceRunMaintenanceSubtypeDatabase        MaintenanceRunMaintenanceSubtypeEnum = "DATABASE"
 	MaintenanceRunMaintenanceSubtypeOneoff          MaintenanceRunMaintenanceSubtypeEnum = "ONEOFF"
 	MaintenanceRunMaintenanceSubtypeSecurityMonthly MaintenanceRunMaintenanceSubtypeEnum = "SECURITY_MONTHLY"
+	MaintenanceRunMaintenanceSubtypeTimezone        MaintenanceRunMaintenanceSubtypeEnum = "TIMEZONE"
 )
 
 var mappingMaintenanceRunMaintenanceSubtypeEnum = map[string]MaintenanceRunMaintenanceSubtypeEnum{
@@ -338,6 +342,7 @@ var mappingMaintenanceRunMaintenanceSubtypeEnum = map[string]MaintenanceRunMaint
 	"DATABASE":         MaintenanceRunMaintenanceSubtypeDatabase,
 	"ONEOFF":           MaintenanceRunMaintenanceSubtypeOneoff,
 	"SECURITY_MONTHLY": MaintenanceRunMaintenanceSubtypeSecurityMonthly,
+	"TIMEZONE":         MaintenanceRunMaintenanceSubtypeTimezone,
 }
 
 var mappingMaintenanceRunMaintenanceSubtypeEnumLowerCase = map[string]MaintenanceRunMaintenanceSubtypeEnum{
@@ -348,6 +353,7 @@ var mappingMaintenanceRunMaintenanceSubtypeEnumLowerCase = map[string]Maintenanc
 	"database":         MaintenanceRunMaintenanceSubtypeDatabase,
 	"oneoff":           MaintenanceRunMaintenanceSubtypeOneoff,
 	"security_monthly": MaintenanceRunMaintenanceSubtypeSecurityMonthly,
+	"timezone":         MaintenanceRunMaintenanceSubtypeTimezone,
 }
 
 // GetMaintenanceRunMaintenanceSubtypeEnumValues Enumerates the set of values for MaintenanceRunMaintenanceSubtypeEnum
@@ -369,6 +375,7 @@ func GetMaintenanceRunMaintenanceSubtypeEnumStringValues() []string {
 		"DATABASE",
 		"ONEOFF",
 		"SECURITY_MONTHLY",
+		"TIMEZONE",
 	}
 }
 

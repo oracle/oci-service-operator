@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -39,6 +39,9 @@ type AutonomousContainerDatabase struct {
 	// **Deprecated.** The `DB_UNIQUE_NAME` value is set by Oracle Cloud Infrastructure.  Do not specify a value for this parameter. Specifying a value for this field will cause Terraform operations to fail.
 	DbUniqueName *string `mandatory:"false" json:"dbUniqueName"`
 
+	// The Database name for the Autonomous Container Database. The name must be unique within the Cloud Autonomous VM Cluster, starting with an alphabetic character, followed by 1 to 7 alphanumeric characters.
+	DbName *string `mandatory:"false" json:"dbName"`
+
 	// **No longer used.** For Autonomous Database on dedicated Exadata infrastructure, the container database is created within a specified `cloudAutonomousVmCluster`.
 	AutonomousExadataInfrastructureId *string `mandatory:"false" json:"autonomousExadataInfrastructureId"`
 
@@ -54,10 +57,10 @@ type AutonomousContainerDatabase struct {
 	// The OCID of the key container that is used as the master encryption key in database transparent data encryption (TDE) operations.
 	KmsKeyId *string `mandatory:"false" json:"kmsKeyId"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Oracle Cloud Infrastructure vault (https://docs.cloud.oracle.com/Content/KeyManagement/Concepts/keyoverview.htm#concepts).
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Oracle Cloud Infrastructure vault (https://docs.cloud.oracle.com/Content/KeyManagement/Concepts/keyoverview.htm#concepts). This parameter and `secretId` are required for Customer Managed Keys.
 	VaultId *string `mandatory:"false" json:"vaultId"`
 
-	// The OCID of the key container version that is used in database transparent data encryption (TDE) operations KMS Key can have multiple key versions. If none is specified, the current key version (latest) of the Key Id is used for the operation.
+	// The OCID of the key container version that is used in database transparent data encryption (TDE) operations KMS Key can have multiple key versions. If none is specified, the current key version (latest) of the Key Id is used for the operation. Autonomous Database Serverless does not use key versions, hence is not applicable for Autonomous Database Serverless instances.
 	KmsKeyVersionId *string `mandatory:"false" json:"kmsKeyVersionId"`
 
 	// Key History Entry.
@@ -68,6 +71,9 @@ type AutonomousContainerDatabase struct {
 
 	// The date and time the Autonomous Container Database was created.
 	TimeCreated *common.SDKTime `mandatory:"false" json:"timeCreated"`
+
+	// The date and time the Autonomous Container Database will be reverted to Standby from Snapshot Standby.
+	TimeSnapshotStandbyRevert *common.SDKTime `mandatory:"false" json:"timeSnapshotStandbyRevert"`
 
 	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the last patch applied on the system.
 	PatchId *string `mandatory:"false" json:"patchId"`
@@ -83,6 +89,15 @@ type AutonomousContainerDatabase struct {
 	// The scheduling detail for the quarterly maintenance window of the standby Autonomous Container Database.
 	// This value represents the number of days before scheduled maintenance of the primary database.
 	StandbyMaintenanceBufferInDays *int `mandatory:"false" json:"standbyMaintenanceBufferInDays"`
+
+	// The next maintenance version preference.
+	VersionPreference AutonomousContainerDatabaseVersionPreferenceEnum `mandatory:"false" json:"versionPreference,omitempty"`
+
+	// Indicates if an automatic DST Time Zone file update is enabled for the Autonomous Container Database. If enabled along with Release Update, patching will be done in a Non-Rolling manner.
+	IsDstFileUpdateEnabled *bool `mandatory:"false" json:"isDstFileUpdateEnabled"`
+
+	// DST Time-zone File version of the Autonomous Container Database.
+	DstFileVersion *string `mandatory:"false" json:"dstFileVersion"`
 
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
 	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
@@ -104,26 +119,53 @@ type AutonomousContainerDatabase struct {
 
 	BackupConfig *AutonomousContainerDatabaseBackupConfig `mandatory:"false" json:"backupConfig"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the key store.
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the key store of Oracle Vault.
 	KeyStoreId *string `mandatory:"false" json:"keyStoreId"`
 
 	// The wallet name for Oracle Key Vault.
 	KeyStoreWalletName *string `mandatory:"false" json:"keyStoreWalletName"`
 
-	// The amount of memory (in GBs) enabled per each OCPU core in Autonomous VM Cluster.
+	// The amount of memory (in GBs) enabled per ECPU or OCPU in the Autonomous VM Cluster.
 	MemoryPerOracleComputeUnitInGBs *int `mandatory:"false" json:"memoryPerOracleComputeUnitInGBs"`
 
-	// Sum of OCPUs available on the Autonomous VM Cluster + Sum of reclaimable OCPUs available in the Autonomous Container Database.
+	// Sum of CPUs available on the Autonomous VM Cluster + Sum of reclaimable CPUs available in the Autonomous Container Database.
 	AvailableCpus *float32 `mandatory:"false" json:"availableCpus"`
 
-	// The number of CPU cores allocated to the Autonomous VM cluster.
+	// The number of CPUs allocated to the Autonomous VM cluster.
 	TotalCpus *int `mandatory:"false" json:"totalCpus"`
 
-	// CPU cores that continue to be included in the count of OCPUs available to the Autonomous Container Database even after one of its Autonomous Database is terminated or scaled down. You can release them to the available OCPUs at its parent AVMC level by restarting the Autonomous Container Database.
+	// CPUs that continue to be included in the count of CPUs available to the Autonomous Container Database even after one of its Autonomous Database is terminated or scaled down. You can release them to the available CPUs at its parent Autonomous VM Cluster level by restarting the Autonomous Container Database.
 	ReclaimableCpus *float32 `mandatory:"false" json:"reclaimableCpus"`
 
 	// An array of CPU values that can be used to successfully provision a single Autonomous Database.
 	ProvisionableCpus []float32 `mandatory:"false" json:"provisionableCpus"`
+
+	// The compute model of the Autonomous Container Database. For Autonomous Database on Dedicated Exadata Infrastructure, the CPU type (ECPUs or OCPUs) is determined by the parent Autonomous Exadata VM Cluster's compute model. ECPU compute model is the recommended model and OCPU compute model is legacy. See Compute Models in Autonomous Database on Dedicated Exadata Infrastructure (https://docs.oracle.com/en/cloud/paas/autonomous-database/dedicated/adbak) for more details.
+	ComputeModel AutonomousContainerDatabaseComputeModelEnum `mandatory:"false" json:"computeModel,omitempty"`
+
+	// The number of CPUs provisioned in an Autonomous Container Database.
+	ProvisionedCpus *float32 `mandatory:"false" json:"provisionedCpus"`
+
+	// The number of CPUs reserved in an Autonomous Container Database.
+	ReservedCpus *float32 `mandatory:"false" json:"reservedCpus"`
+
+	// The largest Autonomous Database (CPU) that can be created in a new Autonomous Container Database.
+	LargestProvisionableAutonomousDatabaseInCpus *float32 `mandatory:"false" json:"largestProvisionableAutonomousDatabaseInCpus"`
+
+	// The timestamp of last successful backup. Here NULL value represents either there are no successful backups or backups are not configured for this Autonomous Container Database.
+	TimeOfLastBackup *common.SDKTime `mandatory:"false" json:"timeOfLastBackup"`
+
+	// The value above which an Autonomous Database will be split across multiple nodes. This value defaults to 16 when the "CPU per VM" value on the Autonomous VM Cluster is greater than 16. Otherwise, it defaults to the "CPU per VM" value.
+	DbSplitThreshold *int `mandatory:"false" json:"dbSplitThreshold"`
+
+	// The percentage of CPUs to reserve for a single node Autonomous Database, in increments of 25.
+	VmFailoverReservation *int `mandatory:"false" json:"vmFailoverReservation"`
+
+	// This option determines whether to open an Autonomous Database across the maximum number of nodes or the least number of nodes. The default will be for the minimum number of VMs.
+	DistributionAffinity AutonomousContainerDatabaseDistributionAffinityEnum `mandatory:"false" json:"distributionAffinity,omitempty"`
+
+	// Enabling SHARED server architecture enables a database server to allow many client processes to share very few server processes, thereby increasing the number of supported users.
+	NetServicesArchitecture AutonomousContainerDatabaseNetServicesArchitectureEnum `mandatory:"false" json:"netServicesArchitecture,omitempty"`
 }
 
 func (m AutonomousContainerDatabase) String() string {
@@ -148,8 +190,20 @@ func (m AutonomousContainerDatabase) ValidateEnumValue() (bool, error) {
 	if _, ok := GetMappingAutonomousContainerDatabaseInfrastructureTypeEnum(string(m.InfrastructureType)); !ok && m.InfrastructureType != "" {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for InfrastructureType: %s. Supported values are: %s.", m.InfrastructureType, strings.Join(GetAutonomousContainerDatabaseInfrastructureTypeEnumStringValues(), ",")))
 	}
+	if _, ok := GetMappingAutonomousContainerDatabaseVersionPreferenceEnum(string(m.VersionPreference)); !ok && m.VersionPreference != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for VersionPreference: %s. Supported values are: %s.", m.VersionPreference, strings.Join(GetAutonomousContainerDatabaseVersionPreferenceEnumStringValues(), ",")))
+	}
 	if _, ok := GetMappingAutonomousContainerDatabaseRoleEnum(string(m.Role)); !ok && m.Role != "" {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for Role: %s. Supported values are: %s.", m.Role, strings.Join(GetAutonomousContainerDatabaseRoleEnumStringValues(), ",")))
+	}
+	if _, ok := GetMappingAutonomousContainerDatabaseComputeModelEnum(string(m.ComputeModel)); !ok && m.ComputeModel != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for ComputeModel: %s. Supported values are: %s.", m.ComputeModel, strings.Join(GetAutonomousContainerDatabaseComputeModelEnumStringValues(), ",")))
+	}
+	if _, ok := GetMappingAutonomousContainerDatabaseDistributionAffinityEnum(string(m.DistributionAffinity)); !ok && m.DistributionAffinity != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for DistributionAffinity: %s. Supported values are: %s.", m.DistributionAffinity, strings.Join(GetAutonomousContainerDatabaseDistributionAffinityEnumStringValues(), ",")))
+	}
+	if _, ok := GetMappingAutonomousContainerDatabaseNetServicesArchitectureEnum(string(m.NetServicesArchitecture)); !ok && m.NetServicesArchitecture != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for NetServicesArchitecture: %s. Supported values are: %s.", m.NetServicesArchitecture, strings.Join(GetAutonomousContainerDatabaseNetServicesArchitectureEnumStringValues(), ",")))
 	}
 	if len(errMessage) > 0 {
 		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
@@ -250,51 +304,54 @@ type AutonomousContainerDatabaseLifecycleStateEnum string
 
 // Set of constants representing the allowable values for AutonomousContainerDatabaseLifecycleStateEnum
 const (
-	AutonomousContainerDatabaseLifecycleStateProvisioning          AutonomousContainerDatabaseLifecycleStateEnum = "PROVISIONING"
-	AutonomousContainerDatabaseLifecycleStateAvailable             AutonomousContainerDatabaseLifecycleStateEnum = "AVAILABLE"
-	AutonomousContainerDatabaseLifecycleStateUpdating              AutonomousContainerDatabaseLifecycleStateEnum = "UPDATING"
-	AutonomousContainerDatabaseLifecycleStateTerminating           AutonomousContainerDatabaseLifecycleStateEnum = "TERMINATING"
-	AutonomousContainerDatabaseLifecycleStateTerminated            AutonomousContainerDatabaseLifecycleStateEnum = "TERMINATED"
-	AutonomousContainerDatabaseLifecycleStateFailed                AutonomousContainerDatabaseLifecycleStateEnum = "FAILED"
-	AutonomousContainerDatabaseLifecycleStateBackupInProgress      AutonomousContainerDatabaseLifecycleStateEnum = "BACKUP_IN_PROGRESS"
-	AutonomousContainerDatabaseLifecycleStateRestoring             AutonomousContainerDatabaseLifecycleStateEnum = "RESTORING"
-	AutonomousContainerDatabaseLifecycleStateRestoreFailed         AutonomousContainerDatabaseLifecycleStateEnum = "RESTORE_FAILED"
-	AutonomousContainerDatabaseLifecycleStateRestarting            AutonomousContainerDatabaseLifecycleStateEnum = "RESTARTING"
-	AutonomousContainerDatabaseLifecycleStateMaintenanceInProgress AutonomousContainerDatabaseLifecycleStateEnum = "MAINTENANCE_IN_PROGRESS"
-	AutonomousContainerDatabaseLifecycleStateRoleChangeInProgress  AutonomousContainerDatabaseLifecycleStateEnum = "ROLE_CHANGE_IN_PROGRESS"
-	AutonomousContainerDatabaseLifecycleStateUnavailable           AutonomousContainerDatabaseLifecycleStateEnum = "UNAVAILABLE"
+	AutonomousContainerDatabaseLifecycleStateProvisioning                AutonomousContainerDatabaseLifecycleStateEnum = "PROVISIONING"
+	AutonomousContainerDatabaseLifecycleStateAvailable                   AutonomousContainerDatabaseLifecycleStateEnum = "AVAILABLE"
+	AutonomousContainerDatabaseLifecycleStateUpdating                    AutonomousContainerDatabaseLifecycleStateEnum = "UPDATING"
+	AutonomousContainerDatabaseLifecycleStateTerminating                 AutonomousContainerDatabaseLifecycleStateEnum = "TERMINATING"
+	AutonomousContainerDatabaseLifecycleStateTerminated                  AutonomousContainerDatabaseLifecycleStateEnum = "TERMINATED"
+	AutonomousContainerDatabaseLifecycleStateFailed                      AutonomousContainerDatabaseLifecycleStateEnum = "FAILED"
+	AutonomousContainerDatabaseLifecycleStateBackupInProgress            AutonomousContainerDatabaseLifecycleStateEnum = "BACKUP_IN_PROGRESS"
+	AutonomousContainerDatabaseLifecycleStateRestoring                   AutonomousContainerDatabaseLifecycleStateEnum = "RESTORING"
+	AutonomousContainerDatabaseLifecycleStateRestoreFailed               AutonomousContainerDatabaseLifecycleStateEnum = "RESTORE_FAILED"
+	AutonomousContainerDatabaseLifecycleStateRestarting                  AutonomousContainerDatabaseLifecycleStateEnum = "RESTARTING"
+	AutonomousContainerDatabaseLifecycleStateMaintenanceInProgress       AutonomousContainerDatabaseLifecycleStateEnum = "MAINTENANCE_IN_PROGRESS"
+	AutonomousContainerDatabaseLifecycleStateRoleChangeInProgress        AutonomousContainerDatabaseLifecycleStateEnum = "ROLE_CHANGE_IN_PROGRESS"
+	AutonomousContainerDatabaseLifecycleStateEnablingAutonomousDataGuard AutonomousContainerDatabaseLifecycleStateEnum = "ENABLING_AUTONOMOUS_DATA_GUARD"
+	AutonomousContainerDatabaseLifecycleStateUnavailable                 AutonomousContainerDatabaseLifecycleStateEnum = "UNAVAILABLE"
 )
 
 var mappingAutonomousContainerDatabaseLifecycleStateEnum = map[string]AutonomousContainerDatabaseLifecycleStateEnum{
-	"PROVISIONING":            AutonomousContainerDatabaseLifecycleStateProvisioning,
-	"AVAILABLE":               AutonomousContainerDatabaseLifecycleStateAvailable,
-	"UPDATING":                AutonomousContainerDatabaseLifecycleStateUpdating,
-	"TERMINATING":             AutonomousContainerDatabaseLifecycleStateTerminating,
-	"TERMINATED":              AutonomousContainerDatabaseLifecycleStateTerminated,
-	"FAILED":                  AutonomousContainerDatabaseLifecycleStateFailed,
-	"BACKUP_IN_PROGRESS":      AutonomousContainerDatabaseLifecycleStateBackupInProgress,
-	"RESTORING":               AutonomousContainerDatabaseLifecycleStateRestoring,
-	"RESTORE_FAILED":          AutonomousContainerDatabaseLifecycleStateRestoreFailed,
-	"RESTARTING":              AutonomousContainerDatabaseLifecycleStateRestarting,
-	"MAINTENANCE_IN_PROGRESS": AutonomousContainerDatabaseLifecycleStateMaintenanceInProgress,
-	"ROLE_CHANGE_IN_PROGRESS": AutonomousContainerDatabaseLifecycleStateRoleChangeInProgress,
-	"UNAVAILABLE":             AutonomousContainerDatabaseLifecycleStateUnavailable,
+	"PROVISIONING":                   AutonomousContainerDatabaseLifecycleStateProvisioning,
+	"AVAILABLE":                      AutonomousContainerDatabaseLifecycleStateAvailable,
+	"UPDATING":                       AutonomousContainerDatabaseLifecycleStateUpdating,
+	"TERMINATING":                    AutonomousContainerDatabaseLifecycleStateTerminating,
+	"TERMINATED":                     AutonomousContainerDatabaseLifecycleStateTerminated,
+	"FAILED":                         AutonomousContainerDatabaseLifecycleStateFailed,
+	"BACKUP_IN_PROGRESS":             AutonomousContainerDatabaseLifecycleStateBackupInProgress,
+	"RESTORING":                      AutonomousContainerDatabaseLifecycleStateRestoring,
+	"RESTORE_FAILED":                 AutonomousContainerDatabaseLifecycleStateRestoreFailed,
+	"RESTARTING":                     AutonomousContainerDatabaseLifecycleStateRestarting,
+	"MAINTENANCE_IN_PROGRESS":        AutonomousContainerDatabaseLifecycleStateMaintenanceInProgress,
+	"ROLE_CHANGE_IN_PROGRESS":        AutonomousContainerDatabaseLifecycleStateRoleChangeInProgress,
+	"ENABLING_AUTONOMOUS_DATA_GUARD": AutonomousContainerDatabaseLifecycleStateEnablingAutonomousDataGuard,
+	"UNAVAILABLE":                    AutonomousContainerDatabaseLifecycleStateUnavailable,
 }
 
 var mappingAutonomousContainerDatabaseLifecycleStateEnumLowerCase = map[string]AutonomousContainerDatabaseLifecycleStateEnum{
-	"provisioning":            AutonomousContainerDatabaseLifecycleStateProvisioning,
-	"available":               AutonomousContainerDatabaseLifecycleStateAvailable,
-	"updating":                AutonomousContainerDatabaseLifecycleStateUpdating,
-	"terminating":             AutonomousContainerDatabaseLifecycleStateTerminating,
-	"terminated":              AutonomousContainerDatabaseLifecycleStateTerminated,
-	"failed":                  AutonomousContainerDatabaseLifecycleStateFailed,
-	"backup_in_progress":      AutonomousContainerDatabaseLifecycleStateBackupInProgress,
-	"restoring":               AutonomousContainerDatabaseLifecycleStateRestoring,
-	"restore_failed":          AutonomousContainerDatabaseLifecycleStateRestoreFailed,
-	"restarting":              AutonomousContainerDatabaseLifecycleStateRestarting,
-	"maintenance_in_progress": AutonomousContainerDatabaseLifecycleStateMaintenanceInProgress,
-	"role_change_in_progress": AutonomousContainerDatabaseLifecycleStateRoleChangeInProgress,
-	"unavailable":             AutonomousContainerDatabaseLifecycleStateUnavailable,
+	"provisioning":                   AutonomousContainerDatabaseLifecycleStateProvisioning,
+	"available":                      AutonomousContainerDatabaseLifecycleStateAvailable,
+	"updating":                       AutonomousContainerDatabaseLifecycleStateUpdating,
+	"terminating":                    AutonomousContainerDatabaseLifecycleStateTerminating,
+	"terminated":                     AutonomousContainerDatabaseLifecycleStateTerminated,
+	"failed":                         AutonomousContainerDatabaseLifecycleStateFailed,
+	"backup_in_progress":             AutonomousContainerDatabaseLifecycleStateBackupInProgress,
+	"restoring":                      AutonomousContainerDatabaseLifecycleStateRestoring,
+	"restore_failed":                 AutonomousContainerDatabaseLifecycleStateRestoreFailed,
+	"restarting":                     AutonomousContainerDatabaseLifecycleStateRestarting,
+	"maintenance_in_progress":        AutonomousContainerDatabaseLifecycleStateMaintenanceInProgress,
+	"role_change_in_progress":        AutonomousContainerDatabaseLifecycleStateRoleChangeInProgress,
+	"enabling_autonomous_data_guard": AutonomousContainerDatabaseLifecycleStateEnablingAutonomousDataGuard,
+	"unavailable":                    AutonomousContainerDatabaseLifecycleStateUnavailable,
 }
 
 // GetAutonomousContainerDatabaseLifecycleStateEnumValues Enumerates the set of values for AutonomousContainerDatabaseLifecycleStateEnum
@@ -321,6 +378,7 @@ func GetAutonomousContainerDatabaseLifecycleStateEnumStringValues() []string {
 		"RESTARTING",
 		"MAINTENANCE_IN_PROGRESS",
 		"ROLE_CHANGE_IN_PROGRESS",
+		"ENABLING_AUTONOMOUS_DATA_GUARD",
 		"UNAVAILABLE",
 	}
 }
@@ -373,6 +431,48 @@ func GetMappingAutonomousContainerDatabasePatchModelEnum(val string) (Autonomous
 	return enum, ok
 }
 
+// AutonomousContainerDatabaseVersionPreferenceEnum Enum with underlying type: string
+type AutonomousContainerDatabaseVersionPreferenceEnum string
+
+// Set of constants representing the allowable values for AutonomousContainerDatabaseVersionPreferenceEnum
+const (
+	AutonomousContainerDatabaseVersionPreferenceNextReleaseUpdate   AutonomousContainerDatabaseVersionPreferenceEnum = "NEXT_RELEASE_UPDATE"
+	AutonomousContainerDatabaseVersionPreferenceLatestReleaseUpdate AutonomousContainerDatabaseVersionPreferenceEnum = "LATEST_RELEASE_UPDATE"
+)
+
+var mappingAutonomousContainerDatabaseVersionPreferenceEnum = map[string]AutonomousContainerDatabaseVersionPreferenceEnum{
+	"NEXT_RELEASE_UPDATE":   AutonomousContainerDatabaseVersionPreferenceNextReleaseUpdate,
+	"LATEST_RELEASE_UPDATE": AutonomousContainerDatabaseVersionPreferenceLatestReleaseUpdate,
+}
+
+var mappingAutonomousContainerDatabaseVersionPreferenceEnumLowerCase = map[string]AutonomousContainerDatabaseVersionPreferenceEnum{
+	"next_release_update":   AutonomousContainerDatabaseVersionPreferenceNextReleaseUpdate,
+	"latest_release_update": AutonomousContainerDatabaseVersionPreferenceLatestReleaseUpdate,
+}
+
+// GetAutonomousContainerDatabaseVersionPreferenceEnumValues Enumerates the set of values for AutonomousContainerDatabaseVersionPreferenceEnum
+func GetAutonomousContainerDatabaseVersionPreferenceEnumValues() []AutonomousContainerDatabaseVersionPreferenceEnum {
+	values := make([]AutonomousContainerDatabaseVersionPreferenceEnum, 0)
+	for _, v := range mappingAutonomousContainerDatabaseVersionPreferenceEnum {
+		values = append(values, v)
+	}
+	return values
+}
+
+// GetAutonomousContainerDatabaseVersionPreferenceEnumStringValues Enumerates the set of values in String for AutonomousContainerDatabaseVersionPreferenceEnum
+func GetAutonomousContainerDatabaseVersionPreferenceEnumStringValues() []string {
+	return []string{
+		"NEXT_RELEASE_UPDATE",
+		"LATEST_RELEASE_UPDATE",
+	}
+}
+
+// GetMappingAutonomousContainerDatabaseVersionPreferenceEnum performs case Insensitive comparison on enum value and return the desired enum
+func GetMappingAutonomousContainerDatabaseVersionPreferenceEnum(val string) (AutonomousContainerDatabaseVersionPreferenceEnum, bool) {
+	enum, ok := mappingAutonomousContainerDatabaseVersionPreferenceEnumLowerCase[strings.ToLower(val)]
+	return enum, ok
+}
+
 // AutonomousContainerDatabaseRoleEnum Enum with underlying type: string
 type AutonomousContainerDatabaseRoleEnum string
 
@@ -381,18 +481,24 @@ const (
 	AutonomousContainerDatabaseRolePrimary         AutonomousContainerDatabaseRoleEnum = "PRIMARY"
 	AutonomousContainerDatabaseRoleStandby         AutonomousContainerDatabaseRoleEnum = "STANDBY"
 	AutonomousContainerDatabaseRoleDisabledStandby AutonomousContainerDatabaseRoleEnum = "DISABLED_STANDBY"
+	AutonomousContainerDatabaseRoleBackupCopy      AutonomousContainerDatabaseRoleEnum = "BACKUP_COPY"
+	AutonomousContainerDatabaseRoleSnapshotStandby AutonomousContainerDatabaseRoleEnum = "SNAPSHOT_STANDBY"
 )
 
 var mappingAutonomousContainerDatabaseRoleEnum = map[string]AutonomousContainerDatabaseRoleEnum{
 	"PRIMARY":          AutonomousContainerDatabaseRolePrimary,
 	"STANDBY":          AutonomousContainerDatabaseRoleStandby,
 	"DISABLED_STANDBY": AutonomousContainerDatabaseRoleDisabledStandby,
+	"BACKUP_COPY":      AutonomousContainerDatabaseRoleBackupCopy,
+	"SNAPSHOT_STANDBY": AutonomousContainerDatabaseRoleSnapshotStandby,
 }
 
 var mappingAutonomousContainerDatabaseRoleEnumLowerCase = map[string]AutonomousContainerDatabaseRoleEnum{
 	"primary":          AutonomousContainerDatabaseRolePrimary,
 	"standby":          AutonomousContainerDatabaseRoleStandby,
 	"disabled_standby": AutonomousContainerDatabaseRoleDisabledStandby,
+	"backup_copy":      AutonomousContainerDatabaseRoleBackupCopy,
+	"snapshot_standby": AutonomousContainerDatabaseRoleSnapshotStandby,
 }
 
 // GetAutonomousContainerDatabaseRoleEnumValues Enumerates the set of values for AutonomousContainerDatabaseRoleEnum
@@ -410,11 +516,139 @@ func GetAutonomousContainerDatabaseRoleEnumStringValues() []string {
 		"PRIMARY",
 		"STANDBY",
 		"DISABLED_STANDBY",
+		"BACKUP_COPY",
+		"SNAPSHOT_STANDBY",
 	}
 }
 
 // GetMappingAutonomousContainerDatabaseRoleEnum performs case Insensitive comparison on enum value and return the desired enum
 func GetMappingAutonomousContainerDatabaseRoleEnum(val string) (AutonomousContainerDatabaseRoleEnum, bool) {
 	enum, ok := mappingAutonomousContainerDatabaseRoleEnumLowerCase[strings.ToLower(val)]
+	return enum, ok
+}
+
+// AutonomousContainerDatabaseComputeModelEnum Enum with underlying type: string
+type AutonomousContainerDatabaseComputeModelEnum string
+
+// Set of constants representing the allowable values for AutonomousContainerDatabaseComputeModelEnum
+const (
+	AutonomousContainerDatabaseComputeModelEcpu AutonomousContainerDatabaseComputeModelEnum = "ECPU"
+	AutonomousContainerDatabaseComputeModelOcpu AutonomousContainerDatabaseComputeModelEnum = "OCPU"
+)
+
+var mappingAutonomousContainerDatabaseComputeModelEnum = map[string]AutonomousContainerDatabaseComputeModelEnum{
+	"ECPU": AutonomousContainerDatabaseComputeModelEcpu,
+	"OCPU": AutonomousContainerDatabaseComputeModelOcpu,
+}
+
+var mappingAutonomousContainerDatabaseComputeModelEnumLowerCase = map[string]AutonomousContainerDatabaseComputeModelEnum{
+	"ecpu": AutonomousContainerDatabaseComputeModelEcpu,
+	"ocpu": AutonomousContainerDatabaseComputeModelOcpu,
+}
+
+// GetAutonomousContainerDatabaseComputeModelEnumValues Enumerates the set of values for AutonomousContainerDatabaseComputeModelEnum
+func GetAutonomousContainerDatabaseComputeModelEnumValues() []AutonomousContainerDatabaseComputeModelEnum {
+	values := make([]AutonomousContainerDatabaseComputeModelEnum, 0)
+	for _, v := range mappingAutonomousContainerDatabaseComputeModelEnum {
+		values = append(values, v)
+	}
+	return values
+}
+
+// GetAutonomousContainerDatabaseComputeModelEnumStringValues Enumerates the set of values in String for AutonomousContainerDatabaseComputeModelEnum
+func GetAutonomousContainerDatabaseComputeModelEnumStringValues() []string {
+	return []string{
+		"ECPU",
+		"OCPU",
+	}
+}
+
+// GetMappingAutonomousContainerDatabaseComputeModelEnum performs case Insensitive comparison on enum value and return the desired enum
+func GetMappingAutonomousContainerDatabaseComputeModelEnum(val string) (AutonomousContainerDatabaseComputeModelEnum, bool) {
+	enum, ok := mappingAutonomousContainerDatabaseComputeModelEnumLowerCase[strings.ToLower(val)]
+	return enum, ok
+}
+
+// AutonomousContainerDatabaseDistributionAffinityEnum Enum with underlying type: string
+type AutonomousContainerDatabaseDistributionAffinityEnum string
+
+// Set of constants representing the allowable values for AutonomousContainerDatabaseDistributionAffinityEnum
+const (
+	AutonomousContainerDatabaseDistributionAffinityMinimumDistribution AutonomousContainerDatabaseDistributionAffinityEnum = "MINIMUM_DISTRIBUTION"
+	AutonomousContainerDatabaseDistributionAffinityMaximumDistribution AutonomousContainerDatabaseDistributionAffinityEnum = "MAXIMUM_DISTRIBUTION"
+)
+
+var mappingAutonomousContainerDatabaseDistributionAffinityEnum = map[string]AutonomousContainerDatabaseDistributionAffinityEnum{
+	"MINIMUM_DISTRIBUTION": AutonomousContainerDatabaseDistributionAffinityMinimumDistribution,
+	"MAXIMUM_DISTRIBUTION": AutonomousContainerDatabaseDistributionAffinityMaximumDistribution,
+}
+
+var mappingAutonomousContainerDatabaseDistributionAffinityEnumLowerCase = map[string]AutonomousContainerDatabaseDistributionAffinityEnum{
+	"minimum_distribution": AutonomousContainerDatabaseDistributionAffinityMinimumDistribution,
+	"maximum_distribution": AutonomousContainerDatabaseDistributionAffinityMaximumDistribution,
+}
+
+// GetAutonomousContainerDatabaseDistributionAffinityEnumValues Enumerates the set of values for AutonomousContainerDatabaseDistributionAffinityEnum
+func GetAutonomousContainerDatabaseDistributionAffinityEnumValues() []AutonomousContainerDatabaseDistributionAffinityEnum {
+	values := make([]AutonomousContainerDatabaseDistributionAffinityEnum, 0)
+	for _, v := range mappingAutonomousContainerDatabaseDistributionAffinityEnum {
+		values = append(values, v)
+	}
+	return values
+}
+
+// GetAutonomousContainerDatabaseDistributionAffinityEnumStringValues Enumerates the set of values in String for AutonomousContainerDatabaseDistributionAffinityEnum
+func GetAutonomousContainerDatabaseDistributionAffinityEnumStringValues() []string {
+	return []string{
+		"MINIMUM_DISTRIBUTION",
+		"MAXIMUM_DISTRIBUTION",
+	}
+}
+
+// GetMappingAutonomousContainerDatabaseDistributionAffinityEnum performs case Insensitive comparison on enum value and return the desired enum
+func GetMappingAutonomousContainerDatabaseDistributionAffinityEnum(val string) (AutonomousContainerDatabaseDistributionAffinityEnum, bool) {
+	enum, ok := mappingAutonomousContainerDatabaseDistributionAffinityEnumLowerCase[strings.ToLower(val)]
+	return enum, ok
+}
+
+// AutonomousContainerDatabaseNetServicesArchitectureEnum Enum with underlying type: string
+type AutonomousContainerDatabaseNetServicesArchitectureEnum string
+
+// Set of constants representing the allowable values for AutonomousContainerDatabaseNetServicesArchitectureEnum
+const (
+	AutonomousContainerDatabaseNetServicesArchitectureDedicated AutonomousContainerDatabaseNetServicesArchitectureEnum = "DEDICATED"
+	AutonomousContainerDatabaseNetServicesArchitectureShared    AutonomousContainerDatabaseNetServicesArchitectureEnum = "SHARED"
+)
+
+var mappingAutonomousContainerDatabaseNetServicesArchitectureEnum = map[string]AutonomousContainerDatabaseNetServicesArchitectureEnum{
+	"DEDICATED": AutonomousContainerDatabaseNetServicesArchitectureDedicated,
+	"SHARED":    AutonomousContainerDatabaseNetServicesArchitectureShared,
+}
+
+var mappingAutonomousContainerDatabaseNetServicesArchitectureEnumLowerCase = map[string]AutonomousContainerDatabaseNetServicesArchitectureEnum{
+	"dedicated": AutonomousContainerDatabaseNetServicesArchitectureDedicated,
+	"shared":    AutonomousContainerDatabaseNetServicesArchitectureShared,
+}
+
+// GetAutonomousContainerDatabaseNetServicesArchitectureEnumValues Enumerates the set of values for AutonomousContainerDatabaseNetServicesArchitectureEnum
+func GetAutonomousContainerDatabaseNetServicesArchitectureEnumValues() []AutonomousContainerDatabaseNetServicesArchitectureEnum {
+	values := make([]AutonomousContainerDatabaseNetServicesArchitectureEnum, 0)
+	for _, v := range mappingAutonomousContainerDatabaseNetServicesArchitectureEnum {
+		values = append(values, v)
+	}
+	return values
+}
+
+// GetAutonomousContainerDatabaseNetServicesArchitectureEnumStringValues Enumerates the set of values in String for AutonomousContainerDatabaseNetServicesArchitectureEnum
+func GetAutonomousContainerDatabaseNetServicesArchitectureEnumStringValues() []string {
+	return []string{
+		"DEDICATED",
+		"SHARED",
+	}
+}
+
+// GetMappingAutonomousContainerDatabaseNetServicesArchitectureEnum performs case Insensitive comparison on enum value and return the desired enum
+func GetMappingAutonomousContainerDatabaseNetServicesArchitectureEnum(val string) (AutonomousContainerDatabaseNetServicesArchitectureEnum, bool) {
+	enum, ok := mappingAutonomousContainerDatabaseNetServicesArchitectureEnumLowerCase[strings.ToLower(val)]
 	return enum, ok
 }

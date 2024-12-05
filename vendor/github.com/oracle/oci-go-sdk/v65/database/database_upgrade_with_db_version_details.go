@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -19,7 +19,8 @@ import (
 // DatabaseUpgradeWithDbVersionDetails Details of the Oracle Database software version number for upgrading a database.
 type DatabaseUpgradeWithDbVersionDetails struct {
 
-	// A valid Oracle Database version. To get a list of supported versions, use the ListDbVersions operation.
+	// A valid Oracle Database version. For a list of supported versions, use the ListDbVersions operation.
+	// This cannot be updated in parallel with any of the following: licenseModel, dbEdition, cpuCoreCount, computeCount, computeModel, adminPassword, whitelistedIps, isMTLSConnectionRequired, openMode, permissionLevel, dbWorkload, privateEndpointLabel, nsgIds, isRefreshable, dbName, scheduledOperations, dbToolsDetails, isLocalDataGuardEnabled, or isFreeTier.
 	DbVersion *string `mandatory:"true" json:"dbVersion"`
 
 	// Additional upgrade options supported by DBUA(Database Upgrade Assistant).
@@ -27,7 +28,7 @@ type DatabaseUpgradeWithDbVersionDetails struct {
 	Options *string `mandatory:"false" json:"options"`
 }
 
-//GetOptions returns Options
+// GetOptions returns Options
 func (m DatabaseUpgradeWithDbVersionDetails) GetOptions() *string {
 	return m.Options
 }

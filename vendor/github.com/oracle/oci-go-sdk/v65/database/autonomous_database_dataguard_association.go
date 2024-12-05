@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -41,7 +41,7 @@ type AutonomousDatabaseDataguardAssociation struct {
 	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the peer Autonomous Database.
 	PeerAutonomousDatabaseId *string `mandatory:"false" json:"peerAutonomousDatabaseId"`
 
-	// The current state of Autonomous Data Guard.
+	// The current state of the Autonomous Database.
 	PeerAutonomousDatabaseLifeCycleState AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnum `mandatory:"false" json:"peerAutonomousDatabaseLifeCycleState,omitempty"`
 
 	// The protection mode of this Autonomous Data Guard association. For more information, see
@@ -115,18 +115,24 @@ const (
 	AutonomousDatabaseDataguardAssociationRolePrimary         AutonomousDatabaseDataguardAssociationRoleEnum = "PRIMARY"
 	AutonomousDatabaseDataguardAssociationRoleStandby         AutonomousDatabaseDataguardAssociationRoleEnum = "STANDBY"
 	AutonomousDatabaseDataguardAssociationRoleDisabledStandby AutonomousDatabaseDataguardAssociationRoleEnum = "DISABLED_STANDBY"
+	AutonomousDatabaseDataguardAssociationRoleBackupCopy      AutonomousDatabaseDataguardAssociationRoleEnum = "BACKUP_COPY"
+	AutonomousDatabaseDataguardAssociationRoleSnapshotStandby AutonomousDatabaseDataguardAssociationRoleEnum = "SNAPSHOT_STANDBY"
 )
 
 var mappingAutonomousDatabaseDataguardAssociationRoleEnum = map[string]AutonomousDatabaseDataguardAssociationRoleEnum{
 	"PRIMARY":          AutonomousDatabaseDataguardAssociationRolePrimary,
 	"STANDBY":          AutonomousDatabaseDataguardAssociationRoleStandby,
 	"DISABLED_STANDBY": AutonomousDatabaseDataguardAssociationRoleDisabledStandby,
+	"BACKUP_COPY":      AutonomousDatabaseDataguardAssociationRoleBackupCopy,
+	"SNAPSHOT_STANDBY": AutonomousDatabaseDataguardAssociationRoleSnapshotStandby,
 }
 
 var mappingAutonomousDatabaseDataguardAssociationRoleEnumLowerCase = map[string]AutonomousDatabaseDataguardAssociationRoleEnum{
 	"primary":          AutonomousDatabaseDataguardAssociationRolePrimary,
 	"standby":          AutonomousDatabaseDataguardAssociationRoleStandby,
 	"disabled_standby": AutonomousDatabaseDataguardAssociationRoleDisabledStandby,
+	"backup_copy":      AutonomousDatabaseDataguardAssociationRoleBackupCopy,
+	"snapshot_standby": AutonomousDatabaseDataguardAssociationRoleSnapshotStandby,
 }
 
 // GetAutonomousDatabaseDataguardAssociationRoleEnumValues Enumerates the set of values for AutonomousDatabaseDataguardAssociationRoleEnum
@@ -144,6 +150,8 @@ func GetAutonomousDatabaseDataguardAssociationRoleEnumStringValues() []string {
 		"PRIMARY",
 		"STANDBY",
 		"DISABLED_STANDBY",
+		"BACKUP_COPY",
+		"SNAPSHOT_STANDBY",
 	}
 }
 
@@ -165,6 +173,7 @@ const (
 	AutonomousDatabaseDataguardAssociationLifecycleStateTerminated           AutonomousDatabaseDataguardAssociationLifecycleStateEnum = "TERMINATED"
 	AutonomousDatabaseDataguardAssociationLifecycleStateFailed               AutonomousDatabaseDataguardAssociationLifecycleStateEnum = "FAILED"
 	AutonomousDatabaseDataguardAssociationLifecycleStateUnavailable          AutonomousDatabaseDataguardAssociationLifecycleStateEnum = "UNAVAILABLE"
+	AutonomousDatabaseDataguardAssociationLifecycleStateUpdating             AutonomousDatabaseDataguardAssociationLifecycleStateEnum = "UPDATING"
 )
 
 var mappingAutonomousDatabaseDataguardAssociationLifecycleStateEnum = map[string]AutonomousDatabaseDataguardAssociationLifecycleStateEnum{
@@ -175,6 +184,7 @@ var mappingAutonomousDatabaseDataguardAssociationLifecycleStateEnum = map[string
 	"TERMINATED":              AutonomousDatabaseDataguardAssociationLifecycleStateTerminated,
 	"FAILED":                  AutonomousDatabaseDataguardAssociationLifecycleStateFailed,
 	"UNAVAILABLE":             AutonomousDatabaseDataguardAssociationLifecycleStateUnavailable,
+	"UPDATING":                AutonomousDatabaseDataguardAssociationLifecycleStateUpdating,
 }
 
 var mappingAutonomousDatabaseDataguardAssociationLifecycleStateEnumLowerCase = map[string]AutonomousDatabaseDataguardAssociationLifecycleStateEnum{
@@ -185,6 +195,7 @@ var mappingAutonomousDatabaseDataguardAssociationLifecycleStateEnumLowerCase = m
 	"terminated":              AutonomousDatabaseDataguardAssociationLifecycleStateTerminated,
 	"failed":                  AutonomousDatabaseDataguardAssociationLifecycleStateFailed,
 	"unavailable":             AutonomousDatabaseDataguardAssociationLifecycleStateUnavailable,
+	"updating":                AutonomousDatabaseDataguardAssociationLifecycleStateUpdating,
 }
 
 // GetAutonomousDatabaseDataguardAssociationLifecycleStateEnumValues Enumerates the set of values for AutonomousDatabaseDataguardAssociationLifecycleStateEnum
@@ -206,6 +217,7 @@ func GetAutonomousDatabaseDataguardAssociationLifecycleStateEnumStringValues() [
 		"TERMINATED",
 		"FAILED",
 		"UNAVAILABLE",
+		"UPDATING",
 	}
 }
 
@@ -223,18 +235,24 @@ const (
 	AutonomousDatabaseDataguardAssociationPeerRolePrimary         AutonomousDatabaseDataguardAssociationPeerRoleEnum = "PRIMARY"
 	AutonomousDatabaseDataguardAssociationPeerRoleStandby         AutonomousDatabaseDataguardAssociationPeerRoleEnum = "STANDBY"
 	AutonomousDatabaseDataguardAssociationPeerRoleDisabledStandby AutonomousDatabaseDataguardAssociationPeerRoleEnum = "DISABLED_STANDBY"
+	AutonomousDatabaseDataguardAssociationPeerRoleBackupCopy      AutonomousDatabaseDataguardAssociationPeerRoleEnum = "BACKUP_COPY"
+	AutonomousDatabaseDataguardAssociationPeerRoleSnapshotStandby AutonomousDatabaseDataguardAssociationPeerRoleEnum = "SNAPSHOT_STANDBY"
 )
 
 var mappingAutonomousDatabaseDataguardAssociationPeerRoleEnum = map[string]AutonomousDatabaseDataguardAssociationPeerRoleEnum{
 	"PRIMARY":          AutonomousDatabaseDataguardAssociationPeerRolePrimary,
 	"STANDBY":          AutonomousDatabaseDataguardAssociationPeerRoleStandby,
 	"DISABLED_STANDBY": AutonomousDatabaseDataguardAssociationPeerRoleDisabledStandby,
+	"BACKUP_COPY":      AutonomousDatabaseDataguardAssociationPeerRoleBackupCopy,
+	"SNAPSHOT_STANDBY": AutonomousDatabaseDataguardAssociationPeerRoleSnapshotStandby,
 }
 
 var mappingAutonomousDatabaseDataguardAssociationPeerRoleEnumLowerCase = map[string]AutonomousDatabaseDataguardAssociationPeerRoleEnum{
 	"primary":          AutonomousDatabaseDataguardAssociationPeerRolePrimary,
 	"standby":          AutonomousDatabaseDataguardAssociationPeerRoleStandby,
 	"disabled_standby": AutonomousDatabaseDataguardAssociationPeerRoleDisabledStandby,
+	"backup_copy":      AutonomousDatabaseDataguardAssociationPeerRoleBackupCopy,
+	"snapshot_standby": AutonomousDatabaseDataguardAssociationPeerRoleSnapshotStandby,
 }
 
 // GetAutonomousDatabaseDataguardAssociationPeerRoleEnumValues Enumerates the set of values for AutonomousDatabaseDataguardAssociationPeerRoleEnum
@@ -252,6 +270,8 @@ func GetAutonomousDatabaseDataguardAssociationPeerRoleEnumStringValues() []strin
 		"PRIMARY",
 		"STANDBY",
 		"DISABLED_STANDBY",
+		"BACKUP_COPY",
+		"SNAPSHOT_STANDBY",
 	}
 }
 
@@ -266,33 +286,75 @@ type AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateE
 
 // Set of constants representing the allowable values for AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnum
 const (
-	AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateProvisioning         AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnum = "PROVISIONING"
-	AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateAvailable            AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnum = "AVAILABLE"
-	AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateRoleChangeInProgress AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnum = "ROLE_CHANGE_IN_PROGRESS"
-	AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateTerminating          AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnum = "TERMINATING"
-	AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateTerminated           AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnum = "TERMINATED"
-	AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateFailed               AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnum = "FAILED"
-	AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateUnavailable          AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnum = "UNAVAILABLE"
+	AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateProvisioning            AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnum = "PROVISIONING"
+	AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateAvailable               AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnum = "AVAILABLE"
+	AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateStopping                AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnum = "STOPPING"
+	AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateStopped                 AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnum = "STOPPED"
+	AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateStarting                AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnum = "STARTING"
+	AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateTerminating             AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnum = "TERMINATING"
+	AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateTerminated              AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnum = "TERMINATED"
+	AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateUnavailable             AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnum = "UNAVAILABLE"
+	AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateRestoreInProgress       AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnum = "RESTORE_IN_PROGRESS"
+	AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateRestoreFailed           AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnum = "RESTORE_FAILED"
+	AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateBackupInProgress        AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnum = "BACKUP_IN_PROGRESS"
+	AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateScaleInProgress         AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnum = "SCALE_IN_PROGRESS"
+	AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateAvailableNeedsAttention AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnum = "AVAILABLE_NEEDS_ATTENTION"
+	AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateUpdating                AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnum = "UPDATING"
+	AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateMaintenanceInProgress   AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnum = "MAINTENANCE_IN_PROGRESS"
+	AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateRestarting              AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnum = "RESTARTING"
+	AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateRecreating              AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnum = "RECREATING"
+	AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateRoleChangeInProgress    AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnum = "ROLE_CHANGE_IN_PROGRESS"
+	AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateUpgrading               AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnum = "UPGRADING"
+	AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateInaccessible            AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnum = "INACCESSIBLE"
+	AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateStandby                 AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnum = "STANDBY"
 )
 
 var mappingAutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnum = map[string]AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnum{
-	"PROVISIONING":            AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateProvisioning,
-	"AVAILABLE":               AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateAvailable,
-	"ROLE_CHANGE_IN_PROGRESS": AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateRoleChangeInProgress,
-	"TERMINATING":             AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateTerminating,
-	"TERMINATED":              AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateTerminated,
-	"FAILED":                  AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateFailed,
-	"UNAVAILABLE":             AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateUnavailable,
+	"PROVISIONING":              AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateProvisioning,
+	"AVAILABLE":                 AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateAvailable,
+	"STOPPING":                  AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateStopping,
+	"STOPPED":                   AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateStopped,
+	"STARTING":                  AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateStarting,
+	"TERMINATING":               AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateTerminating,
+	"TERMINATED":                AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateTerminated,
+	"UNAVAILABLE":               AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateUnavailable,
+	"RESTORE_IN_PROGRESS":       AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateRestoreInProgress,
+	"RESTORE_FAILED":            AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateRestoreFailed,
+	"BACKUP_IN_PROGRESS":        AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateBackupInProgress,
+	"SCALE_IN_PROGRESS":         AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateScaleInProgress,
+	"AVAILABLE_NEEDS_ATTENTION": AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateAvailableNeedsAttention,
+	"UPDATING":                  AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateUpdating,
+	"MAINTENANCE_IN_PROGRESS":   AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateMaintenanceInProgress,
+	"RESTARTING":                AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateRestarting,
+	"RECREATING":                AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateRecreating,
+	"ROLE_CHANGE_IN_PROGRESS":   AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateRoleChangeInProgress,
+	"UPGRADING":                 AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateUpgrading,
+	"INACCESSIBLE":              AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateInaccessible,
+	"STANDBY":                   AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateStandby,
 }
 
 var mappingAutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnumLowerCase = map[string]AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnum{
-	"provisioning":            AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateProvisioning,
-	"available":               AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateAvailable,
-	"role_change_in_progress": AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateRoleChangeInProgress,
-	"terminating":             AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateTerminating,
-	"terminated":              AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateTerminated,
-	"failed":                  AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateFailed,
-	"unavailable":             AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateUnavailable,
+	"provisioning":              AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateProvisioning,
+	"available":                 AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateAvailable,
+	"stopping":                  AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateStopping,
+	"stopped":                   AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateStopped,
+	"starting":                  AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateStarting,
+	"terminating":               AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateTerminating,
+	"terminated":                AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateTerminated,
+	"unavailable":               AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateUnavailable,
+	"restore_in_progress":       AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateRestoreInProgress,
+	"restore_failed":            AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateRestoreFailed,
+	"backup_in_progress":        AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateBackupInProgress,
+	"scale_in_progress":         AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateScaleInProgress,
+	"available_needs_attention": AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateAvailableNeedsAttention,
+	"updating":                  AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateUpdating,
+	"maintenance_in_progress":   AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateMaintenanceInProgress,
+	"restarting":                AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateRestarting,
+	"recreating":                AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateRecreating,
+	"role_change_in_progress":   AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateRoleChangeInProgress,
+	"upgrading":                 AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateUpgrading,
+	"inaccessible":              AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateInaccessible,
+	"standby":                   AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateStandby,
 }
 
 // GetAutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnumValues Enumerates the set of values for AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnum
@@ -309,11 +371,25 @@ func GetAutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleSta
 	return []string{
 		"PROVISIONING",
 		"AVAILABLE",
-		"ROLE_CHANGE_IN_PROGRESS",
+		"STOPPING",
+		"STOPPED",
+		"STARTING",
 		"TERMINATING",
 		"TERMINATED",
-		"FAILED",
 		"UNAVAILABLE",
+		"RESTORE_IN_PROGRESS",
+		"RESTORE_FAILED",
+		"BACKUP_IN_PROGRESS",
+		"SCALE_IN_PROGRESS",
+		"AVAILABLE_NEEDS_ATTENTION",
+		"UPDATING",
+		"MAINTENANCE_IN_PROGRESS",
+		"RESTARTING",
+		"RECREATING",
+		"ROLE_CHANGE_IN_PROGRESS",
+		"UPGRADING",
+		"INACCESSIBLE",
+		"STANDBY",
 	}
 }
 

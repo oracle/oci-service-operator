@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -15,7 +15,7 @@ import (
 	"strings"
 )
 
-// AutonomousDbPreviewVersionSummary The Autonomous Database preview version. Note that preview version software is only available for databases on shared Exadata infrastructure (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html).
+// AutonomousDbPreviewVersionSummary The Autonomous Database preview version. Note that preview version software is only available for Autonomous Database Serverless instances (https://docs.oracle.com/en/cloud/paas/autonomous-database/serverless/).
 type AutonomousDbPreviewVersionSummary struct {
 
 	// A valid Autonomous Database preview version.
@@ -32,6 +32,7 @@ type AutonomousDbPreviewVersionSummary struct {
 	// - DW - indicates an Autonomous Data Warehouse database
 	// - AJD - indicates an Autonomous JSON Database
 	// - APEX - indicates an Autonomous Database with the Oracle APEX Application Development workload type.
+	// This cannot be updated in parallel with any of the following: licenseModel, dbEdition, cpuCoreCount, computeCount, computeModel, adminPassword, whitelistedIps, isMTLSConnectionRequired, privateEndpointLabel, nsgIds, dbVersion, isRefreshable, dbName, scheduledOperations, dbToolsDetails, isLocalDataGuardEnabled, or isFreeTier.
 	DbWorkload AutonomousDbPreviewVersionSummaryDbWorkloadEnum `mandatory:"false" json:"dbWorkload,omitempty"`
 
 	// A URL that points to a detailed description of the preview version.

@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -17,7 +17,7 @@ import (
 	"net/http"
 )
 
-//DatabaseClient a client for Database
+// DatabaseClient a client for Database
 type DatabaseClient struct {
 	common.BaseClient
 	config *common.ConfigurationProvider
@@ -26,6 +26,9 @@ type DatabaseClient struct {
 // NewDatabaseClientWithConfigurationProvider Creates a new default Database client with the given configuration provider.
 // the configuration provider will be used for the default signer as well as reading the region
 func NewDatabaseClientWithConfigurationProvider(configProvider common.ConfigurationProvider) (client DatabaseClient, err error) {
+	if enabled := common.CheckForEnabledServices("database"); !enabled {
+		return client, fmt.Errorf("the Developer Tool configuration disabled this service, this behavior is controlled by OciSdkEnabledServicesMap variables. Please check if your local developer-tool-configuration.json file configured the service you're targeting or contact the cloud provider on the availability of this service")
+	}
 	provider, err := auth.GetGenericConfigurationProvider(configProvider)
 	if err != nil {
 		return client, err
@@ -39,7 +42,8 @@ func NewDatabaseClientWithConfigurationProvider(configProvider common.Configurat
 
 // NewDatabaseClientWithOboToken Creates a new default Database client with the given configuration provider.
 // The obotoken will be added to default headers and signed; the configuration provider will be used for the signer
-//  as well as reading the region
+//
+//	as well as reading the region
 func NewDatabaseClientWithOboToken(configProvider common.ConfigurationProvider, oboToken string) (client DatabaseClient, err error) {
 	baseClient, err := common.NewClientWithOboToken(configProvider, oboToken)
 	if err != nil {
@@ -76,7 +80,7 @@ func (client *DatabaseClient) setConfigurationProvider(configProvider common.Con
 	region, _ := configProvider.Region()
 	client.SetRegion(region)
 	if client.Host == "" {
-		return fmt.Errorf("Invalid region or Host. Endpoint cannot be constructed without endpointServiceName or serviceEndpointTemplate for a dotted region")
+		return fmt.Errorf("invalid region or Host. Endpoint cannot be constructed without endpointServiceName or serviceEndpointTemplate for a dotted region")
 	}
 	client.config = &configProvider
 	return nil
@@ -89,7 +93,7 @@ func (client *DatabaseClient) ConfigurationProvider() *common.ConfigurationProvi
 
 // ActivateExadataInfrastructure Activates the specified Exadata infrastructure resource. Applies to Exadata Cloud@Customer instances only.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ActivateExadataInfrastructure.go.html to see an example of how to use ActivateExadataInfrastructure API.
 func (client DatabaseClient) ActivateExadataInfrastructure(ctx context.Context, request ActivateExadataInfrastructureRequest) (response ActivateExadataInfrastructureResponse, err error) {
@@ -151,7 +155,7 @@ func (client DatabaseClient) activateExadataInfrastructure(ctx context.Context, 
 
 // AddStorageCapacityCloudExadataInfrastructure Makes the storage capacity from additional storage servers available for Cloud VM Cluster consumption. Applies to Exadata Cloud Service instances and Autonomous Database on dedicated Exadata infrastructure only.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/AddStorageCapacityCloudExadataInfrastructure.go.html to see an example of how to use AddStorageCapacityCloudExadataInfrastructure API.
 func (client DatabaseClient) AddStorageCapacityCloudExadataInfrastructure(ctx context.Context, request AddStorageCapacityCloudExadataInfrastructureRequest) (response AddStorageCapacityCloudExadataInfrastructureResponse, err error) {
@@ -213,7 +217,7 @@ func (client DatabaseClient) addStorageCapacityCloudExadataInfrastructure(ctx co
 
 // AddStorageCapacityExadataInfrastructure Makes the storage capacity from additional storage servers available for VM Cluster consumption. Applies to Exadata Cloud@Customer instances only.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/AddStorageCapacityExadataInfrastructure.go.html to see an example of how to use AddStorageCapacityExadataInfrastructure API.
 func (client DatabaseClient) AddStorageCapacityExadataInfrastructure(ctx context.Context, request AddStorageCapacityExadataInfrastructureRequest) (response AddStorageCapacityExadataInfrastructureResponse, err error) {
@@ -275,7 +279,7 @@ func (client DatabaseClient) addStorageCapacityExadataInfrastructure(ctx context
 
 // AddVirtualMachineToCloudVmCluster Add Virtual Machines to the Cloud VM cluster. Applies to Exadata Cloud instances only.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/AddVirtualMachineToCloudVmCluster.go.html to see an example of how to use AddVirtualMachineToCloudVmCluster API.
 func (client DatabaseClient) AddVirtualMachineToCloudVmCluster(ctx context.Context, request AddVirtualMachineToCloudVmClusterRequest) (response AddVirtualMachineToCloudVmClusterResponse, err error) {
@@ -337,7 +341,7 @@ func (client DatabaseClient) addVirtualMachineToCloudVmCluster(ctx context.Conte
 
 // AddVirtualMachineToVmCluster Add Virtual Machines to the VM cluster. Applies to Exadata Cloud@Customer instances only.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/AddVirtualMachineToVmCluster.go.html to see an example of how to use AddVirtualMachineToVmCluster API.
 func (client DatabaseClient) AddVirtualMachineToVmCluster(ctx context.Context, request AddVirtualMachineToVmClusterRequest) (response AddVirtualMachineToVmClusterResponse, err error) {
@@ -399,7 +403,7 @@ func (client DatabaseClient) addVirtualMachineToVmCluster(ctx context.Context, r
 
 // AutonomousDatabaseManualRefresh Initiates a data refresh for an Autonomous Database refreshable clone. Data is refreshed from the source database to the point of a specified timestamp.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/AutonomousDatabaseManualRefresh.go.html to see an example of how to use AutonomousDatabaseManualRefresh API.
 func (client DatabaseClient) AutonomousDatabaseManualRefresh(ctx context.Context, request AutonomousDatabaseManualRefreshRequest) (response AutonomousDatabaseManualRefreshResponse, err error) {
@@ -459,11 +463,73 @@ func (client DatabaseClient) autonomousDatabaseManualRefresh(ctx context.Context
 	return response, err
 }
 
+// CancelBackup Cancel automatic/standalone full/incremental create backup workrequests specified by the backup Id.
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/CancelBackup.go.html to see an example of how to use CancelBackup API.
+func (client DatabaseClient) CancelBackup(ctx context.Context, request CancelBackupRequest) (response CancelBackupResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+
+	if !(request.OpcRetryToken != nil && *request.OpcRetryToken != "") {
+		request.OpcRetryToken = common.String(common.RetryToken())
+	}
+
+	ociResponse, err = common.Retry(ctx, request, client.cancelBackup, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = CancelBackupResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = CancelBackupResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(CancelBackupResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into CancelBackupResponse")
+	}
+	return
+}
+
+// cancelBackup implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) cancelBackup(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/backups/{backupId}/actions/cancel", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response CancelBackupResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/Backup/CancelBackup"
+		err = common.PostProcessServiceError(err, "Database", "CancelBackup", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // ChangeAutonomousContainerDatabaseCompartment Move the Autonomous Container Database and its dependent resources to the specified compartment.
 // For more information about moving Autonomous Container Databases, see
 // Moving Database Resources to a Different Compartment (https://docs.cloud.oracle.com/Content/Database/Concepts/databaseoverview.htm#moveRes).
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ChangeAutonomousContainerDatabaseCompartment.go.html to see an example of how to use ChangeAutonomousContainerDatabaseCompartment API.
 func (client DatabaseClient) ChangeAutonomousContainerDatabaseCompartment(ctx context.Context, request ChangeAutonomousContainerDatabaseCompartmentRequest) (response ChangeAutonomousContainerDatabaseCompartmentResponse, err error) {
@@ -527,7 +593,7 @@ func (client DatabaseClient) changeAutonomousContainerDatabaseCompartment(ctx co
 // For more information about moving Autonomous Databases, see
 // Moving Database Resources to a Different Compartment (https://docs.cloud.oracle.com/Content/Database/Concepts/databaseoverview.htm#moveRes).
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ChangeAutonomousDatabaseCompartment.go.html to see an example of how to use ChangeAutonomousDatabaseCompartment API.
 func (client DatabaseClient) ChangeAutonomousDatabaseCompartment(ctx context.Context, request ChangeAutonomousDatabaseCompartmentRequest) (response ChangeAutonomousDatabaseCompartmentResponse, err error) {
@@ -591,7 +657,7 @@ func (client DatabaseClient) changeAutonomousDatabaseCompartment(ctx context.Con
 // For more information, see
 // Moving Database Resources to a Different Compartment (https://docs.cloud.oracle.com/Content/Database/Concepts/databaseoverview.htm#moveRes).
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ChangeAutonomousExadataInfrastructureCompartment.go.html to see an example of how to use ChangeAutonomousExadataInfrastructureCompartment API.
 func (client DatabaseClient) ChangeAutonomousExadataInfrastructureCompartment(ctx context.Context, request ChangeAutonomousExadataInfrastructureCompartmentRequest) (response ChangeAutonomousExadataInfrastructureCompartmentResponse, err error) {
@@ -653,7 +719,7 @@ func (client DatabaseClient) changeAutonomousExadataInfrastructureCompartment(ct
 
 // ChangeAutonomousVmClusterCompartment Moves an Autonomous VM cluster and its dependent resources to another compartment. Applies to Exadata Cloud@Customer  only. For systems in the Oracle cloud, see ChangeAutonomousVmClusterCompartment.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ChangeAutonomousVmClusterCompartment.go.html to see an example of how to use ChangeAutonomousVmClusterCompartment API.
 func (client DatabaseClient) ChangeAutonomousVmClusterCompartment(ctx context.Context, request ChangeAutonomousVmClusterCompartmentRequest) (response ChangeAutonomousVmClusterCompartmentResponse, err error) {
@@ -717,7 +783,7 @@ func (client DatabaseClient) changeAutonomousVmClusterCompartment(ctx context.Co
 // For more information, see
 // Moving Database Resources to a Different Compartment (https://docs.cloud.oracle.com/Content/Database/Concepts/databaseoverview.htm#moveRes).
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ChangeBackupDestinationCompartment.go.html to see an example of how to use ChangeBackupDestinationCompartment API.
 func (client DatabaseClient) ChangeBackupDestinationCompartment(ctx context.Context, request ChangeBackupDestinationCompartmentRequest) (response ChangeBackupDestinationCompartmentResponse, err error) {
@@ -779,7 +845,7 @@ func (client DatabaseClient) changeBackupDestinationCompartment(ctx context.Cont
 
 // ChangeCloudAutonomousVmClusterCompartment Moves an Autonomous Exadata VM cluster in the Oracle cloud and its dependent resources to another compartment. For Exadata Cloud@Customer systems, see ChangeAutonomousVmClusterCompartment.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ChangeCloudAutonomousVmClusterCompartment.go.html to see an example of how to use ChangeCloudAutonomousVmClusterCompartment API.
 func (client DatabaseClient) ChangeCloudAutonomousVmClusterCompartment(ctx context.Context, request ChangeCloudAutonomousVmClusterCompartmentRequest) (response ChangeCloudAutonomousVmClusterCompartmentResponse, err error) {
@@ -841,7 +907,7 @@ func (client DatabaseClient) changeCloudAutonomousVmClusterCompartment(ctx conte
 
 // ChangeCloudExadataInfrastructureCompartment Moves a cloud Exadata infrastructure resource and its dependent resources to another compartment. Applies to Exadata Cloud Service instances and Autonomous Database on dedicated Exadata infrastructure only.For more information about moving resources to a different compartment, see Moving Database Resources to a Different Compartment (https://docs.cloud.oracle.com/Content/Database/Concepts/databaseoverview.htm#moveRes).
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ChangeCloudExadataInfrastructureCompartment.go.html to see an example of how to use ChangeCloudExadataInfrastructureCompartment API.
 func (client DatabaseClient) ChangeCloudExadataInfrastructureCompartment(ctx context.Context, request ChangeCloudExadataInfrastructureCompartmentRequest) (response ChangeCloudExadataInfrastructureCompartmentResponse, err error) {
@@ -903,7 +969,7 @@ func (client DatabaseClient) changeCloudExadataInfrastructureCompartment(ctx con
 
 // ChangeCloudVmClusterCompartment Moves a cloud VM cluster and its dependent resources to another compartment. Applies to Exadata Cloud Service instances and Autonomous Database on dedicated Exadata infrastructure only.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ChangeCloudVmClusterCompartment.go.html to see an example of how to use ChangeCloudVmClusterCompartment API.
 func (client DatabaseClient) ChangeCloudVmClusterCompartment(ctx context.Context, request ChangeCloudVmClusterCompartmentRequest) (response ChangeCloudVmClusterCompartmentResponse, err error) {
@@ -967,7 +1033,7 @@ func (client DatabaseClient) changeCloudVmClusterCompartment(ctx context.Context
 // For more information about moving Databse Software Images, see
 // Moving Database Resources to a Different Compartment (https://docs.cloud.oracle.com/Content/Database/Concepts/databaseoverview.htm#moveRes).
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ChangeDatabaseSoftwareImageCompartment.go.html to see an example of how to use ChangeDatabaseSoftwareImageCompartment API.
 func (client DatabaseClient) ChangeDatabaseSoftwareImageCompartment(ctx context.Context, request ChangeDatabaseSoftwareImageCompartmentRequest) (response ChangeDatabaseSoftwareImageCompartmentResponse, err error) {
@@ -1027,11 +1093,75 @@ func (client DatabaseClient) changeDatabaseSoftwareImageCompartment(ctx context.
 	return response, err
 }
 
+// ChangeDataguardRole Switch the Autonomous Container Database role between Standby and Snapshot Standby.
+// For more information about changing Autonomous Container Databases Dataguard Role, see
+// Convert Physical Standby to Snapshot Standby (https://docs.oracle.com/en/cloud/paas/autonomous-database/dedicated/adbcl/index.html#ADBCL-GUID-D3B503F1-0032-4B0D-9F00-ACAE8151AB80) and Convert Snapshot Standby to Physical Standby (https://docs.oracle.com/en/cloud/paas/autonomous-database/dedicated/adbcl/index.html#ADBCL-GUID-E8D7E0EE-8244-467D-B33A-1BC6F969A0A4).
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ChangeDataguardRole.go.html to see an example of how to use ChangeDataguardRole API.
+func (client DatabaseClient) ChangeDataguardRole(ctx context.Context, request ChangeDataguardRoleRequest) (response ChangeDataguardRoleResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+
+	if !(request.OpcRetryToken != nil && *request.OpcRetryToken != "") {
+		request.OpcRetryToken = common.String(common.RetryToken())
+	}
+
+	ociResponse, err = common.Retry(ctx, request, client.changeDataguardRole, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = ChangeDataguardRoleResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = ChangeDataguardRoleResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(ChangeDataguardRoleResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into ChangeDataguardRoleResponse")
+	}
+	return
+}
+
+// changeDataguardRole implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) changeDataguardRole(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/autonomousContainerDatabases/{autonomousContainerDatabaseId}/actions/changeDataguardRole", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response ChangeDataguardRoleResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/AutonomousContainerDatabase/ChangeDataguardRole"
+		err = common.PostProcessServiceError(err, "Database", "ChangeDataguardRole", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // ChangeDbSystemCompartment Moves the DB system and its dependent resources to the specified compartment.
 // For more information about moving DB systems, see
 // Moving Database Resources to a Different Compartment (https://docs.cloud.oracle.com/Content/Database/Concepts/databaseoverview.htm#moveRes).
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ChangeDbSystemCompartment.go.html to see an example of how to use ChangeDbSystemCompartment API.
 func (client DatabaseClient) ChangeDbSystemCompartment(ctx context.Context, request ChangeDbSystemCompartmentRequest) (response ChangeDbSystemCompartmentResponse, err error) {
@@ -1091,10 +1221,67 @@ func (client DatabaseClient) changeDbSystemCompartment(ctx context.Context, requ
 	return response, err
 }
 
+// ChangeDisasterRecoveryConfiguration This operation updates the cross-region disaster recovery (DR) details of the standby Autonomous Database Serverless database, and must be run on the standby side.
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ChangeDisasterRecoveryConfiguration.go.html to see an example of how to use ChangeDisasterRecoveryConfiguration API.
+func (client DatabaseClient) ChangeDisasterRecoveryConfiguration(ctx context.Context, request ChangeDisasterRecoveryConfigurationRequest) (response ChangeDisasterRecoveryConfigurationResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.changeDisasterRecoveryConfiguration, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = ChangeDisasterRecoveryConfigurationResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = ChangeDisasterRecoveryConfigurationResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(ChangeDisasterRecoveryConfigurationResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into ChangeDisasterRecoveryConfigurationResponse")
+	}
+	return
+}
+
+// changeDisasterRecoveryConfiguration implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) changeDisasterRecoveryConfiguration(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodPut, "/autonomousDatabases/{autonomousDatabaseId}/actions/changeDisasterRecoveryConfiguration", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response ChangeDisasterRecoveryConfigurationResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/AutonomousDatabase/ChangeDisasterRecoveryConfiguration"
+		err = common.PostProcessServiceError(err, "Database", "ChangeDisasterRecoveryConfiguration", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // ChangeExadataInfrastructureCompartment Moves an Exadata infrastructure resource and its dependent resources to another compartment. Applies to Exadata Cloud@Customer instances only.
 // To move an Exadata Cloud Service infrastructure resource to another compartment, use the  ChangeCloudExadataInfrastructureCompartment operation.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ChangeExadataInfrastructureCompartment.go.html to see an example of how to use ChangeExadataInfrastructureCompartment API.
 func (client DatabaseClient) ChangeExadataInfrastructureCompartment(ctx context.Context, request ChangeExadataInfrastructureCompartmentRequest) (response ChangeExadataInfrastructureCompartmentResponse, err error) {
@@ -1159,7 +1346,7 @@ func (client DatabaseClient) changeExadataInfrastructureCompartment(ctx context.
 // For more information about moving external container databases, see
 // Moving Database Resources to a Different Compartment (https://docs.cloud.oracle.com/Content/Database/Concepts/databaseoverview.htm#moveRes).
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ChangeExternalContainerDatabaseCompartment.go.html to see an example of how to use ChangeExternalContainerDatabaseCompartment API.
 func (client DatabaseClient) ChangeExternalContainerDatabaseCompartment(ctx context.Context, request ChangeExternalContainerDatabaseCompartmentRequest) (response ChangeExternalContainerDatabaseCompartmentResponse, err error) {
@@ -1223,7 +1410,7 @@ func (client DatabaseClient) changeExternalContainerDatabaseCompartment(ctx cont
 // For more information about moving external non-container databases, see
 // Moving Database Resources to a Different Compartment (https://docs.cloud.oracle.com/Content/Database/Concepts/databaseoverview.htm#moveRes).
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ChangeExternalNonContainerDatabaseCompartment.go.html to see an example of how to use ChangeExternalNonContainerDatabaseCompartment API.
 func (client DatabaseClient) ChangeExternalNonContainerDatabaseCompartment(ctx context.Context, request ChangeExternalNonContainerDatabaseCompartmentRequest) (response ChangeExternalNonContainerDatabaseCompartmentResponse, err error) {
@@ -1288,7 +1475,7 @@ func (client DatabaseClient) changeExternalNonContainerDatabaseCompartment(ctx c
 // For more information about moving external pluggable databases, see
 // Moving Database Resources to a Different Compartment (https://docs.cloud.oracle.com/Content/Database/Concepts/databaseoverview.htm#moveRes).
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ChangeExternalPluggableDatabaseCompartment.go.html to see an example of how to use ChangeExternalPluggableDatabaseCompartment API.
 func (client DatabaseClient) ChangeExternalPluggableDatabaseCompartment(ctx context.Context, request ChangeExternalPluggableDatabaseCompartmentRequest) (response ChangeExternalPluggableDatabaseCompartmentResponse, err error) {
@@ -1352,7 +1539,7 @@ func (client DatabaseClient) changeExternalPluggableDatabaseCompartment(ctx cont
 // For more information about moving key stores, see
 // Moving Database Resources to a Different Compartment (https://docs.cloud.oracle.com/Content/Database/Concepts/databaseoverview.htm#moveRes).
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ChangeKeyStoreCompartment.go.html to see an example of how to use ChangeKeyStoreCompartment API.
 func (client DatabaseClient) ChangeKeyStoreCompartment(ctx context.Context, request ChangeKeyStoreCompartmentRequest) (response ChangeKeyStoreCompartmentResponse, err error) {
@@ -1412,10 +1599,134 @@ func (client DatabaseClient) changeKeyStoreCompartment(ctx context.Context, requ
 	return response, err
 }
 
+// ChangeKeyStoreType Changes encryption key management type
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ChangeKeyStoreType.go.html to see an example of how to use ChangeKeyStoreType API.
+func (client DatabaseClient) ChangeKeyStoreType(ctx context.Context, request ChangeKeyStoreTypeRequest) (response ChangeKeyStoreTypeResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+
+	if !(request.OpcRetryToken != nil && *request.OpcRetryToken != "") {
+		request.OpcRetryToken = common.String(common.RetryToken())
+	}
+
+	ociResponse, err = common.Retry(ctx, request, client.changeKeyStoreType, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = ChangeKeyStoreTypeResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = ChangeKeyStoreTypeResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(ChangeKeyStoreTypeResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into ChangeKeyStoreTypeResponse")
+	}
+	return
+}
+
+// changeKeyStoreType implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) changeKeyStoreType(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/databases/{databaseId}/actions/changeKeyStoreType", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response ChangeKeyStoreTypeResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/Database/ChangeKeyStoreType"
+		err = common.PostProcessServiceError(err, "Database", "ChangeKeyStoreType", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
+// ChangeOneoffPatchCompartment Move the one-off patch to the specified compartment.
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ChangeOneoffPatchCompartment.go.html to see an example of how to use ChangeOneoffPatchCompartment API.
+func (client DatabaseClient) ChangeOneoffPatchCompartment(ctx context.Context, request ChangeOneoffPatchCompartmentRequest) (response ChangeOneoffPatchCompartmentResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+
+	if !(request.OpcRetryToken != nil && *request.OpcRetryToken != "") {
+		request.OpcRetryToken = common.String(common.RetryToken())
+	}
+
+	ociResponse, err = common.Retry(ctx, request, client.changeOneoffPatchCompartment, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = ChangeOneoffPatchCompartmentResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = ChangeOneoffPatchCompartmentResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(ChangeOneoffPatchCompartmentResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into ChangeOneoffPatchCompartmentResponse")
+	}
+	return
+}
+
+// changeOneoffPatchCompartment implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) changeOneoffPatchCompartment(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/oneoffPatches/{oneoffPatchId}/actions/changeCompartment", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response ChangeOneoffPatchCompartmentResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/OneoffPatch/ChangeOneoffPatchCompartment"
+		err = common.PostProcessServiceError(err, "Database", "ChangeOneoffPatchCompartment", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // ChangeVmClusterCompartment Moves a VM cluster and its dependent resources to another compartment. Applies to Exadata Cloud@Customer instances only.
 // To move a cloud VM cluster in an Exadata Cloud Service instance to another compartment, use the ChangeCloudVmClusterCompartment operation.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ChangeVmClusterCompartment.go.html to see an example of how to use ChangeVmClusterCompartment API.
 func (client DatabaseClient) ChangeVmClusterCompartment(ctx context.Context, request ChangeVmClusterCompartmentRequest) (response ChangeVmClusterCompartmentResponse, err error) {
@@ -1478,7 +1789,7 @@ func (client DatabaseClient) changeVmClusterCompartment(ctx context.Context, req
 // CheckExternalDatabaseConnectorConnectionStatus Check the status of the external database connection specified in this connector.
 // This operation will refresh the connectionStatus and timeConnectionStatusLastUpdated fields.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/CheckExternalDatabaseConnectorConnectionStatus.go.html to see an example of how to use CheckExternalDatabaseConnectorConnectionStatus API.
 func (client DatabaseClient) CheckExternalDatabaseConnectorConnectionStatus(ctx context.Context, request CheckExternalDatabaseConnectorConnectionStatusRequest) (response CheckExternalDatabaseConnectorConnectionStatusResponse, err error) {
@@ -1541,7 +1852,7 @@ func (client DatabaseClient) checkExternalDatabaseConnectorConnectionStatus(ctx 
 // CompleteExternalBackupJob Changes the status of the standalone backup resource to `ACTIVE` after the backup is created from the on-premises database and placed in Oracle Cloud Infrastructure Object Storage.
 // **Note:** This API is used by an Oracle Cloud Infrastructure Python script that is packaged with the Oracle Cloud Infrastructure CLI. Oracle recommends that you use the script instead using the API directly. See Migrating an On-Premises Database to Oracle Cloud Infrastructure by Creating a Backup in the Cloud (https://docs.cloud.oracle.com/Content/Database/Tasks/mig-onprembackup.htm) for more information.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/CompleteExternalBackupJob.go.html to see an example of how to use CompleteExternalBackupJob API.
 func (client DatabaseClient) CompleteExternalBackupJob(ctx context.Context, request CompleteExternalBackupJobRequest) (response CompleteExternalBackupJobResponse, err error) {
@@ -1603,7 +1914,7 @@ func (client DatabaseClient) completeExternalBackupJob(ctx context.Context, requ
 
 // ConfigureAutonomousDatabaseVaultKey Configures the Autonomous Database Vault service key (https://docs.cloud.oracle.com/Content/KeyManagement/Concepts/keyoverview.htm#concepts).
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ConfigureAutonomousDatabaseVaultKey.go.html to see an example of how to use ConfigureAutonomousDatabaseVaultKey API.
 func (client DatabaseClient) ConfigureAutonomousDatabaseVaultKey(ctx context.Context, request ConfigureAutonomousDatabaseVaultKeyRequest) (response ConfigureAutonomousDatabaseVaultKeyResponse, err error) {
@@ -1663,9 +1974,66 @@ func (client DatabaseClient) configureAutonomousDatabaseVaultKey(ctx context.Con
 	return response, err
 }
 
+// ConfigureSaasAdminUser This operation updates SaaS administrative user configuration of the Autonomous Database.
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ConfigureSaasAdminUser.go.html to see an example of how to use ConfigureSaasAdminUser API.
+func (client DatabaseClient) ConfigureSaasAdminUser(ctx context.Context, request ConfigureSaasAdminUserRequest) (response ConfigureSaasAdminUserResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.configureSaasAdminUser, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = ConfigureSaasAdminUserResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = ConfigureSaasAdminUserResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(ConfigureSaasAdminUserResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into ConfigureSaasAdminUserResponse")
+	}
+	return
+}
+
+// configureSaasAdminUser implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) configureSaasAdminUser(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/autonomousDatabases/{autonomousDatabaseId}/actions/configureSaasAdminUser", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response ConfigureSaasAdminUserResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/AutonomousDatabase/ConfigureSaasAdminUser"
+		err = common.PostProcessServiceError(err, "Database", "ConfigureSaasAdminUser", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // ConvertToPdb Converts a non-container database to a pluggable database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ConvertToPdb.go.html to see an example of how to use ConvertToPdb API.
 func (client DatabaseClient) ConvertToPdb(ctx context.Context, request ConvertToPdbRequest) (response ConvertToPdbResponse, err error) {
@@ -1720,9 +2088,134 @@ func (client DatabaseClient) convertToPdb(ctx context.Context, request common.OC
 	return response, err
 }
 
+// ConvertToRegularPluggableDatabase Converts a Refreshable clone to Regular pluggable database (PDB).
+// Pluggable Database will be in `READ_WRITE` openmode after conversion.
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ConvertToRegularPluggableDatabase.go.html to see an example of how to use ConvertToRegularPluggableDatabase API.
+func (client DatabaseClient) ConvertToRegularPluggableDatabase(ctx context.Context, request ConvertToRegularPluggableDatabaseRequest) (response ConvertToRegularPluggableDatabaseResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+
+	if !(request.OpcRetryToken != nil && *request.OpcRetryToken != "") {
+		request.OpcRetryToken = common.String(common.RetryToken())
+	}
+
+	ociResponse, err = common.Retry(ctx, request, client.convertToRegularPluggableDatabase, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = ConvertToRegularPluggableDatabaseResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = ConvertToRegularPluggableDatabaseResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(ConvertToRegularPluggableDatabaseResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into ConvertToRegularPluggableDatabaseResponse")
+	}
+	return
+}
+
+// convertToRegularPluggableDatabase implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) convertToRegularPluggableDatabase(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/pluggableDatabases/{pluggableDatabaseId}/actions/convertToRegular", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response ConvertToRegularPluggableDatabaseResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/PluggableDatabase/ConvertToRegularPluggableDatabase"
+		err = common.PostProcessServiceError(err, "Database", "ConvertToRegularPluggableDatabase", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
+// CreateApplicationVip Creates a new application virtual IP (VIP) address in the specified cloud VM cluster based on the request parameters you provide.
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/CreateApplicationVip.go.html to see an example of how to use CreateApplicationVip API.
+func (client DatabaseClient) CreateApplicationVip(ctx context.Context, request CreateApplicationVipRequest) (response CreateApplicationVipResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+
+	if !(request.OpcRetryToken != nil && *request.OpcRetryToken != "") {
+		request.OpcRetryToken = common.String(common.RetryToken())
+	}
+
+	ociResponse, err = common.Retry(ctx, request, client.createApplicationVip, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = CreateApplicationVipResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = CreateApplicationVipResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(CreateApplicationVipResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into CreateApplicationVipResponse")
+	}
+	return
+}
+
+// createApplicationVip implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) createApplicationVip(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/applicationVip", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response CreateApplicationVipResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/ApplicationVip/CreateApplicationVip"
+		err = common.PostProcessServiceError(err, "Database", "CreateApplicationVip", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // CreateAutonomousContainerDatabase Creates an Autonomous Container Database in the specified Autonomous Exadata Infrastructure.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/CreateAutonomousContainerDatabase.go.html to see an example of how to use CreateAutonomousContainerDatabase API.
 func (client DatabaseClient) CreateAutonomousContainerDatabase(ctx context.Context, request CreateAutonomousContainerDatabaseRequest) (response CreateAutonomousContainerDatabaseResponse, err error) {
@@ -1782,9 +2275,77 @@ func (client DatabaseClient) createAutonomousContainerDatabase(ctx context.Conte
 	return response, err
 }
 
+// CreateAutonomousContainerDatabaseDataguardAssociation Create a new Autonomous Data Guard association. An Autonomous Data Guard association represents the replication relationship between the
+// specified Autonomous Container database and a peer Autonomous Container database. For more information, see Using Oracle Data Guard (https://docs.cloud.oracle.com/Content/Database/Tasks/usingdataguard.htm).
+// All Oracle Cloud Infrastructure resources, including Data Guard associations, get an Oracle-assigned, unique ID
+// called an Oracle Cloud Identifier (OCID). When you create a resource, you can find its OCID in the response.
+// You can also retrieve a resource's OCID by using a List API operation on that resource type, or by viewing the
+// resource in the Console. For more information, see
+// Resource Identifiers (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm).
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/CreateAutonomousContainerDatabaseDataguardAssociation.go.html to see an example of how to use CreateAutonomousContainerDatabaseDataguardAssociation API.
+func (client DatabaseClient) CreateAutonomousContainerDatabaseDataguardAssociation(ctx context.Context, request CreateAutonomousContainerDatabaseDataguardAssociationRequest) (response CreateAutonomousContainerDatabaseDataguardAssociationResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+
+	if !(request.OpcRetryToken != nil && *request.OpcRetryToken != "") {
+		request.OpcRetryToken = common.String(common.RetryToken())
+	}
+
+	ociResponse, err = common.Retry(ctx, request, client.createAutonomousContainerDatabaseDataguardAssociation, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = CreateAutonomousContainerDatabaseDataguardAssociationResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = CreateAutonomousContainerDatabaseDataguardAssociationResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(CreateAutonomousContainerDatabaseDataguardAssociationResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into CreateAutonomousContainerDatabaseDataguardAssociationResponse")
+	}
+	return
+}
+
+// createAutonomousContainerDatabaseDataguardAssociation implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) createAutonomousContainerDatabaseDataguardAssociation(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/autonomousContainerDatabases/{autonomousContainerDatabaseId}/autonomousContainerDatabaseDataguardAssociations", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response CreateAutonomousContainerDatabaseDataguardAssociationResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/AutonomousContainerDatabaseDataguardAssociation/CreateAutonomousContainerDatabaseDataguardAssociation"
+		err = common.PostProcessServiceError(err, "Database", "CreateAutonomousContainerDatabaseDataguardAssociation", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // CreateAutonomousDatabase Creates a new Autonomous Database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/CreateAutonomousDatabase.go.html to see an example of how to use CreateAutonomousDatabase API.
 func (client DatabaseClient) CreateAutonomousDatabase(ctx context.Context, request CreateAutonomousDatabaseRequest) (response CreateAutonomousDatabaseResponse, err error) {
@@ -1846,7 +2407,7 @@ func (client DatabaseClient) createAutonomousDatabase(ctx context.Context, reque
 
 // CreateAutonomousDatabaseBackup Creates a new Autonomous Database backup for the specified database based on the provided request parameters.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/CreateAutonomousDatabaseBackup.go.html to see an example of how to use CreateAutonomousDatabaseBackup API.
 func (client DatabaseClient) CreateAutonomousDatabaseBackup(ctx context.Context, request CreateAutonomousDatabaseBackupRequest) (response CreateAutonomousDatabaseBackupResponse, err error) {
@@ -1908,7 +2469,7 @@ func (client DatabaseClient) createAutonomousDatabaseBackup(ctx context.Context,
 
 // CreateAutonomousVmCluster Creates an Autonomous VM cluster for Exadata Cloud@Customer. To create an Autonomous VM Cluster in the Oracle cloud, see CreateCloudAutonomousVmCluster.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/CreateAutonomousVmCluster.go.html to see an example of how to use CreateAutonomousVmCluster API.
 func (client DatabaseClient) CreateAutonomousVmCluster(ctx context.Context, request CreateAutonomousVmClusterRequest) (response CreateAutonomousVmClusterResponse, err error) {
@@ -1970,7 +2531,7 @@ func (client DatabaseClient) createAutonomousVmCluster(ctx context.Context, requ
 
 // CreateBackup Creates a new backup in the specified database based on the request parameters you provide. If you previously used RMAN or dbcli to configure backups and then you switch to using the Console or the API for backups, a new backup configuration is created and associated with your database. This means that you can no longer rely on your previously configured unmanaged backups to work.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/CreateBackup.go.html to see an example of how to use CreateBackup API.
 func (client DatabaseClient) CreateBackup(ctx context.Context, request CreateBackupRequest) (response CreateBackupResponse, err error) {
@@ -2032,7 +2593,7 @@ func (client DatabaseClient) createBackup(ctx context.Context, request common.OC
 
 // CreateBackupDestination Creates a backup destination in an Exadata Cloud@Customer system.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/CreateBackupDestination.go.html to see an example of how to use CreateBackupDestination API.
 func (client DatabaseClient) CreateBackupDestination(ctx context.Context, request CreateBackupDestinationRequest) (response CreateBackupDestinationResponse, err error) {
@@ -2094,7 +2655,7 @@ func (client DatabaseClient) createBackupDestination(ctx context.Context, reques
 
 // CreateCloudAutonomousVmCluster Creates an Autonomous Exadata VM cluster in the Oracle cloud. For Exadata Cloud@Customer systems, see CreateAutonomousVmCluster.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/CreateCloudAutonomousVmCluster.go.html to see an example of how to use CreateCloudAutonomousVmCluster API.
 func (client DatabaseClient) CreateCloudAutonomousVmCluster(ctx context.Context, request CreateCloudAutonomousVmClusterRequest) (response CreateCloudAutonomousVmClusterResponse, err error) {
@@ -2156,7 +2717,7 @@ func (client DatabaseClient) createCloudAutonomousVmCluster(ctx context.Context,
 
 // CreateCloudExadataInfrastructure Creates a cloud Exadata infrastructure resource. This resource is used to create either an Exadata Cloud Service (https://docs.cloud.oracle.com/Content/Database/Concepts/exaoverview.htm) instance or an Autonomous Database on dedicated Exadata infrastructure.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/CreateCloudExadataInfrastructure.go.html to see an example of how to use CreateCloudExadataInfrastructure API.
 func (client DatabaseClient) CreateCloudExadataInfrastructure(ctx context.Context, request CreateCloudExadataInfrastructureRequest) (response CreateCloudExadataInfrastructureResponse, err error) {
@@ -2218,7 +2779,7 @@ func (client DatabaseClient) createCloudExadataInfrastructure(ctx context.Contex
 
 // CreateCloudVmCluster Creates a cloud VM cluster.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/CreateCloudVmCluster.go.html to see an example of how to use CreateCloudVmCluster API.
 func (client DatabaseClient) CreateCloudVmCluster(ctx context.Context, request CreateCloudVmClusterRequest) (response CreateCloudVmClusterResponse, err error) {
@@ -2282,7 +2843,7 @@ func (client DatabaseClient) createCloudVmCluster(ctx context.Context, request c
 // After the console connection has been created and is available,
 // you connect to the console using SSH.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/CreateConsoleConnection.go.html to see an example of how to use CreateConsoleConnection API.
 func (client DatabaseClient) CreateConsoleConnection(ctx context.Context, request CreateConsoleConnectionRequest) (response CreateConsoleConnectionResponse, err error) {
@@ -2342,6 +2903,68 @@ func (client DatabaseClient) createConsoleConnection(ctx context.Context, reques
 	return response, err
 }
 
+// CreateConsoleHistory Captures the most recent serial console data (up to a megabyte) for the specified database node.
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/CreateConsoleHistory.go.html to see an example of how to use CreateConsoleHistory API.
+func (client DatabaseClient) CreateConsoleHistory(ctx context.Context, request CreateConsoleHistoryRequest) (response CreateConsoleHistoryResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+
+	if !(request.OpcRetryToken != nil && *request.OpcRetryToken != "") {
+		request.OpcRetryToken = common.String(common.RetryToken())
+	}
+
+	ociResponse, err = common.Retry(ctx, request, client.createConsoleHistory, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = CreateConsoleHistoryResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = CreateConsoleHistoryResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(CreateConsoleHistoryResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into CreateConsoleHistoryResponse")
+	}
+	return
+}
+
+// createConsoleHistory implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) createConsoleHistory(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/dbNodes/{dbNodeId}/consoleHistories", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response CreateConsoleHistoryResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/ConsoleHistory/CreateConsoleHistory"
+		err = common.PostProcessServiceError(err, "Database", "CreateConsoleHistory", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // CreateDataGuardAssociation Creates a new Data Guard association.  A Data Guard association represents the replication relationship between the
 // specified database and a peer database. For more information, see Using Oracle Data Guard (https://docs.cloud.oracle.com/Content/Database/Tasks/usingdataguard.htm).
 // All Oracle Cloud Infrastructure resources, including Data Guard associations, get an Oracle-assigned, unique ID
@@ -2350,7 +2973,7 @@ func (client DatabaseClient) createConsoleConnection(ctx context.Context, reques
 // resource in the Console. For more information, see
 // Resource Identifiers (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm).
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/CreateDataGuardAssociation.go.html to see an example of how to use CreateDataGuardAssociation API.
 func (client DatabaseClient) CreateDataGuardAssociation(ctx context.Context, request CreateDataGuardAssociationRequest) (response CreateDataGuardAssociationResponse, err error) {
@@ -2412,7 +3035,7 @@ func (client DatabaseClient) createDataGuardAssociation(ctx context.Context, req
 
 // CreateDatabase Creates a new database in the specified Database Home. If the database version is provided, it must match the version of the Database Home. Applies to Exadata and Exadata Cloud@Customer systems.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/CreateDatabase.go.html to see an example of how to use CreateDatabase API.
 func (client DatabaseClient) CreateDatabase(ctx context.Context, request CreateDatabaseRequest) (response CreateDatabaseResponse, err error) {
@@ -2474,7 +3097,7 @@ func (client DatabaseClient) createDatabase(ctx context.Context, request common.
 
 // CreateDatabaseSoftwareImage create database software image in the specified compartment.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/CreateDatabaseSoftwareImage.go.html to see an example of how to use CreateDatabaseSoftwareImage API.
 func (client DatabaseClient) CreateDatabaseSoftwareImage(ctx context.Context, request CreateDatabaseSoftwareImageRequest) (response CreateDatabaseSoftwareImageResponse, err error) {
@@ -2536,7 +3159,7 @@ func (client DatabaseClient) createDatabaseSoftwareImage(ctx context.Context, re
 
 // CreateDbHome Creates a new Database Home in the specified database system based on the request parameters you provide. Applies to bare metal DB systems, Exadata systems, and Exadata Cloud@Customer systems.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/CreateDbHome.go.html to see an example of how to use CreateDbHome API.
 func (client DatabaseClient) CreateDbHome(ctx context.Context, request CreateDbHomeRequest) (response CreateDbHomeResponse, err error) {
@@ -2599,7 +3222,7 @@ func (client DatabaseClient) createDbHome(ctx context.Context, request common.OC
 // CreateExadataInfrastructure Creates an Exadata infrastructure resource. Applies to Exadata Cloud@Customer instances only.
 // To create an Exadata Cloud Service infrastructure resource, use the  CreateCloudExadataInfrastructure operation.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/CreateExadataInfrastructure.go.html to see an example of how to use CreateExadataInfrastructure API.
 func (client DatabaseClient) CreateExadataInfrastructure(ctx context.Context, request CreateExadataInfrastructureRequest) (response CreateExadataInfrastructureResponse, err error) {
@@ -2662,7 +3285,7 @@ func (client DatabaseClient) createExadataInfrastructure(ctx context.Context, re
 // CreateExternalBackupJob Creates a new backup resource and returns the information the caller needs to back up an on-premises Oracle Database to Oracle Cloud Infrastructure.
 // **Note:** This API is used by an Oracle Cloud Infrastructure Python script that is packaged with the Oracle Cloud Infrastructure CLI. Oracle recommends that you use the script instead using the API directly. See Migrating an On-Premises Database to Oracle Cloud Infrastructure by Creating a Backup in the Cloud (https://docs.cloud.oracle.com/Content/Database/Tasks/mig-onprembackup.htm) for more information.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/CreateExternalBackupJob.go.html to see an example of how to use CreateExternalBackupJob API.
 func (client DatabaseClient) CreateExternalBackupJob(ctx context.Context, request CreateExternalBackupJobRequest) (response CreateExternalBackupJobResponse, err error) {
@@ -2724,7 +3347,7 @@ func (client DatabaseClient) createExternalBackupJob(ctx context.Context, reques
 
 // CreateExternalContainerDatabase Creates a new external container database resource.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/CreateExternalContainerDatabase.go.html to see an example of how to use CreateExternalContainerDatabase API.
 func (client DatabaseClient) CreateExternalContainerDatabase(ctx context.Context, request CreateExternalContainerDatabaseRequest) (response CreateExternalContainerDatabaseResponse, err error) {
@@ -2786,7 +3409,7 @@ func (client DatabaseClient) createExternalContainerDatabase(ctx context.Context
 
 // CreateExternalDatabaseConnector Creates a new external database connector.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/CreateExternalDatabaseConnector.go.html to see an example of how to use CreateExternalDatabaseConnector API.
 func (client DatabaseClient) CreateExternalDatabaseConnector(ctx context.Context, request CreateExternalDatabaseConnectorRequest) (response CreateExternalDatabaseConnectorResponse, err error) {
@@ -2848,7 +3471,7 @@ func (client DatabaseClient) createExternalDatabaseConnector(ctx context.Context
 
 // CreateExternalNonContainerDatabase Creates a new ExternalNonContainerDatabase resource
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/CreateExternalNonContainerDatabase.go.html to see an example of how to use CreateExternalNonContainerDatabase API.
 func (client DatabaseClient) CreateExternalNonContainerDatabase(ctx context.Context, request CreateExternalNonContainerDatabaseRequest) (response CreateExternalNonContainerDatabaseResponse, err error) {
@@ -2911,7 +3534,7 @@ func (client DatabaseClient) createExternalNonContainerDatabase(ctx context.Cont
 // CreateExternalPluggableDatabase Registers a new CreateExternalPluggableDatabaseDetails
 // resource.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/CreateExternalPluggableDatabase.go.html to see an example of how to use CreateExternalPluggableDatabase API.
 func (client DatabaseClient) CreateExternalPluggableDatabase(ctx context.Context, request CreateExternalPluggableDatabaseRequest) (response CreateExternalPluggableDatabaseResponse, err error) {
@@ -2973,7 +3596,7 @@ func (client DatabaseClient) createExternalPluggableDatabase(ctx context.Context
 
 // CreateKeyStore Creates a Key Store.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/CreateKeyStore.go.html to see an example of how to use CreateKeyStore API.
 func (client DatabaseClient) CreateKeyStore(ctx context.Context, request CreateKeyStoreRequest) (response CreateKeyStoreResponse, err error) {
@@ -3033,10 +3656,138 @@ func (client DatabaseClient) createKeyStore(ctx context.Context, request common.
 	return response, err
 }
 
+// CreateMaintenanceRun Creates a maintenance run with one of the following:
+// 1. The latest available release update patch (RUP) for the Autonomous Container Database.
+// 2. The latest available RUP and DST time-zone (TZ) file updates for the Autonomous Container Database.
+// 3. The DST TZ file updates for the Autonomous Container Database.
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/CreateMaintenanceRun.go.html to see an example of how to use CreateMaintenanceRun API.
+func (client DatabaseClient) CreateMaintenanceRun(ctx context.Context, request CreateMaintenanceRunRequest) (response CreateMaintenanceRunResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+
+	if !(request.OpcRetryToken != nil && *request.OpcRetryToken != "") {
+		request.OpcRetryToken = common.String(common.RetryToken())
+	}
+
+	ociResponse, err = common.Retry(ctx, request, client.createMaintenanceRun, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = CreateMaintenanceRunResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = CreateMaintenanceRunResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(CreateMaintenanceRunResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into CreateMaintenanceRunResponse")
+	}
+	return
+}
+
+// createMaintenanceRun implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) createMaintenanceRun(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/maintenanceRuns", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response CreateMaintenanceRunResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/MaintenanceRun/CreateMaintenanceRun"
+		err = common.PostProcessServiceError(err, "Database", "CreateMaintenanceRun", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
+// CreateOneoffPatch Creates one-off patch for specified database version to download.
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/CreateOneoffPatch.go.html to see an example of how to use CreateOneoffPatch API.
+func (client DatabaseClient) CreateOneoffPatch(ctx context.Context, request CreateOneoffPatchRequest) (response CreateOneoffPatchResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+
+	if !(request.OpcRetryToken != nil && *request.OpcRetryToken != "") {
+		request.OpcRetryToken = common.String(common.RetryToken())
+	}
+
+	ociResponse, err = common.Retry(ctx, request, client.createOneoffPatch, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = CreateOneoffPatchResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = CreateOneoffPatchResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(CreateOneoffPatchResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into CreateOneoffPatchResponse")
+	}
+	return
+}
+
+// createOneoffPatch implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) createOneoffPatch(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/oneoffPatches", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response CreateOneoffPatchResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/OneoffPatch/CreateOneoffPatch"
+		err = common.PostProcessServiceError(err, "Database", "CreateOneoffPatch", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // CreatePluggableDatabase Creates and starts a pluggable database in the specified container database.
+// Pluggable Database can be created using different operations (e.g. LocalClone, RemoteClone, Relocate ) with this API.
 // Use the StartPluggableDatabase and StopPluggableDatabase APIs to start and stop the pluggable database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/CreatePluggableDatabase.go.html to see an example of how to use CreatePluggableDatabase API.
 func (client DatabaseClient) CreatePluggableDatabase(ctx context.Context, request CreatePluggableDatabaseRequest) (response CreatePluggableDatabaseResponse, err error) {
@@ -3098,7 +3849,7 @@ func (client DatabaseClient) createPluggableDatabase(ctx context.Context, reques
 
 // CreateVmCluster Creates an Exadata Cloud@Customer VM cluster.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/CreateVmCluster.go.html to see an example of how to use CreateVmCluster API.
 func (client DatabaseClient) CreateVmCluster(ctx context.Context, request CreateVmClusterRequest) (response CreateVmClusterResponse, err error) {
@@ -3161,7 +3912,7 @@ func (client DatabaseClient) createVmCluster(ctx context.Context, request common
 // CreateVmClusterNetwork Creates the VM cluster network. Applies to Exadata Cloud@Customer instances only.
 // To create a cloud VM cluster in an Exadata Cloud Service instance, use the CreateCloudVmCluster operation.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/CreateVmClusterNetwork.go.html to see an example of how to use CreateVmClusterNetwork API.
 func (client DatabaseClient) CreateVmClusterNetwork(ctx context.Context, request CreateVmClusterNetworkRequest) (response CreateVmClusterNetworkResponse, err error) {
@@ -3234,7 +3985,7 @@ func (client DatabaseClient) createVmClusterNetwork(ctx context.Context, request
 // to remove its resources from billing and quotas.
 // *Virtual machine DB systems* - Stopping a node stops billing for all OCPUs associated with that node, and billing resumes when you restart the node.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/DbNodeAction.go.html to see an example of how to use DbNodeAction API.
 func (client DatabaseClient) DbNodeAction(ctx context.Context, request DbNodeActionRequest) (response DbNodeActionResponse, err error) {
@@ -3294,9 +4045,66 @@ func (client DatabaseClient) dbNodeAction(ctx context.Context, request common.OC
 	return response, err
 }
 
+// DeleteApplicationVip Deletes and deregisters the specified application virtual IP (VIP) address.
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/DeleteApplicationVip.go.html to see an example of how to use DeleteApplicationVip API.
+func (client DatabaseClient) DeleteApplicationVip(ctx context.Context, request DeleteApplicationVipRequest) (response DeleteApplicationVipResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.deleteApplicationVip, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = DeleteApplicationVipResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = DeleteApplicationVipResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(DeleteApplicationVipResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into DeleteApplicationVipResponse")
+	}
+	return
+}
+
+// deleteApplicationVip implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) deleteApplicationVip(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodDelete, "/applicationVip/{applicationVipId}", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response DeleteApplicationVipResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/ApplicationVip/DeleteApplicationVip"
+		err = common.PostProcessServiceError(err, "Database", "DeleteApplicationVip", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // DeleteAutonomousDatabase Deletes the specified Autonomous Database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/DeleteAutonomousDatabase.go.html to see an example of how to use DeleteAutonomousDatabase API.
 func (client DatabaseClient) DeleteAutonomousDatabase(ctx context.Context, request DeleteAutonomousDatabaseRequest) (response DeleteAutonomousDatabaseResponse, err error) {
@@ -3351,9 +4159,66 @@ func (client DatabaseClient) deleteAutonomousDatabase(ctx context.Context, reque
 	return response, err
 }
 
+// DeleteAutonomousDatabaseBackup Deletes a long-term backup. You cannot delete other backups using this API.
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/DeleteAutonomousDatabaseBackup.go.html to see an example of how to use DeleteAutonomousDatabaseBackup API.
+func (client DatabaseClient) DeleteAutonomousDatabaseBackup(ctx context.Context, request DeleteAutonomousDatabaseBackupRequest) (response DeleteAutonomousDatabaseBackupResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.deleteAutonomousDatabaseBackup, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = DeleteAutonomousDatabaseBackupResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = DeleteAutonomousDatabaseBackupResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(DeleteAutonomousDatabaseBackupResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into DeleteAutonomousDatabaseBackupResponse")
+	}
+	return
+}
+
+// deleteAutonomousDatabaseBackup implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) deleteAutonomousDatabaseBackup(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodDelete, "/autonomousDatabaseBackups/{autonomousDatabaseBackupId}", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response DeleteAutonomousDatabaseBackupResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/AutonomousDatabaseBackup/DeleteAutonomousDatabaseBackup"
+		err = common.PostProcessServiceError(err, "Database", "DeleteAutonomousDatabaseBackup", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // DeleteAutonomousVmCluster Deletes the specified Autonomous VM cluster in an Exadata Cloud@Customer system. To delete an Autonomous VM Cluster in the Oracle cloud, see DeleteCloudAutonomousVmCluster.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/DeleteAutonomousVmCluster.go.html to see an example of how to use DeleteAutonomousVmCluster API.
 func (client DatabaseClient) DeleteAutonomousVmCluster(ctx context.Context, request DeleteAutonomousVmClusterRequest) (response DeleteAutonomousVmClusterResponse, err error) {
@@ -3410,7 +4275,7 @@ func (client DatabaseClient) deleteAutonomousVmCluster(ctx context.Context, requ
 
 // DeleteBackup Deletes a full backup. You cannot delete automatic backups using this API.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/DeleteBackup.go.html to see an example of how to use DeleteBackup API.
 func (client DatabaseClient) DeleteBackup(ctx context.Context, request DeleteBackupRequest) (response DeleteBackupResponse, err error) {
@@ -3467,7 +4332,7 @@ func (client DatabaseClient) deleteBackup(ctx context.Context, request common.OC
 
 // DeleteBackupDestination Deletes a backup destination in an Exadata Cloud@Customer system.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/DeleteBackupDestination.go.html to see an example of how to use DeleteBackupDestination API.
 func (client DatabaseClient) DeleteBackupDestination(ctx context.Context, request DeleteBackupDestinationRequest) (response DeleteBackupDestinationResponse, err error) {
@@ -3524,7 +4389,7 @@ func (client DatabaseClient) deleteBackupDestination(ctx context.Context, reques
 
 // DeleteCloudAutonomousVmCluster Deletes the specified Autonomous Exadata VM cluster in the Oracle cloud. For Exadata Cloud@Customer systems, see DeleteAutonomousVmCluster.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/DeleteCloudAutonomousVmCluster.go.html to see an example of how to use DeleteCloudAutonomousVmCluster API.
 func (client DatabaseClient) DeleteCloudAutonomousVmCluster(ctx context.Context, request DeleteCloudAutonomousVmClusterRequest) (response DeleteCloudAutonomousVmClusterResponse, err error) {
@@ -3581,7 +4446,7 @@ func (client DatabaseClient) deleteCloudAutonomousVmCluster(ctx context.Context,
 
 // DeleteCloudExadataInfrastructure Deletes the cloud Exadata infrastructure resource. Applies to Exadata Cloud Service instances and Autonomous Database on dedicated Exadata infrastructure only.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/DeleteCloudExadataInfrastructure.go.html to see an example of how to use DeleteCloudExadataInfrastructure API.
 func (client DatabaseClient) DeleteCloudExadataInfrastructure(ctx context.Context, request DeleteCloudExadataInfrastructureRequest) (response DeleteCloudExadataInfrastructureResponse, err error) {
@@ -3638,7 +4503,7 @@ func (client DatabaseClient) deleteCloudExadataInfrastructure(ctx context.Contex
 
 // DeleteCloudVmCluster Deletes the specified cloud VM cluster. Applies to Exadata Cloud Service instances and Autonomous Database on dedicated Exadata infrastructure only.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/DeleteCloudVmCluster.go.html to see an example of how to use DeleteCloudVmCluster API.
 func (client DatabaseClient) DeleteCloudVmCluster(ctx context.Context, request DeleteCloudVmClusterRequest) (response DeleteCloudVmClusterResponse, err error) {
@@ -3695,7 +4560,7 @@ func (client DatabaseClient) deleteCloudVmCluster(ctx context.Context, request c
 
 // DeleteConsoleConnection Deletes the specified database node console connection.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/DeleteConsoleConnection.go.html to see an example of how to use DeleteConsoleConnection API.
 func (client DatabaseClient) DeleteConsoleConnection(ctx context.Context, request DeleteConsoleConnectionRequest) (response DeleteConsoleConnectionResponse, err error) {
@@ -3750,10 +4615,67 @@ func (client DatabaseClient) deleteConsoleConnection(ctx context.Context, reques
 	return response, err
 }
 
+// DeleteConsoleHistory Deletes the specified database node console history.
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/DeleteConsoleHistory.go.html to see an example of how to use DeleteConsoleHistory API.
+func (client DatabaseClient) DeleteConsoleHistory(ctx context.Context, request DeleteConsoleHistoryRequest) (response DeleteConsoleHistoryResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.deleteConsoleHistory, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = DeleteConsoleHistoryResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = DeleteConsoleHistoryResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(DeleteConsoleHistoryResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into DeleteConsoleHistoryResponse")
+	}
+	return
+}
+
+// deleteConsoleHistory implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) deleteConsoleHistory(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodDelete, "/dbNodes/{dbNodeId}/consoleHistories/{consoleHistoryId}", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response DeleteConsoleHistoryResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/ConsoleHistory/DeleteConsoleHistory"
+		err = common.PostProcessServiceError(err, "Database", "DeleteConsoleHistory", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // DeleteDatabase Deletes the specified database. Applies only to Exadata systems.
 // The data in this database is local to the Exadata system and will be lost when the database is deleted. Oracle recommends that you back up any data in the Exadata system prior to deleting it. You can use the `performFinalBackup` parameter to have the Exadata system database backed up before it is deleted.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/DeleteDatabase.go.html to see an example of how to use DeleteDatabase API.
 func (client DatabaseClient) DeleteDatabase(ctx context.Context, request DeleteDatabaseRequest) (response DeleteDatabaseResponse, err error) {
@@ -3810,7 +4732,7 @@ func (client DatabaseClient) deleteDatabase(ctx context.Context, request common.
 
 // DeleteDatabaseSoftwareImage Delete a database software image
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/DeleteDatabaseSoftwareImage.go.html to see an example of how to use DeleteDatabaseSoftwareImage API.
 func (client DatabaseClient) DeleteDatabaseSoftwareImage(ctx context.Context, request DeleteDatabaseSoftwareImageRequest) (response DeleteDatabaseSoftwareImageResponse, err error) {
@@ -3868,7 +4790,7 @@ func (client DatabaseClient) deleteDatabaseSoftwareImage(ctx context.Context, re
 // DeleteDbHome Deletes a Database Home. Applies to bare metal DB systems, Exadata Cloud Service, and Exadata Cloud@Customer systems.
 // Oracle recommends that you use the `performFinalBackup` parameter to back up any data on a bare metal DB system before you delete a Database Home. On an Exadata Cloud@Customer system or an Exadata Cloud Service system, you can delete a Database Home only when there are no databases in it and therefore you cannot use the `performFinalBackup` parameter to back up data.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/DeleteDbHome.go.html to see an example of how to use DeleteDbHome API.
 func (client DatabaseClient) DeleteDbHome(ctx context.Context, request DeleteDbHomeRequest) (response DeleteDbHomeResponse, err error) {
@@ -3925,7 +4847,7 @@ func (client DatabaseClient) deleteDbHome(ctx context.Context, request common.OC
 
 // DeleteExadataInfrastructure Deletes the Exadata Cloud@Customer infrastructure.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/DeleteExadataInfrastructure.go.html to see an example of how to use DeleteExadataInfrastructure API.
 func (client DatabaseClient) DeleteExadataInfrastructure(ctx context.Context, request DeleteExadataInfrastructureRequest) (response DeleteExadataInfrastructureResponse, err error) {
@@ -3984,7 +4906,7 @@ func (client DatabaseClient) deleteExadataInfrastructure(ctx context.Context, re
 // resource. Any external pluggable databases registered under this container database must be deleted in
 // your Oracle Cloud Infrastructure tenancy prior to this operation.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/DeleteExternalContainerDatabase.go.html to see an example of how to use DeleteExternalContainerDatabase API.
 func (client DatabaseClient) DeleteExternalContainerDatabase(ctx context.Context, request DeleteExternalContainerDatabaseRequest) (response DeleteExternalContainerDatabaseResponse, err error) {
@@ -4043,7 +4965,7 @@ func (client DatabaseClient) deleteExternalContainerDatabase(ctx context.Context
 // Any services enabled using the external database connector must be
 // deleted prior to this operation.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/DeleteExternalDatabaseConnector.go.html to see an example of how to use DeleteExternalDatabaseConnector API.
 func (client DatabaseClient) DeleteExternalDatabaseConnector(ctx context.Context, request DeleteExternalDatabaseConnectorRequest) (response DeleteExternalDatabaseConnectorResponse, err error) {
@@ -4100,7 +5022,7 @@ func (client DatabaseClient) deleteExternalDatabaseConnector(ctx context.Context
 
 // DeleteExternalNonContainerDatabase Deletes the Oracle Cloud Infrastructure resource representing an external non-container database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/DeleteExternalNonContainerDatabase.go.html to see an example of how to use DeleteExternalNonContainerDatabase API.
 func (client DatabaseClient) DeleteExternalNonContainerDatabase(ctx context.Context, request DeleteExternalNonContainerDatabaseRequest) (response DeleteExternalNonContainerDatabaseResponse, err error) {
@@ -4158,7 +5080,7 @@ func (client DatabaseClient) deleteExternalNonContainerDatabase(ctx context.Cont
 // DeleteExternalPluggableDatabase Deletes the CreateExternalPluggableDatabaseDetails.
 // resource.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/DeleteExternalPluggableDatabase.go.html to see an example of how to use DeleteExternalPluggableDatabase API.
 func (client DatabaseClient) DeleteExternalPluggableDatabase(ctx context.Context, request DeleteExternalPluggableDatabaseRequest) (response DeleteExternalPluggableDatabaseResponse, err error) {
@@ -4215,7 +5137,7 @@ func (client DatabaseClient) deleteExternalPluggableDatabase(ctx context.Context
 
 // DeleteKeyStore Deletes a key store.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/DeleteKeyStore.go.html to see an example of how to use DeleteKeyStore API.
 func (client DatabaseClient) DeleteKeyStore(ctx context.Context, request DeleteKeyStoreRequest) (response DeleteKeyStoreResponse, err error) {
@@ -4270,9 +5192,66 @@ func (client DatabaseClient) deleteKeyStore(ctx context.Context, request common.
 	return response, err
 }
 
+// DeleteOneoffPatch Deletes a one-off patch.
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/DeleteOneoffPatch.go.html to see an example of how to use DeleteOneoffPatch API.
+func (client DatabaseClient) DeleteOneoffPatch(ctx context.Context, request DeleteOneoffPatchRequest) (response DeleteOneoffPatchResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.deleteOneoffPatch, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = DeleteOneoffPatchResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = DeleteOneoffPatchResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(DeleteOneoffPatchResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into DeleteOneoffPatchResponse")
+	}
+	return
+}
+
+// deleteOneoffPatch implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) deleteOneoffPatch(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodDelete, "/oneoffPatches/{oneoffPatchId}", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response DeleteOneoffPatchResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/OneoffPatch/DeleteOneoffPatch"
+		err = common.PostProcessServiceError(err, "Database", "DeleteOneoffPatch", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // DeletePluggableDatabase Deletes the specified pluggable database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/DeletePluggableDatabase.go.html to see an example of how to use DeletePluggableDatabase API.
 func (client DatabaseClient) DeletePluggableDatabase(ctx context.Context, request DeletePluggableDatabaseRequest) (response DeletePluggableDatabaseResponse, err error) {
@@ -4329,7 +5308,7 @@ func (client DatabaseClient) deletePluggableDatabase(ctx context.Context, reques
 
 // DeleteVmCluster Deletes the specified VM cluster. Applies to Exadata Cloud@Customer instances only.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/DeleteVmCluster.go.html to see an example of how to use DeleteVmCluster API.
 func (client DatabaseClient) DeleteVmCluster(ctx context.Context, request DeleteVmClusterRequest) (response DeleteVmClusterResponse, err error) {
@@ -4387,7 +5366,7 @@ func (client DatabaseClient) deleteVmCluster(ctx context.Context, request common
 // DeleteVmClusterNetwork Deletes the specified VM cluster network. Applies to Exadata Cloud@Customer instances only.
 // To delete a cloud VM cluster in an Exadata Cloud Service instance, use the DeleteCloudVmCluster operation.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/DeleteVmClusterNetwork.go.html to see an example of how to use DeleteVmClusterNetwork API.
 func (client DatabaseClient) DeleteVmClusterNetwork(ctx context.Context, request DeleteVmClusterNetworkRequest) (response DeleteVmClusterNetworkResponse, err error) {
@@ -4444,7 +5423,7 @@ func (client DatabaseClient) deleteVmClusterNetwork(ctx context.Context, request
 
 // DeregisterAutonomousDatabaseDataSafe Asynchronously deregisters this Autonomous Database with Data Safe.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/DeregisterAutonomousDatabaseDataSafe.go.html to see an example of how to use DeregisterAutonomousDatabaseDataSafe API.
 func (client DatabaseClient) DeregisterAutonomousDatabaseDataSafe(ctx context.Context, request DeregisterAutonomousDatabaseDataSafeRequest) (response DeregisterAutonomousDatabaseDataSafeResponse, err error) {
@@ -4501,7 +5480,7 @@ func (client DatabaseClient) deregisterAutonomousDatabaseDataSafe(ctx context.Co
 
 // DisableAutonomousDatabaseManagement Disables Database Management for the Autonomous Database resource.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/DisableAutonomousDatabaseManagement.go.html to see an example of how to use DisableAutonomousDatabaseManagement API.
 func (client DatabaseClient) DisableAutonomousDatabaseManagement(ctx context.Context, request DisableAutonomousDatabaseManagementRequest) (response DisableAutonomousDatabaseManagementResponse, err error) {
@@ -4558,7 +5537,7 @@ func (client DatabaseClient) disableAutonomousDatabaseManagement(ctx context.Con
 
 // DisableAutonomousDatabaseOperationsInsights Disables Operations Insights for the Autonomous Database resource.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/DisableAutonomousDatabaseOperationsInsights.go.html to see an example of how to use DisableAutonomousDatabaseOperationsInsights API.
 func (client DatabaseClient) DisableAutonomousDatabaseOperationsInsights(ctx context.Context, request DisableAutonomousDatabaseOperationsInsightsRequest) (response DisableAutonomousDatabaseOperationsInsightsResponse, err error) {
@@ -4615,7 +5594,7 @@ func (client DatabaseClient) disableAutonomousDatabaseOperationsInsights(ctx con
 
 // DisableDatabaseManagement Disables the Database Management service for the database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/DisableDatabaseManagement.go.html to see an example of how to use DisableDatabaseManagement API.
 func (client DatabaseClient) DisableDatabaseManagement(ctx context.Context, request DisableDatabaseManagementRequest) (response DisableDatabaseManagementResponse, err error) {
@@ -4677,7 +5656,7 @@ func (client DatabaseClient) disableDatabaseManagement(ctx context.Context, requ
 
 // DisableExternalContainerDatabaseDatabaseManagement Disable Database Management service for the external container database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/DisableExternalContainerDatabaseDatabaseManagement.go.html to see an example of how to use DisableExternalContainerDatabaseDatabaseManagement API.
 func (client DatabaseClient) DisableExternalContainerDatabaseDatabaseManagement(ctx context.Context, request DisableExternalContainerDatabaseDatabaseManagementRequest) (response DisableExternalContainerDatabaseDatabaseManagementResponse, err error) {
@@ -4739,7 +5718,7 @@ func (client DatabaseClient) disableExternalContainerDatabaseDatabaseManagement(
 
 // DisableExternalContainerDatabaseStackMonitoring Disable Stack Monitoring for the external container database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/DisableExternalContainerDatabaseStackMonitoring.go.html to see an example of how to use DisableExternalContainerDatabaseStackMonitoring API.
 func (client DatabaseClient) DisableExternalContainerDatabaseStackMonitoring(ctx context.Context, request DisableExternalContainerDatabaseStackMonitoringRequest) (response DisableExternalContainerDatabaseStackMonitoringResponse, err error) {
@@ -4803,7 +5782,7 @@ func (client DatabaseClient) disableExternalContainerDatabaseStackMonitoring(ctx
 // For more information about the Database Management Service, see
 // Database Management Service (https://docs.cloud.oracle.com/Content/ExternalDatabase/Concepts/databasemanagementservice.htm).
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/DisableExternalNonContainerDatabaseDatabaseManagement.go.html to see an example of how to use DisableExternalNonContainerDatabaseDatabaseManagement API.
 func (client DatabaseClient) DisableExternalNonContainerDatabaseDatabaseManagement(ctx context.Context, request DisableExternalNonContainerDatabaseDatabaseManagementRequest) (response DisableExternalNonContainerDatabaseDatabaseManagementResponse, err error) {
@@ -4865,7 +5844,7 @@ func (client DatabaseClient) disableExternalNonContainerDatabaseDatabaseManageme
 
 // DisableExternalNonContainerDatabaseOperationsInsights Disable Operations Insights for the external non-container database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/DisableExternalNonContainerDatabaseOperationsInsights.go.html to see an example of how to use DisableExternalNonContainerDatabaseOperationsInsights API.
 func (client DatabaseClient) DisableExternalNonContainerDatabaseOperationsInsights(ctx context.Context, request DisableExternalNonContainerDatabaseOperationsInsightsRequest) (response DisableExternalNonContainerDatabaseOperationsInsightsResponse, err error) {
@@ -4927,7 +5906,7 @@ func (client DatabaseClient) disableExternalNonContainerDatabaseOperationsInsigh
 
 // DisableExternalNonContainerDatabaseStackMonitoring Disable Stack Monitoring for the external non-container database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/DisableExternalNonContainerDatabaseStackMonitoring.go.html to see an example of how to use DisableExternalNonContainerDatabaseStackMonitoring API.
 func (client DatabaseClient) DisableExternalNonContainerDatabaseStackMonitoring(ctx context.Context, request DisableExternalNonContainerDatabaseStackMonitoringRequest) (response DisableExternalNonContainerDatabaseStackMonitoringResponse, err error) {
@@ -4991,7 +5970,7 @@ func (client DatabaseClient) disableExternalNonContainerDatabaseStackMonitoring(
 // For more information about the Database Management Service, see
 // Database Management Service (https://docs.cloud.oracle.com/Content/ExternalDatabase/Concepts/databasemanagementservice.htm).
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/DisableExternalPluggableDatabaseDatabaseManagement.go.html to see an example of how to use DisableExternalPluggableDatabaseDatabaseManagement API.
 func (client DatabaseClient) DisableExternalPluggableDatabaseDatabaseManagement(ctx context.Context, request DisableExternalPluggableDatabaseDatabaseManagementRequest) (response DisableExternalPluggableDatabaseDatabaseManagementResponse, err error) {
@@ -5053,7 +6032,7 @@ func (client DatabaseClient) disableExternalPluggableDatabaseDatabaseManagement(
 
 // DisableExternalPluggableDatabaseOperationsInsights Disable Operations Insights for the external pluggable database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/DisableExternalPluggableDatabaseOperationsInsights.go.html to see an example of how to use DisableExternalPluggableDatabaseOperationsInsights API.
 func (client DatabaseClient) DisableExternalPluggableDatabaseOperationsInsights(ctx context.Context, request DisableExternalPluggableDatabaseOperationsInsightsRequest) (response DisableExternalPluggableDatabaseOperationsInsightsResponse, err error) {
@@ -5115,7 +6094,7 @@ func (client DatabaseClient) disableExternalPluggableDatabaseOperationsInsights(
 
 // DisableExternalPluggableDatabaseStackMonitoring Disable Stack Monitoring for the external pluggable database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/DisableExternalPluggableDatabaseStackMonitoring.go.html to see an example of how to use DisableExternalPluggableDatabaseStackMonitoring API.
 func (client DatabaseClient) DisableExternalPluggableDatabaseStackMonitoring(ctx context.Context, request DisableExternalPluggableDatabaseStackMonitoringRequest) (response DisableExternalPluggableDatabaseStackMonitoringResponse, err error) {
@@ -5177,7 +6156,7 @@ func (client DatabaseClient) disableExternalPluggableDatabaseStackMonitoring(ctx
 
 // DisablePluggableDatabaseManagement Disables the Database Management service for the pluggable database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/DisablePluggableDatabaseManagement.go.html to see an example of how to use DisablePluggableDatabaseManagement API.
 func (client DatabaseClient) DisablePluggableDatabaseManagement(ctx context.Context, request DisablePluggableDatabaseManagementRequest) (response DisablePluggableDatabaseManagementResponse, err error) {
@@ -5239,7 +6218,7 @@ func (client DatabaseClient) disablePluggableDatabaseManagement(ctx context.Cont
 
 // DownloadExadataInfrastructureConfigFile Downloads the configuration file for the specified Exadata Cloud@Customer infrastructure.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/DownloadExadataInfrastructureConfigFile.go.html to see an example of how to use DownloadExadataInfrastructureConfigFile API.
 func (client DatabaseClient) DownloadExadataInfrastructureConfigFile(ctx context.Context, request DownloadExadataInfrastructureConfigFileRequest) (response DownloadExadataInfrastructureConfigFileResponse, err error) {
@@ -5298,9 +6277,71 @@ func (client DatabaseClient) downloadExadataInfrastructureConfigFile(ctx context
 	return response, err
 }
 
+// DownloadOneoffPatch Download one-off patch.
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/DownloadOneoffPatch.go.html to see an example of how to use DownloadOneoffPatch API.
+func (client DatabaseClient) DownloadOneoffPatch(ctx context.Context, request DownloadOneoffPatchRequest) (response DownloadOneoffPatchResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+
+	if !(request.OpcRetryToken != nil && *request.OpcRetryToken != "") {
+		request.OpcRetryToken = common.String(common.RetryToken())
+	}
+
+	ociResponse, err = common.Retry(ctx, request, client.downloadOneoffPatch, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = DownloadOneoffPatchResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = DownloadOneoffPatchResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(DownloadOneoffPatchResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into DownloadOneoffPatchResponse")
+	}
+	return
+}
+
+// downloadOneoffPatch implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) downloadOneoffPatch(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/oneoffPatches/{oneoffPatchId}/actions/downloadOneoffPatch", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response DownloadOneoffPatchResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/OneoffPatch/DownloadOneoffPatch"
+		err = common.PostProcessServiceError(err, "Database", "DownloadOneoffPatch", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // DownloadValidationReport Downloads the network validation report file for the specified VM cluster network. Applies to Exadata Cloud@Customer instances only.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/DownloadValidationReport.go.html to see an example of how to use DownloadValidationReport API.
 func (client DatabaseClient) DownloadValidationReport(ctx context.Context, request DownloadValidationReportRequest) (response DownloadValidationReportResponse, err error) {
@@ -5361,7 +6402,7 @@ func (client DatabaseClient) downloadValidationReport(ctx context.Context, reque
 
 // DownloadVmClusterNetworkConfigFile Downloads the configuration file for the specified VM cluster network. Applies to Exadata Cloud@Customer instances only.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/DownloadVmClusterNetworkConfigFile.go.html to see an example of how to use DownloadVmClusterNetworkConfigFile API.
 func (client DatabaseClient) DownloadVmClusterNetworkConfigFile(ctx context.Context, request DownloadVmClusterNetworkConfigFileRequest) (response DownloadVmClusterNetworkConfigFileResponse, err error) {
@@ -5422,7 +6463,7 @@ func (client DatabaseClient) downloadVmClusterNetworkConfigFile(ctx context.Cont
 
 // EnableAutonomousDatabaseManagement Enables Database Management for Autonomous Database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/EnableAutonomousDatabaseManagement.go.html to see an example of how to use EnableAutonomousDatabaseManagement API.
 func (client DatabaseClient) EnableAutonomousDatabaseManagement(ctx context.Context, request EnableAutonomousDatabaseManagementRequest) (response EnableAutonomousDatabaseManagementResponse, err error) {
@@ -5479,7 +6520,7 @@ func (client DatabaseClient) enableAutonomousDatabaseManagement(ctx context.Cont
 
 // EnableAutonomousDatabaseOperationsInsights Enables the specified Autonomous Database with Operations Insights.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/EnableAutonomousDatabaseOperationsInsights.go.html to see an example of how to use EnableAutonomousDatabaseOperationsInsights API.
 func (client DatabaseClient) EnableAutonomousDatabaseOperationsInsights(ctx context.Context, request EnableAutonomousDatabaseOperationsInsightsRequest) (response EnableAutonomousDatabaseOperationsInsightsResponse, err error) {
@@ -5536,7 +6577,7 @@ func (client DatabaseClient) enableAutonomousDatabaseOperationsInsights(ctx cont
 
 // EnableDatabaseManagement Enables the Database Management service for an Oracle Database located in Oracle Cloud Infrastructure. This service allows the database to access tools including Metrics and Performance hub. Database Management is enabled at the container database (CDB) level.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/EnableDatabaseManagement.go.html to see an example of how to use EnableDatabaseManagement API.
 func (client DatabaseClient) EnableDatabaseManagement(ctx context.Context, request EnableDatabaseManagementRequest) (response EnableDatabaseManagementResponse, err error) {
@@ -5600,7 +6641,7 @@ func (client DatabaseClient) enableDatabaseManagement(ctx context.Context, reque
 // For more information about the Database Management Service, see
 // Database Management Service (https://docs.cloud.oracle.com/Content/ExternalDatabase/Concepts/databasemanagementservice.htm).
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/EnableExternalContainerDatabaseDatabaseManagement.go.html to see an example of how to use EnableExternalContainerDatabaseDatabaseManagement API.
 func (client DatabaseClient) EnableExternalContainerDatabaseDatabaseManagement(ctx context.Context, request EnableExternalContainerDatabaseDatabaseManagementRequest) (response EnableExternalContainerDatabaseDatabaseManagementResponse, err error) {
@@ -5662,7 +6703,7 @@ func (client DatabaseClient) enableExternalContainerDatabaseDatabaseManagement(c
 
 // EnableExternalContainerDatabaseStackMonitoring Enable Stack Monitoring for the external container database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/EnableExternalContainerDatabaseStackMonitoring.go.html to see an example of how to use EnableExternalContainerDatabaseStackMonitoring API.
 func (client DatabaseClient) EnableExternalContainerDatabaseStackMonitoring(ctx context.Context, request EnableExternalContainerDatabaseStackMonitoringRequest) (response EnableExternalContainerDatabaseStackMonitoringResponse, err error) {
@@ -5726,7 +6767,7 @@ func (client DatabaseClient) enableExternalContainerDatabaseStackMonitoring(ctx 
 // For more information about the Database Management Service, see
 // Database Management Service (https://docs.cloud.oracle.com/Content/ExternalDatabase/Concepts/databasemanagementservice.htm).
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/EnableExternalNonContainerDatabaseDatabaseManagement.go.html to see an example of how to use EnableExternalNonContainerDatabaseDatabaseManagement API.
 func (client DatabaseClient) EnableExternalNonContainerDatabaseDatabaseManagement(ctx context.Context, request EnableExternalNonContainerDatabaseDatabaseManagementRequest) (response EnableExternalNonContainerDatabaseDatabaseManagementResponse, err error) {
@@ -5788,7 +6829,7 @@ func (client DatabaseClient) enableExternalNonContainerDatabaseDatabaseManagemen
 
 // EnableExternalNonContainerDatabaseOperationsInsights Enable Operations Insights for the external non-container database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/EnableExternalNonContainerDatabaseOperationsInsights.go.html to see an example of how to use EnableExternalNonContainerDatabaseOperationsInsights API.
 func (client DatabaseClient) EnableExternalNonContainerDatabaseOperationsInsights(ctx context.Context, request EnableExternalNonContainerDatabaseOperationsInsightsRequest) (response EnableExternalNonContainerDatabaseOperationsInsightsResponse, err error) {
@@ -5850,7 +6891,7 @@ func (client DatabaseClient) enableExternalNonContainerDatabaseOperationsInsight
 
 // EnableExternalNonContainerDatabaseStackMonitoring Enable Stack Monitoring for the external non-container database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/EnableExternalNonContainerDatabaseStackMonitoring.go.html to see an example of how to use EnableExternalNonContainerDatabaseStackMonitoring API.
 func (client DatabaseClient) EnableExternalNonContainerDatabaseStackMonitoring(ctx context.Context, request EnableExternalNonContainerDatabaseStackMonitoringRequest) (response EnableExternalNonContainerDatabaseStackMonitoringResponse, err error) {
@@ -5914,7 +6955,7 @@ func (client DatabaseClient) enableExternalNonContainerDatabaseStackMonitoring(c
 // For more information about the Database Management Service, see
 // Database Management Service (https://docs.cloud.oracle.com/Content/ExternalDatabase/Concepts/databasemanagementservice.htm).
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/EnableExternalPluggableDatabaseDatabaseManagement.go.html to see an example of how to use EnableExternalPluggableDatabaseDatabaseManagement API.
 func (client DatabaseClient) EnableExternalPluggableDatabaseDatabaseManagement(ctx context.Context, request EnableExternalPluggableDatabaseDatabaseManagementRequest) (response EnableExternalPluggableDatabaseDatabaseManagementResponse, err error) {
@@ -5976,7 +7017,7 @@ func (client DatabaseClient) enableExternalPluggableDatabaseDatabaseManagement(c
 
 // EnableExternalPluggableDatabaseOperationsInsights Enable Operations Insights for the external pluggable database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/EnableExternalPluggableDatabaseOperationsInsights.go.html to see an example of how to use EnableExternalPluggableDatabaseOperationsInsights API.
 func (client DatabaseClient) EnableExternalPluggableDatabaseOperationsInsights(ctx context.Context, request EnableExternalPluggableDatabaseOperationsInsightsRequest) (response EnableExternalPluggableDatabaseOperationsInsightsResponse, err error) {
@@ -6038,7 +7079,7 @@ func (client DatabaseClient) enableExternalPluggableDatabaseOperationsInsights(c
 
 // EnableExternalPluggableDatabaseStackMonitoring Enable Stack Monitoring for the external pluggable database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/EnableExternalPluggableDatabaseStackMonitoring.go.html to see an example of how to use EnableExternalPluggableDatabaseStackMonitoring API.
 func (client DatabaseClient) EnableExternalPluggableDatabaseStackMonitoring(ctx context.Context, request EnableExternalPluggableDatabaseStackMonitoringRequest) (response EnableExternalPluggableDatabaseStackMonitoringResponse, err error) {
@@ -6100,7 +7141,7 @@ func (client DatabaseClient) enableExternalPluggableDatabaseStackMonitoring(ctx 
 
 // EnablePluggableDatabaseManagement Enables the Database Management service for an Oracle Pluggable Database located in Oracle Cloud Infrastructure. This service allows the pluggable database to access tools including Metrics and Performance hub. Database Management is enabled at the pluggable database (PDB) level.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/EnablePluggableDatabaseManagement.go.html to see an example of how to use EnablePluggableDatabaseManagement API.
 func (client DatabaseClient) EnablePluggableDatabaseManagement(ctx context.Context, request EnablePluggableDatabaseManagementRequest) (response EnablePluggableDatabaseManagementResponse, err error) {
@@ -6160,9 +7201,14 @@ func (client DatabaseClient) enablePluggableDatabaseManagement(ctx context.Conte
 	return response, err
 }
 
-// FailOverAutonomousDatabase Initiates a failover the specified Autonomous Database to a standby. To perform a failover to a standby located in a remote region, specify the OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the remote standby using the `peerDbId` parameter.
+// FailOverAutonomousDatabase Initiates a failover of the specified Autonomous Database to the associated peer database. Applicable only to databases with Disaster Recovery enabled.
+// This API should be called in the remote region where the peer database resides.
+// Below parameter is optional:
+//   - `peerDbId`
+//     Use this parameter to specify the database OCID of the Disaster Recovery peer, which is located in a different (remote) region from the current peer database.
+//     If this parameter is not provided, the failover will happen in the same region.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/FailOverAutonomousDatabase.go.html to see an example of how to use FailOverAutonomousDatabase API.
 func (client DatabaseClient) FailOverAutonomousDatabase(ctx context.Context, request FailOverAutonomousDatabaseRequest) (response FailOverAutonomousDatabaseResponse, err error) {
@@ -6225,7 +7271,7 @@ func (client DatabaseClient) failOverAutonomousDatabase(ctx context.Context, req
 // FailoverAutonomousContainerDatabaseDataguardAssociation Fails over the standby Autonomous Container Database identified by the autonomousContainerDatabaseId parameter to the primary Autonomous Container Database after the existing primary Autonomous Container Database fails or becomes unreachable.
 // A failover can result in data loss, depending on the protection mode in effect at the time the primary Autonomous Container Database fails.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/FailoverAutonomousContainerDatabaseDataguardAssociation.go.html to see an example of how to use FailoverAutonomousContainerDatabaseDataguardAssociation API.
 func (client DatabaseClient) FailoverAutonomousContainerDatabaseDataguardAssociation(ctx context.Context, request FailoverAutonomousContainerDatabaseDataguardAssociationRequest) (response FailoverAutonomousContainerDatabaseDataguardAssociationResponse, err error) {
@@ -6285,7 +7331,7 @@ func (client DatabaseClient) failoverAutonomousContainerDatabaseDataguardAssocia
 // A failover might result in data loss depending on the protection mode in effect at the time of the primary
 // database failure.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/FailoverDataGuardAssociation.go.html to see an example of how to use FailoverDataGuardAssociation API.
 func (client DatabaseClient) FailoverDataGuardAssociation(ctx context.Context, request FailoverDataGuardAssociationRequest) (response FailoverDataGuardAssociationResponse, err error) {
@@ -6342,7 +7388,7 @@ func (client DatabaseClient) failoverDataGuardAssociation(ctx context.Context, r
 
 // GenerateAutonomousDatabaseWallet Creates and downloads a wallet for the specified Autonomous Database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GenerateAutonomousDatabaseWallet.go.html to see an example of how to use GenerateAutonomousDatabaseWallet API.
 func (client DatabaseClient) GenerateAutonomousDatabaseWallet(ctx context.Context, request GenerateAutonomousDatabaseWalletRequest) (response GenerateAutonomousDatabaseWalletResponse, err error) {
@@ -6403,7 +7449,7 @@ func (client DatabaseClient) generateAutonomousDatabaseWallet(ctx context.Contex
 
 // GenerateRecommendedVmClusterNetwork Generates a recommended Cloud@Customer VM cluster network configuration.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GenerateRecommendedVmClusterNetwork.go.html to see an example of how to use GenerateRecommendedVmClusterNetwork API.
 func (client DatabaseClient) GenerateRecommendedVmClusterNetwork(ctx context.Context, request GenerateRecommendedVmClusterNetworkRequest) (response GenerateRecommendedVmClusterNetworkResponse, err error) {
@@ -6463,9 +7509,66 @@ func (client DatabaseClient) generateRecommendedVmClusterNetwork(ctx context.Con
 	return response, err
 }
 
+// GetApplicationVip Gets information about a specified application virtual IP (VIP) address.
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetApplicationVip.go.html to see an example of how to use GetApplicationVip API.
+func (client DatabaseClient) GetApplicationVip(ctx context.Context, request GetApplicationVipRequest) (response GetApplicationVipResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.getApplicationVip, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = GetApplicationVipResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = GetApplicationVipResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(GetApplicationVipResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into GetApplicationVipResponse")
+	}
+	return
+}
+
+// getApplicationVip implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) getApplicationVip(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/applicationVip/{applicationVipId}", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response GetApplicationVipResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/ApplicationVip/GetApplicationVip"
+		err = common.PostProcessServiceError(err, "Database", "GetApplicationVip", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // GetAutonomousContainerDatabase Gets information about the specified Autonomous Container Database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetAutonomousContainerDatabase.go.html to see an example of how to use GetAutonomousContainerDatabase API.
 func (client DatabaseClient) GetAutonomousContainerDatabase(ctx context.Context, request GetAutonomousContainerDatabaseRequest) (response GetAutonomousContainerDatabaseResponse, err error) {
@@ -6522,7 +7625,7 @@ func (client DatabaseClient) getAutonomousContainerDatabase(ctx context.Context,
 
 // GetAutonomousContainerDatabaseDataguardAssociation Gets an Autonomous Container Database enabled with Autonomous Data Guard associated with the specified Autonomous Container Database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetAutonomousContainerDatabaseDataguardAssociation.go.html to see an example of how to use GetAutonomousContainerDatabaseDataguardAssociation API.
 func (client DatabaseClient) GetAutonomousContainerDatabaseDataguardAssociation(ctx context.Context, request GetAutonomousContainerDatabaseDataguardAssociationRequest) (response GetAutonomousContainerDatabaseDataguardAssociationResponse, err error) {
@@ -6577,9 +7680,66 @@ func (client DatabaseClient) getAutonomousContainerDatabaseDataguardAssociation(
 	return response, err
 }
 
+// GetAutonomousContainerDatabaseResourceUsage Get resource usage details for the specified Autonomous Container Database.
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetAutonomousContainerDatabaseResourceUsage.go.html to see an example of how to use GetAutonomousContainerDatabaseResourceUsage API.
+func (client DatabaseClient) GetAutonomousContainerDatabaseResourceUsage(ctx context.Context, request GetAutonomousContainerDatabaseResourceUsageRequest) (response GetAutonomousContainerDatabaseResourceUsageResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.getAutonomousContainerDatabaseResourceUsage, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = GetAutonomousContainerDatabaseResourceUsageResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = GetAutonomousContainerDatabaseResourceUsageResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(GetAutonomousContainerDatabaseResourceUsageResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into GetAutonomousContainerDatabaseResourceUsageResponse")
+	}
+	return
+}
+
+// getAutonomousContainerDatabaseResourceUsage implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) getAutonomousContainerDatabaseResourceUsage(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/autonomousContainerDatabases/{autonomousContainerDatabaseId}/resourceUsage", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response GetAutonomousContainerDatabaseResourceUsageResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/AutonomousContainerDatabase/GetAutonomousContainerDatabaseResourceUsage"
+		err = common.PostProcessServiceError(err, "Database", "GetAutonomousContainerDatabaseResourceUsage", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // GetAutonomousDatabase Gets the details of the specified Autonomous Database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetAutonomousDatabase.go.html to see an example of how to use GetAutonomousDatabase API.
 func (client DatabaseClient) GetAutonomousDatabase(ctx context.Context, request GetAutonomousDatabaseRequest) (response GetAutonomousDatabaseResponse, err error) {
@@ -6636,7 +7796,7 @@ func (client DatabaseClient) getAutonomousDatabase(ctx context.Context, request 
 
 // GetAutonomousDatabaseBackup Gets information about the specified Autonomous Database backup.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetAutonomousDatabaseBackup.go.html to see an example of how to use GetAutonomousDatabaseBackup API.
 func (client DatabaseClient) GetAutonomousDatabaseBackup(ctx context.Context, request GetAutonomousDatabaseBackupRequest) (response GetAutonomousDatabaseBackupResponse, err error) {
@@ -6693,7 +7853,7 @@ func (client DatabaseClient) getAutonomousDatabaseBackup(ctx context.Context, re
 
 // GetAutonomousDatabaseDataguardAssociation Gets an Autonomous Data Guard-enabled database associated with the specified Autonomous Database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetAutonomousDatabaseDataguardAssociation.go.html to see an example of how to use GetAutonomousDatabaseDataguardAssociation API.
 func (client DatabaseClient) GetAutonomousDatabaseDataguardAssociation(ctx context.Context, request GetAutonomousDatabaseDataguardAssociationRequest) (response GetAutonomousDatabaseDataguardAssociationResponse, err error) {
@@ -6750,7 +7910,7 @@ func (client DatabaseClient) getAutonomousDatabaseDataguardAssociation(ctx conte
 
 // GetAutonomousDatabaseRegionalWallet Gets the Autonomous Database regional wallet details.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetAutonomousDatabaseRegionalWallet.go.html to see an example of how to use GetAutonomousDatabaseRegionalWallet API.
 func (client DatabaseClient) GetAutonomousDatabaseRegionalWallet(ctx context.Context, request GetAutonomousDatabaseRegionalWalletRequest) (response GetAutonomousDatabaseRegionalWalletResponse, err error) {
@@ -6807,7 +7967,7 @@ func (client DatabaseClient) getAutonomousDatabaseRegionalWallet(ctx context.Con
 
 // GetAutonomousDatabaseWallet Gets the wallet details for the specified Autonomous Database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetAutonomousDatabaseWallet.go.html to see an example of how to use GetAutonomousDatabaseWallet API.
 func (client DatabaseClient) GetAutonomousDatabaseWallet(ctx context.Context, request GetAutonomousDatabaseWalletRequest) (response GetAutonomousDatabaseWalletResponse, err error) {
@@ -6864,7 +8024,7 @@ func (client DatabaseClient) getAutonomousDatabaseWallet(ctx context.Context, re
 
 // GetAutonomousExadataInfrastructure **Deprecated.** Use the GetCloudExadataInfrastructure operation to get details of an Exadata Infrastructure resource and the GetCloudAutonomousVmCluster operation to get details of an Autonomous Exadata VM cluster.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetAutonomousExadataInfrastructure.go.html to see an example of how to use GetAutonomousExadataInfrastructure API.
 func (client DatabaseClient) GetAutonomousExadataInfrastructure(ctx context.Context, request GetAutonomousExadataInfrastructureRequest) (response GetAutonomousExadataInfrastructureResponse, err error) {
@@ -6921,7 +8081,7 @@ func (client DatabaseClient) getAutonomousExadataInfrastructure(ctx context.Cont
 
 // GetAutonomousPatch Gets information about a specific autonomous patch.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetAutonomousPatch.go.html to see an example of how to use GetAutonomousPatch API.
 func (client DatabaseClient) GetAutonomousPatch(ctx context.Context, request GetAutonomousPatchRequest) (response GetAutonomousPatchResponse, err error) {
@@ -6976,9 +8136,66 @@ func (client DatabaseClient) getAutonomousPatch(ctx context.Context, request com
 	return response, err
 }
 
+// GetAutonomousVirtualMachine Gets the details of specific Autonomous Virtual Machine.
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetAutonomousVirtualMachine.go.html to see an example of how to use GetAutonomousVirtualMachine API.
+func (client DatabaseClient) GetAutonomousVirtualMachine(ctx context.Context, request GetAutonomousVirtualMachineRequest) (response GetAutonomousVirtualMachineResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.getAutonomousVirtualMachine, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = GetAutonomousVirtualMachineResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = GetAutonomousVirtualMachineResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(GetAutonomousVirtualMachineResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into GetAutonomousVirtualMachineResponse")
+	}
+	return
+}
+
+// getAutonomousVirtualMachine implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) getAutonomousVirtualMachine(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/autonomousVirtualMachines/{autonomousVirtualMachineId}", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response GetAutonomousVirtualMachineResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/AutonomousVirtualMachine/GetAutonomousVirtualMachine"
+		err = common.PostProcessServiceError(err, "Database", "GetAutonomousVirtualMachine", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // GetAutonomousVmCluster Gets information about the specified Autonomous VM cluster for an Exadata Cloud@Customer system. To get information about an Autonomous VM Cluster in the Oracle cloud, see GetCloudAutonomousVmCluster.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetAutonomousVmCluster.go.html to see an example of how to use GetAutonomousVmCluster API.
 func (client DatabaseClient) GetAutonomousVmCluster(ctx context.Context, request GetAutonomousVmClusterRequest) (response GetAutonomousVmClusterResponse, err error) {
@@ -7033,9 +8250,66 @@ func (client DatabaseClient) getAutonomousVmCluster(ctx context.Context, request
 	return response, err
 }
 
+// GetAutonomousVmClusterResourceUsage Get the resource usage details for the specified Autonomous Exadata VM cluster.
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetAutonomousVmClusterResourceUsage.go.html to see an example of how to use GetAutonomousVmClusterResourceUsage API.
+func (client DatabaseClient) GetAutonomousVmClusterResourceUsage(ctx context.Context, request GetAutonomousVmClusterResourceUsageRequest) (response GetAutonomousVmClusterResourceUsageResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.getAutonomousVmClusterResourceUsage, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = GetAutonomousVmClusterResourceUsageResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = GetAutonomousVmClusterResourceUsageResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(GetAutonomousVmClusterResourceUsageResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into GetAutonomousVmClusterResourceUsageResponse")
+	}
+	return
+}
+
+// getAutonomousVmClusterResourceUsage implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) getAutonomousVmClusterResourceUsage(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/autonomousVmClusters/{autonomousVmClusterId}/resourceUsage", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response GetAutonomousVmClusterResourceUsageResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/AutonomousVmCluster/GetAutonomousVmClusterResourceUsage"
+		err = common.PostProcessServiceError(err, "Database", "GetAutonomousVmClusterResourceUsage", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // GetBackup Gets information about the specified backup.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetBackup.go.html to see an example of how to use GetBackup API.
 func (client DatabaseClient) GetBackup(ctx context.Context, request GetBackupRequest) (response GetBackupResponse, err error) {
@@ -7092,7 +8366,7 @@ func (client DatabaseClient) getBackup(ctx context.Context, request common.OCIRe
 
 // GetBackupDestination Gets information about the specified backup destination in an Exadata Cloud@Customer system.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetBackupDestination.go.html to see an example of how to use GetBackupDestination API.
 func (client DatabaseClient) GetBackupDestination(ctx context.Context, request GetBackupDestinationRequest) (response GetBackupDestinationResponse, err error) {
@@ -7149,7 +8423,7 @@ func (client DatabaseClient) getBackupDestination(ctx context.Context, request c
 
 // GetCloudAutonomousVmCluster Gets information about the specified Autonomous Exadata VM cluster in the Oracle cloud. For Exadata Cloud@Custustomer systems, see GetAutonomousVmCluster.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetCloudAutonomousVmCluster.go.html to see an example of how to use GetCloudAutonomousVmCluster API.
 func (client DatabaseClient) GetCloudAutonomousVmCluster(ctx context.Context, request GetCloudAutonomousVmClusterRequest) (response GetCloudAutonomousVmClusterResponse, err error) {
@@ -7204,9 +8478,66 @@ func (client DatabaseClient) getCloudAutonomousVmCluster(ctx context.Context, re
 	return response, err
 }
 
+// GetCloudAutonomousVmClusterResourceUsage Get the resource usage details for the specified Cloud Autonomous Exadata VM cluster.
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetCloudAutonomousVmClusterResourceUsage.go.html to see an example of how to use GetCloudAutonomousVmClusterResourceUsage API.
+func (client DatabaseClient) GetCloudAutonomousVmClusterResourceUsage(ctx context.Context, request GetCloudAutonomousVmClusterResourceUsageRequest) (response GetCloudAutonomousVmClusterResourceUsageResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.getCloudAutonomousVmClusterResourceUsage, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = GetCloudAutonomousVmClusterResourceUsageResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = GetCloudAutonomousVmClusterResourceUsageResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(GetCloudAutonomousVmClusterResourceUsageResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into GetCloudAutonomousVmClusterResourceUsageResponse")
+	}
+	return
+}
+
+// getCloudAutonomousVmClusterResourceUsage implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) getCloudAutonomousVmClusterResourceUsage(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/cloudAutonomousVmClusters/{cloudAutonomousVmClusterId}/resourceUsage", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response GetCloudAutonomousVmClusterResourceUsageResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/CloudAutonomousVmCluster/GetCloudAutonomousVmClusterResourceUsage"
+		err = common.PostProcessServiceError(err, "Database", "GetCloudAutonomousVmClusterResourceUsage", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // GetCloudExadataInfrastructure Gets information about the specified cloud Exadata infrastructure resource. Applies to Exadata Cloud Service instances and Autonomous Database on dedicated Exadata infrastructure only.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetCloudExadataInfrastructure.go.html to see an example of how to use GetCloudExadataInfrastructure API.
 func (client DatabaseClient) GetCloudExadataInfrastructure(ctx context.Context, request GetCloudExadataInfrastructureRequest) (response GetCloudExadataInfrastructureResponse, err error) {
@@ -7263,7 +8594,7 @@ func (client DatabaseClient) getCloudExadataInfrastructure(ctx context.Context, 
 
 // GetCloudExadataInfrastructureUnallocatedResources Gets unallocated resources information for the specified Cloud Exadata infrastructure.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetCloudExadataInfrastructureUnallocatedResources.go.html to see an example of how to use GetCloudExadataInfrastructureUnallocatedResources API.
 func (client DatabaseClient) GetCloudExadataInfrastructureUnallocatedResources(ctx context.Context, request GetCloudExadataInfrastructureUnallocatedResourcesRequest) (response GetCloudExadataInfrastructureUnallocatedResourcesResponse, err error) {
@@ -7320,7 +8651,7 @@ func (client DatabaseClient) getCloudExadataInfrastructureUnallocatedResources(c
 
 // GetCloudVmCluster Gets information about the specified cloud VM cluster. Applies to Exadata Cloud Service instances and Autonomous Database on dedicated Exadata infrastructure only.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetCloudVmCluster.go.html to see an example of how to use GetCloudVmCluster API.
 func (client DatabaseClient) GetCloudVmCluster(ctx context.Context, request GetCloudVmClusterRequest) (response GetCloudVmClusterResponse, err error) {
@@ -7378,7 +8709,7 @@ func (client DatabaseClient) getCloudVmCluster(ctx context.Context, request comm
 // GetCloudVmClusterIormConfig Gets the IORM configuration for the specified cloud VM cluster in an Exadata Cloud Service instance.
 // If you have not specified an IORM configuration, the default configuration is returned.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetCloudVmClusterIormConfig.go.html to see an example of how to use GetCloudVmClusterIormConfig API.
 func (client DatabaseClient) GetCloudVmClusterIormConfig(ctx context.Context, request GetCloudVmClusterIormConfigRequest) (response GetCloudVmClusterIormConfigResponse, err error) {
@@ -7435,7 +8766,7 @@ func (client DatabaseClient) getCloudVmClusterIormConfig(ctx context.Context, re
 
 // GetCloudVmClusterUpdate Gets information about a specified maintenance update package for a cloud VM cluster. Applies to Exadata Cloud Service instances only.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetCloudVmClusterUpdate.go.html to see an example of how to use GetCloudVmClusterUpdate API.
 func (client DatabaseClient) GetCloudVmClusterUpdate(ctx context.Context, request GetCloudVmClusterUpdateRequest) (response GetCloudVmClusterUpdateResponse, err error) {
@@ -7492,7 +8823,7 @@ func (client DatabaseClient) getCloudVmClusterUpdate(ctx context.Context, reques
 
 // GetCloudVmClusterUpdateHistoryEntry Gets the maintenance update history details for the specified update history entry. Applies to Exadata Cloud Service instances only.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetCloudVmClusterUpdateHistoryEntry.go.html to see an example of how to use GetCloudVmClusterUpdateHistoryEntry API.
 func (client DatabaseClient) GetCloudVmClusterUpdateHistoryEntry(ctx context.Context, request GetCloudVmClusterUpdateHistoryEntryRequest) (response GetCloudVmClusterUpdateHistoryEntryResponse, err error) {
@@ -7549,7 +8880,7 @@ func (client DatabaseClient) getCloudVmClusterUpdateHistoryEntry(ctx context.Con
 
 // GetConsoleConnection Gets the specified database node console connection's information.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetConsoleConnection.go.html to see an example of how to use GetConsoleConnection API.
 func (client DatabaseClient) GetConsoleConnection(ctx context.Context, request GetConsoleConnectionRequest) (response GetConsoleConnectionResponse, err error) {
@@ -7604,9 +8935,122 @@ func (client DatabaseClient) getConsoleConnection(ctx context.Context, request c
 	return response, err
 }
 
+// GetConsoleHistory Gets information about the specified database node console history.
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetConsoleHistory.go.html to see an example of how to use GetConsoleHistory API.
+func (client DatabaseClient) GetConsoleHistory(ctx context.Context, request GetConsoleHistoryRequest) (response GetConsoleHistoryResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.getConsoleHistory, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = GetConsoleHistoryResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = GetConsoleHistoryResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(GetConsoleHistoryResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into GetConsoleHistoryResponse")
+	}
+	return
+}
+
+// getConsoleHistory implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) getConsoleHistory(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/dbNodes/{dbNodeId}/consoleHistories/{consoleHistoryId}", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response GetConsoleHistoryResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/ConsoleHistory/GetConsoleHistory"
+		err = common.PostProcessServiceError(err, "Database", "GetConsoleHistory", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
+// GetConsoleHistoryContent Retrieves the specified database node console history contents upto a megabyte.
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetConsoleHistoryContent.go.html to see an example of how to use GetConsoleHistoryContent API.
+func (client DatabaseClient) GetConsoleHistoryContent(ctx context.Context, request GetConsoleHistoryContentRequest) (response GetConsoleHistoryContentResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.getConsoleHistoryContent, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = GetConsoleHistoryContentResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = GetConsoleHistoryContentResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(GetConsoleHistoryContentResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into GetConsoleHistoryContentResponse")
+	}
+	return
+}
+
+// getConsoleHistoryContent implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) getConsoleHistoryContent(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/dbNodes/{dbNodeId}/consoleHistories/{consoleHistoryId}/content", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response GetConsoleHistoryContentResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/ConsoleHistory/GetConsoleHistoryContent"
+		err = common.PostProcessServiceError(err, "Database", "GetConsoleHistoryContent", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // GetDataGuardAssociation Gets the specified Data Guard association's configuration information.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetDataGuardAssociation.go.html to see an example of how to use GetDataGuardAssociation API.
 func (client DatabaseClient) GetDataGuardAssociation(ctx context.Context, request GetDataGuardAssociationRequest) (response GetDataGuardAssociationResponse, err error) {
@@ -7663,7 +9107,7 @@ func (client DatabaseClient) getDataGuardAssociation(ctx context.Context, reques
 
 // GetDatabase Gets information about the specified database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetDatabase.go.html to see an example of how to use GetDatabase API.
 func (client DatabaseClient) GetDatabase(ctx context.Context, request GetDatabaseRequest) (response GetDatabaseResponse, err error) {
@@ -7720,7 +9164,7 @@ func (client DatabaseClient) getDatabase(ctx context.Context, request common.OCI
 
 // GetDatabaseSoftwareImage Gets information about the specified database software image.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetDatabaseSoftwareImage.go.html to see an example of how to use GetDatabaseSoftwareImage API.
 func (client DatabaseClient) GetDatabaseSoftwareImage(ctx context.Context, request GetDatabaseSoftwareImageRequest) (response GetDatabaseSoftwareImageResponse, err error) {
@@ -7777,7 +9221,7 @@ func (client DatabaseClient) getDatabaseSoftwareImage(ctx context.Context, reque
 
 // GetDatabaseUpgradeHistoryEntry gets the upgrade history for a specified database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetDatabaseUpgradeHistoryEntry.go.html to see an example of how to use GetDatabaseUpgradeHistoryEntry API.
 func (client DatabaseClient) GetDatabaseUpgradeHistoryEntry(ctx context.Context, request GetDatabaseUpgradeHistoryEntryRequest) (response GetDatabaseUpgradeHistoryEntryResponse, err error) {
@@ -7834,7 +9278,7 @@ func (client DatabaseClient) getDatabaseUpgradeHistoryEntry(ctx context.Context,
 
 // GetDbHome Gets information about the specified Database Home.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetDbHome.go.html to see an example of how to use GetDbHome API.
 func (client DatabaseClient) GetDbHome(ctx context.Context, request GetDbHomeRequest) (response GetDbHomeResponse, err error) {
@@ -7891,7 +9335,7 @@ func (client DatabaseClient) getDbHome(ctx context.Context, request common.OCIRe
 
 // GetDbHomePatch Gets information about a specified patch package.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetDbHomePatch.go.html to see an example of how to use GetDbHomePatch API.
 func (client DatabaseClient) GetDbHomePatch(ctx context.Context, request GetDbHomePatchRequest) (response GetDbHomePatchResponse, err error) {
@@ -7948,7 +9392,7 @@ func (client DatabaseClient) getDbHomePatch(ctx context.Context, request common.
 
 // GetDbHomePatchHistoryEntry Gets the patch history details for the specified patchHistoryEntryId
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetDbHomePatchHistoryEntry.go.html to see an example of how to use GetDbHomePatchHistoryEntry API.
 func (client DatabaseClient) GetDbHomePatchHistoryEntry(ctx context.Context, request GetDbHomePatchHistoryEntryRequest) (response GetDbHomePatchHistoryEntryResponse, err error) {
@@ -8005,7 +9449,7 @@ func (client DatabaseClient) getDbHomePatchHistoryEntry(ctx context.Context, req
 
 // GetDbNode Gets information about the specified database node.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetDbNode.go.html to see an example of how to use GetDbNode API.
 func (client DatabaseClient) GetDbNode(ctx context.Context, request GetDbNodeRequest) (response GetDbNodeResponse, err error) {
@@ -8062,7 +9506,7 @@ func (client DatabaseClient) getDbNode(ctx context.Context, request common.OCIRe
 
 // GetDbServer Gets information about the Exadata Db server.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetDbServer.go.html to see an example of how to use GetDbServer API.
 func (client DatabaseClient) GetDbServer(ctx context.Context, request GetDbServerRequest) (response GetDbServerResponse, err error) {
@@ -8121,7 +9565,7 @@ func (client DatabaseClient) getDbServer(ctx context.Context, request common.OCI
 // **Note:** Deprecated for Exadata Cloud Service systems. Use the new resource model APIs (https://docs.cloud.oracle.com/iaas/Content/Database/Concepts/exaflexsystem.htm#exaflexsystem_topic-resource_model) instead.
 // For Exadata Cloud Service instances, support for this API will end on May 15th, 2021. See Switching an Exadata DB System to the New Resource Model and APIs (https://docs.cloud.oracle.com/iaas/Content/Database/Concepts/exaflexsystem_topic-resource_model_conversion.htm) for details on converting existing Exadata DB systems to the new resource model.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetDbSystem.go.html to see an example of how to use GetDbSystem API.
 func (client DatabaseClient) GetDbSystem(ctx context.Context, request GetDbSystemRequest) (response GetDbSystemResponse, err error) {
@@ -8178,7 +9622,7 @@ func (client DatabaseClient) getDbSystem(ctx context.Context, request common.OCI
 
 // GetDbSystemPatch Gets information the specified patch.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetDbSystemPatch.go.html to see an example of how to use GetDbSystemPatch API.
 func (client DatabaseClient) GetDbSystemPatch(ctx context.Context, request GetDbSystemPatchRequest) (response GetDbSystemPatchResponse, err error) {
@@ -8235,7 +9679,7 @@ func (client DatabaseClient) getDbSystemPatch(ctx context.Context, request commo
 
 // GetDbSystemPatchHistoryEntry Gets the details of the specified patch operation on the specified DB system.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetDbSystemPatchHistoryEntry.go.html to see an example of how to use GetDbSystemPatchHistoryEntry API.
 func (client DatabaseClient) GetDbSystemPatchHistoryEntry(ctx context.Context, request GetDbSystemPatchHistoryEntryRequest) (response GetDbSystemPatchHistoryEntryResponse, err error) {
@@ -8292,7 +9736,7 @@ func (client DatabaseClient) getDbSystemPatchHistoryEntry(ctx context.Context, r
 
 // GetDbSystemUpgradeHistoryEntry Gets the details of the specified operating system upgrade operation for the specified DB system.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetDbSystemUpgradeHistoryEntry.go.html to see an example of how to use GetDbSystemUpgradeHistoryEntry API.
 func (client DatabaseClient) GetDbSystemUpgradeHistoryEntry(ctx context.Context, request GetDbSystemUpgradeHistoryEntryRequest) (response GetDbSystemUpgradeHistoryEntryResponse, err error) {
@@ -8350,7 +9794,7 @@ func (client DatabaseClient) getDbSystemUpgradeHistoryEntry(ctx context.Context,
 // GetExadataInfrastructure Gets information about the specified Exadata infrastructure. Applies to Exadata Cloud@Customer instances only.
 // To get information on an Exadata Cloud Service infrastructure resource, use the  GetCloudExadataInfrastructure operation.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetExadataInfrastructure.go.html to see an example of how to use GetExadataInfrastructure API.
 func (client DatabaseClient) GetExadataInfrastructure(ctx context.Context, request GetExadataInfrastructureRequest) (response GetExadataInfrastructureResponse, err error) {
@@ -8407,7 +9851,7 @@ func (client DatabaseClient) getExadataInfrastructure(ctx context.Context, reque
 
 // GetExadataInfrastructureOcpus Gets details of the available and consumed OCPUs for the specified Autonomous Exadata Infrastructure resource.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetExadataInfrastructureOcpus.go.html to see an example of how to use GetExadataInfrastructureOcpus API.
 func (client DatabaseClient) GetExadataInfrastructureOcpus(ctx context.Context, request GetExadataInfrastructureOcpusRequest) (response GetExadataInfrastructureOcpusResponse, err error) {
@@ -8462,6 +9906,63 @@ func (client DatabaseClient) getExadataInfrastructureOcpus(ctx context.Context, 
 	return response, err
 }
 
+// GetExadataInfrastructureUnAllocatedResources Gets un allocated resources information for the specified Exadata infrastructure. Applies to Exadata Cloud@Customer instances only.
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetExadataInfrastructureUnAllocatedResources.go.html to see an example of how to use GetExadataInfrastructureUnAllocatedResources API.
+func (client DatabaseClient) GetExadataInfrastructureUnAllocatedResources(ctx context.Context, request GetExadataInfrastructureUnAllocatedResourcesRequest) (response GetExadataInfrastructureUnAllocatedResourcesResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.getExadataInfrastructureUnAllocatedResources, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = GetExadataInfrastructureUnAllocatedResourcesResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = GetExadataInfrastructureUnAllocatedResourcesResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(GetExadataInfrastructureUnAllocatedResourcesResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into GetExadataInfrastructureUnAllocatedResourcesResponse")
+	}
+	return
+}
+
+// getExadataInfrastructureUnAllocatedResources implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) getExadataInfrastructureUnAllocatedResources(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/exadataInfrastructures/{exadataInfrastructureId}/unAllocatedResources", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response GetExadataInfrastructureUnAllocatedResourcesResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/ExadataInfrastructureUnAllocatedResources/GetExadataInfrastructureUnAllocatedResources"
+		err = common.PostProcessServiceError(err, "Database", "GetExadataInfrastructureUnAllocatedResources", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // GetExadataIormConfig Gets the IORM configuration settings for the specified cloud Exadata DB system.
 // All Exadata service instances have default IORM settings.
 // **Note:** Deprecated for Exadata Cloud Service systems. Use the new resource model APIs (https://docs.cloud.oracle.com/iaas/Content/Database/Concepts/exaflexsystem.htm#exaflexsystem_topic-resource_model) instead.
@@ -8469,7 +9970,7 @@ func (client DatabaseClient) getExadataInfrastructureOcpus(ctx context.Context, 
 // The GetCloudVmClusterIormConfig API is used for this operation with Exadata systems using the
 // new resource model.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetExadataIormConfig.go.html to see an example of how to use GetExadataIormConfig API.
 func (client DatabaseClient) GetExadataIormConfig(ctx context.Context, request GetExadataIormConfigRequest) (response GetExadataIormConfigResponse, err error) {
@@ -8527,7 +10028,7 @@ func (client DatabaseClient) getExadataIormConfig(ctx context.Context, request c
 // GetExternalBackupJob Gets information about the specified external backup job.
 // **Note:** This API is used by an Oracle Cloud Infrastructure Python script that is packaged with the Oracle Cloud Infrastructure CLI. Oracle recommends that you use the script instead using the API directly. See Migrating an On-Premises Database to Oracle Cloud Infrastructure by Creating a Backup in the Cloud (https://docs.cloud.oracle.com/Content/Database/Tasks/mig-onprembackup.htm) for more information.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetExternalBackupJob.go.html to see an example of how to use GetExternalBackupJob API.
 func (client DatabaseClient) GetExternalBackupJob(ctx context.Context, request GetExternalBackupJobRequest) (response GetExternalBackupJobResponse, err error) {
@@ -8584,7 +10085,7 @@ func (client DatabaseClient) getExternalBackupJob(ctx context.Context, request c
 
 // GetExternalContainerDatabase Gets information about the specified external container database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetExternalContainerDatabase.go.html to see an example of how to use GetExternalContainerDatabase API.
 func (client DatabaseClient) GetExternalContainerDatabase(ctx context.Context, request GetExternalContainerDatabaseRequest) (response GetExternalContainerDatabaseResponse, err error) {
@@ -8641,7 +10142,7 @@ func (client DatabaseClient) getExternalContainerDatabase(ctx context.Context, r
 
 // GetExternalDatabaseConnector Gets information about the specified external database connector.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetExternalDatabaseConnector.go.html to see an example of how to use GetExternalDatabaseConnector API.
 func (client DatabaseClient) GetExternalDatabaseConnector(ctx context.Context, request GetExternalDatabaseConnectorRequest) (response GetExternalDatabaseConnectorResponse, err error) {
@@ -8698,7 +10199,7 @@ func (client DatabaseClient) getExternalDatabaseConnector(ctx context.Context, r
 
 // GetExternalNonContainerDatabase Gets information about a specific external non-container database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetExternalNonContainerDatabase.go.html to see an example of how to use GetExternalNonContainerDatabase API.
 func (client DatabaseClient) GetExternalNonContainerDatabase(ctx context.Context, request GetExternalNonContainerDatabaseRequest) (response GetExternalNonContainerDatabaseResponse, err error) {
@@ -8756,7 +10257,7 @@ func (client DatabaseClient) getExternalNonContainerDatabase(ctx context.Context
 // GetExternalPluggableDatabase Gets information about a specific
 // CreateExternalPluggableDatabaseDetails resource.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetExternalPluggableDatabase.go.html to see an example of how to use GetExternalPluggableDatabase API.
 func (client DatabaseClient) GetExternalPluggableDatabase(ctx context.Context, request GetExternalPluggableDatabaseRequest) (response GetExternalPluggableDatabaseResponse, err error) {
@@ -8814,7 +10315,7 @@ func (client DatabaseClient) getExternalPluggableDatabase(ctx context.Context, r
 // GetInfrastructureTargetVersions Gets details of the Exadata Infrastructure target system software versions that can be applied to the specified infrastructure resource for maintenance updates.
 // Applies to Exadata Cloud@Customer and Exadata Cloud instances only.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetInfrastructureTargetVersions.go.html to see an example of how to use GetInfrastructureTargetVersions API.
 func (client DatabaseClient) GetInfrastructureTargetVersions(ctx context.Context, request GetInfrastructureTargetVersionsRequest) (response GetInfrastructureTargetVersionsResponse, err error) {
@@ -8871,7 +10372,7 @@ func (client DatabaseClient) getInfrastructureTargetVersions(ctx context.Context
 
 // GetKeyStore Gets information about the specified key store.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetKeyStore.go.html to see an example of how to use GetKeyStore API.
 func (client DatabaseClient) GetKeyStore(ctx context.Context, request GetKeyStoreRequest) (response GetKeyStoreResponse, err error) {
@@ -8928,7 +10429,7 @@ func (client DatabaseClient) getKeyStore(ctx context.Context, request common.OCI
 
 // GetMaintenanceRun Gets information about the specified maintenance run.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetMaintenanceRun.go.html to see an example of how to use GetMaintenanceRun API.
 func (client DatabaseClient) GetMaintenanceRun(ctx context.Context, request GetMaintenanceRunRequest) (response GetMaintenanceRunResponse, err error) {
@@ -8985,7 +10486,7 @@ func (client DatabaseClient) getMaintenanceRun(ctx context.Context, request comm
 
 // GetMaintenanceRunHistory Gets information about the specified maintenance run history.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetMaintenanceRunHistory.go.html to see an example of how to use GetMaintenanceRunHistory API.
 func (client DatabaseClient) GetMaintenanceRunHistory(ctx context.Context, request GetMaintenanceRunHistoryRequest) (response GetMaintenanceRunHistoryResponse, err error) {
@@ -9040,9 +10541,66 @@ func (client DatabaseClient) getMaintenanceRunHistory(ctx context.Context, reque
 	return response, err
 }
 
+// GetOneoffPatch Gets information about the specified one-off patch.
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetOneoffPatch.go.html to see an example of how to use GetOneoffPatch API.
+func (client DatabaseClient) GetOneoffPatch(ctx context.Context, request GetOneoffPatchRequest) (response GetOneoffPatchResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.getOneoffPatch, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = GetOneoffPatchResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = GetOneoffPatchResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(GetOneoffPatchResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into GetOneoffPatchResponse")
+	}
+	return
+}
+
+// getOneoffPatch implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) getOneoffPatch(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/oneoffPatches/{oneoffPatchId}", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response GetOneoffPatchResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/OneoffPatch/GetOneoffPatch"
+		err = common.PostProcessServiceError(err, "Database", "GetOneoffPatch", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // GetPdbConversionHistoryEntry Gets the details of operations performed to convert the specified database from non-container (non-CDB) to pluggable (PDB).
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetPdbConversionHistoryEntry.go.html to see an example of how to use GetPdbConversionHistoryEntry API.
 func (client DatabaseClient) GetPdbConversionHistoryEntry(ctx context.Context, request GetPdbConversionHistoryEntryRequest) (response GetPdbConversionHistoryEntryResponse, err error) {
@@ -9099,7 +10657,7 @@ func (client DatabaseClient) getPdbConversionHistoryEntry(ctx context.Context, r
 
 // GetPluggableDatabase Gets information about the specified pluggable database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetPluggableDatabase.go.html to see an example of how to use GetPluggableDatabase API.
 func (client DatabaseClient) GetPluggableDatabase(ctx context.Context, request GetPluggableDatabaseRequest) (response GetPluggableDatabaseResponse, err error) {
@@ -9156,7 +10714,7 @@ func (client DatabaseClient) getPluggableDatabase(ctx context.Context, request c
 
 // GetVmCluster Gets information about the VM cluster. Applies to Exadata Cloud@Customer instances only.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetVmCluster.go.html to see an example of how to use GetVmCluster API.
 func (client DatabaseClient) GetVmCluster(ctx context.Context, request GetVmClusterRequest) (response GetVmClusterResponse, err error) {
@@ -9214,7 +10772,7 @@ func (client DatabaseClient) getVmCluster(ctx context.Context, request common.OC
 // GetVmClusterNetwork Gets information about the specified VM cluster network. Applies to Exadata Cloud@Customer instances only.
 // To get information about a cloud VM cluster in an Exadata Cloud Service instance, use the GetCloudVmCluster operation.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetVmClusterNetwork.go.html to see an example of how to use GetVmClusterNetwork API.
 func (client DatabaseClient) GetVmClusterNetwork(ctx context.Context, request GetVmClusterNetworkRequest) (response GetVmClusterNetworkResponse, err error) {
@@ -9271,7 +10829,7 @@ func (client DatabaseClient) getVmClusterNetwork(ctx context.Context, request co
 
 // GetVmClusterPatch Gets information about a specified patch package.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetVmClusterPatch.go.html to see an example of how to use GetVmClusterPatch API.
 func (client DatabaseClient) GetVmClusterPatch(ctx context.Context, request GetVmClusterPatchRequest) (response GetVmClusterPatchResponse, err error) {
@@ -9328,7 +10886,7 @@ func (client DatabaseClient) getVmClusterPatch(ctx context.Context, request comm
 
 // GetVmClusterPatchHistoryEntry Gets the patch history details for the specified patch history entry.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetVmClusterPatchHistoryEntry.go.html to see an example of how to use GetVmClusterPatchHistoryEntry API.
 func (client DatabaseClient) GetVmClusterPatchHistoryEntry(ctx context.Context, request GetVmClusterPatchHistoryEntryRequest) (response GetVmClusterPatchHistoryEntryResponse, err error) {
@@ -9385,7 +10943,7 @@ func (client DatabaseClient) getVmClusterPatchHistoryEntry(ctx context.Context, 
 
 // GetVmClusterUpdate Gets information about a specified maintenance update package for a VM cluster. Applies to Exadata Cloud@Customer instances only.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetVmClusterUpdate.go.html to see an example of how to use GetVmClusterUpdate API.
 func (client DatabaseClient) GetVmClusterUpdate(ctx context.Context, request GetVmClusterUpdateRequest) (response GetVmClusterUpdateResponse, err error) {
@@ -9442,7 +11000,7 @@ func (client DatabaseClient) getVmClusterUpdate(ctx context.Context, request com
 
 // GetVmClusterUpdateHistoryEntry Gets the maintenance update history details for the specified update history entry. Applies to Exadata Cloud@Customer instances only.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/GetVmClusterUpdateHistoryEntry.go.html to see an example of how to use GetVmClusterUpdateHistoryEntry API.
 func (client DatabaseClient) GetVmClusterUpdateHistoryEntry(ctx context.Context, request GetVmClusterUpdateHistoryEntryRequest) (response GetVmClusterUpdateHistoryEntryResponse, err error) {
@@ -9499,7 +11057,7 @@ func (client DatabaseClient) getVmClusterUpdateHistoryEntry(ctx context.Context,
 
 // LaunchAutonomousExadataInfrastructure **Deprecated** To create a new Autonomous Database system on dedicated Exadata Infrastructure, use the CreateCloudExadataInfrastructure and CreateCloudAutonomousVmCluster operations instead. Note that to create an Autonomous VM cluster, you must have an existing Exadata Infrastructure resource to contain the VM cluster.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/LaunchAutonomousExadataInfrastructure.go.html to see an example of how to use LaunchAutonomousExadataInfrastructure API.
 func (client DatabaseClient) LaunchAutonomousExadataInfrastructure(ctx context.Context, request LaunchAutonomousExadataInfrastructureRequest) (response LaunchAutonomousExadataInfrastructureResponse, err error) {
@@ -9567,7 +11125,7 @@ func (client DatabaseClient) launchAutonomousExadataInfrastructure(ctx context.C
 // For Exadata Cloud Service instances, support for this API will end on May 15th, 2021. See Switching an Exadata DB System to the New Resource Model and APIs (https://docs.cloud.oracle.com/iaas/Content/Database/Concepts/exaflexsystem_topic-resource_model_conversion.htm) for details on converting existing Exadata DB systems to the new resource model.
 // Use the CreateCloudExadataInfrastructure and CreateCloudVmCluster APIs to provision a new Exadata Cloud Service instance.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/LaunchDbSystem.go.html to see an example of how to use LaunchDbSystem API.
 func (client DatabaseClient) LaunchDbSystem(ctx context.Context, request LaunchDbSystemRequest) (response LaunchDbSystemResponse, err error) {
@@ -9627,9 +11185,66 @@ func (client DatabaseClient) launchDbSystem(ctx context.Context, request common.
 	return response, err
 }
 
+// ListApplicationVips Gets a list of application virtual IP (VIP) addresses on a cloud VM cluster.
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListApplicationVips.go.html to see an example of how to use ListApplicationVips API.
+func (client DatabaseClient) ListApplicationVips(ctx context.Context, request ListApplicationVipsRequest) (response ListApplicationVipsResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.listApplicationVips, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = ListApplicationVipsResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = ListApplicationVipsResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(ListApplicationVipsResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into ListApplicationVipsResponse")
+	}
+	return
+}
+
+// listApplicationVips implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) listApplicationVips(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/applicationVip", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response ListApplicationVipsResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/ApplicationVipSummary/ListApplicationVips"
+		err = common.PostProcessServiceError(err, "Database", "ListApplicationVips", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // ListAutonomousContainerDatabaseDataguardAssociations Gets a list of the Autonomous Container Databases with Autonomous Data Guard-enabled associated with the specified Autonomous Container Database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListAutonomousContainerDatabaseDataguardAssociations.go.html to see an example of how to use ListAutonomousContainerDatabaseDataguardAssociations API.
 func (client DatabaseClient) ListAutonomousContainerDatabaseDataguardAssociations(ctx context.Context, request ListAutonomousContainerDatabaseDataguardAssociationsRequest) (response ListAutonomousContainerDatabaseDataguardAssociationsResponse, err error) {
@@ -9684,9 +11299,66 @@ func (client DatabaseClient) listAutonomousContainerDatabaseDataguardAssociation
 	return response, err
 }
 
+// ListAutonomousContainerDatabaseVersions Gets a list of supported Autonomous Container Database versions.
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListAutonomousContainerDatabaseVersions.go.html to see an example of how to use ListAutonomousContainerDatabaseVersions API.
+func (client DatabaseClient) ListAutonomousContainerDatabaseVersions(ctx context.Context, request ListAutonomousContainerDatabaseVersionsRequest) (response ListAutonomousContainerDatabaseVersionsResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.listAutonomousContainerDatabaseVersions, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = ListAutonomousContainerDatabaseVersionsResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = ListAutonomousContainerDatabaseVersionsResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(ListAutonomousContainerDatabaseVersionsResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into ListAutonomousContainerDatabaseVersionsResponse")
+	}
+	return
+}
+
+// listAutonomousContainerDatabaseVersions implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) listAutonomousContainerDatabaseVersions(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/autonomousContainerDatabaseVersions", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response ListAutonomousContainerDatabaseVersionsResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/AutonomousContainerDatabaseVersionSummary/ListAutonomousContainerDatabaseVersions"
+		err = common.PostProcessServiceError(err, "Database", "ListAutonomousContainerDatabaseVersions", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // ListAutonomousContainerDatabases Gets a list of the Autonomous Container Databases in the specified compartment.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListAutonomousContainerDatabases.go.html to see an example of how to use ListAutonomousContainerDatabases API.
 func (client DatabaseClient) ListAutonomousContainerDatabases(ctx context.Context, request ListAutonomousContainerDatabasesRequest) (response ListAutonomousContainerDatabasesResponse, err error) {
@@ -9743,7 +11415,7 @@ func (client DatabaseClient) listAutonomousContainerDatabases(ctx context.Contex
 
 // ListAutonomousDatabaseBackups Gets a list of Autonomous Database backups based on either the `autonomousDatabaseId` or `compartmentId` specified as a query parameter.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListAutonomousDatabaseBackups.go.html to see an example of how to use ListAutonomousDatabaseBackups API.
 func (client DatabaseClient) ListAutonomousDatabaseBackups(ctx context.Context, request ListAutonomousDatabaseBackupsRequest) (response ListAutonomousDatabaseBackupsResponse, err error) {
@@ -9800,7 +11472,7 @@ func (client DatabaseClient) listAutonomousDatabaseBackups(ctx context.Context, 
 
 // ListAutonomousDatabaseCharacterSets Gets a list of supported character sets.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListAutonomousDatabaseCharacterSets.go.html to see an example of how to use ListAutonomousDatabaseCharacterSets API.
 func (client DatabaseClient) ListAutonomousDatabaseCharacterSets(ctx context.Context, request ListAutonomousDatabaseCharacterSetsRequest) (response ListAutonomousDatabaseCharacterSetsResponse, err error) {
@@ -9857,7 +11529,7 @@ func (client DatabaseClient) listAutonomousDatabaseCharacterSets(ctx context.Con
 
 // ListAutonomousDatabaseClones Lists the Autonomous Database clones for the specified Autonomous Database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListAutonomousDatabaseClones.go.html to see an example of how to use ListAutonomousDatabaseClones API.
 func (client DatabaseClient) ListAutonomousDatabaseClones(ctx context.Context, request ListAutonomousDatabaseClonesRequest) (response ListAutonomousDatabaseClonesResponse, err error) {
@@ -9914,7 +11586,7 @@ func (client DatabaseClient) listAutonomousDatabaseClones(ctx context.Context, r
 
 // ListAutonomousDatabaseDataguardAssociations Gets a list of the Autonomous Data Guard-enabled databases associated with the specified Autonomous Database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListAutonomousDatabaseDataguardAssociations.go.html to see an example of how to use ListAutonomousDatabaseDataguardAssociations API.
 func (client DatabaseClient) ListAutonomousDatabaseDataguardAssociations(ctx context.Context, request ListAutonomousDatabaseDataguardAssociationsRequest) (response ListAutonomousDatabaseDataguardAssociationsResponse, err error) {
@@ -9971,7 +11643,7 @@ func (client DatabaseClient) listAutonomousDatabaseDataguardAssociations(ctx con
 
 // ListAutonomousDatabaseRefreshableClones Lists the OCIDs of the Autonomous Database local and connected remote refreshable clones with the region where they exist for the specified source database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListAutonomousDatabaseRefreshableClones.go.html to see an example of how to use ListAutonomousDatabaseRefreshableClones API.
 func (client DatabaseClient) ListAutonomousDatabaseRefreshableClones(ctx context.Context, request ListAutonomousDatabaseRefreshableClonesRequest) (response ListAutonomousDatabaseRefreshableClonesResponse, err error) {
@@ -10028,7 +11700,7 @@ func (client DatabaseClient) listAutonomousDatabaseRefreshableClones(ctx context
 
 // ListAutonomousDatabases Gets a list of Autonomous Databases based on the query parameters specified.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListAutonomousDatabases.go.html to see an example of how to use ListAutonomousDatabases API.
 func (client DatabaseClient) ListAutonomousDatabases(ctx context.Context, request ListAutonomousDatabasesRequest) (response ListAutonomousDatabasesResponse, err error) {
@@ -10084,9 +11756,9 @@ func (client DatabaseClient) listAutonomousDatabases(ctx context.Context, reques
 }
 
 // ListAutonomousDbPreviewVersions Gets a list of supported Autonomous Database versions. Note that preview version software is only available for
-// databases with shared Exadata infrastructure (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html).
+// Autonomous Database Serverless (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html) databases.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListAutonomousDbPreviewVersions.go.html to see an example of how to use ListAutonomousDbPreviewVersions API.
 func (client DatabaseClient) ListAutonomousDbPreviewVersions(ctx context.Context, request ListAutonomousDbPreviewVersionsRequest) (response ListAutonomousDbPreviewVersionsResponse, err error) {
@@ -10143,7 +11815,7 @@ func (client DatabaseClient) listAutonomousDbPreviewVersions(ctx context.Context
 
 // ListAutonomousDbVersions Gets a list of supported Autonomous Database versions.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListAutonomousDbVersions.go.html to see an example of how to use ListAutonomousDbVersions API.
 func (client DatabaseClient) ListAutonomousDbVersions(ctx context.Context, request ListAutonomousDbVersionsRequest) (response ListAutonomousDbVersionsResponse, err error) {
@@ -10200,7 +11872,7 @@ func (client DatabaseClient) listAutonomousDbVersions(ctx context.Context, reque
 
 // ListAutonomousExadataInfrastructureShapes **Deprecated.**
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListAutonomousExadataInfrastructureShapes.go.html to see an example of how to use ListAutonomousExadataInfrastructureShapes API.
 func (client DatabaseClient) ListAutonomousExadataInfrastructureShapes(ctx context.Context, request ListAutonomousExadataInfrastructureShapesRequest) (response ListAutonomousExadataInfrastructureShapesResponse, err error) {
@@ -10257,7 +11929,7 @@ func (client DatabaseClient) listAutonomousExadataInfrastructureShapes(ctx conte
 
 // ListAutonomousExadataInfrastructures **Deprecated.** Use the ListCloudExadataInfrastructures operation to list Exadata Infrastructures in the Oracle cloud and the  ListCloudAutonomousVmClusters operation to list Autonomous Exadata VM clusters.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListAutonomousExadataInfrastructures.go.html to see an example of how to use ListAutonomousExadataInfrastructures API.
 func (client DatabaseClient) ListAutonomousExadataInfrastructures(ctx context.Context, request ListAutonomousExadataInfrastructuresRequest) (response ListAutonomousExadataInfrastructuresResponse, err error) {
@@ -10312,9 +11984,123 @@ func (client DatabaseClient) listAutonomousExadataInfrastructures(ctx context.Co
 	return response, err
 }
 
+// ListAutonomousVirtualMachines Lists the Autonomous Virtual Machines in the specified Autonomous VM Cluster and Compartment.
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListAutonomousVirtualMachines.go.html to see an example of how to use ListAutonomousVirtualMachines API.
+func (client DatabaseClient) ListAutonomousVirtualMachines(ctx context.Context, request ListAutonomousVirtualMachinesRequest) (response ListAutonomousVirtualMachinesResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.listAutonomousVirtualMachines, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = ListAutonomousVirtualMachinesResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = ListAutonomousVirtualMachinesResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(ListAutonomousVirtualMachinesResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into ListAutonomousVirtualMachinesResponse")
+	}
+	return
+}
+
+// listAutonomousVirtualMachines implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) listAutonomousVirtualMachines(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/autonomousVirtualMachines", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response ListAutonomousVirtualMachinesResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/AutonomousVirtualMachine/ListAutonomousVirtualMachines"
+		err = common.PostProcessServiceError(err, "Database", "ListAutonomousVirtualMachines", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
+// ListAutonomousVmClusterAcdResourceUsage Gets the list of resource usage details for all the Autonomous Container Database in the specified Autonomous Exadata VM cluster.
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListAutonomousVmClusterAcdResourceUsage.go.html to see an example of how to use ListAutonomousVmClusterAcdResourceUsage API.
+func (client DatabaseClient) ListAutonomousVmClusterAcdResourceUsage(ctx context.Context, request ListAutonomousVmClusterAcdResourceUsageRequest) (response ListAutonomousVmClusterAcdResourceUsageResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.listAutonomousVmClusterAcdResourceUsage, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = ListAutonomousVmClusterAcdResourceUsageResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = ListAutonomousVmClusterAcdResourceUsageResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(ListAutonomousVmClusterAcdResourceUsageResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into ListAutonomousVmClusterAcdResourceUsageResponse")
+	}
+	return
+}
+
+// listAutonomousVmClusterAcdResourceUsage implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) listAutonomousVmClusterAcdResourceUsage(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/autonomousVmClusters/{autonomousVmClusterId}/acdResourceUsage", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response ListAutonomousVmClusterAcdResourceUsageResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/AutonomousVmCluster/ListAutonomousVmClusterAcdResourceUsage"
+		err = common.PostProcessServiceError(err, "Database", "ListAutonomousVmClusterAcdResourceUsage", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // ListAutonomousVmClusters Gets a list of Exadata Cloud@Customer Autonomous VM clusters in the specified compartment. To list Autonomous VM Clusters in the Oracle Cloud, see ListCloudAutonomousVmClusters.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListAutonomousVmClusters.go.html to see an example of how to use ListAutonomousVmClusters API.
 func (client DatabaseClient) ListAutonomousVmClusters(ctx context.Context, request ListAutonomousVmClustersRequest) (response ListAutonomousVmClustersResponse, err error) {
@@ -10371,7 +12157,7 @@ func (client DatabaseClient) listAutonomousVmClusters(ctx context.Context, reque
 
 // ListBackupDestination Gets a list of backup destinations in the specified compartment.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListBackupDestination.go.html to see an example of how to use ListBackupDestination API.
 func (client DatabaseClient) ListBackupDestination(ctx context.Context, request ListBackupDestinationRequest) (response ListBackupDestinationResponse, err error) {
@@ -10428,7 +12214,7 @@ func (client DatabaseClient) listBackupDestination(ctx context.Context, request 
 
 // ListBackups Gets a list of backups based on the `databaseId` or `compartmentId` specified. Either one of these query parameters must be provided.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListBackups.go.html to see an example of how to use ListBackups API.
 func (client DatabaseClient) ListBackups(ctx context.Context, request ListBackupsRequest) (response ListBackupsResponse, err error) {
@@ -10483,9 +12269,67 @@ func (client DatabaseClient) listBackups(ctx context.Context, request common.OCI
 	return response, err
 }
 
+// ListCloudAutonomousVmClusterAcdResourceUsage Gets the list of resource usage details for all the Cloud Autonomous Container Database
+// in the specified Cloud Autonomous Exadata VM cluster.
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListCloudAutonomousVmClusterAcdResourceUsage.go.html to see an example of how to use ListCloudAutonomousVmClusterAcdResourceUsage API.
+func (client DatabaseClient) ListCloudAutonomousVmClusterAcdResourceUsage(ctx context.Context, request ListCloudAutonomousVmClusterAcdResourceUsageRequest) (response ListCloudAutonomousVmClusterAcdResourceUsageResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.listCloudAutonomousVmClusterAcdResourceUsage, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = ListCloudAutonomousVmClusterAcdResourceUsageResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = ListCloudAutonomousVmClusterAcdResourceUsageResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(ListCloudAutonomousVmClusterAcdResourceUsageResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into ListCloudAutonomousVmClusterAcdResourceUsageResponse")
+	}
+	return
+}
+
+// listCloudAutonomousVmClusterAcdResourceUsage implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) listCloudAutonomousVmClusterAcdResourceUsage(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/cloudAutonomousVmClusters/{cloudAutonomousVmClusterId}/acdResourceUsage", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response ListCloudAutonomousVmClusterAcdResourceUsageResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/CloudAutonomousVmCluster/ListCloudAutonomousVmClusterAcdResourceUsage"
+		err = common.PostProcessServiceError(err, "Database", "ListCloudAutonomousVmClusterAcdResourceUsage", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // ListCloudAutonomousVmClusters Lists Autonomous Exadata VM clusters in the Oracle cloud. For Exadata Cloud@Customer systems, see ListAutonomousVmClusters.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListCloudAutonomousVmClusters.go.html to see an example of how to use ListCloudAutonomousVmClusters API.
 func (client DatabaseClient) ListCloudAutonomousVmClusters(ctx context.Context, request ListCloudAutonomousVmClustersRequest) (response ListCloudAutonomousVmClustersResponse, err error) {
@@ -10542,7 +12386,7 @@ func (client DatabaseClient) listCloudAutonomousVmClusters(ctx context.Context, 
 
 // ListCloudExadataInfrastructures Gets a list of the cloud Exadata infrastructure resources in the specified compartment. Applies to Exadata Cloud Service instances and Autonomous Database on dedicated Exadata infrastructure only.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListCloudExadataInfrastructures.go.html to see an example of how to use ListCloudExadataInfrastructures API.
 func (client DatabaseClient) ListCloudExadataInfrastructures(ctx context.Context, request ListCloudExadataInfrastructuresRequest) (response ListCloudExadataInfrastructuresResponse, err error) {
@@ -10599,7 +12443,7 @@ func (client DatabaseClient) listCloudExadataInfrastructures(ctx context.Context
 
 // ListCloudVmClusterUpdateHistoryEntries Gets the history of the maintenance update actions performed on the specified cloud VM cluster. Applies to Exadata Cloud Service instances only.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListCloudVmClusterUpdateHistoryEntries.go.html to see an example of how to use ListCloudVmClusterUpdateHistoryEntries API.
 func (client DatabaseClient) ListCloudVmClusterUpdateHistoryEntries(ctx context.Context, request ListCloudVmClusterUpdateHistoryEntriesRequest) (response ListCloudVmClusterUpdateHistoryEntriesResponse, err error) {
@@ -10656,7 +12500,7 @@ func (client DatabaseClient) listCloudVmClusterUpdateHistoryEntries(ctx context.
 
 // ListCloudVmClusterUpdates Lists the maintenance updates that can be applied to the specified cloud VM cluster. Applies to Exadata Cloud Service instances only.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListCloudVmClusterUpdates.go.html to see an example of how to use ListCloudVmClusterUpdates API.
 func (client DatabaseClient) ListCloudVmClusterUpdates(ctx context.Context, request ListCloudVmClusterUpdatesRequest) (response ListCloudVmClusterUpdatesResponse, err error) {
@@ -10713,7 +12557,7 @@ func (client DatabaseClient) listCloudVmClusterUpdates(ctx context.Context, requ
 
 // ListCloudVmClusters Gets a list of the cloud VM clusters in the specified compartment. Applies to Exadata Cloud Service instances and Autonomous Database on dedicated Exadata infrastructure only.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListCloudVmClusters.go.html to see an example of how to use ListCloudVmClusters API.
 func (client DatabaseClient) ListCloudVmClusters(ctx context.Context, request ListCloudVmClustersRequest) (response ListCloudVmClustersResponse, err error) {
@@ -10770,7 +12614,7 @@ func (client DatabaseClient) listCloudVmClusters(ctx context.Context, request co
 
 // ListConsoleConnections Lists the console connections for the specified database node.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListConsoleConnections.go.html to see an example of how to use ListConsoleConnections API.
 func (client DatabaseClient) ListConsoleConnections(ctx context.Context, request ListConsoleConnectionsRequest) (response ListConsoleConnectionsResponse, err error) {
@@ -10825,9 +12669,66 @@ func (client DatabaseClient) listConsoleConnections(ctx context.Context, request
 	return response, err
 }
 
+// ListConsoleHistories Lists the console histories for the specified database node.
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListConsoleHistories.go.html to see an example of how to use ListConsoleHistories API.
+func (client DatabaseClient) ListConsoleHistories(ctx context.Context, request ListConsoleHistoriesRequest) (response ListConsoleHistoriesResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.listConsoleHistories, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = ListConsoleHistoriesResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = ListConsoleHistoriesResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(ListConsoleHistoriesResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into ListConsoleHistoriesResponse")
+	}
+	return
+}
+
+// listConsoleHistories implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) listConsoleHistories(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/dbNodes/{dbNodeId}/consoleHistories", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response ListConsoleHistoriesResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/ConsoleHistory/ListConsoleHistories"
+		err = common.PostProcessServiceError(err, "Database", "ListConsoleHistories", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // ListContainerDatabasePatches Lists the patches applicable to the requested container database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListContainerDatabasePatches.go.html to see an example of how to use ListContainerDatabasePatches API.
 func (client DatabaseClient) ListContainerDatabasePatches(ctx context.Context, request ListContainerDatabasePatchesRequest) (response ListContainerDatabasePatchesResponse, err error) {
@@ -10884,7 +12785,7 @@ func (client DatabaseClient) listContainerDatabasePatches(ctx context.Context, r
 
 // ListDataGuardAssociations Lists all Data Guard associations for the specified database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListDataGuardAssociations.go.html to see an example of how to use ListDataGuardAssociations API.
 func (client DatabaseClient) ListDataGuardAssociations(ctx context.Context, request ListDataGuardAssociationsRequest) (response ListDataGuardAssociationsResponse, err error) {
@@ -10941,7 +12842,7 @@ func (client DatabaseClient) listDataGuardAssociations(ctx context.Context, requ
 
 // ListDatabaseSoftwareImages Gets a list of the database software images in the specified compartment.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListDatabaseSoftwareImages.go.html to see an example of how to use ListDatabaseSoftwareImages API.
 func (client DatabaseClient) ListDatabaseSoftwareImages(ctx context.Context, request ListDatabaseSoftwareImagesRequest) (response ListDatabaseSoftwareImagesResponse, err error) {
@@ -10998,7 +12899,7 @@ func (client DatabaseClient) listDatabaseSoftwareImages(ctx context.Context, req
 
 // ListDatabaseUpgradeHistoryEntries Gets the upgrade history for a specified database in a bare metal or virtual machine DB system.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListDatabaseUpgradeHistoryEntries.go.html to see an example of how to use ListDatabaseUpgradeHistoryEntries API.
 func (client DatabaseClient) ListDatabaseUpgradeHistoryEntries(ctx context.Context, request ListDatabaseUpgradeHistoryEntriesRequest) (response ListDatabaseUpgradeHistoryEntriesResponse, err error) {
@@ -11055,7 +12956,7 @@ func (client DatabaseClient) listDatabaseUpgradeHistoryEntries(ctx context.Conte
 
 // ListDatabases Gets a list of the databases in the specified Database Home.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListDatabases.go.html to see an example of how to use ListDatabases API.
 func (client DatabaseClient) ListDatabases(ctx context.Context, request ListDatabasesRequest) (response ListDatabasesResponse, err error) {
@@ -11112,7 +13013,7 @@ func (client DatabaseClient) listDatabases(ctx context.Context, request common.O
 
 // ListDbHomePatchHistoryEntries Lists the history of patch operations on the specified Database Home.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListDbHomePatchHistoryEntries.go.html to see an example of how to use ListDbHomePatchHistoryEntries API.
 func (client DatabaseClient) ListDbHomePatchHistoryEntries(ctx context.Context, request ListDbHomePatchHistoryEntriesRequest) (response ListDbHomePatchHistoryEntriesResponse, err error) {
@@ -11169,7 +13070,7 @@ func (client DatabaseClient) listDbHomePatchHistoryEntries(ctx context.Context, 
 
 // ListDbHomePatches Lists patches applicable to the requested Database Home.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListDbHomePatches.go.html to see an example of how to use ListDbHomePatches API.
 func (client DatabaseClient) ListDbHomePatches(ctx context.Context, request ListDbHomePatchesRequest) (response ListDbHomePatchesResponse, err error) {
@@ -11226,7 +13127,7 @@ func (client DatabaseClient) listDbHomePatches(ctx context.Context, request comm
 
 // ListDbHomes Lists the Database Homes in the specified DB system and compartment. A Database Home is a directory where Oracle Database software is installed.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListDbHomes.go.html to see an example of how to use ListDbHomes API.
 func (client DatabaseClient) ListDbHomes(ctx context.Context, request ListDbHomesRequest) (response ListDbHomesResponse, err error) {
@@ -11283,7 +13184,7 @@ func (client DatabaseClient) listDbHomes(ctx context.Context, request common.OCI
 
 // ListDbNodes Lists the database nodes in the specified DB system and compartment. A database node is a server running database software.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListDbNodes.go.html to see an example of how to use ListDbNodes API.
 func (client DatabaseClient) ListDbNodes(ctx context.Context, request ListDbNodesRequest) (response ListDbNodesResponse, err error) {
@@ -11340,7 +13241,7 @@ func (client DatabaseClient) listDbNodes(ctx context.Context, request common.OCI
 
 // ListDbServers Lists the Exadata DB servers in the ExadataInfrastructureId and specified compartment.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListDbServers.go.html to see an example of how to use ListDbServers API.
 func (client DatabaseClient) ListDbServers(ctx context.Context, request ListDbServersRequest) (response ListDbServersResponse, err error) {
@@ -11397,7 +13298,7 @@ func (client DatabaseClient) listDbServers(ctx context.Context, request common.O
 
 // ListDbSystemComputePerformances Gets a list of expected compute performance parameters for a virtual machine DB system based on system configuration.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListDbSystemComputePerformances.go.html to see an example of how to use ListDbSystemComputePerformances API.
 func (client DatabaseClient) ListDbSystemComputePerformances(ctx context.Context, request ListDbSystemComputePerformancesRequest) (response ListDbSystemComputePerformancesResponse, err error) {
@@ -11443,7 +13344,7 @@ func (client DatabaseClient) listDbSystemComputePerformances(ctx context.Context
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/DbSystemComputePerformanceSummary/ListDbSystemComputePerformances"
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/DbSystem/ListDbSystemComputePerformances"
 		err = common.PostProcessServiceError(err, "Database", "ListDbSystemComputePerformances", apiReferenceLink)
 		return response, err
 	}
@@ -11454,7 +13355,7 @@ func (client DatabaseClient) listDbSystemComputePerformances(ctx context.Context
 
 // ListDbSystemPatchHistoryEntries Gets the history of the patch actions performed on the specified DB system.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListDbSystemPatchHistoryEntries.go.html to see an example of how to use ListDbSystemPatchHistoryEntries API.
 func (client DatabaseClient) ListDbSystemPatchHistoryEntries(ctx context.Context, request ListDbSystemPatchHistoryEntriesRequest) (response ListDbSystemPatchHistoryEntriesResponse, err error) {
@@ -11511,7 +13412,7 @@ func (client DatabaseClient) listDbSystemPatchHistoryEntries(ctx context.Context
 
 // ListDbSystemPatches Lists the patches applicable to the specified DB system.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListDbSystemPatches.go.html to see an example of how to use ListDbSystemPatches API.
 func (client DatabaseClient) ListDbSystemPatches(ctx context.Context, request ListDbSystemPatchesRequest) (response ListDbSystemPatchesResponse, err error) {
@@ -11568,7 +13469,7 @@ func (client DatabaseClient) listDbSystemPatches(ctx context.Context, request co
 
 // ListDbSystemShapes Gets a list of the shapes that can be used to launch a new DB system. The shape determines resources to allocate to the DB system - CPU cores and memory for VM shapes; CPU cores, memory and storage for non-VM (or bare metal) shapes.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListDbSystemShapes.go.html to see an example of how to use ListDbSystemShapes API.
 func (client DatabaseClient) ListDbSystemShapes(ctx context.Context, request ListDbSystemShapesRequest) (response ListDbSystemShapesResponse, err error) {
@@ -11625,7 +13526,7 @@ func (client DatabaseClient) listDbSystemShapes(ctx context.Context, request com
 
 // ListDbSystemStoragePerformances Gets a list of possible expected storage performance parameters of a VMDB System based on Configuration.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListDbSystemStoragePerformances.go.html to see an example of how to use ListDbSystemStoragePerformances API.
 func (client DatabaseClient) ListDbSystemStoragePerformances(ctx context.Context, request ListDbSystemStoragePerformancesRequest) (response ListDbSystemStoragePerformancesResponse, err error) {
@@ -11671,7 +13572,7 @@ func (client DatabaseClient) listDbSystemStoragePerformances(ctx context.Context
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/DbSystemStoragePerformanceSummary/ListDbSystemStoragePerformances"
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/DbSystem/ListDbSystemStoragePerformances"
 		err = common.PostProcessServiceError(err, "Database", "ListDbSystemStoragePerformances", apiReferenceLink)
 		return response, err
 	}
@@ -11682,7 +13583,7 @@ func (client DatabaseClient) listDbSystemStoragePerformances(ctx context.Context
 
 // ListDbSystemUpgradeHistoryEntries Gets the history of the upgrade actions performed on the specified DB system.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListDbSystemUpgradeHistoryEntries.go.html to see an example of how to use ListDbSystemUpgradeHistoryEntries API.
 func (client DatabaseClient) ListDbSystemUpgradeHistoryEntries(ctx context.Context, request ListDbSystemUpgradeHistoryEntriesRequest) (response ListDbSystemUpgradeHistoryEntriesResponse, err error) {
@@ -11741,7 +13642,7 @@ func (client DatabaseClient) listDbSystemUpgradeHistoryEntries(ctx context.Conte
 // **Note:** Deprecated for Exadata Cloud Service systems. Use the new resource model APIs (https://docs.cloud.oracle.com/iaas/Content/Database/Concepts/exaflexsystem.htm#exaflexsystem_topic-resource_model) instead.
 // For Exadata Cloud Service instances, support for this API will end on May 15th, 2021. See Switching an Exadata DB System to the New Resource Model and APIs (https://docs.cloud.oracle.com/iaas/Content/Database/Concepts/exaflexsystem_topic-resource_model_conversion.htm) for details on converting existing Exadata DB systems to the new resource model.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListDbSystems.go.html to see an example of how to use ListDbSystems API.
 func (client DatabaseClient) ListDbSystems(ctx context.Context, request ListDbSystemsRequest) (response ListDbSystemsResponse, err error) {
@@ -11798,7 +13699,7 @@ func (client DatabaseClient) listDbSystems(ctx context.Context, request common.O
 
 // ListDbVersions Gets a list of supported Oracle Database versions.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListDbVersions.go.html to see an example of how to use ListDbVersions API.
 func (client DatabaseClient) ListDbVersions(ctx context.Context, request ListDbVersionsRequest) (response ListDbVersionsResponse, err error) {
@@ -11856,7 +13757,7 @@ func (client DatabaseClient) listDbVersions(ctx context.Context, request common.
 // ListExadataInfrastructures Lists the Exadata infrastructure resources in the specified compartment. Applies to Exadata Cloud@Customer instances only.
 // To list the Exadata Cloud Service infrastructure resources in a compartment, use the  ListCloudExadataInfrastructures operation.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListExadataInfrastructures.go.html to see an example of how to use ListExadataInfrastructures API.
 func (client DatabaseClient) ListExadataInfrastructures(ctx context.Context, request ListExadataInfrastructuresRequest) (response ListExadataInfrastructuresResponse, err error) {
@@ -11913,7 +13814,7 @@ func (client DatabaseClient) listExadataInfrastructures(ctx context.Context, req
 
 // ListExternalContainerDatabases Gets a list of the external container databases in the specified compartment.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListExternalContainerDatabases.go.html to see an example of how to use ListExternalContainerDatabases API.
 func (client DatabaseClient) ListExternalContainerDatabases(ctx context.Context, request ListExternalContainerDatabasesRequest) (response ListExternalContainerDatabasesResponse, err error) {
@@ -11968,10 +13869,10 @@ func (client DatabaseClient) listExternalContainerDatabases(ctx context.Context,
 	return response, err
 }
 
-//listexternaldatabaseconnectorsummary allows to unmarshal list of polymorphic ExternalDatabaseConnectorSummary
+// listexternaldatabaseconnectorsummary allows to unmarshal list of polymorphic ExternalDatabaseConnectorSummary
 type listexternaldatabaseconnectorsummary []externaldatabaseconnectorsummary
 
-//UnmarshalPolymorphicJSON unmarshals polymorphic json list of items
+// UnmarshalPolymorphicJSON unmarshals polymorphic json list of items
 func (m *listexternaldatabaseconnectorsummary) UnmarshalPolymorphicJSON(data []byte) (interface{}, error) {
 	res := make([]ExternalDatabaseConnectorSummary, len(*m))
 	for i, v := range *m {
@@ -11986,7 +13887,7 @@ func (m *listexternaldatabaseconnectorsummary) UnmarshalPolymorphicJSON(data []b
 
 // ListExternalDatabaseConnectors Gets a list of the external database connectors in the specified compartment.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListExternalDatabaseConnectors.go.html to see an example of how to use ListExternalDatabaseConnectors API.
 func (client DatabaseClient) ListExternalDatabaseConnectors(ctx context.Context, request ListExternalDatabaseConnectorsRequest) (response ListExternalDatabaseConnectorsResponse, err error) {
@@ -12043,7 +13944,7 @@ func (client DatabaseClient) listExternalDatabaseConnectors(ctx context.Context,
 
 // ListExternalNonContainerDatabases Gets a list of the ExternalNonContainerDatabases in the specified compartment.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListExternalNonContainerDatabases.go.html to see an example of how to use ListExternalNonContainerDatabases API.
 func (client DatabaseClient) ListExternalNonContainerDatabases(ctx context.Context, request ListExternalNonContainerDatabasesRequest) (response ListExternalNonContainerDatabasesResponse, err error) {
@@ -12101,7 +14002,7 @@ func (client DatabaseClient) listExternalNonContainerDatabases(ctx context.Conte
 // ListExternalPluggableDatabases Gets a list of the CreateExternalPluggableDatabaseDetails
 // resources in the specified compartment.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListExternalPluggableDatabases.go.html to see an example of how to use ListExternalPluggableDatabases API.
 func (client DatabaseClient) ListExternalPluggableDatabases(ctx context.Context, request ListExternalPluggableDatabasesRequest) (response ListExternalPluggableDatabasesResponse, err error) {
@@ -12158,7 +14059,7 @@ func (client DatabaseClient) listExternalPluggableDatabases(ctx context.Context,
 
 // ListFlexComponents Gets a list of the flex components that can be used to launch a new DB system. The flex component determines resources to allocate to the DB system - Database Servers and Storage Servers.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListFlexComponents.go.html to see an example of how to use ListFlexComponents API.
 func (client DatabaseClient) ListFlexComponents(ctx context.Context, request ListFlexComponentsRequest) (response ListFlexComponentsResponse, err error) {
@@ -12215,7 +14116,7 @@ func (client DatabaseClient) listFlexComponents(ctx context.Context, request com
 
 // ListGiVersions Gets a list of supported GI versions for the Exadata Cloud@Customer VM cluster.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListGiVersions.go.html to see an example of how to use ListGiVersions API.
 func (client DatabaseClient) ListGiVersions(ctx context.Context, request ListGiVersionsRequest) (response ListGiVersionsResponse, err error) {
@@ -12272,7 +14173,7 @@ func (client DatabaseClient) listGiVersions(ctx context.Context, request common.
 
 // ListKeyStores Gets a list of key stores in the specified compartment.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListKeyStores.go.html to see an example of how to use ListKeyStores API.
 func (client DatabaseClient) ListKeyStores(ctx context.Context, request ListKeyStoresRequest) (response ListKeyStoresResponse, err error) {
@@ -12329,7 +14230,7 @@ func (client DatabaseClient) listKeyStores(ctx context.Context, request common.O
 
 // ListMaintenanceRunHistory Gets a list of the maintenance run histories in the specified compartment.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListMaintenanceRunHistory.go.html to see an example of how to use ListMaintenanceRunHistory API.
 func (client DatabaseClient) ListMaintenanceRunHistory(ctx context.Context, request ListMaintenanceRunHistoryRequest) (response ListMaintenanceRunHistoryResponse, err error) {
@@ -12386,7 +14287,7 @@ func (client DatabaseClient) listMaintenanceRunHistory(ctx context.Context, requ
 
 // ListMaintenanceRuns Gets a list of the maintenance runs in the specified compartment.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListMaintenanceRuns.go.html to see an example of how to use ListMaintenanceRuns API.
 func (client DatabaseClient) ListMaintenanceRuns(ctx context.Context, request ListMaintenanceRunsRequest) (response ListMaintenanceRunsResponse, err error) {
@@ -12441,9 +14342,66 @@ func (client DatabaseClient) listMaintenanceRuns(ctx context.Context, request co
 	return response, err
 }
 
+// ListOneoffPatches Lists one-off patches in the specified compartment.
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListOneoffPatches.go.html to see an example of how to use ListOneoffPatches API.
+func (client DatabaseClient) ListOneoffPatches(ctx context.Context, request ListOneoffPatchesRequest) (response ListOneoffPatchesResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.listOneoffPatches, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = ListOneoffPatchesResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = ListOneoffPatchesResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(ListOneoffPatchesResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into ListOneoffPatchesResponse")
+	}
+	return
+}
+
+// listOneoffPatches implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) listOneoffPatches(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/oneoffPatches", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response ListOneoffPatchesResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/OneoffPatch/ListOneoffPatches"
+		err = common.PostProcessServiceError(err, "Database", "ListOneoffPatches", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // ListPdbConversionHistoryEntries Gets the pluggable database conversion history for a specified database in a bare metal or virtual machine DB system.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListPdbConversionHistoryEntries.go.html to see an example of how to use ListPdbConversionHistoryEntries API.
 func (client DatabaseClient) ListPdbConversionHistoryEntries(ctx context.Context, request ListPdbConversionHistoryEntriesRequest) (response ListPdbConversionHistoryEntriesResponse, err error) {
@@ -12500,7 +14458,7 @@ func (client DatabaseClient) listPdbConversionHistoryEntries(ctx context.Context
 
 // ListPluggableDatabases Gets a list of the pluggable databases in a database or compartment. You must provide either a `databaseId` or `compartmentId` value.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListPluggableDatabases.go.html to see an example of how to use ListPluggableDatabases API.
 func (client DatabaseClient) ListPluggableDatabases(ctx context.Context, request ListPluggableDatabasesRequest) (response ListPluggableDatabasesResponse, err error) {
@@ -12555,9 +14513,66 @@ func (client DatabaseClient) listPluggableDatabases(ctx context.Context, request
 	return response, err
 }
 
+// ListSystemVersions Gets a list of supported Exadata system versions for a given shape and GI version.
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListSystemVersions.go.html to see an example of how to use ListSystemVersions API.
+func (client DatabaseClient) ListSystemVersions(ctx context.Context, request ListSystemVersionsRequest) (response ListSystemVersionsResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.listSystemVersions, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = ListSystemVersionsResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = ListSystemVersionsResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(ListSystemVersionsResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into ListSystemVersionsResponse")
+	}
+	return
+}
+
+// listSystemVersions implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) listSystemVersions(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/systemVersions", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response ListSystemVersionsResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/SystemVersionCollection/ListSystemVersions"
+		err = common.PostProcessServiceError(err, "Database", "ListSystemVersions", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // ListVmClusterNetworks Gets a list of the VM cluster networks in the specified compartment. Applies to Exadata Cloud@Customer instances only.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListVmClusterNetworks.go.html to see an example of how to use ListVmClusterNetworks API.
 func (client DatabaseClient) ListVmClusterNetworks(ctx context.Context, request ListVmClusterNetworksRequest) (response ListVmClusterNetworksResponse, err error) {
@@ -12614,7 +14629,7 @@ func (client DatabaseClient) listVmClusterNetworks(ctx context.Context, request 
 
 // ListVmClusterPatchHistoryEntries Gets the history of the patch actions performed on the specified VM cluster in an Exadata Cloud@Customer system.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListVmClusterPatchHistoryEntries.go.html to see an example of how to use ListVmClusterPatchHistoryEntries API.
 func (client DatabaseClient) ListVmClusterPatchHistoryEntries(ctx context.Context, request ListVmClusterPatchHistoryEntriesRequest) (response ListVmClusterPatchHistoryEntriesResponse, err error) {
@@ -12671,7 +14686,7 @@ func (client DatabaseClient) listVmClusterPatchHistoryEntries(ctx context.Contex
 
 // ListVmClusterPatches Lists the patches applicable to the specified VM cluster in an Exadata Cloud@Customer system.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListVmClusterPatches.go.html to see an example of how to use ListVmClusterPatches API.
 func (client DatabaseClient) ListVmClusterPatches(ctx context.Context, request ListVmClusterPatchesRequest) (response ListVmClusterPatchesResponse, err error) {
@@ -12728,7 +14743,7 @@ func (client DatabaseClient) listVmClusterPatches(ctx context.Context, request c
 
 // ListVmClusterUpdateHistoryEntries Gets the history of the maintenance update actions performed on the specified VM cluster. Applies to Exadata Cloud@Customer instances only.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListVmClusterUpdateHistoryEntries.go.html to see an example of how to use ListVmClusterUpdateHistoryEntries API.
 func (client DatabaseClient) ListVmClusterUpdateHistoryEntries(ctx context.Context, request ListVmClusterUpdateHistoryEntriesRequest) (response ListVmClusterUpdateHistoryEntriesResponse, err error) {
@@ -12785,7 +14800,7 @@ func (client DatabaseClient) listVmClusterUpdateHistoryEntries(ctx context.Conte
 
 // ListVmClusterUpdates Lists the maintenance updates that can be applied to the specified VM cluster. Applies to Exadata Cloud@Customer instances only.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListVmClusterUpdates.go.html to see an example of how to use ListVmClusterUpdates API.
 func (client DatabaseClient) ListVmClusterUpdates(ctx context.Context, request ListVmClusterUpdatesRequest) (response ListVmClusterUpdatesResponse, err error) {
@@ -12843,7 +14858,7 @@ func (client DatabaseClient) listVmClusterUpdates(ctx context.Context, request c
 // ListVmClusters Lists the VM clusters in the specified compartment. Applies to Exadata Cloud@Customer instances only.
 // To list the cloud VM clusters in an Exadata Cloud Service instance, use the ListCloudVmClusters operation.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListVmClusters.go.html to see an example of how to use ListVmClusters API.
 func (client DatabaseClient) ListVmClusters(ctx context.Context, request ListVmClustersRequest) (response ListVmClustersResponse, err error) {
@@ -12898,9 +14913,10 @@ func (client DatabaseClient) listVmClusters(ctx context.Context, request common.
 	return response, err
 }
 
-// LocalClonePluggableDatabase Clones and starts a pluggable database (PDB) in the same database (CDB) as the source PDB. The source PDB must be in the `READ_WRITE` openMode to perform the clone operation.
+// LocalClonePluggableDatabase **Deprecated.** Use CreatePluggableDatabase for Pluggable Database LocalClone Operation.
+// Clones and starts a pluggable database (PDB) in the same database (CDB) as the source PDB. The source PDB must be in the `READ_WRITE` openMode to perform the clone operation.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/LocalClonePluggableDatabase.go.html to see an example of how to use LocalClonePluggableDatabase API.
 func (client DatabaseClient) LocalClonePluggableDatabase(ctx context.Context, request LocalClonePluggableDatabaseRequest) (response LocalClonePluggableDatabaseResponse, err error) {
@@ -12963,7 +14979,7 @@ func (client DatabaseClient) localClonePluggableDatabase(ctx context.Context, re
 // MigrateExadataDbSystemResourceModel Migrates the Exadata DB system to the new Exadata resource model (https://docs.cloud.oracle.com/iaas/Content/Database/Concepts/exaflexsystem.htm#exaflexsystem_topic-resource_model).
 // All related resources will be migrated.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/MigrateExadataDbSystemResourceModel.go.html to see an example of how to use MigrateExadataDbSystemResourceModel API.
 func (client DatabaseClient) MigrateExadataDbSystemResourceModel(ctx context.Context, request MigrateExadataDbSystemResourceModelRequest) (response MigrateExadataDbSystemResourceModelResponse, err error) {
@@ -13025,7 +15041,7 @@ func (client DatabaseClient) migrateExadataDbSystemResourceModel(ctx context.Con
 
 // MigrateVaultKey Changes encryption key management from customer-managed, using the Vault service (https://docs.cloud.oracle.com/iaas/Content/KeyManagement/Concepts/keyoverview.htm), to Oracle-managed.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/MigrateVaultKey.go.html to see an example of how to use MigrateVaultKey API.
 func (client DatabaseClient) MigrateVaultKey(ctx context.Context, request MigrateVaultKeyRequest) (response MigrateVaultKeyResponse, err error) {
@@ -13087,7 +15103,7 @@ func (client DatabaseClient) migrateVaultKey(ctx context.Context, request common
 
 // ModifyDatabaseManagement Updates one or more attributes of the Database Management service for the database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ModifyDatabaseManagement.go.html to see an example of how to use ModifyDatabaseManagement API.
 func (client DatabaseClient) ModifyDatabaseManagement(ctx context.Context, request ModifyDatabaseManagementRequest) (response ModifyDatabaseManagementResponse, err error) {
@@ -13149,7 +15165,7 @@ func (client DatabaseClient) modifyDatabaseManagement(ctx context.Context, reque
 
 // ModifyPluggableDatabaseManagement Updates one or more attributes of the Database Management service for the pluggable database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ModifyPluggableDatabaseManagement.go.html to see an example of how to use ModifyPluggableDatabaseManagement API.
 func (client DatabaseClient) ModifyPluggableDatabaseManagement(ctx context.Context, request ModifyPluggableDatabaseManagementRequest) (response ModifyPluggableDatabaseManagementResponse, err error) {
@@ -13209,9 +15225,71 @@ func (client DatabaseClient) modifyPluggableDatabaseManagement(ctx context.Conte
 	return response, err
 }
 
+// RefreshPluggableDatabase Refreshes a pluggable database (PDB) Refreshable clone.
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/RefreshPluggableDatabase.go.html to see an example of how to use RefreshPluggableDatabase API.
+func (client DatabaseClient) RefreshPluggableDatabase(ctx context.Context, request RefreshPluggableDatabaseRequest) (response RefreshPluggableDatabaseResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+
+	if !(request.OpcRetryToken != nil && *request.OpcRetryToken != "") {
+		request.OpcRetryToken = common.String(common.RetryToken())
+	}
+
+	ociResponse, err = common.Retry(ctx, request, client.refreshPluggableDatabase, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = RefreshPluggableDatabaseResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = RefreshPluggableDatabaseResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(RefreshPluggableDatabaseResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into RefreshPluggableDatabaseResponse")
+	}
+	return
+}
+
+// refreshPluggableDatabase implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) refreshPluggableDatabase(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/pluggableDatabases/{pluggableDatabaseId}/actions/refresh", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response RefreshPluggableDatabaseResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/PluggableDatabase/RefreshPluggableDatabase"
+		err = common.PostProcessServiceError(err, "Database", "RefreshPluggableDatabase", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // RegisterAutonomousDatabaseDataSafe Asynchronously registers this Autonomous Database with Data Safe.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/RegisterAutonomousDatabaseDataSafe.go.html to see an example of how to use RegisterAutonomousDatabaseDataSafe API.
 func (client DatabaseClient) RegisterAutonomousDatabaseDataSafe(ctx context.Context, request RegisterAutonomousDatabaseDataSafeRequest) (response RegisterAutonomousDatabaseDataSafeResponse, err error) {
@@ -13268,7 +15346,7 @@ func (client DatabaseClient) registerAutonomousDatabaseDataSafe(ctx context.Cont
 
 // ReinstateAutonomousContainerDatabaseDataguardAssociation Reinstates a disabled standby Autonomous Container Database, identified by the autonomousContainerDatabaseId parameter, to an active standby Autonomous Container Database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ReinstateAutonomousContainerDatabaseDataguardAssociation.go.html to see an example of how to use ReinstateAutonomousContainerDatabaseDataguardAssociation API.
 func (client DatabaseClient) ReinstateAutonomousContainerDatabaseDataguardAssociation(ctx context.Context, request ReinstateAutonomousContainerDatabaseDataguardAssociationRequest) (response ReinstateAutonomousContainerDatabaseDataguardAssociationResponse, err error) {
@@ -13325,7 +15403,7 @@ func (client DatabaseClient) reinstateAutonomousContainerDatabaseDataguardAssoci
 
 // ReinstateDataGuardAssociation Reinstates the database identified by the `databaseId` parameter into the standby role in a Data Guard association.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ReinstateDataGuardAssociation.go.html to see an example of how to use ReinstateDataGuardAssociation API.
 func (client DatabaseClient) ReinstateDataGuardAssociation(ctx context.Context, request ReinstateDataGuardAssociationRequest) (response ReinstateDataGuardAssociationResponse, err error) {
@@ -13380,10 +15458,11 @@ func (client DatabaseClient) reinstateDataGuardAssociation(ctx context.Context, 
 	return response, err
 }
 
-// RemoteClonePluggableDatabase Clones a pluggable database (PDB) to a different database from the source PDB. The cloned PDB will be started upon completion of the clone operation. The source PDB must be in the `READ_WRITE` openMode when performing the clone.
+// RemoteClonePluggableDatabase **Deprecated.** Use CreatePluggableDatabase for Pluggable Database RemoteClone Operation.
+// Clones a pluggable database (PDB) to a different database from the source PDB. The cloned PDB will be started upon completion of the clone operation. The source PDB must be in the `READ_WRITE` openMode when performing the clone.
 // For Exadata Cloud@Customer instances, the source pluggable database (PDB) must be on the same Exadata Infrastructure as the target container database (CDB) to create a remote clone.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/RemoteClonePluggableDatabase.go.html to see an example of how to use RemoteClonePluggableDatabase API.
 func (client DatabaseClient) RemoteClonePluggableDatabase(ctx context.Context, request RemoteClonePluggableDatabaseRequest) (response RemoteClonePluggableDatabaseResponse, err error) {
@@ -13445,7 +15524,7 @@ func (client DatabaseClient) remoteClonePluggableDatabase(ctx context.Context, r
 
 // RemoveVirtualMachineFromCloudVmCluster Remove Virtual Machines from the Cloud VM cluster. Applies to Exadata Cloud instances only.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/RemoveVirtualMachineFromCloudVmCluster.go.html to see an example of how to use RemoveVirtualMachineFromCloudVmCluster API.
 func (client DatabaseClient) RemoveVirtualMachineFromCloudVmCluster(ctx context.Context, request RemoveVirtualMachineFromCloudVmClusterRequest) (response RemoveVirtualMachineFromCloudVmClusterResponse, err error) {
@@ -13507,7 +15586,7 @@ func (client DatabaseClient) removeVirtualMachineFromCloudVmCluster(ctx context.
 
 // RemoveVirtualMachineFromVmCluster Remove Virtual Machines from the VM cluster. Applies to Exadata Cloud@Customer instances only.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/RemoveVirtualMachineFromVmCluster.go.html to see an example of how to use RemoveVirtualMachineFromVmCluster API.
 func (client DatabaseClient) RemoveVirtualMachineFromVmCluster(ctx context.Context, request RemoveVirtualMachineFromVmClusterRequest) (response RemoveVirtualMachineFromVmClusterResponse, err error) {
@@ -13570,7 +15649,7 @@ func (client DatabaseClient) removeVirtualMachineFromVmCluster(ctx context.Conte
 // ResizeVmClusterNetwork Adds or removes Db server network nodes to extend or shrink the existing VM cluster network. Applies to Exadata
 // Cloud@Customer instances only.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ResizeVmClusterNetwork.go.html to see an example of how to use ResizeVmClusterNetwork API.
 func (client DatabaseClient) ResizeVmClusterNetwork(ctx context.Context, request ResizeVmClusterNetworkRequest) (response ResizeVmClusterNetworkResponse, err error) {
@@ -13630,9 +15709,71 @@ func (client DatabaseClient) resizeVmClusterNetwork(ctx context.Context, request
 	return response, err
 }
 
+// ResourcePoolShapes Lists available resource pools shapes.
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ResourcePoolShapes.go.html to see an example of how to use ResourcePoolShapes API.
+func (client DatabaseClient) ResourcePoolShapes(ctx context.Context, request ResourcePoolShapesRequest) (response ResourcePoolShapesResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+
+	if !(request.OpcRetryToken != nil && *request.OpcRetryToken != "") {
+		request.OpcRetryToken = common.String(common.RetryToken())
+	}
+
+	ociResponse, err = common.Retry(ctx, request, client.resourcePoolShapes, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = ResourcePoolShapesResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = ResourcePoolShapesResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(ResourcePoolShapesResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into ResourcePoolShapesResponse")
+	}
+	return
+}
+
+// resourcePoolShapes implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) resourcePoolShapes(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/autonomousDatabases/actions/listResourcePoolShapes", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response ResourcePoolShapesResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/AutonomousDatabase/ResourcePoolShapes"
+		err = common.PostProcessServiceError(err, "Database", "ResourcePoolShapes", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // RestartAutonomousContainerDatabase Rolling restarts the specified Autonomous Container Database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/RestartAutonomousContainerDatabase.go.html to see an example of how to use RestartAutonomousContainerDatabase API.
 func (client DatabaseClient) RestartAutonomousContainerDatabase(ctx context.Context, request RestartAutonomousContainerDatabaseRequest) (response RestartAutonomousContainerDatabaseResponse, err error) {
@@ -13689,7 +15830,7 @@ func (client DatabaseClient) restartAutonomousContainerDatabase(ctx context.Cont
 
 // RestartAutonomousDatabase Restarts the specified Autonomous Database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/RestartAutonomousDatabase.go.html to see an example of how to use RestartAutonomousDatabase API.
 func (client DatabaseClient) RestartAutonomousDatabase(ctx context.Context, request RestartAutonomousDatabaseRequest) (response RestartAutonomousDatabaseResponse, err error) {
@@ -13746,7 +15887,7 @@ func (client DatabaseClient) restartAutonomousDatabase(ctx context.Context, requ
 
 // RestoreAutonomousDatabase Restores an Autonomous Database based on the provided request parameters.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/RestoreAutonomousDatabase.go.html to see an example of how to use RestoreAutonomousDatabase API.
 func (client DatabaseClient) RestoreAutonomousDatabase(ctx context.Context, request RestoreAutonomousDatabaseRequest) (response RestoreAutonomousDatabaseResponse, err error) {
@@ -13803,7 +15944,7 @@ func (client DatabaseClient) restoreAutonomousDatabase(ctx context.Context, requ
 
 // RestoreDatabase Restore a Database based on the request parameters you provide.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/RestoreDatabase.go.html to see an example of how to use RestoreDatabase API.
 func (client DatabaseClient) RestoreDatabase(ctx context.Context, request RestoreDatabaseRequest) (response RestoreDatabaseResponse, err error) {
@@ -13860,7 +16001,7 @@ func (client DatabaseClient) restoreDatabase(ctx context.Context, request common
 
 // RotateAutonomousContainerDatabaseEncryptionKey Creates a new version of an existing Vault service (https://docs.cloud.oracle.com/iaas/Content/KeyManagement/Concepts/keyoverview.htm) key.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/RotateAutonomousContainerDatabaseEncryptionKey.go.html to see an example of how to use RotateAutonomousContainerDatabaseEncryptionKey API.
 func (client DatabaseClient) RotateAutonomousContainerDatabaseEncryptionKey(ctx context.Context, request RotateAutonomousContainerDatabaseEncryptionKeyRequest) (response RotateAutonomousContainerDatabaseEncryptionKeyResponse, err error) {
@@ -13922,7 +16063,7 @@ func (client DatabaseClient) rotateAutonomousContainerDatabaseEncryptionKey(ctx 
 
 // RotateAutonomousDatabaseEncryptionKey Rotate existing AutonomousDatabase Vault service (https://docs.cloud.oracle.com/iaas/Content/KeyManagement/Concepts/keyoverview.htm) key.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/RotateAutonomousDatabaseEncryptionKey.go.html to see an example of how to use RotateAutonomousDatabaseEncryptionKey API.
 func (client DatabaseClient) RotateAutonomousDatabaseEncryptionKey(ctx context.Context, request RotateAutonomousDatabaseEncryptionKeyRequest) (response RotateAutonomousDatabaseEncryptionKeyResponse, err error) {
@@ -13982,9 +16123,133 @@ func (client DatabaseClient) rotateAutonomousDatabaseEncryptionKey(ctx context.C
 	return response, err
 }
 
+// RotateAutonomousVmClusterOrdsCerts Rotates the Oracle REST Data Services (ORDS) certificates for Autonomous Exadata VM cluster.
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/RotateAutonomousVmClusterOrdsCerts.go.html to see an example of how to use RotateAutonomousVmClusterOrdsCerts API.
+func (client DatabaseClient) RotateAutonomousVmClusterOrdsCerts(ctx context.Context, request RotateAutonomousVmClusterOrdsCertsRequest) (response RotateAutonomousVmClusterOrdsCertsResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+
+	if !(request.OpcRetryToken != nil && *request.OpcRetryToken != "") {
+		request.OpcRetryToken = common.String(common.RetryToken())
+	}
+
+	ociResponse, err = common.Retry(ctx, request, client.rotateAutonomousVmClusterOrdsCerts, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = RotateAutonomousVmClusterOrdsCertsResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = RotateAutonomousVmClusterOrdsCertsResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(RotateAutonomousVmClusterOrdsCertsResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into RotateAutonomousVmClusterOrdsCertsResponse")
+	}
+	return
+}
+
+// rotateAutonomousVmClusterOrdsCerts implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) rotateAutonomousVmClusterOrdsCerts(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/autonomousVmClusters/{autonomousVmClusterId}/actions/rotateOrdsCerts", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response RotateAutonomousVmClusterOrdsCertsResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/AutonomousVmCluster/RotateAutonomousVmClusterOrdsCerts"
+		err = common.PostProcessServiceError(err, "Database", "RotateAutonomousVmClusterOrdsCerts", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
+// RotateAutonomousVmClusterSslCerts Rotates the SSL certificates for Autonomous Exadata VM cluster.
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/RotateAutonomousVmClusterSslCerts.go.html to see an example of how to use RotateAutonomousVmClusterSslCerts API.
+func (client DatabaseClient) RotateAutonomousVmClusterSslCerts(ctx context.Context, request RotateAutonomousVmClusterSslCertsRequest) (response RotateAutonomousVmClusterSslCertsResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+
+	if !(request.OpcRetryToken != nil && *request.OpcRetryToken != "") {
+		request.OpcRetryToken = common.String(common.RetryToken())
+	}
+
+	ociResponse, err = common.Retry(ctx, request, client.rotateAutonomousVmClusterSslCerts, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = RotateAutonomousVmClusterSslCertsResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = RotateAutonomousVmClusterSslCertsResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(RotateAutonomousVmClusterSslCertsResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into RotateAutonomousVmClusterSslCertsResponse")
+	}
+	return
+}
+
+// rotateAutonomousVmClusterSslCerts implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) rotateAutonomousVmClusterSslCerts(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/autonomousVmClusters/{autonomousVmClusterId}/actions/rotateSslCerts", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response RotateAutonomousVmClusterSslCertsResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/AutonomousVmCluster/RotateAutonomousVmClusterSslCerts"
+		err = common.PostProcessServiceError(err, "Database", "RotateAutonomousVmClusterSslCerts", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // RotateCloudAutonomousVmClusterOrdsCerts Rotates the Oracle REST Data Services (ORDS) certificates for a cloud Autonomous Exadata VM cluster.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/RotateCloudAutonomousVmClusterOrdsCerts.go.html to see an example of how to use RotateCloudAutonomousVmClusterOrdsCerts API.
 func (client DatabaseClient) RotateCloudAutonomousVmClusterOrdsCerts(ctx context.Context, request RotateCloudAutonomousVmClusterOrdsCertsRequest) (response RotateCloudAutonomousVmClusterOrdsCertsResponse, err error) {
@@ -14046,7 +16311,7 @@ func (client DatabaseClient) rotateCloudAutonomousVmClusterOrdsCerts(ctx context
 
 // RotateCloudAutonomousVmClusterSslCerts Rotates the SSL certficates for a cloud Autonomous Exadata VM cluster.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/RotateCloudAutonomousVmClusterSslCerts.go.html to see an example of how to use RotateCloudAutonomousVmClusterSslCerts API.
 func (client DatabaseClient) RotateCloudAutonomousVmClusterSslCerts(ctx context.Context, request RotateCloudAutonomousVmClusterSslCertsRequest) (response RotateCloudAutonomousVmClusterSslCertsResponse, err error) {
@@ -14108,7 +16373,7 @@ func (client DatabaseClient) rotateCloudAutonomousVmClusterSslCerts(ctx context.
 
 // RotateOrdsCerts **Deprecated.** Use the RotateCloudAutonomousVmClusterOrdsCerts to rotate Oracle REST Data Services (ORDS) certs for an Autonomous Exadata VM cluster instead.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/RotateOrdsCerts.go.html to see an example of how to use RotateOrdsCerts API.
 func (client DatabaseClient) RotateOrdsCerts(ctx context.Context, request RotateOrdsCertsRequest) (response RotateOrdsCertsResponse, err error) {
@@ -14168,9 +16433,71 @@ func (client DatabaseClient) rotateOrdsCerts(ctx context.Context, request common
 	return response, err
 }
 
+// RotatePluggableDatabaseEncryptionKey Create a new version of the existing encryption key.
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/RotatePluggableDatabaseEncryptionKey.go.html to see an example of how to use RotatePluggableDatabaseEncryptionKey API.
+func (client DatabaseClient) RotatePluggableDatabaseEncryptionKey(ctx context.Context, request RotatePluggableDatabaseEncryptionKeyRequest) (response RotatePluggableDatabaseEncryptionKeyResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+
+	if !(request.OpcRetryToken != nil && *request.OpcRetryToken != "") {
+		request.OpcRetryToken = common.String(common.RetryToken())
+	}
+
+	ociResponse, err = common.Retry(ctx, request, client.rotatePluggableDatabaseEncryptionKey, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = RotatePluggableDatabaseEncryptionKeyResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = RotatePluggableDatabaseEncryptionKeyResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(RotatePluggableDatabaseEncryptionKeyResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into RotatePluggableDatabaseEncryptionKeyResponse")
+	}
+	return
+}
+
+// rotatePluggableDatabaseEncryptionKey implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) rotatePluggableDatabaseEncryptionKey(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/pluggableDatabases/{pluggableDatabaseId}/actions/rotateKey", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response RotatePluggableDatabaseEncryptionKeyResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/PluggableDatabase/RotatePluggableDatabaseEncryptionKey"
+		err = common.PostProcessServiceError(err, "Database", "RotatePluggableDatabaseEncryptionKey", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // RotateSslCerts **Deprecated.** Use the RotateCloudAutonomousVmClusterSslCerts to rotate SSL certs for an Autonomous Exadata VM cluster instead.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/RotateSslCerts.go.html to see an example of how to use RotateSslCerts API.
 func (client DatabaseClient) RotateSslCerts(ctx context.Context, request RotateSslCertsRequest) (response RotateSslCertsResponse, err error) {
@@ -14232,7 +16559,7 @@ func (client DatabaseClient) rotateSslCerts(ctx context.Context, request common.
 
 // RotateVaultKey Creates a new version of an existing Vault service (https://docs.cloud.oracle.com/iaas/Content/KeyManagement/Concepts/keyoverview.htm) key.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/RotateVaultKey.go.html to see an example of how to use RotateVaultKey API.
 func (client DatabaseClient) RotateVaultKey(ctx context.Context, request RotateVaultKeyRequest) (response RotateVaultKeyResponse, err error) {
@@ -14292,10 +16619,67 @@ func (client DatabaseClient) rotateVaultKey(ctx context.Context, request common.
 	return response, err
 }
 
+// SaasAdminUserStatus This operation gets SaaS administrative user status of the Autonomous Database.
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/SaasAdminUserStatus.go.html to see an example of how to use SaasAdminUserStatus API.
+func (client DatabaseClient) SaasAdminUserStatus(ctx context.Context, request SaasAdminUserStatusRequest) (response SaasAdminUserStatusResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.saasAdminUserStatus, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = SaasAdminUserStatusResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = SaasAdminUserStatusResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(SaasAdminUserStatusResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into SaasAdminUserStatusResponse")
+	}
+	return
+}
+
+// saasAdminUserStatus implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) saasAdminUserStatus(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/autonomousDatabases/{autonomousDatabaseId}/actions/getSaasAdminUserStatus", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response SaasAdminUserStatusResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/AutonomousDatabase/SaasAdminUserStatus"
+		err = common.PostProcessServiceError(err, "Database", "SaasAdminUserStatus", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // ScanExternalContainerDatabasePluggableDatabases Scans for pluggable databases in the specified external container database.
 // This operation will return un-registered pluggable databases in the GetWorkRequest operation.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ScanExternalContainerDatabasePluggableDatabases.go.html to see an example of how to use ScanExternalContainerDatabasePluggableDatabases API.
 func (client DatabaseClient) ScanExternalContainerDatabasePluggableDatabases(ctx context.Context, request ScanExternalContainerDatabasePluggableDatabasesRequest) (response ScanExternalContainerDatabasePluggableDatabasesResponse, err error) {
@@ -14357,7 +16741,7 @@ func (client DatabaseClient) scanExternalContainerDatabasePluggableDatabases(ctx
 
 // ShrinkAutonomousDatabase This operation shrinks the current allocated storage down to the current actual used data storage (actualUsedDataStorageSizeInTBs). The if the base storage value for the database (dataStorageSizeInTBs) is larger than the actualUsedDataStorageSizeInTBs value, you are billed for the base storage value.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ShrinkAutonomousDatabase.go.html to see an example of how to use ShrinkAutonomousDatabase API.
 func (client DatabaseClient) ShrinkAutonomousDatabase(ctx context.Context, request ShrinkAutonomousDatabaseRequest) (response ShrinkAutonomousDatabaseResponse, err error) {
@@ -14414,7 +16798,7 @@ func (client DatabaseClient) shrinkAutonomousDatabase(ctx context.Context, reque
 
 // StartAutonomousDatabase Starts the specified Autonomous Database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/StartAutonomousDatabase.go.html to see an example of how to use StartAutonomousDatabase API.
 func (client DatabaseClient) StartAutonomousDatabase(ctx context.Context, request StartAutonomousDatabaseRequest) (response StartAutonomousDatabaseResponse, err error) {
@@ -14471,7 +16855,7 @@ func (client DatabaseClient) startAutonomousDatabase(ctx context.Context, reques
 
 // StartPluggableDatabase Starts a stopped pluggable database. The `openMode` value of the pluggable database will be `READ_WRITE` upon completion.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/StartPluggableDatabase.go.html to see an example of how to use StartPluggableDatabase API.
 func (client DatabaseClient) StartPluggableDatabase(ctx context.Context, request StartPluggableDatabaseRequest) (response StartPluggableDatabaseResponse, err error) {
@@ -14533,7 +16917,7 @@ func (client DatabaseClient) startPluggableDatabase(ctx context.Context, request
 
 // StopAutonomousDatabase Stops the specified Autonomous Database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/StopAutonomousDatabase.go.html to see an example of how to use StopAutonomousDatabase API.
 func (client DatabaseClient) StopAutonomousDatabase(ctx context.Context, request StopAutonomousDatabaseRequest) (response StopAutonomousDatabaseResponse, err error) {
@@ -14590,7 +16974,7 @@ func (client DatabaseClient) stopAutonomousDatabase(ctx context.Context, request
 
 // StopPluggableDatabase Stops a pluggable database. The `openMode` value of the pluggable database will be `MOUNTED` upon completion.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/StopPluggableDatabase.go.html to see an example of how to use StopPluggableDatabase API.
 func (client DatabaseClient) StopPluggableDatabase(ctx context.Context, request StopPluggableDatabaseRequest) (response StopPluggableDatabaseResponse, err error) {
@@ -14653,7 +17037,7 @@ func (client DatabaseClient) stopPluggableDatabase(ctx context.Context, request 
 // SwitchoverAutonomousContainerDatabaseDataguardAssociation Switches over the primary Autonomous Container Database of an Autonomous Data Guard peer association to standby role. The standby Autonomous Container Database associated with autonomousContainerDatabaseDataguardAssociationId assumes the primary Autonomous Container Database role.
 // A switchover incurs no data loss.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/SwitchoverAutonomousContainerDatabaseDataguardAssociation.go.html to see an example of how to use SwitchoverAutonomousContainerDatabaseDataguardAssociation API.
 func (client DatabaseClient) SwitchoverAutonomousContainerDatabaseDataguardAssociation(ctx context.Context, request SwitchoverAutonomousContainerDatabaseDataguardAssociationRequest) (response SwitchoverAutonomousContainerDatabaseDataguardAssociationResponse, err error) {
@@ -14708,9 +17092,14 @@ func (client DatabaseClient) switchoverAutonomousContainerDatabaseDataguardAssoc
 	return response, err
 }
 
-// SwitchoverAutonomousDatabase Initiates a switchover of the specified Autonomous Database to the associated standby database. Applicable only to databases with Autonomous Data Guard enabled. To perform a switchover to a standby located in a remote region, specify the OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the remote standby using the `peerDbId` parameter.
+// SwitchoverAutonomousDatabase Initiates a switchover of the specified Autonomous Database to the associated peer database. Applicable only to databases with Disaster Recovery enabled.
+// This API should be called in the remote region where the peer database resides.
+// Below parameter is optional:
+//   - `peerDbId`
+//     Use this parameter to specify the database OCID of the Disaster Recovery peer, which is located in a different (remote) region from the current peer database.
+//     If this parameter is not provided, the switchover will happen in the same region.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/SwitchoverAutonomousDatabase.go.html to see an example of how to use SwitchoverAutonomousDatabase API.
 func (client DatabaseClient) SwitchoverAutonomousDatabase(ctx context.Context, request SwitchoverAutonomousDatabaseRequest) (response SwitchoverAutonomousDatabaseResponse, err error) {
@@ -14774,7 +17163,7 @@ func (client DatabaseClient) switchoverAutonomousDatabase(ctx context.Context, r
 // standby database associated with the `dataGuardAssociationId` assumes the primary database role.
 // A switchover guarantees no data loss.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/SwitchoverDataGuardAssociation.go.html to see an example of how to use SwitchoverDataGuardAssociation API.
 func (client DatabaseClient) SwitchoverDataGuardAssociation(ctx context.Context, request SwitchoverDataGuardAssociationRequest) (response SwitchoverDataGuardAssociationResponse, err error) {
@@ -14831,7 +17220,7 @@ func (client DatabaseClient) switchoverDataGuardAssociation(ctx context.Context,
 
 // TerminateAutonomousContainerDatabase Terminates an Autonomous Container Database, which permanently deletes the container database and any databases within the container database. The database data is local to the Autonomous Exadata Infrastructure and will be lost when the container database is terminated. Oracle recommends that you back up any data in the Autonomous Container Database prior to terminating it.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/TerminateAutonomousContainerDatabase.go.html to see an example of how to use TerminateAutonomousContainerDatabase API.
 func (client DatabaseClient) TerminateAutonomousContainerDatabase(ctx context.Context, request TerminateAutonomousContainerDatabaseRequest) (response TerminateAutonomousContainerDatabaseResponse, err error) {
@@ -14888,7 +17277,7 @@ func (client DatabaseClient) terminateAutonomousContainerDatabase(ctx context.Co
 
 // TerminateAutonomousExadataInfrastructure **Deprecated.** To terminate an Exadata Infrastructure resource in the Oracle cloud, use the DeleteCloudExadataInfrastructure operation. To delete an Autonomous Exadata VM cluster in the Oracle cloud, use the DeleteCloudAutonomousVmCluster operation.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/TerminateAutonomousExadataInfrastructure.go.html to see an example of how to use TerminateAutonomousExadataInfrastructure API.
 func (client DatabaseClient) TerminateAutonomousExadataInfrastructure(ctx context.Context, request TerminateAutonomousExadataInfrastructureRequest) (response TerminateAutonomousExadataInfrastructureResponse, err error) {
@@ -14947,7 +17336,7 @@ func (client DatabaseClient) terminateAutonomousExadataInfrastructure(ctx contex
 // **Note:** Deprecated for Exadata Cloud Service systems. Use the new resource model APIs (https://docs.cloud.oracle.com/iaas/Content/Database/Concepts/exaflexsystem.htm#exaflexsystem_topic-resource_model) instead.
 // For Exadata Cloud Service instances, support for this API will end on May 15th, 2021. See Switching an Exadata DB System to the New Resource Model and APIs (https://docs.cloud.oracle.com/iaas/Content/Database/Concepts/exaflexsystem_topic-resource_model_conversion.htm) for details on converting existing Exadata DB systems to the new resource model.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/TerminateDbSystem.go.html to see an example of how to use TerminateDbSystem API.
 func (client DatabaseClient) TerminateDbSystem(ctx context.Context, request TerminateDbSystemRequest) (response TerminateDbSystemResponse, err error) {
@@ -15004,7 +17393,7 @@ func (client DatabaseClient) terminateDbSystem(ctx context.Context, request comm
 
 // UpdateAutonomousContainerDatabase Updates the properties of an Autonomous Container Database, such as display name, maintenance preference, backup retention, and tags.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/UpdateAutonomousContainerDatabase.go.html to see an example of how to use UpdateAutonomousContainerDatabase API.
 func (client DatabaseClient) UpdateAutonomousContainerDatabase(ctx context.Context, request UpdateAutonomousContainerDatabaseRequest) (response UpdateAutonomousContainerDatabaseResponse, err error) {
@@ -15061,7 +17450,7 @@ func (client DatabaseClient) updateAutonomousContainerDatabase(ctx context.Conte
 
 // UpdateAutonomousContainerDatabaseDataguardAssociation Update Autonomous Data Guard association.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/UpdateAutonomousContainerDatabaseDataguardAssociation.go.html to see an example of how to use UpdateAutonomousContainerDatabaseDataguardAssociation API.
 func (client DatabaseClient) UpdateAutonomousContainerDatabaseDataguardAssociation(ctx context.Context, request UpdateAutonomousContainerDatabaseDataguardAssociationRequest) (response UpdateAutonomousContainerDatabaseDataguardAssociationResponse, err error) {
@@ -15118,7 +17507,7 @@ func (client DatabaseClient) updateAutonomousContainerDatabaseDataguardAssociati
 
 // UpdateAutonomousDatabase Updates one or more attributes of the specified Autonomous Database. See the UpdateAutonomousDatabaseDetails resource for a full list of attributes that can be updated.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/UpdateAutonomousDatabase.go.html to see an example of how to use UpdateAutonomousDatabase API.
 func (client DatabaseClient) UpdateAutonomousDatabase(ctx context.Context, request UpdateAutonomousDatabaseRequest) (response UpdateAutonomousDatabaseResponse, err error) {
@@ -15173,9 +17562,66 @@ func (client DatabaseClient) updateAutonomousDatabase(ctx context.Context, reque
 	return response, err
 }
 
+// UpdateAutonomousDatabaseBackup Updates the Autonomous Database backup of the specified database based on the request parameters.
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/UpdateAutonomousDatabaseBackup.go.html to see an example of how to use UpdateAutonomousDatabaseBackup API.
+func (client DatabaseClient) UpdateAutonomousDatabaseBackup(ctx context.Context, request UpdateAutonomousDatabaseBackupRequest) (response UpdateAutonomousDatabaseBackupResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.updateAutonomousDatabaseBackup, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = UpdateAutonomousDatabaseBackupResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = UpdateAutonomousDatabaseBackupResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(UpdateAutonomousDatabaseBackupResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into UpdateAutonomousDatabaseBackupResponse")
+	}
+	return
+}
+
+// updateAutonomousDatabaseBackup implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) updateAutonomousDatabaseBackup(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodPut, "/autonomousDatabaseBackups/{autonomousDatabaseBackupId}", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response UpdateAutonomousDatabaseBackupResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/AutonomousDatabaseBackup/UpdateAutonomousDatabaseBackup"
+		err = common.PostProcessServiceError(err, "Database", "UpdateAutonomousDatabaseBackup", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // UpdateAutonomousDatabaseRegionalWallet Updates the Autonomous Database regional wallet.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/UpdateAutonomousDatabaseRegionalWallet.go.html to see an example of how to use UpdateAutonomousDatabaseRegionalWallet API.
 func (client DatabaseClient) UpdateAutonomousDatabaseRegionalWallet(ctx context.Context, request UpdateAutonomousDatabaseRegionalWalletRequest) (response UpdateAutonomousDatabaseRegionalWalletResponse, err error) {
@@ -15232,7 +17678,7 @@ func (client DatabaseClient) updateAutonomousDatabaseRegionalWallet(ctx context.
 
 // UpdateAutonomousDatabaseWallet Updates the wallet for the specified Autonomous Database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/UpdateAutonomousDatabaseWallet.go.html to see an example of how to use UpdateAutonomousDatabaseWallet API.
 func (client DatabaseClient) UpdateAutonomousDatabaseWallet(ctx context.Context, request UpdateAutonomousDatabaseWalletRequest) (response UpdateAutonomousDatabaseWalletResponse, err error) {
@@ -15289,7 +17735,7 @@ func (client DatabaseClient) updateAutonomousDatabaseWallet(ctx context.Context,
 
 // UpdateAutonomousExadataInfrastructure **Deprecated.** Use the UpdateCloudExadataInfrastructure operation to update an Exadata Infrastructure resource and  UpdateCloudAutonomousVmCluster operation to update an Autonomous Exadata VM cluster.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/UpdateAutonomousExadataInfrastructure.go.html to see an example of how to use UpdateAutonomousExadataInfrastructure API.
 func (client DatabaseClient) UpdateAutonomousExadataInfrastructure(ctx context.Context, request UpdateAutonomousExadataInfrastructureRequest) (response UpdateAutonomousExadataInfrastructureResponse, err error) {
@@ -15346,7 +17792,7 @@ func (client DatabaseClient) updateAutonomousExadataInfrastructure(ctx context.C
 
 // UpdateAutonomousVmCluster Updates the specified Autonomous VM cluster for the Exadata Cloud@Customer system.To update an Autonomous VM Cluster in the Oracle cloud, see UpdateCloudAutonomousVmCluster.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/UpdateAutonomousVmCluster.go.html to see an example of how to use UpdateAutonomousVmCluster API.
 func (client DatabaseClient) UpdateAutonomousVmCluster(ctx context.Context, request UpdateAutonomousVmClusterRequest) (response UpdateAutonomousVmClusterResponse, err error) {
@@ -15405,7 +17851,7 @@ func (client DatabaseClient) updateAutonomousVmCluster(ctx context.Context, requ
 // - For a RECOVERY_APPLIANCE backup destination, updates the connection string and/or the list of VPC users.
 // - For an NFS backup destination, updates the NFS location.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/UpdateBackupDestination.go.html to see an example of how to use UpdateBackupDestination API.
 func (client DatabaseClient) UpdateBackupDestination(ctx context.Context, request UpdateBackupDestinationRequest) (response UpdateBackupDestinationResponse, err error) {
@@ -15462,7 +17908,7 @@ func (client DatabaseClient) updateBackupDestination(ctx context.Context, reques
 
 // UpdateCloudAutonomousVmCluster Updates the specified Autonomous Exadata VM cluster in the Oracle cloud. For Exadata Cloud@Customer systems, see UpdateAutonomousVmCluster.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/UpdateCloudAutonomousVmCluster.go.html to see an example of how to use UpdateCloudAutonomousVmCluster API.
 func (client DatabaseClient) UpdateCloudAutonomousVmCluster(ctx context.Context, request UpdateCloudAutonomousVmClusterRequest) (response UpdateCloudAutonomousVmClusterResponse, err error) {
@@ -15519,7 +17965,7 @@ func (client DatabaseClient) updateCloudAutonomousVmCluster(ctx context.Context,
 
 // UpdateCloudExadataInfrastructure Updates the Cloud Exadata infrastructure resource. Applies to Exadata Cloud Service instances and Autonomous Database on dedicated Exadata infrastructure only.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/UpdateCloudExadataInfrastructure.go.html to see an example of how to use UpdateCloudExadataInfrastructure API.
 func (client DatabaseClient) UpdateCloudExadataInfrastructure(ctx context.Context, request UpdateCloudExadataInfrastructureRequest) (response UpdateCloudExadataInfrastructureResponse, err error) {
@@ -15576,7 +18022,7 @@ func (client DatabaseClient) updateCloudExadataInfrastructure(ctx context.Contex
 
 // UpdateCloudVmCluster Updates the specified cloud VM cluster. Applies to Exadata Cloud Service instances and Autonomous Database on dedicated Exadata infrastructure only.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/UpdateCloudVmCluster.go.html to see an example of how to use UpdateCloudVmCluster API.
 func (client DatabaseClient) UpdateCloudVmCluster(ctx context.Context, request UpdateCloudVmClusterRequest) (response UpdateCloudVmClusterResponse, err error) {
@@ -15633,7 +18079,7 @@ func (client DatabaseClient) updateCloudVmCluster(ctx context.Context, request c
 
 // UpdateCloudVmClusterIormConfig Updates the IORM settings for the specified cloud VM cluster in an Exadata Cloud Service instance.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/UpdateCloudVmClusterIormConfig.go.html to see an example of how to use UpdateCloudVmClusterIormConfig API.
 func (client DatabaseClient) UpdateCloudVmClusterIormConfig(ctx context.Context, request UpdateCloudVmClusterIormConfigRequest) (response UpdateCloudVmClusterIormConfigResponse, err error) {
@@ -15688,9 +18134,123 @@ func (client DatabaseClient) updateCloudVmClusterIormConfig(ctx context.Context,
 	return response, err
 }
 
+// UpdateConsoleConnection Updates the specified database node console connection.
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/UpdateConsoleConnection.go.html to see an example of how to use UpdateConsoleConnection API.
+func (client DatabaseClient) UpdateConsoleConnection(ctx context.Context, request UpdateConsoleConnectionRequest) (response UpdateConsoleConnectionResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.updateConsoleConnection, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = UpdateConsoleConnectionResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = UpdateConsoleConnectionResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(UpdateConsoleConnectionResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into UpdateConsoleConnectionResponse")
+	}
+	return
+}
+
+// updateConsoleConnection implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) updateConsoleConnection(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodPut, "/dbNodes/{dbNodeId}/consoleConnections/{consoleConnectionId}", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response UpdateConsoleConnectionResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/ConsoleConnection/UpdateConsoleConnection"
+		err = common.PostProcessServiceError(err, "Database", "UpdateConsoleConnection", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
+// UpdateConsoleHistory Updates the specified database node console history.
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/UpdateConsoleHistory.go.html to see an example of how to use UpdateConsoleHistory API.
+func (client DatabaseClient) UpdateConsoleHistory(ctx context.Context, request UpdateConsoleHistoryRequest) (response UpdateConsoleHistoryResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.updateConsoleHistory, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = UpdateConsoleHistoryResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = UpdateConsoleHistoryResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(UpdateConsoleHistoryResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into UpdateConsoleHistoryResponse")
+	}
+	return
+}
+
+// updateConsoleHistory implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) updateConsoleHistory(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodPut, "/dbNodes/{dbNodeId}/consoleHistories/{consoleHistoryId}", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response UpdateConsoleHistoryResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/ConsoleHistory/UpdateConsoleHistory"
+		err = common.PostProcessServiceError(err, "Database", "UpdateConsoleHistory", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // UpdateDataGuardAssociation Updates the Data Guard association the specified database. This API can be used to change the `protectionMode` and `transportType` of the Data Guard association.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/UpdateDataGuardAssociation.go.html to see an example of how to use UpdateDataGuardAssociation API.
 func (client DatabaseClient) UpdateDataGuardAssociation(ctx context.Context, request UpdateDataGuardAssociationRequest) (response UpdateDataGuardAssociationResponse, err error) {
@@ -15747,7 +18307,7 @@ func (client DatabaseClient) updateDataGuardAssociation(ctx context.Context, req
 
 // UpdateDatabase Update the specified database based on the request parameters provided.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/UpdateDatabase.go.html to see an example of how to use UpdateDatabase API.
 func (client DatabaseClient) UpdateDatabase(ctx context.Context, request UpdateDatabaseRequest) (response UpdateDatabaseResponse, err error) {
@@ -15804,7 +18364,7 @@ func (client DatabaseClient) updateDatabase(ctx context.Context, request common.
 
 // UpdateDatabaseSoftwareImage Updates the properties of a Database Software Image, like Display Nmae
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/UpdateDatabaseSoftwareImage.go.html to see an example of how to use UpdateDatabaseSoftwareImage API.
 func (client DatabaseClient) UpdateDatabaseSoftwareImage(ctx context.Context, request UpdateDatabaseSoftwareImageRequest) (response UpdateDatabaseSoftwareImageResponse, err error) {
@@ -15861,7 +18421,7 @@ func (client DatabaseClient) updateDatabaseSoftwareImage(ctx context.Context, re
 
 // UpdateDbHome Patches the specified Database Home.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/UpdateDbHome.go.html to see an example of how to use UpdateDbHome API.
 func (client DatabaseClient) UpdateDbHome(ctx context.Context, request UpdateDbHomeRequest) (response UpdateDbHomeResponse, err error) {
@@ -15916,11 +18476,68 @@ func (client DatabaseClient) updateDbHome(ctx context.Context, request common.OC
 	return response, err
 }
 
+// UpdateDbNode Updates the specified database node.
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/UpdateDbNode.go.html to see an example of how to use UpdateDbNode API.
+func (client DatabaseClient) UpdateDbNode(ctx context.Context, request UpdateDbNodeRequest) (response UpdateDbNodeResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.updateDbNode, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = UpdateDbNodeResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = UpdateDbNodeResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(UpdateDbNodeResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into UpdateDbNodeResponse")
+	}
+	return
+}
+
+// updateDbNode implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) updateDbNode(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodPut, "/dbNodes/{dbNodeId}", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response UpdateDbNodeResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/DbNode/UpdateDbNode"
+		err = common.PostProcessServiceError(err, "Database", "UpdateDbNode", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // UpdateDbSystem Updates the properties of the specified DB system.
 // **Note:** Deprecated for Exadata Cloud Service systems. Use the new resource model APIs (https://docs.cloud.oracle.com/iaas/Content/Database/Concepts/exaflexsystem.htm#exaflexsystem_topic-resource_model) instead.
 // For Exadata Cloud Service instances, support for this API will end on May 15th, 2021. See Switching an Exadata DB System to the New Resource Model and APIs (https://docs.cloud.oracle.com/iaas/Content/Database/Concepts/exaflexsystem_topic-resource_model_conversion.htm) for details on converting existing Exadata DB systems to the new resource model.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/UpdateDbSystem.go.html to see an example of how to use UpdateDbSystem API.
 func (client DatabaseClient) UpdateDbSystem(ctx context.Context, request UpdateDbSystemRequest) (response UpdateDbSystemResponse, err error) {
@@ -15978,7 +18595,7 @@ func (client DatabaseClient) updateDbSystem(ctx context.Context, request common.
 // UpdateExadataInfrastructure Updates the Exadata infrastructure resource. Applies to Exadata Cloud@Customer instances only.
 // To update an Exadata Cloud Service infrastructure resource, use the  UpdateCloudExadataInfrastructure operation.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/UpdateExadataInfrastructure.go.html to see an example of how to use UpdateExadataInfrastructure API.
 func (client DatabaseClient) UpdateExadataInfrastructure(ctx context.Context, request UpdateExadataInfrastructureRequest) (response UpdateExadataInfrastructureResponse, err error) {
@@ -16039,7 +18656,7 @@ func (client DatabaseClient) updateExadataInfrastructure(ctx context.Context, re
 // The UpdateCloudVmClusterIormConfig API is used for Exadata systems using the
 // new resource model.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/UpdateExadataIormConfig.go.html to see an example of how to use UpdateExadataIormConfig API.
 func (client DatabaseClient) UpdateExadataIormConfig(ctx context.Context, request UpdateExadataIormConfigRequest) (response UpdateExadataIormConfigResponse, err error) {
@@ -16098,7 +18715,7 @@ func (client DatabaseClient) updateExadataIormConfig(ctx context.Context, reques
 // an CreateExternalContainerDatabaseDetails resource,
 // such as the display name.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/UpdateExternalContainerDatabase.go.html to see an example of how to use UpdateExternalContainerDatabase API.
 func (client DatabaseClient) UpdateExternalContainerDatabase(ctx context.Context, request UpdateExternalContainerDatabaseRequest) (response UpdateExternalContainerDatabaseResponse, err error) {
@@ -16155,7 +18772,7 @@ func (client DatabaseClient) updateExternalContainerDatabase(ctx context.Context
 
 // UpdateExternalDatabaseConnector Updates the properties of an external database connector, such as the display name.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/UpdateExternalDatabaseConnector.go.html to see an example of how to use UpdateExternalDatabaseConnector API.
 func (client DatabaseClient) UpdateExternalDatabaseConnector(ctx context.Context, request UpdateExternalDatabaseConnectorRequest) (response UpdateExternalDatabaseConnectorResponse, err error) {
@@ -16212,7 +18829,7 @@ func (client DatabaseClient) updateExternalDatabaseConnector(ctx context.Context
 
 // UpdateExternalNonContainerDatabase Updates the properties of an external non-container database, such as the display name.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/UpdateExternalNonContainerDatabase.go.html to see an example of how to use UpdateExternalNonContainerDatabase API.
 func (client DatabaseClient) UpdateExternalNonContainerDatabase(ctx context.Context, request UpdateExternalNonContainerDatabaseRequest) (response UpdateExternalNonContainerDatabaseResponse, err error) {
@@ -16271,7 +18888,7 @@ func (client DatabaseClient) updateExternalNonContainerDatabase(ctx context.Cont
 // CreateExternalPluggableDatabaseDetails resource,
 // such as the display name.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/UpdateExternalPluggableDatabase.go.html to see an example of how to use UpdateExternalPluggableDatabase API.
 func (client DatabaseClient) UpdateExternalPluggableDatabase(ctx context.Context, request UpdateExternalPluggableDatabaseRequest) (response UpdateExternalPluggableDatabaseResponse, err error) {
@@ -16328,7 +18945,7 @@ func (client DatabaseClient) updateExternalPluggableDatabase(ctx context.Context
 
 // UpdateKeyStore If no database is associated with the key store, edit the key store.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/UpdateKeyStore.go.html to see an example of how to use UpdateKeyStore API.
 func (client DatabaseClient) UpdateKeyStore(ctx context.Context, request UpdateKeyStoreRequest) (response UpdateKeyStoreResponse, err error) {
@@ -16385,7 +19002,7 @@ func (client DatabaseClient) updateKeyStore(ctx context.Context, request common.
 
 // UpdateMaintenanceRun Updates the properties of a maintenance run, such as the state of a maintenance run.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/UpdateMaintenanceRun.go.html to see an example of how to use UpdateMaintenanceRun API.
 func (client DatabaseClient) UpdateMaintenanceRun(ctx context.Context, request UpdateMaintenanceRunRequest) (response UpdateMaintenanceRunResponse, err error) {
@@ -16440,9 +19057,66 @@ func (client DatabaseClient) updateMaintenanceRun(ctx context.Context, request c
 	return response, err
 }
 
+// UpdateOneoffPatch Updates the properties of the specified one-off patch.
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/UpdateOneoffPatch.go.html to see an example of how to use UpdateOneoffPatch API.
+func (client DatabaseClient) UpdateOneoffPatch(ctx context.Context, request UpdateOneoffPatchRequest) (response UpdateOneoffPatchResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.updateOneoffPatch, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = UpdateOneoffPatchResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = UpdateOneoffPatchResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(UpdateOneoffPatchResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into UpdateOneoffPatchResponse")
+	}
+	return
+}
+
+// updateOneoffPatch implements the OCIOperation interface (enables retrying operations)
+func (client DatabaseClient) updateOneoffPatch(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodPut, "/oneoffPatches/{oneoffPatchId}", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response UpdateOneoffPatchResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/database/20160918/OneoffPatch/UpdateOneoffPatch"
+		err = common.PostProcessServiceError(err, "Database", "UpdateOneoffPatch", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // UpdatePluggableDatabase Updates the specified pluggable database.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/UpdatePluggableDatabase.go.html to see an example of how to use UpdatePluggableDatabase API.
 func (client DatabaseClient) UpdatePluggableDatabase(ctx context.Context, request UpdatePluggableDatabaseRequest) (response UpdatePluggableDatabaseResponse, err error) {
@@ -16499,7 +19173,7 @@ func (client DatabaseClient) updatePluggableDatabase(ctx context.Context, reques
 
 // UpdateVmCluster Updates the specified VM cluster. Applies to Exadata Cloud@Customer instances only.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/UpdateVmCluster.go.html to see an example of how to use UpdateVmCluster API.
 func (client DatabaseClient) UpdateVmCluster(ctx context.Context, request UpdateVmClusterRequest) (response UpdateVmClusterResponse, err error) {
@@ -16557,7 +19231,7 @@ func (client DatabaseClient) updateVmCluster(ctx context.Context, request common
 // UpdateVmClusterNetwork Updates the specified VM cluster network. Applies to Exadata Cloud@Customer instances only.
 // To update a cloud VM cluster in an Exadata Cloud Service instance, use the UpdateCloudVmCluster operation.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/UpdateVmClusterNetwork.go.html to see an example of how to use UpdateVmClusterNetwork API.
 func (client DatabaseClient) UpdateVmClusterNetwork(ctx context.Context, request UpdateVmClusterNetworkRequest) (response UpdateVmClusterNetworkResponse, err error) {
@@ -16614,7 +19288,7 @@ func (client DatabaseClient) updateVmClusterNetwork(ctx context.Context, request
 
 // UpgradeDatabase Upgrades the specified Oracle Database instance.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/UpgradeDatabase.go.html to see an example of how to use UpgradeDatabase API.
 func (client DatabaseClient) UpgradeDatabase(ctx context.Context, request UpgradeDatabaseRequest) (response UpgradeDatabaseResponse, err error) {
@@ -16671,7 +19345,7 @@ func (client DatabaseClient) upgradeDatabase(ctx context.Context, request common
 
 // UpgradeDbSystem Upgrades the operating system and grid infrastructure of the DB system.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/UpgradeDbSystem.go.html to see an example of how to use UpgradeDbSystem API.
 func (client DatabaseClient) UpgradeDbSystem(ctx context.Context, request UpgradeDbSystemRequest) (response UpgradeDbSystemResponse, err error) {
@@ -16733,7 +19407,7 @@ func (client DatabaseClient) upgradeDbSystem(ctx context.Context, request common
 
 // ValidateVmClusterNetwork Validates the specified VM cluster network. Applies to Exadata Cloud@Customer instances only.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ValidateVmClusterNetwork.go.html to see an example of how to use ValidateVmClusterNetwork API.
 func (client DatabaseClient) ValidateVmClusterNetwork(ctx context.Context, request ValidateVmClusterNetworkRequest) (response ValidateVmClusterNetworkResponse, err error) {

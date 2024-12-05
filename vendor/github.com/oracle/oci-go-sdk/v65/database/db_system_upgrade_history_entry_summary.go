@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -24,12 +24,6 @@ type DbSystemUpgradeHistoryEntrySummary struct {
 	// The operating system upgrade action.
 	Action DbSystemUpgradeHistoryEntrySummaryActionEnum `mandatory:"true" json:"action"`
 
-	// A valid Oracle Grid Infrastructure (GI) software version.
-	NewGiVersion *string `mandatory:"true" json:"newGiVersion"`
-
-	// A valid Oracle Grid Infrastructure (GI) software version.
-	OldGiVersion *string `mandatory:"true" json:"oldGiVersion"`
-
 	// The retention period, in days, for the snapshot that allows you to perform a rollback of the upgrade operation. After this number of days passes, you cannot roll back the upgrade.
 	SnapshotRetentionPeriodInDays *int `mandatory:"true" json:"snapshotRetentionPeriodInDays"`
 
@@ -38,6 +32,18 @@ type DbSystemUpgradeHistoryEntrySummary struct {
 
 	// The date and time when the upgrade action started.
 	TimeStarted *common.SDKTime `mandatory:"true" json:"timeStarted"`
+
+	// A valid Oracle Grid Infrastructure (GI) software version.
+	NewGiVersion *string `mandatory:"false" json:"newGiVersion"`
+
+	// A valid Oracle Grid Infrastructure (GI) software version.
+	OldGiVersion *string `mandatory:"false" json:"oldGiVersion"`
+
+	// A valid Oracle Software (OS) version eg. Oracle Linux Server release 8
+	OldOsVersion *string `mandatory:"false" json:"oldOsVersion"`
+
+	// A valid Oracle Software (OS) version eg. Oracle Linux Server release 8
+	NewOsVersion *string `mandatory:"false" json:"newOsVersion"`
 
 	// A descriptive text associated with the lifecycleState.
 	// Typically contains additional displayable text.

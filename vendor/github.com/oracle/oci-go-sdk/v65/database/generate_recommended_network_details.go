@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -35,6 +35,9 @@ type GenerateRecommendedNetworkDetails struct {
 
 	// The SCAN TCPIP SSL port. Default is 2484.
 	ScanListenerPortTcpSsl *int `mandatory:"false" json:"scanListenerPortTcpSsl"`
+
+	// The DR SCAN TCPIP port. Default is 1521.
+	DrScanListenerPortTcp *int `mandatory:"false" json:"drScanListenerPortTcp"`
 
 	// The list of DNS server IP addresses. Maximum of 3 allowed.
 	Dns []string `mandatory:"false" json:"dns"`

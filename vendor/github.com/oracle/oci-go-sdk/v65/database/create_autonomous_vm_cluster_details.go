@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -45,13 +45,19 @@ type CreateAutonomousVmClusterDetails struct {
 	// The number of CPU cores to enable per VM cluster node.
 	CpuCoreCountPerNode *int `mandatory:"false" json:"cpuCoreCountPerNode"`
 
-	// The amount of memory (in GBs) to be enabled per each OCPU core.
+	// The compute model of the Autonomous VM Cluster. ECPU compute model is the recommended model and OCPU compute model is legacy.
+	ComputeModel CreateAutonomousVmClusterDetailsComputeModelEnum `mandatory:"false" json:"computeModel,omitempty"`
+
+	// The amount of memory (in GBs) to be enabled per OCPU or ECPU.
 	MemoryPerOracleComputeUnitInGBs *int `mandatory:"false" json:"memoryPerOracleComputeUnitInGBs"`
 
 	// The data disk group size to be allocated for Autonomous Databases, in TBs.
 	AutonomousDataStorageSizeInTBs *float64 `mandatory:"false" json:"autonomousDataStorageSizeInTBs"`
 
 	MaintenanceWindowDetails *MaintenanceWindow `mandatory:"false" json:"maintenanceWindowDetails"`
+
+	// The list of OCIDs (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Db servers.
+	DbServers []string `mandatory:"false" json:"dbServers"`
 
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
 	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
@@ -84,6 +90,9 @@ func (m CreateAutonomousVmClusterDetails) ValidateEnumValue() (bool, error) {
 
 	if _, ok := GetMappingCreateAutonomousVmClusterDetailsLicenseModelEnum(string(m.LicenseModel)); !ok && m.LicenseModel != "" {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for LicenseModel: %s. Supported values are: %s.", m.LicenseModel, strings.Join(GetCreateAutonomousVmClusterDetailsLicenseModelEnumStringValues(), ",")))
+	}
+	if _, ok := GetMappingCreateAutonomousVmClusterDetailsComputeModelEnum(string(m.ComputeModel)); !ok && m.ComputeModel != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for ComputeModel: %s. Supported values are: %s.", m.ComputeModel, strings.Join(GetCreateAutonomousVmClusterDetailsComputeModelEnumStringValues(), ",")))
 	}
 	if len(errMessage) > 0 {
 		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
@@ -130,5 +139,47 @@ func GetCreateAutonomousVmClusterDetailsLicenseModelEnumStringValues() []string 
 // GetMappingCreateAutonomousVmClusterDetailsLicenseModelEnum performs case Insensitive comparison on enum value and return the desired enum
 func GetMappingCreateAutonomousVmClusterDetailsLicenseModelEnum(val string) (CreateAutonomousVmClusterDetailsLicenseModelEnum, bool) {
 	enum, ok := mappingCreateAutonomousVmClusterDetailsLicenseModelEnumLowerCase[strings.ToLower(val)]
+	return enum, ok
+}
+
+// CreateAutonomousVmClusterDetailsComputeModelEnum Enum with underlying type: string
+type CreateAutonomousVmClusterDetailsComputeModelEnum string
+
+// Set of constants representing the allowable values for CreateAutonomousVmClusterDetailsComputeModelEnum
+const (
+	CreateAutonomousVmClusterDetailsComputeModelEcpu CreateAutonomousVmClusterDetailsComputeModelEnum = "ECPU"
+	CreateAutonomousVmClusterDetailsComputeModelOcpu CreateAutonomousVmClusterDetailsComputeModelEnum = "OCPU"
+)
+
+var mappingCreateAutonomousVmClusterDetailsComputeModelEnum = map[string]CreateAutonomousVmClusterDetailsComputeModelEnum{
+	"ECPU": CreateAutonomousVmClusterDetailsComputeModelEcpu,
+	"OCPU": CreateAutonomousVmClusterDetailsComputeModelOcpu,
+}
+
+var mappingCreateAutonomousVmClusterDetailsComputeModelEnumLowerCase = map[string]CreateAutonomousVmClusterDetailsComputeModelEnum{
+	"ecpu": CreateAutonomousVmClusterDetailsComputeModelEcpu,
+	"ocpu": CreateAutonomousVmClusterDetailsComputeModelOcpu,
+}
+
+// GetCreateAutonomousVmClusterDetailsComputeModelEnumValues Enumerates the set of values for CreateAutonomousVmClusterDetailsComputeModelEnum
+func GetCreateAutonomousVmClusterDetailsComputeModelEnumValues() []CreateAutonomousVmClusterDetailsComputeModelEnum {
+	values := make([]CreateAutonomousVmClusterDetailsComputeModelEnum, 0)
+	for _, v := range mappingCreateAutonomousVmClusterDetailsComputeModelEnum {
+		values = append(values, v)
+	}
+	return values
+}
+
+// GetCreateAutonomousVmClusterDetailsComputeModelEnumStringValues Enumerates the set of values in String for CreateAutonomousVmClusterDetailsComputeModelEnum
+func GetCreateAutonomousVmClusterDetailsComputeModelEnumStringValues() []string {
+	return []string{
+		"ECPU",
+		"OCPU",
+	}
+}
+
+// GetMappingCreateAutonomousVmClusterDetailsComputeModelEnum performs case Insensitive comparison on enum value and return the desired enum
+func GetMappingCreateAutonomousVmClusterDetailsComputeModelEnum(val string) (CreateAutonomousVmClusterDetailsComputeModelEnum, bool) {
+	enum, ok := mappingCreateAutonomousVmClusterDetailsComputeModelEnumLowerCase[strings.ToLower(val)]
 	return enum, ok
 }

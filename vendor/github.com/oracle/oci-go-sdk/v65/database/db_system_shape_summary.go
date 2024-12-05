@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -30,7 +30,7 @@ type DbSystemShapeSummary struct {
 	// The family of the shape used for the DB system.
 	ShapeFamily *string `mandatory:"false" json:"shapeFamily"`
 
-	// The shape type for the virtual machine DB system. Shape type is determined by CPU hardware. Valid values are `AMD` , `INTEL` or `INTEL_FLEX_X9`.
+	// The shape type for the virtual machine DB system. Shape type is determined by CPU hardware. Valid values are `AMD` , `INTEL`, `INTEL_FLEX_X9` or `AMPERE_FLEX_A1`.
 	ShapeType DbSystemShapeSummaryShapeTypeEnum `mandatory:"false" json:"shapeType,omitempty"`
 
 	// Deprecated. Use `name` instead of `shape`.
@@ -84,7 +84,7 @@ type DbSystemShapeSummary struct {
 	// The maximum number of compute servers available for this shape.
 	MaximumNodeCount *int `mandatory:"false" json:"maximumNodeCount"`
 
-	// The maximum number of CPU cores per database node that can be enabled for this shape. Only applicable to the flex Exadata shape and ExaCC Elastic shapes.
+	// The maximum number of CPU cores per database node that can be enabled for this shape. Only applicable to the flex Exadata shape, ExaCC Elastic shapes and VM Flex shapes.
 	AvailableCoreCountPerNode *int `mandatory:"false" json:"availableCoreCountPerNode"`
 }
 
@@ -112,21 +112,24 @@ type DbSystemShapeSummaryShapeTypeEnum string
 
 // Set of constants representing the allowable values for DbSystemShapeSummaryShapeTypeEnum
 const (
-	DbSystemShapeSummaryShapeTypeAmd         DbSystemShapeSummaryShapeTypeEnum = "AMD"
-	DbSystemShapeSummaryShapeTypeIntel       DbSystemShapeSummaryShapeTypeEnum = "INTEL"
-	DbSystemShapeSummaryShapeTypeIntelFlexX9 DbSystemShapeSummaryShapeTypeEnum = "INTEL_FLEX_X9"
+	DbSystemShapeSummaryShapeTypeAmd          DbSystemShapeSummaryShapeTypeEnum = "AMD"
+	DbSystemShapeSummaryShapeTypeIntel        DbSystemShapeSummaryShapeTypeEnum = "INTEL"
+	DbSystemShapeSummaryShapeTypeIntelFlexX9  DbSystemShapeSummaryShapeTypeEnum = "INTEL_FLEX_X9"
+	DbSystemShapeSummaryShapeTypeAmpereFlexA1 DbSystemShapeSummaryShapeTypeEnum = "AMPERE_FLEX_A1"
 )
 
 var mappingDbSystemShapeSummaryShapeTypeEnum = map[string]DbSystemShapeSummaryShapeTypeEnum{
-	"AMD":           DbSystemShapeSummaryShapeTypeAmd,
-	"INTEL":         DbSystemShapeSummaryShapeTypeIntel,
-	"INTEL_FLEX_X9": DbSystemShapeSummaryShapeTypeIntelFlexX9,
+	"AMD":            DbSystemShapeSummaryShapeTypeAmd,
+	"INTEL":          DbSystemShapeSummaryShapeTypeIntel,
+	"INTEL_FLEX_X9":  DbSystemShapeSummaryShapeTypeIntelFlexX9,
+	"AMPERE_FLEX_A1": DbSystemShapeSummaryShapeTypeAmpereFlexA1,
 }
 
 var mappingDbSystemShapeSummaryShapeTypeEnumLowerCase = map[string]DbSystemShapeSummaryShapeTypeEnum{
-	"amd":           DbSystemShapeSummaryShapeTypeAmd,
-	"intel":         DbSystemShapeSummaryShapeTypeIntel,
-	"intel_flex_x9": DbSystemShapeSummaryShapeTypeIntelFlexX9,
+	"amd":            DbSystemShapeSummaryShapeTypeAmd,
+	"intel":          DbSystemShapeSummaryShapeTypeIntel,
+	"intel_flex_x9":  DbSystemShapeSummaryShapeTypeIntelFlexX9,
+	"ampere_flex_a1": DbSystemShapeSummaryShapeTypeAmpereFlexA1,
 }
 
 // GetDbSystemShapeSummaryShapeTypeEnumValues Enumerates the set of values for DbSystemShapeSummaryShapeTypeEnum
@@ -144,6 +147,7 @@ func GetDbSystemShapeSummaryShapeTypeEnumStringValues() []string {
 		"AMD",
 		"INTEL",
 		"INTEL_FLEX_X9",
+		"AMPERE_FLEX_A1",
 	}
 }
 

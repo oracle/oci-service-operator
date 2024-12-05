@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -17,7 +17,7 @@ import (
 	"net/http"
 )
 
-//StreamClient a client for Stream
+// StreamClient a client for Stream
 type StreamClient struct {
 	common.BaseClient
 	config *common.ConfigurationProvider
@@ -26,6 +26,9 @@ type StreamClient struct {
 // NewStreamClientWithConfigurationProvider Creates a new default Stream client with the given configuration provider.
 // the configuration provider will be used for the default signer
 func NewStreamClientWithConfigurationProvider(configProvider common.ConfigurationProvider, endpoint string) (client StreamClient, err error) {
+	if enabled := common.CheckForEnabledServices("streaming"); !enabled {
+		return client, fmt.Errorf("the Developer Tool configuration disabled this service, this behavior is controlled by OciSdkEnabledServicesMap variables. Please check if your local developer-tool-configuration.json file configured the service you're targeting or contact the cloud provider on the availability of this service")
+	}
 	provider, err := auth.GetGenericConfigurationProvider(configProvider)
 	if err != nil {
 		return client, err
@@ -39,7 +42,6 @@ func NewStreamClientWithConfigurationProvider(configProvider common.Configuratio
 
 // NewStreamClientWithOboToken Creates a new default Stream client with the given configuration provider.
 // The obotoken will be added to default headers and signed; the configuration provider will be used for the signer
-//
 func NewStreamClientWithOboToken(configProvider common.ConfigurationProvider, oboToken string, endpoint string) (client StreamClient, err error) {
 	baseClient, err := common.NewClientWithOboToken(configProvider, oboToken)
 	if err != nil {
@@ -78,7 +80,7 @@ func (client *StreamClient) ConfigurationProvider() *common.ConfigurationProvide
 // ConsumerCommit Provides a mechanism to manually commit offsets, if not using commit-on-get consumer semantics.
 // This commits offsets assicated with the provided cursor, extends the timeout on each of the affected partitions, and returns an updated cursor.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/streaming/ConsumerCommit.go.html to see an example of how to use ConsumerCommit API.
 // A default retry strategy applies to this operation ConsumerCommit()
@@ -136,7 +138,7 @@ func (client StreamClient) consumerCommit(ctx context.Context, request common.OC
 
 // ConsumerHeartbeat Allows long-running processes to extend the timeout on partitions reserved by a consumer instance.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/streaming/ConsumerHeartbeat.go.html to see an example of how to use ConsumerHeartbeat API.
 // A default retry strategy applies to this operation ConsumerHeartbeat()
@@ -198,7 +200,7 @@ func (client StreamClient) consumerHeartbeat(ctx context.Context, request common
 // on the most recent message allows consumption of only messages that are added to the stream after you create the cursor. Cursors expire
 // five minutes after you receive them from the service.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/streaming/CreateCursor.go.html to see an example of how to use CreateCursor API.
 // A default retry strategy applies to this operation CreateCursor()
@@ -256,7 +258,7 @@ func (client StreamClient) createCursor(ctx context.Context, request common.OCIR
 
 // CreateGroupCursor Creates a group-cursor.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/streaming/CreateGroupCursor.go.html to see an example of how to use CreateGroupCursor API.
 // A default retry strategy applies to this operation CreateGroupCursor()
@@ -314,7 +316,7 @@ func (client StreamClient) createGroupCursor(ctx context.Context, request common
 
 // GetGroup Returns the current state of a consumer group.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/streaming/GetGroup.go.html to see an example of how to use GetGroup API.
 // A default retry strategy applies to this operation GetGroup()
@@ -374,7 +376,7 @@ func (client StreamClient) getGroup(ctx context.Context, request common.OCIReque
 // To get messages, you must first obtain a cursor using the CreateCursor operation.
 // In the response, retrieve the value of the 'opc-next-cursor' header to pass as a parameter to get the next batch of messages in the stream.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/streaming/GetMessages.go.html to see an example of how to use GetMessages API.
 // A default retry strategy applies to this operation GetMessages()
@@ -435,7 +437,7 @@ func (client StreamClient) getMessages(ctx context.Context, request common.OCIRe
 // If a message does not contain a key or if the key is null, the service generates a message key for you.
 // The partition ID cannot be passed as a parameter.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/streaming/PutMessages.go.html to see an example of how to use PutMessages API.
 func (client StreamClient) PutMessages(ctx context.Context, request PutMessagesRequest) (response PutMessagesResponse, err error) {
@@ -502,7 +504,7 @@ func (client StreamClient) putMessages(ctx context.Context, request common.OCIRe
 
 // UpdateGroup Forcefully changes the current location of a group as a whole; reseting processing location of all consumers to a particular location in the stream.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/streaming/UpdateGroup.go.html to see an example of how to use UpdateGroup API.
 // A default retry strategy applies to this operation UpdateGroup()

@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -154,6 +154,11 @@ type ExadataInfrastructureSummary struct {
 	// using the UpdateExadatainfrastructure API.
 	IsCpsOfflineReportEnabled *bool `mandatory:"false" json:"isCpsOfflineReportEnabled"`
 
+	NetworkBondingModeDetails *NetworkBondingModeDetails `mandatory:"false" json:"networkBondingModeDetails"`
+
+	// The name of the availability domain that the Exadata infrastructure is located in.
+	AvailabilityDomain *string `mandatory:"false" json:"availabilityDomain"`
+
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
 	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
@@ -194,45 +199,48 @@ type ExadataInfrastructureSummaryLifecycleStateEnum string
 
 // Set of constants representing the allowable values for ExadataInfrastructureSummaryLifecycleStateEnum
 const (
-	ExadataInfrastructureSummaryLifecycleStateCreating              ExadataInfrastructureSummaryLifecycleStateEnum = "CREATING"
-	ExadataInfrastructureSummaryLifecycleStateRequiresActivation    ExadataInfrastructureSummaryLifecycleStateEnum = "REQUIRES_ACTIVATION"
-	ExadataInfrastructureSummaryLifecycleStateActivating            ExadataInfrastructureSummaryLifecycleStateEnum = "ACTIVATING"
-	ExadataInfrastructureSummaryLifecycleStateActive                ExadataInfrastructureSummaryLifecycleStateEnum = "ACTIVE"
-	ExadataInfrastructureSummaryLifecycleStateActivationFailed      ExadataInfrastructureSummaryLifecycleStateEnum = "ACTIVATION_FAILED"
-	ExadataInfrastructureSummaryLifecycleStateFailed                ExadataInfrastructureSummaryLifecycleStateEnum = "FAILED"
-	ExadataInfrastructureSummaryLifecycleStateUpdating              ExadataInfrastructureSummaryLifecycleStateEnum = "UPDATING"
-	ExadataInfrastructureSummaryLifecycleStateDeleting              ExadataInfrastructureSummaryLifecycleStateEnum = "DELETING"
-	ExadataInfrastructureSummaryLifecycleStateDeleted               ExadataInfrastructureSummaryLifecycleStateEnum = "DELETED"
-	ExadataInfrastructureSummaryLifecycleStateDisconnected          ExadataInfrastructureSummaryLifecycleStateEnum = "DISCONNECTED"
-	ExadataInfrastructureSummaryLifecycleStateMaintenanceInProgress ExadataInfrastructureSummaryLifecycleStateEnum = "MAINTENANCE_IN_PROGRESS"
+	ExadataInfrastructureSummaryLifecycleStateCreating               ExadataInfrastructureSummaryLifecycleStateEnum = "CREATING"
+	ExadataInfrastructureSummaryLifecycleStateRequiresActivation     ExadataInfrastructureSummaryLifecycleStateEnum = "REQUIRES_ACTIVATION"
+	ExadataInfrastructureSummaryLifecycleStateActivating             ExadataInfrastructureSummaryLifecycleStateEnum = "ACTIVATING"
+	ExadataInfrastructureSummaryLifecycleStateActive                 ExadataInfrastructureSummaryLifecycleStateEnum = "ACTIVE"
+	ExadataInfrastructureSummaryLifecycleStateActivationFailed       ExadataInfrastructureSummaryLifecycleStateEnum = "ACTIVATION_FAILED"
+	ExadataInfrastructureSummaryLifecycleStateFailed                 ExadataInfrastructureSummaryLifecycleStateEnum = "FAILED"
+	ExadataInfrastructureSummaryLifecycleStateUpdating               ExadataInfrastructureSummaryLifecycleStateEnum = "UPDATING"
+	ExadataInfrastructureSummaryLifecycleStateDeleting               ExadataInfrastructureSummaryLifecycleStateEnum = "DELETING"
+	ExadataInfrastructureSummaryLifecycleStateDeleted                ExadataInfrastructureSummaryLifecycleStateEnum = "DELETED"
+	ExadataInfrastructureSummaryLifecycleStateDisconnected           ExadataInfrastructureSummaryLifecycleStateEnum = "DISCONNECTED"
+	ExadataInfrastructureSummaryLifecycleStateMaintenanceInProgress  ExadataInfrastructureSummaryLifecycleStateEnum = "MAINTENANCE_IN_PROGRESS"
+	ExadataInfrastructureSummaryLifecycleStateWaitingForConnectivity ExadataInfrastructureSummaryLifecycleStateEnum = "WAITING_FOR_CONNECTIVITY"
 )
 
 var mappingExadataInfrastructureSummaryLifecycleStateEnum = map[string]ExadataInfrastructureSummaryLifecycleStateEnum{
-	"CREATING":                ExadataInfrastructureSummaryLifecycleStateCreating,
-	"REQUIRES_ACTIVATION":     ExadataInfrastructureSummaryLifecycleStateRequiresActivation,
-	"ACTIVATING":              ExadataInfrastructureSummaryLifecycleStateActivating,
-	"ACTIVE":                  ExadataInfrastructureSummaryLifecycleStateActive,
-	"ACTIVATION_FAILED":       ExadataInfrastructureSummaryLifecycleStateActivationFailed,
-	"FAILED":                  ExadataInfrastructureSummaryLifecycleStateFailed,
-	"UPDATING":                ExadataInfrastructureSummaryLifecycleStateUpdating,
-	"DELETING":                ExadataInfrastructureSummaryLifecycleStateDeleting,
-	"DELETED":                 ExadataInfrastructureSummaryLifecycleStateDeleted,
-	"DISCONNECTED":            ExadataInfrastructureSummaryLifecycleStateDisconnected,
-	"MAINTENANCE_IN_PROGRESS": ExadataInfrastructureSummaryLifecycleStateMaintenanceInProgress,
+	"CREATING":                 ExadataInfrastructureSummaryLifecycleStateCreating,
+	"REQUIRES_ACTIVATION":      ExadataInfrastructureSummaryLifecycleStateRequiresActivation,
+	"ACTIVATING":               ExadataInfrastructureSummaryLifecycleStateActivating,
+	"ACTIVE":                   ExadataInfrastructureSummaryLifecycleStateActive,
+	"ACTIVATION_FAILED":        ExadataInfrastructureSummaryLifecycleStateActivationFailed,
+	"FAILED":                   ExadataInfrastructureSummaryLifecycleStateFailed,
+	"UPDATING":                 ExadataInfrastructureSummaryLifecycleStateUpdating,
+	"DELETING":                 ExadataInfrastructureSummaryLifecycleStateDeleting,
+	"DELETED":                  ExadataInfrastructureSummaryLifecycleStateDeleted,
+	"DISCONNECTED":             ExadataInfrastructureSummaryLifecycleStateDisconnected,
+	"MAINTENANCE_IN_PROGRESS":  ExadataInfrastructureSummaryLifecycleStateMaintenanceInProgress,
+	"WAITING_FOR_CONNECTIVITY": ExadataInfrastructureSummaryLifecycleStateWaitingForConnectivity,
 }
 
 var mappingExadataInfrastructureSummaryLifecycleStateEnumLowerCase = map[string]ExadataInfrastructureSummaryLifecycleStateEnum{
-	"creating":                ExadataInfrastructureSummaryLifecycleStateCreating,
-	"requires_activation":     ExadataInfrastructureSummaryLifecycleStateRequiresActivation,
-	"activating":              ExadataInfrastructureSummaryLifecycleStateActivating,
-	"active":                  ExadataInfrastructureSummaryLifecycleStateActive,
-	"activation_failed":       ExadataInfrastructureSummaryLifecycleStateActivationFailed,
-	"failed":                  ExadataInfrastructureSummaryLifecycleStateFailed,
-	"updating":                ExadataInfrastructureSummaryLifecycleStateUpdating,
-	"deleting":                ExadataInfrastructureSummaryLifecycleStateDeleting,
-	"deleted":                 ExadataInfrastructureSummaryLifecycleStateDeleted,
-	"disconnected":            ExadataInfrastructureSummaryLifecycleStateDisconnected,
-	"maintenance_in_progress": ExadataInfrastructureSummaryLifecycleStateMaintenanceInProgress,
+	"creating":                 ExadataInfrastructureSummaryLifecycleStateCreating,
+	"requires_activation":      ExadataInfrastructureSummaryLifecycleStateRequiresActivation,
+	"activating":               ExadataInfrastructureSummaryLifecycleStateActivating,
+	"active":                   ExadataInfrastructureSummaryLifecycleStateActive,
+	"activation_failed":        ExadataInfrastructureSummaryLifecycleStateActivationFailed,
+	"failed":                   ExadataInfrastructureSummaryLifecycleStateFailed,
+	"updating":                 ExadataInfrastructureSummaryLifecycleStateUpdating,
+	"deleting":                 ExadataInfrastructureSummaryLifecycleStateDeleting,
+	"deleted":                  ExadataInfrastructureSummaryLifecycleStateDeleted,
+	"disconnected":             ExadataInfrastructureSummaryLifecycleStateDisconnected,
+	"maintenance_in_progress":  ExadataInfrastructureSummaryLifecycleStateMaintenanceInProgress,
+	"waiting_for_connectivity": ExadataInfrastructureSummaryLifecycleStateWaitingForConnectivity,
 }
 
 // GetExadataInfrastructureSummaryLifecycleStateEnumValues Enumerates the set of values for ExadataInfrastructureSummaryLifecycleStateEnum
@@ -258,6 +266,7 @@ func GetExadataInfrastructureSummaryLifecycleStateEnumStringValues() []string {
 		"DELETED",
 		"DISCONNECTED",
 		"MAINTENANCE_IN_PROGRESS",
+		"WAITING_FOR_CONNECTIVITY",
 	}
 }
 
@@ -272,24 +281,27 @@ type ExadataInfrastructureSummaryAdditionalComputeSystemModelEnum string
 
 // Set of constants representing the allowable values for ExadataInfrastructureSummaryAdditionalComputeSystemModelEnum
 const (
-	ExadataInfrastructureSummaryAdditionalComputeSystemModelX7  ExadataInfrastructureSummaryAdditionalComputeSystemModelEnum = "X7"
-	ExadataInfrastructureSummaryAdditionalComputeSystemModelX8  ExadataInfrastructureSummaryAdditionalComputeSystemModelEnum = "X8"
-	ExadataInfrastructureSummaryAdditionalComputeSystemModelX8m ExadataInfrastructureSummaryAdditionalComputeSystemModelEnum = "X8M"
-	ExadataInfrastructureSummaryAdditionalComputeSystemModelX9m ExadataInfrastructureSummaryAdditionalComputeSystemModelEnum = "X9M"
+	ExadataInfrastructureSummaryAdditionalComputeSystemModelX7   ExadataInfrastructureSummaryAdditionalComputeSystemModelEnum = "X7"
+	ExadataInfrastructureSummaryAdditionalComputeSystemModelX8   ExadataInfrastructureSummaryAdditionalComputeSystemModelEnum = "X8"
+	ExadataInfrastructureSummaryAdditionalComputeSystemModelX8m  ExadataInfrastructureSummaryAdditionalComputeSystemModelEnum = "X8M"
+	ExadataInfrastructureSummaryAdditionalComputeSystemModelX9m  ExadataInfrastructureSummaryAdditionalComputeSystemModelEnum = "X9M"
+	ExadataInfrastructureSummaryAdditionalComputeSystemModelX10m ExadataInfrastructureSummaryAdditionalComputeSystemModelEnum = "X10M"
 )
 
 var mappingExadataInfrastructureSummaryAdditionalComputeSystemModelEnum = map[string]ExadataInfrastructureSummaryAdditionalComputeSystemModelEnum{
-	"X7":  ExadataInfrastructureSummaryAdditionalComputeSystemModelX7,
-	"X8":  ExadataInfrastructureSummaryAdditionalComputeSystemModelX8,
-	"X8M": ExadataInfrastructureSummaryAdditionalComputeSystemModelX8m,
-	"X9M": ExadataInfrastructureSummaryAdditionalComputeSystemModelX9m,
+	"X7":   ExadataInfrastructureSummaryAdditionalComputeSystemModelX7,
+	"X8":   ExadataInfrastructureSummaryAdditionalComputeSystemModelX8,
+	"X8M":  ExadataInfrastructureSummaryAdditionalComputeSystemModelX8m,
+	"X9M":  ExadataInfrastructureSummaryAdditionalComputeSystemModelX9m,
+	"X10M": ExadataInfrastructureSummaryAdditionalComputeSystemModelX10m,
 }
 
 var mappingExadataInfrastructureSummaryAdditionalComputeSystemModelEnumLowerCase = map[string]ExadataInfrastructureSummaryAdditionalComputeSystemModelEnum{
-	"x7":  ExadataInfrastructureSummaryAdditionalComputeSystemModelX7,
-	"x8":  ExadataInfrastructureSummaryAdditionalComputeSystemModelX8,
-	"x8m": ExadataInfrastructureSummaryAdditionalComputeSystemModelX8m,
-	"x9m": ExadataInfrastructureSummaryAdditionalComputeSystemModelX9m,
+	"x7":   ExadataInfrastructureSummaryAdditionalComputeSystemModelX7,
+	"x8":   ExadataInfrastructureSummaryAdditionalComputeSystemModelX8,
+	"x8m":  ExadataInfrastructureSummaryAdditionalComputeSystemModelX8m,
+	"x9m":  ExadataInfrastructureSummaryAdditionalComputeSystemModelX9m,
+	"x10m": ExadataInfrastructureSummaryAdditionalComputeSystemModelX10m,
 }
 
 // GetExadataInfrastructureSummaryAdditionalComputeSystemModelEnumValues Enumerates the set of values for ExadataInfrastructureSummaryAdditionalComputeSystemModelEnum
@@ -308,6 +320,7 @@ func GetExadataInfrastructureSummaryAdditionalComputeSystemModelEnumStringValues
 		"X8",
 		"X8M",
 		"X9M",
+		"X10M",
 	}
 }
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -65,37 +65,37 @@ type CreateDataGuardAssociationToExistingVmClusterDetails struct {
 	TransportType CreateDataGuardAssociationDetailsTransportTypeEnum `mandatory:"true" json:"transportType"`
 }
 
-//GetDatabaseSoftwareImageId returns DatabaseSoftwareImageId
+// GetDatabaseSoftwareImageId returns DatabaseSoftwareImageId
 func (m CreateDataGuardAssociationToExistingVmClusterDetails) GetDatabaseSoftwareImageId() *string {
 	return m.DatabaseSoftwareImageId
 }
 
-//GetDatabaseAdminPassword returns DatabaseAdminPassword
+// GetDatabaseAdminPassword returns DatabaseAdminPassword
 func (m CreateDataGuardAssociationToExistingVmClusterDetails) GetDatabaseAdminPassword() *string {
 	return m.DatabaseAdminPassword
 }
 
-//GetProtectionMode returns ProtectionMode
+// GetProtectionMode returns ProtectionMode
 func (m CreateDataGuardAssociationToExistingVmClusterDetails) GetProtectionMode() CreateDataGuardAssociationDetailsProtectionModeEnum {
 	return m.ProtectionMode
 }
 
-//GetTransportType returns TransportType
+// GetTransportType returns TransportType
 func (m CreateDataGuardAssociationToExistingVmClusterDetails) GetTransportType() CreateDataGuardAssociationDetailsTransportTypeEnum {
 	return m.TransportType
 }
 
-//GetIsActiveDataGuardEnabled returns IsActiveDataGuardEnabled
+// GetIsActiveDataGuardEnabled returns IsActiveDataGuardEnabled
 func (m CreateDataGuardAssociationToExistingVmClusterDetails) GetIsActiveDataGuardEnabled() *bool {
 	return m.IsActiveDataGuardEnabled
 }
 
-//GetPeerDbUniqueName returns PeerDbUniqueName
+// GetPeerDbUniqueName returns PeerDbUniqueName
 func (m CreateDataGuardAssociationToExistingVmClusterDetails) GetPeerDbUniqueName() *string {
 	return m.PeerDbUniqueName
 }
 
-//GetPeerSidPrefix returns PeerSidPrefix
+// GetPeerSidPrefix returns PeerSidPrefix
 func (m CreateDataGuardAssociationToExistingVmClusterDetails) GetPeerSidPrefix() *string {
 	return m.PeerSidPrefix
 }

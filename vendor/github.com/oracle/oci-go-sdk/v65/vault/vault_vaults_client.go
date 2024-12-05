@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2023, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -17,7 +17,7 @@ import (
 	"net/http"
 )
 
-//VaultsClient a client for Vaults
+// VaultsClient a client for Vaults
 type VaultsClient struct {
 	common.BaseClient
 	config *common.ConfigurationProvider
@@ -26,6 +26,9 @@ type VaultsClient struct {
 // NewVaultsClientWithConfigurationProvider Creates a new default Vaults client with the given configuration provider.
 // the configuration provider will be used for the default signer as well as reading the region
 func NewVaultsClientWithConfigurationProvider(configProvider common.ConfigurationProvider) (client VaultsClient, err error) {
+	if enabled := common.CheckForEnabledServices("vault"); !enabled {
+		return client, fmt.Errorf("the Developer Tool configuration disabled this service, this behavior is controlled by OciSdkEnabledServicesMap variables. Please check if your local developer-tool-configuration.json file configured the service you're targeting or contact the cloud provider on the availability of this service")
+	}
 	provider, err := auth.GetGenericConfigurationProvider(configProvider)
 	if err != nil {
 		return client, err
@@ -39,7 +42,8 @@ func NewVaultsClientWithConfigurationProvider(configProvider common.Configuratio
 
 // NewVaultsClientWithOboToken Creates a new default Vaults client with the given configuration provider.
 // The obotoken will be added to default headers and signed; the configuration provider will be used for the signer
-//  as well as reading the region
+//
+//	as well as reading the region
 func NewVaultsClientWithOboToken(configProvider common.ConfigurationProvider, oboToken string) (client VaultsClient, err error) {
 	baseClient, err := common.NewClientWithOboToken(configProvider, oboToken)
 	if err != nil {
@@ -76,7 +80,7 @@ func (client *VaultsClient) setConfigurationProvider(configProvider common.Confi
 	region, _ := configProvider.Region()
 	client.SetRegion(region)
 	if client.Host == "" {
-		return fmt.Errorf("Invalid region or Host. Endpoint cannot be constructed without endpointServiceName or serviceEndpointTemplate for a dotted region")
+		return fmt.Errorf("invalid region or Host. Endpoint cannot be constructed without endpointServiceName or serviceEndpointTemplate for a dotted region")
 	}
 	client.config = &configProvider
 	return nil
@@ -91,7 +95,7 @@ func (client *VaultsClient) ConfigurationProvider() *common.ConfigurationProvide
 // a scheduled deletion restores the secret's lifecycle state to what
 // it was before you scheduled the secret for deletion.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/vault/CancelSecretDeletion.go.html to see an example of how to use CancelSecretDeletion API.
 func (client VaultsClient) CancelSecretDeletion(ctx context.Context, request CancelSecretDeletionRequest) (response CancelSecretDeletionResponse, err error) {
@@ -146,9 +150,69 @@ func (client VaultsClient) cancelSecretDeletion(ctx context.Context, request com
 	return response, err
 }
 
+// CancelSecretRotation Cancels the ongoing secret rotation. The cancellation is contingent on how
+// far the rotation process has progressed. Upon cancelling a rotation, all
+// future rotations are also disabled.
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/vault/CancelSecretRotation.go.html to see an example of how to use CancelSecretRotation API.
+// A default retry strategy applies to this operation CancelSecretRotation()
+func (client VaultsClient) CancelSecretRotation(ctx context.Context, request CancelSecretRotationRequest) (response CancelSecretRotationResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.DefaultRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.cancelSecretRotation, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = CancelSecretRotationResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = CancelSecretRotationResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(CancelSecretRotationResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into CancelSecretRotationResponse")
+	}
+	return
+}
+
+// cancelSecretRotation implements the OCIOperation interface (enables retrying operations)
+func (client VaultsClient) cancelSecretRotation(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/secrets/{secretId}/actions/cancelRotation", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response CancelSecretRotationResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/secretmgmt/20180608/Secret/CancelSecretRotation"
+		err = common.PostProcessServiceError(err, "Vaults", "CancelSecretRotation", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // CancelSecretVersionDeletion Cancels the scheduled deletion of a secret version.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/vault/CancelSecretVersionDeletion.go.html to see an example of how to use CancelSecretVersionDeletion API.
 func (client VaultsClient) CancelSecretVersionDeletion(ctx context.Context, request CancelSecretVersionDeletionRequest) (response CancelSecretVersionDeletionResponse, err error) {
@@ -207,7 +271,7 @@ func (client VaultsClient) cancelSecretVersionDeletion(ctx context.Context, requ
 // moving resources between compartments, see Moving Resources to a Different Compartment (https://docs.cloud.oracle.com/iaas/Content/Identity/Tasks/managingcompartments.htm#moveRes).
 // When provided, if-match is checked against the ETag values of the secret.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/vault/ChangeSecretCompartment.go.html to see an example of how to use ChangeSecretCompartment API.
 func (client VaultsClient) ChangeSecretCompartment(ctx context.Context, request ChangeSecretCompartmentRequest) (response ChangeSecretCompartmentResponse, err error) {
@@ -270,7 +334,7 @@ func (client VaultsClient) changeSecretCompartment(ctx context.Context, request 
 // CreateSecret Creates a new secret according to the details of the request.
 // This operation is not supported by the Oracle Cloud Infrastructure Terraform Provider.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/vault/CreateSecret.go.html to see an example of how to use CreateSecret API.
 // A default retry strategy applies to this operation CreateSecret()
@@ -333,7 +397,7 @@ func (client VaultsClient) createSecret(ctx context.Context, request common.OCIR
 
 // GetSecret Gets information about the specified secret.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/vault/GetSecret.go.html to see an example of how to use GetSecret API.
 // A default retry strategy applies to this operation GetSecret()
@@ -391,7 +455,7 @@ func (client VaultsClient) getSecret(ctx context.Context, request common.OCIRequ
 
 // GetSecretVersion Gets information about the specified version of a secret.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/vault/GetSecretVersion.go.html to see an example of how to use GetSecretVersion API.
 // A default retry strategy applies to this operation GetSecretVersion()
@@ -449,7 +513,7 @@ func (client VaultsClient) getSecretVersion(ctx context.Context, request common.
 
 // ListSecretVersions Lists all secret versions for the specified secret.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/vault/ListSecretVersions.go.html to see an example of how to use ListSecretVersions API.
 // A default retry strategy applies to this operation ListSecretVersions()
@@ -507,7 +571,7 @@ func (client VaultsClient) listSecretVersions(ctx context.Context, request commo
 
 // ListSecrets Lists all secrets in the specified vault and compartment.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/vault/ListSecrets.go.html to see an example of how to use ListSecrets API.
 // A default retry strategy applies to this operation ListSecrets()
@@ -563,10 +627,73 @@ func (client VaultsClient) listSecrets(ctx context.Context, request common.OCIRe
 	return response, err
 }
 
+// RotateSecret API to force rotation of an existing secret in Vault and the specified target system; expects secret to have a valid Target System Details object
+//
+// # See also
+//
+// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/vault/RotateSecret.go.html to see an example of how to use RotateSecret API.
+// A default retry strategy applies to this operation RotateSecret()
+func (client VaultsClient) RotateSecret(ctx context.Context, request RotateSecretRequest) (response RotateSecretResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.DefaultRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+
+	if !(request.OpcRetryToken != nil && *request.OpcRetryToken != "") {
+		request.OpcRetryToken = common.String(common.RetryToken())
+	}
+
+	ociResponse, err = common.Retry(ctx, request, client.rotateSecret, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = RotateSecretResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = RotateSecretResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(RotateSecretResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into RotateSecretResponse")
+	}
+	return
+}
+
+// rotateSecret implements the OCIOperation interface (enables retrying operations)
+func (client VaultsClient) rotateSecret(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/secrets/{secretId}/actions/rotate", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response RotateSecretResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/secretmgmt/20180608/Secret/RotateSecret"
+		err = common.PostProcessServiceError(err, "Vaults", "RotateSecret", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // ScheduleSecretDeletion Schedules the deletion of the specified secret. This sets the lifecycle state of the secret
 // to `PENDING_DELETION` and then deletes it after the specified retention period ends.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/vault/ScheduleSecretDeletion.go.html to see an example of how to use ScheduleSecretDeletion API.
 func (client VaultsClient) ScheduleSecretDeletion(ctx context.Context, request ScheduleSecretDeletionRequest) (response ScheduleSecretDeletionResponse, err error) {
@@ -624,7 +751,7 @@ func (client VaultsClient) scheduleSecretDeletion(ctx context.Context, request c
 // ScheduleSecretVersionDeletion Schedules the deletion of the specified secret version. This deletes it after the specified retention period ends. You can only
 // delete a secret version if the secret version rotation state is marked as `DEPRECATED`.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/vault/ScheduleSecretVersionDeletion.go.html to see an example of how to use ScheduleSecretVersionDeletion API.
 func (client VaultsClient) ScheduleSecretVersionDeletion(ctx context.Context, request ScheduleSecretVersionDeletionRequest) (response ScheduleSecretVersionDeletionResponse, err error) {
@@ -685,7 +812,7 @@ func (client VaultsClient) scheduleSecretVersionDeletion(ctx context.Context, re
 // same time. Furthermore, the secret must in an `ACTIVE` lifecycle state to be updated.
 // This operation is not supported by the Oracle Cloud Infrastructure Terraform Provider.
 //
-// See also
+// # See also
 //
 // Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/vault/UpdateSecret.go.html to see an example of how to use UpdateSecret API.
 func (client VaultsClient) UpdateSecret(ctx context.Context, request UpdateSecretRequest) (response UpdateSecretResponse, err error) {
