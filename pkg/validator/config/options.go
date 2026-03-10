@@ -13,6 +13,8 @@ type Options struct {
 	BaselinePath  string
 	WriteBaseline string
 	FailOnNew     bool
+	UpgradeFrom   string
+	UpgradeTo     string
 }
 
 func DefaultOptions() Options {
@@ -30,6 +32,16 @@ func (o Options) Validate() error {
 	return nil
 }
 
+func (o Options) ValidateUpgrade() error {
+	if err := o.Validate(); err != nil {
+		return err
+	}
+	if strings.TrimSpace(o.UpgradeFrom) == "" || strings.TrimSpace(o.UpgradeTo) == "" {
+		return fmt.Errorf("upgrade mode requires both upgrade-from and upgrade-to")
+	}
+	return nil
+}
+
 func (o Options) HasAllowlist() bool {
 	return strings.TrimSpace(o.AllowlistPath) != ""
 }
@@ -40,4 +52,8 @@ func (o Options) HasBaseline() bool {
 
 func (o Options) WantsBaselineWrite() bool {
 	return strings.TrimSpace(o.WriteBaseline) != ""
+}
+
+func (o Options) WantsUpgrade() bool {
+	return strings.TrimSpace(o.UpgradeFrom) != "" || strings.TrimSpace(o.UpgradeTo) != ""
 }

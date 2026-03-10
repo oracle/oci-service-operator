@@ -39,6 +39,45 @@ cmd/osok-schema-validator/
   main.go      # CLI wrapper
 ```
 
+## CLI Usage
+
+Run the validator from the repository root:
+
+```
+go run ./cmd/osok-schema-validator \
+  --provider-path . \
+  --allowlist validator_allowlist.yaml \
+  --format table|markdown|json \
+  --baseline baseline.json \
+  --write-baseline baseline.json \
+  --fail-on-new-actionable
+```
+
+- `--format` controls the stdout rendering (table by default).  
+- `--baseline` loads a previous report and annotates fields with their prior status.  
+- `--write-baseline` writes the current report to JSON regardless of the stdout format.  
+- `--fail-on-new-actionable` returns exit code 1 when a field transitions into `unclassified` or `potential_gap`.
+
+### SDK Upgrade Diffs
+
+Use the upgrade helper to compare two OCI Go SDK releases and identify new fields that may require OSOK support:
+
+```
+go run ./cmd/osok-schema-validator \
+  --upgrade-from v65.61.1 \
+  --upgrade-to v65.104.0 \
+  --provider-path . \
+  --format markdown
+```
+
+The upgrade report:
+
+- Lists added/removed/changed fields for every tracked SDK struct.  
+- Indicates whether the current OSOK controllers already reference each field.  
+- Emits draft allowlist suggestions for new fields (mandatory fields default to `potential_gap`, optional fields to `future_consideration`).
+
+Both versions must be present in your module cache (`$GOMODCACHE/github.com/oracle/oci-go-sdk/v65@<version>`).
+
 ## Maklib Integration
 
 A Maklib fragment (`makelib/schema.validate.mk`) exposes `make schema.validate`, which runs `go test ./pkg/validator/...`. CI should set `PROVIDER_PATH`/`GOFLAGS` as needed so the validator can locate the OSOK repository and vendor cache.
