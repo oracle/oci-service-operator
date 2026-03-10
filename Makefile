@@ -3,6 +3,8 @@
 # Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
 #
 
+-include makelib/*.mk
+
 
 # VERSION defines the project version for the bundle.
 # Update this value when you upgrade the version of your project.

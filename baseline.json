@@ -1,0 +1,2223 @@
+{
+  "structs": [
+    {
+      "structType": "database.CreateAutonomousDatabaseDetails",
+      "coverage": {
+        "eligibleFields": 45,
+        "usedFields": 16,
+        "percent": 35.55555555555556
+      },
+      "fields": [
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "AdminPassword",
+          "fieldType": "*string",
+          "jsonName": "adminPassword",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/autonomousdatabases/adb/adb_serviceclient.go:47"
+          ],
+          "documentation": "**Important** The `adminPassword` or `secretId` must be specified for all Autonomous Databases except for refreshable clones. The password must be between 12 and 30 characters long, and must contain at least 1 uppercase, 1 lowercase, and 1 numeric character. It cannot contain the double quote symbol (\") or the username \"admin\", regardless of casing.\nThis cannot be used in conjunction with with OCI vault secrets (secretId)."
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "ArePrimaryWhitelistedIpsUsed",
+          "fieldType": "*bool",
+          "jsonName": "arePrimaryWhitelistedIpsUsed",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Standby access control is not managed by the initial OSOK controllers.",
+          "documentation": "This field will be null if the Autonomous Database is not Data Guard enabled or Access Control is disabled.\nIt's value would be `TRUE` if Autonomous Database is Data Guard enabled and Access Control is enabled and if the Autonomous Database uses primary IP access control list (ACL) for standby.\nIt's value would be `FALSE` if Autonomous Database is Data Guard enabled and Access Control is enabled and if the Autonomous Database uses different IP access control list (ACL) for standby compared to primary."
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "AutonomousContainerDatabaseId",
+          "fieldType": "*string",
+          "jsonName": "autonomousContainerDatabaseId",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Dedicated autonomous container selection will be modeled in a later iteration.",
+          "documentation": "The Autonomous Container Database OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm). Used only by Autonomous Database on Dedicated Exadata Infrastructure."
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "AutonomousMaintenanceScheduleType",
+          "fieldType": "database.CreateAutonomousDatabaseBaseAutonomousMaintenanceScheduleTypeEnum",
+          "jsonName": "autonomousMaintenanceScheduleType",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Maintenance scheduling options are out of scope for the first validator pass.",
+          "documentation": "The maintenance schedule type of the Autonomous Database Serverless. An EARLY maintenance schedule\nfollows a schedule applying patches prior to the REGULAR schedule. A REGULAR maintenance schedule follows the normal cycle"
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "BackupRetentionPeriodInDays",
+          "fieldType": "*int",
+          "jsonName": "backupRetentionPeriodInDays",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Retention policies are left at service defaults until lifecycle stories land.",
+          "documentation": "Retention period, in days, for long-term backups"
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "CharacterSet",
+          "fieldType": "*string",
+          "jsonName": "characterSet",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Character set customisation is deferred to keep the CRD surface minimal.",
+          "documentation": "The character set for the autonomous database. The default is AL32UTF8. Allowed values for an Autonomous Database Serverless instance as as returned by List Autonomous Database Character Sets (https://docs.oracle.com/iaas/autonomous-database-serverless/doc/autonomous-character-set-selection.html)\nFor an Autonomous Database on dedicated infrastructure, the allowed values are:\nAL32UTF8, AR8ADOS710, AR8ADOS720, AR8APTEC715, AR8ARABICMACS, AR8ASMO8X, AR8ISO8859P6, AR8MSWIN1256, AR8MUSSAD768, AR8NAFITHA711, AR8NAFITHA721, AR8SAKHR706, AR8SAKHR707, AZ8ISO8859P9E, BG8MSWIN, BG8PC437S, BLT8CP921, BLT8ISO8859P13, BLT8MSWIN1257, BLT8PC775, BN8BSCII, CDN8PC863, CEL8ISO8859P14, CL8ISO8859P5, CL8ISOIR111, CL8KOI8R, CL8KOI8U, CL8MACCYRILLICS, CL8MSWIN1251, EE8ISO8859P2, EE8MACCES, EE8MACCROATIANS, EE8MSWIN1250, EE8PC852, EL8DEC, EL8ISO8859P7, EL8MACGREEKS, EL8MSWIN1253, EL8PC437S, EL8PC851, EL8PC869, ET8MSWIN923, HU8ABMOD, HU8CWI2, IN8ISCII, IS8PC861, IW8ISO8859P8, IW8MACHEBREWS, IW8MSWIN1255, IW8PC1507, JA16EUC, JA16EUCTILDE, JA16SJIS, JA16SJISTILDE, JA16VMS, KO16KSC5601, KO16KSCCS, KO16MSWIN949, LA8ISO6937, LA8PASSPORT, LT8MSWIN921, LT8PC772, LT8PC774, LV8PC1117, LV8PC8LR, LV8RST104090, N8PC865, NE8ISO8859P10, NEE8ISO8859P4, RU8BESTA, RU8PC855, RU8PC866, SE8ISO8859P3, TH8MACTHAIS, TH8TISASCII, TR8DEC, TR8MACTURKISHS, TR8MSWIN1254, TR8PC857, US7ASCII, US8PC437, UTF8, VN8MSWIN1258, VN8VN3, WE8DEC, WE8DG, WE8ISO8859P1, WE8ISO8859P15, WE8ISO8859P9, WE8MACROMAN8S, WE8MSWIN1252, WE8NCR4970, WE8NEXTSTEP, WE8PC850, WE8PC858, WE8PC860, WE8ROMAN8, ZHS16CGB231280, ZHS16GBK, ZHT16BIG5, ZHT16CCDC, ZHT16DBT, ZHT16HKSCS, ZHT16MSWIN950, ZHT32EUC, ZHT32SOPS, ZHT32TRIS"
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "CompartmentId",
+          "fieldType": "*string",
+          "jsonName": "compartmentId",
+          "mandatory": true,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/autonomousdatabases/adb/adb_serviceclient.go:43"
+          ],
+          "documentation": "The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment of the Autonomous Database."
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "ComputeCount",
+          "fieldType": "*float32",
+          "jsonName": "computeCount",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/autonomousdatabases/adb/adb_serviceclient.go:58"
+          ],
+          "documentation": "The compute amount (CPUs) available to the database. Minimum and maximum values depend on the compute model and whether the database is an Autonomous Database Serverless instance or an Autonomous Database on Dedicated Exadata Infrastructure.\nFor an Autonomous Database Serverless instance, the 'ECPU' compute model requires a minimum value of one, for databases in the elastic resource pool and minimum value of two, otherwise. Required when using the `computeModel` parameter. When using `cpuCoreCount` parameter, it is an error to specify computeCount to a non-null value. Providing `computeModel` and `computeCount` is the preferred method for both OCPU and ECPU."
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "ComputeModel",
+          "fieldType": "database.CreateAutonomousDatabaseBaseComputeModelEnum",
+          "jsonName": "computeModel",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/autonomousdatabases/adb/adb_serviceclient.go:57"
+          ],
+          "documentation": "The compute model of the Autonomous Database. This is required if using the `computeCount` parameter. If using `cpuCoreCount` then it is an error to specify `computeModel` to a non-null value. ECPU compute model is the recommended model and OCPU compute model is legacy."
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "CpuCoreCount",
+          "fieldType": "*int",
+          "jsonName": "cpuCoreCount",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/autonomousdatabases/adb/adb_serviceclient.go:60"
+          ],
+          "documentation": "The number of CPU cores to be made available to the database. For Autonomous Databases on dedicated Exadata infrastructure, the maximum number of cores is determined by the infrastructure shape. See Characteristics of Infrastructure Shapes (https://www.oracle.com/pls/topic/lookup?ctx=en/cloud/paas/autonomous-database\u0026id=ATPFG-GUID-B0F033C1-CC5A-42F0-B2E7-3CECFEDA1FD1) for shape details.\n**Note:** This parameter cannot be used with the `ocpuCount` parameter."
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "CustomerContacts",
+          "fieldType": "[]database.CustomerContact",
+          "jsonName": "customerContacts",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Customer contact metadata is not surfaced through OSOK today.",
+          "documentation": "Customer Contacts."
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "DataStorageSizeInGBs",
+          "fieldType": "*int",
+          "jsonName": "dataStorageSizeInGBs",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Only the terabyte-based sizing workflow is supported by the current controllers.",
+          "documentation": "The size, in gigabytes, of the data volume that will be created and attached to the database. This storage can later be scaled up if needed. The maximum storage value is determined by the infrastructure shape. See Characteristics of Infrastructure Shapes (https://www.oracle.com/pls/topic/lookup?ctx=en/cloud/paas/autonomous-database\u0026id=ATPFG-GUID-B0F033C1-CC5A-42F0-B2E7-3CECFEDA1FD1) for shape details.\n**Notes**\n- This parameter is only supported for dedicated Exadata infrastructure.\n- This parameter cannot be used with the `dataStorageSizeInTBs` parameter."
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "DataStorageSizeInTBs",
+          "fieldType": "*int",
+          "jsonName": "dataStorageSizeInTBs",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/autonomousdatabases/adb/adb_serviceclient.go:46"
+          ],
+          "documentation": "The size, in terabytes, of the data volume that will be created and attached to the database. This storage can later be scaled up if needed. For Autonomous Databases on dedicated Exadata infrastructure, the maximum storage value is determined by the infrastructure shape. See Characteristics of Infrastructure Shapes (https://www.oracle.com/pls/topic/lookup?ctx=en/cloud/paas/autonomous-database\u0026id=ATPFG-GUID-B0F033C1-CC5A-42F0-B2E7-3CECFEDA1FD1) for shape details.\nA full Exadata service is allocated when the Autonomous Database size is set to the upper limit (384 TB).\n**Note:** This parameter cannot be used with the `dataStorageSizeInGBs` parameter."
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "DatabaseEdition",
+          "fieldType": "database.AutonomousDatabaseSummaryDatabaseEditionEnum",
+          "jsonName": "databaseEdition",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Edition selection is not yet exposed through the OSOK CRDs.",
+          "documentation": "The Oracle Database Edition that applies to the Autonomous databases."
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "DbName",
+          "fieldType": "*string",
+          "jsonName": "dbName",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/autonomousdatabases/adb/adb_serviceclient.go:45"
+          ],
+          "documentation": "The database name. The name must begin with an alphabetic character and can contain a maximum of 30 alphanumeric characters. Special characters are not permitted. The database name must be unique in the tenancy. It is required in all cases except when creating a cross-region Autonomous Data Guard standby instance or a cross-region disaster recovery standby instance."
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "DbToolsDetails",
+          "fieldType": "[]database.DatabaseTool",
+          "jsonName": "dbToolsDetails",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "DB Tools integration will be considered in a follow-up release.",
+          "documentation": "The list of database tools details.\nThis cannot be updated in parallel with any of the following: licenseModel, dbEdition, cpuCoreCount, computeCount, computeModel, whitelistedIps, isMTLSConnectionRequired, openMode, permissionLevel, dbWorkload, privateEndpointLabel, nsgIds, dbVersion, isRefreshable, dbName, scheduledOperations, isLocalDataGuardEnabled, or isFreeTier."
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "DbVersion",
+          "fieldType": "*string",
+          "jsonName": "dbVersion",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/autonomousdatabases/adb/adb_serviceclient.go:64"
+          ],
+          "documentation": "A valid Oracle Database version for Autonomous Database."
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "DbWorkload",
+          "fieldType": "database.CreateAutonomousDatabaseBaseDbWorkloadEnum",
+          "jsonName": "dbWorkload",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/autonomousdatabases/adb/adb_serviceclient.go:50"
+          ],
+          "documentation": "The Autonomous Database workload type. The following values are valid:\n- OLTP - indicates an Autonomous Transaction Processing database\n- DW - indicates an Autonomous Data Warehouse database\n- AJD - indicates an Autonomous JSON Database\n- APEX - indicates an Autonomous Database with the Oracle APEX Application Development workload type.\nThis cannot be updated in parallel with any of the following: licenseModel, dbEdition, cpuCoreCount, computeCount, computeModel, adminPassword, whitelistedIps, isMTLSConnectionRequired, privateEndpointLabel, nsgIds, dbVersion, isRefreshable, dbName, scheduledOperations, dbToolsDetails, isLocalDataGuardEnabled, or isFreeTier."
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "DefinedTags",
+          "fieldType": "map[string]map[string]interface {}",
+          "jsonName": "definedTags",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/autonomousdatabases/adb/adb_serviceclient.go:53"
+          ],
+          "documentation": "Defined tags for this resource. Each key is predefined and scoped to a namespace.\nFor more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm)."
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "DisplayName",
+          "fieldType": "*string",
+          "jsonName": "displayName",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/autonomousdatabases/adb/adb_serviceclient.go:44"
+          ],
+          "documentation": "The user-friendly name for the Autonomous Database. The name does not have to be unique."
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "FreeformTags",
+          "fieldType": "map[string]string",
+          "jsonName": "freeformTags",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/autonomousdatabases/adb/adb_serviceclient.go:52"
+          ],
+          "documentation": "Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.\nFor more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).\nExample: `{\"Department\": \"Finance\"}`"
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "InMemoryPercentage",
+          "fieldType": "*int",
+          "jsonName": "inMemoryPercentage",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "In-memory tuning is intentionally omitted for the initial managed experience.",
+          "documentation": "The percentage of the System Global Area(SGA) assigned to In-Memory tables in Autonomous Database. This property is applicable only to Autonomous Databases on the Exadata Cloud@Customer platform."
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "IsAccessControlEnabled",
+          "fieldType": "*bool",
+          "jsonName": "isAccessControlEnabled",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "VCN level controls are preferred; database-level ACL toggles will come later.",
+          "documentation": "Indicates if the database-level access control is enabled.\nIf disabled, database access is defined by the network security rules.\nIf enabled, database access is restricted to the IP addresses defined by the rules specified with the `whitelistedIps` property. While specifying `whitelistedIps` rules is optional,\n if database-level access control is enabled and no rules are specified, the database will become inaccessible. The rules can be added later using the `UpdateAutonomousDatabase` API operation or edit option in console.\nWhen creating a database clone, the desired access control setting should be specified. By default, database-level access control will be disabled for the clone.\nThis property is applicable only to Autonomous Databases on the Exadata Cloud@Customer platform. For Autonomous Database Serverless instances, `whitelistedIps` is used."
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "IsAutoScalingEnabled",
+          "fieldType": "*bool",
+          "jsonName": "isAutoScalingEnabled",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/autonomousdatabases/adb/adb_serviceclient.go:48"
+          ],
+          "documentation": "Indicates if auto scaling is enabled for the Autonomous Database CPU core count. The default value is `TRUE`."
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "IsAutoScalingForStorageEnabled",
+          "fieldType": "*bool",
+          "jsonName": "isAutoScalingForStorageEnabled",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Storage autoscaling will be evaluated after core create/update flows stabilize.",
+          "documentation": "Indicates if auto scaling is enabled for the Autonomous Database storage. The default value is `FALSE`."
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "IsDataGuardEnabled",
+          "fieldType": "*bool",
+          "jsonName": "isDataGuardEnabled",
+          "mandatory": false,
+          "used": false,
+          "deprecated": true,
+          "readOnly": false,
+          "status": "deprecated",
+          "reason": "Deprecated in the OCI SDK.",
+          "documentation": "**Deprecated.** Indicates whether the Autonomous Database has local (in-region) Data Guard enabled. Not applicable to cross-region Autonomous Data Guard associations, or to Autonomous Databases using dedicated Exadata infrastructure or Exadata Cloud@Customer infrastructure."
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "IsDedicated",
+          "fieldType": "*bool",
+          "jsonName": "isDedicated",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/autonomousdatabases/adb/adb_serviceclient.go:49"
+          ],
+          "documentation": "True if the database is on dedicated Exadata infrastructure (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html)."
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "IsDevTier",
+          "fieldType": "*bool",
+          "jsonName": "isDevTier",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Developer tier provisioning is not planned for the first validator milestone.",
+          "documentation": "This project introduces Autonomous Database for Developers (ADB-Dev), a free tier on dedicated infrastructure, and Cloud@Customer for database development purposes. ADB-Dev enables ExaDB customers to experiment with ADB for free and incentivizes enterprises to use ADB for new development projects.Note that ADB-Dev have 4 CPU and 20GB of memory. For ADB-Dev , memory and CPU cannot be scaled"
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "IsFreeTier",
+          "fieldType": "*bool",
+          "jsonName": "isFreeTier",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/autonomousdatabases/adb/adb_serviceclient.go:51"
+          ],
+          "documentation": "Indicates if this is an Always Free resource. The default value is false. Note that Always Free Autonomous Databases have 1 CPU and 20GB of memory. For Always Free databases, memory and CPU cannot be scaled.\nThis cannot be updated in parallel with any of the following: licenseModel, dbEdition, cpuCoreCount, computeCount, computeModel, adminPassword, whitelistedIps, isMTLSConnectionRequired, openMode, permissionLevel, privateEndpointLabel, nsgIds, dbVersion, isRefreshable, dbName, scheduledOperations, dbToolsDetails, or isLocalDataGuardEnabled"
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "IsLocalDataGuardEnabled",
+          "fieldType": "*bool",
+          "jsonName": "isLocalDataGuardEnabled",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Local Data Guard configuration is handled manually outside OSOK for now.",
+          "documentation": "Indicates whether the Autonomous Database has local (in-region) Data Guard enabled. Not applicable to cross-region Autonomous Data Guard associations, or to Autonomous Databases using dedicated Exadata infrastructure or Exadata Cloud@Customer infrastructure."
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "IsMtlsConnectionRequired",
+          "fieldType": "*bool",
+          "jsonName": "isMtlsConnectionRequired",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "mTLS enforcement remains at the OCI default pending operator UX work.",
+          "documentation": "Specifies if the Autonomous Database requires mTLS connections.\nThis may not be updated in parallel with any of the following: licenseModel, databaseEdition, cpuCoreCount, computeCount, dataStorageSizeInTBs, whitelistedIps, openMode, permissionLevel, db-workload, privateEndpointLabel, nsgIds, customerContacts, dbVersion, scheduledOperations, dbToolsDetails, isLocalDataGuardEnabled, or isFreeTier.\nService Change: The default value of the isMTLSConnectionRequired attribute will change from true to false on July 1, 2023 in the following APIs:\n- CreateAutonomousDatabase\n- GetAutonomousDatabase\n- UpdateAutonomousDatabase\nDetails: Prior to the July 1, 2023 change, the isMTLSConnectionRequired attribute default value was true. This applies to Autonomous Database Serverless.\nDoes this impact me? If you use or maintain custom scripts or Terraform scripts referencing the CreateAutonomousDatabase, GetAutonomousDatabase, or UpdateAutonomousDatabase APIs, you want to check, and possibly modify, the scripts for the changed default value of the attribute. Should you choose not to leave your scripts unchanged, the API calls containing this attribute will continue to work, but the default value will switch from true to false.\nHow do I make this change? Using either OCI SDKs or command line tools, update your custom scripts to explicitly set the isMTLSConnectionRequired attribute to true."
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "IsPreviewVersionWithServiceTermsAccepted",
+          "fieldType": "*bool",
+          "jsonName": "isPreviewVersionWithServiceTermsAccepted",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Preview database provisioning is intentionally gated outside OSOK.",
+          "documentation": "If set to `TRUE`, indicates that an Autonomous Database preview version is being provisioned, and that the preview version's terms of service have been accepted. Note that preview version software is only available for Autonomous Database Serverless instances (https://docs.oracle.com/en/cloud/paas/autonomous-database/serverless/)."
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "KmsKeyId",
+          "fieldType": "*string",
+          "jsonName": "kmsKeyId",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Customer managed keys will be modelled once the secret workflow solidifies.",
+          "documentation": "The OCID of the key container that is used as the master encryption key in database transparent data encryption (TDE) operations."
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "LicenseModel",
+          "fieldType": "database.CreateAutonomousDatabaseBaseLicenseModelEnum",
+          "jsonName": "licenseModel",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/autonomousdatabases/adb/adb_serviceclient.go:68"
+          ],
+          "documentation": "The Oracle license model that applies to the Oracle Autonomous Database. Bring your own license (BYOL) allows you to apply your current on-premises Oracle software licenses to equivalent, highly automated Oracle services in the cloud.\nLicense Included allows you to subscribe to new Oracle Database software licenses and the Oracle Database service.\nNote that when provisioning an Autonomous Database on dedicated Exadata infrastructure (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html), this attribute must be null. It is already set at the\nAutonomous Exadata Infrastructure level. When provisioning an Autonomous Database Serverless  (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html) database, if a value is not specified, the system defaults the value to `BRING_YOUR_OWN_LICENSE`. Bring your own license (BYOL) also allows you to select the DB edition using the optional parameter.\nThis cannot be updated in parallel with any of the following: cpuCoreCount, computeCount, dataStorageSizeInTBs, adminPassword, isMTLSConnectionRequired, dbWorkload, privateEndpointLabel, nsgIds, dbVersion, dbName, scheduledOperations, dbToolsDetails, or isFreeTier."
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "NcharacterSet",
+          "fieldType": "*string",
+          "jsonName": "ncharacterSet",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "NCHAR character set overrides are not exposed yet.",
+          "documentation": "The character set for the Autonomous Database. The default is AL32UTF8. Use List Autonomous Database Character Sets (https://docs.oracle.com/iaas/autonomous-database-serverless/doc/autonomous-character-set-selection.html) to list the allowed values for an Autonomous Database Serverless instance.\nFor an Autonomous Database on dedicated Exadata infrastructure, the allowed values are:\nAL16UTF16 or UTF8."
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "NsgIds",
+          "fieldType": "[]string",
+          "jsonName": "nsgIds",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Network security group selection will be added with broader networking stories.",
+          "documentation": "The list of OCIDs (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) for the network security groups (NSGs) to which this resource belongs. Setting this to an empty list removes all resources from all NSGs. For more information about NSGs, see Security Rules (https://docs.cloud.oracle.com/Content/Network/Concepts/securityrules.htm).\n**NsgIds restrictions:**\n- A network security group (NSG) is optional for Autonomous Databases with private access. The nsgIds list can be empty."
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "OcpuCount",
+          "fieldType": "*float32",
+          "jsonName": "ocpuCount",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "OCPU-based sizing is intentionally deferred in favour of computeCount.",
+          "documentation": "The number of OCPU cores to be made available to the database.\nThe following points apply:\n- For Autonomous Databases on Dedicated Exadata infrastructure, to provision less than 1 core, enter a fractional value in an increment of 0.1. For example, you can provision 0.3 or 0.4 cores, but not 0.35 cores. (Note that fractional OCPU values are not supported for Autonomous Database Serverless instances.)\n- To provision 1 or more cores, you must enter an integer between 1 and the maximum number of cores available for the infrastructure shape. For example, you can provision 2 cores or 3 cores, but not 2.5 cores. This applies to an Autonomous Database Serverless instance or an Autonomous Database on Dedicated Exadata Infrastructure.\n- For Autonomous Database Serverless instances, this parameter is not used.\nFor Autonomous Databases on Dedicated Exadata infrastructure, the maximum number of cores is determined by the infrastructure shape. See Characteristics of Infrastructure Shapes (https://www.oracle.com/pls/topic/lookup?ctx=en/cloud/paas/autonomous-database\u0026id=ATPFG-GUID-B0F033C1-CC5A-42F0-B2E7-3CECFEDA1FD1) for shape details.\n**Note:** This parameter cannot be used with the `cpuCoreCount` parameter."
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "PrivateEndpointIp",
+          "fieldType": "*string",
+          "jsonName": "privateEndpointIp",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Private endpoint IP management is not part of the initial OSOK contract.",
+          "documentation": "The private endpoint Ip address for the resource."
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "PrivateEndpointLabel",
+          "fieldType": "*string",
+          "jsonName": "privateEndpointLabel",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Private endpoint labelling is pending design for private-cluster rollouts.",
+          "documentation": "The resource's private endpoint label.\n- Setting the endpoint label to a non-empty string creates a private endpoint database.\n- Resetting the endpoint label to an empty string, after the creation of the private endpoint database, changes the private endpoint database to a public endpoint database.\n- Setting the endpoint label to a non-empty string value, updates to a new private endpoint database, when the database is disabled and re-enabled.\nThis setting cannot be updated in parallel with any of the following: licenseModel, dbEdition, cpuCoreCount, computeCount, computeModel, adminPassword, whitelistedIps, isMTLSConnectionRequired, dbWorkload, dbVersion, isRefreshable, dbName, scheduledOperations, dbToolsDetails, or isFreeTier."
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "ResourcePoolLeaderId",
+          "fieldType": "*string",
+          "jsonName": "resourcePoolLeaderId",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Resource pool coordination is not yet supported.",
+          "documentation": "The unique identifier for leader autonomous database OCID OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)."
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "ResourcePoolSummary",
+          "fieldType": "*database.ResourcePoolSummary",
+          "jsonName": "resourcePoolSummary",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Resource pool coordination is not yet supported."
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "ScheduledOperations",
+          "fieldType": "[]database.ScheduledOperationDetails",
+          "jsonName": "scheduledOperations",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Scheduled operations are intentionally omitted from the first release.",
+          "documentation": "The list of scheduled operations. Consists of values such as dayOfWeek, scheduledStartTime, scheduledStopTime.\nThis cannot be updated in parallel with any of the following: licenseModel, dbEdition, cpuCoreCount, computeCount, computeModel, whitelistedIps, isMTLSConnectionRequired, openMode, permissionLevel, dbWorkload, privateEndpointLabel, nsgIds, dbVersion, isRefreshable, dbName, dbToolsDetails, isLocalDataGuardEnabled, or isFreeTier."
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "SecretId",
+          "fieldType": "*string",
+          "jsonName": "secretId",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "intentionally_omitted",
+          "reason": "OSOK sources admin credentials from Kubernetes secrets instead of OCI vault references.",
+          "documentation": "The OCI vault secret [/Content/General/Concepts/identifiers.htm]OCID.\nThis cannot be used in conjunction with adminPassword."
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "SecretVersionNumber",
+          "fieldType": "*int",
+          "jsonName": "secretVersionNumber",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "intentionally_omitted",
+          "reason": "OSOK sources admin credentials from Kubernetes secrets instead of OCI vault references.",
+          "documentation": "The version of the vault secret. If no version is specified, the latest version will be used."
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "StandbyWhitelistedIps",
+          "fieldType": "[]string",
+          "jsonName": "standbyWhitelistedIps",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Standby access control is not managed by the initial OSOK controllers.",
+          "documentation": "The client IP access control list (ACL). This feature is available for Autonomous Database Serverless  (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html) and on Exadata Cloud@Customer.\nOnly clients connecting from an IP address included in the ACL may access the Autonomous Database instance.\nIf `arePrimaryWhitelistedIpsUsed` is 'TRUE' then Autonomous Database uses this primary's IP access control list (ACL) for the disaster recovery peer called `standbywhitelistedips`.\nFor Autonomous Database Serverless, this is an array of CIDR (classless inter-domain routing) notations for a subnet or VCN OCID (virtual cloud network Oracle Cloud ID).\nMultiple IPs and VCN OCIDs should be separate strings separated by commas, but if it’s other configurations that need multiple pieces of information then its each piece is connected with semicolon (;) as a delimiter.\nExample: `[\"1.1.1.1\",\"1.1.1.0/24\",\"ocid1.vcn.oc1.sea.\u003cunique_id\u003e\",\"ocid1.vcn.oc1.sea.\u003cunique_id1\u003e;1.1.1.1\",\"ocid1.vcn.oc1.sea.\u003cunique_id2\u003e;1.1.0.0/16\"]`\nFor Exadata Cloud@Customer, this is an array of IP addresses or CIDR notations.\nExample: `[\"1.1.1.1\",\"1.1.1.0/24\",\"1.1.2.25\"]`\nFor an update operation, if you want to delete all the IPs in the ACL, use an array with a single empty string entry.\nThis cannot be updated in parallel with any of the following: licenseModel, dbEdition, cpuCoreCount, computeCount, computeModel, adminPassword, isMTLSConnectionRequired, openMode, permissionLevel, dbWorkload, dbVersion, isRefreshable, dbName, scheduledOperations, dbToolsDetails, isLocalDataGuardEnabled, or isFreeTier."
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "SubnetId",
+          "fieldType": "*string",
+          "jsonName": "subnetId",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Private endpoint networking will be handled in a later networking enhancement.",
+          "documentation": "The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the subnet the resource is associated with.\n**Subnet Restrictions:**\n- For bare metal DB systems and for single node virtual machine DB systems, do not use a subnet that overlaps with 192.168.16.16/28.\n- For Exadata and virtual machine 2-node RAC systems, do not use a subnet that overlaps with 192.168.128.0/20.\n- For Autonomous Database, setting this will disable public secure access to the database.\nThese subnets are used by the Oracle Clusterware private interconnect on the database instance.\nSpecifying an overlapping subnet will cause the private interconnect to malfunction.\nThis restriction applies to both the client subnet and the backup subnet."
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "VaultId",
+          "fieldType": "*string",
+          "jsonName": "vaultId",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Customer managed keys will be modelled once the secret workflow solidifies.",
+          "documentation": "The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Oracle Cloud Infrastructure vault (https://docs.cloud.oracle.com/Content/KeyManagement/Concepts/keyoverview.htm#concepts). This parameter and `secretId` are required for Customer Managed Keys."
+        },
+        {
+          "structType": "database.CreateAutonomousDatabaseDetails",
+          "fieldName": "WhitelistedIps",
+          "fieldType": "[]string",
+          "jsonName": "whitelistedIps",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Client ACL management is currently left to manual post-provision steps.",
+          "documentation": "The client IP access control list (ACL). This feature is available for Autonomous Database Serverless  (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html) and on Exadata Cloud@Customer.\nOnly clients connecting from an IP address included in the ACL may access the Autonomous Database instance.\nIf `arePrimaryWhitelistedIpsUsed` is 'TRUE' then Autonomous Database uses this primary's IP access control list (ACL) for the disaster recovery peer called `standbywhitelistedips`.\nFor Autonomous Database Serverless, this is an array of CIDR (classless inter-domain routing) notations for a subnet or VCN OCID (virtual cloud network Oracle Cloud ID).\nMultiple IPs and VCN OCIDs should be separate strings separated by commas, but if it’s other configurations that need multiple pieces of information then its each piece is connected with semicolon (;) as a delimiter.\nExample: `[\"1.1.1.1\",\"1.1.1.0/24\",\"ocid1.vcn.oc1.sea.\u003cunique_id\u003e\",\"ocid1.vcn.oc1.sea.\u003cunique_id1\u003e;1.1.1.1\",\"ocid1.vcn.oc1.sea.\u003cunique_id2\u003e;1.1.0.0/16\"]`\nFor Exadata Cloud@Customer, this is an array of IP addresses or CIDR notations.\nExample: `[\"1.1.1.1\",\"1.1.1.0/24\",\"1.1.2.25\"]`\nFor an update operation, if you want to delete all the IPs in the ACL, use an array with a single empty string entry.\nThis cannot be updated in parallel with any of the following: licenseModel, dbEdition, cpuCoreCount, computeCount, computeModel, adminPassword, isMTLSConnectionRequired, openMode, permissionLevel, dbWorkload, dbVersion, isRefreshable, dbName, scheduledOperations, dbToolsDetails, isLocalDataGuardEnabled, or isFreeTier."
+        }
+      ]
+    },
+    {
+      "structType": "database.GenerateAutonomousDatabaseWalletDetails",
+      "coverage": {
+        "eligibleFields": 1,
+        "usedFields": 1,
+        "percent": 100
+      },
+      "fields": [
+        {
+          "structType": "database.GenerateAutonomousDatabaseWalletDetails",
+          "fieldName": "GenerateType",
+          "fieldType": "database.GenerateAutonomousDatabaseWalletDetailsGenerateTypeEnum",
+          "jsonName": "generateType",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "intentionally_omitted",
+          "reason": "Wallet generation always uses the default package until multi-wallet support is needed.",
+          "documentation": "The type of wallet to generate.\n**Serverless instance usage:**\n* `SINGLE` - used to generate a wallet for a single database\n* `ALL` - used to generate wallet for all databases in the region\n**Dedicated Exadata infrastructure usage:** Value must be `NULL` if attribute is used."
+        },
+        {
+          "structType": "database.GenerateAutonomousDatabaseWalletDetails",
+          "fieldName": "IsRegional",
+          "fieldType": "*bool",
+          "jsonName": "isRegional",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "intentionally_omitted",
+          "reason": "Regional wallet exports are not part of the initial wallet automation.",
+          "documentation": "True when requesting regional connection strings in PDB connect info, applicable to cross-region DG only."
+        },
+        {
+          "structType": "database.GenerateAutonomousDatabaseWalletDetails",
+          "fieldName": "Password",
+          "fieldType": "*string",
+          "jsonName": "password",
+          "mandatory": true,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/autonomousdatabases/adb/adb_walletclient.go:49"
+          ],
+          "documentation": "The password to encrypt the keys inside the wallet. The password must be at least 8 characters long and must include at least 1 letter and either 1 numeric character or 1 special character."
+        }
+      ]
+    },
+    {
+      "structType": "database.UpdateAutonomousDatabaseDetails",
+      "coverage": {
+        "eligibleFields": 42,
+        "usedFields": 11,
+        "percent": 26.190476190476193
+      },
+      "fields": [
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "AdminPassword",
+          "fieldType": "*string",
+          "jsonName": "adminPassword",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "intentionally_omitted",
+          "reason": "Password rotation is handled through dedicated secret flows rather than the update API.",
+          "documentation": "The password must be between 12 and 30 characters long, and must contain at least 1 uppercase, 1 lowercase, and 1 numeric character. It cannot contain the double quote symbol (\") or the username \"admin\", regardless of casing. It must be different from the last four passwords and it must not be a password used within the last 24 hours.\nThis cannot be used in conjunction with with OCI vault secrets (secretId).\nThis cannot be updated in parallel with any of the following: licenseModel, dbEdition, whitelistedIps, openMode, permissionLevel, dbWorkload, privateEndpointLabel, nsgIds, dbVersion, isRefreshable, dbName, or isFreeTier."
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "ArePrimaryWhitelistedIpsUsed",
+          "fieldType": "*bool",
+          "jsonName": "arePrimaryWhitelistedIpsUsed",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Standby access control is not managed by the initial OSOK controllers.",
+          "documentation": "This field will be null if the Autonomous Database is not Data Guard enabled or Access Control is disabled.\n`TRUE` if the Autonomous Database has Data Guard and Access Control enabled, and the Autonomous Database uses the primary's IP access control list (ACL) for standby.\n`FALSE` if the Autonomous Database has Data Guard and Access Control enabled, and the Autonomous Database uses a different IP access control list (ACL) for standby compared to primary."
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "BackupRetentionPeriodInDays",
+          "fieldType": "*int",
+          "jsonName": "backupRetentionPeriodInDays",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Retention policies are left at service defaults until lifecycle stories land.",
+          "documentation": "Retention period, in days, for long-term backups"
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "ComputeCount",
+          "fieldType": "*float32",
+          "jsonName": "computeCount",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Compute scaling is limited to the supported ECPU workflow for now.",
+          "documentation": "The compute amount (CPUs) available to the database. Minimum and maximum values depend on the compute model and whether the database is an Autonomous Database Serverless instance or an Autonomous Database on Dedicated Exadata Infrastructure.\nFor an Autonomous Database Serverless instance, the 'ECPU' compute model requires a minimum value of one, for databases in the elastic resource pool and minimum value of two, otherwise. Required when using the `computeModel` parameter. When using `cpuCoreCount` parameter, it is an error to specify computeCount to a non-null value. Providing `computeModel` and `computeCount` is the preferred method for both OCPU and ECPU.\nThis cannot be updated in parallel with any of the following: licenseModel, databaseEdition, whitelistedIps, isMTLSConnectionRequired, openMode, permissionLevel, privateEndpointLabel, nsgIds, dbVersion, isRefreshable, dbName, scheduledOperations, dbToolsDetails, or isFreeTier."
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "ComputeModel",
+          "fieldType": "database.UpdateAutonomousDatabaseDetailsComputeModelEnum",
+          "jsonName": "computeModel",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Compute scaling is limited to the supported ECPU workflow for now.",
+          "documentation": "The compute model of the Autonomous Database. This is required if using the `computeCount` parameter. If using `cpuCoreCount` then it is an error to specify `computeModel` to a non-null value. ECPU compute model is the recommended model and OCPU compute model is legacy."
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "CpuCoreCount",
+          "fieldType": "*int",
+          "jsonName": "cpuCoreCount",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/autonomousdatabases/adb/adb_serviceclient.go:171"
+          ],
+          "documentation": "The number of CPUs to be made available to the Autonomous Database.\u003cbr\u003e\nFor Autonomous Databases on Dedicated Exadata Infrastructure:\n- The CPU type (OCPUs or ECPUs) is determined by the parent Autonomous Exadata VM Cluster's compute model.\n- It is suggested to use 'computeCount' parameter if you want to use fractional value to provision less than 1 core.\n**Note:** This parameter cannot be used with the `ocpuCount` or `computeCount` parameter.\nThis cannot be updated in parallel with any of the following: licenseModel, databaseEdition, whitelistedIps, isMTLSConnectionRequired, openMode, permissionLevel, privateEndpointLabel, nsgIds, dbVersion, isRefreshable, dbName, scheduledOperations, dbToolsDetails, or isFreeTier."
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "CustomerContacts",
+          "fieldType": "[]database.CustomerContact",
+          "jsonName": "customerContacts",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Customer contact metadata is not surfaced through OSOK today.",
+          "documentation": "Customer Contacts. Setting this to an empty list removes all customer contacts of an Oracle\nThis cannot be updated in parallel with any of the following: isMTLSConnectionRequired, scheduledOperations, or dbToolsDetails."
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "DataStorageSizeInGBs",
+          "fieldType": "*int",
+          "jsonName": "dataStorageSizeInGBs",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Only the terabyte-based sizing workflow is supported by the current controllers.",
+          "documentation": "Applies to dedicated Exadata infrastructure only.\nThe size, in gigabytes, of the data volume that will be created and attached to the database. The maximum storage value depends on the system shape. See Characteristics of Infrastructure Shapes (https://www.oracle.com/pls/topic/lookup?ctx=en/cloud/paas/autonomous-database\u0026id=ATPFG-GUID-B0F033C1-CC5A-42F0-B2E7-3CECFEDA1FD1) for shape details.\n**Note:** This parameter cannot be used with the `dataStorageSizeInTBs` parameter."
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "DataStorageSizeInTBs",
+          "fieldType": "*int",
+          "jsonName": "dataStorageSizeInTBs",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/autonomousdatabases/adb/adb_serviceclient.go:166"
+          ],
+          "documentation": "The size, in terabytes, of the data volume that will be created and attached to the database. For Autonomous Databases on dedicated Exadata infrastructure, the maximum storage value is determined by the infrastructure shape. See Characteristics of Infrastructure Shapes (https://www.oracle.com/pls/topic/lookup?ctx=en/cloud/paas/autonomous-database\u0026id=ATPFG-GUID-B0F033C1-CC5A-42F0-B2E7-3CECFEDA1FD1) for shape details.\nA full Exadata service is allocated when the Autonomous Database size is set to the upper limit (384 TB).\n**Note:** This parameter cannot be used with the `dataStorageSizeInGBs` parameter.\nThis cannot be updated in parallel with any of the following: licenseModel, databaseEdition, whitelistedIps, isMTLSConnectionRequired, openMode, permissionLevel, privateEndpointLabel, nsgIds, dbVersion, isRefreshable, dbName, scheduledOperations, dbToolsDetails, or isFreeTier."
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "DatabaseEdition",
+          "fieldType": "database.AutonomousDatabaseSummaryDatabaseEditionEnum",
+          "jsonName": "databaseEdition",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Edition selection is not yet exposed through the OSOK CRDs.",
+          "documentation": "The Oracle Database Edition that applies to the Autonomous databases.\nThis cannot be updated in parallel with any of the following: cpuCoreCount, computeCount, computeModel, adminPassword, whitelistedIps, isMTLSConnectionRequired, dbWorkload, privateEndpointLabel, nsgIds, dbVersion, dbName, scheduledOperations, dbToolsDetails, or isFreeTier."
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "DbName",
+          "fieldType": "*string",
+          "jsonName": "dbName",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/autonomousdatabases/adb/adb_serviceclient.go:151"
+          ],
+          "documentation": "New name for this Autonomous Database.\nFor Autonomous Databases on Dedicated Exadata Infrastructure, the name must begin with an alphabetic character, and can contain a maximum of eight alphanumeric characters. Special characters are not permitted.\nFor Autonomous Database Serverless instances, the name must begin with an alphabetic character, and can contain a maximum of 30 alphanumeric characters. Special characters are not permitted. The database name must be unique in the tenancy.\nThis cannot be updated in parallel with any of the following: licenseModel, dbEdition, cpuCoreCount, computeCount, computeModel, adminPassword, whitelistedIps, isMTLSConnectionRequired, openMode, permissionLevel, dbWorkload, privateEndpointLabel, nsgIds, dbVersion, isRefreshable, dbName, scheduledOperations, dbToolsDetails."
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "DbToolsDetails",
+          "fieldType": "[]database.DatabaseTool",
+          "jsonName": "dbToolsDetails",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "DB Tools integration will be considered in a follow-up release.",
+          "documentation": "The list of database tools details.\nThis cannot be updated in parallel with any of the following: licenseModel, dbEdition, cpuCoreCount, computeCount, computeModel, whitelistedIps, isMTLSConnectionRequired, openMode, permissionLevel, dbWorkload, privateEndpointLabel, nsgIds, dbVersion, isRefreshable, dbName, scheduledOperations, isLocalDataGuardEnabled, or isFreeTier."
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "DbVersion",
+          "fieldType": "*string",
+          "jsonName": "dbVersion",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/autonomousdatabases/adb/adb_serviceclient.go:161"
+          ],
+          "documentation": "A valid Oracle Database version for Autonomous Database."
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "DbWorkload",
+          "fieldType": "database.UpdateAutonomousDatabaseDetailsDbWorkloadEnum",
+          "jsonName": "dbWorkload",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/autonomousdatabases/adb/adb_serviceclient.go:155"
+          ],
+          "documentation": "The Autonomous Database workload type. The following values are valid:\n- OLTP - indicates an Autonomous Transaction Processing database\n- DW - indicates an Autonomous Data Warehouse database\n- AJD - indicates an Autonomous JSON Database\n- APEX - indicates an Autonomous Database with the Oracle APEX Application Development workload type.\nThis cannot be updated in parallel with any of the following: licenseModel, dbEdition, cpuCoreCount, computeCount, computeModel, adminPassword, whitelistedIps, isMTLSConnectionRequired, privateEndpointLabel, nsgIds, dbVersion, isRefreshable, dbName, scheduledOperations, dbToolsDetails, isLocalDataGuardEnabled, or isFreeTier."
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "DefinedTags",
+          "fieldType": "map[string]map[string]interface {}",
+          "jsonName": "definedTags",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/autonomousdatabases/adb/adb_serviceclient.go:197"
+          ],
+          "documentation": "Defined tags for this resource. Each key is predefined and scoped to a namespace.\nFor more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm)."
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "DisplayName",
+          "fieldType": "*string",
+          "jsonName": "displayName",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/autonomousdatabases/adb/adb_serviceclient.go:146"
+          ],
+          "documentation": "The user-friendly name for the Autonomous Database. The name does not have to be unique. The display name can only be updated for Autonomous Databases using dedicated Exadata Infrastructure. This parameter may not be updated in parallel with dbVersion."
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "FreeformTags",
+          "fieldType": "map[string]string",
+          "jsonName": "freeformTags",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/autonomousdatabases/adb/adb_serviceclient.go:191"
+          ],
+          "documentation": "Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.\nFor more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).\nExample: `{\"Department\": \"Finance\"}`"
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "InMemoryPercentage",
+          "fieldType": "*int",
+          "jsonName": "inMemoryPercentage",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "In-memory tuning is intentionally omitted for the initial managed experience.",
+          "documentation": "The percentage of the System Global Area(SGA) assigned to In-Memory tables in Autonomous Database. This property is applicable only to Autonomous Databases on the Exadata Cloud@Customer platform."
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "IsAccessControlEnabled",
+          "fieldType": "*bool",
+          "jsonName": "isAccessControlEnabled",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "VCN level controls are preferred; database-level ACL toggles will come later.",
+          "documentation": "Indicates if the database-level access control is enabled.\nIf disabled, database access is defined by the network security rules.\nIf enabled, database access is restricted to the IP addresses defined by the rules specified with the `whitelistedIps` property. While specifying `whitelistedIps` rules is optional,\n if database-level access control is enabled and no rules are specified, the database will become inaccessible. The rules can be added later using the `UpdateAutonomousDatabase` API operation or edit option in console.\nWhen creating a database clone, the desired access control setting should be specified. By default, database-level access control will be disabled for the clone.\nThis property is applicable only to Autonomous Databases on the Exadata Cloud@Customer platform. For Autonomous Database Serverless instances, `whitelistedIps` is used."
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "IsAutoScalingEnabled",
+          "fieldType": "*bool",
+          "jsonName": "isAutoScalingEnabled",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/autonomousdatabases/adb/adb_serviceclient.go:176"
+          ],
+          "documentation": "Indicates whether auto scaling is enabled for the Autonomous Database CPU core count. Setting to `TRUE` enables auto scaling. Setting to `FALSE` disables auto scaling. The default value is `TRUE`. Auto scaling is only available for Autonomous Database Serverless instances (https://docs.oracle.com/en/cloud/paas/autonomous-database/serverless/)."
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "IsAutoScalingForStorageEnabled",
+          "fieldType": "*bool",
+          "jsonName": "isAutoScalingForStorageEnabled",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Storage autoscaling will be evaluated after core create/update flows stabilize.",
+          "documentation": "Indicates if auto scaling is enabled for the Autonomous Database storage. The default value is `FALSE`."
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "IsDataGuardEnabled",
+          "fieldType": "*bool",
+          "jsonName": "isDataGuardEnabled",
+          "mandatory": false,
+          "used": false,
+          "deprecated": true,
+          "readOnly": false,
+          "status": "deprecated",
+          "reason": "Deprecated in the OCI SDK.",
+          "documentation": "** Deprecated. ** Indicates whether the Autonomous Database has a local (in-region) standby database. Not applicable when creating a cross-region Autonomous Data Guard associations, or to\nAutonomous Databases using dedicated Exadata infrastructure or Exadata Cloud@Customer infrastructure.\nTo create a local standby, set to `TRUE`. To delete a local standby, set to `FALSE`. For more information on using Autonomous Data Guard on an Autonomous Database Serverless instance (local and cross-region) , see About Standby Databases (https://docs.oracle.com/en/cloud/paas/autonomous-database/adbsa/autonomous-data-guard-about.html#GUID-045AD017-8120-4BDC-AF58-7430FFE28D2B)\nTo enable cross-region Autonomous Data Guard on an Autonomous Database Serverless instance, see Enable Autonomous Data Guard (https://docs-uat.us.oracle.com/en/cloud/paas/autonomous-database/adbsa/autonomous-data-guard-update-type.html#GUID-967ED737-4A05-4D6E-A7CA-C3F21ACF9BF0).\nTo delete a cross-region standby database, provide the `peerDbId` for the standby database in a remote region, and set `isDataGuardEnabled` to `FALSE`."
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "IsDevTier",
+          "fieldType": "*bool",
+          "jsonName": "isDevTier",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Developer tier provisioning is not planned for the first validator milestone.",
+          "documentation": "This project introduces Autonomous Database for Developers (ADB-Dev), a free tier on dedicated infrastructure, and Cloud@Customer for database development purposes. ADB-Dev enables ExaDB customers to experiment with ADB for free and incentivizes enterprises to use ADB for new development projects.Note that ADB-Dev have 4 CPU and 20GB of memory. For ADB-Dev , memory and CPU cannot be scaled"
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "IsFreeTier",
+          "fieldType": "*bool",
+          "jsonName": "isFreeTier",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/autonomousdatabases/adb/adb_serviceclient.go:181"
+          ],
+          "documentation": "Indicates if this is an Always Free resource. The default value is false. Note that Always Free Autonomous Databases have 1 CPU and 20GB of memory. For Always Free databases, memory and CPU cannot be scaled.\nThis cannot be updated in parallel with any of the following: licenseModel, dbEdition, cpuCoreCount, computeCount, computeModel, adminPassword, whitelistedIps, isMTLSConnectionRequired, openMode, permissionLevel, privateEndpointLabel, nsgIds, dbVersion, isRefreshable, dbName, scheduledOperations, dbToolsDetails, or isLocalDataGuardEnabled"
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "IsLocalDataGuardEnabled",
+          "fieldType": "*bool",
+          "jsonName": "isLocalDataGuardEnabled",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Local Data Guard configuration is handled manually outside OSOK for now.",
+          "documentation": "Indicates whether the Autonomous Database has a local (in-region) standby database. Not applicable when creating a cross-region Autonomous Data Guard associations, or to\nAutonomous Databases using dedicated Exadata infrastructure or Exadata Cloud@Customer infrastructure.\nTo create a local standby, set to `TRUE`. To delete a local standby, set to `FALSE`. For more information on using Autonomous Data Guard on an Autonomous Database Serverless instance (local and cross-region) , see About Standby Databases (https://docs.oracle.com/en/cloud/paas/autonomous-database/adbsa/autonomous-data-guard-about.html#GUID-045AD017-8120-4BDC-AF58-7430FFE28D2B)\nTo enable cross-region Autonomous Data Guard on an Autonomous Database Serverless instance, see Enable Autonomous Data Guard (https://docs-uat.us.oracle.com/en/cloud/paas/autonomous-database/adbsa/autonomous-data-guard-update-type.html#GUID-967ED737-4A05-4D6E-A7CA-C3F21ACF9BF0).\nThis cannot be updated in parallel with any of the following: isMTLSRequired, dbWorkload, dbVersion, isRefreshable, dbName, scheduledOperations, dbToolsDetails, or isFreeTier."
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "IsMtlsConnectionRequired",
+          "fieldType": "*bool",
+          "jsonName": "isMtlsConnectionRequired",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "mTLS enforcement remains at the OCI default pending operator UX work.",
+          "documentation": "Specifies if the Autonomous Database requires mTLS connections.\nThis may not be updated in parallel with any of the following: licenseModel, databaseEdition, cpuCoreCount, computeCount, dataStorageSizeInTBs, whitelistedIps, openMode, permissionLevel, db-workload, privateEndpointLabel, nsgIds, customerContacts, dbVersion, scheduledOperations, dbToolsDetails, isLocalDataGuardEnabled, or isFreeTier.\nService Change: The default value of the isMTLSConnectionRequired attribute will change from true to false on July 1, 2023 in the following APIs:\n- CreateAutonomousDatabase\n- GetAutonomousDatabase\n- UpdateAutonomousDatabase\nDetails: Prior to the July 1, 2023 change, the isMTLSConnectionRequired attribute default value was true. This applies to Autonomous Database Serverless.\nDoes this impact me? If you use or maintain custom scripts or Terraform scripts referencing the CreateAutonomousDatabase, GetAutonomousDatabase, or UpdateAutonomousDatabase APIs, you want to check, and possibly modify, the scripts for the changed default value of the attribute. Should you choose not to leave your scripts unchanged, the API calls containing this attribute will continue to work, but the default value will switch from true to false.\nHow do I make this change? Using either OCI SDKs or command line tools, update your custom scripts to explicitly set the isMTLSConnectionRequired attribute to true."
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "IsRefreshableClone",
+          "fieldType": "*bool",
+          "jsonName": "isRefreshableClone",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Refreshable clones are not orchestrated by OSOK yet.",
+          "documentation": "Indicates if the Autonomous Database is a refreshable clone.\nThis cannot be updated in parallel with any of the following: cpuCoreCount, computeCount, computeModel, adminPassword, whitelistedIps, openMode, permissionLevel, dbWorkload, privateEndpointLabel, nsgIds, dbVersion, dbName, scheduledOperations, dbToolsDetails, isLocalDataGuardEnabled, or isFreeTier."
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "LicenseModel",
+          "fieldType": "database.UpdateAutonomousDatabaseDetailsLicenseModelEnum",
+          "jsonName": "licenseModel",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/autonomousdatabases/adb/adb_serviceclient.go:186"
+          ],
+          "documentation": "The Oracle license model that applies to the Oracle Autonomous Database. Bring your own license (BYOL) allows you to apply your current on-premises Oracle software licenses to equivalent, highly automated Oracle services in the cloud.\nLicense Included allows you to subscribe to new Oracle Database software licenses and the Oracle Database service.\nNote that when provisioning an Autonomous Database on dedicated Exadata infrastructure (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html), this attribute must be null. It is already set at the\nAutonomous Exadata Infrastructure level. When provisioning an Autonomous Database Serverless  (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html) database, if a value is not specified, the system defaults the value to `BRING_YOUR_OWN_LICENSE`. Bring your own license (BYOL) also allows you to select the DB edition using the optional parameter.\nThis cannot be updated in parallel with any of the following: cpuCoreCount, computeCount, dataStorageSizeInTBs, adminPassword, isMTLSConnectionRequired, dbWorkload, privateEndpointLabel, nsgIds, dbVersion, dbName, scheduledOperations, dbToolsDetails, or isFreeTier."
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "LocalAdgAutoFailoverMaxDataLossLimit",
+          "fieldType": "*int",
+          "jsonName": "localAdgAutoFailoverMaxDataLossLimit",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Local Data Guard configuration is handled manually outside OSOK for now.",
+          "documentation": "Parameter that allows users to select an acceptable maximum data loss limit in seconds, up to which Automatic Failover will be triggered when necessary for a Local Autonomous Data Guard"
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "LongTermBackupSchedule",
+          "fieldType": "*database.LongTermBackUpScheduleDetails",
+          "jsonName": "longTermBackupSchedule",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Backup scheduling customisation is not surfaced yet."
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "NsgIds",
+          "fieldType": "[]string",
+          "jsonName": "nsgIds",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Network security group selection will be added with broader networking stories.",
+          "documentation": "The list of OCIDs (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) for the network security groups (NSGs) to which this resource belongs. Setting this to an empty list removes all resources from all NSGs. For more information about NSGs, see Security Rules (https://docs.cloud.oracle.com/Content/Network/Concepts/securityrules.htm).\n**NsgIds restrictions:**\n- A network security group (NSG) is optional for Autonomous Databases with private access. The nsgIds list can be empty."
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "OcpuCount",
+          "fieldType": "*float32",
+          "jsonName": "ocpuCount",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "OCPU-based sizing is intentionally deferred in favour of computeCount.",
+          "documentation": "The number of OCPU cores to be made available to the Autonomous Database.\nFor Autonomous Databases on Dedicated Exadata Infrastructure, you can specify a fractional value for this parameter. Fractional values are not supported for Autonomous Database Serverless instances.\nFor Autonomous Database Serverless instances, this parameter is not used.\nTo provision less than 1 core, enter a fractional value in an increment of 0.1. To provision 1 or more cores, you must enter an integer between 1 and the maximum number of cores available to the infrastructure shape. For example, you can provision 0.3 or 0.4 cores, but not 0.35 cores. Likewise, you can provision 2 cores or 3 cores, but not 2.5 cores. The maximum number of cores is determined by the infrastructure shape. See Characteristics of Infrastructure Shapes (https://docs.oracle.com/en/cloud/paas/autonomous-database/dedicated/adbde/index.html) for shape details.\n**Note:** This parameter cannot be used with the `cpuCoreCount` parameter."
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "OpenMode",
+          "fieldType": "database.UpdateAutonomousDatabaseDetailsOpenModeEnum",
+          "jsonName": "openMode",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Database open mode changes are managed manually outside of OSOK.",
+          "documentation": "Indicates the Autonomous Database mode. The database can be opened in `READ_ONLY` or `READ_WRITE` mode.\nThis cannot be updated in parallel with any of the following: cpuCoreCount, computeCount, computeModel, adminPassword, whitelistedIps, isMTLSConnectionRequired, dbVersion, isRefreshable, dbName, scheduledOperations, dbToolsDetails, or isFreeTier."
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "PeerDbId",
+          "fieldType": "*string",
+          "jsonName": "peerDbId",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Cross-region peer wiring is not currently automated.",
+          "documentation": "The database OCID(/Content/General/Concepts/identifiers.htm) of the Disaster Recovery peer (source Primary) database, which is located in a different (remote) region from the current peer database.\nTo create or delete a local (in-region) standby, see the `isDataGuardEnabled` parameter."
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "PermissionLevel",
+          "fieldType": "database.UpdateAutonomousDatabaseDetailsPermissionLevelEnum",
+          "jsonName": "permissionLevel",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Permission level toggles are deferred until multi-tenant scenarios are ready.",
+          "documentation": "The Autonomous Database permission level. Restricted mode allows access only by admin users.\nThis cannot be updated in parallel with any of the following: cpuCoreCount, computeCount, computeModel, adminPassword, whitelistedIps, isMTLSConnectionRequired, nsgIds, dbVersion, isRefreshable, dbName, scheduledOperations, dbToolsDetails, or isFreeTier."
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "PrivateEndpointIp",
+          "fieldType": "*string",
+          "jsonName": "privateEndpointIp",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Private endpoint IP management is not part of the initial OSOK contract.",
+          "documentation": "The private endpoint Ip address for the resource."
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "PrivateEndpointLabel",
+          "fieldType": "*string",
+          "jsonName": "privateEndpointLabel",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Private endpoint labelling is pending design for private-cluster rollouts.",
+          "documentation": "The resource's private endpoint label.\n- Setting the endpoint label to a non-empty string creates a private endpoint database.\n- Resetting the endpoint label to an empty string, after the creation of the private endpoint database, changes the private endpoint database to a public endpoint database.\n- Setting the endpoint label to a non-empty string value, updates to a new private endpoint database, when the database is disabled and re-enabled.\nThis setting cannot be updated in parallel with any of the following: licenseModel, dbEdition, cpuCoreCount, computeCount, computeModel, adminPassword, whitelistedIps, isMTLSConnectionRequired, dbWorkload, dbVersion, isRefreshable, dbName, scheduledOperations, dbToolsDetails, or isFreeTier."
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "RefreshableMode",
+          "fieldType": "database.UpdateAutonomousDatabaseDetailsRefreshableModeEnum",
+          "jsonName": "refreshableMode",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Refreshable clones are not orchestrated by OSOK yet.",
+          "documentation": "The refresh mode of the clone. AUTOMATIC indicates that the clone is automatically being refreshed with data from the source Autonomous Database."
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "ResourcePoolLeaderId",
+          "fieldType": "*string",
+          "jsonName": "resourcePoolLeaderId",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Resource pool coordination is not yet supported.",
+          "documentation": "The unique identifier for leader autonomous database OCID OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)."
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "ResourcePoolSummary",
+          "fieldType": "*database.ResourcePoolSummary",
+          "jsonName": "resourcePoolSummary",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Resource pool coordination is not yet supported."
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "ScheduledOperations",
+          "fieldType": "[]database.ScheduledOperationDetails",
+          "jsonName": "scheduledOperations",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Scheduled operations are intentionally omitted from the first release.",
+          "documentation": "The list of scheduled operations. Consists of values such as dayOfWeek, scheduledStartTime, scheduledStopTime.\nThis cannot be updated in parallel with any of the following: licenseModel, dbEdition, cpuCoreCount, computeCount, computeModel, whitelistedIps, isMTLSConnectionRequired, openMode, permissionLevel, dbWorkload, privateEndpointLabel, nsgIds, dbVersion, isRefreshable, dbName, dbToolsDetails, isLocalDataGuardEnabled, or isFreeTier."
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "SecretId",
+          "fieldType": "*string",
+          "jsonName": "secretId",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "intentionally_omitted",
+          "reason": "OSOK sources admin credentials from Kubernetes secrets instead of OCI vault references.",
+          "documentation": "The OCI vault secret [/Content/General/Concepts/identifiers.htm]OCID. This cannot be used in conjunction with adminPassword."
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "SecretVersionNumber",
+          "fieldType": "*int",
+          "jsonName": "secretVersionNumber",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "intentionally_omitted",
+          "reason": "OSOK sources admin credentials from Kubernetes secrets instead of OCI vault references.",
+          "documentation": "The version of the vault secret. If no version is specified, the latest version will be used."
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "StandbyWhitelistedIps",
+          "fieldType": "[]string",
+          "jsonName": "standbyWhitelistedIps",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Standby access control is not managed by the initial OSOK controllers.",
+          "documentation": "The client IP access control list (ACL). This feature is available for Autonomous Database Serverless  (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html) and on Exadata Cloud@Customer.\nOnly clients connecting from an IP address included in the ACL may access the Autonomous Database instance.\nIf `arePrimaryWhitelistedIpsUsed` is 'TRUE' then Autonomous Database uses this primary's IP access control list (ACL) for the disaster recovery peer called `standbywhitelistedips`.\nFor Autonomous Database Serverless, this is an array of CIDR (classless inter-domain routing) notations for a subnet or VCN OCID (virtual cloud network Oracle Cloud ID).\nMultiple IPs and VCN OCIDs should be separate strings separated by commas, but if it’s other configurations that need multiple pieces of information then its each piece is connected with semicolon (;) as a delimiter.\nExample: `[\"1.1.1.1\",\"1.1.1.0/24\",\"ocid1.vcn.oc1.sea.\u003cunique_id\u003e\",\"ocid1.vcn.oc1.sea.\u003cunique_id1\u003e;1.1.1.1\",\"ocid1.vcn.oc1.sea.\u003cunique_id2\u003e;1.1.0.0/16\"]`\nFor Exadata Cloud@Customer, this is an array of IP addresses or CIDR notations.\nExample: `[\"1.1.1.1\",\"1.1.1.0/24\",\"1.1.2.25\"]`\nFor an update operation, if you want to delete all the IPs in the ACL, use an array with a single empty string entry.\nThis cannot be updated in parallel with any of the following: licenseModel, dbEdition, cpuCoreCount, computeCount, computeModel, adminPassword, isMTLSConnectionRequired, openMode, permissionLevel, dbWorkload, dbVersion, isRefreshable, dbName, scheduledOperations, dbToolsDetails, isLocalDataGuardEnabled, or isFreeTier."
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "SubnetId",
+          "fieldType": "*string",
+          "jsonName": "subnetId",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Private endpoint networking will be handled in a later networking enhancement.",
+          "documentation": "The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the subnet the resource is associated with.\n**Subnet Restrictions:**\n- For bare metal DB systems and for single node virtual machine DB systems, do not use a subnet that overlaps with 192.168.16.16/28.\n- For Exadata and virtual machine 2-node RAC systems, do not use a subnet that overlaps with 192.168.128.0/20.\n- For Autonomous Database, setting this will disable public secure access to the database.\nThese subnets are used by the Oracle Clusterware private interconnect on the database instance.\nSpecifying an overlapping subnet will cause the private interconnect to malfunction.\nThis restriction applies to both the client subnet and the backup subnet."
+        },
+        {
+          "structType": "database.UpdateAutonomousDatabaseDetails",
+          "fieldName": "WhitelistedIps",
+          "fieldType": "[]string",
+          "jsonName": "whitelistedIps",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Client ACL management is currently left to manual post-provision steps.",
+          "documentation": "The client IP access control list (ACL). This feature is available for Autonomous Database Serverless  (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html) and on Exadata Cloud@Customer.\nOnly clients connecting from an IP address included in the ACL may access the Autonomous Database instance.\nIf `arePrimaryWhitelistedIpsUsed` is 'TRUE' then Autonomous Database uses this primary's IP access control list (ACL) for the disaster recovery peer called `standbywhitelistedips`.\nFor Autonomous Database Serverless, this is an array of CIDR (classless inter-domain routing) notations for a subnet or VCN OCID (virtual cloud network Oracle Cloud ID).\nMultiple IPs and VCN OCIDs should be separate strings separated by commas, but if it’s other configurations that need multiple pieces of information then its each piece is connected with semicolon (;) as a delimiter.\nExample: `[\"1.1.1.1\",\"1.1.1.0/24\",\"ocid1.vcn.oc1.sea.\u003cunique_id\u003e\",\"ocid1.vcn.oc1.sea.\u003cunique_id1\u003e;1.1.1.1\",\"ocid1.vcn.oc1.sea.\u003cunique_id2\u003e;1.1.0.0/16\"]`\nFor Exadata Cloud@Customer, this is an array of IP addresses or CIDR notations.\nExample: `[\"1.1.1.1\",\"1.1.1.0/24\",\"1.1.2.25\"]`\nFor an update operation, if you want to delete all the IPs in the ACL, use an array with a single empty string entry.\nThis cannot be updated in parallel with any of the following: licenseModel, dbEdition, cpuCoreCount, computeCount, computeModel, adminPassword, isMTLSConnectionRequired, openMode, permissionLevel, dbWorkload, dbVersion, isRefreshable, dbName, scheduledOperations, dbToolsDetails, isLocalDataGuardEnabled, or isFreeTier."
+        }
+      ]
+    },
+    {
+      "structType": "mysql.CreateDbSystemDetails",
+      "coverage": {
+        "eligibleFields": 25,
+        "usedFields": 19,
+        "percent": 76
+      },
+      "fields": [
+        {
+          "structType": "mysql.CreateDbSystemDetails",
+          "fieldName": "AdminPassword",
+          "fieldType": "*string",
+          "jsonName": "adminPassword",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/mysql/dbsystem/dbsystem_serviceclient.go:51"
+          ],
+          "documentation": "The password for the administrative user. The password must be\nbetween 8 and 32 characters long, and must contain at least 1\nnumeric character, 1 lowercase character, 1 uppercase character, and\n1 special (nonalphanumeric) character."
+        },
+        {
+          "structType": "mysql.CreateDbSystemDetails",
+          "fieldName": "AdminUsername",
+          "fieldType": "*string",
+          "jsonName": "adminUsername",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/mysql/dbsystem/dbsystem_serviceclient.go:50"
+          ],
+          "documentation": "The username for the administrative user."
+        },
+        {
+          "structType": "mysql.CreateDbSystemDetails",
+          "fieldName": "AvailabilityDomain",
+          "fieldType": "*string",
+          "jsonName": "availabilityDomain",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/mysql/dbsystem/dbsystem_serviceclient.go:44"
+          ],
+          "documentation": "The availability domain on which to deploy the Read/Write endpoint. This defines the preferred primary instance.\nIn a failover scenario, the Read/Write endpoint is redirected to one of the other availability domains\nand the MySQL instance in that domain is promoted to the primary instance.\nThis redirection does not affect the IP address of the DB System in any way.\nFor a standalone DB System, this defines the availability domain in which the DB System is placed."
+        },
+        {
+          "structType": "mysql.CreateDbSystemDetails",
+          "fieldName": "BackupPolicy",
+          "fieldType": "*mysql.CreateBackupPolicyDetails",
+          "jsonName": "backupPolicy",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Database backup policy customisation will be added alongside lifecycle automation."
+        },
+        {
+          "structType": "mysql.CreateDbSystemDetails",
+          "fieldName": "CompartmentId",
+          "fieldType": "*string",
+          "jsonName": "compartmentId",
+          "mandatory": true,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/mysql/dbsystem/dbsystem_serviceclient.go:47"
+          ],
+          "documentation": "The OCID of the compartment."
+        },
+        {
+          "structType": "mysql.CreateDbSystemDetails",
+          "fieldName": "ConfigurationId",
+          "fieldType": "*string",
+          "jsonName": "configurationId",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/mysql/dbsystem/dbsystem_serviceclient.go:70"
+          ],
+          "documentation": "The OCID of the Configuration to be used for this DB System."
+        },
+        {
+          "structType": "mysql.CreateDbSystemDetails",
+          "fieldName": "CrashRecovery",
+          "fieldType": "mysql.CrashRecoveryStatusEnum",
+          "jsonName": "crashRecovery",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Crash recovery tuning is left at service defaults for now.",
+          "documentation": "Whether to run the DB System with InnoDB Redo Logs and the Double Write Buffer enabled or disabled,\nand whether to enable or disable syncing of the Binary Logs."
+        },
+        {
+          "structType": "mysql.CreateDbSystemDetails",
+          "fieldName": "DataStorageSizeInGBs",
+          "fieldType": "*int",
+          "jsonName": "dataStorageSizeInGBs",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/mysql/dbsystem/dbsystem_serviceclient.go:48"
+          ],
+          "documentation": "Initial size of the data volume in GBs that will be created and attached.\nKeep in mind that this only specifies the size of the database data volume,\nthe log volume for the database will be scaled appropriately with its shape."
+        },
+        {
+          "structType": "mysql.CreateDbSystemDetails",
+          "fieldName": "DatabaseManagement",
+          "fieldType": "mysql.DatabaseManagementStatusEnum",
+          "jsonName": "databaseManagement",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Database Management integration is not targeted in this release.",
+          "documentation": "Whether to enable monitoring via the Database Management service."
+        },
+        {
+          "structType": "mysql.CreateDbSystemDetails",
+          "fieldName": "DefinedTags",
+          "fieldType": "map[string]map[string]interface {}",
+          "jsonName": "definedTags",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/mysql/dbsystem/dbsystem_serviceclient.go:53"
+          ],
+          "documentation": "Usage of predefined tag keys. These predefined keys are scoped to namespaces.\nExample: `{\"foo-namespace\": {\"bar-key\": \"value\"}}`"
+        },
+        {
+          "structType": "mysql.CreateDbSystemDetails",
+          "fieldName": "DeletionPolicy",
+          "fieldType": "*mysql.CreateDeletionPolicyDetails",
+          "jsonName": "deletionPolicy",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Deletion policy configuration is deferred until we support managed teardown flows."
+        },
+        {
+          "structType": "mysql.CreateDbSystemDetails",
+          "fieldName": "Description",
+          "fieldType": "*string",
+          "jsonName": "description",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/mysql/dbsystem/dbsystem_serviceclient.go:58"
+          ],
+          "documentation": "User-provided data about the DB System."
+        },
+        {
+          "structType": "mysql.CreateDbSystemDetails",
+          "fieldName": "DisplayName",
+          "fieldType": "*string",
+          "jsonName": "displayName",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/mysql/dbsystem/dbsystem_serviceclient.go:52"
+          ],
+          "documentation": "The user-friendly name for the DB System. It does not have to be unique."
+        },
+        {
+          "structType": "mysql.CreateDbSystemDetails",
+          "fieldName": "FaultDomain",
+          "fieldType": "*string",
+          "jsonName": "faultDomain",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/mysql/dbsystem/dbsystem_serviceclient.go:45"
+          ],
+          "documentation": "The fault domain on which to deploy the Read/Write endpoint. This defines the preferred primary instance.\nIn a failover scenario, the Read/Write endpoint is redirected to one of the other fault domains\nand the MySQL instance in that domain is promoted to the primary instance.\nThis redirection does not affect the IP address of the DB System in any way.\nFor a standalone DB System, this defines the fault domain in which the DB System is placed."
+        },
+        {
+          "structType": "mysql.CreateDbSystemDetails",
+          "fieldName": "FreeformTags",
+          "fieldType": "map[string]string",
+          "jsonName": "freeformTags",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/mysql/dbsystem/dbsystem_serviceclient.go:54"
+          ],
+          "documentation": "Simple key-value pair applied without any predefined name, type or scope. Exists for cross-compatibility only.\nExample: `{\"bar-key\": \"value\"}`"
+        },
+        {
+          "structType": "mysql.CreateDbSystemDetails",
+          "fieldName": "HostnameLabel",
+          "fieldType": "*string",
+          "jsonName": "hostnameLabel",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/mysql/dbsystem/dbsystem_serviceclient.go:78"
+          ],
+          "documentation": "The hostname for the primary endpoint of the DB System. Used for DNS.\nThe value is the hostname portion of the primary private IP's fully qualified domain name (FQDN)\n(for example, \"dbsystem-1\" in FQDN \"dbsystem-1.subnet123.vcn1.oraclevcn.com\").\nMust be unique across all VNICs in the subnet and comply with RFC 952 and RFC 1123."
+        },
+        {
+          "structType": "mysql.CreateDbSystemDetails",
+          "fieldName": "IpAddress",
+          "fieldType": "*string",
+          "jsonName": "ipAddress",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/mysql/dbsystem/dbsystem_serviceclient.go:74"
+          ],
+          "documentation": "The IP address the DB System is configured to listen on.\nA private IP address of your choice to assign to the primary endpoint of the DB System.\nMust be an available IP address within the subnet's CIDR. If you don't specify a value,\nOracle automatically assigns a private IP address from the subnet. This should be a\n\"dotted-quad\" style IPv4 address."
+        },
+        {
+          "structType": "mysql.CreateDbSystemDetails",
+          "fieldName": "IsHighlyAvailable",
+          "fieldType": "*bool",
+          "jsonName": "isHighlyAvailable",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/mysql/dbsystem/dbsystem_serviceclient.go:46"
+          ],
+          "documentation": "Specifies if the DB System is highly available.\nWhen creating a DB System with High Availability, three instances\nare created and placed according to your region- and\nsubnet-type. The secondaries are placed automatically in the other\ntwo availability or fault domains.  You can choose the preferred\nlocation of your primary instance, only."
+        },
+        {
+          "structType": "mysql.CreateDbSystemDetails",
+          "fieldName": "Maintenance",
+          "fieldType": "*mysql.CreateMaintenanceDetails",
+          "jsonName": "maintenance",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Maintenance scheduling is not yet surfaced through OSOK CRDs."
+        },
+        {
+          "structType": "mysql.CreateDbSystemDetails",
+          "fieldName": "MysqlVersion",
+          "fieldType": "*string",
+          "jsonName": "mysqlVersion",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/mysql/dbsystem/dbsystem_serviceclient.go:82"
+          ],
+          "documentation": "The specific MySQL version identifier."
+        },
+        {
+          "structType": "mysql.CreateDbSystemDetails",
+          "fieldName": "Port",
+          "fieldType": "*int",
+          "jsonName": "port",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/mysql/dbsystem/dbsystem_serviceclient.go:62"
+          ],
+          "documentation": "The port for primary endpoint of the DB System to listen on."
+        },
+        {
+          "structType": "mysql.CreateDbSystemDetails",
+          "fieldName": "PortX",
+          "fieldType": "*int",
+          "jsonName": "portX",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/mysql/dbsystem/dbsystem_serviceclient.go:66"
+          ],
+          "documentation": "The TCP network port on which X Plugin listens for connections. This is the X Plugin equivalent of port."
+        },
+        {
+          "structType": "mysql.CreateDbSystemDetails",
+          "fieldName": "SecureConnections",
+          "fieldType": "*mysql.SecureConnectionDetails",
+          "jsonName": "secureConnections",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "TLS configuration will be modelled with a broader security story."
+        },
+        {
+          "structType": "mysql.CreateDbSystemDetails",
+          "fieldName": "ShapeName",
+          "fieldType": "*string",
+          "jsonName": "shapeName",
+          "mandatory": true,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/mysql/dbsystem/dbsystem_serviceclient.go:43"
+          ],
+          "documentation": "The name of the shape. The shape determines the resources allocated\n- CPU cores and memory for VM shapes; CPU cores, memory and storage\nfor non-VM (or bare metal) shapes. To get a list of shapes, use the\nListShapes operation."
+        },
+        {
+          "structType": "mysql.CreateDbSystemDetails",
+          "fieldName": "Source",
+          "fieldType": "mysql.CreateDbSystemSourceDetails",
+          "jsonName": "source",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "intentionally_omitted",
+          "reason": "OSOK provisions fresh MySQL DB Systems and does not orchestrate backup or PITR restores yet."
+        },
+        {
+          "structType": "mysql.CreateDbSystemDetails",
+          "fieldName": "SubnetId",
+          "fieldType": "*string",
+          "jsonName": "subnetId",
+          "mandatory": true,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/mysql/dbsystem/dbsystem_serviceclient.go:49"
+          ],
+          "documentation": "The OCID of the subnet the DB System is associated with."
+        }
+      ]
+    },
+    {
+      "structType": "mysql.UpdateDbSystemDetails",
+      "coverage": {
+        "eligibleFields": 22,
+        "usedFields": 5,
+        "percent": 22.727272727272727
+      },
+      "fields": [
+        {
+          "structType": "mysql.UpdateDbSystemDetails",
+          "fieldName": "AdminPassword",
+          "fieldType": "*string",
+          "jsonName": "adminPassword",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "intentionally_omitted",
+          "reason": "Password rotation is handled through credential workflows outside the update API.",
+          "documentation": "The password for the administrative user. The password must be\nbetween 8 and 32 characters long, and must contain at least 1\nnumeric character, 1 lowercase character, 1 uppercase character, and\n1 special (nonalphanumeric) character."
+        },
+        {
+          "structType": "mysql.UpdateDbSystemDetails",
+          "fieldName": "AdminUsername",
+          "fieldType": "*string",
+          "jsonName": "adminUsername",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "intentionally_omitted",
+          "reason": "Admin identity updates are intentionally blocked from automation.",
+          "documentation": "The username for the administrative user for the MySQL Instance."
+        },
+        {
+          "structType": "mysql.UpdateDbSystemDetails",
+          "fieldName": "AvailabilityDomain",
+          "fieldType": "*string",
+          "jsonName": "availabilityDomain",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Placement changes are out of scope for the update reconciler.",
+          "documentation": "The availability domain on which to deploy the Read/Write endpoint. This defines the preferred primary instance.\nIn a failover scenario, the Read/Write endpoint is redirected to one of the other availability domains\nand the MySQL instance in that domain is promoted to the primary instance.\nThis redirection does not affect the IP address of the DB System in any way.\nFor a standalone DB System, this defines the availability domain in which the DB System is placed."
+        },
+        {
+          "structType": "mysql.UpdateDbSystemDetails",
+          "fieldName": "BackupPolicy",
+          "fieldType": "*mysql.UpdateBackupPolicyDetails",
+          "jsonName": "backupPolicy",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Database backup policy customisation will be added alongside lifecycle automation."
+        },
+        {
+          "structType": "mysql.UpdateDbSystemDetails",
+          "fieldName": "ConfigurationId",
+          "fieldType": "*string",
+          "jsonName": "configurationId",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/mysql/dbsystem/dbsystem_serviceclient.go:196"
+          ],
+          "documentation": "The OCID of the Configuration to be used for Instances in this DB System."
+        },
+        {
+          "structType": "mysql.UpdateDbSystemDetails",
+          "fieldName": "CrashRecovery",
+          "fieldType": "mysql.CrashRecoveryStatusEnum",
+          "jsonName": "crashRecovery",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Crash recovery tuning is left at service defaults for now.",
+          "documentation": "Whether to run the DB System with InnoDB Redo Logs and the Double Write Buffer enabled or disabled,\nand whether to enable or disable syncing of the Binary Logs."
+        },
+        {
+          "structType": "mysql.UpdateDbSystemDetails",
+          "fieldName": "DataStorageSizeInGBs",
+          "fieldType": "*int",
+          "jsonName": "dataStorageSizeInGBs",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Storage scaling for MySQL DB Systems will be introduced in a later milestone.",
+          "documentation": "Expands the DB System's storage to the specified value. Only supports values larger than the current DB System's\nstorage size.\nDB Systems with an initial storage size of 400 GB or less can be expanded up to 32 TB.\nDB Systems with an initial storage size between 401-800 GB can be expanded up to 64 TB.\nDB Systems with an initial storage size between 801-1200 GB can be expanded up to 96 TB.\nDB Systems with an initial storage size of 1201 GB or more can be expanded up to 128 TB.\nIt is not possible to decrease data storage size."
+        },
+        {
+          "structType": "mysql.UpdateDbSystemDetails",
+          "fieldName": "DatabaseManagement",
+          "fieldType": "mysql.DatabaseManagementStatusEnum",
+          "jsonName": "databaseManagement",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Database Management integration is not targeted in this release.",
+          "documentation": "Whether to enable monitoring via the Database Management service."
+        },
+        {
+          "structType": "mysql.UpdateDbSystemDetails",
+          "fieldName": "DefinedTags",
+          "fieldType": "map[string]map[string]interface {}",
+          "jsonName": "definedTags",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/mysql/dbsystem/dbsystem_serviceclient.go:207"
+          ],
+          "documentation": "Usage of predefined tag keys. These predefined keys are scoped to namespaces.\nExample: `{\"foo-namespace\": {\"bar-key\": \"value\"}}`"
+        },
+        {
+          "structType": "mysql.UpdateDbSystemDetails",
+          "fieldName": "DeletionPolicy",
+          "fieldType": "*mysql.UpdateDeletionPolicyDetails",
+          "jsonName": "deletionPolicy",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Deletion policy configuration is deferred until we support managed teardown flows."
+        },
+        {
+          "structType": "mysql.UpdateDbSystemDetails",
+          "fieldName": "Description",
+          "fieldType": "*string",
+          "jsonName": "description",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/mysql/dbsystem/dbsystem_serviceclient.go:191"
+          ],
+          "documentation": "User-provided data about the DB System."
+        },
+        {
+          "structType": "mysql.UpdateDbSystemDetails",
+          "fieldName": "DisplayName",
+          "fieldType": "*string",
+          "jsonName": "displayName",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/mysql/dbsystem/dbsystem_serviceclient.go:186"
+          ],
+          "documentation": "The user-friendly name for the DB System. It does not have to be unique."
+        },
+        {
+          "structType": "mysql.UpdateDbSystemDetails",
+          "fieldName": "FaultDomain",
+          "fieldType": "*string",
+          "jsonName": "faultDomain",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Placement changes are out of scope for the update reconciler.",
+          "documentation": "The fault domain on which to deploy the Read/Write endpoint. This defines the preferred primary instance.\nIn a failover scenario, the Read/Write endpoint is redirected to one of the other fault domains\nand the MySQL instance in that domain is promoted to the primary instance.\nThis redirection does not affect the IP address of the DB System in any way.\nFor a standalone DB System, this defines the fault domain in which the DB System is placed."
+        },
+        {
+          "structType": "mysql.UpdateDbSystemDetails",
+          "fieldName": "FreeformTags",
+          "fieldType": "map[string]string",
+          "jsonName": "freeformTags",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/mysql/dbsystem/dbsystem_serviceclient.go:201"
+          ],
+          "documentation": "Simple key-value pair applied without any predefined name, type or scope. Exists for cross-compatibility only.\nExample: `{\"bar-key\": \"value\"}`"
+        },
+        {
+          "structType": "mysql.UpdateDbSystemDetails",
+          "fieldName": "HostnameLabel",
+          "fieldType": "*string",
+          "jsonName": "hostnameLabel",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Endpoint renaming is intentionally left manual to avoid DNS churn.",
+          "documentation": "The hostname for the primary endpoint of the DB System. Used for DNS.\nThe value is the hostname portion of the primary private IP's fully qualified domain name (FQDN)\n(for example, \"dbsystem-1\" in FQDN \"dbsystem-1.subnet123.vcn1.oraclevcn.com\").\nMust be unique across all VNICs in the subnet and comply with RFC 952 and RFC 1123."
+        },
+        {
+          "structType": "mysql.UpdateDbSystemDetails",
+          "fieldName": "IpAddress",
+          "fieldType": "*string",
+          "jsonName": "ipAddress",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Endpoint IP management is intentionally left manual to avoid DNS churn.",
+          "documentation": "The IP address the DB System should be configured to listen on the provided subnet.\nIt must be a free private IP address within the subnet's CIDR. If you don't specify a\nvalue, Oracle automatically assigns a private IP address from the subnet. This should\nbe a \"dotted-quad\" style IPv4 address."
+        },
+        {
+          "structType": "mysql.UpdateDbSystemDetails",
+          "fieldName": "IsHighlyAvailable",
+          "fieldType": "*bool",
+          "jsonName": "isHighlyAvailable",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Availability topology changes require reprovisioning today.",
+          "documentation": "Specifies if the DB System is highly available.\nSet to true to enable high availability. Two secondary MySQL instances are created and placed in the unused\navailability or fault domains, depending on your region and subnet type.\nSet to false to disable high availability. The secondary MySQL instances are removed and the MySQL instance\nin the preferred location is used."
+        },
+        {
+          "structType": "mysql.UpdateDbSystemDetails",
+          "fieldName": "Maintenance",
+          "fieldType": "*mysql.UpdateMaintenanceDetails",
+          "jsonName": "maintenance",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Maintenance scheduling is not yet surfaced through OSOK CRDs."
+        },
+        {
+          "structType": "mysql.UpdateDbSystemDetails",
+          "fieldName": "MysqlVersion",
+          "fieldType": "*string",
+          "jsonName": "mysqlVersion",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Version upgrades are orchestrated separately from the day-one validator.",
+          "documentation": "The specific MySQL version identifier."
+        },
+        {
+          "structType": "mysql.UpdateDbSystemDetails",
+          "fieldName": "Port",
+          "fieldType": "*int",
+          "jsonName": "port",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Port changes are intentionally out of scope for the update flow.",
+          "documentation": "The port for primary endpoint of the DB System to listen on."
+        },
+        {
+          "structType": "mysql.UpdateDbSystemDetails",
+          "fieldName": "PortX",
+          "fieldType": "*int",
+          "jsonName": "portX",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Port changes are intentionally out of scope for the update flow.",
+          "documentation": "The TCP network port on which X Plugin listens for connections. This is the X Plugin equivalent of port."
+        },
+        {
+          "structType": "mysql.UpdateDbSystemDetails",
+          "fieldName": "SecureConnections",
+          "fieldType": "*mysql.SecureConnectionDetails",
+          "jsonName": "secureConnections",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "TLS configuration will be modelled with a broader security story."
+        },
+        {
+          "structType": "mysql.UpdateDbSystemDetails",
+          "fieldName": "ShapeName",
+          "fieldType": "*string",
+          "jsonName": "shapeName",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Shape changes require recreate operations and are not tackled in-place.",
+          "documentation": "The shape of the DB System. The shape determines resources\nallocated to the DB System - CPU cores and memory for VM\nshapes; CPU cores, memory and storage for non-VM (or bare metal)\nshapes. To get a list of shapes, use the\nListShapes\noperation.\nChanges in Shape will result in a downtime as the MySQL DB System is\nmigrated to the new Compute instance."
+        },
+        {
+          "structType": "mysql.UpdateDbSystemDetails",
+          "fieldName": "SubnetId",
+          "fieldType": "*string",
+          "jsonName": "subnetId",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Subnet migrations demand reprovisioning and are left manual.",
+          "documentation": "The OCID of the subnet the DB System is associated with."
+        }
+      ]
+    },
+    {
+      "structType": "streaming.CreateStreamDetails",
+      "coverage": {
+        "eligibleFields": 7,
+        "usedFields": 5,
+        "percent": 71.42857142857143
+      },
+      "fields": [
+        {
+          "structType": "streaming.CreateStreamDetails",
+          "fieldName": "CompartmentId",
+          "fieldType": "*string",
+          "jsonName": "compartmentId",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/streams/stream_serviceclient.go:40"
+          ],
+          "documentation": "The OCID of the compartment that contains the stream."
+        },
+        {
+          "structType": "streaming.CreateStreamDetails",
+          "fieldName": "DefinedTags",
+          "fieldType": "map[string]map[string]interface {}",
+          "jsonName": "definedTags",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Tag management will be enabled once the tagging story is aligned across services.",
+          "documentation": "Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).\nExample: `{\"Operations\": {\"CostCenter\": \"42\"}}`"
+        },
+        {
+          "structType": "streaming.CreateStreamDetails",
+          "fieldName": "FreeformTags",
+          "fieldType": "map[string]string",
+          "jsonName": "freeformTags",
+          "mandatory": false,
+          "used": false,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "future_consideration",
+          "reason": "Tag management will be enabled once the tagging story is aligned across services.",
+          "documentation": "Free-form tags for this resource. Each tag is a simple key-value pair that is applied with no predefined name, type, or namespace. Exists for cross-compatibility only.\nFor more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).\nExample: `{\"Department\": \"Finance\"}`"
+        },
+        {
+          "structType": "streaming.CreateStreamDetails",
+          "fieldName": "Name",
+          "fieldType": "*string",
+          "jsonName": "name",
+          "mandatory": true,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/streams/stream_serviceclient.go:31"
+          ],
+          "documentation": "The name of the stream. Avoid entering confidential information.\nExample: `TelemetryEvents`"
+        },
+        {
+          "structType": "streaming.CreateStreamDetails",
+          "fieldName": "Partitions",
+          "fieldType": "*int",
+          "jsonName": "partitions",
+          "mandatory": true,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/streams/stream_serviceclient.go:32"
+          ],
+          "documentation": "The number of partitions in the stream."
+        },
+        {
+          "structType": "streaming.CreateStreamDetails",
+          "fieldName": "RetentionInHours",
+          "fieldType": "*int",
+          "jsonName": "retentionInHours",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/streams/stream_serviceclient.go:44"
+          ],
+          "documentation": "The retention period of the stream, in hours. Accepted values are between 24 and 168 (7 days).\nIf not specified, the stream will have a retention period of 24 hours."
+        },
+        {
+          "structType": "streaming.CreateStreamDetails",
+          "fieldName": "StreamPoolId",
+          "fieldType": "*string",
+          "jsonName": "streamPoolId",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/streams/stream_serviceclient.go:36"
+          ],
+          "documentation": "The OCID of the stream pool that contains the stream."
+        }
+      ]
+    },
+    {
+      "structType": "streaming.UpdateStreamDetails",
+      "coverage": {
+        "eligibleFields": 3,
+        "usedFields": 3,
+        "percent": 100
+      },
+      "fields": [
+        {
+          "structType": "streaming.UpdateStreamDetails",
+          "fieldName": "DefinedTags",
+          "fieldType": "map[string]map[string]interface {}",
+          "jsonName": "definedTags",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/streams/stream_serviceclient.go:142"
+          ],
+          "documentation": "Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).\nExample: `{\"Operations\": {\"CostCenter\": \"42\"}}`"
+        },
+        {
+          "structType": "streaming.UpdateStreamDetails",
+          "fieldName": "FreeformTags",
+          "fieldType": "map[string]string",
+          "jsonName": "freeformTags",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/streams/stream_serviceclient.go:136"
+          ],
+          "documentation": "Free-form tags for this resource. Each tag is a simple key-value pair that is applied with no predefined name, type, or namespace. Exists for cross-compatibility only.\nFor more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).\nExample: `{\"Department\": \"Finance\"}`"
+        },
+        {
+          "structType": "streaming.UpdateStreamDetails",
+          "fieldName": "StreamPoolId",
+          "fieldType": "*string",
+          "jsonName": "streamPoolId",
+          "mandatory": false,
+          "used": true,
+          "deprecated": false,
+          "readOnly": false,
+          "status": "used",
+          "references": [
+            "/Users/ethan/Desktop/projects/oci-service-operator/pkg/servicemanager/streams/stream_serviceclient.go:131"
+          ],
+          "documentation": "The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the stream pool where the stream should be moved."
+        }
+      ]
+    }
+  ]
+}
