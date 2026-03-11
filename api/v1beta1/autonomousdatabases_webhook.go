@@ -10,6 +10,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
 // log is for logging in this package.
@@ -38,25 +39,25 @@ func (r *AutonomousDatabases) Default() {
 var _ webhook.Validator = &AutonomousDatabases{}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
-func (r *AutonomousDatabases) ValidateCreate() error {
+func (r *AutonomousDatabases) ValidateCreate() (admission.Warnings, error) {
 	autonomousdatabaseslog.Info("validate create", "name", r.Name)
 
 	autonomousdatabaseslog.Info("We are validating the Create method for Autonomous Databases")
-	return nil
+	return nil, nil
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (r *AutonomousDatabases) ValidateUpdate(old runtime.Object) error {
+func (r *AutonomousDatabases) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
 	autonomousdatabaseslog.Info("validate update", "name", r.Name)
 
 	// TODO(user): fill in your validation logic upon object update.
-	return nil
+	return nil, nil
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (r *AutonomousDatabases) ValidateDelete() error {
+func (r *AutonomousDatabases) ValidateDelete() (admission.Warnings, error) {
 	autonomousdatabaseslog.Info("validate delete", "name", r.Name)
 
 	// TODO(user): fill in your validation logic upon object deletion.
-	return nil
+	return nil, nil
 }

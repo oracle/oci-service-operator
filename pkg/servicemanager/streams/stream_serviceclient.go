@@ -17,14 +17,31 @@ import (
 	"strings"
 )
 
+// StreamAdminClientInterface defines the OCI operations used by StreamServiceManager.
+type StreamAdminClientInterface interface {
+	CreateStream(ctx context.Context, request streaming.CreateStreamRequest) (streaming.CreateStreamResponse, error)
+	GetStream(ctx context.Context, request streaming.GetStreamRequest) (streaming.GetStreamResponse, error)
+	ListStreams(ctx context.Context, request streaming.ListStreamsRequest) (streaming.ListStreamsResponse, error)
+	UpdateStream(ctx context.Context, request streaming.UpdateStreamRequest) (streaming.UpdateStreamResponse, error)
+	DeleteStream(ctx context.Context, request streaming.DeleteStreamRequest) (streaming.DeleteStreamResponse, error)
+}
+
 func getStreamClient(provider common.ConfigurationProvider) streaming.StreamAdminClient {
 	streamClient, _ := streaming.NewStreamAdminClientWithConfigurationProvider(provider)
 	return streamClient
 }
 
+// getOCIClient returns the injected client if set, otherwise creates one from the provider.
+func (c *StreamServiceManager) getOCIClient() StreamAdminClientInterface {
+	if c.ociClient != nil {
+		return c.ociClient
+	}
+	return getStreamClient(c.Provider)
+}
+
 func (c *StreamServiceManager) CreateStream(ctx context.Context, stream ociv1beta1.Stream) (streaming.CreateStreamResponse, error) {
 
-	streamClient := getStreamClient(c.Provider)
+	streamClient := c.getOCIClient()
 	c.Log.DebugLog("Creating Stream ", "name", stream.Spec.Name)
 
 	createStreamDetails := streaming.CreateStreamDetails{
@@ -53,7 +70,7 @@ func (c *StreamServiceManager) CreateStream(ctx context.Context, stream ociv1bet
 
 func (c *StreamServiceManager) GetStreamOcid(ctx context.Context, stream ociv1beta1.Stream) (*ociv1beta1.OCID, error) {
 
-	streamClient := getStreamClient(c.Provider)
+	streamClient := c.getOCIClient()
 	listStreamsRequest := streaming.ListStreamsRequest{
 		Name: common.String(stream.Spec.Name),
 	}
@@ -77,7 +94,7 @@ func (c *StreamServiceManager) GetStreamOcid(ctx context.Context, stream ociv1be
 }
 
 func (c *StreamServiceManager) DeleteStream(ctx context.Context, stream ociv1beta1.Stream) (streaming.DeleteStreamResponse, error) {
-	streamClient := getStreamClient(c.Provider)
+	streamClient := c.getOCIClient()
 	c.Log.InfoLog("Deleting Stream ", "name", stream.Spec.Name)
 
 	deleteStreamRequest := streaming.DeleteStreamRequest{
@@ -89,7 +106,7 @@ func (c *StreamServiceManager) DeleteStream(ctx context.Context, stream ociv1bet
 
 func (c *StreamServiceManager) GetStream(ctx context.Context, streamId ociv1beta1.OCID, retryPolicy *common.RetryPolicy) (*streaming.Stream, error) {
 
-	streamClient := getStreamClient(c.Provider)
+	streamClient := c.getOCIClient()
 
 	getStreamRequest := streaming.GetStreamRequest{
 		StreamId: common.String(string(streamId)),
@@ -109,7 +126,7 @@ func (c *StreamServiceManager) GetStream(ctx context.Context, streamId ociv1beta
 
 func (c *StreamServiceManager) UpdateStream(ctx context.Context, stream *ociv1beta1.Stream) error {
 
-	streamClient := getStreamClient(c.Provider)
+	streamClient := c.getOCIClient()
 
 	existingStream, err := c.GetStream(ctx, stream.Spec.StreamId, nil)
 	if err != nil {
@@ -183,7 +200,7 @@ func (c *StreamServiceManager) GetStreamOCID(ctx context.Context, stream ociv1be
 
 func (c *StreamServiceManager) GetListOfStreams(ctx context.Context, stream ociv1beta1.Stream) (streaming.ListStreamsResponse, error) {
 
-	streamClient := getStreamClient(c.Provider)
+	streamClient := c.getOCIClient()
 	listStreamsRequest := streaming.ListStreamsRequest{
 		Name:  common.String(stream.Spec.Name),
 		Limit: common.Int(1),

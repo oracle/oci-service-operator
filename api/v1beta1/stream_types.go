@@ -20,7 +20,7 @@ type StreamSpec struct {
 	Name          string `json:"name,omitempty"`
 	// +kubebuilder:validation:Minimum=1
 	Partitions int `json:"partitions,omitempty"`
-	// +kubebuilder:validation:Maximum=167
+	// +kubebuilder:validation:Maximum=168
 	// +kubebuilder:validation:Minimum=24
 	RetentionInHours int  `json:"retentionInHours,omitempty"`
 	StreamPoolId     OCID `json:"streamPoolId,omitempty"`

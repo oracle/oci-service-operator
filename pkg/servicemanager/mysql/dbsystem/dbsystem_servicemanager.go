@@ -33,6 +33,7 @@ type DbSystemServiceManager struct {
 	CredentialClient credhelper.CredentialClient
 	Scheme           *runtime.Scheme
 	Log              loggerutil.OSOKLogger
+	ociClient        MySQLDbSystemClientInterface
 }
 
 func NewDbSystemServiceManager(provider common.ConfigurationProvider, credClient credhelper.CredentialClient,
@@ -165,7 +166,7 @@ func (c *DbSystemServiceManager) CreateOrUpdate(ctx context.Context, obj runtime
 			ociv1beta1.Failed, v1.ConditionFalse, "",
 			fmt.Sprintf("MySqlDbSystem %s creation Failed", *mySqlDbSystemInstance.DisplayName), c.Log)
 		c.Log.InfoLog(fmt.Sprintf("MySqlDbSystem %s creation Failed", *mySqlDbSystemInstance.DisplayName))
-	} else {
+	} else if mySqlDbSystemInstance.LifecycleState == "ACTIVE" {
 		_, err := c.addToSecret(ctx, mysqlDbSystem.Namespace, mysqlDbSystem.Name, *mySqlDbSystemInstance)
 		if err != nil {
 			if apierrors.IsAlreadyExists(err) {
@@ -174,6 +175,11 @@ func (c *DbSystemServiceManager) CreateOrUpdate(ctx context.Context, obj runtime
 			c.Log.InfoLog(fmt.Sprintf("Secret creation failed"))
 			return servicemanager.OSOKResponse{IsSuccessful: false}, err
 		}
+	} else {
+		mysqlDbSystem.Status.OsokStatus = util.UpdateOSOKStatusCondition(mysqlDbSystem.Status.OsokStatus,
+			ociv1beta1.Provisioning, v1.ConditionTrue, "",
+			fmt.Sprintf("MySqlDbSystem %s is %s", *mySqlDbSystemInstance.DisplayName, mySqlDbSystemInstance.LifecycleState), c.Log)
+		return servicemanager.OSOKResponse{IsSuccessful: false}, fmt.Errorf("MySqlDbSystem %s is %s, waiting for ACTIVE", *mySqlDbSystemInstance.DisplayName, mySqlDbSystemInstance.LifecycleState)
 	}
 
 	return servicemanager.OSOKResponse{IsSuccessful: true}, nil

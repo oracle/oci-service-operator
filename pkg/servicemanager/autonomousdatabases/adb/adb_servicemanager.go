@@ -32,6 +32,7 @@ type AdbServiceManager struct {
 	CredentialClient credhelper.CredentialClient
 	Scheme           *runtime.Scheme
 	Log              loggerutil.OSOKLogger
+	ociClient        DatabaseClientInterface
 }
 
 func NewAdbServiceManager(provider common.ConfigurationProvider, credClient credhelper.CredentialClient,

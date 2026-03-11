@@ -1,11 +1,9 @@
-
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.4.1
-  creationTimestamp: null
+    controller-gen.kubebuilder.io/version: v0.17.0
   name: mysqldbsystems.oci.oracle.com
 spec:
   group: oci.oracle.com
@@ -39,14 +37,19 @@ spec:
         description: MySqlDbSystem is the Schema for the mysqldbsystems API
         properties:
           apiVersion:
-            description: 'APIVersion defines the versioned schema of this representation
-              of an object. Servers should convert recognized schemas to the latest
-              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
             type: string
           kind:
-            description: 'Kind is a string value representing the REST resource this
-              object represents. Servers may infer this from the endpoint the client
-              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
             type: string
           metadata:
             type: object
@@ -90,12 +93,10 @@ spec:
                     description: Number of days to retain an automatic backup.
                     type: integer
                   windowStartTime:
-                    description: The start of a 30-minute window of time in which
-                      daily, automated backups occur. This should be in the format
-                      of the "Time" portion of an RFC3339-formatted timestamp. Any
-                      second or sub-second time data will be truncated to zero. At
-                      some point in the window, the system may incur a brief service
-                      disruption as the backup is performed.
+                    description: |-
+                      The start of a 30-minute window of time in which daily, automated backups occur.
+                      This should be in the format of the "Time" portion of an RFC3339-formatted timestamp. Any second or sub-second time data will be truncated to zero.
+                      At some point in the window, the system may incur a brief service disruption as the backup is performed.
                     type: string
                 type: object
               compartmentId:
@@ -150,11 +151,11 @@ spec:
                   DB System.
                 properties:
                   windowStartTime:
-                    description: 'The start of the 2 hour maintenance window. This
-                      string is of the format: "{day-of-week} {time-of-day}". "{day-of-week}"
-                      is a case-insensitive string like "mon", "tue", &c. "{time-of-day}"
-                      is the "Time" portion of an RFC3339-formatted timestamp. Any
-                      second or sub-second time data will be truncated to zero.'
+                    description: |-
+                      The start of the 2 hour maintenance window.
+                      This string is of the format: "{day-of-week} {time-of-day}".
+                      "{day-of-week}" is a case-insensitive string like "mon", "tue", &c.
+                      "{time-of-day}" is the "Time" portion of an RFC3339-formatted timestamp. Any second or sub-second time data will be truncated to zero.
                     type: string
                 type: object
               mysqlVersion:
@@ -236,9 +237,3 @@ spec:
     storage: true
     subresources:
       status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []

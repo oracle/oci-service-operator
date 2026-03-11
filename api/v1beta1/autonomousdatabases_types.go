@@ -20,6 +20,8 @@ type AutonomousDatabasesSpec struct {
 	DbVersion            string         `json:"dbVersion,omitempty"`
 	DataStorageSizeInTBs int            `json:"dataStorageSizeInTBs,omitempty"`
 	CpuCoreCount         int            `json:"cpuCoreCount,omitempty"`
+	ComputeModel         string         `json:"computeModel,omitempty"`
+	ComputeCount         float32        `json:"computeCount,omitempty"`
 	AdminPassword        PasswordSource `json:"adminPassword,omitempty"`
 	IsAutoScalingEnabled bool           `json:"isAutoScalingEnabled,omitempty"`
 	IsFreeTier           bool           `json:"isFreeTier,omitempty"`

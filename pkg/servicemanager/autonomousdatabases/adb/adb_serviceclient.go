@@ -28,14 +28,30 @@ type AdbServiceClient interface {
 	servicemanager.OSOKServiceManager
 }
 
+// DatabaseClientInterface defines the OCI operations used by AdbServiceManager.
+type DatabaseClientInterface interface {
+	CreateAutonomousDatabase(ctx context.Context, request database.CreateAutonomousDatabaseRequest) (database.CreateAutonomousDatabaseResponse, error)
+	ListAutonomousDatabases(ctx context.Context, request database.ListAutonomousDatabasesRequest) (database.ListAutonomousDatabasesResponse, error)
+	GetAutonomousDatabase(ctx context.Context, request database.GetAutonomousDatabaseRequest) (database.GetAutonomousDatabaseResponse, error)
+	UpdateAutonomousDatabase(ctx context.Context, request database.UpdateAutonomousDatabaseRequest) (database.UpdateAutonomousDatabaseResponse, error)
+}
+
 func getDbClient(provider common.ConfigurationProvider) database.DatabaseClient {
 	dbClient, _ := database.NewDatabaseClientWithConfigurationProvider(provider)
 	return dbClient
 }
 
+// getOCIClient returns the injected client if set, otherwise creates one from the provider.
+func (c *AdbServiceManager) getOCIClient() DatabaseClientInterface {
+	if c.ociClient != nil {
+		return c.ociClient
+	}
+	return getDbClient(c.Provider)
+}
+
 func (c *AdbServiceManager) CreateAdb(ctx context.Context, adb ociv1beta1.AutonomousDatabases, adminPwd string) (database.CreateAutonomousDatabaseResponse, error) {
 
-	dbClient := getDbClient(c.Provider)
+	dbClient := c.getOCIClient()
 
 	c.Log.DebugLog("Creating Autonomous Database ", "name", adb.Spec.DisplayName)
 
@@ -43,17 +59,29 @@ func (c *AdbServiceManager) CreateAdb(ctx context.Context, adb ociv1beta1.Autono
 		CompartmentId:        common.String(string(adb.Spec.CompartmentId)),
 		DisplayName:          common.String(adb.Spec.DisplayName),
 		DbName:               common.String(adb.Spec.DbName),
-		CpuCoreCount:         common.Int(adb.Spec.CpuCoreCount),
 		DataStorageSizeInTBs: common.Int(adb.Spec.DataStorageSizeInTBs),
 		AdminPassword:        common.String(adminPwd),
 		IsAutoScalingEnabled: common.Bool(adb.Spec.IsAutoScalingEnabled),
 		IsDedicated:          common.Bool(adb.Spec.IsDedicated),
-		DbVersion:            common.String(adb.Spec.DbVersion),
 		DbWorkload:           database.CreateAutonomousDatabaseBaseDbWorkloadEnum(adb.Spec.DbWorkload),
 		IsFreeTier:           common.Bool(adb.Spec.IsFreeTier),
-		LicenseModel:         database.CreateAutonomousDatabaseBaseLicenseModelEnum(adb.Spec.LicenseModel),
 		FreeformTags:         adb.Spec.FreeFormTags,
 		DefinedTags:          *util.ConvertToOciDefinedTags(&adb.Spec.DefinedTags),
+	}
+
+	if adb.Spec.ComputeModel != "" {
+		createAutonomousDatabaseDetails.ComputeModel = database.CreateAutonomousDatabaseBaseComputeModelEnum(adb.Spec.ComputeModel)
+		createAutonomousDatabaseDetails.ComputeCount = common.Float32(adb.Spec.ComputeCount)
+	} else {
+		createAutonomousDatabaseDetails.CpuCoreCount = common.Int(adb.Spec.CpuCoreCount)
+	}
+
+	if adb.Spec.DbVersion != "" {
+		createAutonomousDatabaseDetails.DbVersion = common.String(adb.Spec.DbVersion)
+	}
+
+	if adb.Spec.LicenseModel != "" {
+		createAutonomousDatabaseDetails.LicenseModel = database.CreateAutonomousDatabaseBaseLicenseModelEnum(adb.Spec.LicenseModel)
 	}
 
 	createAutonomousDatabaseRequest := database.CreateAutonomousDatabaseRequest{
@@ -64,7 +92,7 @@ func (c *AdbServiceManager) CreateAdb(ctx context.Context, adb ociv1beta1.Autono
 }
 
 func (c *AdbServiceManager) GetAdbOcid(ctx context.Context, adb ociv1beta1.AutonomousDatabases) (*ociv1beta1.OCID, error) {
-	dbClient := getDbClient(c.Provider)
+	dbClient := c.getOCIClient()
 
 	// List ADBs based on compartmentId and displayName and lifecycle-state as Active
 	listAdbRequest := database.ListAutonomousDatabasesRequest{
@@ -100,7 +128,7 @@ func (c *AdbServiceManager) DeleteAdb() (string, error) {
 // Sync the Autonomous Database details
 func (c *AdbServiceManager) GetAdb(ctx context.Context, adbId ociv1beta1.OCID, retryPolicy *common.RetryPolicy) (*database.AutonomousDatabase, error) {
 
-	dbClient := getDbClient(c.Provider)
+	dbClient := c.getOCIClient()
 
 	getAutonomousDatabaseRequest := database.GetAutonomousDatabaseRequest{
 		AutonomousDatabaseId: common.String(string(adbId)),
@@ -120,7 +148,7 @@ func (c *AdbServiceManager) GetAdb(ctx context.Context, adbId ociv1beta1.OCID, r
 
 func (c *AdbServiceManager) UpdateAdb(ctx context.Context, adb *ociv1beta1.AutonomousDatabases) error {
 
-	dbClient := getDbClient(c.Provider)
+	dbClient := c.getOCIClient()
 
 	existingAdb, err := c.GetAdb(ctx, adb.Spec.AdbId, nil)
 	if err != nil {

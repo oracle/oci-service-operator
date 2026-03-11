@@ -28,14 +28,30 @@ type DbSystemServiceClient interface {
 	servicemanager.OSOKServiceManager
 }
 
+// MySQLDbSystemClientInterface defines the OCI operations used by DbSystemServiceManager.
+type MySQLDbSystemClientInterface interface {
+	CreateDbSystem(ctx context.Context, request mysql.CreateDbSystemRequest) (mysql.CreateDbSystemResponse, error)
+	ListDbSystems(ctx context.Context, request mysql.ListDbSystemsRequest) (mysql.ListDbSystemsResponse, error)
+	GetDbSystem(ctx context.Context, request mysql.GetDbSystemRequest) (mysql.GetDbSystemResponse, error)
+	UpdateDbSystem(ctx context.Context, request mysql.UpdateDbSystemRequest) (mysql.UpdateDbSystemResponse, error)
+}
+
 func getDbSystemClient(provider common.ConfigurationProvider) mysql.DbSystemClient {
 	dbSystemClient, _ := mysql.NewDbSystemClientWithConfigurationProvider(provider)
 	return dbSystemClient
 }
 
+// getOCIClient returns the injected client if set, otherwise creates one from the provider.
+func (c *DbSystemServiceManager) getOCIClient() MySQLDbSystemClientInterface {
+	if c.ociClient != nil {
+		return c.ociClient
+	}
+	return getDbSystemClient(c.Provider)
+}
+
 func (c *DbSystemServiceManager) CreateDbSystem(ctx context.Context, dbSystem ociv1beta1.MySqlDbSystem, adminUname string, adminPwd string) (mysql.CreateDbSystemResponse, error) {
 
-	dbSystemClient := getDbSystemClient(c.Provider)
+	dbSystemClient := c.getOCIClient()
 
 	c.Log.DebugLog("Creating MySqlDbSystem", "name", dbSystem.Spec.DisplayName)
 
@@ -50,12 +66,24 @@ func (c *DbSystemServiceManager) CreateDbSystem(ctx context.Context, dbSystem oc
 		AdminUsername:        common.String(adminUname),
 		AdminPassword:        common.String(adminPwd),
 		DisplayName:          common.String(dbSystem.Spec.DisplayName),
-		Port:                 common.Int(dbSystem.Spec.Port),
-		PortX:                common.Int(dbSystem.Spec.PortX),
-		ConfigurationId:      common.String(string(dbSystem.Spec.ConfigurationId.Id)),
-		Description:          common.String(dbSystem.Spec.Description),
 		DefinedTags:          *util.ConvertToOciDefinedTags(&dbSystem.Spec.DefinedTags),
 		FreeformTags:         dbSystem.Spec.FreeFormTags,
+	}
+
+	if dbSystem.Spec.Description != "" {
+		createDbSystemDetails.Description = common.String(dbSystem.Spec.Description)
+	}
+
+	if dbSystem.Spec.Port != 0 {
+		createDbSystemDetails.Port = common.Int(dbSystem.Spec.Port)
+	}
+
+	if dbSystem.Spec.PortX != 0 {
+		createDbSystemDetails.PortX = common.Int(dbSystem.Spec.PortX)
+	}
+
+	if dbSystem.Spec.ConfigurationId.Id != "" {
+		createDbSystemDetails.ConfigurationId = common.String(string(dbSystem.Spec.ConfigurationId.Id))
 	}
 
 	if dbSystem.Spec.IpAddress != "" {
@@ -79,7 +107,7 @@ func (c *DbSystemServiceManager) CreateDbSystem(ctx context.Context, dbSystem oc
 }
 
 func (c *DbSystemServiceManager) GetMySqlDbSystemOcid(ctx context.Context, dbSystem ociv1beta1.MySqlDbSystem) (*ociv1beta1.OCID, error) {
-	dbSystemClient := getDbSystemClient(c.Provider)
+	dbSystemClient := c.getOCIClient()
 
 	listDbSystemRequest := mysql.ListDbSystemsRequest{
 		CompartmentId: common.String(string(dbSystem.Spec.CompartmentId)),
@@ -140,7 +168,7 @@ func (c *DbSystemServiceManager) DeleteMySqlDbSystem() (string, error) {
 // GetMySqlDbSystem Sync the MySqlDbSystem details
 func (c *DbSystemServiceManager) GetMySqlDbSystem(ctx context.Context, dbSystemId ociv1beta1.OCID, retryPolicy *common.RetryPolicy) (*mysql.DbSystem, error) {
 
-	dbClient := getDbSystemClient(c.Provider)
+	dbClient := c.getOCIClient()
 
 	getDbSystemRequest := mysql.GetDbSystemRequest{
 		DbSystemId: common.String(string(dbSystemId)),
@@ -160,7 +188,7 @@ func (c *DbSystemServiceManager) GetMySqlDbSystem(ctx context.Context, dbSystemI
 
 func (c *DbSystemServiceManager) UpdateMySqlDbSystem(ctx context.Context, dbSystem *ociv1beta1.MySqlDbSystem) error {
 
-	dbClient := getDbSystemClient(c.Provider)
+	dbClient := c.getOCIClient()
 
 	existingDbSystem, err := c.GetMySqlDbSystem(ctx, dbSystem.Spec.MySqlDbSystemId, nil)
 	if err != nil {

@@ -45,9 +45,8 @@ func getCredentialMap(resp mysql.DbSystem) (map[string][]byte, error) {
 	credMap["MySQLPort"] = []byte(strconv.Itoa(*resp.Port))
 	credMap["MySQLXProtocolPort"] = []byte(strconv.Itoa(*resp.PortX))
 	reqBodyBytes := new(bytes.Buffer)
-	err := json.NewEncoder(reqBodyBytes).Encode(resp.Endpoints)
-	if err != nil {
-		fmt.Sprintln("Unexpected parsing error")
+	if err := json.NewEncoder(reqBodyBytes).Encode(resp.Endpoints); err != nil {
+		return nil, fmt.Errorf("unexpected parsing error encoding endpoints: %w", err)
 	}
 	credMap["Endpoints"] = reqBodyBytes.Bytes()
 

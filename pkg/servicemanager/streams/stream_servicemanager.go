@@ -36,6 +36,7 @@ type StreamServiceManager struct {
 	Scheme           *runtime.Scheme
 	Log              loggerutil.OSOKLogger
 	Metrics          *metrics.Metrics
+	ociClient        StreamAdminClientInterface
 }
 
 func NewStreamServiceManager(provider common.ConfigurationProvider, credClient credhelper.CredentialClient,
