@@ -7,78 +7,124 @@ package kubesecret
 
 import (
 	"context"
-	"fmt"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
+	"reflect"
+	"testing"
+
+	"github.com/go-logr/logr"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/metrics"
-	ctrl "sigs.k8s.io/controller-runtime"
-	"strconv"
+	corev1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
-var _ = Describe("Kube Secrets Client", func() {
-	Context("CRUD operations for Kubesecret client", func() {
-		It(fmt.Sprintf("Should create, retrive, update, and delete secret in k8s"), func() {
-			//Test data for secret creation
-			secretName := "secret" + strconv.FormatInt(GinkgoRandomSeed(), 10)
-			secretNamespace := "default"
-			data := map[string][]byte{
-				"secret": []byte("test"),
-				"data":   []byte("default"),
-			}
-			labels := map[string]string{
-				"lablel_def": "default_label",
-			}
+func newTestKubeSecretClient(t *testing.T, objs ...ctrlclient.Object) *KubeSecretClient {
+	t.Helper()
 
-			//Test context and k8 client for test case execution
-			ctx := context.Background()
-			client := &KubeSecretClient{
-				Client:  k8sClient,
-				Log:     loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("kubesecret_client_test")},
-				Metrics: metrics.Init("KubeSecret", loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("kubesecret_client_test")}),
-			}
+	scheme := runtime.NewScheme()
+	if err := corev1.AddToScheme(scheme); err != nil {
+		t.Fatalf("add corev1 scheme: %v", err)
+	}
 
-			Context("creating secret with secret client", func() {
-				_, err := client.CreateSecret(ctx, secretName, secretNamespace, labels, data)
-				Expect(err).To(BeNil())
-			})
+	logger := loggerutil.OSOKLogger{Logger: logr.Discard()}
+	return New(
+		fake.NewClientBuilder().WithScheme(scheme).WithObjects(objs...).Build(),
+		logger,
+		&metrics.Metrics{
+			Name:        "oci",
+			ServiceName: "KubeSecretTest",
+			Logger:      logger,
+		},
+	)
+}
 
-			Context("ensuring secret exists using k8s client", func() {
-				d, err := client.GetSecret(ctx, secretName, secretNamespace)
-				Expect(err).To(BeNil())
-				for k, v := range d {
-					Expect(data[k]).To(Equal(v))
-				}
-			})
+func TestCreateUpdateDeleteSecret(t *testing.T) {
+	client := newTestKubeSecretClient(t)
+	ctx := context.Background()
 
-			Context("updating secret with secret client", func() {
-				updatedData := map[string][]byte{
-					"secret": []byte("Updated_test"),
-					"data":   []byte("Updated_default"),
-					"value":  []byte("Updated value"),
-				}
-				_, err := client.UpdateSecret(ctx, secretName, secretNamespace, labels, updatedData)
-				Expect(err).To(BeNil())
+	secretName := "test-secret"
+	secretNamespace := "default"
+	labels := map[string]string{"label_def": "default_label"}
+	data := map[string][]byte{
+		"secret": []byte("test"),
+		"data":   []byte("default"),
+	}
 
-				d, err := client.GetSecret(ctx, secretName, secretNamespace)
-				Expect(err).To(BeNil())
-				for k, v := range d {
-					Expect(updatedData[k]).To(Equal(v))
-				}
-			})
+	created, err := client.CreateSecret(ctx, secretName, secretNamespace, labels, data)
+	if err != nil {
+		t.Fatalf("create secret: %v", err)
+	}
+	if !created {
+		t.Fatalf("expected secret to be created")
+	}
 
-			Context("creating secret with same name within same namespace", func() {
-				_, err := client.CreateSecret(ctx, secretName, secretNamespace, labels, data)
-				Expect(err).ToNot(BeNil())
-			})
+	retrieved, err := client.GetSecret(ctx, secretName, secretNamespace)
+	if err != nil {
+		t.Fatalf("get secret: %v", err)
+	}
+	if !reflect.DeepEqual(data, retrieved) {
+		t.Fatalf("unexpected secret data after create: got %v want %v", retrieved, data)
+	}
 
-			Context("delete secret and ensure it is gone", func() {
-				_, err := client.DeleteSecret(ctx, secretName, secretNamespace)
-				Expect(err).To(BeNil())
+	updatedData := map[string][]byte{
+		"secret": []byte("updated_test"),
+		"data":   []byte("updated_default"),
+		"value":  []byte("updated value"),
+	}
+	updated, err := client.UpdateSecret(ctx, secretName, secretNamespace, labels, updatedData)
+	if err != nil {
+		t.Fatalf("update secret: %v", err)
+	}
+	if !updated {
+		t.Fatalf("expected secret to be updated")
+	}
 
-				_, err = client.GetSecret(ctx, secretName, secretNamespace)
-				Expect(err).ToNot(BeNil())
-			})
-		})
-	})
-})
+	retrieved, err = client.GetSecret(ctx, secretName, secretNamespace)
+	if err != nil {
+		t.Fatalf("get updated secret: %v", err)
+	}
+	if !reflect.DeepEqual(updatedData, retrieved) {
+		t.Fatalf("unexpected secret data after update: got %v want %v", retrieved, updatedData)
+	}
+
+	deleted, err := client.DeleteSecret(ctx, secretName, secretNamespace)
+	if err != nil {
+		t.Fatalf("delete secret: %v", err)
+	}
+	if !deleted {
+		t.Fatalf("expected secret to be deleted")
+	}
+
+	_, err = client.GetSecret(ctx, secretName, secretNamespace)
+	if !apierrors.IsNotFound(err) {
+		t.Fatalf("expected not found after delete, got %v", err)
+	}
+}
+
+func TestCreateSecretAlreadyExists(t *testing.T) {
+	existingSecret := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "existing-secret",
+			Namespace: "default",
+		},
+		Data: map[string][]byte{"key": []byte("value")},
+	}
+	client := newTestKubeSecretClient(t, existingSecret)
+
+	created, err := client.CreateSecret(
+		context.Background(),
+		existingSecret.Name,
+		existingSecret.Namespace,
+		nil,
+		map[string][]byte{"key": []byte("new-value")},
+	)
+	if created {
+		t.Fatalf("expected create to report secret already exists")
+	}
+	if !apierrors.IsAlreadyExists(err) {
+		t.Fatalf("expected already exists error, got %v", err)
+	}
+}
