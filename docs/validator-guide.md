@@ -8,7 +8,7 @@ The CLI produces three kinds of analysis:
 
 1. **Controller coverage** — For each curated SDK struct (create/update “Details” types), it inspects the reconciler source code and reports whether each field is actually set. Missing fields show up as `unclassified` unless the allowlist assigns a more meaningful status (e.g. `future_consideration`, `intentionally_omitted`, `potential_gap`). Controller coverage is what you use to enforce that upgrades don’t drop required fields.
 
-2. **API coverage** — It walks the CRD specs in `api/v1beta1` (AutonomousDatabasesSpec, MySqlDbSystemSpec, StreamSpec, etc.), maps them to the corresponding SDK request structs, and reports three buckets:
+2. **API coverage** — It walks the CRD specs in grouped API packages (`api/database/v1beta1`, `api/mysql/v1beta1`, `api/streaming/v1beta1`), maps them to the corresponding SDK request structs, and reports three buckets:
    - **Present fields** — Spec fields that map to the SDK payload.
    - **Missing fields** — SDK fields the spec doesn’t expose. Mandatory SDK fields default to `potential_gap`; optional ones to `future_consideration` unless the allowlist overrides them.
    - **API-only fields** — Spec fields with no matching SDK field (useful when you add CRD-only metadata).
@@ -120,4 +120,3 @@ Use the validator whenever you:
 - Upgrade the OCI SDK (upgrade mode lists new fields/operations and suggests allowlist updates).
 
 With baselines and the fail flag wired into CI, the combination of controller and API coverage catches regressions early and documents intentional gaps, keeping OSOK aligned with OCI.
-

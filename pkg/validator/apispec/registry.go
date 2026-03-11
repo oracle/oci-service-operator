@@ -3,7 +3,9 @@ package apispec
 import (
 	"reflect"
 
-	v1beta1 "github.com/oracle/oci-service-operator/api/v1beta1"
+	databasev1beta1 "github.com/oracle/oci-service-operator/api/database/v1beta1"
+	mysqlv1beta1 "github.com/oracle/oci-service-operator/api/mysql/v1beta1"
+	streamingv1beta1 "github.com/oracle/oci-service-operator/api/streaming/v1beta1"
 )
 
 type Target struct {
@@ -15,7 +17,7 @@ type Target struct {
 var targets = []Target{
 	{
 		Name:     "AutonomousDatabases",
-		SpecType: reflect.TypeOf(v1beta1.AutonomousDatabasesSpec{}),
+		SpecType: reflect.TypeOf(databasev1beta1.AutonomousDatabasesSpec{}),
 		SDKStructs: []string{
 			"database.CreateAutonomousDatabaseDetails",
 			"database.UpdateAutonomousDatabaseDetails",
@@ -23,7 +25,7 @@ var targets = []Target{
 	},
 	{
 		Name:     "MySqlDbSystem",
-		SpecType: reflect.TypeOf(v1beta1.MySqlDbSystemSpec{}),
+		SpecType: reflect.TypeOf(mysqlv1beta1.MySqlDbSystemSpec{}),
 		SDKStructs: []string{
 			"mysql.CreateDbSystemDetails",
 			"mysql.UpdateDbSystemDetails",
@@ -31,7 +33,7 @@ var targets = []Target{
 	},
 	{
 		Name:     "Stream",
-		SpecType: reflect.TypeOf(v1beta1.StreamSpec{}),
+		SpecType: reflect.TypeOf(streamingv1beta1.StreamSpec{}),
 		SDKStructs: []string{
 			"streaming.CreateStreamDetails",
 			"streaming.UpdateStreamDetails",
