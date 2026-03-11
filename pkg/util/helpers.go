@@ -8,8 +8,8 @@ package util
 import (
 	"archive/zip"
 	"context"
-	"github.com/oracle/oci-service-operator/api/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
+	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	"io/ioutil"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -31,7 +31,7 @@ func DoNotRequeue() (ctrl.Result, error) {
 	return ctrl.Result{}, nil
 }
 
-func GetOSOKStatusCondition(status v1beta1.OSOKStatus, conditionType v1beta1.OSOKConditionType, log loggerutil.OSOKLogger) *v1beta1.OSOKCondition {
+func GetOSOKStatusCondition(status shared.OSOKStatus, conditionType shared.OSOKConditionType, log loggerutil.OSOKLogger) *shared.OSOKCondition {
 	for cnt := range status.Conditions {
 		if status.Conditions[cnt].Type == conditionType {
 			return &status.Conditions[cnt]
@@ -40,13 +40,13 @@ func GetOSOKStatusCondition(status v1beta1.OSOKStatus, conditionType v1beta1.OSO
 	return nil
 }
 
-func UpdateOSOKStatusCondition(osokStatus v1beta1.OSOKStatus, conditionType v1beta1.OSOKConditionType,
-	status v1.ConditionStatus, reason string, message string, log loggerutil.OSOKLogger) v1beta1.OSOKStatus {
+func UpdateOSOKStatusCondition(osokStatus shared.OSOKStatus, conditionType shared.OSOKConditionType,
+	status v1.ConditionStatus, reason string, message string, log loggerutil.OSOKLogger) shared.OSOKStatus {
 	currentTime := metav1.Now()
 
 	existingCondition := GetOSOKStatusCondition(osokStatus, conditionType, log)
 	if existingCondition == nil {
-		condition := v1beta1.OSOKCondition{
+		condition := shared.OSOKCondition{
 			Type:               conditionType,
 			Status:             status,
 			LastTransitionTime: &currentTime,
@@ -56,7 +56,7 @@ func UpdateOSOKStatusCondition(osokStatus v1beta1.OSOKStatus, conditionType v1be
 		osokStatus.Conditions = append(osokStatus.Conditions, condition)
 	} else {
 		updated := false
-		var newCondition = v1beta1.OSOKCondition{}
+		var newCondition = shared.OSOKCondition{}
 		if existingCondition.Type != conditionType {
 			newCondition.Type = conditionType
 			newCondition.Status = status
@@ -111,7 +111,7 @@ func UnzipWallet(filename string) (map[string][]byte, error) {
 	return data, nil
 }
 
-func ConvertToOciDefinedTags(osokDef *map[string]v1beta1.MapValue) *map[string]map[string]interface{} {
+func ConvertToOciDefinedTags(osokDef *map[string]shared.MapValue) *map[string]map[string]interface{} {
 	ociDefTags := make(map[string]map[string]interface{})
 
 	for outKey, outVal := range *osokDef {

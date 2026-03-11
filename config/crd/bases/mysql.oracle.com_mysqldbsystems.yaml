@@ -4,9 +4,9 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.17.0
-  name: mysqldbsystems.oci.oracle.com
+  name: mysqldbsystems.mysql.oracle.com
 spec:
-  group: oci.oracle.com
+  group: mysql.oracle.com
   names:
     kind: MySqlDbSystem
     listKind: MySqlDbSystemList

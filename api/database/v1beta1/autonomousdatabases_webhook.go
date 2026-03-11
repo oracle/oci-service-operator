@@ -22,7 +22,7 @@ func (r *AutonomousDatabases) SetupWebhookWithManager(mgr ctrl.Manager) error {
 		Complete()
 }
 
-// +kubebuilder:webhook:path=/mutate-oci-oci-v1beta1-autonomousdatabases,mutating=true,failurePolicy=ignore,sideEffects=None,groups=oci.oracle.com,resources=autonomousdatabases,verbs=create;update,versions=v1,name=mautonomousdatabases.kb.io,admissionReviewVersions={v1}
+// +kubebuilder:webhook:path=/mutate-database-oracle-com-v1beta1-autonomousdatabases,mutating=true,failurePolicy=ignore,sideEffects=None,groups=database.oracle.com,resources=autonomousdatabases,verbs=create;update,versions=v1beta1,name=mautonomousdatabases.kb.io,admissionReviewVersions={v1}
 
 var _ webhook.Defaulter = &AutonomousDatabases{}
 
@@ -34,7 +34,7 @@ func (r *AutonomousDatabases) Default() {
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.
-// +kubebuilder:webhook:path=/validate-oci-oci-v1beta1-autonomousdatabases,mutating=false,failurePolicy=fail,sideEffects=None,groups=oci.oracle.com,resources=autonomousdatabases,verbs=create;update,versions=v1,name=vautonomousdatabases.kb.io,admissionReviewVersions={v1}
+// +kubebuilder:webhook:path=/validate-database-oracle-com-v1beta1-autonomousdatabases,mutating=false,failurePolicy=fail,sideEffects=None,groups=database.oracle.com,resources=autonomousdatabases,verbs=create;update,versions=v1beta1,name=vautonomousdatabases.kb.io,admissionReviewVersions={v1}
 
 var _ webhook.Validator = &AutonomousDatabases{}
 

@@ -10,14 +10,14 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /mutate-oci-oci-v1beta1-autonomousdatabases
+      path: /mutate-database-oracle-com-v1beta1-autonomousdatabases
   failurePolicy: Ignore
   name: mautonomousdatabases.kb.io
   rules:
   - apiGroups:
-    - oci.oracle.com
+    - database.oracle.com
     apiVersions:
-    - v1
+    - v1beta1
     operations:
     - CREATE
     - UPDATE
@@ -36,14 +36,14 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-oci-oci-v1beta1-autonomousdatabases
+      path: /validate-database-oracle-com-v1beta1-autonomousdatabases
   failurePolicy: Fail
   name: vautonomousdatabases.kb.io
   rules:
   - apiGroups:
-    - oci.oracle.com
+    - database.oracle.com
     apiVersions:
-    - v1
+    - v1beta1
     operations:
     - CREATE
     - UPDATE

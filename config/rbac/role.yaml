@@ -18,10 +18,60 @@ rules:
   - update
   - watch
 - apiGroups:
-  - oci.oracle.com
+  - database.oracle.com
   resources:
   - autonomousdatabases
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - database.oracle.com
+  resources:
+  - autonomousdatabases/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - database.oracle.com
+  resources:
+  - autonomousdatabases/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - mysql.oracle.com
+  resources:
   - mysqldbsystems
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - mysql.oracle.com
+  resources:
+  - mysqldbsystems/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - mysql.oracle.com
+  resources:
+  - mysqldbsystems/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - streaming.oracle.com
+  resources:
   - streams
   verbs:
   - create
@@ -32,18 +82,14 @@ rules:
   - update
   - watch
 - apiGroups:
-  - oci.oracle.com
+  - streaming.oracle.com
   resources:
-  - autonomousdatabases/finalizers
-  - mysqldbsystems/finalizers
   - streams/finalizers
   verbs:
   - update
 - apiGroups:
-  - oci.oracle.com
+  - streaming.oracle.com
   resources:
-  - autonomousdatabases/status
-  - mysqldbsystems/status
   - streams/status
   verbs:
   - get

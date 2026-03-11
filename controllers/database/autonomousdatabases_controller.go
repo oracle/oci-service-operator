@@ -3,11 +3,11 @@
   Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
 */
 
-package controllers
+package database
 
 import (
 	"context"
-	ociv1beta1 "github.com/oracle/oci-service-operator/api/v1beta1"
+	databasev1beta1 "github.com/oracle/oci-service-operator/api/database/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/core"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
@@ -19,9 +19,9 @@ type AutonomousDatabasesReconciler struct {
 	Reconciler *core.BaseReconciler
 }
 
-// +kubebuilder:rbac:groups=oci.oracle.com,resources=autonomousdatabases,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=oci.oracle.com,resources=autonomousdatabases/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=oci.oracle.com,resources=autonomousdatabases/finalizers,verbs=update
+// +kubebuilder:rbac:groups=database.oracle.com,resources=autonomousdatabases,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=database.oracle.com,resources=autonomousdatabases/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=database.oracle.com,resources=autonomousdatabases/finalizers,verbs=update
 // +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="",resources=events,verbs=get;list;watch;create;update;patch;delete
 
@@ -34,14 +34,14 @@ type AutonomousDatabasesReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.7.0/pkg/reconcile
 func (r *AutonomousDatabasesReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	autonomousDatabases := &ociv1beta1.AutonomousDatabases{}
+	autonomousDatabases := &databasev1beta1.AutonomousDatabases{}
 	return r.Reconciler.Reconcile(ctx, req, autonomousDatabases)
 }
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *AutonomousDatabasesReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&ociv1beta1.AutonomousDatabases{}).
+		For(&databasev1beta1.AutonomousDatabases{}).
 		WithEventFilter(predicate.GenerationChangedPredicate{}).
 		Complete(r)
 }

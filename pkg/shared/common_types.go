@@ -3,7 +3,9 @@
   Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
 */
 
-package v1beta1
+// Package shared contains reusable schema types shared across OSOK CRDs.
+// +kubebuilder:object:generate=true
+package shared
 
 import (
 	v1 "k8s.io/api/core/v1"

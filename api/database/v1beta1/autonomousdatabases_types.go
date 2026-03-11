@@ -6,38 +6,39 @@
 package v1beta1
 
 import (
+	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // AutonomousDatabasesSpec defines the desired state of AutonomousDatabases
 type AutonomousDatabasesSpec struct {
-	AdbId                OCID           `json:"id,omitempty"`
-	CompartmentId        OCID           `json:"compartmentId,omitempty"`
-	DisplayName          string         `json:"displayName,omitempty"`
-	DbName               string         `json:"dbName,omitempty"`
-	DbWorkload           string         `json:"dbWorkload,omitempty"`
-	IsDedicated          bool           `json:"isDedicated,omitempty"`
-	DbVersion            string         `json:"dbVersion,omitempty"`
-	DataStorageSizeInTBs int            `json:"dataStorageSizeInTBs,omitempty"`
-	CpuCoreCount         int            `json:"cpuCoreCount,omitempty"`
-	ComputeModel         string         `json:"computeModel,omitempty"`
-	ComputeCount         float32        `json:"computeCount,omitempty"`
-	AdminPassword        PasswordSource `json:"adminPassword,omitempty"`
-	IsAutoScalingEnabled bool           `json:"isAutoScalingEnabled,omitempty"`
-	IsFreeTier           bool           `json:"isFreeTier,omitempty"`
-	LicenseModel         string         `json:"licenseModel,omitempty"`
-	TagResources         `json:",inline"`
+	AdbId                shared.OCID           `json:"id,omitempty"`
+	CompartmentId        shared.OCID           `json:"compartmentId,omitempty"`
+	DisplayName          string                `json:"displayName,omitempty"`
+	DbName               string                `json:"dbName,omitempty"`
+	DbWorkload           string                `json:"dbWorkload,omitempty"`
+	IsDedicated          bool                  `json:"isDedicated,omitempty"`
+	DbVersion            string                `json:"dbVersion,omitempty"`
+	DataStorageSizeInTBs int                   `json:"dataStorageSizeInTBs,omitempty"`
+	CpuCoreCount         int                   `json:"cpuCoreCount,omitempty"`
+	ComputeModel         string                `json:"computeModel,omitempty"`
+	ComputeCount         float32               `json:"computeCount,omitempty"`
+	AdminPassword        shared.PasswordSource `json:"adminPassword,omitempty"`
+	IsAutoScalingEnabled bool                  `json:"isAutoScalingEnabled,omitempty"`
+	IsFreeTier           bool                  `json:"isFreeTier,omitempty"`
+	LicenseModel         string                `json:"licenseModel,omitempty"`
+	shared.TagResources  `json:",inline"`
 	Wallet               AutonomousDatabaseWallet `json:"wallet,omitempty"`
 }
 
 type AutonomousDatabaseWallet struct {
-	WalletName     string         `json:"walletName,omitempty"`
-	WalletPassword PasswordSource `json:"walletPassword,omitempty"`
+	WalletName     string                `json:"walletName,omitempty"`
+	WalletPassword shared.PasswordSource `json:"walletPassword,omitempty"`
 }
 
 // AutonomousDatabasesStatus defines the observed state of AutonomousDatabases
 type AutonomousDatabasesStatus struct {
-	OsokStatus OSOKStatus `json:"status"`
+	OsokStatus shared.OSOKStatus `json:"status"`
 }
 
 // +kubebuilder:object:root=true

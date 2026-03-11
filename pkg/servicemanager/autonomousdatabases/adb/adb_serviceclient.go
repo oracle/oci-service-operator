@@ -10,14 +10,15 @@ import (
 	"fmt"
 	"github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/oracle/oci-go-sdk/v65/database"
-	ociv1beta1 "github.com/oracle/oci-service-operator/api/v1beta1"
+	databasev1beta1 "github.com/oracle/oci-service-operator/api/database/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
+	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/oracle/oci-service-operator/pkg/util"
 	"reflect"
 )
 
 type AdbServiceClient interface {
-	CreateAdb(ctx context.Context, adb ociv1beta1.AutonomousDatabases) (database.AutonomousDatabase, error)
+	CreateAdb(ctx context.Context, adb databasev1beta1.AutonomousDatabases) (database.AutonomousDatabase, error)
 
 	UpdateAdb(ctx context.Context, request database.UpdateAutonomousDatabaseRequest) (database.UpdateAutonomousDatabaseResponse, error)
 
@@ -49,7 +50,7 @@ func (c *AdbServiceManager) getOCIClient() DatabaseClientInterface {
 	return getDbClient(c.Provider)
 }
 
-func (c *AdbServiceManager) CreateAdb(ctx context.Context, adb ociv1beta1.AutonomousDatabases, adminPwd string) (database.CreateAutonomousDatabaseResponse, error) {
+func (c *AdbServiceManager) CreateAdb(ctx context.Context, adb databasev1beta1.AutonomousDatabases, adminPwd string) (database.CreateAutonomousDatabaseResponse, error) {
 
 	dbClient := c.getOCIClient()
 
@@ -91,7 +92,7 @@ func (c *AdbServiceManager) CreateAdb(ctx context.Context, adb ociv1beta1.Autono
 	return dbClient.CreateAutonomousDatabase(ctx, createAutonomousDatabaseRequest)
 }
 
-func (c *AdbServiceManager) GetAdbOcid(ctx context.Context, adb ociv1beta1.AutonomousDatabases) (*ociv1beta1.OCID, error) {
+func (c *AdbServiceManager) GetAdbOcid(ctx context.Context, adb databasev1beta1.AutonomousDatabases) (*shared.OCID, error) {
 	dbClient := c.getOCIClient()
 
 	// List ADBs based on compartmentId and displayName and lifecycle-state as Active
@@ -113,7 +114,7 @@ func (c *AdbServiceManager) GetAdbOcid(ctx context.Context, adb ociv1beta1.Auton
 
 			c.Log.DebugLog(fmt.Sprintf("Autonomous Database %s exists.", adb.Spec.DisplayName))
 
-			return (*ociv1beta1.OCID)(listAdbResponse.Items[0].Id), nil
+			return (*shared.OCID)(listAdbResponse.Items[0].Id), nil
 		}
 	}
 
@@ -126,7 +127,7 @@ func (c *AdbServiceManager) DeleteAdb() (string, error) {
 }
 
 // Sync the Autonomous Database details
-func (c *AdbServiceManager) GetAdb(ctx context.Context, adbId ociv1beta1.OCID, retryPolicy *common.RetryPolicy) (*database.AutonomousDatabase, error) {
+func (c *AdbServiceManager) GetAdb(ctx context.Context, adbId shared.OCID, retryPolicy *common.RetryPolicy) (*database.AutonomousDatabase, error) {
 
 	dbClient := c.getOCIClient()
 
@@ -146,7 +147,7 @@ func (c *AdbServiceManager) GetAdb(ctx context.Context, adbId ociv1beta1.OCID, r
 	return &response.AutonomousDatabase, nil
 }
 
-func (c *AdbServiceManager) UpdateAdb(ctx context.Context, adb *ociv1beta1.AutonomousDatabases) error {
+func (c *AdbServiceManager) UpdateAdb(ctx context.Context, adb *databasev1beta1.AutonomousDatabases) error {
 
 	dbClient := c.getOCIClient()
 

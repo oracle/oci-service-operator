@@ -4,26 +4,29 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.17.0
-  name: streams.oci.oracle.com
+  name: autonomousdatabases.database.oracle.com
 spec:
-  group: oci.oracle.com
+  group: database.oracle.com
   names:
-    kind: Stream
-    listKind: StreamList
-    plural: streams
-    singular: stream
+    kind: AutonomousDatabases
+    listKind: AutonomousDatabasesList
+    plural: autonomousdatabases
+    singular: autonomousdatabases
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - jsonPath: .spec.name
-      name: Streamname
+    - jsonPath: .spec.displayName
+      name: DisplayName
       priority: 1
       type: string
-    - description: status of the Stream
+    - jsonPath: .spec.dbWorkload
+      name: DbWorkload
+      type: string
+    - description: status of the AutonomousDatabases
       jsonPath: .status.status.conditions[-1].type
       name: Status
       type: string
-    - description: Ocid of the Stream
+    - description: Ocid of the AutonomousDatabases
       jsonPath: .status.status.ocid
       name: Ocid
       priority: 1
@@ -34,7 +37,8 @@ spec:
     name: v1beta1
     schema:
       openAPIV3Schema:
-        description: Stream is the Schema for the streams API
+        description: AutonomousDatabases is the Schema for the autonomousdatabases
+          API
         properties:
           apiVersion:
             description: |-
@@ -54,18 +58,33 @@ spec:
           metadata:
             type: object
           spec:
-            description: StreamSpec defines the desired state of Stream
+            description: AutonomousDatabasesSpec defines the desired state of AutonomousDatabases
             properties:
-              Id:
-                description: |-
-                  INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-                  Important: Run "make" to regenerate code after modifying this file
-                maxLength: 255
-                minLength: 1
-                type: string
+              adminPassword:
+                properties:
+                  secret:
+                    properties:
+                      secretName:
+                        type: string
+                    type: object
+                type: object
               compartmentId:
                 maxLength: 255
                 minLength: 1
+                type: string
+              computeCount:
+                type: number
+              computeModel:
+                type: string
+              cpuCoreCount:
+                type: integer
+              dataStorageSizeInTBs:
+                type: integer
+              dbName:
+                type: string
+              dbVersion:
+                type: string
+              dbWorkload:
                 type: string
               definedTags:
                 additionalProperties:
@@ -73,31 +92,42 @@ spec:
                     type: string
                   type: object
                 type: object
+              displayName:
+                type: string
               freeformTags:
                 additionalProperties:
                   type: string
                 type: object
-              name:
-                type: string
-              partitions:
-                minimum: 1
-                type: integer
-              retentionInHours:
-                maximum: 168
-                minimum: 24
-                type: integer
-              streamPoolId:
+              id:
                 maxLength: 255
                 minLength: 1
                 type: string
+              isAutoScalingEnabled:
+                type: boolean
+              isDedicated:
+                type: boolean
+              isFreeTier:
+                type: boolean
+              licenseModel:
+                type: string
+              wallet:
+                properties:
+                  walletName:
+                    type: string
+                  walletPassword:
+                    properties:
+                      secret:
+                        properties:
+                          secretName:
+                            type: string
+                        type: object
+                    type: object
+                type: object
             type: object
           status:
-            description: StreamStatus defines the observed state of Stream
+            description: AutonomousDatabasesStatus defines the observed state of AutonomousDatabases
             properties:
               status:
-                description: |-
-                  INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-                  Important: Run "make" to regenerate code after modifying this file
                 properties:
                   conditions:
                     items:

@@ -6,6 +6,7 @@
 package v1beta1
 
 import (
+	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -15,23 +16,23 @@ import (
 type StreamSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	StreamId      OCID   `json:"Id,omitempty"`
-	CompartmentId OCID   `json:"compartmentId,omitempty"`
-	Name          string `json:"name,omitempty"`
+	StreamId      shared.OCID `json:"Id,omitempty"`
+	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
+	Name          string      `json:"name,omitempty"`
 	// +kubebuilder:validation:Minimum=1
 	Partitions int `json:"partitions,omitempty"`
 	// +kubebuilder:validation:Maximum=168
 	// +kubebuilder:validation:Minimum=24
-	RetentionInHours int  `json:"retentionInHours,omitempty"`
-	StreamPoolId     OCID `json:"streamPoolId,omitempty"`
-	TagResources     `json:",inline"`
+	RetentionInHours    int         `json:"retentionInHours,omitempty"`
+	StreamPoolId        shared.OCID `json:"streamPoolId,omitempty"`
+	shared.TagResources `json:",inline"`
 }
 
 // StreamStatus defines the observed state of Stream
 type StreamStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	OsokStatus OSOKStatus `json:"status"`
+	OsokStatus shared.OSOKStatus `json:"status"`
 }
 
 //+kubebuilder:object:root=true

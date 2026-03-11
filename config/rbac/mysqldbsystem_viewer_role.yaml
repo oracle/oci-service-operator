@@ -9,7 +9,7 @@ metadata:
   name: mysqldbsystem-viewer-role
 rules:
 - apiGroups:
-  - oci.oracle.com
+  - mysql.oracle.com
   resources:
   - mysqldbsystems
   verbs:
@@ -17,7 +17,7 @@ rules:
   - list
   - watch
 - apiGroups:
-  - oci.oracle.com
+  - mysql.oracle.com
   resources:
   - mysqldbsystems/status
   verbs:

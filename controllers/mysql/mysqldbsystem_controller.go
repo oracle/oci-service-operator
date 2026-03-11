@@ -3,15 +3,15 @@
   Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
 */
 
-package controllers
+package mysql
 
 import (
 	"context"
+	mysqlv1beta1 "github.com/oracle/oci-service-operator/api/mysql/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/core"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
-	ociv1beta1 "github.com/oracle/oci-service-operator/api/v1beta1"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -21,9 +21,9 @@ type MySqlDBsystemReconciler struct {
 	Reconciler     *core.BaseReconciler
 }
 
-// +kubebuilder:rbac:groups=oci.oracle.com,resources=mysqldbsystems,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=oci.oracle.com,resources=mysqldbsystems/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=oci.oracle.com,resources=mysqldbsystems/finalizers,verbs=update
+// +kubebuilder:rbac:groups=mysql.oracle.com,resources=mysqldbsystems,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=mysql.oracle.com,resources=mysqldbsystems/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=mysql.oracle.com,resources=mysqldbsystems/finalizers,verbs=update
 // +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="",resources=events,verbs=get;list;watch;create;update;patch;delete
 
@@ -36,7 +36,7 @@ type MySqlDBsystemReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.8.3/pkg/reconcile
 func (r *MySqlDBsystemReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	mysqlDbsystem := &ociv1beta1.MySqlDbSystem{}
+	mysqlDbsystem := &mysqlv1beta1.MySqlDbSystem{}
 	return r.Reconciler.Reconcile(ctx, req, mysqlDbsystem)
 
 }
@@ -44,7 +44,7 @@ func (r *MySqlDBsystemReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 // SetupWithManager sets up the controller with the Manager.
 func (r *MySqlDBsystemReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&ociv1beta1.MySqlDbSystem{}).
+		For(&mysqlv1beta1.MySqlDbSystem{}).
 		WithOptions(controller.Options{MaxConcurrentReconciles: 3}).
 		WithEventFilter(predicate.GenerationChangedPredicate{}).
 		Complete(r)

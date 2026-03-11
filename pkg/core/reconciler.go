@@ -20,10 +20,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
-	"github.com/oracle/oci-service-operator/api/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/metrics"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
+	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/oracle/oci-service-operator/pkg/util"
 )
 
@@ -105,7 +105,7 @@ func (r *BaseReconciler) Reconcile(ctx context.Context, req ctrl.Request, obj cl
 	return r.ReconcileResource(ctx, obj, req)
 }
 
-func (r *BaseReconciler) GetStatus(obj client.Object) (*v1beta1.OSOKStatus, error) {
+func (r *BaseReconciler) GetStatus(obj client.Object) (*shared.OSOKStatus, error) {
 	status, err := r.OSOKServiceManager.GetCrdStatus(obj)
 	if err != nil {
 		return nil, err

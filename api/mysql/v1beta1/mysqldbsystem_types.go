@@ -6,18 +6,19 @@
 package v1beta1
 
 import (
+	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // MySqlDbSystemSpec defines the desired state of MySqlDbSystem
 type MySqlDbSystemSpec struct {
-	MySqlDbSystemId OCID           `json:"id,omitempty"`
-	CompartmentId   OCID           `json:"compartmentId,omitempty"`
-	ShapeName       string         `json:"shapeName,omitempty"`
-	SubnetId        OCID           `json:"subnetId,omitempty"`
-	AdminUsername   UsernameSource `json:"adminUsername,omitempty"`
-	AdminPassword   PasswordSource `json:"adminPassword,omitempty"`
-	DisplayName     string         `json:"displayName,omitempty"`
+	MySqlDbSystemId shared.OCID           `json:"id,omitempty"`
+	CompartmentId   shared.OCID           `json:"compartmentId,omitempty"`
+	ShapeName       string                `json:"shapeName,omitempty"`
+	SubnetId        shared.OCID           `json:"subnetId,omitempty"`
+	AdminUsername   shared.UsernameSource `json:"adminUsername,omitempty"`
+	AdminPassword   shared.PasswordSource `json:"adminPassword,omitempty"`
+	DisplayName     string                `json:"displayName,omitempty"`
 	// +kubebuilder:validation:MinLength:=1
 	// +kubebuilder:validation:MaxLength:=400
 	Description        string `json:"description,omitempty"`
@@ -36,12 +37,12 @@ type MySqlDbSystemSpec struct {
 	Port int `json:"port,omitempty"`
 	// +kubebuilder:validation:Minimum:=1024
 	// +kubebuilder:validation:Maximum:=65535
-	PortX           int                         `json:"portX,omitempty"`
-	ConfigurationId CreateConfigurationDetails  `json:"configuration,omitempty"`
-	BackupPolicy    CreateBackupPolicyDetails   `json:"backupPolicy,omitempty"`
-	Source          CreateDbSystemSourceDetails `json:"source,omitempty"`
-	Maintenance     CreateMaintenanceDetails    `json:"maintenance,omitempty"`
-	TagResources    `json:",inline,omitempty"`
+	PortX               int                         `json:"portX,omitempty"`
+	ConfigurationId     CreateConfigurationDetails  `json:"configuration,omitempty"`
+	BackupPolicy        CreateBackupPolicyDetails   `json:"backupPolicy,omitempty"`
+	Source              CreateDbSystemSourceDetails `json:"source,omitempty"`
+	Maintenance         CreateMaintenanceDetails    `json:"maintenance,omitempty"`
+	shared.TagResources `json:",inline,omitempty"`
 }
 
 // CreateDbSystemSourceDetails Parameters detailing how to provision the initial data of the system.
@@ -73,18 +74,18 @@ type CreateBackupPolicyDetails struct {
 	// Number of days to retain an automatic backup.
 	RetentionInDays int `json:"retentionInDays,omitempty"`
 
-	TagResources `json:",inline,omitempty"`
+	shared.TagResources `json:",inline,omitempty"`
 }
 
 // CreateConfigurationDetails The Configuration for the DB System.
 type CreateConfigurationDetails struct {
 	// Configuration Id
-	Id OCID `json:"id,omitempty"`
+	Id shared.OCID `json:"id,omitempty"`
 }
 
 // MySqlDbSystemStatus defines the observed state of MySqlDbSystem
 type MySqlDbSystemStatus struct {
-	OsokStatus OSOKStatus `json:"status"`
+	OsokStatus shared.OSOKStatus `json:"status"`
 }
 
 //+kubebuilder:object:root=true

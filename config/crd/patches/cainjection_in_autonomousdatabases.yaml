@@ -8,4 +8,4 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     cert-manager.io/inject-ca-from: $(CERTIFICATE_NAMESPACE)/$(CERTIFICATE_NAME)
-  name: autonomousdatabases.oci.oracle.com
+  name: autonomousdatabases.database.oracle.com

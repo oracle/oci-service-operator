@@ -4,7 +4,7 @@ metadata:
   annotations:
     alm-examples: '[]'
     capabilities: Basic Install
-  name: oci-service-operator.v1.0.0
+  name: oci-service-operator.v0.0.0
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
@@ -13,20 +13,20 @@ spec:
     - description: AutonomousDatabases is the Schema for the autonomousdatabases API
       displayName: Autonomous Databases
       kind: AutonomousDatabases
-      name: autonomousdatabases.oci.oracle.com
+      name: autonomousdatabases.database.oracle.com
       version: v1beta1
     - description: MySqlDbSystem is the Schema for the mysqldbsystems API
       displayName: My Sql Db System
       kind: MySqlDbSystem
-      name: mysqldbsystems.oci.oracle.com
+      name: mysqldbsystems.mysql.oracle.com
       version: v1beta1
     - description: Stream is the Schema for the streams API
       displayName: Stream
       kind: Stream
-      name: streams.oci.oracle.com
+      name: streams.streaming.oracle.com
       version: v1beta1
-  description: OCI Service Operator for Kubernetes
-  displayName: oci-service-operator
+  description: Oci Service Operator description. TODO.
+  displayName: Oci Service Operator
   icon:
   - base64data: ""
     mediatype: ""
@@ -44,13 +44,15 @@ spec:
   - supported: true
     type: AllNamespaces
   keywords:
-  - osok
+  - oci-service-operator
   links:
   - name: Oci Service Operator
     url: https://oci-service-operator.domain
+  maintainers:
+  - email: your@email.com
+    name: Maintainer Name
   maturity: alpha
-  minKubeVersion: 1.28.0
   provider:
-    name: Oracle Cloud Infrastructure
-    url: https://www.oracle.com/cloud/
-  version: 1.0.0
+    name: Provider Name
+    url: https://your.domain
+  version: 0.0.0

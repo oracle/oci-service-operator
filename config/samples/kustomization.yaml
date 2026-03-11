@@ -5,7 +5,7 @@
 
 ## Append samples you want in your CSV to this file as resources ##
 resources:
-- oci_v1beta1_autonomousdatabases.yaml
-- oci_v1beta1_stream.yaml
-- oci_v1beta1_mysqldbsystem.yaml
+- database_v1beta1_autonomousdatabases.yaml
+- streaming_v1beta1_stream.yaml
+- mysql_v1beta1_mysqldbsystem.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

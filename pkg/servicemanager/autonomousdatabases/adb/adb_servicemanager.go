@@ -19,8 +19,9 @@ import (
 	"time"
 
 	"github.com/oracle/oci-go-sdk/v65/database"
-	ociv1beta1 "github.com/oracle/oci-service-operator/api/v1beta1"
+	databasev1beta1 "github.com/oracle/oci-service-operator/api/database/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/credhelper"
+	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -81,7 +82,7 @@ func (c *AdbServiceManager) CreateOrUpdate(ctx context.Context, obj runtime.Obje
 			resp, err := c.CreateAdb(ctx, *autonomousDatabases, string(pwd))
 			if err != nil {
 				autonomousDatabases.Status.OsokStatus = util.UpdateOSOKStatusCondition(autonomousDatabases.Status.OsokStatus,
-					ociv1beta1.Failed, v1.ConditionFalse, "", err.Error(), c.Log)
+					shared.Failed, v1.ConditionFalse, "", err.Error(), c.Log)
 				if err.(common.ServiceError).GetHTTPStatusCode() == 400 && err.(common.ServiceError).GetCode() == "InvalidParameter" {
 					autonomousDatabases.Status.OsokStatus.Message = err.(common.ServiceError).GetCode()
 					c.Log.ErrorLog(err, "Create AutonomousDatabase failed")
@@ -92,10 +93,10 @@ func (c *AdbServiceManager) CreateOrUpdate(ctx context.Context, obj runtime.Obje
 
 			c.Log.InfoLog(fmt.Sprintf("AutonomousDatabase %s is Provisioning", autonomousDatabases.Spec.DisplayName))
 			autonomousDatabases.Status.OsokStatus = util.UpdateOSOKStatusCondition(autonomousDatabases.Status.OsokStatus,
-				ociv1beta1.Provisioning, v1.ConditionTrue, "", "AutonomousDatabase Provisioning", c.Log)
+				shared.Provisioning, v1.ConditionTrue, "", "AutonomousDatabase Provisioning", c.Log)
 
 			retryPolicy := c.getAdbRetryPolicy(9)
-			adbInstance, err = c.GetAdb(ctx, ociv1beta1.OCID(*resp.Id), &retryPolicy)
+			adbInstance, err = c.GetAdb(ctx, shared.OCID(*resp.Id), &retryPolicy)
 			if err != nil {
 				c.Log.ErrorLog(err, "Error while getting Autonomous database")
 				return servicemanager.OSOKResponse{IsSuccessful: false}, err
@@ -109,11 +110,11 @@ func (c *AdbServiceManager) CreateOrUpdate(ctx context.Context, obj runtime.Obje
 			}
 		}
 		autonomousDatabases.Status.OsokStatus = util.UpdateOSOKStatusCondition(autonomousDatabases.Status.OsokStatus,
-			ociv1beta1.Active, v1.ConditionTrue, "",
+			shared.Active, v1.ConditionTrue, "",
 			fmt.Sprintf("AutonomousDatabase %s is Active", *adbInstance.DisplayName), c.Log)
 		c.Log.InfoLog(fmt.Sprintf("AutonomousDatabase %s is Active", *adbInstance.DisplayName))
 
-		autonomousDatabases.Status.OsokStatus.Ocid = ociv1beta1.OCID(*adbInstance.Id)
+		autonomousDatabases.Status.OsokStatus.Ocid = shared.OCID(*adbInstance.Id)
 		if autonomousDatabases.Status.OsokStatus.CreatedAt != nil {
 			now := metav1.NewTime(time.Now())
 			autonomousDatabases.Status.OsokStatus.CreatedAt = &now
@@ -133,18 +134,18 @@ func (c *AdbServiceManager) CreateOrUpdate(ctx context.Context, obj runtime.Obje
 				return servicemanager.OSOKResponse{IsSuccessful: false}, err
 			}
 			autonomousDatabases.Status.OsokStatus = util.UpdateOSOKStatusCondition(autonomousDatabases.Status.OsokStatus,
-				ociv1beta1.Active, v1.ConditionTrue, "", "AutonomousDatabase Update success", c.Log)
+				shared.Active, v1.ConditionTrue, "", "AutonomousDatabase Update success", c.Log)
 			c.Log.InfoLog(fmt.Sprintf("AutonomousDatabase %s is updated successfully", *adbInstance.DisplayName))
 		} else {
 			autonomousDatabases.Status.OsokStatus = util.UpdateOSOKStatusCondition(autonomousDatabases.Status.OsokStatus,
-				ociv1beta1.Active, v1.ConditionTrue, "", "AutonomousDatabase Bound success", c.Log)
-			autonomousDatabases.Status.OsokStatus.Ocid = ociv1beta1.OCID(*adbInstance.Id)
+				shared.Active, v1.ConditionTrue, "", "AutonomousDatabase Bound success", c.Log)
+			autonomousDatabases.Status.OsokStatus.Ocid = shared.OCID(*adbInstance.Id)
 			now := metav1.NewTime(time.Now())
 			autonomousDatabases.Status.OsokStatus.CreatedAt = &now
 
 			c.Log.InfoLog(fmt.Sprintf("AutonomousDatabase %s is bounded successfully", *adbInstance.DisplayName))
 		}
-		autonomousDatabases.Status.OsokStatus.Ocid = ociv1beta1.OCID(*adbInstance.Id)
+		autonomousDatabases.Status.OsokStatus.Ocid = shared.OCID(*adbInstance.Id)
 		if autonomousDatabases.Status.OsokStatus.CreatedAt != nil {
 			now := metav1.NewTime(time.Now())
 			autonomousDatabases.Status.OsokStatus.CreatedAt = &now
@@ -164,7 +165,7 @@ func (c *AdbServiceManager) CreateOrUpdate(ctx context.Context, obj runtime.Obje
 	return servicemanager.OSOKResponse{IsSuccessful: true}, nil
 }
 
-func isValidUpdate(autonomousDatabases ociv1beta1.AutonomousDatabases, adbInstance database.AutonomousDatabase) bool {
+func isValidUpdate(autonomousDatabases databasev1beta1.AutonomousDatabases, adbInstance database.AutonomousDatabase) bool {
 
 	definedTagUpdated := false
 	if autonomousDatabases.Spec.DefinedTags != nil {
@@ -190,7 +191,7 @@ func (c *AdbServiceManager) Delete(ctx context.Context, obj runtime.Object) (boo
 	return true, nil
 }
 
-func (c *AdbServiceManager) GetCrdStatus(obj runtime.Object) (*ociv1beta1.OSOKStatus, error) {
+func (c *AdbServiceManager) GetCrdStatus(obj runtime.Object) (*shared.OSOKStatus, error) {
 
 	resource, err := c.convert(obj)
 	if err != nil {
@@ -199,8 +200,8 @@ func (c *AdbServiceManager) GetCrdStatus(obj runtime.Object) (*ociv1beta1.OSOKSt
 	return &resource.Status.OsokStatus, nil
 }
 
-func (c *AdbServiceManager) convert(obj runtime.Object) (*ociv1beta1.AutonomousDatabases, error) {
-	copy, err := obj.(*ociv1beta1.AutonomousDatabases)
+func (c *AdbServiceManager) convert(obj runtime.Object) (*databasev1beta1.AutonomousDatabases, error) {
+	copy, err := obj.(*databasev1beta1.AutonomousDatabases)
 	if !err {
 		return nil, fmt.Errorf("failed to convert the type assertion for Autonomous Databases")
 	}

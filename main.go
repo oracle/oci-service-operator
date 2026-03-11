@@ -26,8 +26,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
-	ociv1beta1 "github.com/oracle/oci-service-operator/api/v1beta1"
-	"github.com/oracle/oci-service-operator/controllers"
+	databasev1beta1 "github.com/oracle/oci-service-operator/api/database/v1beta1"
+	mysqlv1beta1 "github.com/oracle/oci-service-operator/api/mysql/v1beta1"
+	streamingv1beta1 "github.com/oracle/oci-service-operator/api/streaming/v1beta1"
+	databasecontrollers "github.com/oracle/oci-service-operator/controllers/database"
+	mysqlcontrollers "github.com/oracle/oci-service-operator/controllers/mysql"
+	streamingcontrollers "github.com/oracle/oci-service-operator/controllers/streaming"
 	"github.com/oracle/oci-service-operator/pkg/authhelper"
 	"github.com/oracle/oci-service-operator/pkg/config"
 	"github.com/oracle/oci-service-operator/pkg/core"
@@ -47,7 +51,9 @@ var (
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
-	utilruntime.Must(ociv1beta1.AddToScheme(scheme))
+	utilruntime.Must(databasev1beta1.AddToScheme(scheme))
+	utilruntime.Must(mysqlv1beta1.AddToScheme(scheme))
+	utilruntime.Must(streamingv1beta1.AddToScheme(scheme))
 	// +kubebuilder:scaffold:scheme
 }
 
@@ -132,7 +138,7 @@ func main() {
 		Metrics: metricsClient,
 	}
 
-	if err = (&controllers.AutonomousDatabasesReconciler{
+	if err = (&databasecontrollers.AutonomousDatabasesReconciler{
 		Reconciler: &core.BaseReconciler{
 			Client:             mgr.GetClient(),
 			OSOKServiceManager: adb.NewAdbServiceManager(provider, credClient, scheme, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("AutonomousDatabases")}),
@@ -146,12 +152,12 @@ func main() {
 		setupLog.ErrorLog(err, "unable to create controller", "controller", "AutonomousDatabases")
 		os.Exit(1)
 	}
-	//if err = (&ociv1beta1.AutonomousDatabases{}).SetupWebhookWithManager(mgr); err != nil {
-	//	setupLog.Error(err, "unable to create webhook", "webhook", "AutonomousDatabases")
-	//	os.Exit(1)
-	//}
+	if err = (&databasev1beta1.AutonomousDatabases{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.ErrorLog(err, "unable to create webhook", "webhook", "AutonomousDatabases")
+		os.Exit(1)
+	}
 
-	if err = (&controllers.StreamReconciler{
+	if err = (&streamingcontrollers.StreamReconciler{
 		Reconciler: &core.BaseReconciler{
 			Client: mgr.GetClient(),
 			OSOKServiceManager: streams.NewStreamServiceManager(provider, credClient, scheme, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("Streams")},
@@ -166,7 +172,7 @@ func main() {
 		setupLog.ErrorLog(err, "unable to create controller", "controller", "Streams")
 		os.Exit(1)
 	}
-	if err = (&controllers.MySqlDBsystemReconciler{
+	if err = (&mysqlcontrollers.MySqlDBsystemReconciler{
 		Reconciler: &core.BaseReconciler{
 			Client:             mgr.GetClient(),
 			OSOKServiceManager: dbsystem.NewDbSystemServiceManager(provider, credClient, scheme, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("MySqlDbSystem")}),

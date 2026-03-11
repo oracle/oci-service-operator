@@ -10,7 +10,8 @@ import (
 	"fmt"
 	"github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/oracle/oci-go-sdk/v65/streaming"
-	ociv1beta1 "github.com/oracle/oci-service-operator/api/v1beta1"
+	streamingv1beta1 "github.com/oracle/oci-service-operator/api/streaming/v1beta1"
+	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/oracle/oci-service-operator/pkg/util"
 	"github.com/pkg/errors"
 	"reflect"
@@ -39,7 +40,7 @@ func (c *StreamServiceManager) getOCIClient() StreamAdminClientInterface {
 	return getStreamClient(c.Provider)
 }
 
-func (c *StreamServiceManager) CreateStream(ctx context.Context, stream ociv1beta1.Stream) (streaming.CreateStreamResponse, error) {
+func (c *StreamServiceManager) CreateStream(ctx context.Context, stream streamingv1beta1.Stream) (streaming.CreateStreamResponse, error) {
 
 	streamClient := c.getOCIClient()
 	c.Log.DebugLog("Creating Stream ", "name", stream.Spec.Name)
@@ -68,7 +69,7 @@ func (c *StreamServiceManager) CreateStream(ctx context.Context, stream ociv1bet
 	return streamClient.CreateStream(ctx, createStreamRequest)
 }
 
-func (c *StreamServiceManager) GetStreamOcid(ctx context.Context, stream ociv1beta1.Stream) (*ociv1beta1.OCID, error) {
+func (c *StreamServiceManager) GetStreamOcid(ctx context.Context, stream streamingv1beta1.Stream) (*shared.OCID, error) {
 
 	streamClient := c.getOCIClient()
 	listStreamsRequest := streaming.ListStreamsRequest{
@@ -93,7 +94,7 @@ func (c *StreamServiceManager) GetStreamOcid(ctx context.Context, stream ociv1be
 	return c.GetCreateOrUpdateStream(listStreamsResponse, stream)
 }
 
-func (c *StreamServiceManager) DeleteStream(ctx context.Context, stream ociv1beta1.Stream) (streaming.DeleteStreamResponse, error) {
+func (c *StreamServiceManager) DeleteStream(ctx context.Context, stream streamingv1beta1.Stream) (streaming.DeleteStreamResponse, error) {
 	streamClient := c.getOCIClient()
 	c.Log.InfoLog("Deleting Stream ", "name", stream.Spec.Name)
 
@@ -104,7 +105,7 @@ func (c *StreamServiceManager) DeleteStream(ctx context.Context, stream ociv1bet
 	return streamClient.DeleteStream(ctx, deleteStreamRequest)
 }
 
-func (c *StreamServiceManager) GetStream(ctx context.Context, streamId ociv1beta1.OCID, retryPolicy *common.RetryPolicy) (*streaming.Stream, error) {
+func (c *StreamServiceManager) GetStream(ctx context.Context, streamId shared.OCID, retryPolicy *common.RetryPolicy) (*streaming.Stream, error) {
 
 	streamClient := c.getOCIClient()
 
@@ -124,7 +125,7 @@ func (c *StreamServiceManager) GetStream(ctx context.Context, streamId ociv1beta
 	return &response.Stream, nil
 }
 
-func (c *StreamServiceManager) UpdateStream(ctx context.Context, stream *ociv1beta1.Stream) error {
+func (c *StreamServiceManager) UpdateStream(ctx context.Context, stream *streamingv1beta1.Stream) error {
 
 	streamClient := c.getOCIClient()
 
@@ -176,7 +177,7 @@ func (c *StreamServiceManager) UpdateStream(ctx context.Context, stream *ociv1be
 
 }
 
-func (c *StreamServiceManager) GetStreamOCID(ctx context.Context, stream ociv1beta1.Stream, status string) (*ociv1beta1.OCID, error) {
+func (c *StreamServiceManager) GetStreamOCID(ctx context.Context, stream streamingv1beta1.Stream, status string) (*shared.OCID, error) {
 
 	if status == "CREATE" {
 		listResponse, err := c.GetListOfStreams(ctx, stream)
@@ -198,7 +199,7 @@ func (c *StreamServiceManager) GetStreamOCID(ctx context.Context, stream ociv1be
 	}
 }
 
-func (c *StreamServiceManager) GetListOfStreams(ctx context.Context, stream ociv1beta1.Stream) (streaming.ListStreamsResponse, error) {
+func (c *StreamServiceManager) GetListOfStreams(ctx context.Context, stream streamingv1beta1.Stream) (streaming.ListStreamsResponse, error) {
 
 	streamClient := c.getOCIClient()
 	listStreamsRequest := streaming.ListStreamsRequest{
@@ -224,7 +225,7 @@ func (c *StreamServiceManager) GetListOfStreams(ctx context.Context, stream ociv
 	return listStreamsResponse, nil
 }
 
-func (c *StreamServiceManager) GetFailedOrDeleteStream(listStreamsResponse streaming.ListStreamsResponse, stream ociv1beta1.Stream) (*ociv1beta1.OCID, error) {
+func (c *StreamServiceManager) GetFailedOrDeleteStream(listStreamsResponse streaming.ListStreamsResponse, stream streamingv1beta1.Stream) (*shared.OCID, error) {
 
 	if len(listStreamsResponse.Items) > 0 {
 		status := listStreamsResponse.Items[0].LifecycleState
@@ -232,14 +233,14 @@ func (c *StreamServiceManager) GetFailedOrDeleteStream(listStreamsResponse strea
 
 			c.Log.DebugLog(fmt.Sprintf("Stream %s exists in GetFailedOrDeletingStream", stream.Spec.Name))
 
-			return (*ociv1beta1.OCID)(listStreamsResponse.Items[0].Id), nil
+			return (*shared.OCID)(listStreamsResponse.Items[0].Id), nil
 		}
 	}
 	c.Log.DebugLog(fmt.Sprintf("Stream %s does not exist.", stream.Spec.Name))
 	return nil, nil
 }
 
-func (c *StreamServiceManager) GetCreateOrUpdateStream(listStreamsResponse streaming.ListStreamsResponse, stream ociv1beta1.Stream) (*ociv1beta1.OCID, error) {
+func (c *StreamServiceManager) GetCreateOrUpdateStream(listStreamsResponse streaming.ListStreamsResponse, stream streamingv1beta1.Stream) (*shared.OCID, error) {
 
 	if len(listStreamsResponse.Items) > 0 {
 		c.Log.DebugLog(fmt.Sprintf(
@@ -252,7 +253,7 @@ func (c *StreamServiceManager) GetCreateOrUpdateStream(listStreamsResponse strea
 
 				c.Log.DebugLog(fmt.Sprintf("Stream %s exists.", stream.Spec.Name))
 
-				return (*ociv1beta1.OCID)(listStreamsResponse.Items[entry].Id), nil
+				return (*shared.OCID)(listStreamsResponse.Items[entry].Id), nil
 			}
 		}
 

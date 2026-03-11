@@ -12,11 +12,12 @@ import (
 
 	"github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/oracle/oci-go-sdk/v65/mysql"
-	ociv1beta1 "github.com/oracle/oci-service-operator/api/v1beta1"
+	mysqlv1beta1 "github.com/oracle/oci-service-operator/api/mysql/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/credhelper"
 	"github.com/oracle/oci-service-operator/pkg/errorutil"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
+	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/oracle/oci-service-operator/pkg/util"
 	v1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -95,7 +96,7 @@ func (c *DbSystemServiceManager) CreateOrUpdate(ctx context.Context, obj runtime
 			resp, err := c.CreateDbSystem(ctx, *mysqlDbSystem, string(uname), string(pwd))
 			if err != nil {
 				mysqlDbSystem.Status.OsokStatus = util.UpdateOSOKStatusCondition(mysqlDbSystem.Status.OsokStatus,
-					ociv1beta1.Failed, v1.ConditionFalse, "", err.Error(), c.Log)
+					shared.Failed, v1.ConditionFalse, "", err.Error(), c.Log)
 				if _, ok := err.(errorutil.BadRequestOciError); !ok {
 					c.Log.ErrorLog(err, "Assertion Error for BadRequestOciError")
 					return servicemanager.OSOKResponse{IsSuccessful: false}, err
@@ -107,11 +108,11 @@ func (c *DbSystemServiceManager) CreateOrUpdate(ctx context.Context, obj runtime
 			}
 			c.Log.InfoLog(fmt.Sprintf("MySqlDbSystem %s is Provisioning", mysqlDbSystem.Spec.DisplayName))
 			mysqlDbSystem.Status.OsokStatus = util.UpdateOSOKStatusCondition(mysqlDbSystem.Status.OsokStatus,
-				ociv1beta1.Provisioning, v1.ConditionTrue, "", "MySqlDbSystem Provisioning", c.Log)
-			mysqlDbSystem.Status.OsokStatus.Ocid = ociv1beta1.OCID(*resp.Id)
+				shared.Provisioning, v1.ConditionTrue, "", "MySqlDbSystem Provisioning", c.Log)
+			mysqlDbSystem.Status.OsokStatus.Ocid = shared.OCID(*resp.Id)
 			retryPolicy := c.getDbSystemRetryPolicy(30)
 
-			mySqlDbSystemInstance, err = c.GetMySqlDbSystem(ctx, ociv1beta1.OCID(*resp.Id), &retryPolicy)
+			mySqlDbSystemInstance, err = c.GetMySqlDbSystem(ctx, shared.OCID(*resp.Id), &retryPolicy)
 			if err != nil {
 				c.Log.ErrorLog(err, "Error while getting MySqlDbSystem")
 				return servicemanager.OSOKResponse{IsSuccessful: false}, err
@@ -126,7 +127,7 @@ func (c *DbSystemServiceManager) CreateOrUpdate(ctx context.Context, obj runtime
 			}
 		}
 		mysqlDbSystem.Status.OsokStatus = util.UpdateOSOKStatusCondition(mysqlDbSystem.Status.OsokStatus,
-			ociv1beta1.Active, v1.ConditionTrue, "",
+			shared.Active, v1.ConditionTrue, "",
 			fmt.Sprintf("MySqlDbSystem %s is %s", *mySqlDbSystemInstance.DisplayName, mySqlDbSystemInstance.LifecycleState), c.Log)
 		c.Log.InfoLog(fmt.Sprintf("MySqlDbSystem %s is %s", *mySqlDbSystemInstance.DisplayName, mySqlDbSystemInstance.LifecycleState))
 
@@ -144,18 +145,18 @@ func (c *DbSystemServiceManager) CreateOrUpdate(ctx context.Context, obj runtime
 				return servicemanager.OSOKResponse{IsSuccessful: false}, err
 			}
 			mysqlDbSystem.Status.OsokStatus = util.UpdateOSOKStatusCondition(mysqlDbSystem.Status.OsokStatus,
-				ociv1beta1.Active, v1.ConditionTrue, "", "MysqlDbSystem update success", c.Log)
+				shared.Active, v1.ConditionTrue, "", "MysqlDbSystem update success", c.Log)
 			c.Log.InfoLog(fmt.Sprintf("MySqlDbSystem %s is updated successfully", *mySqlDbSystemInstance.DisplayName))
 		} else {
 			mysqlDbSystem.Status.OsokStatus = util.UpdateOSOKStatusCondition(mysqlDbSystem.Status.OsokStatus,
-				ociv1beta1.Active, v1.ConditionTrue, "", "MysqlDbSystem Bound success", c.Log)
+				shared.Active, v1.ConditionTrue, "", "MysqlDbSystem Bound success", c.Log)
 			c.Log.InfoLog(fmt.Sprintf("MysqlDbSystem %s is bound successfully", *mySqlDbSystemInstance.DisplayName))
 
 		}
 
 	}
 
-	mysqlDbSystem.Status.OsokStatus.Ocid = ociv1beta1.OCID(*mySqlDbSystemInstance.Id)
+	mysqlDbSystem.Status.OsokStatus.Ocid = shared.OCID(*mySqlDbSystemInstance.Id)
 	if mysqlDbSystem.Status.OsokStatus.CreatedAt != nil {
 		now := metav1.NewTime(time.Now())
 		mysqlDbSystem.Status.OsokStatus.CreatedAt = &now
@@ -163,7 +164,7 @@ func (c *DbSystemServiceManager) CreateOrUpdate(ctx context.Context, obj runtime
 
 	if mySqlDbSystemInstance.LifecycleState == "FAILED" {
 		mysqlDbSystem.Status.OsokStatus = util.UpdateOSOKStatusCondition(mysqlDbSystem.Status.OsokStatus,
-			ociv1beta1.Failed, v1.ConditionFalse, "",
+			shared.Failed, v1.ConditionFalse, "",
 			fmt.Sprintf("MySqlDbSystem %s creation Failed", *mySqlDbSystemInstance.DisplayName), c.Log)
 		c.Log.InfoLog(fmt.Sprintf("MySqlDbSystem %s creation Failed", *mySqlDbSystemInstance.DisplayName))
 	} else if mySqlDbSystemInstance.LifecycleState == "ACTIVE" {
@@ -177,7 +178,7 @@ func (c *DbSystemServiceManager) CreateOrUpdate(ctx context.Context, obj runtime
 		}
 	} else {
 		mysqlDbSystem.Status.OsokStatus = util.UpdateOSOKStatusCondition(mysqlDbSystem.Status.OsokStatus,
-			ociv1beta1.Provisioning, v1.ConditionTrue, "",
+			shared.Provisioning, v1.ConditionTrue, "",
 			fmt.Sprintf("MySqlDbSystem %s is %s", *mySqlDbSystemInstance.DisplayName, mySqlDbSystemInstance.LifecycleState), c.Log)
 		return servicemanager.OSOKResponse{IsSuccessful: false}, fmt.Errorf("MySqlDbSystem %s is %s, waiting for ACTIVE", *mySqlDbSystemInstance.DisplayName, mySqlDbSystemInstance.LifecycleState)
 	}
@@ -185,7 +186,7 @@ func (c *DbSystemServiceManager) CreateOrUpdate(ctx context.Context, obj runtime
 	return servicemanager.OSOKResponse{IsSuccessful: true}, nil
 }
 
-func isValidUpdate(dbSystem ociv1beta1.MySqlDbSystem, mySqlDbInstance mysql.DbSystem) bool {
+func isValidUpdate(dbSystem mysqlv1beta1.MySqlDbSystem, mySqlDbInstance mysql.DbSystem) bool {
 
 	definedTagUpdated := false
 	if dbSystem.Spec.DefinedTags != nil {
@@ -205,7 +206,7 @@ func (c *DbSystemServiceManager) Delete(ctx context.Context, obj runtime.Object)
 	return true, nil
 }
 
-func (c *DbSystemServiceManager) GetCrdStatus(obj runtime.Object) (*ociv1beta1.OSOKStatus, error) {
+func (c *DbSystemServiceManager) GetCrdStatus(obj runtime.Object) (*shared.OSOKStatus, error) {
 	resource, err := c.convert(obj)
 	if err != nil {
 		return nil, err
@@ -213,8 +214,8 @@ func (c *DbSystemServiceManager) GetCrdStatus(obj runtime.Object) (*ociv1beta1.O
 	return &resource.Status.OsokStatus, nil
 }
 
-func (c *DbSystemServiceManager) convert(obj runtime.Object) (*ociv1beta1.MySqlDbSystem, error) {
-	copy, err := obj.(*ociv1beta1.MySqlDbSystem)
+func (c *DbSystemServiceManager) convert(obj runtime.Object) (*mysqlv1beta1.MySqlDbSystem, error) {
+	copy, err := obj.(*mysqlv1beta1.MySqlDbSystem)
 	if !err {
 		return nil, fmt.Errorf("failed to convert the type assertion for MySqlDbSystem")
 	}

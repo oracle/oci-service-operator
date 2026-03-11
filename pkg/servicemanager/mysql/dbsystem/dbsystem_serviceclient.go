@@ -10,14 +10,15 @@ import (
 	"fmt"
 	"github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/oracle/oci-go-sdk/v65/mysql"
-	ociv1beta1 "github.com/oracle/oci-service-operator/api/v1beta1"
+	mysqlv1beta1 "github.com/oracle/oci-service-operator/api/mysql/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
+	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/oracle/oci-service-operator/pkg/util"
 	"reflect"
 )
 
 type DbSystemServiceClient interface {
-	CreateDbSystem(ctx context.Context, dbSystem ociv1beta1.MySqlDbSystem) (mysql.DbSystem, error)
+	CreateDbSystem(ctx context.Context, dbSystem mysqlv1beta1.MySqlDbSystem) (mysql.DbSystem, error)
 
 	UpdateMySqlDbSystem(ctx context.Context, request mysql.UpdateDbSystemRequest) (mysql.UpdateDbSystemResponse, error)
 
@@ -49,7 +50,7 @@ func (c *DbSystemServiceManager) getOCIClient() MySQLDbSystemClientInterface {
 	return getDbSystemClient(c.Provider)
 }
 
-func (c *DbSystemServiceManager) CreateDbSystem(ctx context.Context, dbSystem ociv1beta1.MySqlDbSystem, adminUname string, adminPwd string) (mysql.CreateDbSystemResponse, error) {
+func (c *DbSystemServiceManager) CreateDbSystem(ctx context.Context, dbSystem mysqlv1beta1.MySqlDbSystem, adminUname string, adminPwd string) (mysql.CreateDbSystemResponse, error) {
 
 	dbSystemClient := c.getOCIClient()
 
@@ -106,7 +107,7 @@ func (c *DbSystemServiceManager) CreateDbSystem(ctx context.Context, dbSystem oc
 
 }
 
-func (c *DbSystemServiceManager) GetMySqlDbSystemOcid(ctx context.Context, dbSystem ociv1beta1.MySqlDbSystem) (*ociv1beta1.OCID, error) {
+func (c *DbSystemServiceManager) GetMySqlDbSystemOcid(ctx context.Context, dbSystem mysqlv1beta1.MySqlDbSystem) (*shared.OCID, error) {
 	dbSystemClient := c.getOCIClient()
 
 	listDbSystemRequest := mysql.ListDbSystemsRequest{
@@ -128,7 +129,7 @@ func (c *DbSystemServiceManager) GetMySqlDbSystemOcid(ctx context.Context, dbSys
 
 			c.Log.DebugLog(fmt.Sprintf("MySql DbSystem %s exists.", dbSystem.Spec.DisplayName))
 
-			return (*ociv1beta1.OCID)(listDbSystemResponse.Items[0].Id), nil
+			return (*shared.OCID)(listDbSystemResponse.Items[0].Id), nil
 		}
 	}
 	c.Log.DebugLog(fmt.Sprintf("MySql DbSystem %s does not exist.", dbSystem.Spec.DisplayName))
@@ -154,7 +155,7 @@ func (c *DbSystemServiceManager) GetMySqlDbSystemOcid(ctx context.Context, dbSys
 	//	if status == "ACTIVE" || status == "CREATING" || status == "UPDATING" || status == "INACTIVE" {
 	//		c.Log.DebugLog(fmt.Sprintf("MySql DbSystem %s exists.", dbSystem.Spec.DisplayName))
 	//
-	//		return (*ociv1beta1.OCID)(getDbsystem.Id), nil
+	//		return (*shared.OCID)(getDbsystem.Id), nil
 	//	}
 	//}
 	//c.Log.DebugLog(fmt.Sprintf("MySql DbSystem %s does not exist.", dbSystem.Spec.DisplayName))
@@ -166,7 +167,7 @@ func (c *DbSystemServiceManager) DeleteMySqlDbSystem() (string, error) {
 }
 
 // GetMySqlDbSystem Sync the MySqlDbSystem details
-func (c *DbSystemServiceManager) GetMySqlDbSystem(ctx context.Context, dbSystemId ociv1beta1.OCID, retryPolicy *common.RetryPolicy) (*mysql.DbSystem, error) {
+func (c *DbSystemServiceManager) GetMySqlDbSystem(ctx context.Context, dbSystemId shared.OCID, retryPolicy *common.RetryPolicy) (*mysql.DbSystem, error) {
 
 	dbClient := c.getOCIClient()
 
@@ -186,7 +187,7 @@ func (c *DbSystemServiceManager) GetMySqlDbSystem(ctx context.Context, dbSystemI
 	return &response.DbSystem, nil
 }
 
-func (c *DbSystemServiceManager) UpdateMySqlDbSystem(ctx context.Context, dbSystem *ociv1beta1.MySqlDbSystem) error {
+func (c *DbSystemServiceManager) UpdateMySqlDbSystem(ctx context.Context, dbSystem *mysqlv1beta1.MySqlDbSystem) error {
 
 	dbClient := c.getOCIClient()
 
