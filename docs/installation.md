@@ -170,7 +170,7 @@ Note: the <OCI_SERVICE_1>, <OCI_SERVICE_2> represents in the OCI Services like "
 The OCI Service Operator for Kubernetes is packaged as Operator Lifecycle Manager (OLM) Bundle for making it easy to install in Kubernetes Clusters. The bundle can be downloaded as docker image using below command.
 
 ```bash
-$ docker pull iad.ocir.io/oracle/oci-service-operator-bundle:1.1.1
+$ docker pull iad.ocir.io/oracle/oci-service-operator-bundle:<VERSION>
 ```
 
 The OSOK OLM bundle contains all the required details like CRDs, RBACs, Configmaps, deployment which will install the OSOK in the kubernetes cluster.
@@ -179,18 +179,18 @@ The OSOK OLM bundle contains all the required details like CRDs, RBACs, Configma
 Install the OSOK Operator in the Kubernetes Cluster using below command
 
 ```bash
-$ operator-sdk run bundle iad.ocir.io/oracle/oci-service-operator-bundle:1.1.1
+$ operator-sdk run bundle iad.ocir.io/oracle/oci-service-operator-bundle:<VERSION>
 ```
 
 Upgrade the OSOK Operator in the Kubernetes Cluster using below command
 
 ```bash
-$ operator-sdk run bundle-upgrade iad.ocir.io/oracle/oci-service-operator-bundle:1.1.1
+$ operator-sdk run bundle-upgrade iad.ocir.io/oracle/oci-service-operator-bundle:<VERSION>
 ```
 
 The successful installation of the OSOK in your cluster will provide the final message as below:
 ```bash
-INFO[0040] OLM has successfully installed "oci-service-operator.v1.1.1"
+INFO[0040] OLM has successfully installed "oci-service-operator.v<VERSION>"
 ```
 
 ### Undeploy OSOK
@@ -205,5 +205,5 @@ $ operator-sdk cleanup oci-service-operator
 
 The OCI Service Operator for Kubernetes by default mounts the `/etc/pki` host path so that the host
 certificate chains can be used for TLS verification. The default container image is built on top of
-Oracle Linux 7 which has the default CA trust bundle under `/etc/pki`. A new container image can be
+Oracle Linux 9 which has the default CA trust bundle under `/etc/pki`. A new container image can be
 created with a custom CA trust bundle.
