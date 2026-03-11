@@ -47,6 +47,9 @@ OPERATOR_SDK_VERSION ?= v1.37.0
 IMG ?= $(IMAGE_TAG_BASE):$(VERSION)
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd:generateEmbeddedObjectMeta=true,allowDangerousTypes=true"
+GENERATED_CRD_ARTIFACTS ?= config/crd/bases/*.yaml
+GENERATED_CSV_ARTIFACTS ?= config/manifests/bases/*.clusterserviceversion.yaml
+GENERATED_BUNDLE_ARTIFACTS ?= bundle/manifests/*.yaml bundle/metadata/annotations.yaml bundle.Dockerfile
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
@@ -76,12 +79,13 @@ help: ## Display this help.
 ##@ Development
 
 manifests: controller-gen ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
+	rm -f $(GENERATED_CRD_ARTIFACTS)
 	$(CONTROLLER_GEN) $(CRD_OPTIONS) paths="./api/..." output:crd:artifacts:config=config/crd/bases
 	$(CONTROLLER_GEN) rbac:roleName=manager-role paths="./controllers/..." output:rbac:artifacts:config=config/rbac
 	$(CONTROLLER_GEN) webhook paths="./api/..." output:webhook:artifacts:config=config/webhook
 
 generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
-	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./api/..."
+	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
 fmt: ## Run go fmt against code.
 	go fmt ./...
@@ -89,13 +93,23 @@ fmt: ## Run go fmt against code.
 vet: ## Run go vet against code.
 	go vet ./...
 
+BASH ?= /bin/bash
 ENVTEST_ASSETS_DIR ?= $(shell pwd)/testbin/$(shell uname)
 ENVTEST_HOME ?= $(shell pwd)/.envtest-home
+ENVTEST_CACHE_DIR ?= $(ENVTEST_HOME)/.cache
+ENVTEST_CONFIG_DIR ?= $(ENVTEST_HOME)/.config
 ENVTEST_K8S_VERSION ?= 1.28.0
+ENVTEST_ENV ?= HOME=$(ENVTEST_HOME) XDG_CACHE_HOME=$(ENVTEST_CACHE_DIR) XDG_CONFIG_HOME=$(ENVTEST_CONFIG_DIR)
+# setup-envtest is published from a separate tool module; pin the release-0.17-compatible revision.
+SETUP_ENVTEST_VERSION ?= v0.0.0-20240812162837-9557f1031fe4
+SETUP_ENVTEST_GOFLAGS ?= $(strip $(filter-out -mod=%,$(GOFLAGS)) -mod=mod)
+SETUP_ENVTEST ?= $(ENVTEST_ENV) GOFLAGS="$(SETUP_ENVTEST_GOFLAGS)" go run sigs.k8s.io/controller-runtime/tools/setup-envtest@$(SETUP_ENVTEST_VERSION) use $(ENVTEST_K8S_VERSION) -p path --bin-dir $(ENVTEST_ASSETS_DIR) --use-deprecated-gcs=false
 
 test: manifests generate fmt vet ## Run tests.
-	mkdir -p $(ENVTEST_ASSETS_DIR) $(ENVTEST_HOME)/.cache $(ENVTEST_HOME)/.config
-	HOME=$(ENVTEST_HOME) XDG_CACHE_HOME=$(ENVTEST_HOME)/.cache XDG_CONFIG_HOME=$(ENVTEST_HOME)/.config KUBEBUILDER_ASSETS="$$(HOME=$(ENVTEST_HOME) XDG_CACHE_HOME=$(ENVTEST_HOME)/.cache XDG_CONFIG_HOME=$(ENVTEST_HOME)/.config go run sigs.k8s.io/controller-runtime/tools/setup-envtest@latest use $(ENVTEST_K8S_VERSION) -p path --bin-dir $(ENVTEST_ASSETS_DIR))" go test ./... -coverprofile cover.out | tee unittests.cover
+	mkdir -p $(ENVTEST_ASSETS_DIR) $(ENVTEST_CACHE_DIR) $(ENVTEST_CONFIG_DIR)
+	$(BASH) -o pipefail -ec '\
+		envtest_assets="$$( $(SETUP_ENVTEST) )"; \
+		$(ENVTEST_ENV) KUBEBUILDER_ASSETS="$$envtest_assets" go test ./... -coverprofile cover.out | tee unittests.cover'
 	go tool cover -func cover.out | grep total | awk '{print substr($$3, 1, length($$3)-1)}' > unittests.percent
 
 functionaltest: ## Run functionaltest (placeholder — no functional tests yet).
@@ -104,8 +118,10 @@ functionaltest: ## Run functionaltest (placeholder — no functional tests yet).
 ##@ Build Service
 
 test-sample: fmt vet ## Run tests.
-	mkdir -p $(ENVTEST_ASSETS_DIR) $(ENVTEST_HOME)/.cache $(ENVTEST_HOME)/.config
-	HOME=$(ENVTEST_HOME) XDG_CACHE_HOME=$(ENVTEST_HOME)/.cache XDG_CONFIG_HOME=$(ENVTEST_HOME)/.config KUBEBUILDER_ASSETS="$$(HOME=$(ENVTEST_HOME) XDG_CACHE_HOME=$(ENVTEST_HOME)/.cache XDG_CONFIG_HOME=$(ENVTEST_HOME)/.config go run sigs.k8s.io/controller-runtime/tools/setup-envtest@latest use $(ENVTEST_K8S_VERSION) -p path --bin-dir $(ENVTEST_ASSETS_DIR))" go test -v ./... -coverprofile cover.out -args -ginkgo.v
+	mkdir -p $(ENVTEST_ASSETS_DIR) $(ENVTEST_CACHE_DIR) $(ENVTEST_CONFIG_DIR)
+	$(BASH) -o pipefail -ec '\
+		envtest_assets="$$( $(SETUP_ENVTEST) )"; \
+		$(ENVTEST_ENV) KUBEBUILDER_ASSETS="$$envtest_assets" go test -v ./... -coverprofile cover.out -args -ginkgo.v'
 
 docker-build-sample: ## Build docker image with the manager.
 	docker build -t ${IMG} .
@@ -172,6 +188,7 @@ endef
 
 .PHONY: bundle
 bundle: manifests kustomize operator-sdk ## Generate bundle manifests and metadata, then validate generated files.
+	rm -f $(GENERATED_BUNDLE_ARTIFACTS)
 	$(OPERATOR_SDK) generate kustomize manifests -q --interactive=false --package $(BUNDLE_PACKAGE)
 	cd config/manager && $(KUSTOMIZE) edit set image controller=$(IMG)
 	$(KUSTOMIZE) build config/manifests | $(OPERATOR_SDK) generate bundle -q --overwrite --version $(VERSION) $(BUNDLE_METADATA_OPTS)
