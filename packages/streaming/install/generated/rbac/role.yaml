@@ -1,0 +1,32 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - streaming.oracle.com
+  resources:
+  - streams
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - streaming.oracle.com
+  resources:
+  - streams/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - streaming.oracle.com
+  resources:
+  - streams/status
+  verbs:
+  - get
+  - patch
+  - update

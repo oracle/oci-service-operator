@@ -50,6 +50,12 @@ CRD_OPTIONS ?= "crd:generateEmbeddedObjectMeta=true,allowDangerousTypes=true"
 GENERATED_CRD_ARTIFACTS ?= config/crd/bases/*.yaml
 GENERATED_CSV_ARTIFACTS ?= config/manifests/bases/*.clusterserviceversion.yaml
 GENERATED_BUNDLE_ARTIFACTS ?= bundle/manifests/*.yaml bundle/metadata/annotations.yaml bundle.Dockerfile
+GROUP ?= database
+PACKAGES_DIR ?= packages
+PACKAGE_DIR ?= $(PACKAGES_DIR)/$(GROUP)
+PACKAGE_OUTPUT_DIR ?= dist/packages/$(GROUP)
+PACKAGE_SCRIPT ?= hack/package.sh
+CONTROLLER_IMG ?=
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
@@ -139,6 +145,20 @@ docker-build: test bundle ## Build docker image with the manager and CRDs
 
 docker-push: ## Push docker image with the manager.
 	docker push ${IMG}
+
+##@ Packages
+
+packages: ## List configured package groups under packages/.
+	@find $(PACKAGES_DIR) -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | sort
+
+package-generate: controller-gen ## Generate CRDs and RBAC for GROUP into packages/<group>/install/generated.
+	@test -f "$(PACKAGE_DIR)/metadata.env" || { echo "Unknown GROUP '$(GROUP)'. See 'make packages'."; exit 1; }
+	@CONTROLLER_GEN="$(CONTROLLER_GEN)" "$(PACKAGE_SCRIPT)" generate "$(GROUP)"
+
+package-install: controller-gen kustomize ## Render a single install YAML for GROUP into dist/packages/<group>/install.yaml.
+	@test -f "$(PACKAGE_DIR)/metadata.env" || { echo "Unknown GROUP '$(GROUP)'. See 'make packages'."; exit 1; }
+	@CONTROLLER_GEN="$(CONTROLLER_GEN)" KUSTOMIZE="$(KUSTOMIZE)" CONTROLLER_IMG="$(CONTROLLER_IMG)" OUT="$(PACKAGE_OUTPUT_DIR)/install.yaml" \
+		"$(PACKAGE_SCRIPT)" render "$(GROUP)"
 
 ##@ Deployment
 
