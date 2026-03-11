@@ -25,7 +25,7 @@ import (
 
 // RenderTemplates returns an []string to render the templates
 //
-// Deprecated: will be removed in favor of Arguments
+// Deprecated: will be removed in favor of Arguments.
 func RenderTemplates(argTemplates []string, data interface{}) (args []string, err error) {
 	var t *template.Template
 
@@ -52,7 +52,7 @@ func RenderTemplates(argTemplates []string, data interface{}) (args []string, er
 // appending each argument that starts with `--` and contains an `=` to the
 // argument set (ignoring defaults), returning the rest.
 //
-// Deprecated: will be removed when RenderTemplates is removed
+// Deprecated: will be removed when RenderTemplates is removed.
 func SliceToArguments(sliceArgs []string, args *Arguments) []string {
 	var rest []string
 	for i, arg := range sliceArgs {
@@ -79,7 +79,7 @@ func SliceToArguments(sliceArgs []string, args *Arguments) []string {
 
 // TemplateDefaults specifies defaults to be used for joining structured arguments with templates.
 //
-// Deprecated: will be removed when RenderTemplates is removed
+// Deprecated: will be removed when RenderTemplates is removed.
 type TemplateDefaults struct {
 	// Data will be used to render the template.
 	Data interface{}
@@ -93,17 +93,17 @@ type TemplateDefaults struct {
 // TemplateAndArguments joins structured arguments and non-structured arguments, preserving existing
 // behavior.  Namely:
 //
-// 1. if templ has len > 0, it will be rendered against data
-// 2. the rendered template values that look like `--foo=bar` will be split
-//    and appended to args, the rest will be kept around
-// 3. the given args will be rendered as string form.  If a template is given,
-//    no defaults will be used, otherwise defaults will be used
-// 4. a result of [args..., rest...] will be returned
+//  1. if templ has len > 0, it will be rendered against data
+//  2. the rendered template values that look like `--foo=bar` will be split
+//     and appended to args, the rest will be kept around
+//  3. the given args will be rendered as string form.  If a template is given,
+//     no defaults will be used, otherwise defaults will be used
+//  4. a result of [args..., rest...] will be returned
 //
 // It returns the resulting rendered arguments, plus the arguments that were
 // not transferred to `args` during rendering.
 //
-// Deprecated: will be removed when RenderTemplates is removed
+// Deprecated: will be removed when RenderTemplates is removed.
 func TemplateAndArguments(templ []string, args *Arguments, data TemplateDefaults) (allArgs []string, nonFlagishArgs []string, err error) {
 	if len(templ) == 0 { // 3 & 4 (no template case)
 		return args.AsStrings(data.Defaults), nil, nil
@@ -168,7 +168,7 @@ type Arg interface {
 type userArg []string
 
 func (a userArg) Append(vals ...string) Arg {
-	return userArg(append(a, vals...))
+	return userArg(append(a, vals...)) //nolint:unconvert
 }
 func (a userArg) Get(_ []string) []string {
 	return []string(a)
@@ -177,7 +177,7 @@ func (a userArg) Get(_ []string) []string {
 type defaultedArg []string
 
 func (a defaultedArg) Append(vals ...string) Arg {
-	return defaultedArg(append(a, vals...))
+	return defaultedArg(append(a, vals...)) //nolint:unconvert
 }
 func (a defaultedArg) Get(defaults []string) []string {
 	res := append([]string(nil), defaults...)
@@ -215,9 +215,9 @@ var (
 // for passing to exec.Command and friends, making use of the given defaults
 // as indicated for each particular argument.
 //
-// - Any flag in defaults that's not in Arguments will be present in the output
-// - Any flag that's present in Arguments will be passed the corresponding
-//   defaults to do with as it will (ignore, append-to, suppress, etc).
+//   - Any flag in defaults that's not in Arguments will be present in the output
+//   - Any flag that's present in Arguments will be passed the corresponding
+//     defaults to do with as it will (ignore, append-to, suppress, etc).
 func (a *Arguments) AsStrings(defaults map[string][]string) []string {
 	// sort for deterministic ordering
 	keysInOrder := make([]string, 0, len(defaults)+len(a.values))
@@ -253,7 +253,7 @@ func (a *Arguments) AsStrings(defaults map[string][]string) []string {
 // Get returns the value of the given flag.  If nil,
 // it will not be passed in AsString, otherwise:
 //
-// len == 0 --> `--key`, len > 0 --> `--key=val1 --key=val2 ...`
+// len == 0 --> `--key`, len > 0 --> `--key=val1 --key=val2 ...`.
 func (a *Arguments) Get(key string) Arg {
 	if vals, ok := a.values[key]; ok {
 		return vals
@@ -323,9 +323,9 @@ func (a *Arguments) SetRaw(key string, val Arg) *Arguments {
 // used in conjunction with SetRaw.  For example, to set `--some-flag` to the
 // API server's CertDir, you could do:
 //
-//     server.Configure().SetRaw("--some-flag", FuncArg(func(defaults []string) []string {
-//         return []string{server.CertDir}
-//     }))
+//	server.Configure().SetRaw("--some-flag", FuncArg(func(defaults []string) []string {
+//	    return []string{server.CertDir}
+//	}))
 //
 // FuncArg ignores Appends; if you need to support appending values too, consider implementing
 // Arg directly.

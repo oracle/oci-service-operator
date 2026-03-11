@@ -16,7 +16,6 @@ import (
 
 	. "github.com/oracle/oci-service-operator/pkg/config"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
-	"github.com/oracle/oci-service-operator/pkg/servicemanager/servicemesh/utils/conversions"
 )
 
 type AuthConfigProvider struct {
@@ -77,7 +76,11 @@ func (configProvider *AuthConfigProvider) authValidate(ctx context.Context, prov
 		return false
 	}
 	if len(r.Items) > 0 {
-		configProvider.Log.InfoLog("The ADs obtained during validation", "ADs", conversions.DeRefString(r.Items[0].Name))
+		name := ""
+		if r.Items[0].Name != nil {
+			name = *r.Items[0].Name
+		}
+		configProvider.Log.InfoLog("The ADs obtained during validation", "ADs", name)
 	} else {
 		configProvider.Log.InfoLog("No ADs obtained during validation")
 	}

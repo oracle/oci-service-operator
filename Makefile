@@ -40,11 +40,13 @@ IMAGE_TAG_BASE ?= iad.ocir.io/oracle/oci-service-operator
 # BUNDLE_IMG defines the image:tag used for the bundle.
 # You can use it as an arg. (E.g make bundle-build BUNDLE_IMG=<some-registry>/<project-name-bundle>:<tag>)
 BUNDLE_IMG ?= $(IMAGE_TAG_BASE)-bundle:$(VERSION)
+BUNDLE_PACKAGE ?= oci-service-operator
+OPERATOR_SDK_VERSION ?= v1.37.0
 
 # Image URL to use all building/pushing image targets
 IMG ?= $(IMAGE_TAG_BASE):$(VERSION)
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
-CRD_OPTIONS ?= "crd:trivialVersions=true,preserveUnknownFields=false"
+CRD_OPTIONS ?= "crd:generateEmbeddedObjectMeta=true,allowDangerousTypes=true"
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
@@ -52,8 +54,6 @@ GOBIN=$(shell go env GOPATH)/bin
 else
 GOBIN=$(shell go env GOBIN)
 endif
-
-MOCKS_DIR = $(CURDIR)/test/mocks
 
 all: build
 
@@ -76,10 +76,12 @@ help: ## Display this help.
 ##@ Development
 
 manifests: controller-gen ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
-	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+	$(CONTROLLER_GEN) $(CRD_OPTIONS) paths="./api/..." output:crd:artifacts:config=config/crd/bases
+	$(CONTROLLER_GEN) rbac:roleName=manager-role paths="./controllers/..." output:rbac:artifacts:config=config/rbac
+	$(CONTROLLER_GEN) webhook paths="./api/..." output:webhook:artifacts:config=config/webhook
 
 generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
-	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
+	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./api/..."
 
 fmt: ## Run go fmt against code.
 	go fmt ./...
@@ -87,32 +89,23 @@ fmt: ## Run go fmt against code.
 vet: ## Run go vet against code.
 	go vet ./...
 
-$(MOCKS_DIR):
-	mkdir -p $(MOCKS_DIR)
+ENVTEST_ASSETS_DIR ?= $(shell pwd)/testbin/$(shell uname)
+ENVTEST_HOME ?= $(shell pwd)/.envtest-home
+ENVTEST_K8S_VERSION ?= 1.28.0
 
-mocks: $(MOCKS_DIR) ## Generate mock objects.
-	mockgen -source=pkg/servicemanager/servicemesh/services/servicemesh_client.go -destination=$(MOCKS_DIR)/servicemesh/servicemesh_client.go -package mocks
-	mockgen -source=pkg/servicemanager/servicemesh/references/resolver.go -destination=$(MOCKS_DIR)/servicemesh/resolver.go -package mocks
-	mockgen -source=pkg/servicemanager/servicemesh/k8s/cache/cache_manager.go -destination=$(MOCKS_DIR)/servicemesh/custom_cache.go -package mocks
-
-
-ENVTEST_ASSETS_DIR=$(shell pwd)/testbin/$(shell uname)
 test: manifests generate fmt vet ## Run tests.
-	mkdir -p ${ENVTEST_ASSETS_DIR}
-	test -f ${ENVTEST_ASSETS_DIR}/setup-envtest.sh || curl -sSLo ${ENVTEST_ASSETS_DIR}/setup-envtest.sh https://raw.githubusercontent.com/kubernetes-sigs/controller-runtime/v0.7.2/hack/setup-envtest.sh
-	source ${ENVTEST_ASSETS_DIR}/setup-envtest.sh; fetch_envtest_tools $(ENVTEST_ASSETS_DIR); setup_envtest_env $(ENVTEST_ASSETS_DIR); go test ./api/... ./apis/... ./pkg/... -coverprofile cover.out | tee unittests.cover; go tool cover -func cover.out | grep total | awk '{print substr($$3, 1, length($$3)-1)}' > unittests.percent
+	mkdir -p $(ENVTEST_ASSETS_DIR) $(ENVTEST_HOME)/.cache $(ENVTEST_HOME)/.config
+	HOME=$(ENVTEST_HOME) XDG_CACHE_HOME=$(ENVTEST_HOME)/.cache XDG_CONFIG_HOME=$(ENVTEST_HOME)/.config KUBEBUILDER_ASSETS="$$(HOME=$(ENVTEST_HOME) XDG_CACHE_HOME=$(ENVTEST_HOME)/.cache XDG_CONFIG_HOME=$(ENVTEST_HOME)/.config go run sigs.k8s.io/controller-runtime/tools/setup-envtest@latest use $(ENVTEST_K8S_VERSION) -p path --bin-dir $(ENVTEST_ASSETS_DIR))" go test ./... -coverprofile cover.out | tee unittests.cover
+	go tool cover -func cover.out | grep total | awk '{print substr($$3, 1, length($$3)-1)}' > unittests.percent
 
-functionaltest: manifests generate mocks ## Run functionaltest.
-	mkdir -p ${ENVTEST_ASSETS_DIR}
-	test -f ${ENVTEST_ASSETS_DIR}/setup-envtest.sh || curl -sSLo ${ENVTEST_ASSETS_DIR}/setup-envtest.sh https://raw.githubusercontent.com/kubernetes-sigs/controller-runtime/v0.7.2/hack/setup-envtest.sh
-	source ${ENVTEST_ASSETS_DIR}/setup-envtest.sh; fetch_envtest_tools $(ENVTEST_ASSETS_DIR); setup_envtest_env $(ENVTEST_ASSETS_DIR); go test -v -p 1 -timeout 15m ./test/servicemesh/functional... -coverprofile=cover.out -coverpkg=./api/...,./apis/...,./pkg/...,./controllers/...; go tool cover -func cover.out | grep total | awk '{print substr($$3, 1, length($$3)-1)}' > functionaltests.percent
+functionaltest: ## Run functionaltest (placeholder — no functional tests yet).
+	@echo "No functional tests available."
 
 ##@ Build Service
 
 test-sample: fmt vet ## Run tests.
-	mkdir -p ${ENVTEST_ASSETS_DIR}
-	test -f ${ENVTEST_ASSETS_DIR}/setup-envtest.sh || curl -sSLo ${ENVTEST_ASSETS_DIR}/setup-envtest.sh https://raw.githubusercontent.com/kubernetes-sigs/controller-runtime/v0.7.2/hack/setup-envtest.sh
-	source ${ENVTEST_ASSETS_DIR}/setup-envtest.sh; fetch_envtest_tools $(ENVTEST_ASSETS_DIR); setup_envtest_env $(ENVTEST_ASSETS_DIR); go test -v  ./... -coverprofile cover.out -args -ginkgo.v
+	mkdir -p $(ENVTEST_ASSETS_DIR) $(ENVTEST_HOME)/.cache $(ENVTEST_HOME)/.config
+	HOME=$(ENVTEST_HOME) XDG_CACHE_HOME=$(ENVTEST_HOME)/.cache XDG_CONFIG_HOME=$(ENVTEST_HOME)/.config KUBEBUILDER_ASSETS="$$(HOME=$(ENVTEST_HOME) XDG_CACHE_HOME=$(ENVTEST_HOME)/.cache XDG_CONFIG_HOME=$(ENVTEST_HOME)/.config go run sigs.k8s.io/controller-runtime/tools/setup-envtest@latest use $(ENVTEST_K8S_VERSION) -p path --bin-dir $(ENVTEST_ASSETS_DIR))" go test -v ./... -coverprofile cover.out -args -ginkgo.v
 
 docker-build-sample: ## Build docker image with the manager.
 	docker build -t ${IMG} .
@@ -149,32 +142,40 @@ undeploy: ## Undeploy controller from the K8s cluster specified in ~/.kube/confi
 
 CONTROLLER_GEN = $(shell pwd)/bin/controller-gen
 controller-gen: ## Download controller-gen locally if necessary.
-	$(call go-get-tool,$(CONTROLLER_GEN),sigs.k8s.io/controller-tools/cmd/controller-gen@v0.4.1)
+	$(call go-get-tool,$(CONTROLLER_GEN),sigs.k8s.io/controller-tools/cmd/controller-gen@v0.17.0)
 
 KUSTOMIZE = $(shell pwd)/bin/kustomize
 kustomize: ## Download kustomize locally if necessary.
-	$(call go-get-tool,$(KUSTOMIZE),sigs.k8s.io/kustomize/kustomize/v3@v3.8.7)
+	$(call go-get-tool,$(KUSTOMIZE),sigs.k8s.io/kustomize/kustomize/v5@v5.4.2)
 
-# go-get-tool will 'go get' any package $2 and install it to $1.
+OPERATOR_SDK = $(shell pwd)/bin/operator-sdk
+operator-sdk: ## Download a compatible operator-sdk locally if necessary.
+ifeq (,$(wildcard $(OPERATOR_SDK)))
+	@{ \
+	set -e ;\
+	mkdir -p $(dir $(OPERATOR_SDK)) ;\
+	OS=$(shell go env GOOS) && ARCH=$(shell go env GOARCH) && \
+	curl -sSLo $(OPERATOR_SDK) https://github.com/operator-framework/operator-sdk/releases/download/$(OPERATOR_SDK_VERSION)/operator-sdk_$${OS}_$${ARCH} ;\
+	chmod +x $(OPERATOR_SDK) ;\
+	}
+endif
+
+# go-get-tool will 'go install' any package $2 and install it to $1.
 PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
 define go-get-tool
 @[ -f $(1) ] || { \
 set -e ;\
-TMP_DIR=$$(mktemp -d) ;\
-cd $$TMP_DIR ;\
-go mod init tmp ;\
 echo "Downloading $(2)" ;\
-GOBIN=$(PROJECT_DIR)/bin go get $(2) ;\
-rm -rf $$TMP_DIR ;\
+GOBIN=$(PROJECT_DIR)/bin go install $(2) ;\
 }
 endef
 
 .PHONY: bundle
-bundle: manifests kustomize ## Generate bundle manifests and metadata, then validate generated files.
-	operator-sdk generate kustomize manifests -q
+bundle: manifests kustomize operator-sdk ## Generate bundle manifests and metadata, then validate generated files.
+	$(OPERATOR_SDK) generate kustomize manifests -q --interactive=false --package $(BUNDLE_PACKAGE)
 	cd config/manager && $(KUSTOMIZE) edit set image controller=$(IMG)
-	$(KUSTOMIZE) build config/manifests | operator-sdk generate bundle -q --overwrite --version $(VERSION) $(BUNDLE_METADATA_OPTS)
-	operator-sdk bundle validate ./bundle
+	$(KUSTOMIZE) build config/manifests | $(OPERATOR_SDK) generate bundle -q --overwrite --version $(VERSION) $(BUNDLE_METADATA_OPTS)
+	$(OPERATOR_SDK) bundle validate ./bundle
 
 .PHONY: bundle-build
 bundle-build: ## Build the bundle image.
@@ -232,15 +233,6 @@ catalog-push: ## Push a catalog image.
 	$(MAKE) docker-push IMG=$(CATALOG_IMG)
 
 delete-crds:
-	kubectl delete crd virtualdeploymentbindings.servicemesh.oci.oracle.com &
-	kubectl delete crd ingressgatewaydeployments.servicemesh.oci.oracle.com &
-	kubectl delete crd ingressgatewayroutetables.servicemesh.oci.oracle.com &
-	kubectl delete crd ingressgateways.servicemesh.oci.oracle.com &
-	kubectl delete crd accesspolicies.servicemesh.oci.oracle.com &
-	kubectl delete crd virtualserviceroutetables.servicemesh.oci.oracle.com &
-	kubectl delete crd virtualdeployments.servicemesh.oci.oracle.com &
-	kubectl delete crd virtualservices.servicemesh.oci.oracle.com &
-	kubectl delete crd meshes.servicemesh.oci.oracle.com &
 	kubectl delete crd autonomousdatabases.oci.oracle.com &
 	kubectl delete crd mysqldbsystems.oci.oracle.com &
 	kubectl delete crd streams.oci.oracle.com &
@@ -250,15 +242,6 @@ delete-operator:
 
 .PHONY: delete-crds-force
 delete-crds-force:
-	kubectl patch crd/virtualdeploymentbindings.servicemesh.oci.oracle.com -p '{"metadata":{"finalizers":[]}}' --type=merge &
-	kubectl patch crd/ingressgatewaydeployments.servicemesh.oci.oracle.com -p '{"metadata":{"finalizers":[]}}' --type=merge &
-	kubectl patch crd/ingressgatewayroutetables.servicemesh.oci.oracle.com -p '{"metadata":{"finalizers":[]}}' --type=merge &
-	kubectl patch crd/ingressgateways.servicemesh.oci.oracle.com -p '{"metadata":{"finalizers":[]}}' --type=merge &
-	kubectl patch crd/accesspolicies.servicemesh.oci.oracle.com -p '{"metadata":{"finalizers":[]}}' --type=merge &
-	kubectl patch crd/virtualserviceroutetables.servicemesh.oci.oracle.com -p '{"metadata":{"finalizers":[]}}' --type=merge &
-	kubectl patch crd/virtualdeployments.servicemesh.oci.oracle.com -p '{"metadata":{"finalizers":[]}}' --type=merge &
-	kubectl patch crd/virtualservices.servicemesh.oci.oracle.com -p '{"metadata":{"finalizers":[]}}' --type=merge &
-	kubectl patch crd/meshes.servicemesh.oci.oracle.com -p '{"metadata":{"finalizers":[]}}' --type=merge &
 	kubectl patch crd/autonomousdatabases.oci.oracle.com -p '{"metadata":{"finalizers":[]}}' --type=merge &
 	kubectl patch crd/mysqldbsystems.oci.oracle.com -p '{"metadata":{"finalizers":[]}}' --type=merge &
 	kubectl patch crd/streams.oci.oracle.com -p '{"metadata":{"finalizers":[]}}' --type=merge

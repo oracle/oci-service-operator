@@ -122,7 +122,7 @@ func (r *BaseReconciler) GetStatus(obj client.Object) (*v1beta1.OSOKStatus, erro
 func (r *BaseReconciler) ReconcileResource(ctx context.Context, obj client.Object, req ctrl.Request) (ctrl.Result, error) {
 	ctx = metrics.AddFixedLogMapEntries(ctx, req.Name, req.Namespace)
 
-	oldObj := obj.DeepCopyObject()
+	oldObj := obj.DeepCopyObject().(client.Object)
 	OSOKResponse, err := r.OSOKServiceManager.CreateOrUpdate(ctx, obj, req)
 	if err != nil {
 		r.Log.ErrorLogWithFixedMessage(ctx, err, "Create Or Update failed in the Service Manager with error")

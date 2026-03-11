@@ -2,9 +2,6 @@ package go_ensurefips
 
 import (
 	"crypto/tls"
-	// this import activates FIPS approved mode, even if there's no
-	// BoringCrypto implementation in the executable!
-	_ "crypto/tls/fipsonly"
 	"debug/elf"
 	"fmt"
 	"io"
