@@ -7,6 +7,7 @@ package dbsystem_test
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"testing"
 	"time"
@@ -19,6 +20,8 @@ import (
 	. "github.com/oracle/oci-service-operator/pkg/servicemanager/mysql/dbsystem"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/stretchr/testify/assert"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -327,4 +330,453 @@ func TestDbSystemRetryNextDuration(t *testing.T) {
 	nextDuration := ExportGetDbSystemNextDuration(mgr)
 
 	assert.Equal(t, 1*time.Minute, nextDuration(common.OCIOperationResponse{AttemptNumber: 1}))
+}
+
+func TestCreateOrUpdate_BindExistingDbSystem_NothingToUpdate(t *testing.T) {
+	mgr := newTestManager(&fakeCredentialClient{
+		createSecretFn: func(_ context.Context, _, _ string, _ map[string]string, _ map[string][]byte) (bool, error) {
+			return true, nil
+		},
+	})
+
+	dbSystemID := "ocid1.mysqldbsystem.oc1..xxx"
+	ExportSetClientForTest(mgr, &mockOciDbSystemClient{
+		getFn: func(_ context.Context, _ mysql.GetDbSystemRequest) (mysql.GetDbSystemResponse, error) {
+			return mysql.GetDbSystemResponse{
+				DbSystem: makeActiveDbSystem(dbSystemID, "test-dbsystem"),
+			}, nil
+		},
+	})
+
+	dbSystem := &mysqlv1beta1.MySqlDbSystem{}
+	dbSystem.Name = "test-dbsystem"
+	dbSystem.Namespace = "default"
+	dbSystem.Spec.MySqlDbSystemId = shared.OCID(dbSystemID)
+	dbSystem.Spec.DisplayName = "test-dbsystem"
+
+	resp, err := mgr.CreateOrUpdate(context.Background(), dbSystem, ctrl.Request{})
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.Equal(t, shared.OCID(dbSystemID), dbSystem.Status.OsokStatus.Ocid)
+}
+
+func TestCreateOrUpdate_BindExistingDbSystem_UpdateNeeded(t *testing.T) {
+	mgr := newTestManager(&fakeCredentialClient{
+		createSecretFn: func(_ context.Context, _, _ string, _ map[string]string, _ map[string][]byte) (bool, error) {
+			return true, nil
+		},
+	})
+
+	dbSystemID := "ocid1.mysqldbsystem.oc1..yyy"
+	updateCalled := false
+	ExportSetClientForTest(mgr, &mockOciDbSystemClient{
+		getFn: func(_ context.Context, _ mysql.GetDbSystemRequest) (mysql.GetDbSystemResponse, error) {
+			return mysql.GetDbSystemResponse{
+				DbSystem: makeActiveDbSystem(dbSystemID, "old-name"),
+			}, nil
+		},
+		updateFn: func(_ context.Context, _ mysql.UpdateDbSystemRequest) (mysql.UpdateDbSystemResponse, error) {
+			updateCalled = true
+			return mysql.UpdateDbSystemResponse{}, nil
+		},
+	})
+
+	dbSystem := &mysqlv1beta1.MySqlDbSystem{}
+	dbSystem.Name = "test-dbsystem"
+	dbSystem.Namespace = "default"
+	dbSystem.Spec.MySqlDbSystemId = shared.OCID(dbSystemID)
+	dbSystem.Spec.DisplayName = "new-name"
+
+	resp, err := mgr.CreateOrUpdate(context.Background(), dbSystem, ctrl.Request{})
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.True(t, updateCalled)
+}
+
+func TestCreateOrUpdate_OciGetError(t *testing.T) {
+	mgr := newTestManager(&fakeCredentialClient{})
+
+	ExportSetClientForTest(mgr, &mockOciDbSystemClient{
+		getFn: func(_ context.Context, _ mysql.GetDbSystemRequest) (mysql.GetDbSystemResponse, error) {
+			return mysql.GetDbSystemResponse{}, errors.New("OCI API error")
+		},
+	})
+
+	dbSystem := &mysqlv1beta1.MySqlDbSystem{}
+	dbSystem.Spec.MySqlDbSystemId = "ocid1.mysqldbsystem.oc1..xxx"
+
+	resp, err := mgr.CreateOrUpdate(context.Background(), dbSystem, ctrl.Request{})
+	assert.Error(t, err)
+	assert.False(t, resp.IsSuccessful)
+}
+
+func TestCreateOrUpdate_FindExisting(t *testing.T) {
+	mgr := newTestManager(&fakeCredentialClient{
+		createSecretFn: func(_ context.Context, _, _ string, _ map[string]string, _ map[string][]byte) (bool, error) {
+			return true, nil
+		},
+	})
+
+	dbSystemID := "ocid1.mysqldbsystem.oc1..found"
+	ExportSetClientForTest(mgr, &mockOciDbSystemClient{
+		listFn: func(_ context.Context, _ mysql.ListDbSystemsRequest) (mysql.ListDbSystemsResponse, error) {
+			return mysql.ListDbSystemsResponse{
+				Items: []mysql.DbSystemSummary{
+					{
+						Id:             common.String(dbSystemID),
+						LifecycleState: mysql.DbSystemLifecycleStateActive,
+					},
+				},
+			}, nil
+		},
+		getFn: func(_ context.Context, _ mysql.GetDbSystemRequest) (mysql.GetDbSystemResponse, error) {
+			return mysql.GetDbSystemResponse{
+				DbSystem: makeActiveDbSystem(dbSystemID, "my-dbsystem"),
+			}, nil
+		},
+	})
+
+	dbSystem := &mysqlv1beta1.MySqlDbSystem{}
+	dbSystem.Name = "my-dbsystem"
+	dbSystem.Namespace = "default"
+	dbSystem.Spec.DisplayName = "my-dbsystem"
+	dbSystem.Spec.CompartmentId = "ocid1.compartment.oc1..xxx"
+
+	resp, err := mgr.CreateOrUpdate(context.Background(), dbSystem, ctrl.Request{})
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.Equal(t, shared.OCID(dbSystemID), dbSystem.Status.OsokStatus.Ocid)
+}
+
+func TestCreateOrUpdate_ListError(t *testing.T) {
+	mgr := newTestManager(&fakeCredentialClient{})
+
+	ExportSetClientForTest(mgr, &mockOciDbSystemClient{
+		listFn: func(_ context.Context, _ mysql.ListDbSystemsRequest) (mysql.ListDbSystemsResponse, error) {
+			return mysql.ListDbSystemsResponse{}, errors.New("list API error")
+		},
+	})
+
+	dbSystem := &mysqlv1beta1.MySqlDbSystem{}
+	dbSystem.Spec.DisplayName = "my-dbsystem"
+	dbSystem.Spec.CompartmentId = "ocid1.compartment.oc1..xxx"
+
+	resp, err := mgr.CreateOrUpdate(context.Background(), dbSystem, ctrl.Request{})
+	assert.Error(t, err)
+	assert.False(t, resp.IsSuccessful)
+}
+
+func TestCreateOrUpdate_CreateNew(t *testing.T) {
+	newDbSystemID := "ocid1.mysqldbsystem.oc1..new"
+	credClient := &fakeCredentialClient{
+		getSecretFn: func(_ context.Context, name, _ string) (map[string][]byte, error) {
+			if name == "admin-username-secret" {
+				return map[string][]byte{"username": []byte("admin")}, nil
+			}
+			return map[string][]byte{"password": []byte("secret123")}, nil
+		},
+		createSecretFn: func(_ context.Context, _, _ string, _ map[string]string, _ map[string][]byte) (bool, error) {
+			return true, nil
+		},
+	}
+	mgr := newTestManager(credClient)
+
+	createCalled := false
+	ExportSetClientForTest(mgr, &mockOciDbSystemClient{
+		listFn: func(_ context.Context, _ mysql.ListDbSystemsRequest) (mysql.ListDbSystemsResponse, error) {
+			return mysql.ListDbSystemsResponse{}, nil
+		},
+		createFn: func(_ context.Context, _ mysql.CreateDbSystemRequest) (mysql.CreateDbSystemResponse, error) {
+			createCalled = true
+			return mysql.CreateDbSystemResponse{
+				DbSystem: mysql.DbSystem{Id: common.String(newDbSystemID)},
+			}, nil
+		},
+		getFn: func(_ context.Context, _ mysql.GetDbSystemRequest) (mysql.GetDbSystemResponse, error) {
+			return mysql.GetDbSystemResponse{
+				DbSystem: makeActiveDbSystem(newDbSystemID, "new-dbsystem"),
+			}, nil
+		},
+	})
+
+	dbSystem := &mysqlv1beta1.MySqlDbSystem{}
+	dbSystem.Name = "new-dbsystem"
+	dbSystem.Namespace = "default"
+	dbSystem.Spec.DisplayName = "new-dbsystem"
+	dbSystem.Spec.CompartmentId = "ocid1.compartment.oc1..xxx"
+	dbSystem.Spec.AdminUsername.Secret.SecretName = "admin-username-secret"
+	dbSystem.Spec.AdminPassword.Secret.SecretName = "admin-password-secret"
+
+	resp, err := mgr.CreateOrUpdate(context.Background(), dbSystem, ctrl.Request{NamespacedName: types.NamespacedName{Namespace: "default"}})
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.True(t, createCalled)
+	assert.Equal(t, shared.OCID(newDbSystemID), dbSystem.Status.OsokStatus.Ocid)
+}
+
+func TestCreateOrUpdate_CreateNew_MissingUsernameKey(t *testing.T) {
+	credClient := &fakeCredentialClient{
+		getSecretFn: func(_ context.Context, _, _ string) (map[string][]byte, error) {
+			return map[string][]byte{"wrongkey": []byte("value")}, nil
+		},
+	}
+	mgr := newTestManager(credClient)
+
+	ExportSetClientForTest(mgr, &mockOciDbSystemClient{
+		listFn: func(_ context.Context, _ mysql.ListDbSystemsRequest) (mysql.ListDbSystemsResponse, error) {
+			return mysql.ListDbSystemsResponse{}, nil
+		},
+	})
+
+	dbSystem := &mysqlv1beta1.MySqlDbSystem{}
+	dbSystem.Spec.DisplayName = "my-dbsystem"
+	dbSystem.Spec.CompartmentId = "ocid1.compartment.oc1..xxx"
+	dbSystem.Spec.AdminUsername.Secret.SecretName = "admin-username-secret"
+	dbSystem.Spec.AdminPassword.Secret.SecretName = "admin-password-secret"
+
+	resp, err := mgr.CreateOrUpdate(context.Background(), dbSystem, ctrl.Request{})
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "username key")
+	assert.False(t, resp.IsSuccessful)
+}
+
+func TestCreateOrUpdate_CreateNew_GetSecretError(t *testing.T) {
+	credClient := &fakeCredentialClient{
+		getSecretFn: func(_ context.Context, _, _ string) (map[string][]byte, error) {
+			return nil, errors.New("secret not found")
+		},
+	}
+	mgr := newTestManager(credClient)
+
+	ExportSetClientForTest(mgr, &mockOciDbSystemClient{
+		listFn: func(_ context.Context, _ mysql.ListDbSystemsRequest) (mysql.ListDbSystemsResponse, error) {
+			return mysql.ListDbSystemsResponse{}, nil
+		},
+	})
+
+	dbSystem := &mysqlv1beta1.MySqlDbSystem{}
+	dbSystem.Spec.DisplayName = "my-dbsystem"
+	dbSystem.Spec.CompartmentId = "ocid1.compartment.oc1..xxx"
+	dbSystem.Spec.AdminUsername.Secret.SecretName = "admin-username-secret"
+	dbSystem.Spec.AdminPassword.Secret.SecretName = "admin-password-secret"
+
+	resp, err := mgr.CreateOrUpdate(context.Background(), dbSystem, ctrl.Request{})
+	assert.Error(t, err)
+	assert.False(t, resp.IsSuccessful)
+}
+
+func TestCreateOrUpdate_LifecycleFailed(t *testing.T) {
+	dbSystemID := "ocid1.mysqldbsystem.oc1..failed"
+	failedDBSystem := makeActiveDbSystem(dbSystemID, "failed-dbsystem")
+	failedDBSystem.LifecycleState = mysql.DbSystemLifecycleStateFailed
+
+	mgr := newTestManager(&fakeCredentialClient{})
+	ExportSetClientForTest(mgr, &mockOciDbSystemClient{
+		getFn: func(_ context.Context, _ mysql.GetDbSystemRequest) (mysql.GetDbSystemResponse, error) {
+			return mysql.GetDbSystemResponse{DbSystem: failedDBSystem}, nil
+		},
+	})
+
+	dbSystem := &mysqlv1beta1.MySqlDbSystem{}
+	dbSystem.Name = "failed-dbsystem"
+	dbSystem.Namespace = "default"
+	dbSystem.Spec.MySqlDbSystemId = shared.OCID(dbSystemID)
+
+	resp, err := mgr.CreateOrUpdate(context.Background(), dbSystem, ctrl.Request{})
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.Equal(t, shared.OCID(dbSystemID), dbSystem.Status.OsokStatus.Ocid)
+}
+
+func TestDeleteMySqlDbSystem(t *testing.T) {
+	mgr := newTestManager(&fakeCredentialClient{})
+
+	ocid, err := mgr.DeleteMySqlDbSystem()
+	assert.NoError(t, err)
+	assert.Equal(t, "", ocid)
+}
+
+func TestCreateOrUpdate_CreateNew_WithOptionalFields(t *testing.T) {
+	newDbSystemID := "ocid1.mysqldbsystem.oc1..opts"
+	credClient := &fakeCredentialClient{
+		getSecretFn: func(_ context.Context, name, _ string) (map[string][]byte, error) {
+			if name == "admin-username-secret" {
+				return map[string][]byte{"username": []byte("admin")}, nil
+			}
+			return map[string][]byte{"password": []byte("secret123")}, nil
+		},
+		createSecretFn: func(_ context.Context, _, _ string, _ map[string]string, _ map[string][]byte) (bool, error) {
+			return true, nil
+		},
+	}
+	mgr := newTestManager(credClient)
+
+	var capturedReq mysql.CreateDbSystemRequest
+	ExportSetClientForTest(mgr, &mockOciDbSystemClient{
+		listFn: func(_ context.Context, _ mysql.ListDbSystemsRequest) (mysql.ListDbSystemsResponse, error) {
+			return mysql.ListDbSystemsResponse{}, nil
+		},
+		createFn: func(_ context.Context, req mysql.CreateDbSystemRequest) (mysql.CreateDbSystemResponse, error) {
+			capturedReq = req
+			return mysql.CreateDbSystemResponse{
+				DbSystem: mysql.DbSystem{Id: common.String(newDbSystemID)},
+			}, nil
+		},
+		getFn: func(_ context.Context, _ mysql.GetDbSystemRequest) (mysql.GetDbSystemResponse, error) {
+			return mysql.GetDbSystemResponse{
+				DbSystem: makeActiveDbSystem(newDbSystemID, "opts-dbsystem"),
+			}, nil
+		},
+	})
+
+	dbSystem := &mysqlv1beta1.MySqlDbSystem{}
+	dbSystem.Name = "opts-dbsystem"
+	dbSystem.Namespace = "default"
+	dbSystem.Spec.DisplayName = "opts-dbsystem"
+	dbSystem.Spec.CompartmentId = "ocid1.compartment.oc1..xxx"
+	dbSystem.Spec.AdminUsername.Secret.SecretName = "admin-username-secret"
+	dbSystem.Spec.AdminPassword.Secret.SecretName = "admin-password-secret"
+	dbSystem.Spec.Description = "test description"
+	dbSystem.Spec.Port = 3307
+	dbSystem.Spec.PortX = 33070
+	dbSystem.Spec.ConfigurationId.Id = "ocid1.mysqlconfiguration.oc1..cfg"
+	dbSystem.Spec.IpAddress = "10.0.0.5"
+	dbSystem.Spec.HostnameLabel = "mysql-host"
+	dbSystem.Spec.MysqlVersion = "8.0"
+
+	resp, err := mgr.CreateOrUpdate(context.Background(), dbSystem, ctrl.Request{NamespacedName: types.NamespacedName{Namespace: "default"}})
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+
+	d := capturedReq.CreateDbSystemDetails
+	assert.Equal(t, common.String("test description"), d.Description)
+	assert.Equal(t, common.Int(3307), d.Port)
+	assert.Equal(t, common.Int(33070), d.PortX)
+	assert.Equal(t, common.String("ocid1.mysqlconfiguration.oc1..cfg"), d.ConfigurationId)
+	assert.Equal(t, common.String("10.0.0.5"), d.IpAddress)
+	assert.Equal(t, common.String("mysql-host"), d.HostnameLabel)
+	assert.Equal(t, common.String("8.0"), d.MysqlVersion)
+}
+
+func TestCreateOrUpdate_BindExisting_DescriptionAndConfigIDChange(t *testing.T) {
+	dbSystemID := "ocid1.mysqldbsystem.oc1..descfg"
+	var capturedUpdate mysql.UpdateDbSystemRequest
+
+	mgr := newTestManager(&fakeCredentialClient{
+		createSecretFn: func(_ context.Context, _, _ string, _ map[string]string, _ map[string][]byte) (bool, error) {
+			return true, nil
+		},
+	})
+	ExportSetClientForTest(mgr, &mockOciDbSystemClient{
+		getFn: func(_ context.Context, _ mysql.GetDbSystemRequest) (mysql.GetDbSystemResponse, error) {
+			return mysql.GetDbSystemResponse{
+				DbSystem: makeActiveDbSystem(dbSystemID, "test-dbsystem"),
+			}, nil
+		},
+		updateFn: func(_ context.Context, req mysql.UpdateDbSystemRequest) (mysql.UpdateDbSystemResponse, error) {
+			capturedUpdate = req
+			return mysql.UpdateDbSystemResponse{}, nil
+		},
+	})
+
+	dbSystem := &mysqlv1beta1.MySqlDbSystem{}
+	dbSystem.Name = "test-dbsystem"
+	dbSystem.Namespace = "default"
+	dbSystem.Spec.MySqlDbSystemId = shared.OCID(dbSystemID)
+	dbSystem.Spec.DisplayName = "test-dbsystem"
+	dbSystem.Spec.Description = "new description"
+	dbSystem.Spec.ConfigurationId.Id = "ocid1.mysqlconfiguration.oc1..new"
+
+	resp, err := mgr.CreateOrUpdate(context.Background(), dbSystem, ctrl.Request{})
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.Equal(t, common.String("new description"), capturedUpdate.UpdateDbSystemDetails.Description)
+	assert.Equal(t, common.String("ocid1.mysqlconfiguration.oc1..new"), capturedUpdate.UpdateDbSystemDetails.ConfigurationId)
+}
+
+func TestCreateOrUpdate_BindExisting_DefinedTagsChange(t *testing.T) {
+	dbSystemID := "ocid1.mysqldbsystem.oc1..deftag"
+	updateCalled := false
+
+	mgr := newTestManager(&fakeCredentialClient{
+		createSecretFn: func(_ context.Context, _, _ string, _ map[string]string, _ map[string][]byte) (bool, error) {
+			return true, nil
+		},
+	})
+	ExportSetClientForTest(mgr, &mockOciDbSystemClient{
+		getFn: func(_ context.Context, _ mysql.GetDbSystemRequest) (mysql.GetDbSystemResponse, error) {
+			return mysql.GetDbSystemResponse{
+				DbSystem: makeActiveDbSystem(dbSystemID, "test-dbsystem"),
+			}, nil
+		},
+		updateFn: func(_ context.Context, _ mysql.UpdateDbSystemRequest) (mysql.UpdateDbSystemResponse, error) {
+			updateCalled = true
+			return mysql.UpdateDbSystemResponse{}, nil
+		},
+	})
+
+	dbSystem := &mysqlv1beta1.MySqlDbSystem{}
+	dbSystem.Name = "test-dbsystem"
+	dbSystem.Namespace = "default"
+	dbSystem.Spec.MySqlDbSystemId = shared.OCID(dbSystemID)
+	dbSystem.Spec.DisplayName = "test-dbsystem"
+	dbSystem.Spec.DefinedTags = map[string]shared.MapValue{
+		"ns1": {"key1": "val1"},
+	}
+
+	resp, err := mgr.CreateOrUpdate(context.Background(), dbSystem, ctrl.Request{})
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.True(t, updateCalled)
+}
+
+func TestCreateOrUpdate_LifecycleProvisioning(t *testing.T) {
+	dbSystemID := "ocid1.mysqldbsystem.oc1..prov"
+	creatingDBSystem := makeActiveDbSystem(dbSystemID, "prov-dbsystem")
+	creatingDBSystem.LifecycleState = mysql.DbSystemLifecycleStateCreating
+
+	mgr := newTestManager(&fakeCredentialClient{})
+	ExportSetClientForTest(mgr, &mockOciDbSystemClient{
+		getFn: func(_ context.Context, _ mysql.GetDbSystemRequest) (mysql.GetDbSystemResponse, error) {
+			return mysql.GetDbSystemResponse{DbSystem: creatingDBSystem}, nil
+		},
+	})
+
+	dbSystem := &mysqlv1beta1.MySqlDbSystem{}
+	dbSystem.Name = "prov-dbsystem"
+	dbSystem.Namespace = "default"
+	dbSystem.Spec.MySqlDbSystemId = shared.OCID(dbSystemID)
+
+	resp, err := mgr.CreateOrUpdate(context.Background(), dbSystem, ctrl.Request{})
+	assert.Error(t, err)
+	assert.False(t, resp.IsSuccessful)
+}
+
+func TestCreateOrUpdate_BindExisting_CreatedAtNonNil(t *testing.T) {
+	dbSystemID := "ocid1.mysqldbsystem.oc1..creat"
+
+	mgr := newTestManager(&fakeCredentialClient{
+		createSecretFn: func(_ context.Context, _, _ string, _ map[string]string, _ map[string][]byte) (bool, error) {
+			return true, nil
+		},
+	})
+	ExportSetClientForTest(mgr, &mockOciDbSystemClient{
+		getFn: func(_ context.Context, _ mysql.GetDbSystemRequest) (mysql.GetDbSystemResponse, error) {
+			return mysql.GetDbSystemResponse{
+				DbSystem: makeActiveDbSystem(dbSystemID, "test-dbsystem"),
+			}, nil
+		},
+	})
+
+	dbSystem := &mysqlv1beta1.MySqlDbSystem{}
+	dbSystem.Name = "test-dbsystem"
+	dbSystem.Namespace = "default"
+	dbSystem.Spec.MySqlDbSystemId = shared.OCID(dbSystemID)
+	dbSystem.Spec.DisplayName = "test-dbsystem"
+	ts := metav1.NewTime(time.Now())
+	dbSystem.Status.OsokStatus.CreatedAt = &ts
+
+	resp, err := mgr.CreateOrUpdate(context.Background(), dbSystem, ctrl.Request{})
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
 }

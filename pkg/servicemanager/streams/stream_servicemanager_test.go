@@ -354,3 +354,400 @@ func TestDelete_StreamDeleted(t *testing.T) {
 	assert.True(t, done)
 	assert.True(t, credClient.deleteCalled)
 }
+
+func TestCreateOrUpdate_BindExistingByID(t *testing.T) {
+	credClient := &fakeCredentialClient{}
+	streamID := "ocid1.stream.oc1..xxx"
+	activeStream := makeActiveStream(streamID, "test-stream")
+
+	mockClient := &mockStreamAdminClient{
+		getStreamFn: func(_ context.Context, _ streaming.GetStreamRequest) (streaming.GetStreamResponse, error) {
+			return streaming.GetStreamResponse{Stream: activeStream}, nil
+		},
+	}
+	mgr := makeTestManager(credClient, mockClient)
+
+	stream := &streamingv1beta1.Stream{}
+	stream.Name = "test-stream"
+	stream.Namespace = "default"
+	stream.Spec.StreamId = shared.OCID(streamID)
+
+	resp, err := mgr.CreateOrUpdate(context.Background(), stream, ctrl.Request{})
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.True(t, credClient.createCalled)
+}
+
+func TestCreateOrUpdate_GetStreamFails(t *testing.T) {
+	credClient := &fakeCredentialClient{}
+	streamID := "ocid1.stream.oc1..xxx"
+
+	mockClient := &mockStreamAdminClient{
+		getStreamFn: func(_ context.Context, _ streaming.GetStreamRequest) (streaming.GetStreamResponse, error) {
+			return streaming.GetStreamResponse{}, errors.New("oci: unauthorized")
+		},
+	}
+	mgr := makeTestManager(credClient, mockClient)
+
+	stream := &streamingv1beta1.Stream{}
+	stream.Name = "test-stream"
+	stream.Namespace = "default"
+	stream.Spec.StreamId = shared.OCID(streamID)
+
+	resp, err := mgr.CreateOrUpdate(context.Background(), stream, ctrl.Request{})
+	assert.Error(t, err)
+	assert.False(t, resp.IsSuccessful)
+}
+
+func TestCreateOrUpdate_CreateNew(t *testing.T) {
+	credClient := &fakeCredentialClient{}
+	streamID := "ocid1.stream.oc1..new"
+	activeStream := makeActiveStream(streamID, "new-stream")
+
+	mockClient := &mockStreamAdminClient{
+		listStreamsFn: func(_ context.Context, _ streaming.ListStreamsRequest) (streaming.ListStreamsResponse, error) {
+			return streaming.ListStreamsResponse{Items: []streaming.StreamSummary{}}, nil
+		},
+		createStreamFn: func(_ context.Context, req streaming.CreateStreamRequest) (streaming.CreateStreamResponse, error) {
+			return streaming.CreateStreamResponse{
+				Stream: streaming.Stream{
+					Id:               common.String(streamID),
+					Name:             req.Name,
+					LifecycleState:   "CREATING",
+					MessagesEndpoint: common.String("https://cell-1.streaming.us-phoenix-1.oci.oraclecloud.com"),
+					StreamPoolId:     common.String("ocid1.streampool.oc1..xxx"),
+					Partitions:       common.Int(1),
+					RetentionInHours: common.Int(24),
+				},
+			}, nil
+		},
+		getStreamFn: func(_ context.Context, _ streaming.GetStreamRequest) (streaming.GetStreamResponse, error) {
+			return streaming.GetStreamResponse{Stream: activeStream}, nil
+		},
+	}
+	mgr := makeTestManager(credClient, mockClient)
+
+	stream := &streamingv1beta1.Stream{}
+	stream.Name = "new-stream"
+	stream.Namespace = "default"
+	stream.Spec.Name = "new-stream"
+	stream.Spec.Partitions = 1
+
+	resp, err := mgr.CreateOrUpdate(context.Background(), stream, ctrl.Request{})
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.True(t, credClient.createCalled)
+}
+
+func TestCreateOrUpdate_ListStreamsFails(t *testing.T) {
+	credClient := &fakeCredentialClient{}
+	mockClient := &mockStreamAdminClient{
+		listStreamsFn: func(_ context.Context, _ streaming.ListStreamsRequest) (streaming.ListStreamsResponse, error) {
+			return streaming.ListStreamsResponse{}, errors.New("oci: service unavailable")
+		},
+	}
+	mgr := makeTestManager(credClient, mockClient)
+
+	stream := &streamingv1beta1.Stream{}
+	stream.Name = "test-stream"
+	stream.Namespace = "default"
+	stream.Spec.Name = "test-stream"
+	stream.Spec.Partitions = 1
+
+	resp, err := mgr.CreateOrUpdate(context.Background(), stream, ctrl.Request{})
+	assert.Error(t, err)
+	assert.False(t, resp.IsSuccessful)
+}
+
+func TestCreateOrUpdate_ExistingByName(t *testing.T) {
+	credClient := &fakeCredentialClient{}
+	streamID := "ocid1.stream.oc1..found"
+	activeStream := makeActiveStream(streamID, "named-stream")
+
+	mockClient := &mockStreamAdminClient{
+		listStreamsFn: func(_ context.Context, _ streaming.ListStreamsRequest) (streaming.ListStreamsResponse, error) {
+			return streaming.ListStreamsResponse{
+				Items: []streaming.StreamSummary{
+					{Id: common.String(streamID), LifecycleState: "ACTIVE"},
+				},
+			}, nil
+		},
+		getStreamFn: func(_ context.Context, _ streaming.GetStreamRequest) (streaming.GetStreamResponse, error) {
+			return streaming.GetStreamResponse{Stream: activeStream}, nil
+		},
+	}
+	mgr := makeTestManager(credClient, mockClient)
+
+	stream := &streamingv1beta1.Stream{}
+	stream.Name = "named-stream"
+	stream.Namespace = "default"
+	stream.Spec.Name = "named-stream"
+	stream.Spec.Partitions = 1
+
+	resp, err := mgr.CreateOrUpdate(context.Background(), stream, ctrl.Request{})
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.True(t, credClient.createCalled)
+}
+
+func TestDelete_EmptyOcidPath(t *testing.T) {
+	credClient := &fakeCredentialClient{}
+	listCallCount := 0
+
+	mockClient := &mockStreamAdminClient{
+		listStreamsFn: func(_ context.Context, _ streaming.ListStreamsRequest) (streaming.ListStreamsResponse, error) {
+			listCallCount++
+			return streaming.ListStreamsResponse{Items: []streaming.StreamSummary{}}, nil
+		},
+	}
+	mgr := makeTestManager(credClient, mockClient)
+
+	stream := &streamingv1beta1.Stream{}
+	stream.Name = "test-stream"
+	stream.Namespace = "default"
+	stream.Spec.Name = "test-stream"
+
+	done, err := mgr.Delete(context.Background(), stream)
+	assert.NoError(t, err)
+	assert.True(t, done)
+	assert.Equal(t, 2, listCallCount)
+	assert.False(t, credClient.deleteCalled)
+}
+
+func TestDelete_StreamFoundByName(t *testing.T) {
+	credClient := &fakeCredentialClient{}
+	streamID := "ocid1.stream.oc1..named"
+
+	mockClient := &mockStreamAdminClient{
+		listStreamsFn: func(_ context.Context, _ streaming.ListStreamsRequest) (streaming.ListStreamsResponse, error) {
+			return streaming.ListStreamsResponse{
+				Items: []streaming.StreamSummary{
+					{Id: common.String(streamID), LifecycleState: "ACTIVE"},
+				},
+			}, nil
+		},
+		deleteStreamFn: func(_ context.Context, _ streaming.DeleteStreamRequest) (streaming.DeleteStreamResponse, error) {
+			return streaming.DeleteStreamResponse{}, nil
+		},
+		getStreamFn: func(_ context.Context, _ streaming.GetStreamRequest) (streaming.GetStreamResponse, error) {
+			return streaming.GetStreamResponse{
+				Stream: streaming.Stream{
+					Id:             common.String(streamID),
+					Name:           common.String("test-stream"),
+					LifecycleState: "DELETED",
+				},
+			}, nil
+		},
+	}
+	mgr := makeTestManager(credClient, mockClient)
+
+	stream := &streamingv1beta1.Stream{}
+	stream.Name = "test-stream"
+	stream.Namespace = "default"
+	stream.Spec.Name = "test-stream"
+
+	done, err := mgr.Delete(context.Background(), stream)
+	assert.NoError(t, err)
+	assert.True(t, done)
+	assert.True(t, credClient.deleteCalled)
+}
+
+func TestDelete_FailedStreamFound(t *testing.T) {
+	credClient := &fakeCredentialClient{}
+	streamID := "ocid1.stream.oc1..failed"
+	callCount := 0
+
+	mockClient := &mockStreamAdminClient{
+		listStreamsFn: func(_ context.Context, _ streaming.ListStreamsRequest) (streaming.ListStreamsResponse, error) {
+			callCount++
+			if callCount == 1 {
+				return streaming.ListStreamsResponse{Items: []streaming.StreamSummary{}}, nil
+			}
+			return streaming.ListStreamsResponse{
+				Items: []streaming.StreamSummary{
+					{Id: common.String(streamID), LifecycleState: "FAILED"},
+				},
+			}, nil
+		},
+		deleteStreamFn: func(_ context.Context, _ streaming.DeleteStreamRequest) (streaming.DeleteStreamResponse, error) {
+			return streaming.DeleteStreamResponse{}, nil
+		},
+		getStreamFn: func(_ context.Context, _ streaming.GetStreamRequest) (streaming.GetStreamResponse, error) {
+			return streaming.GetStreamResponse{
+				Stream: streaming.Stream{
+					Id:             common.String(streamID),
+					Name:           common.String("test-stream"),
+					LifecycleState: "DELETING",
+				},
+			}, nil
+		},
+	}
+	mgr := makeTestManager(credClient, mockClient)
+
+	stream := &streamingv1beta1.Stream{}
+	stream.Name = "test-stream"
+	stream.Namespace = "default"
+	stream.Spec.Name = "test-stream"
+
+	done, err := mgr.Delete(context.Background(), stream)
+	assert.NoError(t, err)
+	assert.True(t, done)
+}
+
+func TestCreateOrUpdate_UpdateViaFreeFormTags(t *testing.T) {
+	credClient := &fakeCredentialClient{}
+	streamID := "ocid1.stream.oc1..upd"
+	existingStream := makeActiveStream(streamID, "my-stream")
+	updateCalled := false
+
+	mockClient := &mockStreamAdminClient{
+		getStreamFn: func(_ context.Context, _ streaming.GetStreamRequest) (streaming.GetStreamResponse, error) {
+			return streaming.GetStreamResponse{Stream: existingStream}, nil
+		},
+		updateStreamFn: func(_ context.Context, req streaming.UpdateStreamRequest) (streaming.UpdateStreamResponse, error) {
+			updateCalled = true
+			assert.Equal(t, streamID, *req.StreamId)
+			return streaming.UpdateStreamResponse{}, nil
+		},
+	}
+	mgr := makeTestManager(credClient, mockClient)
+
+	stream := &streamingv1beta1.Stream{}
+	stream.Name = "my-stream"
+	stream.Namespace = "default"
+	stream.Spec.StreamId = shared.OCID(streamID)
+	stream.Spec.Partitions = 1
+	stream.Spec.RetentionInHours = 24
+	stream.Spec.FreeFormTags = map[string]string{"env": "prod"}
+
+	resp, err := mgr.CreateOrUpdate(context.Background(), stream, ctrl.Request{})
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.True(t, updateCalled)
+}
+
+func TestCreateOrUpdate_UpdateViaDefinedTags(t *testing.T) {
+	credClient := &fakeCredentialClient{}
+	streamID := "ocid1.stream.oc1..deftags"
+	existingStream := makeActiveStream(streamID, "tag-stream")
+	updateCalled := false
+
+	mockClient := &mockStreamAdminClient{
+		getStreamFn: func(_ context.Context, _ streaming.GetStreamRequest) (streaming.GetStreamResponse, error) {
+			return streaming.GetStreamResponse{Stream: existingStream}, nil
+		},
+		updateStreamFn: func(_ context.Context, _ streaming.UpdateStreamRequest) (streaming.UpdateStreamResponse, error) {
+			updateCalled = true
+			return streaming.UpdateStreamResponse{}, nil
+		},
+	}
+	mgr := makeTestManager(credClient, mockClient)
+
+	stream := &streamingv1beta1.Stream{}
+	stream.Name = "tag-stream"
+	stream.Namespace = "default"
+	stream.Spec.StreamId = shared.OCID(streamID)
+	stream.Spec.Partitions = 1
+	stream.Spec.RetentionInHours = 24
+	stream.Spec.DefinedTags = map[string]shared.MapValue{
+		"ns1": {"key1": "val1"},
+	}
+
+	resp, err := mgr.CreateOrUpdate(context.Background(), stream, ctrl.Request{})
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.True(t, updateCalled)
+}
+
+func TestUpdateStream_PartitionsMismatch(t *testing.T) {
+	streamID := "ocid1.stream.oc1..partmm"
+	existingStream := makeActiveStream(streamID, "my-stream")
+
+	mockClient := &mockStreamAdminClient{
+		getStreamFn: func(_ context.Context, _ streaming.GetStreamRequest) (streaming.GetStreamResponse, error) {
+			return streaming.GetStreamResponse{Stream: existingStream}, nil
+		},
+	}
+	mgr := makeTestManager(&fakeCredentialClient{}, mockClient)
+
+	stream := &streamingv1beta1.Stream{}
+	stream.Spec.StreamId = shared.OCID(streamID)
+	stream.Spec.Partitions = 3
+
+	err := mgr.UpdateStream(context.Background(), stream)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "Partitions can't be updated")
+}
+
+func TestUpdateStream_RetentionMismatch(t *testing.T) {
+	streamID := "ocid1.stream.oc1..retmm"
+	existingStream := makeActiveStream(streamID, "my-stream")
+
+	mockClient := &mockStreamAdminClient{
+		getStreamFn: func(_ context.Context, _ streaming.GetStreamRequest) (streaming.GetStreamResponse, error) {
+			return streaming.GetStreamResponse{Stream: existingStream}, nil
+		},
+	}
+	mgr := makeTestManager(&fakeCredentialClient{}, mockClient)
+
+	stream := &streamingv1beta1.Stream{}
+	stream.Spec.StreamId = shared.OCID(streamID)
+	stream.Spec.Partitions = 1
+	stream.Spec.RetentionInHours = 12
+
+	err := mgr.UpdateStream(context.Background(), stream)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "RetentionsHours can't be updated")
+}
+
+func TestGetStreamOcid_WithOptionalFilters(t *testing.T) {
+	credClient := &fakeCredentialClient{}
+	listCallCount := 0
+
+	mockClient := &mockStreamAdminClient{
+		listStreamsFn: func(_ context.Context, req streaming.ListStreamsRequest) (streaming.ListStreamsResponse, error) {
+			listCallCount++
+			if listCallCount == 1 {
+				assert.NotNil(t, req.StreamPoolId)
+				assert.NotNil(t, req.CompartmentId)
+			}
+			return streaming.ListStreamsResponse{Items: []streaming.StreamSummary{}}, nil
+		},
+	}
+	mgr := makeTestManager(credClient, mockClient)
+
+	stream := &streamingv1beta1.Stream{}
+	stream.Name = "filtered-stream"
+	stream.Namespace = "default"
+	stream.Spec.Name = "filtered-stream"
+	stream.Spec.StreamPoolId = "ocid1.streampool.oc1..filter"
+	stream.Spec.CompartmentId = "ocid1.compartment.oc1..filter"
+
+	done, err := mgr.Delete(context.Background(), stream)
+	assert.NoError(t, err)
+	assert.True(t, done)
+}
+
+func TestCreateOrUpdate_FailedLifecycle(t *testing.T) {
+	credClient := &fakeCredentialClient{}
+	streamID := "ocid1.stream.oc1..failed"
+	failedStream := makeActiveStream(streamID, "failed-stream")
+	failedStream.LifecycleState = "FAILED"
+
+	mockClient := &mockStreamAdminClient{
+		getStreamFn: func(_ context.Context, _ streaming.GetStreamRequest) (streaming.GetStreamResponse, error) {
+			return streaming.GetStreamResponse{Stream: failedStream}, nil
+		},
+	}
+	mgr := makeTestManager(credClient, mockClient)
+
+	stream := &streamingv1beta1.Stream{}
+	stream.Name = "failed-stream"
+	stream.Namespace = "default"
+	stream.Spec.StreamId = shared.OCID(streamID)
+
+	resp, err := mgr.CreateOrUpdate(context.Background(), stream, ctrl.Request{})
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.False(t, credClient.createCalled)
+}
