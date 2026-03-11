@@ -33,9 +33,6 @@ func (o Options) Validate() error {
 }
 
 func (o Options) ValidateUpgrade() error {
-	if err := o.Validate(); err != nil {
-		return err
-	}
 	if strings.TrimSpace(o.UpgradeFrom) == "" || strings.TrimSpace(o.UpgradeTo) == "" {
 		return fmt.Errorf("upgrade mode requires both upgrade-from and upgrade-to")
 	}

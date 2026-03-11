@@ -72,11 +72,17 @@ go run ./cmd/osok-schema-validator \
 
 The upgrade report:
 
-- Lists added/removed/changed fields for every tracked SDK struct.  
-- Indicates whether the current OSOK controllers already reference each field.  
+- Lists added/removed/changed fields for every tracked SDK struct.
+- Indicates whether the current OSOK controllers already reference each field.
 - Emits draft allowlist suggestions for new fields (mandatory fields default to `potential_gap`, optional fields to `future_consideration`).
 
 Both versions must be present in your module cache (`$GOMODCACHE/github.com/oracle/oci-go-sdk/v65@<version>`).
+
+### API Spec Coverage
+
+Every run now also compares the OSOK CRD specs against the curated SDK structs. Missing SDK fields are grouped by spec (`AutonomousDatabases`, `MySqlDbSystem`, `Stream`) and annotated with the allowlist status so you can see which fields are intentionally omitted versus genuine gaps. The summary appears after the controller coverage in table/markdown formats and under the `api` key in JSON output.
+
+You can reuse the existing allowlist to classify API omissions (for example, `intentionally_omitted`, `future_consideration`, `potential_gap`).
 
 ## Maklib Integration
 

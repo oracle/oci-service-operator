@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/oracle/oci-service-operator/pkg/validator/allowlist"
+	"github.com/oracle/oci-service-operator/pkg/validator/apispec"
 	"github.com/oracle/oci-service-operator/pkg/validator/config"
 	"github.com/oracle/oci-service-operator/pkg/validator/diff"
 	"github.com/oracle/oci-service-operator/pkg/validator/provider"
@@ -50,6 +51,11 @@ func Run(options config.Options) (diff.Report, string, error) {
 
 	result := diff.BuildReport(sdkStructs, providerAnalysis, allow)
 
+	apiReport, err := apispec.BuildReport(sdkStructs, allow)
+	if err != nil {
+		return diff.Report{}, "", err
+	}
+
 	if options.WantsBaselineWrite() {
 		if err := writeBaseline(options.WriteBaseline, result); err != nil {
 			return diff.Report{}, "", err
@@ -64,7 +70,7 @@ func Run(options config.Options) (diff.Report, string, error) {
 		result = reportpkg.WithBaseline(result, baseline)
 	}
 
-	rendered, err := render(result, options)
+	rendered, err := render(result, apiReport, options)
 	if err != nil {
 		return diff.Report{}, "", err
 	}
@@ -76,14 +82,51 @@ func Run(options config.Options) (diff.Report, string, error) {
 	return result, rendered, nil
 }
 
-func render(rep diff.Report, options config.Options) (string, error) {
+func render(controller diff.Report, api apispec.Report, options config.Options) (string, error) {
 	format := strings.TrimSpace(strings.ToLower(options.Format))
 	if format == "" {
 		format = string(reportpkg.FormatTable)
 	}
 	switch reportpkg.Format(format) {
-	case reportpkg.FormatTable, reportpkg.FormatMarkdown, reportpkg.FormatJSON:
-		return reportpkg.Render(rep, reportpkg.Format(format))
+	case reportpkg.FormatTable, reportpkg.FormatMarkdown:
+		controllerText, err := reportpkg.Render(controller, reportpkg.Format(format))
+		if err != nil {
+			return "", err
+		}
+		apiText, err := apispec.Render(api, reportpkg.Format(format))
+		if err != nil {
+			return "", err
+		}
+		controllerText = strings.TrimRight(controllerText, "\n")
+		apiText = strings.TrimRight(apiText, "\n")
+		switch {
+		case controllerText == "" && apiText == "":
+			return "\n", nil
+		case controllerText == "":
+			return apiText + "\n", nil
+		case apiText == "":
+			return controllerText + "\n", nil
+		default:
+			return controllerText + "\n\n" + apiText + "\n", nil
+		}
+	case reportpkg.FormatJSON:
+		controllerJSON, err := reportpkg.Render(controller, reportpkg.FormatJSON)
+		if err != nil {
+			return "", err
+		}
+		apiJSON, err := apispec.Render(api, reportpkg.FormatJSON)
+		if err != nil {
+			return "", err
+		}
+		combined := map[string]json.RawMessage{
+			"controller": json.RawMessage(strings.TrimSpace(controllerJSON)),
+			"api":        json.RawMessage(strings.TrimSpace(apiJSON)),
+		}
+		buf, err := json.MarshalIndent(combined, "", "  ")
+		if err != nil {
+			return "", err
+		}
+		return string(buf) + "\n", nil
 	default:
 		return "", fmt.Errorf("unknown format %q", options.Format)
 	}
