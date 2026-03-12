@@ -2,6 +2,17 @@
 
 This document describes the tooling under `pkg/validator` and how to use the `osok-schema-validator` CLI to keep the OSOK controllers and CRDs aligned with the Oracle Cloud Infrastructure (OCI) Go SDK.
 
+## Purpose
+
+`osok-schema-validator` compares OSOK controller/API usage against curated OCI SDK structs so schema and controller coverage regressions are visible early.
+
+## Objectives
+
+- **Provider-driven**: Traverse OSOK service manager/controller code to discover OCI request struct usage.
+- **OCI SDK aware**: Reflect over tracked SDK targets and capture metadata such as mandatory flags and read-only/deprecated semantics.
+- **Allowlist support**: Classify intentional gaps via `validator_allowlist.yaml`.
+- **CI-friendly**: Emit deterministic output and useful exit codes for build gates.
+
 ## What the Validator Covers
 
 The CLI produces three kinds of analysis:
@@ -63,6 +74,32 @@ Common flags:
 | `--write-baseline` | Save the current controller report as JSON. |
 | `--fail-on-new-actionable` | Exit non-zero if new controller gaps appear vs. baseline. |
 | `--upgrade-from` / `--upgrade-to` | Run the SDK upgrade diff instead of coverage reports. |
+
+## Package Layout
+
+```text
+pkg/validator/
+  allowlist/   # YAML loader for field classifications
+  config/      # Option parsing/validation
+  provider/    # AST-based analyzer for OSOK provider usage
+  sdk/         # Reflection/source-based OCI SDK analyzer
+  diff/        # Comparison engine and coverage stats
+  report/      # Renderers for table/markdown/json
+  apispec/     # CRD spec vs SDK coverage mapping
+  upgrade/     # SDK version diff analysis
+  run.go       # Main coverage orchestration
+  upgrade_runner.go
+cmd/osok-schema-validator/
+  main.go      # CLI wrapper
+```
+
+## Makefile Integration
+
+Run validator directly through the repo `Makefile`:
+
+```bash
+make schema-validator
+```
 
 ## Interpreting the Controller Report
 
