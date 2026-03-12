@@ -35,7 +35,6 @@ source "${metadata_file}"
 set +a
 
 : "${CRD_PATHS:?missing CRD_PATHS in ${metadata_file}}"
-: "${RBAC_PATHS:?missing RBAC_PATHS in ${metadata_file}}"
 : "${DEFAULT_CONTROLLER_IMAGE:?missing DEFAULT_CONTROLLER_IMAGE in ${metadata_file}}"
 
 controller_gen=${CONTROLLER_GEN:-controller-gen}
@@ -72,7 +71,7 @@ write_crd_kustomization() {
 
 generate_assets() {
 	rm -rf "${generated_dir}"
-	mkdir -p "${generated_crd_bases_dir}" "${generated_rbac_dir}"
+	mkdir -p "${generated_crd_bases_dir}"
 
 	"${controller_gen}" \
 		"${crd_options}" \
@@ -81,6 +80,11 @@ generate_assets() {
 
 	write_crd_kustomization "${generated_crd_dir}/kustomization.yaml"
 
+	if [[ -z "${RBAC_PATHS:-}" ]]; then
+		return
+	fi
+
+	mkdir -p "${generated_rbac_dir}"
 	"${controller_gen}" \
 		rbac:roleName=manager-role \
 		paths="${RBAC_PATHS}" \

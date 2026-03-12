@@ -1,0 +1,21 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- bases/containerengine.oracle.com_addonoptions.yaml
+- bases/containerengine.oracle.com_addons.yaml
+- bases/containerengine.oracle.com_clusterendpointconfigs.yaml
+- bases/containerengine.oracle.com_clustermigratetonativevcnstatuses.yaml
+- bases/containerengine.oracle.com_clusteroptions.yaml
+- bases/containerengine.oracle.com_clusters.yaml
+- bases/containerengine.oracle.com_credentialrotationstatuses.yaml
+- bases/containerengine.oracle.com_kubeconfigs.yaml
+- bases/containerengine.oracle.com_nodepooloptions.yaml
+- bases/containerengine.oracle.com_nodepools.yaml
+- bases/containerengine.oracle.com_nodes.yaml
+- bases/containerengine.oracle.com_podshapes.yaml
+- bases/containerengine.oracle.com_virtualnodepools.yaml
+- bases/containerengine.oracle.com_virtualnodes.yaml
+- bases/containerengine.oracle.com_workloadmappings.yaml
+- bases/containerengine.oracle.com_workrequesterrors.yaml
+- bases/containerengine.oracle.com_workrequestlogs.yaml
+- bases/containerengine.oracle.com_workrequests.yaml

@@ -55,6 +55,11 @@ PACKAGE_DIR ?= $(PACKAGES_DIR)/$(GROUP)
 PACKAGE_OUTPUT_DIR ?= dist/packages/$(GROUP)
 PACKAGE_SCRIPT ?= hack/package.sh
 CONTROLLER_IMG ?=
+API_GENERATOR_CONFIG ?= internal/generator/config/services.yaml
+API_GENERATOR_OUTPUT_ROOT ?= .
+API_SERVICE ?=
+API_ALL ?=
+API_OVERWRITE ?=
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
@@ -91,6 +96,33 @@ manifests: controller-gen ## Generate WebhookConfiguration, ClusterRole and Cust
 
 generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
+
+api-generate: ## Run the OSOK API generator. Use API_SERVICE=<service> or API_ALL=true. Set API_OVERWRITE=true to replace existing generator-owned outputs.
+	@set -e; \
+	is_true() { case "$$1" in 1|true|TRUE|yes|YES) return 0 ;; *) return 1 ;; esac; }; \
+	if [ -n "$(API_SERVICE)" ] && is_true "$(API_ALL)"; then \
+		echo "Use either API_SERVICE=<service> or API_ALL=true, not both."; \
+		exit 1; \
+	fi; \
+	if [ -z "$(API_SERVICE)" ] && ! is_true "$(API_ALL)"; then \
+		echo "Set API_SERVICE=<service> or API_ALL=true."; \
+		exit 1; \
+	fi; \
+	args="--config $(API_GENERATOR_CONFIG) --output-root $(API_GENERATOR_OUTPUT_ROOT)"; \
+	if [ -n "$(API_SERVICE)" ]; then \
+		args="$$args --service $(API_SERVICE)"; \
+	else \
+		args="$$args --all"; \
+	fi; \
+	if is_true "$(API_OVERWRITE)"; then \
+		args="$$args --overwrite"; \
+	fi; \
+	go run ./cmd/osok-api-generator $$args
+
+api-refresh: ## Run the OSOK API generator, then refresh deepcopy and manifest artifacts.
+	@$(MAKE) api-generate API_SERVICE="$(API_SERVICE)" API_ALL="$(API_ALL)" API_OVERWRITE="$(API_OVERWRITE)" API_GENERATOR_CONFIG="$(API_GENERATOR_CONFIG)" API_GENERATOR_OUTPUT_ROOT="$(API_GENERATOR_OUTPUT_ROOT)"
+	@$(MAKE) generate
+	@$(MAKE) manifests
 
 fmt: ## Run go fmt against code.
 	go fmt ./...
@@ -153,7 +185,7 @@ docker-push: ## Push docker image with the manager.
 packages: ## List configured package groups under packages/.
 	@find $(PACKAGES_DIR) -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | sort
 
-package-generate: controller-gen ## Generate CRDs and RBAC for GROUP into packages/<group>/install/generated.
+package-generate: controller-gen ## Generate CRDs and optional controller RBAC for GROUP into packages/<group>/install/generated.
 	@test -f "$(PACKAGE_DIR)/metadata.env" || { echo "Unknown GROUP '$(GROUP)'. See 'make packages'."; exit 1; }
 	@CONTROLLER_GEN="$(CONTROLLER_GEN)" "$(PACKAGE_SCRIPT)" generate "$(GROUP)"
 

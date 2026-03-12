@@ -145,14 +145,35 @@ github.com/onsi/gomega/matchers/support/goraph/util
 github.com/onsi/gomega/types
 # github.com/oracle/oci-go-sdk/v65 v65.61.1
 ## explicit; go 1.13
+github.com/oracle/oci-go-sdk/v65/artifacts
+github.com/oracle/oci-go-sdk/v65/certificates
+github.com/oracle/oci-go-sdk/v65/certificatesmanagement
 github.com/oracle/oci-go-sdk/v65/common
 github.com/oracle/oci-go-sdk/v65/common/auth
 github.com/oracle/oci-go-sdk/v65/common/utils
+github.com/oracle/oci-go-sdk/v65/containerengine
+github.com/oracle/oci-go-sdk/v65/core
 github.com/oracle/oci-go-sdk/v65/database
+github.com/oracle/oci-go-sdk/v65/dns
+github.com/oracle/oci-go-sdk/v65/events
+github.com/oracle/oci-go-sdk/v65/functions
 github.com/oracle/oci-go-sdk/v65/identity
+github.com/oracle/oci-go-sdk/v65/keymanagement
+github.com/oracle/oci-go-sdk/v65/limits
+github.com/oracle/oci-go-sdk/v65/loadbalancer
+github.com/oracle/oci-go-sdk/v65/logging
+github.com/oracle/oci-go-sdk/v65/monitoring
 github.com/oracle/oci-go-sdk/v65/mysql
+github.com/oracle/oci-go-sdk/v65/networkloadbalancer
+github.com/oracle/oci-go-sdk/v65/nosql
+github.com/oracle/oci-go-sdk/v65/objectstorage
+github.com/oracle/oci-go-sdk/v65/ons
+github.com/oracle/oci-go-sdk/v65/psql
+github.com/oracle/oci-go-sdk/v65/queue
+github.com/oracle/oci-go-sdk/v65/secrets
 github.com/oracle/oci-go-sdk/v65/streaming
 github.com/oracle/oci-go-sdk/v65/vault
+github.com/oracle/oci-go-sdk/v65/workrequests
 # github.com/pkg/errors v0.9.1
 ## explicit
 github.com/pkg/errors

@@ -1,0 +1,194 @@
+resources:
+  - sourceResource: DbSystem
+    kind: MySqlDbSystem
+    fileStem: mysqldbsystem
+    specComments:
+      - MySqlDbSystemSpec defines the desired state of MySqlDbSystem
+    helperTypes:
+      - name: CreateDbSystemSourceDetails
+        comments:
+          - CreateDbSystemSourceDetails Parameters detailing how to provision the initial data of the system.
+        fields:
+          - name: JsonData
+            type: string
+            tag: 'json:"jsonData,omitempty"'
+          - name: SourceType
+            type: string
+            tag: 'json:"sourceType,omitempty"'
+      - name: CreateMaintenanceDetails
+        comments:
+          - CreateMaintenanceDetails The Maintenance Policy for the DB System.
+        fields:
+          - name: WindowStartTime
+            type: string
+            tag: 'json:"windowStartTime,omitempty"'
+            comments:
+              - The start of the 2 hour maintenance window.
+              - 'This string is of the format: "{day-of-week} {time-of-day}".'
+              - '"{day-of-week}" is a case-insensitive string like "mon", "tue", &c.'
+              - '"{time-of-day}" is the "Time" portion of an RFC3339-formatted timestamp. Any second or sub-second time data will be truncated to zero.'
+      - name: CreateBackupPolicyDetails
+        fields:
+          - name: IsEnabled
+            type: bool
+            tag: 'json:"isEnabled,omitempty"'
+            comments:
+              - Specifies if automatic backups are enabled.
+          - name: WindowStartTime
+            type: string
+            tag: 'json:"windowStartTime,omitempty"'
+            comments:
+              - The start of a 30-minute window of time in which daily, automated backups occur.
+              - This should be in the format of the "Time" portion of an RFC3339-formatted timestamp. Any second or sub-second time data will be truncated to zero.
+              - At some point in the window, the system may incur a brief service disruption as the backup is performed.
+          - name: RetentionInDays
+            type: int
+            tag: 'json:"retentionInDays,omitempty"'
+            comments:
+              - Number of days to retain an automatic backup.
+          - type: shared.TagResources
+            tag: 'json:",inline,omitempty"'
+      - name: CreateConfigurationDetails
+        comments:
+          - CreateConfigurationDetails The Configuration for the DB System.
+        fields:
+          - name: Id
+            type: shared.OCID
+            tag: 'json:"id,omitempty"'
+            comments:
+              - Configuration Id
+    specFields:
+      - name: MySqlDbSystemId
+        type: shared.OCID
+        tag: 'json:"id,omitempty"'
+      - name: CompartmentId
+        type: shared.OCID
+        tag: 'json:"compartmentId,omitempty"'
+      - name: ShapeName
+        type: string
+        tag: 'json:"shapeName,omitempty"'
+      - name: SubnetId
+        type: shared.OCID
+        tag: 'json:"subnetId,omitempty"'
+      - name: AdminUsername
+        type: shared.UsernameSource
+        tag: 'json:"adminUsername,omitempty"'
+      - name: AdminPassword
+        type: shared.PasswordSource
+        tag: 'json:"adminPassword,omitempty"'
+      - name: DisplayName
+        type: string
+        tag: 'json:"displayName,omitempty"'
+      - name: Description
+        type: string
+        tag: 'json:"description,omitempty"'
+        markers:
+          - +kubebuilder:validation:MinLength:=1
+          - +kubebuilder:validation:MaxLength:=400
+      - name: AvailabilityDomain
+        type: string
+        tag: 'json:"availabilityDomain,omitempty"'
+      - name: FaultDomain
+        type: string
+        tag: 'json:"faultDomain,omitempty"'
+        markers:
+          - +kubebuilder:default:=FAULT-DOMAIN-1
+      - name: MysqlVersion
+        type: string
+        tag: 'json:"mysqlVersion,omitempty"'
+      - name: DataStorageSizeInGBs
+        type: int
+        tag: 'json:"dataStorageSizeInGBs,omitempty"'
+        markers:
+          - +kubebuilder:validation:Minimum:=50
+          - +kubebuilder:validation:Maximum:=65536
+      - name: HostnameLabel
+        type: string
+        tag: 'json:"hostnameLabel,omitempty"'
+      - name: IpAddress
+        type: string
+        tag: 'json:"ipAddress,omitempty"'
+      - name: IsHighlyAvailable
+        type: bool
+        tag: 'json:"isHighlyAvailable,omitempty"'
+      - name: Port
+        type: int
+        tag: 'json:"port,omitempty"'
+        markers:
+          - +kubebuilder:validation:Minimum:=1024
+          - +kubebuilder:validation:Maximum:=65535
+      - name: PortX
+        type: int
+        tag: 'json:"portX,omitempty"'
+        markers:
+          - +kubebuilder:validation:Minimum:=1024
+          - +kubebuilder:validation:Maximum:=65535
+      - name: ConfigurationId
+        type: CreateConfigurationDetails
+        tag: 'json:"configuration,omitempty"'
+      - name: BackupPolicy
+        type: CreateBackupPolicyDetails
+        tag: 'json:"backupPolicy,omitempty"'
+      - name: Source
+        type: CreateDbSystemSourceDetails
+        tag: 'json:"source,omitempty"'
+      - name: Maintenance
+        type: CreateMaintenanceDetails
+        tag: 'json:"maintenance,omitempty"'
+      - type: shared.TagResources
+        tag: 'json:",inline,omitempty"'
+    statusComments:
+      - MySqlDbSystemStatus defines the observed state of MySqlDbSystem
+    printColumns:
+      - name: DisplayName
+        type: string
+        jsonPath: .spec.displayName
+        priority: 1
+      - name: Status
+        type: string
+        jsonPath: .status.status.conditions[-1].type
+        description: status of the MySqlDbSystem
+        priority: 0
+      - name: Ocid
+        type: string
+        jsonPath: .status.status.ocid
+        description: Ocid of the MySqlDbSystem
+        priority: 1
+      - name: Age
+        type: date
+        jsonPath: .metadata.creationTimestamp
+        priority: 0
+    objectComments:
+      - MySqlDbSystem is the Schema for the mysqldbsystems API
+    listComments:
+      - MySqlDbSystemList contains a list of MySqlDbSystem
+    sample:
+      metadataName: mysqldbsystem-sample
+      body: |-
+        apiVersion: mysql.oracle.com/v1beta1
+        kind: MySqlDbSystem
+        metadata:
+          name: mysqldbsystem-sample
+        spec:
+          compartmentId: ocid1.compartment.oc1..aaaaaaaaXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+          displayName: SampleDB
+          shapeName: MySQL.VM.Standard.E3.1.8GB
+          subnetId: ocid1.subnet.oc1.<region-shot-code>.aaaaaaaaXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+          configuration:
+            id: ocid1.mysqlconfiguration.oc1..aaaaaaaaXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+          availabilityDomain: XXXX:US-ASHBURN-AD-1
+          isHighlyAvailable: false
+          adminUsername:
+            secret:
+              secretName: admin-secret
+          adminPassword:
+            secret:
+              secretName: admin-secret
+          description: Creating a Sample DB MySqlDbSystem using operators
+          dataStorageSizeInGBs: 50
+          port: 3306
+          portX: 33060
+package:
+  extraResources:
+    - ../../../config/rbac/mysqldbsystem_editor_role.yaml
+    - ../../../config/rbac/mysqldbsystem_viewer_role.yaml

@@ -1,0 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- bases/limits.oracle.com_limitdefinitions.yaml
+- bases/limits.oracle.com_limitvalues.yaml
+- bases/limits.oracle.com_quotas.yaml
+- bases/limits.oracle.com_resourceavailabilities.yaml
+- bases/limits.oracle.com_services.yaml
