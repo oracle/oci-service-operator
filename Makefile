@@ -3,9 +3,6 @@
 # Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
 #
 
--include makelib/*.mk
-
-
 # VERSION defines the project version for the bundle.
 # Update this value when you upgrade the version of your project.
 # To re-generate a bundle for another specific version without changing the standard setup, you can:
@@ -100,6 +97,9 @@ fmt: ## Run go fmt against code.
 
 vet: ## Run go vet against code.
 	go vet ./...
+
+schema-validator: ## Run OSOK schema validator against the current repo.
+	go run ./cmd/osok-schema-validator --provider-path .
 
 BASH ?= /bin/bash
 ENVTEST_ASSETS_DIR ?= $(shell pwd)/testbin/$(shell uname)
