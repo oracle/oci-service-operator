@@ -1,0 +1,209 @@
+# Source-of-truth service map for the OSOK API generator contract.
+schemaVersion: v1alpha1
+domain: oracle.com
+defaultVersion: v1beta1
+generatorEntrypoint: ./cmd/osok-api-generator
+
+packageProfiles:
+  controller-backed:
+    description: Existing groups with hand-maintained controllers wired into the shared manager.
+  crd-only:
+    description: Generated API groups that ship CRDs and samples before controller support exists.
+
+services:
+  - service: artifacts
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/artifacts
+    group: artifacts
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: crd-only
+
+  - service: certificates
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/certificates
+    group: certificates
+    version: v1beta1
+    phase: security-and-identity
+    packageProfile: crd-only
+
+  - service: certificatesmanagement
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/certificatesmanagement
+    group: certificatesmanagement
+    version: v1beta1
+    phase: security-and-identity
+    packageProfile: crd-only
+
+  - service: containerengine
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/containerengine
+    group: containerengine
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: crd-only
+
+  - service: core
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/core
+    group: core
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: crd-only
+
+  - service: database
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/database
+    group: database
+    version: v1beta1
+    phase: parity
+    sampleOrder: 10
+    packageProfile: controller-backed
+    parityFile: parity/database.yaml
+    compatibility:
+      existingKinds:
+        - AutonomousDatabases
+
+  - service: dns
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/dns
+    group: dns
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: crd-only
+
+  - service: events
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/events
+    group: events
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: crd-only
+
+  - service: functions
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/functions
+    group: functions
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: crd-only
+
+  - service: identity
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/identity
+    group: identity
+    version: v1beta1
+    phase: security-and-identity
+    packageProfile: crd-only
+
+  - service: keymanagement
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/keymanagement
+    group: keymanagement
+    version: v1beta1
+    phase: security-and-identity
+    packageProfile: crd-only
+
+  - service: limits
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/limits
+    group: limits
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: crd-only
+
+  - service: loadbalancer
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/loadbalancer
+    group: loadbalancer
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: crd-only
+
+  - service: logging
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/logging
+    group: logging
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: crd-only
+
+  - service: monitoring
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/monitoring
+    group: monitoring
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: crd-only
+
+  - service: mysql
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/mysql
+    group: mysql
+    version: v1beta1
+    phase: parity
+    sampleOrder: 30
+    packageProfile: controller-backed
+    parityFile: parity/mysql.yaml
+    compatibility:
+      existingKinds:
+        - MySqlDbSystem
+
+  - service: networkloadbalancer
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/networkloadbalancer
+    group: networkloadbalancer
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: crd-only
+
+  - service: nosql
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/nosql
+    group: nosql
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: crd-only
+
+  - service: objectstorage
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/objectstorage
+    group: objectstorage
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: crd-only
+
+  - service: ons
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/ons
+    group: ons
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: crd-only
+
+  - service: psql
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/psql
+    group: psql
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: crd-only
+
+  - service: queue
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/queue
+    group: queue
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: crd-only
+
+  - service: secrets
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/secrets
+    group: secrets
+    version: v1beta1
+    phase: security-and-identity
+    packageProfile: crd-only
+
+  - service: streaming
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/streaming
+    group: streaming
+    version: v1beta1
+    phase: parity
+    sampleOrder: 20
+    packageProfile: controller-backed
+    parityFile: parity/streaming.yaml
+    compatibility:
+      existingKinds:
+        - Stream
+
+  - service: vault
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/vault
+    group: vault
+    version: v1beta1
+    phase: security-and-identity
+    packageProfile: crd-only
+
+  - service: workrequests
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/workrequests
+    group: workrequests
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: crd-only

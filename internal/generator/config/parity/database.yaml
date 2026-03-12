@@ -1,0 +1,132 @@
+resources:
+  - sourceResource: AutonomousDatabase
+    kind: AutonomousDatabases
+    fileStem: autonomousdatabases
+    specComments:
+      - AutonomousDatabasesSpec defines the desired state of AutonomousDatabases
+    helperTypes:
+      - name: AutonomousDatabaseWallet
+        fields:
+          - name: WalletName
+            type: string
+            tag: 'json:"walletName,omitempty"'
+          - name: WalletPassword
+            type: shared.PasswordSource
+            tag: 'json:"walletPassword,omitempty"'
+    specFields:
+      - name: AdbId
+        type: shared.OCID
+        tag: 'json:"id,omitempty"'
+      - name: CompartmentId
+        type: shared.OCID
+        tag: 'json:"compartmentId,omitempty"'
+      - name: DisplayName
+        type: string
+        tag: 'json:"displayName,omitempty"'
+      - name: DbName
+        type: string
+        tag: 'json:"dbName,omitempty"'
+      - name: DbWorkload
+        type: string
+        tag: 'json:"dbWorkload,omitempty"'
+      - name: IsDedicated
+        type: bool
+        tag: 'json:"isDedicated,omitempty"'
+      - name: DbVersion
+        type: string
+        tag: 'json:"dbVersion,omitempty"'
+      - name: DataStorageSizeInTBs
+        type: int
+        tag: 'json:"dataStorageSizeInTBs,omitempty"'
+      - name: CpuCoreCount
+        type: int
+        tag: 'json:"cpuCoreCount,omitempty"'
+      - name: ComputeModel
+        type: string
+        tag: 'json:"computeModel,omitempty"'
+      - name: ComputeCount
+        type: float32
+        tag: 'json:"computeCount,omitempty"'
+      - name: AdminPassword
+        type: shared.PasswordSource
+        tag: 'json:"adminPassword,omitempty"'
+      - name: IsAutoScalingEnabled
+        type: bool
+        tag: 'json:"isAutoScalingEnabled,omitempty"'
+      - name: IsFreeTier
+        type: bool
+        tag: 'json:"isFreeTier,omitempty"'
+      - name: LicenseModel
+        type: string
+        tag: 'json:"licenseModel,omitempty"'
+      - type: shared.TagResources
+        tag: 'json:",inline"'
+      - name: Wallet
+        type: AutonomousDatabaseWallet
+        tag: 'json:"wallet,omitempty"'
+    statusComments:
+      - AutonomousDatabasesStatus defines the observed state of AutonomousDatabases
+    printColumns:
+      - name: DisplayName
+        type: string
+        jsonPath: .spec.displayName
+        priority: 1
+      - name: DbWorkload
+        type: string
+        jsonPath: .spec.dbWorkload
+        priority: 0
+      - name: Status
+        type: string
+        jsonPath: .status.status.conditions[-1].type
+        description: status of the AutonomousDatabases
+        priority: 0
+      - name: Ocid
+        type: string
+        jsonPath: .status.status.ocid
+        description: Ocid of the AutonomousDatabases
+        priority: 1
+      - name: Age
+        type: date
+        jsonPath: .metadata.creationTimestamp
+        priority: 0
+    objectComments:
+      - AutonomousDatabases is the Schema for the autonomousdatabases API
+    listComments:
+      - AutonomousDatabasesList contains a list of AutonomousDatabases
+    sample:
+      metadataName: autonomousdatabases-sample
+      body: |-
+        apiVersion: database.oracle.com/v1beta1
+        kind: AutonomousDatabases
+        metadata:
+          name: autonomousdatabases-sample
+        spec:
+        #  Id: ocid1.autonomousdatabase.oc1.<region-code>.aaaaXXXXXXXXXXXXXXXXXXXX
+          compartmentId: ocid1.compartment.oc1..aaaaaaaaXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+          displayName: SampleADB
+          dbName: sampleadb
+          dbWorkload: OLTP
+          isDedicated: false
+          dbVersion: 19c
+          dataStorageSizeInTBs: 2
+          cpuCoreCount: 1
+          adminPassword:
+            secret:
+              secretName: admin-password
+          isAutoScalingEnabled: true
+          isFreeTier: false
+          licenseModel: BRING_YOUR_OWN_LICENSE
+          wallet:
+            walletName: sampleadb-wallet
+            walletPassword:
+              secret:
+                secretName: wallet-password
+          freeformTags:
+            key1: value1
+         # definedTags:
+         #   test:
+         #     key1: value1
+package:
+  extraResources:
+    - ../../../config/rbac/autonomousdatabases_editor_role.yaml
+    - ../../../config/rbac/autonomousdatabases_viewer_role.yaml
