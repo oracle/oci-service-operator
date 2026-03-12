@@ -15,6 +15,7 @@ func main() {
 	opts := config.DefaultOptions()
 	flag.StringVar(&opts.ProviderPath, "provider-path", opts.ProviderPath, "Path to the OSOK repository to analyze")
 	flag.StringVar(&opts.AllowlistPath, "allowlist", opts.AllowlistPath, "Optional allowlist file")
+	flag.StringVar(&opts.Service, "service", opts.Service, "Optional service filter (for example: core, identity, psql)")
 	flag.StringVar(&opts.Format, "format", opts.Format, "Output format: table, json, or markdown")
 	flag.StringVar(&opts.BaselinePath, "baseline", opts.BaselinePath, "Optional baseline report path to diff against")
 	flag.StringVar(&opts.WriteBaseline, "write-baseline", opts.WriteBaseline, "Write the current report to the given path")

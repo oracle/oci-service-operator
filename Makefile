@@ -130,8 +130,15 @@ fmt: ## Run go fmt against code.
 vet: ## Run go vet against code.
 	go vet ./...
 
-schema-validator: ## Run OSOK schema validator against the current repo.
-	go run ./cmd/osok-schema-validator --provider-path .
+SCHEMA_VALIDATOR_PROVIDER_PATH ?= .
+SCHEMA_VALIDATOR_FORMAT ?= json
+SCHEMA_VALIDATOR_REPORT ?= validator-report.json
+SCHEMA_VALIDATOR_SERVICE ?=
+SCHEMA_VALIDATOR_SERVICE_ARG = $(if $(strip $(SCHEMA_VALIDATOR_SERVICE)),--service $(SCHEMA_VALIDATOR_SERVICE),)
+
+schema-validator: ## Run OSOK schema validator and write report to SCHEMA_VALIDATOR_REPORT.
+	go run ./cmd/osok-schema-validator --provider-path $(SCHEMA_VALIDATOR_PROVIDER_PATH) $(SCHEMA_VALIDATOR_SERVICE_ARG) --format $(SCHEMA_VALIDATOR_FORMAT) > $(SCHEMA_VALIDATOR_REPORT)
+	@echo "Wrote schema validator report to $(SCHEMA_VALIDATOR_REPORT)"
 
 BASH ?= /bin/bash
 ENVTEST_ASSETS_DIR ?= $(shell pwd)/testbin/$(shell uname)

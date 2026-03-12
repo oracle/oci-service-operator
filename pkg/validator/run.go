@@ -56,6 +56,12 @@ func Run(options config.Options) (diff.Report, string, error) {
 		return diff.Report{}, "", err
 	}
 
+	if options.HasServiceFilter() {
+		service := strings.ToLower(strings.TrimSpace(options.Service))
+		result = filterControllerReportByService(result, service)
+		apiReport = filterAPIReportByService(apiReport, service)
+	}
+
 	if options.WantsBaselineWrite() {
 		if err := writeBaseline(options.WriteBaseline, result); err != nil {
 			return diff.Report{}, "", err
@@ -80,6 +86,34 @@ func Run(options config.Options) (diff.Report, string, error) {
 	}
 
 	return result, rendered, nil
+}
+
+func filterControllerReportByService(report diff.Report, service string) diff.Report {
+	if service == "" {
+		return report
+	}
+	out := diff.Report{Structs: make([]diff.StructReport, 0, len(report.Structs))}
+	prefix := service + "."
+	for _, structReport := range report.Structs {
+		if strings.HasPrefix(structReport.StructType, prefix) {
+			out.Structs = append(out.Structs, structReport)
+		}
+	}
+	return out
+}
+
+func filterAPIReportByService(report apispec.Report, service string) apispec.Report {
+	if service == "" {
+		return report
+	}
+	out := apispec.Report{Structs: make([]apispec.StructReport, 0, len(report.Structs))}
+	prefix := service + "."
+	for _, structReport := range report.Structs {
+		if strings.HasPrefix(structReport.SDKStruct, prefix) {
+			out.Structs = append(out.Structs, structReport)
+		}
+	}
+	return out
 }
 
 func render(controller diff.Report, api apispec.Report, options config.Options) (string, error) {

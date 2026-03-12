@@ -8,6 +8,7 @@ import (
 type Options struct {
 	ProviderPath  string
 	AllowlistPath string
+	Service       string
 	Verbose       bool
 	Format        string
 	BaselinePath  string
@@ -53,4 +54,8 @@ func (o Options) WantsBaselineWrite() bool {
 
 func (o Options) WantsUpgrade() bool {
 	return strings.TrimSpace(o.UpgradeFrom) != "" || strings.TrimSpace(o.UpgradeTo) != ""
+}
+
+func (o Options) HasServiceFilter() bool {
+	return strings.TrimSpace(o.Service) != ""
 }

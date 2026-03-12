@@ -42,6 +42,9 @@ Assuming you’re at the repo root (`--provider-path .`):
 # Run full controller+API report (default ASCII table)
 go run ./cmd/osok-schema-validator --provider-path .
 
+# Run for a single service only (controller + API)
+go run ./cmd/osok-schema-validator --provider-path . --service core
+
 # Markdown / JSON output
 go run ./cmd/osok-schema-validator --provider-path . --format markdown
 go run ./cmd/osok-schema-validator --provider-path . --format json | jq .
@@ -69,6 +72,7 @@ Common flags:
 | --- | --- |
 | `--provider-path` | Path to the OSOK repo (defaults to `.`). |
 | `--allowlist` | Path to the allowlist file (defaults to `validator_allowlist.yaml`). |
+| `--service` | Optional service filter (for example `core`, `identity`, `psql`). |
 | `--format` | `table` (default), `markdown`, or `json`. |
 | `--baseline` | Load a previous controller report when diffing. |
 | `--write-baseline` | Save the current controller report as JSON. |
@@ -98,6 +102,50 @@ cmd/osok-schema-validator/
 Run validator directly through the repo `Makefile`:
 
 ```bash
+# Full report for all services, written to validator-report.json
+make schema-validator
+
+# Service-specific report
+make schema-validator SCHEMA_VALIDATOR_SERVICE=core
+
+# Custom output file + format
+make schema-validator \
+  SCHEMA_VALIDATOR_SERVICE=identity \
+  SCHEMA_VALIDATOR_FORMAT=json \
+  SCHEMA_VALIDATOR_REPORT=identity-validator-report.json
+```
+
+`schema-validator` target variables:
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `SCHEMA_VALIDATOR_PROVIDER_PATH` | `.` | Provider path passed to the CLI. |
+| `SCHEMA_VALIDATOR_SERVICE` | empty | Optional service filter. |
+| `SCHEMA_VALIDATOR_FORMAT` | `json` | Output format passed to the CLI. |
+| `SCHEMA_VALIDATOR_REPORT` | `validator-report.json` | File path to write CLI output. |
+
+## Registry Generation Workflow
+
+The validator registries can now be generated automatically:
+
+```bash
+# Preview only (no file changes)
+go run ./hack/update_validator_registries.go
+
+# Regenerate and write both registries
+go run ./hack/update_validator_registries.go --write
+```
+
+This script updates:
+
+- `pkg/validator/apispec/registry.go`
+- `pkg/validator/sdk/registry.go`
+
+Recommended workflow when APIs/SDK change:
+
+```bash
+go run ./hack/update_validator_registries.go --write
+go test ./pkg/validator/apispec ./pkg/validator/sdk
 make schema-validator
 ```
 
@@ -134,8 +182,9 @@ This mode ignores baseline/allowlist flags; it’s a standalone helper for SDK b
 
 ## Where the Metadata Lives
 
-- `pkg/validator/sdk/registry.go` lists the SDK structs we track (create/update payloads for each service). When you add a new CRD/controller, add its create/update structs here.
-- `pkg/validator/apispec/registry.go` maps each CRD spec type to the relevant SDK structs so the API validator knows what to compare.
+- `pkg/validator/sdk/registry.go` lists the SDK structs we track per service.
+- `pkg/validator/apispec/registry.go` maps each CRD spec type to relevant SDK structs.
+- `hack/update_validator_registries.go` generates/reorders both registry files from API specs + vendored SDK types.
 - `validator_allowlist.yaml` (repo root) documents intentional gaps and feeds both controller and API reports.
 
 ## Troubleshooting & Tips
