@@ -10,9 +10,51 @@ kind: Kustomization
 # since it depends on service name and namespace that are out of this kustomize package.
 # It should be run by config/default
 resources:
+- bases/artifacts.oracle.com_containerconfigurations.yaml
+- bases/artifacts.oracle.com_containerimages.yaml
+- bases/artifacts.oracle.com_containerimagesignatures.yaml
+- bases/artifacts.oracle.com_containerrepositories.yaml
+- bases/artifacts.oracle.com_genericartifactbypaths.yaml
+- bases/artifacts.oracle.com_genericartifacts.yaml
+- bases/artifacts.oracle.com_repositories.yaml
 - bases/database.oracle.com_autonomousdatabases.yaml
-- bases/streaming.oracle.com_streams.yaml
 - bases/mysql.oracle.com_mysqldbsystems.yaml
+- bases/nosql.oracle.com_indices.yaml
+- bases/nosql.oracle.com_replicas.yaml
+- bases/nosql.oracle.com_rows.yaml
+- bases/nosql.oracle.com_tables.yaml
+- bases/nosql.oracle.com_tableusages.yaml
+- bases/nosql.oracle.com_workrequesterrors.yaml
+- bases/nosql.oracle.com_workrequestlogs.yaml
+- bases/nosql.oracle.com_workrequests.yaml
+- bases/objectstorage.oracle.com_buckets.yaml
+- bases/objectstorage.oracle.com_multipartuploadparts.yaml
+- bases/objectstorage.oracle.com_multipartuploads.yaml
+- bases/objectstorage.oracle.com_namespacemetadata.yaml
+- bases/objectstorage.oracle.com_namespaces.yaml
+- bases/objectstorage.oracle.com_objectlifecyclepolicies.yaml
+- bases/objectstorage.oracle.com_objects.yaml
+- bases/objectstorage.oracle.com_objectstoragetiers.yaml
+- bases/objectstorage.oracle.com_objectversions.yaml
+- bases/objectstorage.oracle.com_preauthenticatedrequests.yaml
+- bases/objectstorage.oracle.com_replicationpolicies.yaml
+- bases/objectstorage.oracle.com_replicationsources.yaml
+- bases/objectstorage.oracle.com_retentionrules.yaml
+- bases/objectstorage.oracle.com_workrequesterrors.yaml
+- bases/objectstorage.oracle.com_workrequestlogs.yaml
+- bases/objectstorage.oracle.com_workrequests.yaml
+- bases/psql.oracle.com_backups.yaml
+- bases/psql.oracle.com_configurations.yaml
+- bases/psql.oracle.com_connectiondetails.yaml
+- bases/psql.oracle.com_dbsystemdbinstances.yaml
+- bases/psql.oracle.com_dbsystems.yaml
+- bases/psql.oracle.com_defaultconfigurations.yaml
+- bases/psql.oracle.com_primarydbinstances.yaml
+- bases/psql.oracle.com_shapes.yaml
+- bases/psql.oracle.com_workrequesterrors.yaml
+- bases/psql.oracle.com_workrequestlogs.yaml
+- bases/psql.oracle.com_workrequests.yaml
+- bases/streaming.oracle.com_streams.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 # patches:
