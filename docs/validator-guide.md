@@ -1,6 +1,6 @@
 # OSOK Validator Guide
 
-This document describes the tooling under `pkg/validator` and how to use the `osok-schema-validator` CLI to keep the OSOK controllers and CRDs aligned with the Oracle Cloud Infrastructure (OCI) Go SDK.
+This document describes the tooling under `internal/validator` and how to use the `osok-schema-validator` CLI to keep the OSOK controllers and CRDs aligned with the Oracle Cloud Infrastructure (OCI) Go SDK.
 
 ## Purpose
 
@@ -82,7 +82,7 @@ Common flags:
 ## Package Layout
 
 ```text
-pkg/validator/
+internal/validator/
   allowlist/   # YAML loader for field classifications
   config/      # Option parsing/validation
   provider/    # AST-based analyzer for OSOK provider usage
@@ -138,14 +138,14 @@ go run ./hack/update_validator_registries.go --write
 
 This script updates:
 
-- `pkg/validator/apispec/registry.go`
-- `pkg/validator/sdk/registry.go`
+- `internal/validator/apispec/registry.go`
+- `internal/validator/sdk/registry.go`
 
 Recommended workflow when APIs/SDK change:
 
 ```bash
 go run ./hack/update_validator_registries.go --write
-go test ./pkg/validator/apispec ./pkg/validator/sdk
+go test ./internal/validator/apispec ./internal/validator/sdk
 make schema-validator
 ```
 
@@ -176,14 +176,14 @@ This report uses the SDK’s `mandatory` tags to default missing mandatory field
 
 - Added/removed/changed fields for each tracked struct (with controller usage if you provide `--provider-path`).
 - Draft allowlist suggestions for new fields (mandatory ones default to `potential_gap`, optional to `future_consideration`).
-- Optional service operation differences if you add operation targets in `pkg/validator/sdk/registry.go`.
+- Optional service operation differences if you add operation targets in `internal/validator/sdk/registry.go`.
 
 This mode ignores baseline/allowlist flags; it’s a standalone helper for SDK bumps.
 
 ## Where the Metadata Lives
 
-- `pkg/validator/sdk/registry.go` lists the SDK structs we track per service.
-- `pkg/validator/apispec/registry.go` maps each CRD spec type to relevant SDK structs.
+- `internal/validator/sdk/registry.go` lists the SDK structs we track per service.
+- `internal/validator/apispec/registry.go` maps each CRD spec type to relevant SDK structs.
 - `hack/update_validator_registries.go` generates/reorders both registry files from API specs + vendored SDK types.
 - `validator_allowlist.yaml` (repo root) documents intentional gaps and feeds both controller and API reports.
 

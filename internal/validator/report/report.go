@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/oracle/oci-service-operator/pkg/validator/diff"
+	"github.com/oracle/oci-service-operator/internal/validator/diff"
 )
 
 func RenderText(result diff.Report) string {

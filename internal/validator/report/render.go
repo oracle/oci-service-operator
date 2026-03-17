@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/oracle/oci-service-operator/pkg/validator/diff"
+	"github.com/oracle/oci-service-operator/internal/validator/diff"
 )
 
 type Format string

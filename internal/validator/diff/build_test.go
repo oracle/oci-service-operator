@@ -3,10 +3,10 @@ package diff_test
 import (
 	"testing"
 
-	"github.com/oracle/oci-service-operator/pkg/validator/allowlist"
-	"github.com/oracle/oci-service-operator/pkg/validator/diff"
-	"github.com/oracle/oci-service-operator/pkg/validator/provider"
-	"github.com/oracle/oci-service-operator/pkg/validator/sdk"
+	"github.com/oracle/oci-service-operator/internal/validator/allowlist"
+	"github.com/oracle/oci-service-operator/internal/validator/diff"
+	"github.com/oracle/oci-service-operator/internal/validator/provider"
+	"github.com/oracle/oci-service-operator/internal/validator/sdk"
 )
 
 func TestBuildReportFlagsUnusedField(t *testing.T) {

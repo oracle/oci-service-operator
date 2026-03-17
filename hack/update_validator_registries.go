@@ -43,8 +43,8 @@ func main() {
 		die(err)
 	}
 
-	apispecPath := filepath.Join(root, "pkg", "validator", "apispec", "registry.go")
-	sdkPath := filepath.Join(root, "pkg", "validator", "sdk", "registry.go")
+	apispecPath := filepath.Join(root, "internal", "validator", "apispec", "registry.go")
+	sdkPath := filepath.Join(root, "internal", "validator", "sdk", "registry.go")
 
 	existingAPI, err := parseExistingAPITargets(apispecPath)
 	if err != nil {

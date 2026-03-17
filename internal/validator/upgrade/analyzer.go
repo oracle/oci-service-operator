@@ -13,8 +13,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/oracle/oci-service-operator/pkg/validator/provider"
-	"github.com/oracle/oci-service-operator/pkg/validator/sdk"
+	"github.com/oracle/oci-service-operator/internal/validator/provider"
+	"github.com/oracle/oci-service-operator/internal/validator/sdk"
 )
 
 const modulePath = "github.com/oracle/oci-go-sdk/v65"

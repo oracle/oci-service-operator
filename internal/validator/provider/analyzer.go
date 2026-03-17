@@ -10,7 +10,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/oracle/oci-service-operator/pkg/validator/sdk"
+	"github.com/oracle/oci-service-operator/internal/validator/sdk"
 	"golang.org/x/tools/go/packages"
 )
 

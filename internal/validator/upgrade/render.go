@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	reportpkg "github.com/oracle/oci-service-operator/pkg/validator/report"
+	reportpkg "github.com/oracle/oci-service-operator/internal/validator/report"
 )
 
 func Render(report Report, format reportpkg.Format) (string, error) {

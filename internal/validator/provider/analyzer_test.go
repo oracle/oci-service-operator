@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/oracle/oci-service-operator/pkg/validator/provider"
+	"github.com/oracle/oci-service-operator/internal/validator/provider"
 )
 
 func moduleRoot(t *testing.T) string {

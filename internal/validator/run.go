@@ -8,13 +8,13 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/oracle/oci-service-operator/pkg/validator/allowlist"
-	"github.com/oracle/oci-service-operator/pkg/validator/apispec"
-	"github.com/oracle/oci-service-operator/pkg/validator/config"
-	"github.com/oracle/oci-service-operator/pkg/validator/diff"
-	"github.com/oracle/oci-service-operator/pkg/validator/provider"
-	reportpkg "github.com/oracle/oci-service-operator/pkg/validator/report"
-	"github.com/oracle/oci-service-operator/pkg/validator/sdk"
+	"github.com/oracle/oci-service-operator/internal/validator/allowlist"
+	"github.com/oracle/oci-service-operator/internal/validator/apispec"
+	"github.com/oracle/oci-service-operator/internal/validator/config"
+	"github.com/oracle/oci-service-operator/internal/validator/diff"
+	"github.com/oracle/oci-service-operator/internal/validator/provider"
+	reportpkg "github.com/oracle/oci-service-operator/internal/validator/report"
+	"github.com/oracle/oci-service-operator/internal/validator/sdk"
 )
 
 var ErrNewActionable = errors.New("new actionable gaps detected")

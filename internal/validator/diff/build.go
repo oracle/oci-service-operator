@@ -4,9 +4,9 @@ import (
 	"sort"
 	"strconv"
 
-	"github.com/oracle/oci-service-operator/pkg/validator/allowlist"
-	"github.com/oracle/oci-service-operator/pkg/validator/provider"
-	"github.com/oracle/oci-service-operator/pkg/validator/sdk"
+	"github.com/oracle/oci-service-operator/internal/validator/allowlist"
+	"github.com/oracle/oci-service-operator/internal/validator/provider"
+	"github.com/oracle/oci-service-operator/internal/validator/sdk"
 )
 
 func BuildReport(sdkStructs []sdk.SDKStruct, providerAnalysis provider.Analysis, allow allowlist.Allowlist) Report {

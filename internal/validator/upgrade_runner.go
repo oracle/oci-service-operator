@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/oracle/oci-service-operator/pkg/validator/config"
-	reportpkg "github.com/oracle/oci-service-operator/pkg/validator/report"
-	upgradepkg "github.com/oracle/oci-service-operator/pkg/validator/upgrade"
+	"github.com/oracle/oci-service-operator/internal/validator/config"
+	reportpkg "github.com/oracle/oci-service-operator/internal/validator/report"
+	upgradepkg "github.com/oracle/oci-service-operator/internal/validator/upgrade"
 )
 
 func RunUpgrade(options config.Options) (upgradepkg.Report, string, error) {
