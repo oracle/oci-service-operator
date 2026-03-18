@@ -150,12 +150,57 @@ spec:
           status:
             description: FunctionStatus defines the observed state of Function.
             properties:
+              applicationId:
+                description: The OCID of the application the function belongs to.
+                type: string
               compartmentId:
                 description: The OCID of the compartment that contains the function.
                 type: string
+              config:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Function configuration. Overrides application configuration.
+                  Keys must be ASCII strings consisting solely of letters, digits, and the '_' (underscore) character, and must not begin with a digit. Values should be limited to printable unicode characters.
+                  Example: `{"MY_FUNCTION_CONFIG": "ConfVal"}`
+                  The maximum size for all configuration keys and values is limited to 4KB. This is measured as the sum of octets necessary to represent each key and value in UTF-8.
+                type: object
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              displayName:
+                description: The display name of the function. The display name is
+                  unique within the application containing the function.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
               id:
                 description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the function.
+                type: string
+              image:
+                description: |-
+                  The qualified name of the Docker image to use in the function, including the image tag.
+                  The image should be in the OCI Registry that is in the same region as the function itself.
+                  Example: `phx.ocir.io/ten/functions/function:0.0.1`
+                type: string
+              imageDigest:
+                description: |-
+                  The image digest for the version of the image that will be pulled when invoking this function.
+                  If no value is specified, the digest currently associated with the image in the OCI Registry will be used.
+                  Example: `sha256:ca0eeb6fb05351dfc8759c20733c91def84cb8007aa89a5bf606bc8b315b9fc7`
                 type: string
               invokeEndpoint:
                 description: The base https invoke URL to set on a client in order
@@ -165,11 +210,46 @@ spec:
               lifecycleState:
                 description: The current state of the function.
                 type: string
+              memoryInMBs:
+                description: Maximum usable memory for the function (MiB).
+                format: int64
+                type: integer
+              provisionedConcurrencyConfig:
+                description: FunctionProvisionedConcurrencyConfigObservedState defines
+                  nested fields for Function.ProvisionedConcurrencyConfig.
+                properties:
+                  count:
+                    description: Configuration specifying a constant amount of provisioned
+                      concurrency.
+                    type: integer
+                  jsonData:
+                    type: string
+                  strategy:
+                    type: string
+                required:
+                - count
+                type: object
               shape:
                 description: The processor shape (`GENERIC_X86`/`GENERIC_ARM`) on
                   which to run functions in the application, extracted from the image
                   manifest.
                 type: string
+              sourceDetails:
+                description: FunctionSourceDetailsObservedState defines nested fields
+                  for Function.SourceDetails.
+                properties:
+                  jsonData:
+                    type: string
+                  pbfListingId:
+                    description: |-
+                      The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the PbfListing this
+                      function is sourced from.
+                    type: string
+                  sourceType:
+                    type: string
+                required:
+                - pbfListingId
+                type: object
               status:
                 properties:
                   conditions:
@@ -224,6 +304,16 @@ spec:
                   timestamp format.
                   Example: `2018-09-12T22:47:12.613Z`
                 type: string
+              timeoutInSeconds:
+                description: Timeout for executions of the function. Value in seconds.
+                type: integer
+              traceConfig:
+                description: FunctionTraceConfig defines nested fields for Function.TraceConfig.
+                properties:
+                  isEnabled:
+                    description: Define if tracing is enabled for the resource.
+                    type: boolean
+                type: object
             required:
             - status
             type: object

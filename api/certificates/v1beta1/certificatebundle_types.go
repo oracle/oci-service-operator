@@ -37,6 +37,7 @@ type CertificateBundleValidity struct {
 // CertificateBundleStatus defines the observed state of CertificateBundle.
 type CertificateBundleStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	JsonData   string            `json:"jsonData,omitempty"`
 	// The certificate in PEM format.
 	CertificatePem string `json:"certificatePem,omitempty"`
 	// The certificate chain (in PEM format) for the certificate bundle.
@@ -57,9 +58,6 @@ type CertificateBundleStatus struct {
 	// Example: `2019-04-03T21:10:29.600Z`
 	TimeCreated string                    `json:"timeCreated,omitempty"`
 	Validity    CertificateBundleValidity `json:"validity,omitempty"`
-	// An optional property indicating when to delete the certificate version, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
-	// Example: `2019-04-03T21:10:29.600Z`
-	TimeOfDeletion string `json:"timeOfDeletion,omitempty"`
 	// A list of rotation states for the certificate bundle.
 	Stages                []string `json:"stages,omitempty"`
 	CertificateBundleType string   `json:"certificateBundleType,omitempty"`

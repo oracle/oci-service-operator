@@ -66,6 +66,21 @@ type CrossConnectGroupMacsecProperties struct {
 	IsUnprotectedTrafficAllowed bool `json:"isUnprotectedTrafficAllowed,omitempty"`
 }
 
+// CrossConnectGroupMacsecPropertiesObservedState defines nested fields for CrossConnectGroup.MacsecProperties.
+type CrossConnectGroupMacsecPropertiesObservedState struct {
+	// Indicates whether or not MACsec is enabled.
+	// +kubebuilder:validation:Required
+	State string `json:"state"`
+	// +kubebuilder:validation:Optional
+	PrimaryKey CrossConnectGroupMacsecPropertiesPrimaryKey `json:"primaryKey,omitempty"`
+	// Type of encryption cipher suite to use for the MACsec connection.
+	// +kubebuilder:validation:Optional
+	EncryptionCipher string `json:"encryptionCipher,omitempty"`
+	// Indicates whether unencrypted traffic is allowed if MACsec Key Agreement protocol (MKA) fails.
+	// +kubebuilder:validation:Optional
+	IsUnprotectedTrafficAllowed bool `json:"isUnprotectedTrafficAllowed,omitempty"`
+}
+
 // CrossConnectGroupStatus defines the observed state of CrossConnectGroup.
 type CrossConnectGroupStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
@@ -91,8 +106,8 @@ type CrossConnectGroupStatus struct {
 	CustomerReferenceName string `json:"customerReferenceName,omitempty"`
 	// The date and time the cross-connect group was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	// Example: `2016-08-25T21:10:29.600Z`
-	TimeCreated      string                            `json:"timeCreated,omitempty"`
-	MacsecProperties CrossConnectGroupMacsecProperties `json:"macsecProperties,omitempty"`
+	TimeCreated      string                                         `json:"timeCreated,omitempty"`
+	MacsecProperties CrossConnectGroupMacsecPropertiesObservedState `json:"macsecProperties,omitempty"`
 	// The FastConnect device that terminates the physical connection.
 	OciPhysicalDeviceName string `json:"ociPhysicalDeviceName,omitempty"`
 	// The FastConnect device that terminates the logical connection.

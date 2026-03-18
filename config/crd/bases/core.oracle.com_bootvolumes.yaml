@@ -188,8 +188,8 @@ spec:
               autotunePolicies:
                 description: The list of autotune policies enabled for this volume.
                 items:
-                  description: BootVolumeAutotunePolicy defines nested fields for
-                    BootVolume.AutotunePolicy.
+                  description: BootVolumeAutotunePolicyObservedState defines nested
+                    fields for BootVolume.AutotunePolicy.
                   properties:
                     autotuneType:
                       type: string
@@ -289,7 +289,8 @@ spec:
                 format: int64
                 type: integer
               sourceDetails:
-                description: BootVolumeSourceDetails defines nested fields for BootVolume.SourceDetails.
+                description: BootVolumeSourceDetailsObservedState defines nested fields
+                  for BootVolume.SourceDetails.
                 properties:
                   id:
                     description: The OCID of the boot volume backup.

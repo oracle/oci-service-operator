@@ -53,10 +53,16 @@ type IndexKey struct {
 // IndexStatus defines the observed state of Index.
 type IndexStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// Index name.
+	Name string `json:"name,omitempty"`
+	// Compartment Identifier.
+	CompartmentId string `json:"compartmentId,omitempty"`
 	// The name of the table to which this index belongs.
 	TableName string `json:"tableName,omitempty"`
 	// the OCID of the table to which this index belongs.
 	TableId string `json:"tableId,omitempty"`
+	// A set of keys for a secondary index.
+	Keys []IndexKey `json:"keys,omitempty"`
 	// The state of an index.
 	LifecycleState string `json:"lifecycleState,omitempty"`
 	// A message describing the current state in more detail.

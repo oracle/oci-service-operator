@@ -341,8 +341,8 @@ spec:
                   type: string
                 type: array
               placementConfiguration:
-                description: ClusterNetworkPlacementConfiguration defines nested fields
-                  for ClusterNetwork.PlacementConfiguration.
+                description: ClusterNetworkPlacementConfigurationObservedState defines
+                  nested fields for ClusterNetwork.PlacementConfiguration.
                 properties:
                   availabilityDomain:
                     description: |-

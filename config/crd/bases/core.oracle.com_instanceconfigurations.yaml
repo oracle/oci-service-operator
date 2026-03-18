@@ -1936,17 +1936,17 @@ spec:
                   of the instance configuration.
                 type: string
               instanceDetails:
-                description: InstanceConfigurationInstanceDetails defines nested fields
-                  for InstanceConfiguration.InstanceDetails.
+                description: InstanceConfigurationInstanceDetailsObservedState defines
+                  nested fields for InstanceConfiguration.InstanceDetails.
                 properties:
                   blockVolumes:
                     description: Block volume parameters.
                     items:
-                      description: InstanceConfigurationInstanceDetailsBlockVolume
+                      description: InstanceConfigurationInstanceDetailsBlockVolumeObservedState
                         defines nested fields for InstanceConfiguration.InstanceDetails.BlockVolume.
                       properties:
                         attachDetails:
-                          description: InstanceConfigurationInstanceDetailsBlockVolumeAttachDetails
+                          description: InstanceConfigurationInstanceDetailsBlockVolumeAttachDetailsObservedState
                             defines nested fields for InstanceConfiguration.InstanceDetails.BlockVolume.AttachDetails.
                           properties:
                             device:
@@ -1983,14 +1983,14 @@ spec:
                               type: boolean
                           type: object
                         createDetails:
-                          description: InstanceConfigurationInstanceDetailsBlockVolumeCreateDetails
+                          description: InstanceConfigurationInstanceDetailsBlockVolumeCreateDetailsObservedState
                             defines nested fields for InstanceConfiguration.InstanceDetails.BlockVolume.CreateDetails.
                           properties:
                             autotunePolicies:
                               description: The list of autotune policies enabled for
                                 this volume.
                               items:
-                                description: InstanceConfigurationInstanceDetailsBlockVolumeCreateDetailsAutotunePolicy
+                                description: InstanceConfigurationInstanceDetailsBlockVolumeCreateDetailsAutotunePolicyObservedState
                                   defines nested fields for InstanceConfiguration.InstanceDetails.BlockVolume.CreateDetails.AutotunePolicy.
                                 properties:
                                   autotuneType:
@@ -2081,7 +2081,7 @@ spec:
                               format: int64
                               type: integer
                             sourceDetails:
-                              description: InstanceConfigurationInstanceDetailsBlockVolumeCreateDetailsSourceDetails
+                              description: InstanceConfigurationInstanceDetailsBlockVolumeCreateDetailsSourceDetailsObservedState
                                 defines nested fields for InstanceConfiguration.InstanceDetails.BlockVolume.CreateDetails.SourceDetails.
                               properties:
                                 id:
@@ -2116,7 +2116,7 @@ spec:
                   jsonData:
                     type: string
                   launchDetails:
-                    description: InstanceConfigurationInstanceDetailsLaunchDetails
+                    description: InstanceConfigurationInstanceDetailsLaunchDetailsObservedState
                       defines nested fields for InstanceConfiguration.InstanceDetails.LaunchDetails.
                     properties:
                       agentConfig:
@@ -2512,7 +2512,7 @@ spec:
                            The combined size of the `metadata` and `extendedMetadata` objects can be a maximum of 32,000 bytes.
                         type: object
                       platformConfig:
-                        description: InstanceConfigurationInstanceDetailsLaunchDetailsPlatformConfig
+                        description: InstanceConfigurationInstanceDetailsLaunchDetailsPlatformConfigObservedState
                           defines nested fields for InstanceConfiguration.InstanceDetails.LaunchDetails.PlatformConfig.
                         properties:
                           areVirtualInstructionsEnabled:
@@ -2578,11 +2578,11 @@ spec:
                             type: string
                         type: object
                       preemptibleInstanceConfig:
-                        description: InstanceConfigurationInstanceDetailsLaunchDetailsPreemptibleInstanceConfig
+                        description: InstanceConfigurationInstanceDetailsLaunchDetailsPreemptibleInstanceConfigObservedState
                           defines nested fields for InstanceConfiguration.InstanceDetails.LaunchDetails.PreemptibleInstanceConfig.
                         properties:
                           preemptionAction:
-                            description: InstanceConfigurationInstanceDetailsLaunchDetailsPreemptibleInstanceConfigPreemptionAction
+                            description: InstanceConfigurationInstanceDetailsLaunchDetailsPreemptibleInstanceConfigPreemptionActionObservedState
                               defines nested fields for InstanceConfiguration.InstanceDetails.LaunchDetails.PreemptibleInstanceConfig.PreemptionAction.
                             properties:
                               jsonData:
@@ -2644,7 +2644,7 @@ spec:
                             type: integer
                         type: object
                       sourceDetails:
-                        description: InstanceConfigurationInstanceDetailsLaunchDetailsSourceDetails
+                        description: InstanceConfigurationInstanceDetailsLaunchDetailsSourceDetailsObservedState
                           defines nested fields for InstanceConfiguration.InstanceDetails.LaunchDetails.SourceDetails.
                         properties:
                           bootVolumeId:
@@ -2713,17 +2713,17 @@ spec:
                   options:
                     description: The Compute Instance Configuration parameters.
                     items:
-                      description: InstanceConfigurationInstanceDetailsOption defines
-                        nested fields for InstanceConfiguration.InstanceDetails.Option.
+                      description: InstanceConfigurationInstanceDetailsOptionObservedState
+                        defines nested fields for InstanceConfiguration.InstanceDetails.Option.
                       properties:
                         blockVolumes:
                           description: Block volume parameters.
                           items:
-                            description: InstanceConfigurationInstanceDetailsOptionBlockVolume
+                            description: InstanceConfigurationInstanceDetailsOptionBlockVolumeObservedState
                               defines nested fields for InstanceConfiguration.InstanceDetails.Option.BlockVolume.
                             properties:
                               attachDetails:
-                                description: InstanceConfigurationInstanceDetailsOptionBlockVolumeAttachDetails
+                                description: InstanceConfigurationInstanceDetailsOptionBlockVolumeAttachDetailsObservedState
                                   defines nested fields for InstanceConfiguration.InstanceDetails.Option.BlockVolume.AttachDetails.
                                 properties:
                                   device:
@@ -2760,14 +2760,14 @@ spec:
                                     type: boolean
                                 type: object
                               createDetails:
-                                description: InstanceConfigurationInstanceDetailsOptionBlockVolumeCreateDetails
+                                description: InstanceConfigurationInstanceDetailsOptionBlockVolumeCreateDetailsObservedState
                                   defines nested fields for InstanceConfiguration.InstanceDetails.Option.BlockVolume.CreateDetails.
                                 properties:
                                   autotunePolicies:
                                     description: The list of autotune policies enabled
                                       for this volume.
                                     items:
-                                      description: InstanceConfigurationInstanceDetailsOptionBlockVolumeCreateDetailsAutotunePolicy
+                                      description: InstanceConfigurationInstanceDetailsOptionBlockVolumeCreateDetailsAutotunePolicyObservedState
                                         defines nested fields for InstanceConfiguration.InstanceDetails.Option.BlockVolume.CreateDetails.AutotunePolicy.
                                       properties:
                                         autotuneType:
@@ -2858,7 +2858,7 @@ spec:
                                     format: int64
                                     type: integer
                                   sourceDetails:
-                                    description: InstanceConfigurationInstanceDetailsOptionBlockVolumeCreateDetailsSourceDetails
+                                    description: InstanceConfigurationInstanceDetailsOptionBlockVolumeCreateDetailsSourceDetailsObservedState
                                       defines nested fields for InstanceConfiguration.InstanceDetails.Option.BlockVolume.CreateDetails.SourceDetails.
                                     properties:
                                       id:
@@ -2889,7 +2889,7 @@ spec:
                             type: object
                           type: array
                         launchDetails:
-                          description: InstanceConfigurationInstanceDetailsOptionLaunchDetails
+                          description: InstanceConfigurationInstanceDetailsOptionLaunchDetailsObservedState
                             defines nested fields for InstanceConfiguration.InstanceDetails.Option.LaunchDetails.
                           properties:
                             agentConfig:
@@ -3285,7 +3285,7 @@ spec:
                                  The combined size of the `metadata` and `extendedMetadata` objects can be a maximum of 32,000 bytes.
                               type: object
                             platformConfig:
-                              description: InstanceConfigurationInstanceDetailsOptionLaunchDetailsPlatformConfig
+                              description: InstanceConfigurationInstanceDetailsOptionLaunchDetailsPlatformConfigObservedState
                                 defines nested fields for InstanceConfiguration.InstanceDetails.Option.LaunchDetails.PlatformConfig.
                               properties:
                                 areVirtualInstructionsEnabled:
@@ -3354,11 +3354,11 @@ spec:
                                   type: string
                               type: object
                             preemptibleInstanceConfig:
-                              description: InstanceConfigurationInstanceDetailsOptionLaunchDetailsPreemptibleInstanceConfig
+                              description: InstanceConfigurationInstanceDetailsOptionLaunchDetailsPreemptibleInstanceConfigObservedState
                                 defines nested fields for InstanceConfiguration.InstanceDetails.Option.LaunchDetails.PreemptibleInstanceConfig.
                               properties:
                                 preemptionAction:
-                                  description: InstanceConfigurationInstanceDetailsOptionLaunchDetailsPreemptibleInstanceConfigPreemptionAction
+                                  description: InstanceConfigurationInstanceDetailsOptionLaunchDetailsPreemptibleInstanceConfigPreemptionActionObservedState
                                     defines nested fields for InstanceConfiguration.InstanceDetails.Option.LaunchDetails.PreemptibleInstanceConfig.PreemptionAction.
                                   properties:
                                     jsonData:
@@ -3420,7 +3420,7 @@ spec:
                                   type: integer
                               type: object
                             sourceDetails:
-                              description: InstanceConfigurationInstanceDetailsOptionLaunchDetailsSourceDetails
+                              description: InstanceConfigurationInstanceDetailsOptionLaunchDetailsSourceDetailsObservedState
                                 defines nested fields for InstanceConfiguration.InstanceDetails.Option.LaunchDetails.SourceDetails.
                               properties:
                                 bootVolumeId:
@@ -3491,7 +3491,7 @@ spec:
                         secondaryVnics:
                           description: Secondary VNIC parameters.
                           items:
-                            description: InstanceConfigurationInstanceDetailsOptionSecondaryVnic
+                            description: InstanceConfigurationInstanceDetailsOptionSecondaryVnicObservedState
                               defines nested fields for InstanceConfiguration.InstanceDetails.Option.SecondaryVnic.
                             properties:
                               createVnicDetails:
@@ -3611,7 +3611,7 @@ spec:
                   secondaryVnics:
                     description: Secondary VNIC parameters.
                     items:
-                      description: InstanceConfigurationInstanceDetailsSecondaryVnic
+                      description: InstanceConfigurationInstanceDetailsSecondaryVnicObservedState
                         defines nested fields for InstanceConfiguration.InstanceDetails.SecondaryVnic.
                       properties:
                         createVnicDetails:

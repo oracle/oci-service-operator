@@ -35,6 +35,9 @@ type WorkRequestStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
 	// The type of work request.
 	OperationType string `json:"operationType,omitempty"`
+	// The status of the specified work request.
+	// This uses a distinct JSON name so it can coexist with the OSOK status envelope.
+	Status string `json:"sdkStatus,omitempty"`
 	// The id of the work request.
 	Id string `json:"id,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment that contains the work request. Work

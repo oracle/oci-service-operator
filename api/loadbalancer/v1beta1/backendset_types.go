@@ -285,6 +285,20 @@ type BackendSetLbCookieSessionPersistenceConfiguration struct {
 // BackendSetStatus defines the observed state of BackendSet.
 type BackendSetStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// A friendly name for the backend set. It must be unique and it cannot be changed.
+	// Valid backend set names include only alphanumeric characters, dashes, and underscores. Backend set names cannot
+	// contain spaces. Avoid entering confidential information.
+	// Example: `example_backend_set`
+	Name string `json:"name,omitempty"`
+	// The load balancer policy for the backend set. To get a list of available policies, use the
+	// ListPolicies operation.
+	// Example: `LEAST_CONNECTIONS`
+	Policy                                  string                                            `json:"policy,omitempty"`
+	Backends                                []BackendSetBackend                               `json:"backends,omitempty"`
+	HealthChecker                           BackendSetHealthChecker                           `json:"healthChecker,omitempty"`
+	SslConfiguration                        BackendSetSslConfiguration                        `json:"sslConfiguration,omitempty"`
+	SessionPersistenceConfiguration         BackendSetSessionPersistenceConfiguration         `json:"sessionPersistenceConfiguration,omitempty"`
+	LbCookieSessionPersistenceConfiguration BackendSetLbCookieSessionPersistenceConfiguration `json:"lbCookieSessionPersistenceConfiguration,omitempty"`
 }
 
 // +kubebuilder:object:root=true

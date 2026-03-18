@@ -50,13 +50,24 @@ type ComputeCapacityTopologyCapacitySource struct {
 	CompartmentId string `json:"compartmentId,omitempty"`
 }
 
+// ComputeCapacityTopologyCapacitySourceObservedState defines nested fields for ComputeCapacityTopology.CapacitySource.
+type ComputeCapacityTopologyCapacitySourceObservedState struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
+	CapacityType string `json:"capacityType,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment of this capacity source.
+	// +kubebuilder:validation:Optional
+	CompartmentId string `json:"compartmentId,omitempty"`
+}
+
 // ComputeCapacityTopologyStatus defines the observed state of ComputeCapacityTopology.
 type ComputeCapacityTopologyStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
 	// The availability domain of the compute capacity topology.
 	// Example: `Uocm:US-CHICAGO-1-AD-2`
-	AvailabilityDomain string                                `json:"availabilityDomain,omitempty"`
-	CapacitySource     ComputeCapacityTopologyCapacitySource `json:"capacitySource,omitempty"`
+	AvailabilityDomain string                                             `json:"availabilityDomain,omitempty"`
+	CapacitySource     ComputeCapacityTopologyCapacitySourceObservedState `json:"capacitySource,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the compute capacity topology.
 	CompartmentId string `json:"compartmentId,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compute capacity topology.

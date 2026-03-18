@@ -122,8 +122,8 @@ spec:
                 description: Information about the available capacity for each shape
                   in a capacity report.
                 items:
-                  description: ComputeCapacityReportShapeAvailability defines nested
-                    fields for ComputeCapacityReport.ShapeAvailability.
+                  description: ComputeCapacityReportShapeAvailabilityObservedState
+                    defines nested fields for ComputeCapacityReport.ShapeAvailability.
                   properties:
                     faultDomain:
                       description: |-

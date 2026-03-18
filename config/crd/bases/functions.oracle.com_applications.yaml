@@ -162,12 +162,84 @@ spec:
           status:
             description: ApplicationStatus defines the observed state of Application.
             properties:
+              compartmentId:
+                description: The OCID of the compartment that contains the application.
+                type: string
+              config:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Application configuration for functions in this application (passed as environment variables). Can be overridden by function configuration.
+                  Keys must be ASCII strings consisting solely of letters, digits, and the '_' (underscore) character, and must not begin with a digit. Values should be limited to printable unicode characters.
+                  Example: `{"MY_FUNCTION_CONFIG": "ConfVal"}`
+                  The maximum size for all configuration keys and values is limited to 4KB. This is measured as the sum of octets necessary to represent each key and value in UTF-8.
+                type: object
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              displayName:
+                description: The display name of the application. The display name
+                  is unique within the compartment containing the application.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
               id:
                 description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the application.
                 type: string
+              imagePolicyConfig:
+                description: ApplicationImagePolicyConfig defines nested fields for
+                  Application.ImagePolicyConfig.
+                properties:
+                  isPolicyEnabled:
+                    description: Define if image signature verification policy is
+                      enabled for the application.
+                    type: boolean
+                  keyDetails:
+                    description: A list of KMS key details.
+                    items:
+                      description: ApplicationImagePolicyConfigKeyDetail defines nested
+                        fields for Application.ImagePolicyConfig.KeyDetail.
+                      properties:
+                        kmsKeyId:
+                          description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)s
+                            of the KMS key that will be used to verify the image signature.
+                          type: string
+                      required:
+                      - kmsKeyId
+                      type: object
+                    type: array
+                required:
+                - isPolicyEnabled
+                type: object
               lifecycleState:
                 description: The current state of the application.
+                type: string
+              networkSecurityGroupIds:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)s
+                  of the Network Security Groups to add the application to.
+                items:
+                  type: string
+                type: array
+              shape:
+                description: |-
+                  Valid values are `GENERIC_X86`, `GENERIC_ARM` and `GENERIC_X86_ARM`. Default is `GENERIC_X86`. Setting this to `GENERIC_X86`, will run the functions in the application on X86 processor architecture.
+                  Setting this to `GENERIC_ARM`, will run the functions in the application on ARM processor architecture.
+                  When set to `GENERIC_X86_ARM`, functions in the application are run on either X86 or ARM processor architecture.
+                  Accepted values are:
+                  `GENERIC_X86`, `GENERIC_ARM`, `GENERIC_X86_ARM`
                 type: string
               status:
                 properties:
@@ -211,6 +283,19 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              subnetIds:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)s
+                  of the subnets in which to run functions in the application.
+                items:
+                  type: string
+                type: array
+              syslogUrl:
+                description: |-
+                  A syslog URL to which to send all function logs. Supports tcp, udp, and tcp+tls.
+                  The syslog URL must be reachable from all of the subnets configured for the application.
+                  Note: If you enable the OCI Logging service for this application, the syslogUrl value is ignored. Function logs are sent to the OCI Logging service, and not to the syslog URL.
+                  Example: `tcp://logserver.myserver:1234`
+                type: string
               timeCreated:
                 description: |-
                   The time the application was created, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339)
@@ -223,6 +308,17 @@ spec:
                   timestamp format.
                   Example: `2018-09-12T22:47:12.613Z`
                 type: string
+              traceConfig:
+                description: ApplicationTraceConfig defines nested fields for Application.TraceConfig.
+                properties:
+                  domainId:
+                    description: The OCID of the collector (e.g. an APM Domain) trace
+                      events will be sent to.
+                    type: string
+                  isEnabled:
+                    description: Define if tracing is enabled for the resource.
+                    type: boolean
+                type: object
             required:
             - status
             type: object

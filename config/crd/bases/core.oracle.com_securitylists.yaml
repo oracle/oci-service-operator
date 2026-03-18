@@ -401,8 +401,8 @@ spec:
               egressSecurityRules:
                 description: Rules for allowing egress IP packets.
                 items:
-                  description: SecurityListEgressSecurityRule defines nested fields
-                    for SecurityList.EgressSecurityRule.
+                  description: SecurityListEgressSecurityRuleObservedState defines
+                    nested fields for SecurityList.EgressSecurityRule.
                   properties:
                     description:
                       description: An optional description of your choice for the
@@ -458,8 +458,8 @@ spec:
                         Options are supported only for ICMP ("1"), TCP ("6"), UDP ("17"), and ICMPv6 ("58").
                       type: string
                     tcpOptions:
-                      description: SecurityListEgressSecurityRuleTcpOptions defines
-                        nested fields for SecurityList.EgressSecurityRule.TcpOptions.
+                      description: SecurityListEgressSecurityRuleTcpOptionsObservedState
+                        defines nested fields for SecurityList.EgressSecurityRule.TcpOptions.
                       properties:
                         destinationPortRange:
                           description: SecurityListEgressSecurityRuleTcpOptionsDestinationPortRange
@@ -497,8 +497,8 @@ spec:
                           type: object
                       type: object
                     udpOptions:
-                      description: SecurityListEgressSecurityRuleUdpOptions defines
-                        nested fields for SecurityList.EgressSecurityRule.UdpOptions.
+                      description: SecurityListEgressSecurityRuleUdpOptionsObservedState
+                        defines nested fields for SecurityList.EgressSecurityRule.UdpOptions.
                       properties:
                         destinationPortRange:
                           description: SecurityListEgressSecurityRuleUdpOptionsDestinationPortRange
@@ -554,8 +554,8 @@ spec:
               ingressSecurityRules:
                 description: Rules for allowing ingress IP packets.
                 items:
-                  description: SecurityListIngressSecurityRule defines nested fields
-                    for SecurityList.IngressSecurityRule.
+                  description: SecurityListIngressSecurityRuleObservedState defines
+                    nested fields for SecurityList.IngressSecurityRule.
                   properties:
                     description:
                       description: An optional description of your choice for the
@@ -610,8 +610,8 @@ spec:
                             particular `Service` through a service gateway).
                       type: string
                     tcpOptions:
-                      description: SecurityListIngressSecurityRuleTcpOptions defines
-                        nested fields for SecurityList.IngressSecurityRule.TcpOptions.
+                      description: SecurityListIngressSecurityRuleTcpOptionsObservedState
+                        defines nested fields for SecurityList.IngressSecurityRule.TcpOptions.
                       properties:
                         destinationPortRange:
                           description: SecurityListIngressSecurityRuleTcpOptionsDestinationPortRange
@@ -649,8 +649,8 @@ spec:
                           type: object
                       type: object
                     udpOptions:
-                      description: SecurityListIngressSecurityRuleUdpOptions defines
-                        nested fields for SecurityList.IngressSecurityRule.UdpOptions.
+                      description: SecurityListIngressSecurityRuleUdpOptionsObservedState
+                        defines nested fields for SecurityList.IngressSecurityRule.UdpOptions.
                       properties:
                         destinationPortRange:
                           description: SecurityListIngressSecurityRuleUdpOptionsDestinationPortRange

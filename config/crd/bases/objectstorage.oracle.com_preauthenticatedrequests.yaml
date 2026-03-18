@@ -93,9 +93,18 @@ spec:
             description: PreauthenticatedRequestStatus defines the observed state
               of PreauthenticatedRequest.
             properties:
+              accessType:
+                description: The operation that can be performed on this resource.
+                type: string
               accessUri:
                 description: The URI to embed in the URL when using the pre-authenticated
                   request.
+                type: string
+              bucketListingAction:
+                description: |-
+                  Specifies whether a list operation is allowed on a PAR with accessType "AnyObjectRead" or "AnyObjectReadWrite".
+                  Deny: Prevents the user from performing a list operation.
+                  ListObjects: Authorizes the user to perform a list operation.
                 type: string
               fullPath:
                 description: The full Path for the object.
@@ -103,6 +112,15 @@ spec:
               id:
                 description: The unique identifier to use when directly addressing
                   the pre-authenticated request.
+                type: string
+              name:
+                description: The user-provided name of the pre-authenticated request.
+                type: string
+              objectName:
+                description: |-
+                  The name of the object that is being granted access to by the pre-authenticated request. Avoid entering confidential
+                  information. The object name can be null and if so, the pre-authenticated request grants access to the entire bucket.
+                  Example: test/object1.log
                 type: string
               status:
                 properties:
@@ -150,6 +168,11 @@ spec:
                 description: |-
                   The date when the pre-authenticated request was created as per specification
                   RFC 3339 (https://tools.ietf.org/html/rfc3339).
+                type: string
+              timeExpires:
+                description: |-
+                  The expiration date for the pre-authenticated request as per RFC 3339 (https://tools.ietf.org/html/rfc3339). After
+                  this date the pre-authenticated request will no longer be valid.
                 type: string
             required:
             - status

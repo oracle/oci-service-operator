@@ -29,6 +29,14 @@ type HostnameSpec struct {
 // HostnameStatus defines the observed state of Hostname.
 type HostnameStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// A friendly name for the hostname resource. It must be unique and it cannot be changed. Avoid entering confidential
+	// information.
+	// Example: `example_hostname_001`
+	Name string `json:"name,omitempty"`
+	// A virtual hostname. For more information about virtual hostname string construction, see
+	// Managing Request Routing (https://docs.cloud.oracle.com/Content/Balance/Tasks/managingrequest.htm#routing).
+	// Example: `app.example.com`
+	Hostname string `json:"hostname,omitempty"`
 }
 
 // +kubebuilder:object:root=true

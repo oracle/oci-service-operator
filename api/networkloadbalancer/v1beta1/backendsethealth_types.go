@@ -19,6 +19,15 @@ type BackendSetHealthSpec struct {
 // BackendSetHealthStatus defines the observed state of BackendSetHealth.
 type BackendSetHealthStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// Overall health status of the backend set.
+	// *  **OK:** All backend servers in the backend set return a status of `OK`.
+	// *  **WARNING:** Half or more of the backend servers in a backend set return a status of `OK` and at least one backend
+	// server returns a status of `WARNING`, `CRITICAL`, or `UNKNOWN`.
+	// *  **CRITICAL:** Fewer than half of the backend servers in a backend set return a status of `OK`.
+	// *  **UNKNOWN:** If no probes have yet been sent to the backends, or the system is
+	// unable to retrieve metrics from the backends.
+	// This uses a distinct JSON name so it can coexist with the OSOK status envelope.
+	Status string `json:"sdkStatus,omitempty"`
 	// A list of backend servers that are currently in the `WARNING` health state. The list identifies each backend server by
 	// IP address or OCID and port.
 	// Example: `10.0.0.3:8080` or `ocid1.privateip..oc1.<var>&lt;unique_ID&gt;</var>:8080`

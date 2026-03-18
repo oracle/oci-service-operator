@@ -155,6 +155,26 @@ type ClusterNetworkClusterConfiguration struct {
 	NetworkBlockIds []string `json:"networkBlockIds,omitempty"`
 }
 
+// ClusterNetworkPlacementConfigurationObservedState defines nested fields for ClusterNetwork.PlacementConfiguration.
+type ClusterNetworkPlacementConfigurationObservedState struct {
+	// The availability domain to place instances.
+	// Example: `Uocm:PHX-AD-1`
+	// +kubebuilder:validation:Required
+	AvailabilityDomain string `json:"availabilityDomain"`
+	// The placement constraint when reserving hosts.
+	// +kubebuilder:validation:Optional
+	PlacementConstraint string `json:"placementConstraint,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the primary subnet to place instances. This field is deprecated.
+	// Use `primaryVnicSubnets` instead to set VNIC data for instances in the pool.
+	// +kubebuilder:validation:Optional
+	PrimarySubnetId string `json:"primarySubnetId,omitempty"`
+	// +kubebuilder:validation:Optional
+	PrimaryVnicSubnets ClusterNetworkPlacementConfigurationPrimaryVnicSubnets `json:"primaryVnicSubnets,omitempty"`
+	// The set of secondary VNIC data for instances in the pool.
+	// +kubebuilder:validation:Optional
+	SecondaryVnicSubnets []ClusterNetworkPlacementConfigurationSecondaryVnicSubnet `json:"secondaryVnicSubnets,omitempty"`
+}
+
 // ClusterNetworkStatus defines the observed state of ClusterNetwork.
 type ClusterNetworkStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
@@ -187,8 +207,8 @@ type ClusterNetworkStatus struct {
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// The instance pools in the cluster network.
 	// Each cluster network can have one instance pool.
-	InstancePools          []ClusterNetworkInstancePool         `json:"instancePools,omitempty"`
-	PlacementConfiguration ClusterNetworkPlacementConfiguration `json:"placementConfiguration,omitempty"`
+	InstancePools          []ClusterNetworkInstancePool                      `json:"instancePools,omitempty"`
+	PlacementConfiguration ClusterNetworkPlacementConfigurationObservedState `json:"placementConfiguration,omitempty"`
 }
 
 // +kubebuilder:object:root=true

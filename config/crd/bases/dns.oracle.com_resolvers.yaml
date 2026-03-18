@@ -191,6 +191,8 @@ spec:
                       description: A Boolean flag indicating whether or not the resolver
                         endpoint is for listening.
                       type: boolean
+                    jsonData:
+                      type: string
                     lifecycleState:
                       description: The current state of the resource.
                       type: string
@@ -246,7 +248,8 @@ spec:
               rules:
                 description: Rules for the resolver. Rules are evaluated in order.
                 items:
-                  description: ResolverRule defines nested fields for Resolver.Rule.
+                  description: ResolverRuleObservedState defines nested fields for
+                    Resolver.Rule.
                   properties:
                     action:
                       type: string
@@ -263,6 +266,8 @@ spec:
                       items:
                         type: string
                       type: array
+                    jsonData:
+                      type: string
                     qnameCoverConditions:
                       description: A list of domain names. The query must be covered
                         by one of the domains in order for the rule action to apply.

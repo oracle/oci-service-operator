@@ -105,6 +105,8 @@ spec:
                   The OCID of the owning compartment. This will match the resolver that the resolver endpoint is under
                   and will be updated if the resolver's compartment is changed.
                 type: string
+              endpointType:
+                type: string
               forwardingAddress:
                 description: |-
                   An IP address from which forwarded queries may be sent. For VNIC endpoints, this IP address must be part
@@ -118,6 +120,8 @@ spec:
                 description: A Boolean flag indicating whether or not the resolver
                   endpoint is for listening.
                 type: boolean
+              jsonData:
+                type: string
               lifecycleState:
                 description: The current state of the resource.
                 type: string

@@ -18,6 +18,7 @@ type ListenerRuleSpec struct {
 
 // ListenerRuleRuleCondition defines nested fields for ListenerRule.Rule.Condition.
 type ListenerRuleRuleCondition struct {
+	JsonData      string `json:"jsonData,omitempty"`
 	AttributeName string `json:"attributeName,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the originating VCN that an incoming packet
 	// must match.
@@ -114,7 +115,8 @@ type ListenerRuleRuleRedirectUri struct {
 
 // ListenerRuleRule defines nested fields for ListenerRule.Rule.
 type ListenerRuleRule struct {
-	Action string `json:"action,omitempty"`
+	JsonData string `json:"jsonData,omitempty"`
+	Action   string `json:"action,omitempty"`
 	// A header name that conforms to RFC 7230.
 	// Example: `example_header_name`
 	Header string `json:"header,omitempty"`

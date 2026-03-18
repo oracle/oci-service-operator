@@ -177,6 +177,22 @@ type CertificateRule struct {
 	AdvanceRenewalPeriod string `json:"advanceRenewalPeriod"`
 }
 
+// CertificateRuleObservedState defines nested fields for Certificate.CertificateRule.
+type CertificateRuleObservedState struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
+	RuleType string `json:"ruleType,omitempty"`
+	// A property specifying how often, in days, a certificate should be renewed.
+	// Expressed in ISO 8601 (https://en.wikipedia.org/wiki/ISO_8601#Time_intervals) format.
+	// +kubebuilder:validation:Required
+	RenewalInterval string `json:"renewalInterval"`
+	// A property specifying the period of time, in days, before the certificate's targeted renewal that the process should occur.
+	// Expressed in ISO 8601 (https://en.wikipedia.org/wiki/ISO_8601#Time_intervals) format.
+	// +kubebuilder:validation:Required
+	AdvanceRenewalPeriod string `json:"advanceRenewalPeriod"`
+}
+
 // CertificateCurrentVersionSubjectAlternativeName defines nested fields for Certificate.CurrentVersion.SubjectAlternativeName.
 type CertificateCurrentVersionSubjectAlternativeName struct {
 	// The subject alternative name type. Currently only DNS domain or host names and IP addresses are supported.
@@ -345,15 +361,23 @@ type CertificateStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
 	// The OCID of the certificate.
 	Id string `json:"id,omitempty"`
+	// A user-friendly name for the certificate. Names are unique within a compartment. Avoid entering confidential information. Valid characters are uppercase or lowercase letters, numbers, hyphens, underscores, and periods.
+	Name string `json:"name,omitempty"`
 	// A property indicating when the certificate was created, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
 	// Example: `2019-04-03T21:10:29.600Z`
 	TimeCreated string `json:"timeCreated,omitempty"`
 	// The current lifecycle state of the certificate.
 	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The OCID of the compartment where you want to create the certificate.
+	CompartmentId string `json:"compartmentId,omitempty"`
 	// The origin of the certificate.
 	ConfigType string `json:"configType,omitempty"`
 	// The OCID of the certificate authority (CA) that issued the certificate.
 	IssuerCertificateAuthorityId string `json:"issuerCertificateAuthorityId,omitempty"`
+	// A brief description of the certificate. Avoid entering confidential information.
+	Description string `json:"description,omitempty"`
+	// A list of rules that control how the certificate is used and managed.
+	CertificateRules []CertificateRuleObservedState `json:"certificateRules,omitempty"`
 	// An optional property indicating when to delete the certificate version, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
 	// Example: `2019-04-03T21:10:29.600Z`
 	TimeOfDeletion string `json:"timeOfDeletion,omitempty"`
@@ -367,8 +391,16 @@ type CertificateStatus struct {
 	// The algorithm used to sign the public key certificate.
 	SignatureAlgorithm string `json:"signatureAlgorithm,omitempty"`
 	// The name of the profile used to create the certificate, which depends on the type of certificate you need.
-	CertificateProfileType string                           `json:"certificateProfileType,omitempty"`
-	CurrentVersionSummary  CertificateCurrentVersionSummary `json:"currentVersionSummary,omitempty"`
+	CertificateProfileType string `json:"certificateProfileType,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags           map[string]shared.MapValue       `json:"definedTags,omitempty"`
+	CurrentVersionSummary CertificateCurrentVersionSummary `json:"currentVersionSummary,omitempty"`
 }
 
 // +kubebuilder:object:root=true

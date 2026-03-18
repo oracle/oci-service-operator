@@ -1509,6 +1509,827 @@ type InstanceConfigurationInstanceDetails struct {
 	SecondaryVnics []InstanceConfigurationInstanceDetailsSecondaryVnic `json:"secondaryVnics,omitempty"`
 }
 
+// InstanceConfigurationInstanceDetailsOptionBlockVolumeAttachDetailsObservedState defines nested fields for InstanceConfiguration.InstanceDetails.Option.BlockVolume.AttachDetails.
+type InstanceConfigurationInstanceDetailsOptionBlockVolumeAttachDetailsObservedState struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
+	// Whether the attachment should be created in read-only mode.
+	IsReadOnly bool `json:"isReadOnly,omitempty"`
+	// The device name.
+	// +kubebuilder:validation:Optional
+	Device string `json:"device,omitempty"`
+	// Whether the attachment should be created in shareable mode. If an attachment
+	// is created in shareable mode, then other instances can attach the same volume, provided
+	// that they also create their attachments in shareable mode. Only certain volume types can
+	// be attached in shareable mode. Defaults to false if not specified.
+	// +kubebuilder:validation:Optional
+	IsShareable bool `json:"isShareable,omitempty"`
+	// +kubebuilder:validation:Optional
+	Type string `json:"type,omitempty"`
+	// Whether to use CHAP authentication for the volume attachment. Defaults to false.
+	// +kubebuilder:validation:Optional
+	UseChap bool `json:"useChap,omitempty"`
+	// Whether to enable in-transit encryption for the data volume's paravirtualized attachment. The default value is false.
+	// +kubebuilder:validation:Optional
+	IsPvEncryptionInTransitEnabled bool `json:"isPvEncryptionInTransitEnabled,omitempty"`
+}
+
+// InstanceConfigurationInstanceDetailsOptionBlockVolumeCreateDetailsSourceDetailsObservedState defines nested fields for InstanceConfiguration.InstanceDetails.Option.BlockVolume.CreateDetails.SourceDetails.
+type InstanceConfigurationInstanceDetailsOptionBlockVolumeCreateDetailsSourceDetailsObservedState struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
+	Type string `json:"type,omitempty"`
+	// The OCID of the volume backup.
+	// +kubebuilder:validation:Optional
+	Id string `json:"id,omitempty"`
+}
+
+// InstanceConfigurationInstanceDetailsOptionBlockVolumeCreateDetailsAutotunePolicyObservedState defines nested fields for InstanceConfiguration.InstanceDetails.Option.BlockVolume.CreateDetails.AutotunePolicy.
+type InstanceConfigurationInstanceDetailsOptionBlockVolumeCreateDetailsAutotunePolicyObservedState struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
+	AutotuneType string `json:"autotuneType,omitempty"`
+	// This will be the maximum VPUs/GB performance level that the volume will be auto-tuned
+	// temporarily based on performance monitoring.
+	// +kubebuilder:validation:Required
+	MaxVpusPerGB int64 `json:"maxVpusPerGB"`
+}
+
+// InstanceConfigurationInstanceDetailsOptionBlockVolumeCreateDetailsObservedState defines nested fields for InstanceConfiguration.InstanceDetails.Option.BlockVolume.CreateDetails.
+type InstanceConfigurationInstanceDetailsOptionBlockVolumeCreateDetailsObservedState struct {
+	// The availability domain of the volume.
+	// Example: `Uocm:PHX-AD-1`
+	// +kubebuilder:validation:Optional
+	AvailabilityDomain string `json:"availabilityDomain,omitempty"`
+	// If provided, specifies the ID of the volume backup policy to assign to the newly
+	// created volume. If omitted, no policy will be assigned.
+	// +kubebuilder:validation:Optional
+	BackupPolicyId string `json:"backupPolicyId,omitempty"`
+	// The OCID of the compartment that contains the volume.
+	// +kubebuilder:validation:Optional
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// Specifies whether the auto-tune performance is enabled for this boot volume. This field is deprecated.
+	// Use the `InstanceConfigurationDetachedVolumeAutotunePolicy` instead to enable the volume for detached autotune.
+	// +kubebuilder:validation:Optional
+	IsAutoTuneEnabled bool `json:"isAutoTuneEnabled,omitempty"`
+	// The list of block volume replicas to be enabled for this volume
+	// in the specified destination availability domains.
+	// +kubebuilder:validation:Optional
+	BlockVolumeReplicas []InstanceConfigurationInstanceDetailsOptionBlockVolumeCreateDetailsBlockVolumeReplica `json:"blockVolumeReplicas,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// The OCID of the Vault service key to assign as the master encryption key
+	// for the volume.
+	// +kubebuilder:validation:Optional
+	KmsKeyId string `json:"kmsKeyId,omitempty"`
+	// The number of volume performance units (VPUs) that will be applied to this volume per GB,
+	// representing the Block Volume service's elastic performance options.
+	// See Block Volume Performance Levels (https://docs.cloud.oracle.com/iaas/Content/Block/Concepts/blockvolumeperformance.htm#perf_levels) for more information.
+	// Allowed values:
+	//   * `0`: Represents Lower Cost option.
+	//   * `10`: Represents Balanced option.
+	//   * `20`: Represents Higher Performance option.
+	//   * `30`-`120`: Represents the Ultra High Performance option.
+	// For performance autotune enabled volumes, it would be the Default(Minimum) VPUs/GB.
+	// +kubebuilder:validation:Optional
+	VpusPerGB int64 `json:"vpusPerGB,omitempty"`
+	// The size of the volume in GBs.
+	// +kubebuilder:validation:Optional
+	SizeInGBs int64 `json:"sizeInGBs,omitempty"`
+	// +kubebuilder:validation:Optional
+	SourceDetails InstanceConfigurationInstanceDetailsOptionBlockVolumeCreateDetailsSourceDetailsObservedState `json:"sourceDetails,omitempty"`
+	// The list of autotune policies enabled for this volume.
+	// +kubebuilder:validation:Optional
+	AutotunePolicies []InstanceConfigurationInstanceDetailsOptionBlockVolumeCreateDetailsAutotunePolicyObservedState `json:"autotunePolicies,omitempty"`
+}
+
+// InstanceConfigurationInstanceDetailsOptionBlockVolumeObservedState defines nested fields for InstanceConfiguration.InstanceDetails.Option.BlockVolume.
+type InstanceConfigurationInstanceDetailsOptionBlockVolumeObservedState struct {
+	// +kubebuilder:validation:Optional
+	AttachDetails InstanceConfigurationInstanceDetailsOptionBlockVolumeAttachDetailsObservedState `json:"attachDetails,omitempty"`
+	// +kubebuilder:validation:Optional
+	CreateDetails InstanceConfigurationInstanceDetailsOptionBlockVolumeCreateDetailsObservedState `json:"createDetails,omitempty"`
+	// The OCID of the volume.
+	// +kubebuilder:validation:Optional
+	VolumeId string `json:"volumeId,omitempty"`
+}
+
+// InstanceConfigurationInstanceDetailsOptionLaunchDetailsPlatformConfigObservedState defines nested fields for InstanceConfiguration.InstanceDetails.Option.LaunchDetails.PlatformConfig.
+type InstanceConfigurationInstanceDetailsOptionLaunchDetailsPlatformConfigObservedState struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// Whether Secure Boot is enabled on the instance.
+	// +kubebuilder:validation:Optional
+	IsSecureBootEnabled bool `json:"isSecureBootEnabled,omitempty"`
+	// Whether the Trusted Platform Module (TPM) is enabled on the instance.
+	// +kubebuilder:validation:Optional
+	IsTrustedPlatformModuleEnabled bool `json:"isTrustedPlatformModuleEnabled,omitempty"`
+	// Whether the Measured Boot feature is enabled on the instance.
+	// +kubebuilder:validation:Optional
+	IsMeasuredBootEnabled bool `json:"isMeasuredBootEnabled,omitempty"`
+	// Whether the instance is a confidential instance. If this value is `true`, the instance is a confidential instance. The default value is `false`.
+	// +kubebuilder:validation:Optional
+	IsMemoryEncryptionEnabled bool `json:"isMemoryEncryptionEnabled,omitempty"`
+	// +kubebuilder:validation:Optional
+	Type string `json:"type,omitempty"`
+	// Whether symmetric multithreading is enabled on the instance. Symmetric multithreading is also
+	// called simultaneous multithreading (SMT) or Intel Hyper-Threading.
+	// Intel and AMD processors have two hardware execution threads per core (OCPU). SMT permits multiple
+	// independent threads of execution, to better use the resources and increase the efficiency
+	// of the CPU. When multithreading is disabled, only one thread is permitted to run on each core, which
+	// can provide higher or more predictable performance for some workloads.
+	// +kubebuilder:validation:Optional
+	IsSymmetricMultiThreadingEnabled bool `json:"isSymmetricMultiThreadingEnabled,omitempty"`
+	// Whether the Access Control Service is enabled on the instance. When enabled,
+	// the platform can enforce PCIe device isolation, required for VFIO device pass-through.
+	// +kubebuilder:validation:Optional
+	IsAccessControlServiceEnabled bool `json:"isAccessControlServiceEnabled,omitempty"`
+	// Whether virtualization instructions are available. For example, Secure Virtual Machine for AMD shapes
+	// or VT-x for Intel shapes.
+	// +kubebuilder:validation:Optional
+	AreVirtualInstructionsEnabled bool `json:"areVirtualInstructionsEnabled,omitempty"`
+	// Whether the input-output memory management unit is enabled.
+	// +kubebuilder:validation:Optional
+	IsInputOutputMemoryManagementUnitEnabled bool `json:"isInputOutputMemoryManagementUnitEnabled,omitempty"`
+	// The percentage of cores enabled. Value must be a multiple of 25%. If the requested percentage
+	// results in a fractional number of cores, the system rounds up the number of cores across processors
+	// and provisions an instance with a whole number of cores.
+	// If the applications that you run on the instance use a core-based licensing model and need fewer cores
+	// than the full size of the shape, you can disable cores to reduce your licensing costs. The instance
+	// itself is billed for the full shape, regardless of whether all cores are enabled.
+	// +kubebuilder:validation:Optional
+	PercentageOfCoresEnabled int `json:"percentageOfCoresEnabled,omitempty"`
+	// Instance Platform Configuration Configuration Map for flexible setting input.
+	// +kubebuilder:validation:Optional
+	ConfigMap map[string]string `json:"configMap,omitempty"`
+	// The number of NUMA nodes per socket (NPS).
+	// +kubebuilder:validation:Optional
+	NumaNodesPerSocket string `json:"numaNodesPerSocket,omitempty"`
+}
+
+// InstanceConfigurationInstanceDetailsOptionLaunchDetailsSourceDetailsObservedState defines nested fields for InstanceConfiguration.InstanceDetails.Option.LaunchDetails.SourceDetails.
+type InstanceConfigurationInstanceDetailsOptionLaunchDetailsSourceDetailsObservedState struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
+	SourceType string `json:"sourceType,omitempty"`
+	// The size of the boot volume in GBs. The minimum value is 50 GB and the maximum
+	// value is 32,768 GB (32 TB).
+	// +kubebuilder:validation:Optional
+	BootVolumeSizeInGBs int64 `json:"bootVolumeSizeInGBs,omitempty"`
+	// The OCID of the image used to boot the instance.
+	// +kubebuilder:validation:Optional
+	ImageId string `json:"imageId,omitempty"`
+	// The OCID of the Vault service key to assign as the master encryption key for the boot volume.
+	// +kubebuilder:validation:Optional
+	KmsKeyId string `json:"kmsKeyId,omitempty"`
+	// The number of volume performance units (VPUs) that will be applied to this volume per GB,
+	// representing the Block Volume service's elastic performance options.
+	// See Block Volume Performance Levels (https://docs.cloud.oracle.com/iaas/Content/Block/Concepts/blockvolumeperformance.htm#perf_levels) for more information.
+	// Allowed values:
+	//   * `10`: Represents Balanced option.
+	//   * `20`: Represents Higher Performance option.
+	//   * `30`-`120`: Represents the Ultra High Performance option.
+	// For performance autotune enabled volumes, it would be the Default(Minimum) VPUs/GB.
+	// +kubebuilder:validation:Optional
+	BootVolumeVpusPerGB int64 `json:"bootVolumeVpusPerGB,omitempty"`
+	// +kubebuilder:validation:Optional
+	InstanceSourceImageFilterDetails InstanceConfigurationInstanceDetailsOptionLaunchDetailsSourceDetailsInstanceSourceImageFilterDetails `json:"instanceSourceImageFilterDetails,omitempty"`
+	// The OCID of the boot volume used to boot the instance.
+	// +kubebuilder:validation:Optional
+	BootVolumeId string `json:"bootVolumeId,omitempty"`
+}
+
+// InstanceConfigurationInstanceDetailsOptionLaunchDetailsPreemptibleInstanceConfigPreemptionActionObservedState defines nested fields for InstanceConfiguration.InstanceDetails.Option.LaunchDetails.PreemptibleInstanceConfig.PreemptionAction.
+type InstanceConfigurationInstanceDetailsOptionLaunchDetailsPreemptibleInstanceConfigPreemptionActionObservedState struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
+	Type string `json:"type,omitempty"`
+	// Whether to preserve the boot volume that was used to launch the preemptible instance when the instance is terminated. Defaults to false if not specified.
+	// +kubebuilder:validation:Optional
+	PreserveBootVolume bool `json:"preserveBootVolume,omitempty"`
+}
+
+// InstanceConfigurationInstanceDetailsOptionLaunchDetailsPreemptibleInstanceConfigObservedState defines nested fields for InstanceConfiguration.InstanceDetails.Option.LaunchDetails.PreemptibleInstanceConfig.
+type InstanceConfigurationInstanceDetailsOptionLaunchDetailsPreemptibleInstanceConfigObservedState struct {
+	// +kubebuilder:validation:Required
+	PreemptionAction InstanceConfigurationInstanceDetailsOptionLaunchDetailsPreemptibleInstanceConfigPreemptionActionObservedState `json:"preemptionAction"`
+}
+
+// InstanceConfigurationInstanceDetailsOptionLaunchDetailsObservedState defines nested fields for InstanceConfiguration.InstanceDetails.Option.LaunchDetails.
+type InstanceConfigurationInstanceDetailsOptionLaunchDetailsObservedState struct {
+	// The availability domain of the instance.
+	// Example: `Uocm:PHX-AD-1`
+	// +kubebuilder:validation:Optional
+	AvailabilityDomain string `json:"availabilityDomain,omitempty"`
+	// The OCID of the compute capacity reservation this instance is launched under.
+	// +kubebuilder:validation:Optional
+	CapacityReservationId string `json:"capacityReservationId,omitempty"`
+	// The OCID of the compartment containing the instance.
+	// Instances created from instance configurations are placed in the same compartment
+	// as the instance that was used to create the instance configuration.
+	// +kubebuilder:validation:Optional
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// +kubebuilder:validation:Optional
+	CreateVnicDetails InstanceConfigurationInstanceDetailsOptionLaunchDetailsCreateVnicDetails `json:"createVnicDetails,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
+	// Additional metadata key/value pairs that you provide. They serve the same purpose and
+	// functionality as fields in the `metadata` object.
+	// They are distinguished from `metadata` fields in that these can be nested JSON objects
+	// (whereas `metadata` fields are string/string maps only).
+	// The combined size of the `metadata` and `extendedMetadata` objects can be a maximum of
+	// 32,000 bytes.
+	// +kubebuilder:validation:Optional
+	ExtendedMetadata map[string]shared.JSONValue `json:"extendedMetadata,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// This is an advanced option.
+	// When a bare metal or virtual machine
+	// instance boots, the iPXE firmware that runs on the instance is
+	// configured to run an iPXE script to continue the boot process.
+	// If you want more control over the boot process, you can provide
+	// your own custom iPXE script that will run when the instance boots;
+	// however, you should be aware that the same iPXE script will run
+	// every time an instance boots; not only after the initial
+	// LaunchInstance call.
+	// The default iPXE script connects to the instance's local boot
+	// volume over iSCSI and performs a network boot. If you use a custom iPXE
+	// script and want to network-boot from the instance's local boot volume
+	// over iSCSI the same way as the default iPXE script, you should use the
+	// following iSCSI IP address: 169.254.0.2, and boot volume IQN:
+	// iqn.2015-02.oracle.boot.
+	// For more information about the Bring Your Own Image feature of
+	// Oracle Cloud Infrastructure, see
+	// Bring Your Own Image (https://docs.cloud.oracle.com/iaas/Content/Compute/References/bringyourownimage.htm).
+	// For more information about iPXE, see http://ipxe.org.
+	// +kubebuilder:validation:Optional
+	IpxeScript string `json:"ipxeScript,omitempty"`
+	// Custom metadata key/value pairs that you provide, such as the SSH public key
+	// required to connect to the instance.
+	// A metadata service runs on every launched instance. The service is an HTTP
+	// endpoint listening on 169.254.169.254. You can use the service to:
+	// * Provide information to Cloud-Init (https://cloudinit.readthedocs.org/en/latest/)
+	//   to be used for various system initialization tasks.
+	// * Get information about the instance, including the custom metadata that you
+	//   provide when you launch the instance.
+	//  **Providing Cloud-Init Metadata**
+	//  You can use the following metadata key names to provide information to
+	//  Cloud-Init:
+	//  **"ssh_authorized_keys"** - Provide one or more public SSH keys to be
+	//  included in the `~/.ssh/authorized_keys` file for the default user on the
+	//  instance. Use a newline character to separate multiple keys. The SSH
+	//  keys must be in the format necessary for the `authorized_keys` file, as shown
+	//  in the example below.
+	//  **"user_data"** - Provide your own base64-encoded data to be used by
+	//  Cloud-Init to run custom scripts or provide custom Cloud-Init configuration. For
+	//  information about how to take advantage of user data, see the
+	//  Cloud-Init Documentation (http://cloudinit.readthedocs.org/en/latest/topics/format.html).
+	//  **Metadata Example**
+	//       "metadata" : {
+	//          "quake_bot_level" : "Severe",
+	//          "ssh_authorized_keys" : "ssh-rsa <your_public_SSH_key>== rsa-key-20160227",
+	//          "user_data" : "<your_public_SSH_key>=="
+	//       }
+	//  **Getting Metadata on the Instance**
+	//  To get information about your instance, connect to the instance using SSH and issue any of the
+	//  following GET requests:
+	//      curl -H "Authorization: Bearer Oracle" http://169.254.169.254/opc/v2/instance/
+	//      curl -H "Authorization: Bearer Oracle" http://169.254.169.254/opc/v2/instance/metadata/
+	//      curl -H "Authorization: Bearer Oracle" http://169.254.169.254/opc/v2/instance/metadata/<any-key-name>
+	//  You'll get back a response that includes all the instance information; only the metadata information; or
+	//  the metadata information for the specified key name, respectively.
+	//  The combined size of the `metadata` and `extendedMetadata` objects can be a maximum of 32,000 bytes.
+	// +kubebuilder:validation:Optional
+	Metadata map[string]string `json:"metadata,omitempty"`
+	// The shape of an instance. The shape determines the number of CPUs, amount of memory,
+	// and other resources allocated to the instance.
+	// You can enumerate all available shapes by calling ListShapes.
+	// +kubebuilder:validation:Optional
+	Shape string `json:"shape,omitempty"`
+	// +kubebuilder:validation:Optional
+	ShapeConfig InstanceConfigurationInstanceDetailsOptionLaunchDetailsShapeConfig `json:"shapeConfig,omitempty"`
+	// +kubebuilder:validation:Optional
+	PlatformConfig InstanceConfigurationInstanceDetailsOptionLaunchDetailsPlatformConfigObservedState `json:"platformConfig,omitempty"`
+	// +kubebuilder:validation:Optional
+	SourceDetails InstanceConfigurationInstanceDetailsOptionLaunchDetailsSourceDetailsObservedState `json:"sourceDetails,omitempty"`
+	// A fault domain is a grouping of hardware and infrastructure within an availability domain.
+	// Each availability domain contains three fault domains. Fault domains let you distribute your
+	// instances so that they are not on the same physical hardware within a single availability domain.
+	// A hardware failure or Compute hardware maintenance that affects one fault domain does not affect
+	// instances in other fault domains.
+	// If you do not specify the fault domain, the system selects one for you.
+	//
+	// To get a list of fault domains, use the
+	// ListFaultDomains operation in the
+	// Identity and Access Management Service API.
+	// Example: `FAULT-DOMAIN-1`
+	// +kubebuilder:validation:Optional
+	FaultDomain string `json:"faultDomain,omitempty"`
+	// The OCID of the dedicated virtual machine host to place the instance on.
+	// Dedicated VM hosts can be used when launching individual instances from an instance configuration. They
+	// cannot be used to launch instance pools.
+	// +kubebuilder:validation:Optional
+	DedicatedVmHostId string `json:"dedicatedVmHostId,omitempty"`
+	// Specifies the configuration mode for launching virtual machine (VM) instances. The configuration modes are:
+	// * `NATIVE` - VM instances launch with iSCSI boot and VFIO devices. The default value for platform images.
+	// * `EMULATED` - VM instances launch with emulated devices, such as the E1000 network driver and emulated SCSI disk controller.
+	// * `PARAVIRTUALIZED` - VM instances launch with paravirtualized devices using VirtIO drivers.
+	// * `CUSTOM` - VM instances launch with custom configuration settings specified in the `LaunchOptions` parameter.
+	// +kubebuilder:validation:Optional
+	LaunchMode string `json:"launchMode,omitempty"`
+	// +kubebuilder:validation:Optional
+	LaunchOptions InstanceConfigurationInstanceDetailsOptionLaunchDetailsLaunchOptions `json:"launchOptions,omitempty"`
+	// +kubebuilder:validation:Optional
+	AgentConfig InstanceConfigurationInstanceDetailsOptionLaunchDetailsAgentConfig `json:"agentConfig,omitempty"`
+	// Whether to enable in-transit encryption for the data volume's paravirtualized attachment. The default value is false.
+	// +kubebuilder:validation:Optional
+	IsPvEncryptionInTransitEnabled bool `json:"isPvEncryptionInTransitEnabled,omitempty"`
+	// The preferred maintenance action for an instance. The default is LIVE_MIGRATE, if live migration is supported.
+	// * `LIVE_MIGRATE` - Run maintenance using a live migration.
+	// * `REBOOT` - Run maintenance using a reboot.
+	// +kubebuilder:validation:Optional
+	PreferredMaintenanceAction string `json:"preferredMaintenanceAction,omitempty"`
+	// +kubebuilder:validation:Optional
+	InstanceOptions InstanceConfigurationInstanceDetailsOptionLaunchDetailsInstanceOptions `json:"instanceOptions,omitempty"`
+	// +kubebuilder:validation:Optional
+	AvailabilityConfig InstanceConfigurationInstanceDetailsOptionLaunchDetailsAvailabilityConfig `json:"availabilityConfig,omitempty"`
+	// +kubebuilder:validation:Optional
+	PreemptibleInstanceConfig InstanceConfigurationInstanceDetailsOptionLaunchDetailsPreemptibleInstanceConfigObservedState `json:"preemptibleInstanceConfig,omitempty"`
+}
+
+// InstanceConfigurationInstanceDetailsOptionSecondaryVnicObservedState defines nested fields for InstanceConfiguration.InstanceDetails.Option.SecondaryVnic.
+type InstanceConfigurationInstanceDetailsOptionSecondaryVnicObservedState struct {
+	// +kubebuilder:validation:Optional
+	CreateVnicDetails InstanceConfigurationInstanceDetailsOptionSecondaryVnicCreateVnicDetails `json:"createVnicDetails,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
+	// Which physical network interface card (NIC) the VNIC will use. Defaults to 0.
+	// Certain bare metal instance shapes have two active physical NICs (0 and 1). If
+	// you add a secondary VNIC to one of these instances, you can specify which NIC
+	// the VNIC will use. For more information, see
+	// Virtual Network Interface Cards (VNICs) (https://docs.cloud.oracle.com/iaas/Content/Network/Tasks/managingVNICs.htm).
+	// +kubebuilder:validation:Optional
+	NicIndex int `json:"nicIndex,omitempty"`
+}
+
+// InstanceConfigurationInstanceDetailsOptionObservedState defines nested fields for InstanceConfiguration.InstanceDetails.Option.
+type InstanceConfigurationInstanceDetailsOptionObservedState struct {
+	// Block volume parameters.
+	// +kubebuilder:validation:Optional
+	BlockVolumes []InstanceConfigurationInstanceDetailsOptionBlockVolumeObservedState `json:"blockVolumes,omitempty"`
+	// +kubebuilder:validation:Optional
+	LaunchDetails InstanceConfigurationInstanceDetailsOptionLaunchDetailsObservedState `json:"launchDetails,omitempty"`
+	// Secondary VNIC parameters.
+	// +kubebuilder:validation:Optional
+	SecondaryVnics []InstanceConfigurationInstanceDetailsOptionSecondaryVnicObservedState `json:"secondaryVnics,omitempty"`
+}
+
+// InstanceConfigurationInstanceDetailsBlockVolumeAttachDetailsObservedState defines nested fields for InstanceConfiguration.InstanceDetails.BlockVolume.AttachDetails.
+type InstanceConfigurationInstanceDetailsBlockVolumeAttachDetailsObservedState struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
+	// Whether the attachment should be created in read-only mode.
+	IsReadOnly bool `json:"isReadOnly,omitempty"`
+	// The device name.
+	// +kubebuilder:validation:Optional
+	Device string `json:"device,omitempty"`
+	// Whether the attachment should be created in shareable mode. If an attachment
+	// is created in shareable mode, then other instances can attach the same volume, provided
+	// that they also create their attachments in shareable mode. Only certain volume types can
+	// be attached in shareable mode. Defaults to false if not specified.
+	// +kubebuilder:validation:Optional
+	IsShareable bool `json:"isShareable,omitempty"`
+	// +kubebuilder:validation:Optional
+	Type string `json:"type,omitempty"`
+	// Whether to use CHAP authentication for the volume attachment. Defaults to false.
+	// +kubebuilder:validation:Optional
+	UseChap bool `json:"useChap,omitempty"`
+	// Whether to enable in-transit encryption for the data volume's paravirtualized attachment. The default value is false.
+	// +kubebuilder:validation:Optional
+	IsPvEncryptionInTransitEnabled bool `json:"isPvEncryptionInTransitEnabled,omitempty"`
+}
+
+// InstanceConfigurationInstanceDetailsBlockVolumeCreateDetailsSourceDetailsObservedState defines nested fields for InstanceConfiguration.InstanceDetails.BlockVolume.CreateDetails.SourceDetails.
+type InstanceConfigurationInstanceDetailsBlockVolumeCreateDetailsSourceDetailsObservedState struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
+	Type string `json:"type,omitempty"`
+	// The OCID of the volume backup.
+	// +kubebuilder:validation:Optional
+	Id string `json:"id,omitempty"`
+}
+
+// InstanceConfigurationInstanceDetailsBlockVolumeCreateDetailsAutotunePolicyObservedState defines nested fields for InstanceConfiguration.InstanceDetails.BlockVolume.CreateDetails.AutotunePolicy.
+type InstanceConfigurationInstanceDetailsBlockVolumeCreateDetailsAutotunePolicyObservedState struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
+	AutotuneType string `json:"autotuneType,omitempty"`
+	// This will be the maximum VPUs/GB performance level that the volume will be auto-tuned
+	// temporarily based on performance monitoring.
+	// +kubebuilder:validation:Required
+	MaxVpusPerGB int64 `json:"maxVpusPerGB"`
+}
+
+// InstanceConfigurationInstanceDetailsBlockVolumeCreateDetailsObservedState defines nested fields for InstanceConfiguration.InstanceDetails.BlockVolume.CreateDetails.
+type InstanceConfigurationInstanceDetailsBlockVolumeCreateDetailsObservedState struct {
+	// The availability domain of the volume.
+	// Example: `Uocm:PHX-AD-1`
+	// +kubebuilder:validation:Optional
+	AvailabilityDomain string `json:"availabilityDomain,omitempty"`
+	// If provided, specifies the ID of the volume backup policy to assign to the newly
+	// created volume. If omitted, no policy will be assigned.
+	// +kubebuilder:validation:Optional
+	BackupPolicyId string `json:"backupPolicyId,omitempty"`
+	// The OCID of the compartment that contains the volume.
+	// +kubebuilder:validation:Optional
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// Specifies whether the auto-tune performance is enabled for this boot volume. This field is deprecated.
+	// Use the `InstanceConfigurationDetachedVolumeAutotunePolicy` instead to enable the volume for detached autotune.
+	// +kubebuilder:validation:Optional
+	IsAutoTuneEnabled bool `json:"isAutoTuneEnabled,omitempty"`
+	// The list of block volume replicas to be enabled for this volume
+	// in the specified destination availability domains.
+	// +kubebuilder:validation:Optional
+	BlockVolumeReplicas []InstanceConfigurationInstanceDetailsBlockVolumeCreateDetailsBlockVolumeReplica `json:"blockVolumeReplicas,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// The OCID of the Vault service key to assign as the master encryption key
+	// for the volume.
+	// +kubebuilder:validation:Optional
+	KmsKeyId string `json:"kmsKeyId,omitempty"`
+	// The number of volume performance units (VPUs) that will be applied to this volume per GB,
+	// representing the Block Volume service's elastic performance options.
+	// See Block Volume Performance Levels (https://docs.cloud.oracle.com/iaas/Content/Block/Concepts/blockvolumeperformance.htm#perf_levels) for more information.
+	// Allowed values:
+	//   * `0`: Represents Lower Cost option.
+	//   * `10`: Represents Balanced option.
+	//   * `20`: Represents Higher Performance option.
+	//   * `30`-`120`: Represents the Ultra High Performance option.
+	// For performance autotune enabled volumes, it would be the Default(Minimum) VPUs/GB.
+	// +kubebuilder:validation:Optional
+	VpusPerGB int64 `json:"vpusPerGB,omitempty"`
+	// The size of the volume in GBs.
+	// +kubebuilder:validation:Optional
+	SizeInGBs int64 `json:"sizeInGBs,omitempty"`
+	// +kubebuilder:validation:Optional
+	SourceDetails InstanceConfigurationInstanceDetailsBlockVolumeCreateDetailsSourceDetailsObservedState `json:"sourceDetails,omitempty"`
+	// The list of autotune policies enabled for this volume.
+	// +kubebuilder:validation:Optional
+	AutotunePolicies []InstanceConfigurationInstanceDetailsBlockVolumeCreateDetailsAutotunePolicyObservedState `json:"autotunePolicies,omitempty"`
+}
+
+// InstanceConfigurationInstanceDetailsBlockVolumeObservedState defines nested fields for InstanceConfiguration.InstanceDetails.BlockVolume.
+type InstanceConfigurationInstanceDetailsBlockVolumeObservedState struct {
+	// +kubebuilder:validation:Optional
+	AttachDetails InstanceConfigurationInstanceDetailsBlockVolumeAttachDetailsObservedState `json:"attachDetails,omitempty"`
+	// +kubebuilder:validation:Optional
+	CreateDetails InstanceConfigurationInstanceDetailsBlockVolumeCreateDetailsObservedState `json:"createDetails,omitempty"`
+	// The OCID of the volume.
+	// +kubebuilder:validation:Optional
+	VolumeId string `json:"volumeId,omitempty"`
+}
+
+// InstanceConfigurationInstanceDetailsLaunchDetailsPlatformConfigObservedState defines nested fields for InstanceConfiguration.InstanceDetails.LaunchDetails.PlatformConfig.
+type InstanceConfigurationInstanceDetailsLaunchDetailsPlatformConfigObservedState struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// Whether Secure Boot is enabled on the instance.
+	// +kubebuilder:validation:Optional
+	IsSecureBootEnabled bool `json:"isSecureBootEnabled,omitempty"`
+	// Whether the Trusted Platform Module (TPM) is enabled on the instance.
+	// +kubebuilder:validation:Optional
+	IsTrustedPlatformModuleEnabled bool `json:"isTrustedPlatformModuleEnabled,omitempty"`
+	// Whether the Measured Boot feature is enabled on the instance.
+	// +kubebuilder:validation:Optional
+	IsMeasuredBootEnabled bool `json:"isMeasuredBootEnabled,omitempty"`
+	// Whether the instance is a confidential instance. If this value is `true`, the instance is a confidential instance. The default value is `false`.
+	// +kubebuilder:validation:Optional
+	IsMemoryEncryptionEnabled bool `json:"isMemoryEncryptionEnabled,omitempty"`
+	// +kubebuilder:validation:Optional
+	Type string `json:"type,omitempty"`
+	// Whether symmetric multithreading is enabled on the instance. Symmetric multithreading is also
+	// called simultaneous multithreading (SMT) or Intel Hyper-Threading.
+	// Intel and AMD processors have two hardware execution threads per core (OCPU). SMT permits multiple
+	// independent threads of execution, to better use the resources and increase the efficiency
+	// of the CPU. When multithreading is disabled, only one thread is permitted to run on each core, which
+	// can provide higher or more predictable performance for some workloads.
+	// +kubebuilder:validation:Optional
+	IsSymmetricMultiThreadingEnabled bool `json:"isSymmetricMultiThreadingEnabled,omitempty"`
+	// Whether the Access Control Service is enabled on the instance. When enabled,
+	// the platform can enforce PCIe device isolation, required for VFIO device pass-through.
+	// +kubebuilder:validation:Optional
+	IsAccessControlServiceEnabled bool `json:"isAccessControlServiceEnabled,omitempty"`
+	// Whether virtualization instructions are available. For example, Secure Virtual Machine for AMD shapes
+	// or VT-x for Intel shapes.
+	// +kubebuilder:validation:Optional
+	AreVirtualInstructionsEnabled bool `json:"areVirtualInstructionsEnabled,omitempty"`
+	// Whether the input-output memory management unit is enabled.
+	// +kubebuilder:validation:Optional
+	IsInputOutputMemoryManagementUnitEnabled bool `json:"isInputOutputMemoryManagementUnitEnabled,omitempty"`
+	// The percentage of cores enabled. Value must be a multiple of 25%. If the requested percentage
+	// results in a fractional number of cores, the system rounds up the number of cores across processors
+	// and provisions an instance with a whole number of cores.
+	// If the applications that you run on the instance use a core-based licensing model and need fewer cores
+	// than the full size of the shape, you can disable cores to reduce your licensing costs. The instance
+	// itself is billed for the full shape, regardless of whether all cores are enabled.
+	// +kubebuilder:validation:Optional
+	PercentageOfCoresEnabled int `json:"percentageOfCoresEnabled,omitempty"`
+	// Instance Platform Configuration Configuration Map for flexible setting input.
+	// +kubebuilder:validation:Optional
+	ConfigMap map[string]string `json:"configMap,omitempty"`
+	// The number of NUMA nodes per socket (NPS).
+	// +kubebuilder:validation:Optional
+	NumaNodesPerSocket string `json:"numaNodesPerSocket,omitempty"`
+}
+
+// InstanceConfigurationInstanceDetailsLaunchDetailsSourceDetailsObservedState defines nested fields for InstanceConfiguration.InstanceDetails.LaunchDetails.SourceDetails.
+type InstanceConfigurationInstanceDetailsLaunchDetailsSourceDetailsObservedState struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
+	SourceType string `json:"sourceType,omitempty"`
+	// The size of the boot volume in GBs. The minimum value is 50 GB and the maximum
+	// value is 32,768 GB (32 TB).
+	// +kubebuilder:validation:Optional
+	BootVolumeSizeInGBs int64 `json:"bootVolumeSizeInGBs,omitempty"`
+	// The OCID of the image used to boot the instance.
+	// +kubebuilder:validation:Optional
+	ImageId string `json:"imageId,omitempty"`
+	// The OCID of the Vault service key to assign as the master encryption key for the boot volume.
+	// +kubebuilder:validation:Optional
+	KmsKeyId string `json:"kmsKeyId,omitempty"`
+	// The number of volume performance units (VPUs) that will be applied to this volume per GB,
+	// representing the Block Volume service's elastic performance options.
+	// See Block Volume Performance Levels (https://docs.cloud.oracle.com/iaas/Content/Block/Concepts/blockvolumeperformance.htm#perf_levels) for more information.
+	// Allowed values:
+	//   * `10`: Represents Balanced option.
+	//   * `20`: Represents Higher Performance option.
+	//   * `30`-`120`: Represents the Ultra High Performance option.
+	// For performance autotune enabled volumes, it would be the Default(Minimum) VPUs/GB.
+	// +kubebuilder:validation:Optional
+	BootVolumeVpusPerGB int64 `json:"bootVolumeVpusPerGB,omitempty"`
+	// +kubebuilder:validation:Optional
+	InstanceSourceImageFilterDetails InstanceConfigurationInstanceDetailsLaunchDetailsSourceDetailsInstanceSourceImageFilterDetails `json:"instanceSourceImageFilterDetails,omitempty"`
+	// The OCID of the boot volume used to boot the instance.
+	// +kubebuilder:validation:Optional
+	BootVolumeId string `json:"bootVolumeId,omitempty"`
+}
+
+// InstanceConfigurationInstanceDetailsLaunchDetailsPreemptibleInstanceConfigPreemptionActionObservedState defines nested fields for InstanceConfiguration.InstanceDetails.LaunchDetails.PreemptibleInstanceConfig.PreemptionAction.
+type InstanceConfigurationInstanceDetailsLaunchDetailsPreemptibleInstanceConfigPreemptionActionObservedState struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
+	Type string `json:"type,omitempty"`
+	// Whether to preserve the boot volume that was used to launch the preemptible instance when the instance is terminated. Defaults to false if not specified.
+	// +kubebuilder:validation:Optional
+	PreserveBootVolume bool `json:"preserveBootVolume,omitempty"`
+}
+
+// InstanceConfigurationInstanceDetailsLaunchDetailsPreemptibleInstanceConfigObservedState defines nested fields for InstanceConfiguration.InstanceDetails.LaunchDetails.PreemptibleInstanceConfig.
+type InstanceConfigurationInstanceDetailsLaunchDetailsPreemptibleInstanceConfigObservedState struct {
+	// +kubebuilder:validation:Required
+	PreemptionAction InstanceConfigurationInstanceDetailsLaunchDetailsPreemptibleInstanceConfigPreemptionActionObservedState `json:"preemptionAction"`
+}
+
+// InstanceConfigurationInstanceDetailsLaunchDetailsObservedState defines nested fields for InstanceConfiguration.InstanceDetails.LaunchDetails.
+type InstanceConfigurationInstanceDetailsLaunchDetailsObservedState struct {
+	// The availability domain of the instance.
+	// Example: `Uocm:PHX-AD-1`
+	// +kubebuilder:validation:Optional
+	AvailabilityDomain string `json:"availabilityDomain,omitempty"`
+	// The OCID of the compute capacity reservation this instance is launched under.
+	// +kubebuilder:validation:Optional
+	CapacityReservationId string `json:"capacityReservationId,omitempty"`
+	// The OCID of the compartment containing the instance.
+	// Instances created from instance configurations are placed in the same compartment
+	// as the instance that was used to create the instance configuration.
+	// +kubebuilder:validation:Optional
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// +kubebuilder:validation:Optional
+	CreateVnicDetails InstanceConfigurationInstanceDetailsLaunchDetailsCreateVnicDetails `json:"createVnicDetails,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
+	// Additional metadata key/value pairs that you provide. They serve the same purpose and
+	// functionality as fields in the `metadata` object.
+	// They are distinguished from `metadata` fields in that these can be nested JSON objects
+	// (whereas `metadata` fields are string/string maps only).
+	// The combined size of the `metadata` and `extendedMetadata` objects can be a maximum of
+	// 32,000 bytes.
+	// +kubebuilder:validation:Optional
+	ExtendedMetadata map[string]shared.JSONValue `json:"extendedMetadata,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// This is an advanced option.
+	// When a bare metal or virtual machine
+	// instance boots, the iPXE firmware that runs on the instance is
+	// configured to run an iPXE script to continue the boot process.
+	// If you want more control over the boot process, you can provide
+	// your own custom iPXE script that will run when the instance boots;
+	// however, you should be aware that the same iPXE script will run
+	// every time an instance boots; not only after the initial
+	// LaunchInstance call.
+	// The default iPXE script connects to the instance's local boot
+	// volume over iSCSI and performs a network boot. If you use a custom iPXE
+	// script and want to network-boot from the instance's local boot volume
+	// over iSCSI the same way as the default iPXE script, you should use the
+	// following iSCSI IP address: 169.254.0.2, and boot volume IQN:
+	// iqn.2015-02.oracle.boot.
+	// For more information about the Bring Your Own Image feature of
+	// Oracle Cloud Infrastructure, see
+	// Bring Your Own Image (https://docs.cloud.oracle.com/iaas/Content/Compute/References/bringyourownimage.htm).
+	// For more information about iPXE, see http://ipxe.org.
+	// +kubebuilder:validation:Optional
+	IpxeScript string `json:"ipxeScript,omitempty"`
+	// Custom metadata key/value pairs that you provide, such as the SSH public key
+	// required to connect to the instance.
+	// A metadata service runs on every launched instance. The service is an HTTP
+	// endpoint listening on 169.254.169.254. You can use the service to:
+	// * Provide information to Cloud-Init (https://cloudinit.readthedocs.org/en/latest/)
+	//   to be used for various system initialization tasks.
+	// * Get information about the instance, including the custom metadata that you
+	//   provide when you launch the instance.
+	//  **Providing Cloud-Init Metadata**
+	//  You can use the following metadata key names to provide information to
+	//  Cloud-Init:
+	//  **"ssh_authorized_keys"** - Provide one or more public SSH keys to be
+	//  included in the `~/.ssh/authorized_keys` file for the default user on the
+	//  instance. Use a newline character to separate multiple keys. The SSH
+	//  keys must be in the format necessary for the `authorized_keys` file, as shown
+	//  in the example below.
+	//  **"user_data"** - Provide your own base64-encoded data to be used by
+	//  Cloud-Init to run custom scripts or provide custom Cloud-Init configuration. For
+	//  information about how to take advantage of user data, see the
+	//  Cloud-Init Documentation (http://cloudinit.readthedocs.org/en/latest/topics/format.html).
+	//  **Metadata Example**
+	//       "metadata" : {
+	//          "quake_bot_level" : "Severe",
+	//          "ssh_authorized_keys" : "ssh-rsa <your_public_SSH_key>== rsa-key-20160227",
+	//          "user_data" : "<your_public_SSH_key>=="
+	//       }
+	//  **Getting Metadata on the Instance**
+	//  To get information about your instance, connect to the instance using SSH and issue any of the
+	//  following GET requests:
+	//      curl -H "Authorization: Bearer Oracle" http://169.254.169.254/opc/v2/instance/
+	//      curl -H "Authorization: Bearer Oracle" http://169.254.169.254/opc/v2/instance/metadata/
+	//      curl -H "Authorization: Bearer Oracle" http://169.254.169.254/opc/v2/instance/metadata/<any-key-name>
+	//  You'll get back a response that includes all the instance information; only the metadata information; or
+	//  the metadata information for the specified key name, respectively.
+	//  The combined size of the `metadata` and `extendedMetadata` objects can be a maximum of 32,000 bytes.
+	// +kubebuilder:validation:Optional
+	Metadata map[string]string `json:"metadata,omitempty"`
+	// The shape of an instance. The shape determines the number of CPUs, amount of memory,
+	// and other resources allocated to the instance.
+	// You can enumerate all available shapes by calling ListShapes.
+	// +kubebuilder:validation:Optional
+	Shape string `json:"shape,omitempty"`
+	// +kubebuilder:validation:Optional
+	ShapeConfig InstanceConfigurationInstanceDetailsLaunchDetailsShapeConfig `json:"shapeConfig,omitempty"`
+	// +kubebuilder:validation:Optional
+	PlatformConfig InstanceConfigurationInstanceDetailsLaunchDetailsPlatformConfigObservedState `json:"platformConfig,omitempty"`
+	// +kubebuilder:validation:Optional
+	SourceDetails InstanceConfigurationInstanceDetailsLaunchDetailsSourceDetailsObservedState `json:"sourceDetails,omitempty"`
+	// A fault domain is a grouping of hardware and infrastructure within an availability domain.
+	// Each availability domain contains three fault domains. Fault domains let you distribute your
+	// instances so that they are not on the same physical hardware within a single availability domain.
+	// A hardware failure or Compute hardware maintenance that affects one fault domain does not affect
+	// instances in other fault domains.
+	// If you do not specify the fault domain, the system selects one for you.
+	//
+	// To get a list of fault domains, use the
+	// ListFaultDomains operation in the
+	// Identity and Access Management Service API.
+	// Example: `FAULT-DOMAIN-1`
+	// +kubebuilder:validation:Optional
+	FaultDomain string `json:"faultDomain,omitempty"`
+	// The OCID of the dedicated virtual machine host to place the instance on.
+	// Dedicated VM hosts can be used when launching individual instances from an instance configuration. They
+	// cannot be used to launch instance pools.
+	// +kubebuilder:validation:Optional
+	DedicatedVmHostId string `json:"dedicatedVmHostId,omitempty"`
+	// Specifies the configuration mode for launching virtual machine (VM) instances. The configuration modes are:
+	// * `NATIVE` - VM instances launch with iSCSI boot and VFIO devices. The default value for platform images.
+	// * `EMULATED` - VM instances launch with emulated devices, such as the E1000 network driver and emulated SCSI disk controller.
+	// * `PARAVIRTUALIZED` - VM instances launch with paravirtualized devices using VirtIO drivers.
+	// * `CUSTOM` - VM instances launch with custom configuration settings specified in the `LaunchOptions` parameter.
+	// +kubebuilder:validation:Optional
+	LaunchMode string `json:"launchMode,omitempty"`
+	// +kubebuilder:validation:Optional
+	LaunchOptions InstanceConfigurationInstanceDetailsLaunchDetailsLaunchOptions `json:"launchOptions,omitempty"`
+	// +kubebuilder:validation:Optional
+	AgentConfig InstanceConfigurationInstanceDetailsLaunchDetailsAgentConfig `json:"agentConfig,omitempty"`
+	// Whether to enable in-transit encryption for the data volume's paravirtualized attachment. The default value is false.
+	// +kubebuilder:validation:Optional
+	IsPvEncryptionInTransitEnabled bool `json:"isPvEncryptionInTransitEnabled,omitempty"`
+	// The preferred maintenance action for an instance. The default is LIVE_MIGRATE, if live migration is supported.
+	// * `LIVE_MIGRATE` - Run maintenance using a live migration.
+	// * `REBOOT` - Run maintenance using a reboot.
+	// +kubebuilder:validation:Optional
+	PreferredMaintenanceAction string `json:"preferredMaintenanceAction,omitempty"`
+	// +kubebuilder:validation:Optional
+	InstanceOptions InstanceConfigurationInstanceDetailsLaunchDetailsInstanceOptions `json:"instanceOptions,omitempty"`
+	// +kubebuilder:validation:Optional
+	AvailabilityConfig InstanceConfigurationInstanceDetailsLaunchDetailsAvailabilityConfig `json:"availabilityConfig,omitempty"`
+	// +kubebuilder:validation:Optional
+	PreemptibleInstanceConfig InstanceConfigurationInstanceDetailsLaunchDetailsPreemptibleInstanceConfigObservedState `json:"preemptibleInstanceConfig,omitempty"`
+}
+
+// InstanceConfigurationInstanceDetailsSecondaryVnicObservedState defines nested fields for InstanceConfiguration.InstanceDetails.SecondaryVnic.
+type InstanceConfigurationInstanceDetailsSecondaryVnicObservedState struct {
+	// +kubebuilder:validation:Optional
+	CreateVnicDetails InstanceConfigurationInstanceDetailsSecondaryVnicCreateVnicDetails `json:"createVnicDetails,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
+	// Which physical network interface card (NIC) the VNIC will use. Defaults to 0.
+	// Certain bare metal instance shapes have two active physical NICs (0 and 1). If
+	// you add a secondary VNIC to one of these instances, you can specify which NIC
+	// the VNIC will use. For more information, see
+	// Virtual Network Interface Cards (VNICs) (https://docs.cloud.oracle.com/iaas/Content/Network/Tasks/managingVNICs.htm).
+	// +kubebuilder:validation:Optional
+	NicIndex int `json:"nicIndex,omitempty"`
+}
+
+// InstanceConfigurationInstanceDetailsObservedState defines nested fields for InstanceConfiguration.InstanceDetails.
+type InstanceConfigurationInstanceDetailsObservedState struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
+	InstanceType string `json:"instanceType,omitempty"`
+	// The Compute Instance Configuration parameters.
+	// +kubebuilder:validation:Optional
+	Options []InstanceConfigurationInstanceDetailsOptionObservedState `json:"options,omitempty"`
+	// Block volume parameters.
+	// +kubebuilder:validation:Optional
+	BlockVolumes []InstanceConfigurationInstanceDetailsBlockVolumeObservedState `json:"blockVolumes,omitempty"`
+	// +kubebuilder:validation:Optional
+	LaunchDetails InstanceConfigurationInstanceDetailsLaunchDetailsObservedState `json:"launchDetails,omitempty"`
+	// Secondary VNIC parameters.
+	// +kubebuilder:validation:Optional
+	SecondaryVnics []InstanceConfigurationInstanceDetailsSecondaryVnicObservedState `json:"secondaryVnics,omitempty"`
+}
+
 // InstanceConfigurationStatus defines the observed state of InstanceConfiguration.
 type InstanceConfigurationStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
@@ -1530,8 +2351,8 @@ type InstanceConfigurationStatus struct {
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no
 	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
-	FreeformTags    map[string]string                    `json:"freeformTags,omitempty"`
-	InstanceDetails InstanceConfigurationInstanceDetails `json:"instanceDetails,omitempty"`
+	FreeformTags    map[string]string                                 `json:"freeformTags,omitempty"`
+	InstanceDetails InstanceConfigurationInstanceDetailsObservedState `json:"instanceDetails,omitempty"`
 	// Parameters that were not specified when the instance configuration was created, but that
 	// are required to launch an instance from the instance configuration. See the
 	// LaunchInstanceConfiguration operation.

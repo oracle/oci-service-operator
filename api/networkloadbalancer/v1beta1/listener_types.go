@@ -42,6 +42,24 @@ type ListenerSpec struct {
 // ListenerStatus defines the observed state of Listener.
 type ListenerStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// A friendly name for the listener. It must be unique and it cannot be changed.
+	// Example: `example_listener`
+	Name string `json:"name,omitempty"`
+	// The name of the associated backend set.
+	// Example: `example_backend_set`
+	DefaultBackendSetName string `json:"defaultBackendSetName,omitempty"`
+	// The communication port for the listener.
+	// Example: `80`
+	Port int `json:"port,omitempty"`
+	// The protocol on which the listener accepts connection requests.
+	// For public network load balancers, ANY protocol refers to TCP/UDP.
+	// For private network load balancers, ANY protocol refers to TCP/UDP/ICMP (note that ICMP requires isPreserveSourceDestination to be set to true).
+	// To get a list of valid protocols, use the ListNetworkLoadBalancersProtocols
+	// operation.
+	// Example: `TCP`
+	Protocol string `json:"protocol,omitempty"`
+	// IP version associated with the listener.
+	IpVersion string `json:"ipVersion,omitempty"`
 }
 
 // +kubebuilder:object:root=true

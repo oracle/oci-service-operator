@@ -28,6 +28,9 @@ type VaultReplicaStatus struct {
 	ManagementEndpoint string `json:"managementEndpoint,omitempty"`
 	// Region to which vault is replicated to
 	Region string `json:"region,omitempty"`
+	// Status of the Vault
+	// This uses a distinct JSON name so it can coexist with the OSOK status envelope.
+	Status string `json:"sdkStatus,omitempty"`
 }
 
 // +kubebuilder:object:root=true

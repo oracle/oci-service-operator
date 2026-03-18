@@ -93,6 +93,33 @@ type ComputeCapacityReservationInstanceReservationConfig struct {
 	ClusterConfig ComputeCapacityReservationInstanceReservationConfigClusterConfig `json:"clusterConfig,omitempty"`
 }
 
+// ComputeCapacityReservationInstanceReservationConfigObservedState defines nested fields for ComputeCapacityReservation.InstanceReservationConfig.
+type ComputeCapacityReservationInstanceReservationConfigObservedState struct {
+	// The shape requested when launching instances using reserved capacity.
+	// The shape determines the number of CPUs, amount of memory,
+	// and other resources allocated to the instance.
+	// You can list all available shapes by calling ListComputeCapacityReservationInstanceShapes.
+	// +kubebuilder:validation:Required
+	InstanceShape string `json:"instanceShape"`
+	// The total number of instances that can be launched from the capacity configuration.
+	// +kubebuilder:validation:Required
+	ReservedCount int64 `json:"reservedCount"`
+	// +kubebuilder:validation:Optional
+	InstanceShapeConfig ComputeCapacityReservationInstanceReservationConfigInstanceShapeConfig `json:"instanceShapeConfig,omitempty"`
+	// The fault domain to use for instances created using this capacity configuration.
+	// For more information, see Fault Domains (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/regions.htm#fault).
+	// If you do not specify the fault domain, the capacity is available for an instance
+	// that does not specify a fault domain. To change the fault domain for a reservation,
+	// delete the reservation and create a new one in the preferred fault domain.
+	// To retrieve a list of fault domains, use the `ListFaultDomains` operation in
+	// the Identity and Access Management Service API (https://docs.cloud.oracle.com/iaas/api/#/en/identity/20160918/).
+	// Example: `FAULT-DOMAIN-1`
+	// +kubebuilder:validation:Optional
+	FaultDomain string `json:"faultDomain,omitempty"`
+	// +kubebuilder:validation:Optional
+	ClusterConfig ComputeCapacityReservationInstanceReservationConfigClusterConfig `json:"clusterConfig,omitempty"`
+}
+
 // ComputeCapacityReservationStatus defines the observed state of ComputeCapacityReservation.
 type ComputeCapacityReservationStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
@@ -126,7 +153,7 @@ type ComputeCapacityReservationStatus struct {
 	// The capacity configurations for the capacity reservation.
 	// To use the reservation for the desired shape, specify the shape, count, and
 	// optionally the fault domain where you want this configuration.
-	InstanceReservationConfigs []ComputeCapacityReservationInstanceReservationConfig `json:"instanceReservationConfigs,omitempty"`
+	InstanceReservationConfigs []ComputeCapacityReservationInstanceReservationConfigObservedState `json:"instanceReservationConfigs,omitempty"`
 	// The number of instances for which capacity will be held with this
 	// compute capacity reservation. This number is the sum of the values of the `reservedCount` fields
 	// for all of the instance capacity configurations under this reservation.

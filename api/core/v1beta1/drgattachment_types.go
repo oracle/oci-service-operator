@@ -81,6 +81,29 @@ type DrgAttachmentNetworkDetails struct {
 	VcnRouteType string `json:"vcnRouteType,omitempty"`
 }
 
+// DrgAttachmentNetworkDetailsObservedState defines nested fields for DrgAttachment.NetworkDetails.
+type DrgAttachmentNetworkDetailsObservedState struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the network attached to the DRG.
+	// +kubebuilder:validation:Optional
+	Id string `json:"id,omitempty"`
+	// +kubebuilder:validation:Optional
+	Type string `json:"type,omitempty"`
+	// This is the OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the route table that is used to route the traffic as it enters a VCN through this attachment.
+	// For information about why you would associate a route table with a DRG attachment, see
+	// Advanced Scenario: Transit Routing (https://docs.cloud.oracle.com/iaas/Content/Network/Tasks/transitrouting.htm).
+	// For information about why you would associate a route table with a DRG attachment, see:
+	//   * Transit Routing: Access to Multiple VCNs in Same Region (https://docs.cloud.oracle.com/iaas/Content/Network/Tasks/transitrouting.htm)
+	//   * Transit Routing: Private Access to Oracle Services (https://docs.cloud.oracle.com/iaas/Content/Network/Tasks/transitroutingoracleservices.htm)
+	// +kubebuilder:validation:Optional
+	RouteTableId string `json:"routeTableId,omitempty"`
+	// Indicates whether the VCN CIDRs or the individual subnet CIDRs are imported from the attachment.
+	// Routes from the VCN ingress route table are always imported.
+	// +kubebuilder:validation:Optional
+	VcnRouteType string `json:"vcnRouteType,omitempty"`
+}
+
 // DrgAttachmentStatus defines the observed state of DrgAttachment.
 type DrgAttachmentStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
@@ -100,8 +123,8 @@ type DrgAttachmentStatus struct {
 	TimeCreated string `json:"timeCreated,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the DRG route table that is assigned to this attachment.
 	// The DRG route table manages traffic inside the DRG.
-	DrgRouteTableId string                      `json:"drgRouteTableId,omitempty"`
-	NetworkDetails  DrgAttachmentNetworkDetails `json:"networkDetails,omitempty"`
+	DrgRouteTableId string                                   `json:"drgRouteTableId,omitempty"`
+	NetworkDetails  DrgAttachmentNetworkDetailsObservedState `json:"networkDetails,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a
 	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`

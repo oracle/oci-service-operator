@@ -27,6 +27,10 @@ type NamespaceMetadataStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
 	// The Object Storage namespace to which the metadata belongs.
 	Namespace string `json:"namespace,omitempty"`
+	// If the field is set, specifies the default compartment assignment for the Amazon S3 Compatibility API.
+	DefaultS3CompartmentId string `json:"defaultS3CompartmentId,omitempty"`
+	// If the field is set, specifies the default compartment assignment for the Swift API.
+	DefaultSwiftCompartmentId string `json:"defaultSwiftCompartmentId,omitempty"`
 }
 
 // +kubebuilder:object:root=true

@@ -89,6 +89,13 @@ spec:
               lifecycleState:
                 description: The state of the replica.
                 type: string
+              maxWriteUnits:
+                description: Maximum sustained write throughput limit of the replica
+                  table.
+                type: integer
+              region:
+                description: A customer-facing region identifier
+                type: string
               status:
                 properties:
                   conditions:

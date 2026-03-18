@@ -147,15 +147,98 @@ spec:
                 description: The OCID of the compartment that the resource belongs
                   to.
                 type: string
+              configuration:
+                description: LogConfigurationObservedState defines nested fields for
+                  Log.Configuration.
+                properties:
+                  archiving:
+                    description: LogConfigurationArchiving defines nested fields for
+                      Log.Configuration.Archiving.
+                    properties:
+                      isEnabled:
+                        description: True if archiving enabled. This field is now
+                          deprecated, you should use Service Connector Hub to enable
+                          archiving.
+                        type: boolean
+                    type: object
+                  compartmentId:
+                    description: The OCID of the compartment that the resource belongs
+                      to.
+                    type: string
+                  source:
+                    description: LogConfigurationSourceObservedState defines nested
+                      fields for Log.Configuration.Source.
+                    properties:
+                      category:
+                        description: Log object category.
+                        type: string
+                      jsonData:
+                        type: string
+                      parameters:
+                        additionalProperties:
+                          type: string
+                        description: Log category parameters are stored here.
+                        type: object
+                      resource:
+                        description: The unique identifier of the resource emitting
+                          the log.
+                        type: string
+                      service:
+                        description: Service generating log.
+                        type: string
+                      sourceType:
+                        type: string
+                    required:
+                    - category
+                    - resource
+                    - service
+                    type: object
+                required:
+                - source
+                type: object
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a
+                  namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              displayName:
+                description: |-
+                  The user-friendly display name. This must be unique within the enclosing resource,
+                  and it's changeable. Avoid entering confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no
+                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
               id:
                 description: The OCID of the resource.
                 type: string
+              isEnabled:
+                description: Whether or not this resource is currently enabled.
+                type: boolean
               lifecycleState:
                 description: The pipeline state.
                 type: string
               logGroupId:
                 description: Log group OCID.
                 type: string
+              logType:
+                description: The logType that the log object is for, whether custom
+                  or service.
+                type: string
+              retentionDuration:
+                description: Log retention duration in 30-day increments (30, 60,
+                  90 and so on until 180).
+                type: integer
               status:
                 properties:
                   conditions:

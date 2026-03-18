@@ -74,12 +74,47 @@ type BucketSpec struct {
 // BucketStatus defines the observed state of Bucket.
 type BucketStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The Object Storage namespace in which the bucket resides.
+	Namespace string `json:"namespace,omitempty"`
+	// The name of the bucket. Avoid entering confidential information.
+	// Example: my-new-bucket1
+	Name string `json:"name,omitempty"`
+	// The compartment ID in which the bucket is authorized.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// Arbitrary string keys and values for user-defined metadata.
+	Metadata map[string]string `json:"metadata,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the user who created the bucket.
 	CreatedBy string `json:"createdBy,omitempty"`
 	// The date and time the bucket was created, as described in RFC 2616 (https://tools.ietf.org/html/rfc2616#section-14.29).
 	TimeCreated string `json:"timeCreated,omitempty"`
 	// The entity tag (ETag) for the bucket.
 	Etag string `json:"etag,omitempty"`
+	// The type of public access enabled on this bucket.
+	// A bucket is set to `NoPublicAccess` by default, which only allows an authenticated caller to access the
+	// bucket and its contents. When `ObjectRead` is enabled on the bucket, public access is allowed for the
+	// `GetObject`, `HeadObject`, and `ListObjects` operations. When `ObjectReadWithoutList` is enabled on the
+	// bucket, public access is allowed for the `GetObject` and `HeadObject` operations.
+	PublicAccessType string `json:"publicAccessType,omitempty"`
+	// The storage tier type assigned to the bucket. A bucket is set to `Standard` tier by default, which means
+	// objects uploaded or copied to the bucket will be in the standard storage tier. When the `Archive` tier type
+	// is set explicitly for a bucket, objects uploaded or copied to the bucket will be stored in archive storage.
+	// The `storageTier` property is immutable after bucket is created.
+	StorageTier string `json:"storageTier,omitempty"`
+	// Whether or not events are emitted for object state changes in this bucket. By default, `objectEventsEnabled` is
+	// set to `false`. Set `objectEventsEnabled` to `true` to emit events for object state changes. For more information
+	// about events, see Overview of Events (https://docs.cloud.oracle.com/Content/Events/Concepts/eventsoverview.htm).
+	ObjectEventsEnabled bool `json:"objectEventsEnabled,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of a master encryption key used to call the Key Management
+	// service to generate a data encryption key or to encrypt or decrypt a data encryption key.
+	KmsKeyId string `json:"kmsKeyId,omitempty"`
 	// The entity tag (ETag) for the live object lifecycle policy on the bucket.
 	ObjectLifecyclePolicyEtag string `json:"objectLifecyclePolicyEtag,omitempty"`
 	// The approximate number of objects in the bucket. Count statistics are reported periodically. You will see a
@@ -96,6 +131,13 @@ type BucketStatus struct {
 	IsReadOnly bool `json:"isReadOnly,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the bucket.
 	Id string `json:"id,omitempty"`
+	// The versioning status on the bucket. A bucket is created with versioning `Disabled` by default.
+	// For versioning `Enabled`, objects are protected from overwrites and deletes, by maintaining their version history. When versioning is `Suspended`, the previous versions will still remain but new versions will no longer be created when overwitten or deleted.
+	Versioning string `json:"versioning,omitempty"`
+	// The auto tiering status on the bucket. A bucket is created with auto tiering `Disabled` by default.
+	// For auto tiering `InfrequentAccess`, objects are transitioned automatically between the 'Standard'
+	// and 'InfrequentAccess' tiers based on the access pattern of the objects.
+	AutoTiering string `json:"autoTiering,omitempty"`
 }
 
 // +kubebuilder:object:root=true

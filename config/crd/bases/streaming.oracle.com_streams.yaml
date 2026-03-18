@@ -16,7 +16,7 @@ spec:
   versions:
   - additionalPrinterColumns:
     - jsonPath: .spec.name
-      name: Streamname
+      name: Name
       priority: 1
       type: string
     - description: status of the Stream

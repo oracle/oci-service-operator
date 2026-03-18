@@ -18,6 +18,7 @@ type SecretBundleSpec struct {
 
 // SecretBundleContent defines nested fields for SecretBundle.SecretBundleContent.
 type SecretBundleContent struct {
+	JsonData    string `json:"jsonData,omitempty"`
 	ContentType string `json:"contentType,omitempty"`
 	// The base64-encoded content of the secret.
 	Content string `json:"content,omitempty"`

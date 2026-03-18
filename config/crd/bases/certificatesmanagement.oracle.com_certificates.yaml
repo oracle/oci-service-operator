@@ -309,6 +309,36 @@ spec:
                         type: string
                     type: object
                 type: object
+              certificateRules:
+                description: A list of rules that control how the certificate is used
+                  and managed.
+                items:
+                  description: CertificateRuleObservedState defines nested fields
+                    for Certificate.CertificateRule.
+                  properties:
+                    advanceRenewalPeriod:
+                      description: |-
+                        A property specifying the period of time, in days, before the certificate's targeted renewal that the process should occur.
+                        Expressed in ISO 8601 (https://en.wikipedia.org/wiki/ISO_8601#Time_intervals) format.
+                      type: string
+                    jsonData:
+                      type: string
+                    renewalInterval:
+                      description: |-
+                        A property specifying how often, in days, a certificate should be renewed.
+                        Expressed in ISO 8601 (https://en.wikipedia.org/wiki/ISO_8601#Time_intervals) format.
+                      type: string
+                    ruleType:
+                      type: string
+                  required:
+                  - advanceRenewalPeriod
+                  - renewalInterval
+                  type: object
+                type: array
+              compartmentId:
+                description: The OCID of the compartment where you want to create
+                  the certificate.
+                type: string
               configType:
                 description: The origin of the certificate.
                 type: string
@@ -481,6 +511,28 @@ spec:
                     format: int64
                     type: integer
                 type: object
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              description:
+                description: A brief description of the certificate. Avoid entering
+                  confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
               id:
                 description: The OCID of the certificate.
                 type: string
@@ -497,6 +549,12 @@ spec:
                 type: string
               lifecycleState:
                 description: The current lifecycle state of the certificate.
+                type: string
+              name:
+                description: A user-friendly name for the certificate. Names are unique
+                  within a compartment. Avoid entering confidential information. Valid
+                  characters are uppercase or lowercase letters, numbers, hyphens,
+                  underscores, and periods.
                 type: string
               signatureAlgorithm:
                 description: The algorithm used to sign the public key certificate.

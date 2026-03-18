@@ -77,6 +77,37 @@ type LogConfiguration struct {
 	Archiving LogConfigurationArchiving `json:"archiving,omitempty"`
 }
 
+// LogConfigurationSourceObservedState defines nested fields for Log.Configuration.Source.
+type LogConfigurationSourceObservedState struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
+	SourceType string `json:"sourceType,omitempty"`
+	// Service generating log.
+	// +kubebuilder:validation:Required
+	Service string `json:"service"`
+	// The unique identifier of the resource emitting the log.
+	// +kubebuilder:validation:Required
+	Resource string `json:"resource"`
+	// Log object category.
+	// +kubebuilder:validation:Required
+	Category string `json:"category"`
+	// Log category parameters are stored here.
+	// +kubebuilder:validation:Optional
+	Parameters map[string]string `json:"parameters,omitempty"`
+}
+
+// LogConfigurationObservedState defines nested fields for Log.Configuration.
+type LogConfigurationObservedState struct {
+	// +kubebuilder:validation:Required
+	Source LogConfigurationSourceObservedState `json:"source"`
+	// The OCID of the compartment that the resource belongs to.
+	// +kubebuilder:validation:Optional
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// +kubebuilder:validation:Optional
+	Archiving LogConfigurationArchiving `json:"archiving,omitempty"`
+}
+
 // LogStatus defines the observed state of Log.
 type LogStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
@@ -84,14 +115,32 @@ type LogStatus struct {
 	Id string `json:"id,omitempty"`
 	// Log group OCID.
 	LogGroupId string `json:"logGroupId,omitempty"`
+	// The user-friendly display name. This must be unique within the enclosing resource,
+	// and it's changeable. Avoid entering confidential information.
+	DisplayName string `json:"displayName,omitempty"`
+	// The logType that the log object is for, whether custom or service.
+	LogType string `json:"logType,omitempty"`
 	// The pipeline state.
 	LifecycleState string `json:"lifecycleState,omitempty"`
 	// The OCID of the tenancy.
 	TenancyId string `json:"tenancyId,omitempty"`
+	// Whether or not this resource is currently enabled.
+	IsEnabled bool `json:"isEnabled,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags  map[string]string             `json:"freeformTags,omitempty"`
+	Configuration LogConfigurationObservedState `json:"configuration,omitempty"`
 	// Time the resource was created.
 	TimeCreated string `json:"timeCreated,omitempty"`
 	// Time the resource was last modified.
 	TimeLastModified string `json:"timeLastModified,omitempty"`
+	// Log retention duration in 30-day increments (30, 60, 90 and so on until 180).
+	RetentionDuration int `json:"retentionDuration,omitempty"`
 	// The OCID of the compartment that the resource belongs to.
 	CompartmentId string `json:"compartmentId,omitempty"`
 }

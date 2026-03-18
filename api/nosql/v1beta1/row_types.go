@@ -63,6 +63,8 @@ type RowUsage struct {
 // RowStatus defines the observed state of Row.
 type RowStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The map of values from a row.
+	Value map[string]shared.JSONValue `json:"value,omitempty"`
 	// The expiration time of the row. A zero value indicates that
 	// the row does not expire. An RFC3339 formatted datetime
 	// string.

@@ -48,6 +48,12 @@ type AlarmStatusObservedState struct {
 	// Note: A three-minute lag for this value accounts for any late-arriving metrics.
 	// Example: `2023-02-01T01:02:29.600Z`
 	TimestampTriggered string `json:"timestampTriggered,omitempty"`
+	// The status of this alarm.
+	// Status is collective, across all metric streams in the alarm.
+	// To list alarm status for each metric stream, use RetrieveDimensionStates.
+	// Example: `FIRING`
+	// This uses a distinct JSON name so it can coexist with the OSOK status envelope.
+	Status string `json:"sdkStatus,omitempty"`
 	// The configuration details for suppressing an alarm.
 	Suppression AlarmStatusSuppression `json:"suppression,omitempty"`
 }

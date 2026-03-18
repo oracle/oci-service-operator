@@ -43,11 +43,26 @@ type PreauthenticatedRequestStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
 	// The unique identifier to use when directly addressing the pre-authenticated request.
 	Id string `json:"id,omitempty"`
+	// The user-provided name of the pre-authenticated request.
+	Name string `json:"name,omitempty"`
 	// The URI to embed in the URL when using the pre-authenticated request.
 	AccessUri string `json:"accessUri,omitempty"`
+	// The operation that can be performed on this resource.
+	AccessType string `json:"accessType,omitempty"`
+	// The expiration date for the pre-authenticated request as per RFC 3339 (https://tools.ietf.org/html/rfc3339). After
+	// this date the pre-authenticated request will no longer be valid.
+	TimeExpires string `json:"timeExpires,omitempty"`
 	// The date when the pre-authenticated request was created as per specification
 	// RFC 3339 (https://tools.ietf.org/html/rfc3339).
 	TimeCreated string `json:"timeCreated,omitempty"`
+	// The name of the object that is being granted access to by the pre-authenticated request. Avoid entering confidential
+	// information. The object name can be null and if so, the pre-authenticated request grants access to the entire bucket.
+	// Example: test/object1.log
+	ObjectName string `json:"objectName,omitempty"`
+	// Specifies whether a list operation is allowed on a PAR with accessType "AnyObjectRead" or "AnyObjectReadWrite".
+	// Deny: Prevents the user from performing a list operation.
+	// ListObjects: Authorizes the user to perform a list operation.
+	BucketListingAction string `json:"bucketListingAction,omitempty"`
 	// The full Path for the object.
 	FullPath string `json:"fullPath,omitempty"`
 }

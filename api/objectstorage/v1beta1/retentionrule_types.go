@@ -44,12 +44,18 @@ type RetentionRuleStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
 	// Unique identifier for the retention rule.
 	Id string `json:"id,omitempty"`
+	// User specified name for the retention rule.
+	DisplayName string `json:"displayName,omitempty"`
 	// The entity tag (ETag) for the retention rule.
 	Etag string `json:"etag,omitempty"`
 	// The date and time that the retention rule was created as per RFC3339 (https://tools.ietf.org/html/rfc3339).
 	TimeCreated string `json:"timeCreated,omitempty"`
 	// The date and time that the retention rule was modified as per RFC3339 (https://tools.ietf.org/html/rfc3339).
-	TimeModified string `json:"timeModified,omitempty"`
+	TimeModified string                `json:"timeModified,omitempty"`
+	Duration     RetentionRuleDuration `json:"duration,omitempty"`
+	// The date and time as per RFC 3339 (https://tools.ietf.org/html/rfc3339) after which this rule becomes locked.
+	// and can only be deleted by deleting the bucket.
+	TimeRuleLocked string `json:"timeRuleLocked,omitempty"`
 }
 
 // +kubebuilder:object:root=true

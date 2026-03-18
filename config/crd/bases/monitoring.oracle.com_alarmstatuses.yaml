@@ -64,6 +64,14 @@ spec:
                 description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the alarm.
                 type: string
+              sdkStatus:
+                description: |-
+                  The status of this alarm.
+                  Status is collective, across all metric streams in the alarm.
+                  To list alarm status for each metric stream, use RetrieveDimensionStates.
+                  Example: `FIRING`
+                  This uses a distinct JSON name so it can coexist with the OSOK status envelope.
+                type: string
               severity:
                 description: |-
                   The perceived type of response required when the alarm is in the "FIRING" state.

@@ -45,6 +45,7 @@ type ResolverEndpointSpec struct {
 // ResolverEndpointStatus defines the observed state of ResolverEndpoint.
 type ResolverEndpointStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	JsonData   string            `json:"jsonData,omitempty"`
 	// An IP address from which forwarded queries may be sent. For VNIC endpoints, this IP address must be part
 	// of the subnet and will be assigned by the system if unspecified when isForwarding is true.
 	ForwardingAddress string `json:"forwardingAddress,omitempty"`
@@ -71,7 +72,8 @@ type ResolverEndpointStatus struct {
 	// The current state of the resource.
 	LifecycleState string `json:"lifecycleState,omitempty"`
 	// The canonical absolute URL of the resource.
-	Self string `json:"self,omitempty"`
+	Self         string `json:"self,omitempty"`
+	EndpointType string `json:"endpointType,omitempty"`
 	// The OCID of a subnet. Must be part of the VCN that the resolver is attached to.
 	SubnetId string `json:"subnetId,omitempty"`
 	// An array of network security group OCIDs for the resolver endpoint. These must be part of the VCN that the

@@ -375,8 +375,8 @@ spec:
                 description: The set of rules governing what traffic the VCN flow
                   log collects.
                 items:
-                  description: CaptureFilterFlowLogCaptureFilterRule defines nested
-                    fields for CaptureFilter.FlowLogCaptureFilterRule.
+                  description: CaptureFilterFlowLogCaptureFilterRuleObservedState
+                    defines nested fields for CaptureFilter.FlowLogCaptureFilterRule.
                   properties:
                     destinationCidr:
                       description: Traffic to this CIDR will be captured in the VCN
@@ -423,7 +423,7 @@ spec:
                         VCN flow log.
                       type: string
                     tcpOptions:
-                      description: CaptureFilterFlowLogCaptureFilterRuleTcpOptions
+                      description: CaptureFilterFlowLogCaptureFilterRuleTcpOptionsObservedState
                         defines nested fields for CaptureFilter.FlowLogCaptureFilterRule.TcpOptions.
                       properties:
                         destinationPortRange:
@@ -462,7 +462,7 @@ spec:
                           type: object
                       type: object
                     udpOptions:
-                      description: CaptureFilterFlowLogCaptureFilterRuleUdpOptions
+                      description: CaptureFilterFlowLogCaptureFilterRuleUdpOptionsObservedState
                         defines nested fields for CaptureFilter.FlowLogCaptureFilterRule.UdpOptions.
                       properties:
                         destinationPortRange:
@@ -566,8 +566,8 @@ spec:
               vtapCaptureFilterRules:
                 description: The set of rules governing what traffic a VTAP mirrors.
                 items:
-                  description: CaptureFilterVtapCaptureFilterRule defines nested fields
-                    for CaptureFilter.VtapCaptureFilterRule.
+                  description: CaptureFilterVtapCaptureFilterRuleObservedState defines
+                    nested fields for CaptureFilter.VtapCaptureFilterRule.
                   properties:
                     destinationCidr:
                       description: Traffic sent to this CIDR block through the VTAP
@@ -603,8 +603,8 @@ spec:
                         will be mirrored to the VTAP target.
                       type: string
                     tcpOptions:
-                      description: CaptureFilterVtapCaptureFilterRuleTcpOptions defines
-                        nested fields for CaptureFilter.VtapCaptureFilterRule.TcpOptions.
+                      description: CaptureFilterVtapCaptureFilterRuleTcpOptionsObservedState
+                        defines nested fields for CaptureFilter.VtapCaptureFilterRule.TcpOptions.
                       properties:
                         destinationPortRange:
                           description: CaptureFilterVtapCaptureFilterRuleTcpOptionsDestinationPortRange
@@ -646,8 +646,8 @@ spec:
                         mirror.
                       type: string
                     udpOptions:
-                      description: CaptureFilterVtapCaptureFilterRuleUdpOptions defines
-                        nested fields for CaptureFilter.VtapCaptureFilterRule.UdpOptions.
+                      description: CaptureFilterVtapCaptureFilterRuleUdpOptionsObservedState
+                        defines nested fields for CaptureFilter.VtapCaptureFilterRule.UdpOptions.
                       properties:
                         destinationPortRange:
                           description: CaptureFilterVtapCaptureFilterRuleUdpOptionsDestinationPortRange

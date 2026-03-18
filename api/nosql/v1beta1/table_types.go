@@ -118,14 +118,21 @@ type TableStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
 	// Unique identifier that is immutable.
 	Id string `json:"id,omitempty"`
+	// Compartment Identifier.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// Human-friendly table name, immutable.
+	Name string `json:"name,omitempty"`
 	// The time the the table was created. An RFC3339 formatted
 	// datetime string.
 	TimeCreated string `json:"timeCreated,omitempty"`
 	// The time the the table's metadata was last updated. An
 	// RFC3339 formatted datetime string.
-	TimeUpdated string `json:"timeUpdated,omitempty"`
+	TimeUpdated string      `json:"timeUpdated,omitempty"`
+	TableLimits TableLimits `json:"tableLimits,omitempty"`
 	// The state of a table.
 	LifecycleState string `json:"lifecycleState,omitempty"`
+	// True if this table can be reclaimed after an idle period.
+	IsAutoReclaimable bool `json:"isAutoReclaimable,omitempty"`
 	// If lifecycleState is INACTIVE, indicates when
 	// this table will be automatically removed.
 	// An RFC3339 formatted datetime string.
@@ -133,6 +140,8 @@ type TableStatus struct {
 	// A message describing the current state in more detail.
 	LifecycleDetails string      `json:"lifecycleDetails,omitempty"`
 	Schema           TableSchema `json:"schema,omitempty"`
+	// A DDL statement representing the schema.
+	DdlStatement string `json:"ddlStatement,omitempty"`
 	// The current state of this table's schema. Available states are
 	// MUTABLE - The schema can be changed. The table is not eligible for replication.
 	// FROZEN - The schema is immutable. The table is eligible for replication.
@@ -145,6 +154,14 @@ type TableStatus struct {
 	LocalReplicaInitializationInPercent int `json:"localReplicaInitializationInPercent,omitempty"`
 	// An array of Replica listing this table's replicas, if any
 	Replicas []TableReplica `json:"replicas,omitempty"`
+	// Simple key-value pair that is applied without any predefined
+	// name, type or scope. Exists for cross-compatibility only.
+	// Example: `{"bar-key": "value"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and
+	// scoped to a namespace.  Example: `{"foo-namespace":
+	// {"bar-key": "value"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// Read-only system tag. These predefined keys are scoped to
 	// namespaces.  At present the only supported namespace is
 	// `"orcl-cloud"`; and the only key in that namespace is

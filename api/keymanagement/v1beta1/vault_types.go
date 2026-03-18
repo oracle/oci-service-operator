@@ -91,10 +91,15 @@ type VaultExternalKeyManagerMetadataSummary struct {
 // VaultStatus defines the observed state of Vault.
 type VaultStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the compartment that contains this vault.
+	CompartmentId string `json:"compartmentId,omitempty"`
 	// The service endpoint to perform cryptographic operations against. Cryptographic operations include
 	// Encrypt (https://docs.cloud.oracle.com/api/#/en/key/latest/EncryptedData/Encrypt), Decrypt (https://docs.cloud.oracle.com/api/#/en/key/latest/DecryptedData/Decrypt),
 	// and GenerateDataEncryptionKey (https://docs.cloud.oracle.com/api/#/en/key/latest/GeneratedKey/GenerateDataEncryptionKey) operations.
 	CryptoEndpoint string `json:"cryptoEndpoint,omitempty"`
+	// A user-friendly name for the vault. It does not have to be unique, and it is changeable.
+	// Avoid entering confidential information.
+	DisplayName string `json:"displayName,omitempty"`
 	// The OCID of the vault.
 	Id string `json:"id,omitempty"`
 	// The vault's current lifecycle state.
@@ -105,8 +110,19 @@ type VaultStatus struct {
 	// The date and time this vault was created, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
 	// Example: `2018-04-03T21:10:29.600Z`
 	TimeCreated string `json:"timeCreated,omitempty"`
+	// The type of vault. Each type of vault stores the key with different
+	// degrees of isolation and has different options and pricing.
+	VaultType string `json:"vaultType,omitempty"`
 	// The OCID of the vault's wrapping key.
 	WrappingkeyId string `json:"wrappingkeyId,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// An optional property to indicate when to delete the vault, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
 	// Example: `2018-04-03T21:10:29.600Z`
 	TimeOfDeletion string `json:"timeOfDeletion,omitempty"`

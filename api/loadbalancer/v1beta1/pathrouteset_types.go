@@ -60,6 +60,11 @@ type PathRouteSetPathRoute struct {
 // PathRouteSetStatus defines the observed state of PathRouteSet.
 type PathRouteSetStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The unique name for this set of path route rules. Avoid entering confidential information.
+	// Example: `example_path_route_set`
+	Name string `json:"name,omitempty"`
+	// The set of path route rules.
+	PathRoutes []PathRouteSetPathRoute `json:"pathRoutes,omitempty"`
 }
 
 // +kubebuilder:object:root=true

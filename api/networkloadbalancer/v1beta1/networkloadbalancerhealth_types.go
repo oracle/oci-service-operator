@@ -19,6 +19,19 @@ type NetworkLoadBalancerHealthSpec struct {
 // NetworkLoadBalancerHealthStatus defines the observed state of NetworkLoadBalancerHealth.
 type NetworkLoadBalancerHealthStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The overall health status of the network load balancer.
+	// *  **OK:** All backend sets associated with the network load balancer return a status of `OK`.
+	// *  **WARNING:** At least one of the backend sets associated with the network load balancer returns a status of `WARNING`,
+	// no backend sets return a status of `CRITICAL`, and the network load balancer life cycle state is `ACTIVE`.
+	// *  **CRITICAL:** One or more of the backend sets associated with the network load balancer return a status of `CRITICAL`.
+	// *  **UNKNOWN:** If any one of the following conditions is true:
+	//     *  The network load balancer life cycle state is not `ACTIVE`.
+	//     *  No backend sets are defined for the network load balancer.
+	//     *  More than half of the backend sets associated with the network load balancer return a status of `UNKNOWN`, none of the backend
+	//        sets return a status of `WARNING` or `CRITICAL`, and the network load balancer life cycle state is `ACTIVE`.
+	//     *  The system could not retrieve metrics for any reason.
+	// This uses a distinct JSON name so it can coexist with the OSOK status envelope.
+	Status string `json:"sdkStatus,omitempty"`
 	// A list of backend sets that are currently in the `WARNING` health state. The list identifies each backend set by the
 	// user-friendly name you assigned when you created the backend set.
 	// Example: `example_backend_set3`

@@ -131,10 +131,62 @@ spec:
           status:
             description: AlarmSuppressionStatus defines the observed state of AlarmSuppression.
             properties:
+              alarmSuppressionTarget:
+                description: AlarmSuppressionTargetObservedState defines nested fields
+                  for AlarmSuppression.AlarmSuppressionTarget.
+                properties:
+                  alarmId:
+                    description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the alarm that is the target of the alarm suppression.
+                    type: string
+                  jsonData:
+                    type: string
+                  targetType:
+                    type: string
+                required:
+                - alarmId
+                type: object
               compartmentId:
                 description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the compartment containing the alarm suppression.
                 type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of predefined tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              description:
+                description: |-
+                  Human-readable reason for this alarm suppression.
+                  It does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
+                  Oracle recommends including tracking information for the event or associated work,
+                  such as a ticket number.
+                  Example: `Planned outage due to change IT-1234.`
+                type: string
+              dimensions:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Configured dimension filter for suppressing alarm state entries that include the set of specified dimension key-value pairs.
+                  Example: `{"resourceId": "ocid1.instance.region1.phx.exampleuniqueID"}`
+                type: object
+              displayName:
+                description: A user-friendly name for the alarm suppression. It does
+                  not have to be unique, and it's changeable. Avoid entering confidential
+                  information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"Department": "Finance"}`
+                type: object
               id:
                 description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the alarm suppression.
@@ -190,6 +242,16 @@ spec:
                 description: |-
                   The date and time the alarm suppression was created. Format defined by RFC3339.
                   Example: `2018-02-01T01:02:29.600Z`
+                type: string
+              timeSuppressFrom:
+                description: |-
+                  The start date and time for the suppression to take place, inclusive. Format defined by RFC3339.
+                  Example: `2018-02-01T01:02:29.600Z`
+                type: string
+              timeSuppressUntil:
+                description: |-
+                  The end date and time for the suppression to take place, inclusive. Format defined by RFC3339.
+                  Example: `2018-02-01T02:02:29.600Z`
                 type: string
               timeUpdated:
                 description: |-

@@ -34,6 +34,13 @@ type BackendHealthHealthCheckResult struct {
 // BackendHealthStatus defines the observed state of BackendHealth.
 type BackendHealthStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The general health status of the specified backend server as reported by the primary and standby load balancers.
+	// *   **OK:** Both health checks returned `OK`.
+	// *   **WARNING:** One health check returned `OK` and one did not.
+	// *   **CRITICAL:** Neither health check returned `OK`.
+	// *   **UNKNOWN:** One or both health checks returned `UNKNOWN`, or the system was unable to retrieve metrics at this time.
+	// This uses a distinct JSON name so it can coexist with the OSOK status envelope.
+	Status string `json:"sdkStatus,omitempty"`
 	// A list of the most recent health check results returned for the specified backend server.
 	HealthCheckResults []BackendHealthHealthCheckResult `json:"healthCheckResults,omitempty"`
 }

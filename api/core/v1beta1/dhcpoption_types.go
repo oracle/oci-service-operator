@@ -82,13 +82,15 @@ type DhcpOptionOption struct {
 	SearchDomainNames []string `json:"searchDomainNames"`
 }
 
-// DhcpOptionStatus defines the observed state of DhcpOption.
-type DhcpOptionStatus struct {
-	OsokStatus shared.OSOKStatus `json:"status"`
-	JsonData   string            `json:"jsonData,omitempty"`
-	Type       string            `json:"type,omitempty"`
+// DhcpOptionOptionObservedState defines nested fields for DhcpOption.Option.
+type DhcpOptionOptionObservedState struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
+	Type string `json:"type,omitempty"`
 	// If you set `serverType` to `CustomDnsServer`, specify the
 	// IP address of at least one DNS server of your choice (three maximum).
+	// +kubebuilder:validation:Optional
 	CustomDnsServers []string `json:"customDnsServers,omitempty"`
 	// * **VcnLocal:** Reserved for future use.
 	// * **VcnLocalPlusInternet:** Also referred to as "Internet and VCN Resolver".
@@ -103,7 +105,8 @@ type DhcpOptionStatus struct {
 	// DNS in Your Virtual Cloud Network (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/dns.htm).
 	// * **CustomDnsServer:** Instances use a DNS server of your choice (three
 	// maximum).
-	ServerType string `json:"serverType,omitempty"`
+	// +kubebuilder:validation:Required
+	ServerType string `json:"serverType"`
 	// A single search domain name according to RFC 952 (https://tools.ietf.org/html/rfc952)
 	// and RFC 1123 (https://tools.ietf.org/html/rfc1123). During a DNS query,
 	// the OS will append this search domain name to the value being queried.
@@ -115,7 +118,13 @@ type DhcpOptionStatus struct {
 	// set of DHCP options. Do not include this option with an empty list
 	// of search domain names, or with an empty string as the value for any search
 	// domain name.
-	SearchDomainNames []string `json:"searchDomainNames,omitempty"`
+	// +kubebuilder:validation:Required
+	SearchDomainNames []string `json:"searchDomainNames"`
+}
+
+// DhcpOptionStatus defines the observed state of DhcpOption.
+type DhcpOptionStatus struct {
+	OsokStatus shared.OSOKStatus `json:"status"`
 	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the set of DHCP options.
 	CompartmentId string `json:"compartmentId,omitempty"`
 	// Oracle ID (OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)) for the set of DHCP options.
@@ -123,7 +132,7 @@ type DhcpOptionStatus struct {
 	// The current state of the set of DHCP options.
 	LifecycleState string `json:"lifecycleState,omitempty"`
 	// The collection of individual DHCP options.
-	Options []DhcpOptionOption `json:"options,omitempty"`
+	Options []DhcpOptionOptionObservedState `json:"options,omitempty"`
 	// Date and time the set of DHCP options was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	// Example: `2016-08-25T21:10:29.600Z`
 	TimeCreated string `json:"timeCreated,omitempty"`

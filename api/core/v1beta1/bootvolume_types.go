@@ -106,6 +106,29 @@ type BootVolumeAutotunePolicy struct {
 	MaxVpusPerGB int64 `json:"maxVpusPerGB"`
 }
 
+// BootVolumeSourceDetailsObservedState defines nested fields for BootVolume.SourceDetails.
+type BootVolumeSourceDetailsObservedState struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
+	Type string `json:"type,omitempty"`
+	// The OCID of the boot volume backup.
+	// +kubebuilder:validation:Required
+	Id string `json:"id"`
+}
+
+// BootVolumeAutotunePolicyObservedState defines nested fields for BootVolume.AutotunePolicy.
+type BootVolumeAutotunePolicyObservedState struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
+	AutotuneType string `json:"autotuneType,omitempty"`
+	// This will be the maximum VPUs/GB performance level that the volume will be auto-tuned
+	// temporarily based on performance monitoring.
+	// +kubebuilder:validation:Required
+	MaxVpusPerGB int64 `json:"maxVpusPerGB"`
+}
+
 // BootVolumeStatus defines the observed state of BootVolume.
 type BootVolumeStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
@@ -153,8 +176,8 @@ type BootVolumeStatus struct {
 	// For performance autotune enabled volumes, it would be the Default(Minimum) VPUs/GB.
 	VpusPerGB int64 `json:"vpusPerGB,omitempty"`
 	// The size of the boot volume in GBs.
-	SizeInGBs     int64                   `json:"sizeInGBs,omitempty"`
-	SourceDetails BootVolumeSourceDetails `json:"sourceDetails,omitempty"`
+	SizeInGBs     int64                                `json:"sizeInGBs,omitempty"`
+	SourceDetails BootVolumeSourceDetailsObservedState `json:"sourceDetails,omitempty"`
 	// The OCID of the source volume group.
 	VolumeGroupId string `json:"volumeGroupId,omitempty"`
 	// The OCID of the Vault service master encryption key assigned to the boot volume.
@@ -167,7 +190,7 @@ type BootVolumeStatus struct {
 	// The list of boot volume replicas of this boot volume
 	BootVolumeReplicas []BootVolumeReplicaFields `json:"bootVolumeReplicas,omitempty"`
 	// The list of autotune policies enabled for this volume.
-	AutotunePolicies []BootVolumeAutotunePolicy `json:"autotunePolicies,omitempty"`
+	AutotunePolicies []BootVolumeAutotunePolicyObservedState `json:"autotunePolicies,omitempty"`
 }
 
 // +kubebuilder:object:root=true

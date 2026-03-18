@@ -286,6 +286,22 @@ type InstancePlatformConfig struct {
 	IsSymmetricMultiThreadingEnabled bool `json:"isSymmetricMultiThreadingEnabled,omitempty"`
 }
 
+// InstancePlatformConfigObservedState defines nested fields for Instance.PlatformConfig.
+type InstancePlatformConfigObservedState struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
+	Type string `json:"type,omitempty"`
+	// Whether symmetric multithreading is enabled on the instance. Symmetric multithreading is also
+	// called simultaneous multithreading (SMT) or Intel Hyper-Threading.
+	// Intel and AMD processors have two hardware execution threads per core (OCPU). SMT permits multiple
+	// independent threads of execution, to better use the resources and increase the efficiency
+	// of the CPU. When multithreading is disabled, only one thread is permitted to run on each core, which
+	// can provide higher or more predictable performance for some workloads.
+	// +kubebuilder:validation:Optional
+	IsSymmetricMultiThreadingEnabled bool `json:"isSymmetricMultiThreadingEnabled,omitempty"`
+}
+
 // InstancePreemptibleInstanceConfigPreemptionAction defines nested fields for Instance.PreemptibleInstanceConfig.PreemptionAction.
 type InstancePreemptibleInstanceConfigPreemptionAction struct {
 	JsonData string `json:"jsonData,omitempty"`
@@ -455,8 +471,8 @@ type InstanceStatus struct {
 	// After that time if instance hasn't been rebooted, Oracle will reboot the instance within 24 hours of the due time.
 	// Regardless of how the instance was stopped, the flag will be reset to empty as soon as instance reaches Stopped state.
 	// Example: `2018-05-25T21:10:29.600Z`
-	TimeMaintenanceRebootDue string                 `json:"timeMaintenanceRebootDue,omitempty"`
-	PlatformConfig           InstancePlatformConfig `json:"platformConfig,omitempty"`
+	TimeMaintenanceRebootDue string                              `json:"timeMaintenanceRebootDue,omitempty"`
+	PlatformConfig           InstancePlatformConfigObservedState `json:"platformConfig,omitempty"`
 	// The OCID of the Instance Configuration used to source launch details for this instance. Any other fields supplied in the instance launch request override the details stored in the Instance Configuration for this instance launch.
 	InstanceConfigurationId string `json:"instanceConfigurationId,omitempty"`
 	// The current state of the instance pool instance.

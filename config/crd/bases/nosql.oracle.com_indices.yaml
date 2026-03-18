@@ -104,11 +104,41 @@ spec:
           status:
             description: IndexStatus defines the observed state of Index.
             properties:
+              compartmentId:
+                description: Compartment Identifier.
+                type: string
+              keys:
+                description: A set of keys for a secondary index.
+                items:
+                  description: IndexKey defines nested fields for Index.Key.
+                  properties:
+                    columnName:
+                      description: The name of a column to be included as an index
+                        key.
+                      type: string
+                    jsonFieldType:
+                      description: |-
+                        If the specified column is of type JSON, jsonFieldType contains
+                        the type of the field indicated by jsonPath.
+                      type: string
+                    jsonPath:
+                      description: |-
+                        If the specified column is of type JSON, jsonPath contains
+                        a dotted path indicating the field within the JSON object
+                        that will be the index key.
+                      type: string
+                  required:
+                  - columnName
+                  type: object
+                type: array
               lifecycleDetails:
                 description: A message describing the current state in more detail.
                 type: string
               lifecycleState:
                 description: The state of an index.
+                type: string
+              name:
+                description: Index name.
                 type: string
               status:
                 properties:

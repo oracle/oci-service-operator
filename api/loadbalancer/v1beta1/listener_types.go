@@ -147,6 +147,35 @@ type ListenerConnectionConfiguration struct {
 // ListenerStatus defines the observed state of Listener.
 type ListenerStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// A friendly name for the listener. It must be unique and it cannot be changed.
+	// Example: `example_listener`
+	Name string `json:"name,omitempty"`
+	// The name of the associated backend set.
+	// Example: `example_backend_set`
+	DefaultBackendSetName string `json:"defaultBackendSetName,omitempty"`
+	// The communication port for the listener.
+	// Example: `80`
+	Port int `json:"port,omitempty"`
+	// The protocol on which the listener accepts connection requests.
+	// To get a list of valid protocols, use the ListProtocols
+	// operation.
+	// Example: `HTTP`
+	Protocol string `json:"protocol,omitempty"`
+	// An array of hostname resource names.
+	HostnameNames []string `json:"hostnameNames,omitempty"`
+	// Deprecated. Please use `routingPolicies` instead.
+	// The name of the set of path-based routing rules, PathRouteSet,
+	// applied to this listener's traffic.
+	// Example: `example_path_route_set`
+	PathRouteSetName        string                          `json:"pathRouteSetName,omitempty"`
+	SslConfiguration        ListenerSslConfiguration        `json:"sslConfiguration,omitempty"`
+	ConnectionConfiguration ListenerConnectionConfiguration `json:"connectionConfiguration,omitempty"`
+	// The names of the RuleSet to apply to the listener.
+	// Example: ["example_rule_set"]
+	RuleSetNames []string `json:"ruleSetNames,omitempty"`
+	// The name of the routing policy applied to this listener's traffic.
+	// Example: `example_routing_policy_name`
+	RoutingPolicyName string `json:"routingPolicyName,omitempty"`
 }
 
 // +kubebuilder:object:root=true

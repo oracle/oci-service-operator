@@ -202,12 +202,22 @@ func (s ServiceConfig) ObservedStateStructCandidates(rawName string) []string {
 	}
 
 	candidates := appendUniqueStrings(nil, rawName, rawName+"Summary")
+	indexByKey := make(map[string]int, len(candidates))
+	for i, candidate := range candidates {
+		indexByKey[normalizedTypeKey(candidate)] = i
+	}
 	for _, alias := range s.ObservedState.SDKAliases[rawName] {
 		alias = strings.TrimSpace(alias)
 		if alias == "" {
 			continue
 		}
-		candidates = appendUniqueStrings(candidates, alias)
+		key := normalizedTypeKey(alias)
+		if index, ok := indexByKey[key]; ok {
+			candidates[index] = alias
+			continue
+		}
+		indexByKey[key] = len(candidates)
+		candidates = append(candidates, alias)
 	}
 
 	return candidates

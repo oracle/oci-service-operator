@@ -114,12 +114,18 @@ type KeyExternalKeyReferenceDetails struct {
 // KeyStatus defines the observed state of Key.
 type KeyStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the compartment that contains this master encryption key.
+	CompartmentId string `json:"compartmentId,omitempty"`
 	// The OCID of the key version used in cryptographic operations. During key rotation, the service might be
 	// in a transitional state where this or a newer key version are used intermittently. The `currentKeyVersion`
 	// property is updated when the service is guaranteed to use the new key version for all subsequent encryption operations.
 	CurrentKeyVersion string `json:"currentKeyVersion,omitempty"`
+	// A user-friendly name for the key. It does not have to be unique, and it is changeable.
+	// Avoid entering confidential information.
+	DisplayName string `json:"displayName,omitempty"`
 	// The OCID of the key.
-	Id string `json:"id,omitempty"`
+	Id       string   `json:"id,omitempty"`
+	KeyShape KeyShape `json:"keyShape,omitempty"`
 	// The key's current lifecycle state.
 	// Example: `ENABLED`
 	LifecycleState string `json:"lifecycleState,omitempty"`
@@ -128,6 +134,23 @@ type KeyStatus struct {
 	TimeCreated string `json:"timeCreated,omitempty"`
 	// The OCID of the vault that contains this key.
 	VaultId string `json:"vaultId,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// The key's protection mode indicates how the key persists and where cryptographic operations that use the key are performed.
+	// A protection mode of `HSM` means that the key persists on a hardware security module (HSM) and all cryptographic operations are performed inside
+	// the HSM. A protection mode of `SOFTWARE` means that the key persists on the server, protected by the vault's RSA wrapping key which persists
+	// on the HSM. All cryptographic operations that use a key with a protection mode of `SOFTWARE` are performed on the server. By default,
+	// a key's protection mode is set to `HSM`. You can't change a key's protection mode after the key is created or imported.
+	// A protection mode of `EXTERNAL` mean that the key persists on the customer's external key manager which is hosted externally outside of oracle.
+	// Oracle only hold a reference to that key.
+	// All cryptographic operations that use a key with a protection mode of `EXTERNAL` are performed by external key manager.
+	ProtectionMode string `json:"protectionMode,omitempty"`
 	// An optional property indicating when to delete the key, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
 	// Example: `2019-04-03T21:10:29.600Z`
 	TimeOfDeletion string `json:"timeOfDeletion,omitempty"`
@@ -135,7 +158,10 @@ type KeyStatus struct {
 	RestoredFromKeyId string            `json:"restoredFromKeyId,omitempty"`
 	ReplicaDetails    KeyReplicaDetails `json:"replicaDetails,omitempty"`
 	// A Boolean value that indicates whether the Key belongs to primary Vault or replica vault.
-	IsPrimary                   bool                           `json:"isPrimary,omitempty"`
+	IsPrimary bool `json:"isPrimary,omitempty"`
+	// A parameter specifying whether the auto key rotation is enabled or not.
+	IsAutoRotationEnabled       bool                           `json:"isAutoRotationEnabled,omitempty"`
+	AutoKeyRotationDetails      KeyAutoKeyRotationDetails      `json:"autoKeyRotationDetails,omitempty"`
 	ExternalKeyReferenceDetails KeyExternalKeyReferenceDetails `json:"externalKeyReferenceDetails,omitempty"`
 	// The algorithm used by a key's key versions to encrypt or decrypt data.
 	Algorithm string `json:"algorithm,omitempty"`

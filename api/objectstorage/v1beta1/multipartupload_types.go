@@ -66,10 +66,14 @@ type MultipartUploadStatus struct {
 	Namespace string `json:"namespace,omitempty"`
 	// The bucket in which the in-progress multipart upload is stored.
 	Bucket string `json:"bucket,omitempty"`
+	// The object name of the in-progress multipart upload.
+	Object string `json:"object,omitempty"`
 	// The unique identifier for the in-progress multipart upload.
 	UploadId string `json:"uploadId,omitempty"`
 	// The date and time the upload was created, as described in RFC 2616 (https://tools.ietf.org/html/rfc2616#section-14.29).
 	TimeCreated string `json:"timeCreated,omitempty"`
+	// The storage tier that the object is stored in.
+	StorageTier string `json:"storageTier,omitempty"`
 }
 
 // +kubebuilder:object:root=true

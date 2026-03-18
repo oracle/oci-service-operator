@@ -43,13 +43,27 @@ type CaBundleStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
 	// The OCID of the CA bundle.
 	Id string `json:"id,omitempty"`
+	// A user-friendly name for the CA bundle. Names are unique within a compartment. Avoid entering confidential information. Valid characters include uppercase or lowercase letters, numbers, hyphens, underscores, and periods.
+	Name string `json:"name,omitempty"`
 	// A property indicating when the CA bundle was created, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
 	// Example: `2019-04-03T21:10:29.600Z`
 	TimeCreated string `json:"timeCreated,omitempty"`
 	// The current lifecycle state of the CA bundle.
 	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The OCID of the compartment for the CA bundle.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// A brief description of the CA bundle.
+	Description string `json:"description,omitempty"`
 	// Additional information about the current lifecycle state of the CA bundle.
 	LifecycleDetails string `json:"lifecycleDetails,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 }
 
 // +kubebuilder:object:root=true

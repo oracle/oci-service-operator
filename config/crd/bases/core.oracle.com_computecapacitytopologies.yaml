@@ -118,8 +118,8 @@ spec:
                   Example: `Uocm:US-CHICAGO-1-AD-2`
                 type: string
               capacitySource:
-                description: ComputeCapacityTopologyCapacitySource defines nested
-                  fields for ComputeCapacityTopology.CapacitySource.
+                description: ComputeCapacityTopologyCapacitySourceObservedState defines
+                  nested fields for ComputeCapacityTopology.CapacitySource.
                 properties:
                   capacityType:
                     type: string

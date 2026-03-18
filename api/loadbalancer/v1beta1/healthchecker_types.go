@@ -62,6 +62,42 @@ type HealthCheckerSpec struct {
 // HealthCheckerStatus defines the observed state of HealthChecker.
 type HealthCheckerStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The protocol the health check must use; either HTTP or TCP.
+	// Example: `HTTP`
+	Protocol string `json:"protocol,omitempty"`
+	// The backend server port against which to run the health check. If the port is not specified, the load balancer uses the
+	// port information from the `Backend` object.
+	// Example: `8080`
+	Port int `json:"port,omitempty"`
+	// The status code a healthy backend server should return. If you configure the health check policy to use the HTTP protocol,
+	// you can use common HTTP status codes such as "200".
+	// Example: `200`
+	ReturnCode int `json:"returnCode,omitempty"`
+	// A regular expression for parsing the response body from the backend server.
+	// Example: `^((?!false).|\s)*$`
+	ResponseBodyRegex string `json:"responseBodyRegex,omitempty"`
+	// The path against which to run the health check.
+	// Example: `/healthcheck`
+	UrlPath string `json:"urlPath,omitempty"`
+	// The number of retries to attempt before a backend server is considered "unhealthy". This number also applies
+	// when recovering a server to the "healthy" state. Defaults to 3.
+	// Example: `3`
+	Retries int `json:"retries,omitempty"`
+	// The maximum time, in milliseconds, to wait for a reply to a health check. A health check is successful only if a reply
+	// returns within this timeout period. Defaults to 3000 (3 seconds).
+	// Example: `3000`
+	TimeoutInMillis int `json:"timeoutInMillis,omitempty"`
+	// The interval between health checks, in milliseconds. The default is 10000 (10 seconds).
+	// Example: `10000`
+	IntervalInMillis int `json:"intervalInMillis,omitempty"`
+	// Specifies if health checks should always be done using plain text instead of depending on
+	// whether or not the associated backend set is using SSL.
+	// If "true", health checks will be done using plain text even if the associated backend set is configured
+	// to use SSL.
+	// If "false", health checks will be done using SSL encryption if the associated backend set is configured
+	// to use SSL. If the backend set is not so configured the health checks will be done using plain text.
+	// Example: `false`
+	IsForcePlainText bool `json:"isForcePlainText,omitempty"`
 }
 
 // +kubebuilder:object:root=true

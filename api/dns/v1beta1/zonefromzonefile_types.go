@@ -16,6 +16,47 @@ import (
 type ZoneFromZoneFileSpec struct {
 }
 
+// ZoneFromZoneFileExternalMaster defines nested fields for ZoneFromZoneFile.ExternalMaster.
+type ZoneFromZoneFileExternalMaster struct {
+	// The server's IP address (IPv4 or IPv6).
+	Address string `json:"address,omitempty"`
+	// The server's port. Port value must be a value of 53, otherwise omit
+	// the port value.
+	Port int `json:"port,omitempty"`
+	// The OCID of the TSIG key.
+	TsigKeyId string `json:"tsigKeyId,omitempty"`
+}
+
+// ZoneFromZoneFileExternalDownstream defines nested fields for ZoneFromZoneFile.ExternalDownstream.
+type ZoneFromZoneFileExternalDownstream struct {
+	// The server's IP address (IPv4 or IPv6).
+	Address string `json:"address,omitempty"`
+	// The server's port. Port value must be a value of 53, otherwise omit
+	// the port value.
+	Port int `json:"port,omitempty"`
+	// The OCID of the TSIG key.
+	// A TSIG key is used to secure DNS messages (in this case, zone transfers) between two systems that both have the (shared) secret.
+	TsigKeyId string `json:"tsigKeyId,omitempty"`
+}
+
+// ZoneFromZoneFileNameserver defines nested fields for ZoneFromZoneFile.Nameserver.
+type ZoneFromZoneFileNameserver struct {
+	// The hostname of the nameserver.
+	Hostname string `json:"hostname,omitempty"`
+}
+
+// ZoneFromZoneFileZoneTransferServer defines nested fields for ZoneFromZoneFile.ZoneTransferServer.
+type ZoneFromZoneFileZoneTransferServer struct {
+	// The server's IP address (IPv4 or IPv6).
+	Address string `json:"address,omitempty"`
+	// The server's port.
+	Port int `json:"port,omitempty"`
+	// A Boolean flag indicating whether or not the server is a zone data transfer source.
+	IsTransferSource bool `json:"isTransferSource,omitempty"`
+	// A Boolean flag indicating whether or not the server is a zone data transfer destination.
+	IsTransferDestination bool `json:"isTransferDestination,omitempty"`
+}
+
 // ZoneFromZoneFileStatus defines the observed state of ZoneFromZoneFile.
 type ZoneFromZoneFileStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
@@ -39,10 +80,10 @@ type ZoneFromZoneFileStatus struct {
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// External master servers for the zone. `externalMasters` becomes a
 	// required parameter when the `zoneType` value is `SECONDARY`.
-	ExternalMasters []ZoneExternalMaster `json:"externalMasters,omitempty"`
+	ExternalMasters []ZoneFromZoneFileExternalMaster `json:"externalMasters,omitempty"`
 	// External secondary servers for the zone.
 	// This field is currently not supported when `zoneType` is `SECONDARY` or `scope` is `PRIVATE`.
-	ExternalDownstreams []ZoneExternalDownstream `json:"externalDownstreams,omitempty"`
+	ExternalDownstreams []ZoneFromZoneFileExternalDownstream `json:"externalDownstreams,omitempty"`
 	// The canonical absolute URL of the resource.
 	Self string `json:"self,omitempty"`
 	// The OCID of the zone.
@@ -62,13 +103,13 @@ type ZoneFromZoneFileStatus struct {
 	// A Boolean flag indicating whether or not parts of the resource are unable to be explicitly managed.
 	IsProtected bool `json:"isProtected,omitempty"`
 	// The authoritative nameservers for the zone.
-	Nameservers []ZoneNameserver `json:"nameservers,omitempty"`
+	Nameservers []ZoneFromZoneFileNameserver `json:"nameservers,omitempty"`
 	// The OCID of the private view containing the zone. This value will
 	// be null for zones in the global DNS, which are publicly resolvable and
 	// not part of a private view.
 	ViewId string `json:"viewId,omitempty"`
 	// The OCI nameservers that transfer the zone data with external nameservers.
-	ZoneTransferServers []ZoneTransferServerFields `json:"zoneTransferServers,omitempty"`
+	ZoneTransferServers []ZoneFromZoneFileZoneTransferServer `json:"zoneTransferServers,omitempty"`
 }
 
 // +kubebuilder:object:root=true

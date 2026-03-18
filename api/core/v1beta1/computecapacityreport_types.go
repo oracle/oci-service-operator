@@ -54,6 +54,20 @@ type ComputeCapacityReportShapeAvailability struct {
 	InstanceShapeConfig ComputeCapacityReportShapeAvailabilityInstanceShapeConfig `json:"instanceShapeConfig,omitempty"`
 }
 
+// ComputeCapacityReportShapeAvailabilityObservedState defines nested fields for ComputeCapacityReport.ShapeAvailability.
+type ComputeCapacityReportShapeAvailabilityObservedState struct {
+	// The shape that you want to request a capacity report for. You can enumerate all available shapes by calling
+	// ListShapes.
+	// +kubebuilder:validation:Required
+	InstanceShape string `json:"instanceShape"`
+	// The fault domain for the capacity report.
+	// If you do not specify a fault domain, the capacity report includes information about all fault domains.
+	// +kubebuilder:validation:Optional
+	FaultDomain string `json:"faultDomain,omitempty"`
+	// +kubebuilder:validation:Optional
+	InstanceShapeConfig ComputeCapacityReportShapeAvailabilityInstanceShapeConfig `json:"instanceShapeConfig,omitempty"`
+}
+
 // ComputeCapacityReportStatus defines the observed state of ComputeCapacityReport.
 type ComputeCapacityReportStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
@@ -64,7 +78,7 @@ type ComputeCapacityReportStatus struct {
 	// Example: `Uocm:PHX-AD-1`
 	AvailabilityDomain string `json:"availabilityDomain,omitempty"`
 	// Information about the available capacity for each shape in a capacity report.
-	ShapeAvailabilities []ComputeCapacityReportShapeAvailability `json:"shapeAvailabilities,omitempty"`
+	ShapeAvailabilities []ComputeCapacityReportShapeAvailabilityObservedState `json:"shapeAvailabilities,omitempty"`
 	// The date and time the capacity report was created, in the format defined by
 	// RFC3339 (https://tools.ietf.org/html/rfc3339).
 	// Example: `2016-08-25T21:10:29.600Z`

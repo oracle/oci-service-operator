@@ -116,6 +116,29 @@ type VolumeAutotunePolicy struct {
 	MaxVpusPerGB int64 `json:"maxVpusPerGB"`
 }
 
+// VolumeSourceDetailsObservedState defines nested fields for Volume.SourceDetails.
+type VolumeSourceDetailsObservedState struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
+	Type string `json:"type,omitempty"`
+	// The OCID of the block volume replica.
+	// +kubebuilder:validation:Required
+	Id string `json:"id"`
+}
+
+// VolumeAutotunePolicyObservedState defines nested fields for Volume.AutotunePolicy.
+type VolumeAutotunePolicyObservedState struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
+	AutotuneType string `json:"autotuneType,omitempty"`
+	// This will be the maximum VPUs/GB performance level that the volume will be auto-tuned
+	// temporarily based on performance monitoring.
+	// +kubebuilder:validation:Required
+	MaxVpusPerGB int64 `json:"maxVpusPerGB"`
+}
+
 // VolumeStatus defines the observed state of Volume.
 type VolumeStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
@@ -162,8 +185,8 @@ type VolumeStatus struct {
 	// For performance autotune enabled volumes, It would be the Default(Minimum) VPUs/GB.
 	VpusPerGB int64 `json:"vpusPerGB,omitempty"`
 	// The size of the volume in GBs.
-	SizeInGBs     int64               `json:"sizeInGBs,omitempty"`
-	SourceDetails VolumeSourceDetails `json:"sourceDetails,omitempty"`
+	SizeInGBs     int64                            `json:"sizeInGBs,omitempty"`
+	SourceDetails VolumeSourceDetailsObservedState `json:"sourceDetails,omitempty"`
 	// The OCID of the source volume group.
 	VolumeGroupId string `json:"volumeGroupId,omitempty"`
 	// Specifies whether the auto-tune performance is enabled for this volume. This field is deprecated.
@@ -174,7 +197,7 @@ type VolumeStatus struct {
 	// The list of block volume replicas of this volume.
 	BlockVolumeReplicas []VolumeBlockVolumeReplica `json:"blockVolumeReplicas,omitempty"`
 	// The list of autotune policies enabled for this volume.
-	AutotunePolicies []VolumeAutotunePolicy `json:"autotunePolicies,omitempty"`
+	AutotunePolicies []VolumeAutotunePolicyObservedState `json:"autotunePolicies,omitempty"`
 }
 
 // +kubebuilder:object:root=true

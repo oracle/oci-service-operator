@@ -169,8 +169,8 @@ spec:
                 type: string
               schemaData:
                 additionalProperties:
-                  description: ComputeImageCapabilitySchemaSchemaData defines nested
-                    fields for ComputeImageCapabilitySchema.SchemaData.
+                  description: ComputeImageCapabilitySchemaSchemaDataObservedState
+                    defines nested fields for ComputeImageCapabilitySchema.SchemaData.
                   properties:
                     defaultValue:
                       description: the default value

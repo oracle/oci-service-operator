@@ -92,6 +92,31 @@ type RuleActions struct {
 	Actions []RuleActionsAction `json:"actions"`
 }
 
+// RuleActionsActionObservedState defines nested fields for Rule.Actions.Action.
+type RuleActionsActionObservedState struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// A string that describes the details of the action. It does not have to be unique, and you can change it. Avoid entering
+	// confidential information.
+	// +kubebuilder:validation:Optional
+	Description string `json:"description,omitempty"`
+	// Whether or not this action is currently enabled.
+	// Example: `true`
+	// +kubebuilder:validation:Required
+	IsEnabled bool `json:"isEnabled"`
+	// +kubebuilder:validation:Optional
+	ActionType string `json:"actionType,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the stream to which messages are delivered.
+	// +kubebuilder:validation:Required
+	StreamId string `json:"streamId"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of a Function hosted by Oracle Functions Service.
+	// +kubebuilder:validation:Optional
+	FunctionId string `json:"functionId,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the topic to which messages are delivered.
+	// +kubebuilder:validation:Optional
+	TopicId string `json:"topicId,omitempty"`
+}
+
 // RuleStatus defines the observed state of Rule.
 type RuleStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
@@ -124,9 +149,8 @@ type RuleStatus struct {
 	CompartmentId string `json:"compartmentId,omitempty"`
 	// Whether or not this rule is currently enabled.
 	// Example: `true`
-	IsEnabled bool `json:"isEnabled,omitempty"`
-	// The configured actions for the rule.
-	Actions RuleActions `json:"actions,omitempty"`
+	IsEnabled bool        `json:"isEnabled,omitempty"`
+	Actions   RuleActions `json:"actions,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of this rule.
 	Id string `json:"id,omitempty"`
 	// The time this rule was created, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339)

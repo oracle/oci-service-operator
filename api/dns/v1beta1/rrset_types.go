@@ -51,6 +51,7 @@ type RRSetItem struct {
 // RRSetStatus defines the observed state of RRSet.
 type RRSetStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	Items      []RRSetItem       `json:"items,omitempty"`
 }
 
 // +kubebuilder:object:root=true

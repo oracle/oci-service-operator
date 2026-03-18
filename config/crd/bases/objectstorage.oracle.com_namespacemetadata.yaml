@@ -64,6 +64,14 @@ spec:
           status:
             description: NamespaceMetadataStatus defines the observed state of NamespaceMetadata.
             properties:
+              defaultS3CompartmentId:
+                description: If the field is set, specifies the default compartment
+                  assignment for the Amazon S3 Compatibility API.
+                type: string
+              defaultSwiftCompartmentId:
+                description: If the field is set, specifies the default compartment
+                  assignment for the Swift API.
+                type: string
               namespace:
                 description: The Object Storage namespace to which the metadata belongs.
                 type: string

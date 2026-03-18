@@ -119,6 +119,9 @@ spec:
                 description: The Object Storage namespace in which the in-progress
                   multipart upload is stored.
                 type: string
+              object:
+                description: The object name of the in-progress multipart upload.
+                type: string
               status:
                 properties:
                   conditions:
@@ -161,6 +164,9 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              storageTier:
+                description: The storage tier that the object is stored in.
+                type: string
               timeCreated:
                 description: The date and time the upload was created, as described
                   in RFC 2616 (https://tools.ietf.org/html/rfc2616#section-14.29).

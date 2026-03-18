@@ -223,6 +223,39 @@ type SteeringPolicyRule struct {
 	DefaultCount int `json:"defaultCount,omitempty"`
 }
 
+// SteeringPolicyRuleObservedState defines nested fields for SteeringPolicy.Rule.
+type SteeringPolicyRuleObservedState struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// A user-defined description of the rule's purpose or behavior.
+	// +kubebuilder:validation:Optional
+	Description string `json:"description,omitempty"`
+	// +kubebuilder:validation:Optional
+	RuleType string `json:"ruleType,omitempty"`
+	// An array of `caseConditions`. A rule may optionally include a sequence of cases defining alternate
+	// configurations for how it should behave during processing for any given DNS query. When a rule has
+	// no sequence of `cases`, it is always evaluated with the same configuration during processing. When
+	// a rule has an empty sequence of `cases`, it is always ignored during processing. When a rule has a
+	// non-empty sequence of `cases`, its behavior during processing is configured by the first matching
+	// `case` in the sequence. When a rule has no matching cases the rule is ignored. A rule case with no
+	// `caseCondition` always matches. A rule case with a `caseCondition` matches only when that expression
+	// evaluates to true for the given query.
+	// +kubebuilder:validation:Optional
+	Cases []SteeringPolicyRuleCase `json:"cases,omitempty"`
+	// Defines a default set of answer conditions and values that are applied to an answer when
+	// `cases` is not defined for the rule, or a matching case does not have any matching
+	// `answerCondition`s in its `answerData`. `defaultAnswerData` is not applied if `cases` is
+	// defined and there are no matching cases. In this scenario, the next rule will be processed.
+	// +kubebuilder:validation:Optional
+	DefaultAnswerData []SteeringPolicyRuleDefaultAnswerData `json:"defaultAnswerData,omitempty"`
+	// Defines a default count if `cases` is not defined for the rule or a matching case does
+	// not define `count`. `defaultCount` is **not** applied if `cases` is defined and there
+	// are no matching cases. In this scenario, the next rule will be processed. If no rules
+	// remain to be processed, the answer will be chosen from the remaining list of answers.
+	// +kubebuilder:validation:Optional
+	DefaultCount int `json:"defaultCount,omitempty"`
+}
+
 // SteeringPolicyStatus defines the observed state of SteeringPolicy.
 type SteeringPolicyStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
@@ -284,7 +317,7 @@ type SteeringPolicyStatus struct {
 	// The first rule receives a shuffled list of all answers, and every other rule receives
 	// the list of answers emitted by the one preceding it. The last rule populates the
 	// response.
-	Rules []SteeringPolicyRule `json:"rules,omitempty"`
+	Rules []SteeringPolicyRuleObservedState `json:"rules,omitempty"`
 	// The canonical absolute URL of the resource.
 	Self string `json:"self,omitempty"`
 	// The OCID of the resource.

@@ -64,13 +64,36 @@ type AlarmSuppressionTarget struct {
 	AlarmId string `json:"alarmId"`
 }
 
+// AlarmSuppressionTargetObservedState defines nested fields for AlarmSuppression.AlarmSuppressionTarget.
+type AlarmSuppressionTargetObservedState struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
+	TargetType string `json:"targetType,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the alarm that is the target of the alarm suppression.
+	// +kubebuilder:validation:Required
+	AlarmId string `json:"alarmId"`
+}
+
 // AlarmSuppressionStatus defines the observed state of AlarmSuppression.
 type AlarmSuppressionStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
 	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the alarm suppression.
 	Id string `json:"id,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the alarm suppression.
-	CompartmentId string `json:"compartmentId,omitempty"`
+	CompartmentId          string                              `json:"compartmentId,omitempty"`
+	AlarmSuppressionTarget AlarmSuppressionTargetObservedState `json:"alarmSuppressionTarget,omitempty"`
+	// A user-friendly name for the alarm suppression. It does not have to be unique, and it's changeable. Avoid entering confidential information.
+	DisplayName string `json:"displayName,omitempty"`
+	// Configured dimension filter for suppressing alarm state entries that include the set of specified dimension key-value pairs.
+	// Example: `{"resourceId": "ocid1.instance.region1.phx.exampleuniqueID"}`
+	Dimensions map[string]string `json:"dimensions,omitempty"`
+	// The start date and time for the suppression to take place, inclusive. Format defined by RFC3339.
+	// Example: `2018-02-01T01:02:29.600Z`
+	TimeSuppressFrom string `json:"timeSuppressFrom,omitempty"`
+	// The end date and time for the suppression to take place, inclusive. Format defined by RFC3339.
+	// Example: `2018-02-01T02:02:29.600Z`
+	TimeSuppressUntil string `json:"timeSuppressUntil,omitempty"`
 	// The current lifecycle state of the alarm suppression.
 	// Example: `DELETED`
 	LifecycleState string `json:"lifecycleState,omitempty"`
@@ -80,6 +103,19 @@ type AlarmSuppressionStatus struct {
 	// The date and time the alarm suppression was last updated (deleted). Format defined by RFC3339.
 	// Example: `2018-02-03T01:02:29.600Z`
 	TimeUpdated string `json:"timeUpdated,omitempty"`
+	// Human-readable reason for this alarm suppression.
+	// It does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	// Oracle recommends including tracking information for the event or associated work,
+	// such as a ticket number.
+	// Example: `Planned outage due to change IT-1234.`
+	Description string `json:"description,omitempty"`
+	// Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Usage of predefined tag keys. These predefined keys are scoped to namespaces.
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 }
 
 // +kubebuilder:object:root=true

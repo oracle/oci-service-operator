@@ -111,6 +111,52 @@ spec:
           status:
             description: RoutingPolicyStatus defines the observed state of RoutingPolicy.
             properties:
+              conditionLanguageVersion:
+                description: The version of the language in which `condition` of `rules`
+                  are composed.
+                type: string
+              name:
+                description: |-
+                  The unique name for this list of routing rules. Avoid entering confidential information.
+                  Example: `example_routing_policy`
+                type: string
+              rules:
+                description: The ordered list of routing rules.
+                items:
+                  description: RoutingPolicyRule defines nested fields for RoutingPolicy.Rule.
+                  properties:
+                    actions:
+                      description: A list of actions to be applied when conditions
+                        of the routing rule are met.
+                      items:
+                        description: RoutingPolicyRuleAction defines nested fields
+                          for RoutingPolicy.Rule.Action.
+                        properties:
+                          backendSetName:
+                            description: |-
+                              Name of the backend set the listener will forward the traffic to.
+                              Example: `backendSetForImages`
+                            type: string
+                          name:
+                            type: string
+                        required:
+                        - backendSetName
+                        type: object
+                      type: array
+                    condition:
+                      description: A routing rule to evaluate defined conditions against
+                        the incoming HTTP request and perform an action.
+                      type: string
+                    name:
+                      description: A unique name for the routing policy rule. Avoid
+                        entering confidential information.
+                      type: string
+                  required:
+                  - actions
+                  - condition
+                  - name
+                  type: object
+                type: array
               status:
                 properties:
                   conditions:

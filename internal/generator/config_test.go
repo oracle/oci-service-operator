@@ -213,3 +213,21 @@ func TestObservedStateStructCandidates(t *testing.T) {
 		t.Fatalf("ObservedStateStructCandidates() = %v, want %v", got, want)
 	}
 }
+
+func TestObservedStateStructCandidatesReplacesNormalizedAliasMatch(t *testing.T) {
+	t.Parallel()
+
+	service := ServiceConfig{
+		ObservedState: ObservedStateConfig{
+			SDKAliases: map[string][]string{
+				"DhcpOption": {"DhcpOptions"},
+			},
+		},
+	}
+
+	dhcpGot := service.ObservedStateStructCandidates("DhcpOption")
+	dhcpWant := []string{"DhcpOptions", "DhcpOptionSummary"}
+	if !slices.Equal(dhcpGot, dhcpWant) {
+		t.Fatalf("ObservedStateStructCandidates(DhcpOption) = %v, want %v", dhcpGot, dhcpWant)
+	}
+}

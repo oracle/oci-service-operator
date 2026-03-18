@@ -218,6 +218,69 @@ type NetworkLoadBalancerBackendSets struct {
 	Backends []NetworkLoadBalancerBackendSetsBackend `json:"backends,omitempty"`
 }
 
+// NetworkLoadBalancerBackendSetsBackendObservedState defines nested fields for NetworkLoadBalancer.BackendSets.Backend.
+type NetworkLoadBalancerBackendSetsBackendObservedState struct {
+	// The communication port for the backend server.
+	// Example: `8080`
+	// +kubebuilder:validation:Required
+	Port int `json:"port"`
+	// A read-only field showing the IP address/IP OCID and port that uniquely identify this backend server in the backend set.
+	// Example: `10.0.0.3:8080`, or `ocid1.privateip..oc1.<var>&lt;unique_ID&gt;</var>:443` or `10.0.0.3:0`
+	Name string `json:"name,omitempty"`
+	// The IP address of the backend server.
+	// Example: `10.0.0.3`
+	// +kubebuilder:validation:Optional
+	IpAddress string `json:"ipAddress,omitempty"`
+	// The IP OCID/Instance OCID associated with the backend server.
+	// Example: `ocid1.privateip..oc1.<var>&lt;unique_ID&gt;</var>`
+	// +kubebuilder:validation:Optional
+	TargetId string `json:"targetId,omitempty"`
+	// The network load balancing policy weight assigned to the server. Backend servers with a higher weight receive a larger
+	// proportion of incoming traffic. For example, a server weighted '3' receives three times the number of new connections
+	// as a server weighted '1'.
+	// For more information about load balancing policies, see
+	// How Network Load Balancing Policies Work (https://docs.cloud.oracle.com/Content/Balance/Reference/lbpolicies.htm).
+	// Example: `3`
+	// +kubebuilder:validation:Optional
+	Weight int `json:"weight,omitempty"`
+	// Whether the network load balancer should drain this server. Servers marked "isDrain" receive no
+	// incoming traffic.
+	// Example: `false`
+	// +kubebuilder:validation:Optional
+	IsDrain bool `json:"isDrain,omitempty"`
+	// Whether the network load balancer should treat this server as a backup unit. If `true`, then the network load balancer forwards no ingress
+	// traffic to this backend server unless all other backend servers not marked as "isBackup" fail the health check policy.
+	// Example: `false`
+	// +kubebuilder:validation:Optional
+	IsBackup bool `json:"isBackup,omitempty"`
+	// Whether the network load balancer should treat this server as offline. Offline servers receive no incoming
+	// traffic.
+	// Example: `false`
+	// +kubebuilder:validation:Optional
+	IsOffline bool `json:"isOffline,omitempty"`
+}
+
+// NetworkLoadBalancerBackendSetsObservedState defines nested fields for NetworkLoadBalancer.BackendSets.
+type NetworkLoadBalancerBackendSetsObservedState struct {
+	// +kubebuilder:validation:Required
+	HealthChecker NetworkLoadBalancerBackendSetsHealthChecker `json:"healthChecker"`
+	// The network load balancer policy for the backend set.
+	// Example: `FIVE_TUPLE`
+	// +kubebuilder:validation:Optional
+	Policy string `json:"policy,omitempty"`
+	// IP version associated with the backend set.
+	// +kubebuilder:validation:Optional
+	IpVersion string `json:"ipVersion,omitempty"`
+	// If this parameter is enabled, then the network load balancer preserves the source IP of the packet when it is forwarded to backends.
+	// Backends see the original source IP. If the isPreserveSourceDestination parameter is enabled for the network load balancer resource, then this parameter cannot be disabled.
+	// The value is true by default.
+	// +kubebuilder:validation:Optional
+	IsPreserveSource bool `json:"isPreserveSource,omitempty"`
+	// An array of backends.
+	// +kubebuilder:validation:Optional
+	Backends []NetworkLoadBalancerBackendSetsBackendObservedState `json:"backends,omitempty"`
+}
+
 // NetworkLoadBalancerIpAddressReservedIp defines nested fields for NetworkLoadBalancer.IpAddress.ReservedIp.
 type NetworkLoadBalancerIpAddressReservedIp struct {
 	// OCID of the reserved public IP address created with the virtual cloud network.
@@ -248,6 +311,11 @@ type NetworkLoadBalancerStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
 	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the network load balancer.
 	Id string `json:"id,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment containing the network load balancer.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// A user-friendly name, which does not have to be unique, and can be changed.
+	// Example: `example_load_balancer`
+	DisplayName string `json:"displayName,omitempty"`
 	// The current state of the network load balancer.
 	LifecycleState string `json:"lifecycleState,omitempty"`
 	// The date and time the network load balancer was created, in the format defined by RFC3339.
@@ -255,12 +323,50 @@ type NetworkLoadBalancerStatus struct {
 	TimeCreated string `json:"timeCreated,omitempty"`
 	// An array of IP addresses.
 	IpAddresses []NetworkLoadBalancerIpAddress `json:"ipAddresses,omitempty"`
+	// The subnet in which the network load balancer is spawned OCIDs (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)."
+	SubnetId string `json:"subnetId,omitempty"`
 	// A message describing the current state in more detail.
 	// For example, can be used to provide actionable information for a resource in Failed state.
 	LifecycleDetails string `json:"lifecycleDetails,omitempty"`
+	// IP version associated with the NLB.
+	NlbIpVersion string `json:"nlbIpVersion,omitempty"`
 	// The time the network load balancer was updated. An RFC3339 formatted date-time string.
 	// Example: `2020-05-01T22:10:29.600Z`
 	TimeUpdated string `json:"timeUpdated,omitempty"`
+	// Whether the network load balancer has a virtual cloud network-local (private) IP address.
+	// If "true", then the service assigns a private IP address to the network load balancer.
+	// If "false", then the service assigns a public IP address to the network load balancer.
+	// A public network load balancer is accessible from the internet, depending the
+	// security list rules (https://docs.cloud.oracle.com/Content/network/Concepts/securitylists.htm) for your virtual cloudn network. For more information about public and
+	// private network load balancers,
+	// see How Network Load Balancing Works (https://docs.cloud.oracle.com/Content/Balance/Concepts/balanceoverview.htm#how-network-load-balancing-works).
+	// This value is true by default.
+	// Example: `true`
+	IsPrivate bool `json:"isPrivate,omitempty"`
+	// When enabled, the skipSourceDestinationCheck parameter is automatically enabled on the load balancer VNIC.
+	// Packets are sent to the backend set without any changes to the source and destination IP.
+	IsPreserveSourceDestination bool `json:"isPreserveSourceDestination,omitempty"`
+	// An array of network security groups OCIDs (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) associated with the network load
+	// balancer.
+	// During the creation of the network load balancer, the service adds the new load balancer to the specified network security groups.
+	// The benefits of associating the network load balancer with network security groups include:
+	// *  Network security groups define network security rules to govern ingress and egress traffic for the network load balancer.
+	// *  The network security rules of other resources can reference the network security groups associated with the network load balancer
+	//    to ensure access.
+	// Example: ["ocid1.nsg.oc1.phx.unique_ID"]
+	NetworkSecurityGroupIds []string `json:"networkSecurityGroupIds,omitempty"`
+	// Listeners associated with the network load balancer.
+	Listeners map[string]NetworkLoadBalancerListeners `json:"listeners,omitempty"`
+	// Backend sets associated with the network load balancer.
+	BackendSets map[string]NetworkLoadBalancerBackendSetsObservedState `json:"backendSets,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// Key-value pair representing system tags' keys and values scoped to a namespace.
 	// Example: `{"bar-key": "value"}`
 	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`

@@ -92,6 +92,33 @@ spec:
           status:
             description: ListenerStatus defines the observed state of Listener.
             properties:
+              defaultBackendSetName:
+                description: |-
+                  The name of the associated backend set.
+                  Example: `example_backend_set`
+                type: string
+              ipVersion:
+                description: IP version associated with the listener.
+                type: string
+              name:
+                description: |-
+                  A friendly name for the listener. It must be unique and it cannot be changed.
+                  Example: `example_listener`
+                type: string
+              port:
+                description: |-
+                  The communication port for the listener.
+                  Example: `80`
+                type: integer
+              protocol:
+                description: |-
+                  The protocol on which the listener accepts connection requests.
+                  For public network load balancers, ANY protocol refers to TCP/UDP.
+                  For private network load balancers, ANY protocol refers to TCP/UDP/ICMP (note that ICMP requires isPreserveSourceDestination to be set to true).
+                  To get a list of valid protocols, use the ListNetworkLoadBalancersProtocols
+                  operation.
+                  Example: `TCP`
+                type: string
               status:
                 properties:
                   conditions:

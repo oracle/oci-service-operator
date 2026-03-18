@@ -31,10 +31,21 @@ type ReplicationPolicyStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
 	// The id of the replication policy.
 	Id string `json:"id,omitempty"`
+	// The name of the policy.
+	Name string `json:"name,omitempty"`
+	// The destination region to replicate to, for example "us-ashburn-1".
+	DestinationRegionName string `json:"destinationRegionName,omitempty"`
+	// The bucket to replicate to in the destination region. Replication policy creation does not automatically
+	// create a destination bucket. Create the destination bucket before creating the policy.
+	DestinationBucketName string `json:"destinationBucketName,omitempty"`
 	// The date when the replication policy was created as per RFC 3339 (https://tools.ietf.org/html/rfc3339).
 	TimeCreated string `json:"timeCreated,omitempty"`
 	// Changes made to the source bucket before this time has been replicated.
 	TimeLastSync string `json:"timeLastSync,omitempty"`
+	// The replication status of the policy. If the status is CLIENT_ERROR, once the user fixes the issue
+	// described in the status message, the status will become ACTIVE.
+	// This uses a distinct JSON name so it can coexist with the OSOK status envelope.
+	Status string `json:"sdkStatus,omitempty"`
 	// A human-readable description of the status.
 	StatusMessage string `json:"statusMessage,omitempty"`
 }

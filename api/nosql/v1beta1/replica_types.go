@@ -37,8 +37,12 @@ type ReplicaSpec struct {
 // ReplicaStatus defines the observed state of Replica.
 type ReplicaStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// A customer-facing region identifier
+	Region string `json:"region,omitempty"`
 	// The OCID of the replica table
 	TableId string `json:"tableId,omitempty"`
+	// Maximum sustained write throughput limit of the replica table.
+	MaxWriteUnits int `json:"maxWriteUnits,omitempty"`
 	// The capacity mode of the replica.
 	CapacityMode string `json:"capacityMode,omitempty"`
 	// The state of the replica.

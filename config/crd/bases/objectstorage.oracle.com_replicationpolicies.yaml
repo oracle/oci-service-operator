@@ -75,8 +75,25 @@ spec:
           status:
             description: ReplicationPolicyStatus defines the observed state of ReplicationPolicy.
             properties:
+              destinationBucketName:
+                description: |-
+                  The bucket to replicate to in the destination region. Replication policy creation does not automatically
+                  create a destination bucket. Create the destination bucket before creating the policy.
+                type: string
+              destinationRegionName:
+                description: The destination region to replicate to, for example "us-ashburn-1".
+                type: string
               id:
                 description: The id of the replication policy.
+                type: string
+              name:
+                description: The name of the policy.
+                type: string
+              sdkStatus:
+                description: |-
+                  The replication status of the policy. If the status is CLIENT_ERROR, once the user fixes the issue
+                  described in the status message, the status will become ACTIVE.
+                  This uses a distinct JSON name so it can coexist with the OSOK status envelope.
                 type: string
               status:
                 properties:

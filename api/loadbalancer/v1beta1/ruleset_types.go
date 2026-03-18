@@ -206,9 +206,121 @@ type RuleSetItem struct {
 	HttpLargeHeaderSizeInKB int `json:"httpLargeHeaderSizeInKB,omitempty"`
 }
 
+// RuleSetItemConditionObservedState defines nested fields for RuleSet.Item.Condition.
+type RuleSetItemConditionObservedState struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
+	AttributeName string `json:"attributeName,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the originating VCN that an incoming packet
+	// must match.
+	// You can use this condition in conjunction with `SourceVcnIpAddressCondition`.
+	// **NOTE:** If you define this condition for a rule without a `SourceVcnIpAddressCondition`, this condition
+	// matches all incoming traffic in the specified VCN.
+	// +kubebuilder:validation:Required
+	AttributeValue string `json:"attributeValue"`
+	// A string that specifies how to compare the PathMatchCondition object's `attributeValue` string to the
+	// incoming URI.
+	// *  **EXACT_MATCH** - The incoming URI path must exactly and completely match the `attributeValue` string.
+	// *  **FORCE_LONGEST_PREFIX_MATCH** - The system looks for the `attributeValue` string with the best,
+	//    longest match of the beginning portion of the incoming URI path.
+	// *  **PREFIX_MATCH** - The beginning portion of the incoming URI path must exactly match the
+	//    `attributeValue` string.
+	// *  **SUFFIX_MATCH** - The ending portion of the incoming URI path must exactly match the `attributeValue`
+	//    string.
+	// +kubebuilder:validation:Required
+	Operator string `json:"operator"`
+}
+
+// RuleSetItemObservedState defines nested fields for RuleSet.Item.
+type RuleSetItemObservedState struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
+	Action string `json:"action,omitempty"`
+	// A header name that conforms to RFC 7230.
+	// Example: `example_header_name`
+	// +kubebuilder:validation:Required
+	Header string `json:"header"`
+	// A header value that conforms to RFC 7230. With the following exceptions:
+	// *  value cannot contain `$`
+	// *  value cannot contain patterns like `{variable_name}`. They are reserved for future extensions. Currently, such values are invalid.
+	// Example: `example_value`
+	// +kubebuilder:validation:Required
+	Value string `json:"value"`
+	// +kubebuilder:validation:Required
+	Conditions []RuleSetItemConditionObservedState `json:"conditions"`
+	// The HTTP status code to return when the incoming request is redirected.
+	// The status line returned with the code is mapped from the standard HTTP specification. Valid response
+	// codes for redirection are:
+	// *  301
+	// *  302
+	// *  303
+	// *  307
+	// *  308
+	// The default value is `302` (Found).
+	// Example: `301`
+	// +kubebuilder:validation:Optional
+	ResponseCode int `json:"responseCode,omitempty"`
+	// +kubebuilder:validation:Optional
+	RedirectUri RuleSetItemRedirectUri `json:"redirectUri,omitempty"`
+	// A string to prepend to the header value. The resulting header value must conform to RFC 7230.
+	// With the following exceptions:
+	// *  value cannot contain `$`
+	// *  value cannot contain patterns like `{variable_name}`. They are reserved for future extensions. Currently, such values are invalid.
+	// Example: `example_prefix_value`
+	// +kubebuilder:validation:Optional
+	Prefix string `json:"prefix,omitempty"`
+	// A string to append to the header value. The resulting header value must conform to RFC 7230.
+	// With the following exceptions:
+	// *  value cannot contain `$`
+	// *  value cannot contain patterns like `{variable_name}`. They are reserved for future extensions. Currently, such values are invalid.
+	// Example: `example_suffix_value`
+	// +kubebuilder:validation:Optional
+	Suffix string `json:"suffix,omitempty"`
+	// The list of HTTP methods allowed for this listener.
+	// By default, you can specify only the standard HTTP methods defined in the
+	// HTTP Method Registry (http://www.iana.org/assignments/http-methods/http-methods.xhtml). You can also
+	// see a list of supported standard HTTP methods in the Load Balancing service documentation at
+	// Managing Rule Sets (https://docs.cloud.oracle.com/Content/Balance/Tasks/managingrulesets.htm).
+	// Your backend application must be able to handle the methods specified in this list.
+	// The list of HTTP methods is extensible. If you need to configure custom HTTP methods, contact
+	// My Oracle Support (http://support.oracle.com/) to remove the restriction for your tenancy.
+	// Example: ["GET", "PUT", "POST", "PROPFIND"]
+	// +kubebuilder:validation:Required
+	AllowedMethods []string `json:"allowedMethods"`
+	// The HTTP status code to return when the requested HTTP method is not in the list of allowed methods.
+	// The associated status line returned with the code is mapped from the standard HTTP specification. The
+	// default value is `405 (Method Not Allowed)`.
+	// Example: 403
+	// +kubebuilder:validation:Optional
+	StatusCode int `json:"statusCode,omitempty"`
+	// A brief description of the access control rule. Avoid entering confidential information.
+	// example: `192.168.0.0/16 and 2001:db8::/32 are trusted clients. Whitelist them.`
+	// +kubebuilder:validation:Optional
+	Description string `json:"description,omitempty"`
+	// Indicates whether or not invalid characters in client header fields will be allowed.
+	// Valid names are composed of English letters, digits, hyphens and underscores.
+	// If "true", invalid characters are allowed in the HTTP header.
+	// If "false", invalid characters are not allowed in the HTTP header
+	// +kubebuilder:validation:Optional
+	AreInvalidCharactersAllowed bool `json:"areInvalidCharactersAllowed,omitempty"`
+	// The maximum size of each buffer used for reading http client request header.
+	// This value indicates the maximum size allowed for each buffer.
+	// The allowed values for buffer size are 8, 16, 32 and 64.
+	// +kubebuilder:validation:Optional
+	HttpLargeHeaderSizeInKB int `json:"httpLargeHeaderSizeInKB,omitempty"`
+}
+
 // RuleSetStatus defines the observed state of RuleSet.
 type RuleSetStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The name for this set of rules. It must be unique and it cannot be changed. Avoid entering
+	// confidential information.
+	// Example: `example_rule_set`
+	Name string `json:"name,omitempty"`
+	// An array of rules that compose the rule set.
+	Items []RuleSetItemObservedState `json:"items,omitempty"`
 }
 
 // +kubebuilder:object:root=true

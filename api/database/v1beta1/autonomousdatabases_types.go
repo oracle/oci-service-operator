@@ -113,7 +113,6 @@ type AutonomousDatabasesStatus struct {
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="DisplayName",type="string",JSONPath=".spec.displayName",priority=1
-// +kubebuilder:printcolumn:name="DbWorkload",type="string",JSONPath=".spec.dbWorkload",priority=0
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.status.conditions[-1].type",description="status of the AutonomousDatabases",priority=0
 // +kubebuilder:printcolumn:name="Ocid",type="string",JSONPath=".status.status.ocid",description="Ocid of the AutonomousDatabases",priority=1
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0

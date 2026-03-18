@@ -70,6 +70,8 @@ spec:
               certificatePem:
                 description: The certificate in PEM format.
                 type: string
+              jsonData:
+                type: string
               privateKeyPem:
                 description: The private key (in PEM format) for the certificate.
                 type: string
@@ -142,11 +144,6 @@ spec:
               timeCreated:
                 description: |-
                   An optional property indicating when the certificate version was created, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
-                  Example: `2019-04-03T21:10:29.600Z`
-                type: string
-              timeOfDeletion:
-                description: |-
-                  An optional property indicating when to delete the certificate version, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
                   Example: `2019-04-03T21:10:29.600Z`
                 type: string
               validity:

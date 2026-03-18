@@ -152,18 +152,119 @@ type SecretGenerationContext struct {
 	GenerationTemplate string `json:"generationTemplate"`
 }
 
+// SecretRotationConfigTargetSystemDetailsObservedState defines nested fields for Secret.RotationConfig.TargetSystemDetails.
+type SecretRotationConfigTargetSystemDetailsObservedState struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
+	TargetSystemType string `json:"targetSystemType,omitempty"`
+	// The unique identifier (OCID) for the autonomous database that Vault Secret connects to.
+	// +kubebuilder:validation:Required
+	AdbId string `json:"adbId"`
+	// The unique identifier (OCID) of the OCI Functions that vault secret connects to.
+	// +kubebuilder:validation:Required
+	FunctionId string `json:"functionId"`
+}
+
+// SecretRotationConfigObservedState defines nested fields for Secret.RotationConfig.
+type SecretRotationConfigObservedState struct {
+	// +kubebuilder:validation:Required
+	TargetSystemDetails SecretRotationConfigTargetSystemDetailsObservedState `json:"targetSystemDetails"`
+	// The time interval that indicates the frequency for rotating secret data, as described in ISO 8601 format.
+	// The minimum value is 1 day and maximum value is 360 days.
+	// For example, if you want to set the time interval for rotating a secret data as 30 days, the duration is expressed as "P30D."
+	// +kubebuilder:validation:Optional
+	RotationInterval string `json:"rotationInterval,omitempty"`
+	// Enables auto rotation, when set to true rotationInterval must be set.
+	// +kubebuilder:validation:Optional
+	IsScheduledRotationEnabled bool `json:"isScheduledRotationEnabled,omitempty"`
+}
+
+// SecretRuleObservedState defines nested fields for Secret.SecretRule.
+type SecretRuleObservedState struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
+	RuleType string `json:"ruleType,omitempty"`
+	// A property indicating how long the secret contents will be considered valid, expressed in
+	// ISO 8601 (https://en.wikipedia.org/wiki/ISO_8601#Time_intervals) format. The secret needs to be
+	// updated when the secret content expires.
+	// The timer resets after you update the secret contents.
+	// The minimum value is 1 day and the maximum value is 90 days for this property. Currently, only intervals expressed in days are supported.
+	// For example, pass `P3D` to have the secret version expire every 3 days.
+	// +kubebuilder:validation:Optional
+	SecretVersionExpiryInterval string `json:"secretVersionExpiryInterval,omitempty"`
+	// An optional property indicating the absolute time when this secret will expire, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// The minimum number of days from current time is 1 day and the maximum number of days from current time is 365 days.
+	// Example: `2019-04-03T21:10:29.600Z`
+	// +kubebuilder:validation:Optional
+	TimeOfAbsoluteExpiry string `json:"timeOfAbsoluteExpiry,omitempty"`
+	// A property indicating whether to block retrieval of the secret content, on expiry. The default is false.
+	// If the secret has already expired and you would like to retrieve the secret contents,
+	// you need to edit the secret rule to disable this property, to allow reading the secret content.
+	// +kubebuilder:validation:Optional
+	IsSecretContentRetrievalBlockedOnExpiry bool `json:"isSecretContentRetrievalBlockedOnExpiry,omitempty"`
+	// A property indicating whether the rule is applied even if the secret version with the content you are trying to reuse was deleted.
+	// +kubebuilder:validation:Optional
+	IsEnforcedOnDeletedSecretVersions bool `json:"isEnforcedOnDeletedSecretVersions,omitempty"`
+}
+
+// SecretGenerationContextObservedState defines nested fields for Secret.SecretGenerationContext.
+type SecretGenerationContextObservedState struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// SecretTemplate captures structure in which customer wants to store secrets. This is optional and a default structure is available for each secret type.
+	// The template can have any structure with static values that are not generated. Within the template, you can insert predefined placeholders to store secrets.
+	// These placeholders are later replaced with the generated content and saved as a Base64 encoded content.
+	// +kubebuilder:validation:Optional
+	SecretTemplate string `json:"secretTemplate,omitempty"`
+	// +kubebuilder:validation:Optional
+	GenerationType string `json:"generationType,omitempty"`
+	// Length of the passphrase to be generated
+	// +kubebuilder:validation:Optional
+	PassphraseLength int `json:"passphraseLength,omitempty"`
+	// Name of passphrase generation template to generate passphrase type secret.
+	// +kubebuilder:validation:Required
+	GenerationTemplate string `json:"generationTemplate"`
+}
+
 // SecretStatus defines the observed state of Secret.
 type SecretStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the compartment where you want to create the secret.
+	CompartmentId string `json:"compartmentId,omitempty"`
 	// The OCID of the secret.
 	Id string `json:"id,omitempty"`
 	// The current lifecycle state of the secret.
 	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The user-friendly name of the secret. Avoid entering confidential information.
+	SecretName string `json:"secretName,omitempty"`
 	// A property indicating when the secret was created, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
 	// Example: `2019-04-03T21:10:29.600Z`
 	TimeCreated string `json:"timeCreated,omitempty"`
+	// The OCID of the vault where the secret exists.
+	VaultId string `json:"vaultId,omitempty"`
+	// The version number of the secret version that's currently in use.
+	CurrentVersionNumber int64 `json:"currentVersionNumber,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A brief description of the secret. Avoid entering confidential information.
+	Description string `json:"description,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// The OCID of the master encryption key that is used to encrypt the secret. You must specify a symmetric key to encrypt the secret during import to the vault. You cannot encrypt secrets with asymmetric keys. Furthermore, the key must exist in the vault that you specify.
+	KeyId string `json:"keyId,omitempty"`
 	// Additional information about the current lifecycle state of the secret.
 	LifecycleDetails string `json:"lifecycleDetails,omitempty"`
+	// Additional metadata that you can use to provide context about how to use the secret or during rotation or
+	// other administrative tasks. For example, for a secret that you use to connect to a database, the additional
+	// metadata might specify the connection endpoint and the connection string. Provide additional metadata as key-value pairs.
+	Metadata       map[string]shared.JSONValue       `json:"metadata,omitempty"`
+	RotationConfig SecretRotationConfigObservedState `json:"rotationConfig,omitempty"`
 	// Additional information about the status of the secret rotation
 	RotationStatus string `json:"rotationStatus,omitempty"`
 	// A property indicating when the secret was last rotated successfully, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
@@ -172,12 +273,15 @@ type SecretStatus struct {
 	// A property indicating when the secret is scheduled to be rotated, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
 	// Example: `2019-04-03T21:10:29.600Z`
 	NextRotationTime string `json:"nextRotationTime,omitempty"`
+	// A list of rules that control how the secret is used and managed.
+	SecretRules []SecretRuleObservedState `json:"secretRules,omitempty"`
 	// An optional property indicating when the current secret version will expire, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
 	// Example: `2019-04-03T21:10:29.600Z`
 	TimeOfCurrentVersionExpiry string `json:"timeOfCurrentVersionExpiry,omitempty"`
 	// An optional property indicating when to delete the secret, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
 	// Example: `2019-04-03T21:10:29.600Z`
-	TimeOfDeletion string `json:"timeOfDeletion,omitempty"`
+	TimeOfDeletion          string                               `json:"timeOfDeletion,omitempty"`
+	SecretGenerationContext SecretGenerationContextObservedState `json:"secretGenerationContext,omitempty"`
 	// The value of this flag determines whether or not secret content will be generated automatically.
 	IsAutoGenerationEnabled bool `json:"isAutoGenerationEnabled,omitempty"`
 	// System tags for this resource. Each key is predefined and scoped to a namespace.

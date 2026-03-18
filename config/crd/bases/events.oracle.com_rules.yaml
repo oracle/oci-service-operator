@@ -164,7 +164,7 @@ spec:
             description: RuleStatus defines the observed state of Rule.
             properties:
               actions:
-                description: The configured actions for the rule.
+                description: RuleActions defines nested fields for Rule.Actions.
                 properties:
                   actions:
                     description: A list of one or more ActionDetails objects.

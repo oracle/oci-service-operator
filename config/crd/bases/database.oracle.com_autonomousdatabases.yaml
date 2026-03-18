@@ -19,9 +19,6 @@ spec:
       name: DisplayName
       priority: 1
       type: string
-    - jsonPath: .spec.dbWorkload
-      name: DbWorkload
-      type: string
     - description: status of the AutonomousDatabases
       jsonPath: .status.status.conditions[-1].type
       name: Status

@@ -149,8 +149,8 @@ spec:
                   The action is applied only if all of the match criteria is met.
                   If there are no match criteria in a statement, any input is considered a match and the action is applied.
                 items:
-                  description: DrgRouteDistributionStatementMatchCriteria defines
-                    nested fields for DrgRouteDistributionStatement.MatchCriteria.
+                  description: DrgRouteDistributionStatementMatchCriteriaObservedState
+                    defines nested fields for DrgRouteDistributionStatement.MatchCriteria.
                   properties:
                     attachmentType:
                       description: |-

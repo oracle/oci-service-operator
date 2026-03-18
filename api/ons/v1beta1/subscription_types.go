@@ -74,19 +74,51 @@ type SubscriptionDeliveryPolicy struct {
 	BackoffRetryPolicy SubscriptionDeliveryPolicyBackoffRetryPolicy `json:"backoffRetryPolicy,omitempty"`
 }
 
+// SubscriptionDeliveryPolicyObservedState defines nested fields for Subscription.DeliveryPolicy.
+type SubscriptionDeliveryPolicyObservedState struct {
+	// +kubebuilder:validation:Optional
+	BackoffRetryPolicy SubscriptionDeliveryPolicyBackoffRetryPolicy `json:"backoffRetryPolicy,omitempty"`
+}
+
 // SubscriptionStatus defines the observed state of Subscription.
 type SubscriptionStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
 	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subscription.
 	Id string `json:"id,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the associated topic.
+	TopicId string `json:"topicId,omitempty"`
+	// The protocol used for the subscription.
+	// Allowed values:
+	//   * `CUSTOM_HTTPS`
+	//   * `EMAIL`
+	//   * `HTTPS` (deprecated; for PagerDuty endpoints, use `PAGERDUTY`)
+	//   * `ORACLE_FUNCTIONS`
+	//   * `PAGERDUTY`
+	//   * `SLACK`
+	//   * `SMS`
+	// For information about subscription protocols, see
+	// To create a subscription (https://docs.cloud.oracle.com/iaas/Content/Notification/Tasks/managingtopicsandsubscriptions.htm#createSub).
+	Protocol string `json:"protocol,omitempty"`
+	// A locator that corresponds to the subscription protocol.
+	// For example, an email address for a subscription that uses the `EMAIL` protocol, or a URL for a subscription that uses an HTTP-based protocol.
+	Endpoint string `json:"endpoint,omitempty"`
 	// The lifecycle state of the subscription. The status of a new subscription is PENDING; when confirmed, the subscription status changes to ACTIVE.
 	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment for the subscription.
+	CompartmentId string `json:"compartmentId,omitempty"`
 	// The time when this suscription was created.
 	CreatedTime int64 `json:"createdTime,omitempty"`
 	// The delivery policy of the subscription. Stored as a JSON string.
 	DeliverPolicy string `json:"deliverPolicy,omitempty"`
 	// For optimistic concurrency control. See `if-match`.
 	Etag string `json:"etag,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags    map[string]shared.MapValue              `json:"definedTags,omitempty"`
+	DeliveryPolicy SubscriptionDeliveryPolicyObservedState `json:"deliveryPolicy,omitempty"`
 }
 
 // +kubebuilder:object:root=true

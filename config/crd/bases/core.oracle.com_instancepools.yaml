@@ -351,8 +351,8 @@ spec:
               placementConfigurations:
                 description: The placement configurations for the instance pool.
                 items:
-                  description: InstancePoolPlacementConfiguration defines nested fields
-                    for InstancePool.PlacementConfiguration.
+                  description: InstancePoolPlacementConfigurationObservedState defines
+                    nested fields for InstancePool.PlacementConfiguration.
                   properties:
                     availabilityDomain:
                       description: |-

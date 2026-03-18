@@ -162,6 +162,14 @@ spec:
                     description: Write Units consumed by this operation.
                     type: integer
                 type: object
+              value:
+                additionalProperties:
+                  description: JSONValue preserves arbitrary JSON values inside generated
+                    CRD fields.
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                description: The map of values from a row.
+                type: object
             required:
             - status
             type: object

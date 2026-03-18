@@ -47,14 +47,32 @@ type EkmsPrivateEndpointStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
 	// Unique identifier that is immutable
 	Id string `json:"id,omitempty"`
+	// Compartment Identifier.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// Subnet Identifier
+	SubnetId string `json:"subnetId,omitempty"`
+	// EKMS Private Endpoint display name
+	DisplayName string `json:"displayName,omitempty"`
 	// The time the EKMS private endpoint was created. An RFC3339 (https://tools.ietf.org/html/rfc3339) formatted datetime string.
 	TimeCreated string `json:"timeCreated,omitempty"`
 	// The current state of the EKMS private endpoint resource.
 	LifecycleState string `json:"lifecycleState,omitempty"`
+	// Private IP of the external key manager system to connect to from the EKMS private endpoint
+	ExternalKeyManagerIp string `json:"externalKeyManagerIp,omitempty"`
 	// The time the EKMS private endpoint was updated. An RFC3339 (https://tools.ietf.org/html/rfc3339) formatted datetime string.
 	TimeUpdated string `json:"timeUpdated,omitempty"`
+	// Simple key-value pair that is applied without any predefined name, type, or scope. Exists for cross-compatibility only.
+	// Example: `{"bar-key": "value"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Usage of predefined tag keys. These predefined keys are scoped to namespaces.
+	// Example: `{"foo-namespace": {"bar-key": "value"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// A message describing the current state in more detail. For example, can be used to provide actionable information for a resource in 'Failed' state.
 	LifecycleDetails string `json:"lifecycleDetails,omitempty"`
+	// The port of the external key manager system
+	Port int `json:"port,omitempty"`
+	// CABundle to validate TLS certificate of the external key manager system in PEM format
+	CaBundle string `json:"caBundle,omitempty"`
 	// The IP address in the customer's VCN for the EKMS private endpoint. This is taken from subnet
 	PrivateEndpointIp string `json:"privateEndpointIp,omitempty"`
 }

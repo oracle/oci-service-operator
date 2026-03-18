@@ -203,7 +203,8 @@ spec:
                 format: int64
                 type: integer
               sourceDetails:
-                description: VolumeGroupSourceDetails defines nested fields for VolumeGroup.SourceDetails.
+                description: VolumeGroupSourceDetailsObservedState defines nested
+                  fields for VolumeGroup.SourceDetails.
                 properties:
                   jsonData:
                     type: string

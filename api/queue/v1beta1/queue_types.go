@@ -53,6 +53,8 @@ type QueueStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
 	// A unique identifier for the queue that is immutable on creation.
 	Id string `json:"id,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the queue.
+	CompartmentId string `json:"compartmentId,omitempty"`
 	// The time that the queue was created, expressed in RFC 3339 (https://tools.ietf.org/rfc/rfc3339) timestamp format.
 	// Example: `2018-04-20T00:00:07.405Z`
 	TimeCreated string `json:"timeCreated,omitempty"`
@@ -63,11 +65,31 @@ type QueueStatus struct {
 	LifecycleState string `json:"lifecycleState,omitempty"`
 	// The endpoint to use to consume or publish messages in the queue.
 	MessagesEndpoint string `json:"messagesEndpoint,omitempty"`
+	// The retention period of the messages in the queue, in seconds.
+	RetentionInSeconds int `json:"retentionInSeconds,omitempty"`
+	// The default visibility timeout of the messages consumed from the queue, in seconds.
+	VisibilityInSeconds int `json:"visibilityInSeconds,omitempty"`
+	// The default polling timeout of the messages in the queue, in seconds.
+	TimeoutInSeconds int `json:"timeoutInSeconds,omitempty"`
+	// The number of times a message can be delivered to a consumer before being moved to the dead letter queue. A value of 0 indicates that the DLQ is not used.
+	DeadLetterQueueDeliveryCount int `json:"deadLetterQueueDeliveryCount,omitempty"`
+	// A user-friendly name for the queue. Does not have to be unique, and it's changeable. Avoid entering confidential information.
+	DisplayName string `json:"displayName,omitempty"`
 	// Any additional details about the current state of the queue.
 	LifecycleDetails string `json:"lifecycleDetails,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the custom encryption key to be used to encrypt messages content.
+	CustomEncryptionKeyId string `json:"customEncryptionKeyId,omitempty"`
+	// Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+	// Example: `{"bar-key": "value"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// Example: `{"foo-namespace": {"bar-key": "value"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// Usage of system tag keys. These predefined keys are scoped to namespaces.
 	// Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
 	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`
+	// The percentage of allocated queue resources that can be consumed by a single channel. For example, if a queue has a storage limit of 2Gb, and a single channel consumption limit is 0.1 (10%), that means data size of a single channel  can't exceed 200Mb. Consumption limit of 100% (default) means that a single channel can consume up-to all allocated queue's resources.
+	ChannelConsumptionLimit int `json:"channelConsumptionLimit,omitempty"`
 }
 
 // +kubebuilder:object:root=true

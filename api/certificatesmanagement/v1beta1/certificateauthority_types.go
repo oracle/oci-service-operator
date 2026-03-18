@@ -168,6 +168,31 @@ type CertificateAuthorityCertificateRevocationListDetails struct {
 	CustomFormattedUrls []string `json:"customFormattedUrls,omitempty"`
 }
 
+// CertificateAuthorityRuleObservedState defines nested fields for CertificateAuthority.CertificateAuthorityRule.
+type CertificateAuthorityRuleObservedState struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
+	RuleType string `json:"ruleType,omitempty"`
+	// A property indicating the maximum validity duration, in days, of leaf certificates issued by this CA.
+	// Expressed in ISO 8601 (https://en.wikipedia.org/wiki/ISO_8601#Time_intervals) format.
+	// +kubebuilder:validation:Optional
+	LeafCertificateMaxValidityDuration string `json:"leafCertificateMaxValidityDuration,omitempty"`
+	// A property indicating the maximum validity duration, in days, of subordinate CA's issued by this CA.
+	// Expressed in ISO 8601 (https://en.wikipedia.org/wiki/ISO_8601#Time_intervals) format.
+	// +kubebuilder:validation:Optional
+	CertificateAuthorityMaxValidityDuration string `json:"certificateAuthorityMaxValidityDuration,omitempty"`
+}
+
+// CertificateAuthorityCertificateRevocationListDetailsObservedState defines nested fields for CertificateAuthority.CertificateRevocationListDetails.
+type CertificateAuthorityCertificateRevocationListDetailsObservedState struct {
+	// +kubebuilder:validation:Required
+	ObjectStorageConfig CertificateAuthorityCertificateRevocationListDetailsObjectStorageConfig `json:"objectStorageConfig"`
+	// Optional CRL access points, expressed using a format where the version number of the issuing CA is inserted wherever you include a pair of curly braces. This versioning scheme helps avoid collisions when new CA versions are created. For example, myCrlFileIssuedFromCAVersion{}.crl becomes myCrlFileIssuedFromCAVersion2.crl for CA version 2.
+	// +kubebuilder:validation:Optional
+	CustomFormattedUrls []string `json:"customFormattedUrls,omitempty"`
+}
+
 // CertificateAuthorityCurrentVersionValidity defines nested fields for CertificateAuthority.CurrentVersion.Validity.
 type CertificateAuthorityCurrentVersionValidity struct {
 	// The date on which the certificate validity period ends, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
@@ -299,24 +324,41 @@ type CertificateAuthorityStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
 	// The OCID of the CA.
 	Id string `json:"id,omitempty"`
+	// A user-friendly name for the CA. Names are unique within a compartment. Avoid entering confidential information. Valid characters include uppercase or lowercase letters, numbers, hyphens, underscores, and periods.
+	Name string `json:"name,omitempty"`
 	// A property indicating when the CA was created, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
 	// Example: `2019-04-03T21:10:29.600Z`
 	TimeCreated string `json:"timeCreated,omitempty"`
 	// The current lifecycle state of the certificate authority.
 	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The OCID of the compartment under which the CA is created.
+	CompartmentId string `json:"compartmentId,omitempty"`
 	// The origin of the CA.
 	ConfigType string `json:"configType,omitempty"`
 	// The OCID of the parent CA that issued this CA. If this is the root CA, then this value is null.
 	IssuerCertificateAuthorityId string `json:"issuerCertificateAuthorityId,omitempty"`
+	// A brief description of the CA.
+	Description string `json:"description,omitempty"`
 	// An optional property indicating when to delete the CA version, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
 	// Example: `2019-04-03T21:10:29.600Z`
 	TimeOfDeletion string `json:"timeOfDeletion,omitempty"`
+	// The OCID of the Oracle Cloud Infrastructure Vault key used to encrypt the CA.
+	KmsKeyId string `json:"kmsKeyId,omitempty"`
 	// Additional information about the current CA lifecycle state.
-	LifecycleDetails string                             `json:"lifecycleDetails,omitempty"`
-	CurrentVersion   CertificateAuthorityCurrentVersion `json:"currentVersion,omitempty"`
-	Subject          CertificateAuthoritySubject        `json:"subject,omitempty"`
+	LifecycleDetails string `json:"lifecycleDetails,omitempty"`
+	// An optional list of rules that control how the CA is used and managed.
+	CertificateAuthorityRules        []CertificateAuthorityRuleObservedState                           `json:"certificateAuthorityRules,omitempty"`
+	CurrentVersion                   CertificateAuthorityCurrentVersion                                `json:"currentVersion,omitempty"`
+	CertificateRevocationListDetails CertificateAuthorityCertificateRevocationListDetailsObservedState `json:"certificateRevocationListDetails,omitempty"`
+	Subject                          CertificateAuthoritySubject                                       `json:"subject,omitempty"`
 	// The algorithm used to sign public key certificates that the CA issues.
-	SigningAlgorithm      string                                    `json:"signingAlgorithm,omitempty"`
+	SigningAlgorithm string `json:"signingAlgorithm,omitempty"`
+	// Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+	// Example: `{"bar-key": "value"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Usage of predefined tag keys. These predefined keys are scoped to namespaces.
+	// Example: `{"foo-namespace": {"bar-key": "value"}}`
+	DefinedTags           map[string]shared.MapValue                `json:"definedTags,omitempty"`
 	CurrentVersionSummary CertificateAuthorityCurrentVersionSummary `json:"currentVersionSummary,omitempty"`
 }
 

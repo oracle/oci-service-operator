@@ -200,7 +200,8 @@ spec:
               autotunePolicies:
                 description: The list of autotune policies enabled for this volume.
                 items:
-                  description: VolumeAutotunePolicy defines nested fields for Volume.AutotunePolicy.
+                  description: VolumeAutotunePolicyObservedState defines nested fields
+                    for Volume.AutotunePolicy.
                   properties:
                     autotuneType:
                       type: string
@@ -297,7 +298,8 @@ spec:
                 format: int64
                 type: integer
               sourceDetails:
-                description: VolumeSourceDetails defines nested fields for Volume.SourceDetails.
+                description: VolumeSourceDetailsObservedState defines nested fields
+                  for Volume.SourceDetails.
                 properties:
                   id:
                     description: The OCID of the block volume replica.

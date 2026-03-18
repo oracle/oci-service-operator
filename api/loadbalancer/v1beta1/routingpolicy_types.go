@@ -50,9 +50,28 @@ type RoutingPolicyRule struct {
 	Actions []RoutingPolicyRuleAction `json:"actions"`
 }
 
+// RoutingPolicyRuleActionObservedState defines nested fields for RoutingPolicy.Rule.Action.
+type RoutingPolicyRuleActionObservedState struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
+	Name string `json:"name,omitempty"`
+	// Name of the backend set the listener will forward the traffic to.
+	// Example: `backendSetForImages`
+	// +kubebuilder:validation:Required
+	BackendSetName string `json:"backendSetName"`
+}
+
 // RoutingPolicyStatus defines the observed state of RoutingPolicy.
 type RoutingPolicyStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The unique name for this list of routing rules. Avoid entering confidential information.
+	// Example: `example_routing_policy`
+	Name string `json:"name,omitempty"`
+	// The version of the language in which `condition` of `rules` are composed.
+	ConditionLanguageVersion string `json:"conditionLanguageVersion,omitempty"`
+	// The ordered list of routing rules.
+	Rules []RoutingPolicyRule `json:"rules,omitempty"`
 }
 
 // +kubebuilder:object:root=true
