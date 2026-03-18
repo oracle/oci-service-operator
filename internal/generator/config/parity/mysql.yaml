@@ -57,6 +57,41 @@ resources:
             tag: 'json:"id,omitempty"'
             comments:
               - Configuration Id
+      - name: DeletionPolicyDetails
+        comments:
+          - DeletionPolicyDetails Policy for how the DB System and related resources should be handled at the time of its deletion.
+        fields:
+          - name: AutomaticBackupRetention
+            type: string
+            tag: 'json:"automaticBackupRetention,omitempty"'
+            comments:
+              - Specifies if any automatic backups created for a DB System should be retained or deleted when the DB System is deleted.
+          - name: FinalBackup
+            type: string
+            tag: 'json:"finalBackup,omitempty"'
+            comments:
+              - Specifies whether or not a backup is taken when the DB System is deleted.
+              - '  REQUIRE_FINAL_BACKUP: a backup is taken if the DB System is deleted.'
+              - '  SKIP_FINAL_BACKUP: a backup is not taken if the DB System is deleted.'
+          - name: IsDeleteProtected
+            type: bool
+            tag: 'json:"isDeleteProtected,omitempty"'
+            comments:
+              - Specifies whether the DB System can be deleted. Set to true to prevent deletion, false (default) to allow.
+      - name: SecureConnectionDetails
+        comments:
+          - SecureConnectionDetails Secure connection configuration details.
+        fields:
+          - name: CertificateGenerationType
+            type: string
+            tag: 'json:"certificateGenerationType,omitempty"'
+            comments:
+              - Select whether to use MySQL Database Service-managed certificate (SYSTEM) or your own certificate (BYOC).
+          - name: CertificateId
+            type: shared.OCID
+            tag: 'json:"certificateId,omitempty"'
+            comments:
+              - The OCID of the certificate to use.
     specFields:
       - name: MySqlDbSystemId
         type: shared.OCID
@@ -137,6 +172,23 @@ resources:
         tag: 'json:"maintenance,omitempty"'
       - type: shared.TagResources
         tag: 'json:",inline,omitempty"'
+      - name: DeletionPolicy
+        type: DeletionPolicyDetails
+        tag: 'json:"deletionPolicy,omitempty"'
+      - name: CrashRecovery
+        type: string
+        tag: 'json:"crashRecovery,omitempty"'
+        comments:
+          - Whether to run the DB System with InnoDB Redo Logs and the Double Write Buffer enabled or disabled,
+          - and whether to enable or disable syncing of the Binary Logs.
+      - name: DatabaseManagement
+        type: string
+        tag: 'json:"databaseManagement,omitempty"'
+        comments:
+          - Whether to enable monitoring via the Database Management service.
+      - name: SecureConnections
+        type: SecureConnectionDetails
+        tag: 'json:"secureConnections,omitempty"'
     statusComments:
       - MySqlDbSystemStatus defines the observed state of MySqlDbSystem
     printColumns:

@@ -14,32 +14,100 @@ import (
 
 // AutonomousDatabasesSpec defines the desired state of AutonomousDatabases
 type AutonomousDatabasesSpec struct {
-	AdbId                shared.OCID           `json:"id,omitempty"`
-	CompartmentId        shared.OCID           `json:"compartmentId,omitempty"`
-	DisplayName          string                `json:"displayName,omitempty"`
-	DbName               string                `json:"dbName,omitempty"`
-	DbWorkload           string                `json:"dbWorkload,omitempty"`
-	IsDedicated          bool                  `json:"isDedicated,omitempty"`
-	DbVersion            string                `json:"dbVersion,omitempty"`
-	DataStorageSizeInTBs int                   `json:"dataStorageSizeInTBs,omitempty"`
-	CpuCoreCount         int                   `json:"cpuCoreCount,omitempty"`
-	ComputeModel         string                `json:"computeModel,omitempty"`
-	ComputeCount         float32               `json:"computeCount,omitempty"`
-	AdminPassword        shared.PasswordSource `json:"adminPassword,omitempty"`
-	IsAutoScalingEnabled bool                  `json:"isAutoScalingEnabled,omitempty"`
-	IsFreeTier           bool                  `json:"isFreeTier,omitempty"`
-	LicenseModel         string                `json:"licenseModel,omitempty"`
-	shared.TagResources  `json:",inline"`
-	Wallet               AutonomousDatabaseWallet `json:"wallet,omitempty"`
+	AdbId                                    shared.OCID                               `json:"id,omitempty"`
+	CompartmentId                            shared.OCID                               `json:"compartmentId,omitempty"`
+	DisplayName                              string                                    `json:"displayName,omitempty"`
+	DbName                                   string                                    `json:"dbName,omitempty"`
+	DbWorkload                               string                                    `json:"dbWorkload,omitempty"`
+	IsDedicated                              bool                                      `json:"isDedicated,omitempty"`
+	DbVersion                                string                                    `json:"dbVersion,omitempty"`
+	CharacterSet                             string                                    `json:"characterSet,omitempty"`
+	NcharacterSet                            string                                    `json:"ncharacterSet,omitempty"`
+	DataStorageSizeInTBs                     int                                       `json:"dataStorageSizeInTBs,omitempty"`
+	DataStorageSizeInGBs                     int                                       `json:"dataStorageSizeInGBs,omitempty"`
+	CpuCoreCount                             int                                       `json:"cpuCoreCount,omitempty"`
+	OcpuCount                                float32                                   `json:"ocpuCount,omitempty"`
+	ComputeModel                             string                                    `json:"computeModel,omitempty"`
+	ComputeCount                             float32                                   `json:"computeCount,omitempty"`
+	InMemoryPercentage                       int                                       `json:"inMemoryPercentage,omitempty"`
+	BackupRetentionPeriodInDays              int                                       `json:"backupRetentionPeriodInDays,omitempty"`
+	LocalAdgAutoFailoverMaxDataLossLimit     int                                       `json:"localAdgAutoFailoverMaxDataLossLimit,omitempty"`
+	AdminPassword                            shared.PasswordSource                     `json:"adminPassword,omitempty"`
+	SecretId                                 string                                    `json:"secretId,omitempty"`
+	SecretVersionNumber                      int                                       `json:"secretVersionNumber,omitempty"`
+	IsAutoScalingEnabled                     bool                                      `json:"isAutoScalingEnabled,omitempty"`
+	IsAutoScalingForStorageEnabled           bool                                      `json:"isAutoScalingForStorageEnabled,omitempty"`
+	IsFreeTier                               bool                                      `json:"isFreeTier,omitempty"`
+	IsDevTier                                bool                                      `json:"isDevTier,omitempty"`
+	IsPreviewVersionWithServiceTermsAccepted bool                                      `json:"isPreviewVersionWithServiceTermsAccepted,omitempty"`
+	IsDataGuardEnabled                       bool                                      `json:"isDataGuardEnabled,omitempty"`
+	IsLocalDataGuardEnabled                  bool                                      `json:"isLocalDataGuardEnabled,omitempty"`
+	IsMtlsConnectionRequired                 bool                                      `json:"isMtlsConnectionRequired,omitempty"`
+	IsAccessControlEnabled                   bool                                      `json:"isAccessControlEnabled,omitempty"`
+	ArePrimaryWhitelistedIpsUsed             bool                                      `json:"arePrimaryWhitelistedIpsUsed,omitempty"`
+	LicenseModel                             string                                    `json:"licenseModel,omitempty"`
+	DatabaseEdition                          string                                    `json:"databaseEdition,omitempty"`
+	AutonomousMaintenanceScheduleType        string                                    `json:"autonomousMaintenanceScheduleType,omitempty"`
+	AutonomousContainerDatabaseId            string                                    `json:"autonomousContainerDatabaseId,omitempty"`
+	KmsKeyId                                 string                                    `json:"kmsKeyId,omitempty"`
+	VaultId                                  string                                    `json:"vaultId,omitempty"`
+	SubnetId                                 string                                    `json:"subnetId,omitempty"`
+	NsgIds                                   []string                                  `json:"nsgIds,omitempty"`
+	PrivateEndpointLabel                     string                                    `json:"privateEndpointLabel,omitempty"`
+	PrivateEndpointIp                        string                                    `json:"privateEndpointIp,omitempty"`
+	WhitelistedIps                           []string                                  `json:"whitelistedIps,omitempty"`
+	StandbyWhitelistedIps                    []string                                  `json:"standbyWhitelistedIps,omitempty"`
+	CustomerContacts                         []AutonomousDatabasesCustomerContact      `json:"customerContacts,omitempty"`
+	ResourcePoolLeaderId                     string                                    `json:"resourcePoolLeaderId,omitempty"`
+	ResourcePoolSummary                      AutonomousDatabasesResourcePoolSummary    `json:"resourcePoolSummary,omitempty"`
+	ScheduledOperations                      []AutonomousDatabasesScheduledOperation   `json:"scheduledOperations,omitempty"`
+	DbToolsDetails                           []AutonomousDatabasesDbToolsDetail        `json:"dbToolsDetails,omitempty"`
+	LongTermBackupSchedule                   AutonomousDatabasesLongTermBackupSchedule `json:"longTermBackupSchedule,omitempty"`
+	OpenMode                                 string                                    `json:"openMode,omitempty"`
+	PermissionLevel                          string                                    `json:"permissionLevel,omitempty"`
+	IsRefreshableClone                       bool                                      `json:"isRefreshableClone,omitempty"`
+	RefreshableMode                          string                                    `json:"refreshableMode,omitempty"`
+	PeerDbId                                 string                                    `json:"peerDbId,omitempty"`
+	shared.TagResources                      `json:",inline"`
+	Wallet                                   AutonomousDatabaseWallet `json:"wallet,omitempty"`
 }
 type AutonomousDatabaseWallet struct {
 	WalletName     string                `json:"walletName,omitempty"`
 	WalletPassword shared.PasswordSource `json:"walletPassword,omitempty"`
 }
+type AutonomousDatabasesCustomerContact struct {
+	Email string `json:"email,omitempty"`
+}
+type AutonomousDatabasesResourcePoolSummary struct {
+	PoolSize   int  `json:"poolSize,omitempty"`
+	IsDisabled bool `json:"isDisabled,omitempty"`
+}
+type AutonomousDatabasesScheduledOperationDayOfWeek struct {
+	Name string `json:"name"`
+}
+type AutonomousDatabasesScheduledOperation struct {
+	DayOfWeek          AutonomousDatabasesScheduledOperationDayOfWeek `json:"dayOfWeek"`
+	ScheduledStartTime string                                         `json:"scheduledStartTime,omitempty"`
+	ScheduledStopTime  string                                         `json:"scheduledStopTime,omitempty"`
+}
+type AutonomousDatabasesDbToolsDetail struct {
+	Name                 string  `json:"name"`
+	IsEnabled            bool    `json:"isEnabled,omitempty"`
+	ComputeCount         float32 `json:"computeCount,omitempty"`
+	MaxIdleTimeInMinutes int     `json:"maxIdleTimeInMinutes,omitempty"`
+}
+type AutonomousDatabasesLongTermBackupSchedule struct {
+	RepeatCadence         string `json:"repeatCadence,omitempty"`
+	TimeOfBackup          string `json:"timeOfBackup,omitempty"`
+	RetentionPeriodInDays int    `json:"retentionPeriodInDays,omitempty"`
+	IsDisabled            bool   `json:"isDisabled,omitempty"`
+}
 
 // AutonomousDatabasesStatus defines the observed state of AutonomousDatabases
 type AutonomousDatabasesStatus struct {
-	OsokStatus shared.OSOKStatus `json:"status"`
+	OsokStatus                     shared.OSOKStatus `json:"status"`
+	LastAppliedSecretId            string            `json:"lastAppliedSecretId,omitempty"`
+	LastAppliedSecretVersionNumber int               `json:"lastAppliedSecretVersionNumber,omitempty"`
 }
 
 // +kubebuilder:object:root=true

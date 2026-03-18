@@ -45,6 +45,13 @@ type MySqlDbSystemSpec struct {
 	Source              CreateDbSystemSourceDetails `json:"source,omitempty"`
 	Maintenance         CreateMaintenanceDetails    `json:"maintenance,omitempty"`
 	shared.TagResources `json:",inline,omitempty"`
+	DeletionPolicy      DeletionPolicyDetails `json:"deletionPolicy,omitempty"`
+	// Whether to run the DB System with InnoDB Redo Logs and the Double Write Buffer enabled or disabled,
+	// and whether to enable or disable syncing of the Binary Logs.
+	CrashRecovery string `json:"crashRecovery,omitempty"`
+	// Whether to enable monitoring via the Database Management service.
+	DatabaseManagement string                  `json:"databaseManagement,omitempty"`
+	SecureConnections  SecureConnectionDetails `json:"secureConnections,omitempty"`
 }
 
 // CreateDbSystemSourceDetails Parameters detailing how to provision the initial data of the system.
@@ -77,6 +84,26 @@ type CreateBackupPolicyDetails struct {
 type CreateConfigurationDetails struct {
 	// Configuration Id
 	Id shared.OCID `json:"id,omitempty"`
+}
+
+// DeletionPolicyDetails Policy for how the DB System and related resources should be handled at the time of its deletion.
+type DeletionPolicyDetails struct {
+	// Specifies if any automatic backups created for a DB System should be retained or deleted when the DB System is deleted.
+	AutomaticBackupRetention string `json:"automaticBackupRetention,omitempty"`
+	// Specifies whether or not a backup is taken when the DB System is deleted.
+	//   REQUIRE_FINAL_BACKUP: a backup is taken if the DB System is deleted.
+	//   SKIP_FINAL_BACKUP: a backup is not taken if the DB System is deleted.
+	FinalBackup string `json:"finalBackup,omitempty"`
+	// Specifies whether the DB System can be deleted. Set to true to prevent deletion, false (default) to allow.
+	IsDeleteProtected bool `json:"isDeleteProtected,omitempty"`
+}
+
+// SecureConnectionDetails Secure connection configuration details.
+type SecureConnectionDetails struct {
+	// Select whether to use MySQL Database Service-managed certificate (SYSTEM) or your own certificate (BYOC).
+	CertificateGenerationType string `json:"certificateGenerationType,omitempty"`
+	// The OCID of the certificate to use.
+	CertificateId shared.OCID `json:"certificateId,omitempty"`
 }
 
 // MySqlDbSystemStatus defines the observed state of MySqlDbSystem

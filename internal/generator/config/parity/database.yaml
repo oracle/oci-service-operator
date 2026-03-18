@@ -13,6 +13,63 @@ resources:
           - name: WalletPassword
             type: shared.PasswordSource
             tag: 'json:"walletPassword,omitempty"'
+      - name: AutonomousDatabasesCustomerContact
+        fields:
+          - name: Email
+            type: string
+            tag: 'json:"email,omitempty"'
+      - name: AutonomousDatabasesResourcePoolSummary
+        fields:
+          - name: PoolSize
+            type: int
+            tag: 'json:"poolSize,omitempty"'
+          - name: IsDisabled
+            type: bool
+            tag: 'json:"isDisabled,omitempty"'
+      - name: AutonomousDatabasesScheduledOperationDayOfWeek
+        fields:
+          - name: Name
+            type: string
+            tag: 'json:"name"'
+      - name: AutonomousDatabasesScheduledOperation
+        fields:
+          - name: DayOfWeek
+            type: AutonomousDatabasesScheduledOperationDayOfWeek
+            tag: 'json:"dayOfWeek"'
+          - name: ScheduledStartTime
+            type: string
+            tag: 'json:"scheduledStartTime,omitempty"'
+          - name: ScheduledStopTime
+            type: string
+            tag: 'json:"scheduledStopTime,omitempty"'
+      - name: AutonomousDatabasesDbToolsDetail
+        fields:
+          - name: Name
+            type: string
+            tag: 'json:"name"'
+          - name: IsEnabled
+            type: bool
+            tag: 'json:"isEnabled,omitempty"'
+          - name: ComputeCount
+            type: float32
+            tag: 'json:"computeCount,omitempty"'
+          - name: MaxIdleTimeInMinutes
+            type: int
+            tag: 'json:"maxIdleTimeInMinutes,omitempty"'
+      - name: AutonomousDatabasesLongTermBackupSchedule
+        fields:
+          - name: RepeatCadence
+            type: string
+            tag: 'json:"repeatCadence,omitempty"'
+          - name: TimeOfBackup
+            type: string
+            tag: 'json:"timeOfBackup,omitempty"'
+          - name: RetentionPeriodInDays
+            type: int
+            tag: 'json:"retentionPeriodInDays,omitempty"'
+          - name: IsDisabled
+            type: bool
+            tag: 'json:"isDisabled,omitempty"'
     specFields:
       - name: AdbId
         type: shared.OCID
@@ -35,30 +92,147 @@ resources:
       - name: DbVersion
         type: string
         tag: 'json:"dbVersion,omitempty"'
+      - name: CharacterSet
+        type: string
+        tag: 'json:"characterSet,omitempty"'
+      - name: NcharacterSet
+        type: string
+        tag: 'json:"ncharacterSet,omitempty"'
       - name: DataStorageSizeInTBs
         type: int
         tag: 'json:"dataStorageSizeInTBs,omitempty"'
+      - name: DataStorageSizeInGBs
+        type: int
+        tag: 'json:"dataStorageSizeInGBs,omitempty"'
       - name: CpuCoreCount
         type: int
         tag: 'json:"cpuCoreCount,omitempty"'
+      - name: OcpuCount
+        type: float32
+        tag: 'json:"ocpuCount,omitempty"'
       - name: ComputeModel
         type: string
         tag: 'json:"computeModel,omitempty"'
       - name: ComputeCount
         type: float32
         tag: 'json:"computeCount,omitempty"'
+      - name: InMemoryPercentage
+        type: int
+        tag: 'json:"inMemoryPercentage,omitempty"'
+      - name: BackupRetentionPeriodInDays
+        type: int
+        tag: 'json:"backupRetentionPeriodInDays,omitempty"'
+      - name: LocalAdgAutoFailoverMaxDataLossLimit
+        type: int
+        tag: 'json:"localAdgAutoFailoverMaxDataLossLimit,omitempty"'
       - name: AdminPassword
         type: shared.PasswordSource
         tag: 'json:"adminPassword,omitempty"'
+      - name: SecretId
+        type: string
+        tag: 'json:"secretId,omitempty"'
+      - name: SecretVersionNumber
+        type: int
+        tag: 'json:"secretVersionNumber,omitempty"'
       - name: IsAutoScalingEnabled
         type: bool
         tag: 'json:"isAutoScalingEnabled,omitempty"'
+      - name: IsAutoScalingForStorageEnabled
+        type: bool
+        tag: 'json:"isAutoScalingForStorageEnabled,omitempty"'
       - name: IsFreeTier
         type: bool
         tag: 'json:"isFreeTier,omitempty"'
+      - name: IsDevTier
+        type: bool
+        tag: 'json:"isDevTier,omitempty"'
+      - name: IsPreviewVersionWithServiceTermsAccepted
+        type: bool
+        tag: 'json:"isPreviewVersionWithServiceTermsAccepted,omitempty"'
+      - name: IsDataGuardEnabled
+        type: bool
+        tag: 'json:"isDataGuardEnabled,omitempty"'
+      - name: IsLocalDataGuardEnabled
+        type: bool
+        tag: 'json:"isLocalDataGuardEnabled,omitempty"'
+      - name: IsMtlsConnectionRequired
+        type: bool
+        tag: 'json:"isMtlsConnectionRequired,omitempty"'
+      - name: IsAccessControlEnabled
+        type: bool
+        tag: 'json:"isAccessControlEnabled,omitempty"'
+      - name: ArePrimaryWhitelistedIpsUsed
+        type: bool
+        tag: 'json:"arePrimaryWhitelistedIpsUsed,omitempty"'
       - name: LicenseModel
         type: string
         tag: 'json:"licenseModel,omitempty"'
+      - name: DatabaseEdition
+        type: string
+        tag: 'json:"databaseEdition,omitempty"'
+      - name: AutonomousMaintenanceScheduleType
+        type: string
+        tag: 'json:"autonomousMaintenanceScheduleType,omitempty"'
+      - name: AutonomousContainerDatabaseId
+        type: string
+        tag: 'json:"autonomousContainerDatabaseId,omitempty"'
+      - name: KmsKeyId
+        type: string
+        tag: 'json:"kmsKeyId,omitempty"'
+      - name: VaultId
+        type: string
+        tag: 'json:"vaultId,omitempty"'
+      - name: SubnetId
+        type: string
+        tag: 'json:"subnetId,omitempty"'
+      - name: NsgIds
+        type: '[]string'
+        tag: 'json:"nsgIds,omitempty"'
+      - name: PrivateEndpointLabel
+        type: string
+        tag: 'json:"privateEndpointLabel,omitempty"'
+      - name: PrivateEndpointIp
+        type: string
+        tag: 'json:"privateEndpointIp,omitempty"'
+      - name: WhitelistedIps
+        type: '[]string'
+        tag: 'json:"whitelistedIps,omitempty"'
+      - name: StandbyWhitelistedIps
+        type: '[]string'
+        tag: 'json:"standbyWhitelistedIps,omitempty"'
+      - name: CustomerContacts
+        type: '[]AutonomousDatabasesCustomerContact'
+        tag: 'json:"customerContacts,omitempty"'
+      - name: ResourcePoolLeaderId
+        type: string
+        tag: 'json:"resourcePoolLeaderId,omitempty"'
+      - name: ResourcePoolSummary
+        type: AutonomousDatabasesResourcePoolSummary
+        tag: 'json:"resourcePoolSummary,omitempty"'
+      - name: ScheduledOperations
+        type: '[]AutonomousDatabasesScheduledOperation'
+        tag: 'json:"scheduledOperations,omitempty"'
+      - name: DbToolsDetails
+        type: '[]AutonomousDatabasesDbToolsDetail'
+        tag: 'json:"dbToolsDetails,omitempty"'
+      - name: LongTermBackupSchedule
+        type: AutonomousDatabasesLongTermBackupSchedule
+        tag: 'json:"longTermBackupSchedule,omitempty"'
+      - name: OpenMode
+        type: string
+        tag: 'json:"openMode,omitempty"'
+      - name: PermissionLevel
+        type: string
+        tag: 'json:"permissionLevel,omitempty"'
+      - name: IsRefreshableClone
+        type: bool
+        tag: 'json:"isRefreshableClone,omitempty"'
+      - name: RefreshableMode
+        type: string
+        tag: 'json:"refreshableMode,omitempty"'
+      - name: PeerDbId
+        type: string
+        tag: 'json:"peerDbId,omitempty"'
       - type: shared.TagResources
         tag: 'json:",inline"'
       - name: Wallet
@@ -66,6 +240,16 @@ resources:
         tag: 'json:"wallet,omitempty"'
     statusComments:
       - AutonomousDatabasesStatus defines the observed state of AutonomousDatabases
+    statusFields:
+      - name: OsokStatus
+        type: shared.OSOKStatus
+        tag: 'json:"status"'
+      - name: LastAppliedSecretId
+        type: string
+        tag: 'json:"lastAppliedSecretId,omitempty"'
+      - name: LastAppliedSecretVersionNumber
+        type: int
+        tag: 'json:"lastAppliedSecretVersionNumber,omitempty"'
     printColumns:
       - name: DisplayName
         type: string

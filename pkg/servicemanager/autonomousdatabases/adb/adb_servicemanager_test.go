@@ -193,6 +193,91 @@ func TestCreateAdb_OCPUUsesCpuCoreCount(t *testing.T) {
 	assert.Nil(t, details.ComputeCount)
 }
 
+func TestCreateAdb_MapsAdditionalOptionalFields(t *testing.T) {
+	mgr := newTestManager()
+	var captured database.CreateAutonomousDatabaseRequest
+
+	ExportSetClientForTest(mgr, &mockOciDbClient{
+		createFn: func(_ context.Context, req database.CreateAutonomousDatabaseRequest) (database.CreateAutonomousDatabaseResponse, error) {
+			captured = req
+			return database.CreateAutonomousDatabaseResponse{}, nil
+		},
+	})
+
+	adb := databasev1beta1.AutonomousDatabases{
+		Spec: databasev1beta1.AutonomousDatabasesSpec{
+			CompartmentId:                     "ocid1.compartment.oc1..example",
+			DisplayName:                       "test-adb",
+			DbName:                            "TESTADB",
+			DbWorkload:                        "OLTP",
+			DataStorageSizeInTBs:              1,
+			CpuCoreCount:                      2,
+			CharacterSet:                      "AL32UTF8",
+			BackupRetentionPeriodInDays:       30,
+			DataStorageSizeInGBs:              512,
+			OcpuCount:                         3.5,
+			KmsKeyId:                          "ocid1.key.oc1..example",
+			VaultId:                           "ocid1.vault.oc1..example",
+			SubnetId:                          "ocid1.subnet.oc1..example",
+			NsgIds:                            []string{"ocid1.nsg.oc1..example"},
+			PrivateEndpointLabel:              "adb-private",
+			PrivateEndpointIp:                 "10.0.0.10",
+			IsAccessControlEnabled:            true,
+			WhitelistedIps:                    []string{"10.0.0.0/24"},
+			CustomerContacts:                  []databasev1beta1.AutonomousDatabasesCustomerContact{{Email: "dba@example.com"}},
+			ResourcePoolLeaderId:              "ocid1.autonomousdatabase.oc1..leader",
+			ResourcePoolSummary:               databasev1beta1.AutonomousDatabasesResourcePoolSummary{PoolSize: 4, IsDisabled: true},
+			ScheduledOperations:               []databasev1beta1.AutonomousDatabasesScheduledOperation{{DayOfWeek: databasev1beta1.AutonomousDatabasesScheduledOperationDayOfWeek{Name: "FRIDAY"}, ScheduledStartTime: "09:00", ScheduledStopTime: "18:00"}},
+			IsAutoScalingForStorageEnabled:    true,
+			DbToolsDetails:                    []databasev1beta1.AutonomousDatabasesDbToolsDetail{{Name: "ORDS", IsEnabled: true, ComputeCount: 1.5, MaxIdleTimeInMinutes: 60}},
+			SecretId:                          "ocid1.vaultsecret.oc1..example",
+			SecretVersionNumber:               2,
+			DatabaseEdition:                   "ENTERPRISE_EDITION",
+			AutonomousMaintenanceScheduleType: "REGULAR",
+		},
+	}
+
+	_, err := mgr.CreateAdb(context.Background(), adb, "")
+	assert.NoError(t, err)
+
+	details := captured.CreateAutonomousDatabaseDetails.(database.CreateAutonomousDatabaseDetails)
+	assert.Nil(t, details.AdminPassword)
+	assert.Equal(t, common.String("AL32UTF8"), details.CharacterSet)
+	assert.Equal(t, common.Int(30), details.BackupRetentionPeriodInDays)
+	assert.Equal(t, common.Int(512), details.DataStorageSizeInGBs)
+	assert.Equal(t, common.Float32(3.5), details.OcpuCount)
+	assert.Equal(t, common.String("ocid1.key.oc1..example"), details.KmsKeyId)
+	assert.Equal(t, common.String("ocid1.vault.oc1..example"), details.VaultId)
+	assert.Equal(t, common.String("ocid1.subnet.oc1..example"), details.SubnetId)
+	assert.Equal(t, []string{"ocid1.nsg.oc1..example"}, details.NsgIds)
+	assert.Equal(t, common.String("adb-private"), details.PrivateEndpointLabel)
+	assert.Equal(t, common.String("10.0.0.10"), details.PrivateEndpointIp)
+	assert.Equal(t, common.Bool(true), details.IsAccessControlEnabled)
+	assert.Equal(t, []string{"10.0.0.0/24"}, details.WhitelistedIps)
+	assert.Len(t, details.CustomerContacts, 1)
+	assert.Equal(t, common.String("dba@example.com"), details.CustomerContacts[0].Email)
+	if assert.NotNil(t, details.ResourcePoolSummary) {
+		assert.Equal(t, common.Int(4), details.ResourcePoolSummary.PoolSize)
+		assert.Equal(t, common.Bool(true), details.ResourcePoolSummary.IsDisabled)
+	}
+	assert.Len(t, details.ScheduledOperations, 1)
+	if assert.NotNil(t, details.ScheduledOperations[0].DayOfWeek) {
+		assert.Equal(t, database.DayOfWeekNameEnum("FRIDAY"), details.ScheduledOperations[0].DayOfWeek.Name)
+	}
+	assert.Equal(t, common.String("09:00"), details.ScheduledOperations[0].ScheduledStartTime)
+	assert.Equal(t, common.String("18:00"), details.ScheduledOperations[0].ScheduledStopTime)
+	assert.Equal(t, common.Bool(true), details.IsAutoScalingForStorageEnabled)
+	assert.Len(t, details.DbToolsDetails, 1)
+	assert.Equal(t, database.DatabaseToolNameEnum("ORDS"), details.DbToolsDetails[0].Name)
+	assert.Equal(t, common.Bool(true), details.DbToolsDetails[0].IsEnabled)
+	assert.Equal(t, common.Float32(1.5), details.DbToolsDetails[0].ComputeCount)
+	assert.Equal(t, common.Int(60), details.DbToolsDetails[0].MaxIdleTimeInMinutes)
+	assert.Equal(t, common.String("ocid1.vaultsecret.oc1..example"), details.SecretId)
+	assert.Equal(t, common.Int(2), details.SecretVersionNumber)
+	assert.Equal(t, database.AutonomousDatabaseSummaryDatabaseEditionEnum("ENTERPRISE_EDITION"), details.DatabaseEdition)
+	assert.Equal(t, database.CreateAutonomousDatabaseBaseAutonomousMaintenanceScheduleTypeEnum("REGULAR"), details.AutonomousMaintenanceScheduleType)
+}
+
 func TestGetCrdStatus_Happy(t *testing.T) {
 	mgr := newTestManager()
 
@@ -479,6 +564,52 @@ func TestCreateOrUpdate_CreateNewAdb(t *testing.T) {
 	assert.Equal(t, shared.OCID(newAdbID), adb.Status.OsokStatus.Ocid)
 }
 
+func TestCreateOrUpdate_CreateNewAdb_WithSecretIdSkipsAdminPasswordSecret(t *testing.T) {
+	newAdbID := "ocid1.autonomousdatabase.oc1..vaultsecret"
+	credClient := &fakeCredentialClient{
+		getSecretFn: func(_ context.Context, _, _ string) (map[string][]byte, error) {
+			return nil, errors.New("admin password secret should not be fetched")
+		},
+	}
+	mgr := newTestManagerWithCreds(credClient)
+
+	var capturedReq database.CreateAutonomousDatabaseRequest
+	ExportSetClientForTest(mgr, &mockOciDbClient{
+		listFn: func(_ context.Context, _ database.ListAutonomousDatabasesRequest) (database.ListAutonomousDatabasesResponse, error) {
+			return database.ListAutonomousDatabasesResponse{}, nil
+		},
+		createFn: func(_ context.Context, req database.CreateAutonomousDatabaseRequest) (database.CreateAutonomousDatabaseResponse, error) {
+			capturedReq = req
+			return database.CreateAutonomousDatabaseResponse{
+				AutonomousDatabase: database.AutonomousDatabase{Id: common.String(newAdbID)},
+			}, nil
+		},
+		getFn: func(_ context.Context, _ database.GetAutonomousDatabaseRequest) (database.GetAutonomousDatabaseResponse, error) {
+			return database.GetAutonomousDatabaseResponse{
+				AutonomousDatabase: makeActiveAdb(newAdbID, "test-adb"),
+			}, nil
+		},
+	})
+
+	adb := &databasev1beta1.AutonomousDatabases{}
+	adb.Spec.DisplayName = "test-adb"
+	adb.Spec.CompartmentId = "ocid1.compartment.oc1..xxx"
+	adb.Spec.SecretId = "ocid1.vaultsecret.oc1..example"
+	adb.Spec.SecretVersionNumber = 7
+	adb.Spec.CpuCoreCount = 1
+
+	resp, err := mgr.CreateOrUpdate(context.Background(), adb, ctrl.Request{})
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+
+	details := capturedReq.CreateAutonomousDatabaseDetails.(database.CreateAutonomousDatabaseDetails)
+	assert.Nil(t, details.AdminPassword)
+	assert.Equal(t, common.String("ocid1.vaultsecret.oc1..example"), details.SecretId)
+	assert.Equal(t, common.Int(7), details.SecretVersionNumber)
+	assert.Equal(t, "ocid1.vaultsecret.oc1..example", adb.Status.LastAppliedSecretId)
+	assert.Equal(t, 7, adb.Status.LastAppliedSecretVersionNumber)
+}
+
 func TestCreateOrUpdate_CreateNewAdb_GetSecretError(t *testing.T) {
 	credClient := &fakeCredentialClient{
 		getSecretFn: func(_ context.Context, _, _ string) (map[string][]byte, error) {
@@ -639,6 +770,243 @@ func TestCreateOrUpdate_UpdateAdb_AdditionalFields(t *testing.T) {
 	assert.Equal(t, database.UpdateAutonomousDatabaseDetailsLicenseModelEnum("BRING_YOUR_OWN_LICENSE"), details.LicenseModel)
 	assert.Equal(t, common.String("21c"), details.DbVersion)
 	assert.Equal(t, map[string]string{"env": "prod"}, details.FreeformTags)
+}
+
+func TestCreateOrUpdate_BindExistingAdb_AdditionalOptionalFields(t *testing.T) {
+	adbID := "ocid1.autonomousdatabase.oc1..advanced"
+	var capturedUpdate database.UpdateAutonomousDatabaseRequest
+	mgr := newTestManagerWithCreds(&fakeCredentialClient{})
+
+	existing := makeActiveAdb(adbID, "test-adb")
+	existing.PrivateEndpointLabel = common.String("old-private")
+	existing.IsMtlsConnectionRequired = common.Bool(false)
+	existing.NsgIds = []string{"ocid1.nsg.oc1..old"}
+	existing.CustomerContacts = []database.CustomerContact{{Email: common.String("old@example.com")}}
+	existing.ResourcePoolSummary = &database.ResourcePoolSummary{PoolSize: common.Int(1), IsDisabled: common.Bool(false)}
+	existing.ScheduledOperations = []database.ScheduledOperationDetails{
+		{
+			DayOfWeek:          &database.DayOfWeek{Name: database.DayOfWeekNameEnum("MONDAY")},
+			ScheduledStartTime: common.String("08:00"),
+			ScheduledStopTime:  common.String("17:00"),
+		},
+	}
+	existing.IsAutoScalingForStorageEnabled = common.Bool(false)
+	existing.DbToolsDetails = []database.DatabaseTool{{Name: database.DatabaseToolNameEnum("ORDS"), IsEnabled: common.Bool(false)}}
+	existing.LongTermBackupSchedule = &database.LongTermBackUpScheduleDetails{
+		RepeatCadence:         database.LongTermBackUpScheduleDetailsRepeatCadenceEnum("WEEKLY"),
+		RetentionPeriodInDays: common.Int(7),
+	}
+	existing.OpenMode = database.AutonomousDatabaseOpenModeEnum("READ_ONLY")
+	existing.PermissionLevel = database.AutonomousDatabasePermissionLevelEnum("RESTRICTED")
+	existing.IsRefreshableClone = common.Bool(false)
+	existing.RefreshableMode = database.AutonomousDatabaseRefreshableModeEnum("MANUAL")
+	existing.PeerDbIds = []string{"ocid1.autonomousdatabase.oc1..oldpeer"}
+
+	ExportSetClientForTest(mgr, &mockOciDbClient{
+		getFn: func(_ context.Context, _ database.GetAutonomousDatabaseRequest) (database.GetAutonomousDatabaseResponse, error) {
+			return database.GetAutonomousDatabaseResponse{
+				AutonomousDatabase: existing,
+			}, nil
+		},
+		updateFn: func(_ context.Context, req database.UpdateAutonomousDatabaseRequest) (database.UpdateAutonomousDatabaseResponse, error) {
+			capturedUpdate = req
+			return database.UpdateAutonomousDatabaseResponse{}, nil
+		},
+	})
+
+	adb := &databasev1beta1.AutonomousDatabases{}
+	adb.Spec.AdbId = shared.OCID(adbID)
+	adb.Spec.PrivateEndpointLabel = "new-private"
+	adb.Spec.IsMtlsConnectionRequired = true
+	adb.Spec.NsgIds = []string{"ocid1.nsg.oc1..new"}
+	adb.Spec.CustomerContacts = []databasev1beta1.AutonomousDatabasesCustomerContact{{Email: "new@example.com"}}
+	adb.Spec.ResourcePoolSummary = databasev1beta1.AutonomousDatabasesResourcePoolSummary{PoolSize: 3, IsDisabled: true}
+	adb.Spec.ScheduledOperations = []databasev1beta1.AutonomousDatabasesScheduledOperation{
+		{
+			DayOfWeek:          databasev1beta1.AutonomousDatabasesScheduledOperationDayOfWeek{Name: "FRIDAY"},
+			ScheduledStartTime: "09:00",
+			ScheduledStopTime:  "18:00",
+		},
+	}
+	adb.Spec.IsAutoScalingForStorageEnabled = true
+	adb.Spec.DbToolsDetails = []databasev1beta1.AutonomousDatabasesDbToolsDetail{{Name: "ORDS", IsEnabled: true, ComputeCount: 2.5, MaxIdleTimeInMinutes: 45}}
+	adb.Spec.LongTermBackupSchedule = databasev1beta1.AutonomousDatabasesLongTermBackupSchedule{
+		RepeatCadence:         "MONTHLY",
+		RetentionPeriodInDays: 30,
+	}
+	adb.Spec.OpenMode = "READ_WRITE"
+	adb.Spec.PermissionLevel = "UNRESTRICTED"
+	adb.Spec.IsRefreshableClone = true
+	adb.Spec.RefreshableMode = "AUTOMATIC"
+	adb.Spec.PeerDbId = "ocid1.autonomousdatabase.oc1..newpeer"
+
+	resp, err := mgr.CreateOrUpdate(context.Background(), adb, ctrl.Request{})
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+
+	details := capturedUpdate.UpdateAutonomousDatabaseDetails
+	assert.Equal(t, common.String("new-private"), details.PrivateEndpointLabel)
+	assert.Equal(t, common.Bool(true), details.IsMtlsConnectionRequired)
+	assert.Equal(t, []string{"ocid1.nsg.oc1..new"}, details.NsgIds)
+	assert.Len(t, details.CustomerContacts, 1)
+	assert.Equal(t, common.String("new@example.com"), details.CustomerContacts[0].Email)
+	if assert.NotNil(t, details.ResourcePoolSummary) {
+		assert.Equal(t, common.Int(3), details.ResourcePoolSummary.PoolSize)
+		assert.Equal(t, common.Bool(true), details.ResourcePoolSummary.IsDisabled)
+	}
+	assert.Len(t, details.ScheduledOperations, 1)
+	if assert.NotNil(t, details.ScheduledOperations[0].DayOfWeek) {
+		assert.Equal(t, database.DayOfWeekNameEnum("FRIDAY"), details.ScheduledOperations[0].DayOfWeek.Name)
+	}
+	assert.Equal(t, common.String("09:00"), details.ScheduledOperations[0].ScheduledStartTime)
+	assert.Equal(t, common.String("18:00"), details.ScheduledOperations[0].ScheduledStopTime)
+	assert.Equal(t, common.Bool(true), details.IsAutoScalingForStorageEnabled)
+	assert.Len(t, details.DbToolsDetails, 1)
+	assert.Equal(t, database.DatabaseToolNameEnum("ORDS"), details.DbToolsDetails[0].Name)
+	assert.Equal(t, common.Bool(true), details.DbToolsDetails[0].IsEnabled)
+	assert.Equal(t, common.Float32(2.5), details.DbToolsDetails[0].ComputeCount)
+	assert.Equal(t, common.Int(45), details.DbToolsDetails[0].MaxIdleTimeInMinutes)
+	if assert.NotNil(t, details.LongTermBackupSchedule) {
+		assert.Equal(t, database.LongTermBackUpScheduleDetailsRepeatCadenceEnum("MONTHLY"), details.LongTermBackupSchedule.RepeatCadence)
+		assert.Equal(t, common.Int(30), details.LongTermBackupSchedule.RetentionPeriodInDays)
+	}
+	assert.Equal(t, database.UpdateAutonomousDatabaseDetailsOpenModeEnum("READ_WRITE"), details.OpenMode)
+	assert.Equal(t, database.UpdateAutonomousDatabaseDetailsPermissionLevelEnum("UNRESTRICTED"), details.PermissionLevel)
+	assert.Equal(t, common.Bool(true), details.IsRefreshableClone)
+	assert.Equal(t, database.UpdateAutonomousDatabaseDetailsRefreshableModeEnum("AUTOMATIC"), details.RefreshableMode)
+	assert.Equal(t, common.String("ocid1.autonomousdatabase.oc1..newpeer"), details.PeerDbId)
+}
+
+func TestCreateOrUpdate_BindExistingAdb_NoUpdateWhenAdditionalFieldsMatch(t *testing.T) {
+	adbID := "ocid1.autonomousdatabase.oc1..match"
+	updateCalled := false
+	mgr := newTestManagerWithCreds(&fakeCredentialClient{})
+
+	existing := makeActiveAdb(adbID, "test-adb")
+	existing.PrivateEndpointLabel = common.String("shared-private")
+	existing.NsgIds = []string{"ocid1.nsg.oc1..shared"}
+	existing.CustomerContacts = []database.CustomerContact{{Email: common.String("same@example.com")}}
+	existing.ResourcePoolSummary = &database.ResourcePoolSummary{PoolSize: common.Int(2), IsDisabled: common.Bool(false)}
+
+	ExportSetClientForTest(mgr, &mockOciDbClient{
+		getFn: func(_ context.Context, _ database.GetAutonomousDatabaseRequest) (database.GetAutonomousDatabaseResponse, error) {
+			return database.GetAutonomousDatabaseResponse{
+				AutonomousDatabase: existing,
+			}, nil
+		},
+		updateFn: func(_ context.Context, _ database.UpdateAutonomousDatabaseRequest) (database.UpdateAutonomousDatabaseResponse, error) {
+			updateCalled = true
+			return database.UpdateAutonomousDatabaseResponse{}, nil
+		},
+	})
+
+	adb := &databasev1beta1.AutonomousDatabases{}
+	adb.Spec.AdbId = shared.OCID(adbID)
+	adb.Spec.PrivateEndpointLabel = "shared-private"
+	adb.Spec.NsgIds = []string{"ocid1.nsg.oc1..shared"}
+	adb.Spec.CustomerContacts = []databasev1beta1.AutonomousDatabasesCustomerContact{{Email: "same@example.com"}}
+	adb.Spec.ResourcePoolSummary = databasev1beta1.AutonomousDatabasesResourcePoolSummary{PoolSize: 2, IsDisabled: false}
+
+	resp, err := mgr.CreateOrUpdate(context.Background(), adb, ctrl.Request{})
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.False(t, updateCalled)
+}
+
+func TestCreateOrUpdate_BindExistingAdb_SecretReferenceUpdateWhenStatusMissing(t *testing.T) {
+	adbID := "ocid1.autonomousdatabase.oc1..secretmissing"
+	var capturedUpdate database.UpdateAutonomousDatabaseRequest
+	mgr := newTestManagerWithCreds(&fakeCredentialClient{})
+
+	ExportSetClientForTest(mgr, &mockOciDbClient{
+		getFn: func(_ context.Context, _ database.GetAutonomousDatabaseRequest) (database.GetAutonomousDatabaseResponse, error) {
+			return database.GetAutonomousDatabaseResponse{
+				AutonomousDatabase: makeActiveAdb(adbID, "test-adb"),
+			}, nil
+		},
+		updateFn: func(_ context.Context, req database.UpdateAutonomousDatabaseRequest) (database.UpdateAutonomousDatabaseResponse, error) {
+			capturedUpdate = req
+			return database.UpdateAutonomousDatabaseResponse{}, nil
+		},
+	})
+
+	adb := &databasev1beta1.AutonomousDatabases{}
+	adb.Spec.AdbId = shared.OCID(adbID)
+	adb.Spec.SecretId = "ocid1.vaultsecret.oc1..desired"
+	adb.Spec.SecretVersionNumber = 4
+
+	resp, err := mgr.CreateOrUpdate(context.Background(), adb, ctrl.Request{})
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.Equal(t, common.String("ocid1.vaultsecret.oc1..desired"), capturedUpdate.UpdateAutonomousDatabaseDetails.SecretId)
+	assert.Equal(t, common.Int(4), capturedUpdate.UpdateAutonomousDatabaseDetails.SecretVersionNumber)
+	assert.Equal(t, "ocid1.vaultsecret.oc1..desired", adb.Status.LastAppliedSecretId)
+	assert.Equal(t, 4, adb.Status.LastAppliedSecretVersionNumber)
+}
+
+func TestCreateOrUpdate_BindExistingAdb_NoUpdateWhenSecretReferenceAlreadyApplied(t *testing.T) {
+	adbID := "ocid1.autonomousdatabase.oc1..secretmatch"
+	updateCalled := false
+	mgr := newTestManagerWithCreds(&fakeCredentialClient{})
+
+	ExportSetClientForTest(mgr, &mockOciDbClient{
+		getFn: func(_ context.Context, _ database.GetAutonomousDatabaseRequest) (database.GetAutonomousDatabaseResponse, error) {
+			return database.GetAutonomousDatabaseResponse{
+				AutonomousDatabase: makeActiveAdb(adbID, "test-adb"),
+			}, nil
+		},
+		updateFn: func(_ context.Context, _ database.UpdateAutonomousDatabaseRequest) (database.UpdateAutonomousDatabaseResponse, error) {
+			updateCalled = true
+			return database.UpdateAutonomousDatabaseResponse{}, nil
+		},
+	})
+
+	adb := &databasev1beta1.AutonomousDatabases{}
+	adb.Spec.AdbId = shared.OCID(adbID)
+	adb.Spec.SecretId = "ocid1.vaultsecret.oc1..desired"
+	adb.Spec.SecretVersionNumber = 4
+	adb.Status.LastAppliedSecretId = "ocid1.vaultsecret.oc1..desired"
+	adb.Status.LastAppliedSecretVersionNumber = 4
+
+	resp, err := mgr.CreateOrUpdate(context.Background(), adb, ctrl.Request{})
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.False(t, updateCalled)
+	assert.Equal(t, "ocid1.vaultsecret.oc1..desired", adb.Status.LastAppliedSecretId)
+	assert.Equal(t, 4, adb.Status.LastAppliedSecretVersionNumber)
+}
+
+func TestCreateOrUpdate_BindExistingAdb_SecretReferenceChangeTriggersUpdate(t *testing.T) {
+	adbID := "ocid1.autonomousdatabase.oc1..secretchange"
+	var capturedUpdate database.UpdateAutonomousDatabaseRequest
+	mgr := newTestManagerWithCreds(&fakeCredentialClient{})
+
+	ExportSetClientForTest(mgr, &mockOciDbClient{
+		getFn: func(_ context.Context, _ database.GetAutonomousDatabaseRequest) (database.GetAutonomousDatabaseResponse, error) {
+			return database.GetAutonomousDatabaseResponse{
+				AutonomousDatabase: makeActiveAdb(adbID, "test-adb"),
+			}, nil
+		},
+		updateFn: func(_ context.Context, req database.UpdateAutonomousDatabaseRequest) (database.UpdateAutonomousDatabaseResponse, error) {
+			capturedUpdate = req
+			return database.UpdateAutonomousDatabaseResponse{}, nil
+		},
+	})
+
+	adb := &databasev1beta1.AutonomousDatabases{}
+	adb.Spec.AdbId = shared.OCID(adbID)
+	adb.Spec.SecretId = "ocid1.vaultsecret.oc1..new"
+	adb.Spec.SecretVersionNumber = 2
+	adb.Status.LastAppliedSecretId = "ocid1.vaultsecret.oc1..old"
+	adb.Status.LastAppliedSecretVersionNumber = 1
+
+	resp, err := mgr.CreateOrUpdate(context.Background(), adb, ctrl.Request{})
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.Equal(t, common.String("ocid1.vaultsecret.oc1..new"), capturedUpdate.UpdateAutonomousDatabaseDetails.SecretId)
+	assert.Equal(t, common.Int(2), capturedUpdate.UpdateAutonomousDatabaseDetails.SecretVersionNumber)
+	assert.Equal(t, "ocid1.vaultsecret.oc1..new", adb.Status.LastAppliedSecretId)
+	assert.Equal(t, 2, adb.Status.LastAppliedSecretVersionNumber)
 }
 
 func TestCreateOrUpdate_WalletPassword_MissingKey(t *testing.T) {

@@ -113,15 +113,44 @@ spec:
                     minLength: 1
                     type: string
                 type: object
+              crashRecovery:
+                description: |-
+                  Whether to run the DB System with InnoDB Redo Logs and the Double Write Buffer enabled or disabled,
+                  and whether to enable or disable syncing of the Binary Logs.
+                type: string
               dataStorageSizeInGBs:
                 maximum: 65536
                 minimum: 50
                 type: integer
+              databaseManagement:
+                description: Whether to enable monitoring via the Database Management
+                  service.
+                type: string
               definedTags:
                 additionalProperties:
                   additionalProperties:
                     type: string
                   type: object
+                type: object
+              deletionPolicy:
+                description: DeletionPolicyDetails Policy for how the DB System and
+                  related resources should be handled at the time of its deletion.
+                properties:
+                  automaticBackupRetention:
+                    description: Specifies if any automatic backups created for a
+                      DB System should be retained or deleted when the DB System is
+                      deleted.
+                    type: string
+                  finalBackup:
+                    description: |-
+                      Specifies whether or not a backup is taken when the DB System is deleted.
+                        REQUIRE_FINAL_BACKUP: a backup is taken if the DB System is deleted.
+                        SKIP_FINAL_BACKUP: a backup is not taken if the DB System is deleted.
+                    type: string
+                  isDeleteProtected:
+                    description: Specifies whether the DB System can be deleted. Set
+                      to true to prevent deletion, false (default) to allow.
+                    type: boolean
                 type: object
               description:
                 maxLength: 400
@@ -168,6 +197,20 @@ spec:
                 maximum: 65535
                 minimum: 1024
                 type: integer
+              secureConnections:
+                description: SecureConnectionDetails Secure connection configuration
+                  details.
+                properties:
+                  certificateGenerationType:
+                    description: Select whether to use MySQL Database Service-managed
+                      certificate (SYSTEM) or your own certificate (BYOC).
+                    type: string
+                  certificateId:
+                    description: The OCID of the certificate to use.
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                type: object
               shapeName:
                 type: string
               source:

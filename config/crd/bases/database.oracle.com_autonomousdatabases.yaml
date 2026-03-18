@@ -68,6 +68,16 @@ spec:
                         type: string
                     type: object
                 type: object
+              arePrimaryWhitelistedIpsUsed:
+                type: boolean
+              autonomousContainerDatabaseId:
+                type: string
+              autonomousMaintenanceScheduleType:
+                type: string
+              backupRetentionPeriodInDays:
+                type: integer
+              characterSet:
+                type: string
               compartmentId:
                 maxLength: 255
                 minLength: 1
@@ -78,10 +88,36 @@ spec:
                 type: string
               cpuCoreCount:
                 type: integer
+              customerContacts:
+                items:
+                  properties:
+                    email:
+                      type: string
+                  type: object
+                type: array
+              dataStorageSizeInGBs:
+                type: integer
               dataStorageSizeInTBs:
                 type: integer
+              databaseEdition:
+                type: string
               dbName:
                 type: string
+              dbToolsDetails:
+                items:
+                  properties:
+                    computeCount:
+                      type: number
+                    isEnabled:
+                      type: boolean
+                    maxIdleTimeInMinutes:
+                      type: integer
+                    name:
+                      type: string
+                  required:
+                  - name
+                  type: object
+                type: array
               dbVersion:
                 type: string
               dbWorkload:
@@ -102,13 +138,105 @@ spec:
                 maxLength: 255
                 minLength: 1
                 type: string
+              inMemoryPercentage:
+                type: integer
+              isAccessControlEnabled:
+                type: boolean
               isAutoScalingEnabled:
+                type: boolean
+              isAutoScalingForStorageEnabled:
+                type: boolean
+              isDataGuardEnabled:
                 type: boolean
               isDedicated:
                 type: boolean
+              isDevTier:
+                type: boolean
               isFreeTier:
                 type: boolean
+              isLocalDataGuardEnabled:
+                type: boolean
+              isMtlsConnectionRequired:
+                type: boolean
+              isPreviewVersionWithServiceTermsAccepted:
+                type: boolean
+              isRefreshableClone:
+                type: boolean
+              kmsKeyId:
+                type: string
               licenseModel:
+                type: string
+              localAdgAutoFailoverMaxDataLossLimit:
+                type: integer
+              longTermBackupSchedule:
+                properties:
+                  isDisabled:
+                    type: boolean
+                  repeatCadence:
+                    type: string
+                  retentionPeriodInDays:
+                    type: integer
+                  timeOfBackup:
+                    type: string
+                type: object
+              ncharacterSet:
+                type: string
+              nsgIds:
+                items:
+                  type: string
+                type: array
+              ocpuCount:
+                type: number
+              openMode:
+                type: string
+              peerDbId:
+                type: string
+              permissionLevel:
+                type: string
+              privateEndpointIp:
+                type: string
+              privateEndpointLabel:
+                type: string
+              refreshableMode:
+                type: string
+              resourcePoolLeaderId:
+                type: string
+              resourcePoolSummary:
+                properties:
+                  isDisabled:
+                    type: boolean
+                  poolSize:
+                    type: integer
+                type: object
+              scheduledOperations:
+                items:
+                  properties:
+                    dayOfWeek:
+                      properties:
+                        name:
+                          type: string
+                      required:
+                      - name
+                      type: object
+                    scheduledStartTime:
+                      type: string
+                    scheduledStopTime:
+                      type: string
+                  required:
+                  - dayOfWeek
+                  type: object
+                type: array
+              secretId:
+                type: string
+              secretVersionNumber:
+                type: integer
+              standbyWhitelistedIps:
+                items:
+                  type: string
+                type: array
+              subnetId:
+                type: string
+              vaultId:
                 type: string
               wallet:
                 properties:
@@ -123,10 +251,18 @@ spec:
                         type: object
                     type: object
                 type: object
+              whitelistedIps:
+                items:
+                  type: string
+                type: array
             type: object
           status:
             description: AutonomousDatabasesStatus defines the observed state of AutonomousDatabases
             properties:
+              lastAppliedSecretId:
+                type: string
+              lastAppliedSecretVersionNumber:
+                type: integer
               status:
                 properties:
                   conditions:

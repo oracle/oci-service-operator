@@ -55,6 +55,7 @@ func (c *AdbServiceManager) CreateOrUpdate(ctx context.Context, obj runtime.Obje
 	}
 
 	var adbInstance *database.AutonomousDatabase
+	secretReferenceApplied := false
 	if strings.TrimSpace(string(autonomousDatabases.Spec.AdbId)) == "" {
 
 		c.Log.DebugLog("AutonomousDatabase Id is empty. Check if adb is already existing.")
@@ -65,21 +66,25 @@ func (c *AdbServiceManager) CreateOrUpdate(ctx context.Context, obj runtime.Obje
 		}
 
 		if adbOcid == nil {
-			// Geting the Admin password from the secret before creating ADB instance
-			c.Log.DebugLog("Getting Admin password from Secret")
-			pwdMap, err := c.CredentialClient.GetSecret(ctx, autonomousDatabases.Spec.AdminPassword.Secret.SecretName, req.Namespace)
-			if err != nil {
-				c.Log.ErrorLog(err, "Error while getting the admin password secret")
-				return servicemanager.OSOKResponse{IsSuccessful: false}, err
+			adminPwd := ""
+			if strings.TrimSpace(autonomousDatabases.Spec.SecretId) == "" {
+				// Get the admin password from the secret before creating the ADB instance when OCI Vault is not used.
+				c.Log.DebugLog("Getting Admin password from Secret")
+				pwdMap, err := c.CredentialClient.GetSecret(ctx, autonomousDatabases.Spec.AdminPassword.Secret.SecretName, req.Namespace)
+				if err != nil {
+					c.Log.ErrorLog(err, "Error while getting the admin password secret")
+					return servicemanager.OSOKResponse{IsSuccessful: false}, err
+				}
+
+				pwd, ok := pwdMap["password"]
+				if !ok {
+					c.Log.ErrorLog(err, "password key in admin password secret is not found")
+					return servicemanager.OSOKResponse{IsSuccessful: false}, errors.New("password key in admin password secret is not found")
+				}
+				adminPwd = string(pwd)
 			}
 
-			pwd, ok := pwdMap["password"]
-			if !ok {
-				c.Log.ErrorLog(err, "password key in admin password secret is not found")
-				return servicemanager.OSOKResponse{IsSuccessful: false}, errors.New("password key in admin password secret is not found")
-			}
-
-			resp, err := c.CreateAdb(ctx, *autonomousDatabases, string(pwd))
+			resp, err := c.CreateAdb(ctx, *autonomousDatabases, adminPwd)
 			if err != nil {
 				autonomousDatabases.Status.OsokStatus = util.UpdateOSOKStatusCondition(autonomousDatabases.Status.OsokStatus,
 					shared.Failed, v1.ConditionFalse, "", err.Error(), c.Log)
@@ -101,6 +106,7 @@ func (c *AdbServiceManager) CreateOrUpdate(ctx context.Context, obj runtime.Obje
 				c.Log.ErrorLog(err, "Error while getting Autonomous database")
 				return servicemanager.OSOKResponse{IsSuccessful: false}, err
 			}
+			secretReferenceApplied = true
 		} else {
 			c.Log.InfoLog(fmt.Sprintf("Getting Autonomous Database %s", *adbOcid))
 			adbInstance, err = c.GetAdb(ctx, *adbOcid, nil)
@@ -128,7 +134,13 @@ func (c *AdbServiceManager) CreateOrUpdate(ctx context.Context, obj runtime.Obje
 			return servicemanager.OSOKResponse{IsSuccessful: false}, err
 		}
 
-		if isValidUpdate(*autonomousDatabases, *adbInstance) {
+		updateNeeded, err := needsAutonomousDatabaseUpdate(*autonomousDatabases, *adbInstance)
+		if err != nil {
+			c.Log.ErrorLog(err, "Error while determining Autonomous database update intent")
+			return servicemanager.OSOKResponse{IsSuccessful: false}, err
+		}
+
+		if updateNeeded {
 			if err = c.UpdateAdb(ctx, autonomousDatabases); err != nil {
 				c.Log.ErrorLog(err, "Error while updating Autonomous database")
 				return servicemanager.OSOKResponse{IsSuccessful: false}, err
@@ -150,6 +162,11 @@ func (c *AdbServiceManager) CreateOrUpdate(ctx context.Context, obj runtime.Obje
 			now := metav1.NewTime(time.Now())
 			autonomousDatabases.Status.OsokStatus.CreatedAt = &now
 		}
+		secretReferenceApplied = true
+	}
+
+	if secretReferenceApplied {
+		recordLastAppliedSecretReferenceStatus(autonomousDatabases)
 	}
 
 	if autonomousDatabases.Spec.Wallet.WalletPassword.Secret.SecretName != "" {
@@ -165,7 +182,7 @@ func (c *AdbServiceManager) CreateOrUpdate(ctx context.Context, obj runtime.Obje
 	return servicemanager.OSOKResponse{IsSuccessful: true}, nil
 }
 
-func isValidUpdate(autonomousDatabases databasev1beta1.AutonomousDatabases, adbInstance database.AutonomousDatabase) bool {
+func needsAutonomousDatabaseUpdate(autonomousDatabases databasev1beta1.AutonomousDatabases, adbInstance database.AutonomousDatabase) (bool, error) {
 
 	definedTagUpdated := false
 	if autonomousDatabases.Spec.DefinedTags != nil {
@@ -174,7 +191,7 @@ func isValidUpdate(autonomousDatabases databasev1beta1.AutonomousDatabases, adbI
 		}
 	}
 
-	return autonomousDatabases.Spec.DisplayName != "" && autonomousDatabases.Spec.DisplayName != *adbInstance.DisplayName ||
+	if autonomousDatabases.Spec.DisplayName != "" && autonomousDatabases.Spec.DisplayName != *adbInstance.DisplayName ||
 		autonomousDatabases.Spec.DbName != "" && autonomousDatabases.Spec.DbName != *adbInstance.DbName ||
 		autonomousDatabases.Spec.CpuCoreCount != 0 && autonomousDatabases.Spec.CpuCoreCount != *adbInstance.CpuCoreCount ||
 		autonomousDatabases.Spec.DataStorageSizeInTBs != 0 && autonomousDatabases.Spec.DataStorageSizeInTBs != *adbInstance.DataStorageSizeInTBs ||
@@ -184,7 +201,44 @@ func isValidUpdate(autonomousDatabases databasev1beta1.AutonomousDatabases, adbI
 		autonomousDatabases.Spec.IsFreeTier != false && autonomousDatabases.Spec.IsFreeTier != *adbInstance.IsFreeTier ||
 		autonomousDatabases.Spec.LicenseModel != "" && autonomousDatabases.Spec.LicenseModel != string(adbInstance.LicenseModel) ||
 		autonomousDatabases.Spec.FreeFormTags != nil && !reflect.DeepEqual(autonomousDatabases.Spec.FreeFormTags, adbInstance.FreeformTags) ||
-		definedTagUpdated
+		definedTagUpdated {
+		return true, nil
+	}
+
+	if secretReferenceUpdateNeeded(autonomousDatabases.Spec, autonomousDatabases.Status) {
+		return true, nil
+	}
+
+	return additionalAutonomousDatabaseUpdateNeededForSpec(autonomousDatabases.Spec, adbInstance)
+}
+
+// OCI GetAutonomousDatabase does not return vault secret references, so status tracks the last applied value.
+func desiredAutonomousDatabaseSecretReference(spec databasev1beta1.AutonomousDatabasesSpec) (string, int, bool) {
+	secretID := strings.TrimSpace(spec.SecretId)
+	if secretID == "" {
+		return "", 0, false
+	}
+
+	return secretID, spec.SecretVersionNumber, true
+}
+
+func secretReferenceUpdateNeeded(spec databasev1beta1.AutonomousDatabasesSpec, status databasev1beta1.AutonomousDatabasesStatus) bool {
+	secretID, secretVersionNumber, ok := desiredAutonomousDatabaseSecretReference(spec)
+	if !ok {
+		return false
+	}
+
+	return secretID != status.LastAppliedSecretId || secretVersionNumber != status.LastAppliedSecretVersionNumber
+}
+
+func recordLastAppliedSecretReferenceStatus(autonomousDatabases *databasev1beta1.AutonomousDatabases) {
+	secretID, secretVersionNumber, ok := desiredAutonomousDatabaseSecretReference(autonomousDatabases.Spec)
+	if !ok {
+		return
+	}
+
+	autonomousDatabases.Status.LastAppliedSecretId = secretID
+	autonomousDatabases.Status.LastAppliedSecretVersionNumber = secretVersionNumber
 }
 
 func (c *AdbServiceManager) Delete(ctx context.Context, obj runtime.Object) (bool, error) {
