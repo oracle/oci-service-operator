@@ -16,9 +16,31 @@ import (
 type AlarmHistorySpec struct {
 }
 
+// AlarmHistoryEntry defines nested fields for AlarmHistory.Entry.
+type AlarmHistoryEntry struct {
+	// Description for this alarm history entry.
+	// Example 1 - alarm state history entry: `The alarm state is FIRING`
+	// Example 2 - alarm state transition history entry: `State transitioned from OK to Firing`
+	Summary string `json:"summary,omitempty"`
+	// Timestamp for this alarm history entry. Format defined by RFC3339.
+	// Example: `2023-02-01T01:02:29.600Z`
+	Timestamp string `json:"timestamp,omitempty"`
+	// Timestamp for the transition of the alarm state. For example, the time when the alarm transitioned from OK to Firing.
+	// Available for state transition entries only. Note: A three-minute lag for this value accounts for any late-arriving metrics.
+	// Example: `2023-02-01T0:59:00.789Z`
+	TimestampTriggered string `json:"timestampTriggered,omitempty"`
+}
+
 // AlarmHistoryStatus defines the observed state of AlarmHistory.
 type AlarmHistoryStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the alarm to retrieve history for.
+	AlarmId string `json:"alarmId,omitempty"`
+	// Whether the alarm is enabled.
+	// Example: `true`
+	IsEnabled bool `json:"isEnabled,omitempty"`
+	// The set of history entries retrieved for the alarm.
+	Entries []AlarmHistoryEntry `json:"entries,omitempty"`
 }
 
 // +kubebuilder:object:root=true

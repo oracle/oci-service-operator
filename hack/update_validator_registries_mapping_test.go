@@ -60,8 +60,44 @@ func TestBuildSDKMappingsSupportsExplicitSurfaceAndExclusionOverrides(t *testing
 	if shapeByStruct["loadbalancer.UpdateLoadBalancerShapeDetails"].Reason == "" {
 		t.Fatal("loadbalancer.UpdateLoadBalancerShapeDetails should carry an exclusion reason")
 	}
-	if shapeByStruct["loadbalancer.ShapeDetails"].Exclude {
-		t.Fatal("loadbalancer.ShapeDetails should remain included")
+	for _, sdkStruct := range []string{"loadbalancer.ShapeDetails", "loadbalancer.LoadBalancerShape"} {
+		mapping := shapeByStruct[sdkStruct]
+		if !mapping.Exclude {
+			t.Fatalf("%s Exclude = false, want true", sdkStruct)
+		}
+		if mapping.Reason == "" {
+			t.Fatalf("%s Reason = %q, want non-empty exclusion reason", sdkStruct, mapping.Reason)
+		}
+	}
+
+	loadBalancerPolicy := buildSDKMappings("loadbalancer", "Policy", []string{
+		"LoadBalancerPolicy",
+	}, false, specTarget{})
+
+	policyByStruct := make(map[string]sdkMapping, len(loadBalancerPolicy))
+	for _, mapping := range loadBalancerPolicy {
+		policyByStruct[mapping.SDKStruct] = mapping
+	}
+	if !policyByStruct["loadbalancer.LoadBalancerPolicy"].Exclude {
+		t.Fatal("loadbalancer.LoadBalancerPolicy should be excluded")
+	}
+	if policyByStruct["loadbalancer.LoadBalancerPolicy"].Reason == "" {
+		t.Fatal("loadbalancer.LoadBalancerPolicy exclusion should carry a reason")
+	}
+
+	loadBalancerProtocol := buildSDKMappings("loadbalancer", "Protocol", []string{
+		"LoadBalancerProtocol",
+	}, false, specTarget{})
+
+	protocolByStruct := make(map[string]sdkMapping, len(loadBalancerProtocol))
+	for _, mapping := range loadBalancerProtocol {
+		protocolByStruct[mapping.SDKStruct] = mapping
+	}
+	if !protocolByStruct["loadbalancer.LoadBalancerProtocol"].Exclude {
+		t.Fatal("loadbalancer.LoadBalancerProtocol should be excluded")
+	}
+	if protocolByStruct["loadbalancer.LoadBalancerProtocol"].Reason == "" {
+		t.Fatal("loadbalancer.LoadBalancerProtocol exclusion should carry a reason")
 	}
 
 	containerEngineCluster := buildSDKMappings("containerengine", "Cluster", []string{
@@ -337,6 +373,273 @@ func TestBuildSDKMappingsAppliesPSQLStatusAndWrapperOverrides(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestBuildSDKMappingsAppliesNoSQLStatusAndWrapperOverrides(t *testing.T) {
+	t.Parallel()
+
+	type expectation struct {
+		apiSurface string
+		exclude    bool
+	}
+
+	tests := []struct {
+		name       string
+		spec       string
+		candidates []string
+		want       map[string]expectation
+	}{
+		{
+			name:       "index",
+			spec:       "Index",
+			candidates: []string{"Index", "IndexCollection", "IndexSummary"},
+			want: map[string]expectation{
+				"nosql.Index":           {apiSurface: "status"},
+				"nosql.IndexCollection": {exclude: true},
+				"nosql.IndexSummary":    {apiSurface: "status"},
+			},
+		},
+		{
+			name:       "table",
+			spec:       "Table",
+			candidates: []string{"CreateTableDetails", "UpdateTableDetails", "Table", "TableCollection", "TableSummary"},
+			want: map[string]expectation{
+				"nosql.Table":           {apiSurface: "status"},
+				"nosql.TableCollection": {exclude: true},
+				"nosql.TableSummary":    {apiSurface: "status"},
+			},
+		},
+		{
+			name:       "table usage",
+			spec:       "TableUsage",
+			candidates: []string{"TableUsageCollection", "TableUsageSummary"},
+			want: map[string]expectation{
+				"nosql.TableUsageCollection": {exclude: true},
+				"nosql.TableUsageSummary":    {apiSurface: "status"},
+			},
+		},
+		{
+			name:       "work request",
+			spec:       "WorkRequest",
+			candidates: []string{"WorkRequest", "WorkRequestCollection", "WorkRequestSummary"},
+			want: map[string]expectation{
+				"nosql.WorkRequest":           {apiSurface: "status"},
+				"nosql.WorkRequestCollection": {exclude: true},
+				"nosql.WorkRequestSummary":    {apiSurface: "status"},
+			},
+		},
+		{
+			name:       "work request error",
+			spec:       "WorkRequestError",
+			candidates: []string{"WorkRequestError", "WorkRequestErrorCollection"},
+			want: map[string]expectation{
+				"nosql.WorkRequestError":           {apiSurface: "status"},
+				"nosql.WorkRequestErrorCollection": {exclude: true},
+			},
+		},
+		{
+			name:       "work request log",
+			spec:       "WorkRequestLog",
+			candidates: []string{"WorkRequestLogEntry", "WorkRequestLogEntryCollection"},
+			want: map[string]expectation{
+				"nosql.WorkRequestLogEntry":           {apiSurface: "status"},
+				"nosql.WorkRequestLogEntryCollection": {exclude: true},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			got := buildSDKMappings("nosql", tt.spec, tt.candidates, false, specTarget{})
+			byStruct := make(map[string]sdkMapping, len(got))
+			for _, mapping := range got {
+				byStruct[mapping.SDKStruct] = mapping
+			}
+
+			for sdkStruct, want := range tt.want {
+				mapping, ok := byStruct[sdkStruct]
+				if !ok {
+					t.Fatalf("missing mapping for %s", sdkStruct)
+				}
+				if mapping.APISurface != want.apiSurface {
+					t.Fatalf("%s APISurface = %q, want %q", sdkStruct, mapping.APISurface, want.apiSurface)
+				}
+				if mapping.Exclude != want.exclude {
+					t.Fatalf("%s Exclude = %t, want %t", sdkStruct, mapping.Exclude, want.exclude)
+				}
+				if want.exclude && mapping.Reason == "" {
+					t.Fatalf("%s exclusion should carry a reason", sdkStruct)
+				}
+			}
+		})
+	}
+}
+
+func TestBuildSDKMappingsAppliesQueueStatusAndWrapperOverrides(t *testing.T) {
+	t.Parallel()
+
+	type expectation struct {
+		apiSurface string
+		exclude    bool
+	}
+
+	tests := []struct {
+		name       string
+		spec       string
+		candidates []string
+		want       map[string]expectation
+	}{
+		{
+			name:       "channel",
+			spec:       "Channel",
+			candidates: []string{"ChannelCollection"},
+			want: map[string]expectation{
+				"queue.ChannelCollection": {exclude: true},
+			},
+		},
+		{
+			name:       "queue",
+			spec:       "Queue",
+			candidates: []string{"CreateQueueDetails", "UpdateQueueDetails", "Queue", "QueueCollection", "QueueSummary"},
+			want: map[string]expectation{
+				"queue.Queue":           {apiSurface: "status"},
+				"queue.QueueCollection": {exclude: true},
+				"queue.QueueSummary":    {apiSurface: "status"},
+			},
+		},
+		{
+			name:       "work request error",
+			spec:       "WorkRequestError",
+			candidates: []string{"WorkRequestError", "WorkRequestErrorCollection"},
+			want: map[string]expectation{
+				"queue.WorkRequestError":           {apiSurface: "status"},
+				"queue.WorkRequestErrorCollection": {exclude: true},
+			},
+		},
+		{
+			name:       "work request log",
+			spec:       "WorkRequestLog",
+			candidates: []string{"WorkRequestLogEntry", "WorkRequestLogEntryCollection"},
+			want: map[string]expectation{
+				"queue.WorkRequestLogEntry":           {apiSurface: "status"},
+				"queue.WorkRequestLogEntryCollection": {exclude: true},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			got := buildSDKMappings("queue", tt.spec, tt.candidates, false, specTarget{})
+			byStruct := make(map[string]sdkMapping, len(got))
+			for _, mapping := range got {
+				byStruct[mapping.SDKStruct] = mapping
+			}
+
+			for sdkStruct, want := range tt.want {
+				mapping, ok := byStruct[sdkStruct]
+				if !ok {
+					t.Fatalf("missing mapping for %s", sdkStruct)
+				}
+				if mapping.APISurface != want.apiSurface {
+					t.Fatalf("%s APISurface = %q, want %q", sdkStruct, mapping.APISurface, want.apiSurface)
+				}
+				if mapping.Exclude != want.exclude {
+					t.Fatalf("%s Exclude = %t, want %t", sdkStruct, mapping.Exclude, want.exclude)
+				}
+				if want.exclude && mapping.Reason == "" {
+					t.Fatalf("%s exclusion should carry a reason", sdkStruct)
+				}
+			}
+		})
+	}
+}
+
+func TestBuildSDKMappingsAppliesMonitoringStatusOverrides(t *testing.T) {
+	t.Parallel()
+
+	alarmHistory := buildSDKMappings("monitoring", "AlarmHistory", []string{
+		"AlarmHistoryCollection",
+		"AlarmHistoryEntry",
+	}, false, specTarget{})
+
+	alarmHistoryByStruct := make(map[string]sdkMapping, len(alarmHistory))
+	for _, mapping := range alarmHistory {
+		alarmHistoryByStruct[mapping.SDKStruct] = mapping
+	}
+	if alarmHistoryByStruct["monitoring.AlarmHistoryCollection"].APISurface != "status" {
+		t.Fatalf("monitoring.AlarmHistoryCollection APISurface = %q, want status", alarmHistoryByStruct["monitoring.AlarmHistoryCollection"].APISurface)
+	}
+	if !alarmHistoryByStruct["monitoring.AlarmHistoryEntry"].Exclude {
+		t.Fatal("monitoring.AlarmHistoryEntry should be excluded")
+	}
+	if alarmHistoryByStruct["monitoring.AlarmHistoryEntry"].Reason == "" {
+		t.Fatal("monitoring.AlarmHistoryEntry exclusion should carry a reason")
+	}
+
+	alarmSuppression := buildSDKMappings("monitoring", "AlarmSuppression", []string{
+		"CreateAlarmSuppressionDetails",
+		"AlarmSuppression",
+		"AlarmSuppressionCollection",
+		"AlarmSuppressionSummary",
+	}, false, specTarget{})
+
+	alarmSuppressionByStruct := make(map[string]sdkMapping, len(alarmSuppression))
+	for _, mapping := range alarmSuppression {
+		alarmSuppressionByStruct[mapping.SDKStruct] = mapping
+	}
+	if alarmSuppressionByStruct["monitoring.AlarmSuppression"].APISurface != "status" {
+		t.Fatalf("monitoring.AlarmSuppression APISurface = %q, want status", alarmSuppressionByStruct["monitoring.AlarmSuppression"].APISurface)
+	}
+	if alarmSuppressionByStruct["monitoring.AlarmSuppressionSummary"].APISurface != "status" {
+		t.Fatalf("monitoring.AlarmSuppressionSummary APISurface = %q, want status", alarmSuppressionByStruct["monitoring.AlarmSuppressionSummary"].APISurface)
+	}
+	if !alarmSuppressionByStruct["monitoring.AlarmSuppressionCollection"].Exclude {
+		t.Fatal("monitoring.AlarmSuppressionCollection should be excluded")
+	}
+	if alarmSuppressionByStruct["monitoring.AlarmSuppressionCollection"].Reason == "" {
+		t.Fatal("monitoring.AlarmSuppressionCollection exclusion should carry a reason")
+	}
+	if alarmSuppressionByStruct["monitoring.CreateAlarmSuppressionDetails"].Exclude {
+		t.Fatal("monitoring.CreateAlarmSuppressionDetails should remain included")
+	}
+}
+
+func TestBuildSDKMappingsAppliesVaultStatusOverrides(t *testing.T) {
+	t.Parallel()
+
+	secret := buildSDKMappings("vault", "Secret", []string{
+		"CreateSecretDetails",
+		"Secret",
+		"SecretSummary",
+		"SecretVersionSummary",
+		"UpdateSecretDetails",
+	}, false, specTarget{})
+
+	secretByStruct := make(map[string]sdkMapping, len(secret))
+	for _, mapping := range secret {
+		secretByStruct[mapping.SDKStruct] = mapping
+	}
+	if secretByStruct["vault.Secret"].APISurface != "status" {
+		t.Fatalf("vault.Secret APISurface = %q, want status", secretByStruct["vault.Secret"].APISurface)
+	}
+	if secretByStruct["vault.SecretSummary"].APISurface != "status" {
+		t.Fatalf("vault.SecretSummary APISurface = %q, want status", secretByStruct["vault.SecretSummary"].APISurface)
+	}
+	if !secretByStruct["vault.SecretVersionSummary"].Exclude {
+		t.Fatal("vault.SecretVersionSummary should be excluded")
+	}
+	if secretByStruct["vault.SecretVersionSummary"].Reason == "" {
+		t.Fatal("vault.SecretVersionSummary exclusion should carry a reason")
+	}
+	if secretByStruct["vault.CreateSecretDetails"].Exclude {
+		t.Fatal("vault.CreateSecretDetails should remain included")
 	}
 }
 

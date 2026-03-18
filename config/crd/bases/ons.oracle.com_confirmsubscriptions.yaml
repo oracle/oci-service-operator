@@ -56,6 +56,15 @@ spec:
           status:
             description: ConfirmSubscriptionStatus defines the observed state of ConfirmSubscription.
             properties:
+              endpoint:
+                description: |-
+                  A locator that corresponds to the subscription protocol.
+                  For example, an email address for a subscription that uses the `EMAIL` protocol, or a URL for a subscription that uses an HTTP-based protocol.
+                type: string
+              message:
+                description: A human-readable string indicating the status of the
+                  subscription confirmation.
+                type: string
               status:
                 properties:
                   conditions:
@@ -98,6 +107,20 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              subscriptionId:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the subscription specified in the request.
+                type: string
+              topicId:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the topic associated with the specified subscription.
+                type: string
+              topicName:
+                description: The name of the subscribed topic.
+                type: string
+              unsubscribeUrl:
+                description: The URL for unsubscribing from the topic.
+                type: string
             required:
             - status
             type: object

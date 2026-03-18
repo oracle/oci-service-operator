@@ -851,9 +851,73 @@ var explicitAPITargetOverrides = map[string]apiTargetOverride{
 			"CertificateBundleVersionCollection",
 		),
 	},
-	"certificatesmanagement.CaBundle": {MappingOverrides: statusMappingOverrides(
-		"CaBundle",
-		"CaBundleSummary",
+	"certificatesmanagement.Association": {MappingOverrides: mergeMappingOverrides(
+		statusMappingOverrides(
+			"Association",
+			"AssociationSummary",
+		),
+		excludedMappingOverrides(
+			"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			"AssociationCollection",
+		),
+	)},
+	"certificatesmanagement.CaBundle": {MappingOverrides: mergeMappingOverrides(
+		statusMappingOverrides(
+			"CaBundle",
+			"CaBundleSummary",
+		),
+		excludedMappingOverrides(
+			"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			"CaBundleCollection",
+		),
+	)},
+	"certificatesmanagement.Certificate": {MappingOverrides: mergeMappingOverrides(
+		statusMappingOverrides(
+			"Certificate",
+			"CertificateSummary",
+		),
+		excludedMappingOverrides(
+			"Intentionally untracked: version summaries belong to the dedicated CertificatesManagementCertificateVersion status surface.",
+			"CertificateVersionSummary",
+		),
+		excludedMappingOverrides(
+			"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			"CertificateCollection",
+		),
+	)},
+	"certificatesmanagement.CertificateAuthority": {MappingOverrides: mergeMappingOverrides(
+		statusMappingOverrides(
+			"CertificateAuthority",
+			"CertificateAuthoritySummary",
+		),
+		excludedMappingOverrides(
+			"Intentionally untracked: version summaries belong to the dedicated CertificatesManagementCertificateAuthorityVersion status surface.",
+			"CertificateAuthorityVersionSummary",
+		),
+		excludedMappingOverrides(
+			"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			"CertificateAuthorityCollection",
+		),
+	)},
+	"certificatesmanagement.CertificateAuthorityVersion": {MappingOverrides: mergeMappingOverrides(
+		statusMappingOverrides(
+			"CertificateAuthorityVersion",
+			"CertificateAuthorityVersionSummary",
+		),
+		excludedMappingOverrides(
+			"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			"CertificateAuthorityVersionCollection",
+		),
+	)},
+	"certificatesmanagement.CertificateVersion": {MappingOverrides: mergeMappingOverrides(
+		statusMappingOverrides(
+			"CertificateVersion",
+			"CertificateVersionSummary",
+		),
+		excludedMappingOverrides(
+			"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			"CertificateVersionCollection",
+		),
 	)},
 	"containerengine.Cluster": {MappingOverrides: statusMappingOverrides(
 		"Cluster",
@@ -1007,6 +1071,18 @@ var explicitAPITargetOverrides = map[string]apiTargetOverride{
 		"Function",
 		"FunctionSummary",
 	)},
+	"functions.PbfListing": {
+		MappingOverrides: mergeMappingOverrides(
+			statusMappingOverrides(
+				"PbfListing",
+				"PbfListingSummary",
+			),
+			excludedMappingOverrides(
+				"Intentionally untracked: version summaries belong to the dedicated PbfListingVersion status surface.",
+				"PbfListingVersionSummary",
+			),
+		),
+	},
 	"identity.AuthenticationPolicy": {MappingOverrides: statusMappingOverrides("AuthenticationPolicy")},
 	"identity.CostTrackingTag":      {SDKTypes: []string{"Tag"}, UseStatus: true},
 	"identity.DynamicGroup":         {MappingOverrides: statusMappingOverrides("DynamicGroup")},
@@ -1039,7 +1115,58 @@ var explicitAPITargetOverrides = map[string]apiTargetOverride{
 		"EkmsPrivateEndpoint",
 		"EkmsPrivateEndpointSummary",
 	)},
+	"keymanagement.HsmCluster": {
+		MappingOverrides: mergeMappingOverrides(
+			statusMappingOverrides(
+				"HsmCluster",
+				"HsmClusterSummary",
+			),
+			excludedMappingOverrides(
+				"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+				"HsmClusterCollection",
+			),
+		),
+	},
+	"keymanagement.HsmPartition": {
+		MappingOverrides: mergeMappingOverrides(
+			statusMappingOverrides(
+				"HsmPartition",
+				"HsmPartitionSummary",
+			),
+			excludedMappingOverrides(
+				"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+				"HsmPartitionCollection",
+			),
+		),
+	},
+	"keymanagement.Key": {
+		MappingOverrides: mergeMappingOverrides(
+			statusMappingOverrides(
+				"Key",
+				"KeySummary",
+			),
+			excludedMappingOverrides(
+				"Intentionally untracked: key version summaries belong to the dedicated KeyManagementKeyVersion status surface.",
+				"KeyVersionSummary",
+			),
+		),
+	},
 	"keymanagement.PreCoUserCredential": {SDKTypes: []string{"PreCoUserCredentials"}},
+	"keymanagement.ReplicationStatus": {
+		MappingOverrides: excludedMappingOverrides(
+			"Intentionally untracked: OCI read-model mappings broaden desired-state coverage, and this CRD does not expose a meaningful status surface for parity tracking.",
+			"ReplicationStatusDetails",
+		),
+	},
+	"keymanagement.VaultReplica": {
+		MappingOverrides: mergeMappingOverrides(
+			statusMappingOverrides("VaultReplicaSummary"),
+			excludedMappingOverrides(
+				"Intentionally untracked: replica detail payload is nested under KeyManagementVault status via replicaDetails.",
+				"VaultReplicaDetails",
+			),
+		),
+	},
 	"limits.Quota": {MappingOverrides: statusMappingOverrides(
 		"Quota",
 		"QuotaSummary",
@@ -1053,11 +1180,27 @@ var explicitAPITargetOverrides = map[string]apiTargetOverride{
 	"loadbalancer.LoadBalancer":         {MappingOverrides: statusMappingOverrides("LoadBalancer")},
 	"loadbalancer.NetworkSecurityGroup": {SDKTypes: []string{"UpdateNetworkSecurityGroupsDetails"}},
 	"loadbalancer.PathRouteSet":         {MappingOverrides: specMappingOverrides("PathRouteSet")},
-	"loadbalancer.RoutingPolicy":        {MappingOverrides: specMappingOverrides("RoutingPolicy")},
-	"loadbalancer.RuleSet":              {MappingOverrides: specMappingOverrides("RuleSet")},
-	"loadbalancer.SSLCipherSuite":       {MappingOverrides: specMappingOverrides("SslCipherSuite")},
+	"loadbalancer.Policy": {MappingOverrides: excludedMappingOverrides(
+		"Intentionally untracked: policy catalog entries are read-only reference data and this CRD does not expose a meaningful singular status surface.",
+		"LoadBalancerPolicy",
+	)},
+	"loadbalancer.Protocol": {MappingOverrides: excludedMappingOverrides(
+		"Intentionally untracked: protocol catalog entries are read-only reference data and this CRD does not expose a meaningful singular status surface.",
+		"LoadBalancerProtocol",
+	)},
+	"loadbalancer.RoutingPolicy":  {MappingOverrides: specMappingOverrides("RoutingPolicy")},
+	"loadbalancer.RuleSet":        {MappingOverrides: specMappingOverrides("RuleSet")},
+	"loadbalancer.SSLCipherSuite": {MappingOverrides: specMappingOverrides("SslCipherSuite")},
 	"loadbalancer.Shape": {
 		MappingOverrides: map[string]mappingOverride{
+			"LoadBalancerShape": {
+				Exclude: true,
+				Reason:  "Intentionally untracked: shape catalog entries are read-only reference data; load balancer shape mutation parity is tracked on LoadBalancerLoadBalancerShape.",
+			},
+			"ShapeDetails": {
+				Exclude: true,
+				Reason:  "Intentionally untracked: shape catalog entries are read-only reference data; load balancer shape mutation parity is tracked on LoadBalancerLoadBalancerShape.",
+			},
 			"UpdateLoadBalancerShapeDetails": {
 				Exclude: true,
 				Reason:  "Intentionally untracked: duplicate desired-state payload is already tracked on LoadBalancerLoadBalancerShape.",
@@ -1080,37 +1223,199 @@ var explicitAPITargetOverrides = map[string]apiTargetOverride{
 		"Alarm",
 		"AlarmSummary",
 	)},
-	"monitoring.AlarmSuppression": {MappingOverrides: statusMappingOverrides(
-		"AlarmSuppression",
-		"AlarmSuppressionSummary",
+	"monitoring.AlarmHistory": {MappingOverrides: mergeMappingOverrides(
+		statusMappingOverrides("AlarmHistoryCollection"),
+		excludedMappingOverrides(
+			"Intentionally untracked: alarm history entries are represented as nested elements under AlarmHistory.status.entries, not a top-level reusable status surface.",
+			"AlarmHistoryEntry",
+		),
+	)},
+	"monitoring.AlarmSuppression": {MappingOverrides: mergeMappingOverrides(
+		statusMappingOverrides(
+			"AlarmSuppression",
+			"AlarmSuppressionSummary",
+		),
+		excludedMappingOverrides(
+			"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			"AlarmSuppressionCollection",
+		),
 	)},
 	"monitoring.Metric": {MappingOverrides: statusMappingOverrides("Metric")},
-	"networkloadbalancer.Backend": {MappingOverrides: specMappingOverrides(
-		"Backend",
-		"BackendSummary",
+	"nosql.Index": {MappingOverrides: mergeMappingOverrides(
+		statusMappingOverrides(
+			"Index",
+			"IndexSummary",
+		),
+		excludedMappingOverrides(
+			"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			"IndexCollection",
+		),
 	)},
-	"networkloadbalancer.BackendSet": {MappingOverrides: specMappingOverrides(
-		"BackendSet",
-		"BackendSetSummary",
+	"nosql.Table": {MappingOverrides: mergeMappingOverrides(
+		statusMappingOverrides(
+			"Table",
+			"TableSummary",
+		),
+		excludedMappingOverrides(
+			"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			"TableCollection",
+		),
+	)},
+	"nosql.TableUsage": {MappingOverrides: mergeMappingOverrides(
+		statusMappingOverrides("TableUsageSummary"),
+		excludedMappingOverrides(
+			"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			"TableUsageCollection",
+		),
+	)},
+	"nosql.WorkRequest": {MappingOverrides: mergeMappingOverrides(
+		statusMappingOverrides(
+			"WorkRequest",
+			"WorkRequestSummary",
+		),
+		excludedMappingOverrides(
+			"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			"WorkRequestCollection",
+		),
+	)},
+	"nosql.WorkRequestError": {MappingOverrides: mergeMappingOverrides(
+		statusMappingOverrides("WorkRequestError"),
+		excludedMappingOverrides(
+			"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			"WorkRequestErrorCollection",
+		),
+	)},
+	"nosql.WorkRequestLog": {MappingOverrides: mergeMappingOverrides(
+		statusMappingOverrides("WorkRequestLogEntry"),
+		excludedMappingOverrides(
+			"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			"WorkRequestLogEntryCollection",
+		),
+	)},
+	"networkloadbalancer.Backend": {MappingOverrides: mergeMappingOverrides(
+		specMappingOverrides(
+			"Backend",
+			"BackendSummary",
+		),
+		excludedMappingOverrides(
+			"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			"BackendCollection",
+		),
+	)},
+	"networkloadbalancer.BackendSet": {MappingOverrides: mergeMappingOverrides(
+		specMappingOverrides(
+			"BackendSet",
+			"BackendSetSummary",
+		),
+		excludedMappingOverrides(
+			"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			"BackendSetCollection",
+		),
 	)},
 	"networkloadbalancer.HealthChecker": {MappingOverrides: specMappingOverrides("HealthChecker")},
-	"networkloadbalancer.Listener":      {MappingOverrides: specMappingOverrides("Listener", "ListenerSummary")},
-	"networkloadbalancer.NetworkLoadBalancer": {MappingOverrides: statusMappingOverrides(
-		"NetworkLoadBalancer",
-		"NetworkLoadBalancerSummary",
+	"networkloadbalancer.Listener": {MappingOverrides: mergeMappingOverrides(
+		specMappingOverrides("Listener", "ListenerSummary"),
+		excludedMappingOverrides(
+			"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			"ListenerCollection",
+		),
+	)},
+	"networkloadbalancer.NetworkLoadBalancer": {MappingOverrides: mergeMappingOverrides(
+		statusMappingOverrides(
+			"NetworkLoadBalancer",
+			"NetworkLoadBalancerSummary",
+		),
+		excludedMappingOverrides(
+			"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			"NetworkLoadBalancerCollection",
+		),
+	)},
+	"networkloadbalancer.NetworkLoadBalancerHealth": {MappingOverrides: mergeMappingOverrides(
+		statusMappingOverrides(
+			"NetworkLoadBalancerHealth",
+			"NetworkLoadBalancerHealthSummary",
+		),
+		excludedMappingOverrides(
+			"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			"NetworkLoadBalancerHealthCollection",
+		),
+	)},
+	"networkloadbalancer.NetworkLoadBalancersPolicy": {MappingOverrides: excludedMappingOverrides(
+		"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+		"NetworkLoadBalancersPolicyCollection",
+	)},
+	"networkloadbalancer.NetworkLoadBalancersProtocol": {MappingOverrides: excludedMappingOverrides(
+		"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+		"NetworkLoadBalancersProtocolCollection",
+	)},
+	"networkloadbalancer.WorkRequest": {MappingOverrides: mergeMappingOverrides(
+		statusMappingOverrides(
+			"WorkRequest",
+			"WorkRequestSummary",
+		),
+		excludedMappingOverrides(
+			"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			"WorkRequestCollection",
+		),
+	)},
+	"networkloadbalancer.WorkRequestError": {MappingOverrides: mergeMappingOverrides(
+		statusMappingOverrides("WorkRequestError"),
+		excludedMappingOverrides(
+			"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			"WorkRequestErrorCollection",
+		),
+	)},
+	"networkloadbalancer.WorkRequestLog": {MappingOverrides: mergeMappingOverrides(
+		statusMappingOverrides("WorkRequestLogEntry"),
+		excludedMappingOverrides(
+			"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			"WorkRequestLogEntryCollection",
+		),
 	)},
 	"networkloadbalancer.NetworkSecurityGroup": {SDKTypes: []string{"UpdateNetworkSecurityGroupsDetails"}},
 	"objectstorage.Bucket": {MappingOverrides: statusMappingOverrides(
 		"Bucket",
 		"BucketSummary",
 	)},
-	"objectstorage.Namespace":         {SDKTypes: []string{"NamespaceMetadata"}},
+	"objectstorage.Namespace": {
+		SDKTypes: []string{"NamespaceMetadata"},
+		MappingOverrides: excludedMappingOverrides(
+			"Intentionally untracked: Namespace returns the namespace string in the response body; namespace metadata parity is tracked on ObjectStorageNamespaceMetadata.",
+			"NamespaceMetadata",
+		),
+	},
 	"objectstorage.NamespaceMetadata": {MappingOverrides: statusMappingOverrides("NamespaceMetadata")},
+	"objectstorage.Object": {MappingOverrides: mergeMappingOverrides(
+		statusMappingOverrides("ObjectSummary"),
+		excludedMappingOverrides(
+			"Intentionally untracked: version summaries belong to the dedicated ObjectStorageObjectVersion status surface.",
+			"ObjectVersionSummary",
+		),
+	)},
+	"objectstorage.ObjectVersion": {MappingOverrides: mergeMappingOverrides(
+		statusMappingOverrides("ObjectVersionSummary"),
+		excludedMappingOverrides(
+			"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			"ObjectVersionCollection",
+		),
+	)},
 	"objectstorage.PreauthenticatedRequest": {MappingOverrides: statusMappingOverrides(
 		"PreauthenticatedRequest",
 		"PreauthenticatedRequestSummary",
 	)},
-	"ons.ConfirmSubscription": {SDKTypes: []string{"ConfirmationResult"}, UseStatus: true},
+	"objectstorage.RetentionRule": {MappingOverrides: mergeMappingOverrides(
+		statusMappingOverrides(
+			"RetentionRule",
+			"RetentionRuleDetails",
+			"RetentionRuleSummary",
+		),
+		excludedMappingOverrides(
+			"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			"RetentionRuleCollection",
+		),
+	)},
+	"objectstorage.WorkRequestLog": {MappingOverrides: statusMappingOverrides("WorkRequestLogEntry")},
+	"ons.ConfirmSubscription":      {SDKTypes: []string{"ConfirmationResult"}, UseStatus: true},
 	"ons.Subscription": {MappingOverrides: statusMappingOverrides(
 		"Subscription",
 		"SubscriptionSummary",
@@ -1191,7 +1496,31 @@ var explicitAPITargetOverrides = map[string]apiTargetOverride{
 			"WorkRequestLogEntryCollection",
 		),
 	)},
-	"queue.Queue": {MappingOverrides: statusMappingOverrides("Queue")},
+	"queue.Channel": {MappingOverrides: excludedMappingOverrides(
+		"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+		"ChannelCollection",
+	)},
+	"queue.Queue": {MappingOverrides: mergeMappingOverrides(
+		statusMappingOverrides("Queue", "QueueSummary"),
+		excludedMappingOverrides(
+			"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			"QueueCollection",
+		),
+	)},
+	"queue.WorkRequestError": {MappingOverrides: mergeMappingOverrides(
+		statusMappingOverrides("WorkRequestError"),
+		excludedMappingOverrides(
+			"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			"WorkRequestErrorCollection",
+		),
+	)},
+	"queue.WorkRequestLog": {MappingOverrides: mergeMappingOverrides(
+		statusMappingOverrides("WorkRequestLogEntry"),
+		excludedMappingOverrides(
+			"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			"WorkRequestLogEntryCollection",
+		),
+	)},
 	"streaming.Stream": {
 		MappingOverrides: excludedMappingOverrides(
 			"Intentionally untracked: OCI read-model mappings broaden desired-state coverage, and this CRD does not expose a meaningful status surface for parity tracking.",
@@ -1199,7 +1528,16 @@ var explicitAPITargetOverrides = map[string]apiTargetOverride{
 			"StreamSummary",
 		),
 	},
-	"vault.Secret": {MappingOverrides: statusMappingOverrides("Secret")},
+	"vault.Secret": {MappingOverrides: mergeMappingOverrides(
+		statusMappingOverrides(
+			"Secret",
+			"SecretSummary",
+		),
+		excludedMappingOverrides(
+			"Intentionally untracked: secret version summaries belong to the dedicated VaultSecretVersion status surface.",
+			"SecretVersionSummary",
+		),
+	)},
 }
 
 func deriveSDKTypes(service, spec, targetName string, structs map[string]bool) []string {

@@ -314,6 +314,11 @@ func TestBuildPackageModelSynthesizesComplexSDKFields(t *testing.T) {
 				SDKPackage:     "github.com/oracle/oci-go-sdk/v65/secrets",
 				Group:          "secrets",
 				PackageProfile: PackageProfileCRDOnly,
+				ObservedState: ObservedStateConfig{
+					SDKAliases: map[string][]string{
+						"SecretBundleByName": {"SecretBundle"},
+					},
+				},
 			},
 			assert: func(t *testing.T, pkg *PackageModel) {
 				bundle := findResource(t, pkg.Resources, "SecretBundle")
@@ -328,6 +333,13 @@ func TestBuildPackageModelSynthesizesComplexSDKFields(t *testing.T) {
 				}
 				if !hasField(contentHelper.Fields, "Content") {
 					t.Fatalf("SecretBundleContent fields = %#v, want Content", contentHelper.Fields)
+				}
+
+				bundleByName := findResource(t, pkg.Resources, "SecretBundleByName")
+				for _, fieldName := range []string{"SecretId", "VersionNumber", "SecretBundleContent", "Metadata"} {
+					if !hasField(bundleByName.StatusFields, fieldName) {
+						t.Fatalf("SecretBundleByName status fields = %#v, want %s", bundleByName.StatusFields, fieldName)
+					}
 				}
 			},
 		},
@@ -496,6 +508,70 @@ func TestBuildPackageModelSynthesizesPSQLObservedStateFields(t *testing.T) {
 	}
 }
 
+func TestBuildPackageModelSynthesizesQueueObservedStateFields(t *testing.T) {
+	t.Parallel()
+
+	cfg := &Config{
+		Domain:         "oracle.com",
+		DefaultVersion: "v1beta1",
+	}
+	service := ServiceConfig{
+		Service:        "queue",
+		SDKPackage:     "github.com/oracle/oci-go-sdk/v65/queue",
+		Group:          "queue",
+		PackageProfile: PackageProfileCRDOnly,
+		ObservedState: ObservedStateConfig{
+			SDKAliases: map[string][]string{
+				"WorkRequestLog": {"WorkRequestLogEntry"},
+			},
+		},
+	}
+
+	pkg, err := NewDiscoverer().BuildPackageModel(context.Background(), cfg, service)
+	if err != nil {
+		t.Fatalf("BuildPackageModel() error = %v", err)
+	}
+
+	workRequestLog := findResource(t, pkg.Resources, "WorkRequestLog")
+	for _, fieldName := range []string{"Message", "Timestamp"} {
+		if !hasField(workRequestLog.StatusFields, fieldName) {
+			t.Fatalf("WorkRequestLog status fields = %#v, want %s", workRequestLog.StatusFields, fieldName)
+		}
+	}
+}
+
+func TestBuildPackageModelSynthesizesNoSQLObservedStateFields(t *testing.T) {
+	t.Parallel()
+
+	cfg := &Config{
+		Domain:         "oracle.com",
+		DefaultVersion: "v1beta1",
+	}
+	service := ServiceConfig{
+		Service:        "nosql",
+		SDKPackage:     "github.com/oracle/oci-go-sdk/v65/nosql",
+		Group:          "nosql",
+		PackageProfile: PackageProfileCRDOnly,
+		ObservedState: ObservedStateConfig{
+			SDKAliases: map[string][]string{
+				"WorkRequestLog": {"WorkRequestLogEntry"},
+			},
+		},
+	}
+
+	pkg, err := NewDiscoverer().BuildPackageModel(context.Background(), cfg, service)
+	if err != nil {
+		t.Fatalf("BuildPackageModel() error = %v", err)
+	}
+
+	workRequestLog := findResource(t, pkg.Resources, "WorkRequestLog")
+	for _, fieldName := range []string{"Message", "Timestamp"} {
+		if !hasField(workRequestLog.StatusFields, fieldName) {
+			t.Fatalf("WorkRequestLog status fields = %#v, want %s", workRequestLog.StatusFields, fieldName)
+		}
+	}
+}
+
 func TestBuildPackageModelSynthesizesContainerEngineObservedStateFields(t *testing.T) {
 	t.Parallel()
 
@@ -619,6 +695,82 @@ func TestBuildPackageModelSynthesizesDNSObservedStateAliases(t *testing.T) {
 	for _, fieldName := range []string{"Domain", "RecordHash", "IsProtected", "Rdata", "RrsetVersion", "Rtype", "Ttl"} {
 		if !hasField(zoneRecord.StatusFields, fieldName) {
 			t.Fatalf("ZoneRecord status fields = %#v, want %s", zoneRecord.StatusFields, fieldName)
+		}
+	}
+}
+
+func TestBuildPackageModelSynthesizesMonitoringObservedStateFields(t *testing.T) {
+	t.Parallel()
+
+	cfg := &Config{
+		Domain:         "oracle.com",
+		DefaultVersion: "v1beta1",
+	}
+	service := ServiceConfig{
+		Service:        "monitoring",
+		SDKPackage:     "github.com/oracle/oci-go-sdk/v65/monitoring",
+		Group:          "monitoring",
+		PackageProfile: PackageProfileCRDOnly,
+		ObservedState: ObservedStateConfig{
+			SDKAliases: map[string][]string{
+				"AlarmHistory": {"AlarmHistoryCollection"},
+			},
+		},
+	}
+
+	pkg, err := NewDiscoverer().BuildPackageModel(context.Background(), cfg, service)
+	if err != nil {
+		t.Fatalf("BuildPackageModel() error = %v", err)
+	}
+
+	alarmHistory := findResource(t, pkg.Resources, "AlarmHistory")
+	for _, fieldName := range []string{"AlarmId", "IsEnabled", "Entries"} {
+		if !hasField(alarmHistory.StatusFields, fieldName) {
+			t.Fatalf("AlarmHistory status fields = %#v, want %s", alarmHistory.StatusFields, fieldName)
+		}
+	}
+
+	entryField := findFieldModel(t, alarmHistory.StatusFields, "Entries")
+	if entryField.Type != "[]AlarmHistoryEntry" {
+		t.Fatalf("AlarmHistory Entries type = %q, want %q", entryField.Type, "[]AlarmHistoryEntry")
+	}
+
+	entryHelper := findHelperType(t, alarmHistory.HelperTypes, "AlarmHistoryEntry")
+	for _, fieldName := range []string{"Summary", "Timestamp", "TimestampTriggered"} {
+		if !hasField(entryHelper.Fields, fieldName) {
+			t.Fatalf("AlarmHistoryEntry helper fields = %#v, want %s", entryHelper.Fields, fieldName)
+		}
+	}
+}
+
+func TestBuildPackageModelSynthesizesONSObservedStateFields(t *testing.T) {
+	t.Parallel()
+
+	cfg := &Config{
+		Domain:         "oracle.com",
+		DefaultVersion: "v1beta1",
+	}
+	service := ServiceConfig{
+		Service:        "ons",
+		SDKPackage:     "github.com/oracle/oci-go-sdk/v65/ons",
+		Group:          "ons",
+		PackageProfile: PackageProfileCRDOnly,
+		ObservedState: ObservedStateConfig{
+			SDKAliases: map[string][]string{
+				"ConfirmSubscription": {"ConfirmationResult"},
+			},
+		},
+	}
+
+	pkg, err := NewDiscoverer().BuildPackageModel(context.Background(), cfg, service)
+	if err != nil {
+		t.Fatalf("BuildPackageModel() error = %v", err)
+	}
+
+	confirmSubscription := findResource(t, pkg.Resources, "ConfirmSubscription")
+	for _, fieldName := range []string{"Endpoint", "Message", "SubscriptionId", "TopicId", "TopicName", "UnsubscribeUrl"} {
+		if !hasField(confirmSubscription.StatusFields, fieldName) {
+			t.Fatalf("ConfirmSubscription status fields = %#v, want %s", confirmSubscription.StatusFields, fieldName)
 		}
 	}
 }
@@ -1330,6 +1482,144 @@ func TestCurrentServiceParityMatchesCheckedInArtifacts(t *testing.T) {
 		filepath.Join(repoRoot(t), "config", "samples", "kustomization.yaml"),
 		filepath.Join(outputRoot, "config", "samples", "kustomization.yaml"),
 	)
+}
+
+func TestCheckedInConfigIncludesNetworkLoadBalancerObservedStateAlias(t *testing.T) {
+	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
+	cfg, err := LoadConfig(cfgPath)
+	if err != nil {
+		t.Fatalf("LoadConfig(%q) error = %v", cfgPath, err)
+	}
+
+	var networkLoadBalancerService *ServiceConfig
+	for i := range cfg.Services {
+		if cfg.Services[i].Service == "networkloadbalancer" {
+			networkLoadBalancerService = &cfg.Services[i]
+			break
+		}
+	}
+	if networkLoadBalancerService == nil {
+		t.Fatal("networkloadbalancer service was not found in services.yaml")
+	}
+
+	if !slices.Equal(networkLoadBalancerService.ObservedState.SDKAliases["WorkRequestLog"], []string{"WorkRequestLogEntry"}) {
+		t.Fatalf("networkloadbalancer WorkRequestLog aliases = %v, want WorkRequestLogEntry", networkLoadBalancerService.ObservedState.SDKAliases["WorkRequestLog"])
+	}
+}
+
+func TestCheckedInConfigIncludesNoSQLObservedStateAlias(t *testing.T) {
+	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
+	cfg, err := LoadConfig(cfgPath)
+	if err != nil {
+		t.Fatalf("LoadConfig(%q) error = %v", cfgPath, err)
+	}
+
+	var nosqlService *ServiceConfig
+	for i := range cfg.Services {
+		if cfg.Services[i].Service == "nosql" {
+			nosqlService = &cfg.Services[i]
+			break
+		}
+	}
+	if nosqlService == nil {
+		t.Fatal("nosql service was not found in services.yaml")
+	}
+
+	if !slices.Equal(nosqlService.ObservedState.SDKAliases["WorkRequestLog"], []string{"WorkRequestLogEntry"}) {
+		t.Fatalf("nosql WorkRequestLog aliases = %v, want WorkRequestLogEntry", nosqlService.ObservedState.SDKAliases["WorkRequestLog"])
+	}
+}
+
+func TestCheckedInConfigIncludesObjectStorageObservedStateAlias(t *testing.T) {
+	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
+	cfg, err := LoadConfig(cfgPath)
+	if err != nil {
+		t.Fatalf("LoadConfig(%q) error = %v", cfgPath, err)
+	}
+
+	var objectStorageService *ServiceConfig
+	for i := range cfg.Services {
+		if cfg.Services[i].Service == "objectstorage" {
+			objectStorageService = &cfg.Services[i]
+			break
+		}
+	}
+	if objectStorageService == nil {
+		t.Fatal("objectstorage service was not found in services.yaml")
+	}
+
+	if !slices.Equal(objectStorageService.ObservedState.SDKAliases["WorkRequestLog"], []string{"WorkRequestLogEntry"}) {
+		t.Fatalf("objectstorage WorkRequestLog aliases = %v, want WorkRequestLogEntry", objectStorageService.ObservedState.SDKAliases["WorkRequestLog"])
+	}
+}
+
+func TestCheckedInConfigIncludesQueueObservedStateAlias(t *testing.T) {
+	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
+	cfg, err := LoadConfig(cfgPath)
+	if err != nil {
+		t.Fatalf("LoadConfig(%q) error = %v", cfgPath, err)
+	}
+
+	var queueService *ServiceConfig
+	for i := range cfg.Services {
+		if cfg.Services[i].Service == "queue" {
+			queueService = &cfg.Services[i]
+			break
+		}
+	}
+	if queueService == nil {
+		t.Fatal("queue service was not found in services.yaml")
+	}
+
+	if !slices.Equal(queueService.ObservedState.SDKAliases["WorkRequestLog"], []string{"WorkRequestLogEntry"}) {
+		t.Fatalf("queue WorkRequestLog aliases = %v, want WorkRequestLogEntry", queueService.ObservedState.SDKAliases["WorkRequestLog"])
+	}
+}
+
+func TestCheckedInConfigIncludesSecretsObservedStateAlias(t *testing.T) {
+	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
+	cfg, err := LoadConfig(cfgPath)
+	if err != nil {
+		t.Fatalf("LoadConfig(%q) error = %v", cfgPath, err)
+	}
+
+	var secretsService *ServiceConfig
+	for i := range cfg.Services {
+		if cfg.Services[i].Service == "secrets" {
+			secretsService = &cfg.Services[i]
+			break
+		}
+	}
+	if secretsService == nil {
+		t.Fatal("secrets service was not found in services.yaml")
+	}
+
+	if !slices.Equal(secretsService.ObservedState.SDKAliases["SecretBundleByName"], []string{"SecretBundle"}) {
+		t.Fatalf("secrets SecretBundleByName aliases = %v, want SecretBundle", secretsService.ObservedState.SDKAliases["SecretBundleByName"])
+	}
+}
+
+func TestCheckedInConfigIncludesONSObservedStateAlias(t *testing.T) {
+	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
+	cfg, err := LoadConfig(cfgPath)
+	if err != nil {
+		t.Fatalf("LoadConfig(%q) error = %v", cfgPath, err)
+	}
+
+	var onsService *ServiceConfig
+	for i := range cfg.Services {
+		if cfg.Services[i].Service == "ons" {
+			onsService = &cfg.Services[i]
+			break
+		}
+	}
+	if onsService == nil {
+		t.Fatal("ons service was not found in services.yaml")
+	}
+
+	if !slices.Equal(onsService.ObservedState.SDKAliases["ConfirmSubscription"], []string{"ConfirmationResult"}) {
+		t.Fatalf("ons ConfirmSubscription aliases = %v, want ConfirmationResult", onsService.ObservedState.SDKAliases["ConfirmSubscription"])
+	}
 }
 
 func TestMySQLParityIncludesOptionalDesiredStateFields(t *testing.T) {

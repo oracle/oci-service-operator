@@ -102,6 +102,8 @@ var targets = []Target{
 		SDKMappings: []SDKMapping{
 			{
 				SDKStruct: "queue.ChannelCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 		},
 	},
@@ -122,9 +124,12 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "queue.QueueCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 			{
-				SDKStruct: "queue.QueueSummary",
+				SDKStruct:  "queue.QueueSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -157,10 +162,13 @@ var targets = []Target{
 		StatusType: reflect.TypeOf(queuev1beta1.WorkRequestErrorStatus{}),
 		SDKMappings: []SDKMapping{
 			{
-				SDKStruct: "queue.WorkRequestError",
+				SDKStruct:  "queue.WorkRequestError",
+				APISurface: "status",
 			},
 			{
 				SDKStruct: "queue.WorkRequestErrorCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 		},
 	},
@@ -180,10 +188,13 @@ var targets = []Target{
 		StatusType: reflect.TypeOf(queuev1beta1.WorkRequestLogStatus{}),
 		SDKMappings: []SDKMapping{
 			{
-				SDKStruct: "queue.WorkRequestLogEntry",
+				SDKStruct:  "queue.WorkRequestLogEntry",
+				APISurface: "status",
 			},
 			{
 				SDKStruct: "queue.WorkRequestLogEntryCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 		},
 	},
@@ -235,13 +246,17 @@ var targets = []Target{
 		StatusType: reflect.TypeOf(functionsv1beta1.PbfListingStatus{}),
 		SDKMappings: []SDKMapping{
 			{
-				SDKStruct: "functions.PbfListing",
+				SDKStruct:  "functions.PbfListing",
+				APISurface: "status",
 			},
 			{
 				SDKStruct: "functions.PbfListingVersionSummary",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: version summaries belong to the dedicated PbfListingVersion status surface.",
 			},
 			{
-				SDKStruct: "functions.PbfListingSummary",
+				SDKStruct:  "functions.PbfListingSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -280,13 +295,17 @@ var targets = []Target{
 				SDKStruct: "nosql.CreateIndexDetails",
 			},
 			{
-				SDKStruct: "nosql.Index",
+				SDKStruct:  "nosql.Index",
+				APISurface: "status",
 			},
 			{
 				SDKStruct: "nosql.IndexCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 			{
-				SDKStruct: "nosql.IndexSummary",
+				SDKStruct:  "nosql.IndexSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -328,13 +347,17 @@ var targets = []Target{
 				SDKStruct: "nosql.UpdateTableDetails",
 			},
 			{
-				SDKStruct: "nosql.Table",
+				SDKStruct:  "nosql.Table",
+				APISurface: "status",
 			},
 			{
 				SDKStruct: "nosql.TableCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 			{
-				SDKStruct: "nosql.TableSummary",
+				SDKStruct:  "nosql.TableSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -345,9 +368,12 @@ var targets = []Target{
 		SDKMappings: []SDKMapping{
 			{
 				SDKStruct: "nosql.TableUsageCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 			{
-				SDKStruct: "nosql.TableUsageSummary",
+				SDKStruct:  "nosql.TableUsageSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -357,13 +383,17 @@ var targets = []Target{
 		StatusType: reflect.TypeOf(nosqlv1beta1.WorkRequestStatus{}),
 		SDKMappings: []SDKMapping{
 			{
-				SDKStruct: "nosql.WorkRequest",
+				SDKStruct:  "nosql.WorkRequest",
+				APISurface: "status",
 			},
 			{
 				SDKStruct: "nosql.WorkRequestCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 			{
-				SDKStruct: "nosql.WorkRequestSummary",
+				SDKStruct:  "nosql.WorkRequestSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -373,10 +403,13 @@ var targets = []Target{
 		StatusType: reflect.TypeOf(nosqlv1beta1.WorkRequestErrorStatus{}),
 		SDKMappings: []SDKMapping{
 			{
-				SDKStruct: "nosql.WorkRequestError",
+				SDKStruct:  "nosql.WorkRequestError",
+				APISurface: "status",
 			},
 			{
 				SDKStruct: "nosql.WorkRequestErrorCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 		},
 	},
@@ -386,10 +419,13 @@ var targets = []Target{
 		StatusType: reflect.TypeOf(nosqlv1beta1.WorkRequestLogStatus{}),
 		SDKMappings: []SDKMapping{
 			{
-				SDKStruct: "nosql.WorkRequestLogEntry",
+				SDKStruct:  "nosql.WorkRequestLogEntry",
+				APISurface: "status",
 			},
 			{
 				SDKStruct: "nosql.WorkRequestLogEntryCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 		},
 	},
@@ -444,6 +480,8 @@ var targets = []Target{
 		SDKMappings: []SDKMapping{
 			{
 				SDKStruct: "objectstorage.NamespaceMetadata",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: Namespace returns the namespace string in the response body; namespace metadata parity is tracked on ObjectStorageNamespaceMetadata.",
 			},
 		},
 	},
@@ -468,9 +506,12 @@ var targets = []Target{
 		SDKMappings: []SDKMapping{
 			{
 				SDKStruct: "objectstorage.ObjectVersionSummary",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: version summaries belong to the dedicated ObjectStorageObjectVersion status surface.",
 			},
 			{
-				SDKStruct: "objectstorage.ObjectSummary",
+				SDKStruct:  "objectstorage.ObjectSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -501,9 +542,12 @@ var targets = []Target{
 		SDKMappings: []SDKMapping{
 			{
 				SDKStruct: "objectstorage.ObjectVersionCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 			{
-				SDKStruct: "objectstorage.ObjectVersionSummary",
+				SDKStruct:  "objectstorage.ObjectVersionSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -563,16 +607,21 @@ var targets = []Target{
 				SDKStruct: "objectstorage.UpdateRetentionRuleDetails",
 			},
 			{
-				SDKStruct: "objectstorage.RetentionRuleDetails",
+				SDKStruct:  "objectstorage.RetentionRuleDetails",
+				APISurface: "status",
 			},
 			{
-				SDKStruct: "objectstorage.RetentionRule",
+				SDKStruct:  "objectstorage.RetentionRule",
+				APISurface: "status",
 			},
 			{
 				SDKStruct: "objectstorage.RetentionRuleCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 			{
-				SDKStruct: "objectstorage.RetentionRuleSummary",
+				SDKStruct:  "objectstorage.RetentionRuleSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -605,7 +654,8 @@ var targets = []Target{
 		StatusType: reflect.TypeOf(objectstoragev1beta1.WorkRequestLogStatus{}),
 		SDKMappings: []SDKMapping{
 			{
-				SDKStruct: "objectstorage.WorkRequestLogEntry",
+				SDKStruct:  "objectstorage.WorkRequestLogEntry",
+				APISurface: "status",
 			},
 		},
 	},
@@ -756,9 +806,12 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "logging.UnifiedAgentConfigurationCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 			{
-				SDKStruct: "logging.UnifiedAgentConfigurationSummary",
+				SDKStruct:  "logging.UnifiedAgentConfigurationSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -1048,10 +1101,13 @@ var targets = []Target{
 		StatusType: reflect.TypeOf(monitoringv1beta1.AlarmHistoryStatus{}),
 		SDKMappings: []SDKMapping{
 			{
-				SDKStruct: "monitoring.AlarmHistoryCollection",
+				SDKStruct:  "monitoring.AlarmHistoryCollection",
+				APISurface: "status",
 			},
 			{
 				SDKStruct: "monitoring.AlarmHistoryEntry",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: alarm history entries are represented as nested elements under AlarmHistory.status.entries, not a top-level reusable status surface.",
 			},
 		},
 	},
@@ -1079,6 +1135,8 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "monitoring.AlarmSuppressionCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 			{
 				SDKStruct:  "monitoring.AlarmSuppressionSummary",
@@ -1512,6 +1570,8 @@ var targets = []Target{
 		SDKMappings: []SDKMapping{
 			{
 				SDKStruct: "loadbalancer.LoadBalancerPolicy",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: policy catalog entries are read-only reference data and this CRD does not expose a meaningful singular status surface.",
 			},
 		},
 	},
@@ -1522,6 +1582,8 @@ var targets = []Target{
 		SDKMappings: []SDKMapping{
 			{
 				SDKStruct: "loadbalancer.LoadBalancerProtocol",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: protocol catalog entries are read-only reference data and this CRD does not expose a meaningful singular status surface.",
 			},
 		},
 	},
@@ -1597,9 +1659,13 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "loadbalancer.ShapeDetails",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: shape catalog entries are read-only reference data; load balancer shape mutation parity is tracked on LoadBalancerLoadBalancerShape.",
 			},
 			{
 				SDKStruct: "loadbalancer.LoadBalancerShape",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: shape catalog entries are read-only reference data; load balancer shape mutation parity is tracked on LoadBalancerLoadBalancerShape.",
 			},
 		},
 	},
@@ -1630,6 +1696,8 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "networkloadbalancer.NetworkLoadBalancerCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 			{
 				SDKStruct:  "networkloadbalancer.NetworkLoadBalancerSummary",
@@ -1657,6 +1725,8 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "networkloadbalancer.BackendCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 			{
 				SDKStruct:  "networkloadbalancer.BackendSummary",
@@ -1694,6 +1764,8 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "networkloadbalancer.BackendSetCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 			{
 				SDKStruct:  "networkloadbalancer.BackendSetSummary",
@@ -1748,6 +1820,8 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "networkloadbalancer.ListenerCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 			{
 				SDKStruct:  "networkloadbalancer.ListenerSummary",
@@ -1761,13 +1835,17 @@ var targets = []Target{
 		StatusType: reflect.TypeOf(networkloadbalancerv1beta1.NetworkLoadBalancerHealthStatus{}),
 		SDKMappings: []SDKMapping{
 			{
-				SDKStruct: "networkloadbalancer.NetworkLoadBalancerHealth",
+				SDKStruct:  "networkloadbalancer.NetworkLoadBalancerHealth",
+				APISurface: "status",
 			},
 			{
 				SDKStruct: "networkloadbalancer.NetworkLoadBalancerHealthCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 			{
-				SDKStruct: "networkloadbalancer.NetworkLoadBalancerHealthSummary",
+				SDKStruct:  "networkloadbalancer.NetworkLoadBalancerHealthSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -1778,6 +1856,8 @@ var targets = []Target{
 		SDKMappings: []SDKMapping{
 			{
 				SDKStruct: "networkloadbalancer.NetworkLoadBalancersPolicyCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 		},
 	},
@@ -1788,6 +1868,8 @@ var targets = []Target{
 		SDKMappings: []SDKMapping{
 			{
 				SDKStruct: "networkloadbalancer.NetworkLoadBalancersProtocolCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 		},
 	},
@@ -1807,13 +1889,17 @@ var targets = []Target{
 		StatusType: reflect.TypeOf(networkloadbalancerv1beta1.WorkRequestStatus{}),
 		SDKMappings: []SDKMapping{
 			{
-				SDKStruct: "networkloadbalancer.WorkRequest",
+				SDKStruct:  "networkloadbalancer.WorkRequest",
+				APISurface: "status",
 			},
 			{
 				SDKStruct: "networkloadbalancer.WorkRequestCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 			{
-				SDKStruct: "networkloadbalancer.WorkRequestSummary",
+				SDKStruct:  "networkloadbalancer.WorkRequestSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -1823,10 +1909,13 @@ var targets = []Target{
 		StatusType: reflect.TypeOf(networkloadbalancerv1beta1.WorkRequestErrorStatus{}),
 		SDKMappings: []SDKMapping{
 			{
-				SDKStruct: "networkloadbalancer.WorkRequestError",
+				SDKStruct:  "networkloadbalancer.WorkRequestError",
+				APISurface: "status",
 			},
 			{
 				SDKStruct: "networkloadbalancer.WorkRequestErrorCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 		},
 	},
@@ -1836,10 +1925,13 @@ var targets = []Target{
 		StatusType: reflect.TypeOf(networkloadbalancerv1beta1.WorkRequestLogStatus{}),
 		SDKMappings: []SDKMapping{
 			{
-				SDKStruct: "networkloadbalancer.WorkRequestLogEntry",
+				SDKStruct:  "networkloadbalancer.WorkRequestLogEntry",
+				APISurface: "status",
 			},
 			{
 				SDKStruct: "networkloadbalancer.WorkRequestLogEntryCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 		},
 	},
@@ -2052,13 +2144,17 @@ var targets = []Target{
 		StatusType: reflect.TypeOf(certificatesmanagementv1beta1.AssociationStatus{}),
 		SDKMappings: []SDKMapping{
 			{
-				SDKStruct: "certificatesmanagement.Association",
+				SDKStruct:  "certificatesmanagement.Association",
+				APISurface: "status",
 			},
 			{
 				SDKStruct: "certificatesmanagement.AssociationCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 			{
-				SDKStruct: "certificatesmanagement.AssociationSummary",
+				SDKStruct:  "certificatesmanagement.AssociationSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -2079,6 +2175,8 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "certificatesmanagement.CaBundleCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 			{
 				SDKStruct:  "certificatesmanagement.CaBundleSummary",
@@ -2098,16 +2196,22 @@ var targets = []Target{
 				SDKStruct: "certificatesmanagement.UpdateCertificateDetails",
 			},
 			{
-				SDKStruct: "certificatesmanagement.Certificate",
+				SDKStruct:  "certificatesmanagement.Certificate",
+				APISurface: "status",
 			},
 			{
 				SDKStruct: "certificatesmanagement.CertificateCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 			{
 				SDKStruct: "certificatesmanagement.CertificateVersionSummary",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: version summaries belong to the dedicated CertificatesManagementCertificateVersion status surface.",
 			},
 			{
-				SDKStruct: "certificatesmanagement.CertificateSummary",
+				SDKStruct:  "certificatesmanagement.CertificateSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -2123,16 +2227,22 @@ var targets = []Target{
 				SDKStruct: "certificatesmanagement.UpdateCertificateAuthorityDetails",
 			},
 			{
-				SDKStruct: "certificatesmanagement.CertificateAuthority",
+				SDKStruct:  "certificatesmanagement.CertificateAuthority",
+				APISurface: "status",
 			},
 			{
 				SDKStruct: "certificatesmanagement.CertificateAuthorityCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 			{
 				SDKStruct: "certificatesmanagement.CertificateAuthorityVersionSummary",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: version summaries belong to the dedicated CertificatesManagementCertificateAuthorityVersion status surface.",
 			},
 			{
-				SDKStruct: "certificatesmanagement.CertificateAuthoritySummary",
+				SDKStruct:  "certificatesmanagement.CertificateAuthoritySummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -2142,13 +2252,17 @@ var targets = []Target{
 		StatusType: reflect.TypeOf(certificatesmanagementv1beta1.CertificateAuthorityVersionStatus{}),
 		SDKMappings: []SDKMapping{
 			{
-				SDKStruct: "certificatesmanagement.CertificateAuthorityVersion",
+				SDKStruct:  "certificatesmanagement.CertificateAuthorityVersion",
+				APISurface: "status",
 			},
 			{
 				SDKStruct: "certificatesmanagement.CertificateAuthorityVersionCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 			{
-				SDKStruct: "certificatesmanagement.CertificateAuthorityVersionSummary",
+				SDKStruct:  "certificatesmanagement.CertificateAuthorityVersionSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -2158,13 +2272,17 @@ var targets = []Target{
 		StatusType: reflect.TypeOf(certificatesmanagementv1beta1.CertificateVersionStatus{}),
 		SDKMappings: []SDKMapping{
 			{
-				SDKStruct: "certificatesmanagement.CertificateVersion",
+				SDKStruct:  "certificatesmanagement.CertificateVersion",
+				APISurface: "status",
 			},
 			{
 				SDKStruct: "certificatesmanagement.CertificateVersionCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 			{
-				SDKStruct: "certificatesmanagement.CertificateVersionSummary",
+				SDKStruct:  "certificatesmanagement.CertificateVersionSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -3066,13 +3184,17 @@ var targets = []Target{
 				SDKStruct: "keymanagement.UpdateHsmClusterDetails",
 			},
 			{
-				SDKStruct: "keymanagement.HsmCluster",
+				SDKStruct:  "keymanagement.HsmCluster",
+				APISurface: "status",
 			},
 			{
 				SDKStruct: "keymanagement.HsmClusterCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 			{
-				SDKStruct: "keymanagement.HsmClusterSummary",
+				SDKStruct:  "keymanagement.HsmClusterSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -3082,13 +3204,17 @@ var targets = []Target{
 		StatusType: reflect.TypeOf(keymanagementv1beta1.HsmPartitionStatus{}),
 		SDKMappings: []SDKMapping{
 			{
-				SDKStruct: "keymanagement.HsmPartition",
+				SDKStruct:  "keymanagement.HsmPartition",
+				APISurface: "status",
 			},
 			{
 				SDKStruct: "keymanagement.HsmPartitionCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 			{
-				SDKStruct: "keymanagement.HsmPartitionSummary",
+				SDKStruct:  "keymanagement.HsmPartitionSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -3104,13 +3230,17 @@ var targets = []Target{
 				SDKStruct: "keymanagement.UpdateKeyDetails",
 			},
 			{
-				SDKStruct: "keymanagement.Key",
+				SDKStruct:  "keymanagement.Key",
+				APISurface: "status",
 			},
 			{
 				SDKStruct: "keymanagement.KeyVersionSummary",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: key version summaries belong to the dedicated KeyManagementKeyVersion status surface.",
 			},
 			{
-				SDKStruct: "keymanagement.KeySummary",
+				SDKStruct:  "keymanagement.KeySummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -3144,6 +3274,8 @@ var targets = []Target{
 		SDKMappings: []SDKMapping{
 			{
 				SDKStruct: "keymanagement.ReplicationStatusDetails",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: OCI read-model mappings broaden desired-state coverage, and this CRD does not expose a meaningful status surface for parity tracking.",
 			},
 		},
 	},
@@ -3176,9 +3308,12 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "keymanagement.VaultReplicaDetails",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: replica detail payload is nested under KeyManagementVault status via replicaDetails.",
 			},
 			{
-				SDKStruct: "keymanagement.VaultReplicaSummary",
+				SDKStruct:  "keymanagement.VaultReplicaSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -3316,9 +3451,12 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "vault.SecretVersionSummary",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: secret version summaries belong to the dedicated VaultSecretVersion status surface.",
 			},
 			{
-				SDKStruct: "vault.SecretSummary",
+				SDKStruct:  "vault.SecretSummary",
+				APISurface: "status",
 			},
 		},
 	},

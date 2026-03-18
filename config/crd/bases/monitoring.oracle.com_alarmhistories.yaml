@@ -55,6 +55,39 @@ spec:
           status:
             description: AlarmHistoryStatus defines the observed state of AlarmHistory.
             properties:
+              alarmId:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the alarm to retrieve history for.
+                type: string
+              entries:
+                description: The set of history entries retrieved for the alarm.
+                items:
+                  description: AlarmHistoryEntry defines nested fields for AlarmHistory.Entry.
+                  properties:
+                    summary:
+                      description: |-
+                        Description for this alarm history entry.
+                        Example 1 - alarm state history entry: `The alarm state is FIRING`
+                        Example 2 - alarm state transition history entry: `State transitioned from OK to Firing`
+                      type: string
+                    timestamp:
+                      description: |-
+                        Timestamp for this alarm history entry. Format defined by RFC3339.
+                        Example: `2023-02-01T01:02:29.600Z`
+                      type: string
+                    timestampTriggered:
+                      description: |-
+                        Timestamp for the transition of the alarm state. For example, the time when the alarm transitioned from OK to Firing.
+                        Available for state transition entries only. Note: A three-minute lag for this value accounts for any late-arriving metrics.
+                        Example: `2023-02-01T0:59:00.789Z`
+                      type: string
+                  type: object
+                type: array
+              isEnabled:
+                description: |-
+                  Whether the alarm is enabled.
+                  Example: `true`
+                type: boolean
               status:
                 properties:
                   conditions:

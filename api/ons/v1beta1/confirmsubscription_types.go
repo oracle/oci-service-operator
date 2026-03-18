@@ -19,6 +19,19 @@ type ConfirmSubscriptionSpec struct {
 // ConfirmSubscriptionStatus defines the observed state of ConfirmSubscription.
 type ConfirmSubscriptionStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The name of the subscribed topic.
+	TopicName string `json:"topicName,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the topic associated with the specified subscription.
+	TopicId string `json:"topicId,omitempty"`
+	// A locator that corresponds to the subscription protocol.
+	// For example, an email address for a subscription that uses the `EMAIL` protocol, or a URL for a subscription that uses an HTTP-based protocol.
+	Endpoint string `json:"endpoint,omitempty"`
+	// The URL for unsubscribing from the topic.
+	UnsubscribeUrl string `json:"unsubscribeUrl,omitempty"`
+	// A human-readable string indicating the status of the subscription confirmation.
+	Message string `json:"message,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subscription specified in the request.
+	SubscriptionId string `json:"subscriptionId,omitempty"`
 }
 
 // +kubebuilder:object:root=true

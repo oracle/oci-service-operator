@@ -195,6 +195,10 @@ services:
     version: v1beta1
     phase: eventing-messaging-and-observability
     packageProfile: crd-only
+    observedState:
+      sdkAliases:
+        AlarmHistory:
+          - AlarmHistoryCollection
 
   - service: mysql
     sdkPackage: github.com/oracle/oci-go-sdk/v65/mysql
@@ -214,6 +218,10 @@ services:
     version: v1beta1
     phase: networking-and-infrastructure
     packageProfile: crd-only
+    observedState:
+      sdkAliases:
+        WorkRequestLog:
+          - WorkRequestLogEntry
 
   - service: nosql
     sdkPackage: github.com/oracle/oci-go-sdk/v65/nosql
@@ -221,6 +229,10 @@ services:
     version: v1beta1
     phase: data-and-storage
     packageProfile: crd-only
+    observedState:
+      sdkAliases:
+        WorkRequestLog:
+          - WorkRequestLogEntry
 
   - service: objectstorage
     sdkPackage: github.com/oracle/oci-go-sdk/v65/objectstorage
@@ -228,6 +240,10 @@ services:
     version: v1beta1
     phase: data-and-storage
     packageProfile: crd-only
+    observedState:
+      sdkAliases:
+        WorkRequestLog:
+          - WorkRequestLogEntry
 
   - service: ons
     sdkPackage: github.com/oracle/oci-go-sdk/v65/ons
@@ -235,6 +251,10 @@ services:
     version: v1beta1
     phase: eventing-messaging-and-observability
     packageProfile: crd-only
+    observedState:
+      sdkAliases:
+        ConfirmSubscription:
+          - ConfirmationResult
 
   - service: psql
     sdkPackage: github.com/oracle/oci-go-sdk/v65/psql
@@ -255,6 +275,10 @@ services:
     version: v1beta1
     phase: eventing-messaging-and-observability
     packageProfile: crd-only
+    observedState:
+      sdkAliases:
+        WorkRequestLog:
+          - WorkRequestLogEntry
 
   - service: secrets
     sdkPackage: github.com/oracle/oci-go-sdk/v65/secrets
@@ -262,6 +286,10 @@ services:
     version: v1beta1
     phase: security-and-identity
     packageProfile: crd-only
+    observedState:
+      sdkAliases:
+        SecretBundleByName:
+          - SecretBundle
 
   - service: streaming
     sdkPackage: github.com/oracle/oci-go-sdk/v65/streaming
