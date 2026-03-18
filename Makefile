@@ -94,8 +94,10 @@ manifests: controller-gen ## Generate WebhookConfiguration, ClusterRole and Cust
 	$(CONTROLLER_GEN) rbac:roleName=manager-role paths="./controllers/..." output:rbac:artifacts:config=config/rbac
 	$(CONTROLLER_GEN) webhook paths="./api/..." output:webhook:artifacts:config=config/webhook
 
+DEEPCOPY_GEN_PATHS ?= "./api/...;./pkg/shared"
+
 generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
-	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
+	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths=$(DEEPCOPY_GEN_PATHS)
 
 api-generate: ## Run the OSOK API generator. Use API_SERVICE=<service> or API_ALL=true. Set API_OVERWRITE=true to replace existing generator-owned outputs.
 	@set -e; \
@@ -140,9 +142,38 @@ schema-validator: ## Run OSOK schema validator and write report to SCHEMA_VALIDA
 	go run ./cmd/osok-schema-validator --provider-path $(SCHEMA_VALIDATOR_PROVIDER_PATH) $(SCHEMA_VALIDATOR_SERVICE_ARG) --format $(SCHEMA_VALIDATOR_FORMAT) > $(SCHEMA_VALIDATOR_REPORT)
 	@echo "Wrote schema validator report to $(SCHEMA_VALIDATOR_REPORT)"
 
+GENERATED_COVERAGE_REPORT ?= generated-coverage-report.json
+GENERATED_COVERAGE_SERVICE ?=
+GENERATED_COVERAGE_TOP ?= 10
+GENERATED_COVERAGE_SNAPSHOT_DIR ?=
+GENERATED_COVERAGE_KEEP_SNAPSHOT ?=
+GENERATED_COVERAGE_VALIDATOR_JSON ?=
+GENERATED_COVERAGE_BASELINE ?= internal/generator/config/generated_coverage_baseline.json
+GENERATED_COVERAGE_SERVICE_ARG = $(if $(strip $(GENERATED_COVERAGE_SERVICE)),--service $(GENERATED_COVERAGE_SERVICE),--all)
+GENERATED_COVERAGE_SNAPSHOT_ARG = $(if $(strip $(GENERATED_COVERAGE_SNAPSHOT_DIR)),--snapshot-dir $(GENERATED_COVERAGE_SNAPSHOT_DIR),)
+GENERATED_COVERAGE_KEEP_ARG = $(if $(filter 1 true TRUE yes YES,$(GENERATED_COVERAGE_KEEP_SNAPSHOT)),--keep-snapshot,)
+GENERATED_COVERAGE_VALIDATOR_JSON_ARG = $(if $(strip $(GENERATED_COVERAGE_VALIDATOR_JSON)),--validator-json-out $(GENERATED_COVERAGE_VALIDATOR_JSON),)
+GENERATED_COVERAGE_BASELINE_ARG = $(if $(strip $(GENERATED_COVERAGE_BASELINE)),--baseline $(GENERATED_COVERAGE_BASELINE),)
+
+generated-coverage-report: controller-gen ## Generate APIs in a snapshot tree, run validator coverage, and write a JSON summary.
+	go run ./cmd/osok-generated-coverage --config $(API_GENERATOR_CONFIG) $(GENERATED_COVERAGE_SERVICE_ARG) --top $(GENERATED_COVERAGE_TOP) --controller-gen $(CONTROLLER_GEN) --report-out $(GENERATED_COVERAGE_REPORT) $(GENERATED_COVERAGE_SNAPSHOT_ARG) $(GENERATED_COVERAGE_KEEP_ARG) $(GENERATED_COVERAGE_VALIDATOR_JSON_ARG)
+	@echo "Wrote generated coverage report to $(GENERATED_COVERAGE_REPORT)"
+
+generated-coverage-baseline: controller-gen ## Refresh the checked-in generated coverage baseline intentionally.
+	go run ./cmd/osok-generated-coverage --config $(API_GENERATOR_CONFIG) --all --top $(GENERATED_COVERAGE_TOP) --controller-gen $(CONTROLLER_GEN) --report-out $(GENERATED_COVERAGE_REPORT) --write-baseline $(GENERATED_COVERAGE_BASELINE) $(GENERATED_COVERAGE_SNAPSHOT_ARG) $(GENERATED_COVERAGE_KEEP_ARG) $(GENERATED_COVERAGE_VALIDATOR_JSON_ARG)
+	@echo "Wrote generated coverage report to $(GENERATED_COVERAGE_REPORT)"
+	@echo "Updated generated coverage baseline at $(GENERATED_COVERAGE_BASELINE)"
+
+generated-coverage-gate: controller-gen ## Fail when generated API coverage regresses compared to the checked-in baseline.
+	go run ./cmd/osok-generated-coverage --config $(API_GENERATOR_CONFIG) --all --top $(GENERATED_COVERAGE_TOP) --controller-gen $(CONTROLLER_GEN) --report-out $(GENERATED_COVERAGE_REPORT) $(GENERATED_COVERAGE_BASELINE_ARG) --fail-on-regression $(GENERATED_COVERAGE_SNAPSHOT_ARG) $(GENERATED_COVERAGE_KEEP_ARG) $(GENERATED_COVERAGE_VALIDATOR_JSON_ARG)
+	@echo "Generated coverage gate passed; report at $(GENERATED_COVERAGE_REPORT)"
+
 BASH ?= /bin/bash
-ENVTEST_ASSETS_DIR ?= $(shell pwd)/testbin/$(shell uname)
-ENVTEST_HOME ?= $(shell pwd)/.envtest-home
+# Keep envtest state outside the module tree so controller-gen never walks its module cache.
+ENVTEST_TMPDIR ?= $(patsubst %/,%,$(or $(TMPDIR),/tmp))
+ENVTEST_ROOT ?= $(ENVTEST_TMPDIR)/oci-service-operator-envtest
+ENVTEST_ASSETS_DIR ?= $(ENVTEST_ROOT)/testbin/$(shell go env GOOS)-$(shell go env GOARCH)
+ENVTEST_HOME ?= $(ENVTEST_ROOT)/home
 ENVTEST_CACHE_DIR ?= $(ENVTEST_HOME)/.cache
 ENVTEST_CONFIG_DIR ?= $(ENVTEST_HOME)/.config
 ENVTEST_K8S_VERSION ?= 1.28.0

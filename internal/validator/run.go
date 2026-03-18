@@ -109,7 +109,7 @@ func filterAPIReportByService(report apispec.Report, service string) apispec.Rep
 	out := apispec.Report{Structs: make([]apispec.StructReport, 0, len(report.Structs))}
 	prefix := service + "."
 	for _, structReport := range report.Structs {
-		if strings.HasPrefix(structReport.SDKStruct, prefix) {
+		if structReport.Service == service || strings.HasPrefix(structReport.SDKStruct, prefix) {
 			out.Structs = append(out.Structs, structReport)
 		}
 	}

@@ -206,10 +206,15 @@ Expected regeneration and validation flow:
    kustomization, and package scaffolding for the selected services.
 3. Run `make api-refresh ...` when deepcopy output and CRD manifests also need
    to be refreshed in the same step.
-4. Run `make fmt`.
-5. Run `make vet`.
-6. Run `make test`.
-7. Run `make build`.
+4. Run `go run ./hack/update_validator_registries.go --write` so validator
+   coverage targets stay aligned with `services.yaml` and the generated API
+   packages. Any generated spec that still has no mapped SDK payload will remain
+   visible as `untracked` in validator output until its `SDKStructs` mapping is
+   filled in.
+5. Run `make fmt`.
+6. Run `make vet`.
+7. Run `make test`.
+8. Run `make build`.
 
 Package regeneration stays separate from the API generation step:
 

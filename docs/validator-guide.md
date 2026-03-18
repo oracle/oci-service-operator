@@ -124,6 +124,113 @@ make schema-validator \
 | `SCHEMA_VALIDATOR_FORMAT` | `json` | Output format passed to the CLI. |
 | `SCHEMA_VALIDATOR_REPORT` | `validator-report.json` | File path to write CLI output. |
 
+## Generated Snapshot Coverage Report
+
+For generator work, use the generated-output coverage workflow instead of
+rewriting the checked-in tree by hand. This command creates a snapshot workspace,
+renders selected services into that snapshot, refreshes the validator registries
+inside the snapshot, regenerates deepcopy code for the generated API groups, and
+then runs `osok-schema-validator` from that snapshot so the report reflects the
+generated API types rather than the checked-in ones.
+
+```bash
+# Full generated-output baseline report
+make generated-coverage-report
+
+# Limit the snapshot run to one service and keep the snapshot for inspection
+make generated-coverage-report \
+  GENERATED_COVERAGE_SERVICE=functions \
+  GENERATED_COVERAGE_REPORT=/tmp/functions-generated-coverage.json \
+  GENERATED_COVERAGE_SNAPSHOT_DIR=/tmp/osok-functions-snapshot
+
+# Direct CLI usage (stdout is JSON)
+go run ./cmd/osok-generated-coverage --all > before.json
+go run ./cmd/osok-generated-coverage --service functions > after.json
+```
+
+Common variables and flags:
+
+| Variable / Flag | Default | Purpose |
+| --- | --- | --- |
+| `GENERATED_COVERAGE_SERVICE` / `--service` | empty | Run the snapshot report for one configured service. |
+| `--all` | false | Report all configured services. |
+| `GENERATED_COVERAGE_REPORT` | `generated-coverage-report.json` | File that receives the summary JSON from the Makefile target. |
+| `GENERATED_COVERAGE_TOP` / `--top` | `10` | Number of top offenders to keep per category. Use `0` for all. |
+| `GENERATED_COVERAGE_SNAPSHOT_DIR` / `--snapshot-dir` | empty | Keep the generated snapshot at a specific path instead of using an auto-cleaned temp dir. |
+| `GENERATED_COVERAGE_KEEP_SNAPSHOT` / `--keep-snapshot` | empty / false | Keep an automatically created temp snapshot after a successful run. |
+| `GENERATED_COVERAGE_VALIDATOR_JSON` / `--validator-json-out` | empty | Optional path for the full raw validator JSON from the snapshot run. |
+| `GENERATED_COVERAGE_BASELINE` / `--baseline` | `internal/generator/config/generated_coverage_baseline.json` | Baseline file used by the regression gate. |
+| `--report-out` | empty | Write the generated coverage summary to a file instead of stdout. |
+| `--write-baseline` | empty | Refresh the baseline file intentionally from the current generated snapshot report. |
+| `--fail-on-regression` | false | Exit non-zero if coverage scope or metrics regress compared to `--baseline`. |
+
+The summary JSON includes:
+
+- `summary.aggregate` — aggregate counts and overall / mandatory coverage percentages.
+- `summary.services[]` — per-service rollups for tracked mappings, missing fields,
+  mandatory missing fields, extra spec-only fields, and coverage percentages.
+- `summary.topOffenders` — the worst individual spec-to-SDK mappings for missing
+  fields, mandatory missing fields, and extra spec-only fields, including field names.
+- `snapshot.root` — present only when the snapshot is retained.
+
+Typical before/after comparison flow:
+
+```bash
+go run ./cmd/osok-generated-coverage --all > before.json
+# make generator changes
+go run ./cmd/osok-generated-coverage --all > after.json
+
+jq '.summary.aggregate' before.json
+jq '.summary.aggregate' after.json
+jq '.summary.topOffenders.missingFields[:5]' after.json
+```
+
+## Generated Coverage Gate
+
+The checked-in baseline for the generated-output workflow lives at:
+
+```text
+internal/generator/config/generated_coverage_baseline.json
+```
+
+Use the gate target when you want CI-style protection against regressions:
+
+```bash
+# Fail if generated coverage regresses compared to the checked-in baseline
+make generated-coverage-gate
+
+# Keep the full summary and raw validator JSON for inspection on failure
+make generated-coverage-gate \
+  GENERATED_COVERAGE_REPORT=/tmp/generated-coverage-gate.json \
+  GENERATED_COVERAGE_VALIDATOR_JSON=/tmp/generated-coverage-gate-validator.json
+```
+
+`generated-coverage-gate` and `generated-coverage-baseline` always operate on
+the full configured service set. Use `make generated-coverage-report
+GENERATED_COVERAGE_SERVICE=<service>` for targeted local inspection, but keep
+the checked-in baseline scoped to `--all`.
+
+The gate checks two classes of failure:
+
+- **Scope changes** — service inventory, spec counts, or mapping counts changed from the baseline.
+- **Metric regressions** — tracked mappings dropped, untracked mappings increased, missing or extra fields increased, or coverage percentages decreased in aggregate or for a specific service.
+
+When the gate fails, the command groups those failures separately and includes
+current top-offender summaries so you can jump straight to the worst mappings.
+If you also set `GENERATED_COVERAGE_REPORT` or `GENERATED_COVERAGE_VALIDATOR_JSON`,
+the failure output points to those files directly.
+
+When a scope change or baseline shift is intentional, refresh the baseline explicitly:
+
+```bash
+make generated-coverage-baseline
+```
+
+That target reruns the generated snapshot report and overwrites
+`internal/generator/config/generated_coverage_baseline.json`. Treat the baseline
+update as part of the reviewed change: if the metrics moved for a good reason,
+the baseline diff documents the new expected floor for future regressions.
+
 ## Registry Generation Workflow
 
 The validator registries can now be generated automatically:
@@ -136,6 +243,12 @@ go run ./hack/update_validator_registries.go
 go run ./hack/update_validator_registries.go --write
 ```
 
+`internal/generator/config/services.yaml` is the source-of-truth inventory for
+this workflow. The generator scans the configured API groups/versions from that
+file, preserves existing explicit SDK mappings, and keeps specs with no inferred
+SDK payloads in the API registry so coverage reports can mark them as
+`untracked` instead of silently omitting them.
+
 This script updates:
 
 - `internal/validator/apispec/registry.go`
@@ -145,7 +258,7 @@ Recommended workflow when APIs/SDK change:
 
 ```bash
 go run ./hack/update_validator_registries.go --write
-go test ./internal/validator/apispec ./internal/validator/sdk
+go test ./hack ./internal/validator/apispec ./internal/validator/sdk
 make schema-validator
 ```
 
@@ -167,6 +280,10 @@ For each spec ↔ SDK pairing you’ll see three lists:
 - **Present fields** — Spec fields exposed to users. They show up as `used` (mandatory fields are flagged).
 - **Missing fields** — SDK fields not visible in the spec. Review these to decide whether to add them or classify them in the allowlist (`future_consideration`, `intentionally_omitted`, etc.).
 - **API-only fields** — Spec fields with no matching SDK field. Useful for catching spec-only metadata or typos.
+- **Untracked mappings** — Generated API specs that exist in `api/<group>/<version>`
+  but still have no mapped SDK payloads in `internal/validator/apispec/registry.go`.
+  These rows render as `untracked` so aggregate coverage no longer drops them on
+  the floor.
 
 This report uses the SDK’s `mandatory` tags to default missing mandatory fields to `potential_gap` and optional ones to `future_consideration`. You can use the same allowlist to adjust those statuses.
 
@@ -183,13 +300,14 @@ This mode ignores baseline/allowlist flags; it’s a standalone helper for SDK b
 ## Where the Metadata Lives
 
 - `internal/validator/sdk/registry.go` lists the SDK structs we track per service.
-- `internal/validator/apispec/registry.go` maps each CRD spec type to relevant SDK structs.
-- `hack/update_validator_registries.go` generates/reorders both registry files from API specs + vendored SDK types.
+- `internal/validator/apispec/registry.go` maps each CRD spec type to relevant SDK structs, including explicit `untracked` entries when a generated spec still lacks an SDK mapping.
+- `hack/update_validator_registries.go` generates/reorders both registry files from `internal/generator/config/services.yaml`, generated API specs, and vendored SDK types.
 - `validator_allowlist.yaml` (repo root) documents intentional gaps and feeds both controller and API reports.
 
 ## Troubleshooting & Tips
 
 - Missing allowlist? The CLI will still run, but all unused fields show as `unclassified` (controller) or default to `future_consideration` / `potential_gap` (API). Add the allowlist to make the output more meaningful.
+- If a new generated resource shows up as `untracked`, rerun `go run ./hack/update_validator_registries.go --write`. If it is still untracked after regeneration, add or adjust the `SDKStructs` mapping in `internal/validator/apispec/registry.go` so the validator knows which payloads to compare.
 - `--fail-on-new-actionable` does nothing without `--baseline`: it needs a “before” snapshot.
 - JSON output returns raw objects; use tools like `jq` to explore the report:
   ```bash

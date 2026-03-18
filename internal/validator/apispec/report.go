@@ -34,13 +34,26 @@ func renderJSON(report Report) (string, error) {
 
 func renderMarkdown(report Report) string {
 	var b strings.Builder
-	b.WriteString("## API Spec Coverage\n\n")
+	b.WriteString("## API Coverage\n\n")
 	if len(report.Structs) == 0 {
-		b.WriteString("All tracked SDK fields are exposed by the OSOK API specs.\n")
+		b.WriteString("All tracked SDK fields are exposed by the OSOK API surfaces.\n")
 		return b.String()
 	}
 	for _, strct := range report.Structs {
-		b.WriteString(fmt.Sprintf("### %s → `%s`\n\n", strct.Spec, strct.SDKStruct))
+		targetLabel := fmt.Sprintf("`%s`", strct.SDKStruct)
+		if strct.SDKStruct == "" {
+			targetLabel = "`untracked`"
+			if isIntentionalUntrackedReason(strct.TrackingReason) {
+				targetLabel = "`intentionally untracked`"
+			}
+		}
+		b.WriteString(fmt.Sprintf("### %s → %s\n\n", displayTargetName(strct), targetLabel))
+		if strct.TrackingStatus == TrackingStatusUntracked {
+			if strct.TrackingReason != "" {
+				b.WriteString(strct.TrackingReason + "\n\n")
+			}
+			continue
+		}
 		if len(strct.PresentFields) > 0 {
 			b.WriteString("**Present fields**\n\n")
 			for _, field := range strct.PresentFields {
@@ -90,14 +103,33 @@ func renderMarkdown(report Report) string {
 
 func renderTable(report Report) string {
 	var b strings.Builder
-	b.WriteString("API spec coverage\n")
+	b.WriteString("API coverage\n")
 	if len(report.Structs) == 0 {
-		b.WriteString("All tracked SDK fields are exposed by the OSOK API specs.\n")
+		b.WriteString("All tracked SDK fields are exposed by the OSOK API surfaces.\n")
 		return b.String()
 	}
-	b.WriteString("\nSPEC / SDK STRUCT                         PRESENT  MISSING  EXTRA\n")
+	b.WriteString("\nAPI TARGET / SDK STRUCT                   PRESENT  MISSING  EXTRA\n")
 	for _, strct := range report.Structs {
-		b.WriteString(fmt.Sprintf("%-35s %-40s %7d %8d %6d\n", strct.Spec, strct.SDKStruct, len(strct.PresentFields), len(strct.MissingFields), len(strct.ExtraSpecFields)))
+		sdkStruct := strct.SDKStruct
+		if sdkStruct == "" {
+			sdkStruct = "[untracked]"
+			if isIntentionalUntrackedReason(strct.TrackingReason) {
+				sdkStruct = "[intentionally untracked]"
+			}
+		}
+		b.WriteString(fmt.Sprintf("%-35s %-40s %7d %8d %6d\n", displayTargetName(strct), sdkStruct, len(strct.PresentFields), len(strct.MissingFields), len(strct.ExtraSpecFields)))
+		if strct.TrackingStatus == TrackingStatusUntracked {
+			trackingLabel := strct.TrackingStatus
+			if isIntentionalUntrackedReason(strct.TrackingReason) {
+				trackingLabel = "intentionally untracked"
+			}
+			b.WriteString(fmt.Sprintf("  Tracking: %s", trackingLabel))
+			if strct.TrackingReason != "" {
+				b.WriteString(fmt.Sprintf(" (%s)", strct.TrackingReason))
+			}
+			b.WriteString("\n\n")
+			continue
+		}
 		if len(strct.PresentFields) > 0 {
 			b.WriteString("  Present:\n")
 			for _, field := range strct.PresentFields {
@@ -127,4 +159,11 @@ func renderTable(report Report) string {
 		b.WriteString("\n")
 	}
 	return b.String()
+}
+
+func displayTargetName(strct StructReport) string {
+	if strings.TrimSpace(strct.APISurface) == "" || strct.APISurface == apiSurfaceSpec {
+		return strct.Spec
+	}
+	return fmt.Sprintf("%s (%s)", strct.Spec, strct.APISurface)
 }

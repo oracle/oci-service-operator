@@ -2,6 +2,7 @@
 cover.out
 bin/
 testbin/
+.envtest-home/
 bundle/
 
 # This is to remediate SCA findings wrt downloads from dockerfiles present in go vendor tree
