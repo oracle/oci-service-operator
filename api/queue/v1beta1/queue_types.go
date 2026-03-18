@@ -14,26 +14,60 @@ import (
 
 // QueueSpec defines the desired state of Queue.
 type QueueSpec struct {
-	Id                           shared.OCID       `json:"id,omitempty"`
-	CompartmentId                shared.OCID       `json:"compartmentId,omitempty"`
-	DisplayName                  string            `json:"displayName,omitempty"`
-	RetentionInSeconds           int               `json:"retentionInSeconds,omitempty"`
-	VisibilityInSeconds          int               `json:"visibilityInSeconds,omitempty"`
-	TimeoutInSeconds             int               `json:"timeoutInSeconds,omitempty"`
-	ChannelConsumptionLimit      int               `json:"channelConsumptionLimit,omitempty"`
-	DeadLetterQueueDeliveryCount int               `json:"deadLetterQueueDeliveryCount,omitempty"`
-	CustomEncryptionKeyId        string            `json:"customEncryptionKeyId,omitempty"`
-	FreeformTags                 map[string]string `json:"freeformTags,omitempty"`
-	TimeCreated                  string            `json:"timeCreated,omitempty"`
-	TimeUpdated                  string            `json:"timeUpdated,omitempty"`
-	LifecycleState               string            `json:"lifecycleState,omitempty"`
-	MessagesEndpoint             string            `json:"messagesEndpoint,omitempty"`
-	LifecycleDetails             string            `json:"lifecycleDetails,omitempty"`
+	// The user-friendly name of the queue.
+	// +kubebuilder:validation:Required
+	DisplayName string `json:"displayName"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the queue.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// The retention period of messages in the queue, in seconds.
+	// +kubebuilder:validation:Optional
+	RetentionInSeconds int `json:"retentionInSeconds,omitempty"`
+	// The default visibility timeout of the messages consumed from the queue, in seconds.
+	// +kubebuilder:validation:Optional
+	VisibilityInSeconds int `json:"visibilityInSeconds,omitempty"`
+	// The default polling timeout of the messages in the queue, in seconds.
+	// +kubebuilder:validation:Optional
+	TimeoutInSeconds int `json:"timeoutInSeconds,omitempty"`
+	// The percentage of allocated queue resources that can be consumed by a single channel. For example, if a queue has a storage limit of 2Gb, and a single channel consumption limit is 0.1 (10%), that means data size of a single channel  can't exceed 200Mb. Consumption limit of 100% (default) means that a single channel can consume up-to all allocated queue's resources.
+	// +kubebuilder:validation:Optional
+	ChannelConsumptionLimit int `json:"channelConsumptionLimit,omitempty"`
+	// The number of times a message can be delivered to a consumer before being moved to the dead letter queue. A value of 0 indicates that the DLQ is not used.
+	// +kubebuilder:validation:Optional
+	DeadLetterQueueDeliveryCount int `json:"deadLetterQueueDeliveryCount,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the custom encryption key to be used to encrypt messages content.
+	// +kubebuilder:validation:Optional
+	CustomEncryptionKeyId string `json:"customEncryptionKeyId,omitempty"`
+	// Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+	// Example: `{"bar-key": "value"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// Example: `{"foo-namespace": {"bar-key": "value"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 }
 
 // QueueStatus defines the observed state of Queue.
 type QueueStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// A unique identifier for the queue that is immutable on creation.
+	Id string `json:"id,omitempty"`
+	// The time that the queue was created, expressed in RFC 3339 (https://tools.ietf.org/rfc/rfc3339) timestamp format.
+	// Example: `2018-04-20T00:00:07.405Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The time that the queue was updated, expressed in RFC 3339 (https://tools.ietf.org/rfc/rfc3339) timestamp format.
+	// Example: `2018-04-20T00:00:07.405Z`
+	TimeUpdated string `json:"timeUpdated,omitempty"`
+	// The current state of the queue.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The endpoint to use to consume or publish messages in the queue.
+	MessagesEndpoint string `json:"messagesEndpoint,omitempty"`
+	// Any additional details about the current state of the queue.
+	LifecycleDetails string `json:"lifecycleDetails,omitempty"`
+	// Usage of system tag keys. These predefined keys are scoped to namespaces.
+	// Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`
 }
 
 // +kubebuilder:object:root=true

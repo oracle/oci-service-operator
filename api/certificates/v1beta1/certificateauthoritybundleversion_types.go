@@ -14,13 +14,50 @@ import (
 
 // CertificateAuthorityBundleVersionSpec defines the desired state of CertificateAuthorityBundleVersion.
 type CertificateAuthorityBundleVersionSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
+}
+
+// CertificateAuthorityBundleVersionValidity defines nested fields for CertificateAuthorityBundleVersion.Validity.
+type CertificateAuthorityBundleVersionValidity struct {
+	// The date on which the certificate validity period begins, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2019-04-03T21:10:29.600Z`
+	TimeOfValidityNotBefore string `json:"timeOfValidityNotBefore,omitempty"`
+	// The date on which the certificate validity period ends, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2019-04-03T21:10:29.600Z`
+	TimeOfValidityNotAfter string `json:"timeOfValidityNotAfter,omitempty"`
+}
+
+// CertificateAuthorityBundleVersionRevocationStatus defines nested fields for CertificateAuthorityBundleVersion.RevocationStatus.
+type CertificateAuthorityBundleVersionRevocationStatus struct {
+	// The time when the certificate or CA was revoked.
+	TimeRevoked string `json:"timeRevoked,omitempty"`
+	// The reason that the certificate or CA was revoked.
+	RevocationReason string `json:"revocationReason,omitempty"`
 }
 
 // CertificateAuthorityBundleVersionStatus defines the observed state of CertificateAuthorityBundleVersion.
 type CertificateAuthorityBundleVersionStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the certificate authority (CA).
+	CertificateAuthorityId string `json:"certificateAuthorityId,omitempty"`
+	// An optional property indicating when the CA version was created, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2019-04-03T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The version number of the CA.
+	VersionNumber int64 `json:"versionNumber,omitempty"`
+	// The name of the CA.
+	CertificateAuthorityName string `json:"certificateAuthorityName,omitempty"`
+	// A list of rotation states for this CA version.
+	Stages []string `json:"stages,omitempty"`
+	// A unique certificate identifier used in certificate revocation tracking, formatted as octets.
+	// Example: `03 AC FC FA CC B3 CB 02 B8 F8 DE F5 85 E7 7B FF`
+	SerialNumber string `json:"serialNumber,omitempty"`
+	// The name of the CA version. When this value is not null, the name is unique across CA versions for a given CA.
+	VersionName string `json:"versionName,omitempty"`
+	// An optional property indicating when to delete the CA version, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2019-04-03T21:10:29.600Z`
+	TimeOfDeletion   string                                            `json:"timeOfDeletion,omitempty"`
+	Validity         CertificateAuthorityBundleVersionValidity         `json:"validity,omitempty"`
+	RevocationStatus CertificateAuthorityBundleVersionRevocationStatus `json:"revocationStatus,omitempty"`
 }
 
 // +kubebuilder:object:root=true

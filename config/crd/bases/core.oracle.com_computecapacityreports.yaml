@@ -54,17 +54,55 @@ spec:
             description: ComputeCapacityReportSpec defines the desired state of ComputeCapacityReport.
             properties:
               availabilityDomain:
+                description: |-
+                  The availability domain for the capacity report.
+                  Example: `Uocm:PHX-AD-1`
                 type: string
               compartmentId:
-                maxLength: 255
-                minLength: 1
+                description: |-
+                  The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) for the compartment. This should always be the root
+                  compartment.
                 type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
-              timeCreated:
-                type: string
+              shapeAvailabilities:
+                description: Information about the shapes in the capacity report.
+                items:
+                  description: ComputeCapacityReportShapeAvailability defines nested
+                    fields for ComputeCapacityReport.ShapeAvailability.
+                  properties:
+                    faultDomain:
+                      description: |-
+                        The fault domain for the capacity report.
+                        If you do not specify a fault domain, the capacity report includes information about all fault domains.
+                      type: string
+                    instanceShape:
+                      description: |-
+                        The shape that you want to request a capacity report for. You can enumerate all available shapes by calling
+                        ListShapes.
+                      type: string
+                    instanceShapeConfig:
+                      description: ComputeCapacityReportShapeAvailabilityInstanceShapeConfig
+                        defines nested fields for ComputeCapacityReport.ShapeAvailability.InstanceShapeConfig.
+                      properties:
+                        memoryInGBs:
+                          description: The total amount of memory available to the
+                            instance, in gigabytes.
+                          type: number
+                        nvmes:
+                          description: The number of NVMe drives to be used for storage.
+                          type: integer
+                        ocpus:
+                          description: The total number of OCPUs available to the
+                            instance.
+                          type: number
+                      type: object
+                  required:
+                  - instanceShape
+                  type: object
+                type: array
+            required:
+            - availabilityDomain
+            - compartmentId
+            - shapeAvailabilities
             type: object
           status:
             description: ComputeCapacityReportStatus defines the observed state of
@@ -112,6 +150,12 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              timeCreated:
+                description: |-
+                  The date and time the capacity report was created, in the format defined by
+                  RFC3339 (https://tools.ietf.org/html/rfc3339).
+                  Example: `2016-08-25T21:10:29.600Z`
+                type: string
             required:
             - status
             type: object

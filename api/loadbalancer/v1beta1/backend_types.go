@@ -14,25 +14,50 @@ import (
 
 // BackendSpec defines the desired state of Backend.
 type BackendSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
-	IpAddress     string      `json:"ipAddress,omitempty"`
-	Port          int         `json:"port,omitempty"`
-	Weight        int         `json:"weight,omitempty"`
-	Backup        bool        `json:"backup,omitempty"`
-	Drain         bool        `json:"drain,omitempty"`
-	Offline       bool        `json:"offline,omitempty"`
-	Name          string      `json:"name,omitempty"`
+	// The IP address of the backend server.
+	// Example: `10.0.0.3`
+	// +kubebuilder:validation:Required
+	IpAddress string `json:"ipAddress"`
+	// The communication port for the backend server.
+	// Example: `8080`
+	// +kubebuilder:validation:Required
+	Port int `json:"port"`
+	// The load balancing policy weight assigned to the server. Backend servers with a higher weight receive a larger
+	// proportion of incoming traffic. For example, a server weighted '3' receives 3 times the number of new connections
+	// as a server weighted '1'.
+	// For more information on load balancing policies, see
+	// How Load Balancing Policies Work (https://docs.cloud.oracle.com/Content/Balance/Reference/lbpolicies.htm).
+	// Example: `3`
+	// +kubebuilder:validation:Optional
+	Weight int `json:"weight,omitempty"`
+	// Whether the load balancer should treat this server as a backup unit. If `true`, the load balancer forwards no ingress
+	// traffic to this backend server unless all other backend servers not marked as "backup" fail the health check policy.
+	// **Note:** You cannot add a backend server marked as `backup` to a backend set that uses the IP Hash policy.
+	// Example: `false`
+	// +kubebuilder:validation:Optional
+	Backup bool `json:"backup,omitempty"`
+	// Whether the load balancer should drain this server. Servers marked "drain" receive no new
+	// incoming traffic.
+	// Example: `false`
+	// +kubebuilder:validation:Optional
+	Drain bool `json:"drain,omitempty"`
+	// Whether the load balancer should treat this server as offline. Offline servers receive no incoming
+	// traffic.
+	// Example: `false`
+	// +kubebuilder:validation:Optional
+	Offline bool `json:"offline,omitempty"`
 }
 
 // BackendStatus defines the observed state of Backend.
 type BackendStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// A read-only field showing the IP address and port that uniquely identify this backend server in the backend set.
+	// Example: `10.0.0.3:8080`
+	Name string `json:"name,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Name",type="string",JSONPath=".spec.name",priority=1
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.status.conditions[-1].type",description="status of the Backend",priority=0
 // +kubebuilder:printcolumn:name="Ocid",type="string",JSONPath=".status.status.ocid",description="Ocid of the Backend",priority=1
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0

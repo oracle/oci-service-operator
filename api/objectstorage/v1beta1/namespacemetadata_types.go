@@ -14,16 +14,19 @@ import (
 
 // NamespaceMetadataSpec defines the desired state of NamespaceMetadata.
 type NamespaceMetadataSpec struct {
-	Id                        shared.OCID `json:"id,omitempty"`
-	CompartmentId             shared.OCID `json:"compartmentId,omitempty"`
-	DefaultS3CompartmentId    string      `json:"defaultS3CompartmentId,omitempty"`
-	DefaultSwiftCompartmentId string      `json:"defaultSwiftCompartmentId,omitempty"`
-	Namespace                 string      `json:"namespace,omitempty"`
+	// The updated compartment id for use by an S3 client, if this field is set.
+	// +kubebuilder:validation:Optional
+	DefaultS3CompartmentId string `json:"defaultS3CompartmentId,omitempty"`
+	// The updated compartment id for use by a Swift client, if this field is set.
+	// +kubebuilder:validation:Optional
+	DefaultSwiftCompartmentId string `json:"defaultSwiftCompartmentId,omitempty"`
 }
 
 // NamespaceMetadataStatus defines the observed state of NamespaceMetadata.
 type NamespaceMetadataStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The Object Storage namespace to which the metadata belongs.
+	Namespace string `json:"namespace,omitempty"`
 }
 
 // +kubebuilder:object:root=true

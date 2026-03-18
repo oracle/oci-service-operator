@@ -14,8 +14,6 @@ import (
 
 // WorkRequestLogSpec defines the desired state of WorkRequestLog.
 type WorkRequestLogSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // WorkRequestLogStatus defines the observed state of WorkRequestLog.

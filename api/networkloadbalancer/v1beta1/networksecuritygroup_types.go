@@ -14,8 +14,15 @@ import (
 
 // NetworkSecurityGroupSpec defines the desired state of NetworkSecurityGroup.
 type NetworkSecurityGroupSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
+	// An array of network security group OCIDs (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) associated with the network load
+	// balancer.
+	// During the creation of the network load balancer, the service adds the new network load balancer to the specified network security groups.
+	// The benefits of associating the network load balancer with network security groups include:
+	// *  Network security groups define network security rules to govern ingress and egress traffic for the network load balancer.
+	// *  The network security rules of other resources can reference the network security groups associated with the network load balancer
+	//    to ensure access.
+	// +kubebuilder:validation:Optional
+	NetworkSecurityGroupIds []string `json:"networkSecurityGroupIds,omitempty"`
 }
 
 // NetworkSecurityGroupStatus defines the observed state of NetworkSecurityGroup.

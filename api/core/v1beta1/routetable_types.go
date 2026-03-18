@@ -14,18 +14,84 @@ import (
 
 // RouteTableSpec defines the desired state of RouteTable.
 type RouteTableSpec struct {
-	Id             shared.OCID       `json:"id,omitempty"`
-	CompartmentId  shared.OCID       `json:"compartmentId,omitempty"`
-	VcnId          string            `json:"vcnId,omitempty"`
-	DisplayName    string            `json:"displayName,omitempty"`
-	FreeformTags   map[string]string `json:"freeformTags,omitempty"`
-	LifecycleState string            `json:"lifecycleState,omitempty"`
-	TimeCreated    string            `json:"timeCreated,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment to contain the route table.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// The collection of rules used for routing destination IPs to network devices.
+	// +kubebuilder:validation:Required
+	RouteRules []RouteTableRouteRule `json:"routeRules"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VCN the route table belongs to.
+	// +kubebuilder:validation:Required
+	VcnId string `json:"vcnId"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+}
+
+// RouteTableRouteRule defines nested fields for RouteTable.RouteRule.
+type RouteTableRouteRule struct {
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) for the route rule's target. For information about the type of
+	// targets you can specify, see
+	// Route Tables (https://docs.cloud.oracle.com/iaas/Content/Network/Tasks/managingroutetables.htm).
+	// +kubebuilder:validation:Required
+	NetworkEntityId string `json:"networkEntityId"`
+	// Deprecated. Instead use `destination` and `destinationType`. Requests that include both
+	// `cidrBlock` and `destination` will be rejected.
+	// A destination IP address range in CIDR notation. Matching packets will
+	// be routed to the indicated network entity (the target).
+	// Cannot be an IPv6 prefix.
+	// Example: `0.0.0.0/0`
+	// +kubebuilder:validation:Optional
+	CidrBlock string `json:"cidrBlock,omitempty"`
+	// Conceptually, this is the range of IP addresses used for matching when routing
+	// traffic. Required if you provide a `destinationType`.
+	// Allowed values:
+	//   * IP address range in CIDR notation. Can be an IPv4 CIDR block or IPv6 prefix. For example: `192.168.1.0/24`
+	//   or `2001:0db8:0123:45::/56`. If you set this to an IPv6 prefix, the route rule's target
+	//   can only be a DRG or internet gateway.
+	//   IPv6 addressing is supported for all commercial and government regions.
+	//   See IPv6 Addresses (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/ipv6.htm).
+	//   * The `cidrBlock` value for a Service, if you're
+	//     setting up a route rule for traffic destined for a particular `Service` through
+	//     a service gateway. For example: `oci-phx-objectstorage`.
+	// +kubebuilder:validation:Optional
+	Destination string `json:"destination,omitempty"`
+	// Type of destination for the rule. Required if you provide a `destination`.
+	//   * `CIDR_BLOCK`: If the rule's `destination` is an IP address range in CIDR notation.
+	//   * `SERVICE_CIDR_BLOCK`: If the rule's `destination` is the `cidrBlock` value for a
+	//     Service (the rule is for traffic destined for a
+	//     particular `Service` through a service gateway).
+	// +kubebuilder:validation:Optional
+	DestinationType string `json:"destinationType,omitempty"`
+	// An optional description of your choice for the rule.
+	// +kubebuilder:validation:Optional
+	Description string `json:"description,omitempty"`
+	// A route rule can be STATIC if manually added to the route table, LOCAL if added by OCI to the route table.
+	// +kubebuilder:validation:Optional
+	RouteType string `json:"routeType,omitempty"`
 }
 
 // RouteTableStatus defines the observed state of RouteTable.
 type RouteTableStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The route table's Oracle ID (OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)).
+	Id string `json:"id,omitempty"`
+	// The route table's current state.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The date and time the route table was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
 }
 
 // +kubebuilder:object:root=true

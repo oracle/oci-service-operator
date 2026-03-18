@@ -14,8 +14,6 @@ import (
 
 // UnsubscriptionSpec defines the desired state of Unsubscription.
 type UnsubscriptionSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // UnsubscriptionStatus defines the observed state of Unsubscription.

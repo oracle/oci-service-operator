@@ -14,26 +14,98 @@ import (
 
 // FunctionSpec defines the desired state of Function.
 type FunctionSpec struct {
-	Id               shared.OCID       `json:"id,omitempty"`
-	CompartmentId    shared.OCID       `json:"compartmentId,omitempty"`
-	DisplayName      string            `json:"displayName,omitempty"`
-	ApplicationId    string            `json:"applicationId,omitempty"`
-	MemoryInMBs      int64             `json:"memoryInMBs,omitempty"`
-	Image            string            `json:"image,omitempty"`
-	ImageDigest      string            `json:"imageDigest,omitempty"`
-	Config           map[string]string `json:"config,omitempty"`
-	TimeoutInSeconds int               `json:"timeoutInSeconds,omitempty"`
-	FreeformTags     map[string]string `json:"freeformTags,omitempty"`
-	LifecycleState   string            `json:"lifecycleState,omitempty"`
-	Shape            string            `json:"shape,omitempty"`
-	InvokeEndpoint   string            `json:"invokeEndpoint,omitempty"`
-	TimeCreated      string            `json:"timeCreated,omitempty"`
-	TimeUpdated      string            `json:"timeUpdated,omitempty"`
+	// The display name of the function. The display name must be unique within the application containing the function. Avoid entering confidential information.
+	// +kubebuilder:validation:Required
+	DisplayName string `json:"displayName"`
+	// The OCID of the application this function belongs to.
+	// +kubebuilder:validation:Required
+	ApplicationId string `json:"applicationId"`
+	// Maximum usable memory for the function (MiB).
+	// +kubebuilder:validation:Required
+	MemoryInMBs int64 `json:"memoryInMBs"`
+	// The qualified name of the Docker image to use in the function, including the image tag.
+	// The image should be in the OCI Registry that is in the same region as the function itself.
+	// Example: `phx.ocir.io/ten/functions/function:0.0.1`
+	// +kubebuilder:validation:Optional
+	Image string `json:"image,omitempty"`
+	// The image digest for the version of the image that will be pulled when invoking this function.
+	// If no value is specified, the digest currently associated with the image in the OCI Registry will be used.
+	// Example: `sha256:ca0eeb6fb05351dfc8759c20733c91def84cb8007aa89a5bf606bc8b315b9fc7`
+	// +kubebuilder:validation:Optional
+	ImageDigest string `json:"imageDigest,omitempty"`
+	// +kubebuilder:validation:Optional
+	SourceDetails FunctionSourceDetails `json:"sourceDetails,omitempty"`
+	// Function configuration. These values are passed on to the function as environment variables, this overrides application configuration values.
+	// Keys must be ASCII strings consisting solely of letters, digits, and the '_' (underscore) character, and must not begin with a digit. Values should be limited to printable unicode characters.
+	// Example: `{"MY_FUNCTION_CONFIG": "ConfVal"}`
+	// The maximum size for all configuration keys and values is limited to 4KB. This is measured as the sum of octets necessary to represent each key and value in UTF-8.
+	// +kubebuilder:validation:Optional
+	Config map[string]string `json:"config,omitempty"`
+	// Timeout for executions of the function. Value in seconds.
+	// +kubebuilder:validation:Optional
+	TimeoutInSeconds int `json:"timeoutInSeconds,omitempty"`
+	// +kubebuilder:validation:Optional
+	ProvisionedConcurrencyConfig FunctionProvisionedConcurrencyConfig `json:"provisionedConcurrencyConfig,omitempty"`
+	// +kubebuilder:validation:Optional
+	TraceConfig FunctionTraceConfig `json:"traceConfig,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+}
+
+// FunctionSourceDetails defines nested fields for Function.SourceDetails.
+type FunctionSourceDetails struct {
+	// +kubebuilder:validation:Optional
+	SourceType string `json:"sourceType,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the PbfListing this
+	// function is sourced from.
+	// +kubebuilder:validation:Required
+	PbfListingId string `json:"pbfListingId"`
+}
+
+// FunctionProvisionedConcurrencyConfig defines nested fields for Function.ProvisionedConcurrencyConfig.
+type FunctionProvisionedConcurrencyConfig struct {
+	// +kubebuilder:validation:Optional
+	Strategy string `json:"strategy,omitempty"`
+	// Configuration specifying a constant amount of provisioned concurrency.
+	// +kubebuilder:validation:Required
+	Count int `json:"count"`
+}
+
+// FunctionTraceConfig defines nested fields for Function.TraceConfig.
+type FunctionTraceConfig struct {
+	// Define if tracing is enabled for the resource.
+	// +kubebuilder:validation:Optional
+	IsEnabled bool `json:"isEnabled,omitempty"`
 }
 
 // FunctionStatus defines the observed state of Function.
 type FunctionStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the function.
+	Id string `json:"id,omitempty"`
+	// The current state of the function.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The OCID of the compartment that contains the function.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The processor shape (`GENERIC_X86`/`GENERIC_ARM`) on which to run functions in the application, extracted from the image manifest.
+	Shape string `json:"shape,omitempty"`
+	// The base https invoke URL to set on a client in order to invoke a function. This URL will never change over the lifetime of the function and can be cached.
+	InvokeEndpoint string `json:"invokeEndpoint,omitempty"`
+	// The time the function was created, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339)
+	// timestamp format.
+	// Example: `2018-09-12T22:47:12.613Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The time the function was updated, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339)
+	// timestamp format.
+	// Example: `2018-09-12T22:47:12.613Z`
+	TimeUpdated string `json:"timeUpdated,omitempty"`
 }
 
 // +kubebuilder:object:root=true

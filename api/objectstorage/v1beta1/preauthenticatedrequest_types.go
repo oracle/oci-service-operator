@@ -14,21 +14,42 @@ import (
 
 // PreauthenticatedRequestSpec defines the desired state of PreauthenticatedRequest.
 type PreauthenticatedRequestSpec struct {
-	Id                  shared.OCID `json:"id,omitempty"`
-	CompartmentId       shared.OCID `json:"compartmentId,omitempty"`
-	Name                string      `json:"name,omitempty"`
-	AccessType          string      `json:"accessType,omitempty"`
-	TimeExpires         string      `json:"timeExpires,omitempty"`
-	BucketListingAction string      `json:"bucketListingAction,omitempty"`
-	ObjectName          string      `json:"objectName,omitempty"`
-	AccessUri           string      `json:"accessUri,omitempty"`
-	TimeCreated         string      `json:"timeCreated,omitempty"`
-	FullPath            string      `json:"fullPath,omitempty"`
+	// A user-specified name for the pre-authenticated request. Names can be helpful in managing pre-authenticated requests.
+	// Avoid entering confidential information.
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+	// The operation that can be performed on this resource.
+	// +kubebuilder:validation:Required
+	AccessType string `json:"accessType"`
+	// The expiration date for the pre-authenticated request as per RFC 3339 (https://tools.ietf.org/html/rfc3339).
+	// After this date the pre-authenticated request will no longer be valid.
+	// +kubebuilder:validation:Required
+	TimeExpires string `json:"timeExpires"`
+	// Specifies whether a list operation is allowed on a PAR with accessType "AnyObjectRead" or "AnyObjectReadWrite".
+	// Deny: Prevents the user from performing a list operation.
+	// ListObjects: Authorizes the user to perform a list operation.
+	// +kubebuilder:validation:Optional
+	BucketListingAction string `json:"bucketListingAction,omitempty"`
+	// The name of the object that is being granted access to by the pre-authenticated request. Avoid entering confidential
+	// information. The object name can be null and if so, the pre-authenticated request grants access to the entire bucket
+	// if the access type allows that. The object name can be a prefix as well, in that case pre-authenticated request
+	// grants access to all the objects within the bucket starting with that prefix provided that we have the correct access type.
+	// +kubebuilder:validation:Optional
+	ObjectName string `json:"objectName,omitempty"`
 }
 
 // PreauthenticatedRequestStatus defines the observed state of PreauthenticatedRequest.
 type PreauthenticatedRequestStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The unique identifier to use when directly addressing the pre-authenticated request.
+	Id string `json:"id,omitempty"`
+	// The URI to embed in the URL when using the pre-authenticated request.
+	AccessUri string `json:"accessUri,omitempty"`
+	// The date when the pre-authenticated request was created as per specification
+	// RFC 3339 (https://tools.ietf.org/html/rfc3339).
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The full Path for the object.
+	FullPath string `json:"fullPath,omitempty"`
 }
 
 // +kubebuilder:object:root=true

@@ -51,35 +51,18 @@ spec:
             type: object
           spec:
             description: BackendSetHealthSpec defines the desired state of BackendSetHealth.
-            properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              criticalStateBackendNames:
-                items:
-                  type: string
-                type: array
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
-              status:
-                type: string
-              totalBackendCount:
-                type: integer
-              unknownStateBackendNames:
-                items:
-                  type: string
-                type: array
-              warningStateBackendNames:
-                items:
-                  type: string
-                type: array
             type: object
           status:
             description: BackendSetHealthStatus defines the observed state of BackendSetHealth.
             properties:
+              criticalStateBackendNames:
+                description: |-
+                  A list of backend servers that are currently in the `CRITICAL` health state. The list identifies each backend server by
+                  IP address and port.
+                  Example: `10.0.0.4:8080`
+                items:
+                  type: string
+                type: array
               status:
                 properties:
                   conditions:
@@ -122,6 +105,27 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              totalBackendCount:
+                description: |-
+                  The total number of backend servers in this backend set.
+                  Example: `7`
+                type: integer
+              unknownStateBackendNames:
+                description: |-
+                  A list of backend servers that are currently in the `UNKNOWN` health state. The list identifies each backend server by
+                  IP address and port.
+                  Example: `10.0.0.5:8080`
+                items:
+                  type: string
+                type: array
+              warningStateBackendNames:
+                description: |-
+                  A list of backend servers that are currently in the `WARNING` health state. The list identifies each backend server by
+                  IP address or OCID and port.
+                  Example: `10.0.0.3:8080` or `ocid1.privateip..oc1.<var>&lt;unique_ID&gt;</var>:8080`
+                items:
+                  type: string
+                type: array
             required:
             - status
             type: object

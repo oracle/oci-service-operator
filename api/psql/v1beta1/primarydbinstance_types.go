@@ -14,8 +14,6 @@ import (
 
 // PrimaryDbInstanceSpec defines the desired state of PrimaryDbInstance.
 type PrimaryDbInstanceSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // PrimaryDbInstanceStatus defines the observed state of PrimaryDbInstance.

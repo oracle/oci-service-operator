@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- bases/artifacts.oracle.com_containerconfigurations.yaml
+- bases/artifacts.oracle.com_containerimages.yaml
+- bases/artifacts.oracle.com_containerimagesignatures.yaml
+- bases/artifacts.oracle.com_containerrepositories.yaml
+- bases/artifacts.oracle.com_genericartifactbypaths.yaml
+- bases/artifacts.oracle.com_genericartifacts.yaml
+- bases/artifacts.oracle.com_repositories.yaml

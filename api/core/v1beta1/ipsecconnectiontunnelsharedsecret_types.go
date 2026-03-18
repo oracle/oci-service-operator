@@ -14,8 +14,10 @@ import (
 
 // IPSecConnectionTunnelSharedSecretSpec defines the desired state of IPSecConnectionTunnelSharedSecret.
 type IPSecConnectionTunnelSharedSecretSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
+	// The shared secret (pre-shared key) to use for the tunnel. Only numbers, letters, and spaces
+	// are allowed.
+	// +kubebuilder:validation:Optional
+	SharedSecret string `json:"sharedSecret,omitempty"`
 }
 
 // IPSecConnectionTunnelSharedSecretStatus defines the observed state of IPSecConnectionTunnelSharedSecret.

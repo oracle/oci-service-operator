@@ -14,8 +14,6 @@ import (
 
 // ComputeCapacityTopologyComputeNetworkBlockSpec defines the desired state of ComputeCapacityTopologyComputeNetworkBlock.
 type ComputeCapacityTopologyComputeNetworkBlockSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // ComputeCapacityTopologyComputeNetworkBlockStatus defines the observed state of ComputeCapacityTopologyComputeNetworkBlock.

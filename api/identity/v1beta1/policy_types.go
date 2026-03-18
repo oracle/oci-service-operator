@@ -14,21 +14,51 @@ import (
 
 // PolicySpec defines the desired state of Policy.
 type PolicySpec struct {
-	Id             shared.OCID       `json:"id,omitempty"`
-	CompartmentId  shared.OCID       `json:"compartmentId,omitempty"`
-	Name           string            `json:"name,omitempty"`
-	Statements     []string          `json:"statements,omitempty"`
-	Description    string            `json:"description,omitempty"`
-	VersionDate    string            `json:"versionDate,omitempty"`
-	FreeformTags   map[string]string `json:"freeformTags,omitempty"`
-	TimeCreated    string            `json:"timeCreated,omitempty"`
-	LifecycleState string            `json:"lifecycleState,omitempty"`
-	InactiveStatus int64             `json:"inactiveStatus,omitempty"`
+	// The OCID of the compartment containing the policy (either the tenancy or another compartment).
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// The name you assign to the policy during creation. The name must be unique across all policies
+	// in the tenancy and cannot be changed.
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+	// An array of policy statements written in the policy language. See
+	// How Policies Work (https://docs.cloud.oracle.com/Content/Identity/policieshow/how-policies-work.htm) and
+	// Common Policies (https://docs.cloud.oracle.com/Content/Identity/policiescommon/commonpolicies.htm).
+	// +kubebuilder:validation:Required
+	Statements []string `json:"statements"`
+	// The description you assign to the policy during creation. Does not have to be unique, and it's changeable.
+	// +kubebuilder:validation:Required
+	Description string `json:"description"`
+	// The version of the policy. If null or set to an empty string, when a request comes in for authorization, the
+	// policy will be evaluated according to the current behavior of the services at that moment. If set to a particular
+	// date (YYYY-MM-DD), the policy will be evaluated according to the behavior of the services on that date.
+	// +kubebuilder:validation:Optional
+	VersionDate string `json:"versionDate,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 }
 
 // PolicyStatus defines the observed state of Policy.
 type PolicyStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the policy.
+	Id string `json:"id,omitempty"`
+	// Date and time the policy was created, in the format defined by RFC3339.
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The policy's current state. After creating a policy, make sure its `lifecycleState` changes from CREATING to
+	// ACTIVE before using it.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The detailed status of INACTIVE lifecycleState.
+	InactiveStatus int64 `json:"inactiveStatus,omitempty"`
 }
 
 // +kubebuilder:object:root=true

@@ -14,18 +14,26 @@ import (
 
 // BackendSetHealthSpec defines the desired state of BackendSetHealth.
 type BackendSetHealthSpec struct {
-	Id                        shared.OCID `json:"id,omitempty"`
-	CompartmentId             shared.OCID `json:"compartmentId,omitempty"`
-	Status                    string      `json:"status,omitempty"`
-	WarningStateBackendNames  []string    `json:"warningStateBackendNames,omitempty"`
-	CriticalStateBackendNames []string    `json:"criticalStateBackendNames,omitempty"`
-	UnknownStateBackendNames  []string    `json:"unknownStateBackendNames,omitempty"`
-	TotalBackendCount         int         `json:"totalBackendCount,omitempty"`
 }
 
 // BackendSetHealthStatus defines the observed state of BackendSetHealth.
 type BackendSetHealthStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// A list of backend servers that are currently in the `WARNING` health state. The list identifies each backend server by
+	// IP address or OCID and port.
+	// Example: `10.0.0.3:8080` or `ocid1.privateip..oc1.<var>&lt;unique_ID&gt;</var>:8080`
+	WarningStateBackendNames []string `json:"warningStateBackendNames,omitempty"`
+	// A list of backend servers that are currently in the `CRITICAL` health state. The list identifies each backend server by
+	// IP address and port.
+	// Example: `10.0.0.4:8080`
+	CriticalStateBackendNames []string `json:"criticalStateBackendNames,omitempty"`
+	// A list of backend servers that are currently in the `UNKNOWN` health state. The list identifies each backend server by
+	// IP address and port.
+	// Example: `10.0.0.5:8080`
+	UnknownStateBackendNames []string `json:"unknownStateBackendNames,omitempty"`
+	// The total number of backend servers in this backend set.
+	// Example: `7`
+	TotalBackendCount int `json:"totalBackendCount,omitempty"`
 }
 
 // +kubebuilder:object:root=true

@@ -14,21 +14,97 @@ import (
 
 // RuleSpec defines the desired state of Rule.
 type RuleSpec struct {
-	Id               shared.OCID       `json:"id,omitempty"`
-	CompartmentId    shared.OCID       `json:"compartmentId,omitempty"`
-	DisplayName      string            `json:"displayName,omitempty"`
-	IsEnabled        bool              `json:"isEnabled,omitempty"`
-	Condition        string            `json:"condition,omitempty"`
-	Description      string            `json:"description,omitempty"`
-	FreeformTags     map[string]string `json:"freeformTags,omitempty"`
-	LifecycleState   string            `json:"lifecycleState,omitempty"`
-	TimeCreated      string            `json:"timeCreated,omitempty"`
-	LifecycleMessage string            `json:"lifecycleMessage,omitempty"`
+	// A string that describes the rule. It does not have to be unique, and you can change it. Avoid entering
+	// confidential information.
+	// +kubebuilder:validation:Required
+	DisplayName string `json:"displayName"`
+	// Whether or not this rule is currently enabled.
+	// Example: `true`
+	// +kubebuilder:validation:Required
+	IsEnabled bool `json:"isEnabled"`
+	// A filter that specifies the event that will trigger actions associated with this rule. A few
+	// important things to remember about filters:
+	// * Fields not mentioned in the condition are ignored. You can create a valid filter that matches
+	// all events with two curly brackets: `{}`
+	//   For more examples, see
+	// Matching Events with Filters (https://docs.cloud.oracle.com/iaas/Content/Events/Concepts/filterevents.htm).
+	// * For a condition with fields to match an event, the event must contain all the field names
+	// listed in the condition. Field names must appear in the condition with the same nesting
+	// structure used in the event.
+	//   For a list of reference events, see
+	// Services that Produce Events (https://docs.cloud.oracle.com/iaas/Content/Events/Reference/eventsproducers.htm).
+	// * Rules apply to events in the compartment in which you create them and any child compartments.
+	// This means that a condition specified by a rule only matches events emitted from resources in
+	// the compartment or any of its child compartments.
+	// * Wildcard matching is supported with the asterisk (*) character.
+	//   For examples of wildcard matching, see
+	// Matching Events with Filters (https://docs.cloud.oracle.com/iaas/Content/Events/Concepts/filterevents.htm)
+	// Example: `\"eventType\": \"com.oraclecloud.databaseservice.autonomous.database.backup.end\"`
+	// +kubebuilder:validation:Required
+	Condition string `json:"condition"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment to which this rule belongs.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// +kubebuilder:validation:Required
+	Actions RuleActions `json:"actions"`
+	// A string that describes the details of the rule. It does not have to be unique, and you can change it. Avoid entering
+	// confidential information.
+	// +kubebuilder:validation:Optional
+	Description string `json:"description,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. Exists for cross-compatibility only.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+}
+
+// RuleActionsAction defines nested fields for Rule.Actions.Action.
+type RuleActionsAction struct {
+	// A string that describes the details of the action. It does not have to be unique, and you can change it. Avoid entering
+	// confidential information.
+	// +kubebuilder:validation:Optional
+	Description string `json:"description,omitempty"`
+	// Whether or not this action is currently enabled.
+	// Example: `true`
+	// +kubebuilder:validation:Required
+	IsEnabled bool `json:"isEnabled"`
+	// +kubebuilder:validation:Optional
+	ActionType string `json:"actionType,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the stream to which messages are delivered.
+	// +kubebuilder:validation:Required
+	StreamId string `json:"streamId"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of a Function hosted by Oracle Functions Service.
+	// +kubebuilder:validation:Optional
+	FunctionId string `json:"functionId,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the topic to which messages are delivered.
+	// +kubebuilder:validation:Optional
+	TopicId string `json:"topicId,omitempty"`
+}
+
+// RuleActions defines nested fields for Rule.Actions.
+type RuleActions struct {
+	// A list of one or more ActionDetails objects.
+	// +kubebuilder:validation:Required
+	Actions []RuleActionsAction `json:"actions"`
 }
 
 // RuleStatus defines the observed state of Rule.
 type RuleStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The current state of the rule.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of this rule.
+	Id string `json:"id,omitempty"`
+	// The time this rule was created, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339)
+	// timestamp format.
+	// Example: `2018-09-12T22:47:12.613Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// A message generated by the Events service about the current state of this rule.
+	LifecycleMessage string `json:"lifecycleMessage,omitempty"`
 }
 
 // +kubebuilder:object:root=true

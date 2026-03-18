@@ -14,8 +14,6 @@ import (
 
 // AppCatalogListingAgreementSpec defines the desired state of AppCatalogListingAgreement.
 type AppCatalogListingAgreementSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // AppCatalogListingAgreementStatus defines the observed state of AppCatalogListingAgreement.

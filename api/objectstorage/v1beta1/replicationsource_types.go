@@ -14,16 +14,17 @@ import (
 
 // ReplicationSourceSpec defines the desired state of ReplicationSource.
 type ReplicationSourceSpec struct {
-	Id               shared.OCID `json:"id,omitempty"`
-	CompartmentId    shared.OCID `json:"compartmentId,omitempty"`
-	PolicyName       string      `json:"policyName,omitempty"`
-	SourceRegionName string      `json:"sourceRegionName,omitempty"`
-	SourceBucketName string      `json:"sourceBucketName,omitempty"`
 }
 
 // ReplicationSourceStatus defines the observed state of ReplicationSource.
 type ReplicationSourceStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The name of the policy.
+	PolicyName string `json:"policyName,omitempty"`
+	// The source region replicating data from, for example "us-ashburn-1".
+	SourceRegionName string `json:"sourceRegionName,omitempty"`
+	// The source bucket replicating data from.
+	SourceBucketName string `json:"sourceBucketName,omitempty"`
 }
 
 // +kubebuilder:object:root=true

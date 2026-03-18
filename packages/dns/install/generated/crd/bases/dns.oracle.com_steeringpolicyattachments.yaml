@@ -58,37 +58,51 @@ spec:
             description: SteeringPolicyAttachmentSpec defines the desired state of
               SteeringPolicyAttachment.
             properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
               displayName:
+                description: |-
+                  A user-friendly name for the steering policy attachment.
+                  Does not have to be unique and can be changed.
+                  Avoid entering confidential information.
                 type: string
               domainName:
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
-              lifecycleState:
-                type: string
-              rtypes:
-                items:
-                  type: string
-                type: array
-              self:
+                description: The attached domain within the attached zone.
                 type: string
               steeringPolicyId:
-                type: string
-              timeCreated:
+                description: The OCID of the attached steering policy.
                 type: string
               zoneId:
+                description: The OCID of the attached zone.
                 type: string
+            required:
+            - domainName
+            - steeringPolicyId
+            - zoneId
             type: object
           status:
             description: SteeringPolicyAttachmentStatus defines the observed state
               of SteeringPolicyAttachment.
             properties:
+              compartmentId:
+                description: The OCID of the compartment containing the steering policy
+                  attachment.
+                type: string
+              id:
+                description: The OCID of the resource.
+                type: string
+              lifecycleState:
+                description: The current state of the resource.
+                type: string
+              rtypes:
+                description: |-
+                  The record types covered by the attachment at the domain. The set of record types is
+                  determined by aggregating the record types from the answers defined in the steering
+                  policy.
+                items:
+                  type: string
+                type: array
+              self:
+                description: The canonical absolute URL of the resource.
+                type: string
               status:
                 properties:
                   conditions:
@@ -131,6 +145,11 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              timeCreated:
+                description: |-
+                  The date and time the resource was created, expressed in RFC 3339 timestamp format.
+                  **Example:** `2016-07-22T17:23:59:60Z`
+                type: string
             required:
             - status
             type: object

@@ -14,28 +14,73 @@ import (
 
 // VolumeBackupSpec defines the desired state of VolumeBackup.
 type VolumeBackupSpec struct {
-	Id                   shared.OCID       `json:"id,omitempty"`
-	CompartmentId        shared.OCID       `json:"compartmentId,omitempty"`
-	VolumeId             string            `json:"volumeId,omitempty"`
-	KmsKeyId             string            `json:"kmsKeyId,omitempty"`
-	DisplayName          string            `json:"displayName,omitempty"`
-	FreeformTags         map[string]string `json:"freeformTags,omitempty"`
-	Type                 string            `json:"type,omitempty"`
-	LifecycleState       string            `json:"lifecycleState,omitempty"`
-	TimeCreated          string            `json:"timeCreated,omitempty"`
-	ExpirationTime       string            `json:"expirationTime,omitempty"`
-	SizeInGBs            int64             `json:"sizeInGBs,omitempty"`
-	SizeInMBs            int64             `json:"sizeInMBs,omitempty"`
-	SourceType           string            `json:"sourceType,omitempty"`
-	SourceVolumeBackupId string            `json:"sourceVolumeBackupId,omitempty"`
-	TimeRequestReceived  string            `json:"timeRequestReceived,omitempty"`
-	UniqueSizeInGBs      int64             `json:"uniqueSizeInGBs,omitempty"`
-	UniqueSizeInMbs      int64             `json:"uniqueSizeInMbs,omitempty"`
+	// The OCID of the volume that needs to be backed up.
+	// +kubebuilder:validation:Required
+	VolumeId string `json:"volumeId"`
+	// The OCID of the Vault service key which is the master encryption key for the volume backup.
+	// For more information about the Vault service and encryption keys, see
+	// Overview of Vault service (https://docs.cloud.oracle.com/iaas/Content/KeyManagement/Concepts/keyoverview.htm) and
+	// Using Keys (https://docs.cloud.oracle.com/iaas/Content/KeyManagement/Tasks/usingkeys.htm).
+	// +kubebuilder:validation:Optional
+	KmsKeyId string `json:"kmsKeyId,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// The type of backup to create. If omitted, defaults to INCREMENTAL.
+	// +kubebuilder:validation:Optional
+	Type string `json:"type,omitempty"`
 }
 
 // VolumeBackupStatus defines the observed state of VolumeBackup.
 type VolumeBackupStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the compartment that contains the volume backup.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The OCID of the volume backup.
+	Id string `json:"id,omitempty"`
+	// The current state of a volume backup.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The date and time the volume backup was created. This is the time the actual point-in-time image
+	// of the volume data was taken. Format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// System tags for this resource. Each key is predefined and scoped to a namespace.
+	// Example: `{"foo-namespace": {"bar-key": "value"}}`
+	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`
+	// The date and time the volume backup will expire and be automatically deleted.
+	// Format defined by RFC3339 (https://tools.ietf.org/html/rfc3339). This parameter will always be present for backups that
+	// were created automatically by a scheduled-backup policy. For manually created backups,
+	// it will be absent, signifying that there is no expiration time and the backup will
+	// last forever until manually deleted.
+	ExpirationTime string `json:"expirationTime,omitempty"`
+	// The size of the volume, in GBs.
+	SizeInGBs int64 `json:"sizeInGBs,omitempty"`
+	// The size of the volume in MBs. The value must be a multiple of 1024.
+	// This field is deprecated. Please use sizeInGBs.
+	SizeInMBs int64 `json:"sizeInMBs,omitempty"`
+	// Specifies whether the backup was created manually, or via scheduled backup policy.
+	SourceType string `json:"sourceType,omitempty"`
+	// The OCID of the source volume backup.
+	SourceVolumeBackupId string `json:"sourceVolumeBackupId,omitempty"`
+	// The date and time the request to create the volume backup was received. Format defined by [RFC3339]https://tools.ietf.org/html/rfc3339.
+	TimeRequestReceived string `json:"timeRequestReceived,omitempty"`
+	// The size used by the backup, in GBs. It is typically smaller than sizeInGBs, depending on the space
+	// consumed on the volume and whether the backup is full or incremental.
+	UniqueSizeInGBs int64 `json:"uniqueSizeInGBs,omitempty"`
+	// The size used by the backup, in MBs. It is typically smaller than sizeInMBs, depending on the space
+	// consumed on the volume and whether the backup is full or incremental.
+	// This field is deprecated. Please use uniqueSizeInGBs.
+	UniqueSizeInMbs int64 `json:"uniqueSizeInMbs,omitempty"`
 }
 
 // +kubebuilder:object:root=true

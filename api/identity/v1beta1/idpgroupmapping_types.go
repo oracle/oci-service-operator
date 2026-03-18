@@ -14,19 +14,32 @@ import (
 
 // IdpGroupMappingSpec defines the desired state of IdpGroupMapping.
 type IdpGroupMappingSpec struct {
-	Id             shared.OCID `json:"id,omitempty"`
-	CompartmentId  shared.OCID `json:"compartmentId,omitempty"`
-	IdpGroupName   string      `json:"idpGroupName,omitempty"`
-	GroupId        string      `json:"groupId,omitempty"`
-	IdpId          string      `json:"idpId,omitempty"`
-	TimeCreated    string      `json:"timeCreated,omitempty"`
-	LifecycleState string      `json:"lifecycleState,omitempty"`
-	InactiveStatus int64       `json:"inactiveStatus,omitempty"`
+	// The name of the IdP group you want to map.
+	// +kubebuilder:validation:Required
+	IdpGroupName string `json:"idpGroupName"`
+	// The OCID of the IAM Service Group
+	// you want to map to the IdP group.
+	// +kubebuilder:validation:Required
+	GroupId string `json:"groupId"`
 }
 
 // IdpGroupMappingStatus defines the observed state of IdpGroupMapping.
 type IdpGroupMappingStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the `IdpGroupMapping`.
+	Id string `json:"id,omitempty"`
+	// The OCID of the `IdentityProvider` this mapping belongs to.
+	IdpId string `json:"idpId,omitempty"`
+	// The OCID of the tenancy containing the `IdentityProvider`.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// Date and time the mapping was created, in the format defined by RFC3339.
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The mapping's current state.  After creating a mapping object, make sure its `lifecycleState` changes
+	// from CREATING to ACTIVE before using it.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The detailed status of INACTIVE lifecycleState.
+	InactiveStatus int64 `json:"inactiveStatus,omitempty"`
 }
 
 // +kubebuilder:object:root=true

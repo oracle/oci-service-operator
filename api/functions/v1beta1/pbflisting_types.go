@@ -14,24 +14,52 @@ import (
 
 // PbfListingSpec defines the desired state of PbfListing.
 type PbfListingSpec struct {
-	Id             shared.OCID       `json:"id,omitempty"`
-	CompartmentId  shared.OCID       `json:"compartmentId,omitempty"`
-	Name           string            `json:"name,omitempty"`
-	Description    string            `json:"description,omitempty"`
-	TimeCreated    string            `json:"timeCreated,omitempty"`
-	TimeUpdated    string            `json:"timeUpdated,omitempty"`
-	LifecycleState string            `json:"lifecycleState,omitempty"`
-	FreeformTags   map[string]string `json:"freeformTags,omitempty"`
+}
+
+// PbfListingPublisherDetails defines nested fields for PbfListing.PublisherDetails.
+type PbfListingPublisherDetails struct {
+	// Name of the Publisher
+	Name string `json:"name,omitempty"`
+}
+
+// PbfListingTrigger defines nested fields for PbfListing.Trigger.
+type PbfListingTrigger struct {
+	// A brief descriptive name for the PBF trigger.
+	Name string `json:"name,omitempty"`
 }
 
 // PbfListingStatus defines the observed state of PbfListing.
 type PbfListingStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// Unique identifier that is immutable on creation.
+	Id string `json:"id,omitempty"`
+	// A brief descriptive name for the PBF listing. The PBF listing name must be unique, and not match and existing
+	// PBF.
+	Name string `json:"name,omitempty"`
+	// A short overview of the PBF Listing: the purpose of the PBF and and associated information.
+	Description      string                     `json:"description,omitempty"`
+	PublisherDetails PbfListingPublisherDetails `json:"publisherDetails,omitempty"`
+	// The time the PbfListing was created. An RFC3339 formatted datetime string.
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The last time the PbfListing was updated. An RFC3339 formatted datetime string.
+	TimeUpdated string `json:"timeUpdated,omitempty"`
+	// The current state of the PBF resource.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// An array of Trigger. A list of triggers that may activate the PBF.
+	Triggers []PbfListingTrigger `json:"triggers,omitempty"`
+	// Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+	// Example: `{"bar-key": "value"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// Example: `{"foo-namespace": {"bar-key": "value"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// System tags for this resource. Each key is predefined and scoped to a namespace.
+	// Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Name",type="string",JSONPath=".spec.name",priority=1
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.status.conditions[-1].type",description="status of the PbfListing",priority=0
 // +kubebuilder:printcolumn:name="Ocid",type="string",JSONPath=".status.status.ocid",description="Ocid of the PbfListing",priority=1
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0

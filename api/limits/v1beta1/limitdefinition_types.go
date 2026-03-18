@@ -14,13 +14,30 @@ import (
 
 // LimitDefinitionSpec defines the desired state of LimitDefinition.
 type LimitDefinitionSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // LimitDefinitionStatus defines the observed state of LimitDefinition.
 type LimitDefinitionStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The resource limit name. To be used for writing policies (in case of quotas) or other programmatic calls.
+	Name string `json:"name,omitempty"`
+	// The service name of the limit.
+	ServiceName string `json:"serviceName,omitempty"`
+	// The limit description.
+	Description string `json:"description,omitempty"`
+	// Reflects the scope of the resource limit, whether Global (across all regions), regional, or availability domain-specific.
+	ScopeType string `json:"scopeType,omitempty"`
+	// If true, quota policies can be created on top of this resource limit.
+	AreQuotasSupported bool `json:"areQuotasSupported,omitempty"`
+	// Reflects whether or not the GetResourceAvailability API is supported for this limit.
+	// If not, the API returns an empty JSON response.
+	IsResourceAvailabilitySupported bool `json:"isResourceAvailabilitySupported,omitempty"`
+	// Indicates if the limit has been deprecated.
+	IsDeprecated bool `json:"isDeprecated,omitempty"`
+	// Indicates if the customer can request a limit increase for this resource.
+	IsEligibleForLimitIncrease bool `json:"isEligibleForLimitIncrease,omitempty"`
+	// The limit for this resource has a dynamic value that is based on consumption across all OCI services.
+	IsDynamic bool `json:"isDynamic,omitempty"`
 }
 
 // +kubebuilder:object:root=true

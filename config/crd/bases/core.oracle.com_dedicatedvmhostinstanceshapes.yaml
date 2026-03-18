@@ -53,20 +53,18 @@ spec:
           spec:
             description: DedicatedVmHostInstanceShapeSpec defines the desired state
               of DedicatedVmHostInstanceShape.
-            properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
             type: object
           status:
             description: DedicatedVmHostInstanceShapeStatus defines the observed state
               of DedicatedVmHostInstanceShape.
             properties:
+              availabilityDomain:
+                description: The shape's availability domain.
+                type: string
+              instanceShapeName:
+                description: The name of the virtual machine instance shapes that
+                  can be launched on a dedicated VM host.
+                type: string
               status:
                 properties:
                   conditions:

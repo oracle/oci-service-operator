@@ -14,20 +14,21 @@ import (
 
 // VirtualCircuitBandwidthShapeSpec defines the desired state of VirtualCircuitBandwidthShape.
 type VirtualCircuitBandwidthShapeSpec struct {
-	Id              shared.OCID `json:"id,omitempty"`
-	CompartmentId   shared.OCID `json:"compartmentId,omitempty"`
-	Name            string      `json:"name,omitempty"`
-	BandwidthInMbps int         `json:"bandwidthInMbps,omitempty"`
 }
 
 // VirtualCircuitBandwidthShapeStatus defines the observed state of VirtualCircuitBandwidthShape.
 type VirtualCircuitBandwidthShapeStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The name of the bandwidth shape.
+	// Example: `10 Gbps`
+	Name string `json:"name,omitempty"`
+	// The bandwidth in Mbps.
+	// Example: `10000`
+	BandwidthInMbps int `json:"bandwidthInMbps,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Name",type="string",JSONPath=".spec.name",priority=1
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.status.conditions[-1].type",description="status of the VirtualCircuitBandwidthShape",priority=0
 // +kubebuilder:printcolumn:name="Ocid",type="string",JSONPath=".status.status.ocid",description="Ocid of the VirtualCircuitBandwidthShape",priority=1
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0

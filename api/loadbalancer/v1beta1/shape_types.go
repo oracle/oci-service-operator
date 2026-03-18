@@ -14,8 +14,6 @@ import (
 
 // ShapeSpec defines the desired state of Shape.
 type ShapeSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // ShapeStatus defines the observed state of Shape.

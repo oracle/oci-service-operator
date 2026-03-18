@@ -14,20 +14,34 @@ import (
 
 // DbCredentialSpec defines the desired state of DbCredential.
 type DbCredentialSpec struct {
-	Id               shared.OCID `json:"id,omitempty"`
-	CompartmentId    shared.OCID `json:"compartmentId,omitempty"`
-	Password         string      `json:"password,omitempty"`
-	Description      string      `json:"description,omitempty"`
-	UserId           string      `json:"userId,omitempty"`
-	TimeCreated      string      `json:"timeCreated,omitempty"`
-	TimeExpires      string      `json:"timeExpires,omitempty"`
-	LifecycleState   string      `json:"lifecycleState,omitempty"`
-	LifecycleDetails int64       `json:"lifecycleDetails,omitempty"`
+	// The password for the DB credentials during creation.
+	// +kubebuilder:validation:Required
+	Password string `json:"password"`
+	// The description you assign to the DB credentials during creation.
+	// (For tenancies that support identity domains) You can have an empty description.
+	// +kubebuilder:validation:Required
+	Description string `json:"description"`
 }
 
 // DbCredentialStatus defines the observed state of DbCredential.
 type DbCredentialStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the DB credential.
+	Id string `json:"id,omitempty"`
+	// The OCID of the user the DB credential belongs to.
+	UserId string `json:"userId,omitempty"`
+	// Date and time the `DbCredential` object was created, in the format defined by RFC3339.
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// Date and time when this credential will expire, in the format defined by RFC3339.
+	// Null if it never expires.
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeExpires string `json:"timeExpires,omitempty"`
+	// The credential's current state. After creating a DB credential, make sure its `lifecycleState` changes from
+	// CREATING to ACTIVE before using it.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The detailed status of INACTIVE lifecycleState.
+	LifecycleDetails int64 `json:"lifecycleDetails,omitempty"`
 }
 
 // +kubebuilder:object:root=true

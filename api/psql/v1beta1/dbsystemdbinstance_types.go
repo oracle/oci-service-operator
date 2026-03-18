@@ -14,10 +14,12 @@ import (
 
 // DbSystemDbInstanceSpec defines the desired state of DbSystemDbInstance.
 type DbSystemDbInstanceSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
-	DisplayName   string      `json:"displayName,omitempty"`
-	Description   string      `json:"description,omitempty"`
+	// A user-friendly display name of the database instance node. Avoid entering confidential information.
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
+	// A user-provided description of the database instance node.
+	// +kubebuilder:validation:Optional
+	Description string `json:"description,omitempty"`
 }
 
 // DbSystemDbInstanceStatus defines the observed state of DbSystemDbInstance.

@@ -14,11 +14,15 @@ import (
 
 // ObjectStorageTierSpec defines the desired state of ObjectStorageTier.
 type ObjectStorageTierSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
-	ObjectName    string      `json:"objectName,omitempty"`
-	StorageTier   string      `json:"storageTier,omitempty"`
-	VersionId     string      `json:"versionId,omitempty"`
+	// An object for which the storage tier needs to be changed.
+	// +kubebuilder:validation:Required
+	ObjectName string `json:"objectName"`
+	// The storage tier that the object should be moved to.
+	// +kubebuilder:validation:Required
+	StorageTier string `json:"storageTier"`
+	// The versionId of the object. Current object version is used by default.
+	// +kubebuilder:validation:Optional
+	VersionId string `json:"versionId,omitempty"`
 }
 
 // ObjectStorageTierStatus defines the observed state of ObjectStorageTier.

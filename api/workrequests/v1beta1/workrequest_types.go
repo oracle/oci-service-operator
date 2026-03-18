@@ -14,19 +14,44 @@ import (
 
 // WorkRequestSpec defines the desired state of WorkRequest.
 type WorkRequestSpec struct {
-	Id              shared.OCID `json:"id,omitempty"`
-	CompartmentId   shared.OCID `json:"compartmentId,omitempty"`
-	OperationType   string      `json:"operationType,omitempty"`
-	Status          string      `json:"status,omitempty"`
-	PercentComplete float32     `json:"percentComplete,omitempty"`
-	TimeAccepted    string      `json:"timeAccepted,omitempty"`
-	TimeStarted     string      `json:"timeStarted,omitempty"`
-	TimeFinished    string      `json:"timeFinished,omitempty"`
+}
+
+// WorkRequestResource defines nested fields for WorkRequest.Resource.
+type WorkRequestResource struct {
+	// The way in which this resource was affected by the operation that spawned the work
+	// request.
+	ActionType string `json:"actionType,omitempty"`
+	// The resource type the work request affects.
+	EntityType string `json:"entityType,omitempty"`
+	// An OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) or other unique identifier for the
+	// resource.
+	Identifier string `json:"identifier,omitempty"`
+	// The URI path that you can use for a GET request to access the resource metadata.
+	EntityUri string `json:"entityUri,omitempty"`
 }
 
 // WorkRequestStatus defines the observed state of WorkRequest.
 type WorkRequestStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The asynchronous operation tracked by this work request.
+	OperationType string `json:"operationType,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the work request.
+	Id string `json:"id,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment
+	// that contains the work request.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The resources that are affected by this work request.
+	Resources []WorkRequestResource `json:"resources,omitempty"`
+	// The percentage complete of the operation tracked by this work request.
+	PercentComplete float32 `json:"percentComplete,omitempty"`
+	// The date and time the work request was created, in the format defined by RFC3339.
+	TimeAccepted string `json:"timeAccepted,omitempty"`
+	// The date and time the work request transitioned from `ACCEPTED` to `IN_PROGRESS`,
+	// in the format defined by RFC3339.
+	TimeStarted string `json:"timeStarted,omitempty"`
+	// The date and time the work request reached a terminal state, either `FAILED` or `SUCCEEDED`.
+	// Format is defined by RFC3339.
+	TimeFinished string `json:"timeFinished,omitempty"`
 }
 
 // +kubebuilder:object:root=true

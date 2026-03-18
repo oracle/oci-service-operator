@@ -14,20 +14,20 @@ import (
 
 // CrossConnectLocationSpec defines the desired state of CrossConnectLocation.
 type CrossConnectLocationSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
-	Description   string      `json:"description,omitempty"`
-	Name          string      `json:"name,omitempty"`
 }
 
 // CrossConnectLocationStatus defines the observed state of CrossConnectLocation.
 type CrossConnectLocationStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// A description of the location.
+	Description string `json:"description,omitempty"`
+	// The name of the location.
+	// Example: `CyrusOne, Chandler, AZ`
+	Name string `json:"name,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Name",type="string",JSONPath=".spec.name",priority=1
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.status.conditions[-1].type",description="status of the CrossConnectLocation",priority=0
 // +kubebuilder:printcolumn:name="Ocid",type="string",JSONPath=".status.status.ocid",description="Ocid of the CrossConnectLocation",priority=1
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0

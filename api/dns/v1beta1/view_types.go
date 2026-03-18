@@ -14,20 +14,45 @@ import (
 
 // ViewSpec defines the desired state of View.
 type ViewSpec struct {
-	Id             shared.OCID       `json:"id,omitempty"`
-	CompartmentId  shared.OCID       `json:"compartmentId,omitempty"`
-	DisplayName    string            `json:"displayName,omitempty"`
-	FreeformTags   map[string]string `json:"freeformTags,omitempty"`
-	Self           string            `json:"self,omitempty"`
-	TimeCreated    string            `json:"timeCreated,omitempty"`
-	TimeUpdated    string            `json:"timeUpdated,omitempty"`
-	LifecycleState string            `json:"lifecycleState,omitempty"`
-	IsProtected    bool              `json:"isProtected,omitempty"`
+	// The OCID of the owning compartment.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// The display name of the view.
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	//
+	// **Example:** `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	//
+	// **Example:** `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 }
 
 // ViewStatus defines the observed state of View.
 type ViewStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the view.
+	Id string `json:"id,omitempty"`
+	// The canonical absolute URL of the resource.
+	Self string `json:"self,omitempty"`
+	// The date and time the resource was created in "YYYY-MM-ddThh:mm:ssZ" format
+	// with a Z offset, as defined by RFC 3339.
+	// **Example:** `2016-07-22T17:23:59:60Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The date and time the resource was last updated in "YYYY-MM-ddThh:mm:ssZ"
+	// format with a Z offset, as defined by RFC 3339.
+	// **Example:** `2016-07-22T17:23:59:60Z`
+	TimeUpdated string `json:"timeUpdated,omitempty"`
+	// The current state of the resource.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// A Boolean flag indicating whether or not parts of the resource are unable to be explicitly managed.
+	IsProtected bool `json:"isProtected,omitempty"`
 }
 
 // +kubebuilder:object:root=true

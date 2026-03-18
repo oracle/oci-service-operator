@@ -14,20 +14,47 @@ import (
 
 // DrgRouteTableSpec defines the desired state of DrgRouteTable.
 type DrgRouteTableSpec struct {
-	Id                           shared.OCID       `json:"id,omitempty"`
-	CompartmentId                shared.OCID       `json:"compartmentId,omitempty"`
-	DrgId                        string            `json:"drgId,omitempty"`
-	DisplayName                  string            `json:"displayName,omitempty"`
-	FreeformTags                 map[string]string `json:"freeformTags,omitempty"`
-	ImportDrgRouteDistributionId string            `json:"importDrgRouteDistributionId,omitempty"`
-	IsEcmpEnabled                bool              `json:"isEcmpEnabled,omitempty"`
-	TimeCreated                  string            `json:"timeCreated,omitempty"`
-	LifecycleState               string            `json:"lifecycleState,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the DRG the DRG route table belongs to.
+	// +kubebuilder:validation:Required
+	DrgId string `json:"drgId"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the import route distribution used to specify how incoming route advertisements through
+	// referenced attachments are inserted into the DRG route table.
+	// +kubebuilder:validation:Optional
+	ImportDrgRouteDistributionId string `json:"importDrgRouteDistributionId,omitempty"`
+	// If you want traffic to be routed using ECMP across your virtual circuits or IPSec tunnels to
+	// your on-premises networks, enable ECMP on the DRG route table.
+	// +kubebuilder:validation:Optional
+	IsEcmpEnabled bool `json:"isEcmpEnabled,omitempty"`
 }
 
 // DrgRouteTableStatus defines the observed state of DrgRouteTable.
 type DrgRouteTableStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the
+	// DRG route table.
+	Id string `json:"id,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment the DRG is in. The DRG route table
+	// is always in the same compartment as the DRG.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The date and time the DRG route table was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The DRG route table's current state.
+	LifecycleState string `json:"lifecycleState,omitempty"`
 }
 
 // +kubebuilder:object:root=true

@@ -51,21 +51,38 @@ spec:
             type: object
           spec:
             description: BackendHealthSpec defines the desired state of BackendHealth.
-            properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
-              status:
-                type: string
             type: object
           status:
             description: BackendHealthStatus defines the observed state of BackendHealth.
             properties:
+              healthCheckResults:
+                description: A list of the most recent health check results returned
+                  for the specified backend server.
+                items:
+                  description: BackendHealthHealthCheckResult defines nested fields
+                    for BackendHealth.HealthCheckResult.
+                  properties:
+                    healthCheckStatus:
+                      description: The result of the most recent health check.
+                      type: string
+                    sourceIpAddress:
+                      description: |-
+                        The IP address of the health check status report provider. This identifier helps you differentiate same-subnet
+                        load balancers that report health check status.
+                        Example: `10.0.0.7`
+                      type: string
+                    subnetId:
+                      description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                        of the subnet hosting the load balancer that reported this
+                        health check status.
+                      type: string
+                    timestamp:
+                      description: |-
+                        The date and time the data was retrieved, in the format defined by RFC3339.
+                        Example: `2017-06-02T18:28:11+00:00`
+                      type: string
+                  type: object
+                type: array
               status:
                 properties:
                   conditions:

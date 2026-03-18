@@ -14,15 +14,33 @@ import (
 
 // ImageShapeCompatibilityEntrySpec defines the desired state of ImageShapeCompatibilityEntry.
 type ImageShapeCompatibilityEntrySpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
-	ImageId       string      `json:"imageId,omitempty"`
-	Shape         string      `json:"shape,omitempty"`
+}
+
+// ImageShapeCompatibilityEntryMemoryConstraints defines nested fields for ImageShapeCompatibilityEntry.MemoryConstraints.
+type ImageShapeCompatibilityEntryMemoryConstraints struct {
+	// The minimum amount of memory, in gigabytes.
+	MinInGBs int `json:"minInGBs,omitempty"`
+	// The maximum amount of memory, in gigabytes.
+	MaxInGBs int `json:"maxInGBs,omitempty"`
+}
+
+// ImageShapeCompatibilityEntryOcpuConstraints defines nested fields for ImageShapeCompatibilityEntry.OcpuConstraints.
+type ImageShapeCompatibilityEntryOcpuConstraints struct {
+	// The minimum number of OCPUs supported for this image and shape.
+	Min int `json:"min,omitempty"`
+	// The maximum number of OCPUs supported for this image and shape.
+	Max int `json:"max,omitempty"`
 }
 
 // ImageShapeCompatibilityEntryStatus defines the observed state of ImageShapeCompatibilityEntry.
 type ImageShapeCompatibilityEntryStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The image OCID.
+	ImageId string `json:"imageId,omitempty"`
+	// The shape name.
+	Shape             string                                        `json:"shape,omitempty"`
+	MemoryConstraints ImageShapeCompatibilityEntryMemoryConstraints `json:"memoryConstraints,omitempty"`
+	OcpuConstraints   ImageShapeCompatibilityEntryOcpuConstraints   `json:"ocpuConstraints,omitempty"`
 }
 
 // +kubebuilder:object:root=true

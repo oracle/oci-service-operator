@@ -14,9 +14,9 @@ import (
 
 // MessageSpec defines the desired state of Message.
 type MessageSpec struct {
-	Id                  shared.OCID `json:"id,omitempty"`
-	CompartmentId       shared.OCID `json:"compartmentId,omitempty"`
-	VisibilityInSeconds int         `json:"visibilityInSeconds,omitempty"`
+	// The new visibility of the message relative to the current time (as-per the clock of the server receiving the request).
+	// +kubebuilder:validation:Required
+	VisibilityInSeconds int `json:"visibilityInSeconds"`
 }
 
 // MessageStatus defines the observed state of Message.

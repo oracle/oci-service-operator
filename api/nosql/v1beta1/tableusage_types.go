@@ -14,13 +14,32 @@ import (
 
 // TableUsageSpec defines the desired state of TableUsage.
 type TableUsageSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // TableUsageStatus defines the observed state of TableUsage.
 type TableUsageStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The length of the sampling period.
+	SecondsInPeriod int `json:"secondsInPeriod,omitempty"`
+	// Read throughput during the sampling period.
+	ReadUnits int `json:"readUnits,omitempty"`
+	// Write throughput during the sampling period.
+	WriteUnits int `json:"writeUnits,omitempty"`
+	// The size of the table, in GB.
+	StorageInGBs int `json:"storageInGBs,omitempty"`
+	// The number of times reads were throttled due to exceeding
+	// the read throughput limit.
+	ReadThrottleCount int `json:"readThrottleCount,omitempty"`
+	// The number of times writes were throttled due to exceeding
+	// the write throughput limit.
+	WriteThrottleCount int `json:"writeThrottleCount,omitempty"`
+	// The number of times writes were throttled because the table
+	// exceeded its size limit.
+	StorageThrottleCount int `json:"storageThrottleCount,omitempty"`
+	// The percentage of allowed per-shard usage for the table shard with the highest usage.
+	MaxShardSizeUsageInPercent int `json:"maxShardSizeUsageInPercent,omitempty"`
+	// The time stamp of this usage record.
+	TimeStarted string `json:"timeStarted,omitempty"`
 }
 
 // +kubebuilder:object:root=true

@@ -15,10 +15,6 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - jsonPath: .spec.name
-      name: Name
-      priority: 1
-      type: string
     - description: status of the Service
       jsonPath: .status.status.conditions[-1].type
       name: Status
@@ -55,25 +51,35 @@ spec:
             type: object
           spec:
             description: ServiceSpec defines the desired state of Service.
-            properties:
-              cidrBlock:
-                type: string
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              description:
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
-              name:
-                type: string
             type: object
           status:
             description: ServiceStatus defines the observed state of Service.
             properties:
+              cidrBlock:
+                description: |-
+                  A string that represents the regional public IP address ranges for the Oracle service or
+                  services covered by this `Service` object. Also known as the `Service` object's *service
+                  CIDR label*.
+                  When you set up a route rule to route traffic to the service gateway, use this value as the
+                  rule's destination. See RouteTable. Also, when you set up
+                  a security list rule to cover traffic with the service gateway, use the `cidrBlock` value
+                  as the rule's destination (for an egress rule) or the source (for an ingress rule).
+                  See SecurityList.
+                  Example: `oci-phx-objectstorage`
+                type: string
+              description:
+                description: |-
+                  Description of the Oracle service or services covered by this `Service` object.
+                  Example: `OCI PHX Object Storage`
+                type: string
+              id:
+                description: The `Service` object's OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm).
+                type: string
+              name:
+                description: |-
+                  Name of the `Service` object. This name can change and is not guaranteed to be unique.
+                  Example: `OCI PHX Object Storage`
+                type: string
               status:
                 properties:
                   conditions:

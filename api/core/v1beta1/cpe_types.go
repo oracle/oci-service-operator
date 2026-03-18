@@ -14,19 +14,52 @@ import (
 
 // CpeSpec defines the desired state of Cpe.
 type CpeSpec struct {
-	Id               shared.OCID       `json:"id,omitempty"`
-	CompartmentId    shared.OCID       `json:"compartmentId,omitempty"`
-	IpAddress        string            `json:"ipAddress,omitempty"`
-	DisplayName      string            `json:"displayName,omitempty"`
-	FreeformTags     map[string]string `json:"freeformTags,omitempty"`
-	CpeDeviceShapeId string            `json:"cpeDeviceShapeId,omitempty"`
-	IsPrivate        bool              `json:"isPrivate,omitempty"`
-	TimeCreated      string            `json:"timeCreated,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment to contain the CPE.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// The public IP address of the on-premises router.
+	// Example: `203.0.113.2`
+	// +kubebuilder:validation:Required
+	IpAddress string `json:"ipAddress"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the CPE device type. You can provide
+	// a value if you want to later generate CPE device configuration content for IPSec connections
+	// that use this CPE. You can also call UpdateCpe later to
+	// provide a value. For a list of possible values, see
+	// ListCpeDeviceShapes.
+	// For more information about generating CPE device configuration content, see:
+	//   * GetCpeDeviceConfigContent
+	//   * GetIpsecCpeDeviceConfigContent
+	//   * GetTunnelCpeDeviceConfigContent
+	//   * GetTunnelCpeDeviceConfig
+	// +kubebuilder:validation:Optional
+	CpeDeviceShapeId string `json:"cpeDeviceShapeId,omitempty"`
+	// Indicates whether this CPE is of type `private` or not.
+	// +kubebuilder:validation:Optional
+	IsPrivate bool `json:"isPrivate,omitempty"`
 }
 
 // CpeStatus defines the observed state of Cpe.
 type CpeStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The CPE's Oracle ID (OCID).
+	Id string `json:"id,omitempty"`
+	// The date and time the CPE was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
 }
 
 // +kubebuilder:object:root=true

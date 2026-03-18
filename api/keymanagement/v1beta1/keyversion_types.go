@@ -14,23 +14,56 @@ import (
 
 // KeyVersionSpec defines the desired state of KeyVersion.
 type KeyVersionSpec struct {
-	Id                       shared.OCID `json:"id,omitempty"`
-	CompartmentId            shared.OCID `json:"compartmentId,omitempty"`
-	KeyId                    string      `json:"keyId,omitempty"`
-	TimeCreated              string      `json:"timeCreated,omitempty"`
-	VaultId                  string      `json:"vaultId,omitempty"`
-	PublicKey                string      `json:"publicKey,omitempty"`
-	LifecycleState           string      `json:"lifecycleState,omitempty"`
-	Origin                   string      `json:"origin,omitempty"`
-	TimeOfDeletion           string      `json:"timeOfDeletion,omitempty"`
-	RestoredFromKeyVersionId string      `json:"restoredFromKeyVersionId,omitempty"`
-	IsPrimary                bool        `json:"isPrimary,omitempty"`
-	IsAutoRotated            bool        `json:"isAutoRotated,omitempty"`
+}
+
+// KeyVersionReplicaDetails defines nested fields for KeyVersion.ReplicaDetails.
+type KeyVersionReplicaDetails struct {
+	// ReplicationId associated with a key version operation
+	ReplicationId string `json:"replicationId,omitempty"`
+}
+
+// KeyVersionExternalKeyReferenceDetails defines nested fields for KeyVersion.ExternalKeyReferenceDetails.
+type KeyVersionExternalKeyReferenceDetails struct {
+	// ExternalKeyId refers to the globally unique key Id associated with the key created in external vault in CTM.
+	ExternalKeyId string `json:"externalKeyId,omitempty"`
+	// Key version ID associated with the external key.
+	ExternalKeyVersionId string `json:"externalKeyVersionId,omitempty"`
 }
 
 // KeyVersionStatus defines the observed state of KeyVersion.
 type KeyVersionStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the compartment that contains this key version.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The OCID of the key version.
+	Id string `json:"id,omitempty"`
+	// The OCID of the key associated with this key version.
+	KeyId string `json:"keyId,omitempty"`
+	// The date and time this key version was created, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: "2018-04-03T21:10:29.600Z"
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The OCID of the vault that contains this key version.
+	VaultId string `json:"vaultId,omitempty"`
+	// The public key in PEM format. (This value pertains only to RSA and ECDSA keys.)
+	PublicKey string `json:"publicKey,omitempty"`
+	// The key version's current lifecycle state.
+	// Example: `ENABLED`
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The source of the key material. When this value is `INTERNAL`, Key Management
+	// created the key material. When this value is `EXTERNAL`, the key material
+	// was imported from an external source.
+	Origin string `json:"origin,omitempty"`
+	// An optional property indicating when to delete the key version, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2019-04-03T21:10:29.600Z`
+	TimeOfDeletion string `json:"timeOfDeletion,omitempty"`
+	// The OCID of the key version from which this key version was restored.
+	RestoredFromKeyVersionId string                   `json:"restoredFromKeyVersionId,omitempty"`
+	ReplicaDetails           KeyVersionReplicaDetails `json:"replicaDetails,omitempty"`
+	// A Boolean value that indicates whether the KeyVersion belongs to primary Vault or replica Vault.
+	IsPrimary                   bool                                  `json:"isPrimary,omitempty"`
+	ExternalKeyReferenceDetails KeyVersionExternalKeyReferenceDetails `json:"externalKeyReferenceDetails,omitempty"`
+	// A Boolean Value indicating whether this keyversion is generated from auto rotation of key
+	IsAutoRotated bool `json:"isAutoRotated,omitempty"`
 }
 
 // +kubebuilder:object:root=true

@@ -14,24 +14,70 @@ import (
 
 // ByoipRangeSpec defines the desired state of ByoipRange.
 type ByoipRangeSpec struct {
-	Id               shared.OCID       `json:"id,omitempty"`
-	CompartmentId    shared.OCID       `json:"compartmentId,omitempty"`
-	CidrBlock        string            `json:"cidrBlock,omitempty"`
-	Ipv6CidrBlock    string            `json:"ipv6CidrBlock,omitempty"`
-	DisplayName      string            `json:"displayName,omitempty"`
-	FreeformTags     map[string]string `json:"freeformTags,omitempty"`
-	LifecycleState   string            `json:"lifecycleState,omitempty"`
-	TimeCreated      string            `json:"timeCreated,omitempty"`
-	ValidationToken  string            `json:"validationToken,omitempty"`
-	LifecycleDetails string            `json:"lifecycleDetails,omitempty"`
-	TimeValidated    string            `json:"timeValidated,omitempty"`
-	TimeAdvertised   string            `json:"timeAdvertised,omitempty"`
-	TimeWithdrawn    string            `json:"timeWithdrawn,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the BYOIP CIDR block.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// The BYOIP CIDR block. You can assign some or all of it to a public IP pool after it is validated.
+	// Example: `10.0.1.0/24`
+	// +kubebuilder:validation:Optional
+	CidrBlock string `json:"cidrBlock,omitempty"`
+	// The BYOIPv6 prefix. You can assign some or all of it to a VCN after it is validated.
+	// +kubebuilder:validation:Optional
+	Ipv6CidrBlock string `json:"ipv6CidrBlock,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+}
+
+// ByoipRangeVcnIpv6Allocation defines nested fields for ByoipRange.ByoipRangeVcnIpv6Allocation.
+type ByoipRangeVcnIpv6Allocation struct {
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the `ByoipRange` resource to which the CIDR block belongs.
+	ByoipRangeId string `json:"byoipRangeId,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the `ByoipRange`.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The BYOIPv6 prefix range or subrange allocated to a VCN. This could be all or part of a BYOIPv6 prefix.
+	// Each VCN allocation must be /64 or larger.
+	Ipv6CidrBlock string `json:"ipv6CidrBlock,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the `Vcn` resource to which the ByoipRange belongs.
+	VcnId string `json:"vcnId,omitempty"`
 }
 
 // ByoipRangeStatus defines the observed state of ByoipRange.
 type ByoipRangeStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the `ByoipRange` resource.
+	Id string `json:"id,omitempty"`
+	// The `ByoipRange` resource's current state.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The date and time the `ByoipRange` resource was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The validation token is an internally-generated ASCII string used in the validation process. See Importing a CIDR block (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/BYOIP.htm#import_cidr) for details.
+	ValidationToken string `json:"validationToken,omitempty"`
+	// A list of `ByoipRangeVcnIpv6AllocationSummary` objects.
+	ByoipRangeVcnIpv6Allocations []ByoipRangeVcnIpv6Allocation `json:"byoipRangeVcnIpv6Allocations,omitempty"`
+	// The `ByoipRange` resource's current status.
+	LifecycleDetails string `json:"lifecycleDetails,omitempty"`
+	// The date and time the `ByoipRange` resource was validated, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeValidated string `json:"timeValidated,omitempty"`
+	// The date and time the `ByoipRange` resource was advertised to the internet by BGP, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeAdvertised string `json:"timeAdvertised,omitempty"`
+	// The date and time the `ByoipRange` resource was withdrawn from advertisement by BGP to the internet, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeWithdrawn string `json:"timeWithdrawn,omitempty"`
 }
 
 // +kubebuilder:object:root=true

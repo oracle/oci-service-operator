@@ -14,13 +14,15 @@ import (
 
 // PreCoUserCredentialSpec defines the desired state of PreCoUserCredential.
 type PreCoUserCredentialSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // PreCoUserCredentialStatus defines the observed state of PreCoUserCredential.
 type PreCoUserCredentialStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The pre crypto officer username..
+	Username string `json:"username,omitempty"`
+	// The base 64 encoded pre crypto officer password.
+	Password string `json:"password,omitempty"`
 }
 
 // +kubebuilder:object:root=true

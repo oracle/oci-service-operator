@@ -14,26 +14,69 @@ import (
 
 // ContainerRepositorySpec defines the desired state of ContainerRepository.
 type ContainerRepositorySpec struct {
-	Id                shared.OCID       `json:"id,omitempty"`
-	CompartmentId     shared.OCID       `json:"compartmentId,omitempty"`
-	DisplayName       string            `json:"displayName,omitempty"`
-	IsImmutable       bool              `json:"isImmutable,omitempty"`
-	IsPublic          bool              `json:"isPublic,omitempty"`
-	FreeformTags      map[string]string `json:"freeformTags,omitempty"`
-	CreatedBy         string            `json:"createdBy,omitempty"`
-	ImageCount        int               `json:"imageCount,omitempty"`
-	LayerCount        int               `json:"layerCount,omitempty"`
-	LayersSizeInBytes int64             `json:"layersSizeInBytes,omitempty"`
-	LifecycleState    string            `json:"lifecycleState,omitempty"`
-	TimeCreated       string            `json:"timeCreated,omitempty"`
-	BillableSizeInGBs int64             `json:"billableSizeInGBs,omitempty"`
-	Namespace         string            `json:"namespace,omitempty"`
-	TimeLastPushed    string            `json:"timeLastPushed,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment in which to create the resource.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// The container repository name.
+	// +kubebuilder:validation:Required
+	DisplayName string `json:"displayName"`
+	// Whether the repository is immutable. Images cannot be overwritten in an immutable repository.
+	// +kubebuilder:validation:Optional
+	IsImmutable bool `json:"isImmutable,omitempty"`
+	// Whether the repository is public. A public repository allows unauthenticated access.
+	// +kubebuilder:validation:Optional
+	IsPublic bool `json:"isPublic,omitempty"`
+	// +kubebuilder:validation:Optional
+	Readme ContainerRepositoryReadme `json:"readme,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+}
+
+// ContainerRepositoryReadme defines nested fields for ContainerRepository.Readme.
+type ContainerRepositoryReadme struct {
+	// Readme content. Avoid entering confidential information.
+	// +kubebuilder:validation:Required
+	Content string `json:"content"`
+	// Readme format. Supported formats are text/plain and text/markdown.
+	// +kubebuilder:validation:Required
+	Format string `json:"format"`
 }
 
 // ContainerRepositoryStatus defines the observed state of ContainerRepository.
 type ContainerRepositoryStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The id of the user or principal that created the resource.
+	CreatedBy string `json:"createdBy,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the container repository.
+	// Example: `ocid1.containerrepo.oc1..exampleuniqueID`
+	Id string `json:"id,omitempty"`
+	// Total number of images.
+	ImageCount int `json:"imageCount,omitempty"`
+	// Total number of layers.
+	LayerCount int `json:"layerCount,omitempty"`
+	// Total storage in bytes consumed by layers.
+	LayersSizeInBytes int64 `json:"layersSizeInBytes,omitempty"`
+	// The current state of the container repository.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// An RFC 3339 timestamp indicating when the repository was created.
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// Total storage size in GBs that will be charged.
+	BillableSizeInGBs int64 `json:"billableSizeInGBs,omitempty"`
+	// The tenancy namespace used in the container repository path.
+	Namespace string `json:"namespace,omitempty"`
+	// The system tags for this resource. Each key is predefined and scoped to a namespace.
+	// Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`
+	// An RFC 3339 timestamp indicating when an image was last pushed to the repository.
+	TimeLastPushed string `json:"timeLastPushed,omitempty"`
 }
 
 // +kubebuilder:object:root=true

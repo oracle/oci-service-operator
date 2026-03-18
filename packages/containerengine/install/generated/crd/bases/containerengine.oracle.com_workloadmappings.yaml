@@ -52,34 +52,49 @@ spec:
           spec:
             description: WorkloadMappingSpec defines the desired state of WorkloadMapping.
             properties:
-              clusterId:
-                type: string
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
               freeformTags:
                 additionalProperties:
                   type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
                 type: object
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
-              lifecycleState:
-                type: string
               mappedCompartmentId:
-                type: string
-              mappedTenancyId:
+                description: The OCID of the mapped customer compartment.
                 type: string
               namespace:
+                description: The namespace of the workloadMapping.
                 type: string
-              timeCreated:
-                type: string
+            required:
+            - mappedCompartmentId
+            - namespace
             type: object
           status:
             description: WorkloadMappingStatus defines the observed state of WorkloadMapping.
             properties:
+              clusterId:
+                description: The OCID of the cluster.
+                type: string
+              id:
+                description: The ocid of the workloadMapping.
+                type: string
+              lifecycleState:
+                description: The state of the workloadMapping.
+                type: string
+              mappedTenancyId:
+                description: The OCID of the mapped customer tenancy.
+                type: string
               status:
                 properties:
                   conditions:
@@ -122,6 +137,9 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              timeCreated:
+                description: The time the cluster was created.
+                type: string
             required:
             - status
             type: object

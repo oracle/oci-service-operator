@@ -14,31 +14,52 @@ import (
 
 // VirtualNodeSpec defines the desired state of VirtualNode.
 type VirtualNodeSpec struct {
-	Id                 shared.OCID       `json:"id,omitempty"`
-	CompartmentId      shared.OCID       `json:"compartmentId,omitempty"`
-	DisplayName        string            `json:"displayName,omitempty"`
-	VirtualNodePoolId  string            `json:"virtualNodePoolId,omitempty"`
-	KubernetesVersion  string            `json:"kubernetesVersion,omitempty"`
-	AvailabilityDomain string            `json:"availabilityDomain,omitempty"`
-	FaultDomain        string            `json:"faultDomain,omitempty"`
-	SubnetId           string            `json:"subnetId,omitempty"`
-	NsgIds             []string          `json:"nsgIds,omitempty"`
-	PrivateIp          string            `json:"privateIp,omitempty"`
-	VirtualNodeError   string            `json:"virtualNodeError,omitempty"`
-	LifecycleState     string            `json:"lifecycleState,omitempty"`
-	LifecycleDetails   string            `json:"lifecycleDetails,omitempty"`
-	TimeCreated        string            `json:"timeCreated,omitempty"`
-	FreeformTags       map[string]string `json:"freeformTags,omitempty"`
 }
 
 // VirtualNodeStatus defines the observed state of VirtualNode.
 type VirtualNodeStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The ocid of the virtual node.
+	Id string `json:"id,omitempty"`
+	// The name of the virtual node.
+	DisplayName string `json:"displayName,omitempty"`
+	// The ocid of the virtual node pool this virtual node belongs to.
+	VirtualNodePoolId string `json:"virtualNodePoolId,omitempty"`
+	// The version of Kubernetes this virtual node is running.
+	KubernetesVersion string `json:"kubernetesVersion,omitempty"`
+	// The name of the availability domain in which this virtual node is placed
+	AvailabilityDomain string `json:"availabilityDomain,omitempty"`
+	// The fault domain of this virtual node.
+	FaultDomain string `json:"faultDomain,omitempty"`
+	// The OCID of the subnet in which this Virtual Node is placed.
+	SubnetId string `json:"subnetId,omitempty"`
+	// NSG Ids applied to virtual node vnic.
+	NsgIds []string `json:"nsgIds,omitempty"`
+	// The private IP address of this Virtual Node.
+	PrivateIp string `json:"privateIp,omitempty"`
+	// An error that may be associated with the virtual node.
+	VirtualNodeError string `json:"virtualNodeError,omitempty"`
+	// The state of the Virtual Node.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// Details about the state of the Virtual Node.
+	LifecycleDetails string `json:"lifecycleDetails,omitempty"`
+	// The time at which the virtual node was created.
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// Usage of system tag keys. These predefined keys are scoped to namespaces.
+	// Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="DisplayName",type="string",JSONPath=".spec.displayName",priority=1
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.status.conditions[-1].type",description="status of the VirtualNode",priority=0
 // +kubebuilder:printcolumn:name="Ocid",type="string",JSONPath=".status.status.ocid",description="Ocid of the VirtualNode",priority=1
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0

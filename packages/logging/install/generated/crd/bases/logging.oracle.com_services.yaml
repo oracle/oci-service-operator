@@ -51,19 +51,67 @@ spec:
             type: object
           spec:
             description: ServiceSpec defines the desired state of Service.
-            properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
             type: object
           status:
             description: ServiceStatus defines the observed state of Service.
             properties:
+              endpoint:
+                description: Service endpoint.
+                type: string
+              id:
+                description: Service ID.
+                type: string
+              name:
+                description: User-friendly service name.
+                type: string
+              namespace:
+                description: Apollo project namespace, if any.
+                type: string
+              resourceTypes:
+                description: Type of resource that a service provides.
+                items:
+                  description: ServiceResourceType defines nested fields for Service.ResourceType.
+                  properties:
+                    categories:
+                      description: Categories for resources.
+                      items:
+                        description: ServiceResourceTypeCategory defines nested fields
+                          for Service.ResourceType.Category.
+                        properties:
+                          displayName:
+                            description: Category display name. Avoid entering confidential
+                              information.
+                            type: string
+                          name:
+                            description: Category name.
+                            type: string
+                          parameters:
+                            description: Parameters the category supports.
+                            items:
+                              description: ServiceResourceTypeCategoryParameter defines
+                                nested fields for Service.ResourceType.Category.Parameter.
+                              properties:
+                                name:
+                                  description: Parameter name.
+                                  type: string
+                                pattern:
+                                  description: Java regex pattern to validate a parameter
+                                    value.
+                                  type: string
+                                type:
+                                  type: string
+                              type: object
+                            type: array
+                        type: object
+                      type: array
+                    name:
+                      description: Resource type name.
+                      type: string
+                  type: object
+                type: array
+              servicePrincipalName:
+                description: Service ID as set in Service Principal.
+                type: string
               status:
                 properties:
                   conditions:
@@ -106,6 +154,9 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              tenantId:
+                description: Tenant OCID.
+                type: string
             required:
             - status
             type: object

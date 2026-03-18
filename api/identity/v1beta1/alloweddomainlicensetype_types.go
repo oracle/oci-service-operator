@@ -14,13 +14,19 @@ import (
 
 // AllowedDomainLicenseTypeSpec defines the desired state of AllowedDomainLicenseType.
 type AllowedDomainLicenseTypeSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // AllowedDomainLicenseTypeStatus defines the observed state of AllowedDomainLicenseType.
 type AllowedDomainLicenseTypeStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The license type name.
+	// Example: "Oracle Apps Premium"
+	Name string `json:"name,omitempty"`
+	// The license type identifier.
+	// Example: "oracle-apps-premium"
+	LicenseType string `json:"licenseType,omitempty"`
+	// The license type description.
+	Description string `json:"description,omitempty"`
 }
 
 // +kubebuilder:object:root=true

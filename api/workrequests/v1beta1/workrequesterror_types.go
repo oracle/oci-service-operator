@@ -14,16 +14,17 @@ import (
 
 // WorkRequestErrorSpec defines the desired state of WorkRequestError.
 type WorkRequestErrorSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
-	Code          string      `json:"code,omitempty"`
-	Message       string      `json:"message,omitempty"`
-	Timestamp     string      `json:"timestamp,omitempty"`
 }
 
 // WorkRequestErrorStatus defines the observed state of WorkRequestError.
 type WorkRequestErrorStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// A machine-usable code for the error that occured.
+	Code string `json:"code,omitempty"`
+	// A human-readable error string.
+	Message string `json:"message,omitempty"`
+	// The date and time the error occurred.
+	Timestamp string `json:"timestamp,omitempty"`
 }
 
 // +kubebuilder:object:root=true

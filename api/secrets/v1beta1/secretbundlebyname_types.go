@@ -14,8 +14,6 @@ import (
 
 // SecretBundleByNameSpec defines the desired state of SecretBundleByName.
 type SecretBundleByNameSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // SecretBundleByNameStatus defines the observed state of SecretBundleByName.

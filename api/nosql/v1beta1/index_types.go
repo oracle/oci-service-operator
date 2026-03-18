@@ -14,19 +14,53 @@ import (
 
 // IndexSpec defines the desired state of Index.
 type IndexSpec struct {
-	Id               shared.OCID `json:"id,omitempty"`
-	CompartmentId    shared.OCID `json:"compartmentId,omitempty"`
-	Name             string      `json:"name,omitempty"`
-	IsIfNotExists    bool        `json:"isIfNotExists,omitempty"`
-	TableName        string      `json:"tableName,omitempty"`
-	TableId          string      `json:"tableId,omitempty"`
-	LifecycleState   string      `json:"lifecycleState,omitempty"`
-	LifecycleDetails string      `json:"lifecycleDetails,omitempty"`
+	// Index name.
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+	// A set of keys for a secondary index.
+	// +kubebuilder:validation:Required
+	Keys []IndexKey `json:"keys"`
+	// The OCID of the table's compartment.  Required
+	// if the tableNameOrId path parameter is a table name.
+	// Optional if tableNameOrId is an OCID.  If tableNameOrId
+	// is an OCID, and compartmentId is supplied, the latter
+	// must match the identified table's compartmentId.
+	// +kubebuilder:validation:Optional
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// If true, the operation completes successfully even when the
+	// index exists.  Otherwise, an attempt to create an index
+	// that already exists will return an error.
+	// +kubebuilder:validation:Optional
+	IsIfNotExists bool `json:"isIfNotExists,omitempty"`
+}
+
+// IndexKey defines nested fields for Index.Key.
+type IndexKey struct {
+	// The name of a column to be included as an index key.
+	// +kubebuilder:validation:Required
+	ColumnName string `json:"columnName"`
+	// If the specified column is of type JSON, jsonPath contains
+	// a dotted path indicating the field within the JSON object
+	// that will be the index key.
+	// +kubebuilder:validation:Optional
+	JsonPath string `json:"jsonPath,omitempty"`
+	// If the specified column is of type JSON, jsonFieldType contains
+	// the type of the field indicated by jsonPath.
+	// +kubebuilder:validation:Optional
+	JsonFieldType string `json:"jsonFieldType,omitempty"`
 }
 
 // IndexStatus defines the observed state of Index.
 type IndexStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The name of the table to which this index belongs.
+	TableName string `json:"tableName,omitempty"`
+	// the OCID of the table to which this index belongs.
+	TableId string `json:"tableId,omitempty"`
+	// The state of an index.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// A message describing the current state in more detail.
+	LifecycleDetails string `json:"lifecycleDetails,omitempty"`
 }
 
 // +kubebuilder:object:root=true

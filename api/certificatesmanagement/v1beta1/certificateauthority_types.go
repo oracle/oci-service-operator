@@ -14,25 +14,310 @@ import (
 
 // CertificateAuthoritySpec defines the desired state of CertificateAuthority.
 type CertificateAuthoritySpec struct {
-	Id                           shared.OCID       `json:"id,omitempty"`
-	CompartmentId                shared.OCID       `json:"compartmentId,omitempty"`
-	Name                         string            `json:"name,omitempty"`
-	KmsKeyId                     string            `json:"kmsKeyId,omitempty"`
-	Description                  string            `json:"description,omitempty"`
-	FreeformTags                 map[string]string `json:"freeformTags,omitempty"`
-	CurrentVersionNumber         int64             `json:"currentVersionNumber,omitempty"`
-	TimeCreated                  string            `json:"timeCreated,omitempty"`
-	LifecycleState               string            `json:"lifecycleState,omitempty"`
-	ConfigType                   string            `json:"configType,omitempty"`
-	IssuerCertificateAuthorityId string            `json:"issuerCertificateAuthorityId,omitempty"`
-	TimeOfDeletion               string            `json:"timeOfDeletion,omitempty"`
-	LifecycleDetails             string            `json:"lifecycleDetails,omitempty"`
-	SigningAlgorithm             string            `json:"signingAlgorithm,omitempty"`
+	// A user-friendly name for the CA. Names are unique within a compartment. Avoid entering confidential information. Valid characters include uppercase or lowercase letters, numbers, hyphens, underscores, and periods.
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+	// The compartment in which you want to create the CA.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// +kubebuilder:validation:Required
+	CertificateAuthorityConfig CertificateAuthorityConfig `json:"certificateAuthorityConfig"`
+	// The OCID of the Oracle Cloud Infrastructure Vault key used to encrypt the CA.
+	// +kubebuilder:validation:Required
+	KmsKeyId string `json:"kmsKeyId"`
+	// A brief description of the CA.
+	// +kubebuilder:validation:Optional
+	Description string `json:"description,omitempty"`
+	// A list of rules that control how the CA is used and managed.
+	// +kubebuilder:validation:Optional
+	CertificateAuthorityRules []CertificateAuthorityRule `json:"certificateAuthorityRules,omitempty"`
+	// +kubebuilder:validation:Optional
+	CertificateRevocationListDetails CertificateAuthorityCertificateRevocationListDetails `json:"certificateRevocationListDetails,omitempty"`
+	// Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+	// Example: `{"bar-key": "value"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Usage of predefined tag keys. These predefined keys are scoped to namespaces.
+	// Example: `{"foo-namespace": {"bar-key": "value"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// Makes this version the current version. This property cannot be updated in combination with any other properties.
+	// +kubebuilder:validation:Optional
+	CurrentVersionNumber int64 `json:"currentVersionNumber,omitempty"`
+}
+
+// CertificateAuthorityConfigSubject defines nested fields for CertificateAuthority.CertificateAuthorityConfig.Subject.
+type CertificateAuthorityConfigSubject struct {
+	// Common name or fully-qualified domain name (RDN CN).
+	// +kubebuilder:validation:Required
+	CommonName string `json:"commonName"`
+	// Country name (RDN C).
+	// +kubebuilder:validation:Optional
+	Country string `json:"country,omitempty"`
+	// Domain component (RDN DC).
+	// +kubebuilder:validation:Optional
+	DomainComponent string `json:"domainComponent,omitempty"`
+	// Distinguished name qualifier(RDN DNQ).
+	// +kubebuilder:validation:Optional
+	DistinguishedNameQualifier string `json:"distinguishedNameQualifier,omitempty"`
+	// Personal generational qualifier (for example, Sr., Jr. 3rd, or IV).
+	// +kubebuilder:validation:Optional
+	GenerationQualifier string `json:"generationQualifier,omitempty"`
+	// Personal given name (RDN G or GN).
+	// +kubebuilder:validation:Optional
+	GivenName string `json:"givenName,omitempty"`
+	// Personal initials.
+	// +kubebuilder:validation:Optional
+	Initials string `json:"initials,omitempty"`
+	// Locality (RDN L).
+	// +kubebuilder:validation:Optional
+	LocalityName string `json:"localityName,omitempty"`
+	// Organization (RDN O).
+	// +kubebuilder:validation:Optional
+	Organization string `json:"organization,omitempty"`
+	// Organizational unit (RDN OU).
+	// +kubebuilder:validation:Optional
+	OrganizationalUnit string `json:"organizationalUnit,omitempty"`
+	// Subject pseudonym.
+	// +kubebuilder:validation:Optional
+	Pseudonym string `json:"pseudonym,omitempty"`
+	// Unique subject identifier, which is not the same as the certificate serial number (RDN SERIALNUMBER).
+	// +kubebuilder:validation:Optional
+	SerialNumber string `json:"serialNumber,omitempty"`
+	// State or province name (RDN ST or S).
+	// +kubebuilder:validation:Optional
+	StateOrProvinceName string `json:"stateOrProvinceName,omitempty"`
+	// Street address (RDN STREET).
+	// +kubebuilder:validation:Optional
+	Street string `json:"street,omitempty"`
+	// Personal surname (RDN SN).
+	// +kubebuilder:validation:Optional
+	Surname string `json:"surname,omitempty"`
+	// Title (RDN T or TITLE).
+	// +kubebuilder:validation:Optional
+	Title string `json:"title,omitempty"`
+	// User ID (RDN UID).
+	// +kubebuilder:validation:Optional
+	UserId string `json:"userId,omitempty"`
+}
+
+// CertificateAuthorityConfigValidity defines nested fields for CertificateAuthority.CertificateAuthorityConfig.Validity.
+type CertificateAuthorityConfigValidity struct {
+	// The date on which the certificate validity period ends, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2019-04-03T21:10:29.600Z`
+	// +kubebuilder:validation:Required
+	TimeOfValidityNotAfter string `json:"timeOfValidityNotAfter"`
+	// The date on which the certificate validity period begins, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2019-04-03T21:10:29.600Z`
+	// +kubebuilder:validation:Optional
+	TimeOfValidityNotBefore string `json:"timeOfValidityNotBefore,omitempty"`
+}
+
+// CertificateAuthorityConfig defines nested fields for CertificateAuthority.CertificateAuthorityConfig.
+type CertificateAuthorityConfig struct {
+	// The name of the CA version. When the value is not null, a name is unique across versions of a given CA.
+	// +kubebuilder:validation:Optional
+	VersionName string `json:"versionName,omitempty"`
+	// +kubebuilder:validation:Optional
+	ConfigType string `json:"configType,omitempty"`
+	// +kubebuilder:validation:Required
+	Subject CertificateAuthorityConfigSubject `json:"subject"`
+	// +kubebuilder:validation:Optional
+	Validity CertificateAuthorityConfigValidity `json:"validity,omitempty"`
+	// The algorithm used to sign public key certificates that the CA issues.
+	// +kubebuilder:validation:Optional
+	SigningAlgorithm string `json:"signingAlgorithm,omitempty"`
+	// The OCID of the private CA.
+	// +kubebuilder:validation:Required
+	IssuerCertificateAuthorityId string `json:"issuerCertificateAuthorityId"`
+}
+
+// CertificateAuthorityRule defines nested fields for CertificateAuthority.CertificateAuthorityRule.
+type CertificateAuthorityRule struct {
+	// +kubebuilder:validation:Optional
+	RuleType string `json:"ruleType,omitempty"`
+	// A property indicating the maximum validity duration, in days, of leaf certificates issued by this CA.
+	// Expressed in ISO 8601 (https://en.wikipedia.org/wiki/ISO_8601#Time_intervals) format.
+	// +kubebuilder:validation:Optional
+	LeafCertificateMaxValidityDuration string `json:"leafCertificateMaxValidityDuration,omitempty"`
+	// A property indicating the maximum validity duration, in days, of subordinate CA's issued by this CA.
+	// Expressed in ISO 8601 (https://en.wikipedia.org/wiki/ISO_8601#Time_intervals) format.
+	// +kubebuilder:validation:Optional
+	CertificateAuthorityMaxValidityDuration string `json:"certificateAuthorityMaxValidityDuration,omitempty"`
+}
+
+// CertificateAuthorityCertificateRevocationListDetailsObjectStorageConfig defines nested fields for CertificateAuthority.CertificateRevocationListDetails.ObjectStorageConfig.
+type CertificateAuthorityCertificateRevocationListDetailsObjectStorageConfig struct {
+	// The name of the bucket where the CRL is stored.
+	// +kubebuilder:validation:Required
+	ObjectStorageBucketName string `json:"objectStorageBucketName"`
+	// The object name in the bucket where the CRL is stored, expressed using a format where the version number of the issuing CA is inserted as part of the Object Storage object name wherever you include a pair of curly braces. This versioning scheme helps avoid collisions when new CA versions are created. For example, myCrlFileIssuedFromCAVersion{}.crl becomes myCrlFileIssuedFromCAVersion2.crl for CA version 2.
+	// +kubebuilder:validation:Required
+	ObjectStorageObjectNameFormat string `json:"objectStorageObjectNameFormat"`
+	// The tenancy of the bucket where the CRL is stored.
+	// +kubebuilder:validation:Optional
+	ObjectStorageNamespace string `json:"objectStorageNamespace,omitempty"`
+}
+
+// CertificateAuthorityCertificateRevocationListDetails defines nested fields for CertificateAuthority.CertificateRevocationListDetails.
+type CertificateAuthorityCertificateRevocationListDetails struct {
+	// +kubebuilder:validation:Required
+	ObjectStorageConfig CertificateAuthorityCertificateRevocationListDetailsObjectStorageConfig `json:"objectStorageConfig"`
+	// Optional CRL access points, expressed using a format where the version number of the issuing CA is inserted wherever you include a pair of curly braces. This versioning scheme helps avoid collisions when new CA versions are created. For example, myCrlFileIssuedFromCAVersion{}.crl becomes myCrlFileIssuedFromCAVersion2.crl for CA version 2.
+	// +kubebuilder:validation:Optional
+	CustomFormattedUrls []string `json:"customFormattedUrls,omitempty"`
+}
+
+// CertificateAuthorityCurrentVersionValidity defines nested fields for CertificateAuthority.CurrentVersion.Validity.
+type CertificateAuthorityCurrentVersionValidity struct {
+	// The date on which the certificate validity period ends, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2019-04-03T21:10:29.600Z`
+	TimeOfValidityNotAfter string `json:"timeOfValidityNotAfter,omitempty"`
+	// The date on which the certificate validity period begins, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2019-04-03T21:10:29.600Z`
+	TimeOfValidityNotBefore string `json:"timeOfValidityNotBefore,omitempty"`
+}
+
+// CertificateAuthorityCurrentVersionRevocationStatus defines nested fields for CertificateAuthority.CurrentVersion.RevocationStatus.
+type CertificateAuthorityCurrentVersionRevocationStatus struct {
+	// The time when the entity was revoked, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2019-04-03T21:10:29.600Z`
+	TimeOfRevocation string `json:"timeOfRevocation,omitempty"`
+	// The reason the certificate or certificate authority (CA) was revoked.
+	RevocationReason string `json:"revocationReason,omitempty"`
+}
+
+// CertificateAuthorityCurrentVersion defines nested fields for CertificateAuthority.CurrentVersion.
+type CertificateAuthorityCurrentVersion struct {
+	// The OCID of the CA.
+	CertificateAuthorityId string `json:"certificateAuthorityId,omitempty"`
+	// A optional property indicating when the CA version was created, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2019-04-03T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The version number of the CA.
+	VersionNumber int64 `json:"versionNumber,omitempty"`
+	// A list of rotation states for this CA version.
+	Stages []string `json:"stages,omitempty"`
+	// The version number of the issuing CA.
+	IssuerCaVersionNumber int64 `json:"issuerCaVersionNumber,omitempty"`
+	// A unique certificate identifier used in certificate revocation tracking, formatted as octets.
+	// Example: `03 AC FC FA CC B3 CB 02 B8 F8 DE F5 85 E7 7B FF`
+	SerialNumber string `json:"serialNumber,omitempty"`
+	// The name of the CA version. When this value is not null, the name is unique across CA versions for a given CA.
+	VersionName string `json:"versionName,omitempty"`
+	// An optional property indicating when to delete the CA version, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2019-04-03T21:10:29.600Z`
+	TimeOfDeletion   string                                             `json:"timeOfDeletion,omitempty"`
+	Validity         CertificateAuthorityCurrentVersionValidity         `json:"validity,omitempty"`
+	RevocationStatus CertificateAuthorityCurrentVersionRevocationStatus `json:"revocationStatus,omitempty"`
+}
+
+// CertificateAuthoritySubject defines nested fields for CertificateAuthority.Subject.
+type CertificateAuthoritySubject struct {
+	// Common name or fully-qualified domain name (RDN CN).
+	CommonName string `json:"commonName,omitempty"`
+	// Country name (RDN C).
+	Country string `json:"country,omitempty"`
+	// Domain component (RDN DC).
+	DomainComponent string `json:"domainComponent,omitempty"`
+	// Distinguished name qualifier(RDN DNQ).
+	DistinguishedNameQualifier string `json:"distinguishedNameQualifier,omitempty"`
+	// Personal generational qualifier (for example, Sr., Jr. 3rd, or IV).
+	GenerationQualifier string `json:"generationQualifier,omitempty"`
+	// Personal given name (RDN G or GN).
+	GivenName string `json:"givenName,omitempty"`
+	// Personal initials.
+	Initials string `json:"initials,omitempty"`
+	// Locality (RDN L).
+	LocalityName string `json:"localityName,omitempty"`
+	// Organization (RDN O).
+	Organization string `json:"organization,omitempty"`
+	// Organizational unit (RDN OU).
+	OrganizationalUnit string `json:"organizationalUnit,omitempty"`
+	// Subject pseudonym.
+	Pseudonym string `json:"pseudonym,omitempty"`
+	// Unique subject identifier, which is not the same as the certificate serial number (RDN SERIALNUMBER).
+	SerialNumber string `json:"serialNumber,omitempty"`
+	// State or province name (RDN ST or S).
+	StateOrProvinceName string `json:"stateOrProvinceName,omitempty"`
+	// Street address (RDN STREET).
+	Street string `json:"street,omitempty"`
+	// Personal surname (RDN SN).
+	Surname string `json:"surname,omitempty"`
+	// Title (RDN T or TITLE).
+	Title string `json:"title,omitempty"`
+	// User ID (RDN UID).
+	UserId string `json:"userId,omitempty"`
+}
+
+// CertificateAuthorityCurrentVersionSummaryValidity defines nested fields for CertificateAuthority.CurrentVersionSummary.Validity.
+type CertificateAuthorityCurrentVersionSummaryValidity struct {
+	// The date on which the certificate validity period ends, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2019-04-03T21:10:29.600Z`
+	TimeOfValidityNotAfter string `json:"timeOfValidityNotAfter,omitempty"`
+	// The date on which the certificate validity period begins, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2019-04-03T21:10:29.600Z`
+	TimeOfValidityNotBefore string `json:"timeOfValidityNotBefore,omitempty"`
+}
+
+// CertificateAuthorityCurrentVersionSummaryRevocationStatus defines nested fields for CertificateAuthority.CurrentVersionSummary.RevocationStatus.
+type CertificateAuthorityCurrentVersionSummaryRevocationStatus struct {
+	// The time when the entity was revoked, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2019-04-03T21:10:29.600Z`
+	TimeOfRevocation string `json:"timeOfRevocation,omitempty"`
+	// The reason the certificate or certificate authority (CA) was revoked.
+	RevocationReason string `json:"revocationReason,omitempty"`
+}
+
+// CertificateAuthorityCurrentVersionSummary defines nested fields for CertificateAuthority.CurrentVersionSummary.
+type CertificateAuthorityCurrentVersionSummary struct {
+	// The OCID of the CA.
+	CertificateAuthorityId string `json:"certificateAuthorityId,omitempty"`
+	// A optional property indicating when the CA version was created, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2019-04-03T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The version number of the CA.
+	VersionNumber int64 `json:"versionNumber,omitempty"`
+	// A list of rotation states for this CA version.
+	Stages []string `json:"stages,omitempty"`
+	// The version number of the issuing CA.
+	IssuerCaVersionNumber int64 `json:"issuerCaVersionNumber,omitempty"`
+	// A unique certificate identifier used in certificate revocation tracking, formatted as octets.
+	// Example: `03 AC FC FA CC B3 CB 02 B8 F8 DE F5 85 E7 7B FF`
+	SerialNumber string `json:"serialNumber,omitempty"`
+	// The name of the CA version. When this value is not null, the name is unique across CA versions for a given CA.
+	VersionName string `json:"versionName,omitempty"`
+	// An optional property indicating when to delete the CA version, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2019-04-03T21:10:29.600Z`
+	TimeOfDeletion   string                                                    `json:"timeOfDeletion,omitempty"`
+	Validity         CertificateAuthorityCurrentVersionSummaryValidity         `json:"validity,omitempty"`
+	RevocationStatus CertificateAuthorityCurrentVersionSummaryRevocationStatus `json:"revocationStatus,omitempty"`
 }
 
 // CertificateAuthorityStatus defines the observed state of CertificateAuthority.
 type CertificateAuthorityStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the CA.
+	Id string `json:"id,omitempty"`
+	// A property indicating when the CA was created, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2019-04-03T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The current lifecycle state of the certificate authority.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The origin of the CA.
+	ConfigType string `json:"configType,omitempty"`
+	// The OCID of the parent CA that issued this CA. If this is the root CA, then this value is null.
+	IssuerCertificateAuthorityId string `json:"issuerCertificateAuthorityId,omitempty"`
+	// An optional property indicating when to delete the CA version, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2019-04-03T21:10:29.600Z`
+	TimeOfDeletion string `json:"timeOfDeletion,omitempty"`
+	// Additional information about the current CA lifecycle state.
+	LifecycleDetails string                             `json:"lifecycleDetails,omitempty"`
+	CurrentVersion   CertificateAuthorityCurrentVersion `json:"currentVersion,omitempty"`
+	Subject          CertificateAuthoritySubject        `json:"subject,omitempty"`
+	// The algorithm used to sign public key certificates that the CA issues.
+	SigningAlgorithm      string                                    `json:"signingAlgorithm,omitempty"`
+	CurrentVersionSummary CertificateAuthorityCurrentVersionSummary `json:"currentVersionSummary,omitempty"`
 }
 
 // +kubebuilder:object:root=true

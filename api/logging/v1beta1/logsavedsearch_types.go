@@ -14,20 +14,42 @@ import (
 
 // LogSavedSearchSpec defines the desired state of LogSavedSearch.
 type LogSavedSearchSpec struct {
-	Id               shared.OCID       `json:"id,omitempty"`
-	CompartmentId    shared.OCID       `json:"compartmentId,omitempty"`
-	Name             string            `json:"name,omitempty"`
-	Query            string            `json:"query,omitempty"`
-	Description      string            `json:"description,omitempty"`
-	FreeformTags     map[string]string `json:"freeformTags,omitempty"`
-	TimeCreated      string            `json:"timeCreated,omitempty"`
-	TimeLastModified string            `json:"timeLastModified,omitempty"`
-	LifecycleState   string            `json:"lifecycleState,omitempty"`
+	// The OCID of the compartment that the resource belongs to.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// The user-friendly display name. This must be unique within the enclosing resource,
+	// and it's changeable. Avoid entering confidential information.
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+	// The search query that is saved.
+	// +kubebuilder:validation:Required
+	Query string `json:"query"`
+	// Description for this resource.
+	// +kubebuilder:validation:Optional
+	Description string `json:"description,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 }
 
 // LogSavedSearchStatus defines the observed state of LogSavedSearch.
 type LogSavedSearchStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the resource.
+	Id string `json:"id,omitempty"`
+	// Time the resource was created.
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// Time the resource was last modified.
+	TimeLastModified string `json:"timeLastModified,omitempty"`
+	// The state of the LogSavedSearch
+	LifecycleState string `json:"lifecycleState,omitempty"`
 }
 
 // +kubebuilder:object:root=true

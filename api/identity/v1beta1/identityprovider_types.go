@@ -14,17 +14,73 @@ import (
 
 // IdentityProviderSpec defines the desired state of IdentityProvider.
 type IdentityProviderSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// The OCID of your tenancy.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// The name you assign to the `IdentityProvider` during creation.
+	// The name must be unique across all `IdentityProvider` objects in the
+	// tenancy and cannot be changed.
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+	// The description you assign to the `IdentityProvider` during creation.
+	// Does not have to be unique, and it's changeable.
+	// +kubebuilder:validation:Required
+	Description string `json:"description"`
+	// The identity provider service or product.
+	// Supported identity providers are Oracle Identity Cloud Service (IDCS) and Microsoft
+	// Active Directory Federation Services (ADFS).
+	// Example: `IDCS`
+	// +kubebuilder:validation:Required
+	ProductType string `json:"productType"`
+	// +kubebuilder:validation:Optional
+	Protocol string `json:"protocol,omitempty"`
+	// The URL for retrieving the identity provider's metadata,
+	// which contains information required for federating.
+	// +kubebuilder:validation:Required
+	MetadataUrl string `json:"metadataUrl"`
+	// The XML that contains the information required for federating.
+	// +kubebuilder:validation:Required
+	Metadata string `json:"metadata"`
+	// Extra name value pairs associated with this identity provider.
+	// Example: `{"clientId": "app_sf3kdjf3"}`
+	// +kubebuilder:validation:Optional
+	FreeformAttributes map[string]string `json:"freeformAttributes,omitempty"`
 }
 
 // IdentityProviderStatus defines the observed state of IdentityProvider.
 type IdentityProviderStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The detailed status of INACTIVE lifecycleState.
+	InactiveStatus int64 `json:"inactiveStatus,omitempty"`
+	// The OCID of the `IdentityProvider`.
+	Id string `json:"id,omitempty"`
+	// Date and time the `IdentityProvider` was created, in the format defined by RFC3339.
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The current state. After creating an `IdentityProvider`, make sure its
+	// `lifecycleState` changes from CREATING to ACTIVE before using it.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The identity provider's signing certificate used by the IAM Service
+	// to validate the SAML2 token.
+	SigningCertificate string `json:"signingCertificate,omitempty"`
+	// The URL to redirect federated users to for authentication with the
+	// identity provider.
+	RedirectUrl string `json:"redirectUrl,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Name",type="string",JSONPath=".spec.name",priority=1
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.status.conditions[-1].type",description="status of the IdentityProvider",priority=0
 // +kubebuilder:printcolumn:name="Ocid",type="string",JSONPath=".status.status.ocid",description="Ocid of the IdentityProvider",priority=1
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0

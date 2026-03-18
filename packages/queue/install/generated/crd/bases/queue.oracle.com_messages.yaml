@@ -52,16 +52,12 @@ spec:
           spec:
             description: MessageSpec defines the desired state of Message.
             properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
               visibilityInSeconds:
+                description: The new visibility of the message relative to the current
+                  time (as-per the clock of the server receiving the request).
                 type: integer
+            required:
+            - visibilityInSeconds
             type: object
           status:
             description: MessageStatus defines the observed state of Message.

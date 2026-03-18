@@ -14,18 +14,28 @@ import (
 
 // NetworkLoadBalancerHealthSpec defines the desired state of NetworkLoadBalancerHealth.
 type NetworkLoadBalancerHealthSpec struct {
-	Id                           shared.OCID `json:"id,omitempty"`
-	CompartmentId                shared.OCID `json:"compartmentId,omitempty"`
-	Status                       string      `json:"status,omitempty"`
-	WarningStateBackendSetNames  []string    `json:"warningStateBackendSetNames,omitempty"`
-	CriticalStateBackendSetNames []string    `json:"criticalStateBackendSetNames,omitempty"`
-	UnknownStateBackendSetNames  []string    `json:"unknownStateBackendSetNames,omitempty"`
-	TotalBackendSetCount         int         `json:"totalBackendSetCount,omitempty"`
 }
 
 // NetworkLoadBalancerHealthStatus defines the observed state of NetworkLoadBalancerHealth.
 type NetworkLoadBalancerHealthStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// A list of backend sets that are currently in the `WARNING` health state. The list identifies each backend set by the
+	// user-friendly name you assigned when you created the backend set.
+	// Example: `example_backend_set3`
+	WarningStateBackendSetNames []string `json:"warningStateBackendSetNames,omitempty"`
+	// A list of backend sets that are currently in the `CRITICAL` health state. The list identifies each backend set by the
+	// user-friendly name you assigned when you created the backend set.
+	// Example: `example_backend_set`
+	CriticalStateBackendSetNames []string `json:"criticalStateBackendSetNames,omitempty"`
+	// A list of backend sets that are currently in the `UNKNOWN` health state. The list identifies each backend set by the
+	// user-friendly name you assigned when you created the backend set.
+	// Example: `example_backend_set2`
+	UnknownStateBackendSetNames []string `json:"unknownStateBackendSetNames,omitempty"`
+	// The total number of backend sets associated with this network load balancer.
+	// Example: `4`
+	TotalBackendSetCount int `json:"totalBackendSetCount,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the network load balancer with which the health status is associated.
+	NetworkLoadBalancerId string `json:"networkLoadBalancerId,omitempty"`
 }
 
 // +kubebuilder:object:root=true

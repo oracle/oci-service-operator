@@ -14,20 +14,21 @@ import (
 
 // CaBundleSpec defines the desired state of CaBundle.
 type CaBundleSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
-	Name          string      `json:"name,omitempty"`
-	CaBundlePem   string      `json:"caBundlePem,omitempty"`
 }
 
 // CaBundleStatus defines the observed state of CaBundle.
 type CaBundleStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the CA bundle.
+	Id string `json:"id,omitempty"`
+	// A user-friendly name for the CA bundle. Names are unique within a compartment. Valid characters include uppercase or lowercase letters, numbers, hyphens, underscores, and periods.
+	Name string `json:"name,omitempty"`
+	// Certificates (in PEM format) in the CA bundle. Can be of arbitrary length.
+	CaBundlePem string `json:"caBundlePem,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Name",type="string",JSONPath=".spec.name",priority=1
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.status.conditions[-1].type",description="status of the CaBundle",priority=0
 // +kubebuilder:printcolumn:name="Ocid",type="string",JSONPath=".status.status.ocid",description="Ocid of the CaBundle",priority=1
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0

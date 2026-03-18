@@ -14,20 +14,34 @@ import (
 
 // SwiftPasswordSpec defines the desired state of SwiftPassword.
 type SwiftPasswordSpec struct {
-	Id             shared.OCID `json:"id,omitempty"`
-	CompartmentId  shared.OCID `json:"compartmentId,omitempty"`
-	Description    string      `json:"description,omitempty"`
-	Password       string      `json:"password,omitempty"`
-	UserId         string      `json:"userId,omitempty"`
-	TimeCreated    string      `json:"timeCreated,omitempty"`
-	ExpiresOn      string      `json:"expiresOn,omitempty"`
-	LifecycleState string      `json:"lifecycleState,omitempty"`
-	InactiveStatus int64       `json:"inactiveStatus,omitempty"`
+	// The description you assign to the Swift password during creation. Does not have to be unique, and it's changeable.
+	// (For tenancies that support identity domains) You can have an empty description.
+	// +kubebuilder:validation:Required
+	Description string `json:"description"`
 }
 
 // SwiftPasswordStatus defines the observed state of SwiftPassword.
 type SwiftPasswordStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The Swift password. The value is available only in the response for `CreateSwiftPassword`, and not
+	// for `ListSwiftPasswords` or `UpdateSwiftPassword`.
+	Password string `json:"password,omitempty"`
+	// The OCID of the Swift password.
+	Id string `json:"id,omitempty"`
+	// The OCID of the user the password belongs to.
+	UserId string `json:"userId,omitempty"`
+	// Date and time the `SwiftPassword` object was created, in the format defined by RFC3339.
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// Date and time when this password will expire, in the format defined by RFC3339.
+	// Null if it never expires.
+	// Example: `2016-08-25T21:10:29.600Z`
+	ExpiresOn string `json:"expiresOn,omitempty"`
+	// The password's current state. After creating a password, make sure its `lifecycleState` changes from
+	// CREATING to ACTIVE before using it.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The detailed status of INACTIVE lifecycleState.
+	InactiveStatus int64 `json:"inactiveStatus,omitempty"`
 }
 
 // +kubebuilder:object:root=true

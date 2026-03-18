@@ -52,22 +52,15 @@ spec:
             type: object
           spec:
             description: DrgRedundancyStatusSpec defines the desired state of DrgRedundancyStatus.
-            properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
-              status:
-                type: string
             type: object
           status:
             description: DrgRedundancyStatusObservedState defines the observed state
               of DrgRedundancyStatus.
             properties:
+              id:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the DRG.
+                type: string
               status:
                 properties:
                   conditions:

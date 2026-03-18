@@ -14,28 +14,70 @@ import (
 
 // VolumeGroupBackupSpec defines the desired state of VolumeGroupBackup.
 type VolumeGroupBackupSpec struct {
-	Id                        shared.OCID       `json:"id,omitempty"`
-	CompartmentId             shared.OCID       `json:"compartmentId,omitempty"`
-	VolumeGroupId             string            `json:"volumeGroupId,omitempty"`
-	DisplayName               string            `json:"displayName,omitempty"`
-	FreeformTags              map[string]string `json:"freeformTags,omitempty"`
-	Type                      string            `json:"type,omitempty"`
-	LifecycleState            string            `json:"lifecycleState,omitempty"`
-	TimeCreated               string            `json:"timeCreated,omitempty"`
-	VolumeBackupIds           []string          `json:"volumeBackupIds,omitempty"`
-	ExpirationTime            string            `json:"expirationTime,omitempty"`
-	SizeInMBs                 int64             `json:"sizeInMBs,omitempty"`
-	SizeInGBs                 int64             `json:"sizeInGBs,omitempty"`
-	SourceType                string            `json:"sourceType,omitempty"`
-	TimeRequestReceived       string            `json:"timeRequestReceived,omitempty"`
-	UniqueSizeInMbs           int64             `json:"uniqueSizeInMbs,omitempty"`
-	UniqueSizeInGbs           int64             `json:"uniqueSizeInGbs,omitempty"`
-	SourceVolumeGroupBackupId string            `json:"sourceVolumeGroupBackupId,omitempty"`
+	// The OCID of the volume group that needs to be backed up.
+	// +kubebuilder:validation:Required
+	VolumeGroupId string `json:"volumeGroupId"`
+	// The OCID of the compartment that will contain the volume group
+	// backup. This parameter is optional, by default backup will be created in
+	// the same compartment and source volume group.
+	// +kubebuilder:validation:Optional
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// The type of backup to create. If omitted, defaults to incremental.
+	// +kubebuilder:validation:Optional
+	Type string `json:"type,omitempty"`
 }
 
 // VolumeGroupBackupStatus defines the observed state of VolumeGroupBackup.
 type VolumeGroupBackupStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the volume group backup.
+	Id string `json:"id,omitempty"`
+	// The current state of a volume group backup.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The date and time the volume group backup was created. This is the time the actual point-in-time image
+	// of the volume group data was taken. Format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// OCIDs for the volume backups in this volume group backup.
+	VolumeBackupIds []string `json:"volumeBackupIds,omitempty"`
+	// The date and time the volume group backup will expire and be automatically deleted.
+	// Format defined by RFC3339 (https://tools.ietf.org/html/rfc3339). This parameter will always be present for volume group
+	// backups that were created automatically by a scheduled-backup policy. For manually
+	// created volume group backups, it will be absent, signifying that there is no expiration
+	// time and the backup will last forever until manually deleted.
+	ExpirationTime string `json:"expirationTime,omitempty"`
+	// The aggregate size of the volume group backup, in MBs.
+	SizeInMBs int64 `json:"sizeInMBs,omitempty"`
+	// The aggregate size of the volume group backup, in GBs.
+	SizeInGBs int64 `json:"sizeInGBs,omitempty"`
+	// Specifies whether the volume group backup was created manually, or via scheduled
+	// backup policy.
+	SourceType string `json:"sourceType,omitempty"`
+	// The date and time the request to create the volume group backup was received. Format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	TimeRequestReceived string `json:"timeRequestReceived,omitempty"`
+	// The aggregate size used by the volume group backup, in MBs.
+	// It is typically smaller than sizeInMBs, depending on the spaceconsumed
+	// on the volume group and whether the volume backup is full or incremental.
+	UniqueSizeInMbs int64 `json:"uniqueSizeInMbs,omitempty"`
+	// The aggregate size used by the volume group backup, in GBs.
+	// It is typically smaller than sizeInGBs, depending on the spaceconsumed
+	// on the volume group and whether the volume backup is full or incremental.
+	UniqueSizeInGbs int64 `json:"uniqueSizeInGbs,omitempty"`
+	// The OCID of the source volume group backup.
+	SourceVolumeGroupBackupId string `json:"sourceVolumeGroupBackupId,omitempty"`
 }
 
 // +kubebuilder:object:root=true

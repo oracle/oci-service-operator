@@ -14,20 +14,49 @@ import (
 
 // LoadBalancerShapeSpec defines the desired state of LoadBalancerShape.
 type LoadBalancerShapeSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
-	ShapeName     string      `json:"shapeName,omitempty"`
-	Name          string      `json:"name,omitempty"`
+	// The new shape name for the load balancer.
+	// Allowed values are :
+	//   *  10Mbps
+	//   *  100Mbps
+	//   *  400Mbps
+	//   *  8000Mbps
+	//   *  Flexible
+	//   Example: `flexible`
+	//   * NOTE: Fixed shapes 10Mbps, 100Mbps, 400Mbps, 8000Mbps will be deprecated from May 2023. This api
+	//   * will only support `Flexible` shape after that date.
+	// +kubebuilder:validation:Required
+	ShapeName string `json:"shapeName"`
+	// The configuration details to update load balancer to a different profile.
+	// +kubebuilder:validation:Optional
+	ShapeDetails LoadBalancerShapeShapeDetails `json:"shapeDetails,omitempty"`
+}
+
+// LoadBalancerShapeShapeDetails defines nested fields for LoadBalancerShape.ShapeDetails.
+type LoadBalancerShapeShapeDetails struct {
+	// Bandwidth in Mbps that determines the total pre-provisioned bandwidth (ingress plus egress).
+	// The values must be between 10 and the maximumBandwidthInMbps.
+	// Example: `150`
+	// +kubebuilder:validation:Required
+	MinimumBandwidthInMbps int `json:"minimumBandwidthInMbps"`
+	// Bandwidth in Mbps that determines the maximum bandwidth (ingress plus egress) that the load balancer can
+	// achieve. This bandwidth cannot be always guaranteed. For a guaranteed bandwidth use the minimumBandwidthInMbps
+	// parameter.
+	// The values must be between minimumBandwidthInMbps and 8000 (8Gbps).
+	// Example: `1500`
+	// +kubebuilder:validation:Required
+	MaximumBandwidthInMbps int `json:"maximumBandwidthInMbps"`
 }
 
 // LoadBalancerShapeStatus defines the observed state of LoadBalancerShape.
 type LoadBalancerShapeStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The name of the shape.
+	// Example: `100Mbps`
+	Name string `json:"name,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Name",type="string",JSONPath=".spec.name",priority=1
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.status.conditions[-1].type",description="status of the LoadBalancerShape",priority=0
 // +kubebuilder:printcolumn:name="Ocid",type="string",JSONPath=".status.status.ocid",description="Ocid of the LoadBalancerShape",priority=1
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0

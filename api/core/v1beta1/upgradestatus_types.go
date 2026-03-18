@@ -14,16 +14,15 @@ import (
 
 // UpgradeStatusSpec defines the desired state of UpgradeStatus.
 type UpgradeStatusSpec struct {
-	Id                  shared.OCID `json:"id,omitempty"`
-	CompartmentId       shared.OCID `json:"compartmentId,omitempty"`
-	DrgId               string      `json:"drgId,omitempty"`
-	Status              string      `json:"status,omitempty"`
-	UpgradedConnections string      `json:"upgradedConnections,omitempty"`
 }
 
 // UpgradeStatusObservedState defines the observed state of UpgradeStatus.
 type UpgradeStatusObservedState struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The `drgId` of the upgraded DRG.
+	DrgId string `json:"drgId,omitempty"`
+	// The number of upgraded connections.
+	UpgradedConnections string `json:"upgradedConnections,omitempty"`
 }
 
 // +kubebuilder:object:root=true

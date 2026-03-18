@@ -14,19 +14,59 @@ import (
 
 // ComputeImageCapabilitySchemaSpec defines the desired state of ComputeImageCapabilitySchema.
 type ComputeImageCapabilitySchemaSpec struct {
-	Id                                            shared.OCID       `json:"id,omitempty"`
-	CompartmentId                                 shared.OCID       `json:"compartmentId,omitempty"`
-	ComputeGlobalImageCapabilitySchemaVersionName string            `json:"computeGlobalImageCapabilitySchemaVersionName,omitempty"`
-	ImageId                                       string            `json:"imageId,omitempty"`
-	FreeformTags                                  map[string]string `json:"freeformTags,omitempty"`
-	DisplayName                                   string            `json:"displayName,omitempty"`
-	ComputeGlobalImageCapabilitySchemaId          string            `json:"computeGlobalImageCapabilitySchemaId,omitempty"`
-	TimeCreated                                   string            `json:"timeCreated,omitempty"`
+	// The OCID of the compartment that contains the resource.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// The name of the compute global image capability schema version
+	// +kubebuilder:validation:Required
+	ComputeGlobalImageCapabilitySchemaVersionName string `json:"computeGlobalImageCapabilitySchemaVersionName"`
+	// The ocid of the image
+	// +kubebuilder:validation:Required
+	ImageId string `json:"imageId"`
+	// The map of each capability name to its ImageCapabilitySchemaDescriptor.
+	// +kubebuilder:validation:Required
+	SchemaData map[string]ComputeImageCapabilitySchemaSchemaData `json:"schemaData"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+}
+
+// ComputeImageCapabilitySchemaSchemaData defines nested fields for ComputeImageCapabilitySchema.SchemaData.
+type ComputeImageCapabilitySchemaSchemaData struct {
+	// +kubebuilder:validation:Required
+	Source string `json:"source"`
+	// +kubebuilder:validation:Optional
+	DescriptorType string `json:"descriptorType,omitempty"`
+	// the list of values for the enum
+	// +kubebuilder:validation:Required
+	Values []string `json:"values"`
+	// the default value
+	// +kubebuilder:validation:Optional
+	DefaultValue string `json:"defaultValue,omitempty"`
 }
 
 // ComputeImageCapabilitySchemaStatus defines the observed state of ComputeImageCapabilitySchema.
 type ComputeImageCapabilitySchemaStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The id of the compute global image capability schema version
+	Id string `json:"id,omitempty"`
+	// The ocid of the compute global image capability schema
+	ComputeGlobalImageCapabilitySchemaId string `json:"computeGlobalImageCapabilitySchemaId,omitempty"`
+	// The date and time the compute image capability schema was created, in the format defined by
+	// RFC3339 (https://tools.ietf.org/html/rfc3339).
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
 }
 
 // +kubebuilder:object:root=true

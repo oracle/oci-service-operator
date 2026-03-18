@@ -14,20 +14,37 @@ import (
 
 // ReplicaSpec defines the desired state of Replica.
 type ReplicaSpec struct {
-	Id               shared.OCID `json:"id,omitempty"`
-	CompartmentId    shared.OCID `json:"compartmentId,omitempty"`
-	Region           string      `json:"region,omitempty"`
-	MaxReadUnits     int         `json:"maxReadUnits,omitempty"`
-	MaxWriteUnits    int         `json:"maxWriteUnits,omitempty"`
-	TableId          string      `json:"tableId,omitempty"`
-	CapacityMode     string      `json:"capacityMode,omitempty"`
-	LifecycleState   string      `json:"lifecycleState,omitempty"`
-	LifecycleDetails string      `json:"lifecycleDetails,omitempty"`
+	// Name of the remote region in standard OCI format, i.e. us-ashburn-1
+	// +kubebuilder:validation:Required
+	Region string `json:"region"`
+	// The OCID of the table's compartment.  Required
+	// if the tableNameOrId path parameter is a table name.
+	// Optional if tableNameOrId is an OCID.  If tableNameOrId
+	// is an OCID, and compartmentId is supplied, the latter
+	// must match the identified table's compartmentId.
+	// +kubebuilder:validation:Optional
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// Maximum sustained read throughput limit for the new replica table.
+	// If not specified, the local table's read limit is used.
+	// +kubebuilder:validation:Optional
+	MaxReadUnits int `json:"maxReadUnits,omitempty"`
+	// Maximum sustained write throughput limit for the new replica table.
+	// If not specified, the local table's write limit is used.
+	// +kubebuilder:validation:Optional
+	MaxWriteUnits int `json:"maxWriteUnits,omitempty"`
 }
 
 // ReplicaStatus defines the observed state of Replica.
 type ReplicaStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the replica table
+	TableId string `json:"tableId,omitempty"`
+	// The capacity mode of the replica.
+	CapacityMode string `json:"capacityMode,omitempty"`
+	// The state of the replica.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// A message describing the current state in more detail.
+	LifecycleDetails string `json:"lifecycleDetails,omitempty"`
 }
 
 // +kubebuilder:object:root=true

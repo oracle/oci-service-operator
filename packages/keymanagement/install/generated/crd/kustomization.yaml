@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- bases/keymanagement.oracle.com_ekmsprivateendpoints.yaml
+- bases/keymanagement.oracle.com_hsmclusters.yaml
+- bases/keymanagement.oracle.com_hsmpartitions.yaml
+- bases/keymanagement.oracle.com_keys.yaml
+- bases/keymanagement.oracle.com_keyversions.yaml
+- bases/keymanagement.oracle.com_precousercredentials.yaml
+- bases/keymanagement.oracle.com_replicationstatuses.yaml
+- bases/keymanagement.oracle.com_vaultreplicas.yaml
+- bases/keymanagement.oracle.com_vaults.yaml
+- bases/keymanagement.oracle.com_vaultusages.yaml
+- bases/keymanagement.oracle.com_wrappingkeys.yaml

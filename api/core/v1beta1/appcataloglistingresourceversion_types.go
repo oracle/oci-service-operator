@@ -14,21 +14,33 @@ import (
 
 // AppCatalogListingResourceVersionSpec defines the desired state of AppCatalogListingResourceVersion.
 type AppCatalogListingResourceVersionSpec struct {
-	Id                     shared.OCID `json:"id,omitempty"`
-	CompartmentId          shared.OCID `json:"compartmentId,omitempty"`
-	ListingId              string      `json:"listingId,omitempty"`
-	TimePublished          string      `json:"timePublished,omitempty"`
-	ListingResourceId      string      `json:"listingResourceId,omitempty"`
-	ListingResourceVersion string      `json:"listingResourceVersion,omitempty"`
-	AvailableRegions       []string    `json:"availableRegions,omitempty"`
-	CompatibleShapes       []string    `json:"compatibleShapes,omitempty"`
-	AccessiblePorts        []int       `json:"accessiblePorts,omitempty"`
-	AllowedActions         []string    `json:"allowedActions,omitempty"`
 }
 
 // AppCatalogListingResourceVersionStatus defines the observed state of AppCatalogListingResourceVersion.
 type AppCatalogListingResourceVersionStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the listing this resource version belongs to.
+	ListingId string `json:"listingId,omitempty"`
+	// Date and time the listing resource version was published, in RFC3339 (https://tools.ietf.org/html/rfc3339) format.
+	// Example: `2018-03-20T12:32:53.532Z`
+	TimePublished string `json:"timePublished,omitempty"`
+	// OCID of the listing resource.
+	ListingResourceId string `json:"listingResourceId,omitempty"`
+	// Resource Version.
+	ListingResourceVersion string `json:"listingResourceVersion,omitempty"`
+	// List of regions that this listing resource version is available.
+	// For information about regions, see
+	// Regions and Availability Domains (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/regions.htm).
+	// Example: `["us-ashburn-1", "us-phoenix-1"]`
+	AvailableRegions []string `json:"availableRegions,omitempty"`
+	// Array of shapes compatible with this resource.
+	// You can enumerate all available shapes by calling ListShapes.
+	// Example: `["VM.Standard1.1", "VM.Standard1.2"]`
+	CompatibleShapes []string `json:"compatibleShapes,omitempty"`
+	// List of accessible ports for instances launched with this listing resource version.
+	AccessiblePorts []int `json:"accessiblePorts,omitempty"`
+	// Allowed actions for the listing resource.
+	AllowedActions []string `json:"allowedActions,omitempty"`
 }
 
 // +kubebuilder:object:root=true

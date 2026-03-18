@@ -14,11 +14,15 @@ import (
 
 // ClusterEndpointConfigSpec defines the desired state of ClusterEndpointConfig.
 type ClusterEndpointConfigSpec struct {
-	Id                shared.OCID `json:"id,omitempty"`
-	CompartmentId     shared.OCID `json:"compartmentId,omitempty"`
-	SubnetId          string      `json:"subnetId,omitempty"`
-	NsgIds            []string    `json:"nsgIds,omitempty"`
-	IsPublicIpEnabled bool        `json:"isPublicIpEnabled,omitempty"`
+	// The OCID of the regional subnet in which to place the Cluster endpoint.
+	// +kubebuilder:validation:Optional
+	SubnetId string `json:"subnetId,omitempty"`
+	// A list of the OCIDs of the network security groups (NSGs) to apply to the cluster endpoint. For more information about NSGs, see NetworkSecurityGroup.
+	// +kubebuilder:validation:Optional
+	NsgIds []string `json:"nsgIds,omitempty"`
+	// Whether the cluster should be assigned a public IP address. Defaults to false. If set to true on a private subnet, the cluster provisioning will fail.
+	// +kubebuilder:validation:Optional
+	IsPublicIpEnabled bool `json:"isPublicIpEnabled,omitempty"`
 }
 
 // ClusterEndpointConfigStatus defines the observed state of ClusterEndpointConfig.

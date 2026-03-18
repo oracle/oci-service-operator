@@ -14,8 +14,6 @@ import (
 
 // IPSecConnectionTunnelSecurityAssociationSpec defines the desired state of IPSecConnectionTunnelSecurityAssociation.
 type IPSecConnectionTunnelSecurityAssociationSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // IPSecConnectionTunnelSecurityAssociationStatus defines the observed state of IPSecConnectionTunnelSecurityAssociation.

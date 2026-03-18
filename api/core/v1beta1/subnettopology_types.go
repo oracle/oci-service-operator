@@ -14,16 +14,52 @@ import (
 
 // SubnetTopologySpec defines the desired state of SubnetTopology.
 type SubnetTopologySpec struct {
-	Id              shared.OCID `json:"id,omitempty"`
-	CompartmentId   shared.OCID `json:"compartmentId,omitempty"`
-	LimitedEntities []string    `json:"limitedEntities,omitempty"`
-	TimeCreated     string      `json:"timeCreated,omitempty"`
-	SubnetId        string      `json:"subnetId,omitempty"`
+}
+
+// SubnetTopologyRelationshipRouteRuleDetails defines nested fields for SubnetTopology.Relationship.RouteRuleDetails.
+type SubnetTopologyRelationshipRouteRuleDetails struct {
+	// The destinationType can be set to one of two values:
+	// * Use `CIDR_BLOCK` if the rule's `destination` is an IP address range in CIDR notation.
+	// * Use `SERVICE_CIDR_BLOCK` if the rule's `destination` is the `cidrBlock` value for a Service.
+	DestinationType string `json:"destinationType,omitempty"`
+	// An IP address range in CIDR notation or the `cidrBlock` value for a Service.
+	Destination string `json:"destination,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the routing table that contains the route rule.
+	RouteTableId string `json:"routeTableId,omitempty"`
+	// A route rule can be `STATIC` if manually added to the route table or `DYNAMIC` if imported from another route table.
+	RouteType string `json:"routeType,omitempty"`
+}
+
+// SubnetTopologyRelationshipAssociatedWithDetails defines nested fields for SubnetTopology.Relationship.AssociatedWithDetails.
+type SubnetTopologyRelationshipAssociatedWithDetails struct {
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the entities via which the relationship is created. For example an instance is associated with a network security group via the VNIC attachment and the VNIC.
+	Via []string `json:"via,omitempty"`
+}
+
+// SubnetTopologyRelationship defines nested fields for SubnetTopology.Relationship.
+type SubnetTopologyRelationship struct {
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the first entity in the relationship.
+	Id1 string `json:"id1,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the second entity in the relationship.
+	Id2                   string                                          `json:"id2,omitempty"`
+	Type                  string                                          `json:"type,omitempty"`
+	RouteRuleDetails      SubnetTopologyRelationshipRouteRuleDetails      `json:"routeRuleDetails,omitempty"`
+	AssociatedWithDetails SubnetTopologyRelationshipAssociatedWithDetails `json:"associatedWithDetails,omitempty"`
 }
 
 // SubnetTopologyStatus defines the observed state of SubnetTopology.
 type SubnetTopologyStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// Lists relationships between entities in the virtual network topology.
+	Relationships []SubnetTopologyRelationship `json:"relationships,omitempty"`
+	// Lists entities that are limited during ingestion.
+	// The values for the items in the list are the entity type names of the limitedEntities.
+	// Example: `vcn`
+	LimitedEntities []string `json:"limitedEntities,omitempty"`
+	// Records when the virtual network topology was created, in RFC3339 (https://tools.ietf.org/html/rfc3339) format for date and time.
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subnet for which the visualization is generated.
+	SubnetId string `json:"subnetId,omitempty"`
 }
 
 // +kubebuilder:object:root=true

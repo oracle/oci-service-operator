@@ -14,21 +14,61 @@ import (
 
 // CertificateVersionSpec defines the desired state of CertificateVersion.
 type CertificateVersionSpec struct {
-	Id                    shared.OCID `json:"id,omitempty"`
-	CompartmentId         shared.OCID `json:"compartmentId,omitempty"`
-	CertificateId         string      `json:"certificateId,omitempty"`
-	TimeCreated           string      `json:"timeCreated,omitempty"`
-	VersionNumber         int64       `json:"versionNumber,omitempty"`
-	Stages                []string    `json:"stages,omitempty"`
-	SerialNumber          string      `json:"serialNumber,omitempty"`
-	IssuerCaVersionNumber int64       `json:"issuerCaVersionNumber,omitempty"`
-	VersionName           string      `json:"versionName,omitempty"`
-	TimeOfDeletion        string      `json:"timeOfDeletion,omitempty"`
+}
+
+// CertificateVersionSubjectAlternativeName defines nested fields for CertificateVersion.SubjectAlternativeName.
+type CertificateVersionSubjectAlternativeName struct {
+	// The subject alternative name type. Currently only DNS domain or host names and IP addresses are supported.
+	Type string `json:"type,omitempty"`
+	// The subject alternative name.
+	Value string `json:"value,omitempty"`
+}
+
+// CertificateVersionValidity defines nested fields for CertificateVersion.Validity.
+type CertificateVersionValidity struct {
+	// The date on which the certificate validity period ends, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2019-04-03T21:10:29.600Z`
+	TimeOfValidityNotAfter string `json:"timeOfValidityNotAfter,omitempty"`
+	// The date on which the certificate validity period begins, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2019-04-03T21:10:29.600Z`
+	TimeOfValidityNotBefore string `json:"timeOfValidityNotBefore,omitempty"`
+}
+
+// CertificateVersionRevocationStatus defines nested fields for CertificateVersion.RevocationStatus.
+type CertificateVersionRevocationStatus struct {
+	// The time when the entity was revoked, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2019-04-03T21:10:29.600Z`
+	TimeOfRevocation string `json:"timeOfRevocation,omitempty"`
+	// The reason the certificate or certificate authority (CA) was revoked.
+	RevocationReason string `json:"revocationReason,omitempty"`
 }
 
 // CertificateVersionStatus defines the observed state of CertificateVersion.
 type CertificateVersionStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the certificate.
+	CertificateId string `json:"certificateId,omitempty"`
+	// A optional property indicating when the certificate version was created, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2019-04-03T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The version number of the certificate.
+	VersionNumber int64 `json:"versionNumber,omitempty"`
+	// A list of stages of this entity.
+	Stages []string `json:"stages,omitempty"`
+	// A unique certificate identifier used in certificate revocation tracking, formatted as octets.
+	// Example: `03 AC FC FA CC B3 CB 02 B8 F8 DE F5 85 E7 7B FF`
+	SerialNumber string `json:"serialNumber,omitempty"`
+	// The version number of the issuing certificate authority (CA).
+	IssuerCaVersionNumber int64 `json:"issuerCaVersionNumber,omitempty"`
+	// The name of the certificate version. When the value is not null, a name is unique across versions of a given certificate.
+	VersionName string `json:"versionName,omitempty"`
+	// A list of subject alternative names.
+	SubjectAlternativeNames []CertificateVersionSubjectAlternativeName `json:"subjectAlternativeNames,omitempty"`
+	// An optional property indicating when to delete the certificate version, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2019-04-03T21:10:29.600Z`
+	TimeOfDeletion   string                             `json:"timeOfDeletion,omitempty"`
+	Validity         CertificateVersionValidity         `json:"validity,omitempty"`
+	RevocationStatus CertificateVersionRevocationStatus `json:"revocationStatus,omitempty"`
 }
 
 // +kubebuilder:object:root=true

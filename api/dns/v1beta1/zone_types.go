@@ -14,24 +14,119 @@ import (
 
 // ZoneSpec defines the desired state of Zone.
 type ZoneSpec struct {
-	Id             shared.OCID       `json:"id,omitempty"`
-	CompartmentId  shared.OCID       `json:"compartmentId,omitempty"`
-	Name           string            `json:"name,omitempty"`
-	FreeformTags   map[string]string `json:"freeformTags,omitempty"`
-	ViewId         string            `json:"viewId,omitempty"`
-	ZoneType       string            `json:"zoneType,omitempty"`
-	Scope          string            `json:"scope,omitempty"`
-	Self           string            `json:"self,omitempty"`
-	TimeCreated    string            `json:"timeCreated,omitempty"`
-	Version        string            `json:"version,omitempty"`
-	Serial         int64             `json:"serial,omitempty"`
-	LifecycleState string            `json:"lifecycleState,omitempty"`
-	IsProtected    bool              `json:"isProtected,omitempty"`
+	// The name of the zone.
+	// Global zone names must be unique across all other zones within the realm. Private zone names must be unique
+	// within their view.
+	// Unicode characters will be converted into punycode, see RFC 3492 (https://tools.ietf.org/html/rfc3492).
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+	// The OCID of the compartment containing the zone.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	//
+	// **Example:** `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	//
+	// **Example:** `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// This value will be null for zones in the global DNS.
+	// +kubebuilder:validation:Optional
+	ViewId string `json:"viewId,omitempty"`
+	// External master servers for the zone. `externalMasters` becomes a
+	// required parameter when the `zoneType` value is `SECONDARY`.
+	// +kubebuilder:validation:Optional
+	ExternalMasters []ZoneExternalMaster `json:"externalMasters,omitempty"`
+	// External secondary servers for the zone.
+	// This field is currently not supported when `zoneType` is `SECONDARY` or `scope` is `PRIVATE`.
+	// +kubebuilder:validation:Optional
+	ExternalDownstreams []ZoneExternalDownstream `json:"externalDownstreams,omitempty"`
+	// The type of the zone. Must be either `PRIMARY` or `SECONDARY`. `SECONDARY` is only supported for GLOBAL
+	// zones.
+	// +kubebuilder:validation:Optional
+	ZoneType string `json:"zoneType,omitempty"`
+	// The scope of the zone.
+	// +kubebuilder:validation:Optional
+	Scope string `json:"scope,omitempty"`
+}
+
+// ZoneExternalMaster defines nested fields for Zone.ExternalMaster.
+type ZoneExternalMaster struct {
+	// The server's IP address (IPv4 or IPv6).
+	// +kubebuilder:validation:Required
+	Address string `json:"address"`
+	// The server's port. Port value must be a value of 53, otherwise omit
+	// the port value.
+	// +kubebuilder:validation:Optional
+	Port int `json:"port,omitempty"`
+	// The OCID of the TSIG key.
+	// +kubebuilder:validation:Optional
+	TsigKeyId string `json:"tsigKeyId,omitempty"`
+}
+
+// ZoneExternalDownstream defines nested fields for Zone.ExternalDownstream.
+type ZoneExternalDownstream struct {
+	// The server's IP address (IPv4 or IPv6).
+	// +kubebuilder:validation:Required
+	Address string `json:"address"`
+	// The server's port. Port value must be a value of 53, otherwise omit
+	// the port value.
+	// +kubebuilder:validation:Optional
+	Port int `json:"port,omitempty"`
+	// The OCID of the TSIG key.
+	// A TSIG key is used to secure DNS messages (in this case, zone transfers) between two systems that both have the (shared) secret.
+	// +kubebuilder:validation:Optional
+	TsigKeyId string `json:"tsigKeyId,omitempty"`
+}
+
+// ZoneNameserver defines nested fields for Zone.Nameserver.
+type ZoneNameserver struct {
+	// The hostname of the nameserver.
+	Hostname string `json:"hostname,omitempty"`
+}
+
+// ZoneTransferServerFields defines nested fields for Zone.ZoneTransferServer.
+type ZoneTransferServerFields struct {
+	// The server's IP address (IPv4 or IPv6).
+	Address string `json:"address,omitempty"`
+	// The server's port.
+	Port int `json:"port,omitempty"`
+	// A Boolean flag indicating whether or not the server is a zone data transfer source.
+	IsTransferSource bool `json:"isTransferSource,omitempty"`
+	// A Boolean flag indicating whether or not the server is a zone data transfer destination.
+	IsTransferDestination bool `json:"isTransferDestination,omitempty"`
 }
 
 // ZoneStatus defines the observed state of Zone.
 type ZoneStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The canonical absolute URL of the resource.
+	Self string `json:"self,omitempty"`
+	// The OCID of the zone.
+	Id string `json:"id,omitempty"`
+	// The date and time the resource was created in "YYYY-MM-ddThh:mm:ssZ" format
+	// with a Z offset, as defined by RFC 3339.
+	// **Example:** `2016-07-22T17:23:59:60Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// Version is the never-repeating, totally-orderable, version of the
+	// zone, from which the serial field of the zone's SOA record is
+	// derived.
+	Version string `json:"version,omitempty"`
+	// The current serial of the zone. As seen in the zone's SOA record.
+	Serial int64 `json:"serial,omitempty"`
+	// The current state of the zone resource.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// A Boolean flag indicating whether or not parts of the resource are unable to be explicitly managed.
+	IsProtected bool `json:"isProtected,omitempty"`
+	// The authoritative nameservers for the zone.
+	Nameservers []ZoneNameserver `json:"nameservers,omitempty"`
+	// The OCI nameservers that transfer the zone data with external nameservers.
+	ZoneTransferServers []ZoneTransferServerFields `json:"zoneTransferServers,omitempty"`
 }
 
 // +kubebuilder:object:root=true

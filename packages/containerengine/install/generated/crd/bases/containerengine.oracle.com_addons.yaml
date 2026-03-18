@@ -15,10 +15,6 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - jsonPath: .spec.name
-      name: Name
-      priority: 1
-      type: string
     - description: status of the Addon
       jsonPath: .status.status.conditions[-1].type
       name: Status
@@ -56,28 +52,50 @@ spec:
           spec:
             description: AddonSpec defines the desired state of Addon.
             properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              currentInstalledVersion:
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
-              lifecycleState:
-                type: string
-              name:
-                type: string
-              timeCreated:
-                type: string
+              configurations:
+                description: Addon configuration details.
+                items:
+                  description: AddonConfiguration defines nested fields for Addon.Configuration.
+                  properties:
+                    key:
+                      description: configuration key name
+                      type: string
+                    value:
+                      description: configuration value name
+                      type: string
+                  type: object
+                type: array
               version:
+                description: The version of the installed addon.
                 type: string
             type: object
           status:
             description: AddonStatus defines the observed state of Addon.
             properties:
+              addonError:
+                description: The error info of the addon.
+                properties:
+                  code:
+                    description: A short error code that defines the upstream error,
+                      meant for programmatic parsing. See API Errors (https://docs.cloud.oracle.com/Content/API/References/apierrors.htm).
+                    type: string
+                  message:
+                    description: A human-readable error string of the upstream error.
+                    type: string
+                  status:
+                    description: The status of the HTTP response encountered in the
+                      upstream error.
+                    type: string
+                type: object
+              currentInstalledVersion:
+                description: current installed version of the addon
+                type: string
+              lifecycleState:
+                description: The state of the addon.
+                type: string
+              name:
+                description: The name of the addon.
+                type: string
               status:
                 properties:
                   conditions:
@@ -120,6 +138,9 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              timeCreated:
+                description: The time the cluster was created.
+                type: string
             required:
             - status
             type: object

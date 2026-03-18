@@ -51,15 +51,6 @@ spec:
             type: object
           spec:
             description: ShapeSpec defines the desired state of Shape.
-            properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
             type: object
           status:
             description: ShapeStatus defines the observed state of Shape.

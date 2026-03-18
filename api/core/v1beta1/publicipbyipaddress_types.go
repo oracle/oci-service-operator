@@ -14,8 +14,6 @@ import (
 
 // PublicIpByIpAddressSpec defines the desired state of PublicIpByIpAddress.
 type PublicIpByIpAddressSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // PublicIpByIpAddressStatus defines the observed state of PublicIpByIpAddress.

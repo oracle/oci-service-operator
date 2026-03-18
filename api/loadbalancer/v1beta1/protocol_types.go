@@ -14,8 +14,6 @@ import (
 
 // ProtocolSpec defines the desired state of Protocol.
 type ProtocolSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // ProtocolStatus defines the observed state of Protocol.

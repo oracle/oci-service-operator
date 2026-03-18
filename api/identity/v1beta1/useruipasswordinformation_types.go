@@ -14,8 +14,6 @@ import (
 
 // UserUIPasswordInformationSpec defines the desired state of UserUIPasswordInformation.
 type UserUIPasswordInformationSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // UserUIPasswordInformationStatus defines the observed state of UserUIPasswordInformation.

@@ -14,13 +14,23 @@ import (
 
 // CpeDeviceShapeSpec defines the desired state of CpeDeviceShape.
 type CpeDeviceShapeSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
+}
+
+// CpeDeviceShapeCpeDeviceInfo defines nested fields for CpeDeviceShape.CpeDeviceInfo.
+type CpeDeviceShapeCpeDeviceInfo struct {
+	// The vendor that makes the CPE device.
+	Vendor string `json:"vendor,omitempty"`
+	// The platform or software version of the CPE device.
+	PlatformSoftwareVersion string `json:"platformSoftwareVersion,omitempty"`
 }
 
 // CpeDeviceShapeStatus defines the observed state of CpeDeviceShape.
 type CpeDeviceShapeStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the CPE device shape.
+	// This value uniquely identifies the type of CPE device.
+	Id            string                      `json:"id,omitempty"`
+	CpeDeviceInfo CpeDeviceShapeCpeDeviceInfo `json:"cpeDeviceInfo,omitempty"`
 }
 
 // +kubebuilder:object:root=true

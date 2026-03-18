@@ -14,8 +14,6 @@ import (
 
 // ConfirmSubscriptionSpec defines the desired state of ConfirmSubscription.
 type ConfirmSubscriptionSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // ConfirmSubscriptionStatus defines the observed state of ConfirmSubscription.

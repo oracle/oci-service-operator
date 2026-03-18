@@ -14,8 +14,6 @@ import (
 
 // ChannelSpec defines the desired state of Channel.
 type ChannelSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // ChannelStatus defines the observed state of Channel.

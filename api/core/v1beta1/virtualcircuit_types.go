@@ -14,40 +14,205 @@ import (
 
 // VirtualCircuitSpec defines the desired state of VirtualCircuit.
 type VirtualCircuitSpec struct {
-	Id                     shared.OCID       `json:"id,omitempty"`
-	CompartmentId          shared.OCID       `json:"compartmentId,omitempty"`
-	Type                   string            `json:"type,omitempty"`
-	BandwidthShapeName     string            `json:"bandwidthShapeName,omitempty"`
-	RoutingPolicy          []string          `json:"routingPolicy,omitempty"`
-	BgpAdminState          string            `json:"bgpAdminState,omitempty"`
-	IsBfdEnabled           bool              `json:"isBfdEnabled,omitempty"`
-	IsTransportMode        bool              `json:"isTransportMode,omitempty"`
-	CustomerBgpAsn         int               `json:"customerBgpAsn,omitempty"`
-	CustomerAsn            int64             `json:"customerAsn,omitempty"`
-	DisplayName            string            `json:"displayName,omitempty"`
-	FreeformTags           map[string]string `json:"freeformTags,omitempty"`
-	GatewayId              string            `json:"gatewayId,omitempty"`
-	ProviderName           string            `json:"providerName,omitempty"`
-	ProviderServiceId      string            `json:"providerServiceId,omitempty"`
-	ProviderServiceKeyName string            `json:"providerServiceKeyName,omitempty"`
-	ProviderServiceName    string            `json:"providerServiceName,omitempty"`
-	Region                 string            `json:"region,omitempty"`
-	IpMtu                  string            `json:"ipMtu,omitempty"`
-	ProviderState          string            `json:"providerState,omitempty"`
-	ReferenceComment       string            `json:"referenceComment,omitempty"`
-	BgpManagement          string            `json:"bgpManagement,omitempty"`
-	BgpSessionState        string            `json:"bgpSessionState,omitempty"`
-	BgpIpv6SessionState    string            `json:"bgpIpv6SessionState,omitempty"`
-	LifecycleState         string            `json:"lifecycleState,omitempty"`
-	OracleBgpAsn           int               `json:"oracleBgpAsn,omitempty"`
-	PublicPrefixes         []string          `json:"publicPrefixes,omitempty"`
-	ServiceType            string            `json:"serviceType,omitempty"`
-	TimeCreated            string            `json:"timeCreated,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment to contain the virtual circuit.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// The type of IP addresses used in this virtual circuit. PRIVATE
+	// means RFC 1918 (https://tools.ietf.org/html/rfc1918) addresses
+	// (10.0.0.0/8, 172.16/12, and 192.168/16).
+	// +kubebuilder:validation:Required
+	Type string `json:"type"`
+	// The provisioned data rate of the connection. To get a list of the
+	// available bandwidth levels (that is, shapes), see
+	// ListFastConnectProviderVirtualCircuitBandwidthShapes.
+	// Example: `10 Gbps`
+	// +kubebuilder:validation:Optional
+	BandwidthShapeName string `json:"bandwidthShapeName,omitempty"`
+	// Create a `CrossConnectMapping` for each cross-connect or cross-connect
+	// group this virtual circuit will run on.
+	// +kubebuilder:validation:Optional
+	CrossConnectMappings []VirtualCircuitCrossConnectMapping `json:"crossConnectMappings,omitempty"`
+	// The routing policy sets how routing information about the Oracle cloud is shared over a public virtual circuit.
+	// Policies available are: `ORACLE_SERVICE_NETWORK`, `REGIONAL`, `MARKET_LEVEL`, and `GLOBAL`.
+	// See Route Filtering (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/routingonprem.htm#route_filtering) for details.
+	// By default, routing information is shared for all routes in the same market.
+	// +kubebuilder:validation:Optional
+	RoutingPolicy []string `json:"routingPolicy,omitempty"`
+	// Set to `ENABLED` (the default) to activate the BGP session of the virtual circuit, set to `DISABLED` to deactivate the virtual circuit.
+	// +kubebuilder:validation:Optional
+	BgpAdminState string `json:"bgpAdminState,omitempty"`
+	// Set to `true` to enable BFD for IPv4 BGP peering, or set to `false` to disable BFD. If this is not set, the default is `false`.
+	// +kubebuilder:validation:Optional
+	IsBfdEnabled bool `json:"isBfdEnabled,omitempty"`
+	// Set to `true` for the virtual circuit to carry only encrypted traffic, or set to `false` for the virtual circuit to carry unencrypted traffic. If this is not set, the default is `false`.
+	// +kubebuilder:validation:Optional
+	IsTransportMode bool `json:"isTransportMode,omitempty"`
+	// Deprecated. Instead use `customerAsn`.
+	// If you specify values for both, the request will be rejected.
+	// +kubebuilder:validation:Optional
+	CustomerBgpAsn int `json:"customerBgpAsn,omitempty"`
+	// Your BGP ASN (either public or private). Provide this value only if
+	// there's a BGP session that goes from your edge router to Oracle.
+	// Otherwise, leave this empty or null.
+	// Can be a 2-byte or 4-byte ASN. Uses "asplain" format.
+	// Example: `12345` (2-byte) or `1587232876` (4-byte)
+	// +kubebuilder:validation:Optional
+	CustomerAsn int64 `json:"customerAsn,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// For private virtual circuits only. The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Drg
+	// that this virtual circuit uses.
+	// +kubebuilder:validation:Optional
+	GatewayId string `json:"gatewayId,omitempty"`
+	// Deprecated. Instead use `providerServiceId`.
+	// To get a list of the provider names, see
+	// ListFastConnectProviderServices.
+	// +kubebuilder:validation:Optional
+	ProviderName string `json:"providerName,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the service offered by the provider (if you're connecting
+	// via a provider). To get a list of the available service offerings, see
+	// ListFastConnectProviderServices.
+	// +kubebuilder:validation:Optional
+	ProviderServiceId string `json:"providerServiceId,omitempty"`
+	// The service key name offered by the provider (if the customer is connecting via a provider).
+	// +kubebuilder:validation:Optional
+	ProviderServiceKeyName string `json:"providerServiceKeyName,omitempty"`
+	// Deprecated. Instead use `providerServiceId`.
+	// To get a list of the provider names, see
+	// ListFastConnectProviderServices.
+	// +kubebuilder:validation:Optional
+	ProviderServiceName string `json:"providerServiceName,omitempty"`
+	// For a public virtual circuit. The public IP prefixes (CIDRs) the customer wants to
+	// advertise across the connection.
+	// +kubebuilder:validation:Optional
+	PublicPrefixes []VirtualCircuitPublicPrefixFields `json:"publicPrefixes,omitempty"`
+	// The Oracle Cloud Infrastructure region where this virtual
+	// circuit is located.
+	// Example: `phx`
+	// +kubebuilder:validation:Optional
+	Region string `json:"region,omitempty"`
+	// The layer 3 IP MTU to use with this virtual circuit.
+	// +kubebuilder:validation:Optional
+	IpMtu string `json:"ipMtu,omitempty"`
+	// The provider's state in relation to this virtual circuit. Relevant only
+	// if the customer is using FastConnect via a provider. ACTIVE
+	// means the provider has provisioned the virtual circuit from their
+	// end. INACTIVE means the provider has not yet provisioned the virtual
+	// circuit, or has de-provisioned it.
+	// To be updated only by the provider.
+	// +kubebuilder:validation:Optional
+	ProviderState string `json:"providerState,omitempty"`
+	// Provider-supplied reference information about this virtual circuit.
+	// Relevant only if the customer is using FastConnect via a provider.
+	// To be updated only by the provider.
+	// +kubebuilder:validation:Optional
+	ReferenceComment string `json:"referenceComment,omitempty"`
+}
+
+// VirtualCircuitCrossConnectMapping defines nested fields for VirtualCircuit.CrossConnectMapping.
+type VirtualCircuitCrossConnectMapping struct {
+	// The key for BGP MD5 authentication. Only applicable if your system
+	// requires MD5 authentication. If empty or not set (null), that
+	// means you don't use BGP MD5 authentication.
+	// +kubebuilder:validation:Optional
+	BgpMd5AuthKey string `json:"bgpMd5AuthKey,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the cross-connect or cross-connect group for this mapping.
+	// Specified by the owner of the cross-connect or cross-connect group (the
+	// customer if the customer is colocated with Oracle, or the provider if the
+	// customer is connecting via provider).
+	// +kubebuilder:validation:Optional
+	CrossConnectOrCrossConnectGroupId string `json:"crossConnectOrCrossConnectGroupId,omitempty"`
+	// The BGP IPv4 address for the router on the other end of the BGP session from
+	// Oracle. Specified by the owner of that router. If the session goes from Oracle
+	// to a customer, this is the BGP IPv4 address of the customer's edge router. If the
+	// session goes from Oracle to a provider, this is the BGP IPv4 address of the
+	// provider's edge router. Must use a subnet mask from /28 to /31.
+	// There's one exception: for a public virtual circuit, Oracle specifies the BGP IPv4 addresses.
+	// Example: `10.0.0.18/31`
+	// +kubebuilder:validation:Optional
+	CustomerBgpPeeringIp string `json:"customerBgpPeeringIp,omitempty"`
+	// The IPv4 address for Oracle's end of the BGP session. Must use a subnet mask from /28 to /31.
+	// If the session goes from Oracle to a customer's edge router,
+	// the customer specifies this information. If the session goes from Oracle to
+	// a provider's edge router, the provider specifies this.
+	// There's one exception: for a public virtual circuit, Oracle specifies the BGP IPv4 addresses.
+	// Example: `10.0.0.19/31`
+	// +kubebuilder:validation:Optional
+	OracleBgpPeeringIp string `json:"oracleBgpPeeringIp,omitempty"`
+	// The BGP IPv6 address for the router on the other end of the BGP session from
+	// Oracle. Specified by the owner of that router. If the session goes from Oracle
+	// to a customer, this is the BGP IPv6 address of the customer's edge router. If the
+	// session goes from Oracle to a provider, this is the BGP IPv6 address of the
+	// provider's edge router. Only subnet masks from /64 up to /127 are allowed.
+	// There's one exception: for a public virtual circuit, Oracle specifies the BGP IPv6 addresses.
+	// IPv6 addressing is supported for all commercial and government regions. See
+	// IPv6 Addresses (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/ipv6.htm).
+	// Example: `2001:db8::1/64`
+	// +kubebuilder:validation:Optional
+	CustomerBgpPeeringIpv6 string `json:"customerBgpPeeringIpv6,omitempty"`
+	// The IPv6 address for Oracle's end of the BGP session. Only subnet masks from /64 up to /127 are allowed.
+	// If the session goes from Oracle to a customer's edge router,
+	// the customer specifies this information. If the session goes from Oracle to
+	// a provider's edge router, the provider specifies this.
+	// There's one exception: for a public virtual circuit, Oracle specifies the BGP IPv6 addresses.
+	// Note that IPv6 addressing is currently supported only in certain regions. See
+	// IPv6 Addresses (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/ipv6.htm).
+	// Example: `2001:db8::2/64`
+	// +kubebuilder:validation:Optional
+	OracleBgpPeeringIpv6 string `json:"oracleBgpPeeringIpv6,omitempty"`
+	// The number of the specific VLAN (on the cross-connect or cross-connect group)
+	// that is assigned to this virtual circuit. Specified by the owner of the cross-connect
+	// or cross-connect group (the customer if the customer is colocated with Oracle, or
+	// the provider if the customer is connecting via provider).
+	// Example: `200`
+	// +kubebuilder:validation:Optional
+	Vlan int `json:"vlan,omitempty"`
+}
+
+// VirtualCircuitPublicPrefixFields defines nested fields for VirtualCircuit.PublicPrefix.
+type VirtualCircuitPublicPrefixFields struct {
+	// An individual public IP prefix (CIDR) to add to the public virtual circuit.
+	// All prefix sizes are allowed.
+	// +kubebuilder:validation:Required
+	CidrBlock string `json:"cidrBlock"`
 }
 
 // VirtualCircuitStatus defines the observed state of VirtualCircuit.
 type VirtualCircuitStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// Deprecated. Instead use the information in
+	// FastConnectProviderService.
+	BgpManagement string `json:"bgpManagement,omitempty"`
+	// The state of the Ipv4 BGP session associated with the virtual circuit.
+	BgpSessionState string `json:"bgpSessionState,omitempty"`
+	// The state of the Ipv6 BGP session associated with the virtual circuit.
+	BgpIpv6SessionState string `json:"bgpIpv6SessionState,omitempty"`
+	// The virtual circuit's Oracle ID (OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)).
+	Id string `json:"id,omitempty"`
+	// The virtual circuit's current state. For information about
+	// the different states, see
+	// FastConnect Overview (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/fastconnect.htm).
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The Oracle BGP ASN.
+	OracleBgpAsn int `json:"oracleBgpAsn,omitempty"`
+	// Provider service type.
+	ServiceType string `json:"serviceType,omitempty"`
+	// The date and time the virtual circuit was created,
+	// in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
 }
 
 // +kubebuilder:object:root=true

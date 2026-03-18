@@ -14,31 +14,91 @@ import (
 
 // DomainSpec defines the desired state of Domain.
 type DomainSpec struct {
-	Id                     shared.OCID       `json:"id,omitempty"`
-	CompartmentId          shared.OCID       `json:"compartmentId,omitempty"`
-	DisplayName            string            `json:"displayName,omitempty"`
-	Description            string            `json:"description,omitempty"`
-	HomeRegion             string            `json:"homeRegion,omitempty"`
-	LicenseType            string            `json:"licenseType,omitempty"`
-	IsHiddenOnLogin        bool              `json:"isHiddenOnLogin,omitempty"`
-	AdminFirstName         string            `json:"adminFirstName,omitempty"`
-	AdminLastName          string            `json:"adminLastName,omitempty"`
-	AdminUserName          string            `json:"adminUserName,omitempty"`
-	AdminEmail             string            `json:"adminEmail,omitempty"`
-	IsNotificationBypassed bool              `json:"isNotificationBypassed,omitempty"`
-	IsPrimaryEmailRequired bool              `json:"isPrimaryEmailRequired,omitempty"`
-	FreeformTags           map[string]string `json:"freeformTags,omitempty"`
-	Url                    string            `json:"url,omitempty"`
-	HomeRegionUrl          string            `json:"homeRegionUrl,omitempty"`
-	Type                   string            `json:"type,omitempty"`
-	TimeCreated            string            `json:"timeCreated,omitempty"`
-	LifecycleState         string            `json:"lifecycleState,omitempty"`
-	LifecycleDetails       string            `json:"lifecycleDetails,omitempty"`
+	// The OCID of the compartment where the identity domain is created.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// The mutable display name of the identity domain.
+	// +kubebuilder:validation:Required
+	DisplayName string `json:"displayName"`
+	// The identity domain description. You can have an empty description.
+	// +kubebuilder:validation:Required
+	Description string `json:"description"`
+	// The region's name identifier. See Regions and Availability Domains (https://docs.cloud.oracle.com/Content/General/Concepts/regions.htm)
+	// for the full list of supported region names.
+	// Example: `us-phoenix-1`
+	// +kubebuilder:validation:Required
+	HomeRegion string `json:"homeRegion"`
+	// The license type of the identity domain.
+	// +kubebuilder:validation:Required
+	LicenseType string `json:"licenseType"`
+	// Indicates whether the identity domain is hidden on the sign-in screen or not.
+	// +kubebuilder:validation:Optional
+	IsHiddenOnLogin bool `json:"isHiddenOnLogin,omitempty"`
+	// The administrator's first name.
+	// +kubebuilder:validation:Optional
+	AdminFirstName string `json:"adminFirstName,omitempty"`
+	// The administrator's last name.
+	// +kubebuilder:validation:Optional
+	AdminLastName string `json:"adminLastName,omitempty"`
+	// The administrator's user name.
+	// +kubebuilder:validation:Optional
+	AdminUserName string `json:"adminUserName,omitempty"`
+	// The administrator's email address.
+	// +kubebuilder:validation:Optional
+	AdminEmail string `json:"adminEmail,omitempty"`
+	// Indicates whether or not the administrator user created in the IDCS stripe would like to receive notifications like a welcome email.
+	// This field is required only if admin information is provided. This field is otherwise optional.
+	// +kubebuilder:validation:Optional
+	IsNotificationBypassed bool `json:"isNotificationBypassed,omitempty"`
+	// Optional field to indicate whether users in the identity domain are required to have a primary email address or not. The default is true.
+	// +kubebuilder:validation:Optional
+	IsPrimaryEmailRequired bool `json:"isPrimaryEmailRequired,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+}
+
+// DomainReplicaRegion defines nested fields for Domain.ReplicaRegion.
+type DomainReplicaRegion struct {
+	// A REPLICATION_ENABLED region, e.g. us-ashburn-1.
+	// See Regions and Availability Domains (https://docs.cloud.oracle.com/Content/General/Concepts/regions.htm)
+	// for the full list of supported region names.
+	Region string `json:"region,omitempty"`
+	// Region-agnostic identity domain URL.
+	Url string `json:"url,omitempty"`
+	// Region-specific identity domain URL.
+	RegionalUrl string `json:"regionalUrl,omitempty"`
+	// The IDCS-replicated region state.
+	State string `json:"state,omitempty"`
 }
 
 // DomainStatus defines the observed state of Domain.
 type DomainStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the identity domain.
+	Id string `json:"id,omitempty"`
+	// Region-agnostic identity domain URL.
+	Url string `json:"url,omitempty"`
+	// Region-specific identity domain URL.
+	HomeRegionUrl string `json:"homeRegionUrl,omitempty"`
+	// The regions where replicas of the identity domain exist.
+	ReplicaRegions []DomainReplicaRegion `json:"replicaRegions,omitempty"`
+	// The type of the domain.
+	Type string `json:"type,omitempty"`
+	// Date and time the identity domain was created, in the format defined by RFC3339.
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The current state.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// Any additional details about the current state of the identity domain.
+	LifecycleDetails string `json:"lifecycleDetails,omitempty"`
 }
 
 // +kubebuilder:object:root=true

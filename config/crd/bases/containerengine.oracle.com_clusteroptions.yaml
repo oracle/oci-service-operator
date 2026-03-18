@@ -52,18 +52,80 @@ spec:
           spec:
             description: ClusterOptionSpec defines the desired state of ClusterOption.
             properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
+              admissionControllerOptions:
+                description: Configurable cluster admission controllers
+                properties:
+                  isPodSecurityPolicyEnabled:
+                    description: Whether or not to enable the Pod Security Policy
+                      admission controller.
+                    type: boolean
+                type: object
+              persistentVolumeConfig:
+                description: ClusterOptionPersistentVolumeConfig defines nested fields
+                  for ClusterOption.PersistentVolumeConfig.
+                properties:
+                  definedTags:
+                    additionalProperties:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    description: |-
+                      Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                      For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                      Example: `{"Operations": {"CostCenter": "42"}}`
+                    type: object
+                  freeformTags:
+                    additionalProperties:
+                      type: string
+                    description: |-
+                      Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                      For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                      Example: `{"Department": "Finance"}`
+                    type: object
+                type: object
+              serviceLbConfig:
+                description: ClusterOptionServiceLbConfig defines nested fields for
+                  ClusterOption.ServiceLbConfig.
+                properties:
+                  definedTags:
+                    additionalProperties:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    description: |-
+                      Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                      For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                      Example: `{"Operations": {"CostCenter": "42"}}`
+                    type: object
+                  freeformTags:
+                    additionalProperties:
+                      type: string
+                    description: |-
+                      Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                      For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                      Example: `{"Department": "Finance"}`
+                    type: object
+                type: object
             type: object
           status:
             description: ClusterOptionStatus defines the observed state of ClusterOption.
             properties:
+              clusterPodNetworkOptions:
+                description: Available CNIs and network options for existing and new
+                  node pools of the cluster
+                items:
+                  description: ClusterOptionClusterPodNetworkOption defines nested
+                    fields for ClusterOption.ClusterPodNetworkOption.
+                  properties:
+                    cniType:
+                      type: string
+                  type: object
+                type: array
+              kubernetesVersions:
+                description: Available Kubernetes versions.
+                items:
+                  type: string
+                type: array
               status:
                 properties:
                   conditions:

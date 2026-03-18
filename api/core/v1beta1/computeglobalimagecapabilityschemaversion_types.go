@@ -14,22 +14,38 @@ import (
 
 // ComputeGlobalImageCapabilitySchemaVersionSpec defines the desired state of ComputeGlobalImageCapabilitySchemaVersion.
 type ComputeGlobalImageCapabilitySchemaVersionSpec struct {
-	Id                                   shared.OCID `json:"id,omitempty"`
-	CompartmentId                        shared.OCID `json:"compartmentId,omitempty"`
-	Name                                 string      `json:"name,omitempty"`
-	ComputeGlobalImageCapabilitySchemaId string      `json:"computeGlobalImageCapabilitySchemaId,omitempty"`
-	DisplayName                          string      `json:"displayName,omitempty"`
-	TimeCreated                          string      `json:"timeCreated,omitempty"`
+}
+
+// ComputeGlobalImageCapabilitySchemaVersionSchemaData defines nested fields for ComputeGlobalImageCapabilitySchemaVersion.SchemaData.
+type ComputeGlobalImageCapabilitySchemaVersionSchemaData struct {
+	Source         string `json:"source,omitempty"`
+	DescriptorType string `json:"descriptorType,omitempty"`
+	// the list of values for the enum
+	Values []string `json:"values,omitempty"`
+	// the default value
+	DefaultValue string `json:"defaultValue,omitempty"`
 }
 
 // ComputeGlobalImageCapabilitySchemaVersionStatus defines the observed state of ComputeGlobalImageCapabilitySchemaVersion.
 type ComputeGlobalImageCapabilitySchemaVersionStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The name of the compute global image capability schema version
+	Name string `json:"name,omitempty"`
+	// The ocid of the compute global image capability schema
+	ComputeGlobalImageCapabilitySchemaId string `json:"computeGlobalImageCapabilitySchemaId,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	DisplayName string `json:"displayName,omitempty"`
+	// The map of each capability name to its ImageCapabilityDescriptor.
+	SchemaData map[string]ComputeGlobalImageCapabilitySchemaVersionSchemaData `json:"schemaData,omitempty"`
+	// The date and time the compute global image capability schema version was created, in the format defined by
+	// RFC3339 (https://tools.ietf.org/html/rfc3339).
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="DisplayName",type="string",JSONPath=".spec.displayName",priority=1
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.status.conditions[-1].type",description="status of the ComputeGlobalImageCapabilitySchemaVersion",priority=0
 // +kubebuilder:printcolumn:name="Ocid",type="string",JSONPath=".status.status.ocid",description="Ocid of the ComputeGlobalImageCapabilitySchemaVersion",priority=1
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0

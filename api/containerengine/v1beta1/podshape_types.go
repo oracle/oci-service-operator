@@ -14,20 +14,57 @@ import (
 
 // PodShapeSpec defines the desired state of PodShape.
 type PodShapeSpec struct {
-	Id                   shared.OCID `json:"id,omitempty"`
-	CompartmentId        shared.OCID `json:"compartmentId,omitempty"`
-	Name                 string      `json:"name,omitempty"`
-	ProcessorDescription string      `json:"processorDescription,omitempty"`
+}
+
+// PodShapeOcpuOption defines nested fields for PodShape.OcpuOption.
+type PodShapeOcpuOption struct {
+	// The minimum number of OCPUs.
+	Min float32 `json:"min,omitempty"`
+	// The maximum number of OCPUs.
+	Max float32 `json:"max,omitempty"`
+}
+
+// PodShapeMemoryOption defines nested fields for PodShape.MemoryOption.
+type PodShapeMemoryOption struct {
+	// The minimum amount of memory, in gigabytes.
+	MinInGBs float32 `json:"minInGBs,omitempty"`
+	// The maximum amount of memory, in gigabytes.
+	MaxInGBs float32 `json:"maxInGBs,omitempty"`
+	// The default amount of memory per OCPU available for this shape, in gigabytes.
+	DefaultPerOcpuInGBs float32 `json:"defaultPerOcpuInGBs,omitempty"`
+	// The minimum amount of memory per OCPU available for this shape, in gigabytes.
+	MinPerOcpuInGBs float32 `json:"minPerOcpuInGBs,omitempty"`
+	// The maximum amount of memory per OCPU available for this shape, in gigabytes.
+	MaxPerOcpuInGBs float32 `json:"maxPerOcpuInGBs,omitempty"`
+}
+
+// PodShapeNetworkBandwidthOption defines nested fields for PodShape.NetworkBandwidthOption.
+type PodShapeNetworkBandwidthOption struct {
+	// The minimum amount of networking bandwidth, in gigabits per second.
+	MinInGbps float32 `json:"minInGbps,omitempty"`
+	// The maximum amount of networking bandwidth, in gigabits per second.
+	MaxInGbps float32 `json:"maxInGbps,omitempty"`
+	// The default amount of networking bandwidth per OCPU, in gigabits per second.
+	DefaultPerOcpuInGbps float32 `json:"defaultPerOcpuInGbps,omitempty"`
 }
 
 // PodShapeStatus defines the observed state of PodShape.
 type PodShapeStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The name of the identifying shape.
+	Name string `json:"name,omitempty"`
+	// A short description of the VM's processor (CPU).
+	ProcessorDescription string `json:"processorDescription,omitempty"`
+	// Options for OCPU shape.
+	OcpuOptions []PodShapeOcpuOption `json:"ocpuOptions,omitempty"`
+	// ShapeMemoryOptions.
+	MemoryOptions []PodShapeMemoryOption `json:"memoryOptions,omitempty"`
+	// ShapeNetworkBandwidthOptions.
+	NetworkBandwidthOptions []PodShapeNetworkBandwidthOption `json:"networkBandwidthOptions,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Name",type="string",JSONPath=".spec.name",priority=1
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.status.conditions[-1].type",description="status of the PodShape",priority=0
 // +kubebuilder:printcolumn:name="Ocid",type="string",JSONPath=".status.status.ocid",description="Ocid of the PodShape",priority=1
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0

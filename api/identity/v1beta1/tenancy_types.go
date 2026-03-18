@@ -14,23 +14,35 @@ import (
 
 // TenancySpec defines the desired state of Tenancy.
 type TenancySpec struct {
-	Id                                shared.OCID       `json:"id,omitempty"`
-	CompartmentId                     shared.OCID       `json:"compartmentId,omitempty"`
-	Name                              string            `json:"name,omitempty"`
-	Description                       string            `json:"description,omitempty"`
-	HomeRegionKey                     string            `json:"homeRegionKey,omitempty"`
-	UpiIdcsCompatibilityLayerEndpoint string            `json:"upiIdcsCompatibilityLayerEndpoint,omitempty"`
-	FreeformTags                      map[string]string `json:"freeformTags,omitempty"`
 }
 
 // TenancyStatus defines the observed state of Tenancy.
 type TenancyStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the tenancy.
+	Id string `json:"id,omitempty"`
+	// The name of the tenancy.
+	Name string `json:"name,omitempty"`
+	// The description of the tenancy.
+	Description string `json:"description,omitempty"`
+	// The region key for the tenancy's home region. For the full list of supported regions, see
+	// Regions and Availability Domains (https://docs.cloud.oracle.com/Content/General/Concepts/regions.htm).
+	// Example: `PHX`
+	HomeRegionKey string `json:"homeRegionKey,omitempty"`
+	// Url which refers to the UPI IDCS compatibility layer endpoint configured for this Tenant's home region.
+	UpiIdcsCompatibilityLayerEndpoint string `json:"upiIdcsCompatibilityLayerEndpoint,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Name",type="string",JSONPath=".spec.name",priority=1
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.status.conditions[-1].type",description="status of the Tenancy",priority=0
 // +kubebuilder:printcolumn:name="Ocid",type="string",JSONPath=".status.status.ocid",description="Ocid of the Tenancy",priority=1
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0

@@ -14,8 +14,6 @@ import (
 
 // OrResetUIPasswordSpec defines the desired state of OrResetUIPassword.
 type OrResetUIPasswordSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // OrResetUIPasswordStatus defines the observed state of OrResetUIPassword.

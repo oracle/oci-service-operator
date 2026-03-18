@@ -14,10 +14,40 @@ import (
 
 // RoutingPolicySpec defines the desired state of RoutingPolicy.
 type RoutingPolicySpec struct {
-	Id                       shared.OCID `json:"id,omitempty"`
-	CompartmentId            shared.OCID `json:"compartmentId,omitempty"`
-	Name                     string      `json:"name,omitempty"`
-	ConditionLanguageVersion string      `json:"conditionLanguageVersion,omitempty"`
+	// The name for this list of routing rules. It must be unique and it cannot be changed. Avoid entering
+	// confidential information.
+	// Example: `example_routing_rules`
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+	// The version of the language in which `condition` of `rules` are composed.
+	// +kubebuilder:validation:Required
+	ConditionLanguageVersion string `json:"conditionLanguageVersion"`
+	// The list of routing rules.
+	// +kubebuilder:validation:Required
+	Rules []RoutingPolicyRule `json:"rules"`
+}
+
+// RoutingPolicyRuleAction defines nested fields for RoutingPolicy.Rule.Action.
+type RoutingPolicyRuleAction struct {
+	// +kubebuilder:validation:Optional
+	Name string `json:"name,omitempty"`
+	// Name of the backend set the listener will forward the traffic to.
+	// Example: `backendSetForImages`
+	// +kubebuilder:validation:Required
+	BackendSetName string `json:"backendSetName"`
+}
+
+// RoutingPolicyRule defines nested fields for RoutingPolicy.Rule.
+type RoutingPolicyRule struct {
+	// A unique name for the routing policy rule. Avoid entering confidential information.
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+	// A routing rule to evaluate defined conditions against the incoming HTTP request and perform an action.
+	// +kubebuilder:validation:Required
+	Condition string `json:"condition"`
+	// A list of actions to be applied when conditions of the routing rule are met.
+	// +kubebuilder:validation:Required
+	Actions []RoutingPolicyRuleAction `json:"actions"`
 }
 
 // RoutingPolicyStatus defines the observed state of RoutingPolicy.

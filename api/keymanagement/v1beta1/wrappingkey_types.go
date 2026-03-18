@@ -14,17 +14,25 @@ import (
 
 // WrappingKeySpec defines the desired state of WrappingKey.
 type WrappingKeySpec struct {
-	Id             shared.OCID `json:"id,omitempty"`
-	CompartmentId  shared.OCID `json:"compartmentId,omitempty"`
-	LifecycleState string      `json:"lifecycleState,omitempty"`
-	PublicKey      string      `json:"publicKey,omitempty"`
-	TimeCreated    string      `json:"timeCreated,omitempty"`
-	VaultId        string      `json:"vaultId,omitempty"`
 }
 
 // WrappingKeyStatus defines the observed state of WrappingKey.
 type WrappingKeyStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the compartment that contains this key.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The OCID of the key.
+	Id string `json:"id,omitempty"`
+	// The key's current lifecycle state.
+	// Example: `ENABLED`
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The public key, in PEM format, to use to wrap the key material before importing it.
+	PublicKey string `json:"publicKey,omitempty"`
+	// The date and time the key was created, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2018-04-03T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The OCID of the vault that contains this key.
+	VaultId string `json:"vaultId,omitempty"`
 }
 
 // +kubebuilder:object:root=true

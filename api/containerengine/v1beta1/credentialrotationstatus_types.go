@@ -14,16 +14,19 @@ import (
 
 // CredentialRotationStatusSpec defines the desired state of CredentialRotationStatus.
 type CredentialRotationStatusSpec struct {
-	Id                          shared.OCID `json:"id,omitempty"`
-	CompartmentId               shared.OCID `json:"compartmentId,omitempty"`
-	Status                      string      `json:"status,omitempty"`
-	StatusDetails               string      `json:"statusDetails,omitempty"`
-	TimeAutoCompletionScheduled string      `json:"timeAutoCompletionScheduled,omitempty"`
 }
 
 // CredentialRotationStatusObservedState defines the observed state of CredentialRotationStatus.
 type CredentialRotationStatusObservedState struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// Details of a kuberenetes cluster credential rotation status:
+	// ISSUING_NEW_CREDENTIALS: Credential rotation is in progress. Starting to issue new credentials to kubernetes cluster control plane and worker nodes.
+	// NEW_CREDENTIALS_ISSUED: New credentials are added. At this stage cluster has both old and new credentials and is awaiting old credentials retirement.
+	// RETIRING_OLD_CREDENTIALS: Retirement of old credentials is in progress. Starting to remove old credentials from kubernetes cluster control plane and worker nodes.
+	// COMPLETED: Credential rotation is complete. Old credentials are retired.
+	StatusDetails string `json:"statusDetails,omitempty"`
+	// The time by which retirement of old credentials should start.
+	TimeAutoCompletionScheduled string `json:"timeAutoCompletionScheduled,omitempty"`
 }
 
 // +kubebuilder:object:root=true

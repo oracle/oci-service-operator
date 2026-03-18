@@ -14,13 +14,15 @@ import (
 
 // ServiceSpec defines the desired state of Service.
 type ServiceSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // ServiceStatus defines the observed state of Service.
 type ServiceStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The service name. Use this when calling other APIs.
+	Name string `json:"name,omitempty"`
+	// The friendly service name.
+	Description string `json:"description,omitempty"`
 }
 
 // +kubebuilder:object:root=true

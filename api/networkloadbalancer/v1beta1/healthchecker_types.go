@@ -14,16 +14,41 @@ import (
 
 // HealthCheckerSpec defines the desired state of HealthChecker.
 type HealthCheckerSpec struct {
-	Id                shared.OCID `json:"id,omitempty"`
-	CompartmentId     shared.OCID `json:"compartmentId,omitempty"`
-	Protocol          string      `json:"protocol,omitempty"`
-	Port              int         `json:"port,omitempty"`
-	Retries           int         `json:"retries,omitempty"`
-	TimeoutInMillis   int         `json:"timeoutInMillis,omitempty"`
-	IntervalInMillis  int         `json:"intervalInMillis,omitempty"`
-	UrlPath           string      `json:"urlPath,omitempty"`
-	ResponseBodyRegex string      `json:"responseBodyRegex,omitempty"`
-	ReturnCode        int         `json:"returnCode,omitempty"`
+	// The protocol that the health check must use; either HTTP, UDP, or TCP.
+	// Example: `HTTP`
+	// +kubebuilder:validation:Optional
+	Protocol string `json:"protocol,omitempty"`
+	// The backend server port against which to run the health check.
+	// Example: `8080`
+	// +kubebuilder:validation:Optional
+	Port int `json:"port,omitempty"`
+	// The number of retries to attempt before a backend server is considered "unhealthy". This number also applies
+	// when recovering a server to the "healthy" state.
+	// Example: `3`
+	// +kubebuilder:validation:Optional
+	Retries int `json:"retries,omitempty"`
+	// The maximum time, in milliseconds, to wait for a reply to a health check. A health check is successful only if a reply
+	// returns within this timeout period.
+	// Example: `3000`
+	// +kubebuilder:validation:Optional
+	TimeoutInMillis int `json:"timeoutInMillis,omitempty"`
+	// The interval between health checks, in milliseconds.
+	// Example: `10000`
+	// +kubebuilder:validation:Optional
+	IntervalInMillis int `json:"intervalInMillis,omitempty"`
+	// The path against which to run the health check.
+	// Example: `/healthcheck`
+	// +kubebuilder:validation:Optional
+	UrlPath string `json:"urlPath,omitempty"`
+	// A regular expression for parsing the response body from the backend server.
+	// Example: `^((?!false).|\s)*$`
+	// +kubebuilder:validation:Optional
+	ResponseBodyRegex string `json:"responseBodyRegex,omitempty"`
+	// The status code a healthy backend server should return. If you configure the health check policy to use the HTTP protocol,
+	// then you can use common HTTP status codes such as "200".
+	// Example: `200`
+	// +kubebuilder:validation:Optional
+	ReturnCode int `json:"returnCode,omitempty"`
 }
 
 // HealthCheckerStatus defines the observed state of HealthChecker.

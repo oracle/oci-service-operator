@@ -14,8 +14,6 @@ import (
 
 // TunnelCpeDeviceConfigContentSpec defines the desired state of TunnelCpeDeviceConfigContent.
 type TunnelCpeDeviceConfigContentSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // TunnelCpeDeviceConfigContentStatus defines the observed state of TunnelCpeDeviceConfigContent.

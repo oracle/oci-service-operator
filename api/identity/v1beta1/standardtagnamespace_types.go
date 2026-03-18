@@ -14,8 +14,6 @@ import (
 
 // StandardTagNamespaceSpec defines the desired state of StandardTagNamespace.
 type StandardTagNamespaceSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // StandardTagNamespaceStatus defines the observed state of StandardTagNamespace.

@@ -14,21 +14,51 @@ import (
 
 // Ipv6Spec defines the desired state of Ipv6.
 type Ipv6Spec struct {
-	Id             shared.OCID       `json:"id,omitempty"`
-	CompartmentId  shared.OCID       `json:"compartmentId,omitempty"`
-	VnicId         string            `json:"vnicId,omitempty"`
-	DisplayName    string            `json:"displayName,omitempty"`
-	FreeformTags   map[string]string `json:"freeformTags,omitempty"`
-	IpAddress      string            `json:"ipAddress,omitempty"`
-	Ipv6SubnetCidr string            `json:"ipv6SubnetCidr,omitempty"`
-	LifecycleState string            `json:"lifecycleState,omitempty"`
-	SubnetId       string            `json:"subnetId,omitempty"`
-	TimeCreated    string            `json:"timeCreated,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VNIC to assign the IPv6 to. The
+	// IPv6 will be in the VNIC's subnet.
+	// +kubebuilder:validation:Required
+	VnicId string `json:"vnicId"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// An IPv6 address of your choice. Must be an available IP address within
+	// the subnet's CIDR. If you don't specify a value, Oracle automatically
+	// assigns an IPv6 address from the subnet. The subnet is the one that
+	// contains the VNIC you specify in `vnicId`.
+	// Example: `2001:DB8::`
+	// +kubebuilder:validation:Optional
+	IpAddress string `json:"ipAddress,omitempty"`
+	// The IPv6 prefix allocated to the subnet. This is required if more than one IPv6 prefix exists on the subnet.
+	// +kubebuilder:validation:Optional
+	Ipv6SubnetCidr string `json:"ipv6SubnetCidr,omitempty"`
 }
 
 // Ipv6Status defines the observed state of Ipv6.
 type Ipv6Status struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the IPv6.
+	// This is the same as the VNIC's compartment.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the IPv6.
+	Id string `json:"id,omitempty"`
+	// The IPv6's current state.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subnet the VNIC is in.
+	SubnetId string `json:"subnetId,omitempty"`
+	// The date and time the IPv6 was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
 }
 
 // +kubebuilder:object:root=true

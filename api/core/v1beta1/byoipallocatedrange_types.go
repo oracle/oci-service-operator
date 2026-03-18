@@ -14,13 +14,15 @@ import (
 
 // ByoipAllocatedRangeSpec defines the desired state of ByoipAllocatedRange.
 type ByoipAllocatedRangeSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // ByoipAllocatedRangeStatus defines the observed state of ByoipAllocatedRange.
 type ByoipAllocatedRangeStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The BYOIP CIDR block range or subrange allocated to an IP pool. This could be all or part of a BYOIP CIDR block.
+	CidrBlock string `json:"cidrBlock,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the IP pool containing the CIDR block.
+	PublicIpPoolId string `json:"publicIpPoolId,omitempty"`
 }
 
 // +kubebuilder:object:root=true

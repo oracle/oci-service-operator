@@ -14,16 +14,17 @@ import (
 
 // VcnDnsResolverAssociationSpec defines the desired state of VcnDnsResolverAssociation.
 type VcnDnsResolverAssociationSpec struct {
-	Id             shared.OCID `json:"id,omitempty"`
-	CompartmentId  shared.OCID `json:"compartmentId,omitempty"`
-	VcnId          string      `json:"vcnId,omitempty"`
-	LifecycleState string      `json:"lifecycleState,omitempty"`
-	DnsResolverId  string      `json:"dnsResolverId,omitempty"`
 }
 
 // VcnDnsResolverAssociationStatus defines the observed state of VcnDnsResolverAssociation.
 type VcnDnsResolverAssociationStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VCN in the association.
+	VcnId string `json:"vcnId,omitempty"`
+	// The current state of the association.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the DNS resolver in the association.
+	DnsResolverId string `json:"dnsResolverId,omitempty"`
 }
 
 // +kubebuilder:object:root=true

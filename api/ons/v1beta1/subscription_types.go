@@ -14,22 +14,79 @@ import (
 
 // SubscriptionSpec defines the desired state of Subscription.
 type SubscriptionSpec struct {
-	Id             shared.OCID       `json:"id,omitempty"`
-	CompartmentId  shared.OCID       `json:"compartmentId,omitempty"`
-	TopicId        string            `json:"topicId,omitempty"`
-	Protocol       string            `json:"protocol,omitempty"`
-	Endpoint       string            `json:"endpoint,omitempty"`
-	Metadata       string            `json:"metadata,omitempty"`
-	FreeformTags   map[string]string `json:"freeformTags,omitempty"`
-	LifecycleState string            `json:"lifecycleState,omitempty"`
-	CreatedTime    int64             `json:"createdTime,omitempty"`
-	DeliverPolicy  string            `json:"deliverPolicy,omitempty"`
-	Etag           string            `json:"etag,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the topic for the subscription.
+	// +kubebuilder:validation:Required
+	TopicId string `json:"topicId"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment for the subscription.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// The protocol used for the subscription.
+	// Allowed values:
+	//   * `CUSTOM_HTTPS`
+	//   * `EMAIL`
+	//   * `HTTPS` (deprecated; for PagerDuty endpoints, use `PAGERDUTY`)
+	//   * `ORACLE_FUNCTIONS`
+	//   * `PAGERDUTY`
+	//   * `SLACK`
+	//   * `SMS`
+	// For information about subscription protocols, see
+	// To create a subscription (https://docs.cloud.oracle.com/iaas/Content/Notification/Tasks/managingtopicsandsubscriptions.htm#createSub).
+	// +kubebuilder:validation:Required
+	Protocol string `json:"protocol"`
+	// A locator that corresponds to the subscription protocol.
+	// For example, an email address for a subscription that uses the `EMAIL` protocol, or a URL for a subscription that uses an HTTP-based protocol.
+	// HTTP-based protocols use URL endpoints that begin with "http:" or "https:".
+	// A URL cannot exceed 512 characters.
+	// Avoid entering confidential information.
+	// For protocol-specific endpoint formats and steps to get or create endpoints, see
+	// To create a subscription (https://docs.cloud.oracle.com/iaas/Content/Notification/Tasks/managingtopicsandsubscriptions.htm#createSub).
+	// +kubebuilder:validation:Required
+	Endpoint string `json:"endpoint"`
+	// Metadata for the subscription.
+	// +kubebuilder:validation:Optional
+	Metadata string `json:"metadata,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// The delivery policy of the subscription. Stored as a JSON string.
+	// +kubebuilder:validation:Optional
+	DeliveryPolicy SubscriptionDeliveryPolicy `json:"deliveryPolicy,omitempty"`
+}
+
+// SubscriptionDeliveryPolicyBackoffRetryPolicy defines nested fields for Subscription.DeliveryPolicy.BackoffRetryPolicy.
+type SubscriptionDeliveryPolicyBackoffRetryPolicy struct {
+	// The maximum retry duration in milliseconds. Default value is `7200000` (2 hours).
+	// +kubebuilder:validation:Required
+	MaxRetryDuration int `json:"maxRetryDuration"`
+	// The type of delivery policy.
+	// +kubebuilder:validation:Required
+	PolicyType string `json:"policyType"`
+}
+
+// SubscriptionDeliveryPolicy defines nested fields for Subscription.DeliveryPolicy.
+type SubscriptionDeliveryPolicy struct {
+	// +kubebuilder:validation:Optional
+	BackoffRetryPolicy SubscriptionDeliveryPolicyBackoffRetryPolicy `json:"backoffRetryPolicy,omitempty"`
 }
 
 // SubscriptionStatus defines the observed state of Subscription.
 type SubscriptionStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subscription.
+	Id string `json:"id,omitempty"`
+	// The lifecycle state of the subscription. The status of a new subscription is PENDING; when confirmed, the subscription status changes to ACTIVE.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The time when this suscription was created.
+	CreatedTime int64 `json:"createdTime,omitempty"`
+	// The delivery policy of the subscription. Stored as a JSON string.
+	DeliverPolicy string `json:"deliverPolicy,omitempty"`
+	// For optimistic concurrency control. See `if-match`.
+	Etag string `json:"etag,omitempty"`
 }
 
 // +kubebuilder:object:root=true

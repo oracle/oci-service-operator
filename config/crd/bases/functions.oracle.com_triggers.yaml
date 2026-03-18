@@ -15,10 +15,6 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - jsonPath: .spec.name
-      name: Name
-      priority: 1
-      type: string
     - description: status of the Trigger
       jsonPath: .status.status.conditions[-1].type
       name: Status
@@ -55,21 +51,13 @@ spec:
             type: object
           spec:
             description: TriggerSpec defines the desired state of Trigger.
-            properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
-              name:
-                type: string
             type: object
           status:
             description: TriggerStatus defines the observed state of Trigger.
             properties:
+              name:
+                description: A brief descriptive name for the PBF trigger.
+                type: string
               status:
                 properties:
                   conditions:

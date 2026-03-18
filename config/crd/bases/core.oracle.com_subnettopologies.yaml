@@ -51,27 +51,74 @@ spec:
             type: object
           spec:
             description: SubnetTopologySpec defines the desired state of SubnetTopology.
-            properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
-              limitedEntities:
-                items:
-                  type: string
-                type: array
-              subnetId:
-                type: string
-              timeCreated:
-                type: string
             type: object
           status:
             description: SubnetTopologyStatus defines the observed state of SubnetTopology.
             properties:
+              limitedEntities:
+                description: |-
+                  Lists entities that are limited during ingestion.
+                  The values for the items in the list are the entity type names of the limitedEntities.
+                  Example: `vcn`
+                items:
+                  type: string
+                type: array
+              relationships:
+                description: Lists relationships between entities in the virtual network
+                  topology.
+                items:
+                  description: SubnetTopologyRelationship defines nested fields for
+                    SubnetTopology.Relationship.
+                  properties:
+                    associatedWithDetails:
+                      description: SubnetTopologyRelationshipAssociatedWithDetails
+                        defines nested fields for SubnetTopology.Relationship.AssociatedWithDetails.
+                      properties:
+                        via:
+                          description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                            of the entities via which the relationship is created.
+                            For example an instance is associated with a network security
+                            group via the VNIC attachment and the VNIC.
+                          items:
+                            type: string
+                          type: array
+                      type: object
+                    id1:
+                      description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                        of the first entity in the relationship.
+                      type: string
+                    id2:
+                      description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                        of the second entity in the relationship.
+                      type: string
+                    routeRuleDetails:
+                      description: SubnetTopologyRelationshipRouteRuleDetails defines
+                        nested fields for SubnetTopology.Relationship.RouteRuleDetails.
+                      properties:
+                        destination:
+                          description: An IP address range in CIDR notation or the
+                            `cidrBlock` value for a Service.
+                          type: string
+                        destinationType:
+                          description: |-
+                            The destinationType can be set to one of two values:
+                            * Use `CIDR_BLOCK` if the rule's `destination` is an IP address range in CIDR notation.
+                            * Use `SERVICE_CIDR_BLOCK` if the rule's `destination` is the `cidrBlock` value for a Service.
+                          type: string
+                        routeTableId:
+                          description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                            of the routing table that contains the route rule.
+                          type: string
+                        routeType:
+                          description: A route rule can be `STATIC` if manually added
+                            to the route table or `DYNAMIC` if imported from another
+                            route table.
+                          type: string
+                      type: object
+                    type:
+                      type: string
+                  type: object
+                type: array
               status:
                 properties:
                   conditions:
@@ -114,6 +161,15 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              subnetId:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the subnet for which the visualization is generated.
+                type: string
+              timeCreated:
+                description: Records when the virtual network topology was created,
+                  in RFC3339 (https://tools.ietf.org/html/rfc3339) format for date
+                  and time.
+                type: string
             required:
             - status
             type: object

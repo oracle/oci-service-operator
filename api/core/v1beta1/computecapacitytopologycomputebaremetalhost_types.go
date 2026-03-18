@@ -14,8 +14,6 @@ import (
 
 // ComputeCapacityTopologyComputeBareMetalHostSpec defines the desired state of ComputeCapacityTopologyComputeBareMetalHost.
 type ComputeCapacityTopologyComputeBareMetalHostSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // ComputeCapacityTopologyComputeBareMetalHostStatus defines the observed state of ComputeCapacityTopologyComputeBareMetalHost.

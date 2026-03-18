@@ -14,17 +14,22 @@ import (
 
 // RegionSubscriptionSpec defines the desired state of RegionSubscription.
 type RegionSubscriptionSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
-	RegionKey     string      `json:"regionKey,omitempty"`
-	RegionName    string      `json:"regionName,omitempty"`
-	Status        string      `json:"status,omitempty"`
-	IsHomeRegion  bool        `json:"isHomeRegion,omitempty"`
+	// The regions's key. See Regions and Availability Domains (https://docs.cloud.oracle.com/Content/General/Concepts/regions.htm) for
+	// the full list of supported 3-letter region codes.
+	// Example: `PHX`
+	// +kubebuilder:validation:Required
+	RegionKey string `json:"regionKey"`
 }
 
 // RegionSubscriptionStatus defines the observed state of RegionSubscription.
 type RegionSubscriptionStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The region's name. See Regions and Availability Domains (https://docs.cloud.oracle.com/Content/General/Concepts/regions.htm)
+	// for the full list of supported region names.
+	// Example: `us-phoenix-1`
+	RegionName string `json:"regionName,omitempty"`
+	// Indicates if the region is the home region or not.
+	IsHomeRegion bool `json:"isHomeRegion,omitempty"`
 }
 
 // +kubebuilder:object:root=true

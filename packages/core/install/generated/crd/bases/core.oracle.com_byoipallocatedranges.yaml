@@ -52,19 +52,18 @@ spec:
             type: object
           spec:
             description: ByoipAllocatedRangeSpec defines the desired state of ByoipAllocatedRange.
-            properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
             type: object
           status:
             description: ByoipAllocatedRangeStatus defines the observed state of ByoipAllocatedRange.
             properties:
+              cidrBlock:
+                description: The BYOIP CIDR block range or subrange allocated to an
+                  IP pool. This could be all or part of a BYOIP CIDR block.
+                type: string
+              publicIpPoolId:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the IP pool containing the CIDR block.
+                type: string
               status:
                 properties:
                   conditions:

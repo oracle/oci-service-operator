@@ -14,16 +14,17 @@ import (
 
 // StatsSpec defines the desired state of Stats.
 type StatsSpec struct {
-	Id               shared.OCID `json:"id,omitempty"`
-	CompartmentId    shared.OCID `json:"compartmentId,omitempty"`
-	VisibleMessages  int64       `json:"visibleMessages,omitempty"`
-	InFlightMessages int64       `json:"inFlightMessages,omitempty"`
-	SizeInBytes      int64       `json:"sizeInBytes,omitempty"`
 }
 
 // StatsObservedState defines the observed state of Stats.
 type StatsObservedState struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The approximate number of visible messages (available for delivery) currently in the queue.
+	VisibleMessages int64 `json:"visibleMessages,omitempty"`
+	// The approximate number of messages delivered to a consumer but not yet deleted and so unavailable for re-delivery.
+	InFlightMessages int64 `json:"inFlightMessages,omitempty"`
+	// The approximate size of the queue in bytes. Sum of the size of visible and in-flight messages.
+	SizeInBytes int64 `json:"sizeInBytes,omitempty"`
 }
 
 // +kubebuilder:object:root=true

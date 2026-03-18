@@ -56,18 +56,57 @@ spec:
           spec:
             description: RoutingPolicySpec defines the desired state of RoutingPolicy.
             properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
               conditionLanguageVersion:
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
+                description: The version of the language in which `condition` of `rules`
+                  are composed.
                 type: string
               name:
+                description: |-
+                  The name for this list of routing rules. It must be unique and it cannot be changed. Avoid entering
+                  confidential information.
+                  Example: `example_routing_rules`
                 type: string
+              rules:
+                description: The list of routing rules.
+                items:
+                  description: RoutingPolicyRule defines nested fields for RoutingPolicy.Rule.
+                  properties:
+                    actions:
+                      description: A list of actions to be applied when conditions
+                        of the routing rule are met.
+                      items:
+                        description: RoutingPolicyRuleAction defines nested fields
+                          for RoutingPolicy.Rule.Action.
+                        properties:
+                          backendSetName:
+                            description: |-
+                              Name of the backend set the listener will forward the traffic to.
+                              Example: `backendSetForImages`
+                            type: string
+                          name:
+                            type: string
+                        required:
+                        - backendSetName
+                        type: object
+                      type: array
+                    condition:
+                      description: A routing rule to evaluate defined conditions against
+                        the incoming HTTP request and perform an action.
+                      type: string
+                    name:
+                      description: A unique name for the routing policy rule. Avoid
+                        entering confidential information.
+                      type: string
+                  required:
+                  - actions
+                  - condition
+                  - name
+                  type: object
+                type: array
+            required:
+            - conditionLanguageVersion
+            - name
+            - rules
             type: object
           status:
             description: RoutingPolicyStatus defines the observed state of RoutingPolicy.

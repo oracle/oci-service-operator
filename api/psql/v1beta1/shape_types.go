@@ -14,13 +14,20 @@ import (
 
 // ShapeSpec defines the desired state of Shape.
 type ShapeSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // ShapeStatus defines the observed state of Shape.
 type ShapeStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The name of the Compute VM shape.
+	// Example: `VM.Standard.E4.Flex`
+	Shape string `json:"shape,omitempty"`
+	// The number of OCPUs.
+	OcpuCount int `json:"ocpuCount,omitempty"`
+	// The amount of memory in gigabytes.
+	MemorySizeInGBs int `json:"memorySizeInGBs,omitempty"`
+	// A unique identifier for the shape.
+	Id string `json:"id,omitempty"`
 }
 
 // +kubebuilder:object:root=true

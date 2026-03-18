@@ -14,8 +14,6 @@ import (
 
 // NetworkLoadBalancersPolicySpec defines the desired state of NetworkLoadBalancersPolicy.
 type NetworkLoadBalancersPolicySpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // NetworkLoadBalancersPolicyStatus defines the observed state of NetworkLoadBalancersPolicy.

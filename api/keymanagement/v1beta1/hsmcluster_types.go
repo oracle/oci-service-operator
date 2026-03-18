@@ -14,20 +14,44 @@ import (
 
 // HsmClusterSpec defines the desired state of HsmCluster.
 type HsmClusterSpec struct {
-	Id             shared.OCID       `json:"id,omitempty"`
-	CompartmentId  shared.OCID       `json:"compartmentId,omitempty"`
-	DisplayName    string            `json:"displayName,omitempty"`
-	FreeformTags   map[string]string `json:"freeformTags,omitempty"`
-	TimeCreated    string            `json:"timeCreated,omitempty"`
-	TimeUpdated    string            `json:"timeUpdated,omitempty"`
-	LifecycleState string            `json:"lifecycleState,omitempty"`
-	DnsName        string            `json:"dnsName,omitempty"`
-	TimeOfDeletion string            `json:"timeOfDeletion,omitempty"`
+	// The OCID of the compartment where you want to create this HSM resource.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// A user-friendly name for the HSM resource. It does not have to be unique, and it is changeable.
+	// Avoid entering confidential information.
+	// +kubebuilder:validation:Required
+	DisplayName string `json:"displayName"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 }
 
 // HsmClusterStatus defines the observed state of HsmCluster.
 type HsmClusterStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the HSMCluster resource.
+	Id string `json:"id,omitempty"`
+	// The date and time this HSM resource was created, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2023-04-03T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The date and time this HSM resource was updated, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2023-04-03T21:10:29.600Z`
+	TimeUpdated string `json:"timeUpdated,omitempty"`
+	// The HSMCluster's current state.
+	// Example: `ACTIVE`
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// DNS name for the Hsm Cluster.
+	DnsName string `json:"dnsName,omitempty"`
+	// An optional property indicating when to delete the key, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2019-04-03T21:10:29.600Z`
+	TimeOfDeletion string `json:"timeOfDeletion,omitempty"`
 }
 
 // +kubebuilder:object:root=true

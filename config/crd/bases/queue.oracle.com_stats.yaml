@@ -51,28 +51,20 @@ spec:
             type: object
           spec:
             description: StatsSpec defines the desired state of Stats.
-            properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
-              inFlightMessages:
-                format: int64
-                type: integer
-              sizeInBytes:
-                format: int64
-                type: integer
-              visibleMessages:
-                format: int64
-                type: integer
             type: object
           status:
             description: StatsObservedState defines the observed state of Stats.
             properties:
+              inFlightMessages:
+                description: The approximate number of messages delivered to a consumer
+                  but not yet deleted and so unavailable for re-delivery.
+                format: int64
+                type: integer
+              sizeInBytes:
+                description: The approximate size of the queue in bytes. Sum of the
+                  size of visible and in-flight messages.
+                format: int64
+                type: integer
               status:
                 properties:
                   conditions:
@@ -115,6 +107,11 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              visibleMessages:
+                description: The approximate number of visible messages (available
+                  for delivery) currently in the queue.
+                format: int64
+                type: integer
             required:
             - status
             type: object

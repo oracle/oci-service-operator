@@ -52,15 +52,11 @@ spec:
           spec:
             description: VolumeKmsKeySpec defines the desired state of VolumeKmsKey.
             properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
               kmsKeyId:
+                description: |-
+                  The OCID of the new Vault service key to assign to protect the specified volume.
+                  This key has to be a valid Vault service key, and policies must exist to allow the user and the Block Volume service to access this key.
+                  If you specify the same OCID as the previous key's OCID, the Block Volume service will use it to regenerate a volume encryption key.
                 type: string
             type: object
           status:

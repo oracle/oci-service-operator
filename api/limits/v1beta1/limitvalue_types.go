@@ -14,13 +14,19 @@ import (
 
 // LimitValueSpec defines the desired state of LimitValue.
 type LimitValueSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // LimitValueStatus defines the observed state of LimitValue.
 type LimitValueStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The resource limit name. To be used for writing policies (in case of quotas) or other programmatic calls.
+	Name string `json:"name,omitempty"`
+	// The scope type of the limit.
+	ScopeType string `json:"scopeType,omitempty"`
+	// If present, the returned value is only specific to this availability domain.
+	AvailabilityDomain string `json:"availabilityDomain,omitempty"`
+	// The resource limit value.
+	Value int64 `json:"value,omitempty"`
 }
 
 // +kubebuilder:object:root=true

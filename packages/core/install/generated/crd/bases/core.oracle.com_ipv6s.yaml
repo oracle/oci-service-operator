@@ -56,36 +56,64 @@ spec:
           spec:
             description: Ipv6Spec defines the desired state of Ipv6.
             properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a
+                  namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
               displayName:
+                description: |-
+                  A user-friendly name. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
                 type: string
               freeformTags:
                 additionalProperties:
                   type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no
+                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
                 type: object
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
               ipAddress:
+                description: |-
+                  An IPv6 address of your choice. Must be an available IP address within
+                  the subnet's CIDR. If you don't specify a value, Oracle automatically
+                  assigns an IPv6 address from the subnet. The subnet is the one that
+                  contains the VNIC you specify in `vnicId`.
+                  Example: `2001:DB8::`
                 type: string
               ipv6SubnetCidr:
-                type: string
-              lifecycleState:
-                type: string
-              subnetId:
-                type: string
-              timeCreated:
+                description: The IPv6 prefix allocated to the subnet. This is required
+                  if more than one IPv6 prefix exists on the subnet.
                 type: string
               vnicId:
+                description: |-
+                  The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VNIC to assign the IPv6 to. The
+                  IPv6 will be in the VNIC's subnet.
                 type: string
+            required:
+            - vnicId
             type: object
           status:
             description: Ipv6Status defines the observed state of Ipv6.
             properties:
+              compartmentId:
+                description: |-
+                  The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the IPv6.
+                  This is the same as the VNIC's compartment.
+                type: string
+              id:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the IPv6.
+                type: string
+              lifecycleState:
+                description: The IPv6's current state.
+                type: string
               status:
                 properties:
                   conditions:
@@ -128,6 +156,15 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              subnetId:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the subnet the VNIC is in.
+                type: string
+              timeCreated:
+                description: |-
+                  The date and time the IPv6 was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+                  Example: `2016-08-25T21:10:29.600Z`
+                type: string
             required:
             - status
             type: object

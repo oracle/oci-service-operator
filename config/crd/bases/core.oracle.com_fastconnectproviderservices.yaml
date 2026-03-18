@@ -53,44 +53,52 @@ spec:
           spec:
             description: FastConnectProviderServiceSpec defines the desired state
               of FastConnectProviderService.
-            properties:
-              bandwithShapeManagement:
-                type: string
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              customerAsnManagement:
-                type: string
-              description:
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
-              privatePeeringBgpManagement:
-                type: string
-              providerName:
-                type: string
-              providerServiceKeyManagement:
-                type: string
-              providerServiceName:
-                type: string
-              publicPeeringBgpManagement:
-                type: string
-              requiredTotalCrossConnects:
-                type: integer
-              supportedVirtualCircuitTypes:
-                items:
-                  type: string
-                type: array
-              type:
-                type: string
             type: object
           status:
             description: FastConnectProviderServiceStatus defines the observed state
               of FastConnectProviderService.
             properties:
+              bandwithShapeManagement:
+                description: Who is responsible for managing the virtual circuit bandwidth.
+                type: string
+              customerAsnManagement:
+                description: |-
+                  Who is responsible for managing the ASN information for the network at the other end
+                  of the connection from Oracle.
+                type: string
+              description:
+                description: |-
+                  The location of the provider's website or portal. This portal is where you can get information
+                  about the provider service, create a virtual circuit connection from the provider to Oracle
+                  Cloud Infrastructure, and retrieve your provider service key for that virtual circuit connection.
+                  Example: `https://example.com`
+                type: string
+              id:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the service offered by the provider.
+                type: string
+              privatePeeringBgpManagement:
+                description: Who is responsible for managing the private peering BGP
+                  information.
+                type: string
+              providerName:
+                description: The name of the provider.
+                type: string
+              providerServiceKeyManagement:
+                description: Who is responsible for managing the provider service
+                  key.
+                type: string
+              providerServiceName:
+                description: The name of the service offered by the provider.
+                type: string
+              publicPeeringBgpManagement:
+                description: Who is responsible for managing the public peering BGP
+                  information.
+                type: string
+              requiredTotalCrossConnects:
+                description: Total number of cross-connect or cross-connect groups
+                  required for the virtual circuit.
+                type: integer
               status:
                 properties:
                   conditions:
@@ -133,6 +141,14 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              supportedVirtualCircuitTypes:
+                description: An array of virtual circuit types supported by this service.
+                items:
+                  type: string
+                type: array
+              type:
+                description: Provider service type.
+                type: string
             required:
             - status
             type: object

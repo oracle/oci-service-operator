@@ -14,14 +14,16 @@ import (
 
 // InstanceMaintenanceRebootSpec defines the desired state of InstanceMaintenanceReboot.
 type InstanceMaintenanceRebootSpec struct {
-	Id                          shared.OCID `json:"id,omitempty"`
-	CompartmentId               shared.OCID `json:"compartmentId,omitempty"`
-	TimeMaintenanceRebootDueMax string      `json:"timeMaintenanceRebootDueMax,omitempty"`
 }
 
 // InstanceMaintenanceRebootStatus defines the observed state of InstanceMaintenanceReboot.
 type InstanceMaintenanceRebootStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The maximum extension date and time for the maintenance reboot, in the format defined by
+	// RFC3339 (https://tools.ietf.org/html/rfc3339).
+	// The range for the maintenance extension is between 1 and 14 days from the initial scheduled maintenance date.
+	// Example: `2018-05-25T21:10:29.600Z`
+	TimeMaintenanceRebootDueMax string `json:"timeMaintenanceRebootDueMax,omitempty"`
 }
 
 // +kubebuilder:object:root=true

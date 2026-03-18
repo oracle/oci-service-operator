@@ -14,19 +14,27 @@ import (
 
 // InstancePoolLoadBalancerAttachmentSpec defines the desired state of InstancePoolLoadBalancerAttachment.
 type InstancePoolLoadBalancerAttachmentSpec struct {
-	Id             shared.OCID `json:"id,omitempty"`
-	CompartmentId  shared.OCID `json:"compartmentId,omitempty"`
-	InstancePoolId string      `json:"instancePoolId,omitempty"`
-	LoadBalancerId string      `json:"loadBalancerId,omitempty"`
-	BackendSetName string      `json:"backendSetName,omitempty"`
-	Port           int         `json:"port,omitempty"`
-	VnicSelection  string      `json:"vnicSelection,omitempty"`
-	LifecycleState string      `json:"lifecycleState,omitempty"`
 }
 
 // InstancePoolLoadBalancerAttachmentStatus defines the observed state of InstancePoolLoadBalancerAttachment.
 type InstancePoolLoadBalancerAttachmentStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the load balancer attachment.
+	Id string `json:"id,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the instance pool of the load balancer attachment.
+	InstancePoolId string `json:"instancePoolId,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the load balancer attached to the instance pool.
+	LoadBalancerId string `json:"loadBalancerId,omitempty"`
+	// The name of the backend set on the load balancer.
+	BackendSetName string `json:"backendSetName,omitempty"`
+	// The port value used for the backends.
+	Port int `json:"port,omitempty"`
+	// Indicates which VNIC on each instance in the instance pool should be used to associate with the load balancer.
+	// Possible values are "PrimaryVnic" or the displayName of one of the secondary VNICs on the instance configuration
+	// that is associated with the instance pool.
+	VnicSelection string `json:"vnicSelection,omitempty"`
+	// The status of the interaction between the instance pool and the load balancer.
+	LifecycleState string `json:"lifecycleState,omitempty"`
 }
 
 // +kubebuilder:object:root=true

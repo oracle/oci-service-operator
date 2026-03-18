@@ -51,19 +51,47 @@ spec:
             type: object
           spec:
             description: AddonOptionSpec defines the desired state of AddonOption.
-            properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
             type: object
           status:
             description: AddonOptionStatus defines the observed state of AddonOption.
             properties:
+              addonGroup:
+                description: Addon group info, a namespace concept that groups addons
+                  with similar functionalities.
+                type: string
+              addonSchemaVersion:
+                description: Addon definition schema version to validate addon.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              description:
+                description: Description on the addon.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              isEssential:
+                description: Is it an essential addon for cluster operation or not.
+                type: boolean
+              lifecycleState:
+                description: The life cycle state of the addon.
+                type: string
+              name:
+                description: Name of the addon and it would be unique.
+                type: string
               status:
                 properties:
                   conditions:
@@ -106,6 +134,75 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of system tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeCreated:
+                description: The time the work request was created.
+                type: string
+              versions:
+                description: The resources this work request affects.
+                items:
+                  description: AddonOptionVersion defines nested fields for AddonOption.Version.
+                  properties:
+                    configurations:
+                      description: Addon version configuration details.
+                      items:
+                        description: AddonOptionVersionConfiguration defines nested
+                          fields for AddonOption.Version.Configuration.
+                        properties:
+                          description:
+                            description: Information about the addon version configuration.
+                            type: string
+                          displayName:
+                            description: Display name of addon version.
+                            type: string
+                          isRequired:
+                            description: If the the configuration is required or not.
+                            type: boolean
+                          key:
+                            description: Addon configuration key
+                            type: string
+                          value:
+                            description: Addon configuration value
+                            type: string
+                        type: object
+                      type: array
+                    description:
+                      description: Information about the addon version.
+                      type: string
+                    kubernetesVersionFilters:
+                      description: The range of kubernetes versions an addon can be
+                        configured.
+                      properties:
+                        exactKubernetesVersions:
+                          description: The exact version of kubernetes that are compatible.
+                          items:
+                            type: string
+                          type: array
+                        maximumVersion:
+                          description: The latest kubernetes version.
+                          type: string
+                        minimalVersion:
+                          description: The earliest kubernetes version.
+                          type: string
+                      type: object
+                    status:
+                      description: Current state of the addon, only active will be
+                        visible to customer, visibility of versions in other status
+                        will be filtered  based on limits property.
+                      type: string
+                    versionNumber:
+                      description: Version number, need be comparable within an addon.
+                      type: string
+                  type: object
+                type: array
             required:
             - status
             type: object

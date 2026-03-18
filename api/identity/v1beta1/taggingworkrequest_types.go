@@ -14,19 +14,42 @@ import (
 
 // TaggingWorkRequestSpec defines the desired state of TaggingWorkRequest.
 type TaggingWorkRequestSpec struct {
-	Id              shared.OCID `json:"id,omitempty"`
-	CompartmentId   shared.OCID `json:"compartmentId,omitempty"`
-	OperationType   string      `json:"operationType,omitempty"`
-	Status          string      `json:"status,omitempty"`
-	TimeAccepted    string      `json:"timeAccepted,omitempty"`
-	TimeStarted     string      `json:"timeStarted,omitempty"`
-	TimeFinished    string      `json:"timeFinished,omitempty"`
-	PercentComplete float32     `json:"percentComplete,omitempty"`
+}
+
+// TaggingWorkRequestResource defines nested fields for TaggingWorkRequest.Resource.
+type TaggingWorkRequestResource struct {
+	// The resource identifier the work request affects.
+	Identifier string `json:"identifier,omitempty"`
+	// The resource type the work request is affects.
+	EntityType string `json:"entityType,omitempty"`
+	// The way in which this resource was affected by the work tracked by the work request.
+	ActionType string `json:"actionType,omitempty"`
+	// The URI path that the user can do a GET on to access the resource metadata.
+	EntityUri string `json:"entityUri,omitempty"`
 }
 
 // TaggingWorkRequestStatus defines the observed state of TaggingWorkRequest.
 type TaggingWorkRequestStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the work request.
+	Id string `json:"id,omitempty"`
+	// An enum-like description of the type of work the work request is doing.
+	OperationType string `json:"operationType,omitempty"`
+	// The OCID of the compartment that contains the work request.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The resources this work request affects.
+	Resources []TaggingWorkRequestResource `json:"resources,omitempty"`
+	// Date and time the work was accepted, in the format defined by RFC3339.
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeAccepted string `json:"timeAccepted,omitempty"`
+	// Date and time the work started, in the format defined by RFC3339.
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeStarted string `json:"timeStarted,omitempty"`
+	// Date and time the work completed, in the format defined by RFC3339.
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeFinished string `json:"timeFinished,omitempty"`
+	// How much progress the operation has made.
+	PercentComplete float32 `json:"percentComplete,omitempty"`
 }
 
 // +kubebuilder:object:root=true

@@ -14,24 +14,39 @@ import (
 
 // FastConnectProviderServiceSpec defines the desired state of FastConnectProviderService.
 type FastConnectProviderServiceSpec struct {
-	Id                           shared.OCID `json:"id,omitempty"`
-	CompartmentId                shared.OCID `json:"compartmentId,omitempty"`
-	PrivatePeeringBgpManagement  string      `json:"privatePeeringBgpManagement,omitempty"`
-	ProviderName                 string      `json:"providerName,omitempty"`
-	ProviderServiceName          string      `json:"providerServiceName,omitempty"`
-	PublicPeeringBgpManagement   string      `json:"publicPeeringBgpManagement,omitempty"`
-	CustomerAsnManagement        string      `json:"customerAsnManagement,omitempty"`
-	ProviderServiceKeyManagement string      `json:"providerServiceKeyManagement,omitempty"`
-	BandwithShapeManagement      string      `json:"bandwithShapeManagement,omitempty"`
-	RequiredTotalCrossConnects   int         `json:"requiredTotalCrossConnects,omitempty"`
-	Type                         string      `json:"type,omitempty"`
-	Description                  string      `json:"description,omitempty"`
-	SupportedVirtualCircuitTypes []string    `json:"supportedVirtualCircuitTypes,omitempty"`
 }
 
 // FastConnectProviderServiceStatus defines the observed state of FastConnectProviderService.
 type FastConnectProviderServiceStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the service offered by the provider.
+	Id string `json:"id,omitempty"`
+	// Who is responsible for managing the private peering BGP information.
+	PrivatePeeringBgpManagement string `json:"privatePeeringBgpManagement,omitempty"`
+	// The name of the provider.
+	ProviderName string `json:"providerName,omitempty"`
+	// The name of the service offered by the provider.
+	ProviderServiceName string `json:"providerServiceName,omitempty"`
+	// Who is responsible for managing the public peering BGP information.
+	PublicPeeringBgpManagement string `json:"publicPeeringBgpManagement,omitempty"`
+	// Who is responsible for managing the ASN information for the network at the other end
+	// of the connection from Oracle.
+	CustomerAsnManagement string `json:"customerAsnManagement,omitempty"`
+	// Who is responsible for managing the provider service key.
+	ProviderServiceKeyManagement string `json:"providerServiceKeyManagement,omitempty"`
+	// Who is responsible for managing the virtual circuit bandwidth.
+	BandwithShapeManagement string `json:"bandwithShapeManagement,omitempty"`
+	// Total number of cross-connect or cross-connect groups required for the virtual circuit.
+	RequiredTotalCrossConnects int `json:"requiredTotalCrossConnects,omitempty"`
+	// Provider service type.
+	Type string `json:"type,omitempty"`
+	// The location of the provider's website or portal. This portal is where you can get information
+	// about the provider service, create a virtual circuit connection from the provider to Oracle
+	// Cloud Infrastructure, and retrieve your provider service key for that virtual circuit connection.
+	// Example: `https://example.com`
+	Description string `json:"description,omitempty"`
+	// An array of virtual circuit types supported by this service.
+	SupportedVirtualCircuitTypes []string `json:"supportedVirtualCircuitTypes,omitempty"`
 }
 
 // +kubebuilder:object:root=true

@@ -53,15 +53,6 @@ spec:
           spec:
             description: IPSecConnectionTunnelRouteSpec defines the desired state
               of IPSecConnectionTunnelRoute.
-            properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
             type: object
           status:
             description: IPSecConnectionTunnelRouteStatus defines the observed state

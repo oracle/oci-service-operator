@@ -14,13 +14,15 @@ import (
 
 // ComputeCapacityReservationInstanceShapeSpec defines the desired state of ComputeCapacityReservationInstanceShape.
 type ComputeCapacityReservationInstanceShapeSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // ComputeCapacityReservationInstanceShapeStatus defines the observed state of ComputeCapacityReservationInstanceShape.
 type ComputeCapacityReservationInstanceShapeStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The shape's availability domain.
+	AvailabilityDomain string `json:"availabilityDomain,omitempty"`
+	// The name of the available shape used to launch instances in a compute capacity reservation.
+	InstanceShape string `json:"instanceShape,omitempty"`
 }
 
 // +kubebuilder:object:root=true

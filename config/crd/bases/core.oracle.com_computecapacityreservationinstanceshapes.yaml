@@ -53,20 +53,18 @@ spec:
           spec:
             description: ComputeCapacityReservationInstanceShapeSpec defines the desired
               state of ComputeCapacityReservationInstanceShape.
-            properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
             type: object
           status:
             description: ComputeCapacityReservationInstanceShapeStatus defines the
               observed state of ComputeCapacityReservationInstanceShape.
             properties:
+              availabilityDomain:
+                description: The shape's availability domain.
+                type: string
+              instanceShape:
+                description: The name of the available shape used to launch instances
+                  in a compute capacity reservation.
+                type: string
               status:
                 properties:
                   conditions:

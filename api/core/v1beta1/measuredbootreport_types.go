@@ -14,14 +14,42 @@ import (
 
 // MeasuredBootReportSpec defines the desired state of MeasuredBootReport.
 type MeasuredBootReportSpec struct {
-	Id                             shared.OCID `json:"id,omitempty"`
-	CompartmentId                  shared.OCID `json:"compartmentId,omitempty"`
-	IsPolicyVerificationSuccessful bool        `json:"isPolicyVerificationSuccessful,omitempty"`
+}
+
+// MeasuredBootReportMeasurementsPolicy defines nested fields for MeasuredBootReport.Measurements.Policy.
+type MeasuredBootReportMeasurementsPolicy struct {
+	// The index of the policy.
+	PcrIndex string `json:"pcrIndex,omitempty"`
+	// The hashed PCR value.
+	Value string `json:"value,omitempty"`
+	// The type of algorithm used to calculate the hash.
+	HashAlgorithm string `json:"hashAlgorithm,omitempty"`
+}
+
+// MeasuredBootReportMeasurementsActual defines nested fields for MeasuredBootReport.Measurements.Actual.
+type MeasuredBootReportMeasurementsActual struct {
+	// The index of the policy.
+	PcrIndex string `json:"pcrIndex,omitempty"`
+	// The hashed PCR value.
+	Value string `json:"value,omitempty"`
+	// The type of algorithm used to calculate the hash.
+	HashAlgorithm string `json:"hashAlgorithm,omitempty"`
+}
+
+// MeasuredBootReportMeasurements defines nested fields for MeasuredBootReport.Measurements.
+type MeasuredBootReportMeasurements struct {
+	// The list of expected PCR entries to use during verification.
+	Policy []MeasuredBootReportMeasurementsPolicy `json:"policy,omitempty"`
+	// The list of actual PCR entries measured during boot.
+	Actual []MeasuredBootReportMeasurementsActual `json:"actual,omitempty"`
 }
 
 // MeasuredBootReportStatus defines the observed state of MeasuredBootReport.
 type MeasuredBootReportStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// Whether the verification succeeded, and the new values match the expected values.
+	IsPolicyVerificationSuccessful bool                           `json:"isPolicyVerificationSuccessful,omitempty"`
+	Measurements                   MeasuredBootReportMeasurements `json:"measurements,omitempty"`
 }
 
 // +kubebuilder:object:root=true

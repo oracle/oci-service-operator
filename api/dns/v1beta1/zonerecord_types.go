@@ -14,8 +14,38 @@ import (
 
 // ZoneRecordSpec defines the desired state of ZoneRecord.
 type ZoneRecordSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
+	// +kubebuilder:validation:Optional
+	Items []ZoneRecordItem `json:"items,omitempty"`
+}
+
+// ZoneRecordItem defines nested fields for ZoneRecord.Item.
+type ZoneRecordItem struct {
+	// The fully qualified domain name where the record can be located.
+	// +kubebuilder:validation:Required
+	Domain string `json:"domain"`
+	// The record's data, as whitespace-delimited tokens in
+	// type-specific presentation format. All RDATA is normalized and the
+	// returned presentation of your RDATA may differ from its initial input.
+	// For more information about RDATA, see Supported DNS Resource Record Types (https://docs.cloud.oracle.com/iaas/Content/DNS/Reference/supporteddnsresource.htm)
+	// +kubebuilder:validation:Required
+	Rdata string `json:"rdata"`
+	// The type of DNS record, such as A or CNAME. For more information, see Resource Record (RR) TYPEs (https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml#dns-parameters-4).
+	// +kubebuilder:validation:Required
+	Rtype string `json:"rtype"`
+	// The Time To Live for the record, in seconds. Using a TTL lower than 30 seconds is not recommended.
+	// +kubebuilder:validation:Required
+	Ttl int `json:"ttl"`
+	// A unique identifier for the record within its zone.
+	// +kubebuilder:validation:Optional
+	RecordHash string `json:"recordHash,omitempty"`
+	// A Boolean flag indicating whether or not parts of the record
+	// are unable to be explicitly managed.
+	// +kubebuilder:validation:Optional
+	IsProtected bool `json:"isProtected,omitempty"`
+	// The latest version of the record's zone in which its RRSet differs
+	// from the preceding version.
+	// +kubebuilder:validation:Optional
+	RrsetVersion string `json:"rrsetVersion,omitempty"`
 }
 
 // ZoneRecordStatus defines the observed state of ZoneRecord.

@@ -14,17 +14,19 @@ import (
 
 // ZoneTransferServerSpec defines the desired state of ZoneTransferServer.
 type ZoneTransferServerSpec struct {
-	Id                    shared.OCID `json:"id,omitempty"`
-	CompartmentId         shared.OCID `json:"compartmentId,omitempty"`
-	Address               string      `json:"address,omitempty"`
-	Port                  int         `json:"port,omitempty"`
-	IsTransferSource      bool        `json:"isTransferSource,omitempty"`
-	IsTransferDestination bool        `json:"isTransferDestination,omitempty"`
 }
 
 // ZoneTransferServerStatus defines the observed state of ZoneTransferServer.
 type ZoneTransferServerStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The server's IP address (IPv4 or IPv6).
+	Address string `json:"address,omitempty"`
+	// The server's port.
+	Port int `json:"port,omitempty"`
+	// A Boolean flag indicating whether or not the server is a zone data transfer source.
+	IsTransferSource bool `json:"isTransferSource,omitempty"`
+	// A Boolean flag indicating whether or not the server is a zone data transfer destination.
+	IsTransferDestination bool `json:"isTransferDestination,omitempty"`
 }
 
 // +kubebuilder:object:root=true

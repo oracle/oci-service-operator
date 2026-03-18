@@ -14,20 +14,73 @@ import (
 
 // CrossConnectGroupSpec defines the desired state of CrossConnectGroup.
 type CrossConnectGroupSpec struct {
-	Id                    shared.OCID       `json:"id,omitempty"`
-	CompartmentId         shared.OCID       `json:"compartmentId,omitempty"`
-	DisplayName           string            `json:"displayName,omitempty"`
-	CustomerReferenceName string            `json:"customerReferenceName,omitempty"`
-	FreeformTags          map[string]string `json:"freeformTags,omitempty"`
-	LifecycleState        string            `json:"lifecycleState,omitempty"`
-	TimeCreated           string            `json:"timeCreated,omitempty"`
-	OciPhysicalDeviceName string            `json:"ociPhysicalDeviceName,omitempty"`
-	OciLogicalDeviceName  string            `json:"ociLogicalDeviceName,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment to contain the cross-connect group.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
+	// A reference name or identifier for the physical fiber connection that this cross-connect
+	// group uses.
+	// +kubebuilder:validation:Optional
+	CustomerReferenceName string `json:"customerReferenceName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// +kubebuilder:validation:Optional
+	MacsecProperties CrossConnectGroupMacsecProperties `json:"macsecProperties,omitempty"`
+}
+
+// CrossConnectGroupMacsecPropertiesPrimaryKey defines nested fields for CrossConnectGroup.MacsecProperties.PrimaryKey.
+type CrossConnectGroupMacsecPropertiesPrimaryKey struct {
+	// Secret OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) containing the Connectivity association Key Name (CKN) of this MACsec key.
+	// NOTE: Only the latest secret version will be used.
+	// +kubebuilder:validation:Required
+	ConnectivityAssociationNameSecretId string `json:"connectivityAssociationNameSecretId"`
+	// Secret OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) containing the Connectivity Association Key (CAK) of this MACsec key.
+	// NOTE: Only the latest secret version will be used.
+	// +kubebuilder:validation:Required
+	ConnectivityAssociationKeySecretId string `json:"connectivityAssociationKeySecretId"`
+}
+
+// CrossConnectGroupMacsecProperties defines nested fields for CrossConnectGroup.MacsecProperties.
+type CrossConnectGroupMacsecProperties struct {
+	// Indicates whether or not MACsec is enabled.
+	// +kubebuilder:validation:Required
+	State string `json:"state"`
+	// +kubebuilder:validation:Optional
+	PrimaryKey CrossConnectGroupMacsecPropertiesPrimaryKey `json:"primaryKey,omitempty"`
+	// Type of encryption cipher suite to use for the MACsec connection.
+	// +kubebuilder:validation:Optional
+	EncryptionCipher string `json:"encryptionCipher,omitempty"`
+	// Indicates whether unencrypted traffic is allowed if MACsec Key Agreement protocol (MKA) fails.
+	// +kubebuilder:validation:Optional
+	IsUnprotectedTrafficAllowed bool `json:"isUnprotectedTrafficAllowed,omitempty"`
 }
 
 // CrossConnectGroupStatus defines the observed state of CrossConnectGroup.
 type CrossConnectGroupStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The cross-connect group's Oracle ID (OCID).
+	Id string `json:"id,omitempty"`
+	// The cross-connect group's current state.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The date and time the cross-connect group was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The FastConnect device that terminates the physical connection.
+	OciPhysicalDeviceName string `json:"ociPhysicalDeviceName,omitempty"`
+	// The FastConnect device that terminates the logical connection.
+	// This device might be different than the device that terminates the physical connection.
+	OciLogicalDeviceName string `json:"ociLogicalDeviceName,omitempty"`
 }
 
 // +kubebuilder:object:root=true

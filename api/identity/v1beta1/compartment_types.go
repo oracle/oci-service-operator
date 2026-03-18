@@ -14,20 +14,45 @@ import (
 
 // CompartmentSpec defines the desired state of Compartment.
 type CompartmentSpec struct {
-	Id             shared.OCID       `json:"id,omitempty"`
-	CompartmentId  shared.OCID       `json:"compartmentId,omitempty"`
-	Name           string            `json:"name,omitempty"`
-	Description    string            `json:"description,omitempty"`
-	FreeformTags   map[string]string `json:"freeformTags,omitempty"`
-	TimeCreated    string            `json:"timeCreated,omitempty"`
-	LifecycleState string            `json:"lifecycleState,omitempty"`
-	InactiveStatus int64             `json:"inactiveStatus,omitempty"`
-	IsAccessible   bool              `json:"isAccessible,omitempty"`
+	// The OCID of the parent compartment containing the compartment.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// The name you assign to the compartment during creation. The name must be unique across all compartments
+	// in the parent compartment. Avoid entering confidential information.
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+	// The description you assign to the compartment during creation. Does not have to be unique, and it's changeable.
+	// +kubebuilder:validation:Required
+	Description string `json:"description"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 }
 
 // CompartmentStatus defines the observed state of Compartment.
 type CompartmentStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the compartment.
+	Id string `json:"id,omitempty"`
+	// Date and time the compartment was created, in the format defined by RFC3339.
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The compartment's current state. After creating a compartment, make sure its `lifecycleState` changes from
+	// CREATING to ACTIVE before using it.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The detailed status of INACTIVE lifecycleState.
+	InactiveStatus int64 `json:"inactiveStatus,omitempty"`
+	// Indicates whether or not the compartment is accessible for the user making the request.
+	// Returns true when the user has INSPECT permissions directly on a resource in the
+	// compartment or indirectly (permissions can be on a resource in a subcompartment).
+	IsAccessible bool `json:"isAccessible,omitempty"`
 }
 
 // +kubebuilder:object:root=true

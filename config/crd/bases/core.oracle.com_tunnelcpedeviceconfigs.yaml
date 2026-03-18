@@ -53,14 +53,22 @@ spec:
           spec:
             description: TunnelCpeDeviceConfigSpec defines the desired state of TunnelCpeDeviceConfig.
             properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
+              tunnelCpeDeviceConfig:
+                description: The set of configuration answers for a CPE device.
+                items:
+                  description: TunnelCpeDeviceConfigFields defines nested fields for
+                    TunnelCpeDeviceConfig.TunnelCpeDeviceConfig.
+                  properties:
+                    key:
+                      description: |-
+                        A string that identifies the question to be answered. See the `key` attribute in
+                        CpeDeviceConfigQuestion.
+                      type: string
+                    value:
+                      description: The answer to the question.
+                      type: string
+                  type: object
+                type: array
             type: object
           status:
             description: TunnelCpeDeviceConfigStatus defines the observed state of
@@ -108,6 +116,21 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              tunnelCpeDeviceConfigParameter:
+                items:
+                  description: TunnelCpeDeviceConfigParameter defines nested fields
+                    for TunnelCpeDeviceConfig.TunnelCpeDeviceConfigParameter.
+                  properties:
+                    key:
+                      description: |-
+                        A string that identifies the question to be answered. See the `key` attribute in
+                        CpeDeviceConfigQuestion.
+                      type: string
+                    value:
+                      description: The answer to the question.
+                      type: string
+                  type: object
+                type: array
             required:
             - status
             type: object

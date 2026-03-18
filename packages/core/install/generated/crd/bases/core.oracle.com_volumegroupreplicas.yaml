@@ -15,10 +15,6 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - jsonPath: .spec.displayName
-      name: DisplayName
-      priority: 1
-      type: string
     - description: status of the VolumeGroupReplica
       jsonPath: .status.status.conditions[-1].type
       name: Status
@@ -56,38 +52,65 @@ spec:
             type: object
           spec:
             description: VolumeGroupReplicaSpec defines the desired state of VolumeGroupReplica.
-            properties:
-              availabilityDomain:
-                type: string
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              displayName:
-                type: string
-              freeformTags:
-                additionalProperties:
-                  type: string
-                type: object
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
-              lifecycleState:
-                type: string
-              sizeInGBs:
-                format: int64
-                type: integer
-              timeCreated:
-                type: string
-              timeLastSynced:
-                type: string
-              volumeGroupId:
-                type: string
             type: object
           status:
             description: VolumeGroupReplicaStatus defines the observed state of VolumeGroupReplica.
             properties:
+              availabilityDomain:
+                description: The availability domain of the volume group replica.
+                type: string
+              compartmentId:
+                description: The OCID of the compartment that contains the volume
+                  group replica.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a
+                  namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              displayName:
+                description: |-
+                  A user-friendly name. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no
+                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              id:
+                description: The OCID for the volume group replica.
+                type: string
+              lifecycleState:
+                description: The current state of a volume group.
+                type: string
+              memberReplicas:
+                description: Volume replicas within this volume group replica.
+                items:
+                  description: VolumeGroupReplicaMemberReplica defines nested fields
+                    for VolumeGroupReplica.MemberReplica.
+                  properties:
+                    membershipState:
+                      description: Membership state of the volume replica in relation
+                        to the volume group replica.
+                      type: string
+                    volumeReplicaId:
+                      description: The volume replica ID.
+                      type: string
+                  type: object
+                type: array
+              sizeInGBs:
+                description: The aggregate size of the volume group replica in GBs.
+                format: int64
+                type: integer
               status:
                 properties:
                   conditions:
@@ -130,6 +153,18 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              timeCreated:
+                description: The date and time the volume group replica was created.
+                  Format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+                type: string
+              timeLastSynced:
+                description: |-
+                  The date and time the volume group replica was last synced from the source volume group.
+                  Format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+                type: string
+              volumeGroupId:
+                description: The OCID of the source volume group.
+                type: string
             required:
             - status
             type: object

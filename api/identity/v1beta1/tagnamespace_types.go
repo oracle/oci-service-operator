@@ -14,19 +14,58 @@ import (
 
 // TagNamespaceSpec defines the desired state of TagNamespace.
 type TagNamespaceSpec struct {
-	Id             shared.OCID       `json:"id,omitempty"`
-	CompartmentId  shared.OCID       `json:"compartmentId,omitempty"`
-	Name           string            `json:"name,omitempty"`
-	Description    string            `json:"description,omitempty"`
-	FreeformTags   map[string]string `json:"freeformTags,omitempty"`
-	IsRetired      bool              `json:"isRetired,omitempty"`
-	TimeCreated    string            `json:"timeCreated,omitempty"`
-	LifecycleState string            `json:"lifecycleState,omitempty"`
+	// The OCID of the tenancy containing the tag namespace.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// The name you assign to the tag namespace during creation. It must be unique across all tag namespaces in the tenancy and cannot be changed.
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+	// The description you assign to the tag namespace during creation.
+	// +kubebuilder:validation:Required
+	Description string `json:"description"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// Locks associated with this resource.
+	// +kubebuilder:validation:Optional
+	Locks []TagNamespaceLock `json:"locks,omitempty"`
+	// Whether the tag namespace is retired.
+	// See Retiring Key Definitions and Namespace Definitions (https://docs.cloud.oracle.com/Content/Tagging/Tasks/managingtagsandtagnamespaces.htm#retiringkeys).
+	// +kubebuilder:validation:Optional
+	IsRetired bool `json:"isRetired,omitempty"`
+}
+
+// TagNamespaceLock defines nested fields for TagNamespace.Lock.
+type TagNamespaceLock struct {
+	// Type of the lock.
+	// +kubebuilder:validation:Required
+	Type string `json:"type"`
+	// The ID of the resource that is locking this resource. Indicates that deleting this resource will remove the lock.
+	// +kubebuilder:validation:Optional
+	RelatedResourceId string `json:"relatedResourceId,omitempty"`
+	// A message added by the creator of the lock. This is typically used to give an
+	// indication of why the resource is locked.
+	// +kubebuilder:validation:Optional
+	Message string `json:"message,omitempty"`
 }
 
 // TagNamespaceStatus defines the observed state of TagNamespace.
 type TagNamespaceStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the tag namespace.
+	Id string `json:"id,omitempty"`
+	// Date and time the tagNamespace was created, in the format defined by RFC3339.
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The tagnamespace's current state. After creating a tagnamespace, make sure its `lifecycleState` is ACTIVE before using it. After retiring a tagnamespace, make sure its `lifecycleState` is INACTIVE before using it.
+	LifecycleState string `json:"lifecycleState,omitempty"`
 }
 
 // +kubebuilder:object:root=true

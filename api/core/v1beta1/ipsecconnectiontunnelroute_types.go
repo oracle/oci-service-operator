@@ -14,8 +14,6 @@ import (
 
 // IPSecConnectionTunnelRouteSpec defines the desired state of IPSecConnectionTunnelRoute.
 type IPSecConnectionTunnelRouteSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // IPSecConnectionTunnelRouteStatus defines the observed state of IPSecConnectionTunnelRoute.

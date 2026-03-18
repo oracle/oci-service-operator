@@ -53,15 +53,6 @@ spec:
           spec:
             description: CrossConnectLetterOfAuthoritySpec defines the desired state
               of CrossConnectLetterOfAuthority.
-            properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
             type: object
           status:
             description: CrossConnectLetterOfAuthorityStatus defines the observed

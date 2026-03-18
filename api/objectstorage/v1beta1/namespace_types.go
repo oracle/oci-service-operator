@@ -14,8 +14,6 @@ import (
 
 // NamespaceSpec defines the desired state of Namespace.
 type NamespaceSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // NamespaceStatus defines the observed state of Namespace.

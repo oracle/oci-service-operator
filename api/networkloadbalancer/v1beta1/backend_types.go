@@ -14,16 +14,45 @@ import (
 
 // BackendSpec defines the desired state of Backend.
 type BackendSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
-	Port          int         `json:"port,omitempty"`
-	Name          string      `json:"name,omitempty"`
-	IpAddress     string      `json:"ipAddress,omitempty"`
-	TargetId      string      `json:"targetId,omitempty"`
-	Weight        int         `json:"weight,omitempty"`
-	IsDrain       bool        `json:"isDrain,omitempty"`
-	IsBackup      bool        `json:"isBackup,omitempty"`
-	IsOffline     bool        `json:"isOffline,omitempty"`
+	// The communication port for the backend server.
+	// Example: `8080`
+	// +kubebuilder:validation:Required
+	Port int `json:"port"`
+	// Optional unique name identifying the backend within the backend set. If not specified, then one will be generated.
+	// Example: `webServer1`
+	// +kubebuilder:validation:Optional
+	Name string `json:"name,omitempty"`
+	// The IP address of the backend server.
+	// Example: `10.0.0.3`
+	// +kubebuilder:validation:Optional
+	IpAddress string `json:"ipAddress,omitempty"`
+	// The IP OCID/Instance OCID associated with the backend server.
+	// Example: `ocid1.privateip..oc1.<var>&lt;unique_ID&gt;</var>`
+	// +kubebuilder:validation:Optional
+	TargetId string `json:"targetId,omitempty"`
+	// The network load balancing policy weight assigned to the server. Backend servers with a higher weight receive a larger
+	// proportion of incoming traffic. For example, a server weighted '3' receives three times the number of new connections
+	// as a server weighted '1'.
+	// For more information about load balancing policies, see
+	// How Network Load Balancing Policies Work (https://docs.cloud.oracle.com/Content/Balance/Reference/lbpolicies.htm).
+	// Example: `3`
+	// +kubebuilder:validation:Optional
+	Weight int `json:"weight,omitempty"`
+	// Whether the network load balancer should drain this server. Servers marked "isDrain" receive no
+	// incoming traffic.
+	// Example: `false`
+	// +kubebuilder:validation:Optional
+	IsDrain bool `json:"isDrain,omitempty"`
+	// Whether the network load balancer should treat this server as a backup unit. If `true`, then the network load balancer forwards no ingress
+	// traffic to this backend server unless all other backend servers not marked as "isBackup" fail the health check policy.
+	// Example: `false`
+	// +kubebuilder:validation:Optional
+	IsBackup bool `json:"isBackup,omitempty"`
+	// Whether the network load balancer should treat this server as offline. Offline servers receive no incoming
+	// traffic.
+	// Example: `false`
+	// +kubebuilder:validation:Optional
+	IsOffline bool `json:"isOffline,omitempty"`
 }
 
 // BackendStatus defines the observed state of Backend.

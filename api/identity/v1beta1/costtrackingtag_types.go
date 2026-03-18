@@ -14,8 +14,6 @@ import (
 
 // CostTrackingTagSpec defines the desired state of CostTrackingTag.
 type CostTrackingTagSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // CostTrackingTagStatus defines the observed state of CostTrackingTag.

@@ -14,19 +14,39 @@ import (
 
 // LogGroupSpec defines the desired state of LogGroup.
 type LogGroupSpec struct {
-	Id               shared.OCID       `json:"id,omitempty"`
-	CompartmentId    shared.OCID       `json:"compartmentId,omitempty"`
-	DisplayName      string            `json:"displayName,omitempty"`
-	Description      string            `json:"description,omitempty"`
-	FreeformTags     map[string]string `json:"freeformTags,omitempty"`
-	LifecycleState   string            `json:"lifecycleState,omitempty"`
-	TimeCreated      string            `json:"timeCreated,omitempty"`
-	TimeLastModified string            `json:"timeLastModified,omitempty"`
+	// The OCID of the compartment that the resource belongs to.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// The user-friendly display name. This must be unique within the enclosing resource,
+	// and it's changeable. Avoid entering confidential information.
+	// +kubebuilder:validation:Required
+	DisplayName string `json:"displayName"`
+	// Description for this resource.
+	// +kubebuilder:validation:Optional
+	Description string `json:"description,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 }
 
 // LogGroupStatus defines the observed state of LogGroup.
 type LogGroupStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the resource.
+	Id string `json:"id,omitempty"`
+	// The log group object state.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// Time the resource was created.
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// Time the resource was last modified.
+	TimeLastModified string `json:"timeLastModified,omitempty"`
 }
 
 // +kubebuilder:object:root=true

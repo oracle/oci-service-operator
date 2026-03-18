@@ -51,15 +51,6 @@ spec:
             type: object
           spec:
             description: WorkRequestLogSpec defines the desired state of WorkRequestLog.
-            properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
             type: object
           status:
             description: WorkRequestLogStatus defines the observed state of WorkRequestLog.

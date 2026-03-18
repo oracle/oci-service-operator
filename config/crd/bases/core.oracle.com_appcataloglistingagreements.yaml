@@ -53,15 +53,6 @@ spec:
           spec:
             description: AppCatalogListingAgreementSpec defines the desired state
               of AppCatalogListingAgreement.
-            properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
             type: object
           status:
             description: AppCatalogListingAgreementStatus defines the observed state

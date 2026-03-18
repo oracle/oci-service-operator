@@ -14,8 +14,6 @@ import (
 
 // CrossconnectPortSpeedShapeSpec defines the desired state of CrossconnectPortSpeedShape.
 type CrossconnectPortSpeedShapeSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // CrossconnectPortSpeedShapeStatus defines the observed state of CrossconnectPortSpeedShape.

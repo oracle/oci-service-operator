@@ -14,19 +14,45 @@ import (
 
 // IamWorkRequestSpec defines the desired state of IamWorkRequest.
 type IamWorkRequestSpec struct {
-	Id              shared.OCID `json:"id,omitempty"`
-	CompartmentId   shared.OCID `json:"compartmentId,omitempty"`
-	OperationType   string      `json:"operationType,omitempty"`
-	Status          string      `json:"status,omitempty"`
-	PercentComplete float32     `json:"percentComplete,omitempty"`
-	TimeAccepted    string      `json:"timeAccepted,omitempty"`
-	TimeStarted     string      `json:"timeStarted,omitempty"`
-	TimeFinished    string      `json:"timeFinished,omitempty"`
+}
+
+// IamWorkRequestResource defines nested fields for IamWorkRequest.Resource.
+type IamWorkRequestResource struct {
+	// The way in which this resource is affected by the work tracked in the work request.
+	// A resource being created, updated, or deleted will remain in the IN_PROGRESS state until
+	// work is complete for that resource at which point it will transition to CREATED, UPDATED,
+	// or DELETED, respectively.
+	ActionType string `json:"actionType,omitempty"`
+	// The resource type the work request is affects.
+	EntityType string `json:"entityType,omitempty"`
+	// An OCID of the resource that the work request affects.
+	Identifier string `json:"identifier,omitempty"`
+	// The URI path that the user can do a GET on to access the resource metadata.
+	EntityUri string `json:"entityUri,omitempty"`
 }
 
 // IamWorkRequestStatus defines the observed state of IamWorkRequest.
 type IamWorkRequestStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the work request.
+	Id string `json:"id,omitempty"`
+	// The asynchronous operation tracked by this IAM work request.
+	OperationType string `json:"operationType,omitempty"`
+	// The OCID of the compartment containing this IAM work request.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The resources this work request affects.
+	Resources []IamWorkRequestResource `json:"resources,omitempty"`
+	// How much progress the operation has made.
+	PercentComplete float32 `json:"percentComplete,omitempty"`
+	// Date and time the work was accepted, in the format defined by RFC3339.
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeAccepted string `json:"timeAccepted,omitempty"`
+	// Date and time the work started, in the format defined by RFC3339.
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeStarted string `json:"timeStarted,omitempty"`
+	// Date and time the work completed, in the format defined by RFC3339.
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeFinished string `json:"timeFinished,omitempty"`
 }
 
 // +kubebuilder:object:root=true

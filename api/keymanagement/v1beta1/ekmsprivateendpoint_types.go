@@ -14,24 +14,49 @@ import (
 
 // EkmsPrivateEndpointSpec defines the desired state of EkmsPrivateEndpoint.
 type EkmsPrivateEndpointSpec struct {
-	Id                   shared.OCID       `json:"id,omitempty"`
-	CompartmentId        shared.OCID       `json:"compartmentId,omitempty"`
-	SubnetId             string            `json:"subnetId,omitempty"`
-	DisplayName          string            `json:"displayName,omitempty"`
-	ExternalKeyManagerIp string            `json:"externalKeyManagerIp,omitempty"`
-	CaBundle             string            `json:"caBundle,omitempty"`
-	FreeformTags         map[string]string `json:"freeformTags,omitempty"`
-	Port                 int               `json:"port,omitempty"`
-	TimeCreated          string            `json:"timeCreated,omitempty"`
-	LifecycleState       string            `json:"lifecycleState,omitempty"`
-	TimeUpdated          string            `json:"timeUpdated,omitempty"`
-	LifecycleDetails     string            `json:"lifecycleDetails,omitempty"`
-	PrivateEndpointIp    string            `json:"privateEndpointIp,omitempty"`
+	// The OCID of subnet in which the EKMS private endpoint is to be created
+	// +kubebuilder:validation:Required
+	SubnetId string `json:"subnetId"`
+	// Compartment identifier.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// Display name of the EKMS private endpoint resource being created.
+	// +kubebuilder:validation:Required
+	DisplayName string `json:"displayName"`
+	// External private IP to connect to from this EKMS private endpoint
+	// +kubebuilder:validation:Required
+	ExternalKeyManagerIp string `json:"externalKeyManagerIp"`
+	// CABundle to validate TLS certificate of the external key manager system in PEM format
+	// +kubebuilder:validation:Required
+	CaBundle string `json:"caBundle"`
+	// Simple key-value pair that is applied without any predefined name, type, or scope. Exists for cross-compatibility only.
+	// Example: `{"bar-key": "value"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Usage of predefined tag keys. These predefined keys are scoped to namespaces.
+	// Example: `{"foo-namespace": {"bar-key": "value"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// The port of the external key manager system
+	// +kubebuilder:validation:Optional
+	Port int `json:"port,omitempty"`
 }
 
 // EkmsPrivateEndpointStatus defines the observed state of EkmsPrivateEndpoint.
 type EkmsPrivateEndpointStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// Unique identifier that is immutable
+	Id string `json:"id,omitempty"`
+	// The time the EKMS private endpoint was created. An RFC3339 (https://tools.ietf.org/html/rfc3339) formatted datetime string.
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The current state of the EKMS private endpoint resource.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The time the EKMS private endpoint was updated. An RFC3339 (https://tools.ietf.org/html/rfc3339) formatted datetime string.
+	TimeUpdated string `json:"timeUpdated,omitempty"`
+	// A message describing the current state in more detail. For example, can be used to provide actionable information for a resource in 'Failed' state.
+	LifecycleDetails string `json:"lifecycleDetails,omitempty"`
+	// The IP address in the customer's VCN for the EKMS private endpoint. This is taken from subnet
+	PrivateEndpointIp string `json:"privateEndpointIp,omitempty"`
 }
 
 // +kubebuilder:object:root=true

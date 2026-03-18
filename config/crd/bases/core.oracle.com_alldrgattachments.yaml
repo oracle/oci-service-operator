@@ -51,15 +51,6 @@ spec:
             type: object
           spec:
             description: AllDrgAttachmentSpec defines the desired state of AllDrgAttachment.
-            properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
             type: object
           status:
             description: AllDrgAttachmentStatus defines the observed state of AllDrgAttachment.

@@ -14,22 +14,963 @@ import (
 
 // LoadBalancerSpec defines the desired state of LoadBalancer.
 type LoadBalancerSpec struct {
-	Id                      shared.OCID       `json:"id,omitempty"`
-	CompartmentId           shared.OCID       `json:"compartmentId,omitempty"`
-	DisplayName             string            `json:"displayName,omitempty"`
-	ShapeName               string            `json:"shapeName,omitempty"`
-	SubnetIds               []string          `json:"subnetIds,omitempty"`
-	IsPrivate               bool              `json:"isPrivate,omitempty"`
-	IpMode                  string            `json:"ipMode,omitempty"`
-	NetworkSecurityGroupIds []string          `json:"networkSecurityGroupIds,omitempty"`
-	FreeformTags            map[string]string `json:"freeformTags,omitempty"`
-	LifecycleState          string            `json:"lifecycleState,omitempty"`
-	TimeCreated             string            `json:"timeCreated,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment in which to create the load balancer.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// A user-friendly name. It does not have to be unique, and it is changeable.
+	// Avoid entering confidential information.
+	// Example: `example_load_balancer`
+	// +kubebuilder:validation:Required
+	DisplayName string `json:"displayName"`
+	// A template that determines the total pre-provisioned bandwidth (ingress plus egress).
+	// To get a list of available shapes, use the ListShapes
+	// operation.
+	// Example: `flexible`
+	// NOTE: Starting May 2023, Fixed shapes - 10Mbps, 100Mbps, 400Mbps, 8000Mbps would be deprecated and only shape
+	//       allowed would be `Flexible`
+	// +kubebuilder:validation:Required
+	ShapeName string `json:"shapeName"`
+	// An array of subnet OCIDs (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm).
+	// +kubebuilder:validation:Required
+	SubnetIds []string `json:"subnetIds"`
+	// The configuration details to create load balancer using Flexible shape. This is required only if shapeName is `Flexible`.
+	// +kubebuilder:validation:Optional
+	ShapeDetails LoadBalancerShapeDetails `json:"shapeDetails,omitempty"`
+	// Whether the load balancer has a VCN-local (private) IP address.
+	// If "true", the service assigns a private IP address to the load balancer.
+	// If "false", the service assigns a public IP address to the load balancer.
+	// A public load balancer is accessible from the internet, depending on your VCN's
+	// security list rules (https://docs.cloud.oracle.com/Content/Network/Concepts/securitylists.htm). For more information about public and
+	// private load balancers, see How Load Balancing Works (https://docs.cloud.oracle.com/Content/Balance/Concepts/balanceoverview.htm#how-load-balancing-works).
+	// Example: `true`
+	// +kubebuilder:validation:Optional
+	IsPrivate bool `json:"isPrivate,omitempty"`
+	// Whether the load balancer has an IPv4 or IPv6 IP address.
+	// If "IPV4", the service assigns an IPv4 address and the load balancer supports IPv4 traffic.
+	// If "IPV6", the service assigns an IPv6 address and the load balancer supports IPv6 traffic.
+	// Example: "ipMode":"IPV6"
+	// +kubebuilder:validation:Optional
+	IpMode string `json:"ipMode,omitempty"`
+	// An array of reserved Ips.
+	// +kubebuilder:validation:Optional
+	ReservedIps []LoadBalancerReservedIp `json:"reservedIps,omitempty"`
+	// +kubebuilder:validation:Optional
+	Listeners map[string]LoadBalancerListeners `json:"listeners,omitempty"`
+	// +kubebuilder:validation:Optional
+	Hostnames map[string]LoadBalancerHostnames `json:"hostnames,omitempty"`
+	// +kubebuilder:validation:Optional
+	BackendSets map[string]LoadBalancerBackendSets `json:"backendSets,omitempty"`
+	// An array of NSG OCIDs (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) associated with this load balancer.
+	// During the load balancer's creation, the service adds the new load balancer to the specified NSGs.
+	// The benefits of using NSGs with the load balancer include:
+	// *  NSGs define network security rules to govern ingress and egress traffic for the load balancer.
+	// *  The network security rules of other resources can reference the NSGs associated with the load balancer
+	//    to ensure access.
+	// Example: `["ocid1.nsg.oc1.phx.unique_ID"]`
+	// +kubebuilder:validation:Optional
+	NetworkSecurityGroupIds []string `json:"networkSecurityGroupIds,omitempty"`
+	// +kubebuilder:validation:Optional
+	Certificates map[string]LoadBalancerCertificates `json:"certificates,omitempty"`
+	// +kubebuilder:validation:Optional
+	SslCipherSuites map[string]LoadBalancerSslCipherSuites `json:"sslCipherSuites,omitempty"`
+	// +kubebuilder:validation:Optional
+	PathRouteSets map[string]LoadBalancerPathRouteSets `json:"pathRouteSets,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// +kubebuilder:validation:Optional
+	RuleSets map[string]LoadBalancerRuleSets `json:"ruleSets,omitempty"`
+}
+
+// LoadBalancerShapeDetails defines nested fields for LoadBalancer.ShapeDetails.
+type LoadBalancerShapeDetails struct {
+	// Bandwidth in Mbps that determines the total pre-provisioned bandwidth (ingress plus egress).
+	// The values must be between 10 and the maximumBandwidthInMbps.
+	// Example: `150`
+	// +kubebuilder:validation:Required
+	MinimumBandwidthInMbps int `json:"minimumBandwidthInMbps"`
+	// Bandwidth in Mbps that determines the maximum bandwidth (ingress plus egress) that the load balancer can
+	// achieve. This bandwidth cannot be always guaranteed. For a guaranteed bandwidth use the minimumBandwidthInMbps
+	// parameter.
+	// The values must be between minimumBandwidthInMbps and 8000 (8Gbps).
+	// Example: `1500`
+	// +kubebuilder:validation:Required
+	MaximumBandwidthInMbps int `json:"maximumBandwidthInMbps"`
+}
+
+// LoadBalancerReservedIp defines nested fields for LoadBalancer.ReservedIp.
+type LoadBalancerReservedIp struct {
+	// +kubebuilder:validation:Optional
+	Id string `json:"id,omitempty"`
+}
+
+// LoadBalancerListenersSslConfiguration defines nested fields for LoadBalancer.Listeners.SslConfiguration.
+type LoadBalancerListenersSslConfiguration struct {
+	// The maximum depth for peer certificate chain verification.
+	// Example: `3`
+	// +kubebuilder:validation:Optional
+	VerifyDepth int `json:"verifyDepth,omitempty"`
+	// Whether the load balancer listener should verify peer certificates.
+	// Example: `true`
+	// +kubebuilder:validation:Optional
+	VerifyPeerCertificate bool `json:"verifyPeerCertificate,omitempty"`
+	// Ids for OCI certificates service CA or CA bundles for the load balancer to trust.
+	// Example: `[ocid1.cabundle.oc1.us-ashburn-1.amaaaaaaav3bgsaagl4zzyqdop5i2vuwoqewdvauuw34llqa74otq2jdsfyq]`
+	// +kubebuilder:validation:Optional
+	TrustedCertificateAuthorityIds []string `json:"trustedCertificateAuthorityIds,omitempty"`
+	// Ids for OCI certificates service certificates. Currently only a single Id may be passed.
+	// Example: `[ocid1.certificate.oc1.us-ashburn-1.amaaaaaaav3bgsaa5o2q7rh5nfmkkukfkogasqhk6af2opufhjlqg7m6jqzq]`
+	// +kubebuilder:validation:Optional
+	CertificateIds []string `json:"certificateIds,omitempty"`
+	// A friendly name for the certificate bundle. It must be unique and it cannot be changed.
+	// Valid certificate bundle names include only alphanumeric characters, dashes, and underscores.
+	// Certificate bundle names cannot contain spaces. Avoid entering confidential information.
+	// Example: `example_certificate_bundle`
+	// +kubebuilder:validation:Optional
+	CertificateName string `json:"certificateName,omitempty"`
+	// A list of SSL protocols the load balancer must support for HTTPS or SSL connections.
+	// The load balancer uses SSL protocols to establish a secure connection between a client and a server. A secure
+	// connection ensures that all data passed between the client and the server is private.
+	// The Load Balancing service supports the following protocols:
+	// *  TLSv1
+	// *  TLSv1.1
+	// *  TLSv1.2
+	// If this field is not specified, TLSv1.2 is the default.
+	// **Warning:** All SSL listeners created on a given port must use the same set of SSL protocols.
+	// **Notes:**
+	// *  The handshake to establish an SSL connection fails if the client supports none of the specified protocols.
+	// *  You must ensure compatibility between the specified SSL protocols and the ciphers configured in the cipher
+	//    suite.
+	// *  For all existing load balancer listeners and backend sets that predate this feature, the `GET` operation
+	//    displays a list of SSL protocols currently used by those resources.
+	// example: `["TLSv1.1", "TLSv1.2"]`
+	// +kubebuilder:validation:Optional
+	Protocols []string `json:"protocols,omitempty"`
+	// The name of the cipher suite to use for HTTPS or SSL connections.
+	// If this field is not specified, the default is `oci-default-ssl-cipher-suite-v1`.
+	// **Notes:**
+	// *  You must ensure compatibility between the specified SSL protocols and the ciphers configured in the cipher
+	//    suite. Clients cannot perform an SSL handshake if there is an incompatible configuration.
+	// *  You must ensure compatibility between the ciphers configured in the cipher suite and the configured
+	//    certificates. For example, RSA-based ciphers require RSA certificates and ECDSA-based ciphers require ECDSA
+	//    certificates.
+	// *  If the cipher configuration is not modified after load balancer creation, the `GET` operation returns
+	//    `oci-default-ssl-cipher-suite-v1` as the value of this field in the SSL configuration for existing listeners
+	//    that predate this feature.
+	// *  If the cipher configuration was modified using Oracle operations after load balancer creation, the `GET`
+	//    operation returns `oci-customized-ssl-cipher-suite` as the value of this field in the SSL configuration for
+	//    existing listeners that predate this feature.
+	// *  The `GET` operation returns `oci-wider-compatible-ssl-cipher-suite-v1` as the value of this field in the SSL
+	//    configuration for existing backend sets that predate this feature.
+	// *  If the `GET` operation on a listener returns `oci-customized-ssl-cipher-suite` as the value of this field,
+	//    you must specify an appropriate predefined or custom cipher suite name when updating the resource.
+	// *  The `oci-customized-ssl-cipher-suite` Oracle reserved cipher suite name is not accepted as valid input for
+	//    this field.
+	// example: `example_cipher_suite`
+	// +kubebuilder:validation:Optional
+	CipherSuiteName string `json:"cipherSuiteName,omitempty"`
+	// When this attribute is set to ENABLED, the system gives preference to the server ciphers over the client
+	// ciphers.
+	// **Note:** This configuration is applicable only when the load balancer is acting as an SSL/HTTPS server. This
+	//           field is ignored when the `SSLConfiguration` object is associated with a backend set.
+	// +kubebuilder:validation:Optional
+	ServerOrderPreference string `json:"serverOrderPreference,omitempty"`
+}
+
+// LoadBalancerListenersConnectionConfiguration defines nested fields for LoadBalancer.Listeners.ConnectionConfiguration.
+type LoadBalancerListenersConnectionConfiguration struct {
+	// The maximum idle time, in seconds, allowed between two successive receive or two successive send operations
+	// between the client and backend servers. A send operation does not reset the timer for receive operations. A
+	// receive operation does not reset the timer for send operations.
+	// For more information, see Connection Configuration (https://docs.cloud.oracle.com/Content/Balance/Reference/connectionreuse.htm#ConnectionConfiguration).
+	// Example: `1200`
+	// +kubebuilder:validation:Required
+	IdleTimeout int64 `json:"idleTimeout"`
+	// The backend TCP Proxy Protocol version.
+	// Example: `1`
+	// +kubebuilder:validation:Optional
+	BackendTcpProxyProtocolVersion int `json:"backendTcpProxyProtocolVersion,omitempty"`
+}
+
+// LoadBalancerListeners defines nested fields for LoadBalancer.Listeners.
+type LoadBalancerListeners struct {
+	// The name of the associated backend set.
+	// Example: `example_backend_set`
+	// +kubebuilder:validation:Required
+	DefaultBackendSetName string `json:"defaultBackendSetName"`
+	// The communication port for the listener.
+	// Example: `80`
+	// +kubebuilder:validation:Required
+	Port int `json:"port"`
+	// The protocol on which the listener accepts connection requests.
+	// To get a list of valid protocols, use the ListProtocols
+	// operation.
+	// Example: `HTTP`
+	// +kubebuilder:validation:Required
+	Protocol string `json:"protocol"`
+	// An array of hostname resource names.
+	// +kubebuilder:validation:Optional
+	HostnameNames []string `json:"hostnameNames,omitempty"`
+	// Deprecated. Please use `routingPolicies` instead.
+	// The name of the set of path-based routing rules, PathRouteSet,
+	// applied to this listener's traffic.
+	// Example: `example_path_route_set`
+	// +kubebuilder:validation:Optional
+	PathRouteSetName string `json:"pathRouteSetName,omitempty"`
+	// +kubebuilder:validation:Optional
+	SslConfiguration LoadBalancerListenersSslConfiguration `json:"sslConfiguration,omitempty"`
+	// +kubebuilder:validation:Optional
+	ConnectionConfiguration LoadBalancerListenersConnectionConfiguration `json:"connectionConfiguration,omitempty"`
+	// The name of the routing policy applied to this listener's traffic.
+	// Example: `example_routing_policy`
+	// +kubebuilder:validation:Optional
+	RoutingPolicyName string `json:"routingPolicyName,omitempty"`
+	// The names of the RuleSet to apply to the listener.
+	//  Example: ["example_rule_set"]
+	// +kubebuilder:validation:Optional
+	RuleSetNames []string `json:"ruleSetNames,omitempty"`
+}
+
+// LoadBalancerHostnames defines nested fields for LoadBalancer.Hostnames.
+type LoadBalancerHostnames struct {
+	// The name of the hostname resource.
+	// Example: `example_hostname_001`
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+	// A virtual hostname. For more information about virtual hostname string construction, see
+	// Managing Request Routing (https://docs.cloud.oracle.com/Content/Balance/Tasks/managingrequest.htm#routing).
+	// Example: `app.example.com`
+	// +kubebuilder:validation:Required
+	Hostname string `json:"hostname"`
+}
+
+// LoadBalancerBackendSetsHealthChecker defines nested fields for LoadBalancer.BackendSets.HealthChecker.
+type LoadBalancerBackendSetsHealthChecker struct {
+	// The protocol the health check must use; either HTTP or TCP.
+	// Example: `HTTP`
+	// +kubebuilder:validation:Required
+	Protocol string `json:"protocol"`
+	// The path against which to run the health check.
+	// Example: `/healthcheck`
+	// +kubebuilder:validation:Optional
+	UrlPath string `json:"urlPath,omitempty"`
+	// The backend server port against which to run the health check. If the port is not specified, the load balancer uses the
+	// port information from the `Backend` object.
+	// Example: `8080`
+	// +kubebuilder:validation:Optional
+	Port int `json:"port,omitempty"`
+	// The status code a healthy backend server should return.
+	// Example: `200`
+	// +kubebuilder:validation:Optional
+	ReturnCode int `json:"returnCode,omitempty"`
+	// The number of retries to attempt before a backend server is considered "unhealthy". This number also applies
+	// when recovering a server to the "healthy" state.
+	// Example: `3`
+	// +kubebuilder:validation:Optional
+	Retries int `json:"retries,omitempty"`
+	// The maximum time, in milliseconds, to wait for a reply to a health check. A health check is successful only if a reply
+	// returns within this timeout period.
+	// Example: `3000`
+	// +kubebuilder:validation:Optional
+	TimeoutInMillis int `json:"timeoutInMillis,omitempty"`
+	// The interval between health checks, in milliseconds.
+	// Example: `10000`
+	// +kubebuilder:validation:Optional
+	IntervalInMillis int `json:"intervalInMillis,omitempty"`
+	// A regular expression for parsing the response body from the backend server.
+	// Example: `^((?!false).|\s)*$`
+	// +kubebuilder:validation:Optional
+	ResponseBodyRegex string `json:"responseBodyRegex,omitempty"`
+	// Specifies if health checks should always be done using plain text instead of depending on
+	// whether or not the associated backend set is using SSL.
+	// If "true", health checks will be done using plain text even if the associated backend set is configured
+	// to use SSL.
+	// If "false", health checks will be done using SSL encryption if the associated backend set is configured
+	// to use SSL. If the backend set is not so configured the health checks will be done using plain text.
+	// Example: `false`
+	// +kubebuilder:validation:Optional
+	IsForcePlainText bool `json:"isForcePlainText,omitempty"`
+}
+
+// LoadBalancerBackendSetsBackend defines nested fields for LoadBalancer.BackendSets.Backend.
+type LoadBalancerBackendSetsBackend struct {
+	// The IP address of the backend server.
+	// Example: `10.0.0.3`
+	// +kubebuilder:validation:Required
+	IpAddress string `json:"ipAddress"`
+	// The communication port for the backend server.
+	// Example: `8080`
+	// +kubebuilder:validation:Required
+	Port int `json:"port"`
+	// The load balancing policy weight assigned to the server. Backend servers with a higher weight receive a larger
+	// proportion of incoming traffic. For example, a server weighted '3' receives 3 times the number of new connections
+	// as a server weighted '1'.
+	// For more information on load balancing policies, see
+	// How Load Balancing Policies Work (https://docs.cloud.oracle.com/Content/Balance/Reference/lbpolicies.htm).
+	// Example: `3`
+	// +kubebuilder:validation:Optional
+	Weight int `json:"weight,omitempty"`
+	// Whether the load balancer should treat this server as a backup unit. If `true`, the load balancer forwards no ingress
+	// traffic to this backend server unless all other backend servers not marked as "backup" fail the health check policy.
+	// **Note:** You cannot add a backend server marked as `backup` to a backend set that uses the IP Hash policy.
+	// Example: `false`
+	// +kubebuilder:validation:Optional
+	Backup bool `json:"backup,omitempty"`
+	// Whether the load balancer should drain this server. Servers marked "drain" receive no new
+	// incoming traffic.
+	// Example: `false`
+	// +kubebuilder:validation:Optional
+	Drain bool `json:"drain,omitempty"`
+	// Whether the load balancer should treat this server as offline. Offline servers receive no incoming
+	// traffic.
+	// Example: `false`
+	// +kubebuilder:validation:Optional
+	Offline bool `json:"offline,omitempty"`
+}
+
+// LoadBalancerBackendSetsSslConfiguration defines nested fields for LoadBalancer.BackendSets.SslConfiguration.
+type LoadBalancerBackendSetsSslConfiguration struct {
+	// The maximum depth for peer certificate chain verification.
+	// Example: `3`
+	// +kubebuilder:validation:Optional
+	VerifyDepth int `json:"verifyDepth,omitempty"`
+	// Whether the load balancer listener should verify peer certificates.
+	// Example: `true`
+	// +kubebuilder:validation:Optional
+	VerifyPeerCertificate bool `json:"verifyPeerCertificate,omitempty"`
+	// Ids for OCI certificates service CA or CA bundles for the load balancer to trust.
+	// Example: `[ocid1.cabundle.oc1.us-ashburn-1.amaaaaaaav3bgsaagl4zzyqdop5i2vuwoqewdvauuw34llqa74otq2jdsfyq]`
+	// +kubebuilder:validation:Optional
+	TrustedCertificateAuthorityIds []string `json:"trustedCertificateAuthorityIds,omitempty"`
+	// Ids for OCI certificates service certificates. Currently only a single Id may be passed.
+	// Example: `[ocid1.certificate.oc1.us-ashburn-1.amaaaaaaav3bgsaa5o2q7rh5nfmkkukfkogasqhk6af2opufhjlqg7m6jqzq]`
+	// +kubebuilder:validation:Optional
+	CertificateIds []string `json:"certificateIds,omitempty"`
+	// A friendly name for the certificate bundle. It must be unique and it cannot be changed.
+	// Valid certificate bundle names include only alphanumeric characters, dashes, and underscores.
+	// Certificate bundle names cannot contain spaces. Avoid entering confidential information.
+	// Example: `example_certificate_bundle`
+	// +kubebuilder:validation:Optional
+	CertificateName string `json:"certificateName,omitempty"`
+	// A list of SSL protocols the load balancer must support for HTTPS or SSL connections.
+	// The load balancer uses SSL protocols to establish a secure connection between a client and a server. A secure
+	// connection ensures that all data passed between the client and the server is private.
+	// The Load Balancing service supports the following protocols:
+	// *  TLSv1
+	// *  TLSv1.1
+	// *  TLSv1.2
+	// If this field is not specified, TLSv1.2 is the default.
+	// **Warning:** All SSL listeners created on a given port must use the same set of SSL protocols.
+	// **Notes:**
+	// *  The handshake to establish an SSL connection fails if the client supports none of the specified protocols.
+	// *  You must ensure compatibility between the specified SSL protocols and the ciphers configured in the cipher
+	//    suite.
+	// *  For all existing load balancer listeners and backend sets that predate this feature, the `GET` operation
+	//    displays a list of SSL protocols currently used by those resources.
+	// example: `["TLSv1.1", "TLSv1.2"]`
+	// +kubebuilder:validation:Optional
+	Protocols []string `json:"protocols,omitempty"`
+	// The name of the cipher suite to use for HTTPS or SSL connections.
+	// If this field is not specified, the default is `oci-default-ssl-cipher-suite-v1`.
+	// **Notes:**
+	// *  You must ensure compatibility between the specified SSL protocols and the ciphers configured in the cipher
+	//    suite. Clients cannot perform an SSL handshake if there is an incompatible configuration.
+	// *  You must ensure compatibility between the ciphers configured in the cipher suite and the configured
+	//    certificates. For example, RSA-based ciphers require RSA certificates and ECDSA-based ciphers require ECDSA
+	//    certificates.
+	// *  If the cipher configuration is not modified after load balancer creation, the `GET` operation returns
+	//    `oci-default-ssl-cipher-suite-v1` as the value of this field in the SSL configuration for existing listeners
+	//    that predate this feature.
+	// *  If the cipher configuration was modified using Oracle operations after load balancer creation, the `GET`
+	//    operation returns `oci-customized-ssl-cipher-suite` as the value of this field in the SSL configuration for
+	//    existing listeners that predate this feature.
+	// *  The `GET` operation returns `oci-wider-compatible-ssl-cipher-suite-v1` as the value of this field in the SSL
+	//    configuration for existing backend sets that predate this feature.
+	// *  If the `GET` operation on a listener returns `oci-customized-ssl-cipher-suite` as the value of this field,
+	//    you must specify an appropriate predefined or custom cipher suite name when updating the resource.
+	// *  The `oci-customized-ssl-cipher-suite` Oracle reserved cipher suite name is not accepted as valid input for
+	//    this field.
+	// example: `example_cipher_suite`
+	// +kubebuilder:validation:Optional
+	CipherSuiteName string `json:"cipherSuiteName,omitempty"`
+	// When this attribute is set to ENABLED, the system gives preference to the server ciphers over the client
+	// ciphers.
+	// **Note:** This configuration is applicable only when the load balancer is acting as an SSL/HTTPS server. This
+	//           field is ignored when the `SSLConfiguration` object is associated with a backend set.
+	// +kubebuilder:validation:Optional
+	ServerOrderPreference string `json:"serverOrderPreference,omitempty"`
+}
+
+// LoadBalancerBackendSetsSessionPersistenceConfiguration defines nested fields for LoadBalancer.BackendSets.SessionPersistenceConfiguration.
+type LoadBalancerBackendSetsSessionPersistenceConfiguration struct {
+	// The name of the cookie used to detect a session initiated by the backend server. Use '*' to specify
+	// that any cookie set by the backend causes the session to persist.
+	// Example: `example_cookie`
+	// +kubebuilder:validation:Required
+	CookieName string `json:"cookieName"`
+	// Whether the load balancer is prevented from directing traffic from a persistent session client to
+	// a different backend server if the original server is unavailable. Defaults to false.
+	// Example: `false`
+	// +kubebuilder:validation:Optional
+	DisableFallback bool `json:"disableFallback,omitempty"`
+}
+
+// LoadBalancerBackendSetsLbCookieSessionPersistenceConfiguration defines nested fields for LoadBalancer.BackendSets.LbCookieSessionPersistenceConfiguration.
+type LoadBalancerBackendSetsLbCookieSessionPersistenceConfiguration struct {
+	// The name of the cookie inserted by the load balancer. If this field is not configured, the cookie name defaults
+	// to "X-Oracle-BMC-LBS-Route".
+	// Example: `example_cookie`
+	// **Notes:**
+	// *  Ensure that the cookie name used at the backend application servers is different from the cookie name used
+	//    at the load balancer. To minimize the chance of name collision, Oracle recommends that you use a prefix
+	//    such as "X-Oracle-OCI-" for this field.
+	// *  If a backend server and the load balancer both insert cookies with the same name, the client or browser
+	//    behavior can vary depending on the domain and path values associated with the cookie. If the name, domain,
+	//    and path values of the `Set-cookie` generated by a backend server and the `Set-cookie` generated by the
+	//    load balancer are all the same, the client or browser treats them as one cookie and returns only one of
+	//    the cookie values in subsequent requests. If both `Set-cookie` names are the same, but the domain and path
+	//    names are different, the client or browser treats them as two different cookies.
+	// +kubebuilder:validation:Optional
+	CookieName string `json:"cookieName,omitempty"`
+	// Whether the load balancer is prevented from directing traffic from a persistent session client to
+	// a different backend server if the original server is unavailable. Defaults to false.
+	// Example: `false`
+	// +kubebuilder:validation:Optional
+	DisableFallback bool `json:"disableFallback,omitempty"`
+	// The domain in which the cookie is valid. The `Set-cookie` header inserted by the load balancer contains a
+	// domain attribute with the specified value.
+	// This attribute has no default value. If you do not specify a value, the load balancer does not insert the domain
+	// attribute into the `Set-cookie` header.
+	// **Notes:**
+	// *  RFC 6265 - HTTP State Management Mechanism (https://www.ietf.org/rfc/rfc6265.txt) describes client and
+	//    browser behavior when the domain attribute is present or not present in the `Set-cookie` header.
+	//    If the value of the `Domain` attribute is `example.com` in the `Set-cookie` header, the client includes
+	//    the same cookie in the `Cookie` header when making HTTP requests to `example.com`, `www.example.com`, and
+	//    `www.abc.example.com`. If the `Domain` attribute is not present, the client returns the cookie only for
+	//    the domain to which the original request was made.
+	// *  Ensure that this attribute specifies the correct domain value. If the `Domain` attribute in the `Set-cookie`
+	//    header does not include the domain to which the original request was made, the client or browser might reject
+	//    the cookie. As specified in RFC 6265, the client accepts a cookie with the `Domain` attribute value `example.com`
+	//    or `www.example.com` sent from `www.example.com`. It does not accept a cookie with the `Domain` attribute
+	//    `abc.example.com` or `www.abc.example.com` sent from `www.example.com`.
+	// Example: `example.com`
+	// +kubebuilder:validation:Optional
+	Domain string `json:"domain,omitempty"`
+	// The path in which the cookie is valid. The `Set-cookie header` inserted by the load balancer contains a `Path`
+	// attribute with the specified value.
+	// Clients include the cookie in an HTTP request only if the path portion of the request-uri matches, or is a
+	// subdirectory of, the cookie's `Path` attribute.
+	// The default value is `/`.
+	// Example: `/example`
+	// +kubebuilder:validation:Optional
+	Path string `json:"path,omitempty"`
+	// The amount of time the cookie remains valid. The `Set-cookie` header inserted by the load balancer contains
+	// a `Max-Age` attribute with the specified value.
+	// The specified value must be at least one second. There is no default value for this attribute. If you do not
+	// specify a value, the load balancer does not include the `Max-Age` attribute in the `Set-cookie` header. In
+	// most cases, the client or browser retains the cookie until the current session ends, as defined by the client.
+	// Example: `3600`
+	// +kubebuilder:validation:Optional
+	MaxAgeInSeconds int `json:"maxAgeInSeconds,omitempty"`
+	// Whether the `Set-cookie` header should contain the `Secure` attribute. If `true`, the `Set-cookie` header
+	// inserted by the load balancer contains the `Secure` attribute, which directs the client or browser to send the
+	// cookie only using a secure protocol.
+	// **Note:** If you set this field to `true`, you cannot associate the corresponding backend set with an HTTP
+	// listener.
+	// Example: `true`
+	// +kubebuilder:validation:Optional
+	IsSecure bool `json:"isSecure,omitempty"`
+	// Whether the `Set-cookie` header should contain the `HttpOnly` attribute. If `true`, the `Set-cookie` header
+	// inserted by the load balancer contains the `HttpOnly` attribute, which limits the scope of the cookie to HTTP
+	// requests. This attribute directs the client or browser to omit the cookie when providing access to cookies
+	// through non-HTTP APIs. For example, it restricts the cookie from JavaScript channels.
+	// Example: `true`
+	// +kubebuilder:validation:Optional
+	IsHttpOnly bool `json:"isHttpOnly,omitempty"`
+}
+
+// LoadBalancerBackendSets defines nested fields for LoadBalancer.BackendSets.
+type LoadBalancerBackendSets struct {
+	// The load balancer policy for the backend set. To get a list of available policies, use the
+	// ListPolicies operation.
+	// Example: `LEAST_CONNECTIONS`
+	// +kubebuilder:validation:Required
+	Policy string `json:"policy"`
+	// +kubebuilder:validation:Required
+	HealthChecker LoadBalancerBackendSetsHealthChecker `json:"healthChecker"`
+	// +kubebuilder:validation:Optional
+	Backends []LoadBalancerBackendSetsBackend `json:"backends,omitempty"`
+	// +kubebuilder:validation:Optional
+	SslConfiguration LoadBalancerBackendSetsSslConfiguration `json:"sslConfiguration,omitempty"`
+	// +kubebuilder:validation:Optional
+	SessionPersistenceConfiguration LoadBalancerBackendSetsSessionPersistenceConfiguration `json:"sessionPersistenceConfiguration,omitempty"`
+	// +kubebuilder:validation:Optional
+	LbCookieSessionPersistenceConfiguration LoadBalancerBackendSetsLbCookieSessionPersistenceConfiguration `json:"lbCookieSessionPersistenceConfiguration,omitempty"`
+}
+
+// LoadBalancerCertificates defines nested fields for LoadBalancer.Certificates.
+type LoadBalancerCertificates struct {
+	// A friendly name for the certificate bundle. It must be unique and it cannot be changed.
+	// Valid certificate bundle names include only alphanumeric characters, dashes, and underscores.
+	// Certificate bundle names cannot contain spaces. Avoid entering confidential information.
+	// Example: `example_certificate_bundle`
+	// +kubebuilder:validation:Required
+	CertificateName string `json:"certificateName"`
+	// A passphrase for encrypted private keys. This is needed only if you created your certificate with a passphrase.
+	// +kubebuilder:validation:Optional
+	Passphrase string `json:"passphrase,omitempty"`
+	// The SSL private key for your certificate, in PEM format.
+	// Example:
+	//     -----BEGIN RSA PRIVATE KEY-----
+	//     jO1O1v2ftXMsawM90tnXwc6xhOAT1gDBC9S8DKeca..JZNUgYYwNS0dP2UK
+	//     tmyN+XqVcAKw4HqVmChXy5b5msu8eIq3uc2NqNVtR..2ksSLukP8pxXcHyb
+	//     +sEwvM4uf8qbnHAqwnOnP9+KV9vds6BaH1eRA4CHz..n+NVZlzBsTxTlS16
+	//     /Umr7wJzVrMqK5sDiSu4WuaaBdqMGfL5hLsTjcBFD..Da2iyQmSKuVD4lIZ
+	//     ...
+	//     -----END RSA PRIVATE KEY-----
+	// +kubebuilder:validation:Optional
+	PrivateKey string `json:"privateKey,omitempty"`
+	// The public certificate, in PEM format, that you received from your SSL certificate provider.
+	// Example:
+	//     -----BEGIN CERTIFICATE-----
+	//     MIIC2jCCAkMCAg38MA0GCSqGSIb3DQEBBQUAMIGbMQswCQYDVQQGEwJKUDEOMAwG
+	//     A1UECBMFVG9reW8xEDAOBgNVBAcTB0NodW8ta3UxETAPBgNVBAoTCEZyYW5rNERE
+	//     MRgwFgYDVQQLEw9XZWJDZXJ0IFN1cHBvcnQxGDAWBgNVBAMTD0ZyYW5rNEREIFdl
+	//     YiBDQTEjMCEGCSqGSIb3DQEJARYUc3VwcG9ydEBmcmFuazRkZC5jb20wHhcNMTIw
+	//     ...
+	//     -----END CERTIFICATE-----
+	// +kubebuilder:validation:Optional
+	PublicCertificate string `json:"publicCertificate,omitempty"`
+	// The Certificate Authority certificate, or any interim certificate, that you received from your SSL certificate provider.
+	// Example:
+	//     -----BEGIN CERTIFICATE-----
+	//     MIIEczCCA1ugAwIBAgIBADANBgkqhkiG9w0BAQQFAD..AkGA1UEBhMCR0Ix
+	//     EzARBgNVBAgTClNvbWUtU3RhdGUxFDASBgNVBAoTC0..0EgTHRkMTcwNQYD
+	//     VQQLEy5DbGFzcyAxIFB1YmxpYyBQcmltYXJ5IENlcn..XRpb24gQXV0aG9y
+	//     aXR5MRQwEgYDVQQDEwtCZXN0IENBIEx0ZDAeFw0wMD..TUwMTZaFw0wMTAy
+	//     ...
+	//     -----END CERTIFICATE-----
+	// +kubebuilder:validation:Optional
+	CaCertificate string `json:"caCertificate,omitempty"`
+}
+
+// LoadBalancerSslCipherSuites defines nested fields for LoadBalancer.SslCipherSuites.
+type LoadBalancerSslCipherSuites struct {
+	// A friendly name for the SSL cipher suite. It must be unique and it cannot be changed.
+	// **Note:** The name of your user-defined cipher suite must not be the same as any of Oracle's predefined or
+	//           reserved SSL cipher suite names:
+	// * oci-default-ssl-cipher-suite-v1
+	// * oci-modern-ssl-cipher-suite-v1
+	// * oci-compatible-ssl-cipher-suite-v1
+	// * oci-wider-compatible-ssl-cipher-suite-v1
+	// * oci-customized-ssl-cipher-suite
+	// example: `example_cipher_suite`
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+	// A list of SSL ciphers the load balancer must support for HTTPS or SSL connections.
+	// The following ciphers are valid values for this property:
+	// *  __TLSv1.2 ciphers__
+	//         "AES128-GCM-SHA256"
+	//         "AES128-SHA256"
+	//         "AES256-GCM-SHA384"
+	//         "AES256-SHA256"
+	//         "DH-DSS-AES128-GCM-SHA256"
+	//         "DH-DSS-AES128-SHA256"
+	//         "DH-DSS-AES256-GCM-SHA384"
+	//         "DH-DSS-AES256-SHA256"
+	//         "DH-RSA-AES128-GCM-SHA256"
+	//         "DH-RSA-AES128-SHA256"
+	//         "DH-RSA-AES256-GCM-SHA384"
+	//         "DH-RSA-AES256-SHA256"
+	//         "DHE-DSS-AES128-GCM-SHA256"
+	//         "DHE-DSS-AES128-SHA256"
+	//         "DHE-DSS-AES256-GCM-SHA384"
+	//         "DHE-DSS-AES256-SHA256"
+	//         "DHE-RSA-AES128-GCM-SHA256"
+	//         "DHE-RSA-AES128-SHA256"
+	//         "DHE-RSA-AES256-GCM-SHA384"
+	//         "DHE-RSA-AES256-SHA256"
+	//         "ECDH-ECDSA-AES128-GCM-SHA256"
+	//         "ECDH-ECDSA-AES128-SHA256"
+	//         "ECDH-ECDSA-AES256-GCM-SHA384"
+	//         "ECDH-ECDSA-AES256-SHA384"
+	//         "ECDH-RSA-AES128-GCM-SHA256"
+	//         "ECDH-RSA-AES128-SHA256"
+	//         "ECDH-RSA-AES256-GCM-SHA384"
+	//         "ECDH-RSA-AES256-SHA384"
+	//         "ECDHE-ECDSA-AES128-GCM-SHA256"
+	//         "ECDHE-ECDSA-AES128-SHA256"
+	//         "ECDHE-ECDSA-AES256-GCM-SHA384"
+	//         "ECDHE-ECDSA-AES256-SHA384"
+	//         "ECDHE-RSA-AES128-GCM-SHA256"
+	//         "ECDHE-RSA-AES128-SHA256"
+	//         "ECDHE-RSA-AES256-GCM-SHA384"
+	//         "ECDHE-RSA-AES256-SHA384"
+	// *  __TLSv1 ciphers also supported by TLSv1.2__
+	//         "AES128-SHA"
+	//         "AES256-SHA"
+	//         "CAMELLIA128-SHA"
+	//         "CAMELLIA256-SHA"
+	//         "DES-CBC3-SHA"
+	//         "DH-DSS-AES128-SHA"
+	//         "DH-DSS-AES256-SHA"
+	//         "DH-DSS-CAMELLIA128-SHA"
+	//         "DH-DSS-CAMELLIA256-SHA"
+	//         "DH-DSS-DES-CBC3-SHAv"
+	//         "DH-DSS-SEED-SHA"
+	//         "DH-RSA-AES128-SHA"
+	//         "DH-RSA-AES256-SHA"
+	//         "DH-RSA-CAMELLIA128-SHA"
+	//         "DH-RSA-CAMELLIA256-SHA"
+	//         "DH-RSA-DES-CBC3-SHA"
+	//         "DH-RSA-SEED-SHA"
+	//         "DHE-DSS-AES128-SHA"
+	//         "DHE-DSS-AES256-SHA"
+	//         "DHE-DSS-CAMELLIA128-SHA"
+	//         "DHE-DSS-CAMELLIA256-SHA"
+	//         "DHE-DSS-DES-CBC3-SHA"
+	//         "DHE-DSS-SEED-SHA"
+	//         "DHE-RSA-AES128-SHA"
+	//         "DHE-RSA-AES256-SHA"
+	//         "DHE-RSA-CAMELLIA128-SHA"
+	//         "DHE-RSA-CAMELLIA256-SHA"
+	//         "DHE-RSA-DES-CBC3-SHA"
+	//         "DHE-RSA-SEED-SHA"
+	//         "ECDH-ECDSA-AES128-SHA"
+	//         "ECDH-ECDSA-AES256-SHA"
+	//         "ECDH-ECDSA-DES-CBC3-SHA"
+	//         "ECDH-ECDSA-RC4-SHA"
+	//         "ECDH-RSA-AES128-SHA"
+	//         "ECDH-RSA-AES256-SHA"
+	//         "ECDH-RSA-DES-CBC3-SHA"
+	//         "ECDH-RSA-RC4-SHA"
+	//         "ECDHE-ECDSA-AES128-SHA"
+	//         "ECDHE-ECDSA-AES256-SHA"
+	//         "ECDHE-ECDSA-DES-CBC3-SHA"
+	//         "ECDHE-ECDSA-RC4-SHA"
+	//         "ECDHE-RSA-AES128-SHA"
+	//         "ECDHE-RSA-AES256-SHA"
+	//         "ECDHE-RSA-DES-CBC3-SHA"
+	//         "ECDHE-RSA-RC4-SHA"
+	//         "IDEA-CBC-SHA"
+	//         "KRB5-DES-CBC3-MD5"
+	//         "KRB5-DES-CBC3-SHA"
+	//         "KRB5-IDEA-CBC-MD5"
+	//         "KRB5-IDEA-CBC-SHA"
+	//         "KRB5-RC4-MD5"
+	//         "KRB5-RC4-SHA"
+	//         "PSK-3DES-EDE-CBC-SHA"
+	//         "PSK-AES128-CBC-SHA"
+	//         "PSK-AES256-CBC-SHA"
+	//         "PSK-RC4-SHA"
+	//         "RC4-MD5"
+	//         "RC4-SHA"
+	//         "SEED-SHA"
+	// example: `["ECDHE-RSA-AES256-GCM-SHA384","ECDHE-ECDSA-AES256-GCM-SHA384","ECDHE-RSA-AES128-GCM-SHA256"]`
+	// +kubebuilder:validation:Required
+	Ciphers []string `json:"ciphers"`
+}
+
+// LoadBalancerPathRouteSetsPathRoutePathMatchType defines nested fields for LoadBalancer.PathRouteSets.PathRoute.PathMatchType.
+type LoadBalancerPathRouteSetsPathRoutePathMatchType struct {
+	// Specifies how the load balancing service compares a PathRoute
+	// object's `path` string against the incoming URI.
+	// *  **EXACT_MATCH** - Looks for a `path` string that exactly matches the incoming URI path.
+	// *  **FORCE_LONGEST_PREFIX_MATCH** - Looks for the `path` string with the best, longest match of the beginning
+	//    portion of the incoming URI path.
+	// *  **PREFIX_MATCH** - Looks for a `path` string that matches the beginning portion of the incoming URI path.
+	// *  **SUFFIX_MATCH** - Looks for a `path` string that matches the ending portion of the incoming URI path.
+	// For a full description of how the system handles `matchType` in a path route set containing multiple rules, see
+	// Managing Request Routing (https://docs.cloud.oracle.com/Content/Balance/Tasks/managingrequest.htm).
+	// +kubebuilder:validation:Required
+	MatchType string `json:"matchType"`
+}
+
+// LoadBalancerPathRouteSetsPathRoute defines nested fields for LoadBalancer.PathRouteSets.PathRoute.
+type LoadBalancerPathRouteSetsPathRoute struct {
+	// The path string to match against the incoming URI path.
+	// *  Path strings are case-insensitive.
+	// *  Asterisk (*) wildcards are not supported.
+	// *  Regular expressions are not supported.
+	// Example: `/example/video/123`
+	// +kubebuilder:validation:Required
+	Path string `json:"path"`
+	// The type of matching to apply to incoming URIs.
+	// +kubebuilder:validation:Required
+	PathMatchType LoadBalancerPathRouteSetsPathRoutePathMatchType `json:"pathMatchType"`
+	// The name of the target backend set for requests where the incoming URI matches the specified path.
+	// Example: `example_backend_set`
+	// +kubebuilder:validation:Required
+	BackendSetName string `json:"backendSetName"`
+}
+
+// LoadBalancerPathRouteSets defines nested fields for LoadBalancer.PathRouteSets.
+type LoadBalancerPathRouteSets struct {
+	// The set of path route rules.
+	// +kubebuilder:validation:Required
+	PathRoutes []LoadBalancerPathRouteSetsPathRoute `json:"pathRoutes"`
+}
+
+// LoadBalancerRuleSetsItemCondition defines nested fields for LoadBalancer.RuleSets.Item.Condition.
+type LoadBalancerRuleSetsItemCondition struct {
+	// +kubebuilder:validation:Optional
+	AttributeName string `json:"attributeName,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the originating VCN that an incoming packet
+	// must match.
+	// You can use this condition in conjunction with `SourceVcnIpAddressCondition`.
+	// **NOTE:** If you define this condition for a rule without a `SourceVcnIpAddressCondition`, this condition
+	// matches all incoming traffic in the specified VCN.
+	// +kubebuilder:validation:Required
+	AttributeValue string `json:"attributeValue"`
+	// A string that specifies how to compare the PathMatchCondition object's `attributeValue` string to the
+	// incoming URI.
+	// *  **EXACT_MATCH** - The incoming URI path must exactly and completely match the `attributeValue` string.
+	// *  **FORCE_LONGEST_PREFIX_MATCH** - The system looks for the `attributeValue` string with the best,
+	//    longest match of the beginning portion of the incoming URI path.
+	// *  **PREFIX_MATCH** - The beginning portion of the incoming URI path must exactly match the
+	//    `attributeValue` string.
+	// *  **SUFFIX_MATCH** - The ending portion of the incoming URI path must exactly match the `attributeValue`
+	//    string.
+	// +kubebuilder:validation:Required
+	Operator string `json:"operator"`
+}
+
+// LoadBalancerRuleSetsItemRedirectUri defines nested fields for LoadBalancer.RuleSets.Item.RedirectUri.
+type LoadBalancerRuleSetsItemRedirectUri struct {
+	// The HTTP protocol to use in the redirect URI.
+	// When this value is null, not set, or set to `{protocol}`, the service preserves the original protocol from the
+	// incoming HTTP request URI. Allowed values are:
+	// *  HTTP
+	// *  HTTPS
+	// *  {protocol}
+	// `{protocol}` is the only valid token for this property. It can appear only once in the value string.
+	// Example: `HTTPS`
+	// +kubebuilder:validation:Optional
+	Protocol string `json:"protocol,omitempty"`
+	// The valid domain name (hostname) or IP address to use in the redirect URI.
+	// When this value is null, not set, or set to `{host}`, the service preserves the original domain name from the
+	// incoming HTTP request URI.
+	// All RedirectUri tokens are valid for this property. You can use any token more than once.
+	// Curly braces are valid in this property only to surround tokens, such as `{host}`
+	// Examples:
+	// *  **example.com** appears as `example.com` in the redirect URI.
+	// *  **in{host}** appears as `inexample.com` in the redirect URI if `example.com` is the hostname in the
+	//    incoming HTTP request URI.
+	// *  **{port}{host}** appears as `8081example.com` in the redirect URI if `example.com` is the hostname and
+	//    the port is `8081` in the incoming HTTP request URI.
+	// +kubebuilder:validation:Optional
+	Host string `json:"host,omitempty"`
+	// The communication port to use in the redirect URI.
+	// Valid values include integers from 1 to 65535.
+	// When this value is null, the service preserves the original port from the incoming HTTP request URI.
+	// Example: `8081`
+	// +kubebuilder:validation:Optional
+	Port int `json:"port,omitempty"`
+	// The HTTP URI path to use in the redirect URI.
+	// When this value is null, not set, or set to `{path}`, the service preserves the original path from the
+	// incoming HTTP request URI. To omit the path from the redirect URI, set this value to an empty string, "".
+	// All RedirectUri tokens are valid for this property. You can use any token more than once.
+	// The path string must begin with `/` if it does not begin with the `{path}` token.
+	// Examples:
+	// *  __/example/video/123__ appears as `/example/video/123` in the redirect URI.
+	// *  __/example{path}__ appears as `/example/video/123` in the redirect URI if `/video/123` is the path in the
+	//    incoming HTTP request URI.
+	// *  __{path}/123__ appears as `/example/video/123` in the redirect URI if `/example/video` is the path in the
+	//    incoming HTTP request URI.
+	// *  __{path}123__ appears as `/example/video123` in the redirect URI if `/example/video` is the path in the
+	//    incoming HTTP request URI.
+	// *  __/{host}/123__ appears as `/example.com/123` in the redirect URI if `example.com` is the hostname
+	//    in the incoming HTTP request URI.
+	// *  __/{host}/{port}__ appears as `/example.com/123` in the redirect URI if `example.com` is the hostname and
+	//    `123` is the port in the incoming HTTP request URI.
+	// *  __/{query}__ appears as `/lang=en` in the redirect URI if the query is `lang=en` in the incoming HTTP
+	//    request URI.
+	// +kubebuilder:validation:Optional
+	Path string `json:"path,omitempty"`
+	// The query string to use in the redirect URI.
+	// When this value is null, not set, or set to `{query}`, the service preserves the original query parameters
+	// from the incoming HTTP request URI.
+	// All `RedirectUri` tokens are valid for this property. You can use any token more than once.
+	// If the query string does not begin with the `{query}` token, it must begin with the question mark (?) character.
+	// You can specify multiple query parameters as a single string. Separate each query parameter with an ampersand
+	// (&) character. To omit all incoming query parameters from the redirect URI, set this value to an empty
+	// string, "".
+	// If the specified query string results in a redirect URI ending with `?` or `&`, the last character is truncated.
+	// For example, if the incoming URI is `http://host.com:8080/documents` and the query property value is
+	// `?lang=en&{query}`, the redirect URI is `http://host.com:8080/documents?lang=en`. The system
+	// truncates the final ampersand (&) because the incoming URI included no value to replace the {query} token.
+	// Examples:
+	// * **lang=en&time_zone=PST** appears as `lang=en&time_zone=PST` in the redirect URI.
+	// * **{query}** appears as `lang=en&time_zone=PST` in the redirect URI if `lang=en&time_zone=PST` is the query
+	//   string in the incoming HTTP request. If the incoming HTTP request has no query parameters, the `{query}`
+	//   token renders as an empty string.
+	// * **lang=en&{query}&time_zone=PST** appears as `lang=en&country=us&time_zone=PST` in the redirect URI if
+	//   `country=us` is the query string in the incoming HTTP request. If the incoming HTTP request has no query
+	//   parameters, this value renders as `lang=en&time_zone=PST`.
+	// *  **protocol={protocol}&hostname={host}** appears as `protocol=http&hostname=example.com` in the redirect
+	//    URI if the protocol is `HTTP` and the hostname is `example.com` in the incoming HTTP request.
+	// *  **port={port}&hostname={host}** appears as `port=8080&hostname=example.com` in the redirect URI if the
+	//    port is `8080` and the hostname is `example.com` in the incoming HTTP request URI.
+	// +kubebuilder:validation:Optional
+	Query string `json:"query,omitempty"`
+}
+
+// LoadBalancerRuleSetsItem defines nested fields for LoadBalancer.RuleSets.Item.
+type LoadBalancerRuleSetsItem struct {
+	// +kubebuilder:validation:Optional
+	Action string `json:"action,omitempty"`
+	// A header name that conforms to RFC 7230.
+	// Example: `example_header_name`
+	// +kubebuilder:validation:Required
+	Header string `json:"header"`
+	// A header value that conforms to RFC 7230. With the following exceptions:
+	// *  value cannot contain `$`
+	// *  value cannot contain patterns like `{variable_name}`. They are reserved for future extensions. Currently, such values are invalid.
+	// Example: `example_value`
+	// +kubebuilder:validation:Required
+	Value string `json:"value"`
+	// +kubebuilder:validation:Required
+	Conditions []LoadBalancerRuleSetsItemCondition `json:"conditions"`
+	// The HTTP status code to return when the incoming request is redirected.
+	// The status line returned with the code is mapped from the standard HTTP specification. Valid response
+	// codes for redirection are:
+	// *  301
+	// *  302
+	// *  303
+	// *  307
+	// *  308
+	// The default value is `302` (Found).
+	// Example: `301`
+	// +kubebuilder:validation:Optional
+	ResponseCode int `json:"responseCode,omitempty"`
+	// +kubebuilder:validation:Optional
+	RedirectUri LoadBalancerRuleSetsItemRedirectUri `json:"redirectUri,omitempty"`
+	// A string to prepend to the header value. The resulting header value must conform to RFC 7230.
+	// With the following exceptions:
+	// *  value cannot contain `$`
+	// *  value cannot contain patterns like `{variable_name}`. They are reserved for future extensions. Currently, such values are invalid.
+	// Example: `example_prefix_value`
+	// +kubebuilder:validation:Optional
+	Prefix string `json:"prefix,omitempty"`
+	// A string to append to the header value. The resulting header value must conform to RFC 7230.
+	// With the following exceptions:
+	// *  value cannot contain `$`
+	// *  value cannot contain patterns like `{variable_name}`. They are reserved for future extensions. Currently, such values are invalid.
+	// Example: `example_suffix_value`
+	// +kubebuilder:validation:Optional
+	Suffix string `json:"suffix,omitempty"`
+	// The list of HTTP methods allowed for this listener.
+	// By default, you can specify only the standard HTTP methods defined in the
+	// HTTP Method Registry (http://www.iana.org/assignments/http-methods/http-methods.xhtml). You can also
+	// see a list of supported standard HTTP methods in the Load Balancing service documentation at
+	// Managing Rule Sets (https://docs.cloud.oracle.com/Content/Balance/Tasks/managingrulesets.htm).
+	// Your backend application must be able to handle the methods specified in this list.
+	// The list of HTTP methods is extensible. If you need to configure custom HTTP methods, contact
+	// My Oracle Support (http://support.oracle.com/) to remove the restriction for your tenancy.
+	// Example: ["GET", "PUT", "POST", "PROPFIND"]
+	// +kubebuilder:validation:Required
+	AllowedMethods []string `json:"allowedMethods"`
+	// The HTTP status code to return when the requested HTTP method is not in the list of allowed methods.
+	// The associated status line returned with the code is mapped from the standard HTTP specification. The
+	// default value is `405 (Method Not Allowed)`.
+	// Example: 403
+	// +kubebuilder:validation:Optional
+	StatusCode int `json:"statusCode,omitempty"`
+	// A brief description of the access control rule. Avoid entering confidential information.
+	// example: `192.168.0.0/16 and 2001:db8::/32 are trusted clients. Whitelist them.`
+	// +kubebuilder:validation:Optional
+	Description string `json:"description,omitempty"`
+	// Indicates whether or not invalid characters in client header fields will be allowed.
+	// Valid names are composed of English letters, digits, hyphens and underscores.
+	// If "true", invalid characters are allowed in the HTTP header.
+	// If "false", invalid characters are not allowed in the HTTP header
+	// +kubebuilder:validation:Optional
+	AreInvalidCharactersAllowed bool `json:"areInvalidCharactersAllowed,omitempty"`
+	// The maximum size of each buffer used for reading http client request header.
+	// This value indicates the maximum size allowed for each buffer.
+	// The allowed values for buffer size are 8, 16, 32 and 64.
+	// +kubebuilder:validation:Optional
+	HttpLargeHeaderSizeInKB int `json:"httpLargeHeaderSizeInKB,omitempty"`
+}
+
+// LoadBalancerRuleSets defines nested fields for LoadBalancer.RuleSets.
+type LoadBalancerRuleSets struct {
+	// An array of rules that compose the rule set.
+	// +kubebuilder:validation:Required
+	Items []LoadBalancerRuleSetsItem `json:"items"`
+}
+
+// LoadBalancerIpAddressReservedIp defines nested fields for LoadBalancer.IpAddress.ReservedIp.
+type LoadBalancerIpAddressReservedIp struct {
+	Id string `json:"id,omitempty"`
+}
+
+// LoadBalancerIpAddress defines nested fields for LoadBalancer.IpAddress.
+type LoadBalancerIpAddress struct {
+	// An IP address.
+	// Example: `192.168.0.3`
+	IpAddress string `json:"ipAddress,omitempty"`
+	// Whether the IP address is public or private.
+	// If "true", the IP address is public and accessible from the internet.
+	// If "false", the IP address is private and accessible only from within the associated VCN.
+	IsPublic   bool                            `json:"isPublic,omitempty"`
+	ReservedIp LoadBalancerIpAddressReservedIp `json:"reservedIp,omitempty"`
+}
+
+// LoadBalancerRoutingPoliciesRuleAction defines nested fields for LoadBalancer.RoutingPolicies.Rule.Action.
+type LoadBalancerRoutingPoliciesRuleAction struct {
+	Name string `json:"name,omitempty"`
+	// Name of the backend set the listener will forward the traffic to.
+	// Example: `backendSetForImages`
+	BackendSetName string `json:"backendSetName,omitempty"`
+}
+
+// LoadBalancerRoutingPoliciesRule defines nested fields for LoadBalancer.RoutingPolicies.Rule.
+type LoadBalancerRoutingPoliciesRule struct {
+	// A unique name for the routing policy rule. Avoid entering confidential information.
+	Name string `json:"name,omitempty"`
+	// A routing rule to evaluate defined conditions against the incoming HTTP request and perform an action.
+	Condition string `json:"condition,omitempty"`
+	// A list of actions to be applied when conditions of the routing rule are met.
+	Actions []LoadBalancerRoutingPoliciesRuleAction `json:"actions,omitempty"`
+}
+
+// LoadBalancerRoutingPolicies defines nested fields for LoadBalancer.RoutingPolicies.
+type LoadBalancerRoutingPolicies struct {
+	// The unique name for this list of routing rules. Avoid entering confidential information.
+	// Example: `example_routing_policy`
+	Name string `json:"name,omitempty"`
+	// The version of the language in which `condition` of `rules` are composed.
+	ConditionLanguageVersion string `json:"conditionLanguageVersion,omitempty"`
+	// The ordered list of routing rules.
+	Rules []LoadBalancerRoutingPoliciesRule `json:"rules,omitempty"`
 }
 
 // LoadBalancerStatus defines the observed state of LoadBalancer.
 type LoadBalancerStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the load balancer.
+	Id string `json:"id,omitempty"`
+	// The current state of the load balancer.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The date and time the load balancer was created, in the format defined by RFC3339.
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// An array of IP addresses.
+	IpAddresses []LoadBalancerIpAddress `json:"ipAddresses,omitempty"`
+	// System tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// System tags can be viewed by users, but can only be created by the system.
+	// Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+	SystemTags      map[string]shared.MapValue             `json:"systemTags,omitempty"`
+	RoutingPolicies map[string]LoadBalancerRoutingPolicies `json:"routingPolicies,omitempty"`
 }
 
 // +kubebuilder:object:root=true

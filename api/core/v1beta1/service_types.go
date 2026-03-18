@@ -14,21 +14,33 @@ import (
 
 // ServiceSpec defines the desired state of Service.
 type ServiceSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
-	CidrBlock     string      `json:"cidrBlock,omitempty"`
-	Description   string      `json:"description,omitempty"`
-	Name          string      `json:"name,omitempty"`
 }
 
 // ServiceStatus defines the observed state of Service.
 type ServiceStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// A string that represents the regional public IP address ranges for the Oracle service or
+	// services covered by this `Service` object. Also known as the `Service` object's *service
+	// CIDR label*.
+	// When you set up a route rule to route traffic to the service gateway, use this value as the
+	// rule's destination. See RouteTable. Also, when you set up
+	// a security list rule to cover traffic with the service gateway, use the `cidrBlock` value
+	// as the rule's destination (for an egress rule) or the source (for an ingress rule).
+	// See SecurityList.
+	// Example: `oci-phx-objectstorage`
+	CidrBlock string `json:"cidrBlock,omitempty"`
+	// Description of the Oracle service or services covered by this `Service` object.
+	// Example: `OCI PHX Object Storage`
+	Description string `json:"description,omitempty"`
+	// The `Service` object's OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm).
+	Id string `json:"id,omitempty"`
+	// Name of the `Service` object. This name can change and is not guaranteed to be unique.
+	// Example: `OCI PHX Object Storage`
+	Name string `json:"name,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Name",type="string",JSONPath=".spec.name",priority=1
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.status.conditions[-1].type",description="status of the Service",priority=0
 // +kubebuilder:printcolumn:name="Ocid",type="string",JSONPath=".status.status.ocid",description="Ocid of the Service",priority=1
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0

@@ -14,13 +14,30 @@ import (
 
 // NodePoolOptionSpec defines the desired state of NodePoolOption.
 type NodePoolOptionSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
+}
+
+// NodePoolOptionSource defines nested fields for NodePoolOption.Source.
+type NodePoolOptionSource struct {
+	// The user-friendly name of the entity corresponding to the OCID.
+	SourceName string `json:"sourceName,omitempty"`
+	SourceType string `json:"sourceType,omitempty"`
+	// The OCID of the image.
+	ImageId string `json:"imageId,omitempty"`
 }
 
 // NodePoolOptionStatus defines the observed state of NodePoolOption.
 type NodePoolOptionStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// Available Kubernetes versions.
+	KubernetesVersions []string `json:"kubernetesVersions,omitempty"`
+	// Available shapes for nodes.
+	Shapes []string `json:"shapes,omitempty"`
+	// Deprecated. See sources.
+	// When creating a node pool using the `CreateNodePoolDetails` object, only image names contained in this
+	// property can be passed to the `nodeImageName` property.
+	Images []string `json:"images,omitempty"`
+	// Available source of the node.
+	Sources []NodePoolOptionSource `json:"sources,omitempty"`
 }
 
 // +kubebuilder:object:root=true

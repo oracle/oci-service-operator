@@ -15,10 +15,6 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - jsonPath: .spec.displayName
-      name: DisplayName
-      priority: 1
-      type: string
     - description: status of the AppCatalogSubscription
       jsonPath: .status.status.conditions[-1].type
       name: Status
@@ -58,40 +54,52 @@ spec:
             description: AppCatalogSubscriptionSpec defines the desired state of AppCatalogSubscription.
             properties:
               compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              displayName:
+                description: The compartmentID for the subscription.
                 type: string
               eulaLink:
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
+                description: EULA link
                 type: string
               listingId:
-                type: string
-              listingResourceId:
+                description: The OCID of the listing.
                 type: string
               listingResourceVersion:
+                description: Listing resource version.
                 type: string
               oracleTermsOfUseLink:
-                type: string
-              publisherName:
+                description: Oracle TOU link
                 type: string
               signature:
-                type: string
-              summary:
-                type: string
-              timeCreated:
+                description: A generated signature for this listing resource version
+                  retrieved the agreements API.
                 type: string
               timeRetrieved:
+                description: |-
+                  Date and time the agreements were retrieved, in RFC3339 (https://tools.ietf.org/html/rfc3339) format.
+                  Example: `2018-03-20T12:32:53.532Z`
                 type: string
+            required:
+            - compartmentId
+            - listingId
+            - listingResourceVersion
+            - oracleTermsOfUseLink
+            - signature
+            - timeRetrieved
             type: object
           status:
             description: AppCatalogSubscriptionStatus defines the observed state of
               AppCatalogSubscription.
             properties:
+              displayName:
+                description: |-
+                  A user-friendly name. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
+                type: string
+              listingResourceId:
+                description: Listing resource id.
+                type: string
+              publisherName:
+                description: Name of the publisher who published this listing.
+                type: string
               status:
                 properties:
                   conditions:
@@ -134,6 +142,14 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              summary:
+                description: The short summary to the listing.
+                type: string
+              timeCreated:
+                description: |-
+                  Date and time at which the subscription was created, in RFC3339 (https://tools.ietf.org/html/rfc3339) format.
+                  Example: `2018-03-20T12:32:53.532Z`
+                type: string
             required:
             - status
             type: object

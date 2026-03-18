@@ -54,23 +54,47 @@ spec:
             description: DrgRouteDistributionStatementSpec defines the desired state
               of DrgRouteDistributionStatement.
             properties:
-              action:
-                type: string
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
               id:
-                maxLength: 255
-                minLength: 1
+                description: The Oracle-assigned ID of each route distribution statement
+                  to be updated.
                 type: string
+              matchCriteria:
+                description: The action is applied only if all of the match criteria
+                  is met.
+                items:
+                  description: DrgRouteDistributionStatementMatchCriteria defines
+                    nested fields for DrgRouteDistributionStatement.MatchCriteria.
+                  properties:
+                    attachmentType:
+                      description: |-
+                        The type of the network resource to be included in this match. A match for a network type implies that all
+                        DRG attachments of that type insert routes into the table.
+                      type: string
+                    drgAttachmentId:
+                      description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                        of the DRG attachment.
+                      type: string
+                    matchType:
+                      type: string
+                  required:
+                  - attachmentType
+                  - drgAttachmentId
+                  type: object
+                type: array
               priority:
+                description: The priority of the statement you'd like to update.
                 type: integer
+            required:
+            - id
             type: object
           status:
             description: DrgRouteDistributionStatementStatus defines the observed
               state of DrgRouteDistributionStatement.
             properties:
+              action:
+                description: '`ACCEPT` indicates the route should be imported or exported
+                  as-is.'
+                type: string
               status:
                 properties:
                   conditions:

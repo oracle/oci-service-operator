@@ -14,19 +14,39 @@ import (
 
 // ConsoleHistorySpec defines the desired state of ConsoleHistory.
 type ConsoleHistorySpec struct {
-	Id                 shared.OCID       `json:"id,omitempty"`
-	CompartmentId      shared.OCID       `json:"compartmentId,omitempty"`
-	DisplayName        string            `json:"displayName,omitempty"`
-	FreeformTags       map[string]string `json:"freeformTags,omitempty"`
-	AvailabilityDomain string            `json:"availabilityDomain,omitempty"`
-	InstanceId         string            `json:"instanceId,omitempty"`
-	LifecycleState     string            `json:"lifecycleState,omitempty"`
-	TimeCreated        string            `json:"timeCreated,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 }
 
 // ConsoleHistoryStatus defines the observed state of ConsoleHistory.
 type ConsoleHistoryStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The availability domain of an instance.
+	// Example: `Uocm:PHX-AD-1`
+	AvailabilityDomain string `json:"availabilityDomain,omitempty"`
+	// The OCID of the compartment.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The OCID of the console history metadata object.
+	Id string `json:"id,omitempty"`
+	// The OCID of the instance this console history was fetched from.
+	InstanceId string `json:"instanceId,omitempty"`
+	// The current state of the console history.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The date and time the history was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
 }
 
 // +kubebuilder:object:root=true

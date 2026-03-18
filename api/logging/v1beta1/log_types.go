@@ -14,23 +14,86 @@ import (
 
 // LogSpec defines the desired state of Log.
 type LogSpec struct {
-	Id                shared.OCID       `json:"id,omitempty"`
-	CompartmentId     shared.OCID       `json:"compartmentId,omitempty"`
-	DisplayName       string            `json:"displayName,omitempty"`
-	LogType           string            `json:"logType,omitempty"`
-	IsEnabled         bool              `json:"isEnabled,omitempty"`
-	FreeformTags      map[string]string `json:"freeformTags,omitempty"`
-	RetentionDuration int               `json:"retentionDuration,omitempty"`
-	LogGroupId        string            `json:"logGroupId,omitempty"`
-	LifecycleState    string            `json:"lifecycleState,omitempty"`
-	TenancyId         string            `json:"tenancyId,omitempty"`
-	TimeCreated       string            `json:"timeCreated,omitempty"`
-	TimeLastModified  string            `json:"timeLastModified,omitempty"`
+	// The user-friendly display name. This must be unique within the enclosing resource,
+	// and it's changeable. Avoid entering confidential information.
+	// +kubebuilder:validation:Required
+	DisplayName string `json:"displayName"`
+	// The logType that the log object is for, whether custom or service.
+	// +kubebuilder:validation:Required
+	LogType string `json:"logType"`
+	// Whether or not this resource is currently enabled.
+	// +kubebuilder:validation:Optional
+	IsEnabled bool `json:"isEnabled,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// +kubebuilder:validation:Optional
+	Configuration LogConfiguration `json:"configuration,omitempty"`
+	// Log retention duration in 30-day increments (30, 60, 90 and so on until 180).
+	// +kubebuilder:validation:Optional
+	RetentionDuration int `json:"retentionDuration,omitempty"`
+}
+
+// LogConfigurationSource defines nested fields for Log.Configuration.Source.
+type LogConfigurationSource struct {
+	// +kubebuilder:validation:Optional
+	SourceType string `json:"sourceType,omitempty"`
+	// Service generating log.
+	// +kubebuilder:validation:Required
+	Service string `json:"service"`
+	// The unique identifier of the resource emitting the log.
+	// +kubebuilder:validation:Required
+	Resource string `json:"resource"`
+	// Log object category.
+	// +kubebuilder:validation:Required
+	Category string `json:"category"`
+	// Log category parameters are stored here.
+	// +kubebuilder:validation:Optional
+	Parameters map[string]string `json:"parameters,omitempty"`
+}
+
+// LogConfigurationArchiving defines nested fields for Log.Configuration.Archiving.
+type LogConfigurationArchiving struct {
+	// True if archiving enabled. This field is now deprecated, you should use Service Connector Hub to enable archiving.
+	// +kubebuilder:validation:Optional
+	IsEnabled bool `json:"isEnabled,omitempty"`
+}
+
+// LogConfiguration defines nested fields for Log.Configuration.
+type LogConfiguration struct {
+	// +kubebuilder:validation:Required
+	Source LogConfigurationSource `json:"source"`
+	// The OCID of the compartment that the resource belongs to.
+	// +kubebuilder:validation:Optional
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// +kubebuilder:validation:Optional
+	Archiving LogConfigurationArchiving `json:"archiving,omitempty"`
 }
 
 // LogStatus defines the observed state of Log.
 type LogStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the resource.
+	Id string `json:"id,omitempty"`
+	// Log group OCID.
+	LogGroupId string `json:"logGroupId,omitempty"`
+	// The pipeline state.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The OCID of the tenancy.
+	TenancyId string `json:"tenancyId,omitempty"`
+	// Time the resource was created.
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// Time the resource was last modified.
+	TimeLastModified string `json:"timeLastModified,omitempty"`
+	// The OCID of the compartment that the resource belongs to.
+	CompartmentId string `json:"compartmentId,omitempty"`
 }
 
 // +kubebuilder:object:root=true

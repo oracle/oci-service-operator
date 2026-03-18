@@ -55,24 +55,23 @@ spec:
               of VolumeBackupPolicyAssignment.
             properties:
               assetId:
-                type: string
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
+                description: The OCID of the volume to assign the policy to.
                 type: string
               policyId:
+                description: The OCID of the volume backup policy to assign to the
+                  volume.
                 type: string
-              timeCreated:
-                type: string
+            required:
+            - assetId
+            - policyId
             type: object
           status:
             description: VolumeBackupPolicyAssignmentStatus defines the observed state
               of VolumeBackupPolicyAssignment.
             properties:
+              id:
+                description: The OCID of the volume backup policy assignment.
+                type: string
               status:
                 properties:
                   conditions:
@@ -115,6 +114,11 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              timeCreated:
+                description: |-
+                  The date and time the volume backup policy was assigned to the volume. The format is
+                  defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+                type: string
             required:
             - status
             type: object

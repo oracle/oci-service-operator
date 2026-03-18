@@ -14,21 +14,27 @@ import (
 
 // FastConnectProviderServiceKeySpec defines the desired state of FastConnectProviderServiceKey.
 type FastConnectProviderServiceKeySpec struct {
-	Id                 shared.OCID `json:"id,omitempty"`
-	CompartmentId      shared.OCID `json:"compartmentId,omitempty"`
-	Name               string      `json:"name,omitempty"`
-	BandwidthShapeName string      `json:"bandwidthShapeName,omitempty"`
-	PeeringLocation    string      `json:"peeringLocation,omitempty"`
 }
 
 // FastConnectProviderServiceKeyStatus defines the observed state of FastConnectProviderServiceKey.
 type FastConnectProviderServiceKeyStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The service key that the provider gives you when you set up a virtual circuit connection
+	// from the provider to Oracle Cloud Infrastructure. Use this value as the `providerServiceKeyName`
+	// query parameter for
+	// GetFastConnectProviderServiceKey.
+	Name string `json:"name,omitempty"`
+	// The provisioned data rate of the connection. To get a list of the
+	// available bandwidth levels (that is, shapes), see
+	// ListFastConnectProviderVirtualCircuitBandwidthShapes.
+	// Example: `10 Gbps`
+	BandwidthShapeName string `json:"bandwidthShapeName,omitempty"`
+	// The provider's peering location.
+	PeeringLocation string `json:"peeringLocation,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Name",type="string",JSONPath=".spec.name",priority=1
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.status.conditions[-1].type",description="status of the FastConnectProviderServiceKey",priority=0
 // +kubebuilder:printcolumn:name="Ocid",type="string",JSONPath=".status.status.ocid",description="Ocid of the FastConnectProviderServiceKey",priority=1
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0

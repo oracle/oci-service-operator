@@ -14,14 +14,95 @@ import (
 
 // ObjectLifecyclePolicySpec defines the desired state of ObjectLifecyclePolicy.
 type ObjectLifecyclePolicySpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
-	TimeCreated   string      `json:"timeCreated,omitempty"`
+}
+
+// ObjectLifecyclePolicyItemObjectNameFilter defines nested fields for ObjectLifecyclePolicy.Item.ObjectNameFilter.
+type ObjectLifecyclePolicyItemObjectNameFilter struct {
+	// An array of glob patterns to match the object names to include. An empty array includes all objects in the
+	// bucket. Exclusion patterns take precedence over inclusion patterns.
+	// A Glob pattern is a sequence of characters to match text. Any character that appears in the pattern, other
+	// than the special pattern characters described below, matches itself.
+	//     Glob patterns must be between 1 and 1024 characters.
+	//     The special pattern characters have the following meanings:
+	//     \           Escapes the following character
+	//     *           Matches any string of characters.
+	//     ?           Matches any single character .
+	//     [...]       Matches a group of characters. A group of characters can be:
+	//                     A set of characters, for example: [Zafg9@]. This matches any character in the brackets.
+	//                     A range of characters, for example: [a-z]. This matches any character in the range.
+	//                         [a-f] is equivalent to [abcdef].
+	//                         For character ranges only the CHARACTER-CHARACTER pattern is supported.
+	//                             [ab-yz] is not valid
+	//                             [a-mn-z] is not valid
+	//                         Character ranges can not start with ^ or :
+	//                         To include a '-' in the range, make it the first or last character.
+	InclusionPatterns []string `json:"inclusionPatterns,omitempty"`
+	// An array of glob patterns to match the object names to exclude. An empty array is ignored. Exclusion
+	// patterns take precedence over inclusion patterns.
+	// A Glob pattern is a sequence of characters to match text. Any character that appears in the pattern, other
+	// than the special pattern characters described below, matches itself.
+	//     Glob patterns must be between 1 and 1024 characters.
+	//     The special pattern characters have the following meanings:
+	//     \           Escapes the following character
+	//     *           Matches any string of characters.
+	//     ?           Matches any single character .
+	//     [...]       Matches a group of characters. A group of characters can be:
+	//                     A set of characters, for example: [Zafg9@]. This matches any character in the brackets.
+	//                     A range of characters, for example: [a-z]. This matches any character in the range.
+	//                         [a-f] is equivalent to [abcdef].
+	//                         For character ranges only the CHARACTER-CHARACTER pattern is supported.
+	//                             [ab-yz] is not valid
+	//                             [a-mn-z] is not valid
+	//                         Character ranges can not start with ^ or :
+	//                         To include a '-' in the range, make it the first or last character.
+	ExclusionPatterns []string `json:"exclusionPatterns,omitempty"`
+	// An array of object name prefixes that the rule will apply to. An empty array means to include all objects.
+	InclusionPrefixes []string `json:"inclusionPrefixes,omitempty"`
+}
+
+// ObjectLifecyclePolicyItem defines nested fields for ObjectLifecyclePolicy.Item.
+type ObjectLifecyclePolicyItem struct {
+	// The name of the lifecycle rule to be applied.
+	Name string `json:"name,omitempty"`
+	// The action of the object lifecycle policy rule.
+	// Rules using the action 'ARCHIVE' move objects from Standard and InfrequentAccess storage tiers
+	// into the Archive storage tier (https://docs.cloud.oracle.com/Content/Archive/Concepts/archivestorageoverview.htm).
+	// Rules using the action 'INFREQUENT_ACCESS' move objects from Standard storage tier into the
+	// Infrequent Access Storage tier. Objects that are already in InfrequentAccess tier or in Archive
+	// tier are left untouched.
+	// Rules using the action 'DELETE' permanently delete objects from buckets.
+	// Rules using 'ABORT' abort the uncommitted multipart-uploads and permanently delete their parts from buckets.
+	Action string `json:"action,omitempty"`
+	// Specifies the age of objects to apply the rule to. The timeAmount is interpreted in units defined by the
+	// timeUnit parameter, and is calculated in relation to each object's Last-Modified time.
+	TimeAmount int64 `json:"timeAmount,omitempty"`
+	// The unit that should be used to interpret timeAmount.  Days are defined as starting and ending at midnight UTC.
+	// Years are defined as 365.2425 days long and likewise round up to the next midnight UTC.
+	TimeUnit string `json:"timeUnit,omitempty"`
+	// A Boolean that determines whether this rule is currently enabled.
+	IsEnabled bool `json:"isEnabled,omitempty"`
+	// The target of the object lifecycle policy rule. The values of target can be either "objects",
+	// "multipart-uploads" or "previous-object-versions".
+	// This field when declared as "objects" is used to specify ARCHIVE, INFREQUENT_ACCESS
+	// or DELETE rule for objects.
+	// This field when declared as "previous-object-versions" is used to specify ARCHIVE,
+	// INFREQUENT_ACCESS or DELETE rule for previous versions of existing objects.
+	// This field when declared as "multipart-uploads" is used to specify the ABORT (only) rule for
+	// uncommitted multipart-uploads.
+	Target           string                                    `json:"target,omitempty"`
+	ObjectNameFilter ObjectLifecyclePolicyItemObjectNameFilter `json:"objectNameFilter,omitempty"`
 }
 
 // ObjectLifecyclePolicyStatus defines the observed state of ObjectLifecyclePolicy.
 type ObjectLifecyclePolicyStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The date and time the object lifecycle policy was created, as described in
+	// RFC 3339 (https://tools.ietf.org/html/rfc3339).
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The live lifecycle policy on the bucket.
+	// For an example of this value, see the
+	// PutObjectLifecyclePolicy API documentation (https://docs.cloud.oracle.com/iaas/api/#/en/objectstorage/20160918/ObjectLifecyclePolicy/PutObjectLifecyclePolicy).
+	Items []ObjectLifecyclePolicyItem `json:"items,omitempty"`
 }
 
 // +kubebuilder:object:root=true

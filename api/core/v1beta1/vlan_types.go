@@ -14,23 +14,69 @@ import (
 
 // VlanSpec defines the desired state of Vlan.
 type VlanSpec struct {
-	Id                 shared.OCID       `json:"id,omitempty"`
-	CompartmentId      shared.OCID       `json:"compartmentId,omitempty"`
-	CidrBlock          string            `json:"cidrBlock,omitempty"`
-	VcnId              string            `json:"vcnId,omitempty"`
-	AvailabilityDomain string            `json:"availabilityDomain,omitempty"`
-	DisplayName        string            `json:"displayName,omitempty"`
-	FreeformTags       map[string]string `json:"freeformTags,omitempty"`
-	NsgIds             []string          `json:"nsgIds,omitempty"`
-	RouteTableId       string            `json:"routeTableId,omitempty"`
-	VlanTag            int               `json:"vlanTag,omitempty"`
-	LifecycleState     string            `json:"lifecycleState,omitempty"`
-	TimeCreated        string            `json:"timeCreated,omitempty"`
+	// The range of IPv4 addresses that will be used for layer 3 communication with
+	// hosts outside the VLAN. The CIDR must maintain the following rules -
+	// 1. The CIDR block is valid and correctly formatted.
+	// 2. The new range is within one of the parent VCN ranges.
+	// Example: `192.0.2.0/24`
+	// +kubebuilder:validation:Required
+	CidrBlock string `json:"cidrBlock"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment to contain the VLAN.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VCN to contain the VLAN.
+	// +kubebuilder:validation:Required
+	VcnId string `json:"vcnId"`
+	// Controls whether the VLAN is regional or specific to an availability domain.
+	// A regional VLAN has the flexibility to implement failover across availability domains.
+	// Previously, all VLANs were AD-specific.
+	// To create a regional VLAN, omit this attribute. Resources created subsequently in this
+	// VLAN (such as a Compute instance) can be created in any availability domain in the region.
+	// To create an AD-specific VLAN, use this attribute to specify the availability domain.
+	// Resources created in this VLAN must be in that availability domain.
+	// Example: `Uocm:PHX-AD-1`
+	// +kubebuilder:validation:Optional
+	AvailabilityDomain string `json:"availabilityDomain,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// A list of the OCIDs of the network security groups (NSGs) to add all VNICs in the VLAN to. For more
+	// information about NSGs, see
+	// NetworkSecurityGroup.
+	// +kubebuilder:validation:Optional
+	NsgIds []string `json:"nsgIds,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the route table the VLAN will use. If you don't provide a value,
+	// the VLAN uses the VCN's default route table.
+	// +kubebuilder:validation:Optional
+	RouteTableId string `json:"routeTableId,omitempty"`
+	// The IEEE 802.1Q VLAN tag for this VLAN. The value must be unique across all
+	// VLANs in the VCN. If you don't provide a value, Oracle assigns one.
+	// You cannot change the value later. VLAN tag 0 is reserved for use by Oracle.
+	// +kubebuilder:validation:Optional
+	VlanTag int `json:"vlanTag,omitempty"`
 }
 
 // VlanStatus defines the observed state of Vlan.
 type VlanStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The VLAN's Oracle ID (OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)).
+	Id string `json:"id,omitempty"`
+	// The VLAN's current state.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The date and time the VLAN was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
 }
 
 // +kubebuilder:object:root=true

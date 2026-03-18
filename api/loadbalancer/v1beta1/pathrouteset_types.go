@@ -14,9 +14,47 @@ import (
 
 // PathRouteSetSpec defines the desired state of PathRouteSet.
 type PathRouteSetSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
-	Name          string      `json:"name,omitempty"`
+	// The name for this set of path route rules. It must be unique and it cannot be changed. Avoid entering
+	// confidential information.
+	// Example: `example_path_route_set`
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+	// The set of path route rules.
+	// +kubebuilder:validation:Required
+	PathRoutes []PathRouteSetPathRoute `json:"pathRoutes"`
+}
+
+// PathRouteSetPathRoutePathMatchType defines nested fields for PathRouteSet.PathRoute.PathMatchType.
+type PathRouteSetPathRoutePathMatchType struct {
+	// Specifies how the load balancing service compares a PathRoute
+	// object's `path` string against the incoming URI.
+	// *  **EXACT_MATCH** - Looks for a `path` string that exactly matches the incoming URI path.
+	// *  **FORCE_LONGEST_PREFIX_MATCH** - Looks for the `path` string with the best, longest match of the beginning
+	//    portion of the incoming URI path.
+	// *  **PREFIX_MATCH** - Looks for a `path` string that matches the beginning portion of the incoming URI path.
+	// *  **SUFFIX_MATCH** - Looks for a `path` string that matches the ending portion of the incoming URI path.
+	// For a full description of how the system handles `matchType` in a path route set containing multiple rules, see
+	// Managing Request Routing (https://docs.cloud.oracle.com/Content/Balance/Tasks/managingrequest.htm).
+	// +kubebuilder:validation:Required
+	MatchType string `json:"matchType"`
+}
+
+// PathRouteSetPathRoute defines nested fields for PathRouteSet.PathRoute.
+type PathRouteSetPathRoute struct {
+	// The path string to match against the incoming URI path.
+	// *  Path strings are case-insensitive.
+	// *  Asterisk (*) wildcards are not supported.
+	// *  Regular expressions are not supported.
+	// Example: `/example/video/123`
+	// +kubebuilder:validation:Required
+	Path string `json:"path"`
+	// The type of matching to apply to incoming URIs.
+	// +kubebuilder:validation:Required
+	PathMatchType PathRouteSetPathRoutePathMatchType `json:"pathMatchType"`
+	// The name of the target backend set for requests where the incoming URI matches the specified path.
+	// Example: `example_backend_set`
+	// +kubebuilder:validation:Required
+	BackendSetName string `json:"backendSetName"`
 }
 
 // PathRouteSetStatus defines the observed state of PathRouteSet.

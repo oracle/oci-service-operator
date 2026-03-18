@@ -14,13 +14,35 @@ import (
 
 // TunnelCpeDeviceConfigSpec defines the desired state of TunnelCpeDeviceConfig.
 type TunnelCpeDeviceConfigSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
+	// The set of configuration answers for a CPE device.
+	// +kubebuilder:validation:Optional
+	TunnelCpeDeviceConfig []TunnelCpeDeviceConfigFields `json:"tunnelCpeDeviceConfig,omitempty"`
+}
+
+// TunnelCpeDeviceConfigFields defines nested fields for TunnelCpeDeviceConfig.TunnelCpeDeviceConfig.
+type TunnelCpeDeviceConfigFields struct {
+	// A string that identifies the question to be answered. See the `key` attribute in
+	// CpeDeviceConfigQuestion.
+	// +kubebuilder:validation:Optional
+	Key string `json:"key,omitempty"`
+	// The answer to the question.
+	// +kubebuilder:validation:Optional
+	Value string `json:"value,omitempty"`
+}
+
+// TunnelCpeDeviceConfigParameter defines nested fields for TunnelCpeDeviceConfig.TunnelCpeDeviceConfigParameter.
+type TunnelCpeDeviceConfigParameter struct {
+	// A string that identifies the question to be answered. See the `key` attribute in
+	// CpeDeviceConfigQuestion.
+	Key string `json:"key,omitempty"`
+	// The answer to the question.
+	Value string `json:"value,omitempty"`
 }
 
 // TunnelCpeDeviceConfigStatus defines the observed state of TunnelCpeDeviceConfig.
 type TunnelCpeDeviceConfigStatus struct {
-	OsokStatus shared.OSOKStatus `json:"status"`
+	OsokStatus                     shared.OSOKStatus                `json:"status"`
+	TunnelCpeDeviceConfigParameter []TunnelCpeDeviceConfigParameter `json:"tunnelCpeDeviceConfigParameter,omitempty"`
 }
 
 // +kubebuilder:object:root=true

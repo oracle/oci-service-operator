@@ -14,8 +14,6 @@ import (
 
 // OAuthClientCredentialSpec defines the desired state of OAuthClientCredential.
 type OAuthClientCredentialSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // OAuthClientCredentialStatus defines the observed state of OAuthClientCredential.

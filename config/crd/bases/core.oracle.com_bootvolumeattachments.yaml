@@ -15,10 +15,6 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - jsonPath: .spec.displayName
-      name: DisplayName
-      priority: 1
-      type: string
     - description: status of the BootVolumeAttachment
       jsonPath: .status.status.conditions[-1].type
       name: Status
@@ -56,36 +52,46 @@ spec:
             type: object
           spec:
             description: BootVolumeAttachmentSpec defines the desired state of BootVolumeAttachment.
-            properties:
-              availabilityDomain:
-                type: string
-              bootVolumeId:
-                type: string
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              displayName:
-                type: string
-              encryptionInTransitType:
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
-              instanceId:
-                type: string
-              isPvEncryptionInTransitEnabled:
-                type: boolean
-              lifecycleState:
-                type: string
-              timeCreated:
-                type: string
             type: object
           status:
             description: BootVolumeAttachmentStatus defines the observed state of
               BootVolumeAttachment.
             properties:
+              availabilityDomain:
+                description: |-
+                  The availability domain of an instance.
+                  Example: `Uocm:PHX-AD-1`
+                type: string
+              bootVolumeId:
+                description: The OCID of the boot volume.
+                type: string
+              compartmentId:
+                description: The OCID of the compartment.
+                type: string
+              displayName:
+                description: |-
+                  A user-friendly name. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
+                type: string
+              encryptionInTransitType:
+                description: |-
+                  Refer the top-level definition of encryptionInTransitType.
+                  The default value is NONE.
+                type: string
+              id:
+                description: The OCID of the boot volume attachment.
+                type: string
+              instanceId:
+                description: The OCID of the instance the boot volume is attached
+                  to.
+                type: string
+              isPvEncryptionInTransitEnabled:
+                description: Whether in-transit encryption for the boot volume's paravirtualized
+                  attachment is enabled or not.
+                type: boolean
+              lifecycleState:
+                description: The current state of the boot volume attachment.
+                type: string
               status:
                 properties:
                   conditions:
@@ -128,6 +134,11 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              timeCreated:
+                description: |-
+                  The date and time the boot volume was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+                  Example: `2016-08-25T21:10:29.600Z`
+                type: string
             required:
             - status
             type: object

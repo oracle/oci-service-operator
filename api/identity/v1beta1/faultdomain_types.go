@@ -14,20 +14,23 @@ import (
 
 // FaultDomainSpec defines the desired state of FaultDomain.
 type FaultDomainSpec struct {
-	Id                 shared.OCID `json:"id,omitempty"`
-	CompartmentId      shared.OCID `json:"compartmentId,omitempty"`
-	Name               string      `json:"name,omitempty"`
-	AvailabilityDomain string      `json:"availabilityDomain,omitempty"`
 }
 
 // FaultDomainStatus defines the observed state of FaultDomain.
 type FaultDomainStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The name of the Fault Domain.
+	Name string `json:"name,omitempty"`
+	// The OCID of the Fault Domain.
+	Id string `json:"id,omitempty"`
+	// The OCID of the compartment. Currently only tenancy (root) compartment can be provided.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The name of the availabilityDomain where the Fault Domain belongs.
+	AvailabilityDomain string `json:"availabilityDomain,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Name",type="string",JSONPath=".spec.name",priority=1
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.status.conditions[-1].type",description="status of the FaultDomain",priority=0
 // +kubebuilder:printcolumn:name="Ocid",type="string",JSONPath=".status.status.ocid",description="Ocid of the FaultDomain",priority=1
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0

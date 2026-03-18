@@ -14,16 +14,22 @@ import (
 
 // VolumeBackupPolicyAssignmentSpec defines the desired state of VolumeBackupPolicyAssignment.
 type VolumeBackupPolicyAssignmentSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
-	AssetId       string      `json:"assetId,omitempty"`
-	PolicyId      string      `json:"policyId,omitempty"`
-	TimeCreated   string      `json:"timeCreated,omitempty"`
+	// The OCID of the volume to assign the policy to.
+	// +kubebuilder:validation:Required
+	AssetId string `json:"assetId"`
+	// The OCID of the volume backup policy to assign to the volume.
+	// +kubebuilder:validation:Required
+	PolicyId string `json:"policyId"`
 }
 
 // VolumeBackupPolicyAssignmentStatus defines the observed state of VolumeBackupPolicyAssignment.
 type VolumeBackupPolicyAssignmentStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the volume backup policy assignment.
+	Id string `json:"id,omitempty"`
+	// The date and time the volume backup policy was assigned to the volume. The format is
+	// defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	TimeCreated string `json:"timeCreated,omitempty"`
 }
 
 // +kubebuilder:object:root=true

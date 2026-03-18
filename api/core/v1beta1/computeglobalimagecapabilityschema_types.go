@@ -14,22 +14,36 @@ import (
 
 // ComputeGlobalImageCapabilitySchemaSpec defines the desired state of ComputeGlobalImageCapabilitySchema.
 type ComputeGlobalImageCapabilitySchemaSpec struct {
-	Id                 shared.OCID       `json:"id,omitempty"`
-	CompartmentId      shared.OCID       `json:"compartmentId,omitempty"`
-	DisplayName        string            `json:"displayName,omitempty"`
-	TimeCreated        string            `json:"timeCreated,omitempty"`
-	CurrentVersionName string            `json:"currentVersionName,omitempty"`
-	FreeformTags       map[string]string `json:"freeformTags,omitempty"`
 }
 
 // ComputeGlobalImageCapabilitySchemaStatus defines the observed state of ComputeGlobalImageCapabilitySchema.
 type ComputeGlobalImageCapabilitySchemaStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compute global image capability schema
+	Id string `json:"id,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	DisplayName string `json:"displayName,omitempty"`
+	// The date and time the compute global image capability schema was created, in the format defined by
+	// RFC3339 (https://tools.ietf.org/html/rfc3339).
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The OCID of the compartment that contains the resource.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The name of the global capabilities version resource that is considered the current version.
+	CurrentVersionName string `json:"currentVersionName,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="DisplayName",type="string",JSONPath=".spec.displayName",priority=1
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.status.conditions[-1].type",description="status of the ComputeGlobalImageCapabilitySchema",priority=0
 // +kubebuilder:printcolumn:name="Ocid",type="string",JSONPath=".status.status.ocid",description="Ocid of the ComputeGlobalImageCapabilitySchema",priority=1
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0

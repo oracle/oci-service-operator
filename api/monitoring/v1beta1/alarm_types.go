@@ -14,32 +14,162 @@ import (
 
 // AlarmSpec defines the desired state of Alarm.
 type AlarmSpec struct {
-	Id                                       shared.OCID       `json:"id,omitempty"`
-	CompartmentId                            shared.OCID       `json:"compartmentId,omitempty"`
-	DisplayName                              string            `json:"displayName,omitempty"`
-	MetricCompartmentId                      string            `json:"metricCompartmentId,omitempty"`
-	Namespace                                string            `json:"namespace,omitempty"`
-	Query                                    string            `json:"query,omitempty"`
-	Severity                                 string            `json:"severity,omitempty"`
-	Destinations                             []string          `json:"destinations,omitempty"`
-	IsEnabled                                bool              `json:"isEnabled,omitempty"`
-	MetricCompartmentIdInSubtree             bool              `json:"metricCompartmentIdInSubtree,omitempty"`
-	ResourceGroup                            string            `json:"resourceGroup,omitempty"`
-	Resolution                               string            `json:"resolution,omitempty"`
-	PendingDuration                          string            `json:"pendingDuration,omitempty"`
-	Body                                     string            `json:"body,omitempty"`
-	IsNotificationsPerMetricDimensionEnabled bool              `json:"isNotificationsPerMetricDimensionEnabled,omitempty"`
-	MessageFormat                            string            `json:"messageFormat,omitempty"`
-	RepeatNotificationDuration               string            `json:"repeatNotificationDuration,omitempty"`
-	FreeformTags                             map[string]string `json:"freeformTags,omitempty"`
-	LifecycleState                           string            `json:"lifecycleState,omitempty"`
-	TimeCreated                              string            `json:"timeCreated,omitempty"`
-	TimeUpdated                              string            `json:"timeUpdated,omitempty"`
+	// A user-friendly name for the alarm. It does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	// This value determines the title of each alarm notification.
+	// Example: `High CPU Utilization`
+	// +kubebuilder:validation:Required
+	DisplayName string `json:"displayName"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the alarm.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the metric
+	// being evaluated by the alarm.
+	// +kubebuilder:validation:Required
+	MetricCompartmentId string `json:"metricCompartmentId"`
+	// The source service or application emitting the metric that is evaluated by the alarm.
+	// Example: `oci_computeagent`
+	// +kubebuilder:validation:Required
+	Namespace string `json:"namespace"`
+	// The Monitoring Query Language (MQL) expression to evaluate for the alarm. The Alarms feature of
+	// the Monitoring service interprets results for each returned time series as Boolean values,
+	// where zero represents false and a non-zero value represents true. A true value means that the trigger
+	// rule condition has been met. The query must specify a metric, statistic, interval, and trigger
+	// rule (threshold or absence). Supported values for interval depend on the specified time range. More
+	// interval values are supported for smaller time ranges. You can optionally
+	// specify dimensions and grouping functions. Supported grouping functions: `grouping()`, `groupBy()`.
+	// For information about writing MQL expressions, see
+	// Editing the MQL Expression for a Query (https://docs.cloud.oracle.com/iaas/Content/Monitoring/Tasks/query-metric-mql.htm).
+	// For details about MQL, see
+	// Monitoring Query Language (MQL) Reference (https://docs.cloud.oracle.com/iaas/Content/Monitoring/Reference/mql.htm).
+	// For available dimensions, review the metric definition for the supported service. See
+	// Supported Services (https://docs.cloud.oracle.com/iaas/Content/Monitoring/Concepts/monitoringoverview.htm#SupportedServices).
+	// Example of threshold alarm:
+	//   -----
+	//     CpuUtilization[1m]{availabilityDomain="cumS:PHX-AD-1"}.groupBy(availabilityDomain).percentile(0.9) > 85
+	//   -----
+	// Example of absence alarm:
+	//   -----
+	//     CpuUtilization[1m]{availabilityDomain="cumS:PHX-AD-1"}.absent()
+	//   -----
+	// +kubebuilder:validation:Required
+	Query string `json:"query"`
+	// The perceived type of response required when the alarm is in the "FIRING" state.
+	// Example: `CRITICAL`
+	// +kubebuilder:validation:Required
+	Severity string `json:"severity"`
+	// A list of destinations for alarm notifications.
+	// Each destination is represented by the OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+	// of a related resource, such as a NotificationTopic.
+	// Supported destination services: Notifications, Streaming.
+	// Limit: One destination per supported destination service.
+	// +kubebuilder:validation:Required
+	Destinations []string `json:"destinations"`
+	// Whether the alarm is enabled.
+	// Example: `true`
+	// +kubebuilder:validation:Required
+	IsEnabled bool `json:"isEnabled"`
+	// When true, the alarm evaluates metrics from all compartments and subcompartments. The parameter can
+	// only be set to true when metricCompartmentId is the tenancy OCID (the tenancy is the root compartment).
+	// A true value requires the user to have tenancy-level permissions. If this requirement is not met,
+	// then the call is rejected. When false, the alarm evaluates metrics from only the compartment specified
+	// in metricCompartmentId. Default is false.
+	// Example: `true`
+	// +kubebuilder:validation:Optional
+	MetricCompartmentIdInSubtree bool `json:"metricCompartmentIdInSubtree,omitempty"`
+	// Resource group that you want to match. A null value returns only metric data that has no resource groups. The alarm retrieves metric data associated with the specified resource group only. Only one resource group can be applied per metric.
+	// A valid resourceGroup value starts with an alphabetical character and includes only alphanumeric characters, periods (.), underscores (_), hyphens (-), and dollar signs ($).
+	// Avoid entering confidential information.
+	// Example: `frontend-fleet`
+	// +kubebuilder:validation:Optional
+	ResourceGroup string `json:"resourceGroup,omitempty"`
+	// The time between calculated aggregation windows for the alarm. Supported value: `1m`
+	// +kubebuilder:validation:Optional
+	Resolution string `json:"resolution,omitempty"`
+	// The period of time that the condition defined in the alarm must persist before the alarm state
+	// changes from "OK" to "FIRING". For example, a value of 5 minutes means that the
+	// alarm must persist in breaching the condition for five minutes before the alarm updates its
+	// state to "FIRING".
+	// The duration is specified as a string in ISO 8601 format (`PT10M` for ten minutes or `PT1H`
+	// for one hour). Minimum: PT1M. Maximum: PT1H. Default: PT1M.
+	// Under the default value of PT1M, the first evaluation that breaches the alarm updates the
+	// state to "FIRING".
+	// The alarm updates its status to "OK" when the breaching condition has been clear for
+	// the most recent minute.
+	// Example: `PT5M`
+	// +kubebuilder:validation:Optional
+	PendingDuration string `json:"pendingDuration,omitempty"`
+	// The human-readable content of the delivered alarm notification. Oracle recommends providing guidance
+	// to operators for resolving the alarm condition. Consider adding links to standard runbook
+	// practices. Avoid entering confidential information.
+	// Example: `High CPU usage alert. Follow runbook instructions for resolution.`
+	// +kubebuilder:validation:Optional
+	Body string `json:"body,omitempty"`
+	// When set to `true`, splits alarm notifications per metric stream.
+	// When set to `false`, groups alarm notifications across metric streams.
+	// Example: `true`
+	// +kubebuilder:validation:Optional
+	IsNotificationsPerMetricDimensionEnabled bool `json:"isNotificationsPerMetricDimensionEnabled,omitempty"`
+	// The format to use for alarm notifications. The formats are:
+	// * `RAW` - Raw JSON blob. Default value. When the `destinations` attribute specifies `Streaming`, all alarm notifications use this format.
+	// * `PRETTY_JSON`: JSON with new lines and indents. Available when the `destinations` attribute specifies `Notifications` only.
+	// * `ONS_OPTIMIZED`: Simplified, user-friendly layout. Available when the `destinations` attribute specifies `Notifications` only. Applies to Email subscription types only.
+	// +kubebuilder:validation:Optional
+	MessageFormat string `json:"messageFormat,omitempty"`
+	// The frequency for re-submitting alarm notifications, if the alarm keeps firing without
+	// interruption. Format defined by ISO 8601. For example, `PT4H` indicates four hours.
+	// Minimum: PT1M. Maximum: P30D.
+	// Default value: null (notifications are not re-submitted).
+	// Example: `PT2H`
+	// +kubebuilder:validation:Optional
+	RepeatNotificationDuration string `json:"repeatNotificationDuration,omitempty"`
+	// The configuration details for suppressing an alarm.
+	// +kubebuilder:validation:Optional
+	Suppression AlarmSuppressionFields `json:"suppression,omitempty"`
+	// Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Usage of predefined tag keys. These predefined keys are scoped to namespaces.
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+}
+
+// AlarmSuppressionFields defines nested fields for Alarm.Suppression.
+type AlarmSuppressionFields struct {
+	// The start date and time for the suppression to take place, inclusive. Format defined by RFC3339.
+	// Example: `2023-02-01T01:02:29.600Z`
+	// +kubebuilder:validation:Required
+	TimeSuppressFrom string `json:"timeSuppressFrom"`
+	// The end date and time for the suppression to take place, inclusive. Format defined by RFC3339.
+	// Example: `2023-02-01T02:02:29.600Z`
+	// +kubebuilder:validation:Required
+	TimeSuppressUntil string `json:"timeSuppressUntil"`
+	// Human-readable reason for suppressing alarm notifications.
+	// It does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	// Oracle recommends including tracking information for the event or associated work,
+	// such as a ticket number.
+	// Example: `Planned outage due to change IT-1234.`
+	// +kubebuilder:validation:Optional
+	Description string `json:"description,omitempty"`
 }
 
 // AlarmObservedState defines the observed state of Alarm.
 type AlarmObservedState struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the alarm.
+	Id string `json:"id,omitempty"`
+	// The current lifecycle state of the alarm.
+	// Example: `DELETED`
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The date and time the alarm was created. Format defined by RFC3339.
+	// Example: `2023-02-01T01:02:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The date and time the alarm was last updated. Format defined by RFC3339.
+	// Example: `2023-02-03T01:02:29.600Z`
+	TimeUpdated string `json:"timeUpdated,omitempty"`
 }
 
 // +kubebuilder:object:root=true

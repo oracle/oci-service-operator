@@ -14,27 +14,106 @@ import (
 
 // CrossConnectSpec defines the desired state of CrossConnect.
 type CrossConnectSpec struct {
-	Id                                    shared.OCID       `json:"id,omitempty"`
-	CompartmentId                         shared.OCID       `json:"compartmentId,omitempty"`
-	LocationName                          string            `json:"locationName,omitempty"`
-	PortSpeedShapeName                    string            `json:"portSpeedShapeName,omitempty"`
-	CrossConnectGroupId                   string            `json:"crossConnectGroupId,omitempty"`
-	DisplayName                           string            `json:"displayName,omitempty"`
-	FarCrossConnectOrCrossConnectGroupId  string            `json:"farCrossConnectOrCrossConnectGroupId,omitempty"`
-	FreeformTags                          map[string]string `json:"freeformTags,omitempty"`
-	NearCrossConnectOrCrossConnectGroupId string            `json:"nearCrossConnectOrCrossConnectGroupId,omitempty"`
-	CustomerReferenceName                 string            `json:"customerReferenceName,omitempty"`
-	IsActive                              bool              `json:"isActive,omitempty"`
-	LifecycleState                        string            `json:"lifecycleState,omitempty"`
-	PortName                              string            `json:"portName,omitempty"`
-	TimeCreated                           string            `json:"timeCreated,omitempty"`
-	OciPhysicalDeviceName                 string            `json:"ociPhysicalDeviceName,omitempty"`
-	OciLogicalDeviceName                  string            `json:"ociLogicalDeviceName,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment to contain the cross-connect.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// The name of the FastConnect location where this cross-connect will be installed.
+	// To get a list of the available locations, see
+	// ListCrossConnectLocations.
+	// Example: `CyrusOne, Chandler, AZ`
+	// +kubebuilder:validation:Required
+	LocationName string `json:"locationName"`
+	// The port speed for this cross-connect. To get a list of the available port speeds, see
+	// ListCrossconnectPortSpeedShapes.
+	// Example: `10 Gbps`
+	// +kubebuilder:validation:Required
+	PortSpeedShapeName string `json:"portSpeedShapeName"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the cross-connect group to put this cross-connect in.
+	// +kubebuilder:validation:Optional
+	CrossConnectGroupId string `json:"crossConnectGroupId,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
+	// If you already have an existing cross-connect or cross-connect group at this FastConnect
+	// location, and you want this new cross-connect to be on a different router (for the
+	// purposes of redundancy), provide the OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of that existing cross-connect or
+	// cross-connect group.
+	// +kubebuilder:validation:Optional
+	FarCrossConnectOrCrossConnectGroupId string `json:"farCrossConnectOrCrossConnectGroupId,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// If you already have an existing cross-connect or cross-connect group at this FastConnect
+	// location, and you want this new cross-connect to be on the same router, provide the
+	// OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of that existing cross-connect or cross-connect group.
+	// +kubebuilder:validation:Optional
+	NearCrossConnectOrCrossConnectGroupId string `json:"nearCrossConnectOrCrossConnectGroupId,omitempty"`
+	// A reference name or identifier for the physical fiber connection that this cross-connect
+	// uses.
+	// +kubebuilder:validation:Optional
+	CustomerReferenceName string `json:"customerReferenceName,omitempty"`
+	// +kubebuilder:validation:Optional
+	MacsecProperties CrossConnectMacsecProperties `json:"macsecProperties,omitempty"`
+	// Set to true to activate the cross-connect. You activate it after the physical cabling
+	// is complete, and you've confirmed the cross-connect's light levels are good and your side
+	// of the interface is up. Activation indicates to Oracle that the physical connection is ready.
+	// Example: `true`
+	// +kubebuilder:validation:Optional
+	IsActive bool `json:"isActive,omitempty"`
+}
+
+// CrossConnectMacsecPropertiesPrimaryKey defines nested fields for CrossConnect.MacsecProperties.PrimaryKey.
+type CrossConnectMacsecPropertiesPrimaryKey struct {
+	// Secret OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) containing the Connectivity association Key Name (CKN) of this MACsec key.
+	// NOTE: Only the latest secret version will be used.
+	// +kubebuilder:validation:Required
+	ConnectivityAssociationNameSecretId string `json:"connectivityAssociationNameSecretId"`
+	// Secret OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) containing the Connectivity Association Key (CAK) of this MACsec key.
+	// NOTE: Only the latest secret version will be used.
+	// +kubebuilder:validation:Required
+	ConnectivityAssociationKeySecretId string `json:"connectivityAssociationKeySecretId"`
+}
+
+// CrossConnectMacsecProperties defines nested fields for CrossConnect.MacsecProperties.
+type CrossConnectMacsecProperties struct {
+	// Indicates whether or not MACsec is enabled.
+	// +kubebuilder:validation:Required
+	State string `json:"state"`
+	// +kubebuilder:validation:Optional
+	PrimaryKey CrossConnectMacsecPropertiesPrimaryKey `json:"primaryKey,omitempty"`
+	// Type of encryption cipher suite to use for the MACsec connection.
+	// +kubebuilder:validation:Optional
+	EncryptionCipher string `json:"encryptionCipher,omitempty"`
+	// Indicates whether unencrypted traffic is allowed if MACsec Key Agreement protocol (MKA) fails.
+	// +kubebuilder:validation:Optional
+	IsUnprotectedTrafficAllowed bool `json:"isUnprotectedTrafficAllowed,omitempty"`
 }
 
 // CrossConnectObservedState defines the observed state of CrossConnect.
 type CrossConnectObservedState struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The cross-connect's Oracle ID (OCID).
+	Id string `json:"id,omitempty"`
+	// The cross-connect's current state.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// A string identifying the meet-me room port for this cross-connect.
+	PortName string `json:"portName,omitempty"`
+	// The date and time the cross-connect was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The FastConnect device that terminates the physical connection.
+	OciPhysicalDeviceName string `json:"ociPhysicalDeviceName,omitempty"`
+	// The FastConnect device that terminates the logical connection.
+	// This device might be different than the device that terminates the physical connection.
+	OciLogicalDeviceName string `json:"ociLogicalDeviceName,omitempty"`
 }
 
 // +kubebuilder:object:root=true

@@ -14,8 +14,6 @@ import (
 
 // StandardTagTemplateSpec defines the desired state of StandardTagTemplate.
 type StandardTagTemplateSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // StandardTagTemplateStatus defines the observed state of StandardTagTemplate.

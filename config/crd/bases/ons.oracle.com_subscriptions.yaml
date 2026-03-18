@@ -53,38 +53,105 @@ spec:
             description: SubscriptionSpec defines the desired state of Subscription.
             properties:
               compartmentId:
-                maxLength: 255
-                minLength: 1
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment for the subscription.
                 type: string
-              createdTime:
-                format: int64
-                type: integer
-              deliverPolicy:
-                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              deliveryPolicy:
+                description: The delivery policy of the subscription. Stored as a
+                  JSON string.
+                properties:
+                  backoffRetryPolicy:
+                    description: SubscriptionDeliveryPolicyBackoffRetryPolicy defines
+                      nested fields for Subscription.DeliveryPolicy.BackoffRetryPolicy.
+                    properties:
+                      maxRetryDuration:
+                        description: The maximum retry duration in milliseconds. Default
+                          value is `7200000` (2 hours).
+                        type: integer
+                      policyType:
+                        description: The type of delivery policy.
+                        type: string
+                    required:
+                    - maxRetryDuration
+                    - policyType
+                    type: object
+                type: object
               endpoint:
-                type: string
-              etag:
+                description: |-
+                  A locator that corresponds to the subscription protocol.
+                  For example, an email address for a subscription that uses the `EMAIL` protocol, or a URL for a subscription that uses an HTTP-based protocol.
+                  HTTP-based protocols use URL endpoints that begin with "http:" or "https:".
+                  A URL cannot exceed 512 characters.
+                  Avoid entering confidential information.
+                  For protocol-specific endpoint formats and steps to get or create endpoints, see
+                  To create a subscription (https://docs.cloud.oracle.com/iaas/Content/Notification/Tasks/managingtopicsandsubscriptions.htm#createSub).
                 type: string
               freeformTags:
                 additionalProperties:
                   type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
                 type: object
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
-              lifecycleState:
-                type: string
               metadata:
+                description: Metadata for the subscription.
                 type: string
               protocol:
+                description: |-
+                  The protocol used for the subscription.
+                  Allowed values:
+                    * `CUSTOM_HTTPS`
+                    * `EMAIL`
+                    * `HTTPS` (deprecated; for PagerDuty endpoints, use `PAGERDUTY`)
+                    * `ORACLE_FUNCTIONS`
+                    * `PAGERDUTY`
+                    * `SLACK`
+                    * `SMS`
+                  For information about subscription protocols, see
+                  To create a subscription (https://docs.cloud.oracle.com/iaas/Content/Notification/Tasks/managingtopicsandsubscriptions.htm#createSub).
                 type: string
               topicId:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the topic for the subscription.
                 type: string
+            required:
+            - compartmentId
+            - endpoint
+            - protocol
+            - topicId
             type: object
           status:
             description: SubscriptionStatus defines the observed state of Subscription.
             properties:
+              createdTime:
+                description: The time when this suscription was created.
+                format: int64
+                type: integer
+              deliverPolicy:
+                description: The delivery policy of the subscription. Stored as a
+                  JSON string.
+                type: string
+              etag:
+                description: For optimistic concurrency control. See `if-match`.
+                type: string
+              id:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the subscription.
+                type: string
+              lifecycleState:
+                description: The lifecycle state of the subscription. The status of
+                  a new subscription is PENDING; when confirmed, the subscription
+                  status changes to ACTIVE.
+                type: string
               status:
                 properties:
                   conditions:

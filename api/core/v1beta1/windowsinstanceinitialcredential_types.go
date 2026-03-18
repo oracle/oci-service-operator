@@ -14,8 +14,6 @@ import (
 
 // WindowsInstanceInitialCredentialSpec defines the desired state of WindowsInstanceInitialCredential.
 type WindowsInstanceInitialCredentialSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // WindowsInstanceInitialCredentialStatus defines the observed state of WindowsInstanceInitialCredential.

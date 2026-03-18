@@ -14,9 +14,16 @@ import (
 
 // GenericArtifactByPathSpec defines the desired state of GenericArtifactByPath.
 type GenericArtifactByPathSpec struct {
-	Id            shared.OCID       `json:"id,omitempty"`
-	CompartmentId shared.OCID       `json:"compartmentId,omitempty"`
-	FreeformTags  map[string]string `json:"freeformTags,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 }
 
 // GenericArtifactByPathStatus defines the observed state of GenericArtifactByPath.

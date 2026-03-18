@@ -15,10 +15,6 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - jsonPath: .spec.name
-      name: Name
-      priority: 1
-      type: string
     - description: status of the PodShape
       jsonPath: .status.status.conditions[-1].type
       name: Status
@@ -55,23 +51,74 @@ spec:
             type: object
           spec:
             description: PodShapeSpec defines the desired state of PodShape.
-            properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
-              name:
-                type: string
-              processorDescription:
-                type: string
             type: object
           status:
             description: PodShapeStatus defines the observed state of PodShape.
             properties:
+              memoryOptions:
+                description: ShapeMemoryOptions.
+                items:
+                  description: PodShapeMemoryOption defines nested fields for PodShape.MemoryOption.
+                  properties:
+                    defaultPerOcpuInGBs:
+                      description: The default amount of memory per OCPU available
+                        for this shape, in gigabytes.
+                      type: number
+                    maxInGBs:
+                      description: The maximum amount of memory, in gigabytes.
+                      type: number
+                    maxPerOcpuInGBs:
+                      description: The maximum amount of memory per OCPU available
+                        for this shape, in gigabytes.
+                      type: number
+                    minInGBs:
+                      description: The minimum amount of memory, in gigabytes.
+                      type: number
+                    minPerOcpuInGBs:
+                      description: The minimum amount of memory per OCPU available
+                        for this shape, in gigabytes.
+                      type: number
+                  type: object
+                type: array
+              name:
+                description: The name of the identifying shape.
+                type: string
+              networkBandwidthOptions:
+                description: ShapeNetworkBandwidthOptions.
+                items:
+                  description: PodShapeNetworkBandwidthOption defines nested fields
+                    for PodShape.NetworkBandwidthOption.
+                  properties:
+                    defaultPerOcpuInGbps:
+                      description: The default amount of networking bandwidth per
+                        OCPU, in gigabits per second.
+                      type: number
+                    maxInGbps:
+                      description: The maximum amount of networking bandwidth, in
+                        gigabits per second.
+                      type: number
+                    minInGbps:
+                      description: The minimum amount of networking bandwidth, in
+                        gigabits per second.
+                      type: number
+                  type: object
+                type: array
+              ocpuOptions:
+                description: Options for OCPU shape.
+                items:
+                  description: PodShapeOcpuOption defines nested fields for PodShape.OcpuOption.
+                  properties:
+                    max:
+                      description: The maximum number of OCPUs.
+                      type: number
+                    min:
+                      description: The minimum number of OCPUs.
+                      type: number
+                  type: object
+                type: array
+              processorDescription:
+                description: A short description of the VM's processor (CPU).
+                type: string
               status:
                 properties:
                   conditions:

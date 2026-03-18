@@ -14,13 +14,35 @@ import (
 
 // IPSecConnectionDeviceStatusSpec defines the desired state of IPSecConnectionDeviceStatus.
 type IPSecConnectionDeviceStatusSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
+}
+
+// IPSecConnectionDeviceStatusTunnel defines nested fields for IPSecConnectionDeviceStatus.Tunnel.
+type IPSecConnectionDeviceStatusTunnel struct {
+	// The IP address of Oracle's VPN headend.
+	// Example: `203.0.113.50`
+	IpAddress string `json:"ipAddress,omitempty"`
+	// The tunnel's current state.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The date and time the IPSec connection was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// When the state of the tunnel last changed, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeStateModified string `json:"timeStateModified,omitempty"`
 }
 
 // IPSecConnectionDeviceStatusObservedState defines the observed state of IPSecConnectionDeviceStatus.
 type IPSecConnectionDeviceStatusObservedState struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the IPSec connection.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The IPSec connection's Oracle ID (OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)).
+	Id string `json:"id,omitempty"`
+	// The date and time the IPSec connection was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// Two TunnelStatus objects.
+	Tunnels []IPSecConnectionDeviceStatusTunnel `json:"tunnels,omitempty"`
 }
 
 // +kubebuilder:object:root=true

@@ -14,19 +14,42 @@ import (
 
 // WorkRequestSpec defines the desired state of WorkRequest.
 type WorkRequestSpec struct {
-	Id              shared.OCID `json:"id,omitempty"`
-	CompartmentId   shared.OCID `json:"compartmentId,omitempty"`
-	OperationType   string      `json:"operationType,omitempty"`
-	Status          string      `json:"status,omitempty"`
-	PercentComplete float32     `json:"percentComplete,omitempty"`
-	TimeAccepted    string      `json:"timeAccepted,omitempty"`
-	TimeStarted     string      `json:"timeStarted,omitempty"`
-	TimeFinished    string      `json:"timeFinished,omitempty"`
+}
+
+// WorkRequestResource defines nested fields for WorkRequest.Resource.
+type WorkRequestResource struct {
+	// The resource type the work request affects.
+	EntityType string `json:"entityType,omitempty"`
+	// The way in which this resource is affected by the work tracked in the work request.
+	// A resource being created, updated, or deleted will remain in the IN_PROGRESS state until
+	// work is complete for that resource, at which point it will transition to CREATED, UPDATED,
+	// or DELETED, respectively.
+	ActionType string `json:"actionType,omitempty"`
+	// The resource identifier the work request affects.
+	Identifier string `json:"identifier,omitempty"`
+	// The URI path that the user can do a GET on to access the resource metadata.
+	EntityUri string `json:"entityUri,omitempty"`
 }
 
 // WorkRequestStatus defines the observed state of WorkRequest.
 type WorkRequestStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The work request OCID.
+	Id string `json:"id,omitempty"`
+	// The type of work the work request is doing.
+	OperationType string `json:"operationType,omitempty"`
+	// The work request's compartment OCID.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The resources this work request affects.
+	Resources []WorkRequestResource `json:"resources,omitempty"`
+	// Percentage of the request completed.
+	PercentComplete float32 `json:"percentComplete,omitempty"`
+	// The time the work request was accepted.
+	TimeAccepted string `json:"timeAccepted,omitempty"`
+	// The time the work request was started.
+	TimeStarted string `json:"timeStarted,omitempty"`
+	// The time the work request was finished.
+	TimeFinished string `json:"timeFinished,omitempty"`
 }
 
 // +kubebuilder:object:root=true

@@ -14,8 +14,6 @@ import (
 
 // ZoneFromZoneFileSpec defines the desired state of ZoneFromZoneFile.
 type ZoneFromZoneFileSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // ZoneFromZoneFileStatus defines the observed state of ZoneFromZoneFile.

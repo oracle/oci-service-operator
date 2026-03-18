@@ -14,24 +14,60 @@ import (
 
 // DedicatedVmHostSpec defines the desired state of DedicatedVmHost.
 type DedicatedVmHostSpec struct {
-	Id                   shared.OCID       `json:"id,omitempty"`
-	CompartmentId        shared.OCID       `json:"compartmentId,omitempty"`
-	AvailabilityDomain   string            `json:"availabilityDomain,omitempty"`
-	DedicatedVmHostShape string            `json:"dedicatedVmHostShape,omitempty"`
-	DisplayName          string            `json:"displayName,omitempty"`
-	FaultDomain          string            `json:"faultDomain,omitempty"`
-	FreeformTags         map[string]string `json:"freeformTags,omitempty"`
-	LifecycleState       string            `json:"lifecycleState,omitempty"`
-	TimeCreated          string            `json:"timeCreated,omitempty"`
-	TotalOcpus           float32           `json:"totalOcpus,omitempty"`
-	RemainingOcpus       float32           `json:"remainingOcpus,omitempty"`
-	TotalMemoryInGBs     float32           `json:"totalMemoryInGBs,omitempty"`
-	RemainingMemoryInGBs float32           `json:"remainingMemoryInGBs,omitempty"`
+	// The availability domain of the dedicated virtual machine host.
+	// Example: `Uocm:PHX-AD-1`
+	// +kubebuilder:validation:Required
+	AvailabilityDomain string `json:"availabilityDomain"`
+	// The OCID of the compartment.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// The dedicated virtual machine host shape. The shape determines the number of CPUs and
+	// other resources available for VM instances launched on the dedicated virtual machine host.
+	// +kubebuilder:validation:Required
+	DedicatedVmHostShape string `json:"dedicatedVmHostShape"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
+	// The fault domain for the dedicated virtual machine host's assigned instances.
+	// For more information, see Fault Domains (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/regions.htm#fault).
+	// If you do not specify the fault domain, the system selects one for you. To change the fault domain for a dedicated virtual machine host,
+	// delete it and create a new dedicated virtual machine host in the preferred fault domain.
+	// To get a list of fault domains, use the `ListFaultDomains` operation in
+	// the Identity and Access Management Service API (https://docs.cloud.oracle.com/iaas/api/#/en/identity/20160918/).
+	// Example: `FAULT-DOMAIN-1`
+	// +kubebuilder:validation:Optional
+	FaultDomain string `json:"faultDomain,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 }
 
 // DedicatedVmHostStatus defines the observed state of DedicatedVmHost.
 type DedicatedVmHostStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the dedicated VM host.
+	Id string `json:"id,omitempty"`
+	// The current state of the dedicated VM host.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The date and time the dedicated VM host was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The total OCPUs of the dedicated VM host.
+	TotalOcpus float32 `json:"totalOcpus,omitempty"`
+	// The available OCPUs of the dedicated VM host.
+	RemainingOcpus float32 `json:"remainingOcpus,omitempty"`
+	// The total memory of the dedicated VM host, in GBs.
+	TotalMemoryInGBs float32 `json:"totalMemoryInGBs,omitempty"`
+	// The remaining memory of the dedicated VM host, in GBs.
+	RemainingMemoryInGBs float32 `json:"remainingMemoryInGBs,omitempty"`
 }
 
 // +kubebuilder:object:root=true

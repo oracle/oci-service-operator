@@ -14,8 +14,160 @@ import (
 
 // NetworkSecurityGroupSecurityRuleSpec defines the desired state of NetworkSecurityGroupSecurityRule.
 type NetworkSecurityGroupSecurityRuleSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
+	// The NSG security rules to update.
+	// +kubebuilder:validation:Optional
+	SecurityRules []NetworkSecurityGroupSecurityRuleSecurityRule `json:"securityRules,omitempty"`
+}
+
+// NetworkSecurityGroupSecurityRuleSecurityRuleIcmpOptions defines nested fields for NetworkSecurityGroupSecurityRule.SecurityRule.IcmpOptions.
+type NetworkSecurityGroupSecurityRuleSecurityRuleIcmpOptions struct {
+	// The ICMP type.
+	// +kubebuilder:validation:Required
+	Type int `json:"type"`
+	// The ICMP code (optional).
+	// +kubebuilder:validation:Optional
+	Code int `json:"code,omitempty"`
+}
+
+// NetworkSecurityGroupSecurityRuleSecurityRuleTcpOptionsDestinationPortRange defines nested fields for NetworkSecurityGroupSecurityRule.SecurityRule.TcpOptions.DestinationPortRange.
+type NetworkSecurityGroupSecurityRuleSecurityRuleTcpOptionsDestinationPortRange struct {
+	// The maximum port number, which must not be less than the minimum port number. To specify
+	// a single port number, set both the min and max to the same value.
+	// +kubebuilder:validation:Required
+	Max int `json:"max"`
+	// The minimum port number, which must not be greater than the maximum port number.
+	// +kubebuilder:validation:Required
+	Min int `json:"min"`
+}
+
+// NetworkSecurityGroupSecurityRuleSecurityRuleTcpOptionsSourcePortRange defines nested fields for NetworkSecurityGroupSecurityRule.SecurityRule.TcpOptions.SourcePortRange.
+type NetworkSecurityGroupSecurityRuleSecurityRuleTcpOptionsSourcePortRange struct {
+	// The maximum port number, which must not be less than the minimum port number. To specify
+	// a single port number, set both the min and max to the same value.
+	// +kubebuilder:validation:Required
+	Max int `json:"max"`
+	// The minimum port number, which must not be greater than the maximum port number.
+	// +kubebuilder:validation:Required
+	Min int `json:"min"`
+}
+
+// NetworkSecurityGroupSecurityRuleSecurityRuleTcpOptions defines nested fields for NetworkSecurityGroupSecurityRule.SecurityRule.TcpOptions.
+type NetworkSecurityGroupSecurityRuleSecurityRuleTcpOptions struct {
+	// +kubebuilder:validation:Optional
+	DestinationPortRange NetworkSecurityGroupSecurityRuleSecurityRuleTcpOptionsDestinationPortRange `json:"destinationPortRange,omitempty"`
+	// +kubebuilder:validation:Optional
+	SourcePortRange NetworkSecurityGroupSecurityRuleSecurityRuleTcpOptionsSourcePortRange `json:"sourcePortRange,omitempty"`
+}
+
+// NetworkSecurityGroupSecurityRuleSecurityRuleUdpOptionsDestinationPortRange defines nested fields for NetworkSecurityGroupSecurityRule.SecurityRule.UdpOptions.DestinationPortRange.
+type NetworkSecurityGroupSecurityRuleSecurityRuleUdpOptionsDestinationPortRange struct {
+	// The maximum port number, which must not be less than the minimum port number. To specify
+	// a single port number, set both the min and max to the same value.
+	// +kubebuilder:validation:Required
+	Max int `json:"max"`
+	// The minimum port number, which must not be greater than the maximum port number.
+	// +kubebuilder:validation:Required
+	Min int `json:"min"`
+}
+
+// NetworkSecurityGroupSecurityRuleSecurityRuleUdpOptionsSourcePortRange defines nested fields for NetworkSecurityGroupSecurityRule.SecurityRule.UdpOptions.SourcePortRange.
+type NetworkSecurityGroupSecurityRuleSecurityRuleUdpOptionsSourcePortRange struct {
+	// The maximum port number, which must not be less than the minimum port number. To specify
+	// a single port number, set both the min and max to the same value.
+	// +kubebuilder:validation:Required
+	Max int `json:"max"`
+	// The minimum port number, which must not be greater than the maximum port number.
+	// +kubebuilder:validation:Required
+	Min int `json:"min"`
+}
+
+// NetworkSecurityGroupSecurityRuleSecurityRuleUdpOptions defines nested fields for NetworkSecurityGroupSecurityRule.SecurityRule.UdpOptions.
+type NetworkSecurityGroupSecurityRuleSecurityRuleUdpOptions struct {
+	// +kubebuilder:validation:Optional
+	DestinationPortRange NetworkSecurityGroupSecurityRuleSecurityRuleUdpOptionsDestinationPortRange `json:"destinationPortRange,omitempty"`
+	// +kubebuilder:validation:Optional
+	SourcePortRange NetworkSecurityGroupSecurityRuleSecurityRuleUdpOptionsSourcePortRange `json:"sourcePortRange,omitempty"`
+}
+
+// NetworkSecurityGroupSecurityRuleSecurityRule defines nested fields for NetworkSecurityGroupSecurityRule.SecurityRule.
+type NetworkSecurityGroupSecurityRuleSecurityRule struct {
+	// Direction of the security rule. Set to `EGRESS` for rules to allow outbound IP packets,
+	// or `INGRESS` for rules to allow inbound IP packets.
+	// +kubebuilder:validation:Required
+	Direction string `json:"direction"`
+	// The Oracle-assigned ID of the security rule that you want to update. You can't change this value.
+	// Example: `04ABEC`
+	// +kubebuilder:validation:Required
+	Id string `json:"id"`
+	// The transport protocol. Specify either `all` or an IPv4 protocol number as
+	// defined in
+	// Protocol Numbers (http://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml).
+	// Options are supported only for ICMP ("1"), TCP ("6"), UDP ("17"), and ICMPv6 ("58").
+	// +kubebuilder:validation:Required
+	Protocol string `json:"protocol"`
+	// An optional description of your choice for the rule. Avoid entering confidential information.
+	// +kubebuilder:validation:Optional
+	Description string `json:"description,omitempty"`
+	// Conceptually, this is the range of IP addresses that a packet originating from the instance
+	// can go to.
+	// Allowed values:
+	//   * An IP address range in CIDR notation. For example: `192.168.1.0/24` or `2001:0db8:0123:45::/56`
+	//     IPv6 addressing is supported for all commercial and government regions. See
+	//     IPv6 Addresses (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/ipv6.htm).
+	//   * The `cidrBlock` value for a Service, if you're
+	//     setting up a security rule for traffic destined for a particular `Service` through
+	//     a service gateway. For example: `oci-phx-objectstorage`.
+	//   * The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of a NetworkSecurityGroup in the same
+	//     VCN. The value can be the NSG that the rule belongs to if the rule's intent is to control
+	//     traffic between VNICs in the same NSG.
+	// +kubebuilder:validation:Optional
+	Destination string `json:"destination,omitempty"`
+	// Type of destination for the rule. Required if `direction` = `EGRESS`.
+	// Allowed values:
+	//   * `CIDR_BLOCK`: If the rule's `destination` is an IP address range in CIDR notation.
+	//   * `SERVICE_CIDR_BLOCK`: If the rule's `destination` is the `cidrBlock` value for a
+	//     Service (the rule is for traffic destined for a
+	//     particular `Service` through a service gateway).
+	//   * `NETWORK_SECURITY_GROUP`: If the rule's `destination` is the OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of a
+	//     NetworkSecurityGroup.
+	// +kubebuilder:validation:Optional
+	DestinationType string `json:"destinationType,omitempty"`
+	// +kubebuilder:validation:Optional
+	IcmpOptions NetworkSecurityGroupSecurityRuleSecurityRuleIcmpOptions `json:"icmpOptions,omitempty"`
+	// A stateless rule allows traffic in one direction. Remember to add a corresponding
+	// stateless rule in the other direction if you need to support bidirectional traffic. For
+	// example, if egress traffic allows TCP destination port 80, there should be an ingress
+	// rule to allow TCP source port 80. Defaults to false, which means the rule is stateful
+	// and a corresponding rule is not necessary for bidirectional traffic.
+	// +kubebuilder:validation:Optional
+	IsStateless bool `json:"isStateless,omitempty"`
+	// Conceptually, this is the range of IP addresses that a packet coming into the instance
+	// can come from.
+	// Allowed values:
+	//   * An IP address range in CIDR notation. For example: `192.168.1.0/24` or `2001:0db8:0123:45::/56`
+	//     IPv6 addressing is supported for all commercial and government regions. See
+	//     IPv6 Addresses (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/ipv6.htm).
+	//   * The `cidrBlock` value for a Service, if you're
+	//     setting up a security rule for traffic coming from a particular `Service` through
+	//     a service gateway. For example: `oci-phx-objectstorage`.
+	//   * The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of a NetworkSecurityGroup in the same
+	//     VCN. The value can be the NSG that the rule belongs to if the rule's intent is to control
+	//     traffic between VNICs in the same NSG.
+	// +kubebuilder:validation:Optional
+	Source string `json:"source,omitempty"`
+	// Type of source for the rule. Required if `direction` = `INGRESS`.
+	//   * `CIDR_BLOCK`: If the rule's `source` is an IP address range in CIDR notation.
+	//   * `SERVICE_CIDR_BLOCK`: If the rule's `source` is the `cidrBlock` value for a
+	//     Service (the rule is for traffic coming from a
+	//     particular `Service` through a service gateway).
+	//   * `NETWORK_SECURITY_GROUP`: If the rule's `source` is the OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of a
+	//     NetworkSecurityGroup.
+	// +kubebuilder:validation:Optional
+	SourceType string `json:"sourceType,omitempty"`
+	// +kubebuilder:validation:Optional
+	TcpOptions NetworkSecurityGroupSecurityRuleSecurityRuleTcpOptions `json:"tcpOptions,omitempty"`
+	// +kubebuilder:validation:Optional
+	UdpOptions NetworkSecurityGroupSecurityRuleSecurityRuleUdpOptions `json:"udpOptions,omitempty"`
 }
 
 // NetworkSecurityGroupSecurityRuleStatus defines the observed state of NetworkSecurityGroupSecurityRule.

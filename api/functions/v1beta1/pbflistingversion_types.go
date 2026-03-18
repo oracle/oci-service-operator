@@ -14,25 +14,76 @@ import (
 
 // PbfListingVersionSpec defines the desired state of PbfListingVersion.
 type PbfListingVersionSpec struct {
-	Id             shared.OCID       `json:"id,omitempty"`
-	CompartmentId  shared.OCID       `json:"compartmentId,omitempty"`
-	PbfListingId   string            `json:"pbfListingId,omitempty"`
-	Name           string            `json:"name,omitempty"`
-	ChangeSummary  string            `json:"changeSummary,omitempty"`
-	TimeCreated    string            `json:"timeCreated,omitempty"`
-	TimeUpdated    string            `json:"timeUpdated,omitempty"`
-	LifecycleState string            `json:"lifecycleState,omitempty"`
-	FreeformTags   map[string]string `json:"freeformTags,omitempty"`
+}
+
+// PbfListingVersionRequirementsPolicy defines nested fields for PbfListingVersion.Requirements.Policy.
+type PbfListingVersionRequirementsPolicy struct {
+	// Policy required for PBF execution
+	Policy string `json:"policy,omitempty"`
+	// Details about why this policy is required and what it will be used for.
+	Description string `json:"description,omitempty"`
+}
+
+// PbfListingVersionRequirements defines nested fields for PbfListingVersion.Requirements.
+type PbfListingVersionRequirements struct {
+	// Minimum memory required by this PBF. The user should use memory greater than or equal to
+	// this value while configuring the Function.
+	MinMemoryRequiredInMBs int64 `json:"minMemoryRequiredInMBs,omitempty"`
+	// List of policies required for this PBF execution.
+	Policies []PbfListingVersionRequirementsPolicy `json:"policies,omitempty"`
+}
+
+// PbfListingVersionTrigger defines nested fields for PbfListingVersion.Trigger.
+type PbfListingVersionTrigger struct {
+	// A brief descriptive name for the PBF trigger.
+	Name string `json:"name,omitempty"`
+}
+
+// PbfListingVersionConfig defines nested fields for PbfListingVersion.Config.
+type PbfListingVersionConfig struct {
+	// The key name of the config param.
+	Key string `json:"key,omitempty"`
+	// Details about why this config is required and what it will be used for.
+	Description string `json:"description,omitempty"`
+	// Is this a required config or an optional one. Requests with required config params missing will be rejected.
+	IsOptional bool `json:"isOptional,omitempty"`
 }
 
 // PbfListingVersionStatus defines the observed state of PbfListingVersion.
 type PbfListingVersionStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// Unique identifier that is immutable on creation
+	Id string `json:"id,omitempty"`
+	// The OCID of the PbfListing this resource version belongs to.
+	PbfListingId string `json:"pbfListingId,omitempty"`
+	// Semantic version
+	Name         string                        `json:"name,omitempty"`
+	Requirements PbfListingVersionRequirements `json:"requirements,omitempty"`
+	// Details changes are included in this version.
+	ChangeSummary string `json:"changeSummary,omitempty"`
+	// An array of Trigger. A list of triggers that may activate the PBF.
+	Triggers []PbfListingVersionTrigger `json:"triggers,omitempty"`
+	// The time the PbfListingVersion was created. An RFC3339 formatted datetime string.
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The last time the PbfListingVersion was updated. An RFC3339 formatted datetime string.
+	TimeUpdated string `json:"timeUpdated,omitempty"`
+	// The current state of the PBF resource.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// Details about the required and optional Function configurations needed for proper performance of the PBF.
+	Config []PbfListingVersionConfig `json:"config,omitempty"`
+	// Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+	// Example: `{"bar-key": "value"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// Example: `{"foo-namespace": {"bar-key": "value"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// System tags for this resource. Each key is predefined and scoped to a namespace.
+	// Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Name",type="string",JSONPath=".spec.name",priority=1
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.status.conditions[-1].type",description="status of the PbfListingVersion",priority=0
 // +kubebuilder:printcolumn:name="Ocid",type="string",JSONPath=".status.status.ocid",description="Ocid of the PbfListingVersion",priority=1
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0

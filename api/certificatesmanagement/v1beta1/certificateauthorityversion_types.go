@@ -14,21 +14,61 @@ import (
 
 // CertificateAuthorityVersionSpec defines the desired state of CertificateAuthorityVersion.
 type CertificateAuthorityVersionSpec struct {
-	Id                     shared.OCID `json:"id,omitempty"`
-	CompartmentId          shared.OCID `json:"compartmentId,omitempty"`
-	CertificateAuthorityId string      `json:"certificateAuthorityId,omitempty"`
-	TimeCreated            string      `json:"timeCreated,omitempty"`
-	VersionNumber          int64       `json:"versionNumber,omitempty"`
-	Stages                 []string    `json:"stages,omitempty"`
-	SerialNumber           string      `json:"serialNumber,omitempty"`
-	IssuerCaVersionNumber  int64       `json:"issuerCaVersionNumber,omitempty"`
-	VersionName            string      `json:"versionName,omitempty"`
-	TimeOfDeletion         string      `json:"timeOfDeletion,omitempty"`
+}
+
+// CertificateAuthorityVersionSubjectAlternativeName defines nested fields for CertificateAuthorityVersion.SubjectAlternativeName.
+type CertificateAuthorityVersionSubjectAlternativeName struct {
+	// The subject alternative name type. Currently only DNS domain or host names and IP addresses are supported.
+	Type string `json:"type,omitempty"`
+	// The subject alternative name.
+	Value string `json:"value,omitempty"`
+}
+
+// CertificateAuthorityVersionValidity defines nested fields for CertificateAuthorityVersion.Validity.
+type CertificateAuthorityVersionValidity struct {
+	// The date on which the certificate validity period ends, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2019-04-03T21:10:29.600Z`
+	TimeOfValidityNotAfter string `json:"timeOfValidityNotAfter,omitempty"`
+	// The date on which the certificate validity period begins, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2019-04-03T21:10:29.600Z`
+	TimeOfValidityNotBefore string `json:"timeOfValidityNotBefore,omitempty"`
+}
+
+// CertificateAuthorityVersionRevocationStatus defines nested fields for CertificateAuthorityVersion.RevocationStatus.
+type CertificateAuthorityVersionRevocationStatus struct {
+	// The time when the entity was revoked, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2019-04-03T21:10:29.600Z`
+	TimeOfRevocation string `json:"timeOfRevocation,omitempty"`
+	// The reason the certificate or certificate authority (CA) was revoked.
+	RevocationReason string `json:"revocationReason,omitempty"`
 }
 
 // CertificateAuthorityVersionStatus defines the observed state of CertificateAuthorityVersion.
 type CertificateAuthorityVersionStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the CA.
+	CertificateAuthorityId string `json:"certificateAuthorityId,omitempty"`
+	// A optional property indicating when the CA version was created, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2019-04-03T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The version number of this CA.
+	VersionNumber int64 `json:"versionNumber,omitempty"`
+	// A list of rotation states for this CA version.
+	Stages []string `json:"stages,omitempty"`
+	// A unique certificate identifier used in certificate revocation tracking, formatted as octets.
+	// Example: `03 AC FC FA CC B3 CB 02 B8 F8 DE F5 85 E7 7B FF`
+	SerialNumber string `json:"serialNumber,omitempty"`
+	// The version number of the issuing CA.
+	IssuerCaVersionNumber int64 `json:"issuerCaVersionNumber,omitempty"`
+	// The name of the CA version. When the value is not null, a name is unique across versions for a given CA.
+	VersionName string `json:"versionName,omitempty"`
+	// A list of subject alternative names. A subject alternative name specifies the domain names, including subdomains, and IP addresses covered by the certificates issued by this CA.
+	SubjectAlternativeNames []CertificateAuthorityVersionSubjectAlternativeName `json:"subjectAlternativeNames,omitempty"`
+	// An optional property indicating when to delete the CA version, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2019-04-03T21:10:29.600Z`
+	TimeOfDeletion   string                                      `json:"timeOfDeletion,omitempty"`
+	Validity         CertificateAuthorityVersionValidity         `json:"validity,omitempty"`
+	RevocationStatus CertificateAuthorityVersionRevocationStatus `json:"revocationStatus,omitempty"`
 }
 
 // +kubebuilder:object:root=true

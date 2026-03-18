@@ -51,19 +51,24 @@ spec:
             type: object
           spec:
             description: AlarmStatusSpec defines the desired state of AlarmStatus.
-            properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
             type: object
           status:
             description: AlarmStatusObservedState defines the observed state of AlarmStatus.
             properties:
+              displayName:
+                description: |-
+                  The configured name of the alarm.
+                  Example: `High CPU Utilization`
+                type: string
+              id:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the alarm.
+                type: string
+              severity:
+                description: |-
+                  The perceived type of response required when the alarm is in the "FIRING" state.
+                  Example: `CRITICAL`
+                type: string
               status:
                 properties:
                   conditions:
@@ -106,6 +111,35 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              suppression:
+                description: The configuration details for suppressing an alarm.
+                properties:
+                  description:
+                    description: |-
+                      Human-readable reason for suppressing alarm notifications.
+                      It does not have to be unique, and it's changeable.
+                      Avoid entering confidential information.
+                      Oracle recommends including tracking information for the event or associated work,
+                      such as a ticket number.
+                      Example: `Planned outage due to change IT-1234.`
+                    type: string
+                  timeSuppressFrom:
+                    description: |-
+                      The start date and time for the suppression to take place, inclusive. Format defined by RFC3339.
+                      Example: `2023-02-01T01:02:29.600Z`
+                    type: string
+                  timeSuppressUntil:
+                    description: |-
+                      The end date and time for the suppression to take place, inclusive. Format defined by RFC3339.
+                      Example: `2023-02-01T02:02:29.600Z`
+                    type: string
+                type: object
+              timestampTriggered:
+                description: |-
+                  Timestamp for the transition of the alarm state. For example, the time when the alarm transitioned from OK to Firing.
+                  Note: A three-minute lag for this value accounts for any late-arriving metrics.
+                  Example: `2023-02-01T01:02:29.600Z`
+                type: string
             required:
             - status
             type: object

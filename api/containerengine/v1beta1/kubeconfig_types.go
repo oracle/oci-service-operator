@@ -14,8 +14,6 @@ import (
 
 // KubeconfigSpec defines the desired state of Kubeconfig.
 type KubeconfigSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // KubeconfigStatus defines the observed state of Kubeconfig.

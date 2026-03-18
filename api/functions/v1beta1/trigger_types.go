@@ -14,19 +14,17 @@ import (
 
 // TriggerSpec defines the desired state of Trigger.
 type TriggerSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
-	Name          string      `json:"name,omitempty"`
 }
 
 // TriggerStatus defines the observed state of Trigger.
 type TriggerStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// A brief descriptive name for the PBF trigger.
+	Name string `json:"name,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Name",type="string",JSONPath=".spec.name",priority=1
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.status.conditions[-1].type",description="status of the Trigger",priority=0
 // +kubebuilder:printcolumn:name="Ocid",type="string",JSONPath=".status.status.ocid",description="Ocid of the Trigger",priority=1
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0

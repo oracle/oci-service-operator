@@ -53,36 +53,23 @@ spec:
           spec:
             description: NetworkLoadBalancerHealthSpec defines the desired state of
               NetworkLoadBalancerHealth.
-            properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              criticalStateBackendSetNames:
-                items:
-                  type: string
-                type: array
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
-              status:
-                type: string
-              totalBackendSetCount:
-                type: integer
-              unknownStateBackendSetNames:
-                items:
-                  type: string
-                type: array
-              warningStateBackendSetNames:
-                items:
-                  type: string
-                type: array
             type: object
           status:
             description: NetworkLoadBalancerHealthStatus defines the observed state
               of NetworkLoadBalancerHealth.
             properties:
+              criticalStateBackendSetNames:
+                description: |-
+                  A list of backend sets that are currently in the `CRITICAL` health state. The list identifies each backend set by the
+                  user-friendly name you assigned when you created the backend set.
+                  Example: `example_backend_set`
+                items:
+                  type: string
+                type: array
+              networkLoadBalancerId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the network load balancer with which the health status is associated.
+                type: string
               status:
                 properties:
                   conditions:
@@ -125,6 +112,27 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              totalBackendSetCount:
+                description: |-
+                  The total number of backend sets associated with this network load balancer.
+                  Example: `4`
+                type: integer
+              unknownStateBackendSetNames:
+                description: |-
+                  A list of backend sets that are currently in the `UNKNOWN` health state. The list identifies each backend set by the
+                  user-friendly name you assigned when you created the backend set.
+                  Example: `example_backend_set2`
+                items:
+                  type: string
+                type: array
+              warningStateBackendSetNames:
+                description: |-
+                  A list of backend sets that are currently in the `WARNING` health state. The list identifies each backend set by the
+                  user-friendly name you assigned when you created the backend set.
+                  Example: `example_backend_set3`
+                items:
+                  type: string
+                type: array
             required:
             - status
             type: object

@@ -21,6 +21,7 @@ func buildPackageModel(cfg *Config, service ServiceConfig, discovered []Resource
 			return nil, err
 		}
 	}
+	resources = assignHelperTypeNames(resources)
 	resources = assignStatusTypeNames(resources)
 	resources = applyDefaultSamples(service, version, resources)
 
@@ -238,6 +239,89 @@ func defaultStatusFields() []FieldModel {
 	}
 }
 
+func assignHelperTypeNames(resources []ResourceModel) []ResourceModel {
+	reservedNames := make(map[string]struct{}, len(resources))
+	for _, resource := range resources {
+		reservedNames[resource.Kind] = struct{}{}
+	}
+
+	usedHelperNames := make(map[string]struct{}, len(resources))
+	updated := make([]ResourceModel, 0, len(resources))
+	for _, resource := range resources {
+		renames := make(map[string]string, len(resource.HelperTypes))
+		for _, helperType := range resource.HelperTypes {
+			name := helperType.Name
+			if nameConflicts(name, reservedNames, usedHelperNames) {
+				name = uniqueHelperTypeName(helperType.Name, reservedNames, usedHelperNames)
+			}
+			if name != helperType.Name {
+				renames[helperType.Name] = name
+			}
+			usedHelperNames[name] = struct{}{}
+		}
+
+		if len(renames) > 0 {
+			resource.SpecFields = rewriteFieldTypes(resource.SpecFields, renames)
+			resource.StatusFields = rewriteFieldTypes(resource.StatusFields, renames)
+		}
+
+		helperTypes := make([]TypeModel, 0, len(resource.HelperTypes))
+		for _, helperType := range resource.HelperTypes {
+			if renamed, ok := renames[helperType.Name]; ok {
+				helperType = renameHelperType(helperType, renamed)
+			}
+			if len(renames) > 0 {
+				helperType.Fields = rewriteFieldTypes(helperType.Fields, renames)
+			}
+			helperTypes = append(helperTypes, helperType)
+		}
+		resource.HelperTypes = helperTypes
+		updated = append(updated, resource)
+	}
+
+	return updated
+}
+
+func rewriteFieldTypes(fields []FieldModel, renames map[string]string) []FieldModel {
+	rewritten := make([]FieldModel, 0, len(fields))
+	for _, field := range fields {
+		field.Type = rewriteFieldType(field.Type, renames)
+		rewritten = append(rewritten, field)
+	}
+	return rewritten
+}
+
+func rewriteFieldType(typeExpr string, renames map[string]string) string {
+	trimmed := strings.TrimSpace(typeExpr)
+	switch {
+	case trimmed == "":
+		return trimmed
+	case strings.HasPrefix(trimmed, "*"):
+		return "*" + rewriteFieldType(strings.TrimPrefix(trimmed, "*"), renames)
+	case strings.HasPrefix(trimmed, "[]"):
+		return "[]" + rewriteFieldType(strings.TrimPrefix(trimmed, "[]"), renames)
+	case strings.HasPrefix(trimmed, "map[string]"):
+		return "map[string]" + rewriteFieldType(strings.TrimPrefix(trimmed, "map[string]"), renames)
+	default:
+		if renamed, ok := renames[trimmed]; ok {
+			return renamed
+		}
+		return trimmed
+	}
+}
+
+func renameHelperType(helperType TypeModel, newName string) TypeModel {
+	oldName := helperType.Name
+	helperType.Name = newName
+	for index, comment := range helperType.Comments {
+		prefix := oldName + " defines nested fields for "
+		if strings.HasPrefix(comment, prefix) {
+			helperType.Comments[index] = newName + " defines nested fields for " + strings.TrimPrefix(comment, prefix)
+		}
+	}
+	return helperType
+}
+
 func assignStatusTypeNames(resources []ResourceModel) []ResourceModel {
 	reservedNames := make(map[string]struct{}, len(resources))
 	for _, resource := range resources {
@@ -285,6 +369,26 @@ func usesDefaultStatusComment(comments []string, statusTypeName string, kind str
 		statusTypeName = defaultStatusTypeName(kind)
 	}
 	return comments[0] == fmt.Sprintf("%s defines the observed state of %s.", statusTypeName, kind)
+}
+
+func uniqueHelperTypeName(name string, reservedNames map[string]struct{}, usedHelperNames map[string]struct{}) string {
+	candidates := []string{
+		name + "Fields",
+		name + "Details",
+	}
+
+	for _, candidate := range candidates {
+		if !nameConflicts(candidate, reservedNames, usedHelperNames) {
+			return candidate
+		}
+	}
+
+	for index := 2; ; index++ {
+		candidate := fmt.Sprintf("%sFields%d", name, index)
+		if !nameConflicts(candidate, reservedNames, usedHelperNames) {
+			return candidate
+		}
+	}
 }
 
 func uniqueStatusTypeName(kind string, reservedNames map[string]struct{}, usedStatusNames map[string]struct{}) string {

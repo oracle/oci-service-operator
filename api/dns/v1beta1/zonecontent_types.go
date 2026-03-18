@@ -14,8 +14,6 @@ import (
 
 // ZoneContentSpec defines the desired state of ZoneContent.
 type ZoneContentSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // ZoneContentStatus defines the observed state of ZoneContent.

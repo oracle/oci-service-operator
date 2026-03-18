@@ -14,18 +14,37 @@ import (
 
 // WorkRequestSpec defines the desired state of WorkRequest.
 type WorkRequestSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
-	OperationType string      `json:"operationType,omitempty"`
-	Status        string      `json:"status,omitempty"`
-	TimeAccepted  string      `json:"timeAccepted,omitempty"`
-	TimeStarted   string      `json:"timeStarted,omitempty"`
-	TimeFinished  string      `json:"timeFinished,omitempty"`
+}
+
+// WorkRequestResource defines nested fields for WorkRequest.Resource.
+type WorkRequestResource struct {
+	// The way in which this resource was affected by the work tracked by the work request.
+	ActionType string `json:"actionType,omitempty"`
+	// The resource type the work request affects.
+	EntityType string `json:"entityType,omitempty"`
+	// The OCID of the resource the work request affects.
+	Identifier string `json:"identifier,omitempty"`
+	// The URI path on which the user can issue a GET request to access the resource metadata.
+	EntityUri string `json:"entityUri,omitempty"`
 }
 
 // WorkRequestStatus defines the observed state of WorkRequest.
 type WorkRequestStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the work request.
+	Id string `json:"id,omitempty"`
+	// The type of work the work request is doing.
+	OperationType string `json:"operationType,omitempty"`
+	// The OCID of the compartment in which the work request exists.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The resources this work request affects.
+	Resources []WorkRequestResource `json:"resources,omitempty"`
+	// The time the work request was accepted.
+	TimeAccepted string `json:"timeAccepted,omitempty"`
+	// The time the work request was started.
+	TimeStarted string `json:"timeStarted,omitempty"`
+	// The time the work request was finished.
+	TimeFinished string `json:"timeFinished,omitempty"`
 }
 
 // +kubebuilder:object:root=true

@@ -52,21 +52,55 @@ spec:
             type: object
           spec:
             description: MeasuredBootReportSpec defines the desired state of MeasuredBootReport.
-            properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
-              isPolicyVerificationSuccessful:
-                type: boolean
             type: object
           status:
             description: MeasuredBootReportStatus defines the observed state of MeasuredBootReport.
             properties:
+              isPolicyVerificationSuccessful:
+                description: Whether the verification succeeded, and the new values
+                  match the expected values.
+                type: boolean
+              measurements:
+                description: MeasuredBootReportMeasurements defines nested fields
+                  for MeasuredBootReport.Measurements.
+                properties:
+                  actual:
+                    description: The list of actual PCR entries measured during boot.
+                    items:
+                      description: MeasuredBootReportMeasurementsActual defines nested
+                        fields for MeasuredBootReport.Measurements.Actual.
+                      properties:
+                        hashAlgorithm:
+                          description: The type of algorithm used to calculate the
+                            hash.
+                          type: string
+                        pcrIndex:
+                          description: The index of the policy.
+                          type: string
+                        value:
+                          description: The hashed PCR value.
+                          type: string
+                      type: object
+                    type: array
+                  policy:
+                    description: The list of expected PCR entries to use during verification.
+                    items:
+                      description: MeasuredBootReportMeasurementsPolicy defines nested
+                        fields for MeasuredBootReport.Measurements.Policy.
+                      properties:
+                        hashAlgorithm:
+                          description: The type of algorithm used to calculate the
+                            hash.
+                          type: string
+                        pcrIndex:
+                          description: The index of the policy.
+                          type: string
+                        value:
+                          description: The hashed PCR value.
+                          type: string
+                      type: object
+                    type: array
+                type: object
               status:
                 properties:
                   conditions:

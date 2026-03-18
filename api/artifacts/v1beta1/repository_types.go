@@ -14,17 +14,47 @@ import (
 
 // RepositorySpec defines the desired state of Repository.
 type RepositorySpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
+	// A user-friendly display name for the repository. If not present, will be auto-generated. It can be modified later. Avoid entering confidential information.
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
+	// A short description of the repository. It can be updated later.
+	// +kubebuilder:validation:Optional
+	Description string `json:"description,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the repository's compartment.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// Whether to make the repository immutable. The artifacts of an immutable repository cannot be overwritten.
+	// +kubebuilder:validation:Required
+	IsImmutable bool `json:"isImmutable"`
+	// +kubebuilder:validation:Optional
+	RepositoryType string `json:"repositoryType,omitempty"`
 }
 
 // RepositoryStatus defines the observed state of Repository.
 type RepositoryStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the repository.
+	// Example: `ocid1.artifactrepository.oc1..exampleuniqueID`
+	Id string `json:"id,omitempty"`
+	// The current state of the repository.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// An RFC 3339 timestamp indicating when the repository was created.
+	TimeCreated string `json:"timeCreated,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="DisplayName",type="string",JSONPath=".spec.displayName",priority=1
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.status.conditions[-1].type",description="status of the Repository",priority=0
 // +kubebuilder:printcolumn:name="Ocid",type="string",JSONPath=".status.status.ocid",description="Ocid of the Repository",priority=1
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0

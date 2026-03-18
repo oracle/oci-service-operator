@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- bases/psql.oracle.com_backups.yaml
+- bases/psql.oracle.com_configurations.yaml
+- bases/psql.oracle.com_connectiondetails.yaml
+- bases/psql.oracle.com_dbsystemdbinstances.yaml
+- bases/psql.oracle.com_dbsystems.yaml
+- bases/psql.oracle.com_defaultconfigurations.yaml
+- bases/psql.oracle.com_primarydbinstances.yaml
+- bases/psql.oracle.com_shapes.yaml
+- bases/psql.oracle.com_workrequesterrors.yaml
+- bases/psql.oracle.com_workrequestlogs.yaml
+- bases/psql.oracle.com_workrequests.yaml

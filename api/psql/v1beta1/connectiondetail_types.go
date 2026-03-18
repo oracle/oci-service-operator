@@ -14,13 +14,45 @@ import (
 
 // ConnectionDetailSpec defines the desired state of ConnectionDetail.
 type ConnectionDetailSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
+}
+
+// ConnectionDetailPrimaryDbEndpoint defines nested fields for ConnectionDetail.PrimaryDbEndpoint.
+type ConnectionDetailPrimaryDbEndpoint struct {
+	// The FQDN of the endpoint.
+	Fqdn string `json:"fqdn,omitempty"`
+	// The IP address of the endpoint.
+	IpAddress string `json:"ipAddress,omitempty"`
+	// The port address of the endpoint.
+	Port int `json:"port,omitempty"`
+}
+
+// ConnectionDetailInstanceEndpointEndpoint defines nested fields for ConnectionDetail.InstanceEndpoint.Endpoint.
+type ConnectionDetailInstanceEndpointEndpoint struct {
+	// The FQDN of the endpoint.
+	Fqdn string `json:"fqdn,omitempty"`
+	// The IP address of the endpoint.
+	IpAddress string `json:"ipAddress,omitempty"`
+	// The port address of the endpoint.
+	Port int `json:"port,omitempty"`
+}
+
+// ConnectionDetailInstanceEndpoint defines nested fields for ConnectionDetail.InstanceEndpoint.
+type ConnectionDetailInstanceEndpoint struct {
+	// Unique identifier of the database instance node.
+	DbInstanceId string                                   `json:"dbInstanceId,omitempty"`
+	Endpoint     ConnectionDetailInstanceEndpointEndpoint `json:"endpoint,omitempty"`
 }
 
 // ConnectionDetailStatus defines the observed state of ConnectionDetail.
 type ConnectionDetailStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The CA certificate to be used by the PosgreSQL client to connect to the database.
+	// The CA certificate is used to authenticate the server identity.
+	// It is issued by PostgreSQL Service Private CA.
+	CaCertificate     string                            `json:"caCertificate,omitempty"`
+	PrimaryDbEndpoint ConnectionDetailPrimaryDbEndpoint `json:"primaryDbEndpoint,omitempty"`
+	// The list of database instance node endpoints in the database system.
+	InstanceEndpoints []ConnectionDetailInstanceEndpoint `json:"instanceEndpoints,omitempty"`
 }
 
 // +kubebuilder:object:root=true

@@ -61,6 +61,9 @@ func TestBuildPackageModelDiscoversResources(t *testing.T) {
 	if !hasField(dbSystem.SpecFields, "Port") {
 		t.Fatalf("MySqlDbSystem fields = %#v, want Port", dbSystem.SpecFields)
 	}
+	if hasField(dbSystem.SpecFields, "Id") {
+		t.Fatalf("MySqlDbSystem fields = %#v, want no implicit Id field", dbSystem.SpecFields)
+	}
 	if dbSystem.PrimaryDisplayField != "DisplayName" {
 		t.Fatalf("MySqlDbSystem primary display field = %q, want DisplayName", dbSystem.PrimaryDisplayField)
 	}
@@ -74,6 +77,240 @@ func TestBuildPackageModelDiscoversResources(t *testing.T) {
 	}
 	if !hasField(widget.SpecFields, "CreatedAt") {
 		t.Fatalf("Widget fields = %#v, want CreatedAt selector field", widget.SpecFields)
+	}
+	if hasField(widget.SpecFields, "LifecycleState") {
+		t.Fatalf("Widget spec fields = %#v, want read-model fields moved out of spec", widget.SpecFields)
+	}
+	if hasField(widget.SpecFields, "TimeUpdated") {
+		t.Fatalf("Widget spec fields = %#v, want summary fields moved out of spec", widget.SpecFields)
+	}
+	if !hasField(widget.StatusFields, "LifecycleState") {
+		t.Fatalf("Widget status fields = %#v, want LifecycleState from the read model", widget.StatusFields)
+	}
+	if !hasField(widget.StatusFields, "TimeUpdated") {
+		t.Fatalf("Widget status fields = %#v, want TimeUpdated from the summary model", widget.StatusFields)
+	}
+
+	compartmentID := findFieldModel(t, widget.SpecFields, "CompartmentId")
+	if compartmentID.Tag != `json:"compartmentId"` {
+		t.Fatalf("Widget CompartmentId tag = %q, want required json tag", compartmentID.Tag)
+	}
+	if !slices.Equal(compartmentID.Comments, []string{"The OCID of the widget compartment."}) {
+		t.Fatalf("Widget CompartmentId comments = %#v, want SDK documentation", compartmentID.Comments)
+	}
+	if !slices.Equal(compartmentID.Markers, []string{"+kubebuilder:validation:Required"}) {
+		t.Fatalf("Widget CompartmentId markers = %#v, want required marker", compartmentID.Markers)
+	}
+
+	labels := findFieldModel(t, widget.SpecFields, "Labels")
+	if labels.Tag != `json:"labels,omitempty"` {
+		t.Fatalf("Widget Labels tag = %q, want optional json tag", labels.Tag)
+	}
+	if !slices.Equal(labels.Comments, []string{"Additional labels for the widget."}) {
+		t.Fatalf("Widget Labels comments = %#v, want SDK documentation", labels.Comments)
+	}
+	if !slices.Equal(labels.Markers, []string{"+kubebuilder:validation:Optional"}) {
+		t.Fatalf("Widget Labels markers = %#v, want optional marker", labels.Markers)
+	}
+
+	serverState := findFieldModel(t, widget.SpecFields, "ServerState")
+	if serverState.Tag != `json:"serverState,omitempty"` {
+		t.Fatalf("Widget ServerState tag = %q, want read-only field to keep omitempty", serverState.Tag)
+	}
+	if len(serverState.Markers) != 0 {
+		t.Fatalf("Widget ServerState markers = %#v, want read-only field to suppress requiredness markers", serverState.Markers)
+	}
+
+	lifecycleState := findFieldModel(t, widget.StatusFields, "LifecycleState")
+	if !slices.Equal(lifecycleState.Comments, []string{"The lifecycle state of the widget."}) {
+		t.Fatalf("Widget LifecycleState comments = %#v, want SDK documentation on status fields", lifecycleState.Comments)
+	}
+	if len(lifecycleState.Markers) != 0 {
+		t.Fatalf("Widget LifecycleState markers = %#v, want no requiredness markers on status fields", lifecycleState.Markers)
+	}
+
+	report := findResource(t, pkg.Resources, "Report")
+	if len(report.SpecFields) != 0 {
+		t.Fatalf("Report spec fields = %#v, want empty spec when no create or update payload exists", report.SpecFields)
+	}
+	if !hasField(report.StatusFields, "Id") {
+		t.Fatalf("Report status fields = %#v, want Id from the read model", report.StatusFields)
+	}
+	if !hasField(report.StatusFields, "LifecycleState") {
+		t.Fatalf("Report status fields = %#v, want LifecycleState from the read model", report.StatusFields)
+	}
+	if !hasField(report.StatusFields, "DisplayName") {
+		t.Fatalf("Report status fields = %#v, want DisplayName from the summary model", report.StatusFields)
+	}
+}
+
+func TestBuildPackageModelSynthesizesComplexSDKFields(t *testing.T) {
+	cfg := &Config{
+		Domain:         "oracle.com",
+		DefaultVersion: "v1beta1",
+	}
+
+	tests := []struct {
+		name    string
+		service ServiceConfig
+		assert  func(*testing.T, *PackageModel)
+	}{
+		{
+			name: "functions",
+			service: ServiceConfig{
+				Service:        "functions",
+				SDKPackage:     "github.com/oracle/oci-go-sdk/v65/functions",
+				Group:          "functions",
+				PackageProfile: PackageProfileCRDOnly,
+			},
+			assert: func(t *testing.T, pkg *PackageModel) {
+				application := findResource(t, pkg.Resources, "Application")
+				traceConfig := findFieldModel(t, application.SpecFields, "TraceConfig")
+				if traceConfig.Type != "ApplicationTraceConfig" {
+					t.Fatalf("Application TraceConfig type = %q, want %q", traceConfig.Type, "ApplicationTraceConfig")
+				}
+				imagePolicy := findFieldModel(t, application.SpecFields, "ImagePolicyConfig")
+				if imagePolicy.Type != "ApplicationImagePolicyConfig" {
+					t.Fatalf("Application ImagePolicyConfig type = %q, want %q", imagePolicy.Type, "ApplicationImagePolicyConfig")
+				}
+				definedTags := findFieldModel(t, application.SpecFields, "DefinedTags")
+				if definedTags.Type != "map[string]shared.MapValue" {
+					t.Fatalf("Application DefinedTags type = %q, want %q", definedTags.Type, "map[string]shared.MapValue")
+				}
+
+				traceHelper := findHelperType(t, application.HelperTypes, "ApplicationTraceConfig")
+				if !hasField(traceHelper.Fields, "DomainId") {
+					t.Fatalf("ApplicationTraceConfig fields = %#v, want DomainId", traceHelper.Fields)
+				}
+				imagePolicyHelper := findHelperType(t, application.HelperTypes, "ApplicationImagePolicyConfig")
+				if !hasField(imagePolicyHelper.Fields, "IsPolicyEnabled") {
+					t.Fatalf("ApplicationImagePolicyConfig fields = %#v, want IsPolicyEnabled", imagePolicyHelper.Fields)
+				}
+
+				function := findResource(t, pkg.Resources, "Function")
+				sourceDetails := findFieldModel(t, function.SpecFields, "SourceDetails")
+				if sourceDetails.Type != "FunctionSourceDetails" {
+					t.Fatalf("Function SourceDetails type = %q, want %q", sourceDetails.Type, "FunctionSourceDetails")
+				}
+				sourceHelper := findHelperType(t, function.HelperTypes, "FunctionSourceDetails")
+				if !hasField(sourceHelper.Fields, "SourceType") {
+					t.Fatalf("FunctionSourceDetails fields = %#v, want SourceType", sourceHelper.Fields)
+				}
+				if !hasField(sourceHelper.Fields, "PbfListingId") {
+					t.Fatalf("FunctionSourceDetails fields = %#v, want PbfListingId", sourceHelper.Fields)
+				}
+
+				provisionedConcurrency := findFieldModel(t, function.SpecFields, "ProvisionedConcurrencyConfig")
+				if provisionedConcurrency.Type != "FunctionProvisionedConcurrencyConfig" {
+					t.Fatalf("Function ProvisionedConcurrencyConfig type = %q, want %q", provisionedConcurrency.Type, "FunctionProvisionedConcurrencyConfig")
+				}
+				provisionedHelper := findHelperType(t, function.HelperTypes, "FunctionProvisionedConcurrencyConfig")
+				if !hasField(provisionedHelper.Fields, "Strategy") {
+					t.Fatalf("FunctionProvisionedConcurrencyConfig fields = %#v, want Strategy", provisionedHelper.Fields)
+				}
+				if !hasField(provisionedHelper.Fields, "Count") {
+					t.Fatalf("FunctionProvisionedConcurrencyConfig fields = %#v, want Count", provisionedHelper.Fields)
+				}
+			},
+		},
+		{
+			name: "core",
+			service: ServiceConfig{
+				Service:        "core",
+				SDKPackage:     "github.com/oracle/oci-go-sdk/v65/core",
+				Group:          "core",
+				PackageProfile: PackageProfileCRDOnly,
+			},
+			assert: func(t *testing.T, pkg *PackageModel) {
+				tunnel := findResource(t, pkg.Resources, "IPSecConnectionTunnel")
+				bgpSession := findFieldModel(t, tunnel.SpecFields, "BgpSessionConfig")
+				if bgpSession.Type != "IPSecConnectionTunnelBgpSessionConfig" {
+					t.Fatalf("IPSecConnectionTunnel BgpSessionConfig type = %q, want %q", bgpSession.Type, "IPSecConnectionTunnelBgpSessionConfig")
+				}
+				phaseOne := findFieldModel(t, tunnel.SpecFields, "PhaseOneConfig")
+				if phaseOne.Type != "IPSecConnectionTunnelPhaseOneConfig" {
+					t.Fatalf("IPSecConnectionTunnel PhaseOneConfig type = %q, want %q", phaseOne.Type, "IPSecConnectionTunnelPhaseOneConfig")
+				}
+				phaseTwo := findFieldModel(t, tunnel.SpecFields, "PhaseTwoConfig")
+				if phaseTwo.Type != "IPSecConnectionTunnelPhaseTwoConfig" {
+					t.Fatalf("IPSecConnectionTunnel PhaseTwoConfig type = %q, want %q", phaseTwo.Type, "IPSecConnectionTunnelPhaseTwoConfig")
+				}
+
+				bgpHelper := findHelperType(t, tunnel.HelperTypes, "IPSecConnectionTunnelBgpSessionConfig")
+				if !hasField(bgpHelper.Fields, "CustomerBgpAsn") {
+					t.Fatalf("IPSecConnectionTunnelBgpSessionConfig fields = %#v, want CustomerBgpAsn", bgpHelper.Fields)
+				}
+				phaseOneHelper := findHelperType(t, tunnel.HelperTypes, "IPSecConnectionTunnelPhaseOneConfig")
+				if !hasField(phaseOneHelper.Fields, "DiffieHelmanGroup") {
+					t.Fatalf("IPSecConnectionTunnelPhaseOneConfig fields = %#v, want DiffieHelmanGroup", phaseOneHelper.Fields)
+				}
+			},
+		},
+		{
+			name: "certificates",
+			service: ServiceConfig{
+				Service:        "certificates",
+				SDKPackage:     "github.com/oracle/oci-go-sdk/v65/certificates",
+				Group:          "certificates",
+				PackageProfile: PackageProfileCRDOnly,
+			},
+			assert: func(t *testing.T, pkg *PackageModel) {
+				bundle := findResource(t, pkg.Resources, "CertificateBundle")
+				validity := findFieldModel(t, bundle.StatusFields, "Validity")
+				if validity.Type != "CertificateBundleValidity" {
+					t.Fatalf("CertificateBundle Validity type = %q, want %q", validity.Type, "CertificateBundleValidity")
+				}
+				revocationStatus := findFieldModel(t, bundle.StatusFields, "RevocationStatus")
+				if revocationStatus.Type != "CertificateBundleRevocationStatus" {
+					t.Fatalf("CertificateBundle RevocationStatus type = %q, want %q", revocationStatus.Type, "CertificateBundleRevocationStatus")
+				}
+
+				validityHelper := findHelperType(t, bundle.HelperTypes, "CertificateBundleValidity")
+				if !hasField(validityHelper.Fields, "TimeOfValidityNotBefore") {
+					t.Fatalf("CertificateBundleValidity fields = %#v, want TimeOfValidityNotBefore", validityHelper.Fields)
+				}
+				revocationHelper := findHelperType(t, bundle.HelperTypes, "CertificateBundleRevocationStatus")
+				if !hasField(revocationHelper.Fields, "RevocationReason") {
+					t.Fatalf("CertificateBundleRevocationStatus fields = %#v, want RevocationReason", revocationHelper.Fields)
+				}
+			},
+		},
+		{
+			name: "secrets",
+			service: ServiceConfig{
+				Service:        "secrets",
+				SDKPackage:     "github.com/oracle/oci-go-sdk/v65/secrets",
+				Group:          "secrets",
+				PackageProfile: PackageProfileCRDOnly,
+			},
+			assert: func(t *testing.T, pkg *PackageModel) {
+				bundle := findResource(t, pkg.Resources, "SecretBundle")
+				secretBundleContent := findFieldModel(t, bundle.StatusFields, "SecretBundleContent")
+				if secretBundleContent.Type != "SecretBundleContent" {
+					t.Fatalf("SecretBundle SecretBundleContent type = %q, want %q", secretBundleContent.Type, "SecretBundleContent")
+				}
+
+				contentHelper := findHelperType(t, bundle.HelperTypes, "SecretBundleContent")
+				if !hasField(contentHelper.Fields, "ContentType") {
+					t.Fatalf("SecretBundleContent fields = %#v, want ContentType", contentHelper.Fields)
+				}
+				if !hasField(contentHelper.Fields, "Content") {
+					t.Fatalf("SecretBundleContent fields = %#v, want Content", contentHelper.Fields)
+				}
+			},
+		},
+	}
+
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			discoverer := NewDiscoverer()
+			pkg, err := discoverer.BuildPackageModel(context.Background(), cfg, test.service)
+			if err != nil {
+				t.Fatalf("BuildPackageModel() error = %v", err)
+			}
+			test.assert(t, pkg)
+		})
 	}
 }
 
@@ -122,6 +359,77 @@ func TestBuildPackageModelAvoidsStatusTypeCollisions(t *testing.T) {
 	alarmStatus := findResource(t, pkg.Resources, "AlarmStatus")
 	if alarmStatus.StatusTypeName != "AlarmStatusObservedState" {
 		t.Fatalf("AlarmStatus status type = %q, want %q", alarmStatus.StatusTypeName, "AlarmStatusObservedState")
+	}
+}
+
+func TestBuildPackageModelAvoidsHelperTypeCollisions(t *testing.T) {
+	t.Parallel()
+
+	cfg := &Config{
+		Domain:         "oracle.com",
+		DefaultVersion: "v1beta1",
+	}
+	service := ServiceConfig{
+		Service:        "containerengine",
+		SDKPackage:     "example.com/test/sdk",
+		Group:          "containerengine",
+		PackageProfile: PackageProfileCRDOnly,
+	}
+
+	pkg, err := buildPackageModel(cfg, service, []ResourceModel{
+		{
+			Kind:           "Cluster",
+			FileStem:       "cluster",
+			KindPlural:     "clusters",
+			StatusTypeName: defaultStatusTypeName("Cluster"),
+			StatusComments: []string{"ClusterStatus defines the observed state of Cluster."},
+			SpecFields: []FieldModel{
+				{
+					Name: "EndpointConfig",
+					Type: "ClusterEndpointConfig",
+					Tag:  `json:"endpointConfig,omitempty"`,
+				},
+			},
+			HelperTypes: []TypeModel{
+				{
+					Name:     "ClusterEndpointConfig",
+					Comments: []string{"ClusterEndpointConfig defines nested fields for Cluster.EndpointConfig."},
+					Fields: []FieldModel{
+						{
+							Name: "SubnetId",
+							Type: "string",
+							Tag:  `json:"subnetId,omitempty"`,
+						},
+					},
+				},
+			},
+		},
+		{
+			Kind:           "ClusterEndpointConfig",
+			FileStem:       "clusterendpointconfig",
+			KindPlural:     "clusterendpointconfigs",
+			StatusTypeName: defaultStatusTypeName("ClusterEndpointConfig"),
+			StatusComments: []string{"ClusterEndpointConfigStatus defines the observed state of ClusterEndpointConfig."},
+		},
+	})
+	if err != nil {
+		t.Fatalf("buildPackageModel() error = %v", err)
+	}
+
+	cluster := findResource(t, pkg.Resources, "Cluster")
+	endpointConfig := findFieldModel(t, cluster.SpecFields, "EndpointConfig")
+	if endpointConfig.Type != "ClusterEndpointConfigFields" {
+		t.Fatalf("Cluster EndpointConfig type = %q, want %q", endpointConfig.Type, "ClusterEndpointConfigFields")
+	}
+
+	helperType := findHelperType(t, cluster.HelperTypes, "ClusterEndpointConfigFields")
+	if len(helperType.Comments) != 1 || helperType.Comments[0] != "ClusterEndpointConfigFields defines nested fields for Cluster.EndpointConfig." {
+		t.Fatalf("helper comments = %#v, want renamed default comment", helperType.Comments)
+	}
+
+	clusterEndpointConfig := findResource(t, pkg.Resources, "ClusterEndpointConfig")
+	if clusterEndpointConfig.StatusTypeName != "ClusterEndpointConfigStatus" {
+		t.Fatalf("ClusterEndpointConfig status type = %q, want %q", clusterEndpointConfig.StatusTypeName, "ClusterEndpointConfigStatus")
 	}
 }
 
@@ -177,6 +485,74 @@ func TestGenerateRendersAndSkipsExisting(t *testing.T) {
 	if len(result.Skipped) != 1 {
 		t.Fatalf("Generate() skipped = %d services, want 1", len(result.Skipped))
 	}
+}
+
+func TestRenderResourceFileIncludesSDKDocumentationAndRequiredness(t *testing.T) {
+	t.Parallel()
+
+	cfg := &Config{
+		Domain:         "oracle.com",
+		DefaultVersion: "v1beta1",
+	}
+	service := ServiceConfig{
+		Service:        "functions",
+		SDKPackage:     "github.com/oracle/oci-go-sdk/v65/functions",
+		Group:          "functions",
+		PackageProfile: PackageProfileCRDOnly,
+	}
+
+	pkg, err := NewDiscoverer().BuildPackageModel(context.Background(), cfg, service)
+	if err != nil {
+		t.Fatalf("BuildPackageModel() error = %v", err)
+	}
+
+	application := findResource(t, pkg.Resources, "Application")
+
+	compartmentID := findFieldModel(t, application.SpecFields, "CompartmentId")
+	if !slices.Equal(compartmentID.Markers, []string{"+kubebuilder:validation:Required"}) {
+		t.Fatalf("Application CompartmentId markers = %#v, want required marker", compartmentID.Markers)
+	}
+	if compartmentID.Tag != `json:"compartmentId"` {
+		t.Fatalf("Application CompartmentId tag = %q, want required json tag", compartmentID.Tag)
+	}
+	if !strings.Contains(strings.Join(compartmentID.Comments, "\n"), "compartment to create the application within") {
+		t.Fatalf("Application CompartmentId comments = %#v, want SDK documentation", compartmentID.Comments)
+	}
+
+	config := findFieldModel(t, application.SpecFields, "Config")
+	if !slices.Equal(config.Markers, []string{"+kubebuilder:validation:Optional"}) {
+		t.Fatalf("Application Config markers = %#v, want optional marker", config.Markers)
+	}
+	if config.Tag != `json:"config,omitempty"` {
+		t.Fatalf("Application Config tag = %q, want optional json tag", config.Tag)
+	}
+	if !strings.Contains(strings.Join(config.Comments, "\n"), "Application configuration") {
+		t.Fatalf("Application Config comments = %#v, want SDK documentation", config.Comments)
+	}
+
+	lifecycleState := findFieldModel(t, application.StatusFields, "LifecycleState")
+	if len(lifecycleState.Markers) != 0 {
+		t.Fatalf("Application LifecycleState markers = %#v, want no requiredness markers on status fields", lifecycleState.Markers)
+	}
+	if !strings.Contains(strings.Join(lifecycleState.Comments, "\n"), "current state of the application") {
+		t.Fatalf("Application LifecycleState comments = %#v, want SDK documentation", lifecycleState.Comments)
+	}
+
+	content, err := renderResourceFile(pkg, application)
+	if err != nil {
+		t.Fatalf("renderResourceFile() error = %v", err)
+	}
+
+	assertContains(t, content, []string{
+		"// The OCID of the compartment to create the application within.",
+		"// +kubebuilder:validation:Required",
+		"CompartmentId string `json:\"compartmentId\"`",
+		"// Application configuration. These values are passed on to the function as environment variables, functions may override application configuration.",
+		"// +kubebuilder:validation:Optional",
+		"Config map[string]string `json:\"config,omitempty\"`",
+		"// The current state of the application.",
+		"LifecycleState string `json:\"lifecycleState,omitempty\"`",
+	})
 }
 
 func TestGenerateRendersPackageOutputsByProfile(t *testing.T) {
@@ -521,6 +897,32 @@ func findResource(t *testing.T, resources []ResourceModel, kind string) Resource
 
 	t.Fatalf("resource kind %q was not found in %#v", kind, resources)
 	return ResourceModel{}
+}
+
+func findFieldModel(t *testing.T, fields []FieldModel, name string) FieldModel {
+	t.Helper()
+
+	for _, field := range fields {
+		if field.Name == name {
+			return field
+		}
+	}
+
+	t.Fatalf("field %q was not found in %#v", name, fields)
+	return FieldModel{}
+}
+
+func findHelperType(t *testing.T, helperTypes []TypeModel, name string) TypeModel {
+	t.Helper()
+
+	for _, helperType := range helperTypes {
+		if helperType.Name == name {
+			return helperType
+		}
+	}
+
+	t.Fatalf("helper type %q was not found in %#v", name, helperTypes)
+	return TypeModel{}
 }
 
 func generatorTestDir(t *testing.T) string {

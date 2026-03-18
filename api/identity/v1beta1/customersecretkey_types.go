@@ -14,20 +14,32 @@ import (
 
 // CustomerSecretKeySpec defines the desired state of CustomerSecretKey.
 type CustomerSecretKeySpec struct {
-	Id             shared.OCID `json:"id,omitempty"`
-	CompartmentId  shared.OCID `json:"compartmentId,omitempty"`
-	DisplayName    string      `json:"displayName,omitempty"`
-	Key            string      `json:"key,omitempty"`
-	UserId         string      `json:"userId,omitempty"`
-	TimeCreated    string      `json:"timeCreated,omitempty"`
-	TimeExpires    string      `json:"timeExpires,omitempty"`
-	LifecycleState string      `json:"lifecycleState,omitempty"`
-	InactiveStatus int64       `json:"inactiveStatus,omitempty"`
+	// The name you assign to the secret key during creation. Does not have to be unique, and it's changeable.
+	// +kubebuilder:validation:Required
+	DisplayName string `json:"displayName"`
 }
 
 // CustomerSecretKeyStatus defines the observed state of CustomerSecretKey.
 type CustomerSecretKeyStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The secret key.
+	Key string `json:"key,omitempty"`
+	// The access key portion of the key pair.
+	Id string `json:"id,omitempty"`
+	// The OCID of the user the password belongs to.
+	UserId string `json:"userId,omitempty"`
+	// Date and time the `CustomerSecretKey` object was created, in the format defined by RFC3339.
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// Date and time when this password will expire, in the format defined by RFC3339.
+	// Null if it never expires.
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeExpires string `json:"timeExpires,omitempty"`
+	// The secret key's current state. After creating a secret key, make sure its `lifecycleState` changes from
+	// CREATING to ACTIVE before using it.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The detailed status of INACTIVE lifecycleState.
+	InactiveStatus int64 `json:"inactiveStatus,omitempty"`
 }
 
 // +kubebuilder:object:root=true

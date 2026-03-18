@@ -14,17 +14,92 @@ import (
 
 // VolumeBackupPolicySpec defines the desired state of VolumeBackupPolicy.
 type VolumeBackupPolicySpec struct {
-	Id                shared.OCID       `json:"id,omitempty"`
-	CompartmentId     shared.OCID       `json:"compartmentId,omitempty"`
-	DisplayName       string            `json:"displayName,omitempty"`
-	DestinationRegion string            `json:"destinationRegion,omitempty"`
-	FreeformTags      map[string]string `json:"freeformTags,omitempty"`
-	TimeCreated       string            `json:"timeCreated,omitempty"`
+	// The OCID of the compartment.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
+	// The paired destination region for copying scheduled backups to. Example: `us-ashburn-1`.
+	// See Region Pairs (https://docs.cloud.oracle.com/iaas/Content/Block/Tasks/schedulingvolumebackups.htm#RegionPairs) for details about paired regions.
+	// +kubebuilder:validation:Optional
+	DestinationRegion string `json:"destinationRegion,omitempty"`
+	// The collection of schedules for the volume backup policy. See
+	// see Schedules (https://docs.cloud.oracle.com/iaas/Content/Block/Tasks/schedulingvolumebackups.htm#schedules) in
+	// Policy-Based Backups (https://docs.cloud.oracle.com/iaas/Content/Block/Tasks/schedulingvolumebackups.htm) for more information.
+	// +kubebuilder:validation:Optional
+	Schedules []VolumeBackupPolicySchedule `json:"schedules,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+}
+
+// VolumeBackupPolicySchedule defines nested fields for VolumeBackupPolicy.Schedule.
+type VolumeBackupPolicySchedule struct {
+	// The type of volume backup to create.
+	// +kubebuilder:validation:Required
+	BackupType string `json:"backupType"`
+	// The volume backup frequency.
+	// +kubebuilder:validation:Required
+	Period string `json:"period"`
+	// How long, in seconds, to keep the volume backups created by this schedule.
+	// +kubebuilder:validation:Required
+	RetentionSeconds int `json:"retentionSeconds"`
+	// The number of seconds that the volume backup start
+	// time should be shifted from the default interval boundaries specified by
+	// the period. The volume backup start time is the frequency start time plus the offset.
+	// +kubebuilder:validation:Optional
+	OffsetSeconds int `json:"offsetSeconds,omitempty"`
+	// Indicates how the offset is defined. If value is `STRUCTURED`,
+	// then `hourOfDay`, `dayOfWeek`, `dayOfMonth`, and `month` fields are used
+	// and `offsetSeconds` will be ignored in requests and users should ignore its
+	// value from the responses.
+	// `hourOfDay` is applicable for periods `ONE_DAY`,
+	// `ONE_WEEK`, `ONE_MONTH` and `ONE_YEAR`.
+	// `dayOfWeek` is applicable for period
+	// `ONE_WEEK`.
+	// `dayOfMonth` is applicable for periods `ONE_MONTH` and `ONE_YEAR`.
+	// 'month' is applicable for period 'ONE_YEAR'.
+	// They will be ignored in the requests for inapplicable periods.
+	// If value is `NUMERIC_SECONDS`, then `offsetSeconds`
+	// will be used for both requests and responses and the structured fields will be
+	// ignored in the requests and users should ignore their values from the responses.
+	// For clients using older versions of Apis and not sending `offsetType` in their
+	// requests, the behaviour is just like `NUMERIC_SECONDS`.
+	// +kubebuilder:validation:Optional
+	OffsetType string `json:"offsetType,omitempty"`
+	// The hour of the day to schedule the volume backup.
+	// +kubebuilder:validation:Optional
+	HourOfDay int `json:"hourOfDay,omitempty"`
+	// The day of the week to schedule the volume backup.
+	// +kubebuilder:validation:Optional
+	DayOfWeek string `json:"dayOfWeek,omitempty"`
+	// The day of the month to schedule the volume backup.
+	// +kubebuilder:validation:Optional
+	DayOfMonth int `json:"dayOfMonth,omitempty"`
+	// The month of the year to schedule the volume backup.
+	// +kubebuilder:validation:Optional
+	Month string `json:"month,omitempty"`
+	// Specifies what time zone is the schedule in
+	// +kubebuilder:validation:Optional
+	TimeZone string `json:"timeZone,omitempty"`
 }
 
 // VolumeBackupPolicyStatus defines the observed state of VolumeBackupPolicy.
 type VolumeBackupPolicyStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the volume backup policy.
+	Id string `json:"id,omitempty"`
+	// The date and time the volume backup policy was created. Format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	TimeCreated string `json:"timeCreated,omitempty"`
 }
 
 // +kubebuilder:object:root=true

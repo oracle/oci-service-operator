@@ -14,22 +14,217 @@ import (
 
 // ClusterSpec defines the desired state of Cluster.
 type ClusterSpec struct {
-	Id                          shared.OCID       `json:"id,omitempty"`
-	CompartmentId               shared.OCID       `json:"compartmentId,omitempty"`
-	Name                        string            `json:"name,omitempty"`
-	VcnId                       string            `json:"vcnId,omitempty"`
-	KubernetesVersion           string            `json:"kubernetesVersion,omitempty"`
-	KmsKeyId                    string            `json:"kmsKeyId,omitempty"`
-	FreeformTags                map[string]string `json:"freeformTags,omitempty"`
-	Type                        string            `json:"type,omitempty"`
-	LifecycleState              string            `json:"lifecycleState,omitempty"`
-	LifecycleDetails            string            `json:"lifecycleDetails,omitempty"`
-	AvailableKubernetesUpgrades []string          `json:"availableKubernetesUpgrades,omitempty"`
+	// The name of the cluster. Avoid entering confidential information.
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+	// The OCID of the compartment in which to create the cluster.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// The OCID of the virtual cloud network (VCN) in which to create the cluster.
+	// +kubebuilder:validation:Required
+	VcnId string `json:"vcnId"`
+	// The version of Kubernetes to install into the cluster masters.
+	// +kubebuilder:validation:Required
+	KubernetesVersion string `json:"kubernetesVersion"`
+	// The network configuration for access to the Cluster control plane.
+	// +kubebuilder:validation:Optional
+	EndpointConfig ClusterEndpointConfigFields `json:"endpointConfig,omitempty"`
+	// The OCID of the KMS key to be used as the master encryption key for Kubernetes secret encryption.
+	// When used, `kubernetesVersion` must be at least `v1.13.0`.
+	// +kubebuilder:validation:Optional
+	KmsKeyId string `json:"kmsKeyId,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// Optional attributes for the cluster.
+	// +kubebuilder:validation:Optional
+	Options ClusterOptions `json:"options,omitempty"`
+	// The image verification policy for signature validation. Once a policy is created and enabled with
+	// one or more kms keys, the policy will ensure all images deployed has been signed with the key(s)
+	// attached to the policy.
+	// +kubebuilder:validation:Optional
+	ImagePolicyConfig ClusterImagePolicyConfig `json:"imagePolicyConfig,omitempty"`
+	// Available CNIs and network options for existing and new node pools of the cluster
+	// +kubebuilder:validation:Optional
+	ClusterPodNetworkOptions []ClusterPodNetworkOption `json:"clusterPodNetworkOptions,omitempty"`
+	// Type of cluster
+	// +kubebuilder:validation:Optional
+	Type string `json:"type,omitempty"`
+}
+
+// ClusterEndpointConfigFields defines nested fields for Cluster.EndpointConfig.
+type ClusterEndpointConfigFields struct {
+	// The OCID of the regional subnet in which to place the Cluster endpoint.
+	// +kubebuilder:validation:Optional
+	SubnetId string `json:"subnetId,omitempty"`
+	// A list of the OCIDs of the network security groups (NSGs) to apply to the cluster endpoint. For more information about NSGs, see NetworkSecurityGroup.
+	// +kubebuilder:validation:Optional
+	NsgIds []string `json:"nsgIds,omitempty"`
+	// Whether the cluster should be assigned a public IP address. Defaults to false. If set to true on a private subnet, the cluster provisioning will fail.
+	// +kubebuilder:validation:Optional
+	IsPublicIpEnabled bool `json:"isPublicIpEnabled,omitempty"`
+}
+
+// ClusterOptionsKubernetesNetworkConfig defines nested fields for Cluster.Options.KubernetesNetworkConfig.
+type ClusterOptionsKubernetesNetworkConfig struct {
+	// The CIDR block for Kubernetes pods. Optional, defaults to 10.244.0.0/16.
+	// +kubebuilder:validation:Optional
+	PodsCidr string `json:"podsCidr,omitempty"`
+	// The CIDR block for Kubernetes services. Optional, defaults to 10.96.0.0/16.
+	// +kubebuilder:validation:Optional
+	ServicesCidr string `json:"servicesCidr,omitempty"`
+}
+
+// ClusterOptionsAddOns defines nested fields for Cluster.Options.AddOns.
+type ClusterOptionsAddOns struct {
+	// Whether or not to enable the Kubernetes Dashboard add-on.
+	// +kubebuilder:validation:Optional
+	IsKubernetesDashboardEnabled bool `json:"isKubernetesDashboardEnabled,omitempty"`
+	// Whether or not to enable the Tiller add-on.
+	// +kubebuilder:validation:Optional
+	IsTillerEnabled bool `json:"isTillerEnabled,omitempty"`
+}
+
+// ClusterOptionsAdmissionControllerOptions defines nested fields for Cluster.Options.AdmissionControllerOptions.
+type ClusterOptionsAdmissionControllerOptions struct {
+	// Whether or not to enable the Pod Security Policy admission controller.
+	// +kubebuilder:validation:Optional
+	IsPodSecurityPolicyEnabled bool `json:"isPodSecurityPolicyEnabled,omitempty"`
+}
+
+// ClusterOptionsPersistentVolumeConfig defines nested fields for Cluster.Options.PersistentVolumeConfig.
+type ClusterOptionsPersistentVolumeConfig struct {
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+}
+
+// ClusterOptionsServiceLbConfig defines nested fields for Cluster.Options.ServiceLbConfig.
+type ClusterOptionsServiceLbConfig struct {
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+}
+
+// ClusterOptions defines nested fields for Cluster.Options.
+type ClusterOptions struct {
+	// The OCIDs of the subnets used for Kubernetes services load balancers.
+	// +kubebuilder:validation:Optional
+	ServiceLbSubnetIds []string `json:"serviceLbSubnetIds,omitempty"`
+	// Network configuration for Kubernetes.
+	// +kubebuilder:validation:Optional
+	KubernetesNetworkConfig ClusterOptionsKubernetesNetworkConfig `json:"kubernetesNetworkConfig,omitempty"`
+	// Configurable cluster add-ons
+	// +kubebuilder:validation:Optional
+	AddOns ClusterOptionsAddOns `json:"addOns,omitempty"`
+	// Configurable cluster admission controllers
+	// +kubebuilder:validation:Optional
+	AdmissionControllerOptions ClusterOptionsAdmissionControllerOptions `json:"admissionControllerOptions,omitempty"`
+	// +kubebuilder:validation:Optional
+	PersistentVolumeConfig ClusterOptionsPersistentVolumeConfig `json:"persistentVolumeConfig,omitempty"`
+	// +kubebuilder:validation:Optional
+	ServiceLbConfig ClusterOptionsServiceLbConfig `json:"serviceLbConfig,omitempty"`
+}
+
+// ClusterImagePolicyConfigKeyDetail defines nested fields for Cluster.ImagePolicyConfig.KeyDetail.
+type ClusterImagePolicyConfigKeyDetail struct {
+	// The OCIDs of the KMS key that will be used to verify whether the images are signed by an approved source.
+	// +kubebuilder:validation:Optional
+	KmsKeyId string `json:"kmsKeyId,omitempty"`
+}
+
+// ClusterImagePolicyConfig defines nested fields for Cluster.ImagePolicyConfig.
+type ClusterImagePolicyConfig struct {
+	// Whether the image verification policy is enabled. Defaults to false. If set to true, the images will be verified against the policy at runtime.
+	// +kubebuilder:validation:Optional
+	IsPolicyEnabled bool `json:"isPolicyEnabled,omitempty"`
+	// A list of KMS key details.
+	// +kubebuilder:validation:Optional
+	KeyDetails []ClusterImagePolicyConfigKeyDetail `json:"keyDetails,omitempty"`
+}
+
+// ClusterPodNetworkOption defines nested fields for Cluster.ClusterPodNetworkOption.
+type ClusterPodNetworkOption struct {
+	// +kubebuilder:validation:Optional
+	CniType string `json:"cniType,omitempty"`
+}
+
+// ClusterMetadata defines nested fields for Cluster.Metadata.
+type ClusterMetadata struct {
+	// The time the cluster was created.
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The user who created the cluster.
+	CreatedByUserId string `json:"createdByUserId,omitempty"`
+	// The OCID of the work request which created the cluster.
+	CreatedByWorkRequestId string `json:"createdByWorkRequestId,omitempty"`
+	// The time the cluster was deleted.
+	TimeDeleted string `json:"timeDeleted,omitempty"`
+	// The user who deleted the cluster.
+	DeletedByUserId string `json:"deletedByUserId,omitempty"`
+	// The OCID of the work request which deleted the cluster.
+	DeletedByWorkRequestId string `json:"deletedByWorkRequestId,omitempty"`
+	// The time the cluster was updated.
+	TimeUpdated string `json:"timeUpdated,omitempty"`
+	// The user who updated the cluster.
+	UpdatedByUserId string `json:"updatedByUserId,omitempty"`
+	// The OCID of the work request which updated the cluster.
+	UpdatedByWorkRequestId string `json:"updatedByWorkRequestId,omitempty"`
+	// The time until which the cluster credential is valid.
+	TimeCredentialExpiration string `json:"timeCredentialExpiration,omitempty"`
+}
+
+// ClusterEndpoints defines nested fields for Cluster.Endpoints.
+type ClusterEndpoints struct {
+	// The non-native networking Kubernetes API server endpoint.
+	Kubernetes string `json:"kubernetes,omitempty"`
+	// The public native networking Kubernetes API server endpoint, if one was requested.
+	PublicEndpoint string `json:"publicEndpoint,omitempty"`
+	// The private native networking Kubernetes API server endpoint.
+	PrivateEndpoint string `json:"privateEndpoint,omitempty"`
+	// The FQDN assigned to the Kubernetes API private endpoint.
+	// Example: 'https://yourVcnHostnameEndpoint'
+	VcnHostnameEndpoint string `json:"vcnHostnameEndpoint,omitempty"`
 }
 
 // ClusterStatus defines the observed state of Cluster.
 type ClusterStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the cluster.
+	Id string `json:"id,omitempty"`
+	// Usage of system tag keys. These predefined keys are scoped to namespaces.
+	// Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`
+	// Metadata about the cluster.
+	Metadata ClusterMetadata `json:"metadata,omitempty"`
+	// The state of the cluster masters.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// Details about the state of the cluster masters.
+	LifecycleDetails string `json:"lifecycleDetails,omitempty"`
+	// Endpoints served up by the cluster masters.
+	Endpoints ClusterEndpoints `json:"endpoints,omitempty"`
+	// Available Kubernetes versions to which the clusters masters may be upgraded.
+	AvailableKubernetesUpgrades []string `json:"availableKubernetesUpgrades,omitempty"`
 }
 
 // +kubebuilder:object:root=true

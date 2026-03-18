@@ -14,20 +14,37 @@ import (
 
 // WorkloadMappingSpec defines the desired state of WorkloadMapping.
 type WorkloadMappingSpec struct {
-	Id                  shared.OCID       `json:"id,omitempty"`
-	CompartmentId       shared.OCID       `json:"compartmentId,omitempty"`
-	Namespace           string            `json:"namespace,omitempty"`
-	MappedCompartmentId string            `json:"mappedCompartmentId,omitempty"`
-	FreeformTags        map[string]string `json:"freeformTags,omitempty"`
-	ClusterId           string            `json:"clusterId,omitempty"`
-	MappedTenancyId     string            `json:"mappedTenancyId,omitempty"`
-	TimeCreated         string            `json:"timeCreated,omitempty"`
-	LifecycleState      string            `json:"lifecycleState,omitempty"`
+	// The namespace of the workloadMapping.
+	// +kubebuilder:validation:Required
+	Namespace string `json:"namespace"`
+	// The OCID of the mapped customer compartment.
+	// +kubebuilder:validation:Required
+	MappedCompartmentId string `json:"mappedCompartmentId"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 }
 
 // WorkloadMappingStatus defines the observed state of WorkloadMapping.
 type WorkloadMappingStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The ocid of the workloadMapping.
+	Id string `json:"id,omitempty"`
+	// The OCID of the cluster.
+	ClusterId string `json:"clusterId,omitempty"`
+	// The OCID of the mapped customer tenancy.
+	MappedTenancyId string `json:"mappedTenancyId,omitempty"`
+	// The time the cluster was created.
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The state of the workloadMapping.
+	LifecycleState string `json:"lifecycleState,omitempty"`
 }
 
 // +kubebuilder:object:root=true

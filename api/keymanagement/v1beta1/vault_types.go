@@ -14,24 +14,110 @@ import (
 
 // VaultSpec defines the desired state of Vault.
 type VaultSpec struct {
-	Id                  shared.OCID       `json:"id,omitempty"`
-	CompartmentId       shared.OCID       `json:"compartmentId,omitempty"`
-	DisplayName         string            `json:"displayName,omitempty"`
-	VaultType           string            `json:"vaultType,omitempty"`
-	FreeformTags        map[string]string `json:"freeformTags,omitempty"`
-	CryptoEndpoint      string            `json:"cryptoEndpoint,omitempty"`
-	LifecycleState      string            `json:"lifecycleState,omitempty"`
-	ManagementEndpoint  string            `json:"managementEndpoint,omitempty"`
-	TimeCreated         string            `json:"timeCreated,omitempty"`
-	WrappingkeyId       string            `json:"wrappingkeyId,omitempty"`
-	TimeOfDeletion      string            `json:"timeOfDeletion,omitempty"`
-	RestoredFromVaultId string            `json:"restoredFromVaultId,omitempty"`
-	IsPrimary           bool              `json:"isPrimary,omitempty"`
+	// The OCID of the compartment where you want to create this vault.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// A user-friendly name for the vault. It does not have to be unique, and it is changeable.
+	// Avoid entering confidential information.
+	// +kubebuilder:validation:Required
+	DisplayName string `json:"displayName"`
+	// The type of vault to create. Each type of vault stores the key with different degrees of isolation and has different options and pricing.
+	// +kubebuilder:validation:Required
+	VaultType string `json:"vaultType"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// +kubebuilder:validation:Optional
+	ExternalKeyManagerMetadata VaultExternalKeyManagerMetadata `json:"externalKeyManagerMetadata,omitempty"`
+}
+
+// VaultExternalKeyManagerMetadataOauthMetadata defines nested fields for Vault.ExternalKeyManagerMetadata.OauthMetadata.
+type VaultExternalKeyManagerMetadataOauthMetadata struct {
+	// Base URL of the IDCS account where confidential client app is created.
+	// +kubebuilder:validation:Required
+	IdcsAccountNameUrl string `json:"idcsAccountNameUrl"`
+	// ID of the client app created in IDP.
+	// +kubebuilder:validation:Required
+	ClientAppId string `json:"clientAppId"`
+	// Secret of the client app created in IDP.
+	// +kubebuilder:validation:Required
+	ClientAppSecret string `json:"clientAppSecret"`
+}
+
+// VaultExternalKeyManagerMetadata defines nested fields for Vault.ExternalKeyManagerMetadata.
+type VaultExternalKeyManagerMetadata struct {
+	// +kubebuilder:validation:Required
+	OauthMetadata VaultExternalKeyManagerMetadataOauthMetadata `json:"oauthMetadata"`
+	// URI of the vault on external key manager.
+	// +kubebuilder:validation:Required
+	ExternalVaultEndpointUrl string `json:"externalVaultEndpointUrl"`
+	// OCID of private endpoint created by customer.
+	// +kubebuilder:validation:Required
+	PrivateEndpointId string `json:"privateEndpointId"`
+}
+
+// VaultReplicaDetails defines nested fields for Vault.ReplicaDetails.
+type VaultReplicaDetails struct {
+	// ReplicationId associated with a vault operation
+	ReplicationId string `json:"replicationId,omitempty"`
+}
+
+// VaultExternalKeyManagerMetadataSummaryOauthMetadataSummary defines nested fields for Vault.ExternalKeyManagerMetadataSummary.OauthMetadataSummary.
+type VaultExternalKeyManagerMetadataSummaryOauthMetadataSummary struct {
+	// Base URL of the IDCS account where confidential client app is created.
+	IdcsAccountNameUrl string `json:"idcsAccountNameUrl,omitempty"`
+	// ID of the client app created in IDP.
+	ClientAppId string `json:"clientAppId,omitempty"`
+}
+
+// VaultExternalKeyManagerMetadataSummary defines nested fields for Vault.ExternalKeyManagerMetadataSummary.
+type VaultExternalKeyManagerMetadataSummary struct {
+	// URL of the vault on external key manager.
+	ExternalVaultEndpointUrl string `json:"externalVaultEndpointUrl,omitempty"`
+	// OCID of the private endpoint.
+	PrivateEndpointId string `json:"privateEndpointId,omitempty"`
+	// Vendor of the external key manager.
+	Vendor               string                                                     `json:"vendor,omitempty"`
+	OauthMetadataSummary VaultExternalKeyManagerMetadataSummaryOauthMetadataSummary `json:"oauthMetadataSummary,omitempty"`
 }
 
 // VaultStatus defines the observed state of Vault.
 type VaultStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The service endpoint to perform cryptographic operations against. Cryptographic operations include
+	// Encrypt (https://docs.cloud.oracle.com/api/#/en/key/latest/EncryptedData/Encrypt), Decrypt (https://docs.cloud.oracle.com/api/#/en/key/latest/DecryptedData/Decrypt),
+	// and GenerateDataEncryptionKey (https://docs.cloud.oracle.com/api/#/en/key/latest/GeneratedKey/GenerateDataEncryptionKey) operations.
+	CryptoEndpoint string `json:"cryptoEndpoint,omitempty"`
+	// The OCID of the vault.
+	Id string `json:"id,omitempty"`
+	// The vault's current lifecycle state.
+	// Example: `DELETED`
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The service endpoint to perform management operations against. Management operations include "Create," "Update," "List," "Get," and "Delete" operations.
+	ManagementEndpoint string `json:"managementEndpoint,omitempty"`
+	// The date and time this vault was created, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2018-04-03T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The OCID of the vault's wrapping key.
+	WrappingkeyId string `json:"wrappingkeyId,omitempty"`
+	// An optional property to indicate when to delete the vault, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2018-04-03T21:10:29.600Z`
+	TimeOfDeletion string `json:"timeOfDeletion,omitempty"`
+	// The OCID of the vault from which this vault was restored, if it was restored from a backup file.
+	// If you restore a vault to the same region, the vault retains the same OCID that it had when you
+	// backed up the vault.
+	RestoredFromVaultId string              `json:"restoredFromVaultId,omitempty"`
+	ReplicaDetails      VaultReplicaDetails `json:"replicaDetails,omitempty"`
+	// A Boolean value that indicates whether the Vault is primary Vault or replica Vault.
+	IsPrimary                         bool                                   `json:"isPrimary,omitempty"`
+	ExternalKeyManagerMetadataSummary VaultExternalKeyManagerMetadataSummary `json:"externalKeyManagerMetadataSummary,omitempty"`
 }
 
 // +kubebuilder:object:root=true

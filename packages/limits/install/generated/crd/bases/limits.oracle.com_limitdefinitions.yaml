@@ -51,19 +51,44 @@ spec:
             type: object
           spec:
             description: LimitDefinitionSpec defines the desired state of LimitDefinition.
-            properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
             type: object
           status:
             description: LimitDefinitionStatus defines the observed state of LimitDefinition.
             properties:
+              areQuotasSupported:
+                description: If true, quota policies can be created on top of this
+                  resource limit.
+                type: boolean
+              description:
+                description: The limit description.
+                type: string
+              isDeprecated:
+                description: Indicates if the limit has been deprecated.
+                type: boolean
+              isDynamic:
+                description: The limit for this resource has a dynamic value that
+                  is based on consumption across all OCI services.
+                type: boolean
+              isEligibleForLimitIncrease:
+                description: Indicates if the customer can request a limit increase
+                  for this resource.
+                type: boolean
+              isResourceAvailabilitySupported:
+                description: |-
+                  Reflects whether or not the GetResourceAvailability API is supported for this limit.
+                  If not, the API returns an empty JSON response.
+                type: boolean
+              name:
+                description: The resource limit name. To be used for writing policies
+                  (in case of quotas) or other programmatic calls.
+                type: string
+              scopeType:
+                description: Reflects the scope of the resource limit, whether Global
+                  (across all regions), regional, or availability domain-specific.
+                type: string
+              serviceName:
+                description: The service name of the limit.
+                type: string
               status:
                 properties:
                   conditions:

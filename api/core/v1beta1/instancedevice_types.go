@@ -14,8 +14,6 @@ import (
 
 // InstanceDeviceSpec defines the desired state of InstanceDevice.
 type InstanceDeviceSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // InstanceDeviceStatus defines the observed state of InstanceDevice.

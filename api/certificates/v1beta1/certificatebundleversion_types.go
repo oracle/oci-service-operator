@@ -14,13 +14,50 @@ import (
 
 // CertificateBundleVersionSpec defines the desired state of CertificateBundleVersion.
 type CertificateBundleVersionSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
+}
+
+// CertificateBundleVersionValidity defines nested fields for CertificateBundleVersion.Validity.
+type CertificateBundleVersionValidity struct {
+	// The date on which the certificate validity period begins, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2019-04-03T21:10:29.600Z`
+	TimeOfValidityNotBefore string `json:"timeOfValidityNotBefore,omitempty"`
+	// The date on which the certificate validity period ends, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2019-04-03T21:10:29.600Z`
+	TimeOfValidityNotAfter string `json:"timeOfValidityNotAfter,omitempty"`
+}
+
+// CertificateBundleVersionRevocationStatus defines nested fields for CertificateBundleVersion.RevocationStatus.
+type CertificateBundleVersionRevocationStatus struct {
+	// The time when the certificate or CA was revoked.
+	TimeRevoked string `json:"timeRevoked,omitempty"`
+	// The reason that the certificate or CA was revoked.
+	RevocationReason string `json:"revocationReason,omitempty"`
 }
 
 // CertificateBundleVersionStatus defines the observed state of CertificateBundleVersion.
 type CertificateBundleVersionStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the certificate.
+	CertificateId string `json:"certificateId,omitempty"`
+	// The name of the certificate.
+	CertificateName string `json:"certificateName,omitempty"`
+	// The version number of the certificate.
+	VersionNumber int64 `json:"versionNumber,omitempty"`
+	// An optional property indicating when the certificate version was created, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2019-04-03T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// A list of rotation states for this certificate bundle version.
+	Stages []string `json:"stages,omitempty"`
+	// A unique certificate identifier used in certificate revocation tracking, formatted as octets.
+	// Example: `03 AC FC FA CC B3 CB 02 B8 F8 DE F5 85 E7 7B FF`
+	SerialNumber string `json:"serialNumber,omitempty"`
+	// The name of the certificate version.
+	VersionName string                           `json:"versionName,omitempty"`
+	Validity    CertificateBundleVersionValidity `json:"validity,omitempty"`
+	// An optional property indicating when to delete the certificate version, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2019-04-03T21:10:29.600Z`
+	TimeOfDeletion   string                                   `json:"timeOfDeletion,omitempty"`
+	RevocationStatus CertificateBundleVersionRevocationStatus `json:"revocationStatus,omitempty"`
 }
 
 // +kubebuilder:object:root=true

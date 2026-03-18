@@ -53,32 +53,33 @@ spec:
           spec:
             description: InstancePoolLoadBalancerAttachmentSpec defines the desired
               state of InstancePoolLoadBalancerAttachment.
-            properties:
-              backendSetName:
-                type: string
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
-              instancePoolId:
-                type: string
-              lifecycleState:
-                type: string
-              loadBalancerId:
-                type: string
-              port:
-                type: integer
-              vnicSelection:
-                type: string
             type: object
           status:
             description: InstancePoolLoadBalancerAttachmentStatus defines the observed
               state of InstancePoolLoadBalancerAttachment.
             properties:
+              backendSetName:
+                description: The name of the backend set on the load balancer.
+                type: string
+              id:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the load balancer attachment.
+                type: string
+              instancePoolId:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the instance pool of the load balancer attachment.
+                type: string
+              lifecycleState:
+                description: The status of the interaction between the instance pool
+                  and the load balancer.
+                type: string
+              loadBalancerId:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the load balancer attached to the instance pool.
+                type: string
+              port:
+                description: The port value used for the backends.
+                type: integer
               status:
                 properties:
                   conditions:
@@ -121,6 +122,12 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              vnicSelection:
+                description: |-
+                  Indicates which VNIC on each instance in the instance pool should be used to associate with the load balancer.
+                  Possible values are "PrimaryVnic" or the displayName of one of the secondary VNICs on the instance configuration
+                  that is associated with the instance pool.
+                type: string
             required:
             - status
             type: object

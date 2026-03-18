@@ -14,18 +14,24 @@ import (
 
 // ResourceAvailabilitySpec defines the desired state of ResourceAvailability.
 type ResourceAvailabilitySpec struct {
-	Id                     shared.OCID `json:"id,omitempty"`
-	CompartmentId          shared.OCID `json:"compartmentId,omitempty"`
-	Used                   int64       `json:"used,omitempty"`
-	Available              int64       `json:"available,omitempty"`
-	FractionalUsage        float32     `json:"fractionalUsage,omitempty"`
-	FractionalAvailability float32     `json:"fractionalAvailability,omitempty"`
-	EffectiveQuotaValue    float32     `json:"effectiveQuotaValue,omitempty"`
 }
 
 // ResourceAvailabilityStatus defines the observed state of ResourceAvailability.
 type ResourceAvailabilityStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The current usage in the given compartment. To support resources with fractional counts,
+	// the field rounds up to the nearest integer.
+	Used int64 `json:"used,omitempty"`
+	// The count of available resources. To support resources with fractional counts,
+	// the field rounds down to the nearest integer.
+	Available int64 `json:"available,omitempty"`
+	// The current most accurate usage in the given compartment.
+	FractionalUsage float32 `json:"fractionalUsage,omitempty"`
+	// The most accurate count of available resources.
+	FractionalAvailability float32 `json:"fractionalAvailability,omitempty"`
+	// The effective quota value for the given compartment. This field is only present if there is a
+	// current quota policy affecting the current resource in the target region or availability domain.
+	EffectiveQuotaValue float32 `json:"effectiveQuotaValue,omitempty"`
 }
 
 // +kubebuilder:object:root=true

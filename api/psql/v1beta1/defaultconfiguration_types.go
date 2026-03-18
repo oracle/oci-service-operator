@@ -14,27 +14,63 @@ import (
 
 // DefaultConfigurationSpec defines the desired state of DefaultConfiguration.
 type DefaultConfigurationSpec struct {
-	Id                      shared.OCID `json:"id,omitempty"`
-	CompartmentId           shared.OCID `json:"compartmentId,omitempty"`
-	DisplayName             string      `json:"displayName,omitempty"`
-	TimeCreated             string      `json:"timeCreated,omitempty"`
-	LifecycleState          string      `json:"lifecycleState,omitempty"`
-	Shape                   string      `json:"shape,omitempty"`
-	InstanceOcpuCount       int         `json:"instanceOcpuCount,omitempty"`
-	InstanceMemorySizeInGBs int         `json:"instanceMemorySizeInGBs,omitempty"`
-	DbVersion               string      `json:"dbVersion,omitempty"`
-	Description             string      `json:"description,omitempty"`
-	LifecycleDetails        string      `json:"lifecycleDetails,omitempty"`
+}
+
+// DefaultConfigurationConfigurationDetailsItem defines nested fields for DefaultConfiguration.ConfigurationDetails.Item.
+type DefaultConfigurationConfigurationDetailsItem struct {
+	// The configuration variable name.
+	ConfigKey string `json:"configKey,omitempty"`
+	// Default value for the variable.
+	DefaultConfigValue string `json:"defaultConfigValue,omitempty"`
+	// Range or list of allowed values.
+	AllowedValues string `json:"allowedValues,omitempty"`
+	// If true, modifying this configuration value will require a restart.
+	IsRestartRequired bool `json:"isRestartRequired,omitempty"`
+	// Data type of the variable.
+	DataType string `json:"dataType,omitempty"`
+	// Whether the value can be overridden or not.
+	IsOverridable bool `json:"isOverridable,omitempty"`
+	// Details about the PostgreSQL variable.
+	Description string `json:"description,omitempty"`
+}
+
+// DefaultConfigurationConfigurationDetails defines nested fields for DefaultConfiguration.ConfigurationDetails.
+type DefaultConfigurationConfigurationDetails struct {
+	// List of ConfigParms object.
+	Items []DefaultConfigurationConfigurationDetailsItem `json:"items,omitempty"`
 }
 
 // DefaultConfigurationStatus defines the observed state of DefaultConfiguration.
 type DefaultConfigurationStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// A unique identifier for the configuration.
+	Id string `json:"id,omitempty"`
+	// A user-friendly display name for the configuration.
+	DisplayName string `json:"displayName,omitempty"`
+	// The date and time that the configuration was created, expressed in
+	// RFC 3339 (https://tools.ietf.org/rfc/rfc3339) timestamp format.
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The current state of the configuration.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The name of the shape for the configuration.
+	// Example: `VM.Standard.E4.Flex`
+	Shape string `json:"shape,omitempty"`
+	// CPU core count. Minimum value is 1.
+	InstanceOcpuCount int `json:"instanceOcpuCount,omitempty"`
+	// Memory size in gigabytes with 1GB increment.
+	InstanceMemorySizeInGBs int `json:"instanceMemorySizeInGBs,omitempty"`
+	// Version of the PostgreSQL database.
+	DbVersion            string                                   `json:"dbVersion,omitempty"`
+	ConfigurationDetails DefaultConfigurationConfigurationDetails `json:"configurationDetails,omitempty"`
+	// A description for the configuration.
+	Description string `json:"description,omitempty"`
+	// A message describing the current state in more detail. For example, can be used to provide actionable information for a resource in Failed state.
+	LifecycleDetails string `json:"lifecycleDetails,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="DisplayName",type="string",JSONPath=".spec.displayName",priority=1
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.status.conditions[-1].type",description="status of the DefaultConfiguration",priority=0
 // +kubebuilder:printcolumn:name="Ocid",type="string",JSONPath=".status.status.ocid",description="Ocid of the DefaultConfiguration",priority=1
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0

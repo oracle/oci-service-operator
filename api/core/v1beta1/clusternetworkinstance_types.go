@@ -14,8 +14,6 @@ import (
 
 // ClusterNetworkInstanceSpec defines the desired state of ClusterNetworkInstance.
 type ClusterNetworkInstanceSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // ClusterNetworkInstanceStatus defines the observed state of ClusterNetworkInstance.

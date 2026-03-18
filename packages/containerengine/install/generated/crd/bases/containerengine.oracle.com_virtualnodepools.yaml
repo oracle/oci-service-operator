@@ -57,41 +57,168 @@ spec:
             description: VirtualNodePoolSpec defines the desired state of VirtualNodePool.
             properties:
               clusterId:
+                description: The cluster the virtual node pool is associated with.
+                  A virtual node pool can only be associated with one cluster.
                 type: string
               compartmentId:
-                maxLength: 255
-                minLength: 1
+                description: Compartment of the virtual node pool.
                 type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
               displayName:
+                description: Display name of the virtual node pool. This is a non-unique
+                  value.
                 type: string
               freeformTags:
                 additionalProperties:
                   type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
                 type: object
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
-              kubernetesVersion:
-                type: string
-              lifecycleDetails:
-                type: string
-              lifecycleState:
-                type: string
+              initialVirtualNodeLabels:
+                description: Initial labels that will be added to the Kubernetes Virtual
+                  Node object when it registers.
+                items:
+                  description: VirtualNodePoolInitialVirtualNodeLabel defines nested
+                    fields for VirtualNodePool.InitialVirtualNodeLabel.
+                  properties:
+                    key:
+                      description: The key of the pair.
+                      type: string
+                    value:
+                      description: The value of the pair.
+                      type: string
+                  type: object
+                type: array
               nsgIds:
+                description: List of network security group id's applied to the Virtual
+                  Node VNIC.
                 items:
                   type: string
                 type: array
+              placementConfigurations:
+                description: The list of placement configurations which determines
+                  where Virtual Nodes will be provisioned across as it relates to
+                  the subnet and availability domains. The size attribute determines
+                  how many we evenly spread across these placement configurations
+                items:
+                  description: VirtualNodePoolPlacementConfiguration defines nested
+                    fields for VirtualNodePool.PlacementConfiguration.
+                  properties:
+                    availabilityDomain:
+                      description: |-
+                        The availability domain in which to place virtual nodes.
+                        Example: `Uocm:PHX-AD-1`
+                      type: string
+                    faultDomain:
+                      description: The fault domain of this virtual node.
+                      items:
+                        type: string
+                      type: array
+                    subnetId:
+                      description: The OCID of the subnet in which to place virtual
+                        nodes.
+                      type: string
+                  type: object
+                type: array
+              podConfiguration:
+                description: The pod configuration for pods run on virtual nodes of
+                  this virtual node pool.
+                properties:
+                  nsgIds:
+                    description: List of network security group IDs applied to the
+                      Pod VNIC.
+                    items:
+                      type: string
+                    type: array
+                  shape:
+                    description: Shape of the pods.
+                    type: string
+                  subnetId:
+                    description: The regional subnet where pods' VNIC will be placed.
+                    type: string
+                required:
+                - shape
+                - subnetId
+                type: object
               size:
+                description: The number of Virtual Nodes that should be in the Virtual
+                  Node Pool. The placement configurations determine where these virtual
+                  nodes are placed.
                 type: integer
-              timeCreated:
-                type: string
-              timeUpdated:
-                type: string
+              taints:
+                description: A taint is a collection of <key, value, effect>. These
+                  taints will be applied to the Virtual Nodes of this Virtual Node
+                  Pool for Kubernetes scheduling.
+                items:
+                  description: VirtualNodePoolTaint defines nested fields for VirtualNodePool.Taint.
+                  properties:
+                    effect:
+                      description: The effect of the pair.
+                      type: string
+                    key:
+                      description: The key of the pair.
+                      type: string
+                    value:
+                      description: The value of the pair.
+                      type: string
+                  type: object
+                type: array
+              virtualNodeTags:
+                description: VirtualNodePoolVirtualNodeTags defines nested fields
+                  for VirtualNodePool.VirtualNodeTags.
+                properties:
+                  definedTags:
+                    additionalProperties:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    description: |-
+                      Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                      For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                      Example: `{"Operations": {"CostCenter": "42"}}`
+                    type: object
+                  freeformTags:
+                    additionalProperties:
+                      type: string
+                    description: |-
+                      Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                      For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                      Example: `{"Department": "Finance"}`
+                    type: object
+                type: object
+            required:
+            - clusterId
+            - compartmentId
+            - displayName
+            - placementConfigurations
             type: object
           status:
             description: VirtualNodePoolStatus defines the observed state of VirtualNodePool.
             properties:
+              id:
+                description: The OCID of the virtual node pool.
+                type: string
+              kubernetesVersion:
+                description: The version of Kubernetes running on the nodes in the
+                  node pool.
+                type: string
+              lifecycleDetails:
+                description: Details about the state of the Virtual Node Pool.
+                type: string
+              lifecycleState:
+                description: The state of the Virtual Node Pool.
+                type: string
               status:
                 properties:
                   conditions:
@@ -134,6 +261,21 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of system tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeCreated:
+                description: The time the virtual node pool was created.
+                type: string
+              timeUpdated:
+                description: The time the virtual node pool was updated.
+                type: string
             required:
             - status
             type: object

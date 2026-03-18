@@ -14,23 +14,101 @@ import (
 
 // ConfigurationSpec defines the desired state of Configuration.
 type ConfigurationSpec struct {
-	Id                      shared.OCID       `json:"id,omitempty"`
-	CompartmentId           shared.OCID       `json:"compartmentId,omitempty"`
-	DisplayName             string            `json:"displayName,omitempty"`
-	Shape                   string            `json:"shape,omitempty"`
-	DbVersion               string            `json:"dbVersion,omitempty"`
-	InstanceOcpuCount       int               `json:"instanceOcpuCount,omitempty"`
-	InstanceMemorySizeInGBs int               `json:"instanceMemorySizeInGBs,omitempty"`
-	Description             string            `json:"description,omitempty"`
-	FreeformTags            map[string]string `json:"freeformTags,omitempty"`
-	TimeCreated             string            `json:"timeCreated,omitempty"`
-	LifecycleState          string            `json:"lifecycleState,omitempty"`
-	LifecycleDetails        string            `json:"lifecycleDetails,omitempty"`
+	// A user-friendly display name for the configuration. Avoid entering confidential information.
+	// +kubebuilder:validation:Required
+	DisplayName string `json:"displayName"`
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment that contains the configuration.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// The name of the shape for the configuration.
+	// Example: `VM.Standard.E4.Flex`
+	// +kubebuilder:validation:Required
+	Shape string `json:"shape"`
+	// Version of the PostgreSQL database.
+	// +kubebuilder:validation:Required
+	DbVersion string `json:"dbVersion"`
+	// CPU core count.
+	// +kubebuilder:validation:Required
+	InstanceOcpuCount int `json:"instanceOcpuCount"`
+	// Memory size in gigabytes with 1GB increment.
+	// +kubebuilder:validation:Required
+	InstanceMemorySizeInGBs int `json:"instanceMemorySizeInGBs"`
+	// +kubebuilder:validation:Required
+	DbConfigurationOverrides ConfigurationDbConfigurationOverrides `json:"dbConfigurationOverrides"`
+	// Details about the configuration set.
+	// +kubebuilder:validation:Optional
+	Description string `json:"description,omitempty"`
+	// Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+	// Example: `{"bar-key": "value"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// Example: `{"foo-namespace": {"bar-key": "value"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// System tags for this resource. Each key is predefined and scoped to a namespace.
+	// Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+	// +kubebuilder:validation:Optional
+	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`
+}
+
+// ConfigurationDbConfigurationOverridesItem defines nested fields for Configuration.DbConfigurationOverrides.Item.
+type ConfigurationDbConfigurationOverridesItem struct {
+	// Configuration variable name.
+	// +kubebuilder:validation:Required
+	ConfigKey string `json:"configKey"`
+	// User-selected variable value.
+	// +kubebuilder:validation:Required
+	OverridenConfigValue string `json:"overridenConfigValue"`
+}
+
+// ConfigurationDbConfigurationOverrides defines nested fields for Configuration.DbConfigurationOverrides.
+type ConfigurationDbConfigurationOverrides struct {
+	// List of configuration overridden values.
+	// +kubebuilder:validation:Required
+	Items []ConfigurationDbConfigurationOverridesItem `json:"items"`
+}
+
+// ConfigurationDetailsItem defines nested fields for Configuration.ConfigurationDetails.Item.
+type ConfigurationDetailsItem struct {
+	// The configuration variable name.
+	ConfigKey string `json:"configKey,omitempty"`
+	// Default value for the configuration variable.
+	DefaultConfigValue string `json:"defaultConfigValue,omitempty"`
+	// Range or list of allowed values.
+	AllowedValues string `json:"allowedValues,omitempty"`
+	// If true, modifying this configuration value will require a restart of the database.
+	IsRestartRequired bool `json:"isRestartRequired,omitempty"`
+	// Data type of the variable.
+	DataType string `json:"dataType,omitempty"`
+	// Whether the value can be overridden or not.
+	IsOverridable bool `json:"isOverridable,omitempty"`
+	// Details about the PostgreSQL parameter.
+	Description string `json:"description,omitempty"`
+	// User-selected configuration variable value.
+	OverridenConfigValue string `json:"overridenConfigValue,omitempty"`
+}
+
+// ConfigurationDetails defines nested fields for Configuration.ConfigurationDetails.
+type ConfigurationDetails struct {
+	// List of ConfigParms object.
+	Items []ConfigurationDetailsItem `json:"items,omitempty"`
 }
 
 // ConfigurationStatus defines the observed state of Configuration.
 type ConfigurationStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// A unique identifier for the configuration. Immutable on creation.
+	Id string `json:"id,omitempty"`
+	// The date and time that the configuration was created, expressed in
+	// RFC 3339 (https://tools.ietf.org/rfc/rfc3339) timestamp format.
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The current state of the configuration.
+	LifecycleState       string               `json:"lifecycleState,omitempty"`
+	ConfigurationDetails ConfigurationDetails `json:"configurationDetails,omitempty"`
+	// A message describing the current state in more detail. For example, can be used to provide actionable information for a resource in Failed state.
+	LifecycleDetails string `json:"lifecycleDetails,omitempty"`
 }
 
 // +kubebuilder:object:root=true

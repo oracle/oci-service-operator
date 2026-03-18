@@ -53,24 +53,14 @@ spec:
           spec:
             description: ClusterMigrateToNativeVcnStatusSpec defines the desired state
               of ClusterMigrateToNativeVcnStatus.
-            properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
-              state:
-                type: string
-              timeDecommissionScheduled:
-                type: string
             type: object
           status:
             description: ClusterMigrateToNativeVcnStatusObservedState defines the
               observed state of ClusterMigrateToNativeVcnStatus.
             properties:
+              state:
+                description: The current migration status of the cluster.
+                type: string
               status:
                 properties:
                   conditions:
@@ -113,6 +103,9 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              timeDecommissionScheduled:
+                description: The date and time the non-native VCN is due to be decommissioned.
+                type: string
             required:
             - status
             type: object

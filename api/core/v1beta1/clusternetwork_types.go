@@ -14,20 +14,164 @@ import (
 
 // ClusterNetworkSpec defines the desired state of ClusterNetwork.
 type ClusterNetworkSpec struct {
-	Id              shared.OCID       `json:"id,omitempty"`
-	CompartmentId   shared.OCID       `json:"compartmentId,omitempty"`
-	DisplayName     string            `json:"displayName,omitempty"`
-	FreeformTags    map[string]string `json:"freeformTags,omitempty"`
-	LifecycleState  string            `json:"lifecycleState,omitempty"`
-	TimeCreated     string            `json:"timeCreated,omitempty"`
-	TimeUpdated     string            `json:"timeUpdated,omitempty"`
-	HpcIslandId     string            `json:"hpcIslandId,omitempty"`
-	NetworkBlockIds []string          `json:"networkBlockIds,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment
+	// containing the cluster network.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// The data to create the instance pools in the cluster network.
+	// Each cluster network can have one instance pool.
+	// +kubebuilder:validation:Required
+	InstancePools []ClusterNetworkInstancePool `json:"instancePools"`
+	// +kubebuilder:validation:Required
+	PlacementConfiguration ClusterNetworkPlacementConfiguration `json:"placementConfiguration"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// +kubebuilder:validation:Optional
+	ClusterConfiguration ClusterNetworkClusterConfiguration `json:"clusterConfiguration,omitempty"`
+}
+
+// ClusterNetworkInstancePool defines nested fields for ClusterNetwork.InstancePool.
+type ClusterNetworkInstancePool struct {
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the instance configuration
+	// associated with the instance pool.
+	// +kubebuilder:validation:Required
+	InstanceConfigurationId string `json:"instanceConfigurationId"`
+	// The number of instances that should be in the instance pool.
+	// +kubebuilder:validation:Required
+	Size int `json:"size"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+}
+
+// ClusterNetworkPlacementConfigurationPrimaryVnicSubnetsIpv6AddressIpv6SubnetCidrPairDetail defines nested fields for ClusterNetwork.PlacementConfiguration.PrimaryVnicSubnets.Ipv6AddressIpv6SubnetCidrPairDetail.
+type ClusterNetworkPlacementConfigurationPrimaryVnicSubnetsIpv6AddressIpv6SubnetCidrPairDetail struct {
+	// Optional. Used to disambiguate which subnet prefix should be used to create an IPv6 allocation.
+	// +kubebuilder:validation:Optional
+	Ipv6SubnetCidr string `json:"ipv6SubnetCidr,omitempty"`
+}
+
+// ClusterNetworkPlacementConfigurationPrimaryVnicSubnets defines nested fields for ClusterNetwork.PlacementConfiguration.PrimaryVnicSubnets.
+type ClusterNetworkPlacementConfigurationPrimaryVnicSubnets struct {
+	// The subnet OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) for the secondary VNIC.
+	// +kubebuilder:validation:Required
+	SubnetId string `json:"subnetId"`
+	// Whether to allocate an IPv6 address at instance and VNIC creation from an IPv6 enabled
+	// subnet. Default: False. When provided you may optionally provide an IPv6 prefix
+	// (`ipv6SubnetCidr`) of your choice to assign the IPv6 address from. If `ipv6SubnetCidr`
+	// is not provided then an IPv6 prefix is chosen
+	// for you.
+	// +kubebuilder:validation:Optional
+	IsAssignIpv6Ip bool `json:"isAssignIpv6Ip,omitempty"`
+	// A list of IPv6 prefix ranges from which the VNIC should be assigned an IPv6 address.
+	// You can provide only the prefix ranges and OCI will select an available
+	// address from the range. You can optionally choose to leave the prefix range empty
+	// and instead provide the specific IPv6 address that should be used from within that range.
+	// +kubebuilder:validation:Optional
+	Ipv6AddressIpv6SubnetCidrPairDetails []ClusterNetworkPlacementConfigurationPrimaryVnicSubnetsIpv6AddressIpv6SubnetCidrPairDetail `json:"ipv6AddressIpv6SubnetCidrPairDetails,omitempty"`
+}
+
+// ClusterNetworkPlacementConfigurationSecondaryVnicSubnetIpv6AddressIpv6SubnetCidrPairDetail defines nested fields for ClusterNetwork.PlacementConfiguration.SecondaryVnicSubnet.Ipv6AddressIpv6SubnetCidrPairDetail.
+type ClusterNetworkPlacementConfigurationSecondaryVnicSubnetIpv6AddressIpv6SubnetCidrPairDetail struct {
+	// Optional. Used to disambiguate which subnet prefix should be used to create an IPv6 allocation.
+	// +kubebuilder:validation:Optional
+	Ipv6SubnetCidr string `json:"ipv6SubnetCidr,omitempty"`
+}
+
+// ClusterNetworkPlacementConfigurationSecondaryVnicSubnet defines nested fields for ClusterNetwork.PlacementConfiguration.SecondaryVnicSubnet.
+type ClusterNetworkPlacementConfigurationSecondaryVnicSubnet struct {
+	// The subnet OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) for the secondary VNIC.
+	// +kubebuilder:validation:Required
+	SubnetId string `json:"subnetId"`
+	// Whether to allocate an IPv6 address at instance and VNIC creation from an IPv6 enabled
+	// subnet. Default: False. When provided you may optionally provide an IPv6 prefix
+	// (`ipv6SubnetCidr`) of your choice to assign the IPv6 address from. If `ipv6SubnetCidr`
+	// is not provided then an IPv6 prefix is chosen
+	// for you.
+	// +kubebuilder:validation:Optional
+	IsAssignIpv6Ip bool `json:"isAssignIpv6Ip,omitempty"`
+	// A list of IPv6 prefix ranges from which the VNIC should be assigned an IPv6 address.
+	// You can provide only the prefix ranges and OCI will select an available
+	// address from the range. You can optionally choose to leave the prefix range empty
+	// and instead provide the specific IPv6 address that should be used from within that range.
+	// +kubebuilder:validation:Optional
+	Ipv6AddressIpv6SubnetCidrPairDetails []ClusterNetworkPlacementConfigurationSecondaryVnicSubnetIpv6AddressIpv6SubnetCidrPairDetail `json:"ipv6AddressIpv6SubnetCidrPairDetails,omitempty"`
+	// The display name of the VNIC. This is also used to match against the instance configuration defined
+	// secondary VNIC.
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
+}
+
+// ClusterNetworkPlacementConfiguration defines nested fields for ClusterNetwork.PlacementConfiguration.
+type ClusterNetworkPlacementConfiguration struct {
+	// The availability domain to place instances.
+	// Example: `Uocm:PHX-AD-1`
+	// +kubebuilder:validation:Required
+	AvailabilityDomain string `json:"availabilityDomain"`
+	// The placement constraint when reserving hosts.
+	// +kubebuilder:validation:Optional
+	PlacementConstraint string `json:"placementConstraint,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the primary subnet to place instances. This field is deprecated.
+	// Use `primaryVnicSubnets` instead to set VNIC data for instances in the pool.
+	// +kubebuilder:validation:Optional
+	PrimarySubnetId string `json:"primarySubnetId,omitempty"`
+	// +kubebuilder:validation:Optional
+	PrimaryVnicSubnets ClusterNetworkPlacementConfigurationPrimaryVnicSubnets `json:"primaryVnicSubnets,omitempty"`
+	// The set of secondary VNIC data for instances in the pool.
+	// +kubebuilder:validation:Optional
+	SecondaryVnicSubnets []ClusterNetworkPlacementConfigurationSecondaryVnicSubnet `json:"secondaryVnicSubnets,omitempty"`
+}
+
+// ClusterNetworkClusterConfiguration defines nested fields for ClusterNetwork.ClusterConfiguration.
+type ClusterNetworkClusterConfiguration struct {
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the HPC island.
+	// +kubebuilder:validation:Required
+	HpcIslandId string `json:"hpcIslandId"`
+	// The list of network block OCIDs.
+	// +kubebuilder:validation:Optional
+	NetworkBlockIds []string `json:"networkBlockIds,omitempty"`
 }
 
 // ClusterNetworkStatus defines the observed state of ClusterNetwork.
 type ClusterNetworkStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the cluster network.
+	Id string `json:"id,omitempty"`
+	// The current state of the cluster network.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The date and time the resource was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The date and time the resource was updated, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeUpdated string `json:"timeUpdated,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the HPC island used by the cluster network.
+	HpcIslandId string `json:"hpcIslandId,omitempty"`
+	// The list of network block OCIDs of the HPC island.
+	NetworkBlockIds []string `json:"networkBlockIds,omitempty"`
 }
 
 // +kubebuilder:object:root=true

@@ -14,23 +14,52 @@ import (
 
 // RemotePeeringConnectionSpec defines the desired state of RemotePeeringConnection.
 type RemotePeeringConnectionSpec struct {
-	Id                    shared.OCID       `json:"id,omitempty"`
-	CompartmentId         shared.OCID       `json:"compartmentId,omitempty"`
-	DrgId                 string            `json:"drgId,omitempty"`
-	DisplayName           string            `json:"displayName,omitempty"`
-	FreeformTags          map[string]string `json:"freeformTags,omitempty"`
-	IsCrossTenancyPeering bool              `json:"isCrossTenancyPeering,omitempty"`
-	LifecycleState        string            `json:"lifecycleState,omitempty"`
-	PeeringStatus         string            `json:"peeringStatus,omitempty"`
-	TimeCreated           string            `json:"timeCreated,omitempty"`
-	PeerId                string            `json:"peerId,omitempty"`
-	PeerRegionName        string            `json:"peerRegionName,omitempty"`
-	PeerTenancyId         string            `json:"peerTenancyId,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment to contain the RPC.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the DRG the RPC belongs to.
+	// +kubebuilder:validation:Required
+	DrgId string `json:"drgId"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 }
 
 // RemotePeeringConnectionStatus defines the observed state of RemotePeeringConnection.
 type RemotePeeringConnectionStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the RPC.
+	Id string `json:"id,omitempty"`
+	// Whether the VCN at the other end of the peering is in a different tenancy.
+	// Example: `false`
+	IsCrossTenancyPeering bool `json:"isCrossTenancyPeering,omitempty"`
+	// The RPC's current lifecycle state.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// Whether the RPC is peered with another RPC. `NEW` means the RPC has not yet been
+	// peered. `PENDING` means the peering is being established. `REVOKED` means the
+	// RPC at the other end of the peering has been deleted.
+	PeeringStatus string `json:"peeringStatus,omitempty"`
+	// The date and time the RPC was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// If this RPC is peered, this value is the OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the other RPC.
+	PeerId string `json:"peerId,omitempty"`
+	// If this RPC is peered, this value is the region that contains the other RPC.
+	// Example: `us-ashburn-1`
+	PeerRegionName string `json:"peerRegionName,omitempty"`
+	// If this RPC is peered, this value is the OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the other RPC's tenancy.
+	PeerTenancyId string `json:"peerTenancyId,omitempty"`
 }
 
 // +kubebuilder:object:root=true

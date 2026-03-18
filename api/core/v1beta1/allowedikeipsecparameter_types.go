@@ -14,13 +14,55 @@ import (
 
 // AllowedIkeIPSecParameterSpec defines the desired state of AllowedIkeIPSecParameter.
 type AllowedIkeIPSecParameterSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
+}
+
+// AllowedIkeIPSecParameterAllowedPhaseOneParameters defines nested fields for AllowedIkeIPSecParameter.AllowedPhaseOneParameters.
+type AllowedIkeIPSecParameterAllowedPhaseOneParameters struct {
+	// Allowed phase one encryption algorithms.
+	EncryptionAlgorithms []string `json:"encryptionAlgorithms,omitempty"`
+	// Allowed phase one authentication algorithms.
+	AuthenticationAlgorithms []string `json:"authenticationAlgorithms,omitempty"`
+	// Allowed phase one Diffie-Hellman groups.
+	DhGroups []string `json:"dhGroups,omitempty"`
+}
+
+// AllowedIkeIPSecParameterAllowedPhaseTwoParameters defines nested fields for AllowedIkeIPSecParameter.AllowedPhaseTwoParameters.
+type AllowedIkeIPSecParameterAllowedPhaseTwoParameters struct {
+	// Allowed phase two encryption algorithms.
+	EncryptionAlgorithms []string `json:"encryptionAlgorithms,omitempty"`
+	// Allowed phase two authentication algorithms.
+	AuthenticationAlgorithms []string `json:"authenticationAlgorithms,omitempty"`
+	// Allowed perfect forward secrecy Diffie-Hellman groups.
+	PfsDhGroups []string `json:"pfsDhGroups,omitempty"`
+}
+
+// AllowedIkeIPSecParameterDefaultPhaseOneParameters defines nested fields for AllowedIkeIPSecParameter.DefaultPhaseOneParameters.
+type AllowedIkeIPSecParameterDefaultPhaseOneParameters struct {
+	// Default phase one encryption algorithms.
+	DefaultEncryptionAlgorithms []string `json:"defaultEncryptionAlgorithms,omitempty"`
+	// Default phase one authentication algorithms.
+	DefaultAuthenticationAlgorithms []string `json:"defaultAuthenticationAlgorithms,omitempty"`
+	// Default phase one Diffie-Hellman groups.
+	DefaultDhGroups []string `json:"defaultDhGroups,omitempty"`
+}
+
+// AllowedIkeIPSecParameterDefaultPhaseTwoParameters defines nested fields for AllowedIkeIPSecParameter.DefaultPhaseTwoParameters.
+type AllowedIkeIPSecParameterDefaultPhaseTwoParameters struct {
+	// Default phase two encryption algorithms.
+	DefaultEncryptionAlgorithms []string `json:"defaultEncryptionAlgorithms,omitempty"`
+	// Default phase two authentication algorithms.
+	DefaultAuthenticationAlgorithms []string `json:"defaultAuthenticationAlgorithms,omitempty"`
+	// Default perfect forward secrecy Diffie-Hellman groups.
+	DefaultPfsDhGroup string `json:"defaultPfsDhGroup,omitempty"`
 }
 
 // AllowedIkeIPSecParameterStatus defines the observed state of AllowedIkeIPSecParameter.
 type AllowedIkeIPSecParameterStatus struct {
-	OsokStatus shared.OSOKStatus `json:"status"`
+	OsokStatus                shared.OSOKStatus                                 `json:"status"`
+	AllowedPhaseOneParameters AllowedIkeIPSecParameterAllowedPhaseOneParameters `json:"allowedPhaseOneParameters,omitempty"`
+	AllowedPhaseTwoParameters AllowedIkeIPSecParameterAllowedPhaseTwoParameters `json:"allowedPhaseTwoParameters,omitempty"`
+	DefaultPhaseOneParameters AllowedIkeIPSecParameterDefaultPhaseOneParameters `json:"defaultPhaseOneParameters,omitempty"`
+	DefaultPhaseTwoParameters AllowedIkeIPSecParameterDefaultPhaseTwoParameters `json:"defaultPhaseTwoParameters,omitempty"`
 }
 
 // +kubebuilder:object:root=true

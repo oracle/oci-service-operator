@@ -53,14 +53,18 @@ spec:
           spec:
             description: NetworkSecurityGroupSpec defines the desired state of NetworkSecurityGroup.
             properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
+              networkSecurityGroupIds:
+                description: |-
+                  An array of NSG OCIDs (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) associated with the load
+                  balancer.
+                  During the load balancer's creation, the service adds the new load balancer to the specified NSGs.
+                  The benefits of associating the load balancer with NSGs include:
+                  *  NSGs define network security rules to govern ingress and egress traffic for the load balancer.
+                  *  The network security rules of other resources can reference the NSGs associated with the load balancer
+                     to ensure access.
+                items:
+                  type: string
+                type: array
             type: object
           status:
             description: NetworkSecurityGroupStatus defines the observed state of

@@ -51,25 +51,18 @@ spec:
             type: object
           spec:
             description: WorkRequestErrorSpec defines the desired state of WorkRequestError.
-            properties:
-              code:
-                type: string
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
-              message:
-                type: string
-              timestamp:
-                type: string
             type: object
           status:
             description: WorkRequestErrorStatus defines the observed state of WorkRequestError.
             properties:
+              code:
+                description: |-
+                  A machine-usable code for the error that occured. Error codes are listed at
+                  https://docs.cloud.oracle.com/Content/API/References/apierrors.htm.
+                type: string
+              message:
+                description: A human readable description of the issue encountered.
+                type: string
               status:
                 properties:
                   conditions:
@@ -112,6 +105,10 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              timestamp:
+                description: The time the error occured. An RFC3339-formatted date
+                  and time string.
+                type: string
             required:
             - status
             type: object

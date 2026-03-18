@@ -14,29 +14,64 @@ import (
 
 // ContainerImageSignatureSpec defines the desired state of ContainerImageSignature.
 type ContainerImageSignatureSpec struct {
-	Id               shared.OCID       `json:"id,omitempty"`
-	CompartmentId    shared.OCID       `json:"compartmentId,omitempty"`
-	ImageId          string            `json:"imageId,omitempty"`
-	KmsKeyId         string            `json:"kmsKeyId,omitempty"`
-	KmsKeyVersionId  string            `json:"kmsKeyVersionId,omitempty"`
-	Message          string            `json:"message,omitempty"`
-	Signature        string            `json:"signature,omitempty"`
-	SigningAlgorithm string            `json:"signingAlgorithm,omitempty"`
-	FreeformTags     map[string]string `json:"freeformTags,omitempty"`
-	CreatedBy        string            `json:"createdBy,omitempty"`
-	DisplayName      string            `json:"displayName,omitempty"`
-	TimeCreated      string            `json:"timeCreated,omitempty"`
-	LifecycleState   string            `json:"lifecycleState,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment in which the container repository exists.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the container image.
+	// Example: `ocid1.containerimage.oc1..exampleuniqueID`
+	// +kubebuilder:validation:Required
+	ImageId string `json:"imageId"`
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the kmsKeyId used to sign the container image.
+	// Example: `ocid1.key.oc1..exampleuniqueID`
+	// +kubebuilder:validation:Required
+	KmsKeyId string `json:"kmsKeyId"`
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the kmsKeyVersionId used to sign the container image.
+	// Example: `ocid1.keyversion.oc1..exampleuniqueID`
+	// +kubebuilder:validation:Required
+	KmsKeyVersionId string `json:"kmsKeyVersionId"`
+	// The base64 encoded signature payload that was signed.
+	// +kubebuilder:validation:Required
+	Message string `json:"message"`
+	// The signature of the message field using the kmsKeyId, the kmsKeyVersionId, and the signingAlgorithm.
+	// +kubebuilder:validation:Required
+	Signature string `json:"signature"`
+	// The algorithm to be used for signing. These are the only supported signing algorithms for container images.
+	// +kubebuilder:validation:Required
+	SigningAlgorithm string `json:"signingAlgorithm"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 }
 
 // ContainerImageSignatureStatus defines the observed state of ContainerImageSignature.
 type ContainerImageSignatureStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The id of the user or principal that created the resource.
+	CreatedBy string `json:"createdBy,omitempty"`
+	// The last 10 characters of the kmsKeyId, the last 10 characters of the kmsKeyVersionId, the signingAlgorithm, and the last 10 characters of the signatureId.
+	// Example: `wrmz22sixa::qdwyc2ptun::SHA_256_RSA_PKCS_PSS::2vwmobasva`
+	DisplayName string `json:"displayName,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the container image signature.
+	// Example: `ocid1.containerimagesignature.oc1..exampleuniqueID`
+	Id string `json:"id,omitempty"`
+	// An RFC 3339 timestamp indicating when the image was created.
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The current state of the container image signature.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The system tags for this resource. Each key is predefined and scoped to a namespace.
+	// Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="DisplayName",type="string",JSONPath=".spec.displayName",priority=1
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.status.conditions[-1].type",description="status of the ContainerImageSignature",priority=0
 // +kubebuilder:printcolumn:name="Ocid",type="string",JSONPath=".status.status.ocid",description="Ocid of the ContainerImageSignature",priority=1
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0

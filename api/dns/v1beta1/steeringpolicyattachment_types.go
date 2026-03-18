@@ -14,21 +14,40 @@ import (
 
 // SteeringPolicyAttachmentSpec defines the desired state of SteeringPolicyAttachment.
 type SteeringPolicyAttachmentSpec struct {
-	Id               shared.OCID `json:"id,omitempty"`
-	CompartmentId    shared.OCID `json:"compartmentId,omitempty"`
-	SteeringPolicyId string      `json:"steeringPolicyId,omitempty"`
-	ZoneId           string      `json:"zoneId,omitempty"`
-	DomainName       string      `json:"domainName,omitempty"`
-	DisplayName      string      `json:"displayName,omitempty"`
-	Rtypes           []string    `json:"rtypes,omitempty"`
-	Self             string      `json:"self,omitempty"`
-	TimeCreated      string      `json:"timeCreated,omitempty"`
-	LifecycleState   string      `json:"lifecycleState,omitempty"`
+	// The OCID of the attached steering policy.
+	// +kubebuilder:validation:Required
+	SteeringPolicyId string `json:"steeringPolicyId"`
+	// The OCID of the attached zone.
+	// +kubebuilder:validation:Required
+	ZoneId string `json:"zoneId"`
+	// The attached domain within the attached zone.
+	// +kubebuilder:validation:Required
+	DomainName string `json:"domainName"`
+	// A user-friendly name for the steering policy attachment.
+	// Does not have to be unique and can be changed.
+	// Avoid entering confidential information.
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
 }
 
 // SteeringPolicyAttachmentStatus defines the observed state of SteeringPolicyAttachment.
 type SteeringPolicyAttachmentStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The record types covered by the attachment at the domain. The set of record types is
+	// determined by aggregating the record types from the answers defined in the steering
+	// policy.
+	Rtypes []string `json:"rtypes,omitempty"`
+	// The OCID of the compartment containing the steering policy attachment.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The canonical absolute URL of the resource.
+	Self string `json:"self,omitempty"`
+	// The OCID of the resource.
+	Id string `json:"id,omitempty"`
+	// The date and time the resource was created, expressed in RFC 3339 timestamp format.
+	// **Example:** `2016-07-22T17:23:59:60Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The current state of the resource.
+	LifecycleState string `json:"lifecycleState,omitempty"`
 }
 
 // +kubebuilder:object:root=true

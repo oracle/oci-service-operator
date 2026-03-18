@@ -14,13 +14,56 @@ import (
 
 // CertificateBundleSpec defines the desired state of CertificateBundle.
 type CertificateBundleSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
+}
+
+// CertificateBundleRevocationStatus defines nested fields for CertificateBundle.RevocationStatus.
+type CertificateBundleRevocationStatus struct {
+	// The time when the certificate or CA was revoked.
+	TimeRevoked string `json:"timeRevoked,omitempty"`
+	// The reason that the certificate or CA was revoked.
+	RevocationReason string `json:"revocationReason,omitempty"`
+}
+
+// CertificateBundleValidity defines nested fields for CertificateBundle.Validity.
+type CertificateBundleValidity struct {
+	// The date on which the certificate validity period begins, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2019-04-03T21:10:29.600Z`
+	TimeOfValidityNotBefore string `json:"timeOfValidityNotBefore,omitempty"`
+	// The date on which the certificate validity period ends, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2019-04-03T21:10:29.600Z`
+	TimeOfValidityNotAfter string `json:"timeOfValidityNotAfter,omitempty"`
 }
 
 // CertificateBundleStatus defines the observed state of CertificateBundle.
 type CertificateBundleStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The certificate in PEM format.
+	CertificatePem string `json:"certificatePem,omitempty"`
+	// The certificate chain (in PEM format) for the certificate bundle.
+	CertChainPem string `json:"certChainPem,omitempty"`
+	// The name of the certificate version.
+	VersionName      string                            `json:"versionName,omitempty"`
+	RevocationStatus CertificateBundleRevocationStatus `json:"revocationStatus,omitempty"`
+	// The OCID of the certificate.
+	CertificateId string `json:"certificateId,omitempty"`
+	// The name of the certificate.
+	CertificateName string `json:"certificateName,omitempty"`
+	// The version number of the certificate.
+	VersionNumber int64 `json:"versionNumber,omitempty"`
+	// A unique certificate identifier used in certificate revocation tracking, formatted as octets.
+	// Example: `03 AC FC FA CC B3 CB 02 B8 F8 DE F5 85 E7 7B FF`
+	SerialNumber string `json:"serialNumber,omitempty"`
+	// An optional property indicating when the certificate version was created, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2019-04-03T21:10:29.600Z`
+	TimeCreated string                    `json:"timeCreated,omitempty"`
+	Validity    CertificateBundleValidity `json:"validity,omitempty"`
+	// A list of rotation states for the certificate bundle.
+	Stages                []string `json:"stages,omitempty"`
+	CertificateBundleType string   `json:"certificateBundleType,omitempty"`
+	// The private key (in PEM format) for the certificate.
+	PrivateKeyPem string `json:"privateKeyPem,omitempty"`
+	// An optional passphrase for the private key.
+	PrivateKeyPemPassphrase string `json:"privateKeyPemPassphrase,omitempty"`
 }
 
 // +kubebuilder:object:root=true

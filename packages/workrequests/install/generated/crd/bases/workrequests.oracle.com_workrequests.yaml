@@ -51,31 +51,50 @@ spec:
             type: object
           spec:
             description: WorkRequestSpec defines the desired state of WorkRequest.
-            properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
-              operationType:
-                type: string
-              percentComplete:
-                type: number
-              status:
-                type: string
-              timeAccepted:
-                type: string
-              timeFinished:
-                type: string
-              timeStarted:
-                type: string
             type: object
           status:
             description: WorkRequestStatus defines the observed state of WorkRequest.
             properties:
+              compartmentId:
+                description: |-
+                  The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment
+                  that contains the work request.
+                type: string
+              id:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the work request.
+                type: string
+              operationType:
+                description: The asynchronous operation tracked by this work request.
+                type: string
+              percentComplete:
+                description: The percentage complete of the operation tracked by this
+                  work request.
+                type: number
+              resources:
+                description: The resources that are affected by this work request.
+                items:
+                  description: WorkRequestResource defines nested fields for WorkRequest.Resource.
+                  properties:
+                    actionType:
+                      description: |-
+                        The way in which this resource was affected by the operation that spawned the work
+                        request.
+                      type: string
+                    entityType:
+                      description: The resource type the work request affects.
+                      type: string
+                    entityUri:
+                      description: The URI path that you can use for a GET request
+                        to access the resource metadata.
+                      type: string
+                    identifier:
+                      description: |-
+                        An OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) or other unique identifier for the
+                        resource.
+                      type: string
+                  type: object
+                type: array
               status:
                 properties:
                   conditions:
@@ -118,6 +137,20 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              timeAccepted:
+                description: The date and time the work request was created, in the
+                  format defined by RFC3339.
+                type: string
+              timeFinished:
+                description: |-
+                  The date and time the work request reached a terminal state, either `FAILED` or `SUCCEEDED`.
+                  Format is defined by RFC3339.
+                type: string
+              timeStarted:
+                description: |-
+                  The date and time the work request transitioned from `ACCEPTED` to `IN_PROGRESS`,
+                  in the format defined by RFC3339.
+                type: string
             required:
             - status
             type: object

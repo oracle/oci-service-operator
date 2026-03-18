@@ -14,14 +14,22 @@ import (
 
 // BackendHealthSpec defines the desired state of BackendHealth.
 type BackendHealthSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
-	Status        string      `json:"status,omitempty"`
+}
+
+// BackendHealthHealthCheckResult defines nested fields for BackendHealth.HealthCheckResult.
+type BackendHealthHealthCheckResult struct {
+	// The date and time the data was retrieved, in the format defined by RFC3339.
+	// Example: `2020-05-01T18:28:11+00:00`
+	Timestamp string `json:"timestamp,omitempty"`
+	// The result of the most recent health check.
+	HealthCheckStatus string `json:"healthCheckStatus,omitempty"`
 }
 
 // BackendHealthStatus defines the observed state of BackendHealth.
 type BackendHealthStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// A list of the most recent health check results returned for the specified backend server.
+	HealthCheckResults []BackendHealthHealthCheckResult `json:"healthCheckResults,omitempty"`
 }
 
 // +kubebuilder:object:root=true

@@ -14,25 +14,62 @@ import (
 
 // MultipartUploadSpec defines the desired state of MultipartUpload.
 type MultipartUploadSpec struct {
-	Id                 shared.OCID       `json:"id,omitempty"`
-	CompartmentId      shared.OCID       `json:"compartmentId,omitempty"`
-	Object             string            `json:"object,omitempty"`
-	ContentType        string            `json:"contentType,omitempty"`
-	ContentLanguage    string            `json:"contentLanguage,omitempty"`
-	ContentEncoding    string            `json:"contentEncoding,omitempty"`
-	ContentDisposition string            `json:"contentDisposition,omitempty"`
-	CacheControl       string            `json:"cacheControl,omitempty"`
-	StorageTier        string            `json:"storageTier,omitempty"`
-	Metadata           map[string]string `json:"metadata,omitempty"`
-	Namespace          string            `json:"namespace,omitempty"`
-	Bucket             string            `json:"bucket,omitempty"`
-	UploadId           string            `json:"uploadId,omitempty"`
-	TimeCreated        string            `json:"timeCreated,omitempty"`
+	// The name of the object to which this multi-part upload is targeted. Avoid entering confidential information.
+	// Example: test/object1.log
+	// +kubebuilder:validation:Required
+	Object string `json:"object"`
+	// The optional Content-Type header that defines the standard MIME type format of the object to upload.
+	// Specifying values for this header has no effect on Object Storage behavior. Programs that read the object
+	// determine what to do based on the value provided. For example, you could use this header to identify and
+	// perform special operations on text only objects.
+	// +kubebuilder:validation:Optional
+	ContentType string `json:"contentType,omitempty"`
+	// The optional Content-Language header that defines the content language of the object to upload. Specifying
+	// values for this header has no effect on Object Storage behavior. Programs that read the object determine what
+	// to do based on the value provided. For example, you could use this header to identify and differentiate objects
+	// based on a particular language.
+	// +kubebuilder:validation:Optional
+	ContentLanguage string `json:"contentLanguage,omitempty"`
+	// The optional Content-Encoding header that defines the content encodings that were applied to the object to
+	// upload. Specifying values for this header has no effect on Object Storage behavior. Programs that read the
+	// object determine what to do based on the value provided. For example, you could use this header to determine
+	// what decoding mechanisms need to be applied to obtain the media-type specified by the Content-Type header of
+	// the object.
+	// +kubebuilder:validation:Optional
+	ContentEncoding string `json:"contentEncoding,omitempty"`
+	// The optional Content-Disposition header that defines presentational information for the object to be
+	// returned in GetObject and HeadObject responses. Specifying values for this header has no effect on Object
+	// Storage behavior. Programs that read the object determine what to do based on the value provided.
+	// For example, you could use this header to let users download objects with custom filenames in a browser.
+	// +kubebuilder:validation:Optional
+	ContentDisposition string `json:"contentDisposition,omitempty"`
+	// The optional Cache-Control header that defines the caching behavior value to be returned in GetObject and
+	// HeadObject responses. Specifying values for this header has no effect on Object Storage behavior. Programs
+	// that read the object determine what to do based on the value provided.
+	// For example, you could use this header to identify objects that require caching restrictions.
+	// +kubebuilder:validation:Optional
+	CacheControl string `json:"cacheControl,omitempty"`
+	// The storage tier that the object should be stored in. If not specified, the object will be stored in
+	// the same storage tier as the bucket.
+	// +kubebuilder:validation:Optional
+	StorageTier string `json:"storageTier,omitempty"`
+	// Arbitrary string keys and values for the user-defined metadata for the object.
+	// Keys must be in "opc-meta-*" format. Avoid entering confidential information.
+	// +kubebuilder:validation:Optional
+	Metadata map[string]string `json:"metadata,omitempty"`
 }
 
 // MultipartUploadStatus defines the observed state of MultipartUpload.
 type MultipartUploadStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The Object Storage namespace in which the in-progress multipart upload is stored.
+	Namespace string `json:"namespace,omitempty"`
+	// The bucket in which the in-progress multipart upload is stored.
+	Bucket string `json:"bucket,omitempty"`
+	// The unique identifier for the in-progress multipart upload.
+	UploadId string `json:"uploadId,omitempty"`
+	// The date and time the upload was created, as described in RFC 2616 (https://tools.ietf.org/html/rfc2616#section-14.29).
+	TimeCreated string `json:"timeCreated,omitempty"`
 }
 
 // +kubebuilder:object:root=true

@@ -14,16 +14,20 @@ import (
 
 // NetworkSecurityGroupVnicSpec defines the desired state of NetworkSecurityGroupVnic.
 type NetworkSecurityGroupVnicSpec struct {
-	Id             shared.OCID `json:"id,omitempty"`
-	CompartmentId  shared.OCID `json:"compartmentId,omitempty"`
-	VnicId         string      `json:"vnicId,omitempty"`
-	ResourceId     string      `json:"resourceId,omitempty"`
-	TimeAssociated string      `json:"timeAssociated,omitempty"`
 }
 
 // NetworkSecurityGroupVnicStatus defines the observed state of NetworkSecurityGroupVnic.
 type NetworkSecurityGroupVnicStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VNIC.
+	VnicId string `json:"vnicId,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the parent resource that the VNIC
+	// is attached to (for example, a Compute instance).
+	ResourceId string `json:"resourceId,omitempty"`
+	// The date and time the VNIC was added to the network security group, in the format
+	// defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeAssociated string `json:"timeAssociated,omitempty"`
 }
 
 // +kubebuilder:object:root=true

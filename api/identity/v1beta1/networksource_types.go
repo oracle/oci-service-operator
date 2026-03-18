@@ -14,18 +14,59 @@ import (
 
 // NetworkSourceSpec defines the desired state of NetworkSource.
 type NetworkSourceSpec struct {
-	Id               shared.OCID       `json:"id,omitempty"`
-	CompartmentId    shared.OCID       `json:"compartmentId,omitempty"`
-	Name             string            `json:"name,omitempty"`
-	Description      string            `json:"description,omitempty"`
-	PublicSourceList []string          `json:"publicSourceList,omitempty"`
-	Services         []string          `json:"services,omitempty"`
-	FreeformTags     map[string]string `json:"freeformTags,omitempty"`
+	// The OCID of the tenancy (root compartment) containing the network source object.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// The name you assign to the network source during creation. The name must be unique across all groups
+	// in the tenancy and cannot be changed.
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+	// The description you assign to the network source during creation. Does not have to be unique, and it's changeable.
+	// +kubebuilder:validation:Required
+	Description string `json:"description"`
+	// A list of allowed public IP addresses and CIDR ranges.
+	// +kubebuilder:validation:Optional
+	PublicSourceList []string `json:"publicSourceList,omitempty"`
+	// A list of allowed VCN OCID and IP range pairs.
+	// Example:`"vcnId": "ocid1.vcn.oc1.iad.aaaaaaaaexampleuniqueID", "ipRanges": [ "129.213.39.0/24" ]`
+	// +kubebuilder:validation:Optional
+	VirtualSourceList []NetworkSourceVirtualSourceList `json:"virtualSourceList,omitempty"`
+	// -- The services attribute has no effect and is reserved for use by Oracle. --
+	// +kubebuilder:validation:Optional
+	Services []string `json:"services,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+}
+
+// NetworkSourceVirtualSourceList defines nested fields for NetworkSource.VirtualSourceList.
+type NetworkSourceVirtualSourceList struct {
+	// +kubebuilder:validation:Optional
+	VcnId string `json:"vcnId,omitempty"`
+	// +kubebuilder:validation:Optional
+	IpRanges []string `json:"ipRanges,omitempty"`
 }
 
 // NetworkSourceStatus defines the observed state of NetworkSource.
 type NetworkSourceStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the network source.
+	Id string `json:"id,omitempty"`
+	// Date and time the network source was created, in the format defined by RFC3339.
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The network source object's current state. After creating a network source, make sure its `lifecycleState` changes from CREATING to
+	// ACTIVE before using it.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The detailed status of INACTIVE lifecycleState.
+	InactiveStatus int64 `json:"inactiveStatus,omitempty"`
 }
 
 // +kubebuilder:object:root=true

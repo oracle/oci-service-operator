@@ -15,10 +15,6 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - jsonPath: .spec.displayName
-      name: DisplayName
-      priority: 1
-      type: string
     - description: status of the VirtualNode
       jsonPath: .status.status.conditions[-1].type
       name: Status
@@ -55,49 +51,58 @@ spec:
             type: object
           spec:
             description: VirtualNodeSpec defines the desired state of VirtualNode.
-            properties:
-              availabilityDomain:
-                type: string
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              displayName:
-                type: string
-              faultDomain:
-                type: string
-              freeformTags:
-                additionalProperties:
-                  type: string
-                type: object
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
-              kubernetesVersion:
-                type: string
-              lifecycleDetails:
-                type: string
-              lifecycleState:
-                type: string
-              nsgIds:
-                items:
-                  type: string
-                type: array
-              privateIp:
-                type: string
-              subnetId:
-                type: string
-              timeCreated:
-                type: string
-              virtualNodeError:
-                type: string
-              virtualNodePoolId:
-                type: string
             type: object
           status:
             description: VirtualNodeStatus defines the observed state of VirtualNode.
             properties:
+              availabilityDomain:
+                description: The name of the availability domain in which this virtual
+                  node is placed
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              displayName:
+                description: The name of the virtual node.
+                type: string
+              faultDomain:
+                description: The fault domain of this virtual node.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              id:
+                description: The ocid of the virtual node.
+                type: string
+              kubernetesVersion:
+                description: The version of Kubernetes this virtual node is running.
+                type: string
+              lifecycleDetails:
+                description: Details about the state of the Virtual Node.
+                type: string
+              lifecycleState:
+                description: The state of the Virtual Node.
+                type: string
+              nsgIds:
+                description: NSG Ids applied to virtual node vnic.
+                items:
+                  type: string
+                type: array
+              privateIp:
+                description: The private IP address of this Virtual Node.
+                type: string
               status:
                 properties:
                   conditions:
@@ -140,6 +145,29 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              subnetId:
+                description: The OCID of the subnet in which this Virtual Node is
+                  placed.
+                type: string
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of system tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeCreated:
+                description: The time at which the virtual node was created.
+                type: string
+              virtualNodeError:
+                description: An error that may be associated with the virtual node.
+                type: string
+              virtualNodePoolId:
+                description: The ocid of the virtual node pool this virtual node belongs
+                  to.
+                type: string
             required:
             - status
             type: object

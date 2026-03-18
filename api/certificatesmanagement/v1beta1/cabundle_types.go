@@ -14,20 +14,42 @@ import (
 
 // CaBundleSpec defines the desired state of CaBundle.
 type CaBundleSpec struct {
-	Id               shared.OCID       `json:"id,omitempty"`
-	CompartmentId    shared.OCID       `json:"compartmentId,omitempty"`
-	Name             string            `json:"name,omitempty"`
-	CaBundlePem      string            `json:"caBundlePem,omitempty"`
-	Description      string            `json:"description,omitempty"`
-	FreeformTags     map[string]string `json:"freeformTags,omitempty"`
-	TimeCreated      string            `json:"timeCreated,omitempty"`
-	LifecycleState   string            `json:"lifecycleState,omitempty"`
-	LifecycleDetails string            `json:"lifecycleDetails,omitempty"`
+	// A user-friendly name for the CA bundle. Names are unique within a compartment. Avoid entering confidential information. Valid characters include uppercase or lowercase letters, numbers, hyphens, underscores, and periods.
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+	// The OCID of the compartment for the CA bundle.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// Certificates (in PEM format) to include in the CA bundle.
+	// +kubebuilder:validation:Required
+	CaBundlePem string `json:"caBundlePem"`
+	// A brief description of the CA bundle.
+	// +kubebuilder:validation:Optional
+	Description string `json:"description,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 }
 
 // CaBundleStatus defines the observed state of CaBundle.
 type CaBundleStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the CA bundle.
+	Id string `json:"id,omitempty"`
+	// A property indicating when the CA bundle was created, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2019-04-03T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The current lifecycle state of the CA bundle.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// Additional information about the current lifecycle state of the CA bundle.
+	LifecycleDetails string `json:"lifecycleDetails,omitempty"`
 }
 
 // +kubebuilder:object:root=true

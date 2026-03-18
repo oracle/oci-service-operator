@@ -14,13 +14,62 @@ import (
 
 // ClusterOptionSpec defines the desired state of ClusterOption.
 type ClusterOptionSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
+	// Configurable cluster admission controllers
+	// +kubebuilder:validation:Optional
+	AdmissionControllerOptions ClusterOptionAdmissionControllerOptions `json:"admissionControllerOptions,omitempty"`
+	// +kubebuilder:validation:Optional
+	PersistentVolumeConfig ClusterOptionPersistentVolumeConfig `json:"persistentVolumeConfig,omitempty"`
+	// +kubebuilder:validation:Optional
+	ServiceLbConfig ClusterOptionServiceLbConfig `json:"serviceLbConfig,omitempty"`
+}
+
+// ClusterOptionAdmissionControllerOptions defines nested fields for ClusterOption.AdmissionControllerOptions.
+type ClusterOptionAdmissionControllerOptions struct {
+	// Whether or not to enable the Pod Security Policy admission controller.
+	// +kubebuilder:validation:Optional
+	IsPodSecurityPolicyEnabled bool `json:"isPodSecurityPolicyEnabled,omitempty"`
+}
+
+// ClusterOptionPersistentVolumeConfig defines nested fields for ClusterOption.PersistentVolumeConfig.
+type ClusterOptionPersistentVolumeConfig struct {
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+}
+
+// ClusterOptionServiceLbConfig defines nested fields for ClusterOption.ServiceLbConfig.
+type ClusterOptionServiceLbConfig struct {
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+}
+
+// ClusterOptionClusterPodNetworkOption defines nested fields for ClusterOption.ClusterPodNetworkOption.
+type ClusterOptionClusterPodNetworkOption struct {
+	CniType string `json:"cniType,omitempty"`
 }
 
 // ClusterOptionStatus defines the observed state of ClusterOption.
 type ClusterOptionStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// Available Kubernetes versions.
+	KubernetesVersions []string `json:"kubernetesVersions,omitempty"`
+	// Available CNIs and network options for existing and new node pools of the cluster
+	ClusterPodNetworkOptions []ClusterOptionClusterPodNetworkOption `json:"clusterPodNetworkOptions,omitempty"`
 }
 
 // +kubebuilder:object:root=true

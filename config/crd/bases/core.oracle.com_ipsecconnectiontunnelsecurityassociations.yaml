@@ -53,15 +53,6 @@ spec:
           spec:
             description: IPSecConnectionTunnelSecurityAssociationSpec defines the
               desired state of IPSecConnectionTunnelSecurityAssociation.
-            properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
             type: object
           status:
             description: IPSecConnectionTunnelSecurityAssociationStatus defines the

@@ -15,10 +15,6 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - jsonPath: .spec.name
-      name: Name
-      priority: 1
-      type: string
     - description: status of the Metric
       jsonPath: .status.status.conditions[-1].type
       name: Status
@@ -55,29 +51,39 @@ spec:
             type: object
           spec:
             description: MetricSpec defines the desired state of Metric.
-            properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              dimensions:
-                additionalProperties:
-                  type: string
-                type: object
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
-              name:
-                type: string
-              namespace:
-                type: string
-              resourceGroup:
-                type: string
             type: object
           status:
             description: MetricStatus defines the observed state of Metric.
             properties:
+              compartmentId:
+                description: |-
+                  The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing
+                  the resources monitored by the metric.
+                type: string
+              dimensions:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Qualifiers provided in a metric definition. Available dimensions vary by metric namespace.
+                  Each dimension takes the form of a key-value pair.
+                  Example: `{"resourceId": "ocid1.instance.region1.phx.exampleuniqueID"}`
+                type: object
+              name:
+                description: |-
+                  The name of the metric.
+                  Example: `CpuUtilization`
+                type: string
+              namespace:
+                description: |-
+                  The source service or application emitting the metric.
+                  Example: `oci_computeagent`
+                type: string
+              resourceGroup:
+                description: |-
+                  Resource group provided with the posted metric. A resource group is a custom string that you can match when retrieving custom metrics. Only one resource group can be applied per metric.
+                  A valid resourceGroup value starts with an alphabetical character and includes only alphanumeric characters, periods (.), underscores (_), hyphens (-), and dollar signs ($).
+                  Example: `frontend-fleet`
+                type: string
               status:
                 properties:
                   conditions:

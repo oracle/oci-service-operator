@@ -14,21 +14,42 @@ import (
 
 // InstanceConsoleConnectionSpec defines the desired state of InstanceConsoleConnection.
 type InstanceConsoleConnectionSpec struct {
-	Id                        shared.OCID       `json:"id,omitempty"`
-	CompartmentId             shared.OCID       `json:"compartmentId,omitempty"`
-	InstanceId                string            `json:"instanceId,omitempty"`
-	PublicKey                 string            `json:"publicKey,omitempty"`
-	FreeformTags              map[string]string `json:"freeformTags,omitempty"`
-	ConnectionString          string            `json:"connectionString,omitempty"`
-	Fingerprint               string            `json:"fingerprint,omitempty"`
-	LifecycleState            string            `json:"lifecycleState,omitempty"`
-	ServiceHostKeyFingerprint string            `json:"serviceHostKeyFingerprint,omitempty"`
-	VncConnectionString       string            `json:"vncConnectionString,omitempty"`
+	// The OCID of the instance to create the console connection to.
+	// +kubebuilder:validation:Required
+	InstanceId string `json:"instanceId"`
+	// The SSH public key used to authenticate the console connection.
+	// +kubebuilder:validation:Required
+	PublicKey string `json:"publicKey"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 }
 
 // InstanceConsoleConnectionStatus defines the observed state of InstanceConsoleConnection.
 type InstanceConsoleConnectionStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the compartment to contain the console connection.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The SSH connection string for the console connection.
+	ConnectionString string `json:"connectionString,omitempty"`
+	// The SSH public key's fingerprint for client authentication to the console connection.
+	Fingerprint string `json:"fingerprint,omitempty"`
+	// The OCID of the console connection.
+	Id string `json:"id,omitempty"`
+	// The current state of the console connection.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The SSH public key's fingerprint for the console connection service host.
+	ServiceHostKeyFingerprint string `json:"serviceHostKeyFingerprint,omitempty"`
+	// The SSH connection string for the SSH tunnel used to
+	// connect to the console connection over VNC.
+	VncConnectionString string `json:"vncConnectionString,omitempty"`
 }
 
 // +kubebuilder:object:root=true

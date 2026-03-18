@@ -14,31 +14,84 @@ import (
 
 // ContainerImageSpec defines the desired state of ContainerImage.
 type ContainerImageSpec struct {
-	Id                  shared.OCID       `json:"id,omitempty"`
-	CompartmentId       shared.OCID       `json:"compartmentId,omitempty"`
-	FreeformTags        map[string]string `json:"freeformTags,omitempty"`
-	CreatedBy           string            `json:"createdBy,omitempty"`
-	Digest              string            `json:"digest,omitempty"`
-	DisplayName         string            `json:"displayName,omitempty"`
-	LayersSizeInBytes   int64             `json:"layersSizeInBytes,omitempty"`
-	LifecycleState      string            `json:"lifecycleState,omitempty"`
-	ManifestSizeInBytes int               `json:"manifestSizeInBytes,omitempty"`
-	PullCount           int64             `json:"pullCount,omitempty"`
-	RepositoryId        string            `json:"repositoryId,omitempty"`
-	RepositoryName      string            `json:"repositoryName,omitempty"`
-	TimeCreated         string            `json:"timeCreated,omitempty"`
-	TimeLastPulled      string            `json:"timeLastPulled,omitempty"`
-	Version             string            `json:"version,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+}
+
+// ContainerImageLayer defines nested fields for ContainerImage.Layer.
+type ContainerImageLayer struct {
+	// The sha256 digest of the image layer.
+	Digest string `json:"digest,omitempty"`
+	// The size of the layer in bytes.
+	SizeInBytes int64 `json:"sizeInBytes,omitempty"`
+	// An RFC 3339 timestamp indicating when the layer was created.
+	TimeCreated string `json:"timeCreated,omitempty"`
+}
+
+// ContainerImageVersion defines nested fields for ContainerImage.Version.
+type ContainerImageVersion struct {
+	// The OCID of the user or principal that pushed the version.
+	CreatedBy string `json:"createdBy,omitempty"`
+	// The creation time of the version.
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The version name.
+	Version string `json:"version,omitempty"`
 }
 
 // ContainerImageStatus defines the observed state of ContainerImage.
 type ContainerImageStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The compartment OCID to which the container image belongs. Inferred from the container repository.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the user or principal that created the resource.
+	CreatedBy string `json:"createdBy,omitempty"`
+	// The container image digest.
+	Digest string `json:"digest,omitempty"`
+	// The repository name and the most recent version associated with the image.
+	// If there are no versions associated with the image, then last known version and digest are used instead.
+	// If the last known version is unavailable, then 'unknown' is used instead of the version.
+	// Example: `ubuntu:latest` or `ubuntu:latest@sha256:45b23dee08af5e43a7fea6c4cf9c25ccf269ee113168c19722f87876677c5cb2`
+	DisplayName string `json:"displayName,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the container image.
+	// Example: `ocid1.containerimage.oc1..exampleuniqueID`
+	Id string `json:"id,omitempty"`
+	// Layers of which the image is composed, ordered by the layer digest.
+	Layers []ContainerImageLayer `json:"layers,omitempty"`
+	// The total size of the container image layers in bytes.
+	LayersSizeInBytes int64 `json:"layersSizeInBytes,omitempty"`
+	// The current state of the container image.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The size of the container image manifest in bytes.
+	ManifestSizeInBytes int `json:"manifestSizeInBytes,omitempty"`
+	// Total number of pulls.
+	PullCount int64 `json:"pullCount,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the container repository.
+	RepositoryId string `json:"repositoryId,omitempty"`
+	// The container repository name.
+	RepositoryName string `json:"repositoryName,omitempty"`
+	// An RFC 3339 timestamp indicating when the image was created.
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The versions associated with this image.
+	Versions []ContainerImageVersion `json:"versions,omitempty"`
+	// The system tags for this resource. Each key is predefined and scoped to a namespace.
+	// Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`
+	// An RFC 3339 timestamp indicating when the image was last pulled.
+	TimeLastPulled string `json:"timeLastPulled,omitempty"`
+	// The most recent version associated with this image.
+	Version string `json:"version,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="DisplayName",type="string",JSONPath=".spec.displayName",priority=1
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.status.conditions[-1].type",description="status of the ContainerImage",priority=0
 // +kubebuilder:printcolumn:name="Ocid",type="string",JSONPath=".status.status.ocid",description="Ocid of the ContainerImage",priority=1
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0

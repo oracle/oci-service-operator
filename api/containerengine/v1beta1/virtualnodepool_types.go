@@ -14,23 +14,129 @@ import (
 
 // VirtualNodePoolSpec defines the desired state of VirtualNodePool.
 type VirtualNodePoolSpec struct {
-	Id                shared.OCID       `json:"id,omitempty"`
-	CompartmentId     shared.OCID       `json:"compartmentId,omitempty"`
-	ClusterId         string            `json:"clusterId,omitempty"`
-	DisplayName       string            `json:"displayName,omitempty"`
-	Size              int               `json:"size,omitempty"`
-	NsgIds            []string          `json:"nsgIds,omitempty"`
-	FreeformTags      map[string]string `json:"freeformTags,omitempty"`
-	KubernetesVersion string            `json:"kubernetesVersion,omitempty"`
-	LifecycleState    string            `json:"lifecycleState,omitempty"`
-	LifecycleDetails  string            `json:"lifecycleDetails,omitempty"`
-	TimeCreated       string            `json:"timeCreated,omitempty"`
-	TimeUpdated       string            `json:"timeUpdated,omitempty"`
+	// Compartment of the virtual node pool.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// The cluster the virtual node pool is associated with. A virtual node pool can only be associated with one cluster.
+	// +kubebuilder:validation:Required
+	ClusterId string `json:"clusterId"`
+	// Display name of the virtual node pool. This is a non-unique value.
+	// +kubebuilder:validation:Required
+	DisplayName string `json:"displayName"`
+	// The list of placement configurations which determines where Virtual Nodes will be provisioned across as it relates to the subnet and availability domains. The size attribute determines how many we evenly spread across these placement configurations
+	// +kubebuilder:validation:Required
+	PlacementConfigurations []VirtualNodePoolPlacementConfiguration `json:"placementConfigurations"`
+	// Initial labels that will be added to the Kubernetes Virtual Node object when it registers.
+	// +kubebuilder:validation:Optional
+	InitialVirtualNodeLabels []VirtualNodePoolInitialVirtualNodeLabel `json:"initialVirtualNodeLabels,omitempty"`
+	// A taint is a collection of <key, value, effect>. These taints will be applied to the Virtual Nodes of this Virtual Node Pool for Kubernetes scheduling.
+	// +kubebuilder:validation:Optional
+	Taints []VirtualNodePoolTaint `json:"taints,omitempty"`
+	// The number of Virtual Nodes that should be in the Virtual Node Pool. The placement configurations determine where these virtual nodes are placed.
+	// +kubebuilder:validation:Optional
+	Size int `json:"size,omitempty"`
+	// List of network security group id's applied to the Virtual Node VNIC.
+	// +kubebuilder:validation:Optional
+	NsgIds []string `json:"nsgIds,omitempty"`
+	// The pod configuration for pods run on virtual nodes of this virtual node pool.
+	// +kubebuilder:validation:Optional
+	PodConfiguration VirtualNodePoolPodConfiguration `json:"podConfiguration,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// +kubebuilder:validation:Optional
+	VirtualNodeTags VirtualNodePoolVirtualNodeTags `json:"virtualNodeTags,omitempty"`
+}
+
+// VirtualNodePoolPlacementConfiguration defines nested fields for VirtualNodePool.PlacementConfiguration.
+type VirtualNodePoolPlacementConfiguration struct {
+	// The availability domain in which to place virtual nodes.
+	// Example: `Uocm:PHX-AD-1`
+	// +kubebuilder:validation:Optional
+	AvailabilityDomain string `json:"availabilityDomain,omitempty"`
+	// The fault domain of this virtual node.
+	// +kubebuilder:validation:Optional
+	FaultDomain []string `json:"faultDomain,omitempty"`
+	// The OCID of the subnet in which to place virtual nodes.
+	// +kubebuilder:validation:Optional
+	SubnetId string `json:"subnetId,omitempty"`
+}
+
+// VirtualNodePoolInitialVirtualNodeLabel defines nested fields for VirtualNodePool.InitialVirtualNodeLabel.
+type VirtualNodePoolInitialVirtualNodeLabel struct {
+	// The key of the pair.
+	// +kubebuilder:validation:Optional
+	Key string `json:"key,omitempty"`
+	// The value of the pair.
+	// +kubebuilder:validation:Optional
+	Value string `json:"value,omitempty"`
+}
+
+// VirtualNodePoolTaint defines nested fields for VirtualNodePool.Taint.
+type VirtualNodePoolTaint struct {
+	// The key of the pair.
+	// +kubebuilder:validation:Optional
+	Key string `json:"key,omitempty"`
+	// The value of the pair.
+	// +kubebuilder:validation:Optional
+	Value string `json:"value,omitempty"`
+	// The effect of the pair.
+	// +kubebuilder:validation:Optional
+	Effect string `json:"effect,omitempty"`
+}
+
+// VirtualNodePoolPodConfiguration defines nested fields for VirtualNodePool.PodConfiguration.
+type VirtualNodePoolPodConfiguration struct {
+	// The regional subnet where pods' VNIC will be placed.
+	// +kubebuilder:validation:Required
+	SubnetId string `json:"subnetId"`
+	// Shape of the pods.
+	// +kubebuilder:validation:Required
+	Shape string `json:"shape"`
+	// List of network security group IDs applied to the Pod VNIC.
+	// +kubebuilder:validation:Optional
+	NsgIds []string `json:"nsgIds,omitempty"`
+}
+
+// VirtualNodePoolVirtualNodeTags defines nested fields for VirtualNodePool.VirtualNodeTags.
+type VirtualNodePoolVirtualNodeTags struct {
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 }
 
 // VirtualNodePoolStatus defines the observed state of VirtualNodePool.
 type VirtualNodePoolStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the virtual node pool.
+	Id string `json:"id,omitempty"`
+	// The version of Kubernetes running on the nodes in the node pool.
+	KubernetesVersion string `json:"kubernetesVersion,omitempty"`
+	// The state of the Virtual Node Pool.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// Details about the state of the Virtual Node Pool.
+	LifecycleDetails string `json:"lifecycleDetails,omitempty"`
+	// The time the virtual node pool was created.
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The time the virtual node pool was updated.
+	TimeUpdated string `json:"timeUpdated,omitempty"`
+	// Usage of system tag keys. These predefined keys are scoped to namespaces.
+	// Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`
 }
 
 // +kubebuilder:object:root=true

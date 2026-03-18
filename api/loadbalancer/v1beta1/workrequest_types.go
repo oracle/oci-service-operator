@@ -14,19 +14,45 @@ import (
 
 // WorkRequestSpec defines the desired state of WorkRequest.
 type WorkRequestSpec struct {
-	Id             shared.OCID `json:"id,omitempty"`
-	CompartmentId  shared.OCID `json:"compartmentId,omitempty"`
-	LoadBalancerId string      `json:"loadBalancerId,omitempty"`
-	Type           string      `json:"type,omitempty"`
-	LifecycleState string      `json:"lifecycleState,omitempty"`
-	Message        string      `json:"message,omitempty"`
-	TimeAccepted   string      `json:"timeAccepted,omitempty"`
-	TimeFinished   string      `json:"timeFinished,omitempty"`
+}
+
+// WorkRequestErrorDetail defines nested fields for WorkRequest.ErrorDetail.
+type WorkRequestErrorDetail struct {
+	ErrorCode string `json:"errorCode,omitempty"`
+	// A human-readable error string.
+	Message string `json:"message,omitempty"`
 }
 
 // WorkRequestStatus defines the observed state of WorkRequest.
 type WorkRequestStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the work request.
+	Id string `json:"id,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the load balancer with which the work request
+	// is associated.
+	LoadBalancerId string `json:"loadBalancerId,omitempty"`
+	// The type of action the work request represents.
+	// Example: `CreateListener`
+	Type string `json:"type,omitempty"`
+	// The current state of the work request.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// A collection of data, related to the load balancer provisioning process, that helps with debugging in the event of failure.
+	// Possible data elements include:
+	// - workflow name
+	// - event ID
+	// - work request ID
+	// - load balancer ID
+	// - workflow completion message
+	Message string `json:"message,omitempty"`
+	// The date and time the work request was created, in the format defined by RFC3339.
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeAccepted string                   `json:"timeAccepted,omitempty"`
+	ErrorDetails []WorkRequestErrorDetail `json:"errorDetails,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment containing the load balancer.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The date and time the work request was completed, in the format defined by RFC3339.
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeFinished string `json:"timeFinished,omitempty"`
 }
 
 // +kubebuilder:object:root=true

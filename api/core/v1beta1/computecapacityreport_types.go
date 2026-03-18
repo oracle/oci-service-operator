@@ -14,15 +14,53 @@ import (
 
 // ComputeCapacityReportSpec defines the desired state of ComputeCapacityReport.
 type ComputeCapacityReportSpec struct {
-	Id                 shared.OCID `json:"id,omitempty"`
-	CompartmentId      shared.OCID `json:"compartmentId,omitempty"`
-	AvailabilityDomain string      `json:"availabilityDomain,omitempty"`
-	TimeCreated        string      `json:"timeCreated,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) for the compartment. This should always be the root
+	// compartment.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// The availability domain for the capacity report.
+	// Example: `Uocm:PHX-AD-1`
+	// +kubebuilder:validation:Required
+	AvailabilityDomain string `json:"availabilityDomain"`
+	// Information about the shapes in the capacity report.
+	// +kubebuilder:validation:Required
+	ShapeAvailabilities []ComputeCapacityReportShapeAvailability `json:"shapeAvailabilities"`
+}
+
+// ComputeCapacityReportShapeAvailabilityInstanceShapeConfig defines nested fields for ComputeCapacityReport.ShapeAvailability.InstanceShapeConfig.
+type ComputeCapacityReportShapeAvailabilityInstanceShapeConfig struct {
+	// The total number of OCPUs available to the instance.
+	// +kubebuilder:validation:Optional
+	Ocpus float32 `json:"ocpus,omitempty"`
+	// The total amount of memory available to the instance, in gigabytes.
+	// +kubebuilder:validation:Optional
+	MemoryInGBs float32 `json:"memoryInGBs,omitempty"`
+	// The number of NVMe drives to be used for storage.
+	// +kubebuilder:validation:Optional
+	Nvmes int `json:"nvmes,omitempty"`
+}
+
+// ComputeCapacityReportShapeAvailability defines nested fields for ComputeCapacityReport.ShapeAvailability.
+type ComputeCapacityReportShapeAvailability struct {
+	// The shape that you want to request a capacity report for. You can enumerate all available shapes by calling
+	// ListShapes.
+	// +kubebuilder:validation:Required
+	InstanceShape string `json:"instanceShape"`
+	// The fault domain for the capacity report.
+	// If you do not specify a fault domain, the capacity report includes information about all fault domains.
+	// +kubebuilder:validation:Optional
+	FaultDomain string `json:"faultDomain,omitempty"`
+	// +kubebuilder:validation:Optional
+	InstanceShapeConfig ComputeCapacityReportShapeAvailabilityInstanceShapeConfig `json:"instanceShapeConfig,omitempty"`
 }
 
 // ComputeCapacityReportStatus defines the observed state of ComputeCapacityReport.
 type ComputeCapacityReportStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The date and time the capacity report was created, in the format defined by
+	// RFC3339 (https://tools.ietf.org/html/rfc3339).
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
 }
 
 // +kubebuilder:object:root=true

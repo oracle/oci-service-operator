@@ -14,31 +14,88 @@ import (
 
 // BucketSpec defines the desired state of Bucket.
 type BucketSpec struct {
-	Id                        shared.OCID       `json:"id,omitempty"`
-	CompartmentId             shared.OCID       `json:"compartmentId,omitempty"`
-	Name                      string            `json:"name,omitempty"`
-	Metadata                  map[string]string `json:"metadata,omitempty"`
-	PublicAccessType          string            `json:"publicAccessType,omitempty"`
-	StorageTier               string            `json:"storageTier,omitempty"`
-	ObjectEventsEnabled       bool              `json:"objectEventsEnabled,omitempty"`
-	FreeformTags              map[string]string `json:"freeformTags,omitempty"`
-	KmsKeyId                  string            `json:"kmsKeyId,omitempty"`
-	Versioning                string            `json:"versioning,omitempty"`
-	AutoTiering               string            `json:"autoTiering,omitempty"`
-	Namespace                 string            `json:"namespace,omitempty"`
-	CreatedBy                 string            `json:"createdBy,omitempty"`
-	TimeCreated               string            `json:"timeCreated,omitempty"`
-	Etag                      string            `json:"etag,omitempty"`
-	ObjectLifecyclePolicyEtag string            `json:"objectLifecyclePolicyEtag,omitempty"`
-	ApproximateCount          int64             `json:"approximateCount,omitempty"`
-	ApproximateSize           int64             `json:"approximateSize,omitempty"`
-	ReplicationEnabled        bool              `json:"replicationEnabled,omitempty"`
-	IsReadOnly                bool              `json:"isReadOnly,omitempty"`
+	// The name of the bucket. Valid characters are uppercase or lowercase letters, numbers, hyphens, underscores, and periods.
+	// Bucket names must be unique within an Object Storage namespace. Avoid entering confidential information.
+	// example: Example: my-new-bucket1
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+	// The ID of the compartment in which to create the bucket.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// Arbitrary string, up to 4KB, of keys and values for user-defined metadata.
+	// +kubebuilder:validation:Optional
+	Metadata map[string]string `json:"metadata,omitempty"`
+	// The type of public access enabled on this bucket.
+	// A bucket is set to `NoPublicAccess` by default, which only allows an authenticated caller to access the
+	// bucket and its contents. When `ObjectRead` is enabled on the bucket, public access is allowed for the
+	// `GetObject`, `HeadObject`, and `ListObjects` operations. When `ObjectReadWithoutList` is enabled on the bucket,
+	// public access is allowed for the `GetObject` and `HeadObject` operations.
+	// +kubebuilder:validation:Optional
+	PublicAccessType string `json:"publicAccessType,omitempty"`
+	// The type of storage tier of this bucket.
+	// A bucket is set to 'Standard' tier by default, which means the bucket will be put in the standard storage tier.
+	// When 'Archive' tier type is set explicitly, the bucket is put in the Archive Storage tier. The 'storageTier'
+	// property is immutable after bucket is created.
+	// +kubebuilder:validation:Optional
+	StorageTier string `json:"storageTier,omitempty"`
+	// Whether or not events are emitted for object state changes in this bucket. By default, `objectEventsEnabled` is
+	// set to `false`. Set `objectEventsEnabled` to `true` to emit events for object state changes. For more information
+	// about events, see Overview of Events (https://docs.cloud.oracle.com/Content/Events/Concepts/eventsoverview.htm).
+	// +kubebuilder:validation:Optional
+	ObjectEventsEnabled bool `json:"objectEventsEnabled,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of a master encryption key used to call the Key
+	// Management service to generate a data encryption key or to encrypt or decrypt a data encryption key.
+	// +kubebuilder:validation:Optional
+	KmsKeyId string `json:"kmsKeyId,omitempty"`
+	// Set the versioning status on the bucket. By default, a bucket is created with versioning `Disabled`. Use this option to enable versioning during bucket creation. Objects in a version enabled bucket are protected from overwrites and deletions. Previous versions of the same object will be available in the bucket.
+	// +kubebuilder:validation:Optional
+	Versioning string `json:"versioning,omitempty"`
+	// Set the auto tiering status on the bucket. By default, a bucket is created with auto tiering `Disabled`.
+	// Use this option to enable auto tiering during bucket creation. Objects in a bucket with auto tiering set to
+	// `InfrequentAccess` are transitioned automatically between the 'Standard' and 'InfrequentAccess'
+	// tiers based on the access pattern of the objects.
+	// +kubebuilder:validation:Optional
+	AutoTiering string `json:"autoTiering,omitempty"`
+	// The Object Storage namespace in which the bucket lives.
+	// +kubebuilder:validation:Optional
+	Namespace string `json:"namespace,omitempty"`
 }
 
 // BucketStatus defines the observed state of Bucket.
 type BucketStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the user who created the bucket.
+	CreatedBy string `json:"createdBy,omitempty"`
+	// The date and time the bucket was created, as described in RFC 2616 (https://tools.ietf.org/html/rfc2616#section-14.29).
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The entity tag (ETag) for the bucket.
+	Etag string `json:"etag,omitempty"`
+	// The entity tag (ETag) for the live object lifecycle policy on the bucket.
+	ObjectLifecyclePolicyEtag string `json:"objectLifecyclePolicyEtag,omitempty"`
+	// The approximate number of objects in the bucket. Count statistics are reported periodically. You will see a
+	// lag between what is displayed and the actual object count.
+	ApproximateCount int64 `json:"approximateCount,omitempty"`
+	// The approximate total size in bytes of all objects in the bucket. Size statistics are reported periodically. You will
+	// see a lag between what is displayed and the actual size of the bucket.
+	ApproximateSize int64 `json:"approximateSize,omitempty"`
+	// Whether or not this bucket is a replication source. By default, `replicationEnabled` is set to `false`. This will
+	// be set to 'true' when you create a replication policy for the bucket.
+	ReplicationEnabled bool `json:"replicationEnabled,omitempty"`
+	// Whether or not this bucket is read only. By default, `isReadOnly` is set to `false`. This will
+	// be set to 'true' when this bucket is configured as a destination in a replication policy.
+	IsReadOnly bool `json:"isReadOnly,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the bucket.
+	Id string `json:"id,omitempty"`
 }
 
 // +kubebuilder:object:root=true

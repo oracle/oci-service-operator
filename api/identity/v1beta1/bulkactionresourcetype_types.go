@@ -14,20 +14,20 @@ import (
 
 // BulkActionResourceTypeSpec defines the desired state of BulkActionResourceType.
 type BulkActionResourceTypeSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
-	Name          string      `json:"name,omitempty"`
-	MetadataKeys  []string    `json:"metadataKeys,omitempty"`
 }
 
 // BulkActionResourceTypeStatus defines the observed state of BulkActionResourceType.
 type BulkActionResourceTypeStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The unique name of the resource-type.
+	Name string `json:"name,omitempty"`
+	// List of metadata keys required to identify a specific resource. Some resource-types require information besides an OCID to identify
+	// a specific resource. For example, the resource-type `buckets` requires metadataKeys DeleteBucket.
+	MetadataKeys []string `json:"metadataKeys,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Name",type="string",JSONPath=".spec.name",priority=1
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.status.conditions[-1].type",description="status of the BulkActionResourceType",priority=0
 // +kubebuilder:printcolumn:name="Ocid",type="string",JSONPath=".status.status.ocid",description="Ocid of the BulkActionResourceType",priority=1
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0

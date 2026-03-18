@@ -14,13 +14,32 @@ import (
 
 // ObjectVersionSpec defines the desired state of ObjectVersion.
 type ObjectVersionSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // ObjectVersionStatus defines the observed state of ObjectVersion.
 type ObjectVersionStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The name of the object. Avoid entering confidential information.
+	// Example: test/object1.log
+	Name string `json:"name,omitempty"`
+	// The date and time the object was modified, as described in RFC 2616 (https://tools.ietf.org/rfc/rfc2616#section-14.29).
+	TimeModified string `json:"timeModified,omitempty"`
+	// VersionId of the object.
+	VersionId string `json:"versionId,omitempty"`
+	// This flag will indicate if the version is deleted or not.
+	IsDeleteMarker bool `json:"isDeleteMarker,omitempty"`
+	// Size of the object in bytes.
+	Size int64 `json:"size,omitempty"`
+	// Base64-encoded MD5 hash of the object data.
+	Md5 string `json:"md5,omitempty"`
+	// The date and time the object was created, as described in RFC 2616 (https://tools.ietf.org/html/rfc2616#section-14.29).
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The current entity tag (ETag) for the object.
+	Etag string `json:"etag,omitempty"`
+	// The storage tier that the object is stored in.
+	StorageTier string `json:"storageTier,omitempty"`
+	// Archival state of an object. This field is set only for objects in Archive tier.
+	ArchivalState string `json:"archivalState,omitempty"`
 }
 
 // +kubebuilder:object:root=true

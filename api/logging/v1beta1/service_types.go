@@ -14,13 +14,52 @@ import (
 
 // ServiceSpec defines the desired state of Service.
 type ServiceSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
+}
+
+// ServiceResourceTypeCategoryParameter defines nested fields for Service.ResourceType.Category.Parameter.
+type ServiceResourceTypeCategoryParameter struct {
+	// Parameter name.
+	Name string `json:"name,omitempty"`
+	Type string `json:"type,omitempty"`
+	// Java regex pattern to validate a parameter value.
+	Pattern string `json:"pattern,omitempty"`
+}
+
+// ServiceResourceTypeCategory defines nested fields for Service.ResourceType.Category.
+type ServiceResourceTypeCategory struct {
+	// Category name.
+	Name string `json:"name,omitempty"`
+	// Category display name. Avoid entering confidential information.
+	DisplayName string `json:"displayName,omitempty"`
+	// Parameters the category supports.
+	Parameters []ServiceResourceTypeCategoryParameter `json:"parameters,omitempty"`
+}
+
+// ServiceResourceType defines nested fields for Service.ResourceType.
+type ServiceResourceType struct {
+	// Resource type name.
+	Name string `json:"name,omitempty"`
+	// Categories for resources.
+	Categories []ServiceResourceTypeCategory `json:"categories,omitempty"`
 }
 
 // ServiceStatus defines the observed state of Service.
 type ServiceStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// Tenant OCID.
+	TenantId string `json:"tenantId,omitempty"`
+	// Service ID as set in Service Principal.
+	ServicePrincipalName string `json:"servicePrincipalName,omitempty"`
+	// Service endpoint.
+	Endpoint string `json:"endpoint,omitempty"`
+	// User-friendly service name.
+	Name string `json:"name,omitempty"`
+	// Type of resource that a service provides.
+	ResourceTypes []ServiceResourceType `json:"resourceTypes,omitempty"`
+	// Apollo project namespace, if any.
+	Namespace string `json:"namespace,omitempty"`
+	// Service ID.
+	Id string `json:"id,omitempty"`
 }
 
 // +kubebuilder:object:root=true

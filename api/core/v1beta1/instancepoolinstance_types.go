@@ -14,28 +14,58 @@ import (
 
 // InstancePoolInstanceSpec defines the desired state of InstancePoolInstance.
 type InstancePoolInstanceSpec struct {
-	Id                      shared.OCID `json:"id,omitempty"`
-	CompartmentId           shared.OCID `json:"compartmentId,omitempty"`
-	InstancePoolId          string      `json:"instancePoolId,omitempty"`
-	AvailabilityDomain      string      `json:"availabilityDomain,omitempty"`
-	LifecycleState          string      `json:"lifecycleState,omitempty"`
-	InstanceConfigurationId string      `json:"instanceConfigurationId,omitempty"`
-	Region                  string      `json:"region,omitempty"`
-	Shape                   string      `json:"shape,omitempty"`
-	State                   string      `json:"state,omitempty"`
-	TimeCreated             string      `json:"timeCreated,omitempty"`
-	DisplayName             string      `json:"displayName,omitempty"`
-	FaultDomain             string      `json:"faultDomain,omitempty"`
+}
+
+// InstancePoolInstanceLoadBalancerBackend defines nested fields for InstancePoolInstance.LoadBalancerBackend.
+type InstancePoolInstanceLoadBalancerBackend struct {
+	// The OCID of the load balancer attached to the instance pool.
+	LoadBalancerId string `json:"loadBalancerId,omitempty"`
+	// The name of the backend set on the load balancer.
+	BackendSetName string `json:"backendSetName,omitempty"`
+	// The name of the backend in the backend set.
+	BackendName string `json:"backendName,omitempty"`
+	// The health of the backend as observed by the load balancer.
+	BackendHealthStatus string `json:"backendHealthStatus,omitempty"`
 }
 
 // InstancePoolInstanceStatus defines the observed state of InstancePoolInstance.
 type InstancePoolInstanceStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the instance.
+	Id string `json:"id,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the instance pool.
+	InstancePoolId string `json:"instancePoolId,omitempty"`
+	// The availability domain the instance is running in.
+	AvailabilityDomain string `json:"availabilityDomain,omitempty"`
+	// The attachment state of the instance in relation to the instance pool.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the
+	// instance.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the instance configuration
+	// used to create the instance.
+	InstanceConfigurationId string `json:"instanceConfigurationId,omitempty"`
+	// The region that contains the availability domain the instance is running in.
+	Region string `json:"region,omitempty"`
+	// The shape of the instance. The shape determines the number of CPUs, amount of memory,
+	// and other resources allocated to the instance.
+	Shape string `json:"shape,omitempty"`
+	// The lifecycle state of the instance. Refer to `lifecycleState` in the Instance resource.
+	State string `json:"state,omitempty"`
+	// The date and time the instance pool instance was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	DisplayName string `json:"displayName,omitempty"`
+	// The fault domain the instance is running in.
+	FaultDomain string `json:"faultDomain,omitempty"`
+	// The load balancer backends that are configured for the instance.
+	LoadBalancerBackends []InstancePoolInstanceLoadBalancerBackend `json:"loadBalancerBackends,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="DisplayName",type="string",JSONPath=".spec.displayName",priority=1
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.status.conditions[-1].type",description="status of the InstancePoolInstance",priority=0
 // +kubebuilder:printcolumn:name="Ocid",type="string",JSONPath=".status.status.ocid",description="Ocid of the InstancePoolInstance",priority=1
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0

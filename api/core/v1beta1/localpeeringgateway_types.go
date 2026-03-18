@@ -14,25 +14,68 @@ import (
 
 // LocalPeeringGatewaySpec defines the desired state of LocalPeeringGateway.
 type LocalPeeringGatewaySpec struct {
-	Id                        shared.OCID       `json:"id,omitempty"`
-	CompartmentId             shared.OCID       `json:"compartmentId,omitempty"`
-	VcnId                     string            `json:"vcnId,omitempty"`
-	DisplayName               string            `json:"displayName,omitempty"`
-	FreeformTags              map[string]string `json:"freeformTags,omitempty"`
-	RouteTableId              string            `json:"routeTableId,omitempty"`
-	IsCrossTenancyPeering     bool              `json:"isCrossTenancyPeering,omitempty"`
-	LifecycleState            string            `json:"lifecycleState,omitempty"`
-	PeeringStatus             string            `json:"peeringStatus,omitempty"`
-	PeerId                    string            `json:"peerId,omitempty"`
-	TimeCreated               string            `json:"timeCreated,omitempty"`
-	PeerAdvertisedCidr        string            `json:"peerAdvertisedCidr,omitempty"`
-	PeerAdvertisedCidrDetails []string          `json:"peerAdvertisedCidrDetails,omitempty"`
-	PeeringStatusDetails      string            `json:"peeringStatusDetails,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the local peering gateway (LPG).
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VCN the LPG belongs to.
+	// +kubebuilder:validation:Required
+	VcnId string `json:"vcnId"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the route table the LPG will use.
+	// If you don't specify a route table here, the LPG is created without an associated route
+	// table. The Networking service does NOT automatically associate the attached VCN's default route table
+	// with the LPG.
+	// For information about why you would associate a route table with an LPG, see
+	// Transit Routing: Access to Multiple VCNs in Same Region (https://docs.cloud.oracle.com/iaas/Content/Network/Tasks/transitrouting.htm).
+	// +kubebuilder:validation:Optional
+	RouteTableId string `json:"routeTableId,omitempty"`
 }
 
 // LocalPeeringGatewayStatus defines the observed state of LocalPeeringGateway.
 type LocalPeeringGatewayStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The LPG's Oracle ID (OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)).
+	Id string `json:"id,omitempty"`
+	// Whether the VCN at the other end of the peering is in a different tenancy.
+	// Example: `false`
+	IsCrossTenancyPeering bool `json:"isCrossTenancyPeering,omitempty"`
+	// The LPG's current lifecycle state.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// Whether the LPG is peered with another LPG. `NEW` means the LPG has not yet been
+	// peered. `PENDING` means the peering is being established. `REVOKED` means the
+	// LPG at the other end of the peering has been deleted.
+	PeeringStatus string `json:"peeringStatus,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the peered LPG.
+	PeerId string `json:"peerId,omitempty"`
+	// The date and time the LPG was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The smallest aggregate CIDR that contains all the CIDR routes advertised by the VCN
+	// at the other end of the peering from this LPG. See `peerAdvertisedCidrDetails` for
+	// the individual CIDRs. The value is `null` if the LPG is not peered.
+	// Example: `192.168.0.0/16`, or if aggregated with `172.16.0.0/24` then `128.0.0.0/1`
+	PeerAdvertisedCidr string `json:"peerAdvertisedCidr,omitempty"`
+	// The specific ranges of IP addresses available on or via the VCN at the other
+	// end of the peering from this LPG. The value is `null` if the LPG is not peered.
+	// You can use these as destination CIDRs for route rules to route a subnet's
+	// traffic to this LPG.
+	// Example: [`192.168.0.0/16`, `172.16.0.0/24`]
+	PeerAdvertisedCidrDetails []string `json:"peerAdvertisedCidrDetails,omitempty"`
+	// Additional information regarding the peering status, if applicable.
+	PeeringStatusDetails string `json:"peeringStatusDetails,omitempty"`
 }
 
 // +kubebuilder:object:root=true

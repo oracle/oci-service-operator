@@ -14,20 +14,56 @@ import (
 
 // TagDefaultSpec defines the desired state of TagDefault.
 type TagDefaultSpec struct {
-	Id                shared.OCID `json:"id,omitempty"`
-	CompartmentId     shared.OCID `json:"compartmentId,omitempty"`
-	TagDefinitionId   string      `json:"tagDefinitionId,omitempty"`
-	Value             string      `json:"value,omitempty"`
-	IsRequired        bool        `json:"isRequired,omitempty"`
-	TagNamespaceId    string      `json:"tagNamespaceId,omitempty"`
-	TagDefinitionName string      `json:"tagDefinitionName,omitempty"`
-	TimeCreated       string      `json:"timeCreated,omitempty"`
-	LifecycleState    string      `json:"lifecycleState,omitempty"`
+	// The OCID of the compartment. The tag default will be applied to all new resources created in this compartment.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// The OCID of the tag definition. The tag default will always assign a default value for this tag definition.
+	// +kubebuilder:validation:Required
+	TagDefinitionId string `json:"tagDefinitionId"`
+	// The default value for the tag definition. This will be applied to all new resources created in the compartment.
+	// +kubebuilder:validation:Required
+	Value string `json:"value"`
+	// If you specify that a value is required, a value is set during resource creation (either by
+	// the user creating the resource or another tag defualt). If no value is set, resource
+	// creation is blocked.
+	// * If the `isRequired` flag is set to "true", the value is set during resource creation.
+	// * If the `isRequired` flag is set to "false", the value you enter is set during resource creation.
+	// Example: `false`
+	// +kubebuilder:validation:Optional
+	IsRequired bool `json:"isRequired,omitempty"`
+	// Locks associated with this resource.
+	// +kubebuilder:validation:Optional
+	Locks []TagDefaultLock `json:"locks,omitempty"`
+}
+
+// TagDefaultLock defines nested fields for TagDefault.Lock.
+type TagDefaultLock struct {
+	// Type of the lock.
+	// +kubebuilder:validation:Required
+	Type string `json:"type"`
+	// The ID of the resource that is locking this resource. Indicates that deleting this resource will remove the lock.
+	// +kubebuilder:validation:Optional
+	RelatedResourceId string `json:"relatedResourceId,omitempty"`
+	// A message added by the creator of the lock. This is typically used to give an
+	// indication of why the resource is locked.
+	// +kubebuilder:validation:Optional
+	Message string `json:"message,omitempty"`
 }
 
 // TagDefaultStatus defines the observed state of TagDefault.
 type TagDefaultStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the tag default.
+	Id string `json:"id,omitempty"`
+	// The OCID of the tag namespace that contains the tag definition.
+	TagNamespaceId string `json:"tagNamespaceId,omitempty"`
+	// The name used in the tag definition. This field is informational in the context of the tag default.
+	TagDefinitionName string `json:"tagDefinitionName,omitempty"`
+	// Date and time the `TagDefault` object was created, in the format defined by RFC3339.
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The tag default's current state. After creating a `TagDefault`, make sure its `lifecycleState` is ACTIVE before using it.
+	LifecycleState string `json:"lifecycleState,omitempty"`
 }
 
 // +kubebuilder:object:root=true

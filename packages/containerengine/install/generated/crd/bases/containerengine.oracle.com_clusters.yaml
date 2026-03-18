@@ -56,40 +56,268 @@ spec:
           spec:
             description: ClusterSpec defines the desired state of Cluster.
             properties:
-              availableKubernetesUpgrades:
+              clusterPodNetworkOptions:
+                description: Available CNIs and network options for existing and new
+                  node pools of the cluster
                 items:
-                  type: string
+                  description: ClusterPodNetworkOption defines nested fields for Cluster.ClusterPodNetworkOption.
+                  properties:
+                    cniType:
+                      type: string
+                  type: object
                 type: array
               compartmentId:
-                maxLength: 255
-                minLength: 1
+                description: The OCID of the compartment in which to create the cluster.
                 type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              endpointConfig:
+                description: The network configuration for access to the Cluster control
+                  plane.
+                properties:
+                  isPublicIpEnabled:
+                    description: Whether the cluster should be assigned a public IP
+                      address. Defaults to false. If set to true on a private subnet,
+                      the cluster provisioning will fail.
+                    type: boolean
+                  nsgIds:
+                    description: A list of the OCIDs of the network security groups
+                      (NSGs) to apply to the cluster endpoint. For more information
+                      about NSGs, see NetworkSecurityGroup.
+                    items:
+                      type: string
+                    type: array
+                  subnetId:
+                    description: The OCID of the regional subnet in which to place
+                      the Cluster endpoint.
+                    type: string
+                type: object
               freeformTags:
                 additionalProperties:
                   type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
                 type: object
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
+              imagePolicyConfig:
+                description: |-
+                  The image verification policy for signature validation. Once a policy is created and enabled with
+                  one or more kms keys, the policy will ensure all images deployed has been signed with the key(s)
+                  attached to the policy.
+                properties:
+                  isPolicyEnabled:
+                    description: Whether the image verification policy is enabled.
+                      Defaults to false. If set to true, the images will be verified
+                      against the policy at runtime.
+                    type: boolean
+                  keyDetails:
+                    description: A list of KMS key details.
+                    items:
+                      description: ClusterImagePolicyConfigKeyDetail defines nested
+                        fields for Cluster.ImagePolicyConfig.KeyDetail.
+                      properties:
+                        kmsKeyId:
+                          description: The OCIDs of the KMS key that will be used
+                            to verify whether the images are signed by an approved
+                            source.
+                          type: string
+                      type: object
+                    type: array
+                type: object
               kmsKeyId:
+                description: |-
+                  The OCID of the KMS key to be used as the master encryption key for Kubernetes secret encryption.
+                  When used, `kubernetesVersion` must be at least `v1.13.0`.
                 type: string
               kubernetesVersion:
-                type: string
-              lifecycleDetails:
-                type: string
-              lifecycleState:
+                description: The version of Kubernetes to install into the cluster
+                  masters.
                 type: string
               name:
+                description: The name of the cluster. Avoid entering confidential
+                  information.
                 type: string
+              options:
+                description: Optional attributes for the cluster.
+                properties:
+                  addOns:
+                    description: Configurable cluster add-ons
+                    properties:
+                      isKubernetesDashboardEnabled:
+                        description: Whether or not to enable the Kubernetes Dashboard
+                          add-on.
+                        type: boolean
+                      isTillerEnabled:
+                        description: Whether or not to enable the Tiller add-on.
+                        type: boolean
+                    type: object
+                  admissionControllerOptions:
+                    description: Configurable cluster admission controllers
+                    properties:
+                      isPodSecurityPolicyEnabled:
+                        description: Whether or not to enable the Pod Security Policy
+                          admission controller.
+                        type: boolean
+                    type: object
+                  kubernetesNetworkConfig:
+                    description: Network configuration for Kubernetes.
+                    properties:
+                      podsCidr:
+                        description: The CIDR block for Kubernetes pods. Optional,
+                          defaults to 10.244.0.0/16.
+                        type: string
+                      servicesCidr:
+                        description: The CIDR block for Kubernetes services. Optional,
+                          defaults to 10.96.0.0/16.
+                        type: string
+                    type: object
+                  persistentVolumeConfig:
+                    description: ClusterOptionsPersistentVolumeConfig defines nested
+                      fields for Cluster.Options.PersistentVolumeConfig.
+                    properties:
+                      definedTags:
+                        additionalProperties:
+                          additionalProperties:
+                            type: string
+                          type: object
+                        description: |-
+                          Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                          For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                          Example: `{"Operations": {"CostCenter": "42"}}`
+                        type: object
+                      freeformTags:
+                        additionalProperties:
+                          type: string
+                        description: |-
+                          Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                          For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                          Example: `{"Department": "Finance"}`
+                        type: object
+                    type: object
+                  serviceLbConfig:
+                    description: ClusterOptionsServiceLbConfig defines nested fields
+                      for Cluster.Options.ServiceLbConfig.
+                    properties:
+                      definedTags:
+                        additionalProperties:
+                          additionalProperties:
+                            type: string
+                          type: object
+                        description: |-
+                          Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                          For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                          Example: `{"Operations": {"CostCenter": "42"}}`
+                        type: object
+                      freeformTags:
+                        additionalProperties:
+                          type: string
+                        description: |-
+                          Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                          For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                          Example: `{"Department": "Finance"}`
+                        type: object
+                    type: object
+                  serviceLbSubnetIds:
+                    description: The OCIDs of the subnets used for Kubernetes services
+                      load balancers.
+                    items:
+                      type: string
+                    type: array
+                type: object
               type:
+                description: Type of cluster
                 type: string
               vcnId:
+                description: The OCID of the virtual cloud network (VCN) in which
+                  to create the cluster.
                 type: string
+            required:
+            - compartmentId
+            - kubernetesVersion
+            - name
+            - vcnId
             type: object
           status:
             description: ClusterStatus defines the observed state of Cluster.
             properties:
+              availableKubernetesUpgrades:
+                description: Available Kubernetes versions to which the clusters masters
+                  may be upgraded.
+                items:
+                  type: string
+                type: array
+              endpoints:
+                description: Endpoints served up by the cluster masters.
+                properties:
+                  kubernetes:
+                    description: The non-native networking Kubernetes API server endpoint.
+                    type: string
+                  privateEndpoint:
+                    description: The private native networking Kubernetes API server
+                      endpoint.
+                    type: string
+                  publicEndpoint:
+                    description: The public native networking Kubernetes API server
+                      endpoint, if one was requested.
+                    type: string
+                  vcnHostnameEndpoint:
+                    description: |-
+                      The FQDN assigned to the Kubernetes API private endpoint.
+                      Example: 'https://yourVcnHostnameEndpoint'
+                    type: string
+                type: object
+              id:
+                description: The OCID of the cluster.
+                type: string
+              lifecycleDetails:
+                description: Details about the state of the cluster masters.
+                type: string
+              lifecycleState:
+                description: The state of the cluster masters.
+                type: string
+              metadata:
+                description: Metadata about the cluster.
+                properties:
+                  createdByUserId:
+                    description: The user who created the cluster.
+                    type: string
+                  createdByWorkRequestId:
+                    description: The OCID of the work request which created the cluster.
+                    type: string
+                  deletedByUserId:
+                    description: The user who deleted the cluster.
+                    type: string
+                  deletedByWorkRequestId:
+                    description: The OCID of the work request which deleted the cluster.
+                    type: string
+                  timeCreated:
+                    description: The time the cluster was created.
+                    type: string
+                  timeCredentialExpiration:
+                    description: The time until which the cluster credential is valid.
+                    type: string
+                  timeDeleted:
+                    description: The time the cluster was deleted.
+                    type: string
+                  timeUpdated:
+                    description: The time the cluster was updated.
+                    type: string
+                  updatedByUserId:
+                    description: The user who updated the cluster.
+                    type: string
+                  updatedByWorkRequestId:
+                    description: The OCID of the work request which updated the cluster.
+                    type: string
+                type: object
               status:
                 properties:
                   conditions:
@@ -131,6 +359,15 @@ spec:
                   updatedAt:
                     format: date-time
                     type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of system tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
                 type: object
             required:
             - status

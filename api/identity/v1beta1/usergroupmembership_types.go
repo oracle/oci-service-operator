@@ -14,18 +14,27 @@ import (
 
 // UserGroupMembershipSpec defines the desired state of UserGroupMembership.
 type UserGroupMembershipSpec struct {
-	Id             shared.OCID `json:"id,omitempty"`
-	CompartmentId  shared.OCID `json:"compartmentId,omitempty"`
-	GroupId        string      `json:"groupId,omitempty"`
-	UserId         string      `json:"userId,omitempty"`
-	TimeCreated    string      `json:"timeCreated,omitempty"`
-	LifecycleState string      `json:"lifecycleState,omitempty"`
-	InactiveStatus int64       `json:"inactiveStatus,omitempty"`
 }
 
 // UserGroupMembershipStatus defines the observed state of UserGroupMembership.
 type UserGroupMembershipStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the membership.
+	Id string `json:"id,omitempty"`
+	// The OCID of the tenancy containing the user, group, and membership object.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The OCID of the group.
+	GroupId string `json:"groupId,omitempty"`
+	// The OCID of the user.
+	UserId string `json:"userId,omitempty"`
+	// Date and time the membership was created, in the format defined by RFC3339.
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The membership's current state.  After creating a membership object, make sure its `lifecycleState` changes
+	// from CREATING to ACTIVE before using it.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The detailed status of INACTIVE lifecycleState.
+	InactiveStatus int64 `json:"inactiveStatus,omitempty"`
 }
 
 // +kubebuilder:object:root=true

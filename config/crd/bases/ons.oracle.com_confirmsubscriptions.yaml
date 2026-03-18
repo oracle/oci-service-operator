@@ -52,15 +52,6 @@ spec:
             type: object
           spec:
             description: ConfirmSubscriptionSpec defines the desired state of ConfirmSubscription.
-            properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
             type: object
           status:
             description: ConfirmSubscriptionStatus defines the observed state of ConfirmSubscription.

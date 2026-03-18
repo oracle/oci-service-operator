@@ -14,23 +14,51 @@ import (
 
 // AddonSpec defines the desired state of Addon.
 type AddonSpec struct {
-	Id                      shared.OCID `json:"id,omitempty"`
-	CompartmentId           shared.OCID `json:"compartmentId,omitempty"`
-	Version                 string      `json:"version,omitempty"`
-	Name                    string      `json:"name,omitempty"`
-	LifecycleState          string      `json:"lifecycleState,omitempty"`
-	CurrentInstalledVersion string      `json:"currentInstalledVersion,omitempty"`
-	TimeCreated             string      `json:"timeCreated,omitempty"`
+	// The version of the installed addon.
+	// +kubebuilder:validation:Optional
+	Version string `json:"version,omitempty"`
+	// Addon configuration details.
+	// +kubebuilder:validation:Optional
+	Configurations []AddonConfiguration `json:"configurations,omitempty"`
+}
+
+// AddonConfiguration defines nested fields for Addon.Configuration.
+type AddonConfiguration struct {
+	// configuration key name
+	// +kubebuilder:validation:Optional
+	Key string `json:"key,omitempty"`
+	// configuration value name
+	// +kubebuilder:validation:Optional
+	Value string `json:"value,omitempty"`
+}
+
+// AddonError defines nested fields for Addon.AddonError.
+type AddonError struct {
+	// A short error code that defines the upstream error, meant for programmatic parsing. See API Errors (https://docs.cloud.oracle.com/Content/API/References/apierrors.htm).
+	Code string `json:"code,omitempty"`
+	// A human-readable error string of the upstream error.
+	Message string `json:"message,omitempty"`
+	// The status of the HTTP response encountered in the upstream error.
+	Status string `json:"status,omitempty"`
 }
 
 // AddonStatus defines the observed state of Addon.
 type AddonStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The name of the addon.
+	Name string `json:"name,omitempty"`
+	// The state of the addon.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// current installed version of the addon
+	CurrentInstalledVersion string `json:"currentInstalledVersion,omitempty"`
+	// The time the cluster was created.
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The error info of the addon.
+	AddonError AddonError `json:"addonError,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Name",type="string",JSONPath=".spec.name",priority=1
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.status.conditions[-1].type",description="status of the Addon",priority=0
 // +kubebuilder:printcolumn:name="Ocid",type="string",JSONPath=".status.status.ocid",description="Ocid of the Addon",priority=1
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0

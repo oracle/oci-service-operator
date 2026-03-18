@@ -14,15 +14,15 @@ import (
 
 // ClusterMigrateToNativeVcnStatusSpec defines the desired state of ClusterMigrateToNativeVcnStatus.
 type ClusterMigrateToNativeVcnStatusSpec struct {
-	Id                        shared.OCID `json:"id,omitempty"`
-	CompartmentId             shared.OCID `json:"compartmentId,omitempty"`
-	State                     string      `json:"state,omitempty"`
-	TimeDecommissionScheduled string      `json:"timeDecommissionScheduled,omitempty"`
 }
 
 // ClusterMigrateToNativeVcnStatusObservedState defines the observed state of ClusterMigrateToNativeVcnStatus.
 type ClusterMigrateToNativeVcnStatusObservedState struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The current migration status of the cluster.
+	State string `json:"state,omitempty"`
+	// The date and time the non-native VCN is due to be decommissioned.
+	TimeDecommissionScheduled string `json:"timeDecommissionScheduled,omitempty"`
 }
 
 // +kubebuilder:object:root=true

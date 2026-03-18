@@ -14,11 +14,23 @@ import (
 
 // TopicSpec defines the desired state of Topic.
 type TopicSpec struct {
-	Id            shared.OCID       `json:"id,omitempty"`
-	CompartmentId shared.OCID       `json:"compartmentId,omitempty"`
-	Name          string            `json:"name,omitempty"`
-	Description   string            `json:"description,omitempty"`
-	FreeformTags  map[string]string `json:"freeformTags,omitempty"`
+	// The name of the topic being created. The topic name must be unique across the tenancy. Avoid entering confidential information.
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment to create the topic in.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// The description of the topic being created. Avoid entering confidential information.
+	// +kubebuilder:validation:Optional
+	Description string `json:"description,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 }
 
 // TopicStatus defines the observed state of Topic.

@@ -14,14 +14,28 @@ import (
 
 // BackendHealthSpec defines the desired state of BackendHealth.
 type BackendHealthSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
-	Status        string      `json:"status,omitempty"`
+}
+
+// BackendHealthHealthCheckResult defines nested fields for BackendHealth.HealthCheckResult.
+type BackendHealthHealthCheckResult struct {
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the subnet hosting the load balancer that reported this health check status.
+	SubnetId string `json:"subnetId,omitempty"`
+	// The IP address of the health check status report provider. This identifier helps you differentiate same-subnet
+	// load balancers that report health check status.
+	// Example: `10.0.0.7`
+	SourceIpAddress string `json:"sourceIpAddress,omitempty"`
+	// The date and time the data was retrieved, in the format defined by RFC3339.
+	// Example: `2017-06-02T18:28:11+00:00`
+	Timestamp string `json:"timestamp,omitempty"`
+	// The result of the most recent health check.
+	HealthCheckStatus string `json:"healthCheckStatus,omitempty"`
 }
 
 // BackendHealthStatus defines the observed state of BackendHealth.
 type BackendHealthStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// A list of the most recent health check results returned for the specified backend server.
+	HealthCheckResults []BackendHealthHealthCheckResult `json:"healthCheckResults,omitempty"`
 }
 
 // +kubebuilder:object:root=true

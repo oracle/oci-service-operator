@@ -14,23 +14,86 @@ import (
 
 // DrgAttachmentSpec defines the desired state of DrgAttachment.
 type DrgAttachmentSpec struct {
-	Id                           shared.OCID       `json:"id,omitempty"`
-	CompartmentId                shared.OCID       `json:"compartmentId,omitempty"`
-	DrgId                        string            `json:"drgId,omitempty"`
-	DisplayName                  string            `json:"displayName,omitempty"`
-	DrgRouteTableId              string            `json:"drgRouteTableId,omitempty"`
-	FreeformTags                 map[string]string `json:"freeformTags,omitempty"`
-	RouteTableId                 string            `json:"routeTableId,omitempty"`
-	VcnId                        string            `json:"vcnId,omitempty"`
-	ExportDrgRouteDistributionId string            `json:"exportDrgRouteDistributionId,omitempty"`
-	LifecycleState               string            `json:"lifecycleState,omitempty"`
-	TimeCreated                  string            `json:"timeCreated,omitempty"`
-	IsCrossTenancy               bool              `json:"isCrossTenancy,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the DRG.
+	// +kubebuilder:validation:Required
+	DrgId string `json:"drgId"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the DRG route table that is assigned to this attachment.
+	// The DRG route table manages traffic inside the DRG.
+	// +kubebuilder:validation:Optional
+	DrgRouteTableId string `json:"drgRouteTableId,omitempty"`
+	// +kubebuilder:validation:Optional
+	NetworkDetails DrgAttachmentNetworkDetails `json:"networkDetails,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the route table used by the DRG attachment.
+	// If you don't specify a route table here, the DRG attachment is created without an associated route
+	// table. The Networking service does NOT automatically associate the attached VCN's default route table
+	// with the DRG attachment.
+	// For information about why you would associate a route table with a DRG attachment, see:
+	//   * Transit Routing: Access to Multiple VCNs in Same Region (https://docs.cloud.oracle.com/iaas/Content/Network/Tasks/transitrouting.htm)
+	//   * Transit Routing: Private Access to Oracle Services (https://docs.cloud.oracle.com/iaas/Content/Network/Tasks/transitroutingoracleservices.htm)
+	// This field is deprecated. Instead, use the networkDetails field to specify the VCN route table for this attachment.
+	// +kubebuilder:validation:Optional
+	RouteTableId string `json:"routeTableId,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VCN.
+	// This field is deprecated. Instead, use the `networkDetails` field to specify the OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the attached resource.
+	// +kubebuilder:validation:Optional
+	VcnId string `json:"vcnId,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the export route distribution used to specify how routes in the assigned DRG route table
+	// are advertised out through the attachment.
+	// If this value is null, no routes are advertised through this attachment.
+	// +kubebuilder:validation:Optional
+	ExportDrgRouteDistributionId string `json:"exportDrgRouteDistributionId,omitempty"`
+}
+
+// DrgAttachmentNetworkDetails defines nested fields for DrgAttachment.NetworkDetails.
+type DrgAttachmentNetworkDetails struct {
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the network attached to the DRG.
+	// +kubebuilder:validation:Optional
+	Id string `json:"id,omitempty"`
+	// +kubebuilder:validation:Optional
+	Type string `json:"type,omitempty"`
+	// This is the OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the route table that is used to route the traffic as it enters a VCN through this attachment.
+	// For information about why you would associate a route table with a DRG attachment, see
+	// Advanced Scenario: Transit Routing (https://docs.cloud.oracle.com/iaas/Content/Network/Tasks/transitrouting.htm).
+	// For information about why you would associate a route table with a DRG attachment, see:
+	//   * Transit Routing: Access to Multiple VCNs in Same Region (https://docs.cloud.oracle.com/iaas/Content/Network/Tasks/transitrouting.htm)
+	//   * Transit Routing: Private Access to Oracle Services (https://docs.cloud.oracle.com/iaas/Content/Network/Tasks/transitroutingoracleservices.htm)
+	// +kubebuilder:validation:Optional
+	RouteTableId string `json:"routeTableId,omitempty"`
+	// Indicates whether the VCN CIDRs or the individual subnet CIDRs are imported from the attachment.
+	// Routes from the VCN ingress route table are always imported.
+	// +kubebuilder:validation:Optional
+	VcnRouteType string `json:"vcnRouteType,omitempty"`
 }
 
 // DrgAttachmentStatus defines the observed state of DrgAttachment.
 type DrgAttachmentStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the DRG attachment.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The DRG attachment's Oracle ID (OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)).
+	Id string `json:"id,omitempty"`
+	// The DRG attachment's current state.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The date and time the DRG attachment was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// Indicates whether the DRG attachment and attached network live in a different tenancy than the DRG.
+	// Example: `false`
+	IsCrossTenancy bool `json:"isCrossTenancy,omitempty"`
 }
 
 // +kubebuilder:object:root=true

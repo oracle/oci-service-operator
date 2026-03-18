@@ -14,8 +14,6 @@ import (
 
 // FastConnectProviderVirtualCircuitBandwidthShapeSpec defines the desired state of FastConnectProviderVirtualCircuitBandwidthShape.
 type FastConnectProviderVirtualCircuitBandwidthShapeSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // FastConnectProviderVirtualCircuitBandwidthShapeStatus defines the observed state of FastConnectProviderVirtualCircuitBandwidthShape.

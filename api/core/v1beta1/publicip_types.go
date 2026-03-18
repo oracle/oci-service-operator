@@ -14,25 +14,75 @@ import (
 
 // PublicIpSpec defines the desired state of PublicIp.
 type PublicIpSpec struct {
-	Id                 shared.OCID       `json:"id,omitempty"`
-	CompartmentId      shared.OCID       `json:"compartmentId,omitempty"`
-	Lifetime           string            `json:"lifetime,omitempty"`
-	DisplayName        string            `json:"displayName,omitempty"`
-	FreeformTags       map[string]string `json:"freeformTags,omitempty"`
-	PrivateIpId        string            `json:"privateIpId,omitempty"`
-	PublicIpPoolId     string            `json:"publicIpPoolId,omitempty"`
-	AssignedEntityId   string            `json:"assignedEntityId,omitempty"`
-	AssignedEntityType string            `json:"assignedEntityType,omitempty"`
-	AvailabilityDomain string            `json:"availabilityDomain,omitempty"`
-	IpAddress          string            `json:"ipAddress,omitempty"`
-	LifecycleState     string            `json:"lifecycleState,omitempty"`
-	Scope              string            `json:"scope,omitempty"`
-	TimeCreated        string            `json:"timeCreated,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment to contain the public IP. For ephemeral public IPs,
+	// you must set this to the private IP's compartment OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm).
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// Defines when the public IP is deleted and released back to the Oracle Cloud
+	// Infrastructure public IP pool. For more information, see
+	// Public IP Addresses (https://docs.cloud.oracle.com/iaas/Content/Network/Tasks/managingpublicIPs.htm).
+	// +kubebuilder:validation:Required
+	Lifetime string `json:"lifetime"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the private IP to assign the public IP to.
+	// Required for an ephemeral public IP because it must always be assigned to a private IP
+	// (specifically a *primary* private IP).
+	// Optional for a reserved public IP. If you don't provide it, the public IP is created but not
+	// assigned to a private IP. You can later assign the public IP with
+	// UpdatePublicIp.
+	// +kubebuilder:validation:Optional
+	PrivateIpId string `json:"privateIpId,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the public IP pool.
+	// +kubebuilder:validation:Optional
+	PublicIpPoolId string `json:"publicIpPoolId,omitempty"`
 }
 
 // PublicIpStatus defines the observed state of PublicIp.
 type PublicIpStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the entity the public IP is assigned to, or in the process of
+	// being assigned to.
+	AssignedEntityId string `json:"assignedEntityId,omitempty"`
+	// The type of entity the public IP is assigned to, or in the process of being
+	// assigned to.
+	AssignedEntityType string `json:"assignedEntityType,omitempty"`
+	// The public IP's availability domain. This property is set only for ephemeral public IPs
+	// that are assigned to a private IP (that is, when the `scope` of the public IP is set to
+	// AVAILABILITY_DOMAIN). The value is the availability domain of the assigned private IP.
+	// Example: `Uocm:PHX-AD-1`
+	AvailabilityDomain string `json:"availabilityDomain,omitempty"`
+	// The public IP's Oracle ID (OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)).
+	Id string `json:"id,omitempty"`
+	// The public IP address of the `publicIp` object.
+	// Example: `203.0.113.2`
+	IpAddress string `json:"ipAddress,omitempty"`
+	// The public IP's current state.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// Whether the public IP is regional or specific to a particular availability domain.
+	// * `REGION`: The public IP exists within a region and is assigned to a regional entity
+	// (such as a NatGateway), or can be assigned to a private
+	// IP in any availability domain in the region. Reserved public IPs and ephemeral public IPs
+	// assigned to a regional entity have `scope` = `REGION`.
+	// * `AVAILABILITY_DOMAIN`: The public IP exists within the availability domain of the entity
+	// it's assigned to, which is specified by the `availabilityDomain` property of the public IP object.
+	// Ephemeral public IPs that are assigned to private IPs have `scope` = `AVAILABILITY_DOMAIN`.
+	Scope string `json:"scope,omitempty"`
+	// The date and time the public IP was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
 }
 
 // +kubebuilder:object:root=true

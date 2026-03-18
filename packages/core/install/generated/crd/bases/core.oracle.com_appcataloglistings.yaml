@@ -15,10 +15,6 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - jsonPath: .spec.displayName
-      name: DisplayName
-      priority: 1
-      type: string
     - description: status of the AppCatalogListing
       jsonPath: .status.status.conditions[-1].type
       name: Status
@@ -55,35 +51,30 @@ spec:
             type: object
           spec:
             description: AppCatalogListingSpec defines the desired state of AppCatalogListing.
-            properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              contactUrl:
-                type: string
-              description:
-                type: string
-              displayName:
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
-              listingId:
-                type: string
-              publisherLogoUrl:
-                type: string
-              publisherName:
-                type: string
-              summary:
-                type: string
-              timePublished:
-                type: string
             type: object
           status:
             description: AppCatalogListingStatus defines the observed state of AppCatalogListing.
             properties:
+              contactUrl:
+                description: Listing's contact URL.
+                type: string
+              description:
+                description: Description of the listing.
+                type: string
+              displayName:
+                description: |-
+                  A user-friendly name. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
+                type: string
+              listingId:
+                description: The OCID of the listing.
+                type: string
+              publisherLogoUrl:
+                description: Publisher's logo URL.
+                type: string
+              publisherName:
+                description: Name of the publisher who published this listing.
+                type: string
               status:
                 properties:
                   conditions:
@@ -126,6 +117,14 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              summary:
+                description: Summary of the listing.
+                type: string
+              timePublished:
+                description: |-
+                  Date and time the listing was published, in RFC3339 (https://tools.ietf.org/html/rfc3339) format.
+                  Example: `2018-03-20T12:32:53.532Z`
+                type: string
             required:
             - status
             type: object

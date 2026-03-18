@@ -14,13 +14,42 @@ import (
 
 // AlarmStatusSpec defines the desired state of AlarmStatus.
 type AlarmStatusSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
+}
+
+// AlarmStatusSuppression defines nested fields for AlarmStatus.Suppression.
+type AlarmStatusSuppression struct {
+	// The start date and time for the suppression to take place, inclusive. Format defined by RFC3339.
+	// Example: `2023-02-01T01:02:29.600Z`
+	TimeSuppressFrom string `json:"timeSuppressFrom,omitempty"`
+	// The end date and time for the suppression to take place, inclusive. Format defined by RFC3339.
+	// Example: `2023-02-01T02:02:29.600Z`
+	TimeSuppressUntil string `json:"timeSuppressUntil,omitempty"`
+	// Human-readable reason for suppressing alarm notifications.
+	// It does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	// Oracle recommends including tracking information for the event or associated work,
+	// such as a ticket number.
+	// Example: `Planned outage due to change IT-1234.`
+	Description string `json:"description,omitempty"`
 }
 
 // AlarmStatusObservedState defines the observed state of AlarmStatus.
 type AlarmStatusObservedState struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the alarm.
+	Id string `json:"id,omitempty"`
+	// The configured name of the alarm.
+	// Example: `High CPU Utilization`
+	DisplayName string `json:"displayName,omitempty"`
+	// The perceived type of response required when the alarm is in the "FIRING" state.
+	// Example: `CRITICAL`
+	Severity string `json:"severity,omitempty"`
+	// Timestamp for the transition of the alarm state. For example, the time when the alarm transitioned from OK to Firing.
+	// Note: A three-minute lag for this value accounts for any late-arriving metrics.
+	// Example: `2023-02-01T01:02:29.600Z`
+	TimestampTriggered string `json:"timestampTriggered,omitempty"`
+	// The configuration details for suppressing an alarm.
+	Suppression AlarmStatusSuppression `json:"suppression,omitempty"`
 }
 
 // +kubebuilder:object:root=true

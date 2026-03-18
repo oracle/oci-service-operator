@@ -14,16 +14,18 @@ import (
 
 // WorkRequestErrorSpec defines the desired state of WorkRequestError.
 type WorkRequestErrorSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
-	Code          string      `json:"code,omitempty"`
-	Message       string      `json:"message,omitempty"`
-	Timestamp     string      `json:"timestamp,omitempty"`
 }
 
 // WorkRequestErrorStatus defines the observed state of WorkRequestError.
 type WorkRequestErrorStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// A machine-usable code for the error that occured. Error codes are listed on
+	// (https://docs.cloud.oracle.com/Content/API/References/apierrors.htm)
+	Code string `json:"code,omitempty"`
+	// A human readable description of the issue encountered.
+	Message string `json:"message,omitempty"`
+	// The time the error occured. An RFC 3339 (https://tools.ietf.org/rfc/rfc3339) formatted datetime string.
+	Timestamp string `json:"timestamp,omitempty"`
 }
 
 // +kubebuilder:object:root=true

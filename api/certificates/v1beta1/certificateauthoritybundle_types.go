@@ -14,22 +14,51 @@ import (
 
 // CertificateAuthorityBundleSpec defines the desired state of CertificateAuthorityBundle.
 type CertificateAuthorityBundleSpec struct {
-	Id                       shared.OCID `json:"id,omitempty"`
-	CompartmentId            shared.OCID `json:"compartmentId,omitempty"`
-	CertificateAuthorityId   string      `json:"certificateAuthorityId,omitempty"`
-	CertificateAuthorityName string      `json:"certificateAuthorityName,omitempty"`
-	SerialNumber             string      `json:"serialNumber,omitempty"`
-	CertificatePem           string      `json:"certificatePem,omitempty"`
-	TimeCreated              string      `json:"timeCreated,omitempty"`
-	VersionNumber            int64       `json:"versionNumber,omitempty"`
-	Stages                   []string    `json:"stages,omitempty"`
-	CertChainPem             string      `json:"certChainPem,omitempty"`
-	VersionName              string      `json:"versionName,omitempty"`
+}
+
+// CertificateAuthorityBundleValidity defines nested fields for CertificateAuthorityBundle.Validity.
+type CertificateAuthorityBundleValidity struct {
+	// The date on which the certificate validity period begins, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2019-04-03T21:10:29.600Z`
+	TimeOfValidityNotBefore string `json:"timeOfValidityNotBefore,omitempty"`
+	// The date on which the certificate validity period ends, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2019-04-03T21:10:29.600Z`
+	TimeOfValidityNotAfter string `json:"timeOfValidityNotAfter,omitempty"`
+}
+
+// CertificateAuthorityBundleRevocationStatus defines nested fields for CertificateAuthorityBundle.RevocationStatus.
+type CertificateAuthorityBundleRevocationStatus struct {
+	// The time when the certificate or CA was revoked.
+	TimeRevoked string `json:"timeRevoked,omitempty"`
+	// The reason that the certificate or CA was revoked.
+	RevocationReason string `json:"revocationReason,omitempty"`
 }
 
 // CertificateAuthorityBundleStatus defines the observed state of CertificateAuthorityBundle.
 type CertificateAuthorityBundleStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the certificate authority (CA).
+	CertificateAuthorityId string `json:"certificateAuthorityId,omitempty"`
+	// The name of the CA.
+	CertificateAuthorityName string `json:"certificateAuthorityName,omitempty"`
+	// A unique certificate identifier used in certificate revocation tracking, formatted as octets.
+	// Example: `03 AC FC FA CC B3 CB 02 B8 F8 DE F5 85 E7 7B FF`
+	SerialNumber string `json:"serialNumber,omitempty"`
+	// The certificate (in PEM format) for this CA version.
+	CertificatePem string `json:"certificatePem,omitempty"`
+	// A property indicating when the CA was created, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2019-04-03T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The version number of the CA.
+	VersionNumber int64                              `json:"versionNumber,omitempty"`
+	Validity      CertificateAuthorityBundleValidity `json:"validity,omitempty"`
+	// A list of rotation states for this CA.
+	Stages []string `json:"stages,omitempty"`
+	// The certificate chain (in PEM format) for this CA version.
+	CertChainPem string `json:"certChainPem,omitempty"`
+	// The name of the CA.
+	VersionName      string                                     `json:"versionName,omitempty"`
+	RevocationStatus CertificateAuthorityBundleRevocationStatus `json:"revocationStatus,omitempty"`
 }
 
 // +kubebuilder:object:root=true

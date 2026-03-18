@@ -14,8 +14,6 @@ import (
 
 // AllDrgAttachmentSpec defines the desired state of AllDrgAttachment.
 type AllDrgAttachmentSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // AllDrgAttachmentStatus defines the observed state of AllDrgAttachment.

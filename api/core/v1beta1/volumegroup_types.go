@@ -14,23 +14,87 @@ import (
 
 // VolumeGroupSpec defines the desired state of VolumeGroup.
 type VolumeGroupSpec struct {
-	Id                 shared.OCID       `json:"id,omitempty"`
-	CompartmentId      shared.OCID       `json:"compartmentId,omitempty"`
-	AvailabilityDomain string            `json:"availabilityDomain,omitempty"`
-	BackupPolicyId     string            `json:"backupPolicyId,omitempty"`
-	DisplayName        string            `json:"displayName,omitempty"`
-	FreeformTags       map[string]string `json:"freeformTags,omitempty"`
-	VolumeIds          []string          `json:"volumeIds,omitempty"`
-	LifecycleState     string            `json:"lifecycleState,omitempty"`
-	SizeInMBs          int64             `json:"sizeInMBs,omitempty"`
-	TimeCreated        string            `json:"timeCreated,omitempty"`
-	SizeInGBs          int64             `json:"sizeInGBs,omitempty"`
-	IsHydrated         bool              `json:"isHydrated,omitempty"`
+	// The availability domain of the volume group.
+	// +kubebuilder:validation:Required
+	AvailabilityDomain string `json:"availabilityDomain"`
+	// The OCID of the compartment that contains the volume group.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// +kubebuilder:validation:Required
+	SourceDetails VolumeGroupSourceDetails `json:"sourceDetails"`
+	// If provided, specifies the ID of the volume backup policy to assign to the newly
+	// created volume group. If omitted, no policy will be assigned.
+	// +kubebuilder:validation:Optional
+	BackupPolicyId string `json:"backupPolicyId,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// The list of volume group replicas that this volume group will be enabled to have
+	// in the specified destination availability domains.
+	// +kubebuilder:validation:Optional
+	VolumeGroupReplicas []VolumeGroupReplicaFields `json:"volumeGroupReplicas,omitempty"`
+	// OCIDs for the volumes in this volume group.
+	// +kubebuilder:validation:Optional
+	VolumeIds []string `json:"volumeIds,omitempty"`
+}
+
+// VolumeGroupSourceDetails defines nested fields for VolumeGroup.SourceDetails.
+type VolumeGroupSourceDetails struct {
+	// +kubebuilder:validation:Optional
+	Type string `json:"type,omitempty"`
+	// The OCID of the volume group replica.
+	// +kubebuilder:validation:Required
+	VolumeGroupReplicaId string `json:"volumeGroupReplicaId"`
+	// The OCID of the volume group to clone from.
+	// +kubebuilder:validation:Required
+	VolumeGroupId string `json:"volumeGroupId"`
+	// OCIDs for the volumes in this volume group.
+	// +kubebuilder:validation:Required
+	VolumeIds []string `json:"volumeIds"`
+	// The OCID of the volume group backup to restore from.
+	// +kubebuilder:validation:Required
+	VolumeGroupBackupId string `json:"volumeGroupBackupId"`
+}
+
+// VolumeGroupReplicaFields defines nested fields for VolumeGroup.VolumeGroupReplica.
+type VolumeGroupReplicaFields struct {
+	// The availability domain of the volume group replica.
+	// Example: `Uocm:PHX-AD-1`
+	// +kubebuilder:validation:Required
+	AvailabilityDomain string `json:"availabilityDomain"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
 }
 
 // VolumeGroupStatus defines the observed state of VolumeGroup.
 type VolumeGroupStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID for the volume group.
+	Id string `json:"id,omitempty"`
+	// The current state of a volume group.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The aggregate size of the volume group in MBs.
+	SizeInMBs int64 `json:"sizeInMBs,omitempty"`
+	// The date and time the volume group was created. Format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The aggregate size of the volume group in GBs.
+	SizeInGBs int64 `json:"sizeInGBs,omitempty"`
+	// Specifies whether the newly created cloned volume group's data has finished copying
+	// from the source volume group or backup.
+	IsHydrated bool `json:"isHydrated,omitempty"`
 }
 
 // +kubebuilder:object:root=true

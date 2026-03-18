@@ -14,15 +14,21 @@ import (
 
 // VirtualCircuitPublicPrefixSpec defines the desired state of VirtualCircuitPublicPrefix.
 type VirtualCircuitPublicPrefixSpec struct {
-	Id                shared.OCID `json:"id,omitempty"`
-	CompartmentId     shared.OCID `json:"compartmentId,omitempty"`
-	CidrBlock         string      `json:"cidrBlock,omitempty"`
-	VerificationState string      `json:"verificationState,omitempty"`
+	// An individual public IP prefix (CIDR) to add to the public virtual circuit.
+	// All prefix sizes are allowed.
+	// +kubebuilder:validation:Required
+	CidrBlock string `json:"cidrBlock"`
 }
 
 // VirtualCircuitPublicPrefixStatus defines the observed state of VirtualCircuitPublicPrefix.
 type VirtualCircuitPublicPrefixStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// Oracle must verify that the customer owns the public IP prefix before traffic
+	// for that prefix can flow across the virtual circuit. Verification can take a
+	// few business days. `IN_PROGRESS` means Oracle is verifying the prefix. `COMPLETED`
+	// means verification succeeded. `FAILED` means verification failed and traffic for
+	// this prefix will not flow across the connection.
+	VerificationState string `json:"verificationState,omitempty"`
 }
 
 // +kubebuilder:object:root=true

@@ -14,22 +14,117 @@ import (
 
 // ResolverSpec defines the desired state of Resolver.
 type ResolverSpec struct {
-	Id             shared.OCID       `json:"id,omitempty"`
-	CompartmentId  shared.OCID       `json:"compartmentId,omitempty"`
-	DisplayName    string            `json:"displayName,omitempty"`
-	FreeformTags   map[string]string `json:"freeformTags,omitempty"`
-	TimeCreated    string            `json:"timeCreated,omitempty"`
-	TimeUpdated    string            `json:"timeUpdated,omitempty"`
-	LifecycleState string            `json:"lifecycleState,omitempty"`
-	Self           string            `json:"self,omitempty"`
-	IsProtected    bool              `json:"isProtected,omitempty"`
-	AttachedVcnId  string            `json:"attachedVcnId,omitempty"`
-	DefaultViewId  string            `json:"defaultViewId,omitempty"`
+	// The display name of the resolver.
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	//
+	// **Example:** `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	//
+	// **Example:** `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// The attached views. Views are evaluated in order.
+	// +kubebuilder:validation:Optional
+	AttachedViews []ResolverAttachedView `json:"attachedViews,omitempty"`
+	// Rules for the resolver. Rules are evaluated in order.
+	// +kubebuilder:validation:Optional
+	Rules []ResolverRule `json:"rules,omitempty"`
+}
+
+// ResolverAttachedView defines nested fields for Resolver.AttachedView.
+type ResolverAttachedView struct {
+	// The OCID of the view.
+	// +kubebuilder:validation:Required
+	ViewId string `json:"viewId"`
+}
+
+// ResolverRule defines nested fields for Resolver.Rule.
+type ResolverRule struct {
+	// A list of CIDR blocks. The query must come from a client within one of the blocks in order for the rule action
+	// to apply.
+	// +kubebuilder:validation:Optional
+	ClientAddressConditions []string `json:"clientAddressConditions,omitempty"`
+	// A list of domain names. The query must be covered by one of the domains in order for the rule action to apply.
+	// +kubebuilder:validation:Optional
+	QnameCoverConditions []string `json:"qnameCoverConditions,omitempty"`
+	// +kubebuilder:validation:Optional
+	Action string `json:"action,omitempty"`
+	// IP addresses to which queries should be forwarded. Currently limited to a single address.
+	// +kubebuilder:validation:Required
+	DestinationAddresses []string `json:"destinationAddresses"`
+	// Case-insensitive name of an endpoint, that is a sub-resource of the resolver, to use as the forwarding
+	// interface. The endpoint must have isForwarding set to true.
+	// +kubebuilder:validation:Required
+	SourceEndpointName string `json:"sourceEndpointName"`
+}
+
+// ResolverEndpointFields defines nested fields for Resolver.Endpoint.
+type ResolverEndpointFields struct {
+	// An IP address from which forwarded queries may be sent. For VNIC endpoints, this IP address must be part
+	// of the subnet and will be assigned by the system if unspecified when isForwarding is true.
+	ForwardingAddress string `json:"forwardingAddress,omitempty"`
+	// An IP address to listen to queries on. For VNIC endpoints this IP address must be part of the
+	// subnet and will be assigned by the system if unspecified when isListening is true.
+	ListeningAddress string `json:"listeningAddress,omitempty"`
+	// The name of the resolver endpoint. Must be unique, case-insensitive, within the resolver.
+	Name string `json:"name,omitempty"`
+	// A Boolean flag indicating whether or not the resolver endpoint is for forwarding.
+	IsForwarding bool `json:"isForwarding,omitempty"`
+	// A Boolean flag indicating whether or not the resolver endpoint is for listening.
+	IsListening bool `json:"isListening,omitempty"`
+	// The OCID of the owning compartment. This will match the resolver that the resolver endpoint is under
+	// and will be updated if the resolver's compartment is changed.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The date and time the resource was created in "YYYY-MM-ddThh:mm:ssZ" format
+	// with a Z offset, as defined by RFC 3339.
+	// **Example:** `2016-07-22T17:23:59:60Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The date and time the resource was last updated in "YYYY-MM-ddThh:mm:ssZ"
+	// format with a Z offset, as defined by RFC 3339.
+	// **Example:** `2016-07-22T17:23:59:60Z`
+	TimeUpdated string `json:"timeUpdated,omitempty"`
+	// The current state of the resource.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The canonical absolute URL of the resource.
+	Self         string `json:"self,omitempty"`
+	EndpointType string `json:"endpointType,omitempty"`
+	// The OCID of a subnet. Must be part of the VCN that the resolver is attached to.
+	SubnetId string `json:"subnetId,omitempty"`
 }
 
 // ResolverStatus defines the observed state of Resolver.
 type ResolverStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the owning compartment.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The OCID of the resolver.
+	Id string `json:"id,omitempty"`
+	// The date and time the resource was created in "YYYY-MM-ddThh:mm:ssZ" format
+	// with a Z offset, as defined by RFC 3339.
+	// **Example:** `2016-07-22T17:23:59:60Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The date and time the resource was last updated in "YYYY-MM-ddThh:mm:ssZ"
+	// format with a Z offset, as defined by RFC 3339.
+	// **Example:** `2016-07-22T17:23:59:60Z`
+	TimeUpdated string `json:"timeUpdated,omitempty"`
+	// The current state of the resource.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The canonical absolute URL of the resource.
+	Self string `json:"self,omitempty"`
+	// A Boolean flag indicating whether or not parts of the resource are unable to be explicitly managed.
+	IsProtected bool `json:"isProtected,omitempty"`
+	// Read-only array of endpoints for the resolver.
+	Endpoints []ResolverEndpointFields `json:"endpoints,omitempty"`
+	// The OCID of the attached VCN.
+	AttachedVcnId string `json:"attachedVcnId,omitempty"`
+	// The OCID of the default view.
+	DefaultViewId string `json:"defaultViewId,omitempty"`
 }
 
 // +kubebuilder:object:root=true

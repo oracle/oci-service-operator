@@ -14,21 +14,35 @@ import (
 
 // SmtpCredentialSpec defines the desired state of SmtpCredential.
 type SmtpCredentialSpec struct {
-	Id             shared.OCID `json:"id,omitempty"`
-	CompartmentId  shared.OCID `json:"compartmentId,omitempty"`
-	Description    string      `json:"description,omitempty"`
-	Username       string      `json:"username,omitempty"`
-	Password       string      `json:"password,omitempty"`
-	UserId         string      `json:"userId,omitempty"`
-	TimeCreated    string      `json:"timeCreated,omitempty"`
-	TimeExpires    string      `json:"timeExpires,omitempty"`
-	LifecycleState string      `json:"lifecycleState,omitempty"`
-	InactiveStatus int64       `json:"inactiveStatus,omitempty"`
+	// The description you assign to the SMTP credentials during creation. Does not have to be unique, and it's changeable.
+	// (For tenancies that support identity domains) You can have an empty description.
+	// +kubebuilder:validation:Required
+	Description string `json:"description"`
 }
 
 // SmtpCredentialStatus defines the observed state of SmtpCredential.
 type SmtpCredentialStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The SMTP user name.
+	Username string `json:"username,omitempty"`
+	// The SMTP password.
+	Password string `json:"password,omitempty"`
+	// The OCID of the SMTP credential.
+	Id string `json:"id,omitempty"`
+	// The OCID of the user the SMTP credential belongs to.
+	UserId string `json:"userId,omitempty"`
+	// Date and time the `SmtpCredential` object was created, in the format defined by RFC3339.
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// Date and time when this credential will expire, in the format defined by RFC3339.
+	// Null if it never expires.
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeExpires string `json:"timeExpires,omitempty"`
+	// The credential's current state. After creating a SMTP credential, make sure its `lifecycleState` changes from
+	// CREATING to ACTIVE before using it.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The detailed status of INACTIVE lifecycleState.
+	InactiveStatus int64 `json:"inactiveStatus,omitempty"`
 }
 
 // +kubebuilder:object:root=true

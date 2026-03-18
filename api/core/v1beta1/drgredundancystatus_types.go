@@ -14,14 +14,13 @@ import (
 
 // DrgRedundancyStatusSpec defines the desired state of DrgRedundancyStatus.
 type DrgRedundancyStatusSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
-	Status        string      `json:"status,omitempty"`
 }
 
 // DrgRedundancyStatusObservedState defines the observed state of DrgRedundancyStatus.
 type DrgRedundancyStatusObservedState struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the DRG.
+	Id string `json:"id,omitempty"`
 }
 
 // +kubebuilder:object:root=true

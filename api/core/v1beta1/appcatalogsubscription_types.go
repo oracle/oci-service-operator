@@ -14,29 +14,49 @@ import (
 
 // AppCatalogSubscriptionSpec defines the desired state of AppCatalogSubscription.
 type AppCatalogSubscriptionSpec struct {
-	Id                     shared.OCID `json:"id,omitempty"`
-	CompartmentId          shared.OCID `json:"compartmentId,omitempty"`
-	ListingId              string      `json:"listingId,omitempty"`
-	ListingResourceVersion string      `json:"listingResourceVersion,omitempty"`
-	OracleTermsOfUseLink   string      `json:"oracleTermsOfUseLink,omitempty"`
-	TimeRetrieved          string      `json:"timeRetrieved,omitempty"`
-	Signature              string      `json:"signature,omitempty"`
-	EulaLink               string      `json:"eulaLink,omitempty"`
-	PublisherName          string      `json:"publisherName,omitempty"`
-	ListingResourceId      string      `json:"listingResourceId,omitempty"`
-	DisplayName            string      `json:"displayName,omitempty"`
-	Summary                string      `json:"summary,omitempty"`
-	TimeCreated            string      `json:"timeCreated,omitempty"`
+	// The compartmentID for the subscription.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// The OCID of the listing.
+	// +kubebuilder:validation:Required
+	ListingId string `json:"listingId"`
+	// Listing resource version.
+	// +kubebuilder:validation:Required
+	ListingResourceVersion string `json:"listingResourceVersion"`
+	// Oracle TOU link
+	// +kubebuilder:validation:Required
+	OracleTermsOfUseLink string `json:"oracleTermsOfUseLink"`
+	// Date and time the agreements were retrieved, in RFC3339 (https://tools.ietf.org/html/rfc3339) format.
+	// Example: `2018-03-20T12:32:53.532Z`
+	// +kubebuilder:validation:Required
+	TimeRetrieved string `json:"timeRetrieved"`
+	// A generated signature for this listing resource version retrieved the agreements API.
+	// +kubebuilder:validation:Required
+	Signature string `json:"signature"`
+	// EULA link
+	// +kubebuilder:validation:Optional
+	EulaLink string `json:"eulaLink,omitempty"`
 }
 
 // AppCatalogSubscriptionStatus defines the observed state of AppCatalogSubscription.
 type AppCatalogSubscriptionStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// Name of the publisher who published this listing.
+	PublisherName string `json:"publisherName,omitempty"`
+	// Listing resource id.
+	ListingResourceId string `json:"listingResourceId,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	DisplayName string `json:"displayName,omitempty"`
+	// The short summary to the listing.
+	Summary string `json:"summary,omitempty"`
+	// Date and time at which the subscription was created, in RFC3339 (https://tools.ietf.org/html/rfc3339) format.
+	// Example: `2018-03-20T12:32:53.532Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="DisplayName",type="string",JSONPath=".spec.displayName",priority=1
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.status.conditions[-1].type",description="status of the AppCatalogSubscription",priority=0
 // +kubebuilder:printcolumn:name="Ocid",type="string",JSONPath=".status.status.ocid",description="Ocid of the AppCatalogSubscription",priority=1
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0

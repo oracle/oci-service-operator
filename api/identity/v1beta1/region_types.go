@@ -14,20 +14,23 @@ import (
 
 // RegionSpec defines the desired state of Region.
 type RegionSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
-	Key           string      `json:"key,omitempty"`
-	Name          string      `json:"name,omitempty"`
 }
 
 // RegionStatus defines the observed state of Region.
 type RegionStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The key of the region. See Regions and Availability Domains (https://docs.cloud.oracle.com/Content/General/Concepts/regions.htm) for
+	// the full list of supported 3-letter region codes.
+	// Example: `PHX`
+	Key string `json:"key,omitempty"`
+	// The name of the region. See Regions and Availability Domains (https://docs.cloud.oracle.com/Content/General/Concepts/regions.htm)
+	// for the full list of supported region names.
+	// Example: `us-phoenix-1`
+	Name string `json:"name,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Name",type="string",JSONPath=".spec.name",priority=1
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.status.conditions[-1].type",description="status of the Region",priority=0
 // +kubebuilder:printcolumn:name="Ocid",type="string",JSONPath=".status.status.ocid",description="Ocid of the Region",priority=1
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0

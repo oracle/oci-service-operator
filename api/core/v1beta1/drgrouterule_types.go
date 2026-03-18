@@ -14,20 +14,42 @@ import (
 
 // DrgRouteRuleSpec defines the desired state of DrgRouteRule.
 type DrgRouteRuleSpec struct {
-	Id                     shared.OCID `json:"id,omitempty"`
-	CompartmentId          shared.OCID `json:"compartmentId,omitempty"`
-	Destination            string      `json:"destination,omitempty"`
-	DestinationType        string      `json:"destinationType,omitempty"`
-	NextHopDrgAttachmentId string      `json:"nextHopDrgAttachmentId,omitempty"`
-	RouteProvenance        string      `json:"routeProvenance,omitempty"`
-	RouteType              string      `json:"routeType,omitempty"`
-	IsConflict             bool        `json:"isConflict,omitempty"`
-	IsBlackhole            bool        `json:"isBlackhole,omitempty"`
+	// The Oracle-assigned ID of each DRG route rule to update.
+	// +kubebuilder:validation:Required
+	Id string `json:"id"`
+	// The range of IP addresses used for matching when routing traffic.
+	// Potential values:
+	//   * IP address range in CIDR notation. Can be an IPv4 CIDR block or IPv6 prefix. For example: `192.168.1.0/24`
+	//   or `2001:0db8:0123:45::/56`.
+	// +kubebuilder:validation:Optional
+	Destination string `json:"destination,omitempty"`
+	// Type of destination for the rule.
+	// Allowed values:
+	//   * `CIDR_BLOCK`: If the rule's `destination` is an IP address range in CIDR notation.
+	// +kubebuilder:validation:Optional
+	DestinationType string `json:"destinationType,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the next hop DRG attachment. The next hop DRG attachment is responsible
+	// for reaching the network destination.
+	// +kubebuilder:validation:Optional
+	NextHopDrgAttachmentId string `json:"nextHopDrgAttachmentId,omitempty"`
 }
 
 // DrgRouteRuleStatus defines the observed state of DrgRouteRule.
 type DrgRouteRuleStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The earliest origin of a route. If a route is advertised to a DRG through an IPsec tunnel attachment,
+	// and is propagated to peered DRGs via RPC attachments, the route's provenance in the peered DRGs remains `IPSEC_TUNNEL`,
+	// because that is the earliest origin.
+	// No routes with a provenance `IPSEC_TUNNEL` or `VIRTUAL_CIRCUIT` will be exported to IPsec tunnel or virtual circuit attachments,
+	// regardless of the attachment's export distribution.
+	RouteProvenance string `json:"routeProvenance,omitempty"`
+	// You can specify static routes for the DRG route table using the API.
+	// The DRG learns dynamic routes from the DRG attachments using various routing protocols.
+	RouteType string `json:"routeType,omitempty"`
+	// Indicates that the route was not imported due to a conflict between route rules.
+	IsConflict bool `json:"isConflict,omitempty"`
+	// Indicates that if the next hop attachment does not exist, so traffic for this route is discarded without notification.
+	IsBlackhole bool `json:"isBlackhole,omitempty"`
 }
 
 // +kubebuilder:object:root=true

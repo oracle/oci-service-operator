@@ -14,17 +14,57 @@ import (
 
 // ResolverEndpointSpec defines the desired state of ResolverEndpoint.
 type ResolverEndpointSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
+	// An IP address from which forwarded queries may be sent. For VNIC endpoints, this IP address must be part
+	// of the subnet and will be assigned by the system if unspecified when isForwarding is true.
+	// +kubebuilder:validation:Optional
+	ForwardingAddress string `json:"forwardingAddress,omitempty"`
+	// An IP address to listen to queries on. For VNIC endpoints this IP address must be part of the
+	// subnet and will be assigned by the system if unspecified when isListening is true.
+	// +kubebuilder:validation:Optional
+	ListeningAddress string `json:"listeningAddress,omitempty"`
+	// The name of the resolver endpoint. Must be unique, case-insensitive, within the resolver.
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+	// A Boolean flag indicating whether or not the resolver endpoint is for forwarding.
+	// +kubebuilder:validation:Required
+	IsForwarding bool `json:"isForwarding"`
+	// A Boolean flag indicating whether or not the resolver endpoint is for listening.
+	// +kubebuilder:validation:Required
+	IsListening bool `json:"isListening"`
+	// +kubebuilder:validation:Optional
+	EndpointType string `json:"endpointType,omitempty"`
+	// The OCID of a subnet. Must be part of the VCN that the resolver is attached to.
+	// +kubebuilder:validation:Required
+	SubnetId string `json:"subnetId"`
+	// An array of network security group OCIDs for the resolver endpoint. These must be part of the VCN that the
+	// resolver endpoint is a part of.
+	// +kubebuilder:validation:Optional
+	NsgIds []string `json:"nsgIds,omitempty"`
 }
 
 // ResolverEndpointStatus defines the observed state of ResolverEndpoint.
 type ResolverEndpointStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the owning compartment. This will match the resolver that the resolver endpoint is under
+	// and will be updated if the resolver's compartment is changed.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The date and time the resource was created in "YYYY-MM-ddThh:mm:ssZ" format
+	// with a Z offset, as defined by RFC 3339.
+	// **Example:** `2016-07-22T17:23:59:60Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The date and time the resource was last updated in "YYYY-MM-ddThh:mm:ssZ"
+	// format with a Z offset, as defined by RFC 3339.
+	// **Example:** `2016-07-22T17:23:59:60Z`
+	TimeUpdated string `json:"timeUpdated,omitempty"`
+	// The current state of the resource.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The canonical absolute URL of the resource.
+	Self string `json:"self,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Name",type="string",JSONPath=".spec.name",priority=1
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.status.conditions[-1].type",description="status of the ResolverEndpoint",priority=0
 // +kubebuilder:printcolumn:name="Ocid",type="string",JSONPath=".status.status.ocid",description="Ocid of the ResolverEndpoint",priority=1
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0

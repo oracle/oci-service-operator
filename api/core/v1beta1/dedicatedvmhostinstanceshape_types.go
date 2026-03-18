@@ -14,13 +14,15 @@ import (
 
 // DedicatedVmHostInstanceShapeSpec defines the desired state of DedicatedVmHostInstanceShape.
 type DedicatedVmHostInstanceShapeSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // DedicatedVmHostInstanceShapeStatus defines the observed state of DedicatedVmHostInstanceShape.
 type DedicatedVmHostInstanceShapeStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The name of the virtual machine instance shapes that can be launched on a dedicated VM host.
+	InstanceShapeName string `json:"instanceShapeName,omitempty"`
+	// The shape's availability domain.
+	AvailabilityDomain string `json:"availabilityDomain,omitempty"`
 }
 
 // +kubebuilder:object:root=true

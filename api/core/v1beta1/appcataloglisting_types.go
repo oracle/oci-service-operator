@@ -14,26 +14,33 @@ import (
 
 // AppCatalogListingSpec defines the desired state of AppCatalogListing.
 type AppCatalogListingSpec struct {
-	Id               shared.OCID `json:"id,omitempty"`
-	CompartmentId    shared.OCID `json:"compartmentId,omitempty"`
-	ContactUrl       string      `json:"contactUrl,omitempty"`
-	Description      string      `json:"description,omitempty"`
-	ListingId        string      `json:"listingId,omitempty"`
-	DisplayName      string      `json:"displayName,omitempty"`
-	TimePublished    string      `json:"timePublished,omitempty"`
-	PublisherLogoUrl string      `json:"publisherLogoUrl,omitempty"`
-	PublisherName    string      `json:"publisherName,omitempty"`
-	Summary          string      `json:"summary,omitempty"`
 }
 
 // AppCatalogListingStatus defines the observed state of AppCatalogListing.
 type AppCatalogListingStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// Listing's contact URL.
+	ContactUrl string `json:"contactUrl,omitempty"`
+	// Description of the listing.
+	Description string `json:"description,omitempty"`
+	// The OCID of the listing.
+	ListingId string `json:"listingId,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	DisplayName string `json:"displayName,omitempty"`
+	// Date and time the listing was published, in RFC3339 (https://tools.ietf.org/html/rfc3339) format.
+	// Example: `2018-03-20T12:32:53.532Z`
+	TimePublished string `json:"timePublished,omitempty"`
+	// Publisher's logo URL.
+	PublisherLogoUrl string `json:"publisherLogoUrl,omitempty"`
+	// Name of the publisher who published this listing.
+	PublisherName string `json:"publisherName,omitempty"`
+	// Summary of the listing.
+	Summary string `json:"summary,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="DisplayName",type="string",JSONPath=".spec.displayName",priority=1
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.status.conditions[-1].type",description="status of the AppCatalogListing",priority=0
 // +kubebuilder:printcolumn:name="Ocid",type="string",JSONPath=".status.status.ocid",description="Ocid of the AppCatalogListing",priority=1
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0

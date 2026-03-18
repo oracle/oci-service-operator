@@ -53,24 +53,41 @@ spec:
           spec:
             description: ImageShapeCompatibilityEntrySpec defines the desired state
               of ImageShapeCompatibilityEntry.
-            properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
-              imageId:
-                type: string
-              shape:
-                type: string
             type: object
           status:
             description: ImageShapeCompatibilityEntryStatus defines the observed state
               of ImageShapeCompatibilityEntry.
             properties:
+              imageId:
+                description: The image OCID.
+                type: string
+              memoryConstraints:
+                description: ImageShapeCompatibilityEntryMemoryConstraints defines
+                  nested fields for ImageShapeCompatibilityEntry.MemoryConstraints.
+                properties:
+                  maxInGBs:
+                    description: The maximum amount of memory, in gigabytes.
+                    type: integer
+                  minInGBs:
+                    description: The minimum amount of memory, in gigabytes.
+                    type: integer
+                type: object
+              ocpuConstraints:
+                description: ImageShapeCompatibilityEntryOcpuConstraints defines nested
+                  fields for ImageShapeCompatibilityEntry.OcpuConstraints.
+                properties:
+                  max:
+                    description: The maximum number of OCPUs supported for this image
+                      and shape.
+                    type: integer
+                  min:
+                    description: The minimum number of OCPUs supported for this image
+                      and shape.
+                    type: integer
+                type: object
+              shape:
+                description: The shape name.
+                type: string
               status:
                 properties:
                   conditions:

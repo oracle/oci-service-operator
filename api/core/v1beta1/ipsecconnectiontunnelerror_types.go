@@ -14,8 +14,6 @@ import (
 
 // IPSecConnectionTunnelErrorSpec defines the desired state of IPSecConnectionTunnelError.
 type IPSecConnectionTunnelErrorSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // IPSecConnectionTunnelErrorStatus defines the observed state of IPSecConnectionTunnelError.

@@ -14,10 +14,16 @@ import (
 
 // HostnameSpec defines the desired state of Hostname.
 type HostnameSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
-	Name          string      `json:"name,omitempty"`
-	Hostname      string      `json:"hostname,omitempty"`
+	// A friendly name for the hostname resource. It must be unique and it cannot be changed. Avoid entering confidential
+	// information.
+	// Example: `example_hostname_001`
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+	// A virtual hostname. For more information about virtual hostname string construction, see
+	// Managing Request Routing (https://docs.cloud.oracle.com/Content/Balance/Tasks/managingrequest.htm#routing).
+	// Example: `app.example.com`
+	// +kubebuilder:validation:Required
+	Hostname string `json:"hostname"`
 }
 
 // HostnameStatus defines the observed state of Hostname.

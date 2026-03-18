@@ -14,13 +14,34 @@ import (
 
 // UserCapabilitySpec defines the desired state of UserCapability.
 type UserCapabilitySpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
+	// Indicates if the user can log in to the console.
+	// +kubebuilder:validation:Optional
+	CanUseConsolePassword bool `json:"canUseConsolePassword,omitempty"`
+	// Indicates if the user can use API keys.
+	// +kubebuilder:validation:Optional
+	CanUseApiKeys bool `json:"canUseApiKeys,omitempty"`
+	// Indicates if the user can use SWIFT passwords / auth tokens.
+	// +kubebuilder:validation:Optional
+	CanUseAuthTokens bool `json:"canUseAuthTokens,omitempty"`
+	// Indicates if the user can use SMTP passwords.
+	// +kubebuilder:validation:Optional
+	CanUseSmtpCredentials bool `json:"canUseSmtpCredentials,omitempty"`
+	// Indicates if the user can use DB passwords.
+	// +kubebuilder:validation:Optional
+	CanUseDBCredentials bool `json:"canUseDBCredentials,omitempty"`
+	// Indicates if the user can use SigV4 symmetric keys.
+	// +kubebuilder:validation:Optional
+	CanUseCustomerSecretKeys bool `json:"canUseCustomerSecretKeys,omitempty"`
+	// Indicates if the user can use OAuth2 credentials and tokens.
+	// +kubebuilder:validation:Optional
+	CanUseOAuth2ClientCredentials bool `json:"canUseOAuth2ClientCredentials,omitempty"`
 }
 
 // UserCapabilityStatus defines the observed state of UserCapability.
 type UserCapabilityStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// Indicates if the user can use DB passwords.
+	CanUseDbCredentials bool `json:"canUseDbCredentials,omitempty"`
 }
 
 // +kubebuilder:object:root=true

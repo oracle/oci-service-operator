@@ -8,46 +8,42 @@ package generator
 import (
 	"context"
 	"fmt"
-	"go/ast"
-	"go/parser"
-	"go/token"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"reflect"
 	"regexp"
 	"sort"
-	"strconv"
 	"strings"
+
+	"github.com/oracle/oci-service-operator/internal/ocisdk"
 )
 
 var operationPattern = regexp.MustCompile(`^(Create|Get|List|Update|Delete)(.+?)(Request|Response)$`)
 
-type packageDirResolver func(context.Context, string) (string, error)
+type packageDirResolver = ocisdk.ResolveDirFunc
 
 // Discoverer builds the intermediate generator model from OCI SDK packages.
 type Discoverer struct {
 	resolveDir packageDirResolver
+	index      *ocisdk.Index
 }
 
 // NewDiscoverer returns the default SDK package discoverer.
 func NewDiscoverer() *Discoverer {
-	return &Discoverer{resolveDir: defaultPackageDirResolver}
+	return &Discoverer{
+		resolveDir: defaultPackageDirResolver,
+		index:      ocisdk.NewIndex(defaultPackageDirResolver),
+	}
 }
 
 // BuildPackageModel loads one OCI SDK package and converts it into a generator model.
 func (d *Discoverer) BuildPackageModel(ctx context.Context, cfg *Config, service ServiceConfig) (*PackageModel, error) {
-	dir, err := d.resolveDir(ctx, service.SDKPackage)
+	index, err := d.sdkIndex().Package(ctx, service.SDKPackage)
 	if err != nil {
-		return nil, fmt.Errorf("resolve sdk package %q: %w", service.SDKPackage, err)
+		return nil, fmt.Errorf("load sdk package %q: %w", service.SDKPackage, err)
 	}
 
-	index, err := parseSDKPackage(dir)
-	if err != nil {
-		return nil, fmt.Errorf("parse sdk package %q: %w", service.SDKPackage, err)
-	}
-
-	resources, err := index.resources(service)
+	resources, err := resourceModels(index, service)
 	if err != nil {
 		return nil, fmt.Errorf("discover resources for service %q: %w", service.Service, err)
 	}
@@ -58,6 +54,20 @@ func (d *Discoverer) BuildPackageModel(ctx context.Context, cfg *Config, service
 	}
 
 	return pkg, nil
+}
+
+func (d *Discoverer) sdkIndex() *ocisdk.Index {
+	if d.index != nil {
+		return d.index
+	}
+
+	resolver := d.resolveDir
+	if resolver == nil {
+		resolver = defaultPackageDirResolver
+		d.resolveDir = resolver
+	}
+	d.index = ocisdk.NewIndex(resolver)
+	return d.index
 }
 
 func defaultPackageDirResolver(ctx context.Context, importPath string) (string, error) {
@@ -101,130 +111,14 @@ func findModuleRoot() (string, error) {
 	}
 }
 
-type packageIndex struct {
-	typeNames []string
-	structs   map[string]structDef
-	aliases   map[string]ast.Expr
-}
-
-type structDef struct {
-	Fields []structField
-}
-
-type structField struct {
-	Name     string
-	JSONName string
-	TypeExpr ast.Expr
-}
-
-func parseSDKPackage(dir string) (*packageIndex, error) {
-	fset := token.NewFileSet()
-	pkgs, err := parser.ParseDir(fset, dir, func(info os.FileInfo) bool {
-		return !info.IsDir() && strings.HasSuffix(info.Name(), ".go") && !strings.HasSuffix(info.Name(), "_test.go")
-	}, parser.SkipObjectResolution)
-	if err != nil {
-		return nil, fmt.Errorf("parse dir %q: %w", dir, err)
-	}
-
-	if len(pkgs) == 0 {
-		return nil, fmt.Errorf("no Go package found in %q", dir)
-	}
-
-	index := &packageIndex{
-		structs: make(map[string]structDef),
-		aliases: make(map[string]ast.Expr),
-	}
-
-	for _, pkg := range pkgs {
-		for _, file := range pkg.Files {
-			for _, decl := range file.Decls {
-				genDecl, ok := decl.(*ast.GenDecl)
-				if !ok || genDecl.Tok != token.TYPE {
-					continue
-				}
-				for _, spec := range genDecl.Specs {
-					typeSpec, ok := spec.(*ast.TypeSpec)
-					if !ok || !typeSpec.Name.IsExported() {
-						continue
-					}
-
-					index.typeNames = append(index.typeNames, typeSpec.Name.Name)
-					switch concrete := typeSpec.Type.(type) {
-					case *ast.StructType:
-						index.structs[typeSpec.Name.Name] = parseStructDef(concrete)
-					default:
-						index.aliases[typeSpec.Name.Name] = concrete
-					}
-				}
-			}
-		}
-	}
-
-	sort.Strings(index.typeNames)
-	return index, nil
-}
-
-func parseStructDef(structType *ast.StructType) structDef {
-	definition := structDef{}
-	if structType.Fields == nil {
-		return definition
-	}
-
-	for _, field := range structType.Fields.List {
-		if len(field.Names) == 0 {
-			continue
-		}
-		for _, name := range field.Names {
-			if !name.IsExported() {
-				continue
-			}
-			jsonName, ok := jsonFieldName(field.Tag)
-			if !ok {
-				continue
-			}
-			definition.Fields = append(definition.Fields, structField{
-				Name:     name.Name,
-				JSONName: jsonName,
-				TypeExpr: field.Type,
-			})
-		}
-	}
-
-	return definition
-}
-
-func jsonFieldName(tag *ast.BasicLit) (string, bool) {
-	if tag == nil {
-		return "", true
-	}
-
-	unquoted, err := strconv.Unquote(tag.Value)
-	if err != nil {
-		return "", false
-	}
-	jsonTag := reflect.StructTag(unquoted).Get("json")
-	if jsonTag == "-" {
-		return "", false
-	}
-	if jsonTag == "" {
-		return "", true
-	}
-
-	name := strings.Split(jsonTag, ",")[0]
-	if name == "-" {
-		return "", false
-	}
-	return name, true
-}
-
-func (p *packageIndex) resources(service ServiceConfig) ([]ResourceModel, error) {
+func resourceModels(index *ocisdk.Package, service ServiceConfig) ([]ResourceModel, error) {
 	type candidate struct {
 		rawName    string
 		operations map[string]struct{}
 	}
 
 	candidates := make(map[string]*candidate)
-	for _, typeName := range p.typeNames {
+	for _, typeName := range index.TypeNames() {
 		matches := operationPattern.FindStringSubmatch(typeName)
 		if len(matches) == 0 {
 			continue
@@ -264,12 +158,12 @@ func (p *packageIndex) resources(service ServiceConfig) ([]ResourceModel, error)
 			compatibilityLocked = true
 		}
 
-		fields := p.specFields(entry.rawName)
+		fieldSet := synthesizeResourceFieldSet(index, kind, entry.rawName)
 		displayField := ""
 		switch {
-		case hasField(fields, "DisplayName"):
+		case hasField(fieldSet.SpecFields, "DisplayName"):
 			displayField = "DisplayName"
-		case hasField(fields, "Name"):
+		case hasField(fieldSet.SpecFields, "Name"):
 			displayField = "Name"
 		}
 
@@ -280,10 +174,11 @@ func (p *packageIndex) resources(service ServiceConfig) ([]ResourceModel, error)
 			KindPlural:          strings.ToLower(pluralize(kind)),
 			Operations:          operations,
 			SpecComments:        []string{fmt.Sprintf("%sSpec defines the desired state of %s.", kind, kind)},
-			SpecFields:          fields,
+			HelperTypes:         fieldSet.HelperTypes,
+			SpecFields:          fieldSet.SpecFields,
 			StatusTypeName:      defaultStatusTypeName(kind),
 			StatusComments:      []string{fmt.Sprintf("%s defines the observed state of %s.", defaultStatusTypeName(kind), kind)},
-			StatusFields:        defaultStatusFields(),
+			StatusFields:        fieldSet.StatusFields,
 			PrintColumns:        defaultPrintColumns(kind, displayField),
 			ObjectComments:      []string{fmt.Sprintf("%s is the Schema for the %s API.", kind, strings.ToLower(pluralize(kind)))},
 			ListComments:        []string{fmt.Sprintf("%sList contains a list of %s.", kind, kind)},
@@ -308,33 +203,59 @@ func hasField(fields []FieldModel, name string) bool {
 	return false
 }
 
-func (p *packageIndex) specFields(rawName string) []FieldModel {
-	defaults := []FieldModel{
-		{Name: "Id", Type: "shared.OCID", Tag: jsonTag("id")},
-		{Name: "CompartmentId", Type: "shared.OCID", Tag: jsonTag("compartmentId")},
-	}
-
-	candidates := []string{
+func resourceFields(index *ocisdk.Package, rawName string) ([]FieldModel, []FieldModel) {
+	specFields, desiredJSONNames := mergeStructFields(index, []string{
 		"Create" + rawName + "Details",
 		"Update" + rawName + "Details",
+	}, nil, fieldRenderingOptions{scope: fieldScopeSpec})
+
+	statusFields := defaultStatusFields()
+	statusJSONNames := fieldJSONNames(statusFields)
+	observedFields, _ := mergeStructFields(index, []string{
 		rawName,
+		rawName + "Summary",
+	}, nil, fieldRenderingOptions{scope: fieldScopeStatus})
+	for _, field := range observedFields {
+		jsonName := tagJSONName(field.Tag)
+		if _, exists := desiredJSONNames[jsonName]; exists {
+			continue
+		}
+		if _, exists := statusJSONNames[jsonName]; exists {
+			continue
+		}
+		statusFields = append(statusFields, field)
+		statusJSONNames[jsonName] = struct{}{}
 	}
 
-	merged := make([]FieldModel, 0, len(defaults)+8)
-	seenJSONNames := make(map[string]struct{}, len(defaults)+8)
-	for _, field := range defaults {
+	return specFields, statusFields
+}
+
+type fieldScope string
+
+const (
+	fieldScopeSpec   fieldScope = "spec"
+	fieldScopeStatus fieldScope = "status"
+)
+
+type fieldRenderingOptions struct {
+	scope fieldScope
+}
+
+func mergeStructFields(index *ocisdk.Package, candidates []string, initial []FieldModel, options fieldRenderingOptions) ([]FieldModel, map[string]struct{}) {
+	merged := make([]FieldModel, 0, len(initial)+8)
+	seenJSONNames := make(map[string]struct{}, len(initial)+8)
+	for _, field := range initial {
 		merged = append(merged, field)
 		seenJSONNames[tagJSONName(field.Tag)] = struct{}{}
 	}
 
 	for _, candidate := range candidates {
-		structDef, ok := p.structs[candidate]
+		structDef, ok := index.Struct(candidate)
 		if !ok {
 			continue
 		}
 		for _, field := range structDef.Fields {
-			resolvedType, ok := p.renderableType(field.TypeExpr)
-			if !ok {
+			if field.RenderableType == "" {
 				continue
 			}
 			jsonName := field.JSONName
@@ -345,65 +266,69 @@ func (p *packageIndex) specFields(rawName string) []FieldModel {
 				continue
 			}
 
-			merged = append(merged, FieldModel{
-				Name: field.Name,
-				Type: resolvedType,
-				Tag:  jsonTag(jsonName),
-			})
+			merged = append(merged, buildFieldModel(field, jsonName, options))
 			seenJSONNames[jsonName] = struct{}{}
 		}
 	}
 
-	return merged
+	return merged, seenJSONNames
 }
 
-func (p *packageIndex) renderableType(expr ast.Expr) (string, bool) {
-	switch concrete := expr.(type) {
-	case *ast.Ident:
-		switch concrete.Name {
-		case "string", "bool", "int", "int32", "int64", "float32", "float64":
-			return concrete.Name, true
-		}
-		if aliasExpr, ok := p.aliases[concrete.Name]; ok {
-			return p.renderableType(aliasExpr)
-		}
-		return "", false
-	case *ast.StarExpr:
-		return p.renderableType(concrete.X)
-	case *ast.ArrayType:
-		elementType, ok := p.renderableType(concrete.Elt)
-		if !ok {
-			return "", false
-		}
-		return "[]" + elementType, true
-	case *ast.MapType:
-		keyType, ok := p.renderableType(concrete.Key)
-		if !ok || keyType != "string" {
-			return "", false
-		}
-		valueType, ok := p.renderableType(concrete.Value)
-		if !ok {
-			return "", false
-		}
-		return fmt.Sprintf("map[%s]%s", keyType, valueType), true
-	case *ast.SelectorExpr:
-		switch concrete.Sel.Name {
-		case "SDKDate", "SDKTime", "Time":
-			return "string", true
-		default:
-			return "", false
-		}
-	default:
-		return "", false
+func buildFieldModel(field ocisdk.Field, jsonName string, options fieldRenderingOptions) FieldModel {
+	return FieldModel{
+		Name:     field.Name,
+		Type:     field.RenderableType,
+		Tag:      jsonTag(jsonName, shouldOmitEmpty(field, options)),
+		Comments: fieldComments(field),
+		Markers:  fieldMarkers(field, options),
 	}
+}
+
+func fieldComments(field ocisdk.Field) []string {
+	documentation := strings.TrimSpace(field.Documentation)
+	if documentation == "" {
+		return nil
+	}
+
+	lines := strings.Split(documentation, "\n")
+	for i, line := range lines {
+		lines[i] = strings.TrimRight(line, " \t")
+	}
+	return lines
+}
+
+func fieldMarkers(field ocisdk.Field, options fieldRenderingOptions) []string {
+	if options.scope != fieldScopeSpec {
+		return nil
+	}
+	if field.ReadOnly {
+		return nil
+	}
+	if field.Mandatory {
+		return []string{"+kubebuilder:validation:Required"}
+	}
+	return []string{"+kubebuilder:validation:Optional"}
+}
+
+func shouldOmitEmpty(field ocisdk.Field, options fieldRenderingOptions) bool {
+	if options.scope != fieldScopeSpec {
+		return true
+	}
+	if field.ReadOnly {
+		return true
+	}
+	return !field.Mandatory
 }
 
 func targetOutputDir(root string, pkg *PackageModel) string {
 	return filepath.Join(root, "api", pkg.Service.Group, pkg.Version)
 }
 
-func jsonTag(name string) string {
-	return fmt.Sprintf(`json:"%s,omitempty"`, name)
+func jsonTag(name string, omitEmpty bool) string {
+	if omitEmpty {
+		return fmt.Sprintf(`json:"%s,omitempty"`, name)
+	}
+	return fmt.Sprintf(`json:"%s"`, name)
 }
 
 func tagJSONName(tag string) string {
@@ -413,4 +338,12 @@ func tagJSONName(tag string) string {
 	}
 
 	return strings.Split(parts[1], ",")[0]
+}
+
+func fieldJSONNames(fields []FieldModel) map[string]struct{} {
+	seen := make(map[string]struct{}, len(fields))
+	for _, field := range fields {
+		seen[tagJSONName(field.Tag)] = struct{}{}
+	}
+	return seen
 }

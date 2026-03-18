@@ -14,8 +14,6 @@ import (
 
 // AlarmHistorySpec defines the desired state of AlarmHistory.
 type AlarmHistorySpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // AlarmHistoryStatus defines the observed state of AlarmHistory.

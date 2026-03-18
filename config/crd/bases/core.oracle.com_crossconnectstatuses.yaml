@@ -52,34 +52,50 @@ spec:
             type: object
           spec:
             description: CrossConnectStatusSpec defines the desired state of CrossConnectStatus.
-            properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              crossConnectId:
-                type: string
-              encryptionStatus:
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
-              interfaceState:
-                type: string
-              lightLevelIndBm:
-                type: number
-              lightLevelIndicator:
-                type: string
-              lightLevelsInDBm:
-                items:
-                  type: number
-                type: array
             type: object
           status:
             description: CrossConnectStatusObservedState defines the observed state
               of CrossConnectStatus.
             properties:
+              crossConnectId:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the cross-connect.
+                type: string
+              encryptionStatus:
+                description: |-
+                  Encryption status of this cross connect.
+                  Possible values:
+                  * **UP:** Traffic is encrypted over this cross-connect
+                  * **DOWN:** Traffic is not encrypted over this cross-connect
+                  * **CIPHER_MISMATCH:** The MACsec encryption cipher doesn't match the cipher on the CPE
+                  * **CKN_MISMATCH:** The MACsec Connectivity association Key Name (CKN) doesn't match the CKN on the CPE
+                  * **CAK_MISMATCH:** The MACsec Connectivity Association Key (CAK) doesn't match the CAK on the CPE
+                type: string
+              interfaceState:
+                description: Indicates whether Oracle's side of the interface is up
+                  or down.
+                type: string
+              lightLevelIndBm:
+                description: |-
+                  The light level of the cross-connect (in dBm).
+                  Example: `14.0`
+                type: number
+              lightLevelIndicator:
+                description: |-
+                  Status indicator corresponding to the light level.
+                    * **NO_LIGHT:** No measurable light
+                    * **LOW_WARN:** There's measurable light but it's too low
+                    * **HIGH_WARN:** Light level is too high
+                    * **BAD:** There's measurable light but the signal-to-noise ratio is bad
+                    * **GOOD:** Good light level
+                type: string
+              lightLevelsInDBm:
+                description: |-
+                  The light levels of the cross-connect (in dBm).
+                  Example: `[14.0, -14.0, 2.1, -10.1]`
+                items:
+                  type: number
+                type: array
               status:
                 properties:
                   conditions:

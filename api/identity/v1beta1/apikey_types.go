@@ -14,21 +14,31 @@ import (
 
 // ApiKeySpec defines the desired state of ApiKey.
 type ApiKeySpec struct {
-	Id             shared.OCID `json:"id,omitempty"`
-	CompartmentId  shared.OCID `json:"compartmentId,omitempty"`
-	Key            string      `json:"key,omitempty"`
-	KeyId          string      `json:"keyId,omitempty"`
-	KeyValue       string      `json:"keyValue,omitempty"`
-	Fingerprint    string      `json:"fingerprint,omitempty"`
-	UserId         string      `json:"userId,omitempty"`
-	TimeCreated    string      `json:"timeCreated,omitempty"`
-	LifecycleState string      `json:"lifecycleState,omitempty"`
-	InactiveStatus int64       `json:"inactiveStatus,omitempty"`
+	// The public key.  Must be an RSA key in PEM format.
+	// +kubebuilder:validation:Required
+	Key string `json:"key"`
 }
 
 // ApiKeyStatus defines the observed state of ApiKey.
 type ApiKeyStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// An Oracle-assigned identifier for the key, in this format:
+	// TENANCY_OCID/USER_OCID/KEY_FINGERPRINT.
+	KeyId string `json:"keyId,omitempty"`
+	// The key's value.
+	KeyValue string `json:"keyValue,omitempty"`
+	// The key's fingerprint (e.g., 12:34:56:78:90:ab:cd:ef:12:34:56:78:90:ab:cd:ef).
+	Fingerprint string `json:"fingerprint,omitempty"`
+	// The OCID of the user the key belongs to.
+	UserId string `json:"userId,omitempty"`
+	// Date and time the `ApiKey` object was created, in the format defined by RFC3339.
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The API key's current state. After creating an `ApiKey` object, make sure its `lifecycleState` changes from
+	// CREATING to ACTIVE before using it.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The detailed status of INACTIVE lifecycleState.
+	InactiveStatus int64 `json:"inactiveStatus,omitempty"`
 }
 
 // +kubebuilder:object:root=true

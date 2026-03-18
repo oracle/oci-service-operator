@@ -52,27 +52,24 @@ spec:
             type: object
           spec:
             description: ZoneTransferServerSpec defines the desired state of ZoneTransferServer.
-            properties:
-              address:
-                type: string
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
-              isTransferDestination:
-                type: boolean
-              isTransferSource:
-                type: boolean
-              port:
-                type: integer
             type: object
           status:
             description: ZoneTransferServerStatus defines the observed state of ZoneTransferServer.
             properties:
+              address:
+                description: The server's IP address (IPv4 or IPv6).
+                type: string
+              isTransferDestination:
+                description: A Boolean flag indicating whether or not the server is
+                  a zone data transfer destination.
+                type: boolean
+              isTransferSource:
+                description: A Boolean flag indicating whether or not the server is
+                  a zone data transfer source.
+                type: boolean
+              port:
+                description: The server's port.
+                type: integer
               status:
                 properties:
                   conditions:

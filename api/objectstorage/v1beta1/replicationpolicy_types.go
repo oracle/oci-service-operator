@@ -14,20 +14,29 @@ import (
 
 // ReplicationPolicySpec defines the desired state of ReplicationPolicy.
 type ReplicationPolicySpec struct {
-	Id                    shared.OCID `json:"id,omitempty"`
-	CompartmentId         shared.OCID `json:"compartmentId,omitempty"`
-	Name                  string      `json:"name,omitempty"`
-	DestinationRegionName string      `json:"destinationRegionName,omitempty"`
-	DestinationBucketName string      `json:"destinationBucketName,omitempty"`
-	TimeCreated           string      `json:"timeCreated,omitempty"`
-	TimeLastSync          string      `json:"timeLastSync,omitempty"`
-	Status                string      `json:"status,omitempty"`
-	StatusMessage         string      `json:"statusMessage,omitempty"`
+	// The name of the policy. Avoid entering confidential information.
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+	// The destination region to replicate to, for example "us-ashburn-1".
+	// +kubebuilder:validation:Required
+	DestinationRegionName string `json:"destinationRegionName"`
+	// The bucket to replicate to in the destination region. Replication policy creation does not automatically
+	// create a destination bucket. Create the destination bucket before creating the policy.
+	// +kubebuilder:validation:Required
+	DestinationBucketName string `json:"destinationBucketName"`
 }
 
 // ReplicationPolicyStatus defines the observed state of ReplicationPolicy.
 type ReplicationPolicyStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The id of the replication policy.
+	Id string `json:"id,omitempty"`
+	// The date when the replication policy was created as per RFC 3339 (https://tools.ietf.org/html/rfc3339).
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// Changes made to the source bucket before this time has been replicated.
+	TimeLastSync string `json:"timeLastSync,omitempty"`
+	// A human-readable description of the status.
+	StatusMessage string `json:"statusMessage,omitempty"`
 }
 
 // +kubebuilder:object:root=true

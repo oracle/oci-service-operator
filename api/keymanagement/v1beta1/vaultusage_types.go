@@ -14,17 +14,19 @@ import (
 
 // VaultUsageSpec defines the desired state of VaultUsage.
 type VaultUsageSpec struct {
-	Id                      shared.OCID `json:"id,omitempty"`
-	CompartmentId           shared.OCID `json:"compartmentId,omitempty"`
-	KeyCount                int         `json:"keyCount,omitempty"`
-	KeyVersionCount         int         `json:"keyVersionCount,omitempty"`
-	SoftwareKeyCount        int         `json:"softwareKeyCount,omitempty"`
-	SoftwareKeyVersionCount int         `json:"softwareKeyVersionCount,omitempty"`
 }
 
 // VaultUsageStatus defines the observed state of VaultUsage.
 type VaultUsageStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The number of keys in this vault that persist on a hardware security module (HSM), across all compartments, excluding keys in a `DELETED` state.
+	KeyCount int `json:"keyCount,omitempty"`
+	// The number of key versions in this vault that persist on a hardware security module (HSM), across all compartments, excluding key versions in a `DELETED` state.
+	KeyVersionCount int `json:"keyVersionCount,omitempty"`
+	// The number of keys in this vault that persist on the server, across all compartments, excluding keys in a `DELETED` state.
+	SoftwareKeyCount int `json:"softwareKeyCount,omitempty"`
+	// The number of key versions in this vault that persist on the server, across all compartments, excluding key versions in a `DELETED` state.
+	SoftwareKeyVersionCount int `json:"softwareKeyVersionCount,omitempty"`
 }
 
 // +kubebuilder:object:root=true

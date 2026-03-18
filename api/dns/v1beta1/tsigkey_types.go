@@ -14,21 +14,50 @@ import (
 
 // TsigKeySpec defines the desired state of TsigKey.
 type TsigKeySpec struct {
-	Id             shared.OCID       `json:"id,omitempty"`
-	CompartmentId  shared.OCID       `json:"compartmentId,omitempty"`
-	Algorithm      string            `json:"algorithm,omitempty"`
-	Name           string            `json:"name,omitempty"`
-	Secret         string            `json:"secret,omitempty"`
-	FreeformTags   map[string]string `json:"freeformTags,omitempty"`
-	Self           string            `json:"self,omitempty"`
-	TimeCreated    string            `json:"timeCreated,omitempty"`
-	LifecycleState string            `json:"lifecycleState,omitempty"`
-	TimeUpdated    string            `json:"timeUpdated,omitempty"`
+	// TSIG key algorithms are encoded as domain names, but most consist of only one
+	// non-empty label, which is not required to be explicitly absolute.
+	// Applicable algorithms include: hmac-sha1, hmac-sha224, hmac-sha256,
+	// hmac-sha512. For more information on these algorithms, see RFC 4635 (https://tools.ietf.org/html/rfc4635#section-2).
+	// +kubebuilder:validation:Required
+	Algorithm string `json:"algorithm"`
+	// A globally unique domain name identifying the key for a given pair of hosts.
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+	// The OCID of the compartment containing the TSIG key.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// A base64 string encoding the binary shared secret.
+	// +kubebuilder:validation:Required
+	Secret string `json:"secret"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	//
+	// **Example:** `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	//
+	// **Example:** `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 }
 
 // TsigKeyStatus defines the observed state of TsigKey.
 type TsigKeyStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the resource.
+	Id string `json:"id,omitempty"`
+	// The canonical absolute URL of the resource.
+	Self string `json:"self,omitempty"`
+	// The date and time the resource was created, expressed in RFC 3339 timestamp format.
+	// **Example:** `2016-07-22T17:23:59:60Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The current state of the resource.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The date and time the resource was last updated, expressed in RFC 3339 timestamp format.
+	// **Example:** `2016-07-22T17:23:59:60Z`
+	TimeUpdated string `json:"timeUpdated,omitempty"`
 }
 
 // +kubebuilder:object:root=true

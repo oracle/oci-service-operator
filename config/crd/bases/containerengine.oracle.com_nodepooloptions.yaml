@@ -51,19 +51,44 @@ spec:
             type: object
           spec:
             description: NodePoolOptionSpec defines the desired state of NodePoolOption.
-            properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
             type: object
           status:
             description: NodePoolOptionStatus defines the observed state of NodePoolOption.
             properties:
+              images:
+                description: |-
+                  Deprecated. See sources.
+                  When creating a node pool using the `CreateNodePoolDetails` object, only image names contained in this
+                  property can be passed to the `nodeImageName` property.
+                items:
+                  type: string
+                type: array
+              kubernetesVersions:
+                description: Available Kubernetes versions.
+                items:
+                  type: string
+                type: array
+              shapes:
+                description: Available shapes for nodes.
+                items:
+                  type: string
+                type: array
+              sources:
+                description: Available source of the node.
+                items:
+                  description: NodePoolOptionSource defines nested fields for NodePoolOption.Source.
+                  properties:
+                    imageId:
+                      description: The OCID of the image.
+                      type: string
+                    sourceName:
+                      description: The user-friendly name of the entity corresponding
+                        to the OCID.
+                      type: string
+                    sourceType:
+                      type: string
+                  type: object
+                type: array
               status:
                 properties:
                   conditions:

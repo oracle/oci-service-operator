@@ -14,13 +14,46 @@ import (
 
 // AuthenticationPolicySpec defines the desired state of AuthenticationPolicy.
 type AuthenticationPolicySpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
+	// +kubebuilder:validation:Optional
+	PasswordPolicy AuthenticationPolicyPasswordPolicy `json:"passwordPolicy,omitempty"`
+	// +kubebuilder:validation:Optional
+	NetworkPolicy AuthenticationPolicyNetworkPolicy `json:"networkPolicy,omitempty"`
+}
+
+// AuthenticationPolicyPasswordPolicy defines nested fields for AuthenticationPolicy.PasswordPolicy.
+type AuthenticationPolicyPasswordPolicy struct {
+	// Minimum password length required.
+	// +kubebuilder:validation:Optional
+	MinimumPasswordLength int `json:"minimumPasswordLength,omitempty"`
+	// At least one uppercase character required.
+	// +kubebuilder:validation:Optional
+	IsUppercaseCharactersRequired bool `json:"isUppercaseCharactersRequired,omitempty"`
+	// At least one lower case character required.
+	// +kubebuilder:validation:Optional
+	IsLowercaseCharactersRequired bool `json:"isLowercaseCharactersRequired,omitempty"`
+	// At least one numeric character required.
+	// +kubebuilder:validation:Optional
+	IsNumericCharactersRequired bool `json:"isNumericCharactersRequired,omitempty"`
+	// At least one special character required.
+	// +kubebuilder:validation:Optional
+	IsSpecialCharactersRequired bool `json:"isSpecialCharactersRequired,omitempty"`
+	// User name is allowed to be part of the password.
+	// +kubebuilder:validation:Optional
+	IsUsernameContainmentAllowed bool `json:"isUsernameContainmentAllowed,omitempty"`
+}
+
+// AuthenticationPolicyNetworkPolicy defines nested fields for AuthenticationPolicy.NetworkPolicy.
+type AuthenticationPolicyNetworkPolicy struct {
+	// Network Source ids
+	// +kubebuilder:validation:Optional
+	NetworkSourceIds []string `json:"networkSourceIds,omitempty"`
 }
 
 // AuthenticationPolicyStatus defines the observed state of AuthenticationPolicy.
 type AuthenticationPolicyStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// Compartment OCID.
+	CompartmentId string `json:"compartmentId,omitempty"`
 }
 
 // +kubebuilder:object:root=true

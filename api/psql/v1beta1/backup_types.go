@@ -14,26 +14,68 @@ import (
 
 // BackupSpec defines the desired state of Backup.
 type BackupSpec struct {
-	Id                        shared.OCID       `json:"id,omitempty"`
-	CompartmentId             shared.OCID       `json:"compartmentId,omitempty"`
-	DisplayName               string            `json:"displayName,omitempty"`
-	DbSystemId                string            `json:"dbSystemId,omitempty"`
-	Description               string            `json:"description,omitempty"`
-	RetentionPeriod           int               `json:"retentionPeriod,omitempty"`
-	FreeformTags              map[string]string `json:"freeformTags,omitempty"`
-	TimeCreated               string            `json:"timeCreated,omitempty"`
-	LifecycleState            string            `json:"lifecycleState,omitempty"`
-	BackupSize                int               `json:"backupSize,omitempty"`
-	SourceType                string            `json:"sourceType,omitempty"`
-	TimeUpdated               string            `json:"timeUpdated,omitempty"`
-	LifecycleDetails          string            `json:"lifecycleDetails,omitempty"`
-	LastAcceptedRequestToken  string            `json:"lastAcceptedRequestToken,omitempty"`
-	LastCompletedRequestToken string            `json:"lastCompletedRequestToken,omitempty"`
+	// A user-friendly display name for the backup. Avoid entering confidential information.
+	// +kubebuilder:validation:Required
+	DisplayName string `json:"displayName"`
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment that contains the backup.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// The ID of the database system.
+	// +kubebuilder:validation:Required
+	DbSystemId string `json:"dbSystemId"`
+	// A description for the backup.
+	// +kubebuilder:validation:Optional
+	Description string `json:"description,omitempty"`
+	// Backup retention period in days.
+	// +kubebuilder:validation:Optional
+	RetentionPeriod int `json:"retentionPeriod,omitempty"`
+	// Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+	// Example: `{"bar-key": "value"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// Example: `{"foo-namespace": {"bar-key": "value"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+}
+
+// BackupDbSystemDetails defines nested fields for Backup.DbSystemDetails.
+type BackupDbSystemDetails struct {
+	// Type of the database system.
+	SystemType string `json:"systemType,omitempty"`
+	// The major and minor versions of the database system software.
+	DbVersion string `json:"dbVersion,omitempty"`
 }
 
 // BackupStatus defines the observed state of Backup.
 type BackupStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the backup.
+	Id string `json:"id,omitempty"`
+	// The date and time the backup was created, expressed in
+	// RFC 3339 (https://tools.ietf.org/rfc/rfc3339) timestamp format.
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The current state of the backup.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The size of the backup, in gigabytes.
+	BackupSize      int                   `json:"backupSize,omitempty"`
+	DbSystemDetails BackupDbSystemDetails `json:"dbSystemDetails,omitempty"`
+	// Specifies whether the backup was created manually, or by a management policy.
+	SourceType string `json:"sourceType,omitempty"`
+	// The date and time the backup was updated, expressed in
+	// RFC 3339 (https://tools.ietf.org/rfc/rfc3339) timestamp format.
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeUpdated string `json:"timeUpdated,omitempty"`
+	// A message describing the current state in more detail. For example, can be used to provide actionable information for a resource in Failed state.
+	LifecycleDetails string `json:"lifecycleDetails,omitempty"`
+	// lastAcceptedRequestToken from MP.
+	LastAcceptedRequestToken string `json:"lastAcceptedRequestToken,omitempty"`
+	// lastCompletedRequestToken from MP.
+	LastCompletedRequestToken string `json:"lastCompletedRequestToken,omitempty"`
+	// System tags for this resource. Each key is predefined and scoped to a namespace.
+	// Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`
 }
 
 // +kubebuilder:object:root=true

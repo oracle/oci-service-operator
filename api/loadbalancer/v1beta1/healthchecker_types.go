@@ -14,17 +14,49 @@ import (
 
 // HealthCheckerSpec defines the desired state of HealthChecker.
 type HealthCheckerSpec struct {
-	Id                shared.OCID `json:"id,omitempty"`
-	CompartmentId     shared.OCID `json:"compartmentId,omitempty"`
-	Protocol          string      `json:"protocol,omitempty"`
-	Port              int         `json:"port,omitempty"`
-	ReturnCode        int         `json:"returnCode,omitempty"`
-	Retries           int         `json:"retries,omitempty"`
-	TimeoutInMillis   int         `json:"timeoutInMillis,omitempty"`
-	IntervalInMillis  int         `json:"intervalInMillis,omitempty"`
-	ResponseBodyRegex string      `json:"responseBodyRegex,omitempty"`
-	UrlPath           string      `json:"urlPath,omitempty"`
-	IsForcePlainText  bool        `json:"isForcePlainText,omitempty"`
+	// The protocol the health check must use; either HTTP or TCP.
+	// Example: `HTTP`
+	// +kubebuilder:validation:Required
+	Protocol string `json:"protocol"`
+	// The backend server port against which to run the health check.
+	// Example: `8080`
+	// +kubebuilder:validation:Required
+	Port int `json:"port"`
+	// The status code a healthy backend server should return.
+	// Example: `200`
+	// +kubebuilder:validation:Required
+	ReturnCode int `json:"returnCode"`
+	// The number of retries to attempt before a backend server is considered "unhealthy". This number also applies
+	// when recovering a server to the "healthy" state.
+	// Example: `3`
+	// +kubebuilder:validation:Required
+	Retries int `json:"retries"`
+	// The maximum time, in milliseconds, to wait for a reply to a health check. A health check is successful only if a reply
+	// returns within this timeout period.
+	// Example: `3000`
+	// +kubebuilder:validation:Required
+	TimeoutInMillis int `json:"timeoutInMillis"`
+	// The interval between health checks, in milliseconds.
+	// Example: `10000`
+	// +kubebuilder:validation:Required
+	IntervalInMillis int `json:"intervalInMillis"`
+	// A regular expression for parsing the response body from the backend server.
+	// Example: `^((?!false).|\s)*$`
+	// +kubebuilder:validation:Required
+	ResponseBodyRegex string `json:"responseBodyRegex"`
+	// The path against which to run the health check.
+	// Example: `/healthcheck`
+	// +kubebuilder:validation:Optional
+	UrlPath string `json:"urlPath,omitempty"`
+	// Specifies if health checks should always be done using plain text instead of depending on
+	// whether or not the associated backend set is using SSL.
+	// If "true", health checks will be done using plain text even if the associated backend set is configured
+	// to use SSL.
+	// If "false", health checks will be done using SSL encryption if the associated backend set is configured
+	// to use SSL. If the backend set is not so configured the health checks will be done using plain text.
+	// Example: `true`
+	// +kubebuilder:validation:Optional
+	IsForcePlainText bool `json:"isForcePlainText,omitempty"`
 }
 
 // HealthCheckerStatus defines the observed state of HealthChecker.

@@ -14,22 +14,32 @@ import (
 
 // MetricSpec defines the desired state of Metric.
 type MetricSpec struct {
-	Id            shared.OCID       `json:"id,omitempty"`
-	CompartmentId shared.OCID       `json:"compartmentId,omitempty"`
-	Name          string            `json:"name,omitempty"`
-	Namespace     string            `json:"namespace,omitempty"`
-	ResourceGroup string            `json:"resourceGroup,omitempty"`
-	Dimensions    map[string]string `json:"dimensions,omitempty"`
 }
 
 // MetricStatus defines the observed state of Metric.
 type MetricStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The name of the metric.
+	// Example: `CpuUtilization`
+	Name string `json:"name,omitempty"`
+	// The source service or application emitting the metric.
+	// Example: `oci_computeagent`
+	Namespace string `json:"namespace,omitempty"`
+	// Resource group provided with the posted metric. A resource group is a custom string that you can match when retrieving custom metrics. Only one resource group can be applied per metric.
+	// A valid resourceGroup value starts with an alphabetical character and includes only alphanumeric characters, periods (.), underscores (_), hyphens (-), and dollar signs ($).
+	// Example: `frontend-fleet`
+	ResourceGroup string `json:"resourceGroup,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing
+	// the resources monitored by the metric.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// Qualifiers provided in a metric definition. Available dimensions vary by metric namespace.
+	// Each dimension takes the form of a key-value pair.
+	// Example: `{"resourceId": "ocid1.instance.region1.phx.exampleuniqueID"}`
+	Dimensions map[string]string `json:"dimensions,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Name",type="string",JSONPath=".spec.name",priority=1
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.status.conditions[-1].type",description="status of the Metric",priority=0
 // +kubebuilder:printcolumn:name="Ocid",type="string",JSONPath=".status.status.ocid",description="Ocid of the Metric",priority=1
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0

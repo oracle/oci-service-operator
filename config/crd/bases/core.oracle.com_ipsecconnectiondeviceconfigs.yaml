@@ -53,20 +53,18 @@ spec:
           spec:
             description: IPSecConnectionDeviceConfigSpec defines the desired state
               of IPSecConnectionDeviceConfig.
-            properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
             type: object
           status:
             description: IPSecConnectionDeviceConfigStatus defines the observed state
               of IPSecConnectionDeviceConfig.
             properties:
+              compartmentId:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment containing the IPSec connection.
+                type: string
+              id:
+                description: The IPSec connection's Oracle ID (OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)).
+                type: string
               status:
                 properties:
                   conditions:
@@ -109,6 +107,30 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              timeCreated:
+                description: The date and time the IPSec connection was created.
+                type: string
+              tunnels:
+                description: Two TunnelConfig objects.
+                items:
+                  description: IPSecConnectionDeviceConfigTunnel defines nested fields
+                    for IPSecConnectionDeviceConfig.Tunnel.
+                  properties:
+                    ipAddress:
+                      description: |-
+                        The IP address of Oracle's VPN headend.
+                        Example: `203.0.113.50 `
+                      type: string
+                    sharedSecret:
+                      description: The shared secret of the IPSec tunnel.
+                      type: string
+                    timeCreated:
+                      description: |-
+                        The date and time the IPSec connection was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+                        Example: `2016-08-25T21:10:29.600Z`
+                      type: string
+                  type: object
+                type: array
             required:
             - status
             type: object

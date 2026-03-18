@@ -14,19 +14,66 @@ import (
 
 // WorkRequestSpec defines the desired state of WorkRequest.
 type WorkRequestSpec struct {
-	Id              shared.OCID `json:"id,omitempty"`
-	CompartmentId   shared.OCID `json:"compartmentId,omitempty"`
-	OperationType   string      `json:"operationType,omitempty"`
-	Status          string      `json:"status,omitempty"`
-	TimeAccepted    string      `json:"timeAccepted,omitempty"`
-	TimeStarted     string      `json:"timeStarted,omitempty"`
-	TimeFinished    string      `json:"timeFinished,omitempty"`
-	PercentComplete float32     `json:"percentComplete,omitempty"`
+}
+
+// WorkRequestResource defines nested fields for WorkRequest.Resource.
+type WorkRequestResource struct {
+	// The resource identifier the work request affects.
+	Identifier string `json:"identifier,omitempty"`
+	// The resource type the work request is affects.
+	EntityType string `json:"entityType,omitempty"`
+	// The way in which this resource was affected by the work tracked by the work request.
+	ActionType string `json:"actionType,omitempty"`
+	// The URI path that the user can do a GET on to access the resource metadata.
+	EntityUri string `json:"entityUri,omitempty"`
+}
+
+// WorkRequestError defines nested fields for WorkRequest.Error.
+type WorkRequestError struct {
+	// A machine-usable code for the error that occured.
+	Code string `json:"code,omitempty"`
+	// A human-readable error string.
+	Message string `json:"message,omitempty"`
+	// Date and time the error happened, in the format defined by RFC3339.
+	// Example: `2016-08-25T21:10:29.600Z`
+	Timestamp string `json:"timestamp,omitempty"`
+}
+
+// WorkRequestLog defines nested fields for WorkRequest.Log.
+type WorkRequestLog struct {
+	// A human-readable error string.
+	Message string `json:"message,omitempty"`
+	// Date and time the log was written, in the format defined by RFC3339.
+	// Example: `2016-08-25T21:10:29.600Z`
+	Timestamp string `json:"timestamp,omitempty"`
 }
 
 // WorkRequestStatus defines the observed state of WorkRequest.
 type WorkRequestStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the work request.
+	Id string `json:"id,omitempty"`
+	// An enum-like description of the type of work the work request is doing.
+	OperationType string `json:"operationType,omitempty"`
+	// The OCID of the compartment that contains the work request.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The resources this work request affects.
+	Resources []WorkRequestResource `json:"resources,omitempty"`
+	// The errors for work request.
+	Errors []WorkRequestError `json:"errors,omitempty"`
+	// The logs for work request.
+	Logs []WorkRequestLog `json:"logs,omitempty"`
+	// Date and time the work was accepted, in the format defined by RFC3339.
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeAccepted string `json:"timeAccepted,omitempty"`
+	// Date and time the work started, in the format defined by RFC3339.
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeStarted string `json:"timeStarted,omitempty"`
+	// Date and time the work completed, in the format defined by RFC3339.
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeFinished string `json:"timeFinished,omitempty"`
+	// How much progress the operation has made.
+	PercentComplete float32 `json:"percentComplete,omitempty"`
 }
 
 // +kubebuilder:object:root=true

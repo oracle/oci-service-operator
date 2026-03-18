@@ -15,10 +15,6 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - jsonPath: .spec.name
-      name: Name
-      priority: 1
-      type: string
     - description: status of the PbfListingVersion
       jsonPath: .status.status.conditions[-1].type
       name: Status
@@ -55,35 +51,87 @@ spec:
             type: object
           spec:
             description: PbfListingVersionSpec defines the desired state of PbfListingVersion.
-            properties:
-              changeSummary:
-                type: string
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              freeformTags:
-                additionalProperties:
-                  type: string
-                type: object
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
-              lifecycleState:
-                type: string
-              name:
-                type: string
-              pbfListingId:
-                type: string
-              timeCreated:
-                type: string
-              timeUpdated:
-                type: string
             type: object
           status:
             description: PbfListingVersionStatus defines the observed state of PbfListingVersion.
             properties:
+              changeSummary:
+                description: Details changes are included in this version.
+                type: string
+              config:
+                description: Details about the required and optional Function configurations
+                  needed for proper performance of the PBF.
+                items:
+                  description: PbfListingVersionConfig defines nested fields for PbfListingVersion.Config.
+                  properties:
+                    description:
+                      description: Details about why this config is required and what
+                        it will be used for.
+                      type: string
+                    isOptional:
+                      description: Is this a required config or an optional one. Requests
+                        with required config params missing will be rejected.
+                      type: boolean
+                    key:
+                      description: The key name of the config param.
+                      type: string
+                  type: object
+                type: array
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              id:
+                description: Unique identifier that is immutable on creation
+                type: string
+              lifecycleState:
+                description: The current state of the PBF resource.
+                type: string
+              name:
+                description: Semantic version
+                type: string
+              pbfListingId:
+                description: The OCID of the PbfListing this resource version belongs
+                  to.
+                type: string
+              requirements:
+                description: PbfListingVersionRequirements defines nested fields for
+                  PbfListingVersion.Requirements.
+                properties:
+                  minMemoryRequiredInMBs:
+                    description: |-
+                      Minimum memory required by this PBF. The user should use memory greater than or equal to
+                      this value while configuring the Function.
+                    format: int64
+                    type: integer
+                  policies:
+                    description: List of policies required for this PBF execution.
+                    items:
+                      description: PbfListingVersionRequirementsPolicy defines nested
+                        fields for PbfListingVersion.Requirements.Policy.
+                      properties:
+                        description:
+                          description: Details about why this policy is required and
+                            what it will be used for.
+                          type: string
+                        policy:
+                          description: Policy required for PBF execution
+                          type: string
+                      type: object
+                    type: array
+                type: object
               status:
                 properties:
                   conditions:
@@ -126,6 +174,35 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  System tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeCreated:
+                description: The time the PbfListingVersion was created. An RFC3339
+                  formatted datetime string.
+                type: string
+              timeUpdated:
+                description: The last time the PbfListingVersion was updated. An RFC3339
+                  formatted datetime string.
+                type: string
+              triggers:
+                description: An array of Trigger. A list of triggers that may activate
+                  the PBF.
+                items:
+                  description: PbfListingVersionTrigger defines nested fields for
+                    PbfListingVersion.Trigger.
+                  properties:
+                    name:
+                      description: A brief descriptive name for the PBF trigger.
+                      type: string
+                  type: object
+                type: array
             required:
             - status
             type: object

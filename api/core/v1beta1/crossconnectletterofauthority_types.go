@@ -14,8 +14,6 @@ import (
 
 // CrossConnectLetterOfAuthoritySpec defines the desired state of CrossConnectLetterOfAuthority.
 type CrossConnectLetterOfAuthoritySpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // CrossConnectLetterOfAuthorityStatus defines the observed state of CrossConnectLetterOfAuthority.

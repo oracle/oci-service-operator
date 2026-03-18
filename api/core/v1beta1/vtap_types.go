@@ -14,32 +14,81 @@ import (
 
 // VtapSpec defines the desired state of Vtap.
 type VtapSpec struct {
-	Id                            shared.OCID       `json:"id,omitempty"`
-	CompartmentId                 shared.OCID       `json:"compartmentId,omitempty"`
-	VcnId                         string            `json:"vcnId,omitempty"`
-	SourceId                      string            `json:"sourceId,omitempty"`
-	CaptureFilterId               string            `json:"captureFilterId,omitempty"`
-	DisplayName                   string            `json:"displayName,omitempty"`
-	FreeformTags                  map[string]string `json:"freeformTags,omitempty"`
-	TargetId                      string            `json:"targetId,omitempty"`
-	TargetIp                      string            `json:"targetIp,omitempty"`
-	EncapsulationProtocol         string            `json:"encapsulationProtocol,omitempty"`
-	VxlanNetworkIdentifier        int64             `json:"vxlanNetworkIdentifier,omitempty"`
-	IsVtapEnabled                 bool              `json:"isVtapEnabled,omitempty"`
-	SourceType                    string            `json:"sourceType,omitempty"`
-	TrafficMode                   string            `json:"trafficMode,omitempty"`
-	MaxPacketSize                 int               `json:"maxPacketSize,omitempty"`
-	TargetType                    string            `json:"targetType,omitempty"`
-	SourcePrivateEndpointIp       string            `json:"sourcePrivateEndpointIp,omitempty"`
-	SourcePrivateEndpointSubnetId string            `json:"sourcePrivateEndpointSubnetId,omitempty"`
-	LifecycleState                string            `json:"lifecycleState,omitempty"`
-	LifecycleStateDetails         string            `json:"lifecycleStateDetails,omitempty"`
-	TimeCreated                   string            `json:"timeCreated,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the `Vtap` resource.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VCN containing the `Vtap` resource.
+	// +kubebuilder:validation:Required
+	VcnId string `json:"vcnId"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the source point where packets are captured.
+	// +kubebuilder:validation:Required
+	SourceId string `json:"sourceId"`
+	// The capture filter's Oracle ID (OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)).
+	// +kubebuilder:validation:Required
+	CaptureFilterId string `json:"captureFilterId"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the destination resource where mirrored packets are sent.
+	// +kubebuilder:validation:Optional
+	TargetId string `json:"targetId,omitempty"`
+	// The IP address of the destination resource where mirrored packets are sent.
+	// +kubebuilder:validation:Optional
+	TargetIp string `json:"targetIp,omitempty"`
+	// Defines an encapsulation header type for the VTAP's mirrored traffic.
+	// +kubebuilder:validation:Optional
+	EncapsulationProtocol string `json:"encapsulationProtocol,omitempty"`
+	// The virtual extensible LAN (VXLAN) network identifier (or VXLAN segment ID) that uniquely identifies the VXLAN.
+	// +kubebuilder:validation:Optional
+	VxlanNetworkIdentifier int64 `json:"vxlanNetworkIdentifier,omitempty"`
+	// Used to start or stop a `Vtap` resource.
+	// * `TRUE` directs the VTAP to start mirroring traffic.
+	// * `FALSE` (Default) directs the VTAP to stop mirroring traffic.
+	// +kubebuilder:validation:Optional
+	IsVtapEnabled bool `json:"isVtapEnabled,omitempty"`
+	// The source type for the VTAP.
+	// +kubebuilder:validation:Optional
+	SourceType string `json:"sourceType,omitempty"`
+	// Used to control the priority of traffic. It is an optional field. If it not passed, the value is DEFAULT
+	// +kubebuilder:validation:Optional
+	TrafficMode string `json:"trafficMode,omitempty"`
+	// The maximum size of the packets to be included in the filter.
+	// +kubebuilder:validation:Optional
+	MaxPacketSize int `json:"maxPacketSize,omitempty"`
+	// The target type for the VTAP.
+	// +kubebuilder:validation:Optional
+	TargetType string `json:"targetType,omitempty"`
+	// The IP Address of the source private endpoint.
+	// +kubebuilder:validation:Optional
+	SourcePrivateEndpointIp string `json:"sourcePrivateEndpointIp,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subnet that source private endpoint belongs to.
+	// +kubebuilder:validation:Optional
+	SourcePrivateEndpointSubnetId string `json:"sourcePrivateEndpointSubnetId,omitempty"`
 }
 
 // VtapStatus defines the observed state of Vtap.
 type VtapStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The VTAP's Oracle ID (OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)).
+	Id string `json:"id,omitempty"`
+	// The VTAP's administrative lifecycle state.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The VTAP's current running state.
+	LifecycleStateDetails string `json:"lifecycleStateDetails,omitempty"`
+	// The date and time the VTAP was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	// Example: `2020-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
 }
 
 // +kubebuilder:object:root=true

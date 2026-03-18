@@ -14,19 +14,53 @@ import (
 
 // ComputeCapacityTopologySpec defines the desired state of ComputeCapacityTopology.
 type ComputeCapacityTopologySpec struct {
-	Id                 shared.OCID       `json:"id,omitempty"`
-	CompartmentId      shared.OCID       `json:"compartmentId,omitempty"`
-	AvailabilityDomain string            `json:"availabilityDomain,omitempty"`
-	DisplayName        string            `json:"displayName,omitempty"`
-	FreeformTags       map[string]string `json:"freeformTags,omitempty"`
-	LifecycleState     string            `json:"lifecycleState,omitempty"`
-	TimeCreated        string            `json:"timeCreated,omitempty"`
-	TimeUpdated        string            `json:"timeUpdated,omitempty"`
+	// The availability domain of this compute capacity topology.
+	// Example: `Uocm:US-CHICAGO-1-AD-2`
+	// +kubebuilder:validation:Required
+	AvailabilityDomain string `json:"availabilityDomain"`
+	// +kubebuilder:validation:Required
+	CapacitySource ComputeCapacityTopologyCapacitySource `json:"capacitySource"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains this compute capacity topology.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+}
+
+// ComputeCapacityTopologyCapacitySource defines nested fields for ComputeCapacityTopology.CapacitySource.
+type ComputeCapacityTopologyCapacitySource struct {
+	// +kubebuilder:validation:Optional
+	CapacityType string `json:"capacityType,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment of this capacity source.
+	// +kubebuilder:validation:Optional
+	CompartmentId string `json:"compartmentId,omitempty"`
 }
 
 // ComputeCapacityTopologyStatus defines the observed state of ComputeCapacityTopology.
 type ComputeCapacityTopologyStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compute capacity topology.
+	Id string `json:"id,omitempty"`
+	// The current state of the compute capacity topology.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The date and time that the compute capacity topology was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The date and time that the compute capacity topology was updated, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeUpdated string `json:"timeUpdated,omitempty"`
 }
 
 // +kubebuilder:object:root=true

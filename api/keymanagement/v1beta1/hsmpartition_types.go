@@ -14,16 +14,35 @@ import (
 
 // HsmPartitionSpec defines the desired state of HsmPartition.
 type HsmPartitionSpec struct {
-	Id             shared.OCID `json:"id,omitempty"`
-	CompartmentId  shared.OCID `json:"compartmentId,omitempty"`
-	TimeCreated    string      `json:"timeCreated,omitempty"`
-	TimeUpdated    string      `json:"timeUpdated,omitempty"`
-	LifecycleState string      `json:"lifecycleState,omitempty"`
+}
+
+// HsmPartitionPortInformation defines nested fields for HsmPartition.PortInformation.
+type HsmPartitionPortInformation struct {
+	// The port number of the cavium server.
+	PortNumber int `json:"portNumber,omitempty"`
+	// Port type associated for the port number.
+	PortType string `json:"portType,omitempty"`
 }
 
 // HsmPartitionStatus defines the observed state of HsmPartition.
 type HsmPartitionStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the HSM resource.
+	Id string `json:"id,omitempty"`
+	// The OCID of the compartment that contains a particular HSM resource.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// Details of PortNumber and PortType.
+	PortInformation []HsmPartitionPortInformation `json:"portInformation,omitempty"`
+	// The date and time a HSMPartition was created, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2018-04-03T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The date and time a HSMPartition was updated, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2018-04-03T21:10:29.600Z`
+	TimeUpdated string `json:"timeUpdated,omitempty"`
+	// The HSMPartition's current lifecycle state.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The OCID of the HSMCluster that contains a particular HSM resource.
+	HsmClusterId string `json:"hsmClusterId,omitempty"`
 }
 
 // +kubebuilder:object:root=true

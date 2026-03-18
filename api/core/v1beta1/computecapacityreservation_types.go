@@ -14,22 +14,108 @@ import (
 
 // ComputeCapacityReservationSpec defines the desired state of ComputeCapacityReservation.
 type ComputeCapacityReservationSpec struct {
-	Id                    shared.OCID       `json:"id,omitempty"`
-	CompartmentId         shared.OCID       `json:"compartmentId,omitempty"`
-	AvailabilityDomain    string            `json:"availabilityDomain,omitempty"`
-	DisplayName           string            `json:"displayName,omitempty"`
-	FreeformTags          map[string]string `json:"freeformTags,omitempty"`
-	IsDefaultReservation  bool              `json:"isDefaultReservation,omitempty"`
-	LifecycleState        string            `json:"lifecycleState,omitempty"`
-	TimeCreated           string            `json:"timeCreated,omitempty"`
-	ReservedInstanceCount int64             `json:"reservedInstanceCount,omitempty"`
-	TimeUpdated           string            `json:"timeUpdated,omitempty"`
-	UsedInstanceCount     int64             `json:"usedInstanceCount,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the capacity reservation.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// The availability domain of this compute capacity reservation.
+	// Example: `Uocm:PHX-AD-1`
+	// +kubebuilder:validation:Required
+	AvailabilityDomain string `json:"availabilityDomain"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Whether this capacity reservation is the default.
+	// For more information, see Capacity Reservations (https://docs.cloud.oracle.com/iaas/Content/Compute/Tasks/reserve-capacity.htm#default).
+	// +kubebuilder:validation:Optional
+	IsDefaultReservation bool `json:"isDefaultReservation,omitempty"`
+	// The capacity configurations for the capacity reservation.
+	// To use the reservation for the desired shape, specify the shape, count, and
+	// optionally the fault domain where you want this configuration.
+	// +kubebuilder:validation:Optional
+	InstanceReservationConfigs []ComputeCapacityReservationInstanceReservationConfig `json:"instanceReservationConfigs,omitempty"`
+}
+
+// ComputeCapacityReservationInstanceReservationConfigInstanceShapeConfig defines nested fields for ComputeCapacityReservation.InstanceReservationConfig.InstanceShapeConfig.
+type ComputeCapacityReservationInstanceReservationConfigInstanceShapeConfig struct {
+	// The total number of OCPUs available to the instance.
+	// +kubebuilder:validation:Optional
+	Ocpus float32 `json:"ocpus,omitempty"`
+	// The total amount of memory available to the instance, in gigabytes.
+	// +kubebuilder:validation:Optional
+	MemoryInGBs float32 `json:"memoryInGBs,omitempty"`
+}
+
+// ComputeCapacityReservationInstanceReservationConfigClusterConfig defines nested fields for ComputeCapacityReservation.InstanceReservationConfig.ClusterConfig.
+type ComputeCapacityReservationInstanceReservationConfigClusterConfig struct {
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the HPC island.
+	// +kubebuilder:validation:Required
+	HpcIslandId string `json:"hpcIslandId"`
+	// The list of OCIDs of the network blocks.
+	// +kubebuilder:validation:Optional
+	NetworkBlockIds []string `json:"networkBlockIds,omitempty"`
+}
+
+// ComputeCapacityReservationInstanceReservationConfig defines nested fields for ComputeCapacityReservation.InstanceReservationConfig.
+type ComputeCapacityReservationInstanceReservationConfig struct {
+	// The shape requested when launching instances using reserved capacity.
+	// The shape determines the number of CPUs, amount of memory,
+	// and other resources allocated to the instance.
+	// You can list all available shapes by calling ListComputeCapacityReservationInstanceShapes.
+	// +kubebuilder:validation:Required
+	InstanceShape string `json:"instanceShape"`
+	// The total number of instances that can be launched from the capacity configuration.
+	// +kubebuilder:validation:Required
+	ReservedCount int64 `json:"reservedCount"`
+	// +kubebuilder:validation:Optional
+	InstanceShapeConfig ComputeCapacityReservationInstanceReservationConfigInstanceShapeConfig `json:"instanceShapeConfig,omitempty"`
+	// The fault domain to use for instances created using this capacity configuration.
+	// For more information, see Fault Domains (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/regions.htm#fault).
+	// If you do not specify the fault domain, the capacity is available for an instance
+	// that does not specify a fault domain. To change the fault domain for a reservation,
+	// delete the reservation and create a new one in the preferred fault domain.
+	// To retrieve a list of fault domains, use the `ListFaultDomains` operation in
+	// the Identity and Access Management Service API (https://docs.cloud.oracle.com/iaas/api/#/en/identity/20160918/).
+	// Example: `FAULT-DOMAIN-1`
+	// +kubebuilder:validation:Optional
+	FaultDomain string `json:"faultDomain,omitempty"`
+	// +kubebuilder:validation:Optional
+	ClusterConfig ComputeCapacityReservationInstanceReservationConfigClusterConfig `json:"clusterConfig,omitempty"`
 }
 
 // ComputeCapacityReservationStatus defines the observed state of ComputeCapacityReservation.
 type ComputeCapacityReservationStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compute capacity reservation.
+	Id string `json:"id,omitempty"`
+	// The current state of the compute capacity reservation.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The date and time the compute capacity reservation was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The number of instances for which capacity will be held with this
+	// compute capacity reservation. This number is the sum of the values of the `reservedCount` fields
+	// for all of the instance capacity configurations under this reservation.
+	// The purpose of this field is to calculate the percentage usage of the reservation.
+	ReservedInstanceCount int64 `json:"reservedInstanceCount,omitempty"`
+	// The date and time the compute capacity reservation was updated, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeUpdated string `json:"timeUpdated,omitempty"`
+	// The total number of instances currently consuming space in
+	// this compute capacity reservation. This number is the sum of the values of the `usedCount` fields
+	// for all of the instance capacity configurations under this reservation.
+	// The purpose of this field is to calculate the percentage usage of the reservation.
+	UsedInstanceCount int64 `json:"usedInstanceCount,omitempty"`
 }
 
 // +kubebuilder:object:root=true

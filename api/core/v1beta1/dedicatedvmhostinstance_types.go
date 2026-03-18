@@ -14,13 +14,23 @@ import (
 
 // DedicatedVmHostInstanceSpec defines the desired state of DedicatedVmHostInstance.
 type DedicatedVmHostInstanceSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // DedicatedVmHostInstanceStatus defines the observed state of DedicatedVmHostInstance.
 type DedicatedVmHostInstanceStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The availability domain the virtual machine instance is running in.
+	// Example: `Uocm:PHX-AD-1`
+	AvailabilityDomain string `json:"availabilityDomain,omitempty"`
+	// The OCID of the compartment that contains the virtual machine instance.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The OCID of the virtual machine instance.
+	InstanceId string `json:"instanceId,omitempty"`
+	// The shape of the VM instance.
+	Shape string `json:"shape,omitempty"`
+	// The date and time the virtual machine instance was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
 }
 
 // +kubebuilder:object:root=true

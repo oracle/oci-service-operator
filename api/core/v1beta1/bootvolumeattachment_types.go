@@ -14,26 +14,39 @@ import (
 
 // BootVolumeAttachmentSpec defines the desired state of BootVolumeAttachment.
 type BootVolumeAttachmentSpec struct {
-	Id                             shared.OCID `json:"id,omitempty"`
-	CompartmentId                  shared.OCID `json:"compartmentId,omitempty"`
-	AvailabilityDomain             string      `json:"availabilityDomain,omitempty"`
-	BootVolumeId                   string      `json:"bootVolumeId,omitempty"`
-	InstanceId                     string      `json:"instanceId,omitempty"`
-	LifecycleState                 string      `json:"lifecycleState,omitempty"`
-	TimeCreated                    string      `json:"timeCreated,omitempty"`
-	DisplayName                    string      `json:"displayName,omitempty"`
-	IsPvEncryptionInTransitEnabled bool        `json:"isPvEncryptionInTransitEnabled,omitempty"`
-	EncryptionInTransitType        string      `json:"encryptionInTransitType,omitempty"`
 }
 
 // BootVolumeAttachmentStatus defines the observed state of BootVolumeAttachment.
 type BootVolumeAttachmentStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The availability domain of an instance.
+	// Example: `Uocm:PHX-AD-1`
+	AvailabilityDomain string `json:"availabilityDomain,omitempty"`
+	// The OCID of the boot volume.
+	BootVolumeId string `json:"bootVolumeId,omitempty"`
+	// The OCID of the compartment.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The OCID of the boot volume attachment.
+	Id string `json:"id,omitempty"`
+	// The OCID of the instance the boot volume is attached to.
+	InstanceId string `json:"instanceId,omitempty"`
+	// The current state of the boot volume attachment.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The date and time the boot volume was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	DisplayName string `json:"displayName,omitempty"`
+	// Whether in-transit encryption for the boot volume's paravirtualized attachment is enabled or not.
+	IsPvEncryptionInTransitEnabled bool `json:"isPvEncryptionInTransitEnabled,omitempty"`
+	// Refer the top-level definition of encryptionInTransitType.
+	// The default value is NONE.
+	EncryptionInTransitType string `json:"encryptionInTransitType,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="DisplayName",type="string",JSONPath=".spec.displayName",priority=1
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.status.conditions[-1].type",description="status of the BootVolumeAttachment",priority=0
 // +kubebuilder:printcolumn:name="Ocid",type="string",JSONPath=".status.status.ocid",description="Ocid of the BootVolumeAttachment",priority=1
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0

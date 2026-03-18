@@ -14,26 +14,53 @@ import (
 
 // VolumeGroupReplicaSpec defines the desired state of VolumeGroupReplica.
 type VolumeGroupReplicaSpec struct {
-	Id                 shared.OCID       `json:"id,omitempty"`
-	CompartmentId      shared.OCID       `json:"compartmentId,omitempty"`
-	AvailabilityDomain string            `json:"availabilityDomain,omitempty"`
-	DisplayName        string            `json:"displayName,omitempty"`
-	LifecycleState     string            `json:"lifecycleState,omitempty"`
-	SizeInGBs          int64             `json:"sizeInGBs,omitempty"`
-	VolumeGroupId      string            `json:"volumeGroupId,omitempty"`
-	TimeCreated        string            `json:"timeCreated,omitempty"`
-	TimeLastSynced     string            `json:"timeLastSynced,omitempty"`
-	FreeformTags       map[string]string `json:"freeformTags,omitempty"`
+}
+
+// VolumeGroupReplicaMemberReplica defines nested fields for VolumeGroupReplica.MemberReplica.
+type VolumeGroupReplicaMemberReplica struct {
+	// The volume replica ID.
+	VolumeReplicaId string `json:"volumeReplicaId,omitempty"`
+	// Membership state of the volume replica in relation to the volume group replica.
+	MembershipState string `json:"membershipState,omitempty"`
 }
 
 // VolumeGroupReplicaStatus defines the observed state of VolumeGroupReplica.
 type VolumeGroupReplicaStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The availability domain of the volume group replica.
+	AvailabilityDomain string `json:"availabilityDomain,omitempty"`
+	// The OCID of the compartment that contains the volume group replica.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	DisplayName string `json:"displayName,omitempty"`
+	// The OCID for the volume group replica.
+	Id string `json:"id,omitempty"`
+	// The current state of a volume group.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The aggregate size of the volume group replica in GBs.
+	SizeInGBs int64 `json:"sizeInGBs,omitempty"`
+	// The OCID of the source volume group.
+	VolumeGroupId string `json:"volumeGroupId,omitempty"`
+	// The date and time the volume group replica was created. Format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// Volume replicas within this volume group replica.
+	MemberReplicas []VolumeGroupReplicaMemberReplica `json:"memberReplicas,omitempty"`
+	// The date and time the volume group replica was last synced from the source volume group.
+	// Format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	TimeLastSynced string `json:"timeLastSynced,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="DisplayName",type="string",JSONPath=".spec.displayName",priority=1
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.status.conditions[-1].type",description="status of the VolumeGroupReplica",priority=0
 // +kubebuilder:printcolumn:name="Ocid",type="string",JSONPath=".status.status.ocid",description="Ocid of the VolumeGroupReplica",priority=1
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0

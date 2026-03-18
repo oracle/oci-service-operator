@@ -53,44 +53,49 @@ spec:
           spec:
             description: AppCatalogListingResourceVersionSpec defines the desired
               state of AppCatalogListingResourceVersion.
-            properties:
-              accessiblePorts:
-                items:
-                  type: integer
-                type: array
-              allowedActions:
-                items:
-                  type: string
-                type: array
-              availableRegions:
-                items:
-                  type: string
-                type: array
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              compatibleShapes:
-                items:
-                  type: string
-                type: array
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
-              listingId:
-                type: string
-              listingResourceId:
-                type: string
-              listingResourceVersion:
-                type: string
-              timePublished:
-                type: string
             type: object
           status:
             description: AppCatalogListingResourceVersionStatus defines the observed
               state of AppCatalogListingResourceVersion.
             properties:
+              accessiblePorts:
+                description: List of accessible ports for instances launched with
+                  this listing resource version.
+                items:
+                  type: integer
+                type: array
+              allowedActions:
+                description: Allowed actions for the listing resource.
+                items:
+                  type: string
+                type: array
+              availableRegions:
+                description: |-
+                  List of regions that this listing resource version is available.
+                  For information about regions, see
+                  Regions and Availability Domains (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/regions.htm).
+                  Example: `["us-ashburn-1", "us-phoenix-1"]`
+                items:
+                  type: string
+                type: array
+              compatibleShapes:
+                description: |-
+                  Array of shapes compatible with this resource.
+                  You can enumerate all available shapes by calling ListShapes.
+                  Example: `["VM.Standard1.1", "VM.Standard1.2"]`
+                items:
+                  type: string
+                type: array
+              listingId:
+                description: The OCID of the listing this resource version belongs
+                  to.
+                type: string
+              listingResourceId:
+                description: OCID of the listing resource.
+                type: string
+              listingResourceVersion:
+                description: Resource Version.
+                type: string
               status:
                 properties:
                   conditions:
@@ -133,6 +138,11 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              timePublished:
+                description: |-
+                  Date and time the listing resource version was published, in RFC3339 (https://tools.ietf.org/html/rfc3339) format.
+                  Example: `2018-03-20T12:32:53.532Z`
+                type: string
             required:
             - status
             type: object

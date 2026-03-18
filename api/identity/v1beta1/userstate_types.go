@@ -14,8 +14,6 @@ import (
 
 // UserStateSpec defines the desired state of UserState.
 type UserStateSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // UserStateStatus defines the observed state of UserState.

@@ -14,27 +14,49 @@ import (
 
 // GenericArtifactSpec defines the desired state of GenericArtifact.
 type GenericArtifactSpec struct {
-	Id             shared.OCID       `json:"id,omitempty"`
-	CompartmentId  shared.OCID       `json:"compartmentId,omitempty"`
-	FreeformTags   map[string]string `json:"freeformTags,omitempty"`
-	DisplayName    string            `json:"displayName,omitempty"`
-	RepositoryId   string            `json:"repositoryId,omitempty"`
-	ArtifactPath   string            `json:"artifactPath,omitempty"`
-	Version        string            `json:"version,omitempty"`
-	Sha256         string            `json:"sha256,omitempty"`
-	SizeInBytes    int64             `json:"sizeInBytes,omitempty"`
-	LifecycleState string            `json:"lifecycleState,omitempty"`
-	TimeCreated    string            `json:"timeCreated,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 }
 
 // GenericArtifactStatus defines the observed state of GenericArtifact.
 type GenericArtifactStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the artifact.
+	// Example: `ocid1.genericartifact.oc1..exampleuniqueID`
+	Id string `json:"id,omitempty"`
+	// The artifact name with the format of `<artifact-path>:<artifact-version>`. The artifact name is truncated to a maximum length of 255.
+	// Example: `project01/my-web-app/artifact-abc:1.0.0`
+	DisplayName string `json:"displayName,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the repository's compartment.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the repository.
+	RepositoryId string `json:"repositoryId,omitempty"`
+	// A user-defined path to describe the location of an artifact. Slashes do not create a directory structure, but you can use slashes to organize the repository. An artifact path does not include an artifact version.
+	// Example: `project01/my-web-app/artifact-abc`
+	ArtifactPath string `json:"artifactPath,omitempty"`
+	// A user-defined string to describe the artifact version.
+	// Example: `1.1.0` or `1.2-beta-2`
+	Version string `json:"version,omitempty"`
+	// The SHA256 digest for the artifact. When you upload an artifact to the repository, a SHA256 digest is calculated and added to the artifact properties.
+	Sha256 string `json:"sha256,omitempty"`
+	// The size of the artifact in bytes.
+	SizeInBytes int64 `json:"sizeInBytes,omitempty"`
+	// The current state of the artifact.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// An RFC 3339 timestamp indicating when the repository was created.
+	TimeCreated string `json:"timeCreated,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="DisplayName",type="string",JSONPath=".spec.displayName",priority=1
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.status.conditions[-1].type",description="status of the GenericArtifact",priority=0
 // +kubebuilder:printcolumn:name="Ocid",type="string",JSONPath=".status.status.ocid",description="Ocid of the GenericArtifact",priority=1
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0

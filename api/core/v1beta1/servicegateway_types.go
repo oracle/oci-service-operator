@@ -14,20 +14,68 @@ import (
 
 // ServiceGatewaySpec defines the desired state of ServiceGateway.
 type ServiceGatewaySpec struct {
-	Id             shared.OCID       `json:"id,omitempty"`
-	CompartmentId  shared.OCID       `json:"compartmentId,omitempty"`
-	VcnId          string            `json:"vcnId,omitempty"`
-	DisplayName    string            `json:"displayName,omitempty"`
-	FreeformTags   map[string]string `json:"freeformTags,omitempty"`
-	RouteTableId   string            `json:"routeTableId,omitempty"`
-	BlockTraffic   bool              `json:"blockTraffic,omitempty"`
-	LifecycleState string            `json:"lifecycleState,omitempty"`
-	TimeCreated    string            `json:"timeCreated,omitempty"`
+	// The OCID  (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment to contain the service gateway.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// List of the OCIDs of the Service objects to
+	// enable for the service gateway. This list can be empty if you don't want to enable any
+	// `Service` objects when you create the gateway. You can enable a `Service`
+	// object later by using either AttachServiceId
+	// or UpdateServiceGateway.
+	// For each enabled `Service`, make sure there's a route rule with the `Service` object's `cidrBlock`
+	// as the rule's destination and the service gateway as the rule's target. See
+	// RouteTable.
+	// +kubebuilder:validation:Required
+	Services []ServiceGatewayService `json:"services"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VCN.
+	// +kubebuilder:validation:Required
+	VcnId string `json:"vcnId"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the route table the service gateway will use.
+	// If you don't specify a route table here, the service gateway is created without an associated route
+	// table. The Networking service does NOT automatically associate the attached VCN's default route table
+	// with the service gateway.
+	// For information about why you would associate a route table with a service gateway, see
+	// Transit Routing: Private Access to Oracle Services (https://docs.cloud.oracle.com/iaas/Content/Network/Tasks/transitroutingoracleservices.htm).
+	// +kubebuilder:validation:Optional
+	RouteTableId string `json:"routeTableId,omitempty"`
+	// Whether the service gateway blocks all traffic through it. The default is `false`. When
+	// this is `true`, traffic is not routed to any services, regardless of route rules.
+	// Example: `true`
+	// +kubebuilder:validation:Optional
+	BlockTraffic bool `json:"blockTraffic,omitempty"`
+}
+
+// ServiceGatewayService defines nested fields for ServiceGateway.Service.
+type ServiceGatewayService struct {
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Service.
+	// +kubebuilder:validation:Required
+	ServiceId string `json:"serviceId"`
 }
 
 // ServiceGatewayStatus defines the observed state of ServiceGateway.
 type ServiceGatewayStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the service gateway.
+	Id string `json:"id,omitempty"`
+	// The service gateway's current state.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The date and time the service gateway was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
 }
 
 // +kubebuilder:object:root=true

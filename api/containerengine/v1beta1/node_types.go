@@ -14,29 +14,62 @@ import (
 
 // NodeSpec defines the desired state of Node.
 type NodeSpec struct {
-	Id                 shared.OCID       `json:"id,omitempty"`
-	CompartmentId      shared.OCID       `json:"compartmentId,omitempty"`
-	Name               string            `json:"name,omitempty"`
-	KubernetesVersion  string            `json:"kubernetesVersion,omitempty"`
-	AvailabilityDomain string            `json:"availabilityDomain,omitempty"`
-	SubnetId           string            `json:"subnetId,omitempty"`
-	NodePoolId         string            `json:"nodePoolId,omitempty"`
-	FaultDomain        string            `json:"faultDomain,omitempty"`
-	PrivateIp          string            `json:"privateIp,omitempty"`
-	PublicIp           string            `json:"publicIp,omitempty"`
-	FreeformTags       map[string]string `json:"freeformTags,omitempty"`
-	LifecycleState     string            `json:"lifecycleState,omitempty"`
-	LifecycleDetails   string            `json:"lifecycleDetails,omitempty"`
+}
+
+// NodeError defines nested fields for Node.NodeError.
+type NodeError struct {
+	// A short error code that defines the upstream error, meant for programmatic parsing. See API Errors (https://docs.cloud.oracle.com/Content/API/References/apierrors.htm).
+	Code string `json:"code,omitempty"`
+	// A human-readable error string of the upstream error.
+	Message string `json:"message,omitempty"`
+	// The status of the HTTP response encountered in the upstream error.
+	Status string `json:"status,omitempty"`
+	// Unique Oracle-assigned identifier for the upstream request. If you need to contact Oracle about a particular upstream request, please provide the request ID.
+	OpcRequestId string `json:"opc-request-id,omitempty"`
 }
 
 // NodeStatus defines the observed state of Node.
 type NodeStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the compute instance backing this node.
+	Id string `json:"id,omitempty"`
+	// The name of the node.
+	Name string `json:"name,omitempty"`
+	// The version of Kubernetes this node is running.
+	KubernetesVersion string `json:"kubernetesVersion,omitempty"`
+	// The name of the availability domain in which this node is placed.
+	AvailabilityDomain string `json:"availabilityDomain,omitempty"`
+	// The OCID of the subnet in which this node is placed.
+	SubnetId string `json:"subnetId,omitempty"`
+	// The OCID of the node pool to which this node belongs.
+	NodePoolId string `json:"nodePoolId,omitempty"`
+	// The fault domain of this node.
+	FaultDomain string `json:"faultDomain,omitempty"`
+	// The private IP address of this node.
+	PrivateIp string `json:"privateIp,omitempty"`
+	// The public IP address of this node.
+	PublicIp string `json:"publicIp,omitempty"`
+	// An error that may be associated with the node.
+	NodeError NodeError `json:"nodeError,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// Usage of system tag keys. These predefined keys are scoped to namespaces.
+	// Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`
+	// The state of the node.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// Details about the state of the node.
+	LifecycleDetails string `json:"lifecycleDetails,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Name",type="string",JSONPath=".spec.name",priority=1
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.status.conditions[-1].type",description="status of the Node",priority=0
 // +kubebuilder:printcolumn:name="Ocid",type="string",JSONPath=".status.status.ocid",description="Ocid of the Node",priority=1
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0

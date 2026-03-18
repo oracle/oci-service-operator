@@ -14,8 +14,6 @@ import (
 
 // AllowedPeerRegionsForRemotePeeringSpec defines the desired state of AllowedPeerRegionsForRemotePeering.
 type AllowedPeerRegionsForRemotePeeringSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // AllowedPeerRegionsForRemotePeeringStatus defines the observed state of AllowedPeerRegionsForRemotePeering.

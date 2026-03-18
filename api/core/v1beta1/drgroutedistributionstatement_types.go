@@ -14,15 +14,35 @@ import (
 
 // DrgRouteDistributionStatementSpec defines the desired state of DrgRouteDistributionStatement.
 type DrgRouteDistributionStatementSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
-	Priority      int         `json:"priority,omitempty"`
-	Action        string      `json:"action,omitempty"`
+	// The Oracle-assigned ID of each route distribution statement to be updated.
+	// +kubebuilder:validation:Required
+	Id string `json:"id"`
+	// The action is applied only if all of the match criteria is met.
+	// +kubebuilder:validation:Optional
+	MatchCriteria []DrgRouteDistributionStatementMatchCriteria `json:"matchCriteria,omitempty"`
+	// The priority of the statement you'd like to update.
+	// +kubebuilder:validation:Optional
+	Priority int `json:"priority,omitempty"`
+}
+
+// DrgRouteDistributionStatementMatchCriteria defines nested fields for DrgRouteDistributionStatement.MatchCriteria.
+type DrgRouteDistributionStatementMatchCriteria struct {
+	// +kubebuilder:validation:Optional
+	MatchType string `json:"matchType,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the DRG attachment.
+	// +kubebuilder:validation:Required
+	DrgAttachmentId string `json:"drgAttachmentId"`
+	// The type of the network resource to be included in this match. A match for a network type implies that all
+	// DRG attachments of that type insert routes into the table.
+	// +kubebuilder:validation:Required
+	AttachmentType string `json:"attachmentType"`
 }
 
 // DrgRouteDistributionStatementStatus defines the observed state of DrgRouteDistributionStatement.
 type DrgRouteDistributionStatementStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// `ACCEPT` indicates the route should be imported or exported as-is.
+	Action string `json:"action,omitempty"`
 }
 
 // +kubebuilder:object:root=true

@@ -53,20 +53,89 @@ spec:
           spec:
             description: AllowedIkeIPSecParameterSpec defines the desired state of
               AllowedIkeIPSecParameter.
-            properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
             type: object
           status:
             description: AllowedIkeIPSecParameterStatus defines the observed state
               of AllowedIkeIPSecParameter.
             properties:
+              allowedPhaseOneParameters:
+                description: AllowedIkeIPSecParameterAllowedPhaseOneParameters defines
+                  nested fields for AllowedIkeIPSecParameter.AllowedPhaseOneParameters.
+                properties:
+                  authenticationAlgorithms:
+                    description: Allowed phase one authentication algorithms.
+                    items:
+                      type: string
+                    type: array
+                  dhGroups:
+                    description: Allowed phase one Diffie-Hellman groups.
+                    items:
+                      type: string
+                    type: array
+                  encryptionAlgorithms:
+                    description: Allowed phase one encryption algorithms.
+                    items:
+                      type: string
+                    type: array
+                type: object
+              allowedPhaseTwoParameters:
+                description: AllowedIkeIPSecParameterAllowedPhaseTwoParameters defines
+                  nested fields for AllowedIkeIPSecParameter.AllowedPhaseTwoParameters.
+                properties:
+                  authenticationAlgorithms:
+                    description: Allowed phase two authentication algorithms.
+                    items:
+                      type: string
+                    type: array
+                  encryptionAlgorithms:
+                    description: Allowed phase two encryption algorithms.
+                    items:
+                      type: string
+                    type: array
+                  pfsDhGroups:
+                    description: Allowed perfect forward secrecy Diffie-Hellman groups.
+                    items:
+                      type: string
+                    type: array
+                type: object
+              defaultPhaseOneParameters:
+                description: AllowedIkeIPSecParameterDefaultPhaseOneParameters defines
+                  nested fields for AllowedIkeIPSecParameter.DefaultPhaseOneParameters.
+                properties:
+                  defaultAuthenticationAlgorithms:
+                    description: Default phase one authentication algorithms.
+                    items:
+                      type: string
+                    type: array
+                  defaultDhGroups:
+                    description: Default phase one Diffie-Hellman groups.
+                    items:
+                      type: string
+                    type: array
+                  defaultEncryptionAlgorithms:
+                    description: Default phase one encryption algorithms.
+                    items:
+                      type: string
+                    type: array
+                type: object
+              defaultPhaseTwoParameters:
+                description: AllowedIkeIPSecParameterDefaultPhaseTwoParameters defines
+                  nested fields for AllowedIkeIPSecParameter.DefaultPhaseTwoParameters.
+                properties:
+                  defaultAuthenticationAlgorithms:
+                    description: Default phase two authentication algorithms.
+                    items:
+                      type: string
+                    type: array
+                  defaultEncryptionAlgorithms:
+                    description: Default phase two encryption algorithms.
+                    items:
+                      type: string
+                    type: array
+                  defaultPfsDhGroup:
+                    description: Default perfect forward secrecy Diffie-Hellman groups.
+                    type: string
+                type: object
               status:
                 properties:
                   conditions:

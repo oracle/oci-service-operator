@@ -14,14 +14,20 @@ import (
 
 // VaultReplicaSpec defines the desired state of VaultReplica.
 type VaultReplicaSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
-	ReplicaRegion string      `json:"replicaRegion,omitempty"`
+	// The region in the realm to which the vault need to be replicated to
+	// +kubebuilder:validation:Required
+	ReplicaRegion string `json:"replicaRegion"`
 }
 
 // VaultReplicaStatus defines the observed state of VaultReplica.
 type VaultReplicaStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The vault replica's crypto endpoint
+	CryptoEndpoint string `json:"cryptoEndpoint,omitempty"`
+	// The vault replica's management endpoint
+	ManagementEndpoint string `json:"managementEndpoint,omitempty"`
+	// Region to which vault is replicated to
+	Region string `json:"region,omitempty"`
 }
 
 // +kubebuilder:object:root=true

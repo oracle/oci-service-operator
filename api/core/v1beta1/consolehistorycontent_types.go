@@ -14,8 +14,6 @@ import (
 
 // ConsoleHistoryContentSpec defines the desired state of ConsoleHistoryContent.
 type ConsoleHistoryContentSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // ConsoleHistoryContentStatus defines the observed state of ConsoleHistoryContent.

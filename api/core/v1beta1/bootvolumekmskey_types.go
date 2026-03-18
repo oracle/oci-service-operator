@@ -14,9 +14,11 @@ import (
 
 // BootVolumeKmsKeySpec defines the desired state of BootVolumeKmsKey.
 type BootVolumeKmsKeySpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
-	KmsKeyId      string      `json:"kmsKeyId,omitempty"`
+	// The OCID of the new Vault service key to assign to protect the specified volume.
+	// This key has to be a valid Vault service key, and policies must exist to allow the user and the Block Volume service to access this key.
+	// If you specify the same OCID as the previous key's OCID, the Block Volume service will use it to regenerate a volume encryption key.
+	// +kubebuilder:validation:Optional
+	KmsKeyId string `json:"kmsKeyId,omitempty"`
 }
 
 // BootVolumeKmsKeyStatus defines the observed state of BootVolumeKmsKey.

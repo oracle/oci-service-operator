@@ -14,13 +14,76 @@ import (
 
 // AddonOptionSpec defines the desired state of AddonOption.
 type AddonOptionSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
+}
+
+// AddonOptionVersionKubernetesVersionFilters defines nested fields for AddonOption.Version.KubernetesVersionFilters.
+type AddonOptionVersionKubernetesVersionFilters struct {
+	// The earliest kubernetes version.
+	MinimalVersion string `json:"minimalVersion,omitempty"`
+	// The latest kubernetes version.
+	MaximumVersion string `json:"maximumVersion,omitempty"`
+	// The exact version of kubernetes that are compatible.
+	ExactKubernetesVersions []string `json:"exactKubernetesVersions,omitempty"`
+}
+
+// AddonOptionVersionConfiguration defines nested fields for AddonOption.Version.Configuration.
+type AddonOptionVersionConfiguration struct {
+	// If the the configuration is required or not.
+	IsRequired bool `json:"isRequired,omitempty"`
+	// Addon configuration key
+	Key string `json:"key,omitempty"`
+	// Addon configuration value
+	Value string `json:"value,omitempty"`
+	// Display name of addon version.
+	DisplayName string `json:"displayName,omitempty"`
+	// Information about the addon version configuration.
+	Description string `json:"description,omitempty"`
+}
+
+// AddonOptionVersion defines nested fields for AddonOption.Version.
+type AddonOptionVersion struct {
+	// Current state of the addon, only active will be visible to customer, visibility of versions in other status will be filtered  based on limits property.
+	Status string `json:"status,omitempty"`
+	// Version number, need be comparable within an addon.
+	VersionNumber string `json:"versionNumber,omitempty"`
+	// Information about the addon version.
+	Description string `json:"description,omitempty"`
+	// The range of kubernetes versions an addon can be configured.
+	KubernetesVersionFilters AddonOptionVersionKubernetesVersionFilters `json:"kubernetesVersionFilters,omitempty"`
+	// Addon version configuration details.
+	Configurations []AddonOptionVersionConfiguration `json:"configurations,omitempty"`
 }
 
 // AddonOptionStatus defines the observed state of AddonOption.
 type AddonOptionStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// Name of the addon and it would be unique.
+	Name string `json:"name,omitempty"`
+	// The life cycle state of the addon.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// Is it an essential addon for cluster operation or not.
+	IsEssential bool `json:"isEssential,omitempty"`
+	// The resources this work request affects.
+	Versions []AddonOptionVersion `json:"versions,omitempty"`
+	// Addon definition schema version to validate addon.
+	AddonSchemaVersion string `json:"addonSchemaVersion,omitempty"`
+	// Addon group info, a namespace concept that groups addons with similar functionalities.
+	AddonGroup string `json:"addonGroup,omitempty"`
+	// Description on the addon.
+	Description string `json:"description,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// Usage of system tag keys. These predefined keys are scoped to namespaces.
+	// Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`
+	// The time the work request was created.
+	TimeCreated string `json:"timeCreated,omitempty"`
 }
 
 // +kubebuilder:object:root=true

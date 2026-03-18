@@ -14,15 +14,17 @@ import (
 
 // ContainerConfigurationSpec defines the desired state of ContainerConfiguration.
 type ContainerConfigurationSpec struct {
-	Id                             shared.OCID `json:"id,omitempty"`
-	CompartmentId                  shared.OCID `json:"compartmentId,omitempty"`
-	IsRepositoryCreatedOnFirstPush bool        `json:"isRepositoryCreatedOnFirstPush,omitempty"`
-	Namespace                      string      `json:"namespace,omitempty"`
+	// Whether to create a new container repository when a container is pushed to a new repository path.
+	// Repositories created in this way belong to the root compartment.
+	// +kubebuilder:validation:Optional
+	IsRepositoryCreatedOnFirstPush bool `json:"isRepositoryCreatedOnFirstPush,omitempty"`
 }
 
 // ContainerConfigurationStatus defines the observed state of ContainerConfiguration.
 type ContainerConfigurationStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The tenancy namespace used in the container repository path.
+	Namespace string `json:"namespace,omitempty"`
 }
 
 // +kubebuilder:object:root=true

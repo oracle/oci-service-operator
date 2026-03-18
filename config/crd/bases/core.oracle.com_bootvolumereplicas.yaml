@@ -15,10 +15,6 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - jsonPath: .spec.displayName
-      name: DisplayName
-      priority: 1
-      type: string
     - description: status of the BootVolumeReplica
       jsonPath: .status.status.conditions[-1].type
       name: Status
@@ -55,45 +51,59 @@ spec:
             type: object
           spec:
             description: BootVolumeReplicaSpec defines the desired state of BootVolumeReplica.
-            properties:
-              availabilityDomain:
-                type: string
-              bootVolumeId:
-                type: string
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              displayName:
-                type: string
-              freeformTags:
-                additionalProperties:
-                  type: string
-                type: object
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
-              imageId:
-                type: string
-              lifecycleState:
-                type: string
-              sizeInGBs:
-                format: int64
-                type: integer
-              timeCreated:
-                type: string
-              timeLastSynced:
-                type: string
-              totalDataTransferredInGBs:
-                format: int64
-                type: integer
-              volumeGroupReplicaId:
-                type: string
             type: object
           status:
             description: BootVolumeReplicaStatus defines the observed state of BootVolumeReplica.
             properties:
+              availabilityDomain:
+                description: |-
+                  The availability domain of the boot volume replica.
+                  Example: `Uocm:PHX-AD-1`
+                type: string
+              bootVolumeId:
+                description: The OCID of the source boot volume.
+                type: string
+              compartmentId:
+                description: The OCID of the compartment that contains the boot volume
+                  replica.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a
+                  namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              displayName:
+                description: |-
+                  A user-friendly name. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no
+                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              id:
+                description: The boot volume replica's Oracle ID (OCID).
+                type: string
+              imageId:
+                description: The image OCID used to create the boot volume the replica
+                  is replicated from.
+                type: string
+              lifecycleState:
+                description: The current state of a boot volume replica.
+                type: string
+              sizeInGBs:
+                description: The size of the source boot volume, in GBs.
+                format: int64
+                type: integer
               status:
                 properties:
                   conditions:
@@ -136,6 +146,24 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              timeCreated:
+                description: |-
+                  The date and time the boot volume replica was created. Format defined
+                  by RFC3339 (https://tools.ietf.org/html/rfc3339).
+                type: string
+              timeLastSynced:
+                description: |-
+                  The date and time the boot volume replica was last synced from the source boot volume.
+                  Format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+                type: string
+              totalDataTransferredInGBs:
+                description: The total size of the data transferred from the source
+                  boot volume to the boot volume replica, in GBs.
+                format: int64
+                type: integer
+              volumeGroupReplicaId:
+                description: The OCID of the volume group replica.
+                type: string
             required:
             - status
             type: object

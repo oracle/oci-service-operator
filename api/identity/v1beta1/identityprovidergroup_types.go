@@ -14,13 +14,27 @@ import (
 
 // IdentityProviderGroupSpec defines the desired state of IdentityProviderGroup.
 type IdentityProviderGroupSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // IdentityProviderGroupStatus defines the observed state of IdentityProviderGroup.
 type IdentityProviderGroupStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the `IdentityProviderGroup`.
+	Id string `json:"id,omitempty"`
+	// The OCID of the `IdentityProvider` this group belongs to.
+	IdentityProviderId string `json:"identityProviderId,omitempty"`
+	// Display name of the group
+	DisplayName string `json:"displayName,omitempty"`
+	// Display name of the group
+	Name string `json:"name,omitempty"`
+	// Identifier of the group in the identity provider
+	ExternalIdentifier string `json:"externalIdentifier,omitempty"`
+	// Date and time the `IdentityProviderGroup` was created, in the format defined by RFC3339.
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// Date and time the `IdentityProviderGroup` was last modified, in the format defined by RFC3339.
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeModified string `json:"timeModified,omitempty"`
 }
 
 // +kubebuilder:object:root=true

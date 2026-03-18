@@ -14,8 +14,6 @@ import (
 
 // CpeDeviceConfigContentSpec defines the desired state of CpeDeviceConfigContent.
 type CpeDeviceConfigContentSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // CpeDeviceConfigContentStatus defines the observed state of CpeDeviceConfigContent.

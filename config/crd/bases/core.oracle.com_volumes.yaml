@@ -56,54 +56,153 @@ spec:
           spec:
             description: VolumeSpec defines the desired state of Volume.
             properties:
-              autoTunedVpusPerGB:
-                format: int64
-                type: integer
+              autotunePolicies:
+                description: The list of autotune policies to be enabled for this
+                  volume.
+                items:
+                  description: VolumeAutotunePolicy defines nested fields for Volume.AutotunePolicy.
+                  properties:
+                    autotuneType:
+                      type: string
+                    maxVpusPerGB:
+                      description: |-
+                        This will be the maximum VPUs/GB performance level that the volume will be auto-tuned
+                        temporarily based on performance monitoring.
+                      format: int64
+                      type: integer
+                  required:
+                  - maxVpusPerGB
+                  type: object
+                type: array
               availabilityDomain:
+                description: |-
+                  The availability domain of the volume. Omissible for cloning a volume. The new volume will be created in the availability domain of the source volume.
+                  Example: `Uocm:PHX-AD-1`
                 type: string
               backupPolicyId:
+                description: |-
+                  If provided, specifies the ID of the volume backup policy to assign to the newly
+                  created volume. If omitted, no policy will be assigned.
                 type: string
+              blockVolumeReplicas:
+                description: |-
+                  The list of block volume replicas to be enabled for this volume
+                  in the specified destination availability domains.
+                items:
+                  description: VolumeBlockVolumeReplica defines nested fields for
+                    Volume.BlockVolumeReplica.
+                  properties:
+                    availabilityDomain:
+                      description: |-
+                        The availability domain of the block volume replica.
+                        Example: `Uocm:PHX-AD-1`
+                      type: string
+                    displayName:
+                      description: |-
+                        A user-friendly name. Does not have to be unique, and it's changeable.
+                        Avoid entering confidential information.
+                      type: string
+                  required:
+                  - availabilityDomain
+                  type: object
+                type: array
               compartmentId:
-                maxLength: 255
-                minLength: 1
+                description: The OCID of the compartment that contains the volume.
                 type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a
+                  namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
               displayName:
+                description: |-
+                  A user-friendly name. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
                 type: string
               freeformTags:
                 additionalProperties:
                   type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no
+                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
                 type: object
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
               isAutoTuneEnabled:
-                type: boolean
-              isHydrated:
+                description: |-
+                  Specifies whether the auto-tune performance is enabled for this volume. This field is deprecated.
+                  Use the `DetachedVolumeAutotunePolicy` instead to enable the volume for detached autotune.
                 type: boolean
               kmsKeyId:
-                type: string
-              lifecycleState:
+                description: |-
+                  The OCID of the Vault service key to assign as the master encryption key
+                  for the volume.
                 type: string
               sizeInGBs:
+                description: The size of the volume in GBs.
                 format: int64
                 type: integer
               sizeInMBs:
+                description: |-
+                  The size of the volume in MBs. The value must be a multiple of 1024.
+                  This field is deprecated. Use sizeInGBs instead.
                 format: int64
                 type: integer
-              timeCreated:
-                type: string
+              sourceDetails:
+                description: VolumeSourceDetails defines nested fields for Volume.SourceDetails.
+                properties:
+                  id:
+                    description: The OCID of the block volume replica.
+                    type: string
+                  type:
+                    type: string
+                required:
+                - id
+                type: object
               volumeBackupId:
-                type: string
-              volumeGroupId:
+                description: |-
+                  The OCID of the volume backup from which the data should be restored on the newly created volume.
+                  This field is deprecated. Use the sourceDetails field instead to specify the
+                  backup for the volume.
                 type: string
               vpusPerGB:
+                description: |-
+                  The number of volume performance units (VPUs) that will be applied to this volume per GB,
+                  representing the Block Volume service's elastic performance options.
+                  See Block Volume Performance Levels (https://docs.cloud.oracle.com/iaas/Content/Block/Concepts/blockvolumeperformance.htm#perf_levels) for more information.
+                  Allowed values:
+                    * `0`: Represents Lower Cost option.
+                    * `10`: Represents Balanced option.
+                    * `20`: Represents Higher Performance option.
+                    * `30`-`120`: Represents the Ultra High Performance option.
+                  For performance autotune enabled volumes, it would be the Default(Minimum) VPUs/GB.
                 format: int64
                 type: integer
+            required:
+            - compartmentId
             type: object
           status:
             description: VolumeStatus defines the observed state of Volume.
             properties:
+              autoTunedVpusPerGB:
+                description: The number of Volume Performance Units per GB that this
+                  volume is effectively tuned to.
+                format: int64
+                type: integer
+              id:
+                description: The OCID of the volume.
+                type: string
+              isHydrated:
+                description: Specifies whether the cloned volume's data has finished
+                  copying from the source volume or backup.
+                type: boolean
+              lifecycleState:
+                description: The current state of a volume.
+                type: string
               status:
                 properties:
                   conditions:
@@ -146,6 +245,22 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  System tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              timeCreated:
+                description: The date and time the volume was created. Format defined
+                  by RFC3339 (https://tools.ietf.org/html/rfc3339).
+                type: string
+              volumeGroupId:
+                description: The OCID of the source volume group.
+                type: string
             required:
             - status
             type: object

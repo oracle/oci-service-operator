@@ -14,8 +14,6 @@ import (
 
 // ComputeCapacityTopologyComputeHpcIslandSpec defines the desired state of ComputeCapacityTopologyComputeHpcIsland.
 type ComputeCapacityTopologyComputeHpcIslandSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // ComputeCapacityTopologyComputeHpcIslandStatus defines the observed state of ComputeCapacityTopologyComputeHpcIsland.

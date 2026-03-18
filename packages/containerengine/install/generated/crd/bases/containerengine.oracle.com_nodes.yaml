@@ -15,10 +15,6 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - jsonPath: .spec.name
-      name: Name
-      priority: 1
-      type: string
     - description: status of the Node
       jsonPath: .status.status.conditions[-1].type
       name: Status
@@ -55,43 +51,79 @@ spec:
             type: object
           spec:
             description: NodeSpec defines the desired state of Node.
-            properties:
-              availabilityDomain:
-                type: string
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              faultDomain:
-                type: string
-              freeformTags:
-                additionalProperties:
-                  type: string
-                type: object
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
-              kubernetesVersion:
-                type: string
-              lifecycleDetails:
-                type: string
-              lifecycleState:
-                type: string
-              name:
-                type: string
-              nodePoolId:
-                type: string
-              privateIp:
-                type: string
-              publicIp:
-                type: string
-              subnetId:
-                type: string
             type: object
           status:
             description: NodeStatus defines the observed state of Node.
             properties:
+              availabilityDomain:
+                description: The name of the availability domain in which this node
+                  is placed.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              faultDomain:
+                description: The fault domain of this node.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              id:
+                description: The OCID of the compute instance backing this node.
+                type: string
+              kubernetesVersion:
+                description: The version of Kubernetes this node is running.
+                type: string
+              lifecycleDetails:
+                description: Details about the state of the node.
+                type: string
+              lifecycleState:
+                description: The state of the node.
+                type: string
+              name:
+                description: The name of the node.
+                type: string
+              nodeError:
+                description: An error that may be associated with the node.
+                properties:
+                  code:
+                    description: A short error code that defines the upstream error,
+                      meant for programmatic parsing. See API Errors (https://docs.cloud.oracle.com/Content/API/References/apierrors.htm).
+                    type: string
+                  message:
+                    description: A human-readable error string of the upstream error.
+                    type: string
+                  opc-request-id:
+                    description: Unique Oracle-assigned identifier for the upstream
+                      request. If you need to contact Oracle about a particular upstream
+                      request, please provide the request ID.
+                    type: string
+                  status:
+                    description: The status of the HTTP response encountered in the
+                      upstream error.
+                    type: string
+                type: object
+              nodePoolId:
+                description: The OCID of the node pool to which this node belongs.
+                type: string
+              privateIp:
+                description: The private IP address of this node.
+                type: string
+              publicIp:
+                description: The public IP address of this node.
+                type: string
               status:
                 properties:
                   conditions:
@@ -133,6 +165,18 @@ spec:
                   updatedAt:
                     format: date-time
                     type: string
+                type: object
+              subnetId:
+                description: The OCID of the subnet in which this node is placed.
+                type: string
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of system tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
                 type: object
             required:
             - status

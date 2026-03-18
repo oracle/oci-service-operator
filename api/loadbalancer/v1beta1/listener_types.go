@@ -14,16 +14,134 @@ import (
 
 // ListenerSpec defines the desired state of Listener.
 type ListenerSpec struct {
-	Id                    shared.OCID `json:"id,omitempty"`
-	CompartmentId         shared.OCID `json:"compartmentId,omitempty"`
-	DefaultBackendSetName string      `json:"defaultBackendSetName,omitempty"`
-	Port                  int         `json:"port,omitempty"`
-	Protocol              string      `json:"protocol,omitempty"`
-	Name                  string      `json:"name,omitempty"`
-	HostnameNames         []string    `json:"hostnameNames,omitempty"`
-	PathRouteSetName      string      `json:"pathRouteSetName,omitempty"`
-	RoutingPolicyName     string      `json:"routingPolicyName,omitempty"`
-	RuleSetNames          []string    `json:"ruleSetNames,omitempty"`
+	// The name of the associated backend set.
+	// Example: `example_backend_set`
+	// +kubebuilder:validation:Required
+	DefaultBackendSetName string `json:"defaultBackendSetName"`
+	// The communication port for the listener.
+	// Example: `80`
+	// +kubebuilder:validation:Required
+	Port int `json:"port"`
+	// The protocol on which the listener accepts connection requests.
+	// To get a list of valid protocols, use the ListProtocols
+	// operation.
+	// Example: `HTTP`
+	// +kubebuilder:validation:Required
+	Protocol string `json:"protocol"`
+	// A friendly name for the listener. It must be unique and it cannot be changed.
+	// Avoid entering confidential information.
+	// Example: `example_listener`
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+	// An array of hostname resource names.
+	// +kubebuilder:validation:Optional
+	HostnameNames []string `json:"hostnameNames,omitempty"`
+	// Deprecated. Please use `routingPolicies` instead.
+	// The name of the set of path-based routing rules, PathRouteSet,
+	// applied to this listener's traffic.
+	// Example: `example_path_route_set`
+	// +kubebuilder:validation:Optional
+	PathRouteSetName string `json:"pathRouteSetName,omitempty"`
+	// +kubebuilder:validation:Optional
+	SslConfiguration ListenerSslConfiguration `json:"sslConfiguration,omitempty"`
+	// +kubebuilder:validation:Optional
+	ConnectionConfiguration ListenerConnectionConfiguration `json:"connectionConfiguration,omitempty"`
+	// The name of the routing policy applied to this listener's traffic.
+	// Example: `example_routing_policy`
+	// +kubebuilder:validation:Optional
+	RoutingPolicyName string `json:"routingPolicyName,omitempty"`
+	// The names of the RuleSet to apply to the listener.
+	// Example: ["example_rule_set"]
+	// +kubebuilder:validation:Optional
+	RuleSetNames []string `json:"ruleSetNames,omitempty"`
+}
+
+// ListenerSslConfiguration defines nested fields for Listener.SslConfiguration.
+type ListenerSslConfiguration struct {
+	// The maximum depth for peer certificate chain verification.
+	// Example: `3`
+	// +kubebuilder:validation:Optional
+	VerifyDepth int `json:"verifyDepth,omitempty"`
+	// Whether the load balancer listener should verify peer certificates.
+	// Example: `true`
+	// +kubebuilder:validation:Optional
+	VerifyPeerCertificate bool `json:"verifyPeerCertificate,omitempty"`
+	// Ids for OCI certificates service CA or CA bundles for the load balancer to trust.
+	// Example: `[ocid1.cabundle.oc1.us-ashburn-1.amaaaaaaav3bgsaagl4zzyqdop5i2vuwoqewdvauuw34llqa74otq2jdsfyq]`
+	// +kubebuilder:validation:Optional
+	TrustedCertificateAuthorityIds []string `json:"trustedCertificateAuthorityIds,omitempty"`
+	// Ids for OCI certificates service certificates. Currently only a single Id may be passed.
+	// Example: `[ocid1.certificate.oc1.us-ashburn-1.amaaaaaaav3bgsaa5o2q7rh5nfmkkukfkogasqhk6af2opufhjlqg7m6jqzq]`
+	// +kubebuilder:validation:Optional
+	CertificateIds []string `json:"certificateIds,omitempty"`
+	// A friendly name for the certificate bundle. It must be unique and it cannot be changed.
+	// Valid certificate bundle names include only alphanumeric characters, dashes, and underscores.
+	// Certificate bundle names cannot contain spaces. Avoid entering confidential information.
+	// Example: `example_certificate_bundle`
+	// +kubebuilder:validation:Optional
+	CertificateName string `json:"certificateName,omitempty"`
+	// A list of SSL protocols the load balancer must support for HTTPS or SSL connections.
+	// The load balancer uses SSL protocols to establish a secure connection between a client and a server. A secure
+	// connection ensures that all data passed between the client and the server is private.
+	// The Load Balancing service supports the following protocols:
+	// *  TLSv1
+	// *  TLSv1.1
+	// *  TLSv1.2
+	// If this field is not specified, TLSv1.2 is the default.
+	// **Warning:** All SSL listeners created on a given port must use the same set of SSL protocols.
+	// **Notes:**
+	// *  The handshake to establish an SSL connection fails if the client supports none of the specified protocols.
+	// *  You must ensure compatibility between the specified SSL protocols and the ciphers configured in the cipher
+	//    suite.
+	// *  For all existing load balancer listeners and backend sets that predate this feature, the `GET` operation
+	//    displays a list of SSL protocols currently used by those resources.
+	// example: `["TLSv1.1", "TLSv1.2"]`
+	// +kubebuilder:validation:Optional
+	Protocols []string `json:"protocols,omitempty"`
+	// The name of the cipher suite to use for HTTPS or SSL connections.
+	// If this field is not specified, the default is `oci-default-ssl-cipher-suite-v1`.
+	// **Notes:**
+	// *  You must ensure compatibility between the specified SSL protocols and the ciphers configured in the cipher
+	//    suite. Clients cannot perform an SSL handshake if there is an incompatible configuration.
+	// *  You must ensure compatibility between the ciphers configured in the cipher suite and the configured
+	//    certificates. For example, RSA-based ciphers require RSA certificates and ECDSA-based ciphers require ECDSA
+	//    certificates.
+	// *  If the cipher configuration is not modified after load balancer creation, the `GET` operation returns
+	//    `oci-default-ssl-cipher-suite-v1` as the value of this field in the SSL configuration for existing listeners
+	//    that predate this feature.
+	// *  If the cipher configuration was modified using Oracle operations after load balancer creation, the `GET`
+	//    operation returns `oci-customized-ssl-cipher-suite` as the value of this field in the SSL configuration for
+	//    existing listeners that predate this feature.
+	// *  The `GET` operation returns `oci-wider-compatible-ssl-cipher-suite-v1` as the value of this field in the SSL
+	//    configuration for existing backend sets that predate this feature.
+	// *  If the `GET` operation on a listener returns `oci-customized-ssl-cipher-suite` as the value of this field,
+	//    you must specify an appropriate predefined or custom cipher suite name when updating the resource.
+	// *  The `oci-customized-ssl-cipher-suite` Oracle reserved cipher suite name is not accepted as valid input for
+	//    this field.
+	// example: `example_cipher_suite`
+	// +kubebuilder:validation:Optional
+	CipherSuiteName string `json:"cipherSuiteName,omitempty"`
+	// When this attribute is set to ENABLED, the system gives preference to the server ciphers over the client
+	// ciphers.
+	// **Note:** This configuration is applicable only when the load balancer is acting as an SSL/HTTPS server. This
+	//           field is ignored when the `SSLConfiguration` object is associated with a backend set.
+	// +kubebuilder:validation:Optional
+	ServerOrderPreference string `json:"serverOrderPreference,omitempty"`
+}
+
+// ListenerConnectionConfiguration defines nested fields for Listener.ConnectionConfiguration.
+type ListenerConnectionConfiguration struct {
+	// The maximum idle time, in seconds, allowed between two successive receive or two successive send operations
+	// between the client and backend servers. A send operation does not reset the timer for receive operations. A
+	// receive operation does not reset the timer for send operations.
+	// For more information, see Connection Configuration (https://docs.cloud.oracle.com/Content/Balance/Reference/connectionreuse.htm#ConnectionConfiguration).
+	// Example: `1200`
+	// +kubebuilder:validation:Required
+	IdleTimeout int64 `json:"idleTimeout"`
+	// The backend TCP Proxy Protocol version.
+	// Example: `1`
+	// +kubebuilder:validation:Optional
+	BackendTcpProxyProtocolVersion int `json:"backendTcpProxyProtocolVersion,omitempty"`
 }
 
 // ListenerStatus defines the observed state of Listener.

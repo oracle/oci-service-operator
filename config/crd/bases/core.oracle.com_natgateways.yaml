@@ -57,37 +57,71 @@ spec:
             description: NatGatewaySpec defines the desired state of NatGateway.
             properties:
               blockTraffic:
+                description: |-
+                  Whether the NAT gateway blocks traffic through it. The default is `false`.
+                  Example: `true`
                 type: boolean
               compartmentId:
-                maxLength: 255
-                minLength: 1
+                description: |-
+                  The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment to contain the
+                  NAT gateway.
                 type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a
+                  namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
               displayName:
+                description: |-
+                  A user-friendly name. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
                 type: string
               freeformTags:
                 additionalProperties:
                   type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no
+                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
                 type: object
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
-              lifecycleState:
-                type: string
-              natIp:
-                type: string
               publicIpId:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the public IP address associated with the NAT gateway.
                 type: string
               routeTableId:
-                type: string
-              timeCreated:
+                description: |-
+                  The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the route table used by the NAT gateway.
+                  If you don't specify a route table here, the NAT gateway is created without an associated route
+                  table. The Networking service does NOT automatically associate the attached VCN's default route table
+                  with the NAT gateway.
                 type: string
               vcnId:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the VCN the gateway belongs to.
                 type: string
+            required:
+            - compartmentId
+            - vcnId
             type: object
           status:
             description: NatGatewayStatus defines the observed state of NatGateway.
             properties:
+              id:
+                description: |-
+                  The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the
+                  NAT gateway.
+                type: string
+              lifecycleState:
+                description: The NAT gateway's current state.
+                type: string
+              natIp:
+                description: The IP address associated with the NAT gateway.
+                type: string
               status:
                 properties:
                   conditions:
@@ -130,6 +164,11 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              timeCreated:
+                description: |-
+                  The date and time the NAT gateway was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+                  Example: `2016-08-25T21:10:29.600Z`
+                type: string
             required:
             - status
             type: object

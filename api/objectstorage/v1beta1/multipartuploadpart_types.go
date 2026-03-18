@@ -14,13 +14,19 @@ import (
 
 // MultipartUploadPartSpec defines the desired state of MultipartUploadPart.
 type MultipartUploadPartSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // MultipartUploadPartStatus defines the observed state of MultipartUploadPart.
 type MultipartUploadPartStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The current entity tag (ETag) for the part.
+	Etag string `json:"etag,omitempty"`
+	// The MD5 hash of the bytes of the part.
+	Md5 string `json:"md5,omitempty"`
+	// The size of the part in bytes.
+	Size int64 `json:"size,omitempty"`
+	// The part number for this part.
+	PartNumber int `json:"partNumber,omitempty"`
 }
 
 // +kubebuilder:object:root=true

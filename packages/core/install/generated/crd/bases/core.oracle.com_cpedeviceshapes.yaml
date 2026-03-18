@@ -51,19 +51,26 @@ spec:
             type: object
           spec:
             description: CpeDeviceShapeSpec defines the desired state of CpeDeviceShape.
-            properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
             type: object
           status:
             description: CpeDeviceShapeStatus defines the observed state of CpeDeviceShape.
             properties:
+              cpeDeviceInfo:
+                description: CpeDeviceShapeCpeDeviceInfo defines nested fields for
+                  CpeDeviceShape.CpeDeviceInfo.
+                properties:
+                  platformSoftwareVersion:
+                    description: The platform or software version of the CPE device.
+                    type: string
+                  vendor:
+                    description: The vendor that makes the CPE device.
+                    type: string
+                type: object
+              id:
+                description: |-
+                  The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the CPE device shape.
+                  This value uniquely identifies the type of CPE device.
+                type: string
               status:
                 properties:
                   conditions:

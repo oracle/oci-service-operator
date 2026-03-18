@@ -14,21 +14,57 @@ import (
 
 // RowSpec defines the desired state of Row.
 type RowSpec struct {
-	Id                   shared.OCID `json:"id,omitempty"`
-	CompartmentId        shared.OCID `json:"compartmentId,omitempty"`
-	Option               string      `json:"option,omitempty"`
-	IsGetReturnRow       bool        `json:"isGetReturnRow,omitempty"`
-	TimeoutInMs          int         `json:"timeoutInMs,omitempty"`
-	Ttl                  int         `json:"ttl,omitempty"`
-	IsTtlUseTableDefault bool        `json:"isTtlUseTableDefault,omitempty"`
-	IdentityCacheSize    int         `json:"identityCacheSize,omitempty"`
-	IsExactMatch         bool        `json:"isExactMatch,omitempty"`
-	TimeOfExpiration     string      `json:"timeOfExpiration,omitempty"`
+	// The OCID of the table's compartment.  Required
+	// if the tableNameOrId path parameter is a table name.
+	// Optional if tableNameOrId is an OCID.  If tableNameOrId
+	// is an OCID, and compartmentId is supplied, the latter
+	// must match the identified table's compartmentId.
+	// +kubebuilder:validation:Optional
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// Specifies a condition for the put operation.
+	// +kubebuilder:validation:Optional
+	Option string `json:"option,omitempty"`
+	// If true, and the put fails due to an option setting, then
+	// the existing row will be returned.
+	// +kubebuilder:validation:Optional
+	IsGetReturnRow bool `json:"isGetReturnRow,omitempty"`
+	// Timeout setting for the put.
+	// +kubebuilder:validation:Optional
+	TimeoutInMs int `json:"timeoutInMs,omitempty"`
+	// Time-to-live for the row, in days.
+	// +kubebuilder:validation:Optional
+	Ttl int `json:"ttl,omitempty"`
+	// If true, set time-to-live for this row to the table's default.
+	// +kubebuilder:validation:Optional
+	IsTtlUseTableDefault bool `json:"isTtlUseTableDefault,omitempty"`
+	// Sets the number of generated identity values that are
+	// requested from the server during a put. If present and greater than 0,
+	// this value takes precedence over a default value for the table.
+	// +kubebuilder:validation:Optional
+	IdentityCacheSize int `json:"identityCacheSize,omitempty"`
+	// If present and true, the presented row value must exactly
+	// match the table's schema.  Otherwise, rows with missing
+	// non-key fields or extra fields can be written successfully.
+	// +kubebuilder:validation:Optional
+	IsExactMatch bool `json:"isExactMatch,omitempty"`
+}
+
+// RowUsage defines nested fields for Row.Usage.
+type RowUsage struct {
+	// Read Units consumed by this operation.
+	ReadUnitsConsumed int `json:"readUnitsConsumed,omitempty"`
+	// Write Units consumed by this operation.
+	WriteUnitsConsumed int `json:"writeUnitsConsumed,omitempty"`
 }
 
 // RowStatus defines the observed state of Row.
 type RowStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The expiration time of the row. A zero value indicates that
+	// the row does not expire. An RFC3339 formatted datetime
+	// string.
+	TimeOfExpiration string   `json:"timeOfExpiration,omitempty"`
+	Usage            RowUsage `json:"usage,omitempty"`
 }
 
 // +kubebuilder:object:root=true

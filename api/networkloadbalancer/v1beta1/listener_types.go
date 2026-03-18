@@ -14,13 +14,29 @@ import (
 
 // ListenerSpec defines the desired state of Listener.
 type ListenerSpec struct {
-	Id                    shared.OCID `json:"id,omitempty"`
-	CompartmentId         shared.OCID `json:"compartmentId,omitempty"`
-	Name                  string      `json:"name,omitempty"`
-	DefaultBackendSetName string      `json:"defaultBackendSetName,omitempty"`
-	Port                  int         `json:"port,omitempty"`
-	Protocol              string      `json:"protocol,omitempty"`
-	IpVersion             string      `json:"ipVersion,omitempty"`
+	// A friendly name for the listener. It must be unique and it cannot be changed.
+	// Example: `example_listener`
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+	// The name of the associated backend set.
+	// Example: `example_backend_set`
+	// +kubebuilder:validation:Required
+	DefaultBackendSetName string `json:"defaultBackendSetName"`
+	// The communication port for the listener.
+	// Example: `80`
+	// +kubebuilder:validation:Required
+	Port int `json:"port"`
+	// The protocol on which the listener accepts connection requests.
+	// For public network load balancers, ANY protocol refers to TCP/UDP.
+	// For private network load balancers, ANY protocol refers to TCP/UDP/ICMP (note that ICMP requires isPreserveSourceDestination to be set to true).
+	// To get a list of valid protocols, use the ListNetworkLoadBalancersProtocols
+	// operation.
+	// Example: `TCP`
+	// +kubebuilder:validation:Required
+	Protocol string `json:"protocol"`
+	// IP version associated with the listener.
+	// +kubebuilder:validation:Optional
+	IpVersion string `json:"ipVersion,omitempty"`
 }
 
 // ListenerStatus defines the observed state of Listener.

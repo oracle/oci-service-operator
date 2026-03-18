@@ -14,19 +14,36 @@ import (
 
 // CrossConnectStatusSpec defines the desired state of CrossConnectStatus.
 type CrossConnectStatusSpec struct {
-	Id                  shared.OCID `json:"id,omitempty"`
-	CompartmentId       shared.OCID `json:"compartmentId,omitempty"`
-	CrossConnectId      string      `json:"crossConnectId,omitempty"`
-	InterfaceState      string      `json:"interfaceState,omitempty"`
-	LightLevelIndBm     float32     `json:"lightLevelIndBm,omitempty"`
-	LightLevelIndicator string      `json:"lightLevelIndicator,omitempty"`
-	EncryptionStatus    string      `json:"encryptionStatus,omitempty"`
-	LightLevelsInDBm    []float32   `json:"lightLevelsInDBm,omitempty"`
 }
 
 // CrossConnectStatusObservedState defines the observed state of CrossConnectStatus.
 type CrossConnectStatusObservedState struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the cross-connect.
+	CrossConnectId string `json:"crossConnectId,omitempty"`
+	// Indicates whether Oracle's side of the interface is up or down.
+	InterfaceState string `json:"interfaceState,omitempty"`
+	// The light level of the cross-connect (in dBm).
+	// Example: `14.0`
+	LightLevelIndBm float32 `json:"lightLevelIndBm,omitempty"`
+	// Status indicator corresponding to the light level.
+	//   * **NO_LIGHT:** No measurable light
+	//   * **LOW_WARN:** There's measurable light but it's too low
+	//   * **HIGH_WARN:** Light level is too high
+	//   * **BAD:** There's measurable light but the signal-to-noise ratio is bad
+	//   * **GOOD:** Good light level
+	LightLevelIndicator string `json:"lightLevelIndicator,omitempty"`
+	// Encryption status of this cross connect.
+	// Possible values:
+	// * **UP:** Traffic is encrypted over this cross-connect
+	// * **DOWN:** Traffic is not encrypted over this cross-connect
+	// * **CIPHER_MISMATCH:** The MACsec encryption cipher doesn't match the cipher on the CPE
+	// * **CKN_MISMATCH:** The MACsec Connectivity association Key Name (CKN) doesn't match the CKN on the CPE
+	// * **CAK_MISMATCH:** The MACsec Connectivity Association Key (CAK) doesn't match the CAK on the CPE
+	EncryptionStatus string `json:"encryptionStatus,omitempty"`
+	// The light levels of the cross-connect (in dBm).
+	// Example: `[14.0, -14.0, 2.1, -10.1]`
+	LightLevelsInDBm []float32 `json:"lightLevelsInDBm,omitempty"`
 }
 
 // +kubebuilder:object:root=true

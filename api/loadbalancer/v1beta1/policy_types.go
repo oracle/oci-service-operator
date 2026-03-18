@@ -14,8 +14,6 @@ import (
 
 // PolicySpec defines the desired state of Policy.
 type PolicySpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // PolicyStatus defines the observed state of Policy.

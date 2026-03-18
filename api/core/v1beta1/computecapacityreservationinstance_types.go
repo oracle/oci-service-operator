@@ -14,8 +14,6 @@ import (
 
 // ComputeCapacityReservationInstanceSpec defines the desired state of ComputeCapacityReservationInstance.
 type ComputeCapacityReservationInstanceSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // ComputeCapacityReservationInstanceStatus defines the observed state of ComputeCapacityReservationInstance.

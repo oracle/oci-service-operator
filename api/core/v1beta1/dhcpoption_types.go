@@ -14,13 +14,41 @@ import (
 
 // DhcpOptionSpec defines the desired state of DhcpOption.
 type DhcpOptionSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // DhcpOptionStatus defines the observed state of DhcpOption.
 type DhcpOptionStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	Type       string            `json:"type,omitempty"`
+	// If you set `serverType` to `CustomDnsServer`, specify the
+	// IP address of at least one DNS server of your choice (three maximum).
+	CustomDnsServers []string `json:"customDnsServers,omitempty"`
+	// * **VcnLocal:** Reserved for future use.
+	// * **VcnLocalPlusInternet:** Also referred to as "Internet and VCN Resolver".
+	// Instances can resolve internet hostnames (no internet gateway is required),
+	// and can resolve hostnames of instances in the VCN. This is the default
+	// value in the default set of DHCP options in the VCN. For the Internet and
+	// VCN Resolver to work across the VCN, there must also be a DNS label set for
+	// the VCN, a DNS label set for each subnet, and a hostname for each instance.
+	// The Internet and VCN Resolver also enables reverse DNS lookup, which lets
+	// you determine the hostname corresponding to the private IP address. For more
+	// information, see
+	// DNS in Your Virtual Cloud Network (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/dns.htm).
+	// * **CustomDnsServer:** Instances use a DNS server of your choice (three
+	// maximum).
+	ServerType string `json:"serverType,omitempty"`
+	// A single search domain name according to RFC 952 (https://tools.ietf.org/html/rfc952)
+	// and RFC 1123 (https://tools.ietf.org/html/rfc1123). During a DNS query,
+	// the OS will append this search domain name to the value being queried.
+	// If you set DhcpDnsOption to `VcnLocalPlusInternet`,
+	// and you assign a DNS label to the VCN during creation, the search domain name in the
+	// VCN's default set of DHCP options is automatically set to the VCN domain
+	// (for example, `vcn1.oraclevcn.com`).
+	// If you don't want to use a search domain name, omit this option from the
+	// set of DHCP options. Do not include this option with an empty list
+	// of search domain names, or with an empty string as the value for any search
+	// domain name.
+	SearchDomainNames []string `json:"searchDomainNames,omitempty"`
 }
 
 // +kubebuilder:object:root=true

@@ -14,26 +14,146 @@ import (
 
 // ImageSpec defines the desired state of Image.
 type ImageSpec struct {
-	Id                     shared.OCID       `json:"id,omitempty"`
-	CompartmentId          shared.OCID       `json:"compartmentId,omitempty"`
-	DisplayName            string            `json:"displayName,omitempty"`
-	FreeformTags           map[string]string `json:"freeformTags,omitempty"`
-	InstanceId             string            `json:"instanceId,omitempty"`
-	LaunchMode             string            `json:"launchMode,omitempty"`
-	OperatingSystem        string            `json:"operatingSystem,omitempty"`
-	OperatingSystemVersion string            `json:"operatingSystemVersion,omitempty"`
-	CreateImageAllowed     bool              `json:"createImageAllowed,omitempty"`
-	LifecycleState         string            `json:"lifecycleState,omitempty"`
-	TimeCreated            string            `json:"timeCreated,omitempty"`
-	BaseImageId            string            `json:"baseImageId,omitempty"`
-	ListingType            string            `json:"listingType,omitempty"`
-	SizeInMBs              int64             `json:"sizeInMBs,omitempty"`
-	BillableSizeInGBs      int64             `json:"billableSizeInGBs,omitempty"`
+	// The OCID of the compartment you want the image to be created in.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name for the image. It does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	// You cannot use a platform image name as a custom image name.
+	// Example: `My Oracle Linux image`
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// +kubebuilder:validation:Optional
+	ImageSourceDetails ImageSourceDetails `json:"imageSourceDetails,omitempty"`
+	// The OCID of the instance you want to use as the basis for the image.
+	// +kubebuilder:validation:Optional
+	InstanceId string `json:"instanceId,omitempty"`
+	// Specifies the configuration mode for launching virtual machine (VM) instances. The configuration modes are:
+	// * `NATIVE` - VM instances launch with paravirtualized boot and VFIO devices. The default value for platform images.
+	// * `EMULATED` - VM instances launch with emulated devices, such as the E1000 network driver and emulated SCSI disk controller.
+	// * `PARAVIRTUALIZED` - VM instances launch with paravirtualized devices using VirtIO drivers.
+	// * `CUSTOM` - VM instances launch with custom configuration settings specified in the `LaunchOptions` parameter.
+	// +kubebuilder:validation:Optional
+	LaunchMode string `json:"launchMode,omitempty"`
+	// Operating system
+	// Example: `Oracle Linux`
+	// +kubebuilder:validation:Optional
+	OperatingSystem string `json:"operatingSystem,omitempty"`
+	// Operating system version
+	// Example: `7.4`
+	// +kubebuilder:validation:Optional
+	OperatingSystemVersion string `json:"operatingSystemVersion,omitempty"`
+}
+
+// ImageSourceDetails defines nested fields for Image.ImageSourceDetails.
+type ImageSourceDetails struct {
+	// +kubebuilder:validation:Optional
+	OperatingSystem string `json:"operatingSystem,omitempty"`
+	// +kubebuilder:validation:Optional
+	OperatingSystemVersion string `json:"operatingSystemVersion,omitempty"`
+	// The format of the image to be imported. Only monolithic
+	// images are supported. This attribute is not used for exported Oracle images with the OCI image format.
+	// +kubebuilder:validation:Optional
+	SourceImageType string `json:"sourceImageType,omitempty"`
+	// +kubebuilder:validation:Optional
+	SourceType string `json:"sourceType,omitempty"`
+	// The Object Storage bucket for the image.
+	// +kubebuilder:validation:Required
+	BucketName string `json:"bucketName"`
+	// The Object Storage namespace for the image.
+	// +kubebuilder:validation:Required
+	NamespaceName string `json:"namespaceName"`
+	// The Object Storage name for the image.
+	// +kubebuilder:validation:Required
+	ObjectName string `json:"objectName"`
+	// The Object Storage URL for the image.
+	// +kubebuilder:validation:Required
+	SourceUri string `json:"sourceUri"`
+}
+
+// ImageLaunchOptions defines nested fields for Image.LaunchOptions.
+type ImageLaunchOptions struct {
+	// Emulation type for the boot volume.
+	// * `ISCSI` - ISCSI attached block storage device.
+	// * `SCSI` - Emulated SCSI disk.
+	// * `IDE` - Emulated IDE disk.
+	// * `VFIO` - Direct attached Virtual Function storage. This is the default option for local data
+	// volumes on platform images.
+	// * `PARAVIRTUALIZED` - Paravirtualized disk. This is the default for boot volumes and remote block
+	// storage volumes on platform images.
+	BootVolumeType string `json:"bootVolumeType,omitempty"`
+	// Firmware used to boot VM. Select the option that matches your operating system.
+	// * `BIOS` - Boot VM using BIOS style firmware. This is compatible with both 32 bit and 64 bit operating
+	// systems that boot using MBR style bootloaders.
+	// * `UEFI_64` - Boot VM using UEFI style firmware compatible with 64 bit operating systems. This is the
+	// default for platform images.
+	Firmware string `json:"firmware,omitempty"`
+	// Emulation type for the physical network interface card (NIC).
+	// * `E1000` - Emulated Gigabit ethernet controller. Compatible with Linux e1000 network driver.
+	// * `VFIO` - Direct attached Virtual Function network controller. This is the networking type
+	// when you launch an instance using hardware-assisted (SR-IOV) networking.
+	// * `PARAVIRTUALIZED` - VM instances launch with paravirtualized devices using VirtIO drivers.
+	NetworkType string `json:"networkType,omitempty"`
+	// Emulation type for volume.
+	// * `ISCSI` - ISCSI attached block storage device.
+	// * `SCSI` - Emulated SCSI disk.
+	// * `IDE` - Emulated IDE disk.
+	// * `VFIO` - Direct attached Virtual Function storage. This is the default option for local data
+	// volumes on platform images.
+	// * `PARAVIRTUALIZED` - Paravirtualized disk. This is the default for boot volumes and remote block
+	// storage volumes on platform images.
+	RemoteDataVolumeType string `json:"remoteDataVolumeType,omitempty"`
+	// Deprecated. Instead use `isPvEncryptionInTransitEnabled` in
+	// LaunchInstanceDetails.
+	IsPvEncryptionInTransitEnabled bool `json:"isPvEncryptionInTransitEnabled,omitempty"`
+	// Whether to enable consistent volume naming feature. Defaults to false.
+	IsConsistentVolumeNamingEnabled bool `json:"isConsistentVolumeNamingEnabled,omitempty"`
+}
+
+// ImageAgentFeatures defines nested fields for Image.AgentFeatures.
+type ImageAgentFeatures struct {
+	// This attribute is not used.
+	IsMonitoringSupported bool `json:"isMonitoringSupported,omitempty"`
+	// This attribute is not used.
+	IsManagementSupported bool `json:"isManagementSupported,omitempty"`
 }
 
 // ImageStatus defines the observed state of Image.
 type ImageStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// Whether instances launched with this image can be used to create new images.
+	// For example, you cannot create an image of an Oracle Database instance.
+	// Example: `true`
+	CreateImageAllowed bool `json:"createImageAllowed,omitempty"`
+	// The OCID of the image.
+	Id             string `json:"id,omitempty"`
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The date and time the image was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The OCID of the image originally used to launch the instance.
+	BaseImageId   string             `json:"baseImageId,omitempty"`
+	LaunchOptions ImageLaunchOptions `json:"launchOptions,omitempty"`
+	AgentFeatures ImageAgentFeatures `json:"agentFeatures,omitempty"`
+	// The listing type of the image. The default value is "NONE".
+	ListingType string `json:"listingType,omitempty"`
+	// The boot volume size for an instance launched from this image (1 MB = 1,048,576 bytes).
+	// Note this is not the same as the size of the image when it was exported or the actual size of the image.
+	// Example: `47694`
+	SizeInMBs int64 `json:"sizeInMBs,omitempty"`
+	// The size of the internal storage for this image that is subject to billing (1 GB = 1,073,741,824 bytes).
+	// Example: `100`
+	BillableSizeInGBs int64 `json:"billableSizeInGBs,omitempty"`
 }
 
 // +kubebuilder:object:root=true

@@ -14,16 +14,52 @@ import (
 
 // VcnTopologySpec defines the desired state of VcnTopology.
 type VcnTopologySpec struct {
-	Id              shared.OCID `json:"id,omitempty"`
-	CompartmentId   shared.OCID `json:"compartmentId,omitempty"`
-	LimitedEntities []string    `json:"limitedEntities,omitempty"`
-	TimeCreated     string      `json:"timeCreated,omitempty"`
-	VcnId           string      `json:"vcnId,omitempty"`
+}
+
+// VcnTopologyRelationshipRouteRuleDetails defines nested fields for VcnTopology.Relationship.RouteRuleDetails.
+type VcnTopologyRelationshipRouteRuleDetails struct {
+	// The destinationType can be set to one of two values:
+	// * Use `CIDR_BLOCK` if the rule's `destination` is an IP address range in CIDR notation.
+	// * Use `SERVICE_CIDR_BLOCK` if the rule's `destination` is the `cidrBlock` value for a Service.
+	DestinationType string `json:"destinationType,omitempty"`
+	// An IP address range in CIDR notation or the `cidrBlock` value for a Service.
+	Destination string `json:"destination,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the routing table that contains the route rule.
+	RouteTableId string `json:"routeTableId,omitempty"`
+	// A route rule can be `STATIC` if manually added to the route table or `DYNAMIC` if imported from another route table.
+	RouteType string `json:"routeType,omitempty"`
+}
+
+// VcnTopologyRelationshipAssociatedWithDetails defines nested fields for VcnTopology.Relationship.AssociatedWithDetails.
+type VcnTopologyRelationshipAssociatedWithDetails struct {
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the entities via which the relationship is created. For example an instance is associated with a network security group via the VNIC attachment and the VNIC.
+	Via []string `json:"via,omitempty"`
+}
+
+// VcnTopologyRelationship defines nested fields for VcnTopology.Relationship.
+type VcnTopologyRelationship struct {
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the first entity in the relationship.
+	Id1 string `json:"id1,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the second entity in the relationship.
+	Id2                   string                                       `json:"id2,omitempty"`
+	Type                  string                                       `json:"type,omitempty"`
+	RouteRuleDetails      VcnTopologyRelationshipRouteRuleDetails      `json:"routeRuleDetails,omitempty"`
+	AssociatedWithDetails VcnTopologyRelationshipAssociatedWithDetails `json:"associatedWithDetails,omitempty"`
 }
 
 // VcnTopologyStatus defines the observed state of VcnTopology.
 type VcnTopologyStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// Lists relationships between entities in the virtual network topology.
+	Relationships []VcnTopologyRelationship `json:"relationships,omitempty"`
+	// Lists entities that are limited during ingestion.
+	// The values for the items in the list are the entity type names of the limitedEntities.
+	// Example: `vcn`
+	LimitedEntities []string `json:"limitedEntities,omitempty"`
+	// Records when the virtual network topology was created, in RFC3339 (https://tools.ietf.org/html/rfc3339) format for date and time.
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VCN for which the topology is generated.
+	VcnId string `json:"vcnId,omitempty"`
 }
 
 // +kubebuilder:object:root=true

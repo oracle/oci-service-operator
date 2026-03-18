@@ -14,18 +14,42 @@ import (
 
 // RetentionRuleSpec defines the desired state of RetentionRule.
 type RetentionRuleSpec struct {
-	Id             shared.OCID `json:"id,omitempty"`
-	CompartmentId  shared.OCID `json:"compartmentId,omitempty"`
-	DisplayName    string      `json:"displayName,omitempty"`
-	TimeRuleLocked string      `json:"timeRuleLocked,omitempty"`
-	Etag           string      `json:"etag,omitempty"`
-	TimeCreated    string      `json:"timeCreated,omitempty"`
-	TimeModified   string      `json:"timeModified,omitempty"`
+	// A user-specified name for the retention rule. Names can be helpful in identifying retention rules.
+	// Avoid entering confidential information.
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
+	// +kubebuilder:validation:Optional
+	Duration RetentionRuleDuration `json:"duration,omitempty"`
+	// The date and time as per RFC 3339 (https://tools.ietf.org/html/rfc3339) after which this rule is locked
+	// and can only be deleted by deleting the bucket. Once a rule is locked, only increases in the duration are
+	// allowed and no other properties can be changed. This property cannot be updated for rules that are in a
+	// locked state. Specifying it when a duration is not specified is considered an error.
+	// +kubebuilder:validation:Optional
+	TimeRuleLocked string `json:"timeRuleLocked,omitempty"`
+}
+
+// RetentionRuleDuration defines nested fields for RetentionRule.Duration.
+type RetentionRuleDuration struct {
+	// The timeAmount is interpreted in units defined by the timeUnit parameter, and is calculated in relation
+	// to each object's Last-Modified timestamp.
+	// +kubebuilder:validation:Required
+	TimeAmount int64 `json:"timeAmount"`
+	// The unit that should be used to interpret timeAmount.
+	// +kubebuilder:validation:Required
+	TimeUnit string `json:"timeUnit"`
 }
 
 // RetentionRuleStatus defines the observed state of RetentionRule.
 type RetentionRuleStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// Unique identifier for the retention rule.
+	Id string `json:"id,omitempty"`
+	// The entity tag (ETag) for the retention rule.
+	Etag string `json:"etag,omitempty"`
+	// The date and time that the retention rule was created as per RFC3339 (https://tools.ietf.org/html/rfc3339).
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The date and time that the retention rule was modified as per RFC3339 (https://tools.ietf.org/html/rfc3339).
+	TimeModified string `json:"timeModified,omitempty"`
 }
 
 // +kubebuilder:object:root=true

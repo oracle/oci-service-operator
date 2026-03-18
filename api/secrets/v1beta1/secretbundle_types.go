@@ -14,20 +14,35 @@ import (
 
 // SecretBundleSpec defines the desired state of SecretBundle.
 type SecretBundleSpec struct {
-	Id             shared.OCID `json:"id,omitempty"`
-	CompartmentId  shared.OCID `json:"compartmentId,omitempty"`
-	SecretId       string      `json:"secretId,omitempty"`
-	VersionNumber  int64       `json:"versionNumber,omitempty"`
-	TimeCreated    string      `json:"timeCreated,omitempty"`
-	VersionName    string      `json:"versionName,omitempty"`
-	TimeOfDeletion string      `json:"timeOfDeletion,omitempty"`
-	TimeOfExpiry   string      `json:"timeOfExpiry,omitempty"`
-	Stages         []string    `json:"stages,omitempty"`
+}
+
+// SecretBundleContent defines nested fields for SecretBundle.SecretBundleContent.
+type SecretBundleContent struct {
+	ContentType string `json:"contentType,omitempty"`
+	// The base64-encoded content of the secret.
+	Content string `json:"content,omitempty"`
 }
 
 // SecretBundleStatus defines the observed state of SecretBundle.
 type SecretBundleStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the secret.
+	SecretId string `json:"secretId,omitempty"`
+	// The version number of the secret.
+	VersionNumber int64 `json:"versionNumber,omitempty"`
+	// The time when the secret bundle was created.
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The name of the secret version. Labels are unique across the different versions of a particular secret.
+	VersionName         string              `json:"versionName,omitempty"`
+	SecretBundleContent SecretBundleContent `json:"secretBundleContent,omitempty"`
+	// An optional property indicating when to delete the secret version, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2019-04-03T21:10:29.600Z`
+	TimeOfDeletion string `json:"timeOfDeletion,omitempty"`
+	// An optional property indicating when the secret version will expire, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+	// Example: `2019-04-03T21:10:29.600Z`
+	TimeOfExpiry string `json:"timeOfExpiry,omitempty"`
+	// A list of possible rotation states for the secret version.
+	Stages []string `json:"stages,omitempty"`
 }
 
 // +kubebuilder:object:root=true

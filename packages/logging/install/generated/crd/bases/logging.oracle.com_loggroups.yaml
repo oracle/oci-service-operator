@@ -57,31 +57,48 @@ spec:
             description: LogGroupSpec defines the desired state of LogGroup.
             properties:
               compartmentId:
-                maxLength: 255
-                minLength: 1
+                description: The OCID of the compartment that the resource belongs
+                  to.
                 type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a
+                  namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
               description:
+                description: Description for this resource.
                 type: string
               displayName:
+                description: |-
+                  The user-friendly display name. This must be unique within the enclosing resource,
+                  and it's changeable. Avoid entering confidential information.
                 type: string
               freeformTags:
                 additionalProperties:
                   type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no
+                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
                 type: object
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
-              lifecycleState:
-                type: string
-              timeCreated:
-                type: string
-              timeLastModified:
-                type: string
+            required:
+            - compartmentId
+            - displayName
             type: object
           status:
             description: LogGroupStatus defines the observed state of LogGroup.
             properties:
+              id:
+                description: The OCID of the resource.
+                type: string
+              lifecycleState:
+                description: The log group object state.
+                type: string
               status:
                 properties:
                   conditions:
@@ -124,6 +141,12 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              timeCreated:
+                description: Time the resource was created.
+                type: string
+              timeLastModified:
+                description: Time the resource was last modified.
+                type: string
             required:
             - status
             type: object

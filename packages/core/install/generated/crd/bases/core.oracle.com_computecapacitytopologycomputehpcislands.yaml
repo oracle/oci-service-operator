@@ -53,15 +53,6 @@ spec:
           spec:
             description: ComputeCapacityTopologyComputeHpcIslandSpec defines the desired
               state of ComputeCapacityTopologyComputeHpcIsland.
-            properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
             type: object
           status:
             description: ComputeCapacityTopologyComputeHpcIslandStatus defines the

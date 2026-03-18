@@ -14,8 +14,6 @@ import (
 
 // VolumeBackupPolicyAssetAssignmentSpec defines the desired state of VolumeBackupPolicyAssetAssignment.
 type VolumeBackupPolicyAssetAssignmentSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // VolumeBackupPolicyAssetAssignmentStatus defines the observed state of VolumeBackupPolicyAssetAssignment.

@@ -53,20 +53,26 @@ spec:
           spec:
             description: DedicatedVmHostInstanceSpec defines the desired state of
               DedicatedVmHostInstance.
-            properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
             type: object
           status:
             description: DedicatedVmHostInstanceStatus defines the observed state
               of DedicatedVmHostInstance.
             properties:
+              availabilityDomain:
+                description: |-
+                  The availability domain the virtual machine instance is running in.
+                  Example: `Uocm:PHX-AD-1`
+                type: string
+              compartmentId:
+                description: The OCID of the compartment that contains the virtual
+                  machine instance.
+                type: string
+              instanceId:
+                description: The OCID of the virtual machine instance.
+                type: string
+              shape:
+                description: The shape of the VM instance.
+                type: string
               status:
                 properties:
                   conditions:
@@ -109,6 +115,11 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              timeCreated:
+                description: |-
+                  The date and time the virtual machine instance was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+                  Example: `2016-08-25T21:10:29.600Z`
+                type: string
             required:
             - status
             type: object

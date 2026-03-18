@@ -55,17 +55,12 @@ spec:
               of VirtualCircuitPublicPrefix.
             properties:
               cidrBlock:
+                description: |-
+                  An individual public IP prefix (CIDR) to add to the public virtual circuit.
+                  All prefix sizes are allowed.
                 type: string
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
-              verificationState:
-                type: string
+            required:
+            - cidrBlock
             type: object
           status:
             description: VirtualCircuitPublicPrefixStatus defines the observed state
@@ -113,6 +108,14 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              verificationState:
+                description: |-
+                  Oracle must verify that the customer owns the public IP prefix before traffic
+                  for that prefix can flow across the virtual circuit. Verification can take a
+                  few business days. `IN_PROGRESS` means Oracle is verifying the prefix. `COMPLETED`
+                  means verification succeeded. `FAILED` means verification failed and traffic for
+                  this prefix will not flow across the connection.
+                type: string
             required:
             - status
             type: object

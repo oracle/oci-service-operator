@@ -53,15 +53,6 @@ spec:
           spec:
             description: CrossconnectPortSpeedShapeSpec defines the desired state
               of CrossconnectPortSpeedShape.
-            properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
             type: object
           status:
             description: CrossconnectPortSpeedShapeStatus defines the observed state

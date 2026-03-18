@@ -14,13 +14,16 @@ import (
 
 // IamWorkRequestLogSpec defines the desired state of IamWorkRequestLog.
 type IamWorkRequestLogSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // IamWorkRequestLogStatus defines the observed state of IamWorkRequestLog.
 type IamWorkRequestLogStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// A human-readable error string.
+	Message string `json:"message,omitempty"`
+	// Date and time the log was written, in the format defined by RFC3339.
+	// Example: `2016-08-25T21:10:29.600Z`
+	Timestamp string `json:"timestamp,omitempty"`
 }
 
 // +kubebuilder:object:root=true

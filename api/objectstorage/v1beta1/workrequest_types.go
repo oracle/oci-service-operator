@@ -14,19 +14,47 @@ import (
 
 // WorkRequestSpec defines the desired state of WorkRequest.
 type WorkRequestSpec struct {
-	Id              shared.OCID `json:"id,omitempty"`
-	CompartmentId   shared.OCID `json:"compartmentId,omitempty"`
-	OperationType   string      `json:"operationType,omitempty"`
-	Status          string      `json:"status,omitempty"`
-	PercentComplete float32     `json:"percentComplete,omitempty"`
-	TimeAccepted    string      `json:"timeAccepted,omitempty"`
-	TimeStarted     string      `json:"timeStarted,omitempty"`
-	TimeFinished    string      `json:"timeFinished,omitempty"`
+}
+
+// WorkRequestResource defines nested fields for WorkRequest.Resource.
+type WorkRequestResource struct {
+	// The status of the work request.
+	ActionType string `json:"actionType,omitempty"`
+	// The resource type the work request affects.
+	EntityType string `json:"entityType,omitempty"`
+	// The resource type identifier.
+	Identifier string `json:"identifier,omitempty"`
+	// The URI path that you can use for a GET request to access the resource metadata.
+	EntityUri string `json:"entityUri,omitempty"`
+	// The metadata of the resource.
+	Metadata map[string]string `json:"metadata,omitempty"`
 }
 
 // WorkRequestStatus defines the observed state of WorkRequest.
 type WorkRequestStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The type of work request.
+	OperationType string `json:"operationType,omitempty"`
+	// The id of the work request.
+	Id string `json:"id,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment that contains the work request. Work
+	// requests are scoped to the same compartment as the resource the work request affects.
+	// If the work request affects multiple resources and those resources are not in the same compartment, the OCID of
+	// the primary resource is used. For example, you can copy an object in a bucket in one compartment to a bucket in
+	// another compartment. In this case, the OCID of the source compartment is used.
+	CompartmentId string                `json:"compartmentId,omitempty"`
+	Resources     []WorkRequestResource `json:"resources,omitempty"`
+	// Percentage of the work request completed.
+	PercentComplete float32 `json:"percentComplete,omitempty"`
+	// The date and time the work request was created, as described in
+	// RFC 3339 (https://tools.ietf.org/html/rfc3339).
+	TimeAccepted string `json:"timeAccepted,omitempty"`
+	// The date and time the work request was started, as described in
+	// RFC 3339 (https://tools.ietf.org/html/rfc3339).
+	TimeStarted string `json:"timeStarted,omitempty"`
+	// The date and time the work request was finished, as described in
+	// RFC 3339 (https://tools.ietf.org/html/rfc3339).
+	TimeFinished string `json:"timeFinished,omitempty"`
 }
 
 // +kubebuilder:object:root=true

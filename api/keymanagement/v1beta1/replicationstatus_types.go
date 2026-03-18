@@ -14,12 +14,10 @@ import (
 
 // ReplicationStatusSpec defines the desired state of ReplicationStatus.
 type ReplicationStatusSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
-// ReplicationStatusStatus defines the observed state of ReplicationStatus.
-type ReplicationStatusStatus struct {
+// ReplicationStatusObservedState defines the observed state of ReplicationStatus.
+type ReplicationStatusObservedState struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
 }
 
@@ -33,8 +31,8 @@ type ReplicationStatus struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   ReplicationStatusSpec   `json:"spec,omitempty"`
-	Status ReplicationStatusStatus `json:"status,omitempty"`
+	Spec   ReplicationStatusSpec          `json:"spec,omitempty"`
+	Status ReplicationStatusObservedState `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true

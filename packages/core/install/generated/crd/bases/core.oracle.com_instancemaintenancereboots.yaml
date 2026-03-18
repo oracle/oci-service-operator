@@ -53,17 +53,6 @@ spec:
           spec:
             description: InstanceMaintenanceRebootSpec defines the desired state of
               InstanceMaintenanceReboot.
-            properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
-              timeMaintenanceRebootDueMax:
-                type: string
             type: object
           status:
             description: InstanceMaintenanceRebootStatus defines the observed state
@@ -111,6 +100,13 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              timeMaintenanceRebootDueMax:
+                description: |-
+                  The maximum extension date and time for the maintenance reboot, in the format defined by
+                  RFC3339 (https://tools.ietf.org/html/rfc3339).
+                  The range for the maintenance extension is between 1 and 14 days from the initial scheduled maintenance date.
+                  Example: `2018-05-25T21:10:29.600Z`
+                type: string
             required:
             - status
             type: object

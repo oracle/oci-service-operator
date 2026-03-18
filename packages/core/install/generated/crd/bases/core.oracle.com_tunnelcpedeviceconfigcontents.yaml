@@ -53,15 +53,6 @@ spec:
           spec:
             description: TunnelCpeDeviceConfigContentSpec defines the desired state
               of TunnelCpeDeviceConfigContent.
-            properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
             type: object
           status:
             description: TunnelCpeDeviceConfigContentStatus defines the observed state

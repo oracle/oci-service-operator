@@ -14,8 +14,6 @@ import (
 
 // VirtualCircuitAssociatedTunnelSpec defines the desired state of VirtualCircuitAssociatedTunnel.
 type VirtualCircuitAssociatedTunnelSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // VirtualCircuitAssociatedTunnelStatus defines the observed state of VirtualCircuitAssociatedTunnel.

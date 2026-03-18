@@ -14,28 +14,49 @@ import (
 
 // BlockVolumeReplicaSpec defines the desired state of BlockVolumeReplica.
 type BlockVolumeReplicaSpec struct {
-	Id                        shared.OCID       `json:"id,omitempty"`
-	CompartmentId             shared.OCID       `json:"compartmentId,omitempty"`
-	AvailabilityDomain        string            `json:"availabilityDomain,omitempty"`
-	DisplayName               string            `json:"displayName,omitempty"`
-	LifecycleState            string            `json:"lifecycleState,omitempty"`
-	SizeInGBs                 int64             `json:"sizeInGBs,omitempty"`
-	TimeCreated               string            `json:"timeCreated,omitempty"`
-	TimeLastSynced            string            `json:"timeLastSynced,omitempty"`
-	BlockVolumeId             string            `json:"blockVolumeId,omitempty"`
-	FreeformTags              map[string]string `json:"freeformTags,omitempty"`
-	TotalDataTransferredInGBs int64             `json:"totalDataTransferredInGBs,omitempty"`
-	VolumeGroupReplicaId      string            `json:"volumeGroupReplicaId,omitempty"`
 }
 
 // BlockVolumeReplicaStatus defines the observed state of BlockVolumeReplica.
 type BlockVolumeReplicaStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The availability domain of the block volume replica.
+	// Example: `Uocm:PHX-AD-1`
+	AvailabilityDomain string `json:"availabilityDomain,omitempty"`
+	// The OCID of the compartment that contains the block volume replica.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	DisplayName string `json:"displayName,omitempty"`
+	// The block volume replica's Oracle ID (OCID).
+	Id string `json:"id,omitempty"`
+	// The current state of a block volume replica.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The size of the source block volume, in GBs.
+	SizeInGBs int64 `json:"sizeInGBs,omitempty"`
+	// The date and time the block volume replica was created. Format defined
+	// by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The date and time the block volume replica was last synced from the source block volume.
+	// Format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	TimeLastSynced string `json:"timeLastSynced,omitempty"`
+	// The OCID of the source block volume.
+	BlockVolumeId string `json:"blockVolumeId,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// The total size of the data transferred from the source block volume to the block volume replica, in GBs.
+	TotalDataTransferredInGBs int64 `json:"totalDataTransferredInGBs,omitempty"`
+	// The OCID of the volume group replica.
+	VolumeGroupReplicaId string `json:"volumeGroupReplicaId,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="DisplayName",type="string",JSONPath=".spec.displayName",priority=1
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.status.conditions[-1].type",description="status of the BlockVolumeReplica",priority=0
 // +kubebuilder:printcolumn:name="Ocid",type="string",JSONPath=".status.status.ocid",description="Ocid of the BlockVolumeReplica",priority=1
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0

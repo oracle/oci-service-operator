@@ -14,13 +14,18 @@ import (
 
 // TaggingWorkRequestErrorSpec defines the desired state of TaggingWorkRequestError.
 type TaggingWorkRequestErrorSpec struct {
-	Id            shared.OCID `json:"id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
 }
 
 // TaggingWorkRequestErrorStatus defines the observed state of TaggingWorkRequestError.
 type TaggingWorkRequestErrorStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// A machine-usable code for the error that occured.
+	Code string `json:"code,omitempty"`
+	// A human-readable error string.
+	Message string `json:"message,omitempty"`
+	// Date and time the error happened, in the format defined by RFC3339.
+	// Example: `2016-08-25T21:10:29.600Z`
+	Timestamp string `json:"timestamp,omitempty"`
 }
 
 // +kubebuilder:object:root=true

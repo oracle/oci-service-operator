@@ -51,31 +51,51 @@ spec:
             type: object
           spec:
             description: WorkRequestSpec defines the desired state of WorkRequest.
-            properties:
-              compartmentId:
-                maxLength: 255
-                minLength: 1
-                type: string
-              id:
-                maxLength: 255
-                minLength: 1
-                type: string
-              operationType:
-                type: string
-              percentComplete:
-                type: number
-              status:
-                type: string
-              timeAccepted:
-                type: string
-              timeFinished:
-                type: string
-              timeStarted:
-                type: string
             type: object
           status:
             description: WorkRequestStatus defines the observed state of WorkRequest.
             properties:
+              compartmentId:
+                description: |-
+                  The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the work request. Work requests should be scoped to
+                  the same compartment as the resource the work request affects. If the work request affects multiple resources,
+                  and those resources are not in the same compartment, it is up to the service team to pick the primary
+                  resource whose compartment should be used
+                type: string
+              id:
+                description: The id of the work request.
+                type: string
+              operationType:
+                description: Type of the work request
+                type: string
+              percentComplete:
+                description: Percentage of the request completed.
+                type: number
+              resources:
+                description: The resources affected by this work request.
+                items:
+                  description: WorkRequestResource defines nested fields for WorkRequest.Resource.
+                  properties:
+                    actionType:
+                      description: |-
+                        The way in which this resource is affected by the work tracked in the work request.
+                        A resource being created, updated, or deleted will remain in the IN_PROGRESS state until
+                        work is complete for that resource at which point it will transition to CREATED, UPDATED,
+                        or DELETED, respectively.
+                      type: string
+                    entityType:
+                      description: The resource type the work request affects.
+                      type: string
+                    entityUri:
+                      description: The URI path that the user can do a GET on to access
+                        the resource metadata
+                      type: string
+                    identifier:
+                      description: The identifier of the resource the work request
+                        affects.
+                      type: string
+                  type: object
+                type: array
               status:
                 properties:
                   conditions:
@@ -118,6 +138,20 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              timeAccepted:
+                description: |-
+                  The date and time the request was created, as described in
+                  RFC 3339 (https://tools.ietf.org/rfc/rfc3339), section 14.29.
+                type: string
+              timeFinished:
+                description: The date and time the object was finished, as described
+                  in RFC 3339 (https://tools.ietf.org/rfc/rfc3339).
+                type: string
+              timeStarted:
+                description: |-
+                  The date and time the request was started, as described in RFC 3339 (https://tools.ietf.org/rfc/rfc3339),
+                  section 14.29.
+                type: string
             required:
             - status
             type: object
