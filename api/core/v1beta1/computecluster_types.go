@@ -40,6 +40,11 @@ type ComputeClusterSpec struct {
 // ComputeClusterStatus defines the observed state of ComputeCluster.
 type ComputeClusterStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The availability domain the compute cluster is running in.
+	// Example: `Uocm:PHX-AD-1`
+	AvailabilityDomain string `json:"availabilityDomain,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the compute cluster.
+	CompartmentId string `json:"compartmentId,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compute cluster.
 	Id string `json:"id,omitempty"`
 	// The current state of the compute cluster.
@@ -48,6 +53,17 @@ type ComputeClusterStatus struct {
 	// in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	// Example: `2016-08-25T21:10:29.600Z`
 	TimeCreated string `json:"timeCreated,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	DisplayName string `json:"displayName,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 }
 
 // +kubebuilder:object:root=true

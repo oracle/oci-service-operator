@@ -8,6 +8,7 @@ package generator
 import (
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 )
@@ -116,5 +117,99 @@ func TestSelectServices(t *testing.T) {
 				t.Fatalf("SelectServices() returned %d services, want %d", len(services), test.wantCount)
 			}
 		})
+	}
+}
+
+func TestLoadConfigIncludesObservedStateAliases(t *testing.T) {
+	t.Parallel()
+
+	configPath := filepath.Join(t.TempDir(), "services.yaml")
+	content := `
+schemaVersion: v1alpha1
+domain: oracle.com
+defaultVersion: v1beta1
+generatorEntrypoint: ./cmd/osok-api-generator
+packageProfiles:
+  crd-only:
+    description: generated APIs
+services:
+  - service: containerengine
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/containerengine
+    group: containerengine
+    packageProfile: crd-only
+    observedState:
+      sdkAliases:
+        WorkRequestLog:
+          - WorkRequestLogEntry
+  - service: psql
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/psql
+    group: psql
+    packageProfile: crd-only
+    observedState:
+      sdkAliases:
+        PrimaryDbInstance:
+          - PrimaryDbInstanceDetails
+        WorkRequestLog:
+          - WorkRequestLogEntry
+  - service: identity
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/identity
+    group: identity
+    packageProfile: crd-only
+    observedState:
+      sdkAliases:
+        CostTrackingTag:
+          - Tag
+        UserState:
+          - User
+`
+	if err := os.WriteFile(configPath, []byte(content), 0o644); err != nil {
+		t.Fatalf("write temp config: %v", err)
+	}
+
+	cfg, err := LoadConfig(configPath)
+	if err != nil {
+		t.Fatalf("LoadConfig() error = %v", err)
+	}
+	if len(cfg.Services) != 3 {
+		t.Fatalf("len(cfg.Services) = %d, want 3", len(cfg.Services))
+	}
+
+	containerEngineService := cfg.Services[0]
+	if !slices.Equal(containerEngineService.ObservedState.SDKAliases["WorkRequestLog"], []string{"WorkRequestLogEntry"}) {
+		t.Fatalf("containerengine WorkRequestLog aliases = %v, want WorkRequestLogEntry", containerEngineService.ObservedState.SDKAliases["WorkRequestLog"])
+	}
+
+	psqlService := cfg.Services[1]
+	if !slices.Equal(psqlService.ObservedState.SDKAliases["PrimaryDbInstance"], []string{"PrimaryDbInstanceDetails"}) {
+		t.Fatalf("PrimaryDbInstance aliases = %v, want PrimaryDbInstanceDetails", psqlService.ObservedState.SDKAliases["PrimaryDbInstance"])
+	}
+	if !slices.Equal(psqlService.ObservedState.SDKAliases["WorkRequestLog"], []string{"WorkRequestLogEntry"}) {
+		t.Fatalf("WorkRequestLog aliases = %v, want WorkRequestLogEntry", psqlService.ObservedState.SDKAliases["WorkRequestLog"])
+	}
+
+	identityService := cfg.Services[2]
+	if !slices.Equal(identityService.ObservedState.SDKAliases["CostTrackingTag"], []string{"Tag"}) {
+		t.Fatalf("CostTrackingTag aliases = %v, want Tag", identityService.ObservedState.SDKAliases["CostTrackingTag"])
+	}
+	if !slices.Equal(identityService.ObservedState.SDKAliases["UserState"], []string{"User"}) {
+		t.Fatalf("UserState aliases = %v, want User", identityService.ObservedState.SDKAliases["UserState"])
+	}
+}
+
+func TestObservedStateStructCandidates(t *testing.T) {
+	t.Parallel()
+
+	service := ServiceConfig{
+		ObservedState: ObservedStateConfig{
+			SDKAliases: map[string][]string{
+				"ZoneFromZoneFile": {"Zone", "ZoneSummary", "Zone"},
+			},
+		},
+	}
+
+	got := service.ObservedStateStructCandidates("ZoneFromZoneFile")
+	want := []string{"ZoneFromZoneFile", "ZoneFromZoneFileSummary", "Zone", "ZoneSummary"}
+	if !slices.Equal(got, want) {
+		t.Fatalf("ObservedStateStructCandidates() = %v, want %v", got, want)
 	}
 }

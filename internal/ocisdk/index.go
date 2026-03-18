@@ -57,11 +57,12 @@ type Index struct {
 }
 
 type Package struct {
-	typeNames   []string
-	structs     map[string]structDefinition
-	aliases     map[string]ast.Expr
-	interfaces  map[string]struct{}
-	polymorphic map[string][]string
+	typeNames           []string
+	structs             map[string]structDefinition
+	aliases             map[string]ast.Expr
+	interfaces          map[string]struct{}
+	polymorphic         map[string][]string
+	requestBodyPayloads map[string][]string
 
 	mu       sync.Mutex
 	resolved map[string]Struct
@@ -129,6 +130,10 @@ func (index *Index) Struct(ctx context.Context, importPath string, typeName stri
 
 func (pkg *Package) TypeNames() []string {
 	return append([]string(nil), pkg.typeNames...)
+}
+
+func (pkg *Package) RequestBodyPayloads(typeName string) []string {
+	return append([]string(nil), pkg.requestBodyPayloads[typeName]...)
 }
 
 func (pkg *Package) Struct(typeName string) (Struct, bool) {
@@ -283,6 +288,36 @@ func (pkg *Package) isInterfaceExpr(expr ast.Expr, visiting map[string]struct{})
 	}
 }
 
+func (pkg *Package) referencedTypeName(expr ast.Expr, visiting map[string]struct{}) (string, bool) {
+	switch concrete := expr.(type) {
+	case *ast.StarExpr:
+		return pkg.referencedTypeName(concrete.X, visiting)
+	case *ast.ArrayType:
+		return pkg.referencedTypeName(concrete.Elt, visiting)
+	case *ast.MapType:
+		return pkg.referencedTypeName(concrete.Value, visiting)
+	case *ast.Ident:
+		if _, ok := pkg.structs[concrete.Name]; ok {
+			return concrete.Name, true
+		}
+		if _, ok := pkg.interfaces[concrete.Name]; ok {
+			return concrete.Name, true
+		}
+		if _, seen := visiting[concrete.Name]; seen {
+			return "", false
+		}
+		aliasExpr, ok := pkg.aliases[concrete.Name]
+		if !ok {
+			return "", false
+		}
+		visiting[concrete.Name] = struct{}{}
+		defer delete(visiting, concrete.Name)
+		return pkg.referencedTypeName(aliasExpr, visiting)
+	default:
+		return "", false
+	}
+}
+
 func (pkg *Package) nestedStructTypeName(expr ast.Expr, visiting map[string]struct{}) (string, bool) {
 	switch concrete := expr.(type) {
 	case *ast.StarExpr:
@@ -334,6 +369,10 @@ func (pkg *Package) renderableTypeExpr(expr ast.Expr, visiting map[string]struct
 	case *ast.StarExpr:
 		return pkg.renderableTypeExpr(concrete.X, visiting)
 	case *ast.ArrayType:
+		if ident, ok := concrete.Elt.(*ast.Ident); ok && ident.Name == "byte" {
+			// OCI SDK byte slices are serialized as base64-encoded JSON strings.
+			return "string", true
+		}
 		elementType, ok := pkg.renderableTypeExpr(concrete.Elt, visiting)
 		if !ok {
 			return "", false
@@ -373,13 +412,15 @@ func parsePackage(dir string) (*Package, error) {
 	}
 
 	pkg := &Package{
-		structs:     make(map[string]structDefinition),
-		aliases:     make(map[string]ast.Expr),
-		interfaces:  make(map[string]struct{}),
-		polymorphic: make(map[string][]string),
-		resolved:    make(map[string]Struct),
+		structs:             make(map[string]structDefinition),
+		aliases:             make(map[string]ast.Expr),
+		interfaces:          make(map[string]struct{}),
+		polymorphic:         make(map[string][]string),
+		requestBodyPayloads: make(map[string][]string),
+		resolved:            make(map[string]Struct),
 	}
 	exportedTypes := make(map[string]struct{})
+	requestBodyPayloadExprs := make(map[string][]ast.Expr)
 	for _, parsedPackage := range pkgs {
 		for _, fileNode := range parsedPackage.Files {
 			for _, declaration := range fileNode.Decls {
@@ -400,6 +441,7 @@ func parsePackage(dir string) (*Package, error) {
 						switch concrete := typeSpec.Type.(type) {
 						case *ast.StructType:
 							pkg.structs[typeSpec.Name.Name] = parseStruct(concrete)
+							requestBodyPayloadExprs[typeSpec.Name.Name] = append(requestBodyPayloadExprs[typeSpec.Name.Name], bodyContributorExprs(concrete)...)
 						case *ast.InterfaceType:
 							pkg.interfaces[typeSpec.Name.Name] = struct{}{}
 						default:
@@ -414,6 +456,16 @@ func parsePackage(dir string) (*Package, error) {
 					pkg.polymorphic[receiverName] = appendUniqueNames(pkg.polymorphic[receiverName], implementations...)
 				}
 			}
+		}
+	}
+
+	for typeName, exprs := range requestBodyPayloadExprs {
+		for _, expr := range exprs {
+			payloadType, ok := pkg.referencedTypeName(expr, map[string]struct{}{})
+			if !ok {
+				continue
+			}
+			pkg.requestBodyPayloads[typeName] = appendUniqueNames(pkg.requestBodyPayloads[typeName], payloadType)
 		}
 	}
 
@@ -457,6 +509,30 @@ func parseStruct(structType *ast.StructType) structDefinition {
 	}
 
 	return definition
+}
+
+func bodyContributorExprs(structType *ast.StructType) []ast.Expr {
+	if structType.Fields == nil {
+		return nil
+	}
+
+	contributors := make([]ast.Expr, 0, len(structType.Fields.List))
+	for _, field := range structType.Fields.List {
+		if !contributesToBody(field.Tag) {
+			continue
+		}
+		contributors = append(contributors, field.Type)
+	}
+
+	return contributors
+}
+
+func contributesToBody(tag *ast.BasicLit) bool {
+	structTag, ok := parseStructTag(tag)
+	if !ok {
+		return false
+	}
+	return structTag.Get("contributesTo") == "body"
 }
 
 func jsonFieldName(tag *ast.BasicLit) (string, bool) {

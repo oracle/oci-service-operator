@@ -23,6 +23,8 @@ type VirtualCircuitPublicPrefixSpec struct {
 // VirtualCircuitPublicPrefixStatus defines the observed state of VirtualCircuitPublicPrefix.
 type VirtualCircuitPublicPrefixStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// Publix IP prefix (CIDR) that the customer specified.
+	CidrBlock string `json:"cidrBlock,omitempty"`
 	// Oracle must verify that the customer owns the public IP prefix before traffic
 	// for that prefix can flow across the virtual circuit. Verification can take a
 	// few business days. `IN_PROGRESS` means Oracle is verifying the prefix. `COMPLETED`

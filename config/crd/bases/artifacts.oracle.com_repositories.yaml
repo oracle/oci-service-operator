@@ -91,6 +91,8 @@ spec:
                 description: Whether to make the repository immutable. The artifacts
                   of an immutable repository cannot be overwritten.
                 type: boolean
+              jsonData:
+                type: string
               repositoryType:
                 type: string
             required:
@@ -100,13 +102,48 @@ spec:
           status:
             description: RepositoryStatus defines the observed state of Repository.
             properties:
+              compartmentId:
+                description: The OCID of the repository's compartment.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a
+                  namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              description:
+                description: The repository description.
+                type: string
+              displayName:
+                description: The repository name.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no
+                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
               id:
                 description: |-
                   The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the repository.
                   Example: `ocid1.artifactrepository.oc1..exampleuniqueID`
                 type: string
+              isImmutable:
+                description: Whether the repository is immutable. The artifacts of
+                  an immutable repository cannot be overwritten.
+                type: boolean
+              jsonData:
+                type: string
               lifecycleState:
                 description: The current state of the repository.
+                type: string
+              repositoryType:
                 type: string
               status:
                 properties:

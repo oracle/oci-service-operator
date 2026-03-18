@@ -19,6 +19,16 @@ type IPSecConnectionTunnelRouteSpec struct {
 // IPSecConnectionTunnelRouteStatus defines the observed state of IPSecConnectionTunnelRoute.
 type IPSecConnectionTunnelRouteStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The BGP network layer reachability information.
+	Prefix string `json:"prefix,omitempty"`
+	// The age of the route.
+	Age int64 `json:"age,omitempty"`
+	// Indicates this is the best route.
+	IsBestPath bool `json:"isBestPath,omitempty"`
+	// A list of ASNs in AS_Path.
+	AsPath []int `json:"asPath,omitempty"`
+	// The source of the route advertisement.
+	Advertiser string `json:"advertiser,omitempty"`
 }
 
 // +kubebuilder:object:root=true

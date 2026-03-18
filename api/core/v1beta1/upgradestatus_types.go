@@ -21,6 +21,9 @@ type UpgradeStatusObservedState struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
 	// The `drgId` of the upgraded DRG.
 	DrgId string `json:"drgId,omitempty"`
+	// The current upgrade status of the DRG attachment.
+	// This uses a distinct JSON name so it can coexist with the OSOK status envelope.
+	Status string `json:"sdkStatus,omitempty"`
 	// The number of upgraded connections.
 	UpgradedConnections string `json:"upgradedConnections,omitempty"`
 }

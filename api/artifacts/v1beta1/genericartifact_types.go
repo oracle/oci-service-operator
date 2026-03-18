@@ -51,6 +51,14 @@ type GenericArtifactStatus struct {
 	SizeInBytes int64 `json:"sizeInBytes,omitempty"`
 	// The current state of the artifact.
 	LifecycleState string `json:"lifecycleState,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// An RFC 3339 timestamp indicating when the repository was created.
 	TimeCreated string `json:"timeCreated,omitempty"`
 }

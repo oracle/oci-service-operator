@@ -124,8 +124,26 @@ type VirtualNodePoolStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
 	// The OCID of the virtual node pool.
 	Id string `json:"id,omitempty"`
+	// Compartment of the virtual node pool.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The cluster the virtual node pool is associated with. A virtual node pool can only be associated with one cluster.
+	ClusterId string `json:"clusterId,omitempty"`
+	// Display name of the virtual node pool. This is a non-unique value.
+	DisplayName string `json:"displayName,omitempty"`
 	// The version of Kubernetes running on the nodes in the node pool.
 	KubernetesVersion string `json:"kubernetesVersion,omitempty"`
+	// The list of placement configurations which determines where Virtual Nodes will be provisioned across as it relates to the subnet and availability domains. The size attribute determines how many we evenly spread across these placement configurations
+	PlacementConfigurations []VirtualNodePoolPlacementConfiguration `json:"placementConfigurations,omitempty"`
+	// Initial labels that will be added to the Kubernetes Virtual Node object when it registers. This is the same as virtualNodePool resources.
+	InitialVirtualNodeLabels []VirtualNodePoolInitialVirtualNodeLabel `json:"initialVirtualNodeLabels,omitempty"`
+	// A taint is a collection of <key, value, effect>. These taints will be applied to the Virtual Nodes of this Virtual Node Pool for Kubernetes scheduling.
+	Taints []VirtualNodePoolTaint `json:"taints,omitempty"`
+	// The number of Virtual Nodes that should be in the Virtual Node Pool. The placement configurations determine where these virtual nodes are placed.
+	Size int `json:"size,omitempty"`
+	// List of network security group id's applied to the Virtual Node VNIC.
+	NsgIds []string `json:"nsgIds,omitempty"`
+	// The pod configuration for pods run on virtual nodes of this virtual node pool.
+	PodConfiguration VirtualNodePoolPodConfiguration `json:"podConfiguration,omitempty"`
 	// The state of the Virtual Node Pool.
 	LifecycleState string `json:"lifecycleState,omitempty"`
 	// Details about the state of the Virtual Node Pool.
@@ -134,9 +152,18 @@ type VirtualNodePoolStatus struct {
 	TimeCreated string `json:"timeCreated,omitempty"`
 	// The time the virtual node pool was updated.
 	TimeUpdated string `json:"timeUpdated,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// Usage of system tag keys. These predefined keys are scoped to namespaces.
 	// Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
-	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`
+	SystemTags      map[string]shared.MapValue     `json:"systemTags,omitempty"`
+	VirtualNodeTags VirtualNodePoolVirtualNodeTags `json:"virtualNodeTags,omitempty"`
 }
 
 // +kubebuilder:object:root=true

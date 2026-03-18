@@ -16,9 +16,30 @@ import (
 type ComputeCapacityReservationInstanceSpec struct {
 }
 
+// ComputeCapacityReservationInstanceShapeConfig defines nested fields for ComputeCapacityReservationInstance.ShapeConfig.
+type ComputeCapacityReservationInstanceShapeConfig struct {
+	// The total number of OCPUs available to the instance.
+	Ocpus float32 `json:"ocpus,omitempty"`
+	// The total amount of memory available to the instance, in gigabytes.
+	MemoryInGBs float32 `json:"memoryInGBs,omitempty"`
+}
+
 // ComputeCapacityReservationInstanceStatus defines the observed state of ComputeCapacityReservationInstance.
 type ComputeCapacityReservationInstanceStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the instance.
+	Id string `json:"id,omitempty"`
+	// The availability domain the instance is running in.
+	AvailabilityDomain string `json:"availabilityDomain,omitempty"`
+	// The OCID of the compartment that contains the instance.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The shape of the instance. The shape determines the number of CPUs, amount of memory,
+	// and other resources allocated to the instance.
+	// You can enumerate all available shapes by calling ListComputeCapacityReservationInstanceShapes.
+	Shape string `json:"shape,omitempty"`
+	// The fault domain the instance is running in.
+	FaultDomain string                                        `json:"faultDomain,omitempty"`
+	ShapeConfig ComputeCapacityReservationInstanceShapeConfig `json:"shapeConfig,omitempty"`
 }
 
 // +kubebuilder:object:root=true

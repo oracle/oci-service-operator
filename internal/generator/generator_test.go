@@ -142,6 +142,22 @@ func TestBuildPackageModelDiscoversResources(t *testing.T) {
 	if !hasField(report.StatusFields, "DisplayName") {
 		t.Fatalf("Report status fields = %#v, want DisplayName from the summary model", report.StatusFields)
 	}
+
+	reportByName := findResource(t, pkg.Resources, "ReportByName")
+	if !hasField(reportByName.SpecFields, "DisplayName") {
+		t.Fatalf("ReportByName spec fields = %#v, want DisplayName from the non-CRUD request payload", reportByName.SpecFields)
+	}
+
+	oauthClientCredential := findResource(t, pkg.Resources, "OAuthClientCredential")
+	if !hasField(oauthClientCredential.SpecFields, "Name") {
+		t.Fatalf("OAuthClientCredential spec fields = %#v, want Name from the aliased create payload", oauthClientCredential.SpecFields)
+	}
+	if !hasField(oauthClientCredential.SpecFields, "Description") {
+		t.Fatalf("OAuthClientCredential spec fields = %#v, want Description from the aliased create/update payloads", oauthClientCredential.SpecFields)
+	}
+	if !hasField(oauthClientCredential.SpecFields, "Scopes") {
+		t.Fatalf("OAuthClientCredential spec fields = %#v, want Scopes from the aliased create/update payloads", oauthClientCredential.SpecFields)
+	}
 }
 
 func TestBuildPackageModelSynthesizesComplexSDKFields(t *testing.T) {
@@ -276,6 +292,22 @@ func TestBuildPackageModelSynthesizesComplexSDKFields(t *testing.T) {
 			},
 		},
 		{
+			name: "nosql",
+			service: ServiceConfig{
+				Service:        "nosql",
+				SDKPackage:     "github.com/oracle/oci-go-sdk/v65/nosql",
+				Group:          "nosql",
+				PackageProfile: PackageProfileCRDOnly,
+			},
+			assert: func(t *testing.T, pkg *PackageModel) {
+				row := findResource(t, pkg.Resources, "Row")
+				value := findFieldModel(t, row.SpecFields, "Value")
+				if value.Type != "map[string]shared.JSONValue" {
+					t.Fatalf("Row Value type = %q, want %q", value.Type, "map[string]shared.JSONValue")
+				}
+			},
+		},
+		{
 			name: "secrets",
 			service: ServiceConfig{
 				Service:        "secrets",
@@ -299,6 +331,97 @@ func TestBuildPackageModelSynthesizesComplexSDKFields(t *testing.T) {
 				}
 			},
 		},
+		{
+			name: "vault",
+			service: ServiceConfig{
+				Service:        "vault",
+				SDKPackage:     "github.com/oracle/oci-go-sdk/v65/vault",
+				Group:          "vault",
+				PackageProfile: PackageProfileCRDOnly,
+			},
+			assert: func(t *testing.T, pkg *PackageModel) {
+				secret := findResource(t, pkg.Resources, "Secret")
+				metadata := findFieldModel(t, secret.SpecFields, "Metadata")
+				if metadata.Type != "map[string]shared.JSONValue" {
+					t.Fatalf("Secret Metadata type = %q, want %q", metadata.Type, "map[string]shared.JSONValue")
+				}
+			},
+		},
+		{
+			name: "artifacts",
+			service: ServiceConfig{
+				Service:        "artifacts",
+				SDKPackage:     "github.com/oracle/oci-go-sdk/v65/artifacts",
+				Group:          "artifacts",
+				PackageProfile: PackageProfileCRDOnly,
+			},
+			assert: func(t *testing.T, pkg *PackageModel) {
+				containerConfiguration := findResource(t, pkg.Resources, "ContainerConfiguration")
+				if !hasField(containerConfiguration.StatusFields, "IsRepositoryCreatedOnFirstPush") {
+					t.Fatalf("ContainerConfiguration status fields = %#v, want IsRepositoryCreatedOnFirstPush", containerConfiguration.StatusFields)
+				}
+
+				containerImage := findResource(t, pkg.Resources, "ContainerImage")
+				if !hasField(containerImage.StatusFields, "FreeformTags") {
+					t.Fatalf("ContainerImage status fields = %#v, want FreeformTags", containerImage.StatusFields)
+				}
+				definedTags := findFieldModel(t, containerImage.StatusFields, "DefinedTags")
+				if definedTags.Type != "map[string]shared.MapValue" {
+					t.Fatalf("ContainerImage DefinedTags type = %q, want %q", definedTags.Type, "map[string]shared.MapValue")
+				}
+
+				containerImageSignature := findResource(t, pkg.Resources, "ContainerImageSignature")
+				for _, fieldName := range []string{"CompartmentId", "ImageId", "Message", "Signature", "SigningAlgorithm"} {
+					if !hasField(containerImageSignature.StatusFields, fieldName) {
+						t.Fatalf("ContainerImageSignature status fields = %#v, want %s", containerImageSignature.StatusFields, fieldName)
+					}
+				}
+
+				containerRepository := findResource(t, pkg.Resources, "ContainerRepository")
+				for _, fieldName := range []string{"CompartmentId", "DisplayName", "IsImmutable", "IsPublic", "FreeformTags", "DefinedTags"} {
+					if !hasField(containerRepository.StatusFields, fieldName) {
+						t.Fatalf("ContainerRepository status fields = %#v, want %s", containerRepository.StatusFields, fieldName)
+					}
+				}
+				readme := findFieldModel(t, containerRepository.StatusFields, "Readme")
+				if readme.Type != "ContainerRepositoryReadme" {
+					t.Fatalf("ContainerRepository Readme type = %q, want %q", readme.Type, "ContainerRepositoryReadme")
+				}
+
+				genericArtifact := findResource(t, pkg.Resources, "GenericArtifact")
+				if !hasField(genericArtifact.StatusFields, "FreeformTags") {
+					t.Fatalf("GenericArtifact status fields = %#v, want FreeformTags", genericArtifact.StatusFields)
+				}
+
+				repository := findResource(t, pkg.Resources, "Repository")
+				for _, fieldName := range []string{"DisplayName", "Description", "CompartmentId", "IsImmutable", "FreeformTags", "DefinedTags"} {
+					if !hasField(repository.StatusFields, fieldName) {
+						t.Fatalf("Repository status fields = %#v, want %s", repository.StatusFields, fieldName)
+					}
+				}
+			},
+		},
+		{
+			name: "networkloadbalancer",
+			service: ServiceConfig{
+				Service:        "networkloadbalancer",
+				SDKPackage:     "github.com/oracle/oci-go-sdk/v65/networkloadbalancer",
+				Group:          "networkloadbalancer",
+				PackageProfile: PackageProfileCRDOnly,
+			},
+			assert: func(t *testing.T, pkg *PackageModel) {
+				healthChecker := findResource(t, pkg.Resources, "HealthChecker")
+				requestData := findFieldModel(t, healthChecker.SpecFields, "RequestData")
+				if requestData.Type != "string" {
+					t.Fatalf("HealthChecker RequestData type = %q, want string", requestData.Type)
+				}
+
+				responseData := findFieldModel(t, healthChecker.SpecFields, "ResponseData")
+				if responseData.Type != "string" {
+					t.Fatalf("HealthChecker ResponseData type = %q, want string", responseData.Type)
+				}
+			},
+		},
 	}
 
 	for _, test := range tests {
@@ -311,6 +434,500 @@ func TestBuildPackageModelSynthesizesComplexSDKFields(t *testing.T) {
 			}
 			test.assert(t, pkg)
 		})
+	}
+}
+
+func TestBuildPackageModelSynthesizesPSQLObservedStateFields(t *testing.T) {
+	t.Parallel()
+
+	cfg := &Config{
+		Domain:         "oracle.com",
+		DefaultVersion: "v1beta1",
+	}
+	service := ServiceConfig{
+		Service:        "psql",
+		SDKPackage:     "github.com/oracle/oci-go-sdk/v65/psql",
+		Group:          "psql",
+		PackageProfile: PackageProfileCRDOnly,
+		ObservedState: ObservedStateConfig{
+			SDKAliases: map[string][]string{
+				"PrimaryDbInstance": []string{"PrimaryDbInstanceDetails"},
+				"WorkRequestLog":    []string{"WorkRequestLogEntry"},
+			},
+		},
+	}
+
+	pkg, err := NewDiscoverer().BuildPackageModel(context.Background(), cfg, service)
+	if err != nil {
+		t.Fatalf("BuildPackageModel() error = %v", err)
+	}
+
+	dbSystem := findResource(t, pkg.Resources, "DbSystem")
+	for _, fieldName := range []string{"DisplayName", "CompartmentId", "Shape", "DbVersion"} {
+		if !hasField(dbSystem.StatusFields, fieldName) {
+			t.Fatalf("DbSystem status fields = %#v, want %s", dbSystem.StatusFields, fieldName)
+		}
+	}
+
+	configuration := findResource(t, pkg.Resources, "Configuration")
+	for _, fieldName := range []string{"DisplayName", "Shape", "DbVersion", "InstanceOcpuCount"} {
+		if !hasField(configuration.StatusFields, fieldName) {
+			t.Fatalf("Configuration status fields = %#v, want %s", configuration.StatusFields, fieldName)
+		}
+	}
+
+	backup := findResource(t, pkg.Resources, "Backup")
+	for _, fieldName := range []string{"DisplayName", "CompartmentId", "DbSystemId", "RetentionPeriod"} {
+		if !hasField(backup.StatusFields, fieldName) {
+			t.Fatalf("Backup status fields = %#v, want %s", backup.StatusFields, fieldName)
+		}
+	}
+
+	primaryDbInstance := findResource(t, pkg.Resources, "PrimaryDbInstance")
+	if !hasField(primaryDbInstance.StatusFields, "DbInstanceId") {
+		t.Fatalf("PrimaryDbInstance status fields = %#v, want DbInstanceId", primaryDbInstance.StatusFields)
+	}
+
+	workRequestLog := findResource(t, pkg.Resources, "WorkRequestLog")
+	for _, fieldName := range []string{"Message", "Timestamp"} {
+		if !hasField(workRequestLog.StatusFields, fieldName) {
+			t.Fatalf("WorkRequestLog status fields = %#v, want %s", workRequestLog.StatusFields, fieldName)
+		}
+	}
+}
+
+func TestBuildPackageModelSynthesizesContainerEngineObservedStateFields(t *testing.T) {
+	t.Parallel()
+
+	cfg := &Config{
+		Domain:         "oracle.com",
+		DefaultVersion: "v1beta1",
+	}
+	service := ServiceConfig{
+		Service:        "containerengine",
+		SDKPackage:     "github.com/oracle/oci-go-sdk/v65/containerengine",
+		Group:          "containerengine",
+		PackageProfile: PackageProfileCRDOnly,
+		ObservedState: ObservedStateConfig{
+			SDKAliases: map[string][]string{
+				"WorkRequestLog": {"WorkRequestLogEntry"},
+			},
+		},
+	}
+
+	pkg, err := NewDiscoverer().BuildPackageModel(context.Background(), cfg, service)
+	if err != nil {
+		t.Fatalf("BuildPackageModel() error = %v", err)
+	}
+
+	cluster := findResource(t, pkg.Resources, "Cluster")
+	for _, fieldName := range []string{"Name", "CompartmentId", "EndpointConfig", "VcnId", "KubernetesVersion", "KmsKeyId", "FreeformTags", "DefinedTags", "Options", "ImagePolicyConfig", "ClusterPodNetworkOptions", "Type"} {
+		if !hasField(cluster.StatusFields, fieldName) {
+			t.Fatalf("Cluster status fields = %#v, want %s", cluster.StatusFields, fieldName)
+		}
+	}
+
+	nodePool := findResource(t, pkg.Resources, "NodePool")
+	for _, fieldName := range []string{"CompartmentId", "ClusterId", "Name", "KubernetesVersion", "NodeMetadata", "NodeImageName", "NodeSourceDetails", "NodeShapeConfig", "InitialNodeLabels", "SshPublicKey", "QuantityPerSubnet", "SubnetIds", "NodeConfigDetails", "FreeformTags", "DefinedTags", "NodeEvictionNodePoolSettings", "NodePoolCyclingDetails"} {
+		if !hasField(nodePool.StatusFields, fieldName) {
+			t.Fatalf("NodePool status fields = %#v, want %s", nodePool.StatusFields, fieldName)
+		}
+	}
+
+	virtualNodePool := findResource(t, pkg.Resources, "VirtualNodePool")
+	for _, fieldName := range []string{"CompartmentId", "ClusterId", "DisplayName", "PlacementConfigurations", "InitialVirtualNodeLabels", "Taints", "Size", "NsgIds", "PodConfiguration", "FreeformTags", "DefinedTags", "VirtualNodeTags"} {
+		if !hasField(virtualNodePool.StatusFields, fieldName) {
+			t.Fatalf("VirtualNodePool status fields = %#v, want %s", virtualNodePool.StatusFields, fieldName)
+		}
+	}
+
+	addon := findResource(t, pkg.Resources, "Addon")
+	for _, fieldName := range []string{"Version", "Configurations"} {
+		if !hasField(addon.StatusFields, fieldName) {
+			t.Fatalf("Addon status fields = %#v, want %s", addon.StatusFields, fieldName)
+		}
+	}
+
+	workloadMapping := findResource(t, pkg.Resources, "WorkloadMapping")
+	for _, fieldName := range []string{"Namespace", "MappedCompartmentId", "FreeformTags", "DefinedTags"} {
+		if !hasField(workloadMapping.StatusFields, fieldName) {
+			t.Fatalf("WorkloadMapping status fields = %#v, want %s", workloadMapping.StatusFields, fieldName)
+		}
+	}
+
+	workRequestLog := findResource(t, pkg.Resources, "WorkRequestLog")
+	for _, fieldName := range []string{"Message", "Timestamp"} {
+		if !hasField(workRequestLog.StatusFields, fieldName) {
+			t.Fatalf("WorkRequestLog status fields = %#v, want %s", workRequestLog.StatusFields, fieldName)
+		}
+	}
+
+	workRequest := findResource(t, pkg.Resources, "WorkRequest")
+	workRequestStatus := findFieldModel(t, workRequest.StatusFields, "Status")
+	if workRequestStatus.Tag != `json:"sdkStatus,omitempty"` {
+		t.Fatalf("WorkRequest Status tag = %q, want sdkStatus collision escape", workRequestStatus.Tag)
+	}
+
+	credentialRotationStatus := findResource(t, pkg.Resources, "CredentialRotationStatus")
+	credentialRotationObservedStatus := findFieldModel(t, credentialRotationStatus.StatusFields, "Status")
+	if credentialRotationObservedStatus.Tag != `json:"sdkStatus,omitempty"` {
+		t.Fatalf("CredentialRotationStatus Status tag = %q, want sdkStatus collision escape", credentialRotationObservedStatus.Tag)
+	}
+}
+
+func TestBuildPackageModelSynthesizesDNSObservedStateAliases(t *testing.T) {
+	t.Parallel()
+
+	cfg := &Config{
+		Domain:         "oracle.com",
+		DefaultVersion: "v1beta1",
+	}
+	service := ServiceConfig{
+		Service:        "dns",
+		SDKPackage:     "github.com/oracle/oci-go-sdk/v65/dns",
+		Group:          "dns",
+		PackageProfile: PackageProfileCRDOnly,
+		ObservedState: ObservedStateConfig{
+			SDKAliases: map[string][]string{
+				"DomainRecord":     {"Record"},
+				"ZoneFromZoneFile": {"Zone"},
+				"ZoneRecord":       {"Record"},
+			},
+		},
+	}
+
+	pkg, err := NewDiscoverer().BuildPackageModel(context.Background(), cfg, service)
+	if err != nil {
+		t.Fatalf("BuildPackageModel() error = %v", err)
+	}
+
+	domainRecord := findResource(t, pkg.Resources, "DomainRecord")
+	for _, fieldName := range []string{"Domain", "RecordHash", "IsProtected", "Rdata", "RrsetVersion", "Rtype", "Ttl"} {
+		if !hasField(domainRecord.StatusFields, fieldName) {
+			t.Fatalf("DomainRecord status fields = %#v, want %s", domainRecord.StatusFields, fieldName)
+		}
+	}
+
+	zoneFromZoneFile := findResource(t, pkg.Resources, "ZoneFromZoneFile")
+	for _, fieldName := range []string{"Name", "ZoneType", "CompartmentId", "Scope", "Id", "LifecycleState", "Nameservers"} {
+		if !hasField(zoneFromZoneFile.StatusFields, fieldName) {
+			t.Fatalf("ZoneFromZoneFile status fields = %#v, want %s", zoneFromZoneFile.StatusFields, fieldName)
+		}
+	}
+
+	zoneRecord := findResource(t, pkg.Resources, "ZoneRecord")
+	for _, fieldName := range []string{"Domain", "RecordHash", "IsProtected", "Rdata", "RrsetVersion", "Rtype", "Ttl"} {
+		if !hasField(zoneRecord.StatusFields, fieldName) {
+			t.Fatalf("ZoneRecord status fields = %#v, want %s", zoneRecord.StatusFields, fieldName)
+		}
+	}
+}
+
+func TestBuildPackageModelSynthesizesWorkRequestsObservedStateAlias(t *testing.T) {
+	t.Parallel()
+
+	cfg := &Config{
+		Domain:         "oracle.com",
+		DefaultVersion: "v1beta1",
+	}
+	service := ServiceConfig{
+		Service:        "workrequests",
+		SDKPackage:     "github.com/oracle/oci-go-sdk/v65/workrequests",
+		Group:          "workrequests",
+		PackageProfile: PackageProfileCRDOnly,
+		ObservedState: ObservedStateConfig{
+			SDKAliases: map[string][]string{
+				"WorkRequestLog": {"WorkRequestLogEntry"},
+			},
+		},
+	}
+
+	pkg, err := NewDiscoverer().BuildPackageModel(context.Background(), cfg, service)
+	if err != nil {
+		t.Fatalf("BuildPackageModel() error = %v", err)
+	}
+
+	workRequestLog := findResource(t, pkg.Resources, "WorkRequestLog")
+	for _, fieldName := range []string{"Message", "Timestamp"} {
+		if !hasField(workRequestLog.StatusFields, fieldName) {
+			t.Fatalf("WorkRequestLog status fields = %#v, want %s", workRequestLog.StatusFields, fieldName)
+		}
+	}
+}
+
+func TestBuildPackageModelSynthesizesIdentityObservedStateAliases(t *testing.T) {
+	t.Parallel()
+
+	cfg := &Config{
+		Domain:         "oracle.com",
+		DefaultVersion: "v1beta1",
+	}
+	service := ServiceConfig{
+		Service:        "identity",
+		SDKPackage:     "github.com/oracle/oci-go-sdk/v65/identity",
+		Group:          "identity",
+		PackageProfile: PackageProfileCRDOnly,
+		ObservedState: ObservedStateConfig{
+			SDKAliases: map[string][]string{
+				"BulkActionResourceType":    []string{"BulkActionResourceTypeCollection"},
+				"BulkEditTagsResourceType":  []string{"BulkEditTagsResourceTypeCollection"},
+				"CostTrackingTag":           []string{"Tag"},
+				"IdentityProvider":          []string{"Saml2IdentityProvider"},
+				"NetworkSource":             []string{"NetworkSources"},
+				"OrResetUIPassword":         []string{"UiPassword"},
+				"StandardTagNamespace":      []string{"StandardTagNamespaceTemplate", "StandardTagNamespaceTemplateSummary"},
+				"StandardTagTemplate":       []string{"StandardTagDefinitionTemplate"},
+				"UserState":                 []string{"User"},
+				"UserUIPasswordInformation": []string{"UiPasswordInformation"},
+			},
+		},
+	}
+
+	pkg, err := NewDiscoverer().BuildPackageModel(context.Background(), cfg, service)
+	if err != nil {
+		t.Fatalf("BuildPackageModel() error = %v", err)
+	}
+
+	bulkAction := findResource(t, pkg.Resources, "BulkActionResourceType")
+	if !hasField(bulkAction.StatusFields, "Items") {
+		t.Fatalf("BulkActionResourceType status fields = %#v, want Items", bulkAction.StatusFields)
+	}
+
+	bulkEdit := findResource(t, pkg.Resources, "BulkEditTagsResourceType")
+	if !hasField(bulkEdit.StatusFields, "Items") {
+		t.Fatalf("BulkEditTagsResourceType status fields = %#v, want Items", bulkEdit.StatusFields)
+	}
+
+	costTrackingTag := findResource(t, pkg.Resources, "CostTrackingTag")
+	for _, fieldName := range []string{"TagNamespaceId", "TagNamespaceName", "IsRetired", "Validator"} {
+		if !hasField(costTrackingTag.StatusFields, fieldName) {
+			t.Fatalf("CostTrackingTag status fields = %#v, want %s", costTrackingTag.StatusFields, fieldName)
+		}
+	}
+
+	identityProvider := findResource(t, pkg.Resources, "IdentityProvider")
+	for _, fieldName := range []string{"CompartmentId", "Name", "Description", "Metadata", "MetadataUrl", "ProductType"} {
+		if !hasField(identityProvider.StatusFields, fieldName) {
+			t.Fatalf("IdentityProvider status fields = %#v, want %s", identityProvider.StatusFields, fieldName)
+		}
+	}
+
+	networkSource := findResource(t, pkg.Resources, "NetworkSource")
+	for _, fieldName := range []string{"CompartmentId", "Name", "Description", "PublicSourceList", "Services", "VirtualSourceList"} {
+		if !hasField(networkSource.StatusFields, fieldName) {
+			t.Fatalf("NetworkSource status fields = %#v, want %s", networkSource.StatusFields, fieldName)
+		}
+	}
+
+	orResetUIPassword := findResource(t, pkg.Resources, "OrResetUIPassword")
+	for _, fieldName := range []string{"Password", "UserId", "TimeCreated", "LifecycleState", "InactiveStatus"} {
+		if !hasField(orResetUIPassword.StatusFields, fieldName) {
+			t.Fatalf("OrResetUIPassword status fields = %#v, want %s", orResetUIPassword.StatusFields, fieldName)
+		}
+	}
+
+	standardTagNamespace := findResource(t, pkg.Resources, "StandardTagNamespace")
+	for _, fieldName := range []string{"Description", "StandardTagNamespaceName", "TagDefinitionTemplates"} {
+		if !hasField(standardTagNamespace.StatusFields, fieldName) {
+			t.Fatalf("StandardTagNamespace status fields = %#v, want %s", standardTagNamespace.StatusFields, fieldName)
+		}
+	}
+	standardTagNamespaceStatus := findFieldModel(t, standardTagNamespace.StatusFields, "Status")
+	if standardTagNamespaceStatus.Tag != `json:"sdkStatus,omitempty"` {
+		t.Fatalf("StandardTagNamespace Status tag = %q, want sdkStatus collision escape", standardTagNamespaceStatus.Tag)
+	}
+
+	standardTagTemplate := findResource(t, pkg.Resources, "StandardTagTemplate")
+	for _, fieldName := range []string{"Description", "TagDefinitionName", "Type", "IsCostTracking"} {
+		if !hasField(standardTagTemplate.StatusFields, fieldName) {
+			t.Fatalf("StandardTagTemplate status fields = %#v, want %s", standardTagTemplate.StatusFields, fieldName)
+		}
+	}
+
+	userState := findResource(t, pkg.Resources, "UserState")
+	for _, fieldName := range []string{"Id", "CompartmentId", "Name", "LifecycleState", "Capabilities"} {
+		if !hasField(userState.StatusFields, fieldName) {
+			t.Fatalf("UserState status fields = %#v, want %s", userState.StatusFields, fieldName)
+		}
+	}
+
+	userUIPasswordInformation := findResource(t, pkg.Resources, "UserUIPasswordInformation")
+	for _, fieldName := range []string{"UserId", "TimeCreated", "LifecycleState"} {
+		if !hasField(userUIPasswordInformation.StatusFields, fieldName) {
+			t.Fatalf("UserUIPasswordInformation status fields = %#v, want %s", userUIPasswordInformation.StatusFields, fieldName)
+		}
+	}
+}
+
+func TestBuildPackageModelSynthesizesCoreObservedStateAliases(t *testing.T) {
+	t.Parallel()
+
+	cfg := &Config{
+		Domain:         "oracle.com",
+		DefaultVersion: "v1beta1",
+	}
+	service := ServiceConfig{
+		Service:        "core",
+		SDKPackage:     "github.com/oracle/oci-go-sdk/v65/core",
+		Group:          "core",
+		PackageProfile: PackageProfileCRDOnly,
+		ObservedState: ObservedStateConfig{
+			SDKAliases: map[string][]string{
+				"AllDrgAttachment":                                {"DrgAttachmentInfo"},
+				"AllowedPeerRegionsForRemotePeering":              {"PeerRegionForRemotePeering"},
+				"AppCatalogListingAgreement":                      {"AppCatalogListingResourceVersionAgreements"},
+				"ClusterNetworkInstance":                          {"InstanceSummary"},
+				"ComputeCapacityReservationInstance":              {"CapacityReservationInstanceSummary"},
+				"ComputeGlobalImageCapabilitySchema":              {"ComputeGlobalImageCapabilitySchemaVersionSummary"},
+				"CrossConnectLetterOfAuthority":                   {"LetterOfAuthority"},
+				"CrossConnectMapping":                             {"CrossConnectMappingDetails"},
+				"CrossconnectPortSpeedShape":                      {"CrossConnectPortSpeedShape"},
+				"DhcpOption":                                      {"DhcpOptions"},
+				"FastConnectProviderVirtualCircuitBandwidthShape": {"VirtualCircuitBandwidthShape"},
+				"IPSecConnectionTunnelError":                      {"IpSecConnectionTunnelErrorDetails"},
+				"IPSecConnectionTunnelRoute":                      {"TunnelRouteSummary"},
+				"IPSecConnectionTunnelSecurityAssociation":        {"TunnelSecurityAssociationSummary"},
+				"InstanceDevice":                                  {"Device"},
+				"NetworkSecurityGroupSecurityRule":                {"SecurityRule"},
+				"VirtualCircuitAssociatedTunnel":                  {"VirtualCircuitAssociatedTunnelDetails"},
+				"VolumeBackupPolicyAssetAssignment":               {"VolumeBackupPolicyAssignment"},
+				"WindowsInstanceInitialCredential":                {"InstanceCredentials"},
+			},
+		},
+	}
+
+	pkg, err := NewDiscoverer().BuildPackageModel(context.Background(), cfg, service)
+	if err != nil {
+		t.Fatalf("BuildPackageModel() error = %v", err)
+	}
+
+	clusterNetworkInstance := findResource(t, pkg.Resources, "ClusterNetworkInstance")
+	for _, fieldName := range []string{"AvailabilityDomain", "CompartmentId", "Region", "State", "TimeCreated"} {
+		if !hasField(clusterNetworkInstance.StatusFields, fieldName) {
+			t.Fatalf("ClusterNetworkInstance status fields = %#v, want %s", clusterNetworkInstance.StatusFields, fieldName)
+		}
+	}
+
+	computeCapacityReservationInstance := findResource(t, pkg.Resources, "ComputeCapacityReservationInstance")
+	for _, fieldName := range []string{"AvailabilityDomain", "CompartmentId", "Id", "Shape"} {
+		if !hasField(computeCapacityReservationInstance.StatusFields, fieldName) {
+			t.Fatalf("ComputeCapacityReservationInstance status fields = %#v, want %s", computeCapacityReservationInstance.StatusFields, fieldName)
+		}
+	}
+
+	computeGlobalImageCapabilitySchema := findResource(t, pkg.Resources, "ComputeGlobalImageCapabilitySchema")
+	for _, fieldName := range []string{"ComputeGlobalImageCapabilitySchemaId", "Name"} {
+		if !hasField(computeGlobalImageCapabilitySchema.StatusFields, fieldName) {
+			t.Fatalf("ComputeGlobalImageCapabilitySchema status fields = %#v, want %s", computeGlobalImageCapabilitySchema.StatusFields, fieldName)
+		}
+	}
+
+	networkSecurityGroupSecurityRule := findResource(t, pkg.Resources, "NetworkSecurityGroupSecurityRule")
+	for _, fieldName := range []string{"Direction", "Protocol", "Id", "TcpOptions", "UdpOptions"} {
+		if !hasField(networkSecurityGroupSecurityRule.StatusFields, fieldName) {
+			t.Fatalf("NetworkSecurityGroupSecurityRule status fields = %#v, want %s", networkSecurityGroupSecurityRule.StatusFields, fieldName)
+		}
+	}
+
+	ipSecConnectionTunnelError := findResource(t, pkg.Resources, "IPSecConnectionTunnelError")
+	for _, fieldName := range []string{"ErrorCode", "ErrorDescription", "Id", "Solution", "Timestamp"} {
+		if !hasField(ipSecConnectionTunnelError.StatusFields, fieldName) {
+			t.Fatalf("IPSecConnectionTunnelError status fields = %#v, want %s", ipSecConnectionTunnelError.StatusFields, fieldName)
+		}
+	}
+
+	ipSecConnectionTunnelRoute := findResource(t, pkg.Resources, "IPSecConnectionTunnelRoute")
+	for _, fieldName := range []string{"Advertiser", "AsPath", "IsBestPath", "Prefix"} {
+		if !hasField(ipSecConnectionTunnelRoute.StatusFields, fieldName) {
+			t.Fatalf("IPSecConnectionTunnelRoute status fields = %#v, want %s", ipSecConnectionTunnelRoute.StatusFields, fieldName)
+		}
+	}
+
+	ipSecConnectionTunnelSecurityAssociation := findResource(t, pkg.Resources, "IPSecConnectionTunnelSecurityAssociation")
+	for _, fieldName := range []string{"CpeSubnet", "OracleSubnet", "TunnelSaStatus"} {
+		if !hasField(ipSecConnectionTunnelSecurityAssociation.StatusFields, fieldName) {
+			t.Fatalf("IPSecConnectionTunnelSecurityAssociation status fields = %#v, want %s", ipSecConnectionTunnelSecurityAssociation.StatusFields, fieldName)
+		}
+	}
+
+	instanceDevice := findResource(t, pkg.Resources, "InstanceDevice")
+	for _, fieldName := range []string{"IsAvailable", "Name"} {
+		if !hasField(instanceDevice.StatusFields, fieldName) {
+			t.Fatalf("InstanceDevice status fields = %#v, want %s", instanceDevice.StatusFields, fieldName)
+		}
+	}
+
+	volumeBackupPolicyAssetAssignment := findResource(t, pkg.Resources, "VolumeBackupPolicyAssetAssignment")
+	for _, fieldName := range []string{"AssetId", "Id", "PolicyId", "TimeCreated"} {
+		if !hasField(volumeBackupPolicyAssetAssignment.StatusFields, fieldName) {
+			t.Fatalf("VolumeBackupPolicyAssetAssignment status fields = %#v, want %s", volumeBackupPolicyAssetAssignment.StatusFields, fieldName)
+		}
+	}
+
+	windowsInstanceInitialCredential := findResource(t, pkg.Resources, "WindowsInstanceInitialCredential")
+	for _, fieldName := range []string{"Password", "Username"} {
+		if !hasField(windowsInstanceInitialCredential.StatusFields, fieldName) {
+			t.Fatalf("WindowsInstanceInitialCredential status fields = %#v, want %s", windowsInstanceInitialCredential.StatusFields, fieldName)
+		}
+	}
+
+	fastConnectProviderVirtualCircuitBandwidthShape := findResource(t, pkg.Resources, "FastConnectProviderVirtualCircuitBandwidthShape")
+	for _, fieldName := range []string{"BandwidthInMbps", "Name"} {
+		if !hasField(fastConnectProviderVirtualCircuitBandwidthShape.StatusFields, fieldName) {
+			t.Fatalf("FastConnectProviderVirtualCircuitBandwidthShape status fields = %#v, want %s", fastConnectProviderVirtualCircuitBandwidthShape.StatusFields, fieldName)
+		}
+	}
+
+	crossconnectPortSpeedShape := findResource(t, pkg.Resources, "CrossconnectPortSpeedShape")
+	for _, fieldName := range []string{"Name", "PortSpeedInGbps"} {
+		if !hasField(crossconnectPortSpeedShape.StatusFields, fieldName) {
+			t.Fatalf("CrossconnectPortSpeedShape status fields = %#v, want %s", crossconnectPortSpeedShape.StatusFields, fieldName)
+		}
+	}
+
+	allDrgAttachment := findResource(t, pkg.Resources, "AllDrgAttachment")
+	if !hasField(allDrgAttachment.StatusFields, "Id") {
+		t.Fatalf("AllDrgAttachment status fields = %#v, want Id", allDrgAttachment.StatusFields)
+	}
+
+	allowedPeerRegions := findResource(t, pkg.Resources, "AllowedPeerRegionsForRemotePeering")
+	if !hasField(allowedPeerRegions.StatusFields, "Name") {
+		t.Fatalf("AllowedPeerRegionsForRemotePeering status fields = %#v, want Name", allowedPeerRegions.StatusFields)
+	}
+
+	appCatalogListingAgreement := findResource(t, pkg.Resources, "AppCatalogListingAgreement")
+	for _, fieldName := range []string{"ListingId", "ListingResourceVersion", "OracleTermsOfUseLink", "EulaLink", "TimeRetrieved", "Signature"} {
+		if !hasField(appCatalogListingAgreement.StatusFields, fieldName) {
+			t.Fatalf("AppCatalogListingAgreement status fields = %#v, want %s", appCatalogListingAgreement.StatusFields, fieldName)
+		}
+	}
+
+	crossConnectLetterOfAuthority := findResource(t, pkg.Resources, "CrossConnectLetterOfAuthority")
+	for _, fieldName := range []string{"CrossConnectId", "FacilityLocation", "TimeExpires"} {
+		if !hasField(crossConnectLetterOfAuthority.StatusFields, fieldName) {
+			t.Fatalf("CrossConnectLetterOfAuthority status fields = %#v, want %s", crossConnectLetterOfAuthority.StatusFields, fieldName)
+		}
+	}
+
+	crossConnectMapping := findResource(t, pkg.Resources, "CrossConnectMapping")
+	for _, fieldName := range []string{"Ipv4BgpStatus", "Ipv6BgpStatus", "OciLogicalDeviceName"} {
+		if !hasField(crossConnectMapping.StatusFields, fieldName) {
+			t.Fatalf("CrossConnectMapping status fields = %#v, want %s", crossConnectMapping.StatusFields, fieldName)
+		}
+	}
+
+	dhcpOption := findResource(t, pkg.Resources, "DhcpOption")
+	for _, fieldName := range []string{"CompartmentId", "DisplayName", "LifecycleState", "Options", "TimeCreated", "VcnId"} {
+		if !hasField(dhcpOption.StatusFields, fieldName) {
+			t.Fatalf("DhcpOption status fields = %#v, want %s", dhcpOption.StatusFields, fieldName)
+		}
+	}
+
+	virtualCircuitAssociatedTunnel := findResource(t, pkg.Resources, "VirtualCircuitAssociatedTunnel")
+	for _, fieldName := range []string{"TunnelId", "TunnelType"} {
+		if !hasField(virtualCircuitAssociatedTunnel.StatusFields, fieldName) {
+			t.Fatalf("VirtualCircuitAssociatedTunnel status fields = %#v, want %s", virtualCircuitAssociatedTunnel.StatusFields, fieldName)
+		}
 	}
 }
 
@@ -713,6 +1330,49 @@ func TestCurrentServiceParityMatchesCheckedInArtifacts(t *testing.T) {
 		filepath.Join(repoRoot(t), "config", "samples", "kustomization.yaml"),
 		filepath.Join(outputRoot, "config", "samples", "kustomization.yaml"),
 	)
+}
+
+func TestMySQLParityIncludesOptionalDesiredStateFields(t *testing.T) {
+	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
+	cfg, err := LoadConfig(cfgPath)
+	if err != nil {
+		t.Fatalf("LoadConfig(%q) error = %v", cfgPath, err)
+	}
+
+	var mysqlService *ServiceConfig
+	for i := range cfg.Services {
+		if cfg.Services[i].Service == "mysql" {
+			mysqlService = &cfg.Services[i]
+			break
+		}
+	}
+	if mysqlService == nil {
+		t.Fatal("mysql service was not found in services.yaml")
+	}
+
+	outputRoot := t.TempDir()
+	pipeline := New()
+	if _, err := pipeline.Generate(context.Background(), cfg, []ServiceConfig{*mysqlService}, Options{
+		OutputRoot: outputRoot,
+	}); err != nil {
+		t.Fatalf("Generate() error = %v", err)
+	}
+
+	content := readFile(t, filepath.Join(outputRoot, "api", "mysql", "v1beta1", "mysqldbsystem_types.go"))
+	normalized := strings.Join(strings.Fields(content), " ")
+	assertContains(t, normalized, []string{
+		"type DeletionPolicyDetails struct {",
+		"AutomaticBackupRetention string `json:\"automaticBackupRetention,omitempty\"`",
+		"FinalBackup string `json:\"finalBackup,omitempty\"`",
+		"IsDeleteProtected bool `json:\"isDeleteProtected,omitempty\"`",
+		"type SecureConnectionDetails struct {",
+		"CertificateGenerationType string `json:\"certificateGenerationType,omitempty\"`",
+		"CertificateId shared.OCID `json:\"certificateId,omitempty\"`",
+		"DeletionPolicy DeletionPolicyDetails `json:\"deletionPolicy,omitempty\"`",
+		"CrashRecovery string `json:\"crashRecovery,omitempty\"`",
+		"DatabaseManagement string `json:\"databaseManagement,omitempty\"`",
+		"SecureConnections SecureConnectionDetails `json:\"secureConnections,omitempty\"`",
+	})
 }
 
 func TestGenerateMergesExistingSampleKustomizationEntries(t *testing.T) {

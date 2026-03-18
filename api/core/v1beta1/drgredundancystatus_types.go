@@ -21,6 +21,9 @@ type DrgRedundancyStatusObservedState struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
 	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the DRG.
 	Id string `json:"id,omitempty"`
+	// The redundancy status of the DRG.
+	// This uses a distinct JSON name so it can coexist with the OSOK status envelope.
+	Status string `json:"sdkStatus,omitempty"`
 }
 
 // +kubebuilder:object:root=true

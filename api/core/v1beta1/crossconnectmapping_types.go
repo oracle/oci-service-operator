@@ -68,6 +68,12 @@ type CrossConnectMappingStatus struct {
 	// the provider if the customer is connecting via provider).
 	// Example: `200`
 	Vlan int `json:"vlan,omitempty"`
+	// The state of the Ipv4 BGP session.
+	Ipv4BgpStatus string `json:"ipv4BgpStatus,omitempty"`
+	// The state of the Ipv6 BGP session.
+	Ipv6BgpStatus string `json:"ipv6BgpStatus,omitempty"`
+	// The FastConnect device that terminates the logical connection.
+	OciLogicalDeviceName string `json:"ociLogicalDeviceName,omitempty"`
 }
 
 // +kubebuilder:object:root=true

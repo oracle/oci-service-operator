@@ -30,6 +30,8 @@ type SwiftPasswordStatus struct {
 	Id string `json:"id,omitempty"`
 	// The OCID of the user the password belongs to.
 	UserId string `json:"userId,omitempty"`
+	// The description you assign to the Swift password. Does not have to be unique, and it's changeable.
+	Description string `json:"description,omitempty"`
 	// Date and time the `SwiftPassword` object was created, in the format defined by RFC3339.
 	// Example: `2016-08-25T21:10:29.600Z`
 	TimeCreated string `json:"timeCreated,omitempty"`

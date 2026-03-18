@@ -57,6 +57,14 @@ type ComputeCapacityReportShapeAvailability struct {
 // ComputeCapacityReportStatus defines the observed state of ComputeCapacityReport.
 type ComputeCapacityReportStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) for the compartment. This should always be the root
+	// compartment.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The availability domain for the capacity report.
+	// Example: `Uocm:PHX-AD-1`
+	AvailabilityDomain string `json:"availabilityDomain,omitempty"`
+	// Information about the available capacity for each shape in a capacity report.
+	ShapeAvailabilities []ComputeCapacityReportShapeAvailability `json:"shapeAvailabilities,omitempty"`
 	// The date and time the capacity report was created, in the format defined by
 	// RFC3339 (https://tools.ietf.org/html/rfc3339).
 	// Example: `2016-08-25T21:10:29.600Z`

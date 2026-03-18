@@ -132,10 +132,18 @@ spec:
                       The protocol the health check must use; either HTTP or HTTPS, or UDP or TCP.
                       Example: `HTTP`
                     type: string
+                  requestData:
+                    description: Base64 encoded pattern to be sent as UDP or TCP health
+                      check probe.
+                    type: string
                   responseBodyRegex:
                     description: |-
                       A regular expression for parsing the response body from the backend server.
                       Example: `^((?!false).|\s)*$`
+                    type: string
+                  responseData:
+                    description: Base64 encoded pattern to be validated as UDP or
+                      TCP health check probe response.
                     type: string
                   retries:
                     description: |-

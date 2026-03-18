@@ -54,19 +54,49 @@ type NetworkSourceVirtualSourceList struct {
 	IpRanges []string `json:"ipRanges,omitempty"`
 }
 
+// NetworkSourceVirtualSourceListObservedState defines nested fields for NetworkSource.VirtualSourceList.
+type NetworkSourceVirtualSourceListObservedState struct {
+	// +kubebuilder:validation:Optional
+	VcnId string `json:"vcnId,omitempty"`
+	// +kubebuilder:validation:Optional
+	IpRanges []string `json:"ipRanges,omitempty"`
+}
+
 // NetworkSourceStatus defines the observed state of NetworkSource.
 type NetworkSourceStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
 	// The OCID of the network source.
 	Id string `json:"id,omitempty"`
+	// The OCID of the tenancy containing the network source. The tenancy is the root compartment.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The name you assign to the network source during creation. The name must be unique across
+	// the tenancy and cannot be changed.
+	Name string `json:"name,omitempty"`
+	// The description you assign to the network source. Does not have to be unique, and it's changeable.
+	Description string `json:"description,omitempty"`
 	// Date and time the network source was created, in the format defined by RFC3339.
 	// Example: `2016-08-25T21:10:29.600Z`
 	TimeCreated string `json:"timeCreated,omitempty"`
 	// The network source object's current state. After creating a network source, make sure its `lifecycleState` changes from CREATING to
 	// ACTIVE before using it.
 	LifecycleState string `json:"lifecycleState,omitempty"`
+	// A list of allowed public IPs and CIDR ranges.
+	PublicSourceList []string `json:"publicSourceList,omitempty"`
+	// A list of allowed VCN OCID and IP range pairs.
+	// Example:`"vcnId": "ocid1.vcn.oc1.iad.aaaaaaaaexampleuniqueID", "ipRanges": [ "129.213.39.0/24" ]`
+	VirtualSourceList []NetworkSourceVirtualSourceListObservedState `json:"virtualSourceList,omitempty"`
+	// -- The services attribute has no effect and is reserved for use by Oracle. --
+	Services []string `json:"services,omitempty"`
 	// The detailed status of INACTIVE lifecycleState.
 	InactiveStatus int64 `json:"inactiveStatus,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 }
 
 // +kubebuilder:object:root=true

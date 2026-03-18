@@ -19,6 +19,12 @@ type FastConnectProviderVirtualCircuitBandwidthShapeSpec struct {
 // FastConnectProviderVirtualCircuitBandwidthShapeStatus defines the observed state of FastConnectProviderVirtualCircuitBandwidthShape.
 type FastConnectProviderVirtualCircuitBandwidthShapeStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The name of the bandwidth shape.
+	// Example: `10 Gbps`
+	Name string `json:"name,omitempty"`
+	// The bandwidth in Mbps.
+	// Example: `10000`
+	BandwidthInMbps int `json:"bandwidthInMbps,omitempty"`
 }
 
 // +kubebuilder:object:root=true

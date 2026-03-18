@@ -65,12 +65,44 @@ type PrivateIpStatus struct {
 	AvailabilityDomain string `json:"availabilityDomain,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the private IP.
 	CompartmentId string `json:"compartmentId,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// The hostname for the private IP. Used for DNS. The value is the hostname
+	// portion of the private IP's fully qualified domain name (FQDN)
+	// (for example, `bminstance1` in FQDN `bminstance1.subnet123.vcn1.oraclevcn.com`).
+	// Must be unique across all VNICs in the subnet and comply with
+	// RFC 952 (https://tools.ietf.org/html/rfc952) and
+	// RFC 1123 (https://tools.ietf.org/html/rfc1123).
+	// For more information, see
+	// DNS in Your Virtual Cloud Network (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/dns.htm).
+	// Example: `bminstance1`
+	HostnameLabel string `json:"hostnameLabel,omitempty"`
 	// The private IP's Oracle ID (OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)).
 	Id string `json:"id,omitempty"`
+	// The private IP address of the `privateIp` object. The address is within the CIDR
+	// of the VNIC's subnet.
+	// However, if the `PrivateIp` object is being used with a VLAN as part of
+	// the Oracle Cloud VMware Solution, the address is from the range specified by the
+	// `cidrBlock` attribute for the VLAN. See Vlan.
+	// Example: `10.0.3.3`
+	IpAddress string `json:"ipAddress,omitempty"`
 	// Whether this private IP is the primary one on the VNIC. Primary private IPs
 	// are unassigned and deleted automatically when the VNIC is terminated.
 	// Example: `true`
 	IsPrimary bool `json:"isPrimary,omitempty"`
+	// Applicable only if the `PrivateIp` object is being used with a VLAN as part of
+	// the Oracle Cloud VMware Solution. The `vlanId` is the OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN. See
+	// Vlan.
+	VlanId string `json:"vlanId,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subnet the VNIC is in.
 	// However, if the `PrivateIp` object is being used with a VLAN as part of
 	// the Oracle Cloud VMware Solution, the `subnetId` is null.
@@ -78,6 +110,11 @@ type PrivateIpStatus struct {
 	// The date and time the private IP was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	// Example: `2016-08-25T21:10:29.600Z`
 	TimeCreated string `json:"timeCreated,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VNIC the private IP is assigned to. The VNIC and private IP
+	// must be in the same subnet.
+	// However, if the `PrivateIp` object is being used with a VLAN as part of
+	// the Oracle Cloud VMware Solution, the `vnicId` is null.
+	VnicId string `json:"vnicId,omitempty"`
 }
 
 // +kubebuilder:object:root=true

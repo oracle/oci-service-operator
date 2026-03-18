@@ -14,6 +14,8 @@ import (
 
 // RepositorySpec defines the desired state of Repository.
 type RepositorySpec struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
 	// A user-friendly display name for the repository. If not present, will be auto-generated. It can be modified later. Avoid entering confidential information.
 	// +kubebuilder:validation:Optional
 	DisplayName string `json:"displayName,omitempty"`
@@ -43,13 +45,31 @@ type RepositorySpec struct {
 // RepositoryStatus defines the observed state of Repository.
 type RepositoryStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	JsonData   string            `json:"jsonData,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the repository.
 	// Example: `ocid1.artifactrepository.oc1..exampleuniqueID`
 	Id string `json:"id,omitempty"`
+	// The repository name.
+	DisplayName string `json:"displayName,omitempty"`
+	// The OCID of the repository's compartment.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The repository description.
+	Description string `json:"description,omitempty"`
+	// Whether the repository is immutable. The artifacts of an immutable repository cannot be overwritten.
+	IsImmutable bool `json:"isImmutable,omitempty"`
 	// The current state of the repository.
 	LifecycleState string `json:"lifecycleState,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// An RFC 3339 timestamp indicating when the repository was created.
-	TimeCreated string `json:"timeCreated,omitempty"`
+	TimeCreated    string `json:"timeCreated,omitempty"`
+	RepositoryType string `json:"repositoryType,omitempty"`
 }
 
 // +kubebuilder:object:root=true

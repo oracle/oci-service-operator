@@ -41,6 +41,13 @@ type CompartmentStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
 	// The OCID of the compartment.
 	Id string `json:"id,omitempty"`
+	// The OCID of the parent compartment containing the compartment.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The name you assign to the compartment during creation. The name must be unique across all
+	// compartments in the parent. Avoid entering confidential information.
+	Name string `json:"name,omitempty"`
+	// The description you assign to the compartment. Does not have to be unique, and it's changeable.
+	Description string `json:"description,omitempty"`
 	// Date and time the compartment was created, in the format defined by RFC3339.
 	// Example: `2016-08-25T21:10:29.600Z`
 	TimeCreated string `json:"timeCreated,omitempty"`
@@ -53,6 +60,14 @@ type CompartmentStatus struct {
 	// Returns true when the user has INSPECT permissions directly on a resource in the
 	// compartment or indirectly (permissions can be on a resource in a subcompartment).
 	IsAccessible bool `json:"isAccessible,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 }
 
 // +kubebuilder:object:root=true

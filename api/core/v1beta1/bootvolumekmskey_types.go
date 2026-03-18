@@ -24,6 +24,8 @@ type BootVolumeKmsKeySpec struct {
 // BootVolumeKmsKeyStatus defines the observed state of BootVolumeKmsKey.
 type BootVolumeKmsKeyStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the Vault service key assigned to this volume. If the volume is not using Vault service, then the `kmsKeyId` will be a null string.
+	KmsKeyId string `json:"kmsKeyId,omitempty"`
 }
 
 // +kubebuilder:object:root=true

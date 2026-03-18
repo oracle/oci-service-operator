@@ -60,7 +60,8 @@ type ClusterOptionServiceLbConfig struct {
 
 // ClusterOptionClusterPodNetworkOption defines nested fields for ClusterOption.ClusterPodNetworkOption.
 type ClusterOptionClusterPodNetworkOption struct {
-	CniType string `json:"cniType,omitempty"`
+	JsonData string `json:"jsonData,omitempty"`
+	CniType  string `json:"cniType,omitempty"`
 }
 
 // ClusterOptionStatus defines the observed state of ClusterOption.

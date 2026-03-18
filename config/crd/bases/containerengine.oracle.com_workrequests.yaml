@@ -86,6 +86,11 @@ spec:
                       type: string
                   type: object
                 type: array
+              sdkStatus:
+                description: |-
+                  The current status of the work request.
+                  This uses a distinct JSON name so it can coexist with the OSOK status envelope.
+                type: string
               status:
                 properties:
                   conditions:

@@ -252,6 +252,33 @@ spec:
           status:
             description: ClusterNetworkStatus defines the observed state of ClusterNetwork.
             properties:
+              compartmentId:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment containing the cluster network.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a
+                  namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              displayName:
+                description: |-
+                  A user-friendly name. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no
+                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
               hpcIslandId:
                 description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the HPC island used by the cluster network.
@@ -260,6 +287,51 @@ spec:
                 description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the cluster network.
                 type: string
+              instancePools:
+                description: |-
+                  The instance pools in the cluster network.
+                  Each cluster network can have one instance pool.
+                items:
+                  description: ClusterNetworkInstancePool defines nested fields for
+                    ClusterNetwork.InstancePool.
+                  properties:
+                    definedTags:
+                      additionalProperties:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      description: |-
+                        Defined tags for this resource. Each key is predefined and scoped to a
+                        namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                        Example: `{"Operations": {"CostCenter": "42"}}`
+                      type: object
+                    displayName:
+                      description: |-
+                        A user-friendly name. Does not have to be unique, and it's changeable.
+                        Avoid entering confidential information.
+                      type: string
+                    freeformTags:
+                      additionalProperties:
+                        type: string
+                      description: |-
+                        Free-form tags for this resource. Each tag is a simple key-value pair with no
+                        predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                        Example: `{"Department": "Finance"}`
+                      type: object
+                    instanceConfigurationId:
+                      description: |-
+                        The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the instance configuration
+                        associated with the instance pool.
+                      type: string
+                    size:
+                      description: The number of instances that should be in the instance
+                        pool.
+                      type: integer
+                  required:
+                  - instanceConfigurationId
+                  - size
+                  type: object
+                type: array
               lifecycleState:
                 description: The current state of the cluster network.
                 type: string
@@ -268,6 +340,105 @@ spec:
                 items:
                   type: string
                 type: array
+              placementConfiguration:
+                description: ClusterNetworkPlacementConfiguration defines nested fields
+                  for ClusterNetwork.PlacementConfiguration.
+                properties:
+                  availabilityDomain:
+                    description: |-
+                      The availability domain to place instances.
+                      Example: `Uocm:PHX-AD-1`
+                    type: string
+                  placementConstraint:
+                    description: The placement constraint when reserving hosts.
+                    type: string
+                  primarySubnetId:
+                    description: |-
+                      The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the primary subnet to place instances. This field is deprecated.
+                      Use `primaryVnicSubnets` instead to set VNIC data for instances in the pool.
+                    type: string
+                  primaryVnicSubnets:
+                    description: ClusterNetworkPlacementConfigurationPrimaryVnicSubnets
+                      defines nested fields for ClusterNetwork.PlacementConfiguration.PrimaryVnicSubnets.
+                    properties:
+                      ipv6AddressIpv6SubnetCidrPairDetails:
+                        description: |-
+                          A list of IPv6 prefix ranges from which the VNIC should be assigned an IPv6 address.
+                          You can provide only the prefix ranges and OCI will select an available
+                          address from the range. You can optionally choose to leave the prefix range empty
+                          and instead provide the specific IPv6 address that should be used from within that range.
+                        items:
+                          description: ClusterNetworkPlacementConfigurationPrimaryVnicSubnetsIpv6AddressIpv6SubnetCidrPairDetail
+                            defines nested fields for ClusterNetwork.PlacementConfiguration.PrimaryVnicSubnets.Ipv6AddressIpv6SubnetCidrPairDetail.
+                          properties:
+                            ipv6SubnetCidr:
+                              description: Optional. Used to disambiguate which subnet
+                                prefix should be used to create an IPv6 allocation.
+                              type: string
+                          type: object
+                        type: array
+                      isAssignIpv6Ip:
+                        description: |-
+                          Whether to allocate an IPv6 address at instance and VNIC creation from an IPv6 enabled
+                          subnet. Default: False. When provided you may optionally provide an IPv6 prefix
+                          (`ipv6SubnetCidr`) of your choice to assign the IPv6 address from. If `ipv6SubnetCidr`
+                          is not provided then an IPv6 prefix is chosen
+                          for you.
+                        type: boolean
+                      subnetId:
+                        description: The subnet OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                          for the secondary VNIC.
+                        type: string
+                    required:
+                    - subnetId
+                    type: object
+                  secondaryVnicSubnets:
+                    description: The set of secondary VNIC data for instances in the
+                      pool.
+                    items:
+                      description: ClusterNetworkPlacementConfigurationSecondaryVnicSubnet
+                        defines nested fields for ClusterNetwork.PlacementConfiguration.SecondaryVnicSubnet.
+                      properties:
+                        displayName:
+                          description: |-
+                            The display name of the VNIC. This is also used to match against the instance configuration defined
+                            secondary VNIC.
+                          type: string
+                        ipv6AddressIpv6SubnetCidrPairDetails:
+                          description: |-
+                            A list of IPv6 prefix ranges from which the VNIC should be assigned an IPv6 address.
+                            You can provide only the prefix ranges and OCI will select an available
+                            address from the range. You can optionally choose to leave the prefix range empty
+                            and instead provide the specific IPv6 address that should be used from within that range.
+                          items:
+                            description: ClusterNetworkPlacementConfigurationSecondaryVnicSubnetIpv6AddressIpv6SubnetCidrPairDetail
+                              defines nested fields for ClusterNetwork.PlacementConfiguration.SecondaryVnicSubnet.Ipv6AddressIpv6SubnetCidrPairDetail.
+                            properties:
+                              ipv6SubnetCidr:
+                                description: Optional. Used to disambiguate which
+                                  subnet prefix should be used to create an IPv6 allocation.
+                                type: string
+                            type: object
+                          type: array
+                        isAssignIpv6Ip:
+                          description: |-
+                            Whether to allocate an IPv6 address at instance and VNIC creation from an IPv6 enabled
+                            subnet. Default: False. When provided you may optionally provide an IPv6 prefix
+                            (`ipv6SubnetCidr`) of your choice to assign the IPv6 address from. If `ipv6SubnetCidr`
+                            is not provided then an IPv6 prefix is chosen
+                            for you.
+                          type: boolean
+                        subnetId:
+                          description: The subnet OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                            for the secondary VNIC.
+                          type: string
+                      required:
+                      - subnetId
+                      type: object
+                    type: array
+                required:
+                - availabilityDomain
+                type: object
               status:
                 properties:
                   conditions:

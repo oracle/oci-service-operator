@@ -14,11 +14,78 @@ import (
 
 // DhcpOptionSpec defines the desired state of DhcpOption.
 type DhcpOptionSpec struct {
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment to contain the set of DHCP options.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// A set of DHCP options.
+	// +kubebuilder:validation:Required
+	Options []DhcpOptionOption `json:"options"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VCN the set of DHCP options belongs to.
+	// +kubebuilder:validation:Required
+	VcnId string `json:"vcnId"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	// +kubebuilder:validation:Optional
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// The search domain name type of DHCP options
+	// +kubebuilder:validation:Optional
+	DomainNameType string `json:"domainNameType,omitempty"`
+}
+
+// DhcpOptionOption defines nested fields for DhcpOption.Option.
+type DhcpOptionOption struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
+	Type string `json:"type,omitempty"`
+	// If you set `serverType` to `CustomDnsServer`, specify the
+	// IP address of at least one DNS server of your choice (three maximum).
+	// +kubebuilder:validation:Optional
+	CustomDnsServers []string `json:"customDnsServers,omitempty"`
+	// * **VcnLocal:** Reserved for future use.
+	// * **VcnLocalPlusInternet:** Also referred to as "Internet and VCN Resolver".
+	// Instances can resolve internet hostnames (no internet gateway is required),
+	// and can resolve hostnames of instances in the VCN. This is the default
+	// value in the default set of DHCP options in the VCN. For the Internet and
+	// VCN Resolver to work across the VCN, there must also be a DNS label set for
+	// the VCN, a DNS label set for each subnet, and a hostname for each instance.
+	// The Internet and VCN Resolver also enables reverse DNS lookup, which lets
+	// you determine the hostname corresponding to the private IP address. For more
+	// information, see
+	// DNS in Your Virtual Cloud Network (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/dns.htm).
+	// * **CustomDnsServer:** Instances use a DNS server of your choice (three
+	// maximum).
+	// +kubebuilder:validation:Required
+	ServerType string `json:"serverType"`
+	// A single search domain name according to RFC 952 (https://tools.ietf.org/html/rfc952)
+	// and RFC 1123 (https://tools.ietf.org/html/rfc1123). During a DNS query,
+	// the OS will append this search domain name to the value being queried.
+	// If you set DhcpDnsOption to `VcnLocalPlusInternet`,
+	// and you assign a DNS label to the VCN during creation, the search domain name in the
+	// VCN's default set of DHCP options is automatically set to the VCN domain
+	// (for example, `vcn1.oraclevcn.com`).
+	// If you don't want to use a search domain name, omit this option from the
+	// set of DHCP options. Do not include this option with an empty list
+	// of search domain names, or with an empty string as the value for any search
+	// domain name.
+	// +kubebuilder:validation:Required
+	SearchDomainNames []string `json:"searchDomainNames"`
 }
 
 // DhcpOptionStatus defines the observed state of DhcpOption.
 type DhcpOptionStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	JsonData   string            `json:"jsonData,omitempty"`
 	Type       string            `json:"type,omitempty"`
 	// If you set `serverType` to `CustomDnsServer`, specify the
 	// IP address of at least one DNS server of your choice (three maximum).
@@ -49,10 +116,37 @@ type DhcpOptionStatus struct {
 	// of search domain names, or with an empty string as the value for any search
 	// domain name.
 	SearchDomainNames []string `json:"searchDomainNames,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the set of DHCP options.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// Oracle ID (OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)) for the set of DHCP options.
+	Id string `json:"id,omitempty"`
+	// The current state of the set of DHCP options.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The collection of individual DHCP options.
+	Options []DhcpOptionOption `json:"options,omitempty"`
+	// Date and time the set of DHCP options was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VCN the set of DHCP options belongs to.
+	VcnId string `json:"vcnId,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// The search domain name type of DHCP options
+	DomainNameType string `json:"domainNameType,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="DisplayName",type="string",JSONPath=".spec.displayName",priority=1
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.status.conditions[-1].type",description="status of the DhcpOption",priority=0
 // +kubebuilder:printcolumn:name="Ocid",type="string",JSONPath=".status.status.ocid",description="Ocid of the DhcpOption",priority=1
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0

@@ -43,6 +43,10 @@ type AppCatalogSubscriptionStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
 	// Name of the publisher who published this listing.
 	PublisherName string `json:"publisherName,omitempty"`
+	// The ocid of the listing resource.
+	ListingId string `json:"listingId,omitempty"`
+	// Listing resource version.
+	ListingResourceVersion string `json:"listingResourceVersion,omitempty"`
 	// Listing resource id.
 	ListingResourceId string `json:"listingResourceId,omitempty"`
 	// A user-friendly name. Does not have to be unique, and it's changeable.
@@ -50,6 +54,8 @@ type AppCatalogSubscriptionStatus struct {
 	DisplayName string `json:"displayName,omitempty"`
 	// The short summary to the listing.
 	Summary string `json:"summary,omitempty"`
+	// The compartmentID of the subscription.
+	CompartmentId string `json:"compartmentId,omitempty"`
 	// Date and time at which the subscription was created, in RFC3339 (https://tools.ietf.org/html/rfc3339) format.
 	// Example: `2018-03-20T12:32:53.532Z`
 	TimeCreated string `json:"timeCreated,omitempty"`

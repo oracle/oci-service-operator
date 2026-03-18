@@ -141,6 +141,13 @@ spec:
                   Flag indicating if this volume was created for the customer as part of a simplified launch.
                   Used to determine whether the volume requires deletion on instance termination.
                 type: boolean
+              iscsiLoginState:
+                description: |-
+                  The iscsi login state of the volume attachment. For a Iscsi volume attachment,
+                  all iscsi sessions need to be all logged-in or logged-out to be in logged-in or logged-out state.
+                type: string
+              jsonData:
+                type: string
               lifecycleState:
                 description: The current state of the volume attachment.
                 type: string

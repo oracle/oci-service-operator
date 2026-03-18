@@ -14,6 +14,10 @@ import (
 
 // PublicIpByIpAddressSpec defines the desired state of PublicIpByIpAddress.
 type PublicIpByIpAddressSpec struct {
+	// The public IP address.
+	// Example: 203.0.113.2
+	// +kubebuilder:validation:Required
+	IpAddress string `json:"ipAddress"`
 }
 
 // PublicIpByIpAddressStatus defines the observed state of PublicIpByIpAddress.

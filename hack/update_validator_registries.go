@@ -696,11 +696,11 @@ func buildSDKMappings(service, spec string, candidates []string, hasExisting boo
 			if strings.TrimSpace(overrideMapping.APISurface) != "" {
 				mapping.APISurface = overrideMapping.APISurface
 			}
-			if overrideMapping.Exclude {
-				mapping.Exclude = true
-			}
+			mapping.Exclude = overrideMapping.Exclude
 			if strings.TrimSpace(overrideMapping.Reason) != "" {
 				mapping.Reason = overrideMapping.Reason
+			} else if !mapping.Exclude {
+				mapping.Reason = ""
 			}
 		}
 		mappings = append(mappings, mapping)
@@ -792,13 +792,19 @@ var explicitAPITargetOverrides = map[string]apiTargetOverride{
 	"dns.ZoneRecord":                         {SDKTypes: []string{"Record"}},
 	"identity.CostTrackingTag":               {SDKTypes: []string{"Tag"}, UseStatus: true},
 	"identity.IdentityProvider":              {SDKTypes: []string{"Saml2IdentityProvider"}},
-	"identity.OrResetUIPassword":             {SDKTypes: []string{"UiPassword"}, UseStatus: true},
-	"identity.StandardTagNamespace":          {SDKTypes: []string{"StandardTagNamespaceTemplate", "StandardTagNamespaceTemplateSummary"}},
-	"identity.StandardTagTemplate":           {SDKTypes: []string{"StandardTagDefinitionTemplate"}},
-	"identity.UserState":                     {SDKTypes: []string{"User"}, UseStatus: true},
-	"identity.UserUIPasswordInformation":     {SDKTypes: []string{"UiPasswordInformation"}},
-	"keymanagement.PreCoUserCredential":      {SDKTypes: []string{"PreCoUserCredentials"}},
-	"loadbalancer.NetworkSecurityGroup":      {SDKTypes: []string{"UpdateNetworkSecurityGroupsDetails"}},
+	"identity.OAuthClientCredential": {
+		MappingOverrides: map[string]mappingOverride{
+			"OAuth2ClientCredential":        {APISurface: "status"},
+			"OAuth2ClientCredentialSummary": {APISurface: "status"},
+		},
+	},
+	"identity.OrResetUIPassword":         {SDKTypes: []string{"UiPassword"}, UseStatus: true},
+	"identity.StandardTagNamespace":      {SDKTypes: []string{"StandardTagNamespaceTemplate", "StandardTagNamespaceTemplateSummary"}},
+	"identity.StandardTagTemplate":       {SDKTypes: []string{"StandardTagDefinitionTemplate"}},
+	"identity.UserState":                 {SDKTypes: []string{"User"}, UseStatus: true},
+	"identity.UserUIPasswordInformation": {SDKTypes: []string{"UiPasswordInformation"}},
+	"keymanagement.PreCoUserCredential":  {SDKTypes: []string{"PreCoUserCredentials"}},
+	"loadbalancer.NetworkSecurityGroup":  {SDKTypes: []string{"UpdateNetworkSecurityGroupsDetails"}},
 	"loadbalancer.Shape": {
 		MappingOverrides: map[string]mappingOverride{
 			"UpdateLoadBalancerShapeDetails": {
@@ -810,7 +816,19 @@ var explicitAPITargetOverrides = map[string]apiTargetOverride{
 	"networkloadbalancer.NetworkSecurityGroup": {SDKTypes: []string{"UpdateNetworkSecurityGroupsDetails"}},
 	"objectstorage.Namespace":                  {SDKTypes: []string{"NamespaceMetadata"}},
 	"ons.ConfirmSubscription":                  {SDKTypes: []string{"ConfirmationResult"}, UseStatus: true},
-	"ons.Unsubscription":                       {UseStatus: true},
+	"ons.Topic": {
+		MappingOverrides: map[string]mappingOverride{
+			"NotificationTopic":        {APISurface: "status"},
+			"NotificationTopicSummary": {APISurface: "status"},
+		},
+	},
+	"ons.Unsubscription": {UseStatus: true},
+	"streaming.Stream": {
+		MappingOverrides: map[string]mappingOverride{
+			"Stream":        {APISurface: "status"},
+			"StreamSummary": {APISurface: "status"},
+		},
+	},
 }
 
 func deriveSDKTypes(service, spec, targetName string, structs map[string]bool) []string {

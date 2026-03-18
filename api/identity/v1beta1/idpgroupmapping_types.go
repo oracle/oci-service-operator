@@ -30,6 +30,10 @@ type IdpGroupMappingStatus struct {
 	Id string `json:"id,omitempty"`
 	// The OCID of the `IdentityProvider` this mapping belongs to.
 	IdpId string `json:"idpId,omitempty"`
+	// The name of the IdP group that is mapped to the IAM Service group.
+	IdpGroupName string `json:"idpGroupName,omitempty"`
+	// The OCID of the IAM Service group that is mapped to the IdP group.
+	GroupId string `json:"groupId,omitempty"`
 	// The OCID of the tenancy containing the `IdentityProvider`.
 	CompartmentId string `json:"compartmentId,omitempty"`
 	// Date and time the mapping was created, in the format defined by RFC3339.

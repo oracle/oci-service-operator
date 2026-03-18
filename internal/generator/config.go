@@ -45,12 +45,18 @@ type ServiceConfig struct {
 	PackageProfile string              `yaml:"packageProfile"`
 	ParityFile     string              `yaml:"parityFile,omitempty"`
 	Compatibility  CompatibilityConfig `yaml:"compatibility,omitempty"`
+	ObservedState  ObservedStateConfig `yaml:"observedState,omitempty"`
 	Parity         *ParityConfig       `yaml:"-"`
 }
 
 // CompatibilityConfig holds explicit backwards-compatibility hints for published kinds.
 type CompatibilityConfig struct {
 	ExistingKinds []string `yaml:"existingKinds,omitempty"`
+}
+
+// ObservedStateConfig tunes how read-model fields are synthesized into status types.
+type ObservedStateConfig struct {
+	SDKAliases map[string][]string `yaml:"sdkAliases,omitempty"`
 }
 
 // LoadConfig reads and validates the generator config file.
@@ -124,6 +130,16 @@ func (c *Config) Validate() error {
 		if _, ok := c.PackageProfiles[service.PackageProfile]; !ok {
 			return fmt.Errorf("service %q references unknown packageProfile %q", service.Service, service.PackageProfile)
 		}
+		for rawName, aliases := range service.ObservedState.SDKAliases {
+			if strings.TrimSpace(rawName) == "" {
+				return fmt.Errorf("service %q observedState sdkAliases contains a blank resource name", service.Service)
+			}
+			for _, alias := range aliases {
+				if strings.TrimSpace(alias) == "" {
+					return fmt.Errorf("service %q observedState sdkAliases[%q] contains a blank SDK alias", service.Service, rawName)
+				}
+			}
+		}
 		if _, exists := servicesByName[service.Service]; exists {
 			return fmt.Errorf("duplicate service %q", service.Service)
 		}
@@ -176,4 +192,23 @@ func (s ServiceConfig) GroupDNSName(domain string) string {
 // IsControllerBacked reports whether the service expects shared-manager controller assets.
 func (s ServiceConfig) IsControllerBacked() bool {
 	return s.PackageProfile == PackageProfileControllerBacked
+}
+
+// ObservedStateStructCandidates returns the read-model structs that should feed status synthesis.
+func (s ServiceConfig) ObservedStateStructCandidates(rawName string) []string {
+	rawName = strings.TrimSpace(rawName)
+	if rawName == "" {
+		return nil
+	}
+
+	candidates := appendUniqueStrings(nil, rawName, rawName+"Summary")
+	for _, alias := range s.ObservedState.SDKAliases[rawName] {
+		alias = strings.TrimSpace(alias)
+		if alias == "" {
+			continue
+		}
+		candidates = appendUniqueStrings(candidates, alias)
+	}
+
+	return candidates
 }

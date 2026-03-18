@@ -38,6 +38,7 @@ set +a
 : "${DEFAULT_CONTROLLER_IMAGE:?missing DEFAULT_CONTROLLER_IMAGE in ${metadata_file}}"
 
 controller_gen=${CONTROLLER_GEN:-controller-gen}
+controller_gen_runner=${CONTROLLER_GEN_RUNNER:-"${ROOT_DIR}/hack/with-controller-gen-godebug.sh"}
 kustomize=${KUSTOMIZE:-kustomize}
 controller_image=${CONTROLLER_IMG:-${DEFAULT_CONTROLLER_IMAGE}}
 crd_options=${CRD_OPTIONS:-crd:generateEmbeddedObjectMeta=true,allowDangerousTypes=true}
@@ -46,6 +47,10 @@ generated_dir="${install_dir}/generated"
 generated_crd_dir="${generated_dir}/crd"
 generated_crd_bases_dir="${generated_crd_dir}/bases"
 generated_rbac_dir="${generated_dir}/rbac"
+
+run_controller_gen() {
+	"${controller_gen_runner}" "${controller_gen}" "$@"
+}
 
 write_crd_kustomization() {
 	local kustomization_file=$1
@@ -73,7 +78,7 @@ generate_assets() {
 	rm -rf "${generated_dir}"
 	mkdir -p "${generated_crd_bases_dir}"
 
-	"${controller_gen}" \
+	run_controller_gen \
 		"${crd_options}" \
 		paths="${CRD_PATHS}" \
 		output:crd:artifacts:config="${generated_crd_bases_dir}"
@@ -85,7 +90,7 @@ generate_assets() {
 	fi
 
 	mkdir -p "${generated_rbac_dir}"
-	"${controller_gen}" \
+	run_controller_gen \
 		rbac:roleName=manager-role \
 		paths="${RBAC_PATHS}" \
 		output:rbac:artifacts:config="${generated_rbac_dir}"

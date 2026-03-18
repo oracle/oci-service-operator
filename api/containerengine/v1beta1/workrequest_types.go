@@ -35,6 +35,9 @@ type WorkRequestStatus struct {
 	Id string `json:"id,omitempty"`
 	// The type of work the work request is doing.
 	OperationType string `json:"operationType,omitempty"`
+	// The current status of the work request.
+	// This uses a distinct JSON name so it can coexist with the OSOK status envelope.
+	Status string `json:"sdkStatus,omitempty"`
 	// The OCID of the compartment in which the work request exists.
 	CompartmentId string `json:"compartmentId,omitempty"`
 	// The resources this work request affects.

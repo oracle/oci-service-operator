@@ -19,6 +19,8 @@ type PrimaryDbInstanceSpec struct {
 // PrimaryDbInstanceStatus defines the observed state of PrimaryDbInstance.
 type PrimaryDbInstanceStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// A unique identifier for the primary database instance node.
+	DbInstanceId string `json:"dbInstanceId,omitempty"`
 }
 
 // +kubebuilder:object:root=true

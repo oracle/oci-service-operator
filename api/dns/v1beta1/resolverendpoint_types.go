@@ -45,6 +45,18 @@ type ResolverEndpointSpec struct {
 // ResolverEndpointStatus defines the observed state of ResolverEndpoint.
 type ResolverEndpointStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// An IP address from which forwarded queries may be sent. For VNIC endpoints, this IP address must be part
+	// of the subnet and will be assigned by the system if unspecified when isForwarding is true.
+	ForwardingAddress string `json:"forwardingAddress,omitempty"`
+	// An IP address to listen to queries on. For VNIC endpoints this IP address must be part of the
+	// subnet and will be assigned by the system if unspecified when isListening is true.
+	ListeningAddress string `json:"listeningAddress,omitempty"`
+	// The name of the resolver endpoint. Must be unique, case-insensitive, within the resolver.
+	Name string `json:"name,omitempty"`
+	// A Boolean flag indicating whether or not the resolver endpoint is for forwarding.
+	IsForwarding bool `json:"isForwarding,omitempty"`
+	// A Boolean flag indicating whether or not the resolver endpoint is for listening.
+	IsListening bool `json:"isListening,omitempty"`
 	// The OCID of the owning compartment. This will match the resolver that the resolver endpoint is under
 	// and will be updated if the resolver's compartment is changed.
 	CompartmentId string `json:"compartmentId,omitempty"`
@@ -60,6 +72,11 @@ type ResolverEndpointStatus struct {
 	LifecycleState string `json:"lifecycleState,omitempty"`
 	// The canonical absolute URL of the resource.
 	Self string `json:"self,omitempty"`
+	// The OCID of a subnet. Must be part of the VCN that the resolver is attached to.
+	SubnetId string `json:"subnetId,omitempty"`
+	// An array of network security group OCIDs for the resolver endpoint. These must be part of the VCN that the
+	// resolver endpoint is a part of.
+	NsgIds []string `json:"nsgIds,omitempty"`
 }
 
 // +kubebuilder:object:root=true

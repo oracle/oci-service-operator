@@ -84,10 +84,12 @@ var targets = []Target{
 				SDKStruct: "streaming.UpdateStreamDetails",
 			},
 			{
-				SDKStruct: "streaming.Stream",
+				SDKStruct:  "streaming.Stream",
+				APISurface: "status",
 			},
 			{
-				SDKStruct: "streaming.StreamSummary",
+				SDKStruct:  "streaming.StreamSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -615,10 +617,12 @@ var targets = []Target{
 				SDKStruct: "ons.CreateTopicDetails",
 			},
 			{
-				SDKStruct: "ons.NotificationTopic",
+				SDKStruct:  "ons.NotificationTopic",
+				APISurface: "status",
 			},
 			{
-				SDKStruct: "ons.NotificationTopicSummary",
+				SDKStruct:  "ons.NotificationTopicSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -2612,10 +2616,12 @@ var targets = []Target{
 				SDKStruct: "identity.UpdateOAuth2ClientCredentialDetails",
 			},
 			{
-				SDKStruct: "identity.OAuth2ClientCredential",
+				SDKStruct:  "identity.OAuth2ClientCredential",
+				APISurface: "status",
 			},
 			{
-				SDKStruct: "identity.OAuth2ClientCredentialSummary",
+				SDKStruct:  "identity.OAuth2ClientCredentialSummary",
+				APISurface: "status",
 			},
 		},
 	},

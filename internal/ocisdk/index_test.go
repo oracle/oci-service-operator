@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 )
@@ -186,6 +187,22 @@ func TestIndexLoadsRepresentativeOCISDKMetadata(t *testing.T) {
 				}
 			},
 		},
+		{
+			name:       "networkloadbalancer.HealthChecker",
+			importPath: "github.com/oracle/oci-go-sdk/v65/networkloadbalancer",
+			typeName:   "HealthChecker",
+			assert: func(t *testing.T, structMeta Struct) {
+				requestData := findField(t, structMeta.Fields, "RequestData")
+				if requestData.RenderableType != "string" {
+					t.Fatalf("RequestData renderable type = %q, want string", requestData.RenderableType)
+				}
+
+				responseData := findField(t, structMeta.Fields, "ResponseData")
+				if responseData.RenderableType != "string" {
+					t.Fatalf("ResponseData renderable type = %q, want string", responseData.RenderableType)
+				}
+			},
+		},
 	}
 
 	for _, tt := range tests {
@@ -304,6 +321,73 @@ func TestIndexLoadsPolymorphicInterfaceFamilies(t *testing.T) {
 				t.Fatalf("InterfaceFamily(%s) did not find a family", tt.typeName)
 			}
 			tt.assert(t, family)
+		})
+	}
+}
+
+func TestPackageRequestBodyPayloads(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name       string
+		importPath string
+		request    string
+		want       []string
+	}{
+		{
+			name:       "sample alias payload",
+			importPath: "example.com/test/sdk",
+			request:    "CreateOAuthClientCredentialRequest",
+			want:       []string{"CreateOAuth2ClientCredentialDetails"},
+		},
+		{
+			name:       "sample non-crud payload",
+			importPath: "example.com/test/sdk",
+			request:    "GetReportByNameRequest",
+			want:       []string{"GetReportByNameDetails"},
+		},
+		{
+			name:       "core create plural alias",
+			importPath: "github.com/oracle/oci-go-sdk/v65/core",
+			request:    "CreateDhcpOptionsRequest",
+			want:       []string{"CreateDhcpDetails"},
+		},
+		{
+			name:       "core get by ip address",
+			importPath: "github.com/oracle/oci-go-sdk/v65/core",
+			request:    "GetPublicIpByIpAddressRequest",
+			want:       []string{"GetPublicIpByIpAddressDetails"},
+		},
+		{
+			name:       "identity oauth alias",
+			importPath: "github.com/oracle/oci-go-sdk/v65/identity",
+			request:    "UpdateOAuthClientCredentialRequest",
+			want:       []string{"UpdateOAuth2ClientCredentialDetails"},
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			resolver := vendorResolver(t)
+			if strings.HasPrefix(tt.importPath, "example.com/") {
+				resolver = func(context.Context, string) (string, error) {
+					return filepath.Join(moduleRoot(t), "internal", "generator", "testdata", "sdk", "sample"), nil
+				}
+			}
+
+			index := NewIndex(resolver)
+			pkg, err := index.Package(context.Background(), tt.importPath)
+			if err != nil {
+				t.Fatalf("Package(%s) error = %v", tt.importPath, err)
+			}
+
+			got := pkg.RequestBodyPayloads(tt.request)
+			if !slices.Equal(got, tt.want) {
+				t.Fatalf("RequestBodyPayloads(%s) = %v, want %v", tt.request, got, tt.want)
+			}
 		})
 	}
 }

@@ -16,6 +16,18 @@ import (
 type BulkEditTagsResourceTypeSpec struct {
 }
 
+// BulkEditTagsResourceTypeItem defines nested fields for BulkEditTagsResourceType.Item.
+type BulkEditTagsResourceTypeItem struct {
+	// The unique name of the resource type.
+	ResourceType string `json:"resourceType,omitempty"`
+	// The metadata keys required to identify the resource.
+	// For example, for a bucket, the value of `metadataKeys` will be "namespaceName", "bucketName".
+	// This information will match the API documentation.
+	// See UpdateBucket (https://docs.cloud.oracle.com/api/#/en/objectstorage/latest/Bucket/UpdateBucket) and
+	// DeleteBucket (https://docs.cloud.oracle.com/api/#/en/objectstorage/latest/Bucket/DeleteBucket).
+	MetadataKeys []string `json:"metadataKeys,omitempty"`
+}
+
 // BulkEditTagsResourceTypeStatus defines the observed state of BulkEditTagsResourceType.
 type BulkEditTagsResourceTypeStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
@@ -27,6 +39,8 @@ type BulkEditTagsResourceTypeStatus struct {
 	// See UpdateBucket (https://docs.cloud.oracle.com/api/#/en/objectstorage/latest/Bucket/UpdateBucket) and
 	// DeleteBucket (https://docs.cloud.oracle.com/api/#/en/objectstorage/latest/Bucket/DeleteBucket).
 	MetadataKeys []string `json:"metadataKeys,omitempty"`
+	// The collection of resource types that support bulk editing of tags.
+	Items []BulkEditTagsResourceTypeItem `json:"items,omitempty"`
 }
 
 // +kubebuilder:object:root=true

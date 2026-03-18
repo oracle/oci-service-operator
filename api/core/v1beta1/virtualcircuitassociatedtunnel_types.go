@@ -19,6 +19,12 @@ type VirtualCircuitAssociatedTunnelSpec struct {
 // VirtualCircuitAssociatedTunnelStatus defines the observed state of VirtualCircuitAssociatedTunnel.
 type VirtualCircuitAssociatedTunnelStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The type of the tunnel associated with the virtual circuit.
+	TunnelType string `json:"tunnelType,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the IPSec tunnel associated with the virtual circuit.
+	TunnelId string `json:"tunnelId,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of IPSec connection associated with the virtual circuit.
+	IpsecConnectionId string `json:"ipsecConnectionId,omitempty"`
 }
 
 // +kubebuilder:object:root=true

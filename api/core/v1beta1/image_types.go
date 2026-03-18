@@ -58,6 +58,8 @@ type ImageSpec struct {
 // ImageSourceDetails defines nested fields for Image.ImageSourceDetails.
 type ImageSourceDetails struct {
 	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
 	OperatingSystem string `json:"operatingSystem,omitempty"`
 	// +kubebuilder:validation:Optional
 	OperatingSystemVersion string `json:"operatingSystemVersion,omitempty"`
@@ -131,6 +133,8 @@ type ImageAgentFeatures struct {
 // ImageStatus defines the observed state of Image.
 type ImageStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the compartment containing the instance you want to use as the basis for the image.
+	CompartmentId string `json:"compartmentId,omitempty"`
 	// Whether instances launched with this image can be used to create new images.
 	// For example, you cannot create an image of an Oracle Database instance.
 	// Example: `true`
@@ -138,11 +142,36 @@ type ImageStatus struct {
 	// The OCID of the image.
 	Id             string `json:"id,omitempty"`
 	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The image's operating system.
+	// Example: `Oracle Linux`
+	OperatingSystem string `json:"operatingSystem,omitempty"`
+	// The image's operating system version.
+	// Example: `7.2`
+	OperatingSystemVersion string `json:"operatingSystemVersion,omitempty"`
 	// The date and time the image was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	// Example: `2016-08-25T21:10:29.600Z`
 	TimeCreated string `json:"timeCreated,omitempty"`
 	// The OCID of the image originally used to launch the instance.
-	BaseImageId   string             `json:"baseImageId,omitempty"`
+	BaseImageId string `json:"baseImageId,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name for the image. It does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	// You cannot use a platform image name as a custom image name.
+	// Example: `My custom Oracle Linux image`
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Specifies the configuration mode for launching virtual machine (VM) instances. The configuration modes are:
+	// * `NATIVE` - VM instances launch with iSCSI boot and VFIO devices. The default value for platform images.
+	// * `EMULATED` - VM instances launch with emulated devices, such as the E1000 network driver and emulated SCSI disk controller.
+	// * `PARAVIRTUALIZED` - VM instances launch with paravirtualized devices using VirtIO drivers.
+	// * `CUSTOM` - VM instances launch with custom configuration settings specified in the `LaunchOptions` parameter.
+	LaunchMode    string             `json:"launchMode,omitempty"`
 	LaunchOptions ImageLaunchOptions `json:"launchOptions,omitempty"`
 	AgentFeatures ImageAgentFeatures `json:"agentFeatures,omitempty"`
 	// The listing type of the image. The default value is "NONE".

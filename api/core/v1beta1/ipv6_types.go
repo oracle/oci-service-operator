@@ -50,8 +50,15 @@ type Ipv6Status struct {
 	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the IPv6.
 	// This is the same as the VNIC's compartment.
 	CompartmentId string `json:"compartmentId,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	DisplayName string `json:"displayName,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the IPv6.
 	Id string `json:"id,omitempty"`
+	// The IPv6 address of the `IPv6` object. The address is within the IPv6 prefix of the VNIC's subnet
+	// (see the `ipv6CidrBlock` attribute for the Subnet object.
+	// Example: `2001:0db8:0123:1111:abcd:ef01:2345:6789`
+	IpAddress string `json:"ipAddress,omitempty"`
 	// The IPv6's current state.
 	LifecycleState string `json:"lifecycleState,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subnet the VNIC is in.
@@ -59,6 +66,17 @@ type Ipv6Status struct {
 	// The date and time the IPv6 was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	// Example: `2016-08-25T21:10:29.600Z`
 	TimeCreated string `json:"timeCreated,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VNIC the IPv6 is assigned to.
+	// The VNIC and IPv6 must be in the same subnet.
+	VnicId string `json:"vnicId,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 }
 
 // +kubebuilder:object:root=true

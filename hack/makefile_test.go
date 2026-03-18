@@ -19,6 +19,45 @@ func TestMakeGenerateUsesScopedDeepcopyPaths(t *testing.T) {
 	}
 }
 
+func TestMakeGenerateUsesControllerGenCompatibilityRunner(t *testing.T) {
+	root, err := findRepoRoot()
+	if err != nil {
+		t.Fatalf("findRepoRoot() error = %v", err)
+	}
+
+	output := runMakeDryRun(t, "generate", nil)
+	expected := filepath.Join(root, "hack", "with-controller-gen-godebug.sh")
+	if !strings.Contains(output, expected) {
+		t.Fatalf("make -n generate output did not invoke the controller-gen compatibility runner %q:\n%s", expected, output)
+	}
+}
+
+func TestMakeManifestsUsesControllerGenCompatibilityRunner(t *testing.T) {
+	root, err := findRepoRoot()
+	if err != nil {
+		t.Fatalf("findRepoRoot() error = %v", err)
+	}
+
+	output := runMakeDryRun(t, "manifests", nil)
+	expected := filepath.Join(root, "hack", "with-controller-gen-godebug.sh")
+	if !strings.Contains(output, expected) {
+		t.Fatalf("make -n manifests output did not invoke the controller-gen compatibility runner %q:\n%s", expected, output)
+	}
+}
+
+func TestMakeGeneratedCoverageUsesControllerGenCompatibilityRunner(t *testing.T) {
+	root, err := findRepoRoot()
+	if err != nil {
+		t.Fatalf("findRepoRoot() error = %v", err)
+	}
+
+	output := runMakeDryRun(t, "generated-coverage-report", nil)
+	expected := filepath.Join(root, "hack", "with-controller-gen-godebug.sh")
+	if !strings.Contains(output, expected) {
+		t.Fatalf("make -n generated-coverage-report output did not invoke the controller-gen compatibility runner %q:\n%s", expected, output)
+	}
+}
+
 func TestMakeTestKeepsEnvtestOutsideRepoByDefault(t *testing.T) {
 	root, err := findRepoRoot()
 	if err != nil {

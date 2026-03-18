@@ -71,6 +71,8 @@ spec:
                     description: DbSystemCredentialsPasswordDetails defines nested
                       fields for DbSystem.Credentials.PasswordDetails.
                     properties:
+                      jsonData:
+                        type: string
                       password:
                         description: The database system password.
                         type: string
@@ -193,6 +195,8 @@ spec:
                         items:
                           type: string
                         type: array
+                      jsonData:
+                        type: string
                       kind:
                         type: string
                       retentionDays:
@@ -244,6 +248,8 @@ spec:
                   isHavingRestoreConfigOverrides:
                     description: Deprecated. Don't use.
                     type: boolean
+                  jsonData:
+                    type: string
                   sourceType:
                     type: string
                 required:
@@ -270,6 +276,8 @@ spec:
                       If `isRegionallyDurable` is set to true, `availabilityDomain` should not be specified.
                       If `isRegionallyDurable` is set to false, `availabilityDomain` must be specified.
                     type: boolean
+                  jsonData:
+                    type: string
                   systemType:
                     type: string
                 required:
@@ -292,10 +300,55 @@ spec:
               adminUsername:
                 description: The database system administrator username.
                 type: string
+              compartmentId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the compartment that contains the database system.
+                type: string
+              configId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the configuration associated with the database system.
+                type: string
+              dbVersion:
+                description: The major and minor versions of the database system software.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: A description of the database system.
+                type: string
+              displayName:
+                description: A user-friendly display name for the database system.
+                  Avoid entering confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
               id:
                 description: A unique identifier for the database system. Immutable
                   on creation.
                 type: string
+              instanceCount:
+                description: Count of instances, or nodes, in the database system.
+                type: integer
+              instanceMemorySizeInGBs:
+                description: The total amount of memory available to each database
+                  instance node, in gigabytes.
+                type: integer
+              instanceOcpuCount:
+                description: The total number of OCPUs available to each database
+                  instance node.
+                type: integer
               instances:
                 description: The list of instances, or nodes, in the database system.
                 items:
@@ -346,6 +399,90 @@ spec:
               lifecycleState:
                 description: The current state of the database system.
                 type: string
+              managementPolicy:
+                description: DbSystemManagementPolicyObservedState defines nested
+                  fields for DbSystem.ManagementPolicy.
+                properties:
+                  backupPolicy:
+                    description: DbSystemManagementPolicyBackupPolicyObservedState
+                      defines nested fields for DbSystem.ManagementPolicy.BackupPolicy.
+                    properties:
+                      backupStart:
+                        description: Hour of the day when the backup starts.
+                        type: string
+                      daysOfTheMonth:
+                        description: |-
+                          Day of the month when the backup should start.
+                          To ensure that the backup runs monthly, the latest day of the month that you can use to schedule a backup is the the 28th day.
+                        items:
+                          type: integer
+                        type: array
+                      daysOfTheWeek:
+                        description: The day of the week that the backup starts.
+                        items:
+                          type: string
+                        type: array
+                      jsonData:
+                        type: string
+                      kind:
+                        type: string
+                      retentionDays:
+                        description: How many days the data should be stored after
+                          the database system deletion.
+                        type: integer
+                    required:
+                    - backupStart
+                    - daysOfTheMonth
+                    - daysOfTheWeek
+                    type: object
+                  maintenanceWindowStart:
+                    description: The start of the maintenance window.
+                    type: string
+                type: object
+              networkDetails:
+                description: DbSystemNetworkDetails defines nested fields for DbSystem.NetworkDetails.
+                properties:
+                  nsgIds:
+                    description: List of customer Network Security Group OCIDs (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                      associated with the database system.
+                    items:
+                      type: string
+                    type: array
+                  primaryDbEndpointPrivateIp:
+                    description: |-
+                      Private IP in customer subnet. The value is optional.
+                      If the IP is not provided, the IP will be chosen from the available IP addresses from the specified subnet.
+                    type: string
+                  subnetId:
+                    description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                      of the customer subnet associated with the database system.
+                    type: string
+                required:
+                - subnetId
+                type: object
+              shape:
+                description: |-
+                  The name of the shape for the database instance.
+                  Example: `VM.Standard.E4.Flex`
+                type: string
+              source:
+                description: DbSystemSourceObservedState defines nested fields for
+                  DbSystem.Source.
+                properties:
+                  backupId:
+                    description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                      of the database system backup.
+                    type: string
+                  isHavingRestoreConfigOverrides:
+                    description: Deprecated. Don't use.
+                    type: boolean
+                  jsonData:
+                    type: string
+                  sourceType:
+                    type: string
+                required:
+                - backupId
+                type: object
               status:
                 properties:
                   conditions:
@@ -388,6 +525,35 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              storageDetails:
+                description: DbSystemStorageDetailsObservedState defines nested fields
+                  for DbSystem.StorageDetails.
+                properties:
+                  availabilityDomain:
+                    description: |-
+                      Specifies the availability domain of AD-local storage.
+                      If `isRegionallyDurable` is set to true, `availabilityDomain` should not be specified.
+                      If `isRegionallyDurable` is set to false, `availabilityDomain` must be specified.
+                    type: string
+                  iops:
+                    description: Guaranteed input/output storage requests per second
+                      (IOPS) available to the database system.
+                    format: int64
+                    type: integer
+                  isRegionallyDurable:
+                    description: |-
+                      Specifies if the block volume used for the database system is regional or AD-local.
+                      If not specified, it will be set to false.
+                      If `isRegionallyDurable` is set to true, `availabilityDomain` should not be specified.
+                      If `isRegionallyDurable` is set to false, `availabilityDomain` must be specified.
+                    type: boolean
+                  jsonData:
+                    type: string
+                  systemType:
+                    type: string
+                required:
+                - isRegionallyDurable
+                type: object
               systemTags:
                 additionalProperties:
                   additionalProperties:
@@ -397,6 +563,9 @@ spec:
                   System tags for this resource. Each key is predefined and scoped to a namespace.
                   Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
                 type: object
+              systemType:
+                description: Type of the database system.
+                type: string
               timeCreated:
                 description: |-
                   The date and time that the database system was created, expressed in

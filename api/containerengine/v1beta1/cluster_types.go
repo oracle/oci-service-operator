@@ -167,6 +167,36 @@ type ClusterImagePolicyConfig struct {
 // ClusterPodNetworkOption defines nested fields for Cluster.ClusterPodNetworkOption.
 type ClusterPodNetworkOption struct {
 	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
+	CniType string `json:"cniType,omitempty"`
+}
+
+// ClusterOptionsObservedState defines nested fields for Cluster.Options.
+type ClusterOptionsObservedState struct {
+	// The OCIDs of the subnets used for Kubernetes services load balancers.
+	// +kubebuilder:validation:Optional
+	ServiceLbSubnetIds []string `json:"serviceLbSubnetIds,omitempty"`
+	// Network configuration for Kubernetes.
+	// +kubebuilder:validation:Optional
+	KubernetesNetworkConfig ClusterOptionsKubernetesNetworkConfig `json:"kubernetesNetworkConfig,omitempty"`
+	// Configurable cluster add-ons
+	// +kubebuilder:validation:Optional
+	AddOns ClusterOptionsAddOns `json:"addOns,omitempty"`
+	// Configurable cluster admission controllers
+	// +kubebuilder:validation:Optional
+	AdmissionControllerOptions ClusterOptionsAdmissionControllerOptions `json:"admissionControllerOptions,omitempty"`
+	// +kubebuilder:validation:Optional
+	PersistentVolumeConfig ClusterOptionsPersistentVolumeConfig `json:"persistentVolumeConfig,omitempty"`
+	// +kubebuilder:validation:Optional
+	ServiceLbConfig ClusterOptionsServiceLbConfig `json:"serviceLbConfig,omitempty"`
+}
+
+// ClusterPodNetworkOptionObservedState defines nested fields for Cluster.ClusterPodNetworkOption.
+type ClusterPodNetworkOptionObservedState struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
 	CniType string `json:"cniType,omitempty"`
 }
 
@@ -212,9 +242,31 @@ type ClusterStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
 	// The OCID of the cluster.
 	Id string `json:"id,omitempty"`
+	// The name of the cluster.
+	Name string `json:"name,omitempty"`
+	// The OCID of the compartment in which the cluster exists.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The network configuration for access to the Cluster control plane.
+	EndpointConfig ClusterEndpointConfigFields `json:"endpointConfig,omitempty"`
+	// The OCID of the virtual cloud network (VCN) in which the cluster exists.
+	VcnId string `json:"vcnId,omitempty"`
+	// The version of Kubernetes running on the cluster masters.
+	KubernetesVersion string `json:"kubernetesVersion,omitempty"`
+	// The OCID of the KMS key to be used as the master encryption key for Kubernetes secret encryption.
+	KmsKeyId string `json:"kmsKeyId,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// Usage of system tag keys. These predefined keys are scoped to namespaces.
 	// Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
 	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`
+	// Optional attributes for the cluster.
+	Options ClusterOptionsObservedState `json:"options,omitempty"`
 	// Metadata about the cluster.
 	Metadata ClusterMetadata `json:"metadata,omitempty"`
 	// The state of the cluster masters.
@@ -225,6 +277,12 @@ type ClusterStatus struct {
 	Endpoints ClusterEndpoints `json:"endpoints,omitempty"`
 	// Available Kubernetes versions to which the clusters masters may be upgraded.
 	AvailableKubernetesUpgrades []string `json:"availableKubernetesUpgrades,omitempty"`
+	// The image verification policy for signature validation.
+	ImagePolicyConfig ClusterImagePolicyConfig `json:"imagePolicyConfig,omitempty"`
+	// Available CNIs and network options for existing and new node pools of the cluster
+	ClusterPodNetworkOptions []ClusterPodNetworkOptionObservedState `json:"clusterPodNetworkOptions,omitempty"`
+	// Type of cluster
+	Type string `json:"type,omitempty"`
 }
 
 // +kubebuilder:object:root=true

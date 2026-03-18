@@ -42,6 +42,8 @@ type ComputeCapacityTopologySpec struct {
 // ComputeCapacityTopologyCapacitySource defines nested fields for ComputeCapacityTopology.CapacitySource.
 type ComputeCapacityTopologyCapacitySource struct {
 	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
 	CapacityType string `json:"capacityType,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment of this capacity source.
 	// +kubebuilder:validation:Optional
@@ -51,6 +53,12 @@ type ComputeCapacityTopologyCapacitySource struct {
 // ComputeCapacityTopologyStatus defines the observed state of ComputeCapacityTopology.
 type ComputeCapacityTopologyStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The availability domain of the compute capacity topology.
+	// Example: `Uocm:US-CHICAGO-1-AD-2`
+	AvailabilityDomain string                                `json:"availabilityDomain,omitempty"`
+	CapacitySource     ComputeCapacityTopologyCapacitySource `json:"capacitySource,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the compute capacity topology.
+	CompartmentId string `json:"compartmentId,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compute capacity topology.
 	Id string `json:"id,omitempty"`
 	// The current state of the compute capacity topology.
@@ -61,6 +69,17 @@ type ComputeCapacityTopologyStatus struct {
 	// The date and time that the compute capacity topology was updated, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	// Example: `2016-08-25T21:10:29.600Z`
 	TimeUpdated string `json:"timeUpdated,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 }
 
 // +kubebuilder:object:root=true

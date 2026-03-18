@@ -18,6 +18,7 @@ type NodePoolOptionSpec struct {
 
 // NodePoolOptionSource defines nested fields for NodePoolOption.Source.
 type NodePoolOptionSource struct {
+	JsonData string `json:"jsonData,omitempty"`
 	// The user-friendly name of the entity corresponding to the OCID.
 	SourceName string `json:"sourceName,omitempty"`
 	SourceType string `json:"sourceType,omitempty"`

@@ -19,6 +19,10 @@ type WorkRequestLogSpec struct {
 // WorkRequestLogStatus defines the observed state of WorkRequestLog.
 type WorkRequestLogStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// Human-readable log message.
+	Message string `json:"message,omitempty"`
+	// The time the log message was written, as described in RFC 3339 (https://tools.ietf.org/rfc/rfc3339).
+	Timestamp string `json:"timestamp,omitempty"`
 }
 
 // +kubebuilder:object:root=true

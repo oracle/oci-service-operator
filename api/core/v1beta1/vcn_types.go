@@ -93,18 +93,49 @@ type VcnByoipv6CidrDetail struct {
 // VcnStatus defines the observed state of Vcn.
 type VcnStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// Deprecated. The first CIDR IP address from cidrBlocks.
+	// Example: `172.16.0.0/16`
+	CidrBlock string `json:"cidrBlock,omitempty"`
+	// The list of IPv4 CIDR blocks the VCN will use.
+	CidrBlocks []string `json:"cidrBlocks,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the VCN.
+	CompartmentId string `json:"compartmentId,omitempty"`
 	// The VCN's Oracle ID (OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)).
 	Id string `json:"id,omitempty"`
 	// The VCN's current state.
 	LifecycleState string `json:"lifecycleState,omitempty"`
 	// The list of BYOIPv6 prefixes required to create a VCN that uses BYOIPv6 ranges.
 	Byoipv6CidrBlocks []string `json:"byoipv6CidrBlocks,omitempty"`
+	// For an IPv6-enabled VCN, this is the list of Private IPv6 prefixes for the VCN's IP address space.
+	Ipv6PrivateCidrBlocks []string `json:"ipv6PrivateCidrBlocks,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) for the VCN's default set of DHCP options.
 	DefaultDhcpOptionsId string `json:"defaultDhcpOptionsId,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) for the VCN's default route table.
 	DefaultRouteTableId string `json:"defaultRouteTableId,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) for the VCN's default security list.
 	DefaultSecurityListId string `json:"defaultSecurityListId,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	DisplayName string `json:"displayName,omitempty"`
+	// A DNS label for the VCN, used in conjunction with the VNIC's hostname and
+	// subnet's DNS label to form a fully qualified domain name (FQDN) for each VNIC
+	// within this subnet (for example, `bminstance1.subnet123.vcn1.oraclevcn.com`).
+	// Must be an alphanumeric string that begins with a letter.
+	// The value cannot be changed.
+	// The absence of this parameter means the Internet and VCN Resolver will
+	// not work for this VCN.
+	// For more information, see
+	// DNS in Your Virtual Cloud Network (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/dns.htm).
+	// Example: `vcn1`
+	DnsLabel string `json:"dnsLabel,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// For an IPv6-enabled VCN, this is the list of IPv6 prefixes for the VCN's IP address space.
 	// The prefixes are provided by Oracle and the sizes are always /56.
 	Ipv6CidrBlocks []string `json:"ipv6CidrBlocks,omitempty"`

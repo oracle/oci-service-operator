@@ -177,6 +177,13 @@ func (in *SecretSpec) DeepCopyInto(out *SecretSpec) {
 			(*out)[key] = val
 		}
 	}
+	if in.Metadata != nil {
+		in, out := &in.Metadata, &out.Metadata
+		*out = make(map[string]shared.JSONValue, len(*in))
+		for key, val := range *in {
+			(*out)[key] = *val.DeepCopy()
+		}
+	}
 	out.SecretContent = in.SecretContent
 	out.RotationConfig = in.RotationConfig
 	if in.SecretRules != nil {

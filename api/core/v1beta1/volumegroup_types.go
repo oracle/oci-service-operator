@@ -52,6 +52,8 @@ type VolumeGroupSpec struct {
 // VolumeGroupSourceDetails defines nested fields for VolumeGroup.SourceDetails.
 type VolumeGroupSourceDetails struct {
 	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
 	Type string `json:"type,omitempty"`
 	// The OCID of the volume group replica.
 	// +kubebuilder:validation:Required
@@ -82,6 +84,13 @@ type VolumeGroupReplicaFields struct {
 // VolumeGroupStatus defines the observed state of VolumeGroup.
 type VolumeGroupStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The availability domain of the volume group.
+	AvailabilityDomain string `json:"availabilityDomain,omitempty"`
+	// The OCID of the compartment that contains the volume group.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	DisplayName string `json:"displayName,omitempty"`
 	// The OCID for the volume group.
 	Id string `json:"id,omitempty"`
 	// The current state of a volume group.
@@ -90,11 +99,24 @@ type VolumeGroupStatus struct {
 	SizeInMBs int64 `json:"sizeInMBs,omitempty"`
 	// The date and time the volume group was created. Format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	TimeCreated string `json:"timeCreated,omitempty"`
+	// OCIDs for the volumes in this volume group.
+	VolumeIds []string `json:"volumeIds,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// The aggregate size of the volume group in GBs.
-	SizeInGBs int64 `json:"sizeInGBs,omitempty"`
+	SizeInGBs     int64                    `json:"sizeInGBs,omitempty"`
+	SourceDetails VolumeGroupSourceDetails `json:"sourceDetails,omitempty"`
 	// Specifies whether the newly created cloned volume group's data has finished copying
 	// from the source volume group or backup.
 	IsHydrated bool `json:"isHydrated,omitempty"`
+	// The list of volume group replicas of this volume group.
+	VolumeGroupReplicas []VolumeGroupReplicaFields `json:"volumeGroupReplicas,omitempty"`
 }
 
 // +kubebuilder:object:root=true

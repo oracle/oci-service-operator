@@ -14,11 +14,95 @@ import (
 
 // UserStateSpec defines the desired state of UserState.
 type UserStateSpec struct {
+	// Update state to blocked or unblocked. Only "false" is supported (for changing the state to unblocked).
+	// +kubebuilder:validation:Optional
+	Blocked bool `json:"blocked,omitempty"`
+}
+
+// UserStateCapabilities defines nested fields for UserState.Capabilities.
+type UserStateCapabilities struct {
+	// Indicates if the user can log in to the console.
+	CanUseConsolePassword bool `json:"canUseConsolePassword,omitempty"`
+	// Indicates if the user can use API keys.
+	CanUseApiKeys bool `json:"canUseApiKeys,omitempty"`
+	// Indicates if the user can use SWIFT passwords / auth tokens.
+	CanUseAuthTokens bool `json:"canUseAuthTokens,omitempty"`
+	// Indicates if the user can use SMTP passwords.
+	CanUseSmtpCredentials bool `json:"canUseSmtpCredentials,omitempty"`
+	// Indicates if the user can use DB passwords.
+	CanUseDbCredentials bool `json:"canUseDbCredentials,omitempty"`
+	// Indicates if the user can use SigV4 symmetric keys.
+	CanUseCustomerSecretKeys bool `json:"canUseCustomerSecretKeys,omitempty"`
+	// Indicates if the user can use OAuth2 credentials and tokens.
+	CanUseOAuth2ClientCredentials bool `json:"canUseOAuth2ClientCredentials,omitempty"`
 }
 
 // UserStateStatus defines the observed state of UserState.
 type UserStateStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the user.
+	Id string `json:"id,omitempty"`
+	// The OCID of the tenancy containing the user.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The name you assign to the user during creation. This is the user's login for the Console.
+	// The name must be unique across all users in the tenancy and cannot be changed.
+	Name string `json:"name,omitempty"`
+	// The description you assign to the user. Does not have to be unique, and it's changeable.
+	// (For tenancies that support identity domains) You can have an empty description.
+	Description string `json:"description,omitempty"`
+	// Date and time the user was created, in the format defined by RFC3339.
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The user's current state. After creating a user, make sure its `lifecycleState` changes from CREATING to
+	// ACTIVE before using it.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// Flag indicates if MFA has been activated for the user.
+	IsMfaActivated bool `json:"isMfaActivated,omitempty"`
+	// The email address you assign to the user.
+	// The email address must be unique across all users in the tenancy.
+	// (For tenancies that support identity domains) The email address is required unless the requirement is disabled at the tenancy level.
+	Email string `json:"email,omitempty"`
+	// Whether the email address has been validated.
+	EmailVerified bool `json:"emailVerified,omitempty"`
+	// DB username of the DB credential. Has to be unique across the tenancy.
+	DbUserName string `json:"dbUserName,omitempty"`
+	// The OCID of the `IdentityProvider` this user belongs to.
+	IdentityProviderId string `json:"identityProviderId,omitempty"`
+	// Identifier of the user in the identity provider
+	ExternalIdentifier string `json:"externalIdentifier,omitempty"`
+	// Returned only if the user's `lifecycleState` is INACTIVE. A 16-bit value showing the reason why the user
+	// is inactive:
+	// - bit 0: SUSPENDED (reserved for future use)
+	// - bit 1: DISABLED (reserved for future use)
+	// - bit 2: BLOCKED (the user has exceeded the maximum number of failed login attempts for the Console)
+	InactiveStatus int64 `json:"inactiveStatus,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags  map[string]shared.MapValue `json:"definedTags,omitempty"`
+	Capabilities UserStateCapabilities      `json:"capabilities,omitempty"`
+	// The date and time of when the user most recently logged in the
+	// format defined by RFC3339 (ex. `2016-08-25T21:10:29.600Z`).
+	// If there is no login history, this field is null.
+	// For illustrative purposes, suppose we have a user who has logged in
+	// at July 1st, 2020 at 1200 PST and logged out 30 minutes later.
+	// They then login again on July 2nd, 2020 at 1500 PST.
+	// Their previousSuccessfulLoginTime would be `2020-07-01:19:00.000Z`.
+	// Their lastSuccessfulLoginTime would be `2020-07-02:22:00.000Z`.
+	LastSuccessfulLoginTime string `json:"lastSuccessfulLoginTime,omitempty"`
+	// The date and time of when the user most recently logged in the
+	// format defined by RFC3339 (ex. `2016-08-25T21:10:29.600Z`).
+	// If there is no login history, this field is null.
+	// For illustrative purposes, suppose we have a user who has logged in
+	// at July 1st, 2020 at 1200 PST and logged out 30 minutes later.
+	// They then login again on July 2nd, 2020 at 1500 PST.
+	// Their previousSuccessfulLoginTime would be `2020-07-01:19:00.000Z`.
+	// Their lastSuccessfulLoginTime would be `2020-07-02:22:00.000Z`.
+	PreviousSuccessfulLoginTime string `json:"previousSuccessfulLoginTime,omitempty"`
 }
 
 // +kubebuilder:object:root=true

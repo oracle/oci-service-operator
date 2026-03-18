@@ -38,6 +38,7 @@ type NetworkingTopologyRelationshipAssociatedWithDetails struct {
 
 // NetworkingTopologyRelationship defines nested fields for NetworkingTopology.Relationship.
 type NetworkingTopologyRelationship struct {
+	JsonData string `json:"jsonData,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the first entity in the relationship.
 	Id1 string `json:"id1,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the second entity in the relationship.
@@ -50,6 +51,8 @@ type NetworkingTopologyRelationship struct {
 // NetworkingTopologyStatus defines the observed state of NetworkingTopology.
 type NetworkingTopologyStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// Lists entities comprising the virtual network topology.
+	Entities []shared.JSONValue `json:"entities,omitempty"`
 	// Lists relationships between entities in the virtual network topology.
 	Relationships []NetworkingTopologyRelationship `json:"relationships,omitempty"`
 	// Lists entities that are limited during ingestion.

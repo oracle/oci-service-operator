@@ -301,8 +301,19 @@ type IPSecConnectionTunnelStatus struct {
 	VpnIp string `json:"vpnIp,omitempty"`
 	// The IP address of the CPE device's VPN headend.
 	// Example: `203.0.113.22`
-	CpeIp          string                              `json:"cpeIp,omitempty"`
-	BgpSessionInfo IPSecConnectionTunnelBgpSessionInfo `json:"bgpSessionInfo,omitempty"`
+	CpeIp string `json:"cpeIp,omitempty"`
+	// The status of the tunnel based on IPSec protocol characteristics.
+	// This uses a distinct JSON name so it can coexist with the OSOK status envelope.
+	Status string `json:"sdkStatus,omitempty"`
+	// Internet Key Exchange protocol version.
+	IkeVersion string `json:"ikeVersion,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	DisplayName            string                                      `json:"displayName,omitempty"`
+	BgpSessionInfo         IPSecConnectionTunnelBgpSessionInfo         `json:"bgpSessionInfo,omitempty"`
+	EncryptionDomainConfig IPSecConnectionTunnelEncryptionDomainConfig `json:"encryptionDomainConfig,omitempty"`
+	// The type of routing used for this tunnel (BGP dynamic routing, static routing, or policy-based routing).
+	Routing string `json:"routing,omitempty"`
 	// The date and time the IPSec tunnel was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	// Example: `2016-08-25T21:10:29.600Z`
 	TimeCreated string `json:"timeCreated,omitempty"`
@@ -311,6 +322,15 @@ type IPSecConnectionTunnelStatus struct {
 	TimeStatusUpdated string `json:"timeStatusUpdated,omitempty"`
 	// Indicates whether Oracle can only respond to a request to start an IPSec tunnel from the CPE device, or both respond to and initiate requests.
 	OracleCanInitiate string `json:"oracleCanInitiate,omitempty"`
+	// By default (the `AUTO` setting), IKE sends packets with a source and destination port set to 500,
+	// and when it detects that the port used to forward packets has changed (most likely because a NAT device
+	// is between the CPE device and the Oracle VPN headend) it will try to negotiate the use of NAT-T.
+	// The `ENABLED` option sets the IKE protocol to use port 4500 instead of 500 and forces encapsulating traffic with the ESP protocol inside UDP packets.
+	// The `DISABLED` option directs IKE to completely refuse to negotiate NAT-T
+	// even if it senses there may be a NAT device in use.
+	//
+	// .
+	NatTranslationEnabled string `json:"natTranslationEnabled,omitempty"`
 	// Dead peer detection (DPD) mode set on the Oracle side of the connection.
 	// This mode sets whether Oracle can only respond to a request from the CPE device to start DPD,
 	// or both respond to and initiate requests.
@@ -319,6 +339,8 @@ type IPSecConnectionTunnelStatus struct {
 	DpdTimeoutInSec int                                  `json:"dpdTimeoutInSec,omitempty"`
 	PhaseOneDetails IPSecConnectionTunnelPhaseOneDetails `json:"phaseOneDetails,omitempty"`
 	PhaseTwoDetails IPSecConnectionTunnelPhaseTwoDetails `json:"phaseTwoDetails,omitempty"`
+	// The list of virtual circuit OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)s over which your network can reach this tunnel.
+	AssociatedVirtualCircuits []string `json:"associatedVirtualCircuits,omitempty"`
 }
 
 // +kubebuilder:object:root=true

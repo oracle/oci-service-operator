@@ -108,6 +108,53 @@ spec:
             description: ComputeCapacityReportStatus defines the observed state of
               ComputeCapacityReport.
             properties:
+              availabilityDomain:
+                description: |-
+                  The availability domain for the capacity report.
+                  Example: `Uocm:PHX-AD-1`
+                type: string
+              compartmentId:
+                description: |-
+                  The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) for the compartment. This should always be the root
+                  compartment.
+                type: string
+              shapeAvailabilities:
+                description: Information about the available capacity for each shape
+                  in a capacity report.
+                items:
+                  description: ComputeCapacityReportShapeAvailability defines nested
+                    fields for ComputeCapacityReport.ShapeAvailability.
+                  properties:
+                    faultDomain:
+                      description: |-
+                        The fault domain for the capacity report.
+                        If you do not specify a fault domain, the capacity report includes information about all fault domains.
+                      type: string
+                    instanceShape:
+                      description: |-
+                        The shape that you want to request a capacity report for. You can enumerate all available shapes by calling
+                        ListShapes.
+                      type: string
+                    instanceShapeConfig:
+                      description: ComputeCapacityReportShapeAvailabilityInstanceShapeConfig
+                        defines nested fields for ComputeCapacityReport.ShapeAvailability.InstanceShapeConfig.
+                      properties:
+                        memoryInGBs:
+                          description: The total amount of memory available to the
+                            instance, in gigabytes.
+                          type: number
+                        nvmes:
+                          description: The number of NVMe drives to be used for storage.
+                          type: integer
+                        ocpus:
+                          description: The total number of OCPUs available to the
+                            instance.
+                          type: number
+                      type: object
+                  required:
+                  - instanceShape
+                  type: object
+                type: array
               status:
                 properties:
                   conditions:

@@ -23,6 +23,8 @@ type IPSecConnectionTunnelSharedSecretSpec struct {
 // IPSecConnectionTunnelSharedSecretStatus defines the observed state of IPSecConnectionTunnelSharedSecret.
 type IPSecConnectionTunnelSharedSecretStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The tunnel's shared secret (pre-shared key).
+	SharedSecret string `json:"sharedSecret,omitempty"`
 }
 
 // +kubebuilder:object:root=true

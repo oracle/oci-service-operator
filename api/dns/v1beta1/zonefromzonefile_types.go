@@ -19,6 +19,56 @@ type ZoneFromZoneFileSpec struct {
 // ZoneFromZoneFileStatus defines the observed state of ZoneFromZoneFile.
 type ZoneFromZoneFileStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The name of the zone.
+	Name string `json:"name,omitempty"`
+	// The type of the zone. Must be either `PRIMARY` or `SECONDARY`. `SECONDARY` is only supported for GLOBAL zones.
+	ZoneType string `json:"zoneType,omitempty"`
+	// The OCID of the compartment containing the zone.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The scope of the zone.
+	Scope string `json:"scope,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	//
+	// **Example:** `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	//
+	// **Example:** `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// External master servers for the zone. `externalMasters` becomes a
+	// required parameter when the `zoneType` value is `SECONDARY`.
+	ExternalMasters []ZoneExternalMaster `json:"externalMasters,omitempty"`
+	// External secondary servers for the zone.
+	// This field is currently not supported when `zoneType` is `SECONDARY` or `scope` is `PRIVATE`.
+	ExternalDownstreams []ZoneExternalDownstream `json:"externalDownstreams,omitempty"`
+	// The canonical absolute URL of the resource.
+	Self string `json:"self,omitempty"`
+	// The OCID of the zone.
+	Id string `json:"id,omitempty"`
+	// The date and time the resource was created in "YYYY-MM-ddThh:mm:ssZ" format
+	// with a Z offset, as defined by RFC 3339.
+	// **Example:** `2016-07-22T17:23:59:60Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// Version is the never-repeating, totally-orderable, version of the
+	// zone, from which the serial field of the zone's SOA record is
+	// derived.
+	Version string `json:"version,omitempty"`
+	// The current serial of the zone. As seen in the zone's SOA record.
+	Serial int64 `json:"serial,omitempty"`
+	// The current state of the zone resource.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// A Boolean flag indicating whether or not parts of the resource are unable to be explicitly managed.
+	IsProtected bool `json:"isProtected,omitempty"`
+	// The authoritative nameservers for the zone.
+	Nameservers []ZoneNameserver `json:"nameservers,omitempty"`
+	// The OCID of the private view containing the zone. This value will
+	// be null for zones in the global DNS, which are publicly resolvable and
+	// not part of a private view.
+	ViewId string `json:"viewId,omitempty"`
+	// The OCI nameservers that transfer the zone data with external nameservers.
+	ZoneTransferServers []ZoneTransferServerFields `json:"zoneTransferServers,omitempty"`
 }
 
 // +kubebuilder:object:root=true

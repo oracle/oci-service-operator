@@ -103,6 +103,18 @@ type ResolverStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
 	// The OCID of the owning compartment.
 	CompartmentId string `json:"compartmentId,omitempty"`
+	// The display name of the resolver.
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	//
+	// **Example:** `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	//
+	// **Example:** `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// The OCID of the resolver.
 	Id string `json:"id,omitempty"`
 	// The date and time the resource was created in "YYYY-MM-ddThh:mm:ssZ" format
@@ -121,10 +133,14 @@ type ResolverStatus struct {
 	IsProtected bool `json:"isProtected,omitempty"`
 	// Read-only array of endpoints for the resolver.
 	Endpoints []ResolverEndpointFields `json:"endpoints,omitempty"`
+	// The attached views. Views are evaluated in order.
+	AttachedViews []ResolverAttachedView `json:"attachedViews,omitempty"`
 	// The OCID of the attached VCN.
 	AttachedVcnId string `json:"attachedVcnId,omitempty"`
 	// The OCID of the default view.
 	DefaultViewId string `json:"defaultViewId,omitempty"`
+	// Rules for the resolver. Rules are evaluated in order.
+	Rules []ResolverRule `json:"rules,omitempty"`
 }
 
 // +kubebuilder:object:root=true

@@ -51,6 +51,15 @@ type PolicyStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
 	// The OCID of the policy.
 	Id string `json:"id,omitempty"`
+	// The OCID of the compartment containing the policy (either the tenancy or another compartment).
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The name you assign to the policy during creation. The name must be unique across all policies
+	// in the tenancy and cannot be changed.
+	Name string `json:"name,omitempty"`
+	// An array of one or more policy statements written in the policy language.
+	Statements []string `json:"statements,omitempty"`
+	// The description you assign to the policy. Does not have to be unique, and it's changeable.
+	Description string `json:"description,omitempty"`
 	// Date and time the policy was created, in the format defined by RFC3339.
 	// Example: `2016-08-25T21:10:29.600Z`
 	TimeCreated string `json:"timeCreated,omitempty"`
@@ -59,6 +68,18 @@ type PolicyStatus struct {
 	LifecycleState string `json:"lifecycleState,omitempty"`
 	// The detailed status of INACTIVE lifecycleState.
 	InactiveStatus int64 `json:"inactiveStatus,omitempty"`
+	// The version of the policy. If null or set to an empty string, when a request comes in for authorization, the
+	// policy will be evaluated according to the current behavior of the services at that moment. If set to a particular
+	// date (YYYY-MM-DD), the policy will be evaluated according to the behavior of the services on that date.
+	VersionDate string `json:"versionDate,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 }
 
 // +kubebuilder:object:root=true

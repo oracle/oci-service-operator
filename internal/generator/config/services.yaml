@@ -38,6 +38,10 @@ services:
     version: v1beta1
     phase: networking-and-infrastructure
     packageProfile: crd-only
+    observedState:
+      sdkAliases:
+        WorkRequestLog:
+          - WorkRequestLogEntry
 
   - service: core
     sdkPackage: github.com/oracle/oci-go-sdk/v65/core
@@ -45,6 +49,46 @@ services:
     version: v1beta1
     phase: networking-and-infrastructure
     packageProfile: crd-only
+    observedState:
+      sdkAliases:
+        AllDrgAttachment:
+          - DrgAttachmentInfo
+        AllowedPeerRegionsForRemotePeering:
+          - PeerRegionForRemotePeering
+        AppCatalogListingAgreement:
+          - AppCatalogListingResourceVersionAgreements
+        ClusterNetworkInstance:
+          - InstanceSummary
+        ComputeCapacityReservationInstance:
+          - CapacityReservationInstanceSummary
+        ComputeGlobalImageCapabilitySchema:
+          - ComputeGlobalImageCapabilitySchemaVersionSummary
+        CrossConnectLetterOfAuthority:
+          - LetterOfAuthority
+        CrossConnectMapping:
+          - CrossConnectMappingDetails
+        CrossconnectPortSpeedShape:
+          - CrossConnectPortSpeedShape
+        DhcpOption:
+          - DhcpOptions
+        FastConnectProviderVirtualCircuitBandwidthShape:
+          - VirtualCircuitBandwidthShape
+        IPSecConnectionTunnelError:
+          - IpSecConnectionTunnelErrorDetails
+        IPSecConnectionTunnelRoute:
+          - TunnelRouteSummary
+        IPSecConnectionTunnelSecurityAssociation:
+          - TunnelSecurityAssociationSummary
+        InstanceDevice:
+          - Device
+        NetworkSecurityGroupSecurityRule:
+          - SecurityRule
+        VirtualCircuitAssociatedTunnel:
+          - VirtualCircuitAssociatedTunnelDetails
+        VolumeBackupPolicyAssetAssignment:
+          - VolumeBackupPolicyAssignment
+        WindowsInstanceInitialCredential:
+          - InstanceCredentials
 
   - service: database
     sdkPackage: github.com/oracle/oci-go-sdk/v65/database
@@ -64,6 +108,14 @@ services:
     version: v1beta1
     phase: networking-and-infrastructure
     packageProfile: crd-only
+    observedState:
+      sdkAliases:
+        DomainRecord:
+          - Record
+        ZoneFromZoneFile:
+          - Zone
+        ZoneRecord:
+          - Record
 
   - service: events
     sdkPackage: github.com/oracle/oci-go-sdk/v65/events
@@ -85,6 +137,29 @@ services:
     version: v1beta1
     phase: security-and-identity
     packageProfile: crd-only
+    observedState:
+      sdkAliases:
+        BulkActionResourceType:
+          - BulkActionResourceTypeCollection
+        BulkEditTagsResourceType:
+          - BulkEditTagsResourceTypeCollection
+        CostTrackingTag:
+          - Tag
+        IdentityProvider:
+          - Saml2IdentityProvider
+        NetworkSource:
+          - NetworkSources
+        OrResetUIPassword:
+          - UiPassword
+        StandardTagNamespace:
+          - StandardTagNamespaceTemplate
+          - StandardTagNamespaceTemplateSummary
+        StandardTagTemplate:
+          - StandardTagDefinitionTemplate
+        UserState:
+          - User
+        UserUIPasswordInformation:
+          - UiPasswordInformation
 
   - service: keymanagement
     sdkPackage: github.com/oracle/oci-go-sdk/v65/keymanagement
@@ -167,6 +242,12 @@ services:
     version: v1beta1
     phase: data-and-storage
     packageProfile: crd-only
+    observedState:
+      sdkAliases:
+        PrimaryDbInstance:
+          - PrimaryDbInstanceDetails
+        WorkRequestLog:
+          - WorkRequestLogEntry
 
   - service: queue
     sdkPackage: github.com/oracle/oci-go-sdk/v65/queue
@@ -207,3 +288,7 @@ services:
     version: v1beta1
     phase: networking-and-infrastructure
     packageProfile: crd-only
+    observedState:
+      sdkAliases:
+        WorkRequestLog:
+          - WorkRequestLogEntry

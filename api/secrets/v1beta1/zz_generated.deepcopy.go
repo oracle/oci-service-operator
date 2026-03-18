@@ -10,6 +10,7 @@
 package v1beta1
 
 import (
+	"github.com/oracle/oci-service-operator/pkg/shared"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -201,6 +202,13 @@ func (in *SecretBundleStatus) DeepCopyInto(out *SecretBundleStatus) {
 		in, out := &in.Stages, &out.Stages
 		*out = make([]string, len(*in))
 		copy(*out, *in)
+	}
+	if in.Metadata != nil {
+		in, out := &in.Metadata, &out.Metadata
+		*out = make(map[string]shared.JSONValue, len(*in))
+		for key, val := range *in {
+			(*out)[key] = *val.DeepCopy()
+		}
 	}
 }
 

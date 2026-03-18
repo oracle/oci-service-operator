@@ -100,15 +100,39 @@ type CrossConnectMacsecProperties struct {
 // CrossConnectObservedState defines the observed state of CrossConnect.
 type CrossConnectObservedState struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the cross-connect group.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the cross-connect group this cross-connect belongs to (if any).
+	CrossConnectGroupId string `json:"crossConnectGroupId,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// The cross-connect's Oracle ID (OCID).
 	Id string `json:"id,omitempty"`
 	// The cross-connect's current state.
 	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The name of the FastConnect location where this cross-connect is installed.
+	LocationName string `json:"locationName,omitempty"`
 	// A string identifying the meet-me room port for this cross-connect.
 	PortName string `json:"portName,omitempty"`
+	// The port speed for this cross-connect.
+	// Example: `10 Gbps`
+	PortSpeedShapeName string `json:"portSpeedShapeName,omitempty"`
+	// A reference name or identifier for the physical fiber connection that this cross-connect
+	// uses.
+	CustomerReferenceName string `json:"customerReferenceName,omitempty"`
 	// The date and time the cross-connect was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	// Example: `2016-08-25T21:10:29.600Z`
-	TimeCreated string `json:"timeCreated,omitempty"`
+	TimeCreated      string                       `json:"timeCreated,omitempty"`
+	MacsecProperties CrossConnectMacsecProperties `json:"macsecProperties,omitempty"`
 	// The FastConnect device that terminates the physical connection.
 	OciPhysicalDeviceName string `json:"ociPhysicalDeviceName,omitempty"`
 	// The FastConnect device that terminates the logical connection.

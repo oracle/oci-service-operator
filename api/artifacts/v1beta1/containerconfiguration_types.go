@@ -23,6 +23,9 @@ type ContainerConfigurationSpec struct {
 // ContainerConfigurationStatus defines the observed state of ContainerConfiguration.
 type ContainerConfigurationStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// Whether to create a new container repository when a container is pushed to a new repository path.
+	// Repositories created in this way belong to the root compartment.
+	IsRepositoryCreatedOnFirstPush bool `json:"isRepositoryCreatedOnFirstPush,omitempty"`
 	// The tenancy namespace used in the container repository path.
 	Namespace string `json:"namespace,omitempty"`
 }

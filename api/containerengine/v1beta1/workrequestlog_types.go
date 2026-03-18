@@ -19,6 +19,10 @@ type WorkRequestLogSpec struct {
 // WorkRequestLogStatus defines the observed state of WorkRequestLog.
 type WorkRequestLogStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The description of an action that occurred.
+	Message string `json:"message,omitempty"`
+	// The date and time the log entry occurred.
+	Timestamp string `json:"timestamp,omitempty"`
 }
 
 // +kubebuilder:object:root=true

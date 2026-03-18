@@ -69,13 +69,30 @@ type CrossConnectGroupMacsecProperties struct {
 // CrossConnectGroupStatus defines the observed state of CrossConnectGroup.
 type CrossConnectGroupStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the cross-connect group.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// The cross-connect group's Oracle ID (OCID).
 	Id string `json:"id,omitempty"`
 	// The cross-connect group's current state.
 	LifecycleState string `json:"lifecycleState,omitempty"`
+	// A reference name or identifier for the physical fiber connection that this cross-connect
+	// group uses.
+	CustomerReferenceName string `json:"customerReferenceName,omitempty"`
 	// The date and time the cross-connect group was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	// Example: `2016-08-25T21:10:29.600Z`
-	TimeCreated string `json:"timeCreated,omitempty"`
+	TimeCreated      string                            `json:"timeCreated,omitempty"`
+	MacsecProperties CrossConnectGroupMacsecProperties `json:"macsecProperties,omitempty"`
 	// The FastConnect device that terminates the physical connection.
 	OciPhysicalDeviceName string `json:"ociPhysicalDeviceName,omitempty"`
 	// The FastConnect device that terminates the logical connection.

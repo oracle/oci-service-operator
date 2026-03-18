@@ -49,10 +49,14 @@ type AddonStatus struct {
 	Name string `json:"name,omitempty"`
 	// The state of the addon.
 	LifecycleState string `json:"lifecycleState,omitempty"`
+	// selected addon version, or null indicates autoUpdate
+	Version string `json:"version,omitempty"`
 	// current installed version of the addon
 	CurrentInstalledVersion string `json:"currentInstalledVersion,omitempty"`
 	// The time the cluster was created.
 	TimeCreated string `json:"timeCreated,omitempty"`
+	// Addon configuration details.
+	Configurations []AddonConfiguration `json:"configurations,omitempty"`
 	// The error info of the addon.
 	AddonError AddonError `json:"addonError,omitempty"`
 }

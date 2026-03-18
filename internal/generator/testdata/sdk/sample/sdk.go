@@ -62,6 +62,37 @@ type ListWidgetsRequest struct{}
 type UpdateWidgetRequest struct{}
 type DeleteWidgetRequest struct{}
 
+type CreateOAuth2ClientCredentialDetails struct {
+	Name string `mandatory:"true" json:"name"`
+
+	Description string `mandatory:"false" json:"description,omitempty"`
+
+	Scopes []string `mandatory:"true" json:"scopes"`
+}
+
+type UpdateOAuth2ClientCredentialDetails struct {
+	Description string `mandatory:"true" json:"description"`
+
+	Scopes []string `mandatory:"true" json:"scopes"`
+}
+
+type CreateOAuthClientCredentialRequest struct {
+	CreateOAuth2ClientCredentialDetails `contributesTo:"body"`
+}
+
+type GetOAuthClientCredentialRequest struct{}
+type ListOAuthClientCredentialsRequest struct{}
+
+type UpdateOAuthClientCredentialRequest struct {
+	UpdateOAuth2ClientCredentialDetails `contributesTo:"body"`
+}
+
+type DeleteOAuthClientCredentialRequest struct{}
+
+type OAuth2ClientCredential struct {
+	LifecycleState ModeEnum `mandatory:"false" json:"lifecycleState,omitempty"`
+}
+
 type Report struct {
 	Id             string    `json:"id,omitempty"`
 	LifecycleState ModeEnum  `json:"lifecycleState,omitempty"`
@@ -75,6 +106,14 @@ type ReportSummary struct {
 type GetReportRequest struct{}
 type ListReportsRequest struct{}
 type DeleteReportRequest struct{}
+
+type GetReportByNameDetails struct {
+	DisplayName string `mandatory:"true" json:"displayName"`
+}
+
+type GetReportByNameRequest struct {
+	GetReportByNameDetails `contributesTo:"body"`
+}
 
 type CreateDbSystemDetails struct {
 	CompartmentId string `json:"compartmentId,omitempty"`

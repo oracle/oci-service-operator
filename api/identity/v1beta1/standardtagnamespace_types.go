@@ -16,9 +16,34 @@ import (
 type StandardTagNamespaceSpec struct {
 }
 
+// StandardTagNamespaceTagDefinitionTemplate defines nested fields for StandardTagNamespace.TagDefinitionTemplate.
+type StandardTagNamespaceTagDefinitionTemplate struct {
+	// The default description of the tag namespace that users can use to create the tag definition
+	Description string `json:"description,omitempty"`
+	// The name of this standard tag definition
+	TagDefinitionName string `json:"tagDefinitionName,omitempty"`
+	// The type of tag definition. Enum or string.
+	Type string `json:"type,omitempty"`
+	// Is the tag a cost tracking tag. Default will be false as cost tracking tags have been deprecated
+	IsCostTracking bool `json:"isCostTracking,omitempty"`
+	// List of possible values. An optional parameter that will be present if the type of definition is enum.
+	PossibleValues []string `json:"possibleValues,omitempty"`
+	// The mutability of the possible values list for enum tags. This will default to IMMUTABLE for string value tags
+	EnumMutability string `json:"enumMutability,omitempty"`
+}
+
 // StandardTagNamespaceStatus defines the observed state of StandardTagNamespace.
 type StandardTagNamespaceStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The default description of the tag namespace that users can use to create the tag namespace
+	Description string `json:"description,omitempty"`
+	// The reserved name of this standard tag namespace
+	StandardTagNamespaceName string `json:"standardTagNamespaceName,omitempty"`
+	// The template of the tag definition. This object includes necessary details to create the provided standard tag definition.
+	TagDefinitionTemplates []StandardTagNamespaceTagDefinitionTemplate `json:"tagDefinitionTemplates,omitempty"`
+	// The status of the standard tag namespace
+	// This uses a distinct JSON name so it can coexist with the OSOK status envelope.
+	Status string `json:"sdkStatus,omitempty"`
 }
 
 // +kubebuilder:object:root=true

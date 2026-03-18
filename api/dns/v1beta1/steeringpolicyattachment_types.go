@@ -33,6 +33,16 @@ type SteeringPolicyAttachmentSpec struct {
 // SteeringPolicyAttachmentStatus defines the observed state of SteeringPolicyAttachment.
 type SteeringPolicyAttachmentStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the attached steering policy.
+	SteeringPolicyId string `json:"steeringPolicyId,omitempty"`
+	// The OCID of the attached zone.
+	ZoneId string `json:"zoneId,omitempty"`
+	// The attached domain within the attached zone.
+	DomainName string `json:"domainName,omitempty"`
+	// A user-friendly name for the steering policy attachment.
+	// Does not have to be unique and can be changed.
+	// Avoid entering confidential information.
+	DisplayName string `json:"displayName,omitempty"`
 	// The record types covered by the attachment at the domain. The set of record types is
 	// determined by aggregating the record types from the answers defined in the steering
 	// policy.

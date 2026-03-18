@@ -53,6 +53,8 @@ type ContainerImageSignatureSpec struct {
 // ContainerImageSignatureStatus defines the observed state of ContainerImageSignature.
 type ContainerImageSignatureStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment in which the container repository exists.
+	CompartmentId string `json:"compartmentId,omitempty"`
 	// The id of the user or principal that created the resource.
 	CreatedBy string `json:"createdBy,omitempty"`
 	// The last 10 characters of the kmsKeyId, the last 10 characters of the kmsKeyVersionId, the signingAlgorithm, and the last 10 characters of the signatureId.
@@ -61,10 +63,33 @@ type ContainerImageSignatureStatus struct {
 	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the container image signature.
 	// Example: `ocid1.containerimagesignature.oc1..exampleuniqueID`
 	Id string `json:"id,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the container image.
+	// Example: `ocid1.containerimage.oc1..exampleuniqueID`
+	ImageId string `json:"imageId,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the kmsKeyId used to sign the container image.
+	// Example: `ocid1.key.oc1..exampleuniqueID`
+	KmsKeyId string `json:"kmsKeyId,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the kmsKeyVersionId used to sign the container image.
+	// Example: `ocid1.keyversion.oc1..exampleuniqueID`
+	KmsKeyVersionId string `json:"kmsKeyVersionId,omitempty"`
+	// The base64 encoded signature payload that was signed.
+	Message string `json:"message,omitempty"`
+	// The signature of the message field using the kmsKeyId, the kmsKeyVersionId, and the signingAlgorithm.
+	Signature string `json:"signature,omitempty"`
+	// The algorithm to be used for signing. These are the only supported signing algorithms for container images.
+	SigningAlgorithm string `json:"signingAlgorithm,omitempty"`
 	// An RFC 3339 timestamp indicating when the image was created.
 	TimeCreated string `json:"timeCreated,omitempty"`
 	// The current state of the container image signature.
 	LifecycleState string `json:"lifecycleState,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// The system tags for this resource. Each key is predefined and scoped to a namespace.
 	// Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
 	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`

@@ -82,6 +82,16 @@ spec:
                 description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
                   of the user or principal that created the resource.
                 type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a
+                  namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
               digest:
                 description: The container image digest.
                 type: string
@@ -92,6 +102,14 @@ spec:
                   If the last known version is unavailable, then 'unknown' is used instead of the version.
                   Example: `ubuntu:latest` or `ubuntu:latest@sha256:45b23dee08af5e43a7fea6c4cf9c25ccf269ee113168c19722f87876677c5cb2`
                 type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no
+                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
               id:
                 description: |-
                   The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the container image.

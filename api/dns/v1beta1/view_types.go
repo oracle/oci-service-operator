@@ -37,6 +37,20 @@ type ViewSpec struct {
 // ViewStatus defines the observed state of View.
 type ViewStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the owning compartment.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The display name of the view.
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	//
+	// **Example:** `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	//
+	// **Example:** `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// The OCID of the view.
 	Id string `json:"id,omitempty"`
 	// The canonical absolute URL of the resource.

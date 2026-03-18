@@ -115,9 +115,34 @@ spec:
                 description: Total storage size in GBs that will be charged.
                 format: int64
                 type: integer
+              compartmentId:
+                description: The OCID of the compartment in which the container repository
+                  exists.
+                type: string
               createdBy:
                 description: The id of the user or principal that created the resource.
                 type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a
+                  namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              displayName:
+                description: The container repository name.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no
+                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
               id:
                 description: |-
                   The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the container repository.
@@ -126,6 +151,14 @@ spec:
               imageCount:
                 description: Total number of images.
                 type: integer
+              isImmutable:
+                description: Whether the repository is immutable. Images cannot be
+                  overwritten in an immutable repository.
+                type: boolean
+              isPublic:
+                description: Whether the repository is public. A public repository
+                  allows unauthenticated access.
+                type: boolean
               layerCount:
                 description: Total number of layers.
                 type: integer
@@ -140,6 +173,20 @@ spec:
                 description: The tenancy namespace used in the container repository
                   path.
                 type: string
+              readme:
+                description: ContainerRepositoryReadme defines nested fields for ContainerRepository.Readme.
+                properties:
+                  content:
+                    description: Readme content. Avoid entering confidential information.
+                    type: string
+                  format:
+                    description: Readme format. Supported formats are text/plain and
+                      text/markdown.
+                    type: string
+                required:
+                - content
+                - format
+                type: object
               status:
                 properties:
                   conditions:

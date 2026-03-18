@@ -169,6 +169,27 @@ type VnicStatus struct {
 	// The date and time the VNIC was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	// Example: `2016-08-25T21:10:29.600Z`
 	TimeCreated string `json:"timeCreated,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// The hostname for the VNIC's primary private IP. Used for DNS. The value is the hostname
+	// portion of the primary private IP's fully qualified domain name (FQDN)
+	// (for example, `bminstance1` in FQDN `bminstance1.subnet123.vcn1.oraclevcn.com`).
+	// Must be unique across all VNICs in the subnet and comply with
+	// RFC 952 (https://tools.ietf.org/html/rfc952) and
+	// RFC 1123 (https://tools.ietf.org/html/rfc1123).
+	// For more information, see
+	// DNS in Your Virtual Cloud Network (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/dns.htm).
+	// Example: `bminstance1`
+	HostnameLabel string `json:"hostnameLabel,omitempty"`
 	// Whether the VNIC is the primary VNIC (the VNIC that is automatically created
 	// and attached during instance launch).
 	IsPrimary bool `json:"isPrimary,omitempty"`
@@ -178,8 +199,35 @@ type VnicStatus struct {
 	// MAC address is a static, Oracle-provided value.
 	// Example: `00:00:00:00:00:01`
 	MacAddress string `json:"macAddress,omitempty"`
+	// A list of the OCIDs of the network security groups that the VNIC belongs to.
+	// If the VNIC belongs to a VLAN as part of the Oracle Cloud VMware Solution (instead of
+	// belonging to a subnet), the value of the `nsgIds` attribute is ignored. Instead, the
+	// VNIC belongs to the NSGs that are associated with the VLAN itself. See Vlan.
+	// For more information about NSGs, see
+	// NetworkSecurityGroup.
+	NsgIds []string `json:"nsgIds,omitempty"`
+	// If the VNIC belongs to a VLAN as part of the Oracle Cloud VMware Solution (instead of
+	// belonging to a subnet), the `vlanId` is the OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN the VNIC is in. See
+	// Vlan. If the VNIC is instead in a subnet, `subnetId` has a value.
+	VlanId string `json:"vlanId,omitempty"`
+	// The private IP address of the primary `privateIp` object on the VNIC.
+	// The address is within the CIDR of the VNIC's subnet.
+	// Example: `10.0.3.3`
+	PrivateIp string `json:"privateIp,omitempty"`
 	// The public IP address of the VNIC, if one is assigned.
 	PublicIp string `json:"publicIp,omitempty"`
+	// Whether the source/destination check is disabled on the VNIC.
+	// Defaults to `false`, which means the check is performed. For information
+	// about why you would skip the source/destination check, see
+	// Using a Private IP as a Route Target (https://docs.cloud.oracle.com/iaas/Content/Network/Tasks/managingroutetables.htm#privateip).
+	//
+	// If the VNIC belongs to a VLAN as part of the Oracle Cloud VMware Solution (instead of
+	// belonging to a subnet), the `skipSourceDestCheck` attribute is `true`.
+	// This is because the source/destination check is always disabled for VNICs in a VLAN.
+	// Example: `true`
+	SkipSourceDestCheck bool `json:"skipSourceDestCheck,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subnet the VNIC is in.
+	SubnetId string `json:"subnetId,omitempty"`
 	// List of IPv6 addresses assigned to the VNIC.
 	// Example: `2001:DB8::`
 	Ipv6Addresses []string `json:"ipv6Addresses,omitempty"`

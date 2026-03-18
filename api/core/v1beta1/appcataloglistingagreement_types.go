@@ -19,6 +19,19 @@ type AppCatalogListingAgreementSpec struct {
 // AppCatalogListingAgreementStatus defines the observed state of AppCatalogListingAgreement.
 type AppCatalogListingAgreementStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the listing associated with these agreements.
+	ListingId string `json:"listingId,omitempty"`
+	// Listing resource version associated with these agreements.
+	ListingResourceVersion string `json:"listingResourceVersion,omitempty"`
+	// Oracle TOU link
+	OracleTermsOfUseLink string `json:"oracleTermsOfUseLink,omitempty"`
+	// EULA link
+	EulaLink string `json:"eulaLink,omitempty"`
+	// Date and time the agreements were retrieved, in RFC3339 (https://tools.ietf.org/html/rfc3339) format.
+	// Example: `2018-03-20T12:32:53.532Z`
+	TimeRetrieved string `json:"timeRetrieved,omitempty"`
+	// A generated signature for this agreement retrieval operation which should be used in the create subscription call.
+	Signature string `json:"signature,omitempty"`
 }
 
 // +kubebuilder:object:root=true

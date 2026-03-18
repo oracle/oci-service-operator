@@ -168,11 +168,40 @@ type InstancePoolStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
 	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the instance pool.
 	Id string `json:"id,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the instance
+	// pool.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the instance configuration associated
+	// with the instance pool.
+	InstanceConfigurationId string `json:"instanceConfigurationId,omitempty"`
 	// The current state of the instance pool.
 	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The placement configurations for the instance pool.
+	PlacementConfigurations []InstancePoolPlacementConfiguration `json:"placementConfigurations,omitempty"`
+	// The number of instances that should be in the instance pool.
+	Size int `json:"size,omitempty"`
 	// The date and time the instance pool was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	// Example: `2016-08-25T21:10:29.600Z`
 	TimeCreated string `json:"timeCreated,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// The load balancers attached to the instance pool.
+	LoadBalancers []InstancePoolLoadBalancer `json:"loadBalancers,omitempty"`
+	// A user-friendly formatter for the instance pool's instances. Instance displaynames follow the format.
+	// The formatter does not retroactively change instance's displaynames, only instance displaynames in the future follow the format
+	InstanceDisplayNameFormatter string `json:"instanceDisplayNameFormatter,omitempty"`
+	// A user-friendly formatter for the instance pool's instances. Instance hostnames follow the format.
+	// The formatter does not retroactively change instance's hostnames, only instance hostnames in the future follow the format
+	InstanceHostnameFormatter string `json:"instanceHostnameFormatter,omitempty"`
 	// The availability domains for the instance pool.
 	AvailabilityDomains []string `json:"availabilityDomains,omitempty"`
 }

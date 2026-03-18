@@ -18,6 +18,7 @@ type ComputeGlobalImageCapabilitySchemaVersionSpec struct {
 
 // ComputeGlobalImageCapabilitySchemaVersionSchemaData defines nested fields for ComputeGlobalImageCapabilitySchemaVersion.SchemaData.
 type ComputeGlobalImageCapabilitySchemaVersionSchemaData struct {
+	JsonData       string `json:"jsonData,omitempty"`
 	Source         string `json:"source,omitempty"`
 	DescriptorType string `json:"descriptorType,omitempty"`
 	// the list of values for the enum

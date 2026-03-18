@@ -39,6 +39,11 @@ type SecretSpec struct {
 	// Example: `{"Department": "Finance"}`
 	// +kubebuilder:validation:Optional
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Additional metadata that you can use to provide context about how to use the secret during rotation or
+	// other administrative tasks. For example, for a secret that you use to connect to a database, the additional
+	// metadata might specify the connection endpoint and the connection string. Provide additional metadata as key-value pairs.
+	// +kubebuilder:validation:Optional
+	Metadata map[string]shared.JSONValue `json:"metadata,omitempty"`
 	// +kubebuilder:validation:Optional
 	SecretContent SecretContent `json:"secretContent,omitempty"`
 	// +kubebuilder:validation:Optional

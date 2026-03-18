@@ -47,6 +47,11 @@ type LocalPeeringGatewaySpec struct {
 // LocalPeeringGatewayStatus defines the observed state of LocalPeeringGateway.
 type LocalPeeringGatewayStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the LPG.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	DisplayName string `json:"displayName,omitempty"`
 	// The LPG's Oracle ID (OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)).
 	Id string `json:"id,omitempty"`
 	// Whether the VCN at the other end of the peering is in a different tenancy.
@@ -63,6 +68,16 @@ type LocalPeeringGatewayStatus struct {
 	// The date and time the LPG was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	// Example: `2016-08-25T21:10:29.600Z`
 	TimeCreated string `json:"timeCreated,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VCN that uses the LPG.
+	VcnId string `json:"vcnId,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// The smallest aggregate CIDR that contains all the CIDR routes advertised by the VCN
 	// at the other end of the peering from this LPG. See `peerAdvertisedCidrDetails` for
 	// the individual CIDRs. The value is `null` if the LPG is not peered.
@@ -76,6 +91,10 @@ type LocalPeeringGatewayStatus struct {
 	PeerAdvertisedCidrDetails []string `json:"peerAdvertisedCidrDetails,omitempty"`
 	// Additional information regarding the peering status, if applicable.
 	PeeringStatusDetails string `json:"peeringStatusDetails,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the route table the LPG is using.
+	// For information about why you would associate a route table with an LPG, see
+	// Transit Routing: Access to Multiple VCNs in Same Region (https://docs.cloud.oracle.com/iaas/Content/Network/Tasks/transitrouting.htm).
+	RouteTableId string `json:"routeTableId,omitempty"`
 }
 
 // +kubebuilder:object:root=true

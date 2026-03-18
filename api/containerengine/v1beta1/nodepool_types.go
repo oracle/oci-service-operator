@@ -81,6 +81,8 @@ type NodePoolSpec struct {
 // NodePoolNodeSourceDetails defines nested fields for NodePool.NodeSourceDetails.
 type NodePoolNodeSourceDetails struct {
 	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
 	SourceType string `json:"sourceType,omitempty"`
 	// The OCID of the image used to boot the node.
 	// +kubebuilder:validation:Required
@@ -113,6 +115,8 @@ type NodePoolInitialNodeLabel struct {
 
 // NodePoolNodeConfigDetailsPlacementConfigPreemptibleNodeConfigPreemptionAction defines nested fields for NodePool.NodeConfigDetails.PlacementConfig.PreemptibleNodeConfig.PreemptionAction.
 type NodePoolNodeConfigDetailsPlacementConfigPreemptibleNodeConfigPreemptionAction struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
 	// +kubebuilder:validation:Optional
 	Type string `json:"type,omitempty"`
 	// Whether to preserve the boot volume that was used to launch the preemptible instance when the instance is terminated. Defaults to false if not specified.
@@ -147,6 +151,8 @@ type NodePoolNodeConfigDetailsPlacementConfig struct {
 
 // NodePoolNodeConfigDetailsNodePoolPodNetworkOptionDetails defines nested fields for NodePool.NodeConfigDetails.NodePoolPodNetworkOptionDetails.
 type NodePoolNodeConfigDetailsNodePoolPodNetworkOptionDetails struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
 	// +kubebuilder:validation:Optional
 	CniType string `json:"cniType,omitempty"`
 	// The OCIDs of the subnets in which to place pods for this node pool. This can be one of the node pool subnet IDs
@@ -224,8 +230,76 @@ type NodePoolCyclingDetails struct {
 	IsNodeCyclingEnabled bool `json:"isNodeCyclingEnabled,omitempty"`
 }
 
+// NodePoolNodeSourceDetailsObservedState defines nested fields for NodePool.NodeSourceDetails.
+type NodePoolNodeSourceDetailsObservedState struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
+	SourceType string `json:"sourceType,omitempty"`
+	// The OCID of the image used to boot the node.
+	// +kubebuilder:validation:Required
+	ImageId string `json:"imageId"`
+	// The size of the boot volume in GBs. Minimum value is 50 GB. See here (https://docs.cloud.oracle.com/en-us/iaas/Content/Block/Concepts/bootvolumes.htm) for max custom boot volume sizing and OS-specific requirements.
+	// +kubebuilder:validation:Optional
+	BootVolumeSizeInGBs int64 `json:"bootVolumeSizeInGBs,omitempty"`
+}
+
+// NodePoolNodeConfigDetailsPlacementConfigPreemptibleNodeConfigPreemptionActionObservedState defines nested fields for NodePool.NodeConfigDetails.PlacementConfig.PreemptibleNodeConfig.PreemptionAction.
+type NodePoolNodeConfigDetailsPlacementConfigPreemptibleNodeConfigPreemptionActionObservedState struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
+	Type string `json:"type,omitempty"`
+	// Whether to preserve the boot volume that was used to launch the preemptible instance when the instance is terminated. Defaults to false if not specified.
+	// +kubebuilder:validation:Optional
+	IsPreserveBootVolume bool `json:"isPreserveBootVolume,omitempty"`
+}
+
+// NodePoolNodeConfigDetailsPlacementConfigPreemptibleNodeConfigObservedState defines nested fields for NodePool.NodeConfigDetails.PlacementConfig.PreemptibleNodeConfig.
+type NodePoolNodeConfigDetailsPlacementConfigPreemptibleNodeConfigObservedState struct {
+	// +kubebuilder:validation:Required
+	PreemptionAction NodePoolNodeConfigDetailsPlacementConfigPreemptibleNodeConfigPreemptionActionObservedState `json:"preemptionAction"`
+}
+
+// NodePoolNodeConfigDetailsPlacementConfigObservedState defines nested fields for NodePool.NodeConfigDetails.PlacementConfig.
+type NodePoolNodeConfigDetailsPlacementConfigObservedState struct {
+	// The availability domain in which to place nodes.
+	// Example: `Uocm:PHX-AD-1`
+	// +kubebuilder:validation:Required
+	AvailabilityDomain string `json:"availabilityDomain"`
+	// The OCID of the subnet in which to place nodes.
+	// +kubebuilder:validation:Required
+	SubnetId string `json:"subnetId"`
+	// The OCID of the compute capacity reservation in which to place the compute instance.
+	// +kubebuilder:validation:Optional
+	CapacityReservationId string `json:"capacityReservationId,omitempty"`
+	// +kubebuilder:validation:Optional
+	PreemptibleNodeConfig NodePoolNodeConfigDetailsPlacementConfigPreemptibleNodeConfigObservedState `json:"preemptibleNodeConfig,omitempty"`
+	// A list of fault domains in which to place nodes.
+	// +kubebuilder:validation:Optional
+	FaultDomains []string `json:"faultDomains,omitempty"`
+}
+
+// NodePoolNodeConfigDetailsNodePoolPodNetworkOptionDetailsObservedState defines nested fields for NodePool.NodeConfigDetails.NodePoolPodNetworkOptionDetails.
+type NodePoolNodeConfigDetailsNodePoolPodNetworkOptionDetailsObservedState struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
+	CniType string `json:"cniType,omitempty"`
+	// The OCIDs of the subnets in which to place pods for this node pool. This can be one of the node pool subnet IDs
+	// +kubebuilder:validation:Required
+	PodSubnetIds []string `json:"podSubnetIds"`
+	// The max number of pods per node in the node pool. This value will be limited by the number of VNICs attachable to the node pool shape
+	// +kubebuilder:validation:Optional
+	MaxPodsPerNode int `json:"maxPodsPerNode,omitempty"`
+	// The OCIDs of the Network Security Group(s) to associate pods for this node pool with. For more information about NSGs, see NetworkSecurityGroup.
+	// +kubebuilder:validation:Optional
+	PodNsgIds []string `json:"podNsgIds,omitempty"`
+}
+
 // NodePoolNodeSource defines nested fields for NodePool.NodeSource.
 type NodePoolNodeSource struct {
+	JsonData string `json:"jsonData,omitempty"`
 	// The user-friendly name of the entity corresponding to the OCID.
 	SourceName string `json:"sourceName,omitempty"`
 	SourceType string `json:"sourceType,omitempty"`
@@ -293,15 +367,53 @@ type NodePoolStatus struct {
 	LifecycleState string `json:"lifecycleState,omitempty"`
 	// Details about the state of the nodepool.
 	LifecycleDetails string `json:"lifecycleDetails,omitempty"`
+	// The OCID of the compartment in which the node pool exists.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The OCID of the cluster to which this node pool is attached.
+	ClusterId string `json:"clusterId,omitempty"`
+	// The name of the node pool.
+	Name string `json:"name,omitempty"`
+	// The version of Kubernetes running on the nodes in the node pool.
+	KubernetesVersion string `json:"kubernetesVersion,omitempty"`
+	// A list of key/value pairs to add to each underlying OCI instance in the node pool on launch.
+	NodeMetadata map[string]string `json:"nodeMetadata,omitempty"`
 	// Deprecated. see `nodeSource`. The OCID of the image running on the nodes in the node pool.
 	NodeImageId string `json:"nodeImageId,omitempty"`
+	// Deprecated. see `nodeSource`. The name of the image running on the nodes in the node pool.
+	NodeImageName string `json:"nodeImageName,omitempty"`
+	// The shape configuration of the nodes.
+	NodeShapeConfig NodePoolNodeShapeConfig `json:"nodeShapeConfig,omitempty"`
 	// Deprecated. see `nodeSourceDetails`. Source running on the nodes in the node pool.
 	NodeSource NodePoolNodeSource `json:"nodeSource,omitempty"`
+	// Source running on the nodes in the node pool.
+	NodeSourceDetails NodePoolNodeSourceDetailsObservedState `json:"nodeSourceDetails,omitempty"`
+	// The name of the node shape of the nodes in the node pool.
+	NodeShape string `json:"nodeShape,omitempty"`
+	// A list of key/value pairs to add to nodes after they join the Kubernetes cluster.
+	InitialNodeLabels []NodePoolInitialNodeLabel `json:"initialNodeLabels,omitempty"`
+	// The SSH public key on each node in the node pool on launch.
+	SshPublicKey string `json:"sshPublicKey,omitempty"`
+	// The number of nodes in each subnet.
+	QuantityPerSubnet int `json:"quantityPerSubnet,omitempty"`
+	// The OCIDs of the subnets in which to place nodes for this node pool.
+	SubnetIds []string `json:"subnetIds,omitempty"`
 	// The nodes in the node pool.
 	Nodes []NodePoolNode `json:"nodes,omitempty"`
+	// The configuration of nodes in the node pool.
+	NodeConfigDetails NodePoolNodeConfigDetails `json:"nodeConfigDetails,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// Usage of system tag keys. These predefined keys are scoped to namespaces.
 	// Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
-	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`
+	SystemTags                   map[string]shared.MapValue           `json:"systemTags,omitempty"`
+	NodeEvictionNodePoolSettings NodePoolNodeEvictionNodePoolSettings `json:"nodeEvictionNodePoolSettings,omitempty"`
+	NodePoolCyclingDetails       NodePoolCyclingDetails               `json:"nodePoolCyclingDetails,omitempty"`
 }
 
 // +kubebuilder:object:root=true

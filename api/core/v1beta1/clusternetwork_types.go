@@ -160,6 +160,8 @@ type ClusterNetworkStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
 	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the cluster network.
 	Id string `json:"id,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the cluster network.
+	CompartmentId string `json:"compartmentId,omitempty"`
 	// The current state of the cluster network.
 	LifecycleState string `json:"lifecycleState,omitempty"`
 	// The date and time the resource was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
@@ -172,6 +174,21 @@ type ClusterNetworkStatus struct {
 	HpcIslandId string `json:"hpcIslandId,omitempty"`
 	// The list of network block OCIDs of the HPC island.
 	NetworkBlockIds []string `json:"networkBlockIds,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// The instance pools in the cluster network.
+	// Each cluster network can have one instance pool.
+	InstancePools          []ClusterNetworkInstancePool         `json:"instancePools,omitempty"`
+	PlacementConfiguration ClusterNetworkPlacementConfiguration `json:"placementConfiguration,omitempty"`
 }
 
 // +kubebuilder:object:root=true

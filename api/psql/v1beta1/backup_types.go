@@ -52,6 +52,10 @@ type BackupStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
 	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the backup.
 	Id string `json:"id,omitempty"`
+	// A user-friendly display name for the backup. Avoid entering confidential information.
+	DisplayName string `json:"displayName,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment that contains the backup.
+	CompartmentId string `json:"compartmentId,omitempty"`
 	// The date and time the backup was created, expressed in
 	// RFC 3339 (https://tools.ietf.org/rfc/rfc3339) timestamp format.
 	// Example: `2016-08-25T21:10:29.600Z`
@@ -61,6 +65,14 @@ type BackupStatus struct {
 	// The size of the backup, in gigabytes.
 	BackupSize      int                   `json:"backupSize,omitempty"`
 	DbSystemDetails BackupDbSystemDetails `json:"dbSystemDetails,omitempty"`
+	// Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+	// Example: `{"bar-key": "value"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// Example: `{"foo-namespace": {"bar-key": "value"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A description for the backup.
+	Description string `json:"description,omitempty"`
 	// Specifies whether the backup was created manually, or by a management policy.
 	SourceType string `json:"sourceType,omitempty"`
 	// The date and time the backup was updated, expressed in
@@ -69,6 +81,10 @@ type BackupStatus struct {
 	TimeUpdated string `json:"timeUpdated,omitempty"`
 	// A message describing the current state in more detail. For example, can be used to provide actionable information for a resource in Failed state.
 	LifecycleDetails string `json:"lifecycleDetails,omitempty"`
+	// Backup retention period in days.
+	RetentionPeriod int `json:"retentionPeriod,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the backup's source database system.
+	DbSystemId string `json:"dbSystemId,omitempty"`
 	// lastAcceptedRequestToken from MP.
 	LastAcceptedRequestToken string `json:"lastAcceptedRequestToken,omitempty"`
 	// lastCompletedRequestToken from MP.

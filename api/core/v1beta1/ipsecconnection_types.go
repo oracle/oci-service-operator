@@ -239,10 +239,51 @@ type IPSecConnectionTunnelConfiguration struct {
 // IPSecConnectionStatus defines the observed state of IPSecConnection.
 type IPSecConnectionStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the IPSec connection.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Cpe object.
+	CpeId string `json:"cpeId,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the DRG.
+	DrgId string `json:"drgId,omitempty"`
 	// The IPSec connection's Oracle ID (OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)).
 	Id string `json:"id,omitempty"`
 	// The IPSec connection's current state.
 	LifecycleState string `json:"lifecycleState,omitempty"`
+	// Static routes to the CPE. The CIDR must not be a
+	// multicast address or class E address.
+	// Used for routing a given IPSec tunnel's traffic only if the tunnel
+	// is using static routing. If you configure at least one tunnel to use static routing, then
+	// you must provide at least one valid static route. If you configure both
+	// tunnels to use BGP dynamic routing, you can provide an empty list for the static routes.
+	// The CIDR can be either IPv4 or IPv6. IPv6 addressing is supported for all commercial and government regions.
+	// See IPv6 Addresses (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/ipv6.htm).
+	// Example: `10.0.1.0/24`
+	// Example: `2001:db8::/32`
+	StaticRoutes []string `json:"staticRoutes,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Your identifier for your CPE device. Can be either an IP address or a hostname (specifically,
+	// the fully qualified domain name (FQDN)). The type of identifier here must correspond
+	// to the value for `cpeLocalIdentifierType`.
+	// If you don't provide a value when creating the IPSec connection, the `ipAddress` attribute
+	// for the Cpe object specified by `cpeId` is used as the `cpeLocalIdentifier`.
+	// For information about why you'd provide this value, see
+	// If Your CPE Is Behind a NAT Device (https://docs.cloud.oracle.com/iaas/Content/Network/Tasks/overviewIPsec.htm#nat).
+	// Example IP address: `10.0.3.3`
+	// Example hostname: `cpe.example.com`
+	CpeLocalIdentifier string `json:"cpeLocalIdentifier,omitempty"`
+	// The type of identifier for your CPE device. The value here must correspond to the value
+	// for `cpeLocalIdentifier`.
+	CpeLocalIdentifierType string `json:"cpeLocalIdentifierType,omitempty"`
 	// The date and time the IPSec connection was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	// Example: `2016-08-25T21:10:29.600Z`
 	TimeCreated string `json:"timeCreated,omitempty"`

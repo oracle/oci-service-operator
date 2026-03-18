@@ -19,6 +19,14 @@ type UserUIPasswordInformationSpec struct {
 // UserUIPasswordInformationStatus defines the observed state of UserUIPasswordInformation.
 type UserUIPasswordInformationStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the user.
+	UserId string `json:"userId,omitempty"`
+	// Date and time the password was created, in the format defined by RFC3339.
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The password's current state. After creating a password, make sure its `lifecycleState` changes from
+	// CREATING to ACTIVE before using it.
+	LifecycleState string `json:"lifecycleState,omitempty"`
 }
 
 // +kubebuilder:object:root=true

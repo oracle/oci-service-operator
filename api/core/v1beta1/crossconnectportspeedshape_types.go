@@ -19,6 +19,12 @@ type CrossconnectPortSpeedShapeSpec struct {
 // CrossconnectPortSpeedShapeStatus defines the observed state of CrossconnectPortSpeedShape.
 type CrossconnectPortSpeedShapeStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The name of the port speed shape.
+	// Example: `10 Gbps`
+	Name string `json:"name,omitempty"`
+	// The port speed in Gbps.
+	// Example: `10`
+	PortSpeedInGbps int `json:"portSpeedInGbps,omitempty"`
 }
 
 // +kubebuilder:object:root=true

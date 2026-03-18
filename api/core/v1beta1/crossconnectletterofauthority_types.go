@@ -19,6 +19,21 @@ type CrossConnectLetterOfAuthoritySpec struct {
 // CrossConnectLetterOfAuthorityStatus defines the observed state of CrossConnectLetterOfAuthority.
 type CrossConnectLetterOfAuthorityStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The name of the entity authorized by this Letter of Authority.
+	AuthorizedEntityName string `json:"authorizedEntityName,omitempty"`
+	// The type of cross-connect fiber, termination, and optical specification.
+	CircuitType string `json:"circuitType,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the cross-connect.
+	CrossConnectId string `json:"crossConnectId,omitempty"`
+	// The address of the FastConnect location.
+	FacilityLocation string `json:"facilityLocation,omitempty"`
+	// The meet-me room port for this cross-connect.
+	PortName string `json:"portName,omitempty"`
+	// The date and time when the Letter of Authority expires, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	TimeExpires string `json:"timeExpires,omitempty"`
+	// The date and time the Letter of Authority was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeIssued string `json:"timeIssued,omitempty"`
 }
 
 // +kubebuilder:object:root=true

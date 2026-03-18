@@ -43,6 +43,8 @@ type SecretBundleStatus struct {
 	TimeOfExpiry string `json:"timeOfExpiry,omitempty"`
 	// A list of possible rotation states for the secret version.
 	Stages []string `json:"stages,omitempty"`
+	// Customer-provided contextual metadata for the secret.
+	Metadata map[string]shared.JSONValue `json:"metadata,omitempty"`
 }
 
 // +kubebuilder:object:root=true

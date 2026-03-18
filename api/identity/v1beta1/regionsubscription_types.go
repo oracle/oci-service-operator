@@ -24,10 +24,17 @@ type RegionSubscriptionSpec struct {
 // RegionSubscriptionStatus defines the observed state of RegionSubscription.
 type RegionSubscriptionStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The region's key. See Regions and Availability Domains (https://docs.cloud.oracle.com/Content/General/Concepts/regions.htm)
+	// for the full list of supported 3-letter region codes.
+	// Example: `PHX`
+	RegionKey string `json:"regionKey,omitempty"`
 	// The region's name. See Regions and Availability Domains (https://docs.cloud.oracle.com/Content/General/Concepts/regions.htm)
 	// for the full list of supported region names.
 	// Example: `us-phoenix-1`
 	RegionName string `json:"regionName,omitempty"`
+	// The region subscription status.
+	// This uses a distinct JSON name so it can coexist with the OSOK status envelope.
+	Status string `json:"sdkStatus,omitempty"`
 	// Indicates if the region is the home region or not.
 	IsHomeRegion bool `json:"isHomeRegion,omitempty"`
 }

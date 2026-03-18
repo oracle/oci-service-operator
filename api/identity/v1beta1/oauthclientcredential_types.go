@@ -14,6 +14,28 @@ import (
 
 // OAuthClientCredentialSpec defines the desired state of OAuthClientCredential.
 type OAuthClientCredentialSpec struct {
+	// Name of the oauth credential to help user differentiate them.
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+	// Description of the oauth credential to help user differentiate them.
+	// +kubebuilder:validation:Required
+	Description string `json:"description"`
+	// Allowed scopes for the given oauth credential.
+	// +kubebuilder:validation:Required
+	Scopes []OAuthClientCredentialScope `json:"scopes"`
+	// Indicate if the password to be reset or not in the update.
+	// +kubebuilder:validation:Optional
+	IsResetPassword bool `json:"isResetPassword,omitempty"`
+}
+
+// OAuthClientCredentialScope defines nested fields for OAuthClientCredential.Scope.
+type OAuthClientCredentialScope struct {
+	// Audience for the given scope context.
+	// +kubebuilder:validation:Required
+	Audience string `json:"audience"`
+	// Allowed permission scope for the given context.
+	// +kubebuilder:validation:Required
+	Scope string `json:"scope"`
 }
 
 // OAuthClientCredentialStatus defines the observed state of OAuthClientCredential.
@@ -23,6 +45,7 @@ type OAuthClientCredentialStatus struct {
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Name",type="string",JSONPath=".spec.name",priority=1
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.status.conditions[-1].type",description="status of the OAuthClientCredential",priority=0
 // +kubebuilder:printcolumn:name="Ocid",type="string",JSONPath=".status.status.ocid",description="Ocid of the OAuthClientCredential",priority=1
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0

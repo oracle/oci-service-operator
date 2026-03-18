@@ -74,6 +74,8 @@ type BootVolumeSpec struct {
 // BootVolumeSourceDetails defines nested fields for BootVolume.SourceDetails.
 type BootVolumeSourceDetails struct {
 	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
 	Type string `json:"type,omitempty"`
 	// The OCID of the boot volume backup.
 	// +kubebuilder:validation:Required
@@ -95,6 +97,8 @@ type BootVolumeReplicaFields struct {
 // BootVolumeAutotunePolicy defines nested fields for BootVolume.AutotunePolicy.
 type BootVolumeAutotunePolicy struct {
 	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
 	AutotuneType string `json:"autotuneType,omitempty"`
 	// This will be the maximum VPUs/GB performance level that the volume will be auto-tuned
 	// temporarily based on performance monitoring.
@@ -105,6 +109,11 @@ type BootVolumeAutotunePolicy struct {
 // BootVolumeStatus defines the observed state of BootVolume.
 type BootVolumeStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The availability domain of the boot volume.
+	// Example: `Uocm:PHX-AD-1`
+	AvailabilityDomain string `json:"availabilityDomain,omitempty"`
+	// The OCID of the compartment that contains the boot volume.
+	CompartmentId string `json:"compartmentId,omitempty"`
 	// The boot volume's Oracle ID (OCID).
 	Id string `json:"id,omitempty"`
 	// The current state of a boot volume.
@@ -115,18 +124,50 @@ type BootVolumeStatus struct {
 	// The date and time the boot volume was created. Format defined
 	// by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	TimeCreated string `json:"timeCreated,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// System tags for this resource. Each key is predefined and scoped to a namespace.
 	// Example: `{"foo-namespace": {"bar-key": "value"}}`
 	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// The image OCID used to create the boot volume.
 	ImageId string `json:"imageId,omitempty"`
 	// Specifies whether the boot volume's data has finished copying
 	// from the source boot volume or boot volume backup.
 	IsHydrated bool `json:"isHydrated,omitempty"`
+	// The number of volume performance units (VPUs) that will be applied to this boot volume per GB,
+	// representing the Block Volume service's elastic performance options.
+	// See Block Volume Performance Levels (https://docs.cloud.oracle.com/iaas/Content/Block/Concepts/blockvolumeperformance.htm#perf_levels) for more information.
+	// Allowed values:
+	//   * `10`: Represents Balanced option.
+	//   * `20`: Represents Higher Performance option.
+	//   * `30`-`120`: Represents the Ultra High Performance option.
+	// For performance autotune enabled volumes, it would be the Default(Minimum) VPUs/GB.
+	VpusPerGB int64 `json:"vpusPerGB,omitempty"`
+	// The size of the boot volume in GBs.
+	SizeInGBs     int64                   `json:"sizeInGBs,omitempty"`
+	SourceDetails BootVolumeSourceDetails `json:"sourceDetails,omitempty"`
 	// The OCID of the source volume group.
 	VolumeGroupId string `json:"volumeGroupId,omitempty"`
+	// The OCID of the Vault service master encryption key assigned to the boot volume.
+	KmsKeyId string `json:"kmsKeyId,omitempty"`
+	// Specifies whether the auto-tune performance is enabled for this boot volume. This field is deprecated.
+	// Use the `DetachedVolumeAutotunePolicy` instead to enable the volume for detached autotune.
+	IsAutoTuneEnabled bool `json:"isAutoTuneEnabled,omitempty"`
 	// The number of Volume Performance Units per GB that this boot volume is effectively tuned to.
 	AutoTunedVpusPerGB int64 `json:"autoTunedVpusPerGB,omitempty"`
+	// The list of boot volume replicas of this boot volume
+	BootVolumeReplicas []BootVolumeReplicaFields `json:"bootVolumeReplicas,omitempty"`
+	// The list of autotune policies enabled for this volume.
+	AutotunePolicies []BootVolumeAutotunePolicy `json:"autotunePolicies,omitempty"`
 }
 
 // +kubebuilder:object:root=true

@@ -73,6 +73,8 @@ type DbSystemSpec struct {
 
 // DbSystemStorageDetails defines nested fields for DbSystem.StorageDetails.
 type DbSystemStorageDetails struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
 	// Specifies the availability domain of AD-local storage.
 	// If `isRegionallyDurable` is set to true, `availabilityDomain` should not be specified.
 	// If `isRegionallyDurable` is set to false, `availabilityDomain` must be specified.
@@ -122,6 +124,8 @@ type DbSystemInstancesDetail struct {
 // DbSystemCredentialsPasswordDetails defines nested fields for DbSystem.Credentials.PasswordDetails.
 type DbSystemCredentialsPasswordDetails struct {
 	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
 	PasswordType string `json:"passwordType,omitempty"`
 	// The database system password.
 	// +kubebuilder:validation:Required
@@ -145,6 +149,8 @@ type DbSystemCredentials struct {
 
 // DbSystemManagementPolicyBackupPolicy defines nested fields for DbSystem.ManagementPolicy.BackupPolicy.
 type DbSystemManagementPolicyBackupPolicy struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
 	// How many days the data should be stored after the database system deletion.
 	// +kubebuilder:validation:Optional
 	RetentionDays int `json:"retentionDays,omitempty"`
@@ -174,6 +180,8 @@ type DbSystemManagementPolicy struct {
 // DbSystemSource defines nested fields for DbSystem.Source.
 type DbSystemSource struct {
 	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
 	SourceType string `json:"sourceType,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the database system backup.
 	// +kubebuilder:validation:Required
@@ -192,6 +200,72 @@ type DbSystemDbConfigurationParams struct {
 	// Some configuration changes require a restart of database instances to be applied.
 	// +kubebuilder:validation:Optional
 	ApplyConfig string `json:"applyConfig,omitempty"`
+}
+
+// DbSystemStorageDetailsObservedState defines nested fields for DbSystem.StorageDetails.
+type DbSystemStorageDetailsObservedState struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// Specifies the availability domain of AD-local storage.
+	// If `isRegionallyDurable` is set to true, `availabilityDomain` should not be specified.
+	// If `isRegionallyDurable` is set to false, `availabilityDomain` must be specified.
+	// +kubebuilder:validation:Optional
+	AvailabilityDomain string `json:"availabilityDomain,omitempty"`
+	// Specifies if the block volume used for the database system is regional or AD-local.
+	// If not specified, it will be set to false.
+	// If `isRegionallyDurable` is set to true, `availabilityDomain` should not be specified.
+	// If `isRegionallyDurable` is set to false, `availabilityDomain` must be specified.
+	// +kubebuilder:validation:Required
+	IsRegionallyDurable bool `json:"isRegionallyDurable"`
+	// +kubebuilder:validation:Optional
+	SystemType string `json:"systemType,omitempty"`
+	// Guaranteed input/output storage requests per second (IOPS) available to the database system.
+	// +kubebuilder:validation:Optional
+	Iops int64 `json:"iops,omitempty"`
+}
+
+// DbSystemManagementPolicyBackupPolicyObservedState defines nested fields for DbSystem.ManagementPolicy.BackupPolicy.
+type DbSystemManagementPolicyBackupPolicyObservedState struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// How many days the data should be stored after the database system deletion.
+	// +kubebuilder:validation:Optional
+	RetentionDays int `json:"retentionDays,omitempty"`
+	// +kubebuilder:validation:Optional
+	Kind string `json:"kind,omitempty"`
+	// Hour of the day when the backup starts.
+	// +kubebuilder:validation:Required
+	BackupStart string `json:"backupStart"`
+	// The day of the week that the backup starts.
+	// +kubebuilder:validation:Required
+	DaysOfTheWeek []string `json:"daysOfTheWeek"`
+	// Day of the month when the backup should start.
+	// To ensure that the backup runs monthly, the latest day of the month that you can use to schedule a backup is the the 28th day.
+	// +kubebuilder:validation:Required
+	DaysOfTheMonth []int `json:"daysOfTheMonth"`
+}
+
+// DbSystemManagementPolicyObservedState defines nested fields for DbSystem.ManagementPolicy.
+type DbSystemManagementPolicyObservedState struct {
+	// The start of the maintenance window.
+	// +kubebuilder:validation:Optional
+	MaintenanceWindowStart string `json:"maintenanceWindowStart,omitempty"`
+	// +kubebuilder:validation:Optional
+	BackupPolicy DbSystemManagementPolicyBackupPolicyObservedState `json:"backupPolicy,omitempty"`
+}
+
+// DbSystemSourceObservedState defines nested fields for DbSystem.Source.
+type DbSystemSourceObservedState struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
+	SourceType string `json:"sourceType,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the database system backup.
+	// +kubebuilder:validation:Required
+	BackupId string `json:"backupId"`
+	// Deprecated. Don't use.
+	// +kubebuilder:validation:Optional
+	IsHavingRestoreConfigOverrides bool `json:"isHavingRestoreConfigOverrides,omitempty"`
 }
 
 // DbSystemInstance defines nested fields for DbSystem.Instance.
@@ -223,12 +297,32 @@ type DbSystemStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
 	// A unique identifier for the database system. Immutable on creation.
 	Id string `json:"id,omitempty"`
+	// A user-friendly display name for the database system. Avoid entering confidential information.
+	DisplayName string `json:"displayName,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment that contains the database system.
+	CompartmentId string `json:"compartmentId,omitempty"`
 	// The date and time that the database system was created, expressed in
 	// RFC 3339 (https://tools.ietf.org/rfc/rfc3339) timestamp format.
 	// Example: `2016-08-25T21:10:29.600Z`
 	TimeCreated string `json:"timeCreated,omitempty"`
 	// The current state of the database system.
 	LifecycleState string `json:"lifecycleState,omitempty"`
+	// Type of the database system.
+	SystemType string `json:"systemType,omitempty"`
+	// The major and minor versions of the database system software.
+	DbVersion string `json:"dbVersion,omitempty"`
+	// The name of the shape for the database instance.
+	// Example: `VM.Standard.E4.Flex`
+	Shape string `json:"shape,omitempty"`
+	// The total number of OCPUs available to each database instance node.
+	InstanceOcpuCount int `json:"instanceOcpuCount,omitempty"`
+	// The total amount of memory available to each database instance node, in gigabytes.
+	InstanceMemorySizeInGBs int                                   `json:"instanceMemorySizeInGBs,omitempty"`
+	StorageDetails          DbSystemStorageDetailsObservedState   `json:"storageDetails,omitempty"`
+	NetworkDetails          DbSystemNetworkDetails                `json:"networkDetails,omitempty"`
+	ManagementPolicy        DbSystemManagementPolicyObservedState `json:"managementPolicy,omitempty"`
+	// A description of the database system.
+	Description string `json:"description,omitempty"`
 	// The date and time that the database system was updated, expressed in
 	// RFC 3339 (https://tools.ietf.org/rfc/rfc3339) timestamp format.
 	// Example: `2016-08-25T21:10:29.600Z`
@@ -237,11 +331,22 @@ type DbSystemStatus struct {
 	LifecycleDetails string `json:"lifecycleDetails,omitempty"`
 	// The database system administrator username.
 	AdminUsername string `json:"adminUsername,omitempty"`
+	// Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+	// Example: `{"bar-key": "value"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// Example: `{"foo-namespace": {"bar-key": "value"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// System tags for this resource. Each key is predefined and scoped to a namespace.
 	// Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
 	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the configuration associated with the database system.
+	ConfigId string `json:"configId,omitempty"`
+	// Count of instances, or nodes, in the database system.
+	InstanceCount int `json:"instanceCount,omitempty"`
 	// The list of instances, or nodes, in the database system.
-	Instances []DbSystemInstance `json:"instances,omitempty"`
+	Instances []DbSystemInstance          `json:"instances,omitempty"`
+	Source    DbSystemSourceObservedState `json:"source,omitempty"`
 }
 
 // +kubebuilder:object:root=true

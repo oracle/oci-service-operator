@@ -90,6 +90,16 @@ spec:
               ttl:
                 description: Time-to-live for the row, in days.
                 type: integer
+              value:
+                additionalProperties:
+                  description: JSONValue preserves arbitrary JSON values inside generated
+                    CRD fields.
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                description: The map of values from a row.
+                type: object
+            required:
+            - value
             type: object
           status:
             description: RowStatus defines the observed state of Row.

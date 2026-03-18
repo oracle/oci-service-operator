@@ -65,6 +65,102 @@ func TestBuildSDKMappingsSupportsExplicitSurfaceAndExclusionOverrides(t *testing
 	}
 }
 
+func TestBuildSDKMappingsMovesAliasedReadModelsToStatusAndClearsLegacyExclusions(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name         string
+		service      string
+		spec         string
+		candidates   []string
+		existing     specTarget
+		wantStatus   []string
+		wantIncluded []string
+	}{
+		{
+			name:    "identity oauth client credential",
+			service: "identity",
+			spec:    "OAuthClientCredential",
+			candidates: []string{
+				"CreateOAuth2ClientCredentialDetails",
+				"UpdateOAuth2ClientCredentialDetails",
+			},
+			existing: specTarget{
+				SDKMappings: []sdkMapping{
+					{
+						SDKStruct:  "identity.OAuth2ClientCredential",
+						Exclude:    true,
+						Reason:     "legacy exclusion",
+						APISurface: "",
+					},
+					{
+						SDKStruct: "identity.OAuth2ClientCredentialSummary",
+						Exclude:   true,
+						Reason:    "legacy exclusion",
+					},
+				},
+			},
+			wantStatus:   []string{"identity.OAuth2ClientCredential", "identity.OAuth2ClientCredentialSummary"},
+			wantIncluded: []string{"identity.OAuth2ClientCredential", "identity.OAuth2ClientCredentialSummary"},
+		},
+		{
+			name:    "ons topic",
+			service: "ons",
+			spec:    "Topic",
+			candidates: []string{
+				"CreateTopicDetails",
+				"UpdateTopicDetails",
+			},
+			wantStatus: []string{"ons.NotificationTopic", "ons.NotificationTopicSummary"},
+		},
+		{
+			name:    "streaming stream",
+			service: "streaming",
+			spec:    "Stream",
+			candidates: []string{
+				"CreateStreamDetails",
+				"UpdateStreamDetails",
+				"Stream",
+				"StreamSummary",
+			},
+			wantStatus: []string{"streaming.Stream", "streaming.StreamSummary"},
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			got := buildSDKMappings(tt.service, tt.spec, tt.candidates, len(tt.existing.SDKMappings) > 0, tt.existing)
+			byStruct := make(map[string]sdkMapping, len(got))
+			for _, mapping := range got {
+				byStruct[mapping.SDKStruct] = mapping
+			}
+
+			for _, sdkStruct := range tt.wantStatus {
+				mapping, ok := byStruct[sdkStruct]
+				if !ok {
+					t.Fatalf("missing mapping for %s", sdkStruct)
+				}
+				if mapping.APISurface != "status" {
+					t.Fatalf("%s APISurface = %q, want status", sdkStruct, mapping.APISurface)
+				}
+			}
+
+			for _, sdkStruct := range tt.wantIncluded {
+				mapping := byStruct[sdkStruct]
+				if mapping.Exclude {
+					t.Fatalf("%s Exclude = true, want false", sdkStruct)
+				}
+				if mapping.Reason != "" {
+					t.Fatalf("%s Reason = %q, want empty", sdkStruct, mapping.Reason)
+				}
+			}
+		})
+	}
+}
+
 func TestParseExistingAPITargetsPreservesSDKMappingMetadata(t *testing.T) {
 	t.Parallel()
 

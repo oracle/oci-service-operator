@@ -63,6 +63,11 @@ spec:
           status:
             description: AuthTokenStatus defines the observed state of AuthToken.
             properties:
+              description:
+                description: |-
+                  The description you assign to the auth token. Does not have to be unique, and it's changeable.
+                  (For tenancies that support identity domains) You can have an empty description.
+                type: string
               id:
                 description: The OCID of the auth token.
                 type: string

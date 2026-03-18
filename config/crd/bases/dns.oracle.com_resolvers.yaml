@@ -134,11 +134,37 @@ spec:
               attachedVcnId:
                 description: The OCID of the attached VCN.
                 type: string
+              attachedViews:
+                description: The attached views. Views are evaluated in order.
+                items:
+                  description: ResolverAttachedView defines nested fields for Resolver.AttachedView.
+                  properties:
+                    viewId:
+                      description: The OCID of the view.
+                      type: string
+                  required:
+                  - viewId
+                  type: object
+                type: array
               compartmentId:
                 description: The OCID of the owning compartment.
                 type: string
               defaultViewId:
                 description: The OCID of the default view.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+
+                  **Example:** `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              displayName:
+                description: The display name of the resolver.
                 type: string
               endpoints:
                 description: Read-only array of endpoints for the resolver.
@@ -198,6 +224,15 @@ spec:
                       type: string
                   type: object
                 type: array
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+
+                  **Example:** `{"Department": "Finance"}`
+                type: object
               id:
                 description: The OCID of the resolver.
                 type: string
@@ -208,6 +243,42 @@ spec:
               lifecycleState:
                 description: The current state of the resource.
                 type: string
+              rules:
+                description: Rules for the resolver. Rules are evaluated in order.
+                items:
+                  description: ResolverRule defines nested fields for Resolver.Rule.
+                  properties:
+                    action:
+                      type: string
+                    clientAddressConditions:
+                      description: |-
+                        A list of CIDR blocks. The query must come from a client within one of the blocks in order for the rule action
+                        to apply.
+                      items:
+                        type: string
+                      type: array
+                    destinationAddresses:
+                      description: IP addresses to which queries should be forwarded.
+                        Currently limited to a single address.
+                      items:
+                        type: string
+                      type: array
+                    qnameCoverConditions:
+                      description: A list of domain names. The query must be covered
+                        by one of the domains in order for the rule action to apply.
+                      items:
+                        type: string
+                      type: array
+                    sourceEndpointName:
+                      description: |-
+                        Case-insensitive name of an endpoint, that is a sub-resource of the resolver, to use as the forwarding
+                        interface. The endpoint must have isForwarding set to true.
+                      type: string
+                  required:
+                  - destinationAddresses
+                  - sourceEndpointName
+                  type: object
+                type: array
               self:
                 description: The canonical absolute URL of the resource.
                 type: string

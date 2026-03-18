@@ -46,6 +46,18 @@ type InstanceSpec struct {
 	// 32,000 bytes.
 	// +kubebuilder:validation:Optional
 	Metadata map[string]string `json:"metadata,omitempty"`
+	// Additional metadata key/value pairs that you provide. They serve the same purpose and
+	// functionality as fields in the `metadata` object.
+	// They are distinguished from `metadata` fields in that these can be nested JSON objects
+	// (whereas `metadata` fields are string/string maps only).
+	// The "user_data" field and the "ssh_authorized_keys" field cannot be changed after an instance
+	// has launched. Any request that updates, removes, or adds either of these fields will be
+	// rejected. You must provide the same values for "user_data" and "ssh_authorized_keys" that
+	// already exist on the instance.
+	// The combined size of the `metadata` and `extendedMetadata` objects can be a maximum of
+	// 32,000 bytes.
+	// +kubebuilder:validation:Optional
+	ExtendedMetadata map[string]shared.JSONValue `json:"extendedMetadata,omitempty"`
 	// The shape of the instance. The shape determines the number of CPUs and the amount of memory
 	// allocated to the instance. For more information about how to change shapes, and a list of
 	// shapes that are supported, see
@@ -261,6 +273,8 @@ type InstanceAvailabilityConfig struct {
 // InstancePlatformConfig defines nested fields for Instance.PlatformConfig.
 type InstancePlatformConfig struct {
 	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
 	Type string `json:"type,omitempty"`
 	// Whether symmetric multithreading is enabled on the instance. Symmetric multithreading is also
 	// called simultaneous multithreading (SMT) or Intel Hyper-Threading.
@@ -274,7 +288,8 @@ type InstancePlatformConfig struct {
 
 // InstancePreemptibleInstanceConfigPreemptionAction defines nested fields for Instance.PreemptibleInstanceConfig.PreemptionAction.
 type InstancePreemptibleInstanceConfigPreemptionAction struct {
-	Type string `json:"type,omitempty"`
+	JsonData string `json:"jsonData,omitempty"`
+	Type     string `json:"type,omitempty"`
 	// Whether to preserve the boot volume that was used to launch the preemptible instance when the instance is terminated. Defaults to false if not specified.
 	PreserveBootVolume bool `json:"preserveBootVolume,omitempty"`
 }
@@ -301,6 +316,7 @@ type InstanceSourceDetailsInstanceSourceImageFilterDetails struct {
 
 // InstanceSourceDetails defines nested fields for Instance.SourceDetails.
 type InstanceSourceDetails struct {
+	JsonData   string `json:"jsonData,omitempty"`
 	SourceType string `json:"sourceType,omitempty"`
 	// The size of the boot volume in GBs. Minimum value is 50 GB and maximum value is 32,768 GB (32 TB).
 	BootVolumeSizeInGBs int64 `json:"bootVolumeSizeInGBs,omitempty"`
@@ -351,9 +367,44 @@ type InstanceStatus struct {
 	// For all other regions, the full region name is returned.
 	// Examples: `phx`, `eu-frankfurt-1`
 	Region string `json:"region,omitempty"`
+	// The shape of the instance. The shape determines the number of CPUs and the amount of memory
+	// allocated to the instance. You can enumerate all available shapes by calling
+	// ListShapes.
+	Shape string `json:"shape,omitempty"`
 	// The date and time the instance was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	// Example: `2016-08-25T21:10:29.600Z`
 	TimeCreated string `json:"timeCreated,omitempty"`
+	// The OCID of the compute capacity reservation this instance is launched under.
+	// When this field contains an empty string or is null, the instance is not currently in a capacity reservation.
+	// For more information, see Capacity Reservations (https://docs.cloud.oracle.com/iaas/Content/Compute/Tasks/reserve-capacity.htm#default).
+	CapacityReservationId string `json:"capacityReservationId,omitempty"`
+	// The OCID of the dedicated virtual machine host that the instance is placed on.
+	DedicatedVmHostId string `json:"dedicatedVmHostId,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	DisplayName string `json:"displayName,omitempty"`
+	// Additional metadata key/value pairs that you provide. They serve the same purpose and functionality
+	// as fields in the `metadata` object.
+	// They are distinguished from `metadata` fields in that these can be nested JSON objects (whereas `metadata`
+	// fields are string/string maps only).
+	ExtendedMetadata map[string]shared.JSONValue `json:"extendedMetadata,omitempty"`
+	// The name of the fault domain the instance is running in.
+	// A fault domain is a grouping of hardware and infrastructure within an availability domain.
+	// Each availability domain contains three fault domains. Fault domains let you distribute your
+	// instances so that they are not on the same physical hardware within a single availability domain.
+	// A hardware failure or Compute hardware maintenance that affects one fault domain does not affect
+	// instances in other fault domains.
+	// If you do not specify the fault domain, the system selects one for you.
+	// Example: `FAULT-DOMAIN-1`
+	FaultDomain string `json:"faultDomain,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// Deprecated. Use `sourceDetails` instead.
 	ImageId string `json:"imageId,omitempty"`
 	// When a bare metal or virtual machine
@@ -386,13 +437,26 @@ type InstanceStatus struct {
 	// * `PARAVIRTUALIZED` - VM instances launch with paravirtualized devices using VirtIO drivers.
 	// * `CUSTOM` - VM instances launch with custom configuration settings specified in the `LaunchOptions` parameter.
 	LaunchMode                string                            `json:"launchMode,omitempty"`
+	LaunchOptions             InstanceLaunchOptions             `json:"launchOptions,omitempty"`
+	InstanceOptions           InstanceOptions                   `json:"instanceOptions,omitempty"`
+	AvailabilityConfig        InstanceAvailabilityConfig        `json:"availabilityConfig,omitempty"`
 	PreemptibleInstanceConfig InstancePreemptibleInstanceConfig `json:"preemptibleInstanceConfig,omitempty"`
+	// Custom metadata that you provide.
+	Metadata    map[string]string   `json:"metadata,omitempty"`
+	ShapeConfig InstanceShapeConfig `json:"shapeConfig,omitempty"`
 	// Whether the instance’s OCPUs and memory are distributed across multiple NUMA nodes.
 	IsCrossNumaNode bool                  `json:"isCrossNumaNode,omitempty"`
 	SourceDetails   InstanceSourceDetails `json:"sourceDetails,omitempty"`
 	// System tags for this resource. Each key is predefined and scoped to a namespace.
 	// Example: `{"foo-namespace": {"bar-key": "value"}}`
-	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`
+	SystemTags  map[string]shared.MapValue `json:"systemTags,omitempty"`
+	AgentConfig InstanceAgentConfig        `json:"agentConfig,omitempty"`
+	// The date and time the instance is expected to be stopped / started,  in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	// After that time if instance hasn't been rebooted, Oracle will reboot the instance within 24 hours of the due time.
+	// Regardless of how the instance was stopped, the flag will be reset to empty as soon as instance reaches Stopped state.
+	// Example: `2018-05-25T21:10:29.600Z`
+	TimeMaintenanceRebootDue string                 `json:"timeMaintenanceRebootDue,omitempty"`
+	PlatformConfig           InstancePlatformConfig `json:"platformConfig,omitempty"`
 	// The OCID of the Instance Configuration used to source launch details for this instance. Any other fields supplied in the instance launch request override the details stored in the Instance Configuration for this instance launch.
 	InstanceConfigurationId string `json:"instanceConfigurationId,omitempty"`
 	// The current state of the instance pool instance.

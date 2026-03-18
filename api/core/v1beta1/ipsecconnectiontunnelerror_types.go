@@ -19,6 +19,18 @@ type IPSecConnectionTunnelErrorSpec struct {
 // IPSecConnectionTunnelErrorStatus defines the observed state of IPSecConnectionTunnelError.
 type IPSecConnectionTunnelErrorStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// Unique ID generated for each error report.
+	Id string `json:"id,omitempty"`
+	// Unique code describes the error type.
+	ErrorCode string `json:"errorCode,omitempty"`
+	// A detailed description of the error.
+	ErrorDescription string `json:"errorDescription,omitempty"`
+	// Resolution for the error.
+	Solution string `json:"solution,omitempty"`
+	// Link to more Oracle resources or relevant documentation.
+	OciResourcesLink string `json:"ociResourcesLink,omitempty"`
+	// Timestamp when the error occurred.
+	Timestamp string `json:"timestamp,omitempty"`
 }
 
 // +kubebuilder:object:root=true

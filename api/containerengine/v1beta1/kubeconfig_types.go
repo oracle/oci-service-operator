@@ -14,6 +14,15 @@ import (
 
 // KubeconfigSpec defines the desired state of Kubeconfig.
 type KubeconfigSpec struct {
+	// The version of the kubeconfig token. Supported value 2.0.0
+	// +kubebuilder:validation:Optional
+	TokenVersion string `json:"tokenVersion,omitempty"`
+	// Deprecated. This field is no longer used.
+	// +kubebuilder:validation:Optional
+	Expiration int `json:"expiration,omitempty"`
+	// The endpoint to target. A cluster may have multiple endpoints exposed but the kubeconfig can only target one at a time.
+	// +kubebuilder:validation:Optional
+	Endpoint string `json:"endpoint,omitempty"`
 }
 
 // KubeconfigStatus defines the observed state of Kubeconfig.

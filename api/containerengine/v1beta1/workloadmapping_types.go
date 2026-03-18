@@ -39,12 +39,24 @@ type WorkloadMappingStatus struct {
 	Id string `json:"id,omitempty"`
 	// The OCID of the cluster.
 	ClusterId string `json:"clusterId,omitempty"`
+	// The namespace of the workloadMapping.
+	Namespace string `json:"namespace,omitempty"`
 	// The OCID of the mapped customer tenancy.
 	MappedTenancyId string `json:"mappedTenancyId,omitempty"`
+	// The OCID of the mapped customer compartment.
+	MappedCompartmentId string `json:"mappedCompartmentId,omitempty"`
 	// The time the cluster was created.
 	TimeCreated string `json:"timeCreated,omitempty"`
 	// The state of the workloadMapping.
 	LifecycleState string `json:"lifecycleState,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 }
 
 // +kubebuilder:object:root=true

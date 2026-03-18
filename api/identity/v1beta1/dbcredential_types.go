@@ -42,6 +42,9 @@ type DbCredentialStatus struct {
 	LifecycleState string `json:"lifecycleState,omitempty"`
 	// The detailed status of INACTIVE lifecycleState.
 	LifecycleDetails int64 `json:"lifecycleDetails,omitempty"`
+	// The description you assign to the DB credential. Does not have to be unique, and it's changeable.
+	// (For tenancies that support identity domains) You can have an empty description.
+	Description string `json:"description,omitempty"`
 }
 
 // +kubebuilder:object:root=true

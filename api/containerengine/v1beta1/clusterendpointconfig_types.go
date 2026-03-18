@@ -28,6 +28,12 @@ type ClusterEndpointConfigSpec struct {
 // ClusterEndpointConfigStatus defines the observed state of ClusterEndpointConfig.
 type ClusterEndpointConfigStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the regional subnet in which to place the Cluster endpoint.
+	SubnetId string `json:"subnetId,omitempty"`
+	// A list of the OCIDs of the network security groups (NSGs) to apply to the cluster endpoint. For more information about NSGs, see NetworkSecurityGroup.
+	NsgIds []string `json:"nsgIds,omitempty"`
+	// Whether the cluster should be assigned a public IP address. Defaults to false. If set to true on a private subnet, the cluster provisioning will fail.
+	IsPublicIpEnabled bool `json:"isPublicIpEnabled,omitempty"`
 }
 
 // +kubebuilder:object:root=true

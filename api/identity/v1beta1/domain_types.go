@@ -84,14 +84,29 @@ type DomainStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
 	// The OCID of the identity domain.
 	Id string `json:"id,omitempty"`
+	// The OCID of the compartment containing the identity domain.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The mutable display name of the identity domain.
+	DisplayName string `json:"displayName,omitempty"`
+	// The identity domain description. You can have an empty description.
+	Description string `json:"description,omitempty"`
 	// Region-agnostic identity domain URL.
 	Url string `json:"url,omitempty"`
 	// Region-specific identity domain URL.
 	HomeRegionUrl string `json:"homeRegionUrl,omitempty"`
+	// The home region for the identity domain.
+	// See Regions and Availability Domains (https://docs.cloud.oracle.com/Content/General/Concepts/regions.htm)
+	// for the full list of supported region names.
+	// Example: `us-phoenix-1`
+	HomeRegion string `json:"homeRegion,omitempty"`
 	// The regions where replicas of the identity domain exist.
 	ReplicaRegions []DomainReplicaRegion `json:"replicaRegions,omitempty"`
 	// The type of the domain.
 	Type string `json:"type,omitempty"`
+	// The license type of the identity domain.
+	LicenseType string `json:"licenseType,omitempty"`
+	// Indicates whether the identity domain is hidden on the sign-in screen or not.
+	IsHiddenOnLogin bool `json:"isHiddenOnLogin,omitempty"`
 	// Date and time the identity domain was created, in the format defined by RFC3339.
 	// Example: `2016-08-25T21:10:29.600Z`
 	TimeCreated string `json:"timeCreated,omitempty"`
@@ -99,6 +114,14 @@ type DomainStatus struct {
 	LifecycleState string `json:"lifecycleState,omitempty"`
 	// Any additional details about the current state of the identity domain.
 	LifecycleDetails string `json:"lifecycleDetails,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 }
 
 // +kubebuilder:object:root=true

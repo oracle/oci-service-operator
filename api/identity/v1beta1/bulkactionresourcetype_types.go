@@ -16,6 +16,15 @@ import (
 type BulkActionResourceTypeSpec struct {
 }
 
+// BulkActionResourceTypeItem defines nested fields for BulkActionResourceType.Item.
+type BulkActionResourceTypeItem struct {
+	// The unique name of the resource-type.
+	Name string `json:"name,omitempty"`
+	// List of metadata keys required to identify a specific resource. Some resource-types require information besides an OCID to identify
+	// a specific resource. For example, the resource-type `buckets` requires metadataKeys DeleteBucket.
+	MetadataKeys []string `json:"metadataKeys,omitempty"`
+}
+
 // BulkActionResourceTypeStatus defines the observed state of BulkActionResourceType.
 type BulkActionResourceTypeStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
@@ -24,6 +33,8 @@ type BulkActionResourceTypeStatus struct {
 	// List of metadata keys required to identify a specific resource. Some resource-types require information besides an OCID to identify
 	// a specific resource. For example, the resource-type `buckets` requires metadataKeys DeleteBucket.
 	MetadataKeys []string `json:"metadataKeys,omitempty"`
+	// Collection of the resource-types supported by a compartment bulk action.
+	Items []BulkActionResourceTypeItem `json:"items,omitempty"`
 }
 
 // +kubebuilder:object:root=true

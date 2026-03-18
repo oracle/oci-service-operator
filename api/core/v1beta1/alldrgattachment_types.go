@@ -19,6 +19,8 @@ type AllDrgAttachmentSpec struct {
 // AllDrgAttachmentStatus defines the observed state of AllDrgAttachment.
 type AllDrgAttachmentStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The Oracle-assigned ID of the DRG attachment
+	Id string `json:"id,omitempty"`
 }
 
 // +kubebuilder:object:root=true

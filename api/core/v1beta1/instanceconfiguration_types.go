@@ -34,10 +34,20 @@ type InstanceConfigurationSpec struct {
 	// Example: `{"Department": "Finance"}`
 	// +kubebuilder:validation:Optional
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
+	Source string `json:"source,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the instance to use to create the
+	// instance configuration.
+	// +kubebuilder:validation:Required
+	InstanceId string `json:"instanceId"`
 }
 
 // InstanceConfigurationInstanceDetailsOptionBlockVolumeAttachDetails defines nested fields for InstanceConfiguration.InstanceDetails.Option.BlockVolume.AttachDetails.
 type InstanceConfigurationInstanceDetailsOptionBlockVolumeAttachDetails struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
 	// A user-friendly name. Does not have to be unique, and it's changeable.
 	// Avoid entering confidential information.
 	// +kubebuilder:validation:Optional
@@ -78,6 +88,8 @@ type InstanceConfigurationInstanceDetailsOptionBlockVolumeCreateDetailsBlockVolu
 // InstanceConfigurationInstanceDetailsOptionBlockVolumeCreateDetailsSourceDetails defines nested fields for InstanceConfiguration.InstanceDetails.Option.BlockVolume.CreateDetails.SourceDetails.
 type InstanceConfigurationInstanceDetailsOptionBlockVolumeCreateDetailsSourceDetails struct {
 	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
 	Type string `json:"type,omitempty"`
 	// The OCID of the volume backup.
 	// +kubebuilder:validation:Optional
@@ -86,6 +98,8 @@ type InstanceConfigurationInstanceDetailsOptionBlockVolumeCreateDetailsSourceDet
 
 // InstanceConfigurationInstanceDetailsOptionBlockVolumeCreateDetailsAutotunePolicy defines nested fields for InstanceConfiguration.InstanceDetails.Option.BlockVolume.CreateDetails.AutotunePolicy.
 type InstanceConfigurationInstanceDetailsOptionBlockVolumeCreateDetailsAutotunePolicy struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
 	// +kubebuilder:validation:Optional
 	AutotuneType string `json:"autotuneType,omitempty"`
 	// This will be the maximum VPUs/GB performance level that the volume will be auto-tuned
@@ -263,6 +277,8 @@ type InstanceConfigurationInstanceDetailsOptionLaunchDetailsShapeConfig struct {
 
 // InstanceConfigurationInstanceDetailsOptionLaunchDetailsPlatformConfig defines nested fields for InstanceConfiguration.InstanceDetails.Option.LaunchDetails.PlatformConfig.
 type InstanceConfigurationInstanceDetailsOptionLaunchDetailsPlatformConfig struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
 	// Whether Secure Boot is enabled on the instance.
 	// +kubebuilder:validation:Optional
 	IsSecureBootEnabled bool `json:"isSecureBootEnabled,omitempty"`
@@ -333,6 +349,8 @@ type InstanceConfigurationInstanceDetailsOptionLaunchDetailsSourceDetailsInstanc
 
 // InstanceConfigurationInstanceDetailsOptionLaunchDetailsSourceDetails defines nested fields for InstanceConfiguration.InstanceDetails.Option.LaunchDetails.SourceDetails.
 type InstanceConfigurationInstanceDetailsOptionLaunchDetailsSourceDetails struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
 	// +kubebuilder:validation:Optional
 	SourceType string `json:"sourceType,omitempty"`
 	// The size of the boot volume in GBs. The minimum value is 50 GB and the maximum
@@ -490,6 +508,8 @@ type InstanceConfigurationInstanceDetailsOptionLaunchDetailsAvailabilityConfig s
 // InstanceConfigurationInstanceDetailsOptionLaunchDetailsPreemptibleInstanceConfigPreemptionAction defines nested fields for InstanceConfiguration.InstanceDetails.Option.LaunchDetails.PreemptibleInstanceConfig.PreemptionAction.
 type InstanceConfigurationInstanceDetailsOptionLaunchDetailsPreemptibleInstanceConfigPreemptionAction struct {
 	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
 	Type string `json:"type,omitempty"`
 	// Whether to preserve the boot volume that was used to launch the preemptible instance when the instance is terminated. Defaults to false if not specified.
 	// +kubebuilder:validation:Optional
@@ -527,6 +547,14 @@ type InstanceConfigurationInstanceDetailsOptionLaunchDetails struct {
 	// Avoid entering confidential information.
 	// +kubebuilder:validation:Optional
 	DisplayName string `json:"displayName,omitempty"`
+	// Additional metadata key/value pairs that you provide. They serve the same purpose and
+	// functionality as fields in the `metadata` object.
+	// They are distinguished from `metadata` fields in that these can be nested JSON objects
+	// (whereas `metadata` fields are string/string maps only).
+	// The combined size of the `metadata` and `extendedMetadata` objects can be a maximum of
+	// 32,000 bytes.
+	// +kubebuilder:validation:Optional
+	ExtendedMetadata map[string]shared.JSONValue `json:"extendedMetadata,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no
 	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
@@ -747,6 +775,8 @@ type InstanceConfigurationInstanceDetailsOption struct {
 
 // InstanceConfigurationInstanceDetailsBlockVolumeAttachDetails defines nested fields for InstanceConfiguration.InstanceDetails.BlockVolume.AttachDetails.
 type InstanceConfigurationInstanceDetailsBlockVolumeAttachDetails struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
 	// A user-friendly name. Does not have to be unique, and it's changeable.
 	// Avoid entering confidential information.
 	// +kubebuilder:validation:Optional
@@ -787,6 +817,8 @@ type InstanceConfigurationInstanceDetailsBlockVolumeCreateDetailsBlockVolumeRepl
 // InstanceConfigurationInstanceDetailsBlockVolumeCreateDetailsSourceDetails defines nested fields for InstanceConfiguration.InstanceDetails.BlockVolume.CreateDetails.SourceDetails.
 type InstanceConfigurationInstanceDetailsBlockVolumeCreateDetailsSourceDetails struct {
 	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
 	Type string `json:"type,omitempty"`
 	// The OCID of the volume backup.
 	// +kubebuilder:validation:Optional
@@ -795,6 +827,8 @@ type InstanceConfigurationInstanceDetailsBlockVolumeCreateDetailsSourceDetails s
 
 // InstanceConfigurationInstanceDetailsBlockVolumeCreateDetailsAutotunePolicy defines nested fields for InstanceConfiguration.InstanceDetails.BlockVolume.CreateDetails.AutotunePolicy.
 type InstanceConfigurationInstanceDetailsBlockVolumeCreateDetailsAutotunePolicy struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
 	// +kubebuilder:validation:Optional
 	AutotuneType string `json:"autotuneType,omitempty"`
 	// This will be the maximum VPUs/GB performance level that the volume will be auto-tuned
@@ -972,6 +1006,8 @@ type InstanceConfigurationInstanceDetailsLaunchDetailsShapeConfig struct {
 
 // InstanceConfigurationInstanceDetailsLaunchDetailsPlatformConfig defines nested fields for InstanceConfiguration.InstanceDetails.LaunchDetails.PlatformConfig.
 type InstanceConfigurationInstanceDetailsLaunchDetailsPlatformConfig struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
 	// Whether Secure Boot is enabled on the instance.
 	// +kubebuilder:validation:Optional
 	IsSecureBootEnabled bool `json:"isSecureBootEnabled,omitempty"`
@@ -1042,6 +1078,8 @@ type InstanceConfigurationInstanceDetailsLaunchDetailsSourceDetailsInstanceSourc
 
 // InstanceConfigurationInstanceDetailsLaunchDetailsSourceDetails defines nested fields for InstanceConfiguration.InstanceDetails.LaunchDetails.SourceDetails.
 type InstanceConfigurationInstanceDetailsLaunchDetailsSourceDetails struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
 	// +kubebuilder:validation:Optional
 	SourceType string `json:"sourceType,omitempty"`
 	// The size of the boot volume in GBs. The minimum value is 50 GB and the maximum
@@ -1199,6 +1237,8 @@ type InstanceConfigurationInstanceDetailsLaunchDetailsAvailabilityConfig struct 
 // InstanceConfigurationInstanceDetailsLaunchDetailsPreemptibleInstanceConfigPreemptionAction defines nested fields for InstanceConfiguration.InstanceDetails.LaunchDetails.PreemptibleInstanceConfig.PreemptionAction.
 type InstanceConfigurationInstanceDetailsLaunchDetailsPreemptibleInstanceConfigPreemptionAction struct {
 	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
 	Type string `json:"type,omitempty"`
 	// Whether to preserve the boot volume that was used to launch the preemptible instance when the instance is terminated. Defaults to false if not specified.
 	// +kubebuilder:validation:Optional
@@ -1236,6 +1276,14 @@ type InstanceConfigurationInstanceDetailsLaunchDetails struct {
 	// Avoid entering confidential information.
 	// +kubebuilder:validation:Optional
 	DisplayName string `json:"displayName,omitempty"`
+	// Additional metadata key/value pairs that you provide. They serve the same purpose and
+	// functionality as fields in the `metadata` object.
+	// They are distinguished from `metadata` fields in that these can be nested JSON objects
+	// (whereas `metadata` fields are string/string maps only).
+	// The combined size of the `metadata` and `extendedMetadata` objects can be a maximum of
+	// 32,000 bytes.
+	// +kubebuilder:validation:Optional
+	ExtendedMetadata map[string]shared.JSONValue `json:"extendedMetadata,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no
 	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
@@ -1445,6 +1493,8 @@ type InstanceConfigurationInstanceDetailsSecondaryVnic struct {
 // InstanceConfigurationInstanceDetails defines nested fields for InstanceConfiguration.InstanceDetails.
 type InstanceConfigurationInstanceDetails struct {
 	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
 	InstanceType string `json:"instanceType,omitempty"`
 	// The Compute Instance Configuration parameters.
 	// +kubebuilder:validation:Optional
@@ -1462,11 +1512,26 @@ type InstanceConfigurationInstanceDetails struct {
 // InstanceConfigurationStatus defines the observed state of InstanceConfiguration.
 type InstanceConfigurationStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment
+	// containing the instance configuration.
+	CompartmentId string `json:"compartmentId,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the instance configuration.
 	Id string `json:"id,omitempty"`
 	// The date and time the instance configuration was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	// Example: `2016-08-25T21:10:29.600Z`
 	TimeCreated string `json:"timeCreated,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags    map[string]string                    `json:"freeformTags,omitempty"`
+	InstanceDetails InstanceConfigurationInstanceDetails `json:"instanceDetails,omitempty"`
 	// Parameters that were not specified when the instance configuration was created, but that
 	// are required to launch an instance from the instance configuration. See the
 	// LaunchInstanceConfiguration operation.

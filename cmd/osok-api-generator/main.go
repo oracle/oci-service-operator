@@ -21,6 +21,7 @@ func main() {
 		all        bool
 		outputRoot string
 		overwrite  bool
+		preserve   bool
 	)
 
 	flag.StringVar(&configPath, "config", "internal/generator/config/services.yaml", "Path to the OSOK API generator config file.")
@@ -28,15 +29,16 @@ func main() {
 	flag.BoolVar(&all, "all", false, "Generate all configured services.")
 	flag.StringVar(&outputRoot, "output-root", ".", "Root directory where generated API packages are written.")
 	flag.BoolVar(&overwrite, "overwrite", false, "Overwrite existing generated package files when the target directory already exists.")
+	flag.BoolVar(&preserve, "preserve-existing-spec-surface", false, "Preserve the current checked-in spec/helper surface for existing API packages while regenerating status/read-model outputs.")
 	flag.Parse()
 
-	if err := run(context.Background(), configPath, service, all, outputRoot, overwrite); err != nil {
+	if err := run(context.Background(), configPath, service, all, outputRoot, overwrite, preserve); err != nil {
 		fmt.Fprintf(os.Stderr, "osok-api-generator: %v\n", err)
 		os.Exit(1)
 	}
 }
 
-func run(ctx context.Context, configPath string, service string, all bool, outputRoot string, overwrite bool) error {
+func run(ctx context.Context, configPath string, service string, all bool, outputRoot string, overwrite bool, preserve bool) error {
 	cfg, err := generator.LoadConfig(configPath)
 	if err != nil {
 		return err
@@ -48,10 +50,15 @@ func run(ctx context.Context, configPath string, service string, all bool, outpu
 	}
 
 	pipeline := generator.New()
+	preserveRoot := ""
+	if preserve {
+		preserveRoot = "."
+	}
 	result, err := pipeline.Generate(ctx, cfg, services, generator.Options{
-		OutputRoot:   outputRoot,
-		Overwrite:    overwrite,
-		SkipExisting: all && !overwrite,
+		OutputRoot:                      outputRoot,
+		Overwrite:                       overwrite,
+		SkipExisting:                    all && !overwrite,
+		PreserveExistingSpecSurfaceRoot: preserveRoot,
 	})
 	if err != nil {
 		return err

@@ -44,6 +44,11 @@ type VolumeGroupBackupSpec struct {
 // VolumeGroupBackupStatus defines the observed state of VolumeGroupBackup.
 type VolumeGroupBackupStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the compartment that contains the volume group backup.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	DisplayName string `json:"displayName,omitempty"`
 	// The OCID of the volume group backup.
 	Id string `json:"id,omitempty"`
 	// The current state of a volume group backup.
@@ -51,14 +56,24 @@ type VolumeGroupBackupStatus struct {
 	// The date and time the volume group backup was created. This is the time the actual point-in-time image
 	// of the volume group data was taken. Format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	TimeCreated string `json:"timeCreated,omitempty"`
+	// The type of backup.
+	Type string `json:"type,omitempty"`
 	// OCIDs for the volume backups in this volume group backup.
 	VolumeBackupIds []string `json:"volumeBackupIds,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// The date and time the volume group backup will expire and be automatically deleted.
 	// Format defined by RFC3339 (https://tools.ietf.org/html/rfc3339). This parameter will always be present for volume group
 	// backups that were created automatically by a scheduled-backup policy. For manually
 	// created volume group backups, it will be absent, signifying that there is no expiration
 	// time and the backup will last forever until manually deleted.
 	ExpirationTime string `json:"expirationTime,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// The aggregate size of the volume group backup, in MBs.
 	SizeInMBs int64 `json:"sizeInMBs,omitempty"`
 	// The aggregate size of the volume group backup, in GBs.
@@ -76,6 +91,8 @@ type VolumeGroupBackupStatus struct {
 	// It is typically smaller than sizeInGBs, depending on the spaceconsumed
 	// on the volume group and whether the volume backup is full or incremental.
 	UniqueSizeInGbs int64 `json:"uniqueSizeInGbs,omitempty"`
+	// The OCID of the source volume group.
+	VolumeGroupId string `json:"volumeGroupId,omitempty"`
 	// The OCID of the source volume group backup.
 	SourceVolumeGroupBackupId string `json:"sourceVolumeGroupBackupId,omitempty"`
 }

@@ -19,6 +19,16 @@ type IPSecConnectionTunnelSecurityAssociationSpec struct {
 // IPSecConnectionTunnelSecurityAssociationStatus defines the observed state of IPSecConnectionTunnelSecurityAssociation.
 type IPSecConnectionTunnelSecurityAssociationStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The IP address and mask of the partner subnet used in policy based VPNs or static routes.
+	CpeSubnet string `json:"cpeSubnet,omitempty"`
+	// The IP address and mask of the local subnet used in policy based VPNs or static routes.
+	OracleSubnet string `json:"oracleSubnet,omitempty"`
+	// The IPSec tunnel's phase one status.
+	TunnelSaStatus string `json:"tunnelSaStatus,omitempty"`
+	// Current state if the IPSec tunnel status is not `UP`, including phase one and phase two details and a possible reason the tunnel is not `UP`.
+	TunnelSaErrorInfo string `json:"tunnelSaErrorInfo,omitempty"`
+	// Time in the current state, in seconds.
+	Time string `json:"time,omitempty"`
 }
 
 // +kubebuilder:object:root=true

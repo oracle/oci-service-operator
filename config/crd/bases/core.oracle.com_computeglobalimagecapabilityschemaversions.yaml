@@ -80,6 +80,8 @@ spec:
                       type: string
                     descriptorType:
                       type: string
+                    jsonData:
+                      type: string
                     source:
                       type: string
                     values:

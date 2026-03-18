@@ -19,6 +19,15 @@ type VolumeBackupPolicyAssetAssignmentSpec struct {
 // VolumeBackupPolicyAssetAssignmentStatus defines the observed state of VolumeBackupPolicyAssetAssignment.
 type VolumeBackupPolicyAssetAssignmentStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the volume the policy has been assigned to.
+	AssetId string `json:"assetId,omitempty"`
+	// The OCID of the volume backup policy assignment.
+	Id string `json:"id,omitempty"`
+	// The OCID of the volume backup policy that has been assigned to the volume.
+	PolicyId string `json:"policyId,omitempty"`
+	// The date and time the volume backup policy was assigned to the volume. The format is
+	// defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	TimeCreated string `json:"timeCreated,omitempty"`
 }
 
 // +kubebuilder:object:root=true

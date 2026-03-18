@@ -87,6 +87,19 @@ spec:
                       upstream error.
                     type: string
                 type: object
+              configurations:
+                description: Addon configuration details.
+                items:
+                  description: AddonConfiguration defines nested fields for Addon.Configuration.
+                  properties:
+                    key:
+                      description: configuration key name
+                      type: string
+                    value:
+                      description: configuration value name
+                      type: string
+                  type: object
+                type: array
               currentInstalledVersion:
                 description: current installed version of the addon
                 type: string
@@ -140,6 +153,9 @@ spec:
                 type: object
               timeCreated:
                 description: The time the cluster was created.
+                type: string
+              version:
+                description: selected addon version, or null indicates autoUpdate
                 type: string
             required:
             - status

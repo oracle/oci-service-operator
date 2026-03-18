@@ -16,9 +16,47 @@ import (
 type ClusterNetworkInstanceSpec struct {
 }
 
+// ClusterNetworkInstanceLoadBalancerBackend defines nested fields for ClusterNetworkInstance.LoadBalancerBackend.
+type ClusterNetworkInstanceLoadBalancerBackend struct {
+	// The OCID of the load balancer attached to the instance pool.
+	LoadBalancerId string `json:"loadBalancerId,omitempty"`
+	// The name of the backend set on the load balancer.
+	BackendSetName string `json:"backendSetName,omitempty"`
+	// The name of the backend in the backend set.
+	BackendName string `json:"backendName,omitempty"`
+	// The health of the backend as observed by the load balancer.
+	BackendHealthStatus string `json:"backendHealthStatus,omitempty"`
+}
+
 // ClusterNetworkInstanceStatus defines the observed state of ClusterNetworkInstance.
 type ClusterNetworkInstanceStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the instance.
+	Id string `json:"id,omitempty"`
+	// The availability domain the instance is running in.
+	AvailabilityDomain string `json:"availabilityDomain,omitempty"`
+	// The OCID of the compartment that contains the instance.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The OCID of the instance confgiuration used to create the instance.
+	InstanceConfigurationId string `json:"instanceConfigurationId,omitempty"`
+	// The region that contains the availability domain the instance is running in.
+	Region string `json:"region,omitempty"`
+	// The current state of the instance pool instance.
+	State string `json:"state,omitempty"`
+	// The date and time the instance pool instance was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+	// Example: `2016-08-25T21:10:29.600Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	DisplayName string `json:"displayName,omitempty"`
+	// The fault domain the instance is running in.
+	FaultDomain string `json:"faultDomain,omitempty"`
+	// The shape of an instance. The shape determines the number of CPUs, amount of memory,
+	// and other resources allocated to the instance.
+	// You can enumerate all available shapes by calling ListShapes.
+	Shape string `json:"shape,omitempty"`
+	// The load balancer backends that are configured for the instance pool instance.
+	LoadBalancerBackends []ClusterNetworkInstanceLoadBalancerBackend `json:"loadBalancerBackends,omitempty"`
 }
 
 // +kubebuilder:object:root=true

@@ -32,11 +32,56 @@ type DrgRouteRuleSpec struct {
 	// for reaching the network destination.
 	// +kubebuilder:validation:Optional
 	NextHopDrgAttachmentId string `json:"nextHopDrgAttachmentId,omitempty"`
+	// The DRG rute rules to update.
+	// +kubebuilder:validation:Optional
+	RouteRules []DrgRouteRuleRouteRule `json:"routeRules,omitempty"`
+}
+
+// DrgRouteRuleRouteRule defines nested fields for DrgRouteRule.RouteRule.
+type DrgRouteRuleRouteRule struct {
+	// The Oracle-assigned ID of each DRG route rule to update.
+	// +kubebuilder:validation:Required
+	Id string `json:"id"`
+	// The range of IP addresses used for matching when routing traffic.
+	// Potential values:
+	//   * IP address range in CIDR notation. Can be an IPv4 CIDR block or IPv6 prefix. For example: `192.168.1.0/24`
+	//   or `2001:0db8:0123:45::/56`.
+	// +kubebuilder:validation:Optional
+	Destination string `json:"destination,omitempty"`
+	// Type of destination for the rule.
+	// Allowed values:
+	//   * `CIDR_BLOCK`: If the rule's `destination` is an IP address range in CIDR notation.
+	// +kubebuilder:validation:Optional
+	DestinationType string `json:"destinationType,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the next hop DRG attachment. The next hop DRG attachment is responsible
+	// for reaching the network destination.
+	// +kubebuilder:validation:Optional
+	NextHopDrgAttachmentId string `json:"nextHopDrgAttachmentId,omitempty"`
 }
 
 // DrgRouteRuleStatus defines the observed state of DrgRouteRule.
 type DrgRouteRuleStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// Represents the range of IP addresses to match against when routing traffic.
+	// Potential values:
+	//   * An IP address range (IPv4 or IPv6) in CIDR notation. For example: `192.168.1.0/24`
+	//   or `2001:0db8:0123:45::/56`.
+	//   * When you're setting up a security rule for traffic destined for a particular `Service` through
+	//   a service gateway, this is the `cidrBlock` value associated with that Service. For example: `oci-phx-objectstorage`.
+	Destination string `json:"destination,omitempty"`
+	// The type of destination for the rule.
+	// Allowed values:
+	//   * `CIDR_BLOCK`: If the rule's `destination` is an IP address range in CIDR notation.
+	//   * `SERVICE_CIDR_BLOCK`: If the rule's `destination` is the `cidrBlock` value for a
+	//     Service (the rule is for traffic destined for a
+	//     particular `Service` through a service gateway).
+	DestinationType string `json:"destinationType,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the next hop DRG attachment responsible
+	// for reaching the network destination.
+	// A value of `BLACKHOLE` means traffic for this route is discarded without notification.
+	NextHopDrgAttachmentId string `json:"nextHopDrgAttachmentId,omitempty"`
+	// The Oracle-assigned ID of the DRG route rule.
+	Id string `json:"id,omitempty"`
 	// The earliest origin of a route. If a route is advertised to a DRG through an IPsec tunnel attachment,
 	// and is propagated to peered DRGs via RPC attachments, the route's provenance in the peered DRGs remains `IPSEC_TUNNEL`,
 	// because that is the earliest origin.
@@ -50,6 +95,8 @@ type DrgRouteRuleStatus struct {
 	IsConflict bool `json:"isConflict,omitempty"`
 	// Indicates that if the next hop attachment does not exist, so traffic for this route is discarded without notification.
 	IsBlackhole bool `json:"isBlackhole,omitempty"`
+	// Additional properties for the route, computed by the service.
+	Attributes shared.JSONValue `json:"attributes,omitempty"`
 }
 
 // +kubebuilder:object:root=true

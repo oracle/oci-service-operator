@@ -14,6 +14,9 @@ import (
 
 // RowSpec defines the desired state of Row.
 type RowSpec struct {
+	// The map of values from a row.
+	// +kubebuilder:validation:Required
+	Value map[string]shared.JSONValue `json:"value"`
 	// The OCID of the table's compartment.  Required
 	// if the tableNameOrId path parameter is a table name.
 	// Optional if tableNameOrId is an OCID.  If tableNameOrId

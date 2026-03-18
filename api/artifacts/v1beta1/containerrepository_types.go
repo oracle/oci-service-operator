@@ -53,13 +53,21 @@ type ContainerRepositoryReadme struct {
 // ContainerRepositoryStatus defines the observed state of ContainerRepository.
 type ContainerRepositoryStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID of the compartment in which the container repository exists.
+	CompartmentId string `json:"compartmentId,omitempty"`
 	// The id of the user or principal that created the resource.
 	CreatedBy string `json:"createdBy,omitempty"`
+	// The container repository name.
+	DisplayName string `json:"displayName,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the container repository.
 	// Example: `ocid1.containerrepo.oc1..exampleuniqueID`
 	Id string `json:"id,omitempty"`
 	// Total number of images.
 	ImageCount int `json:"imageCount,omitempty"`
+	// Whether the repository is immutable. Images cannot be overwritten in an immutable repository.
+	IsImmutable bool `json:"isImmutable,omitempty"`
+	// Whether the repository is public. A public repository allows unauthenticated access.
+	IsPublic bool `json:"isPublic,omitempty"`
 	// Total number of layers.
 	LayerCount int `json:"layerCount,omitempty"`
 	// Total storage in bytes consumed by layers.
@@ -72,9 +80,18 @@ type ContainerRepositoryStatus struct {
 	BillableSizeInGBs int64 `json:"billableSizeInGBs,omitempty"`
 	// The tenancy namespace used in the container repository path.
 	Namespace string `json:"namespace,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// The system tags for this resource. Each key is predefined and scoped to a namespace.
 	// Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
 	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`
+	Readme     ContainerRepositoryReadme  `json:"readme,omitempty"`
 	// An RFC 3339 timestamp indicating when an image was last pushed to the repository.
 	TimeLastPushed string `json:"timeLastPushed,omitempty"`
 }

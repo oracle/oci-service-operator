@@ -56,6 +56,8 @@ type ByoipRangeVcnIpv6Allocation struct {
 // ByoipRangeStatus defines the observed state of ByoipRange.
 type ByoipRangeStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the BYOIP CIDR block.
+	CompartmentId string `json:"compartmentId,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the `ByoipRange` resource.
 	Id string `json:"id,omitempty"`
 	// The `ByoipRange` resource's current state.
@@ -67,6 +69,23 @@ type ByoipRangeStatus struct {
 	ValidationToken string `json:"validationToken,omitempty"`
 	// A list of `ByoipRangeVcnIpv6AllocationSummary` objects.
 	ByoipRangeVcnIpv6Allocations []ByoipRangeVcnIpv6Allocation `json:"byoipRangeVcnIpv6Allocations,omitempty"`
+	// The public IPv4 CIDR block being imported from on-premises to the Oracle cloud.
+	CidrBlock string `json:"cidrBlock,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// The IPv6 prefix being imported to the Oracle cloud. This prefix must be /48 or larger, and can be subdivided into sub-ranges used
+	// across multiple VCNs. A BYOIPv6 prefix can be also assigned across multiple VCNs, and each VCN must be /64 or larger. You may specify
+	// a ULA or private IPv6 prefix of /64 or larger to use in the VCN. IPv6-enabled subnets will remain a fixed /64 in size.
+	Ipv6CidrBlock string `json:"ipv6CidrBlock,omitempty"`
 	// The `ByoipRange` resource's current status.
 	LifecycleDetails string `json:"lifecycleDetails,omitempty"`
 	// The date and time the `ByoipRange` resource was validated, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).

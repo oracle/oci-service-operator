@@ -58,6 +58,16 @@ spec:
             description: VolumeBackupPolicyAssetAssignmentStatus defines the observed
               state of VolumeBackupPolicyAssetAssignment.
             properties:
+              assetId:
+                description: The OCID of the volume the policy has been assigned to.
+                type: string
+              id:
+                description: The OCID of the volume backup policy assignment.
+                type: string
+              policyId:
+                description: The OCID of the volume backup policy that has been assigned
+                  to the volume.
+                type: string
               status:
                 properties:
                   conditions:
@@ -100,6 +110,11 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              timeCreated:
+                description: |-
+                  The date and time the volume backup policy was assigned to the volume. The format is
+                  defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+                type: string
             required:
             - status
             type: object

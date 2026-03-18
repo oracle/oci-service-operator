@@ -61,11 +61,30 @@ type TagNamespaceStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
 	// The OCID of the tag namespace.
 	Id string `json:"id,omitempty"`
+	// The OCID of the compartment that contains the tag namespace.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The name of the tag namespace. It must be unique across all tag namespaces in the tenancy and cannot be changed.
+	Name string `json:"name,omitempty"`
+	// The description you assign to the tag namespace.
+	Description string `json:"description,omitempty"`
+	// Whether the tag namespace is retired.
+	// See Retiring Key Definitions and Namespace Definitions (https://docs.cloud.oracle.com/Content/Tagging/Tasks/managingtagsandtagnamespaces.htm#retiringkeys).
+	IsRetired bool `json:"isRetired,omitempty"`
 	// Date and time the tagNamespace was created, in the format defined by RFC3339.
 	// Example: `2016-08-25T21:10:29.600Z`
 	TimeCreated string `json:"timeCreated,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// The tagnamespace's current state. After creating a tagnamespace, make sure its `lifecycleState` is ACTIVE before using it. After retiring a tagnamespace, make sure its `lifecycleState` is INACTIVE before using it.
 	LifecycleState string `json:"lifecycleState,omitempty"`
+	// Locks associated with this resource.
+	Locks []TagNamespaceLock `json:"locks,omitempty"`
 }
 
 // +kubebuilder:object:root=true

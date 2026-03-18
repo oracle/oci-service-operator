@@ -19,6 +19,10 @@ type InstanceDeviceSpec struct {
 // InstanceDeviceStatus defines the observed state of InstanceDevice.
 type InstanceDeviceStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The device name.
+	Name string `json:"name,omitempty"`
+	// The flag denoting whether device is available.
+	IsAvailable bool `json:"isAvailable,omitempty"`
 }
 
 // +kubebuilder:object:root=true

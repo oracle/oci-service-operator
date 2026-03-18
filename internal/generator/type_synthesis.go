@@ -18,25 +18,20 @@ type resourceFieldSet struct {
 	HelperTypes  []TypeModel
 }
 
-func synthesizeResourceFieldSet(index *ocisdk.Package, resourceKind string, rawName string) resourceFieldSet {
+func synthesizeResourceFieldSet(index *ocisdk.Package, service ServiceConfig, resourceKind string, rawName string, specCandidates []string) resourceFieldSet {
 	synthesizer := newFieldSynthesizer(index, resourceKind)
 
-	specFields, desiredJSONNames := synthesizer.mergeStructFields([]string{
-		"Create" + rawName + "Details",
-		"Update" + rawName + "Details",
-	}, nil, fieldRenderingOptions{scope: fieldScopeSpec})
+	specFields, _ := synthesizer.mergeStructFields(specCandidates, nil, fieldRenderingOptions{scope: fieldScopeSpec})
 
 	statusFields := defaultStatusFields()
 	statusJSONNames := fieldJSONNames(statusFields)
-	observedFields, _ := synthesizer.mergeStructFields([]string{
-		rawName,
-		rawName + "Summary",
-	}, nil, fieldRenderingOptions{scope: fieldScopeStatus})
+	observedFields, _ := synthesizer.mergeStructFields(
+		service.ObservedStateStructCandidates(rawName),
+		nil,
+		fieldRenderingOptions{scope: fieldScopeStatus, escapeStatusJSONCollision: true},
+	)
 	for _, field := range observedFields {
 		jsonName := tagJSONName(field.Tag)
-		if _, exists := desiredJSONNames[jsonName]; exists {
-			continue
-		}
 		if _, exists := statusJSONNames[jsonName]; exists {
 			continue
 		}
@@ -49,6 +44,13 @@ func synthesizeResourceFieldSet(index *ocisdk.Package, resourceKind string, rawN
 		StatusFields: statusFields,
 		HelperTypes:  append([]TypeModel(nil), synthesizer.helperTypes...),
 	}
+}
+
+func desiredStateStructCandidates(rawName string, requestBodyPayloads []string) []string {
+	return appendUniqueStrings([]string{
+		"Create" + rawName + "Details",
+		"Update" + rawName + "Details",
+	}, requestBodyPayloads...)
 }
 
 type fieldSynthesizer struct {
@@ -174,9 +176,12 @@ func (s *fieldSynthesizer) ensureHelperType(path []string, fields []ocisdk.Field
 		return s.helperTypes[index].Name, len(s.helperTypes[index].Fields) > 0
 	}
 
+	nestedOptions := options
+	nestedOptions.escapeStatusJSONCollision = false
+
 	helperFields := make([]FieldModel, 0, len(fields))
 	for _, field := range fields {
-		fieldModel, ok := s.buildGeneratedField(field, options, append(append([]string(nil), path...), helperPathComponent(field)))
+		fieldModel, ok := s.buildGeneratedField(field, nestedOptions, append(append([]string(nil), path...), helperPathComponent(field)))
 		if !ok {
 			continue
 		}
@@ -200,7 +205,36 @@ func sharedSchemaType(field ocisdk.Field) (string, bool) {
 	if field.Type == "map[string]map[string]interface{}" {
 		return "map[string]shared.MapValue", true
 	}
+	if renderedType, ok := arbitraryJSONSchemaType(field.Type); ok {
+		return renderedType, true
+	}
 	return "", false
+}
+
+func arbitraryJSONSchemaType(typeExpr string) (string, bool) {
+	trimmed := strings.TrimSpace(typeExpr)
+	switch {
+	case trimmed == "":
+		return "", false
+	case trimmed == "interface{}":
+		return "shared.JSONValue", true
+	case strings.HasPrefix(trimmed, "*"):
+		return arbitraryJSONSchemaType(strings.TrimPrefix(trimmed, "*"))
+	case strings.HasPrefix(trimmed, "[]"):
+		inner, ok := arbitraryJSONSchemaType(strings.TrimPrefix(trimmed, "[]"))
+		if !ok {
+			return "", false
+		}
+		return "[]" + inner, true
+	case strings.HasPrefix(trimmed, "map[string]"):
+		inner, ok := arbitraryJSONSchemaType(strings.TrimPrefix(trimmed, "map[string]"))
+		if !ok {
+			return "", false
+		}
+		return "map[string]" + inner, true
+	default:
+		return "", false
+	}
 }
 
 func wrapRenderedType(typeExpr string, replacement string) (string, bool) {

@@ -14,6 +14,8 @@ import (
 
 // IdentityProviderSpec defines the desired state of IdentityProvider.
 type IdentityProviderSpec struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
 	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
@@ -60,22 +62,59 @@ type IdentityProviderSpec struct {
 // IdentityProviderStatus defines the observed state of IdentityProvider.
 type IdentityProviderStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	JsonData   string            `json:"jsonData,omitempty"`
 	// The detailed status of INACTIVE lifecycleState.
 	InactiveStatus int64 `json:"inactiveStatus,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// The OCID of the `IdentityProvider`.
 	Id string `json:"id,omitempty"`
+	// The OCID of the tenancy containing the `IdentityProvider`.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The name you assign to the `IdentityProvider` during creation. The name
+	// must be unique across all `IdentityProvider` objects in the tenancy and
+	// cannot be changed. This is the name federated users see when choosing
+	// which identity provider to use when signing in to the Oracle Cloud Infrastructure
+	// Console.
+	Name string `json:"name,omitempty"`
+	// The description you assign to the `IdentityProvider` during creation. Does
+	// not have to be unique, and it's changeable.
+	Description string `json:"description,omitempty"`
+	// The identity provider service or product.
+	// Supported identity providers are Oracle Identity Cloud Service (IDCS) and Microsoft
+	// Active Directory Federation Services (ADFS).
+	// Allowed values are:
+	// - `ADFS`
+	// - `IDCS`
+	// Example: `IDCS`
+	ProductType string `json:"productType,omitempty"`
 	// Date and time the `IdentityProvider` was created, in the format defined by RFC3339.
 	// Example: `2016-08-25T21:10:29.600Z`
 	TimeCreated string `json:"timeCreated,omitempty"`
 	// The current state. After creating an `IdentityProvider`, make sure its
 	// `lifecycleState` changes from CREATING to ACTIVE before using it.
 	LifecycleState string `json:"lifecycleState,omitempty"`
+	Protocol       string `json:"protocol,omitempty"`
+	// The URL for retrieving the identity provider's metadata, which
+	// contains information required for federating.
+	MetadataUrl string `json:"metadataUrl,omitempty"`
 	// The identity provider's signing certificate used by the IAM Service
 	// to validate the SAML2 token.
 	SigningCertificate string `json:"signingCertificate,omitempty"`
 	// The URL to redirect federated users to for authentication with the
 	// identity provider.
 	RedirectUrl string `json:"redirectUrl,omitempty"`
+	// The XML that contains the information required for federating Identity with SAML2 Identity Provider.
+	Metadata string `json:"metadata,omitempty"`
+	// Extra name value pairs associated with this identity provider.
+	// Example: `{"clientId": "app_sf3kdjf3"}`
+	FreeformAttributes map[string]string `json:"freeformAttributes,omitempty"`
 }
 
 // +kubebuilder:object:root=true

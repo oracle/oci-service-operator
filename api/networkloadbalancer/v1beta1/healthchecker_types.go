@@ -49,6 +49,12 @@ type HealthCheckerSpec struct {
 	// Example: `200`
 	// +kubebuilder:validation:Optional
 	ReturnCode int `json:"returnCode,omitempty"`
+	// Base64 encoded pattern to be sent as UDP or TCP health check probe.
+	// +kubebuilder:validation:Optional
+	RequestData string `json:"requestData,omitempty"`
+	// Base64 encoded pattern to be validated as UDP or TCP health check probe response.
+	// +kubebuilder:validation:Optional
+	ResponseData string `json:"responseData,omitempty"`
 }
 
 // HealthCheckerStatus defines the observed state of HealthChecker.

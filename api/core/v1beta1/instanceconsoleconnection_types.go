@@ -39,10 +39,20 @@ type InstanceConsoleConnectionStatus struct {
 	CompartmentId string `json:"compartmentId,omitempty"`
 	// The SSH connection string for the console connection.
 	ConnectionString string `json:"connectionString,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// The SSH public key's fingerprint for client authentication to the console connection.
 	Fingerprint string `json:"fingerprint,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// The OCID of the console connection.
 	Id string `json:"id,omitempty"`
+	// The OCID of the instance the console connection connects to.
+	InstanceId string `json:"instanceId,omitempty"`
 	// The current state of the console connection.
 	LifecycleState string `json:"lifecycleState,omitempty"`
 	// The SSH public key's fingerprint for the console connection service host.

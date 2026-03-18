@@ -13,9 +13,10 @@ import (
 
 // Options controls how generator outputs are emitted.
 type Options struct {
-	OutputRoot   string
-	Overwrite    bool
-	SkipExisting bool
+	OutputRoot                      string
+	Overwrite                       bool
+	SkipExisting                    bool
+	PreserveExistingSpecSurfaceRoot string
 }
 
 // ServiceResult describes the outcome for one generated or skipped service.
@@ -55,6 +56,9 @@ func (g *Generator) Generate(ctx context.Context, cfg *Config, services []Servic
 		pkg, err := g.discoverer.BuildPackageModel(ctx, cfg, service)
 		if err != nil {
 			return result, fmt.Errorf("build package model for service %q: %w", service.Service, err)
+		}
+		if err := preservePackageSpecSurfaces(options.PreserveExistingSpecSurfaceRoot, pkg); err != nil {
+			return result, fmt.Errorf("preserve existing spec surface for service %q: %w", service.Service, err)
 		}
 
 		outputDir, err := g.renderer.RenderPackage(options.OutputRoot, pkg, options.Overwrite)

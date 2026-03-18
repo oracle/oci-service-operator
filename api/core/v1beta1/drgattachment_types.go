@@ -60,6 +60,8 @@ type DrgAttachmentSpec struct {
 
 // DrgAttachmentNetworkDetails defines nested fields for DrgAttachment.NetworkDetails.
 type DrgAttachmentNetworkDetails struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the network attached to the DRG.
 	// +kubebuilder:validation:Optional
 	Id string `json:"id,omitempty"`
@@ -84,13 +86,43 @@ type DrgAttachmentStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
 	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the DRG attachment.
 	CompartmentId string `json:"compartmentId,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the DRG.
+	DrgId string `json:"drgId,omitempty"`
 	// The DRG attachment's Oracle ID (OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)).
 	Id string `json:"id,omitempty"`
 	// The DRG attachment's current state.
 	LifecycleState string `json:"lifecycleState,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	DisplayName string `json:"displayName,omitempty"`
 	// The date and time the DRG attachment was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	// Example: `2016-08-25T21:10:29.600Z`
 	TimeCreated string `json:"timeCreated,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the DRG route table that is assigned to this attachment.
+	// The DRG route table manages traffic inside the DRG.
+	DrgRouteTableId string                      `json:"drgRouteTableId,omitempty"`
+	NetworkDetails  DrgAttachmentNetworkDetails `json:"networkDetails,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the route table the DRG attachment is using.
+	// For information about why you would associate a route table with a DRG attachment, see:
+	//   * Transit Routing: Access to Multiple VCNs in Same Region (https://docs.cloud.oracle.com/iaas/Content/Network/Tasks/transitrouting.htm)
+	//   * Transit Routing: Private Access to Oracle Services (https://docs.cloud.oracle.com/iaas/Content/Network/Tasks/transitroutingoracleservices.htm)
+	// This field is deprecated. Instead, use the `networkDetails` field to view the OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the attached resource.
+	RouteTableId string `json:"routeTableId,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VCN.
+	// This field is deprecated. Instead, use the `networkDetails` field to view the OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the attached resource.
+	VcnId string `json:"vcnId,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the export route distribution used to specify how routes in the assigned DRG route table
+	// are advertised to the attachment.
+	// If this value is null, no routes are advertised through this attachment.
+	ExportDrgRouteDistributionId string `json:"exportDrgRouteDistributionId,omitempty"`
 	// Indicates whether the DRG attachment and attached network live in a different tenancy than the DRG.
 	// Example: `false`
 	IsCrossTenancy bool `json:"isCrossTenancy,omitempty"`

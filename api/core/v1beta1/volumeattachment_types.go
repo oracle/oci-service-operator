@@ -37,6 +37,7 @@ type VolumeAttachmentMultipathDevice struct {
 // VolumeAttachmentStatus defines the observed state of VolumeAttachment.
 type VolumeAttachmentStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	JsonData   string            `json:"jsonData,omitempty"`
 	// The device name.
 	Device string `json:"device,omitempty"`
 	// A user-friendly name. Does not have to be unique, and it's changeable.
@@ -53,6 +54,9 @@ type VolumeAttachmentStatus struct {
 	IsPvEncryptionInTransitEnabled bool `json:"isPvEncryptionInTransitEnabled,omitempty"`
 	// Whether the Iscsi or Paravirtualized attachment is multipath or not, it is not applicable to NVMe attachment.
 	IsMultipath bool `json:"isMultipath,omitempty"`
+	// The iscsi login state of the volume attachment. For a Iscsi volume attachment,
+	// all iscsi sessions need to be all logged-in or logged-out to be in logged-in or logged-out state.
+	IscsiLoginState string `json:"iscsiLoginState,omitempty"`
 	// Flag indicating if this volume was created for the customer as part of a simplified launch.
 	// Used to determine whether the volume requires deletion on instance termination.
 	IsVolumeCreatedDuringLaunch bool `json:"isVolumeCreatedDuringLaunch,omitempty"`

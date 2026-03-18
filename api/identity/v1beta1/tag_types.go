@@ -45,6 +45,19 @@ type TagSpec struct {
 // TagValidator defines nested fields for Tag.Validator.
 type TagValidator struct {
 	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
+	ValidatorType string `json:"validatorType,omitempty"`
+	// The list of allowed values for a definedTag value.
+	// +kubebuilder:validation:Optional
+	Values []string `json:"values,omitempty"`
+}
+
+// TagValidatorObservedState defines nested fields for Tag.Validator.
+type TagValidatorObservedState struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
 	ValidatorType string `json:"validatorType,omitempty"`
 	// The list of allowed values for a definedTag value.
 	// +kubebuilder:validation:Optional
@@ -62,11 +75,30 @@ type TagStatus struct {
 	TagNamespaceName string `json:"tagNamespaceName,omitempty"`
 	// The OCID of the tag definition.
 	Id string `json:"id,omitempty"`
+	// The name assigned to the tag during creation. This is the tag key definition.
+	// The name must be unique within the tag namespace and cannot be changed.
+	Name string `json:"name,omitempty"`
+	// The description you assign to the tag.
+	Description string `json:"description,omitempty"`
+	// Indicates whether the tag is retired.
+	// See Retiring Key Definitions and Namespace Definitions (https://docs.cloud.oracle.com/Content/Tagging/Tasks/managingtagsandtagnamespaces.htm#retiringkeys).
+	IsRetired bool `json:"isRetired,omitempty"`
 	// Date and time the tag was created, in the format defined by RFC3339.
 	// Example: `2016-08-25T21:10:29.600Z`
 	TimeCreated string `json:"timeCreated,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// The tag's current state. After creating a tag, make sure its `lifecycleState` is ACTIVE before using it. After retiring a tag, make sure its `lifecycleState` is INACTIVE before using it. If you delete a tag, you cannot delete another tag until the deleted tag's `lifecycleState` changes from DELETING to DELETED.
 	LifecycleState string `json:"lifecycleState,omitempty"`
+	// Indicates whether the tag is enabled for cost tracking.
+	IsCostTracking bool                      `json:"isCostTracking,omitempty"`
+	Validator      TagValidatorObservedState `json:"validator,omitempty"`
 }
 
 // +kubebuilder:object:root=true

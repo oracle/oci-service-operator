@@ -19,6 +19,12 @@ type CredentialRotationStatusSpec struct {
 // CredentialRotationStatusObservedState defines the observed state of CredentialRotationStatus.
 type CredentialRotationStatusObservedState struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// Credential rotation status of a kubernetes cluster
+	// IN_PROGRESS: Issuing new credentials to kubernetes cluster control plane and worker nodes or retiring old credentials from kubernetes cluster control plane and worker nodes.
+	// WAITING: Waiting for customer to invoke the complete rotation action or the automcatic complete rotation action.
+	// COMPLETED: New credentials are functional on kuberentes cluster.
+	// This uses a distinct JSON name so it can coexist with the OSOK status envelope.
+	Status string `json:"sdkStatus,omitempty"`
 	// Details of a kuberenetes cluster credential rotation status:
 	// ISSUING_NEW_CREDENTIALS: Credential rotation is in progress. Starting to issue new credentials to kubernetes cluster control plane and worker nodes.
 	// NEW_CREDENTIALS_ISSUED: New credentials are added. At this stage cluster has both old and new credentials and is awaiting old credentials retirement.

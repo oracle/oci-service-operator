@@ -38,6 +38,9 @@ type IamWorkRequestStatus struct {
 	Id string `json:"id,omitempty"`
 	// The asynchronous operation tracked by this IAM work request.
 	OperationType string `json:"operationType,omitempty"`
+	// The status of the work request.
+	// This uses a distinct JSON name so it can coexist with the OSOK status envelope.
+	Status string `json:"sdkStatus,omitempty"`
 	// The OCID of the compartment containing this IAM work request.
 	CompartmentId string `json:"compartmentId,omitempty"`
 	// The resources this work request affects.

@@ -14,6 +14,9 @@ import (
 
 // PublicIpByPrivateIpIdSpec defines the desired state of PublicIpByPrivateIpId.
 type PublicIpByPrivateIpIdSpec struct {
+	// OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the private IP.
+	// +kubebuilder:validation:Required
+	PrivateIpId string `json:"privateIpId"`
 }
 
 // PublicIpByPrivateIpIdStatus defines the observed state of PublicIpByPrivateIpId.

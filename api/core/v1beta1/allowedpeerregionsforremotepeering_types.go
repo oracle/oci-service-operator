@@ -19,6 +19,9 @@ type AllowedPeerRegionsForRemotePeeringSpec struct {
 // AllowedPeerRegionsForRemotePeeringStatus defines the observed state of AllowedPeerRegionsForRemotePeering.
 type AllowedPeerRegionsForRemotePeeringStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The region's name.
+	// Example: `us-phoenix-1`
+	Name string `json:"name,omitempty"`
 }
 
 // +kubebuilder:object:root=true

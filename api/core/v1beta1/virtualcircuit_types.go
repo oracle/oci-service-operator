@@ -192,6 +192,11 @@ type VirtualCircuitPublicPrefixFields struct {
 // VirtualCircuitStatus defines the observed state of VirtualCircuit.
 type VirtualCircuitStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The provisioned data rate of the connection. To get a list of the
+	// available bandwidth levels (that is, shapes), see
+	// ListFastConnectProviderVirtualCircuitBandwidthShapes.
+	// Example: `10 Gbps`
+	BandwidthShapeName string `json:"bandwidthShapeName,omitempty"`
 	// Deprecated. Instead use the information in
 	// FastConnectProviderService.
 	BgpManagement string `json:"bgpManagement,omitempty"`
@@ -199,6 +204,47 @@ type VirtualCircuitStatus struct {
 	BgpSessionState string `json:"bgpSessionState,omitempty"`
 	// The state of the Ipv6 BGP session associated with the virtual circuit.
 	BgpIpv6SessionState string `json:"bgpIpv6SessionState,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the virtual circuit.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// An array of mappings, each containing properties for a
+	// cross-connect or cross-connect group that is associated with this
+	// virtual circuit.
+	CrossConnectMappings []VirtualCircuitCrossConnectMapping `json:"crossConnectMappings,omitempty"`
+	// The routing policy sets how routing information about the Oracle cloud is shared over a public virtual circuit.
+	// Policies available are: `ORACLE_SERVICE_NETWORK`, `REGIONAL`, `MARKET_LEVEL`, and `GLOBAL`.
+	// See Route Filtering (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/routingonprem.htm#route_filtering) for details.
+	// By default, routing information is shared for all routes in the same market.
+	RoutingPolicy []string `json:"routingPolicy,omitempty"`
+	// Set to `ENABLED` (the default) to activate the BGP session of the virtual circuit, set to `DISABLED` to deactivate the virtual circuit.
+	BgpAdminState string `json:"bgpAdminState,omitempty"`
+	// Set to `true` to enable BFD for IPv4 BGP peering, or set to `false` to disable BFD. If this is not set, the default is `false`.
+	IsBfdEnabled bool `json:"isBfdEnabled,omitempty"`
+	// Set to `true` for the virtual circuit to carry only encrypted traffic, or set to `false` for the virtual circuit to carry unencrypted traffic. If this is not set, the default is `false`.
+	IsTransportMode bool `json:"isTransportMode,omitempty"`
+	// Deprecated. Instead use `customerAsn`.
+	// If you specify values for both, the request will be rejected.
+	CustomerBgpAsn int `json:"customerBgpAsn,omitempty"`
+	// The BGP ASN of the network at the other end of the BGP
+	// session from Oracle. If the session is between the customer's
+	// edge router and Oracle, the value is the customer's ASN. If the BGP
+	// session is between the provider's edge router and Oracle, the value
+	// is the provider's ASN.
+	// Can be a 2-byte or 4-byte ASN. Uses "asplain" format.
+	CustomerAsn int64 `json:"customerAsn,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the customer's Drg
+	// that this virtual circuit uses. Applicable only to private virtual circuits.
+	GatewayId string `json:"gatewayId,omitempty"`
 	// The virtual circuit's Oracle ID (OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)).
 	Id string `json:"id,omitempty"`
 	// The virtual circuit's current state. For information about
@@ -207,12 +253,40 @@ type VirtualCircuitStatus struct {
 	LifecycleState string `json:"lifecycleState,omitempty"`
 	// The Oracle BGP ASN.
 	OracleBgpAsn int `json:"oracleBgpAsn,omitempty"`
+	// Deprecated. Instead use `providerServiceId`.
+	ProviderName string `json:"providerName,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the service offered by the provider (if the customer is connecting via a provider).
+	ProviderServiceId string `json:"providerServiceId,omitempty"`
+	// The service key name offered by the provider (if the customer is connecting via a provider).
+	ProviderServiceKeyName string `json:"providerServiceKeyName,omitempty"`
+	// Deprecated. Instead use `providerServiceId`.
+	ProviderServiceName string `json:"providerServiceName,omitempty"`
+	// The provider's state in relation to this virtual circuit (if the
+	// customer is connecting via a provider). ACTIVE means
+	// the provider has provisioned the virtual circuit from their end.
+	// INACTIVE means the provider has not yet provisioned the virtual
+	// circuit, or has de-provisioned it.
+	ProviderState string `json:"providerState,omitempty"`
+	// For a public virtual circuit. The public IP prefixes (CIDRs) the customer wants to
+	// advertise across the connection. All prefix sizes are allowed.
+	PublicPrefixes []string `json:"publicPrefixes,omitempty"`
+	// Provider-supplied reference information about this virtual circuit
+	// (if the customer is connecting via a provider).
+	ReferenceComment string `json:"referenceComment,omitempty"`
+	// The Oracle Cloud Infrastructure region where this virtual
+	// circuit is located.
+	Region string `json:"region,omitempty"`
 	// Provider service type.
 	ServiceType string `json:"serviceType,omitempty"`
 	// The date and time the virtual circuit was created,
 	// in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	// Example: `2016-08-25T21:10:29.600Z`
 	TimeCreated string `json:"timeCreated,omitempty"`
+	// Whether the virtual circuit supports private or public peering. For more information,
+	// see FastConnect Overview (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/fastconnect.htm).
+	Type string `json:"type,omitempty"`
+	// The layer 3 IP MTU to use on this virtual circuit.
+	IpMtu string `json:"ipMtu,omitempty"`
 }
 
 // +kubebuilder:object:root=true

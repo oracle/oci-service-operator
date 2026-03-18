@@ -96,6 +96,12 @@ type ComputeCapacityReservationInstanceReservationConfig struct {
 // ComputeCapacityReservationStatus defines the observed state of ComputeCapacityReservation.
 type ComputeCapacityReservationStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The availability domain of the compute capacity reservation.
+	// Example: `Uocm:PHX-AD-1`
+	AvailabilityDomain string `json:"availabilityDomain,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment
+	// containing the compute capacity reservation.
+	CompartmentId string `json:"compartmentId,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compute capacity reservation.
 	Id string `json:"id,omitempty"`
 	// The current state of the compute capacity reservation.
@@ -103,6 +109,24 @@ type ComputeCapacityReservationStatus struct {
 	// The date and time the compute capacity reservation was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	// Example: `2016-08-25T21:10:29.600Z`
 	TimeCreated string `json:"timeCreated,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Whether this capacity reservation is the default.
+	// For more information, see Capacity Reservations (https://docs.cloud.oracle.com/iaas/Content/Compute/Tasks/reserve-capacity.htm#default).
+	IsDefaultReservation bool `json:"isDefaultReservation,omitempty"`
+	// The capacity configurations for the capacity reservation.
+	// To use the reservation for the desired shape, specify the shape, count, and
+	// optionally the fault domain where you want this configuration.
+	InstanceReservationConfigs []ComputeCapacityReservationInstanceReservationConfig `json:"instanceReservationConfigs,omitempty"`
 	// The number of instances for which capacity will be held with this
 	// compute capacity reservation. This number is the sum of the values of the `reservedCount` fields
 	// for all of the instance capacity configurations under this reservation.

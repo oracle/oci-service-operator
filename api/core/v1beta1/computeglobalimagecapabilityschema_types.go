@@ -40,6 +40,10 @@ type ComputeGlobalImageCapabilitySchemaStatus struct {
 	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// The compute global image capability schema version name
+	Name string `json:"name,omitempty"`
+	// The OCID of the compute global image capability schema
+	ComputeGlobalImageCapabilitySchemaId string `json:"computeGlobalImageCapabilitySchemaId,omitempty"`
 }
 
 // +kubebuilder:object:root=true

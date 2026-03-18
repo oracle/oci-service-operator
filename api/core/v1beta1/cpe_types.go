@@ -55,11 +55,41 @@ type CpeSpec struct {
 // CpeStatus defines the observed state of Cpe.
 type CpeStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the CPE.
+	CompartmentId string `json:"compartmentId,omitempty"`
 	// The CPE's Oracle ID (OCID).
 	Id string `json:"id,omitempty"`
+	// The public IP address of the on-premises router.
+	IpAddress string `json:"ipAddress,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A user-friendly name. Does not have to be unique, and it's changeable.
+	// Avoid entering confidential information.
+	DisplayName string `json:"displayName,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the CPE's device type.
+	// The Networking service maintains a general list of CPE device types (for example,
+	// Cisco ASA). For each type, Oracle provides CPE configuration content that can help
+	// a network engineer configure the CPE. The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) uniquely identifies the type of
+	// device. To get the OCIDs for the device types on the list, see
+	// ListCpeDeviceShapes.
+	// For information about how to generate CPE configuration content for a
+	// CPE device type, see:
+	//   * GetCpeDeviceConfigContent
+	//   * GetIpsecCpeDeviceConfigContent
+	//   * GetTunnelCpeDeviceConfigContent
+	//   * GetTunnelCpeDeviceConfig
+	CpeDeviceShapeId string `json:"cpeDeviceShapeId,omitempty"`
 	// The date and time the CPE was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	// Example: `2016-08-25T21:10:29.600Z`
 	TimeCreated string `json:"timeCreated,omitempty"`
+	// Indicates whether this CPE is of type `private` or not.
+	IsPrivate bool `json:"isPrivate,omitempty"`
 }
 
 // +kubebuilder:object:root=true

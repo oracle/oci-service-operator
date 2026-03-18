@@ -51,9 +51,11 @@ type AuthenticationPolicyNetworkPolicy struct {
 
 // AuthenticationPolicyStatus defines the observed state of AuthenticationPolicy.
 type AuthenticationPolicyStatus struct {
-	OsokStatus shared.OSOKStatus `json:"status"`
+	OsokStatus     shared.OSOKStatus                  `json:"status"`
+	PasswordPolicy AuthenticationPolicyPasswordPolicy `json:"passwordPolicy,omitempty"`
 	// Compartment OCID.
-	CompartmentId string `json:"compartmentId,omitempty"`
+	CompartmentId string                            `json:"compartmentId,omitempty"`
+	NetworkPolicy AuthenticationPolicyNetworkPolicy `json:"networkPolicy,omitempty"`
 }
 
 // +kubebuilder:object:root=true

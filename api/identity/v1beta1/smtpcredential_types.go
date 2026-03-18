@@ -31,6 +31,9 @@ type SmtpCredentialStatus struct {
 	Id string `json:"id,omitempty"`
 	// The OCID of the user the SMTP credential belongs to.
 	UserId string `json:"userId,omitempty"`
+	// The description you assign to the SMTP credential. Does not have to be unique, and it's changeable.
+	// (For tenancies that support identity domains) You can have an empty description.
+	Description string `json:"description,omitempty"`
 	// Date and time the `SmtpCredential` object was created, in the format defined by RFC3339.
 	// Example: `2016-08-25T21:10:29.600Z`
 	TimeCreated string `json:"timeCreated,omitempty"`

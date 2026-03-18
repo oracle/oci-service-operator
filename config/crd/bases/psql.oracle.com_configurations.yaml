@@ -142,6 +142,10 @@ spec:
           status:
             description: ConfigurationStatus defines the observed state of Configuration.
             properties:
+              compartmentId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the compartment that contains the configuration.
+                type: string
               configurationDetails:
                 description: ConfigurationDetails defines nested fields for Configuration.ConfigurationDetails.
                 properties:
@@ -179,10 +183,42 @@ spec:
                       type: object
                     type: array
                 type: object
+              dbVersion:
+                description: Version of the PostgreSQL database.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: A description for the configuration.
+                type: string
+              displayName:
+                description: A user-friendly display name for the configuration. Avoid
+                  entering confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
               id:
                 description: A unique identifier for the configuration. Immutable
                   on creation.
                 type: string
+              instanceMemorySizeInGBs:
+                description: Memory size in gigabytes with 1GB increment.
+                type: integer
+              instanceOcpuCount:
+                description: CPU core count.
+                type: integer
               lifecycleDetails:
                 description: A message describing the current state in more detail.
                   For example, can be used to provide actionable information for a
@@ -190,6 +226,11 @@ spec:
                 type: string
               lifecycleState:
                 description: The current state of the configuration.
+                type: string
+              shape:
+                description: |-
+                  The name of the shape for the configuration.
+                  Example: `VM.Standard.E4.Flex`
                 type: string
               status:
                 properties:
@@ -232,6 +273,15 @@ spec:
                   updatedAt:
                     format: date-time
                     type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  System tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
                 type: object
               timeCreated:
                 description: |-
