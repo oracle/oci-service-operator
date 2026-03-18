@@ -288,6 +288,11 @@ structs:
       SubnetId:
         status: future_consideration
         reason: Subnet migrations demand reprovisioning and are left manual.
+  core.UpgradeStatus:
+    fields:
+      Status:
+        status: intentionally_omitted
+        reason: The SDK field collides with the CRD's existing `status.status` envelope and cannot be exposed as a sibling status field.
   streaming.CreateStreamDetails:
     fields:
       DefinedTags:

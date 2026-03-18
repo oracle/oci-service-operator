@@ -84,12 +84,14 @@ var targets = []Target{
 				SDKStruct: "streaming.UpdateStreamDetails",
 			},
 			{
-				SDKStruct:  "streaming.Stream",
-				APISurface: "status",
+				SDKStruct: "streaming.Stream",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: OCI read-model mappings broaden desired-state coverage, and this CRD does not expose a meaningful status surface for parity tracking.",
 			},
 			{
-				SDKStruct:  "streaming.StreamSummary",
-				APISurface: "status",
+				SDKStruct: "streaming.StreamSummary",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: OCI read-model mappings broaden desired-state coverage, and this CRD does not expose a meaningful status surface for parity tracking.",
 			},
 		},
 	},
@@ -115,7 +117,8 @@ var targets = []Target{
 				SDKStruct: "queue.UpdateQueueDetails",
 			},
 			{
-				SDKStruct: "queue.Queue",
+				SDKStruct:  "queue.Queue",
+				APISurface: "status",
 			},
 			{
 				SDKStruct: "queue.QueueCollection",
@@ -196,10 +199,12 @@ var targets = []Target{
 				SDKStruct: "functions.UpdateApplicationDetails",
 			},
 			{
-				SDKStruct: "functions.Application",
+				SDKStruct:  "functions.Application",
+				APISurface: "status",
 			},
 			{
-				SDKStruct: "functions.ApplicationSummary",
+				SDKStruct:  "functions.ApplicationSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -215,10 +220,12 @@ var targets = []Target{
 				SDKStruct: "functions.UpdateFunctionDetails",
 			},
 			{
-				SDKStruct: "functions.Function",
+				SDKStruct:  "functions.Function",
+				APISurface: "status",
 			},
 			{
-				SDKStruct: "functions.FunctionSummary",
+				SDKStruct:  "functions.FunctionSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -398,10 +405,12 @@ var targets = []Target{
 				SDKStruct: "objectstorage.UpdateBucketDetails",
 			},
 			{
-				SDKStruct: "objectstorage.Bucket",
+				SDKStruct:  "objectstorage.Bucket",
+				APISurface: "status",
 			},
 			{
-				SDKStruct: "objectstorage.BucketSummary",
+				SDKStruct:  "objectstorage.BucketSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -447,7 +456,8 @@ var targets = []Target{
 				SDKStruct: "objectstorage.UpdateNamespaceMetadataDetails",
 			},
 			{
-				SDKStruct: "objectstorage.NamespaceMetadata",
+				SDKStruct:  "objectstorage.NamespaceMetadata",
+				APISurface: "status",
 			},
 		},
 	},
@@ -506,10 +516,12 @@ var targets = []Target{
 				SDKStruct: "objectstorage.CreatePreauthenticatedRequestDetails",
 			},
 			{
-				SDKStruct: "objectstorage.PreauthenticatedRequest",
+				SDKStruct:  "objectstorage.PreauthenticatedRequest",
+				APISurface: "status",
 			},
 			{
-				SDKStruct: "objectstorage.PreauthenticatedRequestSummary",
+				SDKStruct:  "objectstorage.PreauthenticatedRequestSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -617,12 +629,14 @@ var targets = []Target{
 				SDKStruct: "ons.CreateTopicDetails",
 			},
 			{
-				SDKStruct:  "ons.NotificationTopic",
-				APISurface: "status",
+				SDKStruct: "ons.NotificationTopic",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: OCI read-model mappings broaden desired-state coverage, and this CRD does not expose a meaningful status surface for parity tracking.",
 			},
 			{
-				SDKStruct:  "ons.NotificationTopicSummary",
-				APISurface: "status",
+				SDKStruct: "ons.NotificationTopicSummary",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: OCI read-model mappings broaden desired-state coverage, and this CRD does not expose a meaningful status surface for parity tracking.",
 			},
 		},
 	},
@@ -644,10 +658,12 @@ var targets = []Target{
 				SDKStruct: "ons.UpdateSubscriptionDetails",
 			},
 			{
-				SDKStruct: "ons.Subscription",
+				SDKStruct:  "ons.Subscription",
+				APISurface: "status",
 			},
 			{
-				SDKStruct: "ons.SubscriptionSummary",
+				SDKStruct:  "ons.SubscriptionSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -663,10 +679,12 @@ var targets = []Target{
 				SDKStruct: "logging.UpdateLogGroupDetails",
 			},
 			{
-				SDKStruct: "logging.LogGroup",
+				SDKStruct:  "logging.LogGroup",
+				APISurface: "status",
 			},
 			{
-				SDKStruct: "logging.LogGroupSummary",
+				SDKStruct:  "logging.LogGroupSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -685,7 +703,8 @@ var targets = []Target{
 				SDKStruct: "logging.Log",
 			},
 			{
-				SDKStruct: "logging.LogSummary",
+				SDKStruct:  "logging.LogSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -701,10 +720,12 @@ var targets = []Target{
 				SDKStruct: "logging.UpdateLogSavedSearchDetails",
 			},
 			{
-				SDKStruct: "logging.LogSavedSearch",
+				SDKStruct:  "logging.LogSavedSearch",
+				APISurface: "status",
 			},
 			{
-				SDKStruct: "logging.LogSavedSearchSummary",
+				SDKStruct:  "logging.LogSavedSearchSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -730,7 +751,8 @@ var targets = []Target{
 				SDKStruct: "logging.UpdateUnifiedAgentConfigurationDetails",
 			},
 			{
-				SDKStruct: "logging.UnifiedAgentConfiguration",
+				SDKStruct:  "logging.UnifiedAgentConfiguration",
+				APISurface: "status",
 			},
 			{
 				SDKStruct: "logging.UnifiedAgentConfigurationCollection",
@@ -785,13 +807,17 @@ var targets = []Target{
 				SDKStruct: "psql.UpdateBackupDetails",
 			},
 			{
-				SDKStruct: "psql.Backup",
+				SDKStruct:  "psql.Backup",
+				APISurface: "status",
 			},
 			{
 				SDKStruct: "psql.BackupCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: transport wrapper type does not correspond to a top-level CRD spec or status surface.",
 			},
 			{
-				SDKStruct: "psql.BackupSummary",
+				SDKStruct:  "psql.BackupSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -808,15 +834,21 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "psql.ConfigurationDetails",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: transport wrapper type does not correspond to a top-level CRD spec or status surface.",
 			},
 			{
-				SDKStruct: "psql.Configuration",
+				SDKStruct:  "psql.Configuration",
+				APISurface: "status",
 			},
 			{
 				SDKStruct: "psql.ConfigurationCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: transport wrapper type does not correspond to a top-level CRD spec or status surface.",
 			},
 			{
-				SDKStruct: "psql.ConfigurationSummary",
+				SDKStruct:  "psql.ConfigurationSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -847,15 +879,21 @@ var targets = []Target{
 		SDKMappings: []SDKMapping{
 			{
 				SDKStruct: "psql.DefaultConfigurationDetails",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: transport wrapper type does not correspond to a top-level CRD spec or status surface.",
 			},
 			{
-				SDKStruct: "psql.DefaultConfiguration",
+				SDKStruct:  "psql.DefaultConfiguration",
+				APISurface: "status",
 			},
 			{
 				SDKStruct: "psql.DefaultConfigurationCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: transport wrapper type does not correspond to a top-level CRD spec or status surface.",
 			},
 			{
-				SDKStruct: "psql.DefaultConfigurationSummary",
+				SDKStruct:  "psql.DefaultConfigurationSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -865,7 +903,8 @@ var targets = []Target{
 		StatusType: reflect.TypeOf(psqlv1beta1.PrimaryDbInstanceStatus{}),
 		SDKMappings: []SDKMapping{
 			{
-				SDKStruct: "psql.PrimaryDbInstanceDetails",
+				SDKStruct:  "psql.PrimaryDbInstanceDetails",
+				APISurface: "status",
 			},
 		},
 	},
@@ -876,9 +915,12 @@ var targets = []Target{
 		SDKMappings: []SDKMapping{
 			{
 				SDKStruct: "psql.ShapeCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: transport wrapper type does not correspond to a top-level CRD spec or status surface.",
 			},
 			{
-				SDKStruct: "psql.ShapeSummary",
+				SDKStruct:  "psql.ShapeSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -888,10 +930,12 @@ var targets = []Target{
 		StatusType: reflect.TypeOf(psqlv1beta1.WorkRequestStatus{}),
 		SDKMappings: []SDKMapping{
 			{
-				SDKStruct: "psql.WorkRequest",
+				SDKStruct:  "psql.WorkRequest",
+				APISurface: "status",
 			},
 			{
-				SDKStruct: "psql.WorkRequestSummary",
+				SDKStruct:  "psql.WorkRequestSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -901,10 +945,13 @@ var targets = []Target{
 		StatusType: reflect.TypeOf(psqlv1beta1.WorkRequestErrorStatus{}),
 		SDKMappings: []SDKMapping{
 			{
-				SDKStruct: "psql.WorkRequestError",
+				SDKStruct:  "psql.WorkRequestError",
+				APISurface: "status",
 			},
 			{
 				SDKStruct: "psql.WorkRequestErrorCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: transport wrapper type does not correspond to a top-level CRD spec or status surface.",
 			},
 		},
 	},
@@ -914,10 +961,13 @@ var targets = []Target{
 		StatusType: reflect.TypeOf(psqlv1beta1.WorkRequestLogStatus{}),
 		SDKMappings: []SDKMapping{
 			{
-				SDKStruct: "psql.WorkRequestLogEntry",
+				SDKStruct:  "psql.WorkRequestLogEntry",
+				APISurface: "status",
 			},
 			{
 				SDKStruct: "psql.WorkRequestLogEntryCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: transport wrapper type does not correspond to a top-level CRD spec or status surface.",
 			},
 		},
 	},
@@ -936,13 +986,17 @@ var targets = []Target{
 				SDKStruct: "psql.DbSystemDetails",
 			},
 			{
-				SDKStruct: "psql.DbSystem",
+				SDKStruct:  "psql.DbSystem",
+				APISurface: "status",
 			},
 			{
 				SDKStruct: "psql.DbSystemCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: transport wrapper type does not correspond to a top-level CRD spec or status surface.",
 			},
 			{
-				SDKStruct: "psql.DbSystemSummary",
+				SDKStruct:  "psql.DbSystemSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -958,10 +1012,12 @@ var targets = []Target{
 				SDKStruct: "events.UpdateRuleDetails",
 			},
 			{
-				SDKStruct: "events.Rule",
+				SDKStruct:  "events.Rule",
+				APISurface: "status",
 			},
 			{
-				SDKStruct: "events.RuleSummary",
+				SDKStruct:  "events.RuleSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -977,10 +1033,12 @@ var targets = []Target{
 				SDKStruct: "monitoring.UpdateAlarmDetails",
 			},
 			{
-				SDKStruct: "monitoring.Alarm",
+				SDKStruct:  "monitoring.Alarm",
+				APISurface: "status",
 			},
 			{
-				SDKStruct: "monitoring.AlarmSummary",
+				SDKStruct:  "monitoring.AlarmSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -1016,13 +1074,15 @@ var targets = []Target{
 				SDKStruct: "monitoring.CreateAlarmSuppressionDetails",
 			},
 			{
-				SDKStruct: "monitoring.AlarmSuppression",
+				SDKStruct:  "monitoring.AlarmSuppression",
+				APISurface: "status",
 			},
 			{
 				SDKStruct: "monitoring.AlarmSuppressionCollection",
 			},
 			{
-				SDKStruct: "monitoring.AlarmSuppressionSummary",
+				SDKStruct:  "monitoring.AlarmSuppressionSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -1032,7 +1092,8 @@ var targets = []Target{
 		StatusType: reflect.TypeOf(monitoringv1beta1.MetricStatus{}),
 		SDKMappings: []SDKMapping{
 			{
-				SDKStruct: "monitoring.Metric",
+				SDKStruct:  "monitoring.Metric",
+				APISurface: "status",
 			},
 		},
 	},
@@ -1055,7 +1116,8 @@ var targets = []Target{
 				SDKStruct: "dns.UpdateRrSetDetails",
 			},
 			{
-				SDKStruct: "dns.RrSet",
+				SDKStruct:  "dns.RrSet",
+				APISurface: "spec",
 			},
 		},
 	},
@@ -1081,10 +1143,12 @@ var targets = []Target{
 		StatusType: reflect.TypeOf(dnsv1beta1.ResolverEndpointStatus{}),
 		SDKMappings: []SDKMapping{
 			{
-				SDKStruct: "dns.ResolverVnicEndpoint",
+				SDKStruct:  "dns.ResolverVnicEndpoint",
+				APISurface: "status",
 			},
 			{
-				SDKStruct: "dns.ResolverVnicEndpointSummary",
+				SDKStruct:  "dns.ResolverVnicEndpointSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -1100,10 +1164,12 @@ var targets = []Target{
 				SDKStruct: "dns.UpdateSteeringPolicyDetails",
 			},
 			{
-				SDKStruct: "dns.SteeringPolicy",
+				SDKStruct:  "dns.SteeringPolicy",
+				APISurface: "status",
 			},
 			{
-				SDKStruct: "dns.SteeringPolicySummary",
+				SDKStruct:  "dns.SteeringPolicySummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -1138,10 +1204,12 @@ var targets = []Target{
 				SDKStruct: "dns.UpdateTsigKeyDetails",
 			},
 			{
-				SDKStruct: "dns.TsigKey",
+				SDKStruct:  "dns.TsigKey",
+				APISurface: "status",
 			},
 			{
-				SDKStruct: "dns.TsigKeySummary",
+				SDKStruct:  "dns.TsigKeySummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -1232,7 +1300,8 @@ var targets = []Target{
 				SDKStruct: "loadbalancer.UpdateLoadBalancerDetails",
 			},
 			{
-				SDKStruct: "loadbalancer.LoadBalancer",
+				SDKStruct:  "loadbalancer.LoadBalancer",
+				APISurface: "status",
 			},
 		},
 	},
@@ -1251,7 +1320,8 @@ var targets = []Target{
 				SDKStruct: "loadbalancer.BackendDetails",
 			},
 			{
-				SDKStruct: "loadbalancer.Backend",
+				SDKStruct:  "loadbalancer.Backend",
+				APISurface: "status",
 			},
 		},
 	},
@@ -1280,7 +1350,8 @@ var targets = []Target{
 				SDKStruct: "loadbalancer.BackendSetDetails",
 			},
 			{
-				SDKStruct: "loadbalancer.BackendSet",
+				SDKStruct:  "loadbalancer.BackendSet",
+				APISurface: "spec",
 			},
 		},
 	},
@@ -1306,7 +1377,8 @@ var targets = []Target{
 				SDKStruct: "loadbalancer.CertificateDetails",
 			},
 			{
-				SDKStruct: "loadbalancer.Certificate",
+				SDKStruct:  "loadbalancer.Certificate",
+				APISurface: "spec",
 			},
 		},
 	},
@@ -1322,7 +1394,8 @@ var targets = []Target{
 				SDKStruct: "loadbalancer.HealthCheckerDetails",
 			},
 			{
-				SDKStruct: "loadbalancer.HealthChecker",
+				SDKStruct:  "loadbalancer.HealthChecker",
+				APISurface: "spec",
 			},
 		},
 	},
@@ -1341,7 +1414,8 @@ var targets = []Target{
 				SDKStruct: "loadbalancer.HostnameDetails",
 			},
 			{
-				SDKStruct: "loadbalancer.Hostname",
+				SDKStruct:  "loadbalancer.Hostname",
+				APISurface: "spec",
 			},
 		},
 	},
@@ -1360,7 +1434,8 @@ var targets = []Target{
 				SDKStruct: "loadbalancer.ListenerDetails",
 			},
 			{
-				SDKStruct: "loadbalancer.Listener",
+				SDKStruct:  "loadbalancer.Listener",
+				APISurface: "spec",
 			},
 		},
 	},
@@ -1425,7 +1500,8 @@ var targets = []Target{
 				SDKStruct: "loadbalancer.PathRouteSetDetails",
 			},
 			{
-				SDKStruct: "loadbalancer.PathRouteSet",
+				SDKStruct:  "loadbalancer.PathRouteSet",
+				APISurface: "spec",
 			},
 		},
 	},
@@ -1464,7 +1540,8 @@ var targets = []Target{
 				SDKStruct: "loadbalancer.RoutingPolicyDetails",
 			},
 			{
-				SDKStruct: "loadbalancer.RoutingPolicy",
+				SDKStruct:  "loadbalancer.RoutingPolicy",
+				APISurface: "spec",
 			},
 		},
 	},
@@ -1483,7 +1560,8 @@ var targets = []Target{
 				SDKStruct: "loadbalancer.RuleSetDetails",
 			},
 			{
-				SDKStruct: "loadbalancer.RuleSet",
+				SDKStruct:  "loadbalancer.RuleSet",
+				APISurface: "spec",
 			},
 		},
 	},
@@ -1502,7 +1580,8 @@ var targets = []Target{
 				SDKStruct: "loadbalancer.SslCipherSuiteDetails",
 			},
 			{
-				SDKStruct: "loadbalancer.SslCipherSuite",
+				SDKStruct:  "loadbalancer.SslCipherSuite",
+				APISurface: "spec",
 			},
 		},
 	},
@@ -1546,13 +1625,15 @@ var targets = []Target{
 				SDKStruct: "networkloadbalancer.UpdateNetworkLoadBalancerDetails",
 			},
 			{
-				SDKStruct: "networkloadbalancer.NetworkLoadBalancer",
+				SDKStruct:  "networkloadbalancer.NetworkLoadBalancer",
+				APISurface: "status",
 			},
 			{
 				SDKStruct: "networkloadbalancer.NetworkLoadBalancerCollection",
 			},
 			{
-				SDKStruct: "networkloadbalancer.NetworkLoadBalancerSummary",
+				SDKStruct:  "networkloadbalancer.NetworkLoadBalancerSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -1571,13 +1652,15 @@ var targets = []Target{
 				SDKStruct: "networkloadbalancer.BackendDetails",
 			},
 			{
-				SDKStruct: "networkloadbalancer.Backend",
+				SDKStruct:  "networkloadbalancer.Backend",
+				APISurface: "spec",
 			},
 			{
 				SDKStruct: "networkloadbalancer.BackendCollection",
 			},
 			{
-				SDKStruct: "networkloadbalancer.BackendSummary",
+				SDKStruct:  "networkloadbalancer.BackendSummary",
+				APISurface: "spec",
 			},
 		},
 	},
@@ -1606,13 +1689,15 @@ var targets = []Target{
 				SDKStruct: "networkloadbalancer.BackendSetDetails",
 			},
 			{
-				SDKStruct: "networkloadbalancer.BackendSet",
+				SDKStruct:  "networkloadbalancer.BackendSet",
+				APISurface: "spec",
 			},
 			{
 				SDKStruct: "networkloadbalancer.BackendSetCollection",
 			},
 			{
-				SDKStruct: "networkloadbalancer.BackendSetSummary",
+				SDKStruct:  "networkloadbalancer.BackendSetSummary",
+				APISurface: "spec",
 			},
 		},
 	},
@@ -1638,7 +1723,8 @@ var targets = []Target{
 				SDKStruct: "networkloadbalancer.HealthCheckerDetails",
 			},
 			{
-				SDKStruct: "networkloadbalancer.HealthChecker",
+				SDKStruct:  "networkloadbalancer.HealthChecker",
+				APISurface: "spec",
 			},
 		},
 	},
@@ -1657,13 +1743,15 @@ var targets = []Target{
 				SDKStruct: "networkloadbalancer.ListenerDetails",
 			},
 			{
-				SDKStruct: "networkloadbalancer.Listener",
+				SDKStruct:  "networkloadbalancer.Listener",
+				APISurface: "spec",
 			},
 			{
 				SDKStruct: "networkloadbalancer.ListenerCollection",
 			},
 			{
-				SDKStruct: "networkloadbalancer.ListenerSummary",
+				SDKStruct:  "networkloadbalancer.ListenerSummary",
+				APISurface: "spec",
 			},
 		},
 	},
@@ -1781,6 +1869,8 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "artifacts.ContainerImageCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 			{
 				SDKStruct: "artifacts.ContainerImageSummary",
@@ -1799,13 +1889,17 @@ var targets = []Target{
 				SDKStruct: "artifacts.UpdateContainerImageSignatureDetails",
 			},
 			{
-				SDKStruct: "artifacts.ContainerImageSignature",
+				SDKStruct:  "artifacts.ContainerImageSignature",
+				APISurface: "status",
 			},
 			{
 				SDKStruct: "artifacts.ContainerImageSignatureCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 			{
-				SDKStruct: "artifacts.ContainerImageSignatureSummary",
+				SDKStruct:  "artifacts.ContainerImageSignatureSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -1825,6 +1919,8 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "artifacts.ContainerRepositoryCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 			{
 				SDKStruct: "artifacts.ContainerRepositorySummary",
@@ -1844,6 +1940,8 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "artifacts.GenericArtifactCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 			{
 				SDKStruct: "artifacts.GenericArtifactSummary",
@@ -1866,13 +1964,19 @@ var targets = []Target{
 		StatusType: reflect.TypeOf(artifactsv1beta1.RepositoryStatus{}),
 		SDKMappings: []SDKMapping{
 			{
-				SDKStruct: "artifacts.ContainerRepository",
+				SDKStruct:  "artifacts.ContainerRepository",
+				APISurface: "status",
+				Exclude:    true,
+				Reason:     "Intentionally untracked: ArtifactsRepository status represents generic repositories; container repository parity is tracked on ArtifactsContainerRepository.",
 			},
 			{
-				SDKStruct: "artifacts.GenericRepository",
+				SDKStruct:  "artifacts.GenericRepository",
+				APISurface: "status",
 			},
 			{
 				SDKStruct: "artifacts.RepositoryCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 		},
 	},
@@ -1906,6 +2010,8 @@ var targets = []Target{
 		SDKMappings: []SDKMapping{
 			{
 				SDKStruct: "certificates.CertificateAuthorityBundleVersionCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 			{
 				SDKStruct: "certificates.CertificateAuthorityBundleVersionSummary",
@@ -1932,6 +2038,8 @@ var targets = []Target{
 		SDKMappings: []SDKMapping{
 			{
 				SDKStruct: "certificates.CertificateBundleVersionCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 			{
 				SDKStruct: "certificates.CertificateBundleVersionSummary",
@@ -1966,13 +2074,15 @@ var targets = []Target{
 				SDKStruct: "certificatesmanagement.UpdateCaBundleDetails",
 			},
 			{
-				SDKStruct: "certificatesmanagement.CaBundle",
+				SDKStruct:  "certificatesmanagement.CaBundle",
+				APISurface: "status",
 			},
 			{
 				SDKStruct: "certificatesmanagement.CaBundleCollection",
 			},
 			{
-				SDKStruct: "certificatesmanagement.CaBundleSummary",
+				SDKStruct:  "certificatesmanagement.CaBundleSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -2096,10 +2206,12 @@ var targets = []Target{
 				SDKStruct: "containerengine.UpdateClusterDetails",
 			},
 			{
-				SDKStruct: "containerengine.Cluster",
+				SDKStruct:  "containerengine.Cluster",
+				APISurface: "status",
 			},
 			{
-				SDKStruct: "containerengine.ClusterSummary",
+				SDKStruct:  "containerengine.ClusterSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -2115,7 +2227,8 @@ var targets = []Target{
 				SDKStruct: "containerengine.UpdateClusterEndpointConfigDetails",
 			},
 			{
-				SDKStruct: "containerengine.ClusterEndpointConfig",
+				SDKStruct:  "containerengine.ClusterEndpointConfig",
+				APISurface: "spec",
 			},
 		},
 	},
@@ -2181,10 +2294,12 @@ var targets = []Target{
 				SDKStruct: "containerengine.UpdateNodePoolDetails",
 			},
 			{
-				SDKStruct: "containerengine.NodePool",
+				SDKStruct:  "containerengine.NodePool",
+				APISurface: "status",
 			},
 			{
-				SDKStruct: "containerengine.NodePoolSummary",
+				SDKStruct:  "containerengine.NodePoolSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -2236,10 +2351,12 @@ var targets = []Target{
 				SDKStruct: "containerengine.UpdateVirtualNodePoolDetails",
 			},
 			{
-				SDKStruct: "containerengine.VirtualNodePool",
+				SDKStruct:  "containerengine.VirtualNodePool",
+				APISurface: "status",
 			},
 			{
-				SDKStruct: "containerengine.VirtualNodePoolSummary",
+				SDKStruct:  "containerengine.VirtualNodePoolSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -2343,7 +2460,8 @@ var targets = []Target{
 				SDKStruct: "identity.UpdateAuthenticationPolicyDetails",
 			},
 			{
-				SDKStruct: "identity.AuthenticationPolicy",
+				SDKStruct:  "identity.AuthenticationPolicy",
+				APISurface: "status",
 			},
 		},
 	},
@@ -2476,7 +2594,8 @@ var targets = []Target{
 				SDKStruct: "identity.UpdateDynamicGroupDetails",
 			},
 			{
-				SDKStruct: "identity.DynamicGroup",
+				SDKStruct:  "identity.DynamicGroup",
+				APISurface: "status",
 			},
 		},
 	},
@@ -2502,7 +2621,8 @@ var targets = []Target{
 				SDKStruct: "identity.UpdateGroupDetails",
 			},
 			{
-				SDKStruct: "identity.Group",
+				SDKStruct:  "identity.Group",
+				APISurface: "status",
 			},
 		},
 	},
@@ -2545,7 +2665,8 @@ var targets = []Target{
 		StatusType: reflect.TypeOf(identityv1beta1.IdentityProviderStatus{}),
 		SDKMappings: []SDKMapping{
 			{
-				SDKStruct: "identity.Saml2IdentityProvider",
+				SDKStruct:  "identity.Saml2IdentityProvider",
+				APISurface: "status",
 			},
 		},
 	},
@@ -2600,7 +2721,8 @@ var targets = []Target{
 				SDKStruct: "identity.UpdateNetworkSourceDetails",
 			},
 			{
-				SDKStruct: "identity.NetworkSources",
+				SDKStruct:  "identity.NetworkSources",
+				APISurface: "status",
 			},
 		},
 	},
@@ -2616,12 +2738,14 @@ var targets = []Target{
 				SDKStruct: "identity.UpdateOAuth2ClientCredentialDetails",
 			},
 			{
-				SDKStruct:  "identity.OAuth2ClientCredential",
-				APISurface: "status",
+				SDKStruct: "identity.OAuth2ClientCredential",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: OCI read-model mappings broaden desired-state coverage, and this CRD does not expose a meaningful status surface for parity tracking.",
 			},
 			{
-				SDKStruct:  "identity.OAuth2ClientCredentialSummary",
-				APISurface: "status",
+				SDKStruct: "identity.OAuth2ClientCredentialSummary",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: OCI read-model mappings broaden desired-state coverage, and this CRD does not expose a meaningful status surface for parity tracking.",
 			},
 		},
 	},
@@ -2648,7 +2772,8 @@ var targets = []Target{
 				SDKStruct: "identity.UpdatePolicyDetails",
 			},
 			{
-				SDKStruct: "identity.Policy",
+				SDKStruct:  "identity.Policy",
+				APISurface: "status",
 			},
 		},
 	},
@@ -2745,10 +2870,12 @@ var targets = []Target{
 				SDKStruct: "identity.UpdateTagDetails",
 			},
 			{
-				SDKStruct: "identity.Tag",
+				SDKStruct:  "identity.Tag",
+				APISurface: "status",
 			},
 			{
-				SDKStruct: "identity.TagSummary",
+				SDKStruct:  "identity.TagSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -2783,10 +2910,12 @@ var targets = []Target{
 				SDKStruct: "identity.UpdateTagNamespaceDetails",
 			},
 			{
-				SDKStruct: "identity.TagNamespace",
+				SDKStruct:  "identity.TagNamespace",
+				APISurface: "status",
 			},
 			{
-				SDKStruct: "identity.TagNamespaceSummary",
+				SDKStruct:  "identity.TagNamespaceSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -2855,7 +2984,8 @@ var targets = []Target{
 		StatusType: reflect.TypeOf(identityv1beta1.UserCapabilityStatus{}),
 		SDKMappings: []SDKMapping{
 			{
-				SDKStruct: "identity.UserCapabilities",
+				SDKStruct:  "identity.UserCapabilities",
+				APISurface: "spec",
 			},
 		},
 	},
@@ -2915,10 +3045,12 @@ var targets = []Target{
 				SDKStruct: "keymanagement.UpdateEkmsPrivateEndpointDetails",
 			},
 			{
-				SDKStruct: "keymanagement.EkmsPrivateEndpoint",
+				SDKStruct:  "keymanagement.EkmsPrivateEndpoint",
+				APISurface: "status",
 			},
 			{
-				SDKStruct: "keymanagement.EkmsPrivateEndpointSummary",
+				SDKStruct:  "keymanagement.EkmsPrivateEndpointSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -3102,10 +3234,12 @@ var targets = []Target{
 				SDKStruct: "limits.UpdateQuotaDetails",
 			},
 			{
-				SDKStruct: "limits.Quota",
+				SDKStruct:  "limits.Quota",
+				APISurface: "status",
 			},
 			{
-				SDKStruct: "limits.QuotaSummary",
+				SDKStruct:  "limits.QuotaSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -3177,7 +3311,8 @@ var targets = []Target{
 				SDKStruct: "vault.UpdateSecretDetails",
 			},
 			{
-				SDKStruct: "vault.Secret",
+				SDKStruct:  "vault.Secret",
+				APISurface: "status",
 			},
 			{
 				SDKStruct: "vault.SecretVersionSummary",
@@ -3309,7 +3444,8 @@ var targets = []Target{
 				SDKStruct: "core.UpdateBootVolumeDetails",
 			},
 			{
-				SDKStruct: "core.BootVolume",
+				SDKStruct:  "core.BootVolume",
+				APISurface: "status",
 			},
 		},
 	},
@@ -3348,7 +3484,8 @@ var targets = []Target{
 				SDKStruct: "core.UpdateBootVolumeKmsKeyDetails",
 			},
 			{
-				SDKStruct: "core.BootVolumeKmsKey",
+				SDKStruct:  "core.BootVolumeKmsKey",
+				APISurface: "spec",
 			},
 		},
 	},
@@ -3372,9 +3509,12 @@ var targets = []Target{
 		SDKMappings: []SDKMapping{
 			{
 				SDKStruct: "core.ByoipAllocatedRangeCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 			{
-				SDKStruct: "core.ByoipAllocatedRangeSummary",
+				SDKStruct:  "core.ByoipAllocatedRangeSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -3390,13 +3530,17 @@ var targets = []Target{
 				SDKStruct: "core.UpdateByoipRangeDetails",
 			},
 			{
-				SDKStruct: "core.ByoipRange",
+				SDKStruct:  "core.ByoipRange",
+				APISurface: "status",
 			},
 			{
 				SDKStruct: "core.ByoipRangeCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 			{
-				SDKStruct: "core.ByoipRangeSummary",
+				SDKStruct:  "core.ByoipRangeSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -3412,7 +3556,8 @@ var targets = []Target{
 				SDKStruct: "core.UpdateCpeDetails",
 			},
 			{
-				SDKStruct: "core.Cpe",
+				SDKStruct:  "core.Cpe",
+				APISurface: "status",
 			},
 		},
 	},
@@ -3428,7 +3573,8 @@ var targets = []Target{
 				SDKStruct: "core.UpdateCaptureFilterDetails",
 			},
 			{
-				SDKStruct: "core.CaptureFilter",
+				SDKStruct:  "core.CaptureFilter",
+				APISurface: "status",
 			},
 		},
 	},
@@ -3444,10 +3590,12 @@ var targets = []Target{
 				SDKStruct: "core.UpdateClusterNetworkDetails",
 			},
 			{
-				SDKStruct: "core.ClusterNetwork",
+				SDKStruct:  "core.ClusterNetwork",
+				APISurface: "status",
 			},
 			{
-				SDKStruct: "core.ClusterNetworkSummary",
+				SDKStruct:  "core.ClusterNetworkSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -3471,7 +3619,8 @@ var targets = []Target{
 				SDKStruct: "core.CreateComputeCapacityReportDetails",
 			},
 			{
-				SDKStruct: "core.ComputeCapacityReport",
+				SDKStruct:  "core.ComputeCapacityReport",
+				APISurface: "status",
 			},
 		},
 	},
@@ -3487,10 +3636,12 @@ var targets = []Target{
 				SDKStruct: "core.UpdateComputeCapacityReservationDetails",
 			},
 			{
-				SDKStruct: "core.ComputeCapacityReservation",
+				SDKStruct:  "core.ComputeCapacityReservation",
+				APISurface: "status",
 			},
 			{
-				SDKStruct: "core.ComputeCapacityReservationSummary",
+				SDKStruct:  "core.ComputeCapacityReservationSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -3527,13 +3678,17 @@ var targets = []Target{
 				SDKStruct: "core.UpdateComputeCapacityTopologyDetails",
 			},
 			{
-				SDKStruct: "core.ComputeCapacityTopology",
+				SDKStruct:  "core.ComputeCapacityTopology",
+				APISurface: "status",
 			},
 			{
 				SDKStruct: "core.ComputeCapacityTopologyCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 			{
-				SDKStruct: "core.ComputeCapacityTopologySummary",
+				SDKStruct:  "core.ComputeCapacityTopologySummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -3545,6 +3700,8 @@ var targets = []Target{
 			{
 				SDKStruct:  "core.ComputeBareMetalHostCollection",
 				APISurface: "status",
+				Exclude:    true,
+				Reason:     "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 		},
 	},
@@ -3556,6 +3713,8 @@ var targets = []Target{
 			{
 				SDKStruct:  "core.ComputeHpcIslandCollection",
 				APISurface: "status",
+				Exclude:    true,
+				Reason:     "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 		},
 	},
@@ -3567,6 +3726,8 @@ var targets = []Target{
 			{
 				SDKStruct:  "core.ComputeNetworkBlockCollection",
 				APISurface: "status",
+				Exclude:    true,
+				Reason:     "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 		},
 	},
@@ -3582,13 +3743,17 @@ var targets = []Target{
 				SDKStruct: "core.UpdateComputeClusterDetails",
 			},
 			{
-				SDKStruct: "core.ComputeCluster",
+				SDKStruct:  "core.ComputeCluster",
+				APISurface: "status",
 			},
 			{
 				SDKStruct: "core.ComputeClusterCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 			{
-				SDKStruct: "core.ComputeClusterSummary",
+				SDKStruct:  "core.ComputeClusterSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -3633,10 +3798,12 @@ var targets = []Target{
 				SDKStruct: "core.UpdateComputeImageCapabilitySchemaDetails",
 			},
 			{
-				SDKStruct: "core.ComputeImageCapabilitySchema",
+				SDKStruct:  "core.ComputeImageCapabilitySchema",
+				APISurface: "status",
 			},
 			{
-				SDKStruct: "core.ComputeImageCapabilitySchemaSummary",
+				SDKStruct:  "core.ComputeImageCapabilitySchemaSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -3687,7 +3854,8 @@ var targets = []Target{
 				SDKStruct: "core.UpdateCrossConnectDetails",
 			},
 			{
-				SDKStruct: "core.CrossConnect",
+				SDKStruct:  "core.CrossConnect",
+				APISurface: "status",
 			},
 		},
 	},
@@ -3703,7 +3871,8 @@ var targets = []Target{
 				SDKStruct: "core.UpdateCrossConnectGroupDetails",
 			},
 			{
-				SDKStruct: "core.CrossConnectGroup",
+				SDKStruct:  "core.CrossConnectGroup",
+				APISurface: "status",
 			},
 		},
 	},
@@ -3773,7 +3942,8 @@ var targets = []Target{
 				SDKStruct: "core.UpdateDrgDetails",
 			},
 			{
-				SDKStruct: "core.Drg",
+				SDKStruct:  "core.Drg",
+				APISurface: "status",
 			},
 		},
 	},
@@ -3789,7 +3959,8 @@ var targets = []Target{
 				SDKStruct: "core.UpdateDrgAttachmentDetails",
 			},
 			{
-				SDKStruct: "core.DrgAttachment",
+				SDKStruct:  "core.DrgAttachment",
+				APISurface: "status",
 			},
 		},
 	},
@@ -3805,7 +3976,8 @@ var targets = []Target{
 				SDKStruct: "core.UpdateDrgRouteDistributionDetails",
 			},
 			{
-				SDKStruct: "core.DrgRouteDistribution",
+				SDKStruct:  "core.DrgRouteDistribution",
+				APISurface: "status",
 			},
 		},
 	},
@@ -3818,7 +3990,8 @@ var targets = []Target{
 				SDKStruct: "core.UpdateDrgRouteDistributionStatementDetails",
 			},
 			{
-				SDKStruct: "core.DrgRouteDistributionStatement",
+				SDKStruct:  "core.DrgRouteDistributionStatement",
+				APISurface: "status",
 			},
 		},
 	},
@@ -3847,7 +4020,8 @@ var targets = []Target{
 				SDKStruct: "core.UpdateDrgRouteTableDetails",
 			},
 			{
-				SDKStruct: "core.DrgRouteTable",
+				SDKStruct:  "core.DrgRouteTable",
+				APISurface: "status",
 			},
 		},
 	},
@@ -3912,7 +4086,8 @@ var targets = []Target{
 				SDKStruct: "core.UpdateDhcpDetails",
 			},
 			{
-				SDKStruct: "core.DhcpOptions",
+				SDKStruct:  "core.DhcpOptions",
+				APISurface: "status",
 			},
 		},
 	},
@@ -3969,7 +4144,8 @@ var targets = []Target{
 				SDKStruct: "core.UpdateIpSecConnectionDetails",
 			},
 			{
-				SDKStruct: "core.IpSecConnection",
+				SDKStruct:  "core.IpSecConnection",
+				APISurface: "status",
 			},
 		},
 	},
@@ -4050,7 +4226,8 @@ var targets = []Target{
 				SDKStruct: "core.UpdateIpSecConnectionTunnelSharedSecretDetails",
 			},
 			{
-				SDKStruct: "core.IpSecConnectionTunnelSharedSecret",
+				SDKStruct:  "core.IpSecConnectionTunnelSharedSecret",
+				APISurface: "spec",
 			},
 		},
 	},
@@ -4110,10 +4287,12 @@ var targets = []Target{
 				SDKStruct: "core.UpdateInstanceConfigurationDetails",
 			},
 			{
-				SDKStruct: "core.InstanceConfiguration",
+				SDKStruct:  "core.InstanceConfiguration",
+				APISurface: "status",
 			},
 			{
-				SDKStruct: "core.InstanceConfigurationSummary",
+				SDKStruct:  "core.InstanceConfigurationSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -4166,10 +4345,12 @@ var targets = []Target{
 				SDKStruct: "core.UpdateInstancePoolDetails",
 			},
 			{
-				SDKStruct: "core.InstancePool",
+				SDKStruct:  "core.InstancePool",
+				APISurface: "status",
 			},
 			{
-				SDKStruct: "core.InstancePoolSummary",
+				SDKStruct:  "core.InstancePoolSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -4205,7 +4386,8 @@ var targets = []Target{
 				SDKStruct: "core.UpdateInternetGatewayDetails",
 			},
 			{
-				SDKStruct: "core.InternetGateway",
+				SDKStruct:  "core.InternetGateway",
+				APISurface: "status",
 			},
 		},
 	},
@@ -4269,7 +4451,8 @@ var targets = []Target{
 				SDKStruct: "core.UpdateNatGatewayDetails",
 			},
 			{
-				SDKStruct: "core.NatGateway",
+				SDKStruct:  "core.NatGateway",
+				APISurface: "status",
 			},
 		},
 	},
@@ -4285,7 +4468,8 @@ var targets = []Target{
 				SDKStruct: "core.UpdateNetworkSecurityGroupDetails",
 			},
 			{
-				SDKStruct: "core.NetworkSecurityGroup",
+				SDKStruct:  "core.NetworkSecurityGroup",
+				APISurface: "status",
 			},
 		},
 	},
@@ -4331,7 +4515,8 @@ var targets = []Target{
 				SDKStruct: "core.UpdatePrivateIpDetails",
 			},
 			{
-				SDKStruct: "core.PrivateIp",
+				SDKStruct:  "core.PrivateIp",
+				APISurface: "status",
 			},
 		},
 	},
@@ -4363,13 +4548,17 @@ var targets = []Target{
 				SDKStruct: "core.UpdatePublicIpPoolDetails",
 			},
 			{
-				SDKStruct: "core.PublicIpPool",
+				SDKStruct:  "core.PublicIpPool",
+				APISurface: "status",
 			},
 			{
 				SDKStruct: "core.PublicIpPoolCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 			{
-				SDKStruct: "core.PublicIpPoolSummary",
+				SDKStruct:  "core.PublicIpPoolSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -4421,7 +4610,8 @@ var targets = []Target{
 				SDKStruct: "core.UpdateRouteTableDetails",
 			},
 			{
-				SDKStruct: "core.RouteTable",
+				SDKStruct:  "core.RouteTable",
+				APISurface: "status",
 			},
 		},
 	},
@@ -4437,7 +4627,8 @@ var targets = []Target{
 				SDKStruct: "core.UpdateSecurityListDetails",
 			},
 			{
-				SDKStruct: "core.SecurityList",
+				SDKStruct:  "core.SecurityList",
+				APISurface: "status",
 			},
 		},
 	},
@@ -4463,7 +4654,8 @@ var targets = []Target{
 				SDKStruct: "core.UpdateServiceGatewayDetails",
 			},
 			{
-				SDKStruct: "core.ServiceGateway",
+				SDKStruct:  "core.ServiceGateway",
+				APISurface: "status",
 			},
 		},
 	},
@@ -4489,7 +4681,8 @@ var targets = []Target{
 				SDKStruct: "core.UpdateSubnetDetails",
 			},
 			{
-				SDKStruct: "core.Subnet",
+				SDKStruct:  "core.Subnet",
+				APISurface: "status",
 			},
 		},
 	},
@@ -4560,7 +4753,8 @@ var targets = []Target{
 				SDKStruct: "core.UpdateVlanDetails",
 			},
 			{
-				SDKStruct: "core.Vlan",
+				SDKStruct:  "core.Vlan",
+				APISurface: "status",
 			},
 		},
 	},
@@ -4612,7 +4806,8 @@ var targets = []Target{
 				SDKStruct: "core.UpdateVirtualCircuitDetails",
 			},
 			{
-				SDKStruct: "core.VirtualCircuit",
+				SDKStruct:  "core.VirtualCircuit",
+				APISurface: "status",
 			},
 		},
 	},
@@ -4671,7 +4866,8 @@ var targets = []Target{
 				SDKStruct: "core.UpdateVolumeDetails",
 			},
 			{
-				SDKStruct: "core.Volume",
+				SDKStruct:  "core.Volume",
+				APISurface: "status",
 			},
 		},
 	},
@@ -4713,7 +4909,8 @@ var targets = []Target{
 				SDKStruct: "core.UpdateVolumeBackupPolicyDetails",
 			},
 			{
-				SDKStruct: "core.VolumeBackupPolicy",
+				SDKStruct:  "core.VolumeBackupPolicy",
+				APISurface: "status",
 			},
 		},
 	},
@@ -4752,7 +4949,8 @@ var targets = []Target{
 				SDKStruct: "core.UpdateVolumeGroupDetails",
 			},
 			{
-				SDKStruct: "core.VolumeGroup",
+				SDKStruct:  "core.VolumeGroup",
+				APISurface: "status",
 			},
 		},
 	},
@@ -4794,7 +4992,8 @@ var targets = []Target{
 				SDKStruct: "core.UpdateVolumeKmsKeyDetails",
 			},
 			{
-				SDKStruct: "core.VolumeKmsKey",
+				SDKStruct:  "core.VolumeKmsKey",
+				APISurface: "spec",
 			},
 		},
 	},
@@ -4810,7 +5009,8 @@ var targets = []Target{
 				SDKStruct: "core.UpdateVtapDetails",
 			},
 			{
-				SDKStruct: "core.Vtap",
+				SDKStruct:  "core.Vtap",
+				APISurface: "status",
 			},
 		},
 	},

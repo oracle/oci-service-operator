@@ -169,6 +169,11 @@ The summary JSON includes:
 - `summary.aggregate` — aggregate counts and overall / mandatory coverage percentages.
 - `summary.services[]` — per-service rollups for tracked mappings, missing fields,
   mandatory missing fields, extra spec-only fields, and coverage percentages.
+- `summary.scopeBreakdown[]` — planning slices derived from the raw API report:
+  `desiredState` for the spec + `*Details` subset, `statusParity` for status-surface
+  mappings, `broadening` for tracked spec mappings against non-`*Details` SDK
+  structs, and `responseBody` for the preserved response-body special cases.
+  Each scope also includes its own per-service rollup.
 - `summary.topOffenders` — the worst individual spec-to-SDK mappings for missing
   fields, mandatory missing fields, and extra spec-only fields, including field names.
 - `snapshot.root` — present only when the snapshot is retained.
@@ -182,6 +187,7 @@ go run ./cmd/osok-generated-coverage --all > after.json
 
 jq '.summary.aggregate' before.json
 jq '.summary.aggregate' after.json
+jq '.summary.scopeBreakdown' after.json
 jq '.summary.topOffenders.missingFields[:5]' after.json
 ```
 

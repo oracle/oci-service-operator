@@ -270,6 +270,11 @@ type testWidgetStatus struct {
 	DisplayName string           `json:"displayName,omitempty"`
 }
 
+type testEscapedStatusField struct {
+	OsokStatus testStatusMarker `json:"status,omitempty"`
+	Status     string           `json:"sdkStatus,omitempty"`
+}
+
 func TestBuildReportUsesStatusSurfaceForStatusTargets(t *testing.T) {
 	originalTargets := targets
 	t.Cleanup(func() {
@@ -312,6 +317,51 @@ func TestBuildReportUsesStatusSurfaceForStatusTargets(t *testing.T) {
 	}
 	if HasActionable(report) {
 		t.Fatal("HasActionable() = true, want false for covered status target")
+	}
+}
+
+func TestBuildReportMatchesEscapedStatusFieldByGoName(t *testing.T) {
+	originalTargets := targets
+	t.Cleanup(func() {
+		targets = originalTargets
+	})
+
+	targets = []Target{
+		{
+			Name:        "TestWorkRequest",
+			SpecType:    reflect.TypeOf(testWidgetSpec{}),
+			StatusType:  reflect.TypeOf(testEscapedStatusField{}),
+			SDKMappings: testSDKMappings("example.WorkRequest"),
+		},
+	}
+
+	report, err := BuildReport([]sdk.SDKStruct{
+		{
+			QualifiedName: "example.WorkRequest",
+			Fields: []sdk.SDKField{
+				{Name: "Status", JSONName: "status"},
+			},
+		},
+	}, allowlist.Allowlist{})
+	if err != nil {
+		t.Fatalf("BuildReport() error = %v", err)
+	}
+	if len(report.Structs) != 1 {
+		t.Fatalf("BuildReport() report count = %d, want 1", len(report.Structs))
+	}
+
+	got := report.Structs[0]
+	if got.APISurface != apiSurfaceStatus {
+		t.Fatalf("report.Structs[0].APISurface = %q, want %q", got.APISurface, apiSurfaceStatus)
+	}
+	if len(got.PresentFields) != 1 || got.PresentFields[0].FieldName != "Status" {
+		t.Fatalf("report.Structs[0].PresentFields = %#v, want Status present", got.PresentFields)
+	}
+	if len(got.MissingFields) != 0 {
+		t.Fatalf("report.Structs[0].MissingFields = %#v, want none", got.MissingFields)
+	}
+	if len(got.ExtraSpecFields) != 0 {
+		t.Fatalf("report.Structs[0].ExtraSpecFields = %#v, want none", got.ExtraSpecFields)
 	}
 }
 

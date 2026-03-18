@@ -696,11 +696,11 @@ func buildSDKMappings(service, spec string, candidates []string, hasExisting boo
 			if strings.TrimSpace(overrideMapping.APISurface) != "" {
 				mapping.APISurface = overrideMapping.APISurface
 			}
-			mapping.Exclude = overrideMapping.Exclude
+			if overrideMapping.Exclude {
+				mapping.Exclude = true
+			}
 			if strings.TrimSpace(overrideMapping.Reason) != "" {
 				mapping.Reason = overrideMapping.Reason
-			} else if !mapping.Exclude {
-				mapping.Reason = ""
 			}
 		}
 		mappings = append(mappings, mapping)
@@ -753,58 +753,309 @@ type mappingOverride struct {
 	Reason     string
 }
 
+func mappingOverridesForSurface(apiSurface string, sdkTypes ...string) map[string]mappingOverride {
+	overrides := make(map[string]mappingOverride, len(sdkTypes))
+	for _, sdkType := range sdkTypes {
+		overrides[sdkType] = mappingOverride{APISurface: apiSurface}
+	}
+	return overrides
+}
+
+func specMappingOverrides(sdkTypes ...string) map[string]mappingOverride {
+	return mappingOverridesForSurface("spec", sdkTypes...)
+}
+
+func statusMappingOverrides(sdkTypes ...string) map[string]mappingOverride {
+	return mappingOverridesForSurface("status", sdkTypes...)
+}
+
+func excludedMappingOverrides(reason string, sdkTypes ...string) map[string]mappingOverride {
+	overrides := make(map[string]mappingOverride, len(sdkTypes))
+	for _, sdkType := range sdkTypes {
+		overrides[sdkType] = mappingOverride{Exclude: true, Reason: reason}
+	}
+	return overrides
+}
+
+func mergeMappingOverrides(sets ...map[string]mappingOverride) map[string]mappingOverride {
+	total := 0
+	for _, set := range sets {
+		total += len(set)
+	}
+	merged := make(map[string]mappingOverride, total)
+	for _, set := range sets {
+		for sdkType, override := range set {
+			merged[sdkType] = override
+		}
+	}
+	return merged
+}
+
+const psqlTransportWrapperExcludedReason = "Intentionally untracked: transport wrapper type does not correspond to a top-level CRD spec or status surface."
+
 // Explicit overrides cover specs whose API surface or SDK names do not follow the common generator conventions.
 var explicitAPITargetOverrides = map[string]apiTargetOverride{
-	"artifacts.Repository":                                 {SDKTypes: []string{"GenericRepository", "ContainerRepository"}},
-	"containerengine.ClusterOption":                        {SDKTypes: []string{"ClusterOptions"}},
-	"containerengine.Kubeconfig":                           {SDKTypes: []string{"CreateClusterKubeconfigContentDetails"}},
-	"containerengine.NodePoolOption":                       {SDKTypes: []string{"NodePoolOptions"}},
-	"core.AllDrgAttachment":                                {SDKTypes: []string{"DrgAttachmentInfo"}, UseStatus: true},
-	"core.AllowedPeerRegionsForRemotePeering":              {SDKTypes: []string{"PeerRegionForRemotePeering"}, UseStatus: true},
-	"core.AppCatalogListingAgreement":                      {SDKTypes: []string{"AppCatalogListingResourceVersionAgreements"}},
-	"core.ClusterNetworkInstance":                          {SDKTypes: []string{"InstanceSummary"}, UseStatus: true},
-	"core.ComputeCapacityReservationInstance":              {SDKTypes: []string{"CapacityReservationInstanceSummary"}, UseStatus: true},
-	"core.ComputeCapacityTopologyComputeBareMetalHost":     {SDKTypes: []string{"ComputeBareMetalHostCollection"}, UseStatus: true},
-	"core.ComputeCapacityTopologyComputeHpcIsland":         {SDKTypes: []string{"ComputeHpcIslandCollection"}, UseStatus: true},
-	"core.ComputeCapacityTopologyComputeNetworkBlock":      {SDKTypes: []string{"ComputeNetworkBlockCollection"}, UseStatus: true},
-	"core.ConsoleHistoryContent":                           {UseStatus: true},
-	"core.CpeDeviceConfigContent":                          {UseStatus: true},
-	"core.CrossConnectLetterOfAuthority":                   {SDKTypes: []string{"LetterOfAuthority"}, UseStatus: true},
+	"artifacts.ContainerImage": {
+		MappingOverrides: excludedMappingOverrides(
+			"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			"ContainerImageCollection",
+		),
+	},
+	"artifacts.ContainerImageSignature": {
+		MappingOverrides: mergeMappingOverrides(
+			statusMappingOverrides(
+				"ContainerImageSignature",
+				"ContainerImageSignatureSummary",
+			),
+			excludedMappingOverrides(
+				"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+				"ContainerImageSignatureCollection",
+			),
+		),
+	},
+	"artifacts.ContainerRepository": {
+		MappingOverrides: excludedMappingOverrides(
+			"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			"ContainerRepositoryCollection",
+		),
+	},
+	"artifacts.GenericArtifact": {
+		MappingOverrides: excludedMappingOverrides(
+			"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			"GenericArtifactCollection",
+		),
+	},
+	"artifacts.Repository": {
+		SDKTypes: []string{"GenericRepository", "ContainerRepository"},
+		MappingOverrides: mergeMappingOverrides(
+			statusMappingOverrides("GenericRepository"),
+			excludedMappingOverrides(
+				"Intentionally untracked: ArtifactsRepository status represents generic repositories; container repository parity is tracked on ArtifactsContainerRepository.",
+				"ContainerRepository",
+			),
+			excludedMappingOverrides(
+				"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+				"RepositoryCollection",
+			),
+		),
+	},
+	"certificates.CertificateAuthorityBundleVersion": {
+		MappingOverrides: excludedMappingOverrides(
+			"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			"CertificateAuthorityBundleVersionCollection",
+		),
+	},
+	"certificates.CertificateBundleVersion": {
+		MappingOverrides: excludedMappingOverrides(
+			"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			"CertificateBundleVersionCollection",
+		),
+	},
+	"certificatesmanagement.CaBundle": {MappingOverrides: statusMappingOverrides(
+		"CaBundle",
+		"CaBundleSummary",
+	)},
+	"containerengine.Cluster": {MappingOverrides: statusMappingOverrides(
+		"Cluster",
+		"ClusterSummary",
+	)},
+	"containerengine.ClusterEndpointConfig": {MappingOverrides: specMappingOverrides(
+		"ClusterEndpointConfig",
+	)},
+	"containerengine.ClusterOption":           {SDKTypes: []string{"ClusterOptions"}},
+	"containerengine.Kubeconfig":              {SDKTypes: []string{"CreateClusterKubeconfigContentDetails"}},
+	"containerengine.NodePool":                {MappingOverrides: statusMappingOverrides("NodePool", "NodePoolSummary")},
+	"containerengine.NodePoolOption":          {SDKTypes: []string{"NodePoolOptions"}},
+	"containerengine.VirtualNodePool":         {MappingOverrides: statusMappingOverrides("VirtualNodePool", "VirtualNodePoolSummary")},
+	"core.AllDrgAttachment":                   {SDKTypes: []string{"DrgAttachmentInfo"}, UseStatus: true},
+	"core.AllowedPeerRegionsForRemotePeering": {SDKTypes: []string{"PeerRegionForRemotePeering"}, UseStatus: true},
+	"core.AppCatalogListingAgreement":         {SDKTypes: []string{"AppCatalogListingResourceVersionAgreements"}},
+	"core.BootVolume":                         {MappingOverrides: statusMappingOverrides("BootVolume")},
+	"core.BootVolumeKmsKey":                   {MappingOverrides: specMappingOverrides("BootVolumeKmsKey")},
+	"core.ByoipAllocatedRange": {MappingOverrides: mergeMappingOverrides(
+		statusMappingOverrides("ByoipAllocatedRangeSummary"),
+		excludedMappingOverrides(
+			"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			"ByoipAllocatedRangeCollection",
+		),
+	)},
+	"core.ByoipRange": {MappingOverrides: mergeMappingOverrides(
+		statusMappingOverrides("ByoipRange", "ByoipRangeSummary"),
+		excludedMappingOverrides(
+			"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			"ByoipRangeCollection",
+		),
+	)},
+	"core.CaptureFilter":          {MappingOverrides: statusMappingOverrides("CaptureFilter")},
+	"core.ClusterNetwork":         {MappingOverrides: statusMappingOverrides("ClusterNetwork", "ClusterNetworkSummary")},
+	"core.ClusterNetworkInstance": {SDKTypes: []string{"InstanceSummary"}, UseStatus: true},
+	"core.ComputeCapacityReport":  {MappingOverrides: statusMappingOverrides("ComputeCapacityReport")},
+	"core.ComputeCapacityReservation": {MappingOverrides: statusMappingOverrides(
+		"ComputeCapacityReservation",
+		"ComputeCapacityReservationSummary",
+	)},
+	"core.ComputeCapacityReservationInstance": {SDKTypes: []string{"CapacityReservationInstanceSummary"}, UseStatus: true},
+	"core.ComputeCapacityTopology": {MappingOverrides: mergeMappingOverrides(
+		statusMappingOverrides("ComputeCapacityTopology", "ComputeCapacityTopologySummary"),
+		excludedMappingOverrides(
+			"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			"ComputeCapacityTopologyCollection",
+		),
+	)},
+	"core.ComputeCapacityTopologyComputeBareMetalHost": {SDKTypes: []string{"ComputeBareMetalHostCollection"}, MappingOverrides: excludedMappingOverrides(
+		"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+		"ComputeBareMetalHostCollection",
+	)},
+	"core.ComputeCapacityTopologyComputeHpcIsland": {SDKTypes: []string{"ComputeHpcIslandCollection"}, MappingOverrides: excludedMappingOverrides(
+		"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+		"ComputeHpcIslandCollection",
+	)},
+	"core.ComputeCapacityTopologyComputeNetworkBlock": {SDKTypes: []string{"ComputeNetworkBlockCollection"}, MappingOverrides: excludedMappingOverrides(
+		"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+		"ComputeNetworkBlockCollection",
+	)},
+	"core.ComputeCluster": {MappingOverrides: mergeMappingOverrides(
+		statusMappingOverrides("ComputeCluster", "ComputeClusterSummary"),
+		excludedMappingOverrides(
+			"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			"ComputeClusterCollection",
+		),
+	)},
+	"core.ComputeImageCapabilitySchema": {MappingOverrides: statusMappingOverrides(
+		"ComputeImageCapabilitySchema",
+		"ComputeImageCapabilitySchemaSummary",
+	)},
+	"core.ConsoleHistoryContent":         {UseStatus: true},
+	"core.Cpe":                           {MappingOverrides: statusMappingOverrides("Cpe")},
+	"core.CpeDeviceConfigContent":        {UseStatus: true},
+	"core.CrossConnect":                  {MappingOverrides: statusMappingOverrides("CrossConnect")},
+	"core.CrossConnectGroup":             {MappingOverrides: statusMappingOverrides("CrossConnectGroup")},
+	"core.CrossConnectLetterOfAuthority": {SDKTypes: []string{"LetterOfAuthority"}, UseStatus: true},
+	"core.DhcpOption":                    {MappingOverrides: statusMappingOverrides("DhcpOptions")},
+	"core.Drg":                           {MappingOverrides: statusMappingOverrides("Drg")},
+	"core.DrgAttachment":                 {MappingOverrides: statusMappingOverrides("DrgAttachment")},
+	"core.DrgRouteDistribution":          {MappingOverrides: statusMappingOverrides("DrgRouteDistribution")},
+	"core.DrgRouteDistributionStatement": {MappingOverrides: statusMappingOverrides("DrgRouteDistributionStatement")},
+	"core.DrgRouteTable":                 {MappingOverrides: statusMappingOverrides("DrgRouteTable")},
 	"core.FastConnectProviderVirtualCircuitBandwidthShape": {SDKTypes: []string{"VirtualCircuitBandwidthShape"}, UseStatus: true},
+	"core.IPSecConnection":                                 {MappingOverrides: statusMappingOverrides("IpSecConnection")},
 	"core.IPSecConnectionTunnelRoute":                      {SDKTypes: []string{"TunnelRouteSummary"}, UseStatus: true},
 	"core.IPSecConnectionTunnelSecurityAssociation":        {SDKTypes: []string{"TunnelSecurityAssociationSummary"}, UseStatus: true},
-	"core.InstanceDevice":                                  {SDKTypes: []string{"Device"}, UseStatus: true},
+	"core.IPSecConnectionTunnelSharedSecret":               {MappingOverrides: specMappingOverrides("IpSecConnectionTunnelSharedSecret")},
 	"core.Instance": {
 		MappingOverrides: map[string]mappingOverride{
 			"Instance":        {APISurface: "status"},
 			"InstanceSummary": {APISurface: "status"},
 		},
 	},
-	"core.IpsecCpeDeviceConfigContent":       {UseStatus: true},
-	"core.NetworkSecurityGroupSecurityRule":  {SDKTypes: []string{"SecurityRule"}},
+	"core.InstanceConfiguration": {MappingOverrides: statusMappingOverrides(
+		"InstanceConfiguration",
+		"InstanceConfigurationSummary",
+	)},
+	"core.InstanceDevice":                   {SDKTypes: []string{"Device"}, UseStatus: true},
+	"core.InstancePool":                     {MappingOverrides: statusMappingOverrides("InstancePool", "InstancePoolSummary")},
+	"core.InternetGateway":                  {MappingOverrides: statusMappingOverrides("InternetGateway")},
+	"core.IpsecCpeDeviceConfigContent":      {UseStatus: true},
+	"core.NatGateway":                       {MappingOverrides: statusMappingOverrides("NatGateway")},
+	"core.NetworkSecurityGroup":             {MappingOverrides: statusMappingOverrides("NetworkSecurityGroup")},
+	"core.NetworkSecurityGroupSecurityRule": {SDKTypes: []string{"SecurityRule"}},
+	"core.PrivateIp":                        {MappingOverrides: statusMappingOverrides("PrivateIp")},
+	"core.PublicIpPool": {MappingOverrides: mergeMappingOverrides(
+		statusMappingOverrides("PublicIpPool", "PublicIpPoolSummary"),
+		excludedMappingOverrides(
+			"Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			"PublicIpPoolCollection",
+		),
+	)},
+	"core.RouteTable":                        {MappingOverrides: statusMappingOverrides("RouteTable")},
+	"core.SecurityList":                      {MappingOverrides: statusMappingOverrides("SecurityList")},
+	"core.ServiceGateway":                    {MappingOverrides: statusMappingOverrides("ServiceGateway")},
+	"core.Subnet":                            {MappingOverrides: statusMappingOverrides("Subnet")},
 	"core.TunnelCpeDeviceConfigContent":      {UseStatus: true},
+	"core.VirtualCircuit":                    {MappingOverrides: statusMappingOverrides("VirtualCircuit")},
+	"core.Vlan":                              {MappingOverrides: statusMappingOverrides("Vlan")},
+	"core.Volume":                            {MappingOverrides: statusMappingOverrides("Volume")},
+	"core.VolumeBackupPolicy":                {MappingOverrides: statusMappingOverrides("VolumeBackupPolicy")},
 	"core.VolumeBackupPolicyAssetAssignment": {SDKTypes: []string{"VolumeBackupPolicyAssignment"}},
+	"core.VolumeGroup":                       {MappingOverrides: statusMappingOverrides("VolumeGroup")},
+	"core.VolumeKmsKey":                      {MappingOverrides: specMappingOverrides("VolumeKmsKey")},
+	"core.Vtap":                              {MappingOverrides: statusMappingOverrides("Vtap")},
 	"core.WindowsInstanceInitialCredential":  {SDKTypes: []string{"InstanceCredentials"}, UseStatus: true},
 	"dns.DomainRecord":                       {SDKTypes: []string{"Record"}},
-	"dns.ResolverEndpoint":                   {SDKTypes: []string{"ResolverVnicEndpoint", "ResolverVnicEndpointSummary"}},
-	"dns.ZoneContent":                        {UseStatus: true},
-	"dns.ZoneFromZoneFile":                   {SDKTypes: []string{"Zone"}, UseStatus: true},
-	"dns.ZoneRecord":                         {SDKTypes: []string{"Record"}},
-	"identity.CostTrackingTag":               {SDKTypes: []string{"Tag"}, UseStatus: true},
-	"identity.IdentityProvider":              {SDKTypes: []string{"Saml2IdentityProvider"}},
-	"identity.OAuthClientCredential": {
-		MappingOverrides: map[string]mappingOverride{
-			"OAuth2ClientCredential":        {APISurface: "status"},
-			"OAuth2ClientCredentialSummary": {APISurface: "status"},
-		},
+	"dns.RRSet":                              {MappingOverrides: specMappingOverrides("RrSet")},
+	"dns.ResolverEndpoint": {
+		SDKTypes:         []string{"ResolverVnicEndpoint", "ResolverVnicEndpointSummary"},
+		MappingOverrides: statusMappingOverrides("ResolverVnicEndpoint", "ResolverVnicEndpointSummary"),
 	},
-	"identity.OrResetUIPassword":         {SDKTypes: []string{"UiPassword"}, UseStatus: true},
-	"identity.StandardTagNamespace":      {SDKTypes: []string{"StandardTagNamespaceTemplate", "StandardTagNamespaceTemplateSummary"}},
+	"dns.SteeringPolicy": {MappingOverrides: statusMappingOverrides(
+		"SteeringPolicy",
+		"SteeringPolicySummary",
+	)},
+	"dns.TsigKey": {MappingOverrides: statusMappingOverrides(
+		"TsigKey",
+		"TsigKeySummary",
+	)},
+	"dns.ZoneContent":      {UseStatus: true},
+	"dns.ZoneFromZoneFile": {SDKTypes: []string{"Zone"}, UseStatus: true},
+	"dns.ZoneRecord":       {SDKTypes: []string{"Record"}},
+	"events.Rule":          {MappingOverrides: statusMappingOverrides("Rule", "RuleSummary")},
+	"functions.Application": {MappingOverrides: statusMappingOverrides(
+		"Application",
+		"ApplicationSummary",
+	)},
+	"functions.Function": {MappingOverrides: statusMappingOverrides(
+		"Function",
+		"FunctionSummary",
+	)},
+	"identity.AuthenticationPolicy": {MappingOverrides: statusMappingOverrides("AuthenticationPolicy")},
+	"identity.CostTrackingTag":      {SDKTypes: []string{"Tag"}, UseStatus: true},
+	"identity.DynamicGroup":         {MappingOverrides: statusMappingOverrides("DynamicGroup")},
+	"identity.Group":                {MappingOverrides: statusMappingOverrides("Group")},
+	"identity.IdentityProvider": {
+		SDKTypes:         []string{"Saml2IdentityProvider"},
+		MappingOverrides: statusMappingOverrides("Saml2IdentityProvider"),
+	},
+	"identity.NetworkSource": {MappingOverrides: statusMappingOverrides("NetworkSources")},
+	"identity.OAuthClientCredential": {
+		MappingOverrides: excludedMappingOverrides(
+			"Intentionally untracked: OCI read-model mappings broaden desired-state coverage, and this CRD does not expose a meaningful status surface for parity tracking.",
+			"OAuth2ClientCredential",
+			"OAuth2ClientCredentialSummary",
+		),
+	},
+	"identity.OrResetUIPassword": {SDKTypes: []string{"UiPassword"}, UseStatus: true},
+	"identity.Policy":            {MappingOverrides: statusMappingOverrides("Policy")},
+	"identity.StandardTagNamespace": {SDKTypes: []string{
+		"StandardTagNamespaceTemplate",
+		"StandardTagNamespaceTemplateSummary",
+	}},
 	"identity.StandardTagTemplate":       {SDKTypes: []string{"StandardTagDefinitionTemplate"}},
+	"identity.Tag":                       {MappingOverrides: statusMappingOverrides("Tag", "TagSummary")},
+	"identity.TagNamespace":              {MappingOverrides: statusMappingOverrides("TagNamespace", "TagNamespaceSummary")},
+	"identity.UserCapability":            {MappingOverrides: specMappingOverrides("UserCapabilities")},
 	"identity.UserState":                 {SDKTypes: []string{"User"}, UseStatus: true},
 	"identity.UserUIPasswordInformation": {SDKTypes: []string{"UiPasswordInformation"}},
-	"keymanagement.PreCoUserCredential":  {SDKTypes: []string{"PreCoUserCredentials"}},
-	"loadbalancer.NetworkSecurityGroup":  {SDKTypes: []string{"UpdateNetworkSecurityGroupsDetails"}},
+	"keymanagement.EkmsPrivateEndpoint": {MappingOverrides: statusMappingOverrides(
+		"EkmsPrivateEndpoint",
+		"EkmsPrivateEndpointSummary",
+	)},
+	"keymanagement.PreCoUserCredential": {SDKTypes: []string{"PreCoUserCredentials"}},
+	"limits.Quota": {MappingOverrides: statusMappingOverrides(
+		"Quota",
+		"QuotaSummary",
+	)},
+	"loadbalancer.Backend":              {MappingOverrides: statusMappingOverrides("Backend")},
+	"loadbalancer.BackendSet":           {MappingOverrides: specMappingOverrides("BackendSet")},
+	"loadbalancer.Certificate":          {MappingOverrides: specMappingOverrides("Certificate")},
+	"loadbalancer.HealthChecker":        {MappingOverrides: specMappingOverrides("HealthChecker")},
+	"loadbalancer.Hostname":             {MappingOverrides: specMappingOverrides("Hostname")},
+	"loadbalancer.Listener":             {MappingOverrides: specMappingOverrides("Listener")},
+	"loadbalancer.LoadBalancer":         {MappingOverrides: statusMappingOverrides("LoadBalancer")},
+	"loadbalancer.NetworkSecurityGroup": {SDKTypes: []string{"UpdateNetworkSecurityGroupsDetails"}},
+	"loadbalancer.PathRouteSet":         {MappingOverrides: specMappingOverrides("PathRouteSet")},
+	"loadbalancer.RoutingPolicy":        {MappingOverrides: specMappingOverrides("RoutingPolicy")},
+	"loadbalancer.RuleSet":              {MappingOverrides: specMappingOverrides("RuleSet")},
+	"loadbalancer.SSLCipherSuite":       {MappingOverrides: specMappingOverrides("SslCipherSuite")},
 	"loadbalancer.Shape": {
 		MappingOverrides: map[string]mappingOverride{
 			"UpdateLoadBalancerShapeDetails": {
@@ -813,22 +1064,142 @@ var explicitAPITargetOverrides = map[string]apiTargetOverride{
 			},
 		},
 	},
+	"logging.Log": {MappingOverrides: statusMappingOverrides("LogSummary")},
+	"logging.LogGroup": {MappingOverrides: statusMappingOverrides(
+		"LogGroup",
+		"LogGroupSummary",
+	)},
+	"logging.LogSavedSearch": {MappingOverrides: statusMappingOverrides(
+		"LogSavedSearch",
+		"LogSavedSearchSummary",
+	)},
+	"logging.UnifiedAgentConfiguration": {MappingOverrides: statusMappingOverrides(
+		"UnifiedAgentConfiguration",
+	)},
+	"monitoring.Alarm": {MappingOverrides: statusMappingOverrides(
+		"Alarm",
+		"AlarmSummary",
+	)},
+	"monitoring.AlarmSuppression": {MappingOverrides: statusMappingOverrides(
+		"AlarmSuppression",
+		"AlarmSuppressionSummary",
+	)},
+	"monitoring.Metric": {MappingOverrides: statusMappingOverrides("Metric")},
+	"networkloadbalancer.Backend": {MappingOverrides: specMappingOverrides(
+		"Backend",
+		"BackendSummary",
+	)},
+	"networkloadbalancer.BackendSet": {MappingOverrides: specMappingOverrides(
+		"BackendSet",
+		"BackendSetSummary",
+	)},
+	"networkloadbalancer.HealthChecker": {MappingOverrides: specMappingOverrides("HealthChecker")},
+	"networkloadbalancer.Listener":      {MappingOverrides: specMappingOverrides("Listener", "ListenerSummary")},
+	"networkloadbalancer.NetworkLoadBalancer": {MappingOverrides: statusMappingOverrides(
+		"NetworkLoadBalancer",
+		"NetworkLoadBalancerSummary",
+	)},
 	"networkloadbalancer.NetworkSecurityGroup": {SDKTypes: []string{"UpdateNetworkSecurityGroupsDetails"}},
-	"objectstorage.Namespace":                  {SDKTypes: []string{"NamespaceMetadata"}},
-	"ons.ConfirmSubscription":                  {SDKTypes: []string{"ConfirmationResult"}, UseStatus: true},
+	"objectstorage.Bucket": {MappingOverrides: statusMappingOverrides(
+		"Bucket",
+		"BucketSummary",
+	)},
+	"objectstorage.Namespace":         {SDKTypes: []string{"NamespaceMetadata"}},
+	"objectstorage.NamespaceMetadata": {MappingOverrides: statusMappingOverrides("NamespaceMetadata")},
+	"objectstorage.PreauthenticatedRequest": {MappingOverrides: statusMappingOverrides(
+		"PreauthenticatedRequest",
+		"PreauthenticatedRequestSummary",
+	)},
+	"ons.ConfirmSubscription": {SDKTypes: []string{"ConfirmationResult"}, UseStatus: true},
+	"ons.Subscription": {MappingOverrides: statusMappingOverrides(
+		"Subscription",
+		"SubscriptionSummary",
+	)},
 	"ons.Topic": {
-		MappingOverrides: map[string]mappingOverride{
-			"NotificationTopic":        {APISurface: "status"},
-			"NotificationTopicSummary": {APISurface: "status"},
-		},
+		MappingOverrides: excludedMappingOverrides(
+			"Intentionally untracked: OCI read-model mappings broaden desired-state coverage, and this CRD does not expose a meaningful status surface for parity tracking.",
+			"NotificationTopic",
+			"NotificationTopicSummary",
+		),
 	},
 	"ons.Unsubscription": {UseStatus: true},
+	"psql.Backup": {MappingOverrides: mergeMappingOverrides(
+		statusMappingOverrides(
+			"Backup",
+			"BackupSummary",
+		),
+		excludedMappingOverrides(
+			psqlTransportWrapperExcludedReason,
+			"BackupCollection",
+		),
+	)},
+	"psql.Configuration": {MappingOverrides: mergeMappingOverrides(
+		statusMappingOverrides(
+			"Configuration",
+			"ConfigurationSummary",
+		),
+		excludedMappingOverrides(
+			psqlTransportWrapperExcludedReason,
+			"ConfigurationCollection",
+			"ConfigurationDetails",
+		),
+	)},
+	"psql.DbSystem": {MappingOverrides: mergeMappingOverrides(
+		statusMappingOverrides(
+			"DbSystem",
+			"DbSystemSummary",
+		),
+		excludedMappingOverrides(
+			psqlTransportWrapperExcludedReason,
+			"DbSystemCollection",
+		),
+	)},
+	"psql.DefaultConfiguration": {MappingOverrides: mergeMappingOverrides(
+		statusMappingOverrides(
+			"DefaultConfiguration",
+			"DefaultConfigurationSummary",
+		),
+		excludedMappingOverrides(
+			psqlTransportWrapperExcludedReason,
+			"DefaultConfigurationCollection",
+			"DefaultConfigurationDetails",
+		),
+	)},
+	"psql.PrimaryDbInstance": {MappingOverrides: statusMappingOverrides("PrimaryDbInstanceDetails")},
+	"psql.Shape": {MappingOverrides: mergeMappingOverrides(
+		statusMappingOverrides("ShapeSummary"),
+		excludedMappingOverrides(
+			psqlTransportWrapperExcludedReason,
+			"ShapeCollection",
+		),
+	)},
+	"psql.WorkRequest": {MappingOverrides: statusMappingOverrides(
+		"WorkRequest",
+		"WorkRequestSummary",
+	)},
+	"psql.WorkRequestError": {MappingOverrides: mergeMappingOverrides(
+		statusMappingOverrides("WorkRequestError"),
+		excludedMappingOverrides(
+			psqlTransportWrapperExcludedReason,
+			"WorkRequestErrorCollection",
+		),
+	)},
+	"psql.WorkRequestLog": {MappingOverrides: mergeMappingOverrides(
+		statusMappingOverrides("WorkRequestLogEntry"),
+		excludedMappingOverrides(
+			psqlTransportWrapperExcludedReason,
+			"WorkRequestLogEntryCollection",
+		),
+	)},
+	"queue.Queue": {MappingOverrides: statusMappingOverrides("Queue")},
 	"streaming.Stream": {
-		MappingOverrides: map[string]mappingOverride{
-			"Stream":        {APISurface: "status"},
-			"StreamSummary": {APISurface: "status"},
-		},
+		MappingOverrides: excludedMappingOverrides(
+			"Intentionally untracked: OCI read-model mappings broaden desired-state coverage, and this CRD does not expose a meaningful status surface for parity tracking.",
+			"Stream",
+			"StreamSummary",
+		),
 	},
+	"vault.Secret": {MappingOverrides: statusMappingOverrides("Secret")},
 }
 
 func deriveSDKTypes(service, spec, targetName string, structs map[string]bool) []string {
