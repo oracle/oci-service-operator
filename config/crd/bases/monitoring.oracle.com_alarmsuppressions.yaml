@@ -63,6 +63,8 @@ spec:
                     description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                       of the alarm that is the target of the alarm suppression.
                     type: string
+                  jsonData:
+                    type: string
                   targetType:
                     type: string
                 required:

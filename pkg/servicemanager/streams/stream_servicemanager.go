@@ -40,15 +40,25 @@ type StreamServiceManager struct {
 	ociClient        StreamAdminClientInterface
 }
 
+func NewStreamServiceManagerWithDeps(deps servicemanager.RuntimeDeps) *StreamServiceManager {
+	return &StreamServiceManager{
+		Provider:         deps.Provider,
+		CredentialClient: deps.CredentialClient,
+		Scheme:           deps.Scheme,
+		Log:              deps.Log,
+		Metrics:          deps.Metrics,
+	}
+}
+
 func NewStreamServiceManager(provider common.ConfigurationProvider, credClient credhelper.CredentialClient,
 	scheme *runtime.Scheme, log loggerutil.OSOKLogger, metrics *metrics.Metrics) *StreamServiceManager {
-	return &StreamServiceManager{
+	return NewStreamServiceManagerWithDeps(servicemanager.RuntimeDeps{
 		Provider:         provider,
 		CredentialClient: credClient,
 		Scheme:           scheme,
 		Log:              log,
 		Metrics:          metrics,
-	}
+	})
 }
 
 func (c *StreamServiceManager) CreateOrUpdate(ctx context.Context, obj runtime.Object, req ctrl.Request) (servicemanager.OSOKResponse, error) {

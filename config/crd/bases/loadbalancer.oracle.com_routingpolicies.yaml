@@ -83,6 +83,8 @@ spec:
                               Name of the backend set the listener will forward the traffic to.
                               Example: `backendSetForImages`
                             type: string
+                          jsonData:
+                            type: string
                           name:
                             type: string
                         required:
@@ -136,6 +138,8 @@ spec:
                             description: |-
                               Name of the backend set the listener will forward the traffic to.
                               Example: `backendSetForImages`
+                            type: string
+                          jsonData:
                             type: string
                           name:
                             type: string

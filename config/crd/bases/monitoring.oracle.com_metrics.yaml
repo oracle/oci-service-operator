@@ -15,6 +15,10 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
+    - jsonPath: .spec.name
+      name: Name
+      priority: 1
+      type: string
     - description: status of the Metric
       jsonPath: .status.status.conditions[-1].type
       name: Status
@@ -51,6 +55,52 @@ spec:
             type: object
           spec:
             description: MetricSpec defines the desired state of Metric.
+            properties:
+              dimensionFilters:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Qualifiers that you want to use when searching for metric definitions.
+                  Available dimensions vary by metric namespace. Each dimension takes the form of a key-value pair.
+                  Example: `{"resourceId": "ocid1.instance.region1.phx.exampleuniqueID"}`
+                type: object
+              groupBy:
+                description: |-
+                  Group metrics by these fields in the response. For example, to list all metric namespaces available
+                            in a compartment, groupBy the "namespace" field. Supported fields: namespace, name, resourceGroup.
+                  If `groupBy` is used, then `dimensionFilters` is ignored.
+                  Example - group by namespace:
+                  `[ "namespace" ]`
+                items:
+                  type: string
+                type: array
+              name:
+                description: |-
+                  The metric name to use when searching for metric definitions.
+                  Example: `CpuUtilization`
+                type: string
+              namespace:
+                description: |-
+                  The source service or application to use when searching for metric definitions.
+                  Example: `oci_computeagent`
+                type: string
+              resourceGroup:
+                description: |-
+                  Resource group that you want to match. A null value returns only metric data that has no resource groups. The specified resource group must exist in the definition of the posted metric. Only one resource group can be applied per metric.
+                  A valid resourceGroup value starts with an alphabetical character and includes only alphanumeric characters, periods (.), underscores (_), hyphens (-), and dollar signs ($).
+                  Example: `frontend-fleet`
+                type: string
+              sortBy:
+                description: |-
+                  The field to use when sorting returned metric definitions. Only one sorting level is provided.
+                  Example: `NAMESPACE`
+                type: string
+              sortOrder:
+                description: |-
+                  The sort order to use when sorting returned metric definitions. Ascending (ASC) or
+                  descending (DESC).
+                  Example: `ASC`
+                type: string
             type: object
           status:
             description: MetricStatus defines the observed state of Metric.

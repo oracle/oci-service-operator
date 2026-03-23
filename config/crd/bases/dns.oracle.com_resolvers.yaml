@@ -111,6 +111,8 @@ spec:
                       items:
                         type: string
                       type: array
+                    jsonData:
+                      type: string
                     qnameCoverConditions:
                       description: A list of domain names. The query must be covered
                         by one of the domains in order for the rule action to apply.

@@ -36,14 +36,23 @@ type AdbServiceManager struct {
 	ociClient        DatabaseClientInterface
 }
 
+func NewAdbServiceManagerWithDeps(deps servicemanager.RuntimeDeps) *AdbServiceManager {
+	return &AdbServiceManager{
+		Provider:         deps.Provider,
+		CredentialClient: deps.CredentialClient,
+		Scheme:           deps.Scheme,
+		Log:              deps.Log,
+	}
+}
+
 func NewAdbServiceManager(provider common.ConfigurationProvider, credClient credhelper.CredentialClient,
 	scheme *runtime.Scheme, log loggerutil.OSOKLogger) *AdbServiceManager {
-	return &AdbServiceManager{
+	return NewAdbServiceManagerWithDeps(servicemanager.RuntimeDeps{
 		Provider:         provider,
 		CredentialClient: credClient,
 		Scheme:           scheme,
 		Log:              log,
-	}
+	})
 }
 
 func (c *AdbServiceManager) CreateOrUpdate(ctx context.Context, obj runtime.Object, req ctrl.Request) (servicemanager.OSOKResponse, error) {

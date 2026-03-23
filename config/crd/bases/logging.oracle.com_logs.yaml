@@ -80,6 +80,8 @@ spec:
                       category:
                         description: Log object category.
                         type: string
+                      jsonData:
+                        type: string
                       parameters:
                         additionalProperties:
                           type: string

@@ -66,6 +66,8 @@ spec:
                   issuerCertificateAuthorityId:
                     description: The OCID of the private CA.
                     type: string
+                  jsonData:
+                    type: string
                   signingAlgorithm:
                     description: The algorithm used to sign public key certificates
                       that the CA issues.
@@ -166,6 +168,8 @@ spec:
                       description: |-
                         A property indicating the maximum validity duration, in days, of subordinate CA's issued by this CA.
                         Expressed in ISO 8601 (https://en.wikipedia.org/wiki/ISO_8601#Time_intervals) format.
+                      type: string
+                    jsonData:
                       type: string
                     leafCertificateMaxValidityDuration:
                       description: |-

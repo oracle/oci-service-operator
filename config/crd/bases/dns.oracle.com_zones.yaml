@@ -70,6 +70,60 @@ spec:
 
                   **Example:** `{"Operations": {"CostCenter": "42"}}`
                 type: object
+              dynectMigrationDetails:
+                description: ZoneDynectMigrationDetails defines nested fields for
+                  Zone.DynectMigrationDetails.
+                properties:
+                  customerName:
+                    description: DynECT customer name the zone belongs to.
+                    type: string
+                  httpRedirectReplacements:
+                    additionalProperties:
+                      items:
+                        description: ZoneDynectMigrationDetailsHttpRedirectReplacements
+                          defines nested fields for Zone.DynectMigrationDetails.HttpRedirectReplacements.
+                        properties:
+                          rdata:
+                            description: |-
+                              The record data of the replacement record, as whitespace-delimited tokens in
+                              type-specific presentation format.
+                            type: string
+                          rtype:
+                            description: The type of DNS record, such as A or CNAME.
+                              For more information, see Resource Record (RR) TYPEs
+                              (https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml#dns-parameters-4).
+                            type: string
+                          substituteRtype:
+                            description: The canonical name for a substitute type
+                              of the replacement record to be used if the specified
+                              `rtype` is not allowed at the domain. The specified
+                              `ttl` and `rdata` will still apply with the substitute
+                              type.
+                            type: string
+                          ttl:
+                            description: The Time To Live of the replacement record,
+                              in seconds.
+                            type: integer
+                        required:
+                        - rdata
+                        - rtype
+                        - ttl
+                        type: object
+                      type: array
+                    description: A map of fully-qualified domain names (FQDNs) to
+                      an array of `MigrationReplacement` objects.
+                    type: object
+                  password:
+                    description: DynECT API password for the provided username.
+                    type: string
+                  username:
+                    description: DynECT API username to perform the migration with.
+                    type: string
+                required:
+                - customerName
+                - password
+                - username
+                type: object
               externalDownstreams:
                 description: |-
                   External secondary servers for the zone.
@@ -125,6 +179,10 @@ spec:
 
                   **Example:** `{"Department": "Finance"}`
                 type: object
+              jsonData:
+                type: string
+              migrationSource:
+                type: string
               name:
                 description: |-
                   The name of the zone.

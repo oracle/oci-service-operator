@@ -52,11 +52,24 @@ spec:
           spec:
             description: MessageSpec defines the desired state of Message.
             properties:
+              entries:
+                description: The array of messages to delete from a queue.
+                items:
+                  description: MessageEntry defines nested fields for Message.Entry.
+                  properties:
+                    receipt:
+                      description: The receipt of the message to delete.
+                      type: string
+                  required:
+                  - receipt
+                  type: object
+                type: array
               visibilityInSeconds:
                 description: The new visibility of the message relative to the current
                   time (as-per the clock of the server receiving the request).
                 type: integer
             required:
+            - entries
             - visibilityInSeconds
             type: object
           status:

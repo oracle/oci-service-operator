@@ -18,9 +18,679 @@ rules:
   - update
   - watch
 - apiGroups:
+  - artifacts.oracle.com
+  resources:
+  - containerconfigurations
+  - containerimages
+  - containerimagesignatures
+  - containerrepositories
+  - genericartifactbypaths
+  - genericartifacts
+  - repositories
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - artifacts.oracle.com
+  resources:
+  - containerconfigurations/finalizers
+  - containerimages/finalizers
+  - containerimagesignatures/finalizers
+  - containerrepositories/finalizers
+  - genericartifactbypaths/finalizers
+  - genericartifacts/finalizers
+  - repositories/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - artifacts.oracle.com
+  resources:
+  - containerconfigurations/status
+  - containerimages/status
+  - containerimagesignatures/status
+  - containerrepositories/status
+  - genericartifactbypaths/status
+  - genericartifacts/status
+  - repositories/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - certificates.oracle.com
+  resources:
+  - cabundles
+  - certificateauthoritybundles
+  - certificateauthoritybundleversions
+  - certificatebundles
+  - certificatebundleversions
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - certificates.oracle.com
+  resources:
+  - cabundles/finalizers
+  - certificateauthoritybundles/finalizers
+  - certificateauthoritybundleversions/finalizers
+  - certificatebundles/finalizers
+  - certificatebundleversions/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - certificates.oracle.com
+  resources:
+  - cabundles/status
+  - certificateauthoritybundles/status
+  - certificateauthoritybundleversions/status
+  - certificatebundles/status
+  - certificatebundleversions/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - certificatesmanagement.oracle.com
+  resources:
+  - associations
+  - cabundles
+  - certificateauthorities
+  - certificateauthorityversions
+  - certificates
+  - certificateversions
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - certificatesmanagement.oracle.com
+  resources:
+  - associations/finalizers
+  - cabundles/finalizers
+  - certificateauthorities/finalizers
+  - certificateauthorityversions/finalizers
+  - certificates/finalizers
+  - certificateversions/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - certificatesmanagement.oracle.com
+  resources:
+  - associations/status
+  - cabundles/status
+  - certificateauthorities/status
+  - certificateauthorityversions/status
+  - certificates/status
+  - certificateversions/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - containerengine.oracle.com
+  resources:
+  - addonoptions
+  - addons
+  - clusterendpointconfigs
+  - clustermigratetonativevcnstatuses
+  - clusteroptions
+  - clusters
+  - credentialrotationstatuses
+  - kubeconfigs
+  - nodepooloptions
+  - nodepools
+  - nodes
+  - podshapes
+  - virtualnodepools
+  - virtualnodes
+  - workloadmappings
+  - workrequesterrors
+  - workrequestlogs
+  - workrequests
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - containerengine.oracle.com
+  resources:
+  - addonoptions/finalizers
+  - addons/finalizers
+  - clusterendpointconfigs/finalizers
+  - clustermigratetonativevcnstatuses/finalizers
+  - clusteroptions/finalizers
+  - clusters/finalizers
+  - credentialrotationstatuses/finalizers
+  - kubeconfigs/finalizers
+  - nodepooloptions/finalizers
+  - nodepools/finalizers
+  - nodes/finalizers
+  - podshapes/finalizers
+  - virtualnodepools/finalizers
+  - virtualnodes/finalizers
+  - workloadmappings/finalizers
+  - workrequesterrors/finalizers
+  - workrequestlogs/finalizers
+  - workrequests/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - containerengine.oracle.com
+  resources:
+  - addonoptions/status
+  - addons/status
+  - clusterendpointconfigs/status
+  - clustermigratetonativevcnstatuses/status
+  - clusteroptions/status
+  - clusters/status
+  - credentialrotationstatuses/status
+  - kubeconfigs/status
+  - nodepooloptions/status
+  - nodepools/status
+  - nodes/status
+  - podshapes/status
+  - virtualnodepools/status
+  - virtualnodes/status
+  - workloadmappings/status
+  - workrequesterrors/status
+  - workrequestlogs/status
+  - workrequests/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - core.oracle.com
+  resources:
+  - alldrgattachments
+  - allowedikeipsecparameters
+  - allowedpeerregionsforremotepeerings
+  - appcataloglistingagreements
+  - appcataloglistingresourceversions
+  - appcataloglistings
+  - appcatalogsubscriptions
+  - blockvolumereplicas
+  - bootvolumeattachments
+  - bootvolumebackups
+  - bootvolumekmskeies
+  - bootvolumereplicas
+  - bootvolumes
+  - byoipallocatedranges
+  - byoipranges
+  - capturefilters
+  - clusternetworkinstances
+  - clusternetworks
+  - computecapacityreports
+  - computecapacityreservationinstances
+  - computecapacityreservationinstanceshapes
+  - computecapacityreservations
+  - computecapacitytopologies
+  - computecapacitytopologycomputebaremetalhosts
+  - computecapacitytopologycomputehpcislands
+  - computecapacitytopologycomputenetworkblocks
+  - computeclusters
+  - computeglobalimagecapabilityschemas
+  - computeglobalimagecapabilityschemaversions
+  - computeimagecapabilityschemas
+  - consolehistories
+  - consolehistorycontents
+  - cpedeviceconfigcontents
+  - cpedeviceshapes
+  - cpes
+  - crossconnectgroups
+  - crossconnectletterofauthorities
+  - crossconnectlocations
+  - crossconnectmappings
+  - crossconnectportspeedshapes
+  - crossconnects
+  - crossconnectstatuses
+  - dedicatedvmhostinstances
+  - dedicatedvmhostinstanceshapes
+  - dedicatedvmhosts
+  - dedicatedvmhostshapes
+  - dhcpoptions
+  - drgattachments
+  - drgredundancystatuses
+  - drgroutedistributions
+  - drgroutedistributionstatements
+  - drgrouterules
+  - drgroutetables
+  - drgs
+  - fastconnectproviderservicekeies
+  - fastconnectproviderservices
+  - fastconnectprovidervirtualcircuitbandwidthshapes
+  - images
+  - imageshapecompatibilityentries
+  - instanceconfigurations
+  - instanceconsoleconnections
+  - instancedevices
+  - instancemaintenancereboots
+  - instancepoolinstances
+  - instancepoolloadbalancerattachments
+  - instancepools
+  - instances
+  - internetgatewaies
+  - ipsecconnectiondeviceconfigs
+  - ipsecconnectiondevicestatuses
+  - ipsecconnections
+  - ipsecconnectiontunnelerrors
+  - ipsecconnectiontunnelroutes
+  - ipsecconnectiontunnels
+  - ipsecconnectiontunnelsecurityassociations
+  - ipsecconnectiontunnelsharedsecrets
+  - ipseccpedeviceconfigcontents
+  - ipv6s
+  - localpeeringgatewaies
+  - measuredbootreports
+  - natgatewaies
+  - networkingtopologies
+  - networksecuritygroups
+  - networksecuritygroupsecurityrules
+  - networksecuritygroupvnics
+  - privateips
+  - publicipbyipaddresss
+  - publicipbyprivateipids
+  - publicippools
+  - publicips
+  - remotepeeringconnections
+  - routetables
+  - securitylists
+  - servicegatewaies
+  - services
+  - shapes
+  - subnets
+  - subnettopologies
+  - tunnelcpedeviceconfigcontents
+  - tunnelcpedeviceconfigs
+  - upgradestatuses
+  - vcndnsresolverassociations
+  - vcns
+  - vcntopologies
+  - virtualcircuitassociatedtunnels
+  - virtualcircuitbandwidthshapes
+  - virtualcircuitpublicprefixes
+  - virtualcircuits
+  - vlans
+  - vnicattachments
+  - vnics
+  - volumeattachments
+  - volumebackuppolicies
+  - volumebackuppolicyassetassignments
+  - volumebackuppolicyassignments
+  - volumebackups
+  - volumegroupbackups
+  - volumegroupreplicas
+  - volumegroups
+  - volumekmskeies
+  - volumes
+  - vtaps
+  - windowsinstanceinitialcredentials
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - core.oracle.com
+  resources:
+  - alldrgattachments/finalizers
+  - allowedikeipsecparameters/finalizers
+  - allowedpeerregionsforremotepeerings/finalizers
+  - appcataloglistingagreements/finalizers
+  - appcataloglistingresourceversions/finalizers
+  - appcataloglistings/finalizers
+  - appcatalogsubscriptions/finalizers
+  - blockvolumereplicas/finalizers
+  - bootvolumeattachments/finalizers
+  - bootvolumebackups/finalizers
+  - bootvolumekmskeies/finalizers
+  - bootvolumereplicas/finalizers
+  - bootvolumes/finalizers
+  - byoipallocatedranges/finalizers
+  - byoipranges/finalizers
+  - capturefilters/finalizers
+  - clusternetworkinstances/finalizers
+  - clusternetworks/finalizers
+  - computecapacityreports/finalizers
+  - computecapacityreservationinstances/finalizers
+  - computecapacityreservationinstanceshapes/finalizers
+  - computecapacityreservations/finalizers
+  - computecapacitytopologies/finalizers
+  - computecapacitytopologycomputebaremetalhosts/finalizers
+  - computecapacitytopologycomputehpcislands/finalizers
+  - computecapacitytopologycomputenetworkblocks/finalizers
+  - computeclusters/finalizers
+  - computeglobalimagecapabilityschemas/finalizers
+  - computeglobalimagecapabilityschemaversions/finalizers
+  - computeimagecapabilityschemas/finalizers
+  - consolehistories/finalizers
+  - consolehistorycontents/finalizers
+  - cpedeviceconfigcontents/finalizers
+  - cpedeviceshapes/finalizers
+  - cpes/finalizers
+  - crossconnectgroups/finalizers
+  - crossconnectletterofauthorities/finalizers
+  - crossconnectlocations/finalizers
+  - crossconnectmappings/finalizers
+  - crossconnectportspeedshapes/finalizers
+  - crossconnects/finalizers
+  - crossconnectstatuses/finalizers
+  - dedicatedvmhostinstances/finalizers
+  - dedicatedvmhostinstanceshapes/finalizers
+  - dedicatedvmhosts/finalizers
+  - dedicatedvmhostshapes/finalizers
+  - dhcpoptions/finalizers
+  - drgattachments/finalizers
+  - drgredundancystatuses/finalizers
+  - drgroutedistributions/finalizers
+  - drgroutedistributionstatements/finalizers
+  - drgrouterules/finalizers
+  - drgroutetables/finalizers
+  - drgs/finalizers
+  - fastconnectproviderservicekeies/finalizers
+  - fastconnectproviderservices/finalizers
+  - fastconnectprovidervirtualcircuitbandwidthshapes/finalizers
+  - images/finalizers
+  - imageshapecompatibilityentries/finalizers
+  - instanceconfigurations/finalizers
+  - instanceconsoleconnections/finalizers
+  - instancedevices/finalizers
+  - instancemaintenancereboots/finalizers
+  - instancepoolinstances/finalizers
+  - instancepoolloadbalancerattachments/finalizers
+  - instancepools/finalizers
+  - instances/finalizers
+  - internetgatewaies/finalizers
+  - ipsecconnectiondeviceconfigs/finalizers
+  - ipsecconnectiondevicestatuses/finalizers
+  - ipsecconnections/finalizers
+  - ipsecconnectiontunnelerrors/finalizers
+  - ipsecconnectiontunnelroutes/finalizers
+  - ipsecconnectiontunnels/finalizers
+  - ipsecconnectiontunnelsecurityassociations/finalizers
+  - ipsecconnectiontunnelsharedsecrets/finalizers
+  - ipseccpedeviceconfigcontents/finalizers
+  - ipv6s/finalizers
+  - localpeeringgatewaies/finalizers
+  - measuredbootreports/finalizers
+  - natgatewaies/finalizers
+  - networkingtopologies/finalizers
+  - networksecuritygroups/finalizers
+  - networksecuritygroupsecurityrules/finalizers
+  - networksecuritygroupvnics/finalizers
+  - privateips/finalizers
+  - publicipbyipaddresss/finalizers
+  - publicipbyprivateipids/finalizers
+  - publicippools/finalizers
+  - publicips/finalizers
+  - remotepeeringconnections/finalizers
+  - routetables/finalizers
+  - securitylists/finalizers
+  - servicegatewaies/finalizers
+  - services/finalizers
+  - shapes/finalizers
+  - subnets/finalizers
+  - subnettopologies/finalizers
+  - tunnelcpedeviceconfigcontents/finalizers
+  - tunnelcpedeviceconfigs/finalizers
+  - upgradestatuses/finalizers
+  - vcndnsresolverassociations/finalizers
+  - vcns/finalizers
+  - vcntopologies/finalizers
+  - virtualcircuitassociatedtunnels/finalizers
+  - virtualcircuitbandwidthshapes/finalizers
+  - virtualcircuitpublicprefixes/finalizers
+  - virtualcircuits/finalizers
+  - vlans/finalizers
+  - vnicattachments/finalizers
+  - vnics/finalizers
+  - volumeattachments/finalizers
+  - volumebackuppolicies/finalizers
+  - volumebackuppolicyassetassignments/finalizers
+  - volumebackuppolicyassignments/finalizers
+  - volumebackups/finalizers
+  - volumegroupbackups/finalizers
+  - volumegroupreplicas/finalizers
+  - volumegroups/finalizers
+  - volumekmskeies/finalizers
+  - volumes/finalizers
+  - vtaps/finalizers
+  - windowsinstanceinitialcredentials/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - core.oracle.com
+  resources:
+  - alldrgattachments/status
+  - allowedikeipsecparameters/status
+  - allowedpeerregionsforremotepeerings/status
+  - appcataloglistingagreements/status
+  - appcataloglistingresourceversions/status
+  - appcataloglistings/status
+  - appcatalogsubscriptions/status
+  - blockvolumereplicas/status
+  - bootvolumeattachments/status
+  - bootvolumebackups/status
+  - bootvolumekmskeies/status
+  - bootvolumereplicas/status
+  - bootvolumes/status
+  - byoipallocatedranges/status
+  - byoipranges/status
+  - capturefilters/status
+  - clusternetworkinstances/status
+  - clusternetworks/status
+  - computecapacityreports/status
+  - computecapacityreservationinstances/status
+  - computecapacityreservationinstanceshapes/status
+  - computecapacityreservations/status
+  - computecapacitytopologies/status
+  - computecapacitytopologycomputebaremetalhosts/status
+  - computecapacitytopologycomputehpcislands/status
+  - computecapacitytopologycomputenetworkblocks/status
+  - computeclusters/status
+  - computeglobalimagecapabilityschemas/status
+  - computeglobalimagecapabilityschemaversions/status
+  - computeimagecapabilityschemas/status
+  - consolehistories/status
+  - consolehistorycontents/status
+  - cpedeviceconfigcontents/status
+  - cpedeviceshapes/status
+  - cpes/status
+  - crossconnectgroups/status
+  - crossconnectletterofauthorities/status
+  - crossconnectlocations/status
+  - crossconnectmappings/status
+  - crossconnectportspeedshapes/status
+  - crossconnects/status
+  - crossconnectstatuses/status
+  - dedicatedvmhostinstances/status
+  - dedicatedvmhostinstanceshapes/status
+  - dedicatedvmhosts/status
+  - dedicatedvmhostshapes/status
+  - dhcpoptions/status
+  - drgattachments/status
+  - drgredundancystatuses/status
+  - drgroutedistributions/status
+  - drgroutedistributionstatements/status
+  - drgrouterules/status
+  - drgroutetables/status
+  - drgs/status
+  - fastconnectproviderservicekeies/status
+  - fastconnectproviderservices/status
+  - fastconnectprovidervirtualcircuitbandwidthshapes/status
+  - images/status
+  - imageshapecompatibilityentries/status
+  - instanceconfigurations/status
+  - instanceconsoleconnections/status
+  - instancedevices/status
+  - instancemaintenancereboots/status
+  - instancepoolinstances/status
+  - instancepoolloadbalancerattachments/status
+  - instancepools/status
+  - instances/status
+  - internetgatewaies/status
+  - ipsecconnectiondeviceconfigs/status
+  - ipsecconnectiondevicestatuses/status
+  - ipsecconnections/status
+  - ipsecconnectiontunnelerrors/status
+  - ipsecconnectiontunnelroutes/status
+  - ipsecconnectiontunnels/status
+  - ipsecconnectiontunnelsecurityassociations/status
+  - ipsecconnectiontunnelsharedsecrets/status
+  - ipseccpedeviceconfigcontents/status
+  - ipv6s/status
+  - localpeeringgatewaies/status
+  - measuredbootreports/status
+  - natgatewaies/status
+  - networkingtopologies/status
+  - networksecuritygroups/status
+  - networksecuritygroupsecurityrules/status
+  - networksecuritygroupvnics/status
+  - privateips/status
+  - publicipbyipaddresss/status
+  - publicipbyprivateipids/status
+  - publicippools/status
+  - publicips/status
+  - remotepeeringconnections/status
+  - routetables/status
+  - securitylists/status
+  - servicegatewaies/status
+  - services/status
+  - shapes/status
+  - subnets/status
+  - subnettopologies/status
+  - tunnelcpedeviceconfigcontents/status
+  - tunnelcpedeviceconfigs/status
+  - upgradestatuses/status
+  - vcndnsresolverassociations/status
+  - vcns/status
+  - vcntopologies/status
+  - virtualcircuitassociatedtunnels/status
+  - virtualcircuitbandwidthshapes/status
+  - virtualcircuitpublicprefixes/status
+  - virtualcircuits/status
+  - vlans/status
+  - vnicattachments/status
+  - vnics/status
+  - volumeattachments/status
+  - volumebackuppolicies/status
+  - volumebackuppolicyassetassignments/status
+  - volumebackuppolicyassignments/status
+  - volumebackups/status
+  - volumegroupbackups/status
+  - volumegroupreplicas/status
+  - volumegroups/status
+  - volumekmskeies/status
+  - volumes/status
+  - vtaps/status
+  - windowsinstanceinitialcredentials/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - database.oracle.com
   resources:
+  - applicationvips
+  - autonomouscontainerdatabasedataguardassociations
+  - autonomouscontainerdatabaseresourceusages
+  - autonomouscontainerdatabases
+  - autonomouscontainerdatabaseversions
+  - autonomousdatabasebackups
+  - autonomousdatabasecharactersets
+  - autonomousdatabaseclones
+  - autonomousdatabasedataguardassociations
+  - autonomousdatabaserefreshableclones
+  - autonomousdatabaseregionalwallets
   - autonomousdatabases
+  - autonomousdatabasewallets
+  - autonomousdbpreviewversions
+  - autonomousdbversions
+  - autonomousexadatainfrastructures
+  - autonomousexadatainfrastructureshapes
+  - autonomouspatches
+  - autonomousvirtualmachines
+  - autonomousvmclusteracdresourceusages
+  - autonomousvmclusterresourceusages
+  - autonomousvmclusters
+  - backupdestinations
+  - backups
+  - cloudautonomousvmclusteracdresourceusages
+  - cloudautonomousvmclusterresourceusages
+  - cloudautonomousvmclusters
+  - cloudexadatainfrastructures
+  - cloudexadatainfrastructureunallocatedresources
+  - cloudvmclusteriormconfigs
+  - cloudvmclusters
+  - cloudvmclusterupdatehistoryentries
+  - cloudvmclusterupdates
+  - consoleconnections
+  - consolehistories
+  - consolehistorycontents
+  - containerdatabasepatches
+  - databases
+  - databasesoftwareimages
+  - databaseupgradehistoryentries
+  - dataguardassociations
+  - dbhomepatches
+  - dbhomepatchhistoryentries
+  - dbhomes
+  - dbnodes
+  - dbservers
+  - dbsystemcomputeperformances
+  - dbsystempatches
+  - dbsystempatchhistoryentries
+  - dbsystems
+  - dbsystemshapes
+  - dbsystemstorageperformances
+  - dbsystemupgradehistoryentries
+  - dbversions
+  - exadatainfrastructureocpus
+  - exadatainfrastructures
+  - exadatainfrastructureunallocatedresources
+  - exadataiormconfigs
+  - externalbackupjobs
+  - externalcontainerdatabases
+  - externaldatabaseconnectors
+  - externalnoncontainerdatabases
+  - externalpluggabledatabases
+  - flexcomponents
+  - giversions
+  - infrastructuretargetversions
+  - keystores
+  - maintenancerunhistories
+  - maintenanceruns
+  - oneoffpatches
+  - pdbconversionhistoryentries
+  - pluggabledatabases
+  - systemversions
+  - vmclusternetworks
+  - vmclusterpatches
+  - vmclusterpatchhistoryentries
+  - vmclusters
+  - vmclusterupdatehistoryentries
+  - vmclusterupdates
   verbs:
   - create
   - delete
@@ -32,13 +702,706 @@ rules:
 - apiGroups:
   - database.oracle.com
   resources:
+  - applicationvips/finalizers
+  - autonomouscontainerdatabasedataguardassociations/finalizers
+  - autonomouscontainerdatabaseresourceusages/finalizers
+  - autonomouscontainerdatabases/finalizers
+  - autonomouscontainerdatabaseversions/finalizers
+  - autonomousdatabasebackups/finalizers
+  - autonomousdatabasecharactersets/finalizers
+  - autonomousdatabaseclones/finalizers
+  - autonomousdatabasedataguardassociations/finalizers
+  - autonomousdatabaserefreshableclones/finalizers
+  - autonomousdatabaseregionalwallets/finalizers
   - autonomousdatabases/finalizers
+  - autonomousdatabasewallets/finalizers
+  - autonomousdbpreviewversions/finalizers
+  - autonomousdbversions/finalizers
+  - autonomousexadatainfrastructures/finalizers
+  - autonomousexadatainfrastructureshapes/finalizers
+  - autonomouspatches/finalizers
+  - autonomousvirtualmachines/finalizers
+  - autonomousvmclusteracdresourceusages/finalizers
+  - autonomousvmclusterresourceusages/finalizers
+  - autonomousvmclusters/finalizers
+  - backupdestinations/finalizers
+  - backups/finalizers
+  - cloudautonomousvmclusteracdresourceusages/finalizers
+  - cloudautonomousvmclusterresourceusages/finalizers
+  - cloudautonomousvmclusters/finalizers
+  - cloudexadatainfrastructures/finalizers
+  - cloudexadatainfrastructureunallocatedresources/finalizers
+  - cloudvmclusteriormconfigs/finalizers
+  - cloudvmclusters/finalizers
+  - cloudvmclusterupdatehistoryentries/finalizers
+  - cloudvmclusterupdates/finalizers
+  - consoleconnections/finalizers
+  - consolehistories/finalizers
+  - consolehistorycontents/finalizers
+  - containerdatabasepatches/finalizers
+  - databases/finalizers
+  - databasesoftwareimages/finalizers
+  - databaseupgradehistoryentries/finalizers
+  - dataguardassociations/finalizers
+  - dbhomepatches/finalizers
+  - dbhomepatchhistoryentries/finalizers
+  - dbhomes/finalizers
+  - dbnodes/finalizers
+  - dbservers/finalizers
+  - dbsystemcomputeperformances/finalizers
+  - dbsystempatches/finalizers
+  - dbsystempatchhistoryentries/finalizers
+  - dbsystems/finalizers
+  - dbsystemshapes/finalizers
+  - dbsystemstorageperformances/finalizers
+  - dbsystemupgradehistoryentries/finalizers
+  - dbversions/finalizers
+  - exadatainfrastructureocpus/finalizers
+  - exadatainfrastructures/finalizers
+  - exadatainfrastructureunallocatedresources/finalizers
+  - exadataiormconfigs/finalizers
+  - externalbackupjobs/finalizers
+  - externalcontainerdatabases/finalizers
+  - externaldatabaseconnectors/finalizers
+  - externalnoncontainerdatabases/finalizers
+  - externalpluggabledatabases/finalizers
+  - flexcomponents/finalizers
+  - giversions/finalizers
+  - infrastructuretargetversions/finalizers
+  - keystores/finalizers
+  - maintenancerunhistories/finalizers
+  - maintenanceruns/finalizers
+  - oneoffpatches/finalizers
+  - pdbconversionhistoryentries/finalizers
+  - pluggabledatabases/finalizers
+  - systemversions/finalizers
+  - vmclusternetworks/finalizers
+  - vmclusterpatches/finalizers
+  - vmclusterpatchhistoryentries/finalizers
+  - vmclusters/finalizers
+  - vmclusterupdatehistoryentries/finalizers
+  - vmclusterupdates/finalizers
   verbs:
   - update
 - apiGroups:
   - database.oracle.com
   resources:
+  - applicationvips/status
+  - autonomouscontainerdatabasedataguardassociations/status
+  - autonomouscontainerdatabaseresourceusages/status
+  - autonomouscontainerdatabases/status
+  - autonomouscontainerdatabaseversions/status
+  - autonomousdatabasebackups/status
+  - autonomousdatabasecharactersets/status
+  - autonomousdatabaseclones/status
+  - autonomousdatabasedataguardassociations/status
+  - autonomousdatabaserefreshableclones/status
+  - autonomousdatabaseregionalwallets/status
   - autonomousdatabases/status
+  - autonomousdatabasewallets/status
+  - autonomousdbpreviewversions/status
+  - autonomousdbversions/status
+  - autonomousexadatainfrastructures/status
+  - autonomousexadatainfrastructureshapes/status
+  - autonomouspatches/status
+  - autonomousvirtualmachines/status
+  - autonomousvmclusteracdresourceusages/status
+  - autonomousvmclusterresourceusages/status
+  - autonomousvmclusters/status
+  - backupdestinations/status
+  - backups/status
+  - cloudautonomousvmclusteracdresourceusages/status
+  - cloudautonomousvmclusterresourceusages/status
+  - cloudautonomousvmclusters/status
+  - cloudexadatainfrastructures/status
+  - cloudexadatainfrastructureunallocatedresources/status
+  - cloudvmclusteriormconfigs/status
+  - cloudvmclusters/status
+  - cloudvmclusterupdatehistoryentries/status
+  - cloudvmclusterupdates/status
+  - consoleconnections/status
+  - consolehistories/status
+  - consolehistorycontents/status
+  - containerdatabasepatches/status
+  - databases/status
+  - databasesoftwareimages/status
+  - databaseupgradehistoryentries/status
+  - dataguardassociations/status
+  - dbhomepatches/status
+  - dbhomepatchhistoryentries/status
+  - dbhomes/status
+  - dbnodes/status
+  - dbservers/status
+  - dbsystemcomputeperformances/status
+  - dbsystempatches/status
+  - dbsystempatchhistoryentries/status
+  - dbsystems/status
+  - dbsystemshapes/status
+  - dbsystemstorageperformances/status
+  - dbsystemupgradehistoryentries/status
+  - dbversions/status
+  - exadatainfrastructureocpus/status
+  - exadatainfrastructures/status
+  - exadatainfrastructureunallocatedresources/status
+  - exadataiormconfigs/status
+  - externalbackupjobs/status
+  - externalcontainerdatabases/status
+  - externaldatabaseconnectors/status
+  - externalnoncontainerdatabases/status
+  - externalpluggabledatabases/status
+  - flexcomponents/status
+  - giversions/status
+  - infrastructuretargetversions/status
+  - keystores/status
+  - maintenancerunhistories/status
+  - maintenanceruns/status
+  - oneoffpatches/status
+  - pdbconversionhistoryentries/status
+  - pluggabledatabases/status
+  - systemversions/status
+  - vmclusternetworks/status
+  - vmclusterpatches/status
+  - vmclusterpatchhistoryentries/status
+  - vmclusters/status
+  - vmclusterupdatehistoryentries/status
+  - vmclusterupdates/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - dns.oracle.com
+  resources:
+  - domainrecords
+  - resolverendpoints
+  - resolvers
+  - rrsets
+  - steeringpolicies
+  - steeringpolicyattachments
+  - tsigkeies
+  - views
+  - zonecontents
+  - zonefromzonefiles
+  - zonerecords
+  - zones
+  - zonetransferservers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - dns.oracle.com
+  resources:
+  - domainrecords/finalizers
+  - resolverendpoints/finalizers
+  - resolvers/finalizers
+  - rrsets/finalizers
+  - steeringpolicies/finalizers
+  - steeringpolicyattachments/finalizers
+  - tsigkeies/finalizers
+  - views/finalizers
+  - zonecontents/finalizers
+  - zonefromzonefiles/finalizers
+  - zonerecords/finalizers
+  - zones/finalizers
+  - zonetransferservers/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - dns.oracle.com
+  resources:
+  - domainrecords/status
+  - resolverendpoints/status
+  - resolvers/status
+  - rrsets/status
+  - steeringpolicies/status
+  - steeringpolicyattachments/status
+  - tsigkeies/status
+  - views/status
+  - zonecontents/status
+  - zonefromzonefiles/status
+  - zonerecords/status
+  - zones/status
+  - zonetransferservers/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - events.oracle.com
+  resources:
+  - rules
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - events.oracle.com
+  resources:
+  - rules/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - events.oracle.com
+  resources:
+  - rules/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - functions.oracle.com
+  resources:
+  - applications
+  - functions
+  - pbflistings
+  - pbflistingversions
+  - triggers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - functions.oracle.com
+  resources:
+  - applications/finalizers
+  - functions/finalizers
+  - pbflistings/finalizers
+  - pbflistingversions/finalizers
+  - triggers/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - functions.oracle.com
+  resources:
+  - applications/status
+  - functions/status
+  - pbflistings/status
+  - pbflistingversions/status
+  - triggers/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - identity.oracle.com
+  resources:
+  - alloweddomainlicensetypes
+  - apikeies
+  - authenticationpolicies
+  - authtokens
+  - availabilitydomains
+  - bulkactionresourcetypes
+  - bulkedittagsresourcetypes
+  - compartments
+  - costtrackingtags
+  - customersecretkeies
+  - dbcredentials
+  - domains
+  - dynamicgroups
+  - faultdomains
+  - groups
+  - iamworkrequesterrors
+  - iamworkrequestlogs
+  - iamworkrequests
+  - identityprovidergroups
+  - identityproviders
+  - idpgroupmappings
+  - mfatotpdevices
+  - networksources
+  - oauthclientcredentials
+  - orresetuipasswords
+  - policies
+  - regions
+  - regionsubscriptions
+  - smtpcredentials
+  - standardtagnamespaces
+  - standardtagtemplates
+  - swiftpasswords
+  - tagdefaults
+  - taggingworkrequesterrors
+  - taggingworkrequestlogs
+  - taggingworkrequests
+  - tagnamespaces
+  - tags
+  - tenancies
+  - usercapabilities
+  - usergroupmemberships
+  - users
+  - userstates
+  - useruipasswordinformations
+  - workrequests
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - identity.oracle.com
+  resources:
+  - alloweddomainlicensetypes/finalizers
+  - apikeies/finalizers
+  - authenticationpolicies/finalizers
+  - authtokens/finalizers
+  - availabilitydomains/finalizers
+  - bulkactionresourcetypes/finalizers
+  - bulkedittagsresourcetypes/finalizers
+  - compartments/finalizers
+  - costtrackingtags/finalizers
+  - customersecretkeies/finalizers
+  - dbcredentials/finalizers
+  - domains/finalizers
+  - dynamicgroups/finalizers
+  - faultdomains/finalizers
+  - groups/finalizers
+  - iamworkrequesterrors/finalizers
+  - iamworkrequestlogs/finalizers
+  - iamworkrequests/finalizers
+  - identityprovidergroups/finalizers
+  - identityproviders/finalizers
+  - idpgroupmappings/finalizers
+  - mfatotpdevices/finalizers
+  - networksources/finalizers
+  - oauthclientcredentials/finalizers
+  - orresetuipasswords/finalizers
+  - policies/finalizers
+  - regions/finalizers
+  - regionsubscriptions/finalizers
+  - smtpcredentials/finalizers
+  - standardtagnamespaces/finalizers
+  - standardtagtemplates/finalizers
+  - swiftpasswords/finalizers
+  - tagdefaults/finalizers
+  - taggingworkrequesterrors/finalizers
+  - taggingworkrequestlogs/finalizers
+  - taggingworkrequests/finalizers
+  - tagnamespaces/finalizers
+  - tags/finalizers
+  - tenancies/finalizers
+  - usercapabilities/finalizers
+  - usergroupmemberships/finalizers
+  - users/finalizers
+  - userstates/finalizers
+  - useruipasswordinformations/finalizers
+  - workrequests/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - identity.oracle.com
+  resources:
+  - alloweddomainlicensetypes/status
+  - apikeies/status
+  - authenticationpolicies/status
+  - authtokens/status
+  - availabilitydomains/status
+  - bulkactionresourcetypes/status
+  - bulkedittagsresourcetypes/status
+  - compartments/status
+  - costtrackingtags/status
+  - customersecretkeies/status
+  - dbcredentials/status
+  - domains/status
+  - dynamicgroups/status
+  - faultdomains/status
+  - groups/status
+  - iamworkrequesterrors/status
+  - iamworkrequestlogs/status
+  - iamworkrequests/status
+  - identityprovidergroups/status
+  - identityproviders/status
+  - idpgroupmappings/status
+  - mfatotpdevices/status
+  - networksources/status
+  - oauthclientcredentials/status
+  - orresetuipasswords/status
+  - policies/status
+  - regions/status
+  - regionsubscriptions/status
+  - smtpcredentials/status
+  - standardtagnamespaces/status
+  - standardtagtemplates/status
+  - swiftpasswords/status
+  - tagdefaults/status
+  - taggingworkrequesterrors/status
+  - taggingworkrequestlogs/status
+  - taggingworkrequests/status
+  - tagnamespaces/status
+  - tags/status
+  - tenancies/status
+  - usercapabilities/status
+  - usergroupmemberships/status
+  - users/status
+  - userstates/status
+  - useruipasswordinformations/status
+  - workrequests/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - keymanagement.oracle.com
+  resources:
+  - ekmsprivateendpoints
+  - hsmclusters
+  - hsmpartitions
+  - precousercredentials
+  - vaultreplicas
+  - vaults
+  - vaultusages
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - keymanagement.oracle.com
+  resources:
+  - ekmsprivateendpoints/finalizers
+  - hsmclusters/finalizers
+  - hsmpartitions/finalizers
+  - precousercredentials/finalizers
+  - vaultreplicas/finalizers
+  - vaults/finalizers
+  - vaultusages/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - keymanagement.oracle.com
+  resources:
+  - ekmsprivateendpoints/status
+  - hsmclusters/status
+  - hsmpartitions/status
+  - precousercredentials/status
+  - vaultreplicas/status
+  - vaults/status
+  - vaultusages/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - limits.oracle.com
+  resources:
+  - limitdefinitions
+  - limitvalues
+  - quotas
+  - resourceavailabilities
+  - services
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - limits.oracle.com
+  resources:
+  - limitdefinitions/finalizers
+  - limitvalues/finalizers
+  - quotas/finalizers
+  - resourceavailabilities/finalizers
+  - services/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - limits.oracle.com
+  resources:
+  - limitdefinitions/status
+  - limitvalues/status
+  - quotas/status
+  - resourceavailabilities/status
+  - services/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - loadbalancer.oracle.com
+  resources:
+  - backendhealths
+  - backends
+  - backendsethealths
+  - backendsets
+  - certificates
+  - healthcheckers
+  - hostnames
+  - listenerrules
+  - listeners
+  - loadbalancerhealths
+  - loadbalancers
+  - loadbalancershapes
+  - networksecuritygroups
+  - pathroutesets
+  - policies
+  - protocols
+  - routingpolicies
+  - rulesets
+  - shapes
+  - sslciphersuites
+  - workrequests
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - loadbalancer.oracle.com
+  resources:
+  - backendhealths/finalizers
+  - backends/finalizers
+  - backendsethealths/finalizers
+  - backendsets/finalizers
+  - certificates/finalizers
+  - healthcheckers/finalizers
+  - hostnames/finalizers
+  - listenerrules/finalizers
+  - listeners/finalizers
+  - loadbalancerhealths/finalizers
+  - loadbalancers/finalizers
+  - loadbalancershapes/finalizers
+  - networksecuritygroups/finalizers
+  - pathroutesets/finalizers
+  - policies/finalizers
+  - protocols/finalizers
+  - routingpolicies/finalizers
+  - rulesets/finalizers
+  - shapes/finalizers
+  - sslciphersuites/finalizers
+  - workrequests/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - loadbalancer.oracle.com
+  resources:
+  - backendhealths/status
+  - backends/status
+  - backendsethealths/status
+  - backendsets/status
+  - certificates/status
+  - healthcheckers/status
+  - hostnames/status
+  - listenerrules/status
+  - listeners/status
+  - loadbalancerhealths/status
+  - loadbalancers/status
+  - loadbalancershapes/status
+  - networksecuritygroups/status
+  - pathroutesets/status
+  - policies/status
+  - protocols/status
+  - routingpolicies/status
+  - rulesets/status
+  - shapes/status
+  - sslciphersuites/status
+  - workrequests/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - logging.oracle.com
+  resources:
+  - loggroups
+  - logs
+  - logsavedsearches
+  - services
+  - unifiedagentconfigurations
+  - workrequesterrors
+  - workrequestlogs
+  - workrequests
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - logging.oracle.com
+  resources:
+  - loggroups/finalizers
+  - logs/finalizers
+  - logsavedsearches/finalizers
+  - services/finalizers
+  - unifiedagentconfigurations/finalizers
+  - workrequesterrors/finalizers
+  - workrequestlogs/finalizers
+  - workrequests/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - logging.oracle.com
+  resources:
+  - loggroups/status
+  - logs/status
+  - logsavedsearches/status
+  - services/status
+  - unifiedagentconfigurations/status
+  - workrequesterrors/status
+  - workrequestlogs/status
+  - workrequests/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - monitoring.oracle.com
+  resources:
+  - alarmhistories
+  - alarms
+  - alarmstatuses
+  - alarmsuppressions
+  - metrics
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - monitoring.oracle.com
+  resources:
+  - alarmhistories/finalizers
+  - alarms/finalizers
+  - alarmstatuses/finalizers
+  - alarmsuppressions/finalizers
+  - metrics/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - monitoring.oracle.com
+  resources:
+  - alarmhistories/status
+  - alarms/status
+  - alarmstatuses/status
+  - alarmsuppressions/status
+  - metrics/status
   verbs:
   - get
   - patch
@@ -46,7 +1409,18 @@ rules:
 - apiGroups:
   - mysql.oracle.com
   resources:
+  - backups
+  - channels
+  - configurations
+  - heatwaveclustermemoryestimates
+  - heatwaveclusters
   - mysqldbsystems
+  - replicas
+  - shapes
+  - versions
+  - workrequesterrors
+  - workrequestlogs
+  - workrequests
   verbs:
   - create
   - delete
@@ -58,13 +1432,385 @@ rules:
 - apiGroups:
   - mysql.oracle.com
   resources:
+  - backups/finalizers
+  - channels/finalizers
+  - configurations/finalizers
+  - heatwaveclustermemoryestimates/finalizers
+  - heatwaveclusters/finalizers
   - mysqldbsystems/finalizers
+  - replicas/finalizers
+  - shapes/finalizers
+  - versions/finalizers
+  - workrequesterrors/finalizers
+  - workrequestlogs/finalizers
+  - workrequests/finalizers
   verbs:
   - update
 - apiGroups:
   - mysql.oracle.com
   resources:
+  - backups/status
+  - channels/status
+  - configurations/status
+  - heatwaveclustermemoryestimates/status
+  - heatwaveclusters/status
   - mysqldbsystems/status
+  - replicas/status
+  - shapes/status
+  - versions/status
+  - workrequesterrors/status
+  - workrequestlogs/status
+  - workrequests/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - networkloadbalancer.oracle.com
+  resources:
+  - backendhealths
+  - backends
+  - backendsethealths
+  - backendsets
+  - healthcheckers
+  - listeners
+  - networkloadbalancerhealths
+  - networkloadbalancers
+  - networkloadbalancerspolicies
+  - networkloadbalancersprotocols
+  - networksecuritygroups
+  - workrequesterrors
+  - workrequestlogs
+  - workrequests
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - networkloadbalancer.oracle.com
+  resources:
+  - backendhealths/finalizers
+  - backends/finalizers
+  - backendsethealths/finalizers
+  - backendsets/finalizers
+  - healthcheckers/finalizers
+  - listeners/finalizers
+  - networkloadbalancerhealths/finalizers
+  - networkloadbalancers/finalizers
+  - networkloadbalancerspolicies/finalizers
+  - networkloadbalancersprotocols/finalizers
+  - networksecuritygroups/finalizers
+  - workrequesterrors/finalizers
+  - workrequestlogs/finalizers
+  - workrequests/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - networkloadbalancer.oracle.com
+  resources:
+  - backendhealths/status
+  - backends/status
+  - backendsethealths/status
+  - backendsets/status
+  - healthcheckers/status
+  - listeners/status
+  - networkloadbalancerhealths/status
+  - networkloadbalancers/status
+  - networkloadbalancerspolicies/status
+  - networkloadbalancersprotocols/status
+  - networksecuritygroups/status
+  - workrequesterrors/status
+  - workrequestlogs/status
+  - workrequests/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - nosql.oracle.com
+  resources:
+  - indexes
+  - replicas
+  - rows
+  - tables
+  - tableusages
+  - workrequesterrors
+  - workrequestlogs
+  - workrequests
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - nosql.oracle.com
+  resources:
+  - indexes/finalizers
+  - replicas/finalizers
+  - rows/finalizers
+  - tables/finalizers
+  - tableusages/finalizers
+  - workrequesterrors/finalizers
+  - workrequestlogs/finalizers
+  - workrequests/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - nosql.oracle.com
+  resources:
+  - indexes/status
+  - replicas/status
+  - rows/status
+  - tables/status
+  - tableusages/status
+  - workrequesterrors/status
+  - workrequestlogs/status
+  - workrequests/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - objectstorage.oracle.com
+  resources:
+  - buckets
+  - multipartuploadparts
+  - multipartuploads
+  - namespacemetadatas
+  - namespaces
+  - objectlifecyclepolicies
+  - objects
+  - objectstoragetiers
+  - objectversions
+  - preauthenticatedrequests
+  - replicationpolicies
+  - replicationsources
+  - retentionrules
+  - workrequesterrors
+  - workrequestlogs
+  - workrequests
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - objectstorage.oracle.com
+  resources:
+  - buckets/finalizers
+  - multipartuploadparts/finalizers
+  - multipartuploads/finalizers
+  - namespacemetadatas/finalizers
+  - namespaces/finalizers
+  - objectlifecyclepolicies/finalizers
+  - objects/finalizers
+  - objectstoragetiers/finalizers
+  - objectversions/finalizers
+  - preauthenticatedrequests/finalizers
+  - replicationpolicies/finalizers
+  - replicationsources/finalizers
+  - retentionrules/finalizers
+  - workrequesterrors/finalizers
+  - workrequestlogs/finalizers
+  - workrequests/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - objectstorage.oracle.com
+  resources:
+  - buckets/status
+  - multipartuploadparts/status
+  - multipartuploads/status
+  - namespacemetadatas/status
+  - namespaces/status
+  - objectlifecyclepolicies/status
+  - objects/status
+  - objectstoragetiers/status
+  - objectversions/status
+  - preauthenticatedrequests/status
+  - replicationpolicies/status
+  - replicationsources/status
+  - retentionrules/status
+  - workrequesterrors/status
+  - workrequestlogs/status
+  - workrequests/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - ons.oracle.com
+  resources:
+  - confirmsubscriptions
+  - subscriptions
+  - topics
+  - unsubscriptions
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ons.oracle.com
+  resources:
+  - confirmsubscriptions/finalizers
+  - subscriptions/finalizers
+  - topics/finalizers
+  - unsubscriptions/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - ons.oracle.com
+  resources:
+  - confirmsubscriptions/status
+  - subscriptions/status
+  - topics/status
+  - unsubscriptions/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - psql.oracle.com
+  resources:
+  - backups
+  - configurations
+  - connectiondetails
+  - dbsystemdbinstances
+  - dbsystems
+  - defaultconfigurations
+  - primarydbinstances
+  - shapes
+  - workrequesterrors
+  - workrequestlogs
+  - workrequests
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - psql.oracle.com
+  resources:
+  - backups/finalizers
+  - configurations/finalizers
+  - connectiondetails/finalizers
+  - dbsystemdbinstances/finalizers
+  - dbsystems/finalizers
+  - defaultconfigurations/finalizers
+  - primarydbinstances/finalizers
+  - shapes/finalizers
+  - workrequesterrors/finalizers
+  - workrequestlogs/finalizers
+  - workrequests/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - psql.oracle.com
+  resources:
+  - backups/status
+  - configurations/status
+  - connectiondetails/status
+  - dbsystemdbinstances/status
+  - dbsystems/status
+  - defaultconfigurations/status
+  - primarydbinstances/status
+  - shapes/status
+  - workrequesterrors/status
+  - workrequestlogs/status
+  - workrequests/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - queue.oracle.com
+  resources:
+  - channels
+  - messages
+  - queues
+  - stats
+  - workrequesterrors
+  - workrequestlogs
+  - workrequests
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - queue.oracle.com
+  resources:
+  - channels/finalizers
+  - messages/finalizers
+  - queues/finalizers
+  - stats/finalizers
+  - workrequesterrors/finalizers
+  - workrequestlogs/finalizers
+  - workrequests/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - queue.oracle.com
+  resources:
+  - channels/status
+  - messages/status
+  - queues/status
+  - stats/status
+  - workrequesterrors/status
+  - workrequestlogs/status
+  - workrequests/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - secrets.oracle.com
+  resources:
+  - secretbundlebynames
+  - secretbundles
+  - secretbundleversions
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - secrets.oracle.com
+  resources:
+  - secretbundlebynames/finalizers
+  - secretbundles/finalizers
+  - secretbundleversions/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - secrets.oracle.com
+  resources:
+  - secretbundlebynames/status
+  - secretbundles/status
+  - secretbundleversions/status
   verbs:
   - get
   - patch
@@ -72,6 +1818,8 @@ rules:
 - apiGroups:
   - streaming.oracle.com
   resources:
+  - connectharnesss
+  - streampools
   - streams
   verbs:
   - create
@@ -84,13 +1832,78 @@ rules:
 - apiGroups:
   - streaming.oracle.com
   resources:
+  - connectharnesss/finalizers
+  - streampools/finalizers
   - streams/finalizers
   verbs:
   - update
 - apiGroups:
   - streaming.oracle.com
   resources:
+  - connectharnesss/status
+  - streampools/status
   - streams/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - vault.oracle.com
+  resources:
+  - secrets
+  - secretversions
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - vault.oracle.com
+  resources:
+  - secrets/finalizers
+  - secretversions/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - vault.oracle.com
+  resources:
+  - secrets/status
+  - secretversions/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - workrequests.oracle.com
+  resources:
+  - workrequesterrors
+  - workrequestlogs
+  - workrequests
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - workrequests.oracle.com
+  resources:
+  - workrequesterrors/finalizers
+  - workrequestlogs/finalizers
+  - workrequests/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - workrequests.oracle.com
+  resources:
+  - workrequesterrors/status
+  - workrequestlogs/status
+  - workrequests/status
   verbs:
   - get
   - patch

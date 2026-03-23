@@ -1,14 +1,17 @@
-# Source-of-truth service map for the OSOK API generator contract.
+# Source-of-truth service map for the OSOK generator contract.
+# Services without a `generation` block default to:
+# - controller/serviceManager/registration: none
+# - webhooks: manual
 schemaVersion: v1alpha1
 domain: oracle.com
 defaultVersion: v1beta1
-generatorEntrypoint: ./cmd/osok-api-generator
+generatorEntrypoint: ./cmd/generator
 
 packageProfiles:
   controller-backed:
-    description: Existing groups with hand-maintained controllers wired into the shared manager.
+    description: Groups that participate in the shared manager install, whether runtime pieces are manual or generated.
   crd-only:
-    description: Generated API groups that ship CRDs and samples before controller support exists.
+    description: Generated API groups that ship CRDs and samples before controller, service-manager, and registration rollout is enabled.
 
 services:
   - service: artifacts
@@ -16,28 +19,64 @@ services:
     group: artifacts
     version: v1beta1
     phase: data-and-storage
-    packageProfile: crd-only
+    packageProfile: controller-backed
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
 
   - service: certificates
     sdkPackage: github.com/oracle/oci-go-sdk/v65/certificates
     group: certificates
     version: v1beta1
     phase: security-and-identity
-    packageProfile: crd-only
+    packageProfile: controller-backed
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
 
   - service: certificatesmanagement
     sdkPackage: github.com/oracle/oci-go-sdk/v65/certificatesmanagement
     group: certificatesmanagement
     version: v1beta1
     phase: security-and-identity
-    packageProfile: crd-only
+    packageProfile: controller-backed
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
 
   - service: containerengine
     sdkPackage: github.com/oracle/oci-go-sdk/v65/containerengine
     group: containerengine
     version: v1beta1
     phase: networking-and-infrastructure
-    packageProfile: crd-only
+    packageProfile: controller-backed
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
     observedState:
       sdkAliases:
         WorkRequestLog:
@@ -48,7 +87,16 @@ services:
     group: core
     version: v1beta1
     phase: networking-and-infrastructure
-    packageProfile: crd-only
+    packageProfile: controller-backed
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
     observedState:
       sdkAliases:
         AllDrgAttachment:
@@ -101,13 +149,41 @@ services:
     compatibility:
       existingKinds:
         - AutonomousDatabases
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: manual
+      resources:
+        - kind: AutonomousDatabases
+          controller:
+            extraRBACMarkers:
+              - groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
+              - groups="",resources=events,verbs=get;list;watch;create;update;patch;delete
+          serviceManager:
+            packagePath: autonomousdatabases/adb
+          webhooks:
+            strategy: manual
 
   - service: dns
     sdkPackage: github.com/oracle/oci-go-sdk/v65/dns
     group: dns
     version: v1beta1
     phase: networking-and-infrastructure
-    packageProfile: crd-only
+    packageProfile: controller-backed
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
     observedState:
       sdkAliases:
         DomainRecord:
@@ -122,21 +198,48 @@ services:
     group: events
     version: v1beta1
     phase: eventing-messaging-and-observability
-    packageProfile: crd-only
+    packageProfile: controller-backed
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
 
   - service: functions
     sdkPackage: github.com/oracle/oci-go-sdk/v65/functions
     group: functions
     version: v1beta1
     phase: eventing-messaging-and-observability
-    packageProfile: crd-only
+    packageProfile: controller-backed
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
 
   - service: identity
     sdkPackage: github.com/oracle/oci-go-sdk/v65/identity
     group: identity
     version: v1beta1
     phase: security-and-identity
-    packageProfile: crd-only
+    packageProfile: controller-backed
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
     observedState:
       sdkAliases:
         BulkActionResourceType:
@@ -166,35 +269,101 @@ services:
     group: keymanagement
     version: v1beta1
     phase: security-and-identity
-    packageProfile: crd-only
+    packageProfile: controller-backed
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: Key
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: KeyVersion
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: ReplicationStatus
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WrappingKey
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
 
   - service: limits
     sdkPackage: github.com/oracle/oci-go-sdk/v65/limits
     group: limits
     version: v1beta1
     phase: eventing-messaging-and-observability
-    packageProfile: crd-only
+    packageProfile: controller-backed
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
 
   - service: loadbalancer
     sdkPackage: github.com/oracle/oci-go-sdk/v65/loadbalancer
     group: loadbalancer
     version: v1beta1
     phase: networking-and-infrastructure
-    packageProfile: crd-only
+    packageProfile: controller-backed
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
 
   - service: logging
     sdkPackage: github.com/oracle/oci-go-sdk/v65/logging
     group: logging
     version: v1beta1
     phase: eventing-messaging-and-observability
-    packageProfile: crd-only
+    packageProfile: controller-backed
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
 
   - service: monitoring
     sdkPackage: github.com/oracle/oci-go-sdk/v65/monitoring
     group: monitoring
     version: v1beta1
     phase: eventing-messaging-and-observability
-    packageProfile: crd-only
+    packageProfile: controller-backed
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
     observedState:
       sdkAliases:
         AlarmHistory:
@@ -211,13 +380,40 @@ services:
     compatibility:
       existingKinds:
         - MySqlDbSystem
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: manual
+      resources:
+        - kind: MySqlDbSystem
+          controller:
+            maxConcurrentReconciles: 3
+            extraRBACMarkers:
+              - groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
+              - groups="",resources=events,verbs=get;list;watch;create;update;patch;delete
+          serviceManager:
+            packagePath: mysql/dbsystem
 
   - service: networkloadbalancer
     sdkPackage: github.com/oracle/oci-go-sdk/v65/networkloadbalancer
     group: networkloadbalancer
     version: v1beta1
     phase: networking-and-infrastructure
-    packageProfile: crd-only
+    packageProfile: controller-backed
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
     observedState:
       sdkAliases:
         WorkRequestLog:
@@ -228,7 +424,16 @@ services:
     group: nosql
     version: v1beta1
     phase: data-and-storage
-    packageProfile: crd-only
+    packageProfile: controller-backed
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
     observedState:
       sdkAliases:
         WorkRequestLog:
@@ -239,7 +444,16 @@ services:
     group: objectstorage
     version: v1beta1
     phase: data-and-storage
-    packageProfile: crd-only
+    packageProfile: controller-backed
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
     observedState:
       sdkAliases:
         WorkRequestLog:
@@ -250,7 +464,16 @@ services:
     group: ons
     version: v1beta1
     phase: eventing-messaging-and-observability
-    packageProfile: crd-only
+    packageProfile: controller-backed
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
     observedState:
       sdkAliases:
         ConfirmSubscription:
@@ -261,7 +484,16 @@ services:
     group: psql
     version: v1beta1
     phase: data-and-storage
-    packageProfile: crd-only
+    packageProfile: controller-backed
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
     observedState:
       sdkAliases:
         PrimaryDbInstance:
@@ -274,7 +506,16 @@ services:
     group: queue
     version: v1beta1
     phase: eventing-messaging-and-observability
-    packageProfile: crd-only
+    packageProfile: controller-backed
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
     observedState:
       sdkAliases:
         WorkRequestLog:
@@ -285,7 +526,16 @@ services:
     group: secrets
     version: v1beta1
     phase: security-and-identity
-    packageProfile: crd-only
+    packageProfile: controller-backed
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
     observedState:
       sdkAliases:
         SecretBundleByName:
@@ -302,20 +552,71 @@ services:
     compatibility:
       existingKinds:
         - Stream
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: manual
+      resources:
+        - kind: Stream
+          serviceManager:
+            packagePath: streaming/stream
+        - kind: Cursor
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: Group
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: GroupCursor
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: Message
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
 
   - service: vault
     sdkPackage: github.com/oracle/oci-go-sdk/v65/vault
     group: vault
     version: v1beta1
     phase: security-and-identity
-    packageProfile: crd-only
+    packageProfile: controller-backed
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
 
   - service: workrequests
     sdkPackage: github.com/oracle/oci-go-sdk/v65/workrequests
     group: workrequests
     version: v1beta1
     phase: networking-and-infrastructure
-    packageProfile: crd-only
+    packageProfile: controller-backed
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
     observedState:
       sdkAliases:
         WorkRequestLog:

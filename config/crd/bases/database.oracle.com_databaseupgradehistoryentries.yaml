@@ -1,0 +1,157 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: databaseupgradehistoryentries.database.oracle.com
+spec:
+  group: database.oracle.com
+  names:
+    kind: DatabaseUpgradeHistoryEntry
+    listKind: DatabaseUpgradeHistoryEntryList
+    plural: databaseupgradehistoryentries
+    singular: databaseupgradehistoryentry
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: status of the DatabaseUpgradeHistoryEntry
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the DatabaseUpgradeHistoryEntry
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: DatabaseUpgradeHistoryEntry is the Schema for the databaseupgradehistoryentries
+          API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: DatabaseUpgradeHistoryEntrySpec defines the desired state
+              of DatabaseUpgradeHistoryEntry.
+            type: object
+          status:
+            description: DatabaseUpgradeHistoryEntryStatus defines the observed state
+              of DatabaseUpgradeHistoryEntry.
+            properties:
+              action:
+                description: The database upgrade action.
+                type: string
+              id:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the database upgrade history.
+                type: string
+              lifecycleDetails:
+                description: Additional information about the current lifecycle state.
+                type: string
+              lifecycleState:
+                description: Status of database upgrade history SUCCEEDED|IN_PROGRESS|FAILED.
+                type: string
+              options:
+                description: |-
+                  Additional upgrade options supported by DBUA(Database Upgrade Assistant).
+                  Example: "-upgradeTimezone false -keepEvents"
+                type: string
+              source:
+                description: |-
+                  The source of the Oracle Database software to be used for the upgrade.
+                   - Use `DB_HOME` to specify an existing Database Home to upgrade the database. The database is moved to the target Database Home and makes use of the Oracle Database software version of the target Database Home.
+                   - Use `DB_VERSION` to specify a generally-available Oracle Database software version to upgrade the database.
+                   - Use `DB_SOFTWARE_IMAGE` to specify a database software image (https://docs.cloud.oracle.com/iaas/Content/Database/Concepts/databasesoftwareimage.htm) to upgrade the database.
+                type: string
+              sourceDbHomeId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the Database Home.
+                type: string
+              status:
+                properties:
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              targetDBVersion:
+                description: |-
+                  A valid Oracle Database version. For a list of supported versions, use the ListDbVersions operation.
+                  This cannot be updated in parallel with any of the following: licenseModel, dbEdition, cpuCoreCount, computeCount, computeModel, adminPassword, whitelistedIps, isMTLSConnectionRequired, openMode, permissionLevel, dbWorkload, privateEndpointLabel, nsgIds, isRefreshable, dbName, scheduledOperations, dbToolsDetails, isLocalDataGuardEnabled, or isFreeTier.
+                type: string
+              targetDatabaseSoftwareImageId:
+                description: the database software image used for upgrading database.
+                type: string
+              targetDbHomeId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the Database Home.
+                type: string
+              timeEnded:
+                description: The date and time when the database upgrade ended.
+                type: string
+              timeStarted:
+                description: The date and time when the database upgrade started.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

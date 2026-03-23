@@ -169,6 +169,8 @@ spec:
                     required:
                     - logObjectId
                     type: object
+                  jsonData:
+                    type: string
                   sources:
                     description: Logging source object.
                     items:
@@ -180,6 +182,8 @@ spec:
                           items:
                             type: string
                           type: array
+                        jsonData:
+                          type: string
                         name:
                           description: Unique name for the source.
                           type: string
@@ -236,6 +240,8 @@ spec:
                               description: Specifies with priority or not. Corresponds
                                 to the Fluentd with_priority parameter.
                               type: boolean
+                            jsonData:
+                              type: string
                             keys:
                               description: TSV keys.
                               items:

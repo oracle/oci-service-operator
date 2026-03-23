@@ -99,6 +99,8 @@ spec:
                               **NOTE:** If you define this condition for a rule without a `SourceVcnIpAddressCondition`, this condition
                               matches all incoming traffic in the specified VCN.
                             type: string
+                          jsonData:
+                            type: string
                           operator:
                             description: |-
                               A string that specifies how to compare the PathMatchCondition object's `attributeValue` string to the
@@ -132,6 +134,8 @@ spec:
                         This value indicates the maximum size allowed for each buffer.
                         The allowed values for buffer size are 8, 16, 32 and 64.
                       type: integer
+                    jsonData:
+                      type: string
                     prefix:
                       description: |-
                         A string to prepend to the header value. The resulting header value must conform to RFC 7230.

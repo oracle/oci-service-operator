@@ -114,6 +114,8 @@ spec:
                     description: Configuration specifying a constant amount of provisioned
                       concurrency.
                     type: integer
+                  jsonData:
+                    type: string
                   strategy:
                     type: string
                 required:
@@ -122,6 +124,8 @@ spec:
               sourceDetails:
                 description: FunctionSourceDetails defines nested fields for Function.SourceDetails.
                 properties:
+                  jsonData:
+                    type: string
                   pbfListingId:
                     description: |-
                       The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the PbfListing this

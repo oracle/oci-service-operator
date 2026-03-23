@@ -37,14 +37,23 @@ type DbSystemServiceManager struct {
 	ociClient        MySQLDbSystemClientInterface
 }
 
+func NewDbSystemServiceManagerWithDeps(deps servicemanager.RuntimeDeps) *DbSystemServiceManager {
+	return &DbSystemServiceManager{
+		Provider:         deps.Provider,
+		CredentialClient: deps.CredentialClient,
+		Scheme:           deps.Scheme,
+		Log:              deps.Log,
+	}
+}
+
 func NewDbSystemServiceManager(provider common.ConfigurationProvider, credClient credhelper.CredentialClient,
 	scheme *runtime.Scheme, log loggerutil.OSOKLogger) *DbSystemServiceManager {
-	return &DbSystemServiceManager{
+	return NewDbSystemServiceManagerWithDeps(servicemanager.RuntimeDeps{
 		Provider:         provider,
 		CredentialClient: credClient,
 		Scheme:           scheme,
 		Log:              log,
-	}
+	})
 }
 
 func (c *DbSystemServiceManager) CreateOrUpdate(ctx context.Context, obj runtime.Object, req ctrl.Request) (servicemanager.OSOKResponse, error) {

@@ -11,8 +11,8 @@ import (
 
 	"github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/oracle/oci-service-operator/go_ensurefips"
+	"github.com/oracle/oci-service-operator/internal/registrations"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
-	"github.com/oracle/oci-service-operator/pkg/servicemanager/mysql/dbsystem"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
@@ -26,19 +26,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
-	databasev1beta1 "github.com/oracle/oci-service-operator/api/database/v1beta1"
-	mysqlv1beta1 "github.com/oracle/oci-service-operator/api/mysql/v1beta1"
-	streamingv1beta1 "github.com/oracle/oci-service-operator/api/streaming/v1beta1"
-	databasecontrollers "github.com/oracle/oci-service-operator/controllers/database"
-	mysqlcontrollers "github.com/oracle/oci-service-operator/controllers/mysql"
-	streamingcontrollers "github.com/oracle/oci-service-operator/controllers/streaming"
 	"github.com/oracle/oci-service-operator/pkg/authhelper"
 	"github.com/oracle/oci-service-operator/pkg/config"
-	"github.com/oracle/oci-service-operator/pkg/core"
 	"github.com/oracle/oci-service-operator/pkg/credhelper/kubesecret"
 	"github.com/oracle/oci-service-operator/pkg/metrics"
-	"github.com/oracle/oci-service-operator/pkg/servicemanager/autonomousdatabases/adb"
-	"github.com/oracle/oci-service-operator/pkg/servicemanager/streams"
+	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	"github.com/oracle/oci-service-operator/pkg/util"
 	// +kubebuilder:scaffold:imports
 )
@@ -51,9 +43,9 @@ var (
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
-	utilruntime.Must(databasev1beta1.AddToScheme(scheme))
-	utilruntime.Must(mysqlv1beta1.AddToScheme(scheme))
-	utilruntime.Must(streamingv1beta1.AddToScheme(scheme))
+	for _, registration := range registrations.All() {
+		utilruntime.Must(registration.AddToScheme(scheme))
+	}
 	// +kubebuilder:scaffold:scheme
 }
 
@@ -138,53 +130,24 @@ func main() {
 		Metrics: metricsClient,
 	}
 
-	if err = (&databasecontrollers.AutonomousDatabasesReconciler{
-		Reconciler: &core.BaseReconciler{
-			Client:             mgr.GetClient(),
-			OSOKServiceManager: adb.NewAdbServiceManager(provider, credClient, scheme, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("AutonomousDatabases")}),
-			Finalizer:          core.NewBaseFinalizer(mgr.GetClient(), ctrl.Log),
-			Log:                loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("AutonomousDatabases")},
-			Metrics:            metricsClient,
-			Recorder:           mgr.GetEventRecorderFor("AutonomousDatabases"),
-			Scheme:             scheme,
-		},
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.ErrorLog(err, "unable to create controller", "controller", "AutonomousDatabases")
-		os.Exit(1)
-	}
-	if err = (&databasev1beta1.AutonomousDatabases{}).SetupWebhookWithManager(mgr); err != nil {
-		setupLog.ErrorLog(err, "unable to create webhook", "webhook", "AutonomousDatabases")
-		os.Exit(1)
-	}
+	registrationContext := registrations.NewContext(mgr, servicemanager.RuntimeDeps{
+		Provider:         provider,
+		CredentialClient: credClient,
+		Scheme:           mgr.GetScheme(),
+		Metrics:          metricsClient,
+	})
 
-	if err = (&streamingcontrollers.StreamReconciler{
-		Reconciler: &core.BaseReconciler{
-			Client: mgr.GetClient(),
-			OSOKServiceManager: streams.NewStreamServiceManager(provider, credClient, scheme, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("Streams")},
-				metricsClient),
-			Finalizer: core.NewBaseFinalizer(mgr.GetClient(), ctrl.Log),
-			Log:       loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("Streams")},
-			Metrics:   metricsClient,
-			Recorder:  mgr.GetEventRecorderFor("Streams"),
-			Scheme:    scheme,
-		},
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.ErrorLog(err, "unable to create controller", "controller", "Streams")
-		os.Exit(1)
+	for _, registration := range registrations.All() {
+		if err = registration.SetupWithManager(registrationContext); err != nil {
+			setupLog.ErrorLog(err, "unable to create controller registration", "group", registration.Group)
+			os.Exit(1)
+		}
 	}
-	if err = (&mysqlcontrollers.MySqlDBsystemReconciler{
-		Reconciler: &core.BaseReconciler{
-			Client:             mgr.GetClient(),
-			OSOKServiceManager: dbsystem.NewDbSystemServiceManager(provider, credClient, scheme, loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("service-manager").WithName("MySqlDbSystem")}),
-			Finalizer:          core.NewBaseFinalizer(mgr.GetClient(), ctrl.Log),
-			Log:                loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("controllers").WithName("MySqlDbSystem")},
-			Metrics:            metricsClient,
-			Recorder:           mgr.GetEventRecorderFor("MySqlDbSystem"),
-			Scheme:             scheme,
-		},
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.ErrorLog(err, "unable to create controller", "controller", "MySqlDbSystem")
-		os.Exit(1)
+	for _, webhook := range registrations.ManualWebhooks() {
+		if err = webhook.SetupWithManager(mgr); err != nil {
+			setupLog.ErrorLog(err, "unable to create webhook", "webhook", webhook.Name)
+			os.Exit(1)
+		}
 	}
 
 	// +kubebuilder:scaffold:builder

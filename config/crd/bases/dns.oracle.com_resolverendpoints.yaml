@@ -71,6 +71,8 @@ spec:
                 description: A Boolean flag indicating whether or not the resolver
                   endpoint is for listening.
                 type: boolean
+              jsonData:
+                type: string
               listeningAddress:
                 description: |-
                   An IP address to listen to queries on. For VNIC endpoints this IP address must be part of the

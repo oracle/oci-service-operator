@@ -79,6 +79,8 @@ spec:
                   issuerCertificateAuthorityId:
                     description: The OCID of the private CA.
                     type: string
+                  jsonData:
+                    type: string
                   keyAlgorithm:
                     description: The algorithm to use to create key pairs.
                     type: string
@@ -211,6 +213,8 @@ spec:
                       description: |-
                         A property specifying the period of time, in days, before the certificate's targeted renewal that the process should occur.
                         Expressed in ISO 8601 (https://en.wikipedia.org/wiki/ISO_8601#Time_intervals) format.
+                      type: string
+                    jsonData:
                       type: string
                     renewalInterval:
                       description: |-
