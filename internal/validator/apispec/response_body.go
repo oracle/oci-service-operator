@@ -15,6 +15,11 @@ type responseBodyCoverage struct {
 }
 
 var responseBodyCoverageTargets = map[string]responseBodyCoverage{
+	"ConsoleHistoryContent": {
+		SDKStruct: "database.GetConsoleHistoryContentResponse",
+		FieldName: "Content",
+		Encoding:  "binary",
+	},
 	"CoreConsoleHistoryContent": {
 		SDKStruct: "core.GetConsoleHistoryContentResponse",
 		FieldName: "Value",

@@ -47,6 +47,170 @@ type Target struct {
 
 var targets = []Target{
 	{
+		Name:       "ApplicationVip",
+		SpecType:   reflect.TypeOf(databasev1beta1.ApplicationVipSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.ApplicationVipStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.CreateApplicationVipDetails",
+			},
+			{
+				SDKStruct: "database.ApplicationVip",
+			},
+			{
+				SDKStruct: "database.ApplicationVipSummary",
+			},
+		},
+	},
+	{
+		Name:       "AutonomousContainerDatabase",
+		SpecType:   reflect.TypeOf(databasev1beta1.AutonomousContainerDatabaseSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.AutonomousContainerDatabaseStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.CreateAutonomousContainerDatabaseDetails",
+			},
+			{
+				SDKStruct: "database.UpdateAutonomousContainerDatabaseDetails",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: patch-style update payload only covers a narrow subset of the generated desired-state surface; create payload parity remains tracked on the CRD spec.",
+			},
+			{
+				SDKStruct: "database.AutonomousContainerDatabase",
+			},
+			{
+				SDKStruct: "database.AutonomousContainerDatabaseVersionSummary",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: version summaries belong to the dedicated AutonomousContainerDatabaseVersion status surface.",
+			},
+			{
+				SDKStruct: "database.AutonomousContainerDatabaseSummary",
+			},
+		},
+	},
+	{
+		Name:       "AutonomousContainerDatabaseDataguardAssociation",
+		SpecType:   reflect.TypeOf(databasev1beta1.AutonomousContainerDatabaseDataguardAssociationSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.AutonomousContainerDatabaseDataguardAssociationStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.CreateAutonomousContainerDatabaseDataguardAssociationDetails",
+			},
+			{
+				SDKStruct: "database.AutonomousContainerDatabaseDataguardAssociation",
+			},
+		},
+	},
+	{
+		Name:       "AutonomousContainerDatabaseResourceUsage",
+		SpecType:   reflect.TypeOf(databasev1beta1.AutonomousContainerDatabaseResourceUsageSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.AutonomousContainerDatabaseResourceUsageStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.AutonomousContainerDatabaseResourceUsage",
+			},
+		},
+	},
+	{
+		Name:       "AutonomousContainerDatabaseVersion",
+		SpecType:   reflect.TypeOf(databasev1beta1.AutonomousContainerDatabaseVersionSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.AutonomousContainerDatabaseVersionStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.AutonomousContainerDatabaseVersionSummary",
+			},
+		},
+	},
+	{
+		Name:       "AutonomousDatabaseBackup",
+		SpecType:   reflect.TypeOf(databasev1beta1.AutonomousDatabaseBackupSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.AutonomousDatabaseBackupStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.CreateAutonomousDatabaseBackupDetails",
+			},
+			{
+				SDKStruct: "database.UpdateAutonomousDatabaseBackupDetails",
+			},
+			{
+				SDKStruct: "database.AutonomousDatabaseBackup",
+			},
+			{
+				SDKStruct: "database.AutonomousDatabaseBackupSummary",
+			},
+		},
+	},
+	{
+		Name:       "AutonomousDatabaseCharacterSet",
+		SpecType:   reflect.TypeOf(databasev1beta1.AutonomousDatabaseCharacterSetSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.AutonomousDatabaseCharacterSetStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.AutonomousDatabaseCharacterSets",
+			},
+		},
+	},
+	{
+		Name:       "AutonomousDatabaseClone",
+		SpecType:   reflect.TypeOf(databasev1beta1.AutonomousDatabaseCloneSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.AutonomousDatabaseCloneStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.CreateAutonomousDatabaseCloneDetails",
+			},
+		},
+	},
+	{
+		Name:       "AutonomousDatabaseDataguardAssociation",
+		SpecType:   reflect.TypeOf(databasev1beta1.AutonomousDatabaseDataguardAssociationSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.AutonomousDatabaseDataguardAssociationStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.AutonomousDatabaseDataguardAssociation",
+			},
+		},
+	},
+	{
+		Name:       "AutonomousDatabaseRefreshableClone",
+		SpecType:   reflect.TypeOf(databasev1beta1.AutonomousDatabaseRefreshableCloneSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.AutonomousDatabaseRefreshableCloneStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.RefreshableCloneSummary",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: spec is empty and the SDK only exposes read-only response payloads via database.RefreshableCloneSummary, which would make every field appear missing from desired state.",
+			},
+		},
+	},
+	{
+		Name:       "AutonomousDatabaseRegionalWallet",
+		SpecType:   reflect.TypeOf(databasev1beta1.AutonomousDatabaseRegionalWalletSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.AutonomousDatabaseRegionalWalletStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.UpdateAutonomousDatabaseWalletDetails",
+			},
+			{
+				SDKStruct: "database.AutonomousDatabaseWallet",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: OCI read-model mappings broaden desired-state coverage, and this CRD does not expose a meaningful status surface for parity tracking.",
+			},
+		},
+	},
+	{
+		Name:       "AutonomousDatabaseWallet",
+		SpecType:   reflect.TypeOf(databasev1beta1.AutonomousDatabaseWalletSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.AutonomousDatabaseWalletStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.UpdateAutonomousDatabaseWalletDetails",
+			},
+			{
+				SDKStruct: "database.AutonomousDatabaseWallet",
+			},
+		},
+	},
+	{
 		Name:       "AutonomousDatabases",
 		SpecType:   reflect.TypeOf(databasev1beta1.AutonomousDatabasesSpec{}),
 		StatusType: reflect.TypeOf(databasev1beta1.AutonomousDatabasesStatus{}),
@@ -60,6 +224,1088 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "AutonomousDbPreviewVersion",
+		SpecType:   reflect.TypeOf(databasev1beta1.AutonomousDbPreviewVersionSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.AutonomousDbPreviewVersionStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.AutonomousDbPreviewVersionSummary",
+			},
+		},
+	},
+	{
+		Name:       "AutonomousDbVersion",
+		SpecType:   reflect.TypeOf(databasev1beta1.AutonomousDbVersionSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.AutonomousDbVersionStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.AutonomousDbVersionSummary",
+			},
+		},
+	},
+	{
+		Name:       "AutonomousExadataInfrastructure",
+		SpecType:   reflect.TypeOf(databasev1beta1.AutonomousExadataInfrastructureSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.AutonomousExadataInfrastructureStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.UpdateAutonomousExadataInfrastructureDetails",
+			},
+			{
+				SDKStruct: "database.AutonomousExadataInfrastructure",
+			},
+			{
+				SDKStruct: "database.AutonomousExadataInfrastructureSummary",
+			},
+		},
+	},
+	{
+		Name:       "AutonomousExadataInfrastructureShape",
+		SpecType:   reflect.TypeOf(databasev1beta1.AutonomousExadataInfrastructureShapeSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.AutonomousExadataInfrastructureShapeStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.AutonomousExadataInfrastructureShapeSummary",
+			},
+		},
+	},
+	{
+		Name:       "AutonomousPatch",
+		SpecType:   reflect.TypeOf(databasev1beta1.AutonomousPatchSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.AutonomousPatchStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.AutonomousPatch",
+			},
+			{
+				SDKStruct: "database.AutonomousPatchSummary",
+			},
+		},
+	},
+	{
+		Name:       "AutonomousVirtualMachine",
+		SpecType:   reflect.TypeOf(databasev1beta1.AutonomousVirtualMachineSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.AutonomousVirtualMachineStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.AutonomousVirtualMachine",
+			},
+			{
+				SDKStruct: "database.AutonomousVirtualMachineSummary",
+			},
+		},
+	},
+	{
+		Name:       "AutonomousVmCluster",
+		SpecType:   reflect.TypeOf(databasev1beta1.AutonomousVmClusterSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.AutonomousVmClusterStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.CreateAutonomousVmClusterDetails",
+			},
+			{
+				SDKStruct: "database.UpdateAutonomousVmClusterDetails",
+			},
+			{
+				SDKStruct: "database.AutonomousVmCluster",
+			},
+			{
+				SDKStruct: "database.AutonomousVmClusterSummary",
+			},
+		},
+	},
+	{
+		Name:       "AutonomousVmClusterAcdResourceUsage",
+		SpecType:   reflect.TypeOf(databasev1beta1.AutonomousVmClusterAcdResourceUsageSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.AutonomousVmClusterAcdResourceUsageStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.AutonomousContainerDatabaseResourceUsage",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: spec is empty and the SDK only exposes read-only response payloads via database.AutonomousContainerDatabaseResourceUsage, which would make every field appear missing from desired state.",
+			},
+		},
+	},
+	{
+		Name:       "AutonomousVmClusterResourceUsage",
+		SpecType:   reflect.TypeOf(databasev1beta1.AutonomousVmClusterResourceUsageSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.AutonomousVmClusterResourceUsageStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.AutonomousVmClusterResourceUsage",
+			},
+		},
+	},
+	{
+		Name:       "Backup",
+		SpecType:   reflect.TypeOf(databasev1beta1.BackupSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.BackupStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.CreateBackupDetails",
+			},
+			{
+				SDKStruct: "database.Backup",
+			},
+			{
+				SDKStruct: "database.BackupSummary",
+			},
+		},
+	},
+	{
+		Name:       "BackupDestination",
+		SpecType:   reflect.TypeOf(databasev1beta1.BackupDestinationSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.BackupDestinationStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.CreateNfsBackupDestinationDetails",
+			},
+			{
+				SDKStruct: "database.CreateRecoveryApplianceBackupDestinationDetails",
+			},
+			{
+				SDKStruct: "database.UpdateBackupDestinationDetails",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: patch-style update payload only covers a narrow subset of the generated desired-state surface; create payload parity remains tracked on the CRD spec.",
+			},
+			{
+				SDKStruct: "database.BackupDestinationDetails",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: detailed read-model broadens status coverage beyond the generated CRD status surface; primary status parity remains tracked on the resource and summary types.",
+			},
+			{
+				SDKStruct: "database.BackupDestination",
+			},
+			{
+				SDKStruct: "database.BackupDestinationSummary",
+			},
+		},
+	},
+	{
+		Name:       "CloudAutonomousVmCluster",
+		SpecType:   reflect.TypeOf(databasev1beta1.CloudAutonomousVmClusterSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.CloudAutonomousVmClusterStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.CreateCloudAutonomousVmClusterDetails",
+			},
+			{
+				SDKStruct: "database.UpdateCloudAutonomousVmClusterDetails",
+			},
+			{
+				SDKStruct: "database.CloudAutonomousVmCluster",
+			},
+			{
+				SDKStruct: "database.CloudAutonomousVmClusterSummary",
+			},
+		},
+	},
+	{
+		Name:       "CloudAutonomousVmClusterAcdResourceUsage",
+		SpecType:   reflect.TypeOf(databasev1beta1.CloudAutonomousVmClusterAcdResourceUsageSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.CloudAutonomousVmClusterAcdResourceUsageStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.AutonomousContainerDatabaseResourceUsage",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: spec is empty and the SDK only exposes read-only response payloads via database.AutonomousContainerDatabaseResourceUsage, which would make every field appear missing from desired state.",
+			},
+		},
+	},
+	{
+		Name:       "CloudAutonomousVmClusterResourceUsage",
+		SpecType:   reflect.TypeOf(databasev1beta1.CloudAutonomousVmClusterResourceUsageSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.CloudAutonomousVmClusterResourceUsageStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.CloudAutonomousVmClusterResourceUsage",
+			},
+		},
+	},
+	{
+		Name:       "CloudExadataInfrastructure",
+		SpecType:   reflect.TypeOf(databasev1beta1.CloudExadataInfrastructureSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.CloudExadataInfrastructureStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.CreateCloudExadataInfrastructureDetails",
+			},
+			{
+				SDKStruct: "database.UpdateCloudExadataInfrastructureDetails",
+			},
+			{
+				SDKStruct: "database.CloudExadataInfrastructure",
+			},
+			{
+				SDKStruct: "database.CloudExadataInfrastructureSummary",
+			},
+		},
+	},
+	{
+		Name:       "CloudExadataInfrastructureUnallocatedResource",
+		SpecType:   reflect.TypeOf(databasev1beta1.CloudExadataInfrastructureUnallocatedResourceSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.CloudExadataInfrastructureUnallocatedResourceStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.CloudExadataInfrastructureUnallocatedResources",
+			},
+		},
+	},
+	{
+		Name:       "CloudVmCluster",
+		SpecType:   reflect.TypeOf(databasev1beta1.CloudVmClusterSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.CloudVmClusterStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.CreateCloudVmClusterDetails",
+			},
+			{
+				SDKStruct: "database.UpdateCloudVmClusterDetails",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: patch-style update payload only covers a narrow subset of the generated desired-state surface; create payload parity remains tracked on the CRD spec.",
+			},
+			{
+				SDKStruct: "database.CloudVmCluster",
+			},
+			{
+				SDKStruct: "database.CloudVmClusterSummary",
+			},
+		},
+	},
+	{
+		Name:       "CloudVmClusterIormConfig",
+		SpecType:   reflect.TypeOf(databasev1beta1.CloudVmClusterIormConfigSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.CloudVmClusterIormConfigStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.ExadataIormConfigUpdateDetails",
+			},
+			{
+				SDKStruct: "database.ExadataIormConfig",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: OCI read-model mappings broaden desired-state coverage, and this CRD does not expose a meaningful status surface for parity tracking.",
+			},
+		},
+	},
+	{
+		Name:       "CloudVmClusterUpdate",
+		SpecType:   reflect.TypeOf(databasev1beta1.CloudVmClusterUpdateSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.CloudVmClusterUpdateStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.Update",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: spec is empty and the SDK only exposes read-only response payloads via database.Update, which would make every field appear missing from desired state.",
+			},
+			{
+				SDKStruct: "database.UpdateSummary",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: spec is empty and the SDK only exposes read-only response payloads via database.UpdateSummary, which would make every field appear missing from desired state.",
+			},
+		},
+	},
+	{
+		Name:       "CloudVmClusterUpdateHistoryEntry",
+		SpecType:   reflect.TypeOf(databasev1beta1.CloudVmClusterUpdateHistoryEntrySpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.CloudVmClusterUpdateHistoryEntryStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.UpdateHistoryEntry",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: spec is empty and the SDK only exposes read-only response payloads via database.UpdateHistoryEntry, which would make every field appear missing from desired state.",
+			},
+			{
+				SDKStruct: "database.UpdateHistoryEntrySummary",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: spec is empty and the SDK only exposes read-only response payloads via database.UpdateHistoryEntrySummary, which would make every field appear missing from desired state.",
+			},
+		},
+	},
+	{
+		Name:       "ConsoleConnection",
+		SpecType:   reflect.TypeOf(databasev1beta1.ConsoleConnectionSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.ConsoleConnectionStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.CreateConsoleConnectionDetails",
+			},
+			{
+				SDKStruct: "database.UpdateConsoleConnectionDetails",
+			},
+			{
+				SDKStruct: "database.ConsoleConnection",
+			},
+			{
+				SDKStruct: "database.ConsoleConnectionSummary",
+			},
+		},
+	},
+	{
+		Name:       "ConsoleHistory",
+		SpecType:   reflect.TypeOf(databasev1beta1.ConsoleHistorySpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.ConsoleHistoryStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.CreateConsoleHistoryDetails",
+			},
+			{
+				SDKStruct: "database.UpdateConsoleHistoryDetails",
+			},
+			{
+				SDKStruct: "database.ConsoleHistory",
+			},
+			{
+				SDKStruct: "database.ConsoleHistoryCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			},
+			{
+				SDKStruct: "database.ConsoleHistorySummary",
+			},
+		},
+	},
+	{
+		Name:        "ConsoleHistoryContent",
+		SpecType:    reflect.TypeOf(databasev1beta1.ConsoleHistoryContentSpec{}),
+		StatusType:  reflect.TypeOf(databasev1beta1.ConsoleHistoryContentStatus{}),
+		SDKMappings: []SDKMapping{},
+	},
+	{
+		Name:       "ContainerDatabasePatch",
+		SpecType:   reflect.TypeOf(databasev1beta1.ContainerDatabasePatchSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.ContainerDatabasePatchStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.AutonomousPatchSummary",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: spec is empty and the SDK only exposes read-only response payloads via database.AutonomousPatchSummary, which would make every field appear missing from desired state.",
+			},
+		},
+	},
+	{
+		Name:       "DataGuardAssociation",
+		SpecType:   reflect.TypeOf(databasev1beta1.DataGuardAssociationSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.DataGuardAssociationStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.CreateDataGuardAssociationToExistingDbSystemDetails",
+			},
+			{
+				SDKStruct: "database.CreateDataGuardAssociationToExistingVmClusterDetails",
+			},
+			{
+				SDKStruct: "database.CreateDataGuardAssociationWithNewDbSystemDetails",
+			},
+			{
+				SDKStruct: "database.UpdateDataGuardAssociationDetails",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: patch-style update payload only covers a narrow subset of the generated desired-state surface; create payload parity remains tracked on the CRD spec.",
+			},
+			{
+				SDKStruct: "database.DataGuardAssociation",
+			},
+			{
+				SDKStruct: "database.DataGuardAssociationSummary",
+			},
+		},
+	},
+	{
+		Name:       "Database",
+		SpecType:   reflect.TypeOf(databasev1beta1.DatabaseSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.DatabaseStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.CreateDatabaseDetails",
+			},
+			{
+				SDKStruct: "database.UpdateDatabaseDetails",
+			},
+			{
+				SDKStruct: "database.Database",
+			},
+			{
+				SDKStruct: "database.DatabaseSummary",
+			},
+		},
+	},
+	{
+		Name:       "DatabaseSoftwareImage",
+		SpecType:   reflect.TypeOf(databasev1beta1.DatabaseSoftwareImageSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.DatabaseSoftwareImageStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.CreateDatabaseSoftwareImageDetails",
+			},
+			{
+				SDKStruct: "database.UpdateDatabaseSoftwareImageDetails",
+			},
+			{
+				SDKStruct: "database.DatabaseSoftwareImage",
+			},
+			{
+				SDKStruct: "database.DatabaseSoftwareImageSummary",
+			},
+		},
+	},
+	{
+		Name:       "DatabaseUpgradeHistoryEntry",
+		SpecType:   reflect.TypeOf(databasev1beta1.DatabaseUpgradeHistoryEntrySpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.DatabaseUpgradeHistoryEntryStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.DatabaseUpgradeHistoryEntry",
+			},
+			{
+				SDKStruct: "database.DatabaseUpgradeHistoryEntrySummary",
+			},
+		},
+	},
+	{
+		Name:       "DbHome",
+		SpecType:   reflect.TypeOf(databasev1beta1.DbHomeSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.DbHomeStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.CreateDbHomeDetails",
+			},
+			{
+				SDKStruct: "database.UpdateDbHomeDetails",
+			},
+			{
+				SDKStruct: "database.DbHome",
+			},
+			{
+				SDKStruct: "database.DbHomeSummary",
+			},
+		},
+	},
+	{
+		Name:       "DbHomePatch",
+		SpecType:   reflect.TypeOf(databasev1beta1.DbHomePatchSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.DbHomePatchStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.Patch",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: spec is empty and the SDK only exposes read-only response payloads via database.Patch, which would make every field appear missing from desired state.",
+			},
+			{
+				SDKStruct: "database.PatchSummary",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: spec is empty and the SDK only exposes read-only response payloads via database.PatchSummary, which would make every field appear missing from desired state.",
+			},
+		},
+	},
+	{
+		Name:       "DbHomePatchHistoryEntry",
+		SpecType:   reflect.TypeOf(databasev1beta1.DbHomePatchHistoryEntrySpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.DbHomePatchHistoryEntryStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.PatchHistoryEntry",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: spec is empty and the SDK only exposes read-only response payloads via database.PatchHistoryEntry, which would make every field appear missing from desired state.",
+			},
+			{
+				SDKStruct: "database.PatchHistoryEntrySummary",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: spec is empty and the SDK only exposes read-only response payloads via database.PatchHistoryEntrySummary, which would make every field appear missing from desired state.",
+			},
+		},
+	},
+	{
+		Name:       "DbNode",
+		SpecType:   reflect.TypeOf(databasev1beta1.DbNodeSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.DbNodeStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.UpdateDbNodeDetails",
+			},
+			{
+				SDKStruct: "database.DbNode",
+			},
+			{
+				SDKStruct: "database.DbNodeSummary",
+			},
+		},
+	},
+	{
+		Name:       "DbServer",
+		SpecType:   reflect.TypeOf(databasev1beta1.DbServerSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.DbServerStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.DbServerDetails",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: detailed read-model broadens status coverage beyond the generated CRD status surface; primary status parity remains tracked on the resource and summary types.",
+			},
+			{
+				SDKStruct: "database.DbServer",
+			},
+			{
+				SDKStruct: "database.DbServerSummary",
+			},
+		},
+	},
+	{
+		Name:       "DbSystem",
+		SpecType:   reflect.TypeOf(databasev1beta1.DbSystemSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.DbSystemStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.UpdateDbSystemDetails",
+			},
+			{
+				SDKStruct: "database.DbSystem",
+			},
+			{
+				SDKStruct: "database.DbSystemSummary",
+			},
+		},
+	},
+	{
+		Name:       "DbSystemComputePerformance",
+		SpecType:   reflect.TypeOf(databasev1beta1.DbSystemComputePerformanceSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.DbSystemComputePerformanceStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.DbSystemComputePerformanceSummary",
+			},
+		},
+	},
+	{
+		Name:       "DbSystemPatch",
+		SpecType:   reflect.TypeOf(databasev1beta1.DbSystemPatchSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.DbSystemPatchStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.Patch",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: spec is empty and the SDK only exposes read-only response payloads via database.Patch, which would make every field appear missing from desired state.",
+			},
+			{
+				SDKStruct: "database.PatchSummary",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: spec is empty and the SDK only exposes read-only response payloads via database.PatchSummary, which would make every field appear missing from desired state.",
+			},
+		},
+	},
+	{
+		Name:       "DbSystemPatchHistoryEntry",
+		SpecType:   reflect.TypeOf(databasev1beta1.DbSystemPatchHistoryEntrySpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.DbSystemPatchHistoryEntryStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.PatchHistoryEntry",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: spec is empty and the SDK only exposes read-only response payloads via database.PatchHistoryEntry, which would make every field appear missing from desired state.",
+			},
+			{
+				SDKStruct: "database.PatchHistoryEntrySummary",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: spec is empty and the SDK only exposes read-only response payloads via database.PatchHistoryEntrySummary, which would make every field appear missing from desired state.",
+			},
+		},
+	},
+	{
+		Name:       "DbSystemShape",
+		SpecType:   reflect.TypeOf(databasev1beta1.DbSystemShapeSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.DbSystemShapeStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.DbSystemShapeSummary",
+			},
+		},
+	},
+	{
+		Name:       "DbSystemStoragePerformance",
+		SpecType:   reflect.TypeOf(databasev1beta1.DbSystemStoragePerformanceSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.DbSystemStoragePerformanceStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.DbSystemStoragePerformanceSummary",
+			},
+		},
+	},
+	{
+		Name:       "DbSystemUpgradeHistoryEntry",
+		SpecType:   reflect.TypeOf(databasev1beta1.DbSystemUpgradeHistoryEntrySpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.DbSystemUpgradeHistoryEntryStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.DbSystemUpgradeHistoryEntry",
+			},
+			{
+				SDKStruct: "database.DbSystemUpgradeHistoryEntrySummary",
+			},
+		},
+	},
+	{
+		Name:       "DbVersion",
+		SpecType:   reflect.TypeOf(databasev1beta1.DbVersionSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.DbVersionStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.DbVersionSummary",
+			},
+		},
+	},
+	{
+		Name:       "ExadataInfrastructure",
+		SpecType:   reflect.TypeOf(databasev1beta1.ExadataInfrastructureSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.ExadataInfrastructureStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.CreateExadataInfrastructureDetails",
+			},
+			{
+				SDKStruct: "database.UpdateExadataInfrastructureDetails",
+			},
+			{
+				SDKStruct: "database.ExadataInfrastructure",
+			},
+			{
+				SDKStruct: "database.ExadataInfrastructureSummary",
+			},
+		},
+	},
+	{
+		Name:       "ExadataInfrastructureOcpu",
+		SpecType:   reflect.TypeOf(databasev1beta1.ExadataInfrastructureOcpuSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.ExadataInfrastructureOcpuStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.OcpUs",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: spec is empty and the SDK only exposes read-only response payloads via database.OcpUs, which would make every field appear missing from desired state.",
+			},
+		},
+	},
+	{
+		Name:       "ExadataInfrastructureUnAllocatedResource",
+		SpecType:   reflect.TypeOf(databasev1beta1.ExadataInfrastructureUnAllocatedResourceSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.ExadataInfrastructureUnAllocatedResourceStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.ExadataInfrastructureUnAllocatedResources",
+			},
+		},
+	},
+	{
+		Name:       "ExadataIormConfig",
+		SpecType:   reflect.TypeOf(databasev1beta1.ExadataIormConfigSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.ExadataIormConfigStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.ExadataIormConfig",
+			},
+		},
+	},
+	{
+		Name:       "ExternalBackupJob",
+		SpecType:   reflect.TypeOf(databasev1beta1.ExternalBackupJobSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.ExternalBackupJobStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.CreateExternalBackupJobDetails",
+			},
+			{
+				SDKStruct: "database.ExternalBackupJob",
+			},
+		},
+	},
+	{
+		Name:       "ExternalContainerDatabase",
+		SpecType:   reflect.TypeOf(databasev1beta1.ExternalContainerDatabaseSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.ExternalContainerDatabaseStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.CreateExternalContainerDatabaseDetails",
+			},
+			{
+				SDKStruct: "database.UpdateExternalContainerDatabaseDetails",
+			},
+			{
+				SDKStruct: "database.ExternalContainerDatabase",
+			},
+			{
+				SDKStruct: "database.ExternalContainerDatabaseSummary",
+			},
+		},
+	},
+	{
+		Name:       "ExternalDatabaseConnector",
+		SpecType:   reflect.TypeOf(databasev1beta1.ExternalDatabaseConnectorSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.ExternalDatabaseConnectorStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.CreateExternalMacsConnectorDetails",
+			},
+			{
+				SDKStruct: "database.UpdateExternalMacsConnectorDetails",
+			},
+			{
+				SDKStruct: "database.ExternalMacsConnector",
+			},
+			{
+				SDKStruct: "database.ExternalMacsConnectorSummary",
+			},
+		},
+	},
+	{
+		Name:       "ExternalNonContainerDatabase",
+		SpecType:   reflect.TypeOf(databasev1beta1.ExternalNonContainerDatabaseSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.ExternalNonContainerDatabaseStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.CreateExternalNonContainerDatabaseDetails",
+			},
+			{
+				SDKStruct: "database.UpdateExternalNonContainerDatabaseDetails",
+			},
+			{
+				SDKStruct: "database.ExternalNonContainerDatabase",
+			},
+			{
+				SDKStruct: "database.ExternalNonContainerDatabaseSummary",
+			},
+		},
+	},
+	{
+		Name:       "ExternalPluggableDatabase",
+		SpecType:   reflect.TypeOf(databasev1beta1.ExternalPluggableDatabaseSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.ExternalPluggableDatabaseStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.CreateExternalPluggableDatabaseDetails",
+			},
+			{
+				SDKStruct: "database.UpdateExternalPluggableDatabaseDetails",
+			},
+			{
+				SDKStruct: "database.ExternalPluggableDatabase",
+			},
+			{
+				SDKStruct: "database.ExternalPluggableDatabaseSummary",
+			},
+		},
+	},
+	{
+		Name:       "FlexComponent",
+		SpecType:   reflect.TypeOf(databasev1beta1.FlexComponentSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.FlexComponentStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.FlexComponentCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			},
+			{
+				SDKStruct: "database.FlexComponentSummary",
+			},
+		},
+	},
+	{
+		Name:       "GiVersion",
+		SpecType:   reflect.TypeOf(databasev1beta1.GiVersionSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.GiVersionStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.GiVersionSummary",
+			},
+		},
+	},
+	{
+		Name:       "InfrastructureTargetVersion",
+		SpecType:   reflect.TypeOf(databasev1beta1.InfrastructureTargetVersionSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.InfrastructureTargetVersionStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.InfrastructureTargetVersion",
+			},
+			{
+				SDKStruct: "database.InfrastructureTargetVersionSummary",
+			},
+		},
+	},
+	{
+		Name:       "KeyStore",
+		SpecType:   reflect.TypeOf(databasev1beta1.KeyStoreSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.KeyStoreStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.CreateKeyStoreDetails",
+			},
+			{
+				SDKStruct: "database.UpdateKeyStoreDetails",
+			},
+			{
+				SDKStruct: "database.KeyStore",
+			},
+			{
+				SDKStruct: "database.KeyStoreSummary",
+			},
+		},
+	},
+	{
+		Name:       "MaintenanceRun",
+		SpecType:   reflect.TypeOf(databasev1beta1.MaintenanceRunSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.MaintenanceRunStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.CreateMaintenanceRunDetails",
+			},
+			{
+				SDKStruct: "database.UpdateMaintenanceRunDetails",
+			},
+			{
+				SDKStruct: "database.MaintenanceRun",
+			},
+			{
+				SDKStruct: "database.MaintenanceRunSummary",
+			},
+		},
+	},
+	{
+		Name:       "MaintenanceRunHistory",
+		SpecType:   reflect.TypeOf(databasev1beta1.MaintenanceRunHistorySpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.MaintenanceRunHistoryStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.MaintenanceRunHistory",
+			},
+			{
+				SDKStruct: "database.MaintenanceRunHistorySummary",
+			},
+		},
+	},
+	{
+		Name:       "OneoffPatch",
+		SpecType:   reflect.TypeOf(databasev1beta1.OneoffPatchSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.OneoffPatchStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.CreateOneoffPatchDetails",
+			},
+			{
+				SDKStruct: "database.UpdateOneoffPatchDetails",
+			},
+			{
+				SDKStruct: "database.OneoffPatch",
+			},
+			{
+				SDKStruct: "database.OneoffPatchSummary",
+			},
+		},
+	},
+	{
+		Name:       "PdbConversionHistoryEntry",
+		SpecType:   reflect.TypeOf(databasev1beta1.PdbConversionHistoryEntrySpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.PdbConversionHistoryEntryStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.PdbConversionHistoryEntry",
+			},
+			{
+				SDKStruct: "database.PdbConversionHistoryEntrySummary",
+			},
+		},
+	},
+	{
+		Name:       "PluggableDatabase",
+		SpecType:   reflect.TypeOf(databasev1beta1.PluggableDatabaseSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.PluggableDatabaseStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.CreatePluggableDatabaseDetails",
+			},
+			{
+				SDKStruct: "database.UpdatePluggableDatabaseDetails",
+			},
+			{
+				SDKStruct: "database.PluggableDatabase",
+			},
+			{
+				SDKStruct: "database.PluggableDatabaseSummary",
+			},
+		},
+	},
+	{
+		Name:       "SystemVersion",
+		SpecType:   reflect.TypeOf(databasev1beta1.SystemVersionSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.SystemVersionStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.SystemVersionCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			},
+			{
+				SDKStruct: "database.SystemVersionSummary",
+			},
+		},
+	},
+	{
+		Name:       "VmCluster",
+		SpecType:   reflect.TypeOf(databasev1beta1.VmClusterSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.VmClusterStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.CreateVmClusterDetails",
+			},
+			{
+				SDKStruct: "database.UpdateVmClusterDetails",
+			},
+			{
+				SDKStruct: "database.VmCluster",
+			},
+			{
+				SDKStruct: "database.VmClusterSummary",
+			},
+		},
+	},
+	{
+		Name:       "VmClusterNetwork",
+		SpecType:   reflect.TypeOf(databasev1beta1.VmClusterNetworkSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.VmClusterNetworkStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.UpdateVmClusterNetworkDetails",
+			},
+			{
+				SDKStruct: "database.VmClusterNetworkDetails",
+			},
+			{
+				SDKStruct: "database.VmClusterNetwork",
+			},
+			{
+				SDKStruct: "database.VmClusterNetworkSummary",
+			},
+		},
+	},
+	{
+		Name:       "VmClusterPatch",
+		SpecType:   reflect.TypeOf(databasev1beta1.VmClusterPatchSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.VmClusterPatchStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.Patch",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: spec is empty and the SDK only exposes read-only response payloads via database.Patch, which would make every field appear missing from desired state.",
+			},
+			{
+				SDKStruct: "database.PatchSummary",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: spec is empty and the SDK only exposes read-only response payloads via database.PatchSummary, which would make every field appear missing from desired state.",
+			},
+		},
+	},
+	{
+		Name:       "VmClusterPatchHistoryEntry",
+		SpecType:   reflect.TypeOf(databasev1beta1.VmClusterPatchHistoryEntrySpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.VmClusterPatchHistoryEntryStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.PatchHistoryEntry",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: spec is empty and the SDK only exposes read-only response payloads via database.PatchHistoryEntry, which would make every field appear missing from desired state.",
+			},
+			{
+				SDKStruct: "database.PatchHistoryEntrySummary",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: spec is empty and the SDK only exposes read-only response payloads via database.PatchHistoryEntrySummary, which would make every field appear missing from desired state.",
+			},
+		},
+	},
+	{
+		Name:       "VmClusterUpdate",
+		SpecType:   reflect.TypeOf(databasev1beta1.VmClusterUpdateSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.VmClusterUpdateStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.VmClusterUpdateDetails",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: detailed read-model broadens status coverage beyond the generated CRD status surface; primary status parity remains tracked on the resource and summary types.",
+			},
+			{
+				SDKStruct: "database.VmClusterUpdate",
+			},
+			{
+				SDKStruct: "database.VmClusterUpdateSummary",
+			},
+		},
+	},
+	{
+		Name:       "VmClusterUpdateHistoryEntry",
+		SpecType:   reflect.TypeOf(databasev1beta1.VmClusterUpdateHistoryEntrySpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.VmClusterUpdateHistoryEntryStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.VmClusterUpdateHistoryEntry",
+			},
+			{
+				SDKStruct: "database.VmClusterUpdateHistoryEntrySummary",
+			},
+		},
+	},
+	{
+		Name:       "MySqlBackup",
+		SpecType:   reflect.TypeOf(mysqlv1beta1.BackupSpec{}),
+		StatusType: reflect.TypeOf(mysqlv1beta1.BackupStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "mysql.CreateBackupDetails",
+			},
+			{
+				SDKStruct: "mysql.UpdateBackupDetails",
+			},
+			{
+				SDKStruct: "mysql.Backup",
+			},
+			{
+				SDKStruct: "mysql.BackupSummary",
+			},
+		},
+	},
+	{
+		Name:       "MySqlChannel",
+		SpecType:   reflect.TypeOf(mysqlv1beta1.ChannelSpec{}),
+		StatusType: reflect.TypeOf(mysqlv1beta1.ChannelStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "mysql.CreateChannelDetails",
+			},
+			{
+				SDKStruct: "mysql.UpdateChannelDetails",
+			},
+			{
+				SDKStruct: "mysql.Channel",
+			},
+			{
+				SDKStruct: "mysql.ChannelSummary",
+			},
+		},
+	},
+	{
+		Name:       "MySqlConfiguration",
+		SpecType:   reflect.TypeOf(mysqlv1beta1.ConfigurationSpec{}),
+		StatusType: reflect.TypeOf(mysqlv1beta1.ConfigurationStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "mysql.CreateConfigurationDetails",
+			},
+			{
+				SDKStruct: "mysql.UpdateConfigurationDetails",
+			},
+			{
+				SDKStruct: "mysql.Configuration",
+			},
+			{
+				SDKStruct: "mysql.ConfigurationSummary",
+			},
+		},
+	},
+	{
 		Name:       "MySqlDbSystem",
 		SpecType:   reflect.TypeOf(mysqlv1beta1.MySqlDbSystemSpec{}),
 		StatusType: reflect.TypeOf(mysqlv1beta1.MySqlDbSystemStatus{}),
@@ -69,6 +1315,176 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "mysql.UpdateDbSystemDetails",
+			},
+		},
+	},
+	{
+		Name:       "MySqlHeatWaveCluster",
+		SpecType:   reflect.TypeOf(mysqlv1beta1.HeatWaveClusterSpec{}),
+		StatusType: reflect.TypeOf(mysqlv1beta1.HeatWaveClusterStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "mysql.UpdateHeatWaveClusterDetails",
+			},
+			{
+				SDKStruct: "mysql.HeatWaveCluster",
+			},
+			{
+				SDKStruct: "mysql.HeatWaveClusterSummary",
+			},
+		},
+	},
+	{
+		Name:       "MySqlHeatWaveClusterMemoryEstimate",
+		SpecType:   reflect.TypeOf(mysqlv1beta1.HeatWaveClusterMemoryEstimateSpec{}),
+		StatusType: reflect.TypeOf(mysqlv1beta1.HeatWaveClusterMemoryEstimateStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "mysql.HeatWaveClusterMemoryEstimate",
+			},
+		},
+	},
+	{
+		Name:       "MySqlReplica",
+		SpecType:   reflect.TypeOf(mysqlv1beta1.ReplicaSpec{}),
+		StatusType: reflect.TypeOf(mysqlv1beta1.ReplicaStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "mysql.CreateReplicaDetails",
+			},
+			{
+				SDKStruct: "mysql.UpdateReplicaDetails",
+			},
+			{
+				SDKStruct: "mysql.Replica",
+			},
+			{
+				SDKStruct: "mysql.ReplicaSummary",
+			},
+		},
+	},
+	{
+		Name:       "MySqlShape",
+		SpecType:   reflect.TypeOf(mysqlv1beta1.ShapeSpec{}),
+		StatusType: reflect.TypeOf(mysqlv1beta1.ShapeStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "mysql.ShapeSummary",
+			},
+		},
+	},
+	{
+		Name:       "MySqlVersion",
+		SpecType:   reflect.TypeOf(mysqlv1beta1.VersionSpec{}),
+		StatusType: reflect.TypeOf(mysqlv1beta1.VersionStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "mysql.Version",
+			},
+			{
+				SDKStruct: "mysql.VersionSummary",
+			},
+		},
+	},
+	{
+		Name:       "MySqlWorkRequest",
+		SpecType:   reflect.TypeOf(mysqlv1beta1.WorkRequestSpec{}),
+		StatusType: reflect.TypeOf(mysqlv1beta1.WorkRequestStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "mysql.WorkRequest",
+			},
+			{
+				SDKStruct: "mysql.WorkRequestSummary",
+			},
+		},
+	},
+	{
+		Name:       "MySqlWorkRequestError",
+		SpecType:   reflect.TypeOf(mysqlv1beta1.WorkRequestErrorSpec{}),
+		StatusType: reflect.TypeOf(mysqlv1beta1.WorkRequestErrorStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "mysql.WorkRequestError",
+			},
+		},
+	},
+	{
+		Name:       "MySqlWorkRequestLog",
+		SpecType:   reflect.TypeOf(mysqlv1beta1.WorkRequestLogSpec{}),
+		StatusType: reflect.TypeOf(mysqlv1beta1.WorkRequestLogStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "mysql.WorkRequestLogEntry",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: OCI read-model mappings broaden desired-state coverage, and this CRD does not expose a meaningful status surface for parity tracking.",
+			},
+		},
+	},
+	{
+		Name:       "ConnectHarness",
+		SpecType:   reflect.TypeOf(streamingv1beta1.ConnectHarnessSpec{}),
+		StatusType: reflect.TypeOf(streamingv1beta1.ConnectHarnessStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "streaming.CreateConnectHarnessDetails",
+			},
+			{
+				SDKStruct: "streaming.UpdateConnectHarnessDetails",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: patch-style update payload only covers a narrow subset of the generated desired-state surface; create payload parity remains tracked on the CRD spec.",
+			},
+			{
+				SDKStruct: "streaming.ConnectHarness",
+			},
+			{
+				SDKStruct: "streaming.ConnectHarnessSummary",
+			},
+		},
+	},
+	{
+		Name:       "Cursor",
+		SpecType:   reflect.TypeOf(streamingv1beta1.CursorSpec{}),
+		StatusType: reflect.TypeOf(streamingv1beta1.CursorStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "streaming.CreateCursorDetails",
+			},
+			{
+				SDKStruct: "streaming.Cursor",
+			},
+		},
+	},
+	{
+		Name:       "Group",
+		SpecType:   reflect.TypeOf(streamingv1beta1.GroupSpec{}),
+		StatusType: reflect.TypeOf(streamingv1beta1.GroupStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "streaming.UpdateGroupDetails",
+			},
+			{
+				SDKStruct: "streaming.Group",
+			},
+		},
+	},
+	{
+		Name:       "GroupCursor",
+		SpecType:   reflect.TypeOf(streamingv1beta1.GroupCursorSpec{}),
+		StatusType: reflect.TypeOf(streamingv1beta1.GroupCursorStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "streaming.CreateGroupCursorDetails",
+			},
+		},
+	},
+	{
+		Name:       "Message",
+		SpecType:   reflect.TypeOf(streamingv1beta1.MessageSpec{}),
+		StatusType: reflect.TypeOf(streamingv1beta1.MessageStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "streaming.Message",
 			},
 		},
 	},
@@ -92,6 +1508,27 @@ var targets = []Target{
 				SDKStruct: "streaming.StreamSummary",
 				Exclude:   true,
 				Reason:    "Intentionally untracked: OCI read-model mappings broaden desired-state coverage, and this CRD does not expose a meaningful status surface for parity tracking.",
+			},
+		},
+	},
+	{
+		Name:       "StreamPool",
+		SpecType:   reflect.TypeOf(streamingv1beta1.StreamPoolSpec{}),
+		StatusType: reflect.TypeOf(streamingv1beta1.StreamPoolStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "streaming.CreateStreamPoolDetails",
+			},
+			{
+				SDKStruct: "streaming.UpdateStreamPoolDetails",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: patch-style update payload only covers a narrow subset of the generated desired-state surface; create payload parity remains tracked on the CRD spec.",
+			},
+			{
+				SDKStruct: "streaming.StreamPool",
+			},
+			{
+				SDKStruct: "streaming.StreamPoolSummary",
 			},
 		},
 	},

@@ -244,6 +244,182 @@ func TestBuildSDKMappingsSupportsExplicitSurfaceAndExclusionOverrides(t *testing
 	}
 }
 
+func TestBuildSDKMappingsAppliesDatabaseMySQLAndStreamingOverrides(t *testing.T) {
+	t.Parallel()
+
+	type expectation struct {
+		exclude bool
+	}
+
+	tests := []struct {
+		name       string
+		service    string
+		spec       string
+		candidates []string
+		want       map[string]expectation
+	}{
+		{
+			name:       "database autonomous container database",
+			service:    "database",
+			spec:       "AutonomousContainerDatabase",
+			candidates: []string{"CreateAutonomousContainerDatabaseDetails", "UpdateAutonomousContainerDatabaseDetails", "AutonomousContainerDatabase", "AutonomousContainerDatabaseSummary", "AutonomousContainerDatabaseVersionSummary"},
+			want: map[string]expectation{
+				"database.UpdateAutonomousContainerDatabaseDetails":  {exclude: true},
+				"database.AutonomousContainerDatabaseVersionSummary": {exclude: true},
+			},
+		},
+		{
+			name:       "database autonomous database regional wallet",
+			service:    "database",
+			spec:       "AutonomousDatabaseRegionalWallet",
+			candidates: []string{"UpdateAutonomousDatabaseWalletDetails", "AutonomousDatabaseWallet"},
+			want: map[string]expectation{
+				"database.AutonomousDatabaseWallet": {exclude: true},
+			},
+		},
+		{
+			name:       "database backup destination",
+			service:    "database",
+			spec:       "BackupDestination",
+			candidates: []string{"UpdateBackupDestinationDetails", "BackupDestinationDetails", "BackupDestination", "BackupDestinationSummary"},
+			want: map[string]expectation{
+				"database.CreateNfsBackupDestinationDetails":               {},
+				"database.CreateRecoveryApplianceBackupDestinationDetails": {},
+				"database.UpdateBackupDestinationDetails":                  {exclude: true},
+				"database.BackupDestinationDetails":                        {exclude: true},
+			},
+		},
+		{
+			name:       "database cloud vm cluster",
+			service:    "database",
+			spec:       "CloudVmCluster",
+			candidates: []string{"CreateCloudVmClusterDetails", "UpdateCloudVmClusterDetails", "CloudVmCluster", "CloudVmClusterSummary"},
+			want: map[string]expectation{
+				"database.UpdateCloudVmClusterDetails": {exclude: true},
+			},
+		},
+		{
+			name:       "database cloud vm cluster iorm config",
+			service:    "database",
+			spec:       "CloudVmClusterIormConfig",
+			candidates: []string{"ExadataIormConfigUpdateDetails", "ExadataIormConfig"},
+			want: map[string]expectation{
+				"database.ExadataIormConfig": {exclude: true},
+			},
+		},
+		{
+			name:       "database console history",
+			service:    "database",
+			spec:       "ConsoleHistory",
+			candidates: []string{"CreateConsoleHistoryDetails", "UpdateConsoleHistoryDetails", "ConsoleHistory", "ConsoleHistoryCollection", "ConsoleHistorySummary"},
+			want: map[string]expectation{
+				"database.ConsoleHistoryCollection": {exclude: true},
+			},
+		},
+		{
+			name:       "database data guard association",
+			service:    "database",
+			spec:       "DataGuardAssociation",
+			candidates: []string{"UpdateDataGuardAssociationDetails", "DataGuardAssociation", "DataGuardAssociationSummary"},
+			want: map[string]expectation{
+				"database.CreateDataGuardAssociationToExistingDbSystemDetails":  {},
+				"database.CreateDataGuardAssociationToExistingVmClusterDetails": {},
+				"database.CreateDataGuardAssociationWithNewDbSystemDetails":     {},
+				"database.UpdateDataGuardAssociationDetails":                    {exclude: true},
+			},
+		},
+		{
+			name:       "database db server",
+			service:    "database",
+			spec:       "DbServer",
+			candidates: []string{"DbServerDetails", "DbServer", "DbServerSummary"},
+			want: map[string]expectation{
+				"database.DbServerDetails": {exclude: true},
+			},
+		},
+		{
+			name:       "database flex component",
+			service:    "database",
+			spec:       "FlexComponent",
+			candidates: []string{"FlexComponentCollection", "FlexComponentSummary"},
+			want: map[string]expectation{
+				"database.FlexComponentCollection": {exclude: true},
+			},
+		},
+		{
+			name:       "database system version",
+			service:    "database",
+			spec:       "SystemVersion",
+			candidates: []string{"SystemVersionCollection", "SystemVersionSummary"},
+			want: map[string]expectation{
+				"database.SystemVersionCollection": {exclude: true},
+			},
+		},
+		{
+			name:       "database vm cluster update",
+			service:    "database",
+			spec:       "VmClusterUpdate",
+			candidates: []string{"VmClusterUpdateDetails", "VmClusterUpdate", "VmClusterUpdateSummary"},
+			want: map[string]expectation{
+				"database.VmClusterUpdateDetails": {exclude: true},
+			},
+		},
+		{
+			name:       "mysql work request log",
+			service:    "mysql",
+			spec:       "WorkRequestLog",
+			candidates: []string{"WorkRequestLogEntry"},
+			want: map[string]expectation{
+				"mysql.WorkRequestLogEntry": {exclude: true},
+			},
+		},
+		{
+			name:       "streaming connect harness",
+			service:    "streaming",
+			spec:       "ConnectHarness",
+			candidates: []string{"CreateConnectHarnessDetails", "UpdateConnectHarnessDetails", "ConnectHarness", "ConnectHarnessSummary"},
+			want: map[string]expectation{
+				"streaming.UpdateConnectHarnessDetails": {exclude: true},
+			},
+		},
+		{
+			name:       "streaming stream pool",
+			service:    "streaming",
+			spec:       "StreamPool",
+			candidates: []string{"CreateStreamPoolDetails", "UpdateStreamPoolDetails", "StreamPool", "StreamPoolSummary"},
+			want: map[string]expectation{
+				"streaming.UpdateStreamPoolDetails": {exclude: true},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			got := buildSDKMappings(tt.service, tt.spec, tt.candidates, false, specTarget{})
+			byStruct := make(map[string]sdkMapping, len(got))
+			for _, mapping := range got {
+				byStruct[mapping.SDKStruct] = mapping
+			}
+
+			for sdkStruct, want := range tt.want {
+				mapping, ok := byStruct[sdkStruct]
+				if !ok {
+					t.Fatalf("missing mapping for %s", sdkStruct)
+				}
+				if mapping.Exclude != want.exclude {
+					t.Fatalf("%s Exclude = %t, want %t", sdkStruct, mapping.Exclude, want.exclude)
+				}
+				if want.exclude && mapping.Reason == "" {
+					t.Fatalf("%s exclusion should carry a reason", sdkStruct)
+				}
+			}
+		})
+	}
+}
+
 func TestBuildSDKMappingsAppliesPSQLStatusAndWrapperOverrides(t *testing.T) {
 	t.Parallel()
 

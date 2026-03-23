@@ -131,7 +131,9 @@ rewriting the checked-in tree by hand. This command creates a snapshot workspace
 renders selected services into that snapshot, refreshes the validator registries
 inside the snapshot, regenerates deepcopy code for the generated API groups, and
 then runs `osok-schema-validator` from that snapshot so the report reflects the
-generated API types rather than the checked-in ones.
+generated API types rather than the checked-in ones. This workflow is focused on
+API and validator coverage only; generated controller and service-manager
+compilation is covered by the runtime gate below.
 
 ```bash
 # Full generated-output baseline report
@@ -236,6 +238,57 @@ That target reruns the generated snapshot report and overwrites
 `internal/generator/config/generated_coverage_baseline.json`. Treat the baseline
 update as part of the reviewed change: if the metrics moved for a good reason,
 the baseline diff documents the new expected floor for future regressions.
+
+## Generated Runtime Gate
+
+Use the runtime gate when generator work changes controller, service-manager, or
+registration templates. By default it uses
+`internal/generator/config/services.yaml`, creates an isolated snapshot repo,
+generates runtime-enabled outputs there, regenerates deepcopy code for the
+selected API groups, and then compile-checks the generated controller,
+service-manager, and registration packages.
+
+When future rollout work needs a pre-promotion snapshot, override
+`GENERATED_RUNTIME_CONFIG` or `--config` with an alternate config explicitly.
+
+```bash
+# Write a runtime validation summary JSON
+make generated-runtime-report
+
+# CI-style gate for the full runtime config
+make generated-runtime-gate
+
+# Keep the snapshot for inspection
+make generated-runtime-gate \
+  GENERATED_RUNTIME_SNAPSHOT_DIR=/tmp/osok-generated-runtime \
+  GENERATED_RUNTIME_REPORT=/tmp/generated-runtime-report.json
+
+# Direct CLI usage
+go run ./cmd/osok-generated-runtime-check --all
+```
+
+Common variables and flags:
+
+| Variable / Flag | Default | Purpose |
+| --- | --- | --- |
+| `GENERATED_RUNTIME_CONFIG` / `--config` | `internal/generator/config/services.yaml` | Generator config used for the runtime snapshot. Override for alternate rollout configs. |
+| `GENERATED_RUNTIME_SERVICE` / `--service` | empty | Run the runtime check for one configured service. |
+| `--all` | false | Validate all services in the selected runtime config. |
+| `GENERATED_RUNTIME_REPORT` / `--report-out` | `generated-runtime-report.json` | JSON summary file for the packages compiled from the snapshot. |
+| `GENERATED_RUNTIME_SNAPSHOT_DIR` / `--snapshot-dir` | empty | Keep the runtime snapshot at a specific path instead of using an auto-cleaned temp dir. |
+| `GENERATED_RUNTIME_KEEP_SNAPSHOT` / `--keep-snapshot` | empty / false | Keep an automatically created temp snapshot after a successful run. |
+| `--controller-gen` | `<repo>/bin/controller-gen` | `controller-gen` binary used to regenerate deepcopy code inside the snapshot. |
+
+The runtime summary JSON includes:
+
+- `build.controllerPackages` — generated controller packages compiled from the snapshot.
+- `build.serviceManagerPackages` — generated service-manager packages compiled from the snapshot.
+- `build.registrationPackages` — generated registration packages compiled from the snapshot.
+- `snapshot.root` — present only when the snapshot is retained.
+
+`generated-runtime-gate` does not use a baseline file. The build either
+compiles or it fails, which makes it a straightforward regression tripwire for
+runtime template changes.
 
 ## Registry Generation Workflow
 

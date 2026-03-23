@@ -791,7 +791,13 @@ func mergeMappingOverrides(sets ...map[string]mappingOverride) map[string]mappin
 	return merged
 }
 
-const psqlTransportWrapperExcludedReason = "Intentionally untracked: transport wrapper type does not correspond to a top-level CRD spec or status surface."
+const (
+	psqlTransportWrapperExcludedReason = "Intentionally untracked: transport wrapper type does not correspond to a top-level CRD spec or status surface."
+	collectionResponseExcludedReason   = "Intentionally untracked: collection responses do not map to a singular resource status surface."
+	narrowUpdateExcludedReason         = "Intentionally untracked: patch-style update payload only covers a narrow subset of the generated desired-state surface; create payload parity remains tracked on the CRD spec."
+	statusDetailsExcludedReason        = "Intentionally untracked: detailed read-model broadens status coverage beyond the generated CRD status surface; primary status parity remains tracked on the resource and summary types."
+	noMeaningfulStatusExcludedReason   = "Intentionally untracked: OCI read-model mappings broaden desired-state coverage, and this CRD does not expose a meaningful status surface for parity tracking."
+)
 
 // Explicit overrides cover specs whose API surface or SDK names do not follow the common generator conventions.
 var explicitAPITargetOverrides = map[string]apiTargetOverride{
@@ -926,11 +932,80 @@ var explicitAPITargetOverrides = map[string]apiTargetOverride{
 	"containerengine.ClusterEndpointConfig": {MappingOverrides: specMappingOverrides(
 		"ClusterEndpointConfig",
 	)},
-	"containerengine.ClusterOption":           {SDKTypes: []string{"ClusterOptions"}},
-	"containerengine.Kubeconfig":              {SDKTypes: []string{"CreateClusterKubeconfigContentDetails"}},
-	"containerengine.NodePool":                {MappingOverrides: statusMappingOverrides("NodePool", "NodePoolSummary")},
-	"containerengine.NodePoolOption":          {SDKTypes: []string{"NodePoolOptions"}},
-	"containerengine.VirtualNodePool":         {MappingOverrides: statusMappingOverrides("VirtualNodePool", "VirtualNodePoolSummary")},
+	"containerengine.ClusterOption":   {SDKTypes: []string{"ClusterOptions"}},
+	"containerengine.Kubeconfig":      {SDKTypes: []string{"CreateClusterKubeconfigContentDetails"}},
+	"containerengine.NodePool":        {MappingOverrides: statusMappingOverrides("NodePool", "NodePoolSummary")},
+	"containerengine.NodePoolOption":  {SDKTypes: []string{"NodePoolOptions"}},
+	"containerengine.VirtualNodePool": {MappingOverrides: statusMappingOverrides("VirtualNodePool", "VirtualNodePoolSummary")},
+	"database.AutonomousContainerDatabase": {MappingOverrides: mergeMappingOverrides(
+		excludedMappingOverrides(
+			narrowUpdateExcludedReason,
+			"UpdateAutonomousContainerDatabaseDetails",
+		),
+		excludedMappingOverrides(
+			"Intentionally untracked: version summaries belong to the dedicated AutonomousContainerDatabaseVersion status surface.",
+			"AutonomousContainerDatabaseVersionSummary",
+		),
+	)},
+	"database.AutonomousDatabaseRegionalWallet": {MappingOverrides: excludedMappingOverrides(
+		noMeaningfulStatusExcludedReason,
+		"AutonomousDatabaseWallet",
+	)},
+	"database.BackupDestination": {
+		SDKTypes: []string{
+			"CreateNfsBackupDestinationDetails",
+			"CreateRecoveryApplianceBackupDestinationDetails",
+		},
+		MappingOverrides: mergeMappingOverrides(
+			excludedMappingOverrides(
+				narrowUpdateExcludedReason,
+				"UpdateBackupDestinationDetails",
+			),
+			excludedMappingOverrides(
+				statusDetailsExcludedReason,
+				"BackupDestinationDetails",
+			),
+		),
+	},
+	"database.CloudVmCluster": {MappingOverrides: excludedMappingOverrides(
+		narrowUpdateExcludedReason,
+		"UpdateCloudVmClusterDetails",
+	)},
+	"database.CloudVmClusterIormConfig": {MappingOverrides: excludedMappingOverrides(
+		noMeaningfulStatusExcludedReason,
+		"ExadataIormConfig",
+	)},
+	"database.ConsoleHistory": {MappingOverrides: excludedMappingOverrides(
+		collectionResponseExcludedReason,
+		"ConsoleHistoryCollection",
+	)},
+	"database.DataGuardAssociation": {
+		SDKTypes: []string{
+			"CreateDataGuardAssociationToExistingDbSystemDetails",
+			"CreateDataGuardAssociationToExistingVmClusterDetails",
+			"CreateDataGuardAssociationWithNewDbSystemDetails",
+		},
+		MappingOverrides: excludedMappingOverrides(
+			narrowUpdateExcludedReason,
+			"UpdateDataGuardAssociationDetails",
+		),
+	},
+	"database.DbServer": {MappingOverrides: excludedMappingOverrides(
+		statusDetailsExcludedReason,
+		"DbServerDetails",
+	)},
+	"database.FlexComponent": {MappingOverrides: excludedMappingOverrides(
+		collectionResponseExcludedReason,
+		"FlexComponentCollection",
+	)},
+	"database.SystemVersion": {MappingOverrides: excludedMappingOverrides(
+		collectionResponseExcludedReason,
+		"SystemVersionCollection",
+	)},
+	"database.VmClusterUpdate": {MappingOverrides: excludedMappingOverrides(
+		statusDetailsExcludedReason,
+		"VmClusterUpdateDetails",
+	)},
 	"core.AllDrgAttachment":                   {SDKTypes: []string{"DrgAttachmentInfo"}, UseStatus: true},
 	"core.AllowedPeerRegionsForRemotePeering": {SDKTypes: []string{"PeerRegionForRemotePeering"}, UseStatus: true},
 	"core.AppCatalogListingAgreement":         {SDKTypes: []string{"AppCatalogListingResourceVersionAgreements"}},
@@ -1521,6 +1596,14 @@ var explicitAPITargetOverrides = map[string]apiTargetOverride{
 			"WorkRequestLogEntryCollection",
 		),
 	)},
+	"mysql.WorkRequestLog": {MappingOverrides: excludedMappingOverrides(
+		noMeaningfulStatusExcludedReason,
+		"WorkRequestLogEntry",
+	)},
+	"streaming.ConnectHarness": {MappingOverrides: excludedMappingOverrides(
+		narrowUpdateExcludedReason,
+		"UpdateConnectHarnessDetails",
+	)},
 	"streaming.Stream": {
 		MappingOverrides: excludedMappingOverrides(
 			"Intentionally untracked: OCI read-model mappings broaden desired-state coverage, and this CRD does not expose a meaningful status surface for parity tracking.",
@@ -1528,6 +1611,10 @@ var explicitAPITargetOverrides = map[string]apiTargetOverride{
 			"StreamSummary",
 		),
 	},
+	"streaming.StreamPool": {MappingOverrides: excludedMappingOverrides(
+		narrowUpdateExcludedReason,
+		"UpdateStreamPoolDetails",
+	)},
 	"vault.Secret": {MappingOverrides: mergeMappingOverrides(
 		statusMappingOverrides(
 			"Secret",
