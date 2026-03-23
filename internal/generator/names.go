@@ -125,10 +125,14 @@ func compatibilityKind(rawName string, compatibility CompatibilityConfig) (strin
 		if slices.Equal(resourceTokens, existingTokens) {
 			return existingKind, true
 		}
-		if len(existingTokens) >= len(resourceTokens) && slices.Equal(existingTokens[len(existingTokens)-len(resourceTokens):], resourceTokens) {
+		if len(resourceTokens) > 1 && len(existingTokens) > 1 &&
+			len(existingTokens) >= len(resourceTokens) &&
+			slices.Equal(existingTokens[len(existingTokens)-len(resourceTokens):], resourceTokens) {
 			return existingKind, true
 		}
-		if len(resourceTokens) >= len(existingTokens) && slices.Equal(resourceTokens[len(resourceTokens)-len(existingTokens):], existingTokens) {
+		if len(resourceTokens) > 1 && len(existingTokens) > 1 &&
+			len(resourceTokens) >= len(existingTokens) &&
+			slices.Equal(resourceTokens[len(resourceTokens)-len(existingTokens):], existingTokens) {
 			return existingKind, true
 		}
 	}

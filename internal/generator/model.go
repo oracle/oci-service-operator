@@ -5,15 +5,54 @@
 
 package generator
 
-// PackageModel is the intermediate representation rendered into an OSOK API package.
+// PackageModel is the intermediate representation rendered into generator-owned OSOK outputs.
 type PackageModel struct {
-	Service       ServiceConfig
-	Domain        string
-	Version       string
-	GroupDNSName  string
-	SampleOrder   int
-	Resources     []ResourceModel
-	PackageOutput PackageOutputModel
+	Service         ServiceConfig
+	Domain          string
+	Version         string
+	GroupDNSName    string
+	SampleOrder     int
+	Resources       []ResourceModel
+	Controller      ControllerOutputModel
+	Registration    RegistrationOutputModel
+	PackageOutput   PackageOutputModel
+	ServiceManagers []ServiceManagerModel
+}
+
+// ControllerOutputModel describes the generated controller files owned by the generator contract.
+type ControllerOutputModel struct {
+	Resources []ControllerModel
+}
+
+// ControllerModel renders one controller source file under controllers/<group>/.
+type ControllerModel struct {
+	Kind                       string
+	FileStem                   string
+	ReconcilerType             string
+	ResourceVariable           string
+	MaxConcurrentReconciles    int
+	HasMaxConcurrentReconciles bool
+	RBACMarkers                []string
+}
+
+// RegistrationOutputModel describes one generated runtime registration file.
+type RegistrationOutputModel struct {
+	Group                 string
+	APIImportPath         string
+	APIImportAlias        string
+	ControllerImportPath  string
+	ControllerImportAlias string
+	Resources             []RegistrationResourceModel
+}
+
+// RegistrationResourceModel renders one generated resource registration inside a group file.
+type RegistrationResourceModel struct {
+	Kind                      string
+	ComponentName             string
+	ReconcilerType            string
+	ServiceManagerImportPath  string
+	ServiceManagerImportAlias string
+	WithDepsConstructor       string
 }
 
 // PackageOutputModel describes the non-API generated files owned by the generator contract.
@@ -42,6 +81,42 @@ type InstallKustomizationModel struct {
 	PatchTarget string
 }
 
+// ServiceManagerModel describes one generated pkg/servicemanager scaffold package.
+type ServiceManagerModel struct {
+	Kind                     string
+	SDKName                  string
+	FileStem                 string
+	PackagePath              string
+	PackageName              string
+	APIImportPath            string
+	APIImportAlias           string
+	SDKImportPath            string
+	SDKImportAlias           string
+	ManagerTypeName          string
+	WithDepsConstructor      string
+	Constructor              string
+	ClientInterfaceName      string
+	DefaultClientTypeName    string
+	SDKClientTypeName        string
+	SDKClientConstructor     string
+	SDKClientConstructorKind string
+	CreateOperation          *RuntimeOperationModel
+	GetOperation             *RuntimeOperationModel
+	ListOperation            *RuntimeOperationModel
+	UpdateOperation          *RuntimeOperationModel
+	DeleteOperation          *RuntimeOperationModel
+	ServiceClientFileName    string
+	ServiceManagerFileName   string
+}
+
+// RuntimeOperationModel describes one generated SDK-backed operation binding.
+type RuntimeOperationModel struct {
+	MethodName       string
+	RequestTypeName  string
+	ResponseTypeName string
+	UsesRequest      bool
+}
+
 // ResourceModel describes one generated top-level kind inside an OSOK API package.
 type ResourceModel struct {
 	SDKName             string
@@ -49,6 +124,7 @@ type ResourceModel struct {
 	FileStem            string
 	KindPlural          string
 	Operations          []string
+	Runtime             *RuntimeModel
 	LeadingComments     []string
 	SpecComments        []string
 	HelperTypes         []TypeModel
@@ -62,6 +138,18 @@ type ResourceModel struct {
 	Sample              SampleModel
 	PrimaryDisplayField string
 	CompatibilityLocked bool
+}
+
+// RuntimeModel describes the OCI SDK client and methods that back a generated resource.
+type RuntimeModel struct {
+	ClientType            string
+	ClientConstructor     string
+	ClientConstructorKind string
+	Create                *RuntimeOperationModel
+	Get                   *RuntimeOperationModel
+	List                  *RuntimeOperationModel
+	Update                *RuntimeOperationModel
+	Delete                *RuntimeOperationModel
 }
 
 // TypeModel is one helper type emitted into a resource types file.

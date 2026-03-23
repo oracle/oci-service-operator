@@ -8,13 +8,14 @@ package generator
 import (
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 
 	"sigs.k8s.io/yaml"
 )
 
-// Config is the source-of-truth configuration consumed by the API generator.
+// Config is the source-of-truth configuration consumed by the generator.
 type Config struct {
 	SchemaVersion       string                    `yaml:"schemaVersion"`
 	Domain              string                    `yaml:"domain"`
@@ -27,11 +28,50 @@ type Config struct {
 const (
 	PackageProfileControllerBacked = "controller-backed"
 	PackageProfileCRDOnly          = "crd-only"
+
+	GenerationStrategyNone      = "none"
+	GenerationStrategyManual    = "manual"
+	GenerationStrategyGenerated = "generated"
 )
 
 // PackageProfile describes how generated service outputs integrate with packaging.
 type PackageProfile struct {
 	Description string `yaml:"description"`
+}
+
+// GenerationConfig defines controller/service-manager/runtime rollout for a service.
+type GenerationConfig struct {
+	Controller     GenerationSurfaceConfig      `yaml:"controller,omitempty"`
+	ServiceManager GenerationSurfaceConfig      `yaml:"serviceManager,omitempty"`
+	Registration   GenerationSurfaceConfig      `yaml:"registration,omitempty"`
+	Webhooks       GenerationSurfaceConfig      `yaml:"webhooks,omitempty"`
+	Resources      []ResourceGenerationOverride `yaml:"resources,omitempty"`
+}
+
+// GenerationSurfaceConfig tracks one generator-owned surface rollout.
+type GenerationSurfaceConfig struct {
+	Strategy string `yaml:"strategy,omitempty"`
+}
+
+// ResourceGenerationOverride captures per-kind rollout and override metadata.
+type ResourceGenerationOverride struct {
+	Kind           string                           `yaml:"kind"`
+	Controller     ControllerGenerationOverride     `yaml:"controller,omitempty"`
+	ServiceManager ServiceManagerGenerationOverride `yaml:"serviceManager,omitempty"`
+	Webhooks       GenerationSurfaceConfig          `yaml:"webhooks,omitempty"`
+}
+
+// ControllerGenerationOverride captures per-kind controller-specific settings.
+type ControllerGenerationOverride struct {
+	Strategy                string   `yaml:"strategy,omitempty"`
+	MaxConcurrentReconciles int      `yaml:"maxConcurrentReconciles,omitempty"`
+	ExtraRBACMarkers        []string `yaml:"extraRBACMarkers,omitempty"`
+}
+
+// ServiceManagerGenerationOverride captures per-kind service-manager settings.
+type ServiceManagerGenerationOverride struct {
+	Strategy    string `yaml:"strategy,omitempty"`
+	PackagePath string `yaml:"packagePath,omitempty"`
 }
 
 // ServiceConfig identifies one OCI SDK service and its OSOK output group.
@@ -46,6 +86,7 @@ type ServiceConfig struct {
 	ParityFile     string              `yaml:"parityFile,omitempty"`
 	Compatibility  CompatibilityConfig `yaml:"compatibility,omitempty"`
 	ObservedState  ObservedStateConfig `yaml:"observedState,omitempty"`
+	Generation     GenerationConfig    `yaml:"generation,omitempty"`
 	Parity         *ParityConfig       `yaml:"-"`
 }
 
@@ -130,6 +171,9 @@ func (c *Config) Validate() error {
 		if _, ok := c.PackageProfiles[service.PackageProfile]; !ok {
 			return fmt.Errorf("service %q references unknown packageProfile %q", service.Service, service.PackageProfile)
 		}
+		if err := service.Generation.Validate(service.Service); err != nil {
+			return err
+		}
 		for rawName, aliases := range service.ObservedState.SDKAliases {
 			if strings.TrimSpace(rawName) == "" {
 				return fmt.Errorf("service %q observedState sdkAliases contains a blank resource name", service.Service)
@@ -151,6 +195,143 @@ func (c *Config) Validate() error {
 	}
 
 	return nil
+}
+
+// Validate ensures runtime rollout metadata is coherent before generation begins.
+func (g GenerationConfig) Validate(serviceName string) error {
+	if err := validateGenerationStrategy(
+		fmt.Sprintf("service %q generation.controller.strategy", serviceName),
+		g.Controller.Strategy,
+	); err != nil {
+		return err
+	}
+	if err := validateGenerationStrategy(
+		fmt.Sprintf("service %q generation.serviceManager.strategy", serviceName),
+		g.ServiceManager.Strategy,
+	); err != nil {
+		return err
+	}
+	if err := validateGenerationStrategy(
+		fmt.Sprintf("service %q generation.registration.strategy", serviceName),
+		g.Registration.Strategy,
+	); err != nil {
+		return err
+	}
+	if err := validateWebhookStrategy(
+		fmt.Sprintf("service %q generation.webhooks.strategy", serviceName),
+		g.Webhooks.Strategy,
+	); err != nil {
+		return err
+	}
+
+	resourceKinds := make(map[string]struct{}, len(g.Resources))
+	for _, resource := range g.Resources {
+		kind := strings.TrimSpace(resource.Kind)
+		if kind == "" {
+			return fmt.Errorf("service %q generation.resources kind is required", serviceName)
+		}
+		if _, exists := resourceKinds[kind]; exists {
+			return fmt.Errorf("service %q generation.resources contains duplicate kind %q", serviceName, kind)
+		}
+		resourceKinds[kind] = struct{}{}
+
+		if err := validateGenerationStrategy(
+			fmt.Sprintf("service %q generation.resources[%q].controller.strategy", serviceName, kind),
+			resource.Controller.Strategy,
+		); err != nil {
+			return err
+		}
+		if err := validateGenerationStrategy(
+			fmt.Sprintf("service %q generation.resources[%q].serviceManager.strategy", serviceName, kind),
+			resource.ServiceManager.Strategy,
+		); err != nil {
+			return err
+		}
+		if err := validateWebhookStrategy(
+			fmt.Sprintf("service %q generation.resources[%q].webhooks.strategy", serviceName, kind),
+			resource.Webhooks.Strategy,
+		); err != nil {
+			return err
+		}
+		if resource.Controller.MaxConcurrentReconciles < 0 {
+			return fmt.Errorf(
+				"service %q generation.resources[%q].controller.maxConcurrentReconciles must be >= 0",
+				serviceName,
+				kind,
+			)
+		}
+		for _, marker := range resource.Controller.ExtraRBACMarkers {
+			if strings.TrimSpace(marker) == "" {
+				return fmt.Errorf(
+					"service %q generation.resources[%q].controller.extraRBACMarkers contains a blank marker",
+					serviceName,
+					kind,
+				)
+			}
+		}
+		if packagePath := strings.TrimSpace(resource.ServiceManager.PackagePath); packagePath != "" {
+			cleaned := path.Clean(packagePath)
+			if strings.HasPrefix(packagePath, "/") || cleaned == "." || strings.HasPrefix(cleaned, "../") || cleaned != packagePath {
+				return fmt.Errorf(
+					"service %q generation.resources[%q].serviceManager.packagePath must be a clean relative path beneath pkg/servicemanager",
+					serviceName,
+					kind,
+				)
+			}
+		}
+		if !resource.hasOverrides() {
+			return fmt.Errorf(
+				"service %q generation.resources[%q] does not override any runtime output",
+				serviceName,
+				kind,
+			)
+		}
+	}
+
+	return nil
+}
+
+func validateGenerationStrategy(field string, strategy string) error {
+	switch strings.TrimSpace(strategy) {
+	case "", GenerationStrategyNone, GenerationStrategyManual, GenerationStrategyGenerated:
+		return nil
+	default:
+		return fmt.Errorf(
+			"%s %q must be one of %q, %q, or %q",
+			field,
+			strategy,
+			GenerationStrategyNone,
+			GenerationStrategyManual,
+			GenerationStrategyGenerated,
+		)
+	}
+}
+
+func validateWebhookStrategy(field string, strategy string) error {
+	switch strings.TrimSpace(strategy) {
+	case "", GenerationStrategyNone, GenerationStrategyManual:
+		return nil
+	default:
+		return fmt.Errorf(
+			"%s %q must be one of %q or %q",
+			field,
+			strategy,
+			GenerationStrategyNone,
+			GenerationStrategyManual,
+		)
+	}
+}
+
+func (r ResourceGenerationOverride) hasOverrides() bool {
+	return r.Controller.hasOverrides() || r.ServiceManager.hasOverrides() || strings.TrimSpace(r.Webhooks.Strategy) != ""
+}
+
+func (c ControllerGenerationOverride) hasOverrides() bool {
+	return strings.TrimSpace(c.Strategy) != "" || c.MaxConcurrentReconciles != 0 || len(c.ExtraRBACMarkers) > 0
+}
+
+func (s ServiceManagerGenerationOverride) hasOverrides() bool {
+	return strings.TrimSpace(s.Strategy) != "" || strings.TrimSpace(s.PackagePath) != ""
 }
 
 // SelectServices resolves the requested services from the config.
@@ -192,6 +373,81 @@ func (s ServiceConfig) GroupDNSName(domain string) string {
 // IsControllerBacked reports whether the service expects shared-manager controller assets.
 func (s ServiceConfig) IsControllerBacked() bool {
 	return s.PackageProfile == PackageProfileControllerBacked
+}
+
+// ControllerGenerationStrategy returns the controller rollout strategy for the service.
+func (s ServiceConfig) ControllerGenerationStrategy() string {
+	return generationStrategyOrDefault(s.Generation.Controller.Strategy, GenerationStrategyNone)
+}
+
+// ControllerGenerationStrategyFor returns the resource-specific controller rollout strategy.
+func (s ServiceConfig) ControllerGenerationStrategyFor(kind string) string {
+	if override, ok := s.resourceGenerationOverride(kind); ok {
+		return generationStrategyOrDefault(override.Controller.Strategy, s.ControllerGenerationStrategy())
+	}
+	return s.ControllerGenerationStrategy()
+}
+
+// ControllerGenerationConfigFor resolves one resource's effective controller generation config.
+func (s ServiceConfig) ControllerGenerationConfigFor(kind string) ControllerGenerationOverride {
+	config := ControllerGenerationOverride{
+		Strategy: s.ControllerGenerationStrategyFor(kind),
+	}
+
+	if override, ok := s.resourceGenerationOverride(kind); ok {
+		config.MaxConcurrentReconciles = override.Controller.MaxConcurrentReconciles
+		config.ExtraRBACMarkers = append([]string(nil), override.Controller.ExtraRBACMarkers...)
+	}
+
+	return config
+}
+
+// ServiceManagerGenerationStrategy returns the service-manager rollout strategy for the service.
+func (s ServiceConfig) ServiceManagerGenerationStrategy() string {
+	return generationStrategyOrDefault(s.Generation.ServiceManager.Strategy, GenerationStrategyNone)
+}
+
+// ServiceManagerGenerationStrategyFor returns the resource-specific service-manager rollout strategy.
+func (s ServiceConfig) ServiceManagerGenerationStrategyFor(kind string) string {
+	if override, ok := s.resourceGenerationOverride(kind); ok {
+		return generationStrategyOrDefault(override.ServiceManager.Strategy, s.ServiceManagerGenerationStrategy())
+	}
+	return s.ServiceManagerGenerationStrategy()
+}
+
+// ServiceManagerPackagePathFor resolves the package path for one generated service-manager resource.
+func (s ServiceConfig) ServiceManagerPackagePathFor(kind string, fileStem string) string {
+	if override, ok := s.resourceGenerationOverride(kind); ok && strings.TrimSpace(override.ServiceManager.PackagePath) != "" {
+		return override.ServiceManager.PackagePath
+	}
+	return path.Join(s.Group, fileStem)
+}
+
+// RegistrationGenerationStrategy returns the runtime-registration rollout strategy for the service.
+func (s ServiceConfig) RegistrationGenerationStrategy() string {
+	return generationStrategyOrDefault(s.Generation.Registration.Strategy, GenerationStrategyNone)
+}
+
+// WebhookGenerationStrategy returns the webhook ownership strategy for the service.
+func (s ServiceConfig) WebhookGenerationStrategy() string {
+	return generationStrategyOrDefault(s.Generation.Webhooks.Strategy, GenerationStrategyManual)
+}
+
+func generationStrategyOrDefault(strategy string, defaultStrategy string) string {
+	strategy = strings.TrimSpace(strategy)
+	if strategy == "" {
+		return defaultStrategy
+	}
+	return strategy
+}
+
+func (s ServiceConfig) resourceGenerationOverride(kind string) (ResourceGenerationOverride, bool) {
+	for _, override := range s.Generation.Resources {
+		if override.Kind == kind {
+			return override, true
+		}
+	}
+	return ResourceGenerationOverride{}, false
 }
 
 // ObservedStateStructCandidates returns the read-model structs that should feed status synthesis.

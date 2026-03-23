@@ -97,6 +97,91 @@ func (r *Renderer) RenderPackageOutputs(root string, pkg *PackageModel) error {
 	return nil
 }
 
+func (r *Renderer) RenderControllers(root string, pkg *PackageModel, overwrite bool) error {
+	if len(pkg.Controller.Resources) == 0 {
+		return nil
+	}
+
+	outputDir := controllerOutputDir(root, pkg)
+	if err := os.MkdirAll(outputDir, 0o755); err != nil {
+		return fmt.Errorf("create controller dir %q: %w", outputDir, err)
+	}
+
+	for _, controller := range pkg.Controller.Resources {
+		content, err := renderControllerFile(pkg, controller)
+		if err != nil {
+			return err
+		}
+
+		path := filepath.Join(outputDir, controller.FileStem+"_controller.go")
+		if err := writeGeneratedFile(path, content, overwrite); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (r *Renderer) RenderRegistrations(root string, pkg *PackageModel, overwrite bool) error {
+	if len(pkg.Registration.Resources) == 0 {
+		return nil
+	}
+
+	outputDir := registrationOutputDir(root)
+	if err := os.MkdirAll(outputDir, 0o755); err != nil {
+		return fmt.Errorf("create registration dir %q: %w", outputDir, err)
+	}
+
+	content, err := renderRegistrationFile(pkg.Registration)
+	if err != nil {
+		return err
+	}
+
+	path := filepath.Join(outputDir, pkg.Registration.Group+"_generated.go")
+	if err := writeGeneratedFile(path, content, overwrite); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *Renderer) RenderServiceManagers(root string, pkg *PackageModel, overwrite bool) error {
+	if len(pkg.ServiceManagers) == 0 {
+		return nil
+	}
+
+	if err := preflightServiceManagerDirs(root, pkg.ServiceManagers, overwrite); err != nil {
+		return err
+	}
+
+	for _, serviceManager := range pkg.ServiceManagers {
+		outputDir := serviceManagerOutputDir(root, serviceManager)
+		if err := os.MkdirAll(outputDir, 0o755); err != nil {
+			return fmt.Errorf("create service-manager dir %q: %w", outputDir, err)
+		}
+
+		serviceClientContent, err := renderServiceClientFile(serviceManager)
+		if err != nil {
+			return fmt.Errorf("render %s for %s: %w", serviceManager.ServiceClientFileName, pkg.Service.Service, err)
+		}
+		serviceClientPath := filepath.Join(outputDir, serviceManager.ServiceClientFileName)
+		if err := writeGeneratedFile(serviceClientPath, serviceClientContent, overwrite); err != nil {
+			return err
+		}
+
+		serviceManagerContent, err := renderServiceManagerFile(serviceManager)
+		if err != nil {
+			return fmt.Errorf("render %s for %s: %w", serviceManager.ServiceManagerFileName, pkg.Service.Service, err)
+		}
+		serviceManagerPath := filepath.Join(outputDir, serviceManager.ServiceManagerFileName)
+		if err := writeGeneratedFile(serviceManagerPath, serviceManagerContent, overwrite); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (r *Renderer) RenderSamples(root string, packages []*PackageModel) error {
 	type sampleEntry struct {
 		order    int
@@ -210,12 +295,58 @@ func renderResourceFile(pkg *PackageModel, resource ResourceModel) (string, erro
 	return formatGoSource(content)
 }
 
+func renderControllerFile(pkg *PackageModel, controller ControllerModel) (string, error) {
+	data := struct {
+		PackageName    string
+		APIImportAlias string
+		Group          string
+		Version        string
+		ControllerModel
+	}{
+		PackageName:     pkg.Service.Group,
+		APIImportAlias:  fmt.Sprintf("%s%s", pkg.Service.Group, pkg.Version),
+		Group:           pkg.Service.Group,
+		Version:         pkg.Version,
+		ControllerModel: controller,
+	}
+
+	content, err := executeTemplate(controllerTemplate, data)
+	if err != nil {
+		return "", fmt.Errorf("render %s_controller.go for %s: %w", controller.FileStem, pkg.Service.Service, err)
+	}
+	return formatGoSource(content)
+}
+
+func renderRegistrationFile(registration RegistrationOutputModel) (string, error) {
+	content, err := executeTemplate(registrationTemplate, registration)
+	if err != nil {
+		return "", fmt.Errorf("render %s_generated.go: %w", registration.Group, err)
+	}
+	return formatGoSource(content)
+}
+
 func renderPackageMetadata(metadata PackageMetadataModel) (string, error) {
 	return executeTemplate(packageMetadataTemplate, metadata)
 }
 
 func renderInstallKustomization(install InstallKustomizationModel) (string, error) {
 	return executeTemplate(installKustomizationTemplate, install)
+}
+
+func renderServiceClientFile(serviceManager ServiceManagerModel) (string, error) {
+	content, err := executeTemplate(serviceClientTemplate, serviceManager)
+	if err != nil {
+		return "", err
+	}
+	return formatGoSource(content)
+}
+
+func renderServiceManagerFile(serviceManager ServiceManagerModel) (string, error) {
+	content, err := executeTemplate(serviceManagerTemplate, serviceManager)
+	if err != nil {
+		return "", err
+	}
+	return formatGoSource(content)
 }
 
 func renderSampleFile(body string, groupDNS string, version string, kind string, metadataName string, spec string) (string, error) {
@@ -438,12 +569,60 @@ func hasComments(comments []string) bool {
 	return len(comments) > 0
 }
 
+func preflightServiceManagerDirs(root string, serviceManagers []ServiceManagerModel, overwrite bool) error {
+	if overwrite {
+		return nil
+	}
+
+	seen := make(map[string]struct{}, len(serviceManagers))
+	for _, serviceManager := range serviceManagers {
+		outputDir := serviceManagerOutputDir(root, serviceManager)
+		if _, ok := seen[outputDir]; ok {
+			continue
+		}
+		seen[outputDir] = struct{}{}
+
+		if _, err := os.Stat(outputDir); err == nil {
+			return ErrTargetExists{Path: outputDir}
+		} else if !os.IsNotExist(err) {
+			return fmt.Errorf("stat service-manager dir %q: %w", outputDir, err)
+		}
+	}
+
+	return nil
+}
+
+func serviceManagerOutputDir(root string, serviceManager ServiceManagerModel) string {
+	return filepath.Join(root, "pkg", "servicemanager", filepath.FromSlash(serviceManager.PackagePath))
+}
+
+func controllerOutputDir(root string, pkg *PackageModel) string {
+	return filepath.Join(root, "controllers", pkg.Service.Group)
+}
+
+func registrationOutputDir(root string) string {
+	return filepath.Join(root, "internal", "registrations")
+}
+
+func writeGeneratedFile(path string, content string, overwrite bool) error {
+	if _, err := os.Stat(path); err == nil && !overwrite {
+		return ErrTargetExists{Path: path}
+	} else if err != nil && !os.IsNotExist(err) {
+		return fmt.Errorf("stat generated file %q: %w", path, err)
+	}
+
+	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+		return fmt.Errorf("write generated file %q: %w", path, err)
+	}
+	return nil
+}
+
 const groupVersionTemplate = `/*
   Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
   Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
 */
 
-// Code generated by osok-api-generator. DO NOT EDIT.
+// Code generated by generator. DO NOT EDIT.
 
 // Package {{ .Version }} contains API Schema definitions for the {{ .Group }} {{ .Version }} API group.
 // +kubebuilder:object:generate=true
@@ -472,7 +651,7 @@ const resourceTemplate = `/*
   Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
 */
 
-// Code generated by osok-api-generator. DO NOT EDIT.
+// Code generated by generator. DO NOT EDIT.
 
 package {{ .Version }}
 
@@ -568,6 +747,330 @@ type {{ .Kind }}List struct {
 
 func init() {
 	SchemeBuilder.Register(&{{ .Kind }}{}, &{{ .Kind }}List{})
+}
+`
+
+const controllerTemplate = `/*
+  Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
+  Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+*/
+
+// Code generated by generator. DO NOT EDIT.
+
+package {{ .PackageName }}
+
+import (
+	"context"
+
+	{{ .APIImportAlias }} "github.com/oracle/oci-service-operator/api/{{ .Group }}/{{ .Version }}"
+	"github.com/oracle/oci-service-operator/pkg/core"
+{{- if .HasMaxConcurrentReconciles }}
+	"sigs.k8s.io/controller-runtime/pkg/controller"
+{{- end }}
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
+)
+
+// {{ .ReconcilerType }} reconciles a {{ .Kind }} object.
+type {{ .ReconcilerType }} struct {
+	Reconciler *core.BaseReconciler
+}
+
+{{- range .RBACMarkers }}
+{{ marker . }}
+{{- end }}
+
+// Reconcile is part of the main Kubernetes reconciliation loop.
+func (r *{{ .ReconcilerType }}) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	{{ .ResourceVariable }} := &{{ .APIImportAlias }}.{{ .Kind }}{}
+	return r.Reconciler.Reconcile(ctx, req, {{ .ResourceVariable }})
+}
+
+// SetupWithManager sets up the controller with the Manager.
+func (r *{{ .ReconcilerType }}) SetupWithManager(mgr ctrl.Manager) error {
+	builder := ctrl.NewControllerManagedBy(mgr).
+		For(&{{ .APIImportAlias }}.{{ .Kind }}{})
+{{- if .HasMaxConcurrentReconciles }}
+	builder = builder.WithOptions(controller.Options{MaxConcurrentReconciles: {{ .MaxConcurrentReconciles }}})
+{{- end }}
+	return builder.
+		WithEventFilter(predicate.GenerationChangedPredicate{}).
+		Complete(r)
+}
+`
+
+const registrationTemplate = `/*
+  Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
+  Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+*/
+
+// Code generated by generator. DO NOT EDIT.
+
+package registrations
+
+import (
+	"fmt"
+
+	{{ .APIImportAlias }} "{{ .APIImportPath }}"
+	{{ .ControllerImportAlias }} "{{ .ControllerImportPath }}"
+{{- range .Resources }}
+	{{ .ServiceManagerImportAlias }} "{{ .ServiceManagerImportPath }}"
+{{- end }}
+	"github.com/oracle/oci-service-operator/pkg/servicemanager"
+)
+
+func init() {
+	registerGeneratedGroup(GroupRegistration{
+		Group:       "{{ .Group }}",
+		AddToScheme: {{ .APIImportAlias }}.AddToScheme,
+		SetupWithManager: func(ctx Context) error {
+{{- range .Resources }}
+			if err := (&{{ $.ControllerImportAlias }}.{{ .ReconcilerType }}{
+				Reconciler: NewBaseReconciler(
+					ctx,
+					"{{ .ComponentName }}",
+					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
+						return {{ .ServiceManagerImportAlias }}.{{ .WithDepsConstructor }}(deps)
+					},
+				),
+			}).SetupWithManager(ctx.Manager); err != nil {
+				return fmt.Errorf("setup {{ .Kind }} controller: %w", err)
+			}
+{{- end }}
+			return nil
+		},
+	})
+}
+`
+
+const serviceClientTemplate = `/*
+  Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
+  Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+*/
+
+// Code generated by generator. DO NOT EDIT.
+
+package {{ .PackageName }}
+
+import (
+	"context"
+	"fmt"
+
+	{{ .SDKImportAlias }} "{{ .SDKImportPath }}"
+	{{ .APIImportAlias }} "{{ .APIImportPath }}"
+	"github.com/oracle/oci-service-operator/pkg/servicemanager"
+	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
+	ctrl "sigs.k8s.io/controller-runtime"
+)
+
+// {{ .ClientInterfaceName }} is the handwritten extension seam for {{ .Kind }} runtime behavior.
+// Add a manual file in this package that implements the interface and wire it through
+// (*{{ .ManagerTypeName }}).WithClient.
+type {{ .ClientInterfaceName }} interface {
+	CreateOrUpdate(context.Context, *{{ .APIImportAlias }}.{{ .Kind }}, ctrl.Request) (servicemanager.OSOKResponse, error)
+	Delete(context.Context, *{{ .APIImportAlias }}.{{ .Kind }}) (bool, error)
+}
+
+type {{ .DefaultClientTypeName }} struct {
+	generatedruntime.ServiceClient[*{{ .APIImportAlias }}.{{ .Kind }}]
+}
+
+var _ {{ .ClientInterfaceName }} = {{ .DefaultClientTypeName }}{}
+
+var new{{ .Kind }}ServiceClient = func(manager *{{ .ManagerTypeName }}) {{ .ClientInterfaceName }} {
+{{- if eq .SDKClientConstructorKind "provider" }}
+	sdkClient, err := {{ .SDKImportAlias }}.{{ .SDKClientConstructor }}(manager.Provider)
+{{- else }}
+	var (
+		sdkClient {{ .SDKImportAlias }}.{{ .SDKClientTypeName }}
+		err error
+	)
+{{- if eq .SDKClientConstructorKind "provider_endpoint" }}
+	err = fmt.Errorf("{{ .SDKImportAlias }}.{{ .SDKClientConstructor }} requires an explicit service endpoint")
+{{- else }}
+	err = fmt.Errorf("unsupported SDK client constructor signature for {{ .SDKImportAlias }}.{{ .SDKClientConstructor }}")
+{{- end }}
+{{- end }}
+	config := generatedruntime.Config[*{{ .APIImportAlias }}.{{ .Kind }}]{
+		Kind:    "{{ .Kind }}",
+		SDKName: "{{ .SDKName }}",
+		Log:     manager.Log,
+{{- if .CreateOperation }}
+		Create: &generatedruntime.Operation{
+			NewRequest: func() any { return &{{ $.SDKImportAlias }}.{{ .CreateOperation.RequestTypeName }}{} },
+			Call: func(ctx context.Context, request any) (any, error) {
+{{- if .CreateOperation.UsesRequest }}
+				return sdkClient.{{ .CreateOperation.MethodName }}(ctx, *request.(*{{ $.SDKImportAlias }}.{{ .CreateOperation.RequestTypeName }}))
+{{- else }}
+				return sdkClient.{{ .CreateOperation.MethodName }}(ctx)
+{{- end }}
+			},
+		},
+{{- end }}
+{{- if .GetOperation }}
+		Get: &generatedruntime.Operation{
+			NewRequest: func() any { return &{{ $.SDKImportAlias }}.{{ .GetOperation.RequestTypeName }}{} },
+			Call: func(ctx context.Context, request any) (any, error) {
+{{- if .GetOperation.UsesRequest }}
+				return sdkClient.{{ .GetOperation.MethodName }}(ctx, *request.(*{{ $.SDKImportAlias }}.{{ .GetOperation.RequestTypeName }}))
+{{- else }}
+				return sdkClient.{{ .GetOperation.MethodName }}(ctx)
+{{- end }}
+			},
+		},
+{{- end }}
+{{- if .ListOperation }}
+		List: &generatedruntime.Operation{
+			NewRequest: func() any { return &{{ $.SDKImportAlias }}.{{ .ListOperation.RequestTypeName }}{} },
+			Call: func(ctx context.Context, request any) (any, error) {
+{{- if .ListOperation.UsesRequest }}
+				return sdkClient.{{ .ListOperation.MethodName }}(ctx, *request.(*{{ $.SDKImportAlias }}.{{ .ListOperation.RequestTypeName }}))
+{{- else }}
+				return sdkClient.{{ .ListOperation.MethodName }}(ctx)
+{{- end }}
+			},
+		},
+{{- end }}
+{{- if .UpdateOperation }}
+		Update: &generatedruntime.Operation{
+			NewRequest: func() any { return &{{ $.SDKImportAlias }}.{{ .UpdateOperation.RequestTypeName }}{} },
+			Call: func(ctx context.Context, request any) (any, error) {
+{{- if .UpdateOperation.UsesRequest }}
+				return sdkClient.{{ .UpdateOperation.MethodName }}(ctx, *request.(*{{ $.SDKImportAlias }}.{{ .UpdateOperation.RequestTypeName }}))
+{{- else }}
+				return sdkClient.{{ .UpdateOperation.MethodName }}(ctx)
+{{- end }}
+			},
+		},
+{{- end }}
+{{- if .DeleteOperation }}
+		Delete: &generatedruntime.Operation{
+			NewRequest: func() any { return &{{ $.SDKImportAlias }}.{{ .DeleteOperation.RequestTypeName }}{} },
+			Call: func(ctx context.Context, request any) (any, error) {
+{{- if .DeleteOperation.UsesRequest }}
+				return sdkClient.{{ .DeleteOperation.MethodName }}(ctx, *request.(*{{ $.SDKImportAlias }}.{{ .DeleteOperation.RequestTypeName }}))
+{{- else }}
+				return sdkClient.{{ .DeleteOperation.MethodName }}(ctx)
+{{- end }}
+			},
+		},
+{{- end }}
+	}
+	if err != nil {
+		config.InitError = fmt.Errorf("initialize {{ .Kind }} OCI client: %w", err)
+	}
+	return {{ .DefaultClientTypeName }}{
+		ServiceClient: generatedruntime.NewServiceClient[*{{ .APIImportAlias }}.{{ .Kind }}](config),
+	}
+}
+`
+
+const serviceManagerTemplate = `/*
+  Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
+  Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+*/
+
+// Code generated by generator. DO NOT EDIT.
+
+package {{ .PackageName }}
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/oracle/oci-go-sdk/v65/common"
+	{{ .APIImportAlias }} "{{ .APIImportPath }}"
+	"github.com/oracle/oci-service-operator/pkg/credhelper"
+	"github.com/oracle/oci-service-operator/pkg/loggerutil"
+	"github.com/oracle/oci-service-operator/pkg/metrics"
+	"github.com/oracle/oci-service-operator/pkg/servicemanager"
+	shared "github.com/oracle/oci-service-operator/pkg/shared"
+	"k8s.io/apimachinery/pkg/runtime"
+	ctrl "sigs.k8s.io/controller-runtime"
+)
+
+type {{ .ManagerTypeName }} struct {
+	Provider         common.ConfigurationProvider
+	CredentialClient credhelper.CredentialClient
+	Scheme           *runtime.Scheme
+	Log              loggerutil.OSOKLogger
+	Metrics          *metrics.Metrics
+
+	client {{ .ClientInterfaceName }}
+}
+
+var _ servicemanager.OSOKServiceManager = (*{{ .ManagerTypeName }})(nil)
+
+func {{ .WithDepsConstructor }}(deps servicemanager.RuntimeDeps) *{{ .ManagerTypeName }} {
+	manager := &{{ .ManagerTypeName }}{
+		Provider:         deps.Provider,
+		CredentialClient: deps.CredentialClient,
+		Scheme:           deps.Scheme,
+		Log:              deps.Log,
+		Metrics:          deps.Metrics,
+	}
+	manager.client = new{{ .Kind }}ServiceClient(manager)
+	return manager
+}
+
+func {{ .Constructor }}(provider common.ConfigurationProvider, credClient credhelper.CredentialClient,
+	scheme *runtime.Scheme, log loggerutil.OSOKLogger, metrics *metrics.Metrics) *{{ .ManagerTypeName }} {
+	return {{ .WithDepsConstructor }}(servicemanager.RuntimeDeps{
+		Provider:         provider,
+		CredentialClient: credClient,
+		Scheme:           scheme,
+		Log:              log,
+		Metrics:          metrics,
+	})
+}
+
+// WithClient overrides the default generated client with handwritten runtime behavior.
+func (c *{{ .ManagerTypeName }}) WithClient(client {{ .ClientInterfaceName }}) *{{ .ManagerTypeName }} {
+	if client != nil {
+		c.client = client
+	}
+	return c
+}
+
+func (c *{{ .ManagerTypeName }}) CreateOrUpdate(ctx context.Context, obj runtime.Object, req ctrl.Request) (servicemanager.OSOKResponse, error) {
+	resource, err := c.convert(obj)
+	if err != nil {
+		c.Log.ErrorLog(err, "Conversion of object failed")
+		return servicemanager.OSOKResponse{IsSuccessful: false}, err
+	}
+
+	return c.client.CreateOrUpdate(ctx, resource, req)
+}
+
+func (c *{{ .ManagerTypeName }}) Delete(ctx context.Context, obj runtime.Object) (bool, error) {
+	resource, err := c.convert(obj)
+	if err != nil {
+		c.Log.ErrorLog(err, "Conversion of object failed")
+		return false, err
+	}
+
+	return c.client.Delete(ctx, resource)
+}
+
+func (c *{{ .ManagerTypeName }}) GetCrdStatus(obj runtime.Object) (*shared.OSOKStatus, error) {
+	resource, err := c.convert(obj)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.status(resource), nil
+}
+
+func (c *{{ .ManagerTypeName }}) convert(obj runtime.Object) (*{{ .APIImportAlias }}.{{ .Kind }}, error) {
+	resource, ok := obj.(*{{ .APIImportAlias }}.{{ .Kind }})
+	if !ok {
+		return nil, fmt.Errorf("expected *{{ .APIImportAlias }}.{{ .Kind }}, got %T", obj)
+	}
+	return resource, nil
+}
+
+func (c *{{ .ManagerTypeName }}) status(resource *{{ .APIImportAlias }}.{{ .Kind }}) *shared.OSOKStatus {
+	return &resource.Status.OsokStatus
 }
 `
 

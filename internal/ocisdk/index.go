@@ -10,6 +10,7 @@ import (
 	"go/token"
 	"os"
 	"reflect"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -49,6 +50,29 @@ type InterfaceFamily struct {
 	Implementations []Struct
 }
 
+type OperationMethod struct {
+	Verb         string
+	MethodName   string
+	ClientType   string
+	RequestType  string
+	ResponseType string
+	UsesRequest  bool
+}
+
+type ConstructorKind string
+
+const (
+	ConstructorKindProvider         ConstructorKind = "provider"
+	ConstructorKindProviderEndpoint ConstructorKind = "provider_endpoint"
+	ConstructorKindUnknown          ConstructorKind = "unknown"
+)
+
+type ClientConstructor struct {
+	Name       string
+	ClientType string
+	Kind       ConstructorKind
+}
+
 type Index struct {
 	resolveDir ResolveDirFunc
 
@@ -63,6 +87,8 @@ type Package struct {
 	interfaces          map[string]struct{}
 	polymorphic         map[string][]string
 	requestBodyPayloads map[string][]string
+	requestMethods      map[string]OperationMethod
+	clientConstructors  map[string]ClientConstructor
 
 	mu       sync.Mutex
 	resolved map[string]Struct
@@ -81,6 +107,10 @@ type fieldDefinition struct {
 	Deprecated    bool
 	ReadOnly      bool
 }
+
+var crudMethodPattern = regexp.MustCompile(`^(Create|Get|List|Update|Delete)(.+)$`)
+var crudRequestPattern = regexp.MustCompile(`^(Create|Get|List|Update|Delete)(.+)Request$`)
+var constructorPattern = regexp.MustCompile(`^New(.+)WithConfigurationProvider$`)
 
 func NewIndex(resolveDir ResolveDirFunc) *Index {
 	return &Index{
@@ -134,6 +164,31 @@ func (pkg *Package) TypeNames() []string {
 
 func (pkg *Package) RequestBodyPayloads(typeName string) []string {
 	return append([]string(nil), pkg.requestBodyPayloads[typeName]...)
+}
+
+func (pkg *Package) OperationForRequest(typeName string) (OperationMethod, bool) {
+	method, ok := pkg.requestMethods[typeName]
+	return method, ok
+}
+
+func (pkg *Package) ClientConstructor(clientType string) (ClientConstructor, bool) {
+	constructor, ok := pkg.clientConstructors[clientType]
+	return constructor, ok
+}
+
+func (pkg *Package) ResourceOperations(rawName string) map[string]OperationMethod {
+	operations := make(map[string]OperationMethod)
+	for _, method := range pkg.requestMethods {
+		matches := crudRequestPattern.FindStringSubmatch(method.RequestType)
+		if len(matches) == 0 {
+			continue
+		}
+		if sdkSingularize(matches[2]) != rawName {
+			continue
+		}
+		operations[matches[1]] = method
+	}
+	return operations
 }
 
 func (pkg *Package) Struct(typeName string) (Struct, bool) {
@@ -417,6 +472,8 @@ func parsePackage(dir string) (*Package, error) {
 		interfaces:          make(map[string]struct{}),
 		polymorphic:         make(map[string][]string),
 		requestBodyPayloads: make(map[string][]string),
+		requestMethods:      make(map[string]OperationMethod),
+		clientConstructors:  make(map[string]ClientConstructor),
 		resolved:            make(map[string]Struct),
 	}
 	exportedTypes := make(map[string]struct{})
@@ -450,10 +507,15 @@ func parsePackage(dir string) (*Package, error) {
 					}
 				case *ast.FuncDecl:
 					receiverName, implementations := polymorphicMethod(typedDeclaration)
-					if receiverName == "" || len(implementations) == 0 {
-						continue
+					if receiverName != "" && len(implementations) > 0 {
+						pkg.polymorphic[receiverName] = appendUniqueNames(pkg.polymorphic[receiverName], implementations...)
 					}
-					pkg.polymorphic[receiverName] = appendUniqueNames(pkg.polymorphic[receiverName], implementations...)
+					if method, ok := operationMethod(typedDeclaration); ok {
+						pkg.requestMethods[method.RequestType] = method
+					}
+					if constructor, ok := clientConstructor(typedDeclaration); ok {
+						pkg.clientConstructors[constructor.ClientType] = constructor
+					}
 				}
 			}
 		}
@@ -712,4 +774,190 @@ func appendUniqueNames(existing []string, extras ...string) []string {
 		existing = append(existing, name)
 	}
 	return existing
+}
+
+func clientConstructor(decl *ast.FuncDecl) (ClientConstructor, bool) {
+	if decl == nil || decl.Name == nil || decl.Recv != nil || decl.Type == nil || decl.Type.Params == nil || decl.Type.Results == nil {
+		return ClientConstructor{}, false
+	}
+
+	matches := constructorPattern.FindStringSubmatch(decl.Name.Name)
+	if len(matches) == 0 {
+		return ClientConstructor{}, false
+	}
+
+	clientType := matches[1]
+	resultType, ok := firstNamedType(decl.Type.Results.List)
+	if !ok || resultType != clientType {
+		return ClientConstructor{}, false
+	}
+
+	return ClientConstructor{
+		Name:       decl.Name.Name,
+		ClientType: clientType,
+		Kind:       constructorKind(decl.Type.Params.List),
+	}, true
+}
+
+func constructorKind(fields []*ast.Field) ConstructorKind {
+	params := parameterExprs(fields)
+	switch {
+	case len(params) == 1 && isConfigurationProviderType(params[0]):
+		return ConstructorKindProvider
+	case len(params) == 2 && isConfigurationProviderType(params[0]) && isStringType(params[1]):
+		return ConstructorKindProviderEndpoint
+	default:
+		return ConstructorKindUnknown
+	}
+}
+
+func parameterExprs(fields []*ast.Field) []ast.Expr {
+	params := make([]ast.Expr, 0, len(fields))
+	for _, field := range fields {
+		count := len(field.Names)
+		if count == 0 {
+			count = 1
+		}
+		for i := 0; i < count; i++ {
+			params = append(params, field.Type)
+		}
+	}
+	return params
+}
+
+func isConfigurationProviderType(expr ast.Expr) bool {
+	typeName, ok := namedType(expr)
+	return ok && typeName == "ConfigurationProvider"
+}
+
+func isStringType(expr ast.Expr) bool {
+	ident, ok := expr.(*ast.Ident)
+	return ok && ident.Name == "string"
+}
+
+func operationMethod(decl *ast.FuncDecl) (OperationMethod, bool) {
+	if decl == nil || decl.Name == nil || decl.Recv == nil || decl.Type == nil || decl.Type.Params == nil || decl.Type.Results == nil {
+		return OperationMethod{}, false
+	}
+
+	matches := crudMethodPattern.FindStringSubmatch(decl.Name.Name)
+	if len(matches) == 0 {
+		return OperationMethod{}, false
+	}
+
+	if len(decl.Recv.List) == 0 {
+		return OperationMethod{}, false
+	}
+	clientType := receiverTypeName(decl.Recv.List[0].Type)
+	if clientType == "" || !strings.HasSuffix(clientType, "Client") {
+		return OperationMethod{}, false
+	}
+	if !hasContextParam(decl.Type.Params.List) {
+		return OperationMethod{}, false
+	}
+
+	requestType, hasRequest := firstNamedTypeAfterContext(decl.Type.Params.List)
+	if !hasRequest {
+		requestType = decl.Name.Name + "Request"
+	}
+	responseType, ok := firstNamedType(decl.Type.Results.List)
+	if !ok {
+		return OperationMethod{}, false
+	}
+	if requestType != decl.Name.Name+"Request" || responseType != decl.Name.Name+"Response" {
+		return OperationMethod{}, false
+	}
+
+	return OperationMethod{
+		Verb:         matches[1],
+		MethodName:   decl.Name.Name,
+		ClientType:   clientType,
+		RequestType:  requestType,
+		ResponseType: responseType,
+		UsesRequest:  hasRequest,
+	}, true
+}
+
+func firstNamedTypeAfterContext(fields []*ast.Field) (string, bool) {
+	contextSeen := false
+	for _, field := range fields {
+		typeName, ok := namedType(field.Type)
+		if !ok {
+			continue
+		}
+		if typeName == "Context" {
+			contextSeen = true
+			continue
+		}
+		if contextSeen {
+			return typeName, true
+		}
+	}
+	return "", false
+}
+
+func hasContextParam(fields []*ast.Field) bool {
+	for _, field := range fields {
+		typeName, ok := namedType(field.Type)
+		if ok && typeName == "Context" {
+			return true
+		}
+	}
+	return false
+}
+
+func firstNamedType(fields []*ast.Field) (string, bool) {
+	for _, field := range fields {
+		typeName, ok := namedType(field.Type)
+		if ok {
+			return typeName, true
+		}
+	}
+	return "", false
+}
+
+func namedType(expr ast.Expr) (string, bool) {
+	switch concrete := expr.(type) {
+	case *ast.Ident:
+		return concrete.Name, true
+	case *ast.SelectorExpr:
+		return concrete.Sel.Name, true
+	case *ast.StarExpr:
+		return namedType(concrete.X)
+	default:
+		return "", false
+	}
+}
+
+func sdkSingularize(name string) string {
+	switch {
+	case strings.HasSuffix(name, "Statuses") && len(name) > len("Statuses"):
+		return strings.TrimSuffix(name, "Statuses") + "Status"
+	case strings.HasSuffix(name, "statuses") && len(name) > len("statuses"):
+		return strings.TrimSuffix(name, "statuses") + "status"
+	case strings.HasSuffix(name, "Status") && len(name) > len("Status"):
+		return sdkSingularize(strings.TrimSuffix(name, "Status")) + "Status"
+	case strings.HasSuffix(name, "status") && len(name) > len("status"):
+		return sdkSingularize(strings.TrimSuffix(name, "status")) + "status"
+	case name == "Status" || name == "status":
+		return name
+	case name == "Stats" || name == "stats":
+		return name
+	case strings.HasSuffix(name, "Stats") && len(name) > len("Stats"):
+		return sdkSingularize(strings.TrimSuffix(name, "Stats")) + "Stats"
+	case strings.HasSuffix(name, "stats") && len(name) > len("stats"):
+		return sdkSingularize(strings.TrimSuffix(name, "stats")) + "stats"
+	case strings.HasSuffix(name, "ies") && len(name) > 3:
+		return strings.TrimSuffix(name, "ies") + "y"
+	case strings.HasSuffix(name, "sses"),
+		strings.HasSuffix(name, "shes"),
+		strings.HasSuffix(name, "ches"),
+		strings.HasSuffix(name, "xes"),
+		strings.HasSuffix(name, "zes"):
+		return strings.TrimSuffix(name, "es")
+	case strings.HasSuffix(name, "s") && !strings.HasSuffix(name, "ss"):
+		return strings.TrimSuffix(name, "s")
+	default:
+		return name
+	}
 }

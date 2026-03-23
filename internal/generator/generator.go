@@ -79,6 +79,15 @@ func (g *Generator) Generate(ctx context.Context, cfg *Config, services []Servic
 		if err := g.renderer.RenderPackageOutputs(options.OutputRoot, pkg); err != nil {
 			return result, fmt.Errorf("render package outputs for service %q: %w", service.Service, err)
 		}
+		if err := g.renderer.RenderControllers(options.OutputRoot, pkg, options.Overwrite); err != nil {
+			return result, fmt.Errorf("render controller outputs for service %q: %w", service.Service, err)
+		}
+		if err := g.renderer.RenderRegistrations(options.OutputRoot, pkg, options.Overwrite); err != nil {
+			return result, fmt.Errorf("render registration outputs for service %q: %w", service.Service, err)
+		}
+		if err := g.renderer.RenderServiceManagers(options.OutputRoot, pkg, options.Overwrite); err != nil {
+			return result, fmt.Errorf("render service-manager outputs for service %q: %w", service.Service, err)
+		}
 
 		result.Generated = append(result.Generated, ServiceResult{
 			Service:       service.Service,

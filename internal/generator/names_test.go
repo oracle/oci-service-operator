@@ -69,6 +69,12 @@ func TestCompatibilityKind(t *testing.T) {
 			compatibility: CompatibilityConfig{ExistingKinds: []string{"Vault"}},
 			wantMatch:     false,
 		},
+		{
+			name:          "single token does not suffix match",
+			rawName:       "Database",
+			compatibility: CompatibilityConfig{ExistingKinds: []string{"AutonomousDatabases"}},
+			wantMatch:     false,
+		},
 	}
 
 	for _, test := range tests {

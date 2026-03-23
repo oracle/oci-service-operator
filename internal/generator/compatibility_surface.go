@@ -45,6 +45,18 @@ func preservePackageSpecSurfaces(root string, pkg *PackageModel) error {
 	pkg.Resources = assignHelperTypeNames(resources)
 	pkg.Resources = assignStatusTypeNames(pkg.Resources)
 	pkg.Resources = applyDefaultSamples(pkg.Service, pkg.Version, pkg.Resources)
+	pkg.Controller = buildControllerOutputModel(pkg.Service, pkg.Domain, pkg.Resources)
+	serviceManagers, err := buildServiceManagerModels(pkg.Service, pkg.Version, pkg.Resources)
+	if err != nil {
+		return err
+	}
+	pkg.ServiceManagers = serviceManagers
+	registration, err := buildRegistrationOutputModel(pkg.Service, pkg.Version, pkg.Resources, pkg.Controller, pkg.ServiceManagers)
+	if err != nil {
+		return err
+	}
+	pkg.Registration = registration
+	pkg.PackageOutput = buildPackageOutputModel(pkg.Service, pkg.Resources)
 	return nil
 }
 

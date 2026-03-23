@@ -7,6 +7,7 @@ package generator
 
 import (
 	"fmt"
+	"path"
 	"sort"
 	"strings"
 )
@@ -24,15 +25,27 @@ func buildPackageModel(cfg *Config, service ServiceConfig, discovered []Resource
 	resources = assignHelperTypeNames(resources)
 	resources = assignStatusTypeNames(resources)
 	resources = applyDefaultSamples(service, version, resources)
+	controllerOutput := buildControllerOutputModel(service, cfg.Domain, resources)
+	serviceManagers, err := buildServiceManagerModels(service, version, resources)
+	if err != nil {
+		return nil, err
+	}
+	registrationOutput, err := buildRegistrationOutputModel(service, version, resources, controllerOutput, serviceManagers)
+	if err != nil {
+		return nil, err
+	}
 
 	return &PackageModel{
-		Service:       service,
-		Domain:        cfg.Domain,
-		Version:       version,
-		GroupDNSName:  service.GroupDNSName(cfg.Domain),
-		SampleOrder:   service.SampleOrder,
-		Resources:     resources,
-		PackageOutput: buildPackageOutputModel(service, resources),
+		Service:         service,
+		Domain:          cfg.Domain,
+		Version:         version,
+		GroupDNSName:    service.GroupDNSName(cfg.Domain),
+		SampleOrder:     service.SampleOrder,
+		Resources:       resources,
+		Controller:      controllerOutput,
+		Registration:    registrationOutput,
+		PackageOutput:   buildPackageOutputModel(service, resources),
+		ServiceManagers: serviceManagers,
 	}, nil
 }
 
@@ -42,53 +55,21 @@ func buildParityResources(service ServiceConfig, version string, discovered []Re
 		discoveredBySource[resource.SDKName] = resource
 	}
 
-	resources := make([]ResourceModel, 0, len(service.Parity.Resources))
+	overridesBySource := make(map[string]ParityResource, len(service.Parity.Resources))
 	for _, override := range service.Parity.Resources {
-		discoveredResource, ok := discoveredBySource[override.SourceResource]
-		if !ok {
+		if _, ok := discoveredBySource[override.SourceResource]; !ok {
 			return nil, fmt.Errorf("parity resource %q for service %q was not found in SDK discovery", override.SourceResource, service.Service)
 		}
+		overridesBySource[override.SourceResource] = override
+	}
 
-		fileStem := override.FileStem
-		if strings.TrimSpace(fileStem) == "" {
-			fileStem = strings.ToLower(override.Kind)
+	resources := make([]ResourceModel, 0, len(discovered))
+	for _, resource := range discovered {
+		override, ok := overridesBySource[resource.SDKName]
+		if ok {
+			resource = buildParityResourceModel(service, version, resource, override)
 		}
-
-		printColumns := convertPrintColumns(override.PrintColumns)
-		if len(printColumns) == 0 {
-			printColumns = discoveredResource.PrintColumns
-		}
-
-		statusFields := convertFields(override.StatusFields)
-		if len(statusFields) == 0 {
-			statusFields = defaultStatusFields()
-		}
-
-		resources = append(resources, ResourceModel{
-			SDKName:         discoveredResource.SDKName,
-			Kind:            override.Kind,
-			FileStem:        fileStem,
-			KindPlural:      strings.ToLower(pluralize(override.Kind)),
-			Operations:      discoveredResource.Operations,
-			LeadingComments: override.LeadingComments,
-			SpecComments:    override.SpecComments,
-			HelperTypes:     convertHelperTypes(override.HelperTypes),
-			SpecFields:      convertFields(override.SpecFields),
-			StatusTypeName:  defaultStatusTypeName(override.Kind),
-			StatusComments:  override.StatusComments,
-			StatusFields:    statusFields,
-			PrintColumns:    printColumns,
-			ObjectComments:  override.ObjectComments,
-			ListComments:    override.ListComments,
-			Sample: SampleModel{
-				Body:         override.Sample.Body,
-				FileName:     sampleFileName(service.Group, version, fileStem),
-				MetadataName: override.Sample.MetadataName,
-				Spec:         override.Sample.Spec,
-			},
-			PrimaryDisplayField: discoveredResource.PrimaryDisplayField,
-			CompatibilityLocked: true,
-		})
+		resources = append(resources, resource)
 	}
 
 	sort.Slice(resources, func(i, j int) bool {
@@ -96,6 +77,50 @@ func buildParityResources(service ServiceConfig, version string, discovered []Re
 	})
 
 	return resources, nil
+}
+
+func buildParityResourceModel(service ServiceConfig, version string, discoveredResource ResourceModel, override ParityResource) ResourceModel {
+	fileStem := override.FileStem
+	if strings.TrimSpace(fileStem) == "" {
+		fileStem = strings.ToLower(override.Kind)
+	}
+
+	printColumns := convertPrintColumns(override.PrintColumns)
+	if len(printColumns) == 0 {
+		printColumns = discoveredResource.PrintColumns
+	}
+
+	statusFields := convertFields(override.StatusFields)
+	if len(statusFields) == 0 {
+		statusFields = defaultStatusFields()
+	}
+
+	return ResourceModel{
+		SDKName:         discoveredResource.SDKName,
+		Kind:            override.Kind,
+		FileStem:        fileStem,
+		KindPlural:      strings.ToLower(pluralize(override.Kind)),
+		Operations:      discoveredResource.Operations,
+		Runtime:         discoveredResource.Runtime,
+		LeadingComments: override.LeadingComments,
+		SpecComments:    override.SpecComments,
+		HelperTypes:     convertHelperTypes(override.HelperTypes),
+		SpecFields:      convertFields(override.SpecFields),
+		StatusTypeName:  defaultStatusTypeName(override.Kind),
+		StatusComments:  override.StatusComments,
+		StatusFields:    statusFields,
+		PrintColumns:    printColumns,
+		ObjectComments:  override.ObjectComments,
+		ListComments:    override.ListComments,
+		Sample: SampleModel{
+			Body:         override.Sample.Body,
+			FileName:     sampleFileName(service.Group, version, fileStem),
+			MetadataName: override.Sample.MetadataName,
+			Spec:         override.Sample.Spec,
+		},
+		PrimaryDisplayField: discoveredResource.PrimaryDisplayField,
+		CompatibilityLocked: true,
+	}
 }
 
 func buildPackageOutputModel(service ServiceConfig, resources []ResourceModel) PackageOutputModel {
@@ -125,7 +150,6 @@ func buildPackageOutputModel(service ServiceConfig, resources []ResourceModel) P
 			"../../../config/rbac/leader_election_role.yaml",
 			"../../../config/rbac/leader_election_role_binding.yaml",
 		)
-		output.Install.Resources = appendUniqueStrings(output.Install.Resources, packageRoleResources(resources)...)
 		if service.Parity != nil {
 			output.Install.Resources = appendUniqueStrings(output.Install.Resources, service.Parity.Package.ExtraResources...)
 		}
@@ -136,6 +160,225 @@ func buildPackageOutputModel(service ServiceConfig, resources []ResourceModel) P
 	}
 
 	return output
+}
+
+func buildRegistrationOutputModel(
+	service ServiceConfig,
+	version string,
+	resources []ResourceModel,
+	controllerOutput ControllerOutputModel,
+	serviceManagers []ServiceManagerModel,
+) (RegistrationOutputModel, error) {
+	if service.RegistrationGenerationStrategy() != GenerationStrategyGenerated {
+		return RegistrationOutputModel{}, nil
+	}
+	if service.PackageProfile != PackageProfileControllerBacked {
+		return RegistrationOutputModel{}, fmt.Errorf(
+			"service %q registration strategy %q requires packageProfile %q",
+			service.Service,
+			GenerationStrategyGenerated,
+			PackageProfileControllerBacked,
+		)
+	}
+
+	controllersByKind := make(map[string]ControllerModel, len(controllerOutput.Resources))
+	for _, controller := range controllerOutput.Resources {
+		controllersByKind[controller.Kind] = controller
+	}
+
+	serviceManagersByKind := make(map[string]ServiceManagerModel, len(serviceManagers))
+	for _, serviceManager := range serviceManagers {
+		serviceManagersByKind[serviceManager.Kind] = serviceManager
+	}
+
+	output := RegistrationOutputModel{
+		Group:                 service.Group,
+		APIImportPath:         fmt.Sprintf("github.com/oracle/oci-service-operator/api/%s/%s", service.Group, version),
+		APIImportAlias:        fmt.Sprintf("%s%s", service.Group, version),
+		ControllerImportPath:  fmt.Sprintf("github.com/oracle/oci-service-operator/controllers/%s", service.Group),
+		ControllerImportAlias: service.Group + "controllers",
+		Resources:             make([]RegistrationResourceModel, 0, len(resources)),
+	}
+
+	for _, resource := range resources {
+		controllerStrategy := service.ControllerGenerationStrategyFor(resource.Kind)
+		serviceManagerStrategy := service.ServiceManagerGenerationStrategyFor(resource.Kind)
+		if controllerStrategy != GenerationStrategyGenerated && serviceManagerStrategy != GenerationStrategyGenerated {
+			continue
+		}
+		if controllerStrategy != GenerationStrategyGenerated {
+			return RegistrationOutputModel{}, fmt.Errorf(
+				"service %q registration strategy %q requires generated controller output for kind %q",
+				service.Service,
+				GenerationStrategyGenerated,
+				resource.Kind,
+			)
+		}
+		if serviceManagerStrategy != GenerationStrategyGenerated {
+			return RegistrationOutputModel{}, fmt.Errorf(
+				"service %q registration strategy %q requires generated service-manager output for kind %q",
+				service.Service,
+				GenerationStrategyGenerated,
+				resource.Kind,
+			)
+		}
+
+		controller, ok := controllersByKind[resource.Kind]
+		if !ok {
+			return RegistrationOutputModel{}, fmt.Errorf(
+				"service %q registration strategy %q requires generated controller output for kind %q",
+				service.Service,
+				GenerationStrategyGenerated,
+				resource.Kind,
+			)
+		}
+
+		serviceManager, ok := serviceManagersByKind[resource.Kind]
+		if !ok {
+			return RegistrationOutputModel{}, fmt.Errorf(
+				"service %q registration strategy %q requires generated service-manager output for kind %q",
+				service.Service,
+				GenerationStrategyGenerated,
+				resource.Kind,
+			)
+		}
+
+		output.Resources = append(output.Resources, RegistrationResourceModel{
+			Kind:                      resource.Kind,
+			ComponentName:             resource.Kind,
+			ReconcilerType:            controller.ReconcilerType,
+			ServiceManagerImportPath:  fmt.Sprintf("github.com/oracle/oci-service-operator/pkg/servicemanager/%s", serviceManager.PackagePath),
+			ServiceManagerImportAlias: registrationServiceManagerImportAlias(service.Group, serviceManager.FileStem),
+			WithDepsConstructor:       serviceManager.WithDepsConstructor,
+		})
+	}
+
+	if len(output.Resources) == 0 {
+		return RegistrationOutputModel{}, fmt.Errorf(
+			"service %q registration strategy %q requires at least one generated resource",
+			service.Service,
+			GenerationStrategyGenerated,
+		)
+	}
+
+	return output, nil
+}
+
+func buildControllerOutputModel(service ServiceConfig, domain string, resources []ResourceModel) ControllerOutputModel {
+	output := ControllerOutputModel{
+		Resources: make([]ControllerModel, 0, len(resources)),
+	}
+
+	groupDNSName := service.GroupDNSName(domain)
+	for _, resource := range resources {
+		controllerConfig := service.ControllerGenerationConfigFor(resource.Kind)
+		if controllerConfig.Strategy != GenerationStrategyGenerated {
+			continue
+		}
+
+		kindPlural := resource.KindPlural
+		if strings.TrimSpace(kindPlural) == "" {
+			kindPlural = strings.ToLower(pluralize(resource.Kind))
+		}
+
+		rbacMarkers := append(
+			defaultControllerRBACMarkers(groupDNSName, kindPlural),
+			extraControllerRBACMarkers(controllerConfig.ExtraRBACMarkers)...,
+		)
+
+		output.Resources = append(output.Resources, ControllerModel{
+			Kind:                       resource.Kind,
+			FileStem:                   resource.FileStem,
+			ReconcilerType:             fmt.Sprintf("%sReconciler", resource.Kind),
+			ResourceVariable:           lowerCamel(resource.Kind),
+			MaxConcurrentReconciles:    controllerConfig.MaxConcurrentReconciles,
+			HasMaxConcurrentReconciles: controllerConfig.MaxConcurrentReconciles > 0,
+			RBACMarkers:                rbacMarkers,
+		})
+	}
+
+	return output
+}
+
+func registrationServiceManagerImportAlias(group string, fileStem string) string {
+	return group + fileStem + "servicemanager"
+}
+
+func buildServiceManagerModels(service ServiceConfig, version string, resources []ResourceModel) ([]ServiceManagerModel, error) {
+	serviceManagers := make([]ServiceManagerModel, 0, len(resources))
+	for _, resource := range resources {
+		if service.ServiceManagerGenerationStrategyFor(resource.Kind) != GenerationStrategyGenerated {
+			continue
+		}
+		if resource.Runtime == nil {
+			return nil, fmt.Errorf(
+				"service %q generated service-manager resource %q is missing SDK runtime metadata",
+				service.Service,
+				resource.Kind,
+			)
+		}
+
+		packagePath := service.ServiceManagerPackagePathFor(resource.Kind, resource.FileStem)
+		serviceManagers = append(serviceManagers, ServiceManagerModel{
+			Kind:                     resource.Kind,
+			SDKName:                  resource.SDKName,
+			FileStem:                 resource.FileStem,
+			PackagePath:              packagePath,
+			PackageName:              path.Base(packagePath),
+			APIImportPath:            fmt.Sprintf("github.com/oracle/oci-service-operator/api/%s/%s", service.Group, version),
+			APIImportAlias:           fmt.Sprintf("%s%s", service.Group, version),
+			SDKImportPath:            service.SDKPackage,
+			SDKImportAlias:           service.Group + "sdk",
+			ManagerTypeName:          fmt.Sprintf("%sServiceManager", resource.Kind),
+			WithDepsConstructor:      fmt.Sprintf("New%sServiceManagerWithDeps", resource.Kind),
+			Constructor:              fmt.Sprintf("New%sServiceManager", resource.Kind),
+			ClientInterfaceName:      fmt.Sprintf("%sServiceClient", resource.Kind),
+			DefaultClientTypeName:    fmt.Sprintf("default%sServiceClient", resource.Kind),
+			SDKClientTypeName:        resource.Runtime.ClientType,
+			SDKClientConstructor:     resource.Runtime.ClientConstructor,
+			SDKClientConstructorKind: resource.Runtime.ClientConstructorKind,
+			CreateOperation:          resource.Runtime.Create,
+			GetOperation:             resource.Runtime.Get,
+			ListOperation:            resource.Runtime.List,
+			UpdateOperation:          resource.Runtime.Update,
+			DeleteOperation:          resource.Runtime.Delete,
+			ServiceClientFileName:    fmt.Sprintf("%s_serviceclient.go", resource.FileStem),
+			ServiceManagerFileName:   fmt.Sprintf("%s_servicemanager.go", resource.FileStem),
+		})
+	}
+
+	sort.Slice(serviceManagers, func(i, j int) bool {
+		if serviceManagers[i].PackagePath == serviceManagers[j].PackagePath {
+			return serviceManagers[i].Kind < serviceManagers[j].Kind
+		}
+		return serviceManagers[i].PackagePath < serviceManagers[j].PackagePath
+	})
+
+	return serviceManagers, nil
+}
+
+func defaultControllerRBACMarkers(groupDNSName string, kindPlural string) []string {
+	return []string{
+		fmt.Sprintf("+kubebuilder:rbac:groups=%s,resources=%s,verbs=get;list;watch;create;update;patch;delete", groupDNSName, kindPlural),
+		fmt.Sprintf("+kubebuilder:rbac:groups=%s,resources=%s/status,verbs=get;update;patch", groupDNSName, kindPlural),
+		fmt.Sprintf("+kubebuilder:rbac:groups=%s,resources=%s/finalizers,verbs=update", groupDNSName, kindPlural),
+	}
+}
+
+func extraControllerRBACMarkers(markers []string) []string {
+	normalized := make([]string, 0, len(markers))
+	for _, marker := range markers {
+		marker = strings.TrimSpace(marker)
+		if marker == "" {
+			continue
+		}
+		if strings.HasPrefix(marker, "+kubebuilder:") {
+			normalized = append(normalized, marker)
+			continue
+		}
+		normalized = append(normalized, "+kubebuilder:rbac:"+marker)
+	}
+	return normalized
 }
 
 func applyDefaultSamples(service ServiceConfig, version string, resources []ResourceModel) []ResourceModel {
@@ -150,23 +393,6 @@ func applyDefaultSamples(service ServiceConfig, version string, resources []Reso
 		updated = append(updated, resource)
 	}
 	return updated
-}
-
-func packageRoleResources(resources []ResourceModel) []string {
-	roleResources := make([]string, 0, len(resources)*2)
-	seen := make(map[string]struct{}, len(resources))
-	for _, resource := range resources {
-		if _, ok := seen[resource.FileStem]; ok {
-			continue
-		}
-		seen[resource.FileStem] = struct{}{}
-		roleResources = append(roleResources,
-			fmt.Sprintf("../../../config/rbac/%s_editor_role.yaml", resource.FileStem),
-			fmt.Sprintf("../../../config/rbac/%s_viewer_role.yaml", resource.FileStem),
-		)
-	}
-	sort.Strings(roleResources)
-	return roleResources
 }
 
 func appendUniqueStrings(existing []string, extras ...string) []string {

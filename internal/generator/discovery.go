@@ -155,6 +155,11 @@ func resourceModels(index *ocisdk.Package, service ServiceConfig) ([]ResourceMod
 		}
 		sort.Strings(operations)
 
+		runtimeModel, err := buildRuntimeModel(index, entry.rawName, operations, index.ResourceOperations(entry.rawName))
+		if err != nil {
+			return nil, fmt.Errorf("discover runtime metadata for %q: %w", entry.rawName, err)
+		}
+
 		kind := entry.rawName
 		compatibilityLocked := false
 		if compatibilityKindName, ok := compatibilityKind(entry.rawName, service.Compatibility); ok {
@@ -177,6 +182,7 @@ func resourceModels(index *ocisdk.Package, service ServiceConfig) ([]ResourceMod
 			FileStem:            fileStem(kind),
 			KindPlural:          strings.ToLower(pluralize(kind)),
 			Operations:          operations,
+			Runtime:             runtimeModel,
 			SpecComments:        []string{fmt.Sprintf("%sSpec defines the desired state of %s.", kind, kind)},
 			HelperTypes:         fieldSet.HelperTypes,
 			SpecFields:          fieldSet.SpecFields,
@@ -196,6 +202,63 @@ func resourceModels(index *ocisdk.Package, service ServiceConfig) ([]ResourceMod
 	})
 
 	return resources, nil
+}
+
+func buildRuntimeModel(pkg *ocisdk.Package, rawName string, operations []string, discovered map[string]ocisdk.OperationMethod) (*RuntimeModel, error) {
+	if len(discovered) == 0 {
+		return nil, nil
+	}
+	if pkg == nil {
+		return nil, fmt.Errorf("sdk package metadata is required")
+	}
+
+	var clientType string
+	for _, method := range discovered {
+		if clientType == "" {
+			clientType = method.ClientType
+			continue
+		}
+		if method.ClientType != clientType {
+			return nil, fmt.Errorf("resource %q spans multiple SDK clients: %q and %q", rawName, clientType, method.ClientType)
+		}
+	}
+
+	constructor, ok := pkg.ClientConstructor(clientType)
+	if !ok {
+		return nil, fmt.Errorf("client %q does not expose a WithConfigurationProvider constructor", clientType)
+	}
+
+	model := &RuntimeModel{
+		ClientType:            clientType,
+		ClientConstructor:     constructor.Name,
+		ClientConstructorKind: string(constructor.Kind),
+	}
+	for _, operation := range operations {
+		method, ok := discovered[operation]
+		if !ok {
+			continue
+		}
+		binding := &RuntimeOperationModel{
+			MethodName:       method.MethodName,
+			RequestTypeName:  method.RequestType,
+			ResponseTypeName: method.ResponseType,
+			UsesRequest:      method.UsesRequest,
+		}
+		switch operation {
+		case "Create":
+			model.Create = binding
+		case "Get":
+			model.Get = binding
+		case "List":
+			model.List = binding
+		case "Update":
+			model.Update = binding
+		case "Delete":
+			model.Delete = binding
+		}
+	}
+
+	return model, nil
 }
 
 func hasField(fields []FieldModel, name string) bool {

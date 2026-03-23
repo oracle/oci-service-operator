@@ -73,7 +73,7 @@ type snapshot struct {
 
 func main() {
 	opts := options{}
-	flag.StringVar(&opts.configPath, "config", "internal/generator/config/services.yaml", "Path to the OSOK API generator config file.")
+	flag.StringVar(&opts.configPath, "config", "internal/generator/config/services.yaml", "Path to the OSOK generator config file.")
 	flag.StringVar(&opts.service, "service", "", "Generate and report a single configured service.")
 	flag.BoolVar(&opts.all, "all", false, "Generate and report all configured services.")
 	flag.IntVar(&opts.top, "top", 10, "Number of top offenders to include per category. Use 0 for all.")

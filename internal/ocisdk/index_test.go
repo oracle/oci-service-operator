@@ -392,6 +392,187 @@ func TestPackageRequestBodyPayloads(t *testing.T) {
 	}
 }
 
+func TestPackageResourceOperations(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name       string
+		importPath string
+		rawName    string
+		assert     func(*testing.T, map[string]OperationMethod)
+	}{
+		{
+			name:       "sample Widget",
+			importPath: "example.com/test/sdk",
+			rawName:    "Widget",
+			assert: func(t *testing.T, operations map[string]OperationMethod) {
+				create := operations["Create"]
+				if create.ClientType != "SampleClient" {
+					t.Fatalf("Widget create client = %q, want SampleClient", create.ClientType)
+				}
+				if create.MethodName != "CreateWidget" {
+					t.Fatalf("Widget create method = %q, want CreateWidget", create.MethodName)
+				}
+				if create.RequestType != "CreateWidgetRequest" || create.ResponseType != "CreateWidgetResponse" {
+					t.Fatalf("Widget create types = %s/%s, want CreateWidgetRequest/CreateWidgetResponse", create.RequestType, create.ResponseType)
+				}
+				if _, ok := operations["Update"]; !ok {
+					t.Fatal("Widget runtime metadata should include Update")
+				}
+				if _, ok := operations["Delete"]; !ok {
+					t.Fatal("Widget runtime metadata should include Delete")
+				}
+			},
+		},
+		{
+			name:       "sample ReportByName",
+			importPath: "example.com/test/sdk",
+			rawName:    "ReportByName",
+			assert: func(t *testing.T, operations map[string]OperationMethod) {
+				if len(operations) != 1 {
+					t.Fatalf("ReportByName operation count = %d, want 1", len(operations))
+				}
+				get := operations["Get"]
+				if get.MethodName != "GetReportByName" {
+					t.Fatalf("ReportByName get method = %q, want GetReportByName", get.MethodName)
+				}
+			},
+		},
+		{
+			name:       "artifacts Repository",
+			importPath: "github.com/oracle/oci-go-sdk/v65/artifacts",
+			rawName:    "Repository",
+			assert: func(t *testing.T, operations map[string]OperationMethod) {
+				create := operations["Create"]
+				if create.ClientType != "ArtifactsClient" {
+					t.Fatalf("Repository create client = %q, want ArtifactsClient", create.ClientType)
+				}
+				if create.MethodName != "CreateRepository" {
+					t.Fatalf("Repository create method = %q, want CreateRepository", create.MethodName)
+				}
+				update := operations["Update"]
+				if update.MethodName != "UpdateRepository" {
+					t.Fatalf("Repository update method = %q, want UpdateRepository", update.MethodName)
+				}
+				if _, ok := operations["List"]; !ok {
+					t.Fatal("Repository runtime metadata should include List")
+				}
+			},
+		},
+		{
+			name:       "identity Region",
+			importPath: "github.com/oracle/oci-go-sdk/v65/identity",
+			rawName:    "Region",
+			assert: func(t *testing.T, operations map[string]OperationMethod) {
+				list := operations["List"]
+				if list.MethodName != "ListRegions" {
+					t.Fatalf("Region list method = %q, want ListRegions", list.MethodName)
+				}
+				if list.UsesRequest {
+					t.Fatal("Region list operation should record that the SDK method takes no request parameter")
+				}
+				if list.RequestType != "ListRegionsRequest" {
+					t.Fatalf("Region list request type = %q, want ListRegionsRequest", list.RequestType)
+				}
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			resolver := vendorResolver(t)
+			if strings.HasPrefix(tt.importPath, "example.com/") {
+				resolver = func(context.Context, string) (string, error) {
+					return filepath.Join(moduleRoot(t), "internal", "generator", "testdata", "sdk", "sample"), nil
+				}
+			}
+
+			index := NewIndex(resolver)
+			pkg, err := index.Package(context.Background(), tt.importPath)
+			if err != nil {
+				t.Fatalf("Package(%s) error = %v", tt.importPath, err)
+			}
+
+			tt.assert(t, pkg.ResourceOperations(tt.rawName))
+		})
+	}
+}
+
+func TestPackageClientConstructors(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name       string
+		importPath string
+		clientType string
+		wantName   string
+		wantKind   ConstructorKind
+	}{
+		{
+			name:       "sample provider constructor",
+			importPath: "example.com/test/sdk",
+			clientType: "SampleClient",
+			wantName:   "NewSampleClientWithConfigurationProvider",
+			wantKind:   ConstructorKindProvider,
+		},
+		{
+			name:       "keymanagement endpoint constructor",
+			importPath: "github.com/oracle/oci-go-sdk/v65/keymanagement",
+			clientType: "KmsManagementClient",
+			wantName:   "NewKmsManagementClientWithConfigurationProvider",
+			wantKind:   ConstructorKindProviderEndpoint,
+		},
+		{
+			name:       "streaming admin provider constructor",
+			importPath: "github.com/oracle/oci-go-sdk/v65/streaming",
+			clientType: "StreamAdminClient",
+			wantName:   "NewStreamAdminClientWithConfigurationProvider",
+			wantKind:   ConstructorKindProvider,
+		},
+		{
+			name:       "streaming data endpoint constructor",
+			importPath: "github.com/oracle/oci-go-sdk/v65/streaming",
+			clientType: "StreamClient",
+			wantName:   "NewStreamClientWithConfigurationProvider",
+			wantKind:   ConstructorKindProviderEndpoint,
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			resolver := vendorResolver(t)
+			if strings.HasPrefix(tt.importPath, "example.com/") {
+				resolver = func(context.Context, string) (string, error) {
+					return filepath.Join(moduleRoot(t), "internal", "generator", "testdata", "sdk", "sample"), nil
+				}
+			}
+
+			index := NewIndex(resolver)
+			pkg, err := index.Package(context.Background(), tt.importPath)
+			if err != nil {
+				t.Fatalf("Package(%s) error = %v", tt.importPath, err)
+			}
+
+			constructor, ok := pkg.ClientConstructor(tt.clientType)
+			if !ok {
+				t.Fatalf("ClientConstructor(%s) did not find a constructor", tt.clientType)
+			}
+			if constructor.Name != tt.wantName {
+				t.Fatalf("ClientConstructor(%s) name = %q, want %q", tt.clientType, constructor.Name, tt.wantName)
+			}
+			if constructor.Kind != tt.wantKind {
+				t.Fatalf("ClientConstructor(%s) kind = %q, want %q", tt.clientType, constructor.Kind, tt.wantKind)
+			}
+		})
+	}
+}
+
 func TestIndexFlagsDeprecatedAndReadOnlyDocumentation(t *testing.T) {
 	t.Parallel()
 
