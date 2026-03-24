@@ -86,6 +86,8 @@ type ServiceManagerModel struct {
 	Kind                     string
 	SDKName                  string
 	FileStem                 string
+	Formal                   *FormalModel
+	Semantics                *RuntimeSemanticsModel
 	PackagePath              string
 	PackageName              string
 	APIImportPath            string
@@ -115,6 +117,7 @@ type RuntimeOperationModel struct {
 	RequestTypeName  string
 	ResponseTypeName string
 	UsesRequest      bool
+	RequestFields    []RuntimeRequestFieldModel
 }
 
 // ResourceModel describes one generated top-level kind inside an OSOK API package.
@@ -124,6 +127,7 @@ type ResourceModel struct {
 	FileStem            string
 	KindPlural          string
 	Operations          []string
+	Formal              *FormalModel
 	Runtime             *RuntimeModel
 	LeadingComments     []string
 	SpecComments        []string
@@ -145,11 +149,100 @@ type RuntimeModel struct {
 	ClientType            string
 	ClientConstructor     string
 	ClientConstructorKind string
+	Semantics             *RuntimeSemanticsModel
 	Create                *RuntimeOperationModel
 	Get                   *RuntimeOperationModel
 	List                  *RuntimeOperationModel
 	Update                *RuntimeOperationModel
 	Delete                *RuntimeOperationModel
+}
+
+// RuntimeRequestFieldModel describes one explicit generatedruntime request-field assignment.
+type RuntimeRequestFieldModel struct {
+	FieldName        string
+	RequestName      string
+	Contribution     string
+	PreferResourceID bool
+}
+
+// RuntimeSemanticsModel describes the explicit formal runtime semantics attached to one resource.
+type RuntimeSemanticsModel struct {
+	FormalService       string
+	FormalSlug          string
+	StatusProjection    string
+	SecretSideEffects   string
+	FinalizerPolicy     string
+	Lifecycle           RuntimeLifecycleModel
+	Delete              RuntimeDeleteSemanticsModel
+	List                *RuntimeListLookupModel
+	Mutation            RuntimeMutationModel
+	Hooks               RuntimeHookSetModel
+	CreateFollowUp      RuntimeFollowUpModel
+	UpdateFollowUp      RuntimeFollowUpModel
+	DeleteFollowUp      RuntimeFollowUpModel
+	AuxiliaryOperations []RuntimeAuxiliaryOperationModel
+	OpenGaps            []RuntimeGapModel
+}
+
+// RuntimeLifecycleModel groups explicit state buckets used for condition mapping.
+type RuntimeLifecycleModel struct {
+	ProvisioningStates []string
+	UpdatingStates     []string
+	ActiveStates       []string
+}
+
+// RuntimeDeleteSemanticsModel captures explicit delete confirmation policy and states.
+type RuntimeDeleteSemanticsModel struct {
+	Policy         string
+	PendingStates  []string
+	TerminalStates []string
+}
+
+// RuntimeListLookupModel captures explicit list payload selection and item matching.
+type RuntimeListLookupModel struct {
+	ResponseItemsField string
+	MatchFields        []string
+}
+
+// RuntimeMutationModel captures explicit mutable, force-new, and conflictsWith rules.
+type RuntimeMutationModel struct {
+	Mutable       []string
+	ForceNew      []string
+	ConflictsWith map[string][]string
+}
+
+// RuntimeHookSetModel groups imported helper hooks by CRUD phase.
+type RuntimeHookSetModel struct {
+	Create []RuntimeHookModel
+	Update []RuntimeHookModel
+	Delete []RuntimeHookModel
+}
+
+// RuntimeHookModel captures one imported helper hook.
+type RuntimeHookModel struct {
+	Helper     string
+	EntityType string
+	Action     string
+}
+
+// RuntimeFollowUpModel captures the explicit post-operation follow-up strategy.
+type RuntimeFollowUpModel struct {
+	Strategy string
+	Hooks    []RuntimeHookModel
+}
+
+// RuntimeAuxiliaryOperationModel captures an imported provider operation beyond the primary CRUD binding.
+type RuntimeAuxiliaryOperationModel struct {
+	Phase            string
+	MethodName       string
+	RequestTypeName  string
+	ResponseTypeName string
+}
+
+// RuntimeGapModel captures one open formal gap that blocks the generated path.
+type RuntimeGapModel struct {
+	Category      string
+	StopCondition string
 }
 
 // TypeModel is one helper type emitted into a resource types file.

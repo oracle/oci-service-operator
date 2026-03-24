@@ -27,16 +27,29 @@ const (
 	FieldKindInterface FieldKind = "interface"
 )
 
+type FieldContribution string
+
+const (
+	FieldContributionNone   FieldContribution = ""
+	FieldContributionPath   FieldContribution = "path"
+	FieldContributionQuery  FieldContribution = "query"
+	FieldContributionHeader FieldContribution = "header"
+	FieldContributionBody   FieldContribution = "body"
+	FieldContributionBinary FieldContribution = "binary"
+)
+
 type Field struct {
 	Name           string
 	Type           string
 	JSONName       string
+	RequestName    string
 	RenderableType string
 	Mandatory      bool
 	Deprecated     bool
 	ReadOnly       bool
 	Documentation  string
 	Kind           FieldKind
+	Contribution   FieldContribution
 	NestedFields   []Field
 }
 
@@ -102,10 +115,12 @@ type fieldDefinition struct {
 	Name          string
 	TypeExpr      ast.Expr
 	JSONName      string
+	RequestName   string
 	Mandatory     bool
 	Documentation string
 	Deprecated    bool
 	ReadOnly      bool
+	Contribution  FieldContribution
 }
 
 var crudMethodPattern = regexp.MustCompile(`^(Create|Get|List|Update|Delete)(.+)$`)
@@ -266,12 +281,14 @@ func (pkg *Package) resolveStruct(typeName string, visiting map[string]struct{})
 			Name:           fieldDef.Name,
 			Type:           exprString(fieldDef.TypeExpr),
 			JSONName:       fieldDef.JSONName,
+			RequestName:    fieldDef.RequestName,
 			RenderableType: renderableType,
 			Mandatory:      fieldDef.Mandatory,
 			Deprecated:     fieldDef.Deprecated,
 			ReadOnly:       fieldDef.ReadOnly,
 			Documentation:  fieldDef.Documentation,
 			Kind:           kind,
+			Contribution:   fieldDef.Contribution,
 		}
 		if kind == FieldKindStruct {
 			if _, seen := visiting[nestedType]; !seen {
@@ -562,10 +579,12 @@ func parseStruct(structType *ast.StructType) structDefinition {
 				Name:          name.Name,
 				TypeExpr:      field.Type,
 				JSONName:      jsonName,
+				RequestName:   requestFieldName(field.Tag, jsonName, name.Name),
 				Mandatory:     mandatoryField(field.Tag),
 				Documentation: documentation,
 				Deprecated:    strings.Contains(strings.ToLower(documentation), "deprecated"),
 				ReadOnly:      isReadOnlyDocumentation(documentation),
+				Contribution:  fieldContribution(field.Tag),
 			})
 		}
 	}
@@ -620,6 +639,36 @@ func jsonFieldName(tag *ast.BasicLit) (string, bool) {
 	return name, true
 }
 
+func requestFieldName(tag *ast.BasicLit, jsonName string, fieldName string) string {
+	structTag, ok := parseStructTag(tag)
+	if ok {
+		if name := strings.TrimSpace(structTag.Get("name")); name != "" {
+			return name
+		}
+	}
+	if jsonName != "" {
+		return jsonName
+	}
+	return lowerCamel(fieldName)
+}
+
+func fieldContribution(tag *ast.BasicLit) FieldContribution {
+	structTag, ok := parseStructTag(tag)
+	if !ok {
+		return FieldContributionNone
+	}
+	switch FieldContribution(structTag.Get("contributesTo")) {
+	case FieldContributionPath,
+		FieldContributionQuery,
+		FieldContributionHeader,
+		FieldContributionBody,
+		FieldContributionBinary:
+		return FieldContribution(structTag.Get("contributesTo"))
+	default:
+		return FieldContributionNone
+	}
+}
+
 func mandatoryField(tag *ast.BasicLit) bool {
 	structTag, ok := parseStructTag(tag)
 	if !ok {
@@ -638,6 +687,13 @@ func parseStructTag(tag *ast.BasicLit) (reflect.StructTag, bool) {
 		return "", false
 	}
 	return reflect.StructTag(unquoted), true
+}
+
+func lowerCamel(value string) string {
+	if value == "" {
+		return ""
+	}
+	return strings.ToLower(value[:1]) + value[1:]
 }
 
 func fieldDocumentation(field *ast.Field) string {

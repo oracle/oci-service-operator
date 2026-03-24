@@ -325,6 +325,63 @@ func TestIndexLoadsPolymorphicInterfaceFamilies(t *testing.T) {
 	}
 }
 
+func TestIndexLoadsRequestFieldTagMetadata(t *testing.T) {
+	t.Parallel()
+
+	index := NewIndex(vendorResolver(t))
+
+	getUser, ok, err := index.Struct(context.Background(), "github.com/oracle/oci-go-sdk/v65/identity", "GetUserRequest")
+	if err != nil {
+		t.Fatalf("Struct(GetUserRequest) error = %v", err)
+	}
+	if !ok {
+		t.Fatal("Struct(GetUserRequest) did not find type")
+	}
+
+	userID := findField(t, getUser.Fields, "UserId")
+	if userID.RequestName != "userId" {
+		t.Fatalf("GetUserRequest.UserId request name = %q, want userId", userID.RequestName)
+	}
+	if userID.Contribution != FieldContributionPath {
+		t.Fatalf("GetUserRequest.UserId contribution = %q, want %q", userID.Contribution, FieldContributionPath)
+	}
+
+	opcRequestID := findField(t, getUser.Fields, "OpcRequestId")
+	if opcRequestID.RequestName != "opc-request-id" {
+		t.Fatalf("GetUserRequest.OpcRequestId request name = %q, want opc-request-id", opcRequestID.RequestName)
+	}
+	if opcRequestID.Contribution != FieldContributionHeader {
+		t.Fatalf("GetUserRequest.OpcRequestId contribution = %q, want %q", opcRequestID.Contribution, FieldContributionHeader)
+	}
+
+	listUsers, ok, err := index.Struct(context.Background(), "github.com/oracle/oci-go-sdk/v65/identity", "ListUsersRequest")
+	if err != nil {
+		t.Fatalf("Struct(ListUsersRequest) error = %v", err)
+	}
+	if !ok {
+		t.Fatal("Struct(ListUsersRequest) did not find type")
+	}
+
+	compartmentID := findField(t, listUsers.Fields, "CompartmentId")
+	if compartmentID.RequestName != "compartmentId" {
+		t.Fatalf("ListUsersRequest.CompartmentId request name = %q, want compartmentId", compartmentID.RequestName)
+	}
+	if compartmentID.Contribution != FieldContributionQuery {
+		t.Fatalf("ListUsersRequest.CompartmentId contribution = %q, want %q", compartmentID.Contribution, FieldContributionQuery)
+	}
+	if !compartmentID.Mandatory {
+		t.Fatal("ListUsersRequest.CompartmentId should be mandatory")
+	}
+
+	name := findField(t, listUsers.Fields, "Name")
+	if name.RequestName != "name" {
+		t.Fatalf("ListUsersRequest.Name request name = %q, want name", name.RequestName)
+	}
+	if name.Contribution != FieldContributionQuery {
+		t.Fatalf("ListUsersRequest.Name contribution = %q, want %q", name.Contribution, FieldContributionQuery)
+	}
+}
+
 func TestPackageRequestBodyPayloads(t *testing.T) {
 	t.Parallel()
 

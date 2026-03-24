@@ -295,6 +295,104 @@ services:
 	}
 }
 
+func TestLoadConfigIncludesFormalSpecReferences(t *testing.T) {
+	t.Parallel()
+
+	configPath := filepath.Join(t.TempDir(), "services.yaml")
+	content := `
+schemaVersion: v1alpha1
+domain: oracle.com
+defaultVersion: v1beta1
+generatorEntrypoint: ./cmd/generator
+packageProfiles:
+  controller-backed:
+    description: runtime-integrated groups
+services:
+  - service: mysql
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/mysql
+    group: mysql
+    packageProfile: controller-backed
+    formalSpec: dbsystem
+    generation:
+      resources:
+        - kind: Widget
+          formalSpec: widget
+`
+	if err := os.WriteFile(configPath, []byte(content), 0o644); err != nil {
+		t.Fatalf("write temp config: %v", err)
+	}
+
+	cfg, err := LoadConfig(configPath)
+	if err != nil {
+		t.Fatalf("LoadConfig() error = %v", err)
+	}
+	if len(cfg.Services) != 1 {
+		t.Fatalf("len(cfg.Services) = %d, want 1", len(cfg.Services))
+	}
+
+	service := cfg.Services[0]
+	if service.FormalSpec != "dbsystem" {
+		t.Fatalf("service formalSpec = %q, want %q", service.FormalSpec, "dbsystem")
+	}
+	if got := service.FormalSpecFor("Widget"); got != "widget" {
+		t.Fatalf("FormalSpecFor(Widget) = %q, want %q", got, "widget")
+	}
+	if got := service.FormalSpecFor("MySqlDbSystem"); got != "dbsystem" {
+		t.Fatalf("FormalSpecFor(MySqlDbSystem) = %q, want %q", got, "dbsystem")
+	}
+	if got := filepath.ToSlash(cfg.FormalRoot()); got != "formal" && !strings.HasSuffix(got, "/formal") {
+		t.Fatalf("FormalRoot() = %q, want a formal/ path", got)
+	}
+}
+
+func TestConfigVerifyFormalInputsSkipsConfigsWithoutFormalSpecs(t *testing.T) {
+	t.Parallel()
+
+	cfg := &Config{
+		Services: []ServiceConfig{
+			{Service: "core"},
+		},
+	}
+
+	if err := cfg.VerifyFormalInputs(); err != nil {
+		t.Fatalf("VerifyFormalInputs() error = %v", err)
+	}
+}
+
+func TestConfigVerifyFormalInputsRejectsMissingFormalRoot(t *testing.T) {
+	t.Parallel()
+
+	root := t.TempDir()
+	cfg := &Config{
+		configDir: filepath.Join(root, "internal", "generator", "config"),
+		Services: []ServiceConfig{
+			{Service: "identity", FormalSpec: "user"},
+		},
+	}
+
+	err := cfg.VerifyFormalInputs()
+	if err == nil {
+		t.Fatal("VerifyFormalInputs() error = nil, want missing formal root failure")
+	}
+	if !strings.Contains(err.Error(), filepath.ToSlash(filepath.Join(root, "formal"))) {
+		t.Fatalf("VerifyFormalInputs() error = %v, want formal root path", err)
+	}
+}
+
+func TestCheckedInConfigVerifyFormalInputs(t *testing.T) {
+	t.Parallel()
+
+	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
+	cfg, err := LoadConfig(cfgPath)
+	if err != nil {
+		t.Fatalf("LoadConfig(%q) error = %v", cfgPath, err)
+	}
+
+	if err := cfg.VerifyFormalInputs(); err != nil {
+		t.Fatalf("VerifyFormalInputs() error = %v", err)
+	}
+}
+
 func TestServiceConfigControllerGenerationConfigFor(t *testing.T) {
 	t.Parallel()
 
@@ -338,6 +436,39 @@ func TestServiceConfigControllerGenerationConfigFor(t *testing.T) {
 	}
 	if got := service.ControllerGenerationConfigFor("Widget"); got.Strategy != GenerationStrategyManual {
 		t.Fatalf("ControllerGenerationConfigFor(Widget).Strategy = %q, want %q", got.Strategy, GenerationStrategyManual)
+	}
+}
+
+func TestValidateAllowsResourceFormalSpecWithoutRuntimeOverride(t *testing.T) {
+	t.Parallel()
+
+	cfg := &Config{
+		SchemaVersion:  "v1alpha1",
+		Domain:         "oracle.com",
+		DefaultVersion: "v1beta1",
+		PackageProfiles: map[string]PackageProfile{
+			"controller-backed": {Description: "runtime-integrated groups"},
+		},
+		Services: []ServiceConfig{
+			{
+				Service:        "mysql",
+				SDKPackage:     "example/mysql",
+				Group:          "mysql",
+				PackageProfile: "controller-backed",
+				Generation: GenerationConfig{
+					Resources: []ResourceGenerationOverride{
+						{
+							Kind:       "Widget",
+							FormalSpec: "widget",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	if err := cfg.Validate(); err != nil {
+		t.Fatalf("Validate() error = %v", err)
 	}
 }
 
@@ -409,6 +540,25 @@ func TestValidateRejectsInvalidGenerationConfig(t *testing.T) {
 				}
 			},
 			wantErr: `generation.resources["MySqlDbSystem"] does not override any runtime output`,
+		},
+		{
+			name: "invalid service formal spec",
+			mutate: func(cfg *Config) {
+				cfg.Services[0].FormalSpec = "mysql/widget"
+			},
+			wantErr: `formalSpec "mysql/widget" must be a single formal slug`,
+		},
+		{
+			name: "invalid resource formal spec",
+			mutate: func(cfg *Config) {
+				cfg.Services[0].Generation.Resources = []ResourceGenerationOverride{
+					{
+						Kind:       "MySqlDbSystem",
+						FormalSpec: "../dbsystem",
+					},
+				}
+			},
+			wantErr: `formalSpec "../dbsystem" must be a single formal slug`,
 		},
 	}
 
@@ -567,6 +717,56 @@ func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
 	}
 	if got := coreService.WebhookGenerationStrategy(); got != GenerationStrategyNone {
 		t.Fatalf("core webhook strategy = %q, want %q", got, GenerationStrategyNone)
+	}
+}
+
+func TestCheckedInConfigPromotesOnlyIdentityUserFormalSpec(t *testing.T) {
+	t.Parallel()
+
+	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
+	cfg, err := LoadConfig(cfgPath)
+	if err != nil {
+		t.Fatalf("LoadConfig(%q) error = %v", cfgPath, err)
+	}
+
+	var identityService *ServiceConfig
+	var databaseService *ServiceConfig
+	var mysqlService *ServiceConfig
+	var streamingService *ServiceConfig
+	for i := range cfg.Services {
+		switch cfg.Services[i].Service {
+		case "identity":
+			identityService = &cfg.Services[i]
+		case "database":
+			databaseService = &cfg.Services[i]
+		case "mysql":
+			mysqlService = &cfg.Services[i]
+		case "streaming":
+			streamingService = &cfg.Services[i]
+		}
+	}
+	if identityService == nil || databaseService == nil || mysqlService == nil || streamingService == nil {
+		t.Fatal("expected identity, database, mysql, and streaming services in services.yaml")
+	}
+
+	if got := identityService.FormalSpecFor("User"); got != "user" {
+		t.Fatalf("identity User formalSpec = %q, want %q", got, "user")
+	}
+	if got := identityService.FormalSpecFor("Compartment"); got != "" {
+		t.Fatalf("identity Compartment formalSpec = %q, want empty", got)
+	}
+
+	for _, test := range []struct {
+		service *ServiceConfig
+		kind    string
+	}{
+		{service: databaseService, kind: "AutonomousDatabases"},
+		{service: mysqlService, kind: "MySqlDbSystem"},
+		{service: streamingService, kind: "Stream"},
+	} {
+		if got := test.service.FormalSpecFor(test.kind); got != "" {
+			t.Fatalf("%s %s formalSpec = %q, want empty while legacy adapter remains active", test.service.Service, test.kind, got)
+		}
 	}
 }
 

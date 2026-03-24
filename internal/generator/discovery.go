@@ -15,6 +15,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/oracle/oci-service-operator/internal/formal"
 	"github.com/oracle/oci-service-operator/internal/ocisdk"
 )
 
@@ -26,6 +27,7 @@ type packageDirResolver = ocisdk.ResolveDirFunc
 type Discoverer struct {
 	resolveDir packageDirResolver
 	index      *ocisdk.Index
+	formal     map[string]*formal.Catalog
 }
 
 // NewDiscoverer returns the default SDK package discoverer.
@@ -51,6 +53,9 @@ func (d *Discoverer) BuildPackageModel(ctx context.Context, cfg *Config, service
 	pkg, err := buildPackageModel(cfg, service, resources)
 	if err != nil {
 		return nil, fmt.Errorf("build package model: %w", err)
+	}
+	if err := d.attachFormalModels(cfg, service, pkg); err != nil {
+		return nil, fmt.Errorf("attach formal model: %w", err)
 	}
 
 	return pkg, nil
@@ -238,11 +243,9 @@ func buildRuntimeModel(pkg *ocisdk.Package, rawName string, operations []string,
 		if !ok {
 			continue
 		}
-		binding := &RuntimeOperationModel{
-			MethodName:       method.MethodName,
-			RequestTypeName:  method.RequestType,
-			ResponseTypeName: method.ResponseType,
-			UsesRequest:      method.UsesRequest,
+		binding, err := buildRuntimeOperationModel(pkg, rawName, operation, method)
+		if err != nil {
+			return nil, err
 		}
 		switch operation {
 		case "Create":
@@ -261,6 +264,76 @@ func buildRuntimeModel(pkg *ocisdk.Package, rawName string, operations []string,
 	return model, nil
 }
 
+func buildRuntimeOperationModel(pkg *ocisdk.Package, rawName string, operation string, method ocisdk.OperationMethod) (*RuntimeOperationModel, error) {
+	requestFields, err := runtimeRequestFields(pkg, rawName, operation, method)
+	if err != nil {
+		return nil, fmt.Errorf("build %s request fields for %q: %w", operation, rawName, err)
+	}
+
+	return &RuntimeOperationModel{
+		MethodName:       method.MethodName,
+		RequestTypeName:  method.RequestType,
+		ResponseTypeName: method.ResponseType,
+		UsesRequest:      method.UsesRequest,
+		RequestFields:    requestFields,
+	}, nil
+}
+
+func runtimeRequestFields(pkg *ocisdk.Package, rawName string, operation string, method ocisdk.OperationMethod) ([]RuntimeRequestFieldModel, error) {
+	if pkg == nil || !method.UsesRequest {
+		return nil, nil
+	}
+
+	fields := make([]RuntimeRequestFieldModel, 0)
+	requestStruct, ok := pkg.Struct(method.RequestType)
+	if ok {
+		pathFieldCount := 0
+		for _, field := range requestStruct.Fields {
+			if field.Contribution == ocisdk.FieldContributionPath {
+				pathFieldCount++
+			}
+		}
+		for _, field := range requestStruct.Fields {
+			if field.Name == "RequestMetadata" {
+				continue
+			}
+			switch field.Contribution {
+			case ocisdk.FieldContributionHeader, ocisdk.FieldContributionBinary:
+				continue
+			}
+			fields = append(fields, RuntimeRequestFieldModel{
+				FieldName:        field.Name,
+				RequestName:      field.RequestName,
+				Contribution:     string(field.Contribution),
+				PreferResourceID: shouldPreferResourceID(operation, rawName, field, pathFieldCount),
+			})
+		}
+	}
+
+	for _, payloadType := range pkg.RequestBodyPayloads(method.RequestType) {
+		fields = append(fields, RuntimeRequestFieldModel{
+			FieldName:    payloadType,
+			RequestName:  payloadType,
+			Contribution: string(ocisdk.FieldContributionBody),
+		})
+	}
+
+	return fields, nil
+}
+
+func shouldPreferResourceID(operation string, rawName string, field ocisdk.Field, pathFieldCount int) bool {
+	if operation == "Create" || field.Contribution != ocisdk.FieldContributionPath {
+		return false
+	}
+	if pathFieldCount == 1 {
+		return true
+	}
+
+	requestName := strings.ToLower(strings.TrimSpace(field.RequestName))
+	rawName = strings.ToLower(strings.TrimSpace(rawName))
+	return requestName != "" && rawName != "" && strings.Contains(requestName, rawName) && strings.HasSuffix(requestName, "id")
+}
+
 func hasField(fields []FieldModel, name string) bool {
 	for _, field := range fields {
 		if field.Name == name {
@@ -268,6 +341,118 @@ func hasField(fields []FieldModel, name string) bool {
 		}
 	}
 	return false
+}
+
+func (d *Discoverer) attachFormalModels(cfg *Config, service ServiceConfig, pkg *PackageModel) error {
+	if pkg == nil {
+		return nil
+	}
+
+	needsFormal := false
+	for _, resource := range pkg.Resources {
+		if strings.TrimSpace(service.FormalSpecFor(resource.Kind)) != "" {
+			needsFormal = true
+			break
+		}
+	}
+	if !needsFormal {
+		return nil
+	}
+	if cfg == nil {
+		return fmt.Errorf("generator config is required to resolve formal specs")
+	}
+
+	formalRoot := cfg.FormalRoot()
+	if strings.TrimSpace(formalRoot) == "" {
+		return fmt.Errorf("service %q declares formalSpec references but the generator config root is unknown", service.Service)
+	}
+
+	catalog, err := d.formalCatalog(formalRoot)
+	if err != nil {
+		return fmt.Errorf("load formal catalog %q: %w", formalRoot, err)
+	}
+
+	formalByKind := make(map[string]*FormalModel, len(pkg.Resources))
+	for index := range pkg.Resources {
+		slug := service.FormalSpecFor(pkg.Resources[index].Kind)
+		if strings.TrimSpace(slug) == "" {
+			continue
+		}
+
+		binding, ok := catalog.Lookup(service.Service, slug)
+		if !ok {
+			return fmt.Errorf(
+				"service %q kind %q formalSpec %q was not found in %s",
+				service.Service,
+				pkg.Resources[index].Kind,
+				slug,
+				filepath.ToSlash(filepath.Join(catalog.Root, "controller_manifest.tsv")),
+			)
+		}
+		if binding.Manifest.Kind != pkg.Resources[index].Kind {
+			return fmt.Errorf(
+				"service %q kind %q formalSpec %q resolves to manifest kind %q",
+				service.Service,
+				pkg.Resources[index].Kind,
+				slug,
+				binding.Manifest.Kind,
+			)
+		}
+
+		model := &FormalModel{
+			Reference: FormalReferenceModel{
+				Service: service.Service,
+				Slug:    slug,
+			},
+			Binding:  binding,
+			Diagrams: formal.DiagramFilesForRow(binding.Manifest),
+		}
+		pkg.Resources[index].Formal = model
+		if pkg.Resources[index].Runtime != nil {
+			pkg.Resources[index].Runtime.Semantics = buildRuntimeSemanticsModel(model, pkg.Resources[index].Runtime)
+		}
+		formalByKind[pkg.Resources[index].Kind] = model
+	}
+
+	for index := range pkg.ServiceManagers {
+		if model, ok := formalByKind[pkg.ServiceManagers[index].Kind]; ok {
+			pkg.ServiceManagers[index].Formal = model
+			if runtime := findResourceRuntime(pkg.Resources, pkg.ServiceManagers[index].Kind); runtime != nil {
+				pkg.ServiceManagers[index].Semantics = runtime.Semantics
+			}
+		}
+	}
+
+	return nil
+}
+
+func findResourceRuntime(resources []ResourceModel, kind string) *RuntimeModel {
+	for index := range resources {
+		if resources[index].Kind == kind {
+			return resources[index].Runtime
+		}
+	}
+	return nil
+}
+
+func (d *Discoverer) formalCatalog(root string) (*formal.Catalog, error) {
+	root = strings.TrimSpace(root)
+	if root == "" {
+		return nil, fmt.Errorf("formal root must not be empty")
+	}
+	if d.formal == nil {
+		d.formal = make(map[string]*formal.Catalog)
+	}
+	if catalog, ok := d.formal[root]; ok {
+		return catalog, nil
+	}
+
+	catalog, err := formal.LoadCatalog(root)
+	if err != nil {
+		return nil, err
+	}
+	d.formal[root] = catalog
+	return catalog, nil
 }
 
 func resourceFields(index *ocisdk.Package, rawName string) ([]FieldModel, []FieldModel) {

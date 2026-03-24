@@ -7,6 +7,7 @@ package generatedruntime
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
@@ -23,25 +24,31 @@ type fakeResource struct {
 type fakeSpec struct {
 	CompartmentId string `json:"compartmentId,omitempty"`
 	DisplayName   string `json:"displayName,omitempty"`
+	Name          string `json:"name,omitempty"`
 	Enabled       bool   `json:"enabled,omitempty"`
 }
 
 type fakeStatus struct {
 	OsokStatus     shared.OSOKStatus `json:"status"`
 	Id             string            `json:"id,omitempty"`
+	CompartmentId  string            `json:"compartmentId,omitempty"`
 	DisplayName    string            `json:"displayName,omitempty"`
 	LifecycleState string            `json:"lifecycleState,omitempty"`
 }
 
 type fakeThing struct {
 	Id             string `json:"id,omitempty"`
+	CompartmentId  string `json:"compartmentId,omitempty"`
 	DisplayName    string `json:"displayName,omitempty"`
+	Name           string `json:"name,omitempty"`
 	LifecycleState string `json:"lifecycleState,omitempty"`
 }
 
 type fakeThingSummary struct {
 	Id             string `json:"id,omitempty"`
+	CompartmentId  string `json:"compartmentId,omitempty"`
 	DisplayName    string `json:"displayName,omitempty"`
+	Name           string `json:"name,omitempty"`
 	LifecycleState string `json:"lifecycleState,omitempty"`
 }
 
@@ -88,7 +95,9 @@ type fakeDeleteThingRequest struct {
 type fakeDeleteThingResponse struct{}
 
 type fakeListThingRequest struct {
-	DisplayName string `contributesTo:"query" name:"displayName"`
+	CompartmentId string `contributesTo:"query" name:"compartmentId"`
+	DisplayName   string `contributesTo:"query" name:"displayName"`
+	Name          string `contributesTo:"query" name:"name"`
 }
 
 type fakeThingCollection struct {
@@ -97,6 +106,14 @@ type fakeThingCollection struct {
 
 type fakeListThingResponse struct {
 	Collection fakeThingCollection `presentIn:"body"`
+}
+
+type fakeNamedThingCollection struct {
+	Resources []fakeThingSummary `json:"resources,omitempty"`
+}
+
+type fakeNamedListThingResponse struct {
+	Collection fakeNamedThingCollection `presentIn:"body"`
 }
 
 type fakeServiceError struct {
@@ -358,5 +375,308 @@ func TestServiceClientDeleteTreatsNotFoundAsDeleted(t *testing.T) {
 	}
 	if resource.Status.OsokStatus.DeletedAt == nil {
 		t.Fatal("status.deletedAt should be set after confirmed deletion")
+	}
+}
+
+func TestServiceClientCreateOrUpdateUsesExplicitRequestFieldsAndFormalLifecycle(t *testing.T) {
+	t.Parallel()
+
+	var createRequest fakeCreateThingRequest
+	var getRequest fakeGetThingRequest
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Semantics: &Semantics{
+			FormalService: "identity",
+			FormalSlug:    "user",
+			Lifecycle: LifecycleSemantics{
+				ProvisioningStates: []string{"CREATING"},
+				ActiveStates:       []string{"AVAILABLE"},
+			},
+			Delete: DeleteSemantics{
+				Policy:         "required",
+				PendingStates:  []string{"DELETING"},
+				TerminalStates: []string{"DELETED"},
+			},
+			CreateFollowUp: FollowUpSemantics{
+				Strategy: "read-after-write",
+				Hooks:    []Hook{{Helper: "tfresource.CreateResource"}},
+			},
+		},
+		Create: &Operation{
+			NewRequest: func() any { return &fakeCreateThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				createRequest = *request.(*fakeCreateThingRequest)
+				return fakeCreateThingResponse{
+					Thing: fakeThing{
+						Id:             "ocid1.thing.oc1..create",
+						DisplayName:    "created-name",
+						LifecycleState: "CREATING",
+					},
+				}, nil
+			},
+			Fields: []RequestField{
+				{FieldName: "FakeCreateThingDetails", Contribution: "body"},
+			},
+		},
+		Get: &Operation{
+			NewRequest: func() any { return &fakeGetThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				getRequest = *request.(*fakeGetThingRequest)
+				return fakeGetThingResponse{
+					Thing: fakeThing{
+						Id:             "ocid1.thing.oc1..create",
+						DisplayName:    "created-name",
+						LifecycleState: "AVAILABLE",
+					},
+				}, nil
+			},
+			Fields: []RequestField{
+				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Spec: fakeSpec{
+			CompartmentId: "ocid1.compartment.oc1..example",
+			DisplayName:   "desired-name",
+			Enabled:       true,
+		},
+	}
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful {
+		t.Fatal("CreateOrUpdate() should report success")
+	}
+	if response.ShouldRequeue {
+		t.Fatal("CreateOrUpdate() should not requeue for AVAILABLE lifecycle")
+	}
+	if createRequest.CompartmentId != resource.Spec.CompartmentId {
+		t.Fatalf("create request compartmentId = %q, want %q", createRequest.CompartmentId, resource.Spec.CompartmentId)
+	}
+	if getRequest.ThingId == nil || *getRequest.ThingId != "ocid1.thing.oc1..create" {
+		t.Fatalf("get request thingId = %v, want created OCID", getRequest.ThingId)
+	}
+	if resource.Status.LifecycleState != "AVAILABLE" {
+		t.Fatalf("status.lifecycleState = %q, want AVAILABLE", resource.Status.LifecycleState)
+	}
+}
+
+func TestServiceClientCreateOrUpdateUsesFormalListMatching(t *testing.T) {
+	t.Parallel()
+
+	var listRequest fakeListThingRequest
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Semantics: &Semantics{
+			List: &ListSemantics{
+				ResponseItemsField: "Resources",
+				MatchFields:        []string{"name", "compartmentId"},
+			},
+			Lifecycle: LifecycleSemantics{
+				ActiveStates: []string{"ACTIVE"},
+			},
+			Delete: DeleteSemantics{
+				Policy:         "required",
+				TerminalStates: []string{"DELETED"},
+			},
+		},
+		List: &Operation{
+			NewRequest: func() any { return &fakeListThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				listRequest = *request.(*fakeListThingRequest)
+				return fakeNamedListThingResponse{
+					Collection: fakeNamedThingCollection{
+						Resources: []fakeThingSummary{
+							{Id: "ocid1.thing.oc1..other", Name: "wanted", CompartmentId: "ocid1.compartment.oc1..other", LifecycleState: "ACTIVE"},
+							{Id: "ocid1.thing.oc1..match", Name: "wanted", CompartmentId: "ocid1.compartment.oc1..match", LifecycleState: "ACTIVE"},
+						},
+					},
+				}, nil
+			},
+			Fields: []RequestField{
+				{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
+				{FieldName: "Name", RequestName: "name", Contribution: "query"},
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Spec: fakeSpec{
+			CompartmentId: "ocid1.compartment.oc1..match",
+			Name:          "wanted",
+		},
+	}
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful {
+		t.Fatal("CreateOrUpdate() should report success")
+	}
+	if listRequest.CompartmentId != "ocid1.compartment.oc1..match" {
+		t.Fatalf("list request compartmentId = %q, want ocid1.compartment.oc1..match", listRequest.CompartmentId)
+	}
+	if listRequest.Name != "wanted" {
+		t.Fatalf("list request name = %q, want wanted", listRequest.Name)
+	}
+	if string(resource.Status.OsokStatus.Ocid) != "ocid1.thing.oc1..match" {
+		t.Fatalf("status.ocid = %q, want matched OCID", resource.Status.OsokStatus.Ocid)
+	}
+}
+
+func TestServiceClientRejectsForceNewMutationChanges(t *testing.T) {
+	t.Parallel()
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Semantics: &Semantics{
+			Mutation: MutationSemantics{
+				ForceNew: []string{"compartmentId"},
+			},
+		},
+		Update: &Operation{
+			NewRequest: func() any { return &fakeUpdateThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				t.Fatal("Update() should not be called when a force-new field changes")
+				return nil, nil
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Spec: fakeSpec{
+			CompartmentId: "ocid1.compartment.oc1..new",
+			DisplayName:   "updated-name",
+		},
+		Status: fakeStatus{
+			OsokStatus:    shared.OSOKStatus{Ocid: "ocid1.thing.oc1..existing"},
+			Id:            "ocid1.thing.oc1..existing",
+			CompartmentId: "ocid1.compartment.oc1..old",
+		},
+	}
+
+	if _, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{}); err == nil || !strings.Contains(err.Error(), "require replacement when compartmentId changes") {
+		t.Fatalf("CreateOrUpdate() error = %v, want force-new replacement failure", err)
+	}
+}
+
+func TestServiceClientRejectsConflictingMutationFields(t *testing.T) {
+	t.Parallel()
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Semantics: &Semantics{
+			Mutation: MutationSemantics{
+				ConflictsWith: map[string][]string{
+					"name": {"displayName"},
+				},
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Spec: fakeSpec{
+			Name:        "wanted",
+			DisplayName: "conflicting",
+		},
+	}
+
+	if _, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{}); err == nil || !strings.Contains(err.Error(), "forbid setting name with displayName") {
+		t.Fatalf("CreateOrUpdate() error = %v, want conflictsWith failure", err)
+	}
+}
+
+func TestServiceClientRejectsOpenFormalGapsAtInit(t *testing.T) {
+	t.Parallel()
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Semantics: &Semantics{
+			Unsupported: []UnsupportedSemantic{
+				{Category: "legacy-adapter", StopCondition: "keep manual adapter until gaps close"},
+			},
+		},
+	})
+
+	if _, err := client.CreateOrUpdate(context.Background(), &fakeResource{}, ctrl.Request{}); err == nil || !strings.Contains(err.Error(), "open formal gap legacy-adapter") {
+		t.Fatalf("CreateOrUpdate() error = %v, want init failure for open formal gap", err)
+	}
+}
+
+func TestServiceClientDeleteUsesFormalRequiredConfirmation(t *testing.T) {
+	t.Parallel()
+
+	var deleteRequest fakeDeleteThingRequest
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Semantics: &Semantics{
+			Delete: DeleteSemantics{
+				Policy:         "required",
+				PendingStates:  []string{"DELETING"},
+				TerminalStates: []string{"DELETED"},
+			},
+			DeleteFollowUp: FollowUpSemantics{
+				Strategy: "confirm-delete",
+				Hooks:    []Hook{{Helper: "tfresource.DeleteResource"}},
+			},
+		},
+		Delete: &Operation{
+			NewRequest: func() any { return &fakeDeleteThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				deleteRequest = *request.(*fakeDeleteThingRequest)
+				return fakeDeleteThingResponse{}, nil
+			},
+			Fields: []RequestField{
+				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
+			},
+		},
+		Get: &Operation{
+			NewRequest: func() any { return &fakeGetThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				return fakeGetThingResponse{
+					Thing: fakeThing{
+						Id:             "ocid1.thing.oc1..delete",
+						LifecycleState: "DELETING",
+					},
+				}, nil
+			},
+			Fields: []RequestField{
+				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Status: fakeStatus{
+			OsokStatus: shared.OSOKStatus{Ocid: "ocid1.thing.oc1..delete"},
+		},
+	}
+
+	deleted, err := client.Delete(context.Background(), resource)
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
+	}
+	if deleted {
+		t.Fatal("Delete() should keep waiting while lifecycle is DELETING")
+	}
+	if deleteRequest.ThingId == nil || *deleteRequest.ThingId != "ocid1.thing.oc1..delete" {
+		t.Fatalf("delete request thingId = %v, want existing OCID", deleteRequest.ThingId)
+	}
+	if len(resource.Status.OsokStatus.Conditions) == 0 || resource.Status.OsokStatus.Conditions[len(resource.Status.OsokStatus.Conditions)-1].Type != shared.Terminating {
+		t.Fatalf("status conditions = %#v, want trailing Terminating condition", resource.Status.OsokStatus.Conditions)
 	}
 }

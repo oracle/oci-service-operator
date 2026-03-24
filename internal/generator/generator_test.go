@@ -7,6 +7,7 @@ package generator
 
 import (
 	"context"
+	"fmt"
 	"go/ast"
 	"go/format"
 	"go/parser"
@@ -18,6 +19,8 @@ import (
 	"slices"
 	"strings"
 	"testing"
+
+	"github.com/oracle/oci-service-operator/internal/formal"
 )
 
 func TestBuildPackageModelDiscoversResources(t *testing.T) {
@@ -158,6 +161,163 @@ func TestBuildPackageModelDiscoversResources(t *testing.T) {
 	}
 	if !hasField(oauthClientCredential.SpecFields, "Scopes") {
 		t.Fatalf("OAuthClientCredential spec fields = %#v, want Scopes from the aliased create/update payloads", oauthClientCredential.SpecFields)
+	}
+}
+
+func TestBuildPackageModelAttachesFormalModelFromResourceOverride(t *testing.T) {
+	t.Parallel()
+
+	repo := t.TempDir()
+	configPath := filepath.Join(repo, "internal", "generator", "config", "services.yaml")
+	writeGeneratorTestFile(t, configPath, `schemaVersion: v1alpha1
+domain: oracle.com
+defaultVersion: v1beta1
+generatorEntrypoint: ./cmd/generator
+packageProfiles:
+  controller-backed:
+    description: runtime-integrated groups
+services:
+  - service: mysql
+    sdkPackage: example.com/test/sdk
+    group: mysql
+    packageProfile: controller-backed
+    generation:
+      resources:
+        - kind: Widget
+          formalSpec: widget
+          serviceManager:
+            strategy: generated
+`)
+	writeGeneratorFormalScaffold(t, repo, "mysql", "widget", "Widget")
+
+	cfg, err := LoadConfig(configPath)
+	if err != nil {
+		t.Fatalf("LoadConfig(%q) error = %v", configPath, err)
+	}
+	service := cfg.Services[0]
+
+	discoverer := &Discoverer{
+		resolveDir: func(context.Context, string) (string, error) {
+			return sampleSDKDir(t), nil
+		},
+	}
+
+	pkg, err := discoverer.BuildPackageModel(context.Background(), cfg, service)
+	if err != nil {
+		t.Fatalf("BuildPackageModel() error = %v", err)
+	}
+
+	widget := findResource(t, pkg.Resources, "Widget")
+	if widget.Formal == nil {
+		t.Fatal("Widget formal model was not attached")
+	}
+	if widget.Formal.Reference.Service != "mysql" {
+		t.Fatalf("Widget formal service = %q, want %q", widget.Formal.Reference.Service, "mysql")
+	}
+	if widget.Formal.Reference.Slug != "widget" {
+		t.Fatalf("Widget formal slug = %q, want %q", widget.Formal.Reference.Slug, "widget")
+	}
+	if widget.Formal.Binding.Import.ProviderResource != "widget_resource" {
+		t.Fatalf("Widget provider resource = %q, want %q", widget.Formal.Binding.Import.ProviderResource, "widget_resource")
+	}
+	if widget.Formal.Binding.Spec.Kind != "Widget" {
+		t.Fatalf("Widget formal kind = %q, want %q", widget.Formal.Binding.Spec.Kind, "Widget")
+	}
+	if widget.Formal.Diagrams.ActivitySourcePath != "controllers/mysql/widget/diagrams/activity.puml" {
+		t.Fatalf("Widget activity diagram path = %q, want %q", widget.Formal.Diagrams.ActivitySourcePath, "controllers/mysql/widget/diagrams/activity.puml")
+	}
+
+	report := findResource(t, pkg.Resources, "Report")
+	if report.Formal != nil {
+		t.Fatalf("Report formal model = %#v, want nil", report.Formal)
+	}
+
+	serviceManager := findServiceManagerModel(t, pkg.ServiceManagers, "Widget")
+	if serviceManager.Formal == nil {
+		t.Fatal("Widget service manager formal model was not attached")
+	}
+	if serviceManager.Formal.Reference.Slug != "widget" {
+		t.Fatalf("Widget service manager formal slug = %q, want %q", serviceManager.Formal.Reference.Slug, "widget")
+	}
+}
+
+func TestBuildPackageModelDerivesRuntimeSemanticsFromFormalSpec(t *testing.T) {
+	t.Parallel()
+
+	repo := t.TempDir()
+	configPath := filepath.Join(repo, "internal", "generator", "config", "services.yaml")
+	writeGeneratorTestFile(t, configPath, `schemaVersion: v1alpha1
+domain: oracle.com
+defaultVersion: v1beta1
+generatorEntrypoint: ./cmd/generator
+packageProfiles:
+  controller-backed:
+    description: runtime-integrated groups
+services:
+  - service: mysql
+    sdkPackage: example.com/test/sdk
+    group: mysql
+    packageProfile: controller-backed
+    generation:
+      resources:
+        - kind: Widget
+          formalSpec: widget
+          serviceManager:
+            strategy: generated
+`)
+	writeGeneratorFormalScaffold(t, repo, "mysql", "widget", "Widget")
+
+	cfg, err := LoadConfig(configPath)
+	if err != nil {
+		t.Fatalf("LoadConfig(%q) error = %v", configPath, err)
+	}
+
+	discoverer := &Discoverer{
+		resolveDir: func(context.Context, string) (string, error) {
+			return sampleSDKDir(t), nil
+		},
+	}
+
+	pkg, err := discoverer.BuildPackageModel(context.Background(), cfg, cfg.Services[0])
+	if err != nil {
+		t.Fatalf("BuildPackageModel() error = %v", err)
+	}
+
+	widget := findResource(t, pkg.Resources, "Widget")
+	if widget.Runtime == nil || widget.Runtime.Semantics == nil {
+		t.Fatal("Widget runtime semantics were not attached")
+	}
+	if got := widget.Runtime.Semantics.Lifecycle.ProvisioningStates; !slices.Equal(got, []string{"PROVISIONING"}) {
+		t.Fatalf("Widget provisioning states = %v, want [PROVISIONING]", got)
+	}
+	if got := widget.Runtime.Semantics.Lifecycle.ActiveStates; !slices.Equal(got, []string{"ACTIVE"}) {
+		t.Fatalf("Widget active states = %v, want [ACTIVE]", got)
+	}
+	if got := widget.Runtime.Semantics.Delete.Policy; got != "required" {
+		t.Fatalf("Widget delete policy = %q, want required", got)
+	}
+	if got := widget.Runtime.Semantics.List; got == nil || got.ResponseItemsField != "Items" {
+		t.Fatalf("Widget list semantics = %#v, want responseItemsField Items", got)
+	}
+	if got := widget.Runtime.Semantics.List.MatchFields; !slices.Equal(got, []string{"compartmentId", "state"}) {
+		t.Fatalf("Widget list match fields = %v, want [compartmentId state]", got)
+	}
+	if got := widget.Runtime.Semantics.Mutation.ForceNew; !slices.Equal(got, []string{"compartmentId"}) {
+		t.Fatalf("Widget forceNew = %v, want [compartmentId]", got)
+	}
+	if got := widget.Runtime.Semantics.CreateFollowUp.Strategy; got != followUpStrategyReadAfterWrite {
+		t.Fatalf("Widget create follow-up = %q, want %q", got, followUpStrategyReadAfterWrite)
+	}
+	if len(widget.Runtime.Semantics.OpenGaps) != 0 {
+		t.Fatalf("Widget open gaps = %#v, want none", widget.Runtime.Semantics.OpenGaps)
+	}
+
+	serviceManager := findServiceManagerModel(t, pkg.ServiceManagers, "Widget")
+	if serviceManager.Semantics == nil {
+		t.Fatal("Widget service manager semantics were not attached")
+	}
+	if serviceManager.Semantics.FormalSlug != "widget" {
+		t.Fatalf("Widget service manager formal slug = %q, want widget", serviceManager.Semantics.FormalSlug)
 	}
 }
 
@@ -1776,6 +1936,86 @@ func TestRenderServiceClientFileHandlesEndpointConstructors(t *testing.T) {
 	})
 }
 
+func TestRenderServiceClientFileRendersFormalSemanticsAndRequestFields(t *testing.T) {
+	t.Parallel()
+
+	content, err := renderServiceClientFile(ServiceManagerModel{
+		Kind:                     "Thing",
+		SDKName:                  "Thing",
+		PackageName:              "thing",
+		APIImportPath:            "github.com/oracle/oci-service-operator/api/example/v1beta1",
+		APIImportAlias:           "examplev1beta1",
+		SDKImportPath:            "github.com/oracle/oci-go-sdk/v65/example",
+		SDKImportAlias:           "examplesdk",
+		ManagerTypeName:          "ThingServiceManager",
+		ClientInterfaceName:      "ThingServiceClient",
+		DefaultClientTypeName:    "defaultThingServiceClient",
+		SDKClientTypeName:        "ExampleClient",
+		SDKClientConstructor:     "NewExampleClientWithConfigurationProvider",
+		SDKClientConstructorKind: "provider",
+		Semantics: &RuntimeSemanticsModel{
+			FormalService:     "identity",
+			FormalSlug:        "user",
+			StatusProjection:  "required",
+			SecretSideEffects: "none",
+			FinalizerPolicy:   "retain-until-confirmed-delete",
+			Lifecycle: RuntimeLifecycleModel{
+				ProvisioningStates: []string{"CREATING"},
+				ActiveStates:       []string{"ACTIVE"},
+			},
+			Delete: RuntimeDeleteSemanticsModel{
+				Policy:         "required",
+				PendingStates:  []string{"DELETING"},
+				TerminalStates: []string{"DELETED"},
+			},
+			List: &RuntimeListLookupModel{
+				ResponseItemsField: "Items",
+				MatchFields:        []string{"name"},
+			},
+			Mutation: RuntimeMutationModel{
+				Mutable:       []string{"displayName"},
+				ForceNew:      []string{"compartmentId"},
+				ConflictsWith: map[string][]string{"name": {"displayName"}},
+			},
+			Hooks: RuntimeHookSetModel{
+				Create: []RuntimeHookModel{{Helper: "tfresource.CreateResource"}},
+			},
+			CreateFollowUp: RuntimeFollowUpModel{
+				Strategy: "read-after-write",
+				Hooks:    []RuntimeHookModel{{Helper: "tfresource.CreateResource"}},
+			},
+		},
+		CreateOperation: &RuntimeOperationModel{
+			MethodName:      "CreateThing",
+			RequestTypeName: "CreateThingRequest",
+			UsesRequest:     true,
+			RequestFields: []RuntimeRequestFieldModel{
+				{FieldName: "CreateThingDetails", Contribution: "body"},
+			},
+		},
+		GetOperation: &RuntimeOperationModel{
+			MethodName:      "GetThing",
+			RequestTypeName: "GetThingRequest",
+			UsesRequest:     true,
+			RequestFields: []RuntimeRequestFieldModel{
+				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
+			},
+		},
+	})
+	if err != nil {
+		t.Fatalf("renderServiceClientFile() error = %v", err)
+	}
+
+	assertContains(t, content, []string{
+		"Semantics: &generatedruntime.Semantics{",
+		`FormalService:     "identity"`,
+		`FormalSlug:        "user"`,
+		`Fields: []generatedruntime.RequestField{{FieldName: "CreateThingDetails", RequestName: "", Contribution: "body", PreferResourceID: false}},`,
+		`Fields: []generatedruntime.RequestField{{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true}},`,
+		`CreateFollowUp: generatedruntime.FollowUpSemantics{`,
+	})
+}
+
 func TestGenerateRendersServiceManagerScaffoldAtOverridePath(t *testing.T) {
 	t.Parallel()
 
@@ -2015,6 +2255,69 @@ func TestCheckedInPromotedCoreRuntimeArtifactsMatchGenerator(t *testing.T) {
 	for _, relativePath := range exactFiles {
 		assertExactFileMatch(t, filepath.Join(repoRoot(t), relativePath), filepath.Join(outputRoot, relativePath))
 	}
+}
+
+func TestCheckedInIdentityUserRuntimeArtifactsMatchGenerator(t *testing.T) {
+	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
+	cfg, err := LoadConfig(cfgPath)
+	if err != nil {
+		t.Fatalf("LoadConfig(%q) error = %v", cfgPath, err)
+	}
+
+	var identityService *ServiceConfig
+	for i := range cfg.Services {
+		if cfg.Services[i].Service == "identity" {
+			identityService = &cfg.Services[i]
+			break
+		}
+	}
+	if identityService == nil {
+		t.Fatal("identity service was not found in services.yaml")
+	}
+	if got := identityService.FormalSpecFor("User"); got != "user" {
+		t.Fatalf("identity User formalSpec = %q, want %q", got, "user")
+	}
+
+	outputRoot := t.TempDir()
+	samplesDir := filepath.Join(outputRoot, "config", "samples")
+	if err := os.MkdirAll(samplesDir, 0o755); err != nil {
+		t.Fatalf("mkdir %s: %v", samplesDir, err)
+	}
+	checkedInSampleKustomization := readFile(t, filepath.Join(repoRoot(t), "config", "samples", "kustomization.yaml"))
+	if err := os.WriteFile(filepath.Join(samplesDir, "kustomization.yaml"), []byte(checkedInSampleKustomization), 0o644); err != nil {
+		t.Fatalf("write seeded samples kustomization: %v", err)
+	}
+
+	pipeline := New()
+	result, err := pipeline.Generate(context.Background(), cfg, []ServiceConfig{*identityService}, Options{
+		OutputRoot:                      outputRoot,
+		PreserveExistingSpecSurfaceRoot: repoRoot(t),
+	})
+	if err != nil {
+		t.Fatalf("Generate() error = %v", err)
+	}
+	if len(result.Generated) != 1 {
+		t.Fatalf("Generate() generated %d services, want 1", len(result.Generated))
+	}
+
+	serviceClientPath := "pkg/servicemanager/identity/user/user_serviceclient.go"
+	serviceManagerPath := "pkg/servicemanager/identity/user/user_servicemanager.go"
+	assertGoParity(t, filepath.Join(repoRoot(t), serviceClientPath), filepath.Join(outputRoot, serviceClientPath))
+	assertGoParity(t, filepath.Join(repoRoot(t), serviceManagerPath), filepath.Join(outputRoot, serviceManagerPath))
+
+	content := readFile(t, filepath.Join(outputRoot, serviceClientPath))
+	assertContains(t, content, []string{
+		"Semantics: &generatedruntime.Semantics{",
+		`FormalService:     "identity"`,
+		`FormalSlug:        "user"`,
+		`ResponseItemsField: "Items"`,
+		`CreateFollowUp: generatedruntime.FollowUpSemantics{`,
+		`Strategy: "read-after-write"`,
+		`DeleteFollowUp: generatedruntime.FollowUpSemantics{`,
+		`Strategy: "confirm-delete"`,
+		`Fields: []generatedruntime.RequestField{{FieldName: "CreateUserDetails", RequestName: "CreateUserDetails", Contribution: "body", PreferResourceID: false}},`,
+		`Fields: []generatedruntime.RequestField{{FieldName: "UserId", RequestName: "userId", Contribution: "path", PreferResourceID: true}},`,
+	})
 }
 
 func TestCheckedInConfigIncludesNetworkLoadBalancerObservedStateAlias(t *testing.T) {
@@ -2416,6 +2719,19 @@ func findHelperType(t *testing.T, helperTypes []TypeModel, name string) TypeMode
 	return TypeModel{}
 }
 
+func findServiceManagerModel(t *testing.T, serviceManagers []ServiceManagerModel, kind string) ServiceManagerModel {
+	t.Helper()
+
+	for _, serviceManager := range serviceManagers {
+		if serviceManager.Kind == kind {
+			return serviceManager
+		}
+	}
+
+	t.Fatalf("service manager kind %q was not found in %#v", kind, serviceManagers)
+	return ServiceManagerModel{}
+}
+
 func generatorTestDir(t *testing.T) string {
 	t.Helper()
 
@@ -2462,6 +2778,204 @@ func normalizeGoForParity(t *testing.T, source string) string {
 	}
 
 	return strings.Join(normalized, "\n")
+}
+
+func writeGeneratorTestFile(t *testing.T, path string, contents string) {
+	t.Helper()
+
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatalf("MkdirAll(%q) error = %v", filepath.Dir(path), err)
+	}
+	if err := os.WriteFile(path, []byte(contents), 0o644); err != nil {
+		t.Fatalf("WriteFile(%q) error = %v", path, err)
+	}
+}
+
+func writeGeneratorFormalScaffold(t *testing.T, repoRoot string, service string, slug string, kind string) {
+	t.Helper()
+
+	formalRoot := filepath.Join(repoRoot, "formal")
+	writeGeneratorTestFile(t, filepath.Join(formalRoot, "controller_manifest.tsv"), "service\tslug\tkind\tstage\tsurface\timport\tspec\tlogic_gaps\tdiagram_dir\n"+
+		fmt.Sprintf("%s\t%s\t%s\tscaffold\trepo-authored-semantics\timports/%s/%s.json\tcontrollers/%s/%s/spec.cfg\tcontrollers/%s/%s/logic-gaps.md\tcontrollers/%s/%s/diagrams\n", service, slug, kind, service, slug, service, slug, service, slug, service, slug))
+	writeGeneratorTestFile(t, filepath.Join(formalRoot, "sources.lock"), `{
+  "schemaVersion": 1,
+  "sources": [
+    {
+      "name": "terraform-provider-oci",
+      "surface": "provider-facts",
+      "status": "scaffold",
+      "notes": [
+        "formal-import will pin a provider revision here."
+      ]
+    }
+  ]
+}
+`)
+	writeGeneratorTestFile(t, filepath.Join(formalRoot, "shared", "BaseReconcilerContract.tla"), `------------------------------ MODULE BaseReconcilerContract ------------------------------
+EXTENDS ControllerLifecycleSpec
+
+VARIABLES deletionRequested, deleteConfirmed, finalizerPresent, lifecycleCondition, shouldRequeue, requestedAtStamped
+
+FinalizerRetention == deletionRequested /\ ~deleteConfirmed => finalizerPresent
+RetryableConditionsRequeue == lifecycleCondition \in {"Provisioning", "Updating", "Terminating"} => shouldRequeue
+StatusProjectionStampsRequestedAt == requestedAtStamped
+
+=============================================================================
+`)
+	writeGeneratorTestFile(t, filepath.Join(formalRoot, "shared", "ControllerLifecycleSpec.tla"), `------------------------------ MODULE ControllerLifecycleSpec ------------------------------
+
+RetryableConditions == {"Provisioning", "Updating", "Terminating"}
+ShouldRequeue(condition) == condition \in RetryableConditions
+
+=============================================================================
+`)
+	writeGeneratorTestFile(t, filepath.Join(formalRoot, "shared", "OSOKServiceManagerContract.tla"), `------------------------------ MODULE OSOKServiceManagerContract ------------------------------
+EXTENDS Naturals
+
+ResponseShape(response) == response \in [IsSuccessful : BOOLEAN, ShouldRequeue : BOOLEAN, RequeueDuration : Nat]
+
+=============================================================================
+`)
+	writeGeneratorTestFile(t, filepath.Join(formalRoot, "shared", "SecretSideEffectsContract.tla"), `------------------------------ MODULE SecretSideEffectsContract ------------------------------
+
+SecretWritePolicies == {"none", "ready-only"}
+SecretWritesAllowed(policy, condition) == IF policy = "none" THEN FALSE ELSE condition = "Active"
+
+=============================================================================
+`)
+	writeGeneratorDiagramStrategyFixtures(t, formalRoot)
+	writeGeneratorTestFile(t, filepath.Join(formalRoot, "controllers", service, slug, "spec.cfg"), fmt.Sprintf(`# formal controller binding schema v1
+schema_version = 1
+surface = repo-authored-semantics
+service = %s
+slug = %s
+kind = %s
+stage = scaffold
+import = imports/%s/%s.json
+shared_contracts = shared/BaseReconcilerContract.tla,shared/ControllerLifecycleSpec.tla,shared/OSOKServiceManagerContract.tla,shared/SecretSideEffectsContract.tla
+status_projection = required
+success_condition = active
+requeue_conditions = provisioning,updating,terminating
+delete_confirmation = required
+finalizer_policy = retain-until-confirmed-delete
+secret_side_effects = none
+`, service, slug, kind, service, slug))
+	writeGeneratorTestFile(t, filepath.Join(formalRoot, "controllers", service, slug, "logic-gaps.md"), fmt.Sprintf(`---
+schemaVersion: 1
+surface: repo-authored-semantics
+service: %s
+slug: %s
+gaps: []
+---
+
+# Logic Gaps
+`, service, slug))
+	writeGeneratorTestFile(t, filepath.Join(formalRoot, "controllers", service, slug, "diagrams", "runtime-lifecycle.yaml"), fmt.Sprintf(`schemaVersion: 1
+surface: repo-authored-semantics
+service: %s
+slug: %s
+kind: %s
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+notes:
+  - Scaffold metadata only.
+`, service, slug, kind))
+	writeGeneratorTestFile(t, filepath.Join(formalRoot, "imports", service, slug+".json"), fmt.Sprintf(`{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": %q,
+  "slug": %q,
+  "kind": %q,
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "widget_resource",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateWidget",
+        "requestType": "CreateWidgetRequest",
+        "responseType": "CreateWidgetResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetWidget",
+        "requestType": "GetWidgetRequest",
+        "responseType": "GetWidgetResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListWidgets",
+        "requestType": "ListWidgetsRequest",
+        "responseType": "ListWidgetsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateWidget",
+        "requestType": "UpdateWidgetRequest",
+        "responseType": "UpdateWidgetResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteWidget",
+        "requestType": "DeleteWidgetRequest",
+        "responseType": "DeleteWidgetResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": ["PROVISIONING"],
+      "target": ["ACTIVE"]
+    },
+    "update": {
+      "pending": ["UPDATING"],
+      "target": ["ACTIVE"]
+    }
+  },
+  "mutation": {
+    "mutable": ["display_name"],
+    "forceNew": ["compartment_id"],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": ["DELETING"],
+    "target": ["DELETED"]
+  },
+  "listLookup": {
+    "datasource": "oci_widget_widgets",
+    "collectionField": "widgets",
+    "responseItemsField": "Items",
+    "filterFields": ["compartment_id", "state"]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/%s/%s/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/%s/%s/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  }
+}
+`, service, slug, kind, service, slug, service, slug))
+	if _, err := formal.RenderDiagrams(formal.RenderOptions{Root: formalRoot}); err != nil {
+		t.Fatalf("RenderDiagrams(%q) error = %v", formalRoot, err)
+	}
 }
 
 func stripGoComments(file *ast.File) {

@@ -499,12 +499,18 @@ func matchesSamplePrefix(name string, prefixes []string) bool {
 
 func executeTemplate(content string, data any) (string, error) {
 	tmpl, err := template.New("generator").Funcs(template.FuncMap{
-		"comment":      commentLine,
-		"marker":       markerLine,
-		"fieldDecl":    fieldDecl,
-		"printColumn":  printColumnMarker,
-		"hasComments":  hasComments,
-		"hasSpecValue": hasSpecValue,
+		"comment":               commentLine,
+		"marker":                markerLine,
+		"fieldDecl":             fieldDecl,
+		"printColumn":           printColumnMarker,
+		"hasComments":           hasComments,
+		"hasSpecValue":          hasSpecValue,
+		"stringSliceLiteral":    goStringSliceLiteral,
+		"stringSliceMapLiteral": goStringSliceMapLiteral,
+		"requestFieldsLiteral":  requestFieldsLiteral,
+		"runtimeHooksLiteral":   runtimeHooksLiteral,
+		"runtimeAuxOpsLiteral":  runtimeAuxiliaryOperationsLiteral,
+		"runtimeGapsLiteral":    runtimeGapsLiteral,
 	}).Parse(content)
 	if err != nil {
 		return "", fmt.Errorf("parse template: %w", err)
@@ -895,6 +901,55 @@ var new{{ .Kind }}ServiceClient = func(manager *{{ .ManagerTypeName }}) {{ .Clie
 		Kind:    "{{ .Kind }}",
 		SDKName: "{{ .SDKName }}",
 		Log:     manager.Log,
+{{- if .Semantics }}
+		Semantics: &generatedruntime.Semantics{
+			FormalService:     "{{ .Semantics.FormalService }}",
+			FormalSlug:        "{{ .Semantics.FormalSlug }}",
+			StatusProjection:  "{{ .Semantics.StatusProjection }}",
+			SecretSideEffects: "{{ .Semantics.SecretSideEffects }}",
+			FinalizerPolicy:   "{{ .Semantics.FinalizerPolicy }}",
+			Lifecycle: generatedruntime.LifecycleSemantics{
+				ProvisioningStates: {{ stringSliceLiteral .Semantics.Lifecycle.ProvisioningStates }},
+				UpdatingStates:     {{ stringSliceLiteral .Semantics.Lifecycle.UpdatingStates }},
+				ActiveStates:       {{ stringSliceLiteral .Semantics.Lifecycle.ActiveStates }},
+			},
+			Delete: generatedruntime.DeleteSemantics{
+				Policy:         "{{ .Semantics.Delete.Policy }}",
+				PendingStates:  {{ stringSliceLiteral .Semantics.Delete.PendingStates }},
+				TerminalStates: {{ stringSliceLiteral .Semantics.Delete.TerminalStates }},
+			},
+{{- if .Semantics.List }}
+			List: &generatedruntime.ListSemantics{
+				ResponseItemsField: "{{ .Semantics.List.ResponseItemsField }}",
+				MatchFields:        {{ stringSliceLiteral .Semantics.List.MatchFields }},
+			},
+{{- end }}
+			Mutation: generatedruntime.MutationSemantics{
+				Mutable:       {{ stringSliceLiteral .Semantics.Mutation.Mutable }},
+				ForceNew:      {{ stringSliceLiteral .Semantics.Mutation.ForceNew }},
+				ConflictsWith: {{ stringSliceMapLiteral .Semantics.Mutation.ConflictsWith }},
+			},
+			Hooks: generatedruntime.HookSet{
+				Create: {{ runtimeHooksLiteral .Semantics.Hooks.Create }},
+				Update: {{ runtimeHooksLiteral .Semantics.Hooks.Update }},
+				Delete: {{ runtimeHooksLiteral .Semantics.Hooks.Delete }},
+			},
+			CreateFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "{{ .Semantics.CreateFollowUp.Strategy }}",
+				Hooks:    {{ runtimeHooksLiteral .Semantics.CreateFollowUp.Hooks }},
+			},
+			UpdateFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "{{ .Semantics.UpdateFollowUp.Strategy }}",
+				Hooks:    {{ runtimeHooksLiteral .Semantics.UpdateFollowUp.Hooks }},
+			},
+			DeleteFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "{{ .Semantics.DeleteFollowUp.Strategy }}",
+				Hooks:    {{ runtimeHooksLiteral .Semantics.DeleteFollowUp.Hooks }},
+			},
+			AuxiliaryOperations: {{ runtimeAuxOpsLiteral .Semantics.AuxiliaryOperations }},
+			Unsupported:         {{ runtimeGapsLiteral .Semantics.OpenGaps }},
+		},
+{{- end }}
 {{- if .CreateOperation }}
 		Create: &generatedruntime.Operation{
 			NewRequest: func() any { return &{{ $.SDKImportAlias }}.{{ .CreateOperation.RequestTypeName }}{} },
@@ -905,6 +960,9 @@ var new{{ .Kind }}ServiceClient = func(manager *{{ .ManagerTypeName }}) {{ .Clie
 				return sdkClient.{{ .CreateOperation.MethodName }}(ctx)
 {{- end }}
 			},
+{{- if $.Semantics }}
+			Fields: {{ requestFieldsLiteral .CreateOperation.RequestFields }},
+{{- end }}
 		},
 {{- end }}
 {{- if .GetOperation }}
@@ -917,6 +975,9 @@ var new{{ .Kind }}ServiceClient = func(manager *{{ .ManagerTypeName }}) {{ .Clie
 				return sdkClient.{{ .GetOperation.MethodName }}(ctx)
 {{- end }}
 			},
+{{- if $.Semantics }}
+			Fields: {{ requestFieldsLiteral .GetOperation.RequestFields }},
+{{- end }}
 		},
 {{- end }}
 {{- if .ListOperation }}
@@ -929,6 +990,9 @@ var new{{ .Kind }}ServiceClient = func(manager *{{ .ManagerTypeName }}) {{ .Clie
 				return sdkClient.{{ .ListOperation.MethodName }}(ctx)
 {{- end }}
 			},
+{{- if $.Semantics }}
+			Fields: {{ requestFieldsLiteral .ListOperation.RequestFields }},
+{{- end }}
 		},
 {{- end }}
 {{- if .UpdateOperation }}
@@ -941,6 +1005,9 @@ var new{{ .Kind }}ServiceClient = func(manager *{{ .ManagerTypeName }}) {{ .Clie
 				return sdkClient.{{ .UpdateOperation.MethodName }}(ctx)
 {{- end }}
 			},
+{{- if $.Semantics }}
+			Fields: {{ requestFieldsLiteral .UpdateOperation.RequestFields }},
+{{- end }}
 		},
 {{- end }}
 {{- if .DeleteOperation }}
@@ -953,6 +1020,9 @@ var new{{ .Kind }}ServiceClient = func(manager *{{ .ManagerTypeName }}) {{ .Clie
 				return sdkClient.{{ .DeleteOperation.MethodName }}(ctx)
 {{- end }}
 			},
+{{- if $.Semantics }}
+			Fields: {{ requestFieldsLiteral .DeleteOperation.RequestFields }},
+{{- end }}
 		},
 {{- end }}
 	}

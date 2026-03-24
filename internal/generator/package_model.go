@@ -323,6 +323,8 @@ func buildServiceManagerModels(service ServiceConfig, version string, resources 
 			Kind:                     resource.Kind,
 			SDKName:                  resource.SDKName,
 			FileStem:                 resource.FileStem,
+			Formal:                   resource.Formal,
+			Semantics:                resource.Runtime.Semantics,
 			PackagePath:              packagePath,
 			PackageName:              path.Base(packagePath),
 			APIImportPath:            fmt.Sprintf("github.com/oracle/oci-service-operator/api/%s/%s", service.Group, version),

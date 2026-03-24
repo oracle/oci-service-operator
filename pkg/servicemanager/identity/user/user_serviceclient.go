@@ -38,35 +38,85 @@ var newUserServiceClient = func(manager *UserServiceManager) UserServiceClient {
 		Kind:    "User",
 		SDKName: "User",
 		Log:     manager.Log,
+		Semantics: &generatedruntime.Semantics{
+			FormalService:     "identity",
+			FormalSlug:        "user",
+			StatusProjection:  "required",
+			SecretSideEffects: "none",
+			FinalizerPolicy:   "retain-until-confirmed-delete",
+			Lifecycle: generatedruntime.LifecycleSemantics{
+				ProvisioningStates: []string{"CREATING"},
+				UpdatingStates:     []string{},
+				ActiveStates:       []string{"ACTIVE"},
+			},
+			Delete: generatedruntime.DeleteSemantics{
+				Policy:         "required",
+				PendingStates:  []string{"DELETING"},
+				TerminalStates: []string{"DELETED"},
+			},
+			List: &generatedruntime.ListSemantics{
+				ResponseItemsField: "Items",
+				MatchFields:        []string{"compartmentId", "externalIdentifier", "identityProviderId", "name", "state"},
+			},
+			Mutation: generatedruntime.MutationSemantics{
+				Mutable:       []string{"definedTags", "description", "email", "freeformTags"},
+				ForceNew:      []string{"compartmentId", "name"},
+				ConflictsWith: map[string][]string{},
+			},
+			Hooks: generatedruntime.HookSet{
+				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+				Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+				Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+			},
+			CreateFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "read-after-write",
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			},
+			UpdateFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "read-after-write",
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			},
+			DeleteFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "confirm-delete",
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+			},
+			AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+			Unsupported:         []generatedruntime.UnsupportedSemantic{},
+		},
 		Create: &generatedruntime.Operation{
 			NewRequest: func() any { return &identitysdk.CreateUserRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.CreateUser(ctx, *request.(*identitysdk.CreateUserRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "CreateUserDetails", RequestName: "CreateUserDetails", Contribution: "body", PreferResourceID: false}},
 		},
 		Get: &generatedruntime.Operation{
 			NewRequest: func() any { return &identitysdk.GetUserRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.GetUser(ctx, *request.(*identitysdk.GetUserRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "UserId", RequestName: "userId", Contribution: "path", PreferResourceID: true}},
 		},
 		List: &generatedruntime.Operation{
 			NewRequest: func() any { return &identitysdk.ListUsersRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.ListUsers(ctx, *request.(*identitysdk.ListUsersRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "IdentityProviderId", RequestName: "identityProviderId", Contribution: "query", PreferResourceID: false}, {FieldName: "ExternalIdentifier", RequestName: "externalIdentifier", Contribution: "query", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}},
 		},
 		Update: &generatedruntime.Operation{
 			NewRequest: func() any { return &identitysdk.UpdateUserRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.UpdateUser(ctx, *request.(*identitysdk.UpdateUserRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "UserId", RequestName: "userId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateUserDetails", RequestName: "UpdateUserDetails", Contribution: "body", PreferResourceID: false}},
 		},
 		Delete: &generatedruntime.Operation{
 			NewRequest: func() any { return &identitysdk.DeleteUserRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.DeleteUser(ctx, *request.(*identitysdk.DeleteUserRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "UserId", RequestName: "userId", Contribution: "path", PreferResourceID: true}},
 		},
 	}
 	if err != nil {
