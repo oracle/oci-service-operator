@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "opsi",
+  "slug": "opsihostinsights",
+  "kind": "OpsiHostInsights",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_opsi_host_insights",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOpsiHostInsights",
+        "requestType": "opsi.CreateOpsiHostInsightsRequest",
+        "responseType": "opsi.CreateOpsiHostInsightsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOpsiHostInsights",
+        "requestType": "opsi.GetOpsiHostInsightsRequest",
+        "responseType": "opsi.GetOpsiHostInsightsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOpsiHostInsights",
+        "requestType": "opsi.ListOpsiHostInsightsRequest",
+        "responseType": "opsi.ListOpsiHostInsightsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOpsiHostInsights",
+        "requestType": "opsi.UpdateOpsiHostInsightsRequest",
+        "responseType": "opsi.UpdateOpsiHostInsightsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOpsiHostInsights",
+        "requestType": "opsi.DeleteOpsiHostInsightsRequest",
+        "responseType": "opsi.DeleteOpsiHostInsightsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_opsi_opsihostinsights",
+    "collectionField": "opsihostinsights",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/opsi/opsihostinsights/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/opsi/opsihostinsights/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for opsi/opsihostinsights; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

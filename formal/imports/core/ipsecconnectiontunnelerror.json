@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "ipsecconnectiontunnelerror",
+  "kind": "IPSecConnectionTunnelError",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_core_ipsecconnectiontunnelerror",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateIPSecConnectionTunnelError",
+        "requestType": "core.CreateIPSecConnectionTunnelErrorRequest",
+        "responseType": "core.CreateIPSecConnectionTunnelErrorResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetIPSecConnectionTunnelError",
+        "requestType": "core.GetIPSecConnectionTunnelErrorRequest",
+        "responseType": "core.GetIPSecConnectionTunnelErrorResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListIPSecConnectionTunnelError",
+        "requestType": "core.ListIPSecConnectionTunnelErrorRequest",
+        "responseType": "core.ListIPSecConnectionTunnelErrorResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateIPSecConnectionTunnelError",
+        "requestType": "core.UpdateIPSecConnectionTunnelErrorRequest",
+        "responseType": "core.UpdateIPSecConnectionTunnelErrorResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteIPSecConnectionTunnelError",
+        "requestType": "core.DeleteIPSecConnectionTunnelErrorRequest",
+        "responseType": "core.DeleteIPSecConnectionTunnelErrorResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_core_ipsecconnectiontunnelerror",
+    "collectionField": "ipsecconnectiontunnelerror",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/ipsecconnectiontunnelerror/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/ipsecconnectiontunnelerror/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for core/ipsecconnectiontunnelerror; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "dataguardassociation",
+  "kind": "DataGuardAssociation",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_database_dataguardassociation",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDataGuardAssociation",
+        "requestType": "database.CreateDataGuardAssociationRequest",
+        "responseType": "database.CreateDataGuardAssociationResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDataGuardAssociation",
+        "requestType": "database.GetDataGuardAssociationRequest",
+        "responseType": "database.GetDataGuardAssociationResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDataGuardAssociation",
+        "requestType": "database.ListDataGuardAssociationRequest",
+        "responseType": "database.ListDataGuardAssociationResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDataGuardAssociation",
+        "requestType": "database.UpdateDataGuardAssociationRequest",
+        "responseType": "database.UpdateDataGuardAssociationResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDataGuardAssociation",
+        "requestType": "database.DeleteDataGuardAssociationRequest",
+        "responseType": "database.DeleteDataGuardAssociationResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_dataguardassociation",
+    "collectionField": "dataguardassociation",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/dataguardassociation/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/dataguardassociation/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/dataguardassociation; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

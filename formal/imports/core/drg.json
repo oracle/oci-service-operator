@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "drg",
+  "kind": "Drg",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_core_drg",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDrg",
+        "requestType": "core.CreateDrgRequest",
+        "responseType": "core.CreateDrgResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDrg",
+        "requestType": "core.GetDrgRequest",
+        "responseType": "core.GetDrgResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDrg",
+        "requestType": "core.ListDrgRequest",
+        "responseType": "core.ListDrgResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDrg",
+        "requestType": "core.UpdateDrgRequest",
+        "responseType": "core.UpdateDrgResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDrg",
+        "requestType": "core.DeleteDrgRequest",
+        "responseType": "core.DeleteDrgResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_core_drg",
+    "collectionField": "drg",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/drg/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/drg/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for core/drg; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

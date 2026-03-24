@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "queue",
+  "slug": "stats",
+  "kind": "Stats",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_queue_stats",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateStats",
+        "requestType": "queue.CreateStatsRequest",
+        "responseType": "queue.CreateStatsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetStats",
+        "requestType": "queue.GetStatsRequest",
+        "responseType": "queue.GetStatsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListStats",
+        "requestType": "queue.ListStatsRequest",
+        "responseType": "queue.ListStatsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateStats",
+        "requestType": "queue.UpdateStatsRequest",
+        "responseType": "queue.UpdateStatsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteStats",
+        "requestType": "queue.DeleteStatsRequest",
+        "responseType": "queue.DeleteStatsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_queue_stats",
+    "collectionField": "stats",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/queue/stats/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/queue/stats/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for queue/stats; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

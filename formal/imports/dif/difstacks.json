@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "dif",
+  "slug": "difstacks",
+  "kind": "DifStacks",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_dif_stacks",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDifStacks",
+        "requestType": "dif.CreateDifStacksRequest",
+        "responseType": "dif.CreateDifStacksResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDifStacks",
+        "requestType": "dif.GetDifStacksRequest",
+        "responseType": "dif.GetDifStacksResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDifStacks",
+        "requestType": "dif.ListDifStacksRequest",
+        "responseType": "dif.ListDifStacksResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDifStacks",
+        "requestType": "dif.UpdateDifStacksRequest",
+        "responseType": "dif.UpdateDifStacksResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDifStacks",
+        "requestType": "dif.DeleteDifStacksRequest",
+        "responseType": "dif.DeleteDifStacksResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_dif_difstacks",
+    "collectionField": "difstacks",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/dif/difstacks/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/dif/difstacks/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for dif/difstacks; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

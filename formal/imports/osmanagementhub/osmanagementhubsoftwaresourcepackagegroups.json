@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "osmanagementhub",
+  "slug": "osmanagementhubsoftwaresourcepackagegroups",
+  "kind": "OsManagementHubSoftwareSourcePackageGroups",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_os_management_hub_software_source_package_groups",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOsManagementHubSoftwareSourcePackageGroups",
+        "requestType": "osmanagementhub.CreateOsManagementHubSoftwareSourcePackageGroupsRequest",
+        "responseType": "osmanagementhub.CreateOsManagementHubSoftwareSourcePackageGroupsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOsManagementHubSoftwareSourcePackageGroups",
+        "requestType": "osmanagementhub.GetOsManagementHubSoftwareSourcePackageGroupsRequest",
+        "responseType": "osmanagementhub.GetOsManagementHubSoftwareSourcePackageGroupsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOsManagementHubSoftwareSourcePackageGroups",
+        "requestType": "osmanagementhub.ListOsManagementHubSoftwareSourcePackageGroupsRequest",
+        "responseType": "osmanagementhub.ListOsManagementHubSoftwareSourcePackageGroupsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOsManagementHubSoftwareSourcePackageGroups",
+        "requestType": "osmanagementhub.UpdateOsManagementHubSoftwareSourcePackageGroupsRequest",
+        "responseType": "osmanagementhub.UpdateOsManagementHubSoftwareSourcePackageGroupsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOsManagementHubSoftwareSourcePackageGroups",
+        "requestType": "osmanagementhub.DeleteOsManagementHubSoftwareSourcePackageGroupsRequest",
+        "responseType": "osmanagementhub.DeleteOsManagementHubSoftwareSourcePackageGroupsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_osmanagementhub_osmanagementhubsoftwaresourcepackagegroups",
+    "collectionField": "osmanagementhubsoftwaresourcepackagegroups",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/osmanagementhub/osmanagementhubsoftwaresourcepackagegroups/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/osmanagementhub/osmanagementhubsoftwaresourcepackagegroups/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for osmanagementhub/osmanagementhubsoftwaresourcepackagegroups; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

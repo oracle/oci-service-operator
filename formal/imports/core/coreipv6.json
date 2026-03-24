@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "coreipv6",
+  "kind": "CoreIpv6",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_core_ipv6",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCoreIpv6",
+        "requestType": "core.CreateCoreIpv6Request",
+        "responseType": "core.CreateCoreIpv6Response"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCoreIpv6",
+        "requestType": "core.GetCoreIpv6Request",
+        "responseType": "core.GetCoreIpv6Response"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCoreIpv6",
+        "requestType": "core.ListCoreIpv6Request",
+        "responseType": "core.ListCoreIpv6Response"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCoreIpv6",
+        "requestType": "core.UpdateCoreIpv6Request",
+        "responseType": "core.UpdateCoreIpv6Response"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCoreIpv6",
+        "requestType": "core.DeleteCoreIpv6Request",
+        "responseType": "core.DeleteCoreIpv6Response"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_core_coreipv6",
+    "collectionField": "coreipv6",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/coreipv6/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/coreipv6/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for core/coreipv6; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

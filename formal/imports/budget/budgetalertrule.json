@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "budget",
+  "slug": "budgetalertrule",
+  "kind": "BudgetAlertRule",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_budget_alert_rule",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateBudgetAlertRule",
+        "requestType": "budget.CreateBudgetAlertRuleRequest",
+        "responseType": "budget.CreateBudgetAlertRuleResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetBudgetAlertRule",
+        "requestType": "budget.GetBudgetAlertRuleRequest",
+        "responseType": "budget.GetBudgetAlertRuleResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListBudgetAlertRule",
+        "requestType": "budget.ListBudgetAlertRuleRequest",
+        "responseType": "budget.ListBudgetAlertRuleResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateBudgetAlertRule",
+        "requestType": "budget.UpdateBudgetAlertRuleRequest",
+        "responseType": "budget.UpdateBudgetAlertRuleResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteBudgetAlertRule",
+        "requestType": "budget.DeleteBudgetAlertRuleRequest",
+        "responseType": "budget.DeleteBudgetAlertRuleResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_budget_budgetalertrule",
+    "collectionField": "budgetalertrule",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/budget/budgetalertrule/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/budget/budgetalertrule/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for budget/budgetalertrule; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

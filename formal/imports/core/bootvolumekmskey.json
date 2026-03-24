@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "bootvolumekmskey",
+  "kind": "BootVolumeKmsKey",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_core_bootvolumekmskey",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateBootVolumeKmsKey",
+        "requestType": "core.CreateBootVolumeKmsKeyRequest",
+        "responseType": "core.CreateBootVolumeKmsKeyResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetBootVolumeKmsKey",
+        "requestType": "core.GetBootVolumeKmsKeyRequest",
+        "responseType": "core.GetBootVolumeKmsKeyResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListBootVolumeKmsKey",
+        "requestType": "core.ListBootVolumeKmsKeyRequest",
+        "responseType": "core.ListBootVolumeKmsKeyResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateBootVolumeKmsKey",
+        "requestType": "core.UpdateBootVolumeKmsKeyRequest",
+        "responseType": "core.UpdateBootVolumeKmsKeyResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteBootVolumeKmsKey",
+        "requestType": "core.DeleteBootVolumeKmsKeyRequest",
+        "responseType": "core.DeleteBootVolumeKmsKeyResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_core_bootvolumekmskey",
+    "collectionField": "bootvolumekmskey",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/bootvolumekmskey/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/bootvolumekmskey/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for core/bootvolumekmskey; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

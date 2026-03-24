@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "datasafesensitivedatamodelssensitivecolumns",
+  "kind": "DataSafeSensitiveDataModelsSensitiveColumns",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_sensitive_data_models_sensitive_columns",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDataSafeSensitiveDataModelsSensitiveColumns",
+        "requestType": "datasafe.CreateDataSafeSensitiveDataModelsSensitiveColumnsRequest",
+        "responseType": "datasafe.CreateDataSafeSensitiveDataModelsSensitiveColumnsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDataSafeSensitiveDataModelsSensitiveColumns",
+        "requestType": "datasafe.GetDataSafeSensitiveDataModelsSensitiveColumnsRequest",
+        "responseType": "datasafe.GetDataSafeSensitiveDataModelsSensitiveColumnsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDataSafeSensitiveDataModelsSensitiveColumns",
+        "requestType": "datasafe.ListDataSafeSensitiveDataModelsSensitiveColumnsRequest",
+        "responseType": "datasafe.ListDataSafeSensitiveDataModelsSensitiveColumnsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDataSafeSensitiveDataModelsSensitiveColumns",
+        "requestType": "datasafe.UpdateDataSafeSensitiveDataModelsSensitiveColumnsRequest",
+        "responseType": "datasafe.UpdateDataSafeSensitiveDataModelsSensitiveColumnsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDataSafeSensitiveDataModelsSensitiveColumns",
+        "requestType": "datasafe.DeleteDataSafeSensitiveDataModelsSensitiveColumnsRequest",
+        "responseType": "datasafe.DeleteDataSafeSensitiveDataModelsSensitiveColumnsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_datasafe_datasafesensitivedatamodelssensitivecolumns",
+    "collectionField": "datasafesensitivedatamodelssensitivecolumns",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/datasafesensitivedatamodelssensitivecolumns/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/datasafesensitivedatamodelssensitivecolumns/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for datasafe/datasafesensitivedatamodelssensitivecolumns; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

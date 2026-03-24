@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "dataflow",
+  "slug": "dataflowprivateendpoint",
+  "kind": "DataflowPrivateEndpoint",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_dataflow_private_endpoint",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDataflowPrivateEndpoint",
+        "requestType": "dataflow.CreateDataflowPrivateEndpointRequest",
+        "responseType": "dataflow.CreateDataflowPrivateEndpointResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDataflowPrivateEndpoint",
+        "requestType": "dataflow.GetDataflowPrivateEndpointRequest",
+        "responseType": "dataflow.GetDataflowPrivateEndpointResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDataflowPrivateEndpoint",
+        "requestType": "dataflow.ListDataflowPrivateEndpointRequest",
+        "responseType": "dataflow.ListDataflowPrivateEndpointResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDataflowPrivateEndpoint",
+        "requestType": "dataflow.UpdateDataflowPrivateEndpointRequest",
+        "responseType": "dataflow.UpdateDataflowPrivateEndpointResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDataflowPrivateEndpoint",
+        "requestType": "dataflow.DeleteDataflowPrivateEndpointRequest",
+        "responseType": "dataflow.DeleteDataflowPrivateEndpointResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_dataflow_dataflowprivateendpoint",
+    "collectionField": "dataflowprivateendpoint",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/dataflow/dataflowprivateendpoint/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/dataflow/dataflowprivateendpoint/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for dataflow/dataflowprivateendpoint; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

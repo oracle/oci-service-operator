@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "identitydomains",
+  "slug": "identitydomainsmytrusteduseragent",
+  "kind": "IdentityDomainsMyTrustedUserAgent",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_identity_domains_my_trusted_user_agent",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateIdentityDomainsMyTrustedUserAgent",
+        "requestType": "identitydomains.CreateIdentityDomainsMyTrustedUserAgentRequest",
+        "responseType": "identitydomains.CreateIdentityDomainsMyTrustedUserAgentResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetIdentityDomainsMyTrustedUserAgent",
+        "requestType": "identitydomains.GetIdentityDomainsMyTrustedUserAgentRequest",
+        "responseType": "identitydomains.GetIdentityDomainsMyTrustedUserAgentResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListIdentityDomainsMyTrustedUserAgent",
+        "requestType": "identitydomains.ListIdentityDomainsMyTrustedUserAgentRequest",
+        "responseType": "identitydomains.ListIdentityDomainsMyTrustedUserAgentResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateIdentityDomainsMyTrustedUserAgent",
+        "requestType": "identitydomains.UpdateIdentityDomainsMyTrustedUserAgentRequest",
+        "responseType": "identitydomains.UpdateIdentityDomainsMyTrustedUserAgentResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteIdentityDomainsMyTrustedUserAgent",
+        "requestType": "identitydomains.DeleteIdentityDomainsMyTrustedUserAgentRequest",
+        "responseType": "identitydomains.DeleteIdentityDomainsMyTrustedUserAgentResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_identitydomains_identitydomainsmytrusteduseragent",
+    "collectionField": "identitydomainsmytrusteduseragent",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/identitydomains/identitydomainsmytrusteduseragent/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/identitydomains/identitydomainsmytrusteduseragent/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for identitydomains/identitydomainsmytrusteduseragent; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasemanagement",
+  "slug": "databasemanagementclouddbsystemcloudstackmonitoringsmanagement",
+  "kind": "DatabaseManagementCloudDbSystemCloudStackMonitoringsManagement",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_management_cloud_db_system_cloud_stack_monitorings_management",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseManagementCloudDbSystemCloudStackMonitoringsManagement",
+        "requestType": "databasemanagement.CreateDatabaseManagementCloudDbSystemCloudStackMonitoringsManagementRequest",
+        "responseType": "databasemanagement.CreateDatabaseManagementCloudDbSystemCloudStackMonitoringsManagementResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseManagementCloudDbSystemCloudStackMonitoringsManagement",
+        "requestType": "databasemanagement.GetDatabaseManagementCloudDbSystemCloudStackMonitoringsManagementRequest",
+        "responseType": "databasemanagement.GetDatabaseManagementCloudDbSystemCloudStackMonitoringsManagementResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseManagementCloudDbSystemCloudStackMonitoringsManagement",
+        "requestType": "databasemanagement.ListDatabaseManagementCloudDbSystemCloudStackMonitoringsManagementRequest",
+        "responseType": "databasemanagement.ListDatabaseManagementCloudDbSystemCloudStackMonitoringsManagementResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseManagementCloudDbSystemCloudStackMonitoringsManagement",
+        "requestType": "databasemanagement.UpdateDatabaseManagementCloudDbSystemCloudStackMonitoringsManagementRequest",
+        "responseType": "databasemanagement.UpdateDatabaseManagementCloudDbSystemCloudStackMonitoringsManagementResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseManagementCloudDbSystemCloudStackMonitoringsManagement",
+        "requestType": "databasemanagement.DeleteDatabaseManagementCloudDbSystemCloudStackMonitoringsManagementRequest",
+        "responseType": "databasemanagement.DeleteDatabaseManagementCloudDbSystemCloudStackMonitoringsManagementResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_databasemanagement_databasemanagementclouddbsystemcloudstackmonitoringsmanagement",
+    "collectionField": "databasemanagementclouddbsystemcloudstackmonitoringsmanagement",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasemanagement/databasemanagementclouddbsystemcloudstackmonitoringsmanagement/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasemanagement/databasemanagementclouddbsystemcloudstackmonitoringsmanagement/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for databasemanagement/databasemanagementclouddbsystemcloudstackmonitoringsmanagement; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

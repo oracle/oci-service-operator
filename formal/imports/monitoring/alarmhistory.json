@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "monitoring",
+  "slug": "alarmhistory",
+  "kind": "AlarmHistory",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_monitoring_alarmhistory",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateAlarmHistory",
+        "requestType": "monitoring.CreateAlarmHistoryRequest",
+        "responseType": "monitoring.CreateAlarmHistoryResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetAlarmHistory",
+        "requestType": "monitoring.GetAlarmHistoryRequest",
+        "responseType": "monitoring.GetAlarmHistoryResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListAlarmHistory",
+        "requestType": "monitoring.ListAlarmHistoryRequest",
+        "responseType": "monitoring.ListAlarmHistoryResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateAlarmHistory",
+        "requestType": "monitoring.UpdateAlarmHistoryRequest",
+        "responseType": "monitoring.UpdateAlarmHistoryResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteAlarmHistory",
+        "requestType": "monitoring.DeleteAlarmHistoryRequest",
+        "responseType": "monitoring.DeleteAlarmHistoryResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_monitoring_alarmhistory",
+    "collectionField": "alarmhistory",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/monitoring/alarmhistory/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/monitoring/alarmhistory/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for monitoring/alarmhistory; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

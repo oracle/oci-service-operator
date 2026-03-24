@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "containerengine",
+  "slug": "containerenginenodepooloption",
+  "kind": "ContainerengineNodePoolOption",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_containerengine_node_pool_option",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateContainerengineNodePoolOption",
+        "requestType": "containerengine.CreateContainerengineNodePoolOptionRequest",
+        "responseType": "containerengine.CreateContainerengineNodePoolOptionResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetContainerengineNodePoolOption",
+        "requestType": "containerengine.GetContainerengineNodePoolOptionRequest",
+        "responseType": "containerengine.GetContainerengineNodePoolOptionResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListContainerengineNodePoolOption",
+        "requestType": "containerengine.ListContainerengineNodePoolOptionRequest",
+        "responseType": "containerengine.ListContainerengineNodePoolOptionResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateContainerengineNodePoolOption",
+        "requestType": "containerengine.UpdateContainerengineNodePoolOptionRequest",
+        "responseType": "containerengine.UpdateContainerengineNodePoolOptionResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteContainerengineNodePoolOption",
+        "requestType": "containerengine.DeleteContainerengineNodePoolOptionRequest",
+        "responseType": "containerengine.DeleteContainerengineNodePoolOptionResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_containerengine_containerenginenodepooloption",
+    "collectionField": "containerenginenodepooloption",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/containerengine/containerenginenodepooloption/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/containerengine/containerenginenodepooloption/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for containerengine/containerenginenodepooloption; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

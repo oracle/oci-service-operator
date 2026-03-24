@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "email",
+  "slug": "emailemailoutboundips",
+  "kind": "EmailEmailOutboundIps",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_email_email_outbound_ips",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateEmailEmailOutboundIps",
+        "requestType": "email.CreateEmailEmailOutboundIpsRequest",
+        "responseType": "email.CreateEmailEmailOutboundIpsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetEmailEmailOutboundIps",
+        "requestType": "email.GetEmailEmailOutboundIpsRequest",
+        "responseType": "email.GetEmailEmailOutboundIpsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListEmailEmailOutboundIps",
+        "requestType": "email.ListEmailEmailOutboundIpsRequest",
+        "responseType": "email.ListEmailEmailOutboundIpsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateEmailEmailOutboundIps",
+        "requestType": "email.UpdateEmailEmailOutboundIpsRequest",
+        "responseType": "email.UpdateEmailEmailOutboundIpsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteEmailEmailOutboundIps",
+        "requestType": "email.DeleteEmailEmailOutboundIpsRequest",
+        "responseType": "email.DeleteEmailEmailOutboundIpsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_email_emailemailoutboundips",
+    "collectionField": "emailemailoutboundips",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/email/emailemailoutboundips/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/email/emailemailoutboundips/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for email/emailemailoutboundips; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

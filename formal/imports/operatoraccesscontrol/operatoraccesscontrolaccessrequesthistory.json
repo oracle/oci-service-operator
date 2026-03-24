@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "operatoraccesscontrol",
+  "slug": "operatoraccesscontrolaccessrequesthistory",
+  "kind": "OperatorAccessControlAccessRequestHistory",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_operator_access_control_access_request_history",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOperatorAccessControlAccessRequestHistory",
+        "requestType": "operatoraccesscontrol.CreateOperatorAccessControlAccessRequestHistoryRequest",
+        "responseType": "operatoraccesscontrol.CreateOperatorAccessControlAccessRequestHistoryResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOperatorAccessControlAccessRequestHistory",
+        "requestType": "operatoraccesscontrol.GetOperatorAccessControlAccessRequestHistoryRequest",
+        "responseType": "operatoraccesscontrol.GetOperatorAccessControlAccessRequestHistoryResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOperatorAccessControlAccessRequestHistory",
+        "requestType": "operatoraccesscontrol.ListOperatorAccessControlAccessRequestHistoryRequest",
+        "responseType": "operatoraccesscontrol.ListOperatorAccessControlAccessRequestHistoryResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOperatorAccessControlAccessRequestHistory",
+        "requestType": "operatoraccesscontrol.UpdateOperatorAccessControlAccessRequestHistoryRequest",
+        "responseType": "operatoraccesscontrol.UpdateOperatorAccessControlAccessRequestHistoryResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOperatorAccessControlAccessRequestHistory",
+        "requestType": "operatoraccesscontrol.DeleteOperatorAccessControlAccessRequestHistoryRequest",
+        "responseType": "operatoraccesscontrol.DeleteOperatorAccessControlAccessRequestHistoryResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_operatoraccesscontrol_operatoraccesscontrolaccessrequesthistory",
+    "collectionField": "operatoraccesscontrolaccessrequesthistory",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/operatoraccesscontrol/operatoraccesscontrolaccessrequesthistory/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/operatoraccesscontrol/operatoraccesscontrolaccessrequesthistory/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for operatoraccesscontrol/operatoraccesscontrolaccessrequesthistory; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datascience",
+  "slug": "datascienceprivateendpoint",
+  "kind": "DatasciencePrivateEndpoint",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_datascience_private_endpoint",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatasciencePrivateEndpoint",
+        "requestType": "datascience.CreateDatasciencePrivateEndpointRequest",
+        "responseType": "datascience.CreateDatasciencePrivateEndpointResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatasciencePrivateEndpoint",
+        "requestType": "datascience.GetDatasciencePrivateEndpointRequest",
+        "responseType": "datascience.GetDatasciencePrivateEndpointResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatasciencePrivateEndpoint",
+        "requestType": "datascience.ListDatasciencePrivateEndpointRequest",
+        "responseType": "datascience.ListDatasciencePrivateEndpointResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatasciencePrivateEndpoint",
+        "requestType": "datascience.UpdateDatasciencePrivateEndpointRequest",
+        "responseType": "datascience.UpdateDatasciencePrivateEndpointResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatasciencePrivateEndpoint",
+        "requestType": "datascience.DeleteDatasciencePrivateEndpointRequest",
+        "responseType": "datascience.DeleteDatasciencePrivateEndpointResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_datascience_datascienceprivateendpoint",
+    "collectionField": "datascienceprivateendpoint",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datascience/datascienceprivateendpoint/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datascience/datascienceprivateendpoint/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for datascience/datascienceprivateendpoint; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

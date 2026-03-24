@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "databasecloudautonomousvmcluster",
+  "kind": "DatabaseCloudAutonomousVmCluster",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_cloud_autonomous_vm_cluster",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseCloudAutonomousVmCluster",
+        "requestType": "database.CreateDatabaseCloudAutonomousVmClusterRequest",
+        "responseType": "database.CreateDatabaseCloudAutonomousVmClusterResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseCloudAutonomousVmCluster",
+        "requestType": "database.GetDatabaseCloudAutonomousVmClusterRequest",
+        "responseType": "database.GetDatabaseCloudAutonomousVmClusterResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseCloudAutonomousVmCluster",
+        "requestType": "database.ListDatabaseCloudAutonomousVmClusterRequest",
+        "responseType": "database.ListDatabaseCloudAutonomousVmClusterResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseCloudAutonomousVmCluster",
+        "requestType": "database.UpdateDatabaseCloudAutonomousVmClusterRequest",
+        "responseType": "database.UpdateDatabaseCloudAutonomousVmClusterResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseCloudAutonomousVmCluster",
+        "requestType": "database.DeleteDatabaseCloudAutonomousVmClusterRequest",
+        "responseType": "database.DeleteDatabaseCloudAutonomousVmClusterResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_databasecloudautonomousvmcluster",
+    "collectionField": "databasecloudautonomousvmcluster",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/databasecloudautonomousvmcluster/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/databasecloudautonomousvmcluster/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/databasecloudautonomousvmcluster; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

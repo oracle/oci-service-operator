@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "networkloadbalancer",
+  "slug": "workrequesterror",
+  "kind": "WorkRequestError",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_networkloadbalancer_workrequesterror",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateWorkRequestError",
+        "requestType": "networkloadbalancer.CreateWorkRequestErrorRequest",
+        "responseType": "networkloadbalancer.CreateWorkRequestErrorResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetWorkRequestError",
+        "requestType": "networkloadbalancer.GetWorkRequestErrorRequest",
+        "responseType": "networkloadbalancer.GetWorkRequestErrorResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListWorkRequestError",
+        "requestType": "networkloadbalancer.ListWorkRequestErrorRequest",
+        "responseType": "networkloadbalancer.ListWorkRequestErrorResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateWorkRequestError",
+        "requestType": "networkloadbalancer.UpdateWorkRequestErrorRequest",
+        "responseType": "networkloadbalancer.UpdateWorkRequestErrorResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteWorkRequestError",
+        "requestType": "networkloadbalancer.DeleteWorkRequestErrorRequest",
+        "responseType": "networkloadbalancer.DeleteWorkRequestErrorResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_networkloadbalancer_workrequesterror",
+    "collectionField": "workrequesterror",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/networkloadbalancer/workrequesterror/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/networkloadbalancer/workrequesterror/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for networkloadbalancer/workrequesterror; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

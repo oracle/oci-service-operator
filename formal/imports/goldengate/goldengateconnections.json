@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "goldengate",
+  "slug": "goldengateconnections",
+  "kind": "GoldenGateConnections",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_golden_gate_connections",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateGoldenGateConnections",
+        "requestType": "goldengate.CreateGoldenGateConnectionsRequest",
+        "responseType": "goldengate.CreateGoldenGateConnectionsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetGoldenGateConnections",
+        "requestType": "goldengate.GetGoldenGateConnectionsRequest",
+        "responseType": "goldengate.GetGoldenGateConnectionsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListGoldenGateConnections",
+        "requestType": "goldengate.ListGoldenGateConnectionsRequest",
+        "responseType": "goldengate.ListGoldenGateConnectionsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateGoldenGateConnections",
+        "requestType": "goldengate.UpdateGoldenGateConnectionsRequest",
+        "responseType": "goldengate.UpdateGoldenGateConnectionsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteGoldenGateConnections",
+        "requestType": "goldengate.DeleteGoldenGateConnectionsRequest",
+        "responseType": "goldengate.DeleteGoldenGateConnectionsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_goldengate_goldengateconnections",
+    "collectionField": "goldengateconnections",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/goldengate/goldengateconnections/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/goldengate/goldengateconnections/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for goldengate/goldengateconnections; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

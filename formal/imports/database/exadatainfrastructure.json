@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "exadatainfrastructure",
+  "kind": "ExadataInfrastructure",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_database_exadatainfrastructure",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateExadataInfrastructure",
+        "requestType": "database.CreateExadataInfrastructureRequest",
+        "responseType": "database.CreateExadataInfrastructureResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetExadataInfrastructure",
+        "requestType": "database.GetExadataInfrastructureRequest",
+        "responseType": "database.GetExadataInfrastructureResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListExadataInfrastructure",
+        "requestType": "database.ListExadataInfrastructureRequest",
+        "responseType": "database.ListExadataInfrastructureResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateExadataInfrastructure",
+        "requestType": "database.UpdateExadataInfrastructureRequest",
+        "responseType": "database.UpdateExadataInfrastructureResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteExadataInfrastructure",
+        "requestType": "database.DeleteExadataInfrastructureRequest",
+        "responseType": "database.DeleteExadataInfrastructureResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_exadatainfrastructure",
+    "collectionField": "exadatainfrastructure",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/exadatainfrastructure/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/exadatainfrastructure/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/exadatainfrastructure; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

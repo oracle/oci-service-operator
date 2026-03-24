@@ -1,0 +1,54 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title State Machine - core/CoreConsoleHistory
+skinparam state {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+}
+state "provisioning\nprovider: PROVISIONING" as provisioning
+state "active\nprovider: ACTIVE" as active
+state "updating\nprovider: UPDATING" as updating
+state "terminating\nprovider: DELETING" as terminating
+[*] --> provisioning : CreateCoreConsoleHistory
+provisioning --> active : ACTIVE
+active --> updating : UpdateCoreConsoleHistory
+updating --> active : ACTIVE
+active --> terminating : DeleteCoreConsoleHistory
+terminating --> [*] : DELETED
+note right of active
+shared diagram:
+shared/diagrams/shared-controller-state-machine.svg
+Start from the shared controller phase model and
+specialize imported provider states, delete
+targets, and failure exits here.
+archetype batch: Generated service-manager
+controllers map provider states into the shared
+controller phases with explicit finalizer and
+requeue policies.
+service: core
+slug: coreconsolehistory
+kind: CoreConsoleHistory
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create PROVISIONING; update
+UPDATING; delete DELETING
+mutable/forceNew: display_name / compartment_id
+open gaps: none
+Scaffold metadata only; replace with
+controller-specific runtime states before
+promotion.
+end note
+@enduml

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "bastion",
+  "slug": "bastionsession",
+  "kind": "BastionSession",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_bastion_session",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateBastionSession",
+        "requestType": "bastion.CreateBastionSessionRequest",
+        "responseType": "bastion.CreateBastionSessionResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetBastionSession",
+        "requestType": "bastion.GetBastionSessionRequest",
+        "responseType": "bastion.GetBastionSessionResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListBastionSession",
+        "requestType": "bastion.ListBastionSessionRequest",
+        "responseType": "bastion.ListBastionSessionResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateBastionSession",
+        "requestType": "bastion.UpdateBastionSessionRequest",
+        "responseType": "bastion.UpdateBastionSessionResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteBastionSession",
+        "requestType": "bastion.DeleteBastionSessionRequest",
+        "responseType": "bastion.DeleteBastionSessionResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_bastion_bastionsession",
+    "collectionField": "bastionsession",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/bastion/bastionsession/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/bastion/bastionsession/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for bastion/bastionsession; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

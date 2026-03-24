@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "recovery",
+  "slug": "recoveryprotecteddatabases",
+  "kind": "RecoveryProtectedDatabases",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_recovery_protected_databases",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateRecoveryProtectedDatabases",
+        "requestType": "recovery.CreateRecoveryProtectedDatabasesRequest",
+        "responseType": "recovery.CreateRecoveryProtectedDatabasesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetRecoveryProtectedDatabases",
+        "requestType": "recovery.GetRecoveryProtectedDatabasesRequest",
+        "responseType": "recovery.GetRecoveryProtectedDatabasesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListRecoveryProtectedDatabases",
+        "requestType": "recovery.ListRecoveryProtectedDatabasesRequest",
+        "responseType": "recovery.ListRecoveryProtectedDatabasesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateRecoveryProtectedDatabases",
+        "requestType": "recovery.UpdateRecoveryProtectedDatabasesRequest",
+        "responseType": "recovery.UpdateRecoveryProtectedDatabasesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteRecoveryProtectedDatabases",
+        "requestType": "recovery.DeleteRecoveryProtectedDatabasesRequest",
+        "responseType": "recovery.DeleteRecoveryProtectedDatabasesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_recovery_recoveryprotecteddatabases",
+    "collectionField": "recoveryprotecteddatabases",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/recovery/recoveryprotecteddatabases/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/recovery/recoveryprotecteddatabases/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for recovery/recoveryprotecteddatabases; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

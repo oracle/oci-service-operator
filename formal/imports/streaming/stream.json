@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "streaming",
+  "slug": "stream",
+  "kind": "Stream",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_streaming_stream",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateStream",
+        "requestType": "streaming.CreateStreamRequest",
+        "responseType": "streaming.CreateStreamResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetStream",
+        "requestType": "streaming.GetStreamRequest",
+        "responseType": "streaming.GetStreamResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListStreams",
+        "requestType": "streaming.ListStreamsRequest",
+        "responseType": "streaming.ListStreamsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeStreamCompartment",
+        "requestType": "streaming.ChangeStreamCompartmentRequest",
+        "responseType": "streaming.ChangeStreamCompartmentResponse"
+      },
+      {
+        "operation": "UpdateStream",
+        "requestType": "streaming.UpdateStreamRequest",
+        "responseType": "streaming.UpdateStreamResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteStream",
+        "requestType": "streaming.DeleteStreamRequest",
+        "responseType": "streaming.DeleteStreamResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "freeform_tags",
+      "stream_pool_id"
+    ],
+    "forceNew": [
+      "name",
+      "partitions",
+      "retention_in_hours"
+    ],
+    "conflictsWith": {
+      "compartment_id": [
+        "stream_pool_id"
+      ],
+      "stream_pool_id": [
+        "compartment_id"
+      ]
+    }
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_streaming_streams",
+    "collectionField": "streams",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "id",
+      "name",
+      "state",
+      "stream_pool_id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/streaming/stream/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/streaming/stream/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "list-lookup",
+      "endpoint-materialization",
+      "status-projection",
+      "mutation-policy",
+      "delete-confirmation",
+      "legacy-adapter"
+    ]
+  },
+  "notes": [
+    "Seed stub; run formal-import to refresh provider facts."
+  ]
+}

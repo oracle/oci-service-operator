@@ -1,0 +1,16 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: identity
+slug: user
+kind: User
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+  - failed
+notes:
+  - The generated runtime reads back the OCI user after create or update and projects the response into status.
+  - Finalizer removal waits for delete confirmation through Get or list fallback.
+  - No secret side effects or legacy adapter seams are involved in the current User path.

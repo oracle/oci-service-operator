@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "zpr",
+  "slug": "zprconfiguration",
+  "kind": "ZprConfiguration",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_zpr_configuration",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateZprConfiguration",
+        "requestType": "zpr.CreateZprConfigurationRequest",
+        "responseType": "zpr.CreateZprConfigurationResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetZprConfiguration",
+        "requestType": "zpr.GetZprConfigurationRequest",
+        "responseType": "zpr.GetZprConfigurationResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListZprConfiguration",
+        "requestType": "zpr.ListZprConfigurationRequest",
+        "responseType": "zpr.ListZprConfigurationResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateZprConfiguration",
+        "requestType": "zpr.UpdateZprConfigurationRequest",
+        "responseType": "zpr.UpdateZprConfigurationResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteZprConfiguration",
+        "requestType": "zpr.DeleteZprConfigurationRequest",
+        "responseType": "zpr.DeleteZprConfigurationResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_zpr_zprconfiguration",
+    "collectionField": "zprconfiguration",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/zpr/zprconfiguration/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/zpr/zprconfiguration/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for zpr/zprconfiguration; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

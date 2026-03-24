@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "dns",
+  "slug": "dnssteeringpolicyattachment",
+  "kind": "DnsSteeringPolicyAttachment",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_dns_steering_policy_attachment",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDnsSteeringPolicyAttachment",
+        "requestType": "dns.CreateDnsSteeringPolicyAttachmentRequest",
+        "responseType": "dns.CreateDnsSteeringPolicyAttachmentResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDnsSteeringPolicyAttachment",
+        "requestType": "dns.GetDnsSteeringPolicyAttachmentRequest",
+        "responseType": "dns.GetDnsSteeringPolicyAttachmentResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDnsSteeringPolicyAttachment",
+        "requestType": "dns.ListDnsSteeringPolicyAttachmentRequest",
+        "responseType": "dns.ListDnsSteeringPolicyAttachmentResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDnsSteeringPolicyAttachment",
+        "requestType": "dns.UpdateDnsSteeringPolicyAttachmentRequest",
+        "responseType": "dns.UpdateDnsSteeringPolicyAttachmentResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDnsSteeringPolicyAttachment",
+        "requestType": "dns.DeleteDnsSteeringPolicyAttachmentRequest",
+        "responseType": "dns.DeleteDnsSteeringPolicyAttachmentResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_dns_dnssteeringpolicyattachment",
+    "collectionField": "dnssteeringpolicyattachment",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/dns/dnssteeringpolicyattachment/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/dns/dnssteeringpolicyattachment/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for dns/dnssteeringpolicyattachment; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "osmanagementhub",
+  "slug": "osmanagementhubmanagedinstancegroupupdateallpackagesmanagement",
+  "kind": "OsManagementHubManagedInstanceGroupUpdateAllPackagesManagement",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_os_management_hub_managed_instance_group_update_all_packages_management",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOsManagementHubManagedInstanceGroupUpdateAllPackagesManagement",
+        "requestType": "osmanagementhub.CreateOsManagementHubManagedInstanceGroupUpdateAllPackagesManagementRequest",
+        "responseType": "osmanagementhub.CreateOsManagementHubManagedInstanceGroupUpdateAllPackagesManagementResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOsManagementHubManagedInstanceGroupUpdateAllPackagesManagement",
+        "requestType": "osmanagementhub.GetOsManagementHubManagedInstanceGroupUpdateAllPackagesManagementRequest",
+        "responseType": "osmanagementhub.GetOsManagementHubManagedInstanceGroupUpdateAllPackagesManagementResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOsManagementHubManagedInstanceGroupUpdateAllPackagesManagement",
+        "requestType": "osmanagementhub.ListOsManagementHubManagedInstanceGroupUpdateAllPackagesManagementRequest",
+        "responseType": "osmanagementhub.ListOsManagementHubManagedInstanceGroupUpdateAllPackagesManagementResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOsManagementHubManagedInstanceGroupUpdateAllPackagesManagement",
+        "requestType": "osmanagementhub.UpdateOsManagementHubManagedInstanceGroupUpdateAllPackagesManagementRequest",
+        "responseType": "osmanagementhub.UpdateOsManagementHubManagedInstanceGroupUpdateAllPackagesManagementResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOsManagementHubManagedInstanceGroupUpdateAllPackagesManagement",
+        "requestType": "osmanagementhub.DeleteOsManagementHubManagedInstanceGroupUpdateAllPackagesManagementRequest",
+        "responseType": "osmanagementhub.DeleteOsManagementHubManagedInstanceGroupUpdateAllPackagesManagementResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_osmanagementhub_osmanagementhubmanagedinstancegroupupdateallpackagesmanagement",
+    "collectionField": "osmanagementhubmanagedinstancegroupupdateallpackagesmanagement",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/osmanagementhub/osmanagementhubmanagedinstancegroupupdateallpackagesmanagement/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/osmanagementhub/osmanagementhubmanagedinstancegroupupdateallpackagesmanagement/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for osmanagementhub/osmanagementhubmanagedinstancegroupupdateallpackagesmanagement; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

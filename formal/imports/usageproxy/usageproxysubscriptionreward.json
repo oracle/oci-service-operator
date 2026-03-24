@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "usageproxy",
+  "slug": "usageproxysubscriptionreward",
+  "kind": "UsageProxySubscriptionReward",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_usage_proxy_subscription_reward",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateUsageProxySubscriptionReward",
+        "requestType": "usageproxy.CreateUsageProxySubscriptionRewardRequest",
+        "responseType": "usageproxy.CreateUsageProxySubscriptionRewardResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetUsageProxySubscriptionReward",
+        "requestType": "usageproxy.GetUsageProxySubscriptionRewardRequest",
+        "responseType": "usageproxy.GetUsageProxySubscriptionRewardResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListUsageProxySubscriptionReward",
+        "requestType": "usageproxy.ListUsageProxySubscriptionRewardRequest",
+        "responseType": "usageproxy.ListUsageProxySubscriptionRewardResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateUsageProxySubscriptionReward",
+        "requestType": "usageproxy.UpdateUsageProxySubscriptionRewardRequest",
+        "responseType": "usageproxy.UpdateUsageProxySubscriptionRewardResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteUsageProxySubscriptionReward",
+        "requestType": "usageproxy.DeleteUsageProxySubscriptionRewardRequest",
+        "responseType": "usageproxy.DeleteUsageProxySubscriptionRewardResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_usageproxy_usageproxysubscriptionreward",
+    "collectionField": "usageproxysubscriptionreward",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/usageproxy/usageproxysubscriptionreward/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/usageproxy/usageproxysubscriptionreward/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for usageproxy/usageproxysubscriptionreward; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

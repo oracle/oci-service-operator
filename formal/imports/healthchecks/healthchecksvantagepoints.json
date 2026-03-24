@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "healthchecks",
+  "slug": "healthchecksvantagepoints",
+  "kind": "HealthChecksVantagePoints",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_health_checks_vantage_points",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateHealthChecksVantagePoints",
+        "requestType": "healthchecks.CreateHealthChecksVantagePointsRequest",
+        "responseType": "healthchecks.CreateHealthChecksVantagePointsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetHealthChecksVantagePoints",
+        "requestType": "healthchecks.GetHealthChecksVantagePointsRequest",
+        "responseType": "healthchecks.GetHealthChecksVantagePointsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListHealthChecksVantagePoints",
+        "requestType": "healthchecks.ListHealthChecksVantagePointsRequest",
+        "responseType": "healthchecks.ListHealthChecksVantagePointsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateHealthChecksVantagePoints",
+        "requestType": "healthchecks.UpdateHealthChecksVantagePointsRequest",
+        "responseType": "healthchecks.UpdateHealthChecksVantagePointsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteHealthChecksVantagePoints",
+        "requestType": "healthchecks.DeleteHealthChecksVantagePointsRequest",
+        "responseType": "healthchecks.DeleteHealthChecksVantagePointsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_healthchecks_healthchecksvantagepoints",
+    "collectionField": "healthchecksvantagepoints",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/healthchecks/healthchecksvantagepoints/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/healthchecks/healthchecksvantagepoints/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for healthchecks/healthchecksvantagepoints; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

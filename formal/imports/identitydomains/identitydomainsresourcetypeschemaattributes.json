@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "identitydomains",
+  "slug": "identitydomainsresourcetypeschemaattributes",
+  "kind": "IdentityDomainsResourceTypeSchemaAttributes",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_identity_domains_resource_type_schema_attributes",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateIdentityDomainsResourceTypeSchemaAttributes",
+        "requestType": "identitydomains.CreateIdentityDomainsResourceTypeSchemaAttributesRequest",
+        "responseType": "identitydomains.CreateIdentityDomainsResourceTypeSchemaAttributesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetIdentityDomainsResourceTypeSchemaAttributes",
+        "requestType": "identitydomains.GetIdentityDomainsResourceTypeSchemaAttributesRequest",
+        "responseType": "identitydomains.GetIdentityDomainsResourceTypeSchemaAttributesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListIdentityDomainsResourceTypeSchemaAttributes",
+        "requestType": "identitydomains.ListIdentityDomainsResourceTypeSchemaAttributesRequest",
+        "responseType": "identitydomains.ListIdentityDomainsResourceTypeSchemaAttributesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateIdentityDomainsResourceTypeSchemaAttributes",
+        "requestType": "identitydomains.UpdateIdentityDomainsResourceTypeSchemaAttributesRequest",
+        "responseType": "identitydomains.UpdateIdentityDomainsResourceTypeSchemaAttributesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteIdentityDomainsResourceTypeSchemaAttributes",
+        "requestType": "identitydomains.DeleteIdentityDomainsResourceTypeSchemaAttributesRequest",
+        "responseType": "identitydomains.DeleteIdentityDomainsResourceTypeSchemaAttributesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_identitydomains_identitydomainsresourcetypeschemaattributes",
+    "collectionField": "identitydomainsresourcetypeschemaattributes",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/identitydomains/identitydomainsresourcetypeschemaattributes/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/identitydomains/identitydomainsresourcetypeschemaattributes/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for identitydomains/identitydomainsresourcetypeschemaattributes; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

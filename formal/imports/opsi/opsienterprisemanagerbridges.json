@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "opsi",
+  "slug": "opsienterprisemanagerbridges",
+  "kind": "OpsiEnterpriseManagerBridges",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_opsi_enterprise_manager_bridges",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOpsiEnterpriseManagerBridges",
+        "requestType": "opsi.CreateOpsiEnterpriseManagerBridgesRequest",
+        "responseType": "opsi.CreateOpsiEnterpriseManagerBridgesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOpsiEnterpriseManagerBridges",
+        "requestType": "opsi.GetOpsiEnterpriseManagerBridgesRequest",
+        "responseType": "opsi.GetOpsiEnterpriseManagerBridgesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOpsiEnterpriseManagerBridges",
+        "requestType": "opsi.ListOpsiEnterpriseManagerBridgesRequest",
+        "responseType": "opsi.ListOpsiEnterpriseManagerBridgesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOpsiEnterpriseManagerBridges",
+        "requestType": "opsi.UpdateOpsiEnterpriseManagerBridgesRequest",
+        "responseType": "opsi.UpdateOpsiEnterpriseManagerBridgesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOpsiEnterpriseManagerBridges",
+        "requestType": "opsi.DeleteOpsiEnterpriseManagerBridgesRequest",
+        "responseType": "opsi.DeleteOpsiEnterpriseManagerBridgesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_opsi_opsienterprisemanagerbridges",
+    "collectionField": "opsienterprisemanagerbridges",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/opsi/opsienterprisemanagerbridges/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/opsi/opsienterprisemanagerbridges/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for opsi/opsienterprisemanagerbridges; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

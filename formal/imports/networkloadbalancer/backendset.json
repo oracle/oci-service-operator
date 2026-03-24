@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "networkloadbalancer",
+  "slug": "backendset",
+  "kind": "BackendSet",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_networkloadbalancer_backendset",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateBackendSet",
+        "requestType": "networkloadbalancer.CreateBackendSetRequest",
+        "responseType": "networkloadbalancer.CreateBackendSetResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetBackendSet",
+        "requestType": "networkloadbalancer.GetBackendSetRequest",
+        "responseType": "networkloadbalancer.GetBackendSetResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListBackendSet",
+        "requestType": "networkloadbalancer.ListBackendSetRequest",
+        "responseType": "networkloadbalancer.ListBackendSetResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateBackendSet",
+        "requestType": "networkloadbalancer.UpdateBackendSetRequest",
+        "responseType": "networkloadbalancer.UpdateBackendSetResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteBackendSet",
+        "requestType": "networkloadbalancer.DeleteBackendSetRequest",
+        "responseType": "networkloadbalancer.DeleteBackendSetResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_networkloadbalancer_backendset",
+    "collectionField": "backendset",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/networkloadbalancer/backendset/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/networkloadbalancer/backendset/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for networkloadbalancer/backendset; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

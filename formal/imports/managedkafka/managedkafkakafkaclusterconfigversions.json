@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "managedkafka",
+  "slug": "managedkafkakafkaclusterconfigversions",
+  "kind": "ManagedKafkaKafkaClusterConfigVersions",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_managed_kafka_kafka_cluster_config_versions",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateManagedKafkaKafkaClusterConfigVersions",
+        "requestType": "managedkafka.CreateManagedKafkaKafkaClusterConfigVersionsRequest",
+        "responseType": "managedkafka.CreateManagedKafkaKafkaClusterConfigVersionsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetManagedKafkaKafkaClusterConfigVersions",
+        "requestType": "managedkafka.GetManagedKafkaKafkaClusterConfigVersionsRequest",
+        "responseType": "managedkafka.GetManagedKafkaKafkaClusterConfigVersionsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListManagedKafkaKafkaClusterConfigVersions",
+        "requestType": "managedkafka.ListManagedKafkaKafkaClusterConfigVersionsRequest",
+        "responseType": "managedkafka.ListManagedKafkaKafkaClusterConfigVersionsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateManagedKafkaKafkaClusterConfigVersions",
+        "requestType": "managedkafka.UpdateManagedKafkaKafkaClusterConfigVersionsRequest",
+        "responseType": "managedkafka.UpdateManagedKafkaKafkaClusterConfigVersionsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteManagedKafkaKafkaClusterConfigVersions",
+        "requestType": "managedkafka.DeleteManagedKafkaKafkaClusterConfigVersionsRequest",
+        "responseType": "managedkafka.DeleteManagedKafkaKafkaClusterConfigVersionsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_managedkafka_managedkafkakafkaclusterconfigversions",
+    "collectionField": "managedkafkakafkaclusterconfigversions",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/managedkafka/managedkafkakafkaclusterconfigversions/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/managedkafka/managedkafkakafkaclusterconfigversions/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for managedkafka/managedkafkakafkaclusterconfigversions; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "clusterplacementgroups",
+  "slug": "clusterplacementgroupsclusterplacementgroups",
+  "kind": "ClusterPlacementGroupsClusterPlacementGroups",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_cluster_placement_groups_cluster_placement_groups",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateClusterPlacementGroupsClusterPlacementGroups",
+        "requestType": "clusterplacementgroups.CreateClusterPlacementGroupsClusterPlacementGroupsRequest",
+        "responseType": "clusterplacementgroups.CreateClusterPlacementGroupsClusterPlacementGroupsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetClusterPlacementGroupsClusterPlacementGroups",
+        "requestType": "clusterplacementgroups.GetClusterPlacementGroupsClusterPlacementGroupsRequest",
+        "responseType": "clusterplacementgroups.GetClusterPlacementGroupsClusterPlacementGroupsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListClusterPlacementGroupsClusterPlacementGroups",
+        "requestType": "clusterplacementgroups.ListClusterPlacementGroupsClusterPlacementGroupsRequest",
+        "responseType": "clusterplacementgroups.ListClusterPlacementGroupsClusterPlacementGroupsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateClusterPlacementGroupsClusterPlacementGroups",
+        "requestType": "clusterplacementgroups.UpdateClusterPlacementGroupsClusterPlacementGroupsRequest",
+        "responseType": "clusterplacementgroups.UpdateClusterPlacementGroupsClusterPlacementGroupsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteClusterPlacementGroupsClusterPlacementGroups",
+        "requestType": "clusterplacementgroups.DeleteClusterPlacementGroupsClusterPlacementGroupsRequest",
+        "responseType": "clusterplacementgroups.DeleteClusterPlacementGroupsClusterPlacementGroupsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_clusterplacementgroups_clusterplacementgroupsclusterplacementgroups",
+    "collectionField": "clusterplacementgroupsclusterplacementgroups",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/clusterplacementgroups/clusterplacementgroupsclusterplacementgroups/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/clusterplacementgroups/clusterplacementgroupsclusterplacementgroups/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for clusterplacementgroups/clusterplacementgroupsclusterplacementgroups; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

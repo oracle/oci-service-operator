@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasemanagement",
+  "slug": "databasemanagementexternalnoncontainerdatabaseexternalnoncontainerdbmfeaturesmanagement",
+  "kind": "DatabaseManagementExternalnoncontainerdatabaseExternalNonContainerDbmFeaturesManagement",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_management_externalnoncontainerdatabase_external_non_container_dbm_features_management",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseManagementExternalnoncontainerdatabaseExternalNonContainerDbmFeaturesManagement",
+        "requestType": "databasemanagement.CreateDatabaseManagementExternalnoncontainerdatabaseExternalNonContainerDbmFeaturesManagementRequest",
+        "responseType": "databasemanagement.CreateDatabaseManagementExternalnoncontainerdatabaseExternalNonContainerDbmFeaturesManagementResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseManagementExternalnoncontainerdatabaseExternalNonContainerDbmFeaturesManagement",
+        "requestType": "databasemanagement.GetDatabaseManagementExternalnoncontainerdatabaseExternalNonContainerDbmFeaturesManagementRequest",
+        "responseType": "databasemanagement.GetDatabaseManagementExternalnoncontainerdatabaseExternalNonContainerDbmFeaturesManagementResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseManagementExternalnoncontainerdatabaseExternalNonContainerDbmFeaturesManagement",
+        "requestType": "databasemanagement.ListDatabaseManagementExternalnoncontainerdatabaseExternalNonContainerDbmFeaturesManagementRequest",
+        "responseType": "databasemanagement.ListDatabaseManagementExternalnoncontainerdatabaseExternalNonContainerDbmFeaturesManagementResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseManagementExternalnoncontainerdatabaseExternalNonContainerDbmFeaturesManagement",
+        "requestType": "databasemanagement.UpdateDatabaseManagementExternalnoncontainerdatabaseExternalNonContainerDbmFeaturesManagementRequest",
+        "responseType": "databasemanagement.UpdateDatabaseManagementExternalnoncontainerdatabaseExternalNonContainerDbmFeaturesManagementResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseManagementExternalnoncontainerdatabaseExternalNonContainerDbmFeaturesManagement",
+        "requestType": "databasemanagement.DeleteDatabaseManagementExternalnoncontainerdatabaseExternalNonContainerDbmFeaturesManagementRequest",
+        "responseType": "databasemanagement.DeleteDatabaseManagementExternalnoncontainerdatabaseExternalNonContainerDbmFeaturesManagementResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_databasemanagement_databasemanagementexternalnoncontainerdatabaseexternalnoncontainerdbmfeaturesmanagement",
+    "collectionField": "databasemanagementexternalnoncontainerdatabaseexternalnoncontainerdbmfeaturesmanagement",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasemanagement/databasemanagementexternalnoncontainerdatabaseexternalnoncontainerdbmfeaturesmanagement/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasemanagement/databasemanagementexternalnoncontainerdatabaseexternalnoncontainerdbmfeaturesmanagement/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for databasemanagement/databasemanagementexternalnoncontainerdatabaseexternalnoncontainerdbmfeaturesmanagement; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

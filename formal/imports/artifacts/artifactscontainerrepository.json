@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "artifacts",
+  "slug": "artifactscontainerrepository",
+  "kind": "ArtifactsContainerRepository",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_artifacts_container_repository",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateArtifactsContainerRepository",
+        "requestType": "artifacts.CreateArtifactsContainerRepositoryRequest",
+        "responseType": "artifacts.CreateArtifactsContainerRepositoryResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetArtifactsContainerRepository",
+        "requestType": "artifacts.GetArtifactsContainerRepositoryRequest",
+        "responseType": "artifacts.GetArtifactsContainerRepositoryResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListArtifactsContainerRepository",
+        "requestType": "artifacts.ListArtifactsContainerRepositoryRequest",
+        "responseType": "artifacts.ListArtifactsContainerRepositoryResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateArtifactsContainerRepository",
+        "requestType": "artifacts.UpdateArtifactsContainerRepositoryRequest",
+        "responseType": "artifacts.UpdateArtifactsContainerRepositoryResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteArtifactsContainerRepository",
+        "requestType": "artifacts.DeleteArtifactsContainerRepositoryRequest",
+        "responseType": "artifacts.DeleteArtifactsContainerRepositoryResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_artifacts_artifactscontainerrepository",
+    "collectionField": "artifactscontainerrepository",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/artifacts/artifactscontainerrepository/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/artifacts/artifactscontainerrepository/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for artifacts/artifactscontainerrepository; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

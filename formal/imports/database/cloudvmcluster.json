@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "cloudvmcluster",
+  "kind": "CloudVmCluster",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_database_cloudvmcluster",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCloudVmCluster",
+        "requestType": "database.CreateCloudVmClusterRequest",
+        "responseType": "database.CreateCloudVmClusterResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCloudVmCluster",
+        "requestType": "database.GetCloudVmClusterRequest",
+        "responseType": "database.GetCloudVmClusterResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCloudVmCluster",
+        "requestType": "database.ListCloudVmClusterRequest",
+        "responseType": "database.ListCloudVmClusterResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCloudVmCluster",
+        "requestType": "database.UpdateCloudVmClusterRequest",
+        "responseType": "database.UpdateCloudVmClusterResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCloudVmCluster",
+        "requestType": "database.DeleteCloudVmClusterRequest",
+        "responseType": "database.DeleteCloudVmClusterResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_cloudvmcluster",
+    "collectionField": "cloudvmcluster",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/cloudvmcluster/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/cloudvmcluster/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/cloudvmcluster; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

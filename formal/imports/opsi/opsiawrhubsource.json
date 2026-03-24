@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "opsi",
+  "slug": "opsiawrhubsource",
+  "kind": "OpsiAwrHubSource",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_opsi_awr_hub_source",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOpsiAwrHubSource",
+        "requestType": "opsi.CreateOpsiAwrHubSourceRequest",
+        "responseType": "opsi.CreateOpsiAwrHubSourceResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOpsiAwrHubSource",
+        "requestType": "opsi.GetOpsiAwrHubSourceRequest",
+        "responseType": "opsi.GetOpsiAwrHubSourceResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOpsiAwrHubSource",
+        "requestType": "opsi.ListOpsiAwrHubSourceRequest",
+        "responseType": "opsi.ListOpsiAwrHubSourceResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOpsiAwrHubSource",
+        "requestType": "opsi.UpdateOpsiAwrHubSourceRequest",
+        "responseType": "opsi.UpdateOpsiAwrHubSourceResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOpsiAwrHubSource",
+        "requestType": "opsi.DeleteOpsiAwrHubSourceRequest",
+        "responseType": "opsi.DeleteOpsiAwrHubSourceResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_opsi_opsiawrhubsource",
+    "collectionField": "opsiawrhubsource",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/opsi/opsiawrhubsource/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/opsi/opsiawrhubsource/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for opsi/opsiawrhubsource; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

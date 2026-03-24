@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "monitoring",
+  "slug": "alarmstatus",
+  "kind": "AlarmStatus",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_monitoring_alarmstatus",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateAlarmStatus",
+        "requestType": "monitoring.CreateAlarmStatusRequest",
+        "responseType": "monitoring.CreateAlarmStatusResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetAlarmStatus",
+        "requestType": "monitoring.GetAlarmStatusRequest",
+        "responseType": "monitoring.GetAlarmStatusResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListAlarmStatus",
+        "requestType": "monitoring.ListAlarmStatusRequest",
+        "responseType": "monitoring.ListAlarmStatusResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateAlarmStatus",
+        "requestType": "monitoring.UpdateAlarmStatusRequest",
+        "responseType": "monitoring.UpdateAlarmStatusResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteAlarmStatus",
+        "requestType": "monitoring.DeleteAlarmStatusRequest",
+        "responseType": "monitoring.DeleteAlarmStatusResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_monitoring_alarmstatus",
+    "collectionField": "alarmstatus",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/monitoring/alarmstatus/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/monitoring/alarmstatus/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for monitoring/alarmstatus; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

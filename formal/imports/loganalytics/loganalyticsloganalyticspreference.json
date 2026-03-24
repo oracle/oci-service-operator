@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "loganalytics",
+  "slug": "loganalyticsloganalyticspreference",
+  "kind": "LogAnalyticsLogAnalyticsPreference",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_log_analytics_log_analytics_preference",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateLogAnalyticsLogAnalyticsPreference",
+        "requestType": "loganalytics.CreateLogAnalyticsLogAnalyticsPreferenceRequest",
+        "responseType": "loganalytics.CreateLogAnalyticsLogAnalyticsPreferenceResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetLogAnalyticsLogAnalyticsPreference",
+        "requestType": "loganalytics.GetLogAnalyticsLogAnalyticsPreferenceRequest",
+        "responseType": "loganalytics.GetLogAnalyticsLogAnalyticsPreferenceResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListLogAnalyticsLogAnalyticsPreference",
+        "requestType": "loganalytics.ListLogAnalyticsLogAnalyticsPreferenceRequest",
+        "responseType": "loganalytics.ListLogAnalyticsLogAnalyticsPreferenceResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateLogAnalyticsLogAnalyticsPreference",
+        "requestType": "loganalytics.UpdateLogAnalyticsLogAnalyticsPreferenceRequest",
+        "responseType": "loganalytics.UpdateLogAnalyticsLogAnalyticsPreferenceResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteLogAnalyticsLogAnalyticsPreference",
+        "requestType": "loganalytics.DeleteLogAnalyticsLogAnalyticsPreferenceRequest",
+        "responseType": "loganalytics.DeleteLogAnalyticsLogAnalyticsPreferenceResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_loganalytics_loganalyticsloganalyticspreference",
+    "collectionField": "loganalyticsloganalyticspreference",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/loganalytics/loganalyticsloganalyticspreference/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/loganalytics/loganalyticsloganalyticspreference/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for loganalytics/loganalyticsloganalyticspreference; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

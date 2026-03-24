@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "coreremotepeeringconnection",
+  "kind": "CoreRemotePeeringConnection",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_core_remote_peering_connection",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCoreRemotePeeringConnection",
+        "requestType": "core.CreateCoreRemotePeeringConnectionRequest",
+        "responseType": "core.CreateCoreRemotePeeringConnectionResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCoreRemotePeeringConnection",
+        "requestType": "core.GetCoreRemotePeeringConnectionRequest",
+        "responseType": "core.GetCoreRemotePeeringConnectionResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCoreRemotePeeringConnection",
+        "requestType": "core.ListCoreRemotePeeringConnectionRequest",
+        "responseType": "core.ListCoreRemotePeeringConnectionResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCoreRemotePeeringConnection",
+        "requestType": "core.UpdateCoreRemotePeeringConnectionRequest",
+        "responseType": "core.UpdateCoreRemotePeeringConnectionResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCoreRemotePeeringConnection",
+        "requestType": "core.DeleteCoreRemotePeeringConnectionRequest",
+        "responseType": "core.DeleteCoreRemotePeeringConnectionResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_core_coreremotepeeringconnection",
+    "collectionField": "coreremotepeeringconnection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/coreremotepeeringconnection/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/coreremotepeeringconnection/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for core/coreremotepeeringconnection; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

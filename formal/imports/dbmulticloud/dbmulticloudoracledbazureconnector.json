@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "dbmulticloud",
+  "slug": "dbmulticloudoracledbazureconnector",
+  "kind": "DbmulticloudOracleDbAzureConnector",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_dbmulticloud_oracle_db_azure_connector",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDbmulticloudOracleDbAzureConnector",
+        "requestType": "dbmulticloud.CreateDbmulticloudOracleDbAzureConnectorRequest",
+        "responseType": "dbmulticloud.CreateDbmulticloudOracleDbAzureConnectorResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDbmulticloudOracleDbAzureConnector",
+        "requestType": "dbmulticloud.GetDbmulticloudOracleDbAzureConnectorRequest",
+        "responseType": "dbmulticloud.GetDbmulticloudOracleDbAzureConnectorResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDbmulticloudOracleDbAzureConnector",
+        "requestType": "dbmulticloud.ListDbmulticloudOracleDbAzureConnectorRequest",
+        "responseType": "dbmulticloud.ListDbmulticloudOracleDbAzureConnectorResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDbmulticloudOracleDbAzureConnector",
+        "requestType": "dbmulticloud.UpdateDbmulticloudOracleDbAzureConnectorRequest",
+        "responseType": "dbmulticloud.UpdateDbmulticloudOracleDbAzureConnectorResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDbmulticloudOracleDbAzureConnector",
+        "requestType": "dbmulticloud.DeleteDbmulticloudOracleDbAzureConnectorRequest",
+        "responseType": "dbmulticloud.DeleteDbmulticloudOracleDbAzureConnectorResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_dbmulticloud_dbmulticloudoracledbazureconnector",
+    "collectionField": "dbmulticloudoracledbazureconnector",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/dbmulticloud/dbmulticloudoracledbazureconnector/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/dbmulticloud/dbmulticloudoracledbazureconnector/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for dbmulticloud/dbmulticloudoracledbazureconnector; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

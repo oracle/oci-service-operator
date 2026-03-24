@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "optimizer",
+  "slug": "optimizerresourceaction",
+  "kind": "OptimizerResourceAction",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_optimizer_resource_action",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOptimizerResourceAction",
+        "requestType": "optimizer.CreateOptimizerResourceActionRequest",
+        "responseType": "optimizer.CreateOptimizerResourceActionResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOptimizerResourceAction",
+        "requestType": "optimizer.GetOptimizerResourceActionRequest",
+        "responseType": "optimizer.GetOptimizerResourceActionResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOptimizerResourceAction",
+        "requestType": "optimizer.ListOptimizerResourceActionRequest",
+        "responseType": "optimizer.ListOptimizerResourceActionResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOptimizerResourceAction",
+        "requestType": "optimizer.UpdateOptimizerResourceActionRequest",
+        "responseType": "optimizer.UpdateOptimizerResourceActionResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOptimizerResourceAction",
+        "requestType": "optimizer.DeleteOptimizerResourceActionRequest",
+        "responseType": "optimizer.DeleteOptimizerResourceActionResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_optimizer_optimizerresourceaction",
+    "collectionField": "optimizerresourceaction",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/optimizer/optimizerresourceaction/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/optimizer/optimizerresourceaction/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for optimizer/optimizerresourceaction; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

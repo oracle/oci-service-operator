@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "dataintegration",
+  "slug": "dataintegrationworkspaceapplicationschedule",
+  "kind": "DataintegrationWorkspaceApplicationSchedule",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_dataintegration_workspace_application_schedule",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDataintegrationWorkspaceApplicationSchedule",
+        "requestType": "dataintegration.CreateDataintegrationWorkspaceApplicationScheduleRequest",
+        "responseType": "dataintegration.CreateDataintegrationWorkspaceApplicationScheduleResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDataintegrationWorkspaceApplicationSchedule",
+        "requestType": "dataintegration.GetDataintegrationWorkspaceApplicationScheduleRequest",
+        "responseType": "dataintegration.GetDataintegrationWorkspaceApplicationScheduleResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDataintegrationWorkspaceApplicationSchedule",
+        "requestType": "dataintegration.ListDataintegrationWorkspaceApplicationScheduleRequest",
+        "responseType": "dataintegration.ListDataintegrationWorkspaceApplicationScheduleResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDataintegrationWorkspaceApplicationSchedule",
+        "requestType": "dataintegration.UpdateDataintegrationWorkspaceApplicationScheduleRequest",
+        "responseType": "dataintegration.UpdateDataintegrationWorkspaceApplicationScheduleResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDataintegrationWorkspaceApplicationSchedule",
+        "requestType": "dataintegration.DeleteDataintegrationWorkspaceApplicationScheduleRequest",
+        "responseType": "dataintegration.DeleteDataintegrationWorkspaceApplicationScheduleResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_dataintegration_dataintegrationworkspaceapplicationschedule",
+    "collectionField": "dataintegrationworkspaceapplicationschedule",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/dataintegration/dataintegrationworkspaceapplicationschedule/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/dataintegration/dataintegrationworkspaceapplicationschedule/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for dataintegration/dataintegrationworkspaceapplicationschedule; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

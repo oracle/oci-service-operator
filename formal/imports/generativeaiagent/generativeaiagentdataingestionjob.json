@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "generativeaiagent",
+  "slug": "generativeaiagentdataingestionjob",
+  "kind": "GenerativeAiAgentDataIngestionJob",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_generative_ai_agent_data_ingestion_job",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateGenerativeAiAgentDataIngestionJob",
+        "requestType": "generativeaiagent.CreateGenerativeAiAgentDataIngestionJobRequest",
+        "responseType": "generativeaiagent.CreateGenerativeAiAgentDataIngestionJobResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetGenerativeAiAgentDataIngestionJob",
+        "requestType": "generativeaiagent.GetGenerativeAiAgentDataIngestionJobRequest",
+        "responseType": "generativeaiagent.GetGenerativeAiAgentDataIngestionJobResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListGenerativeAiAgentDataIngestionJob",
+        "requestType": "generativeaiagent.ListGenerativeAiAgentDataIngestionJobRequest",
+        "responseType": "generativeaiagent.ListGenerativeAiAgentDataIngestionJobResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateGenerativeAiAgentDataIngestionJob",
+        "requestType": "generativeaiagent.UpdateGenerativeAiAgentDataIngestionJobRequest",
+        "responseType": "generativeaiagent.UpdateGenerativeAiAgentDataIngestionJobResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteGenerativeAiAgentDataIngestionJob",
+        "requestType": "generativeaiagent.DeleteGenerativeAiAgentDataIngestionJobRequest",
+        "responseType": "generativeaiagent.DeleteGenerativeAiAgentDataIngestionJobResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_generativeaiagent_generativeaiagentdataingestionjob",
+    "collectionField": "generativeaiagentdataingestionjob",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/generativeaiagent/generativeaiagentdataingestionjob/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/generativeaiagent/generativeaiagentdataingestionjob/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for generativeaiagent/generativeaiagentdataingestionjob; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

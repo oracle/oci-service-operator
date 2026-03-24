@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "gdp",
+  "slug": "gdpgdppipelines",
+  "kind": "GdpGdpPipelines",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_gdp_gdp_pipelines",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateGdpGdpPipelines",
+        "requestType": "gdp.CreateGdpGdpPipelinesRequest",
+        "responseType": "gdp.CreateGdpGdpPipelinesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetGdpGdpPipelines",
+        "requestType": "gdp.GetGdpGdpPipelinesRequest",
+        "responseType": "gdp.GetGdpGdpPipelinesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListGdpGdpPipelines",
+        "requestType": "gdp.ListGdpGdpPipelinesRequest",
+        "responseType": "gdp.ListGdpGdpPipelinesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateGdpGdpPipelines",
+        "requestType": "gdp.UpdateGdpGdpPipelinesRequest",
+        "responseType": "gdp.UpdateGdpGdpPipelinesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteGdpGdpPipelines",
+        "requestType": "gdp.DeleteGdpGdpPipelinesRequest",
+        "responseType": "gdp.DeleteGdpGdpPipelinesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_gdp_gdpgdppipelines",
+    "collectionField": "gdpgdppipelines",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/gdp/gdpgdppipelines/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/gdp/gdpgdppipelines/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for gdp/gdpgdppipelines; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

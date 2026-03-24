@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "aidocument",
+  "slug": "aidocumentmodel",
+  "kind": "AiDocumentModel",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_ai_document_model",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateAiDocumentModel",
+        "requestType": "aidocument.CreateAiDocumentModelRequest",
+        "responseType": "aidocument.CreateAiDocumentModelResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetAiDocumentModel",
+        "requestType": "aidocument.GetAiDocumentModelRequest",
+        "responseType": "aidocument.GetAiDocumentModelResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListAiDocumentModel",
+        "requestType": "aidocument.ListAiDocumentModelRequest",
+        "responseType": "aidocument.ListAiDocumentModelResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateAiDocumentModel",
+        "requestType": "aidocument.UpdateAiDocumentModelRequest",
+        "responseType": "aidocument.UpdateAiDocumentModelResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteAiDocumentModel",
+        "requestType": "aidocument.DeleteAiDocumentModelRequest",
+        "responseType": "aidocument.DeleteAiDocumentModelResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_aidocument_aidocumentmodel",
+    "collectionField": "aidocumentmodel",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/aidocument/aidocumentmodel/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/aidocument/aidocumentmodel/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for aidocument/aidocumentmodel; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

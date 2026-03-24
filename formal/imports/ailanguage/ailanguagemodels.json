@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "ailanguage",
+  "slug": "ailanguagemodels",
+  "kind": "AiLanguageModels",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_ai_language_models",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateAiLanguageModels",
+        "requestType": "ailanguage.CreateAiLanguageModelsRequest",
+        "responseType": "ailanguage.CreateAiLanguageModelsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetAiLanguageModels",
+        "requestType": "ailanguage.GetAiLanguageModelsRequest",
+        "responseType": "ailanguage.GetAiLanguageModelsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListAiLanguageModels",
+        "requestType": "ailanguage.ListAiLanguageModelsRequest",
+        "responseType": "ailanguage.ListAiLanguageModelsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateAiLanguageModels",
+        "requestType": "ailanguage.UpdateAiLanguageModelsRequest",
+        "responseType": "ailanguage.UpdateAiLanguageModelsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteAiLanguageModels",
+        "requestType": "ailanguage.DeleteAiLanguageModelsRequest",
+        "responseType": "ailanguage.DeleteAiLanguageModelsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_ailanguage_ailanguagemodels",
+    "collectionField": "ailanguagemodels",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/ailanguage/ailanguagemodels/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/ailanguage/ailanguagemodels/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for ailanguage/ailanguagemodels; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "identitydomains",
+  "slug": "identitydomainscloudgatemapping",
+  "kind": "IdentityDomainsCloudGateMapping",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_identity_domains_cloud_gate_mapping",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateIdentityDomainsCloudGateMapping",
+        "requestType": "identitydomains.CreateIdentityDomainsCloudGateMappingRequest",
+        "responseType": "identitydomains.CreateIdentityDomainsCloudGateMappingResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetIdentityDomainsCloudGateMapping",
+        "requestType": "identitydomains.GetIdentityDomainsCloudGateMappingRequest",
+        "responseType": "identitydomains.GetIdentityDomainsCloudGateMappingResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListIdentityDomainsCloudGateMapping",
+        "requestType": "identitydomains.ListIdentityDomainsCloudGateMappingRequest",
+        "responseType": "identitydomains.ListIdentityDomainsCloudGateMappingResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateIdentityDomainsCloudGateMapping",
+        "requestType": "identitydomains.UpdateIdentityDomainsCloudGateMappingRequest",
+        "responseType": "identitydomains.UpdateIdentityDomainsCloudGateMappingResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteIdentityDomainsCloudGateMapping",
+        "requestType": "identitydomains.DeleteIdentityDomainsCloudGateMappingRequest",
+        "responseType": "identitydomains.DeleteIdentityDomainsCloudGateMappingResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_identitydomains_identitydomainscloudgatemapping",
+    "collectionField": "identitydomainscloudgatemapping",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/identitydomains/identitydomainscloudgatemapping/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/identitydomains/identitydomainscloudgatemapping/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for identitydomains/identitydomainscloudgatemapping; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

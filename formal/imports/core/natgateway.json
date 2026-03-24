@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "natgateway",
+  "kind": "NatGateway",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_core_natgateway",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateNatGateway",
+        "requestType": "core.CreateNatGatewayRequest",
+        "responseType": "core.CreateNatGatewayResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetNatGateway",
+        "requestType": "core.GetNatGatewayRequest",
+        "responseType": "core.GetNatGatewayResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListNatGateway",
+        "requestType": "core.ListNatGatewayRequest",
+        "responseType": "core.ListNatGatewayResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateNatGateway",
+        "requestType": "core.UpdateNatGatewayRequest",
+        "responseType": "core.UpdateNatGatewayResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteNatGateway",
+        "requestType": "core.DeleteNatGatewayRequest",
+        "responseType": "core.DeleteNatGatewayResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_core_natgateway",
+    "collectionField": "natgateway",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/natgateway/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/natgateway/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for core/natgateway; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

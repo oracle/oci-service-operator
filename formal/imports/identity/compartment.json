@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "identity",
+  "slug": "compartment",
+  "kind": "Compartment",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_identity_compartment",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCompartment",
+        "requestType": "identity.CreateCompartmentRequest",
+        "responseType": "identity.CreateCompartmentResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCompartment",
+        "requestType": "identity.GetCompartmentRequest",
+        "responseType": "identity.GetCompartmentResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCompartment",
+        "requestType": "identity.ListCompartmentRequest",
+        "responseType": "identity.ListCompartmentResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCompartment",
+        "requestType": "identity.UpdateCompartmentRequest",
+        "responseType": "identity.UpdateCompartmentResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCompartment",
+        "requestType": "identity.DeleteCompartmentRequest",
+        "responseType": "identity.DeleteCompartmentResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_identity_compartment",
+    "collectionField": "compartment",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/identity/compartment/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/identity/compartment/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for identity/compartment; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

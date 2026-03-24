@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "cloudguard",
+  "slug": "cloudguarddetectorrecipes",
+  "kind": "CloudGuardDetectorRecipes",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_cloud_guard_detector_recipes",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCloudGuardDetectorRecipes",
+        "requestType": "cloudguard.CreateCloudGuardDetectorRecipesRequest",
+        "responseType": "cloudguard.CreateCloudGuardDetectorRecipesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCloudGuardDetectorRecipes",
+        "requestType": "cloudguard.GetCloudGuardDetectorRecipesRequest",
+        "responseType": "cloudguard.GetCloudGuardDetectorRecipesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCloudGuardDetectorRecipes",
+        "requestType": "cloudguard.ListCloudGuardDetectorRecipesRequest",
+        "responseType": "cloudguard.ListCloudGuardDetectorRecipesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCloudGuardDetectorRecipes",
+        "requestType": "cloudguard.UpdateCloudGuardDetectorRecipesRequest",
+        "responseType": "cloudguard.UpdateCloudGuardDetectorRecipesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCloudGuardDetectorRecipes",
+        "requestType": "cloudguard.DeleteCloudGuardDetectorRecipesRequest",
+        "responseType": "cloudguard.DeleteCloudGuardDetectorRecipesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_cloudguard_cloudguarddetectorrecipes",
+    "collectionField": "cloudguarddetectorrecipes",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/cloudguard/cloudguarddetectorrecipes/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/cloudguard/cloudguarddetectorrecipes/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for cloudguard/cloudguarddetectorrecipes; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

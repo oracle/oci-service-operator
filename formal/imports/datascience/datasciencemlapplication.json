@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datascience",
+  "slug": "datasciencemlapplication",
+  "kind": "DatascienceMlApplication",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_datascience_ml_application",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatascienceMlApplication",
+        "requestType": "datascience.CreateDatascienceMlApplicationRequest",
+        "responseType": "datascience.CreateDatascienceMlApplicationResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatascienceMlApplication",
+        "requestType": "datascience.GetDatascienceMlApplicationRequest",
+        "responseType": "datascience.GetDatascienceMlApplicationResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatascienceMlApplication",
+        "requestType": "datascience.ListDatascienceMlApplicationRequest",
+        "responseType": "datascience.ListDatascienceMlApplicationResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatascienceMlApplication",
+        "requestType": "datascience.UpdateDatascienceMlApplicationRequest",
+        "responseType": "datascience.UpdateDatascienceMlApplicationResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatascienceMlApplication",
+        "requestType": "datascience.DeleteDatascienceMlApplicationRequest",
+        "responseType": "datascience.DeleteDatascienceMlApplicationResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_datascience_datasciencemlapplication",
+    "collectionField": "datasciencemlapplication",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datascience/datasciencemlapplication/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datascience/datasciencemlapplication/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for datascience/datasciencemlapplication; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

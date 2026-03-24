@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "optimizer",
+  "slug": "optimizerprofilelevel",
+  "kind": "OptimizerProfileLevel",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_optimizer_profile_level",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOptimizerProfileLevel",
+        "requestType": "optimizer.CreateOptimizerProfileLevelRequest",
+        "responseType": "optimizer.CreateOptimizerProfileLevelResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOptimizerProfileLevel",
+        "requestType": "optimizer.GetOptimizerProfileLevelRequest",
+        "responseType": "optimizer.GetOptimizerProfileLevelResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOptimizerProfileLevel",
+        "requestType": "optimizer.ListOptimizerProfileLevelRequest",
+        "responseType": "optimizer.ListOptimizerProfileLevelResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOptimizerProfileLevel",
+        "requestType": "optimizer.UpdateOptimizerProfileLevelRequest",
+        "responseType": "optimizer.UpdateOptimizerProfileLevelResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOptimizerProfileLevel",
+        "requestType": "optimizer.DeleteOptimizerProfileLevelRequest",
+        "responseType": "optimizer.DeleteOptimizerProfileLevelResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_optimizer_optimizerprofilelevel",
+    "collectionField": "optimizerprofilelevel",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/optimizer/optimizerprofilelevel/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/optimizer/optimizerprofilelevel/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for optimizer/optimizerprofilelevel; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

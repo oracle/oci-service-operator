@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "consolehistorycontent",
+  "kind": "ConsoleHistoryContent",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_core_consolehistorycontent",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateConsoleHistoryContent",
+        "requestType": "core.CreateConsoleHistoryContentRequest",
+        "responseType": "core.CreateConsoleHistoryContentResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetConsoleHistoryContent",
+        "requestType": "core.GetConsoleHistoryContentRequest",
+        "responseType": "core.GetConsoleHistoryContentResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListConsoleHistoryContent",
+        "requestType": "core.ListConsoleHistoryContentRequest",
+        "responseType": "core.ListConsoleHistoryContentResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateConsoleHistoryContent",
+        "requestType": "core.UpdateConsoleHistoryContentRequest",
+        "responseType": "core.UpdateConsoleHistoryContentResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteConsoleHistoryContent",
+        "requestType": "core.DeleteConsoleHistoryContentRequest",
+        "responseType": "core.DeleteConsoleHistoryContentResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_core_consolehistorycontent",
+    "collectionField": "consolehistorycontent",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/consolehistorycontent/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/consolehistorycontent/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for core/consolehistorycontent; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

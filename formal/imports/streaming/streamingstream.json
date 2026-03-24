@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "streaming",
+  "slug": "streamingstream",
+  "kind": "StreamingStream",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_streaming_stream",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateStreamingStream",
+        "requestType": "streaming.CreateStreamingStreamRequest",
+        "responseType": "streaming.CreateStreamingStreamResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetStreamingStream",
+        "requestType": "streaming.GetStreamingStreamRequest",
+        "responseType": "streaming.GetStreamingStreamResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListStreamingStream",
+        "requestType": "streaming.ListStreamingStreamRequest",
+        "responseType": "streaming.ListStreamingStreamResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateStreamingStream",
+        "requestType": "streaming.UpdateStreamingStreamRequest",
+        "responseType": "streaming.UpdateStreamingStreamResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteStreamingStream",
+        "requestType": "streaming.DeleteStreamingStreamRequest",
+        "responseType": "streaming.DeleteStreamingStreamResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_streaming_streamingstream",
+    "collectionField": "streamingstream",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/streaming/streamingstream/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/streaming/streamingstream/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for streaming/streamingstream; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

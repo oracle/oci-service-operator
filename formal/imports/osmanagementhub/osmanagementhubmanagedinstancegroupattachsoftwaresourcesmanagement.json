@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "osmanagementhub",
+  "slug": "osmanagementhubmanagedinstancegroupattachsoftwaresourcesmanagement",
+  "kind": "OsManagementHubManagedInstanceGroupAttachSoftwareSourcesManagement",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_os_management_hub_managed_instance_group_attach_software_sources_management",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOsManagementHubManagedInstanceGroupAttachSoftwareSourcesManagement",
+        "requestType": "osmanagementhub.CreateOsManagementHubManagedInstanceGroupAttachSoftwareSourcesManagementRequest",
+        "responseType": "osmanagementhub.CreateOsManagementHubManagedInstanceGroupAttachSoftwareSourcesManagementResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOsManagementHubManagedInstanceGroupAttachSoftwareSourcesManagement",
+        "requestType": "osmanagementhub.GetOsManagementHubManagedInstanceGroupAttachSoftwareSourcesManagementRequest",
+        "responseType": "osmanagementhub.GetOsManagementHubManagedInstanceGroupAttachSoftwareSourcesManagementResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOsManagementHubManagedInstanceGroupAttachSoftwareSourcesManagement",
+        "requestType": "osmanagementhub.ListOsManagementHubManagedInstanceGroupAttachSoftwareSourcesManagementRequest",
+        "responseType": "osmanagementhub.ListOsManagementHubManagedInstanceGroupAttachSoftwareSourcesManagementResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOsManagementHubManagedInstanceGroupAttachSoftwareSourcesManagement",
+        "requestType": "osmanagementhub.UpdateOsManagementHubManagedInstanceGroupAttachSoftwareSourcesManagementRequest",
+        "responseType": "osmanagementhub.UpdateOsManagementHubManagedInstanceGroupAttachSoftwareSourcesManagementResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOsManagementHubManagedInstanceGroupAttachSoftwareSourcesManagement",
+        "requestType": "osmanagementhub.DeleteOsManagementHubManagedInstanceGroupAttachSoftwareSourcesManagementRequest",
+        "responseType": "osmanagementhub.DeleteOsManagementHubManagedInstanceGroupAttachSoftwareSourcesManagementResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_osmanagementhub_osmanagementhubmanagedinstancegroupattachsoftwaresourcesmanagement",
+    "collectionField": "osmanagementhubmanagedinstancegroupattachsoftwaresourcesmanagement",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/osmanagementhub/osmanagementhubmanagedinstancegroupattachsoftwaresourcesmanagement/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/osmanagementhub/osmanagementhubmanagedinstancegroupattachsoftwaresourcesmanagement/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for osmanagementhub/osmanagementhubmanagedinstancegroupattachsoftwaresourcesmanagement; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

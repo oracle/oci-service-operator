@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "virtualcircuit",
+  "kind": "VirtualCircuit",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_core_virtualcircuit",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateVirtualCircuit",
+        "requestType": "core.CreateVirtualCircuitRequest",
+        "responseType": "core.CreateVirtualCircuitResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetVirtualCircuit",
+        "requestType": "core.GetVirtualCircuitRequest",
+        "responseType": "core.GetVirtualCircuitResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListVirtualCircuit",
+        "requestType": "core.ListVirtualCircuitRequest",
+        "responseType": "core.ListVirtualCircuitResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateVirtualCircuit",
+        "requestType": "core.UpdateVirtualCircuitRequest",
+        "responseType": "core.UpdateVirtualCircuitResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteVirtualCircuit",
+        "requestType": "core.DeleteVirtualCircuitRequest",
+        "responseType": "core.DeleteVirtualCircuitResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_core_virtualcircuit",
+    "collectionField": "virtualcircuit",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/virtualcircuit/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/virtualcircuit/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for core/virtualcircuit; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

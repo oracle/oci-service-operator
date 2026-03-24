@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "devops",
+  "slug": "devopsbuildpipelines",
+  "kind": "DevopsBuildPipelines",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_devops_build_pipelines",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDevopsBuildPipelines",
+        "requestType": "devops.CreateDevopsBuildPipelinesRequest",
+        "responseType": "devops.CreateDevopsBuildPipelinesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDevopsBuildPipelines",
+        "requestType": "devops.GetDevopsBuildPipelinesRequest",
+        "responseType": "devops.GetDevopsBuildPipelinesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDevopsBuildPipelines",
+        "requestType": "devops.ListDevopsBuildPipelinesRequest",
+        "responseType": "devops.ListDevopsBuildPipelinesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDevopsBuildPipelines",
+        "requestType": "devops.UpdateDevopsBuildPipelinesRequest",
+        "responseType": "devops.UpdateDevopsBuildPipelinesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDevopsBuildPipelines",
+        "requestType": "devops.DeleteDevopsBuildPipelinesRequest",
+        "responseType": "devops.DeleteDevopsBuildPipelinesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_devops_devopsbuildpipelines",
+    "collectionField": "devopsbuildpipelines",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/devops/devopsbuildpipelines/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/devops/devopsbuildpipelines/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for devops/devopsbuildpipelines; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

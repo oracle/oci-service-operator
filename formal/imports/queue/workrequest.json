@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "queue",
+  "slug": "workrequest",
+  "kind": "WorkRequest",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_queue_workrequest",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateWorkRequest",
+        "requestType": "queue.CreateWorkRequestRequest",
+        "responseType": "queue.CreateWorkRequestResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetWorkRequest",
+        "requestType": "queue.GetWorkRequestRequest",
+        "responseType": "queue.GetWorkRequestResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListWorkRequest",
+        "requestType": "queue.ListWorkRequestRequest",
+        "responseType": "queue.ListWorkRequestResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateWorkRequest",
+        "requestType": "queue.UpdateWorkRequestRequest",
+        "responseType": "queue.UpdateWorkRequestResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteWorkRequest",
+        "requestType": "queue.DeleteWorkRequestRequest",
+        "responseType": "queue.DeleteWorkRequestResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_queue_workrequest",
+    "collectionField": "workrequest",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/queue/workrequest/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/queue/workrequest/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for queue/workrequest; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

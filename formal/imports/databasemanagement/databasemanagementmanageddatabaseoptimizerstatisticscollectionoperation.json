@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasemanagement",
+  "slug": "databasemanagementmanageddatabaseoptimizerstatisticscollectionoperation",
+  "kind": "DatabaseManagementManagedDatabaseOptimizerStatisticsCollectionOperation",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_management_managed_database_optimizer_statistics_collection_operation",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseManagementManagedDatabaseOptimizerStatisticsCollectionOperation",
+        "requestType": "databasemanagement.CreateDatabaseManagementManagedDatabaseOptimizerStatisticsCollectionOperationRequest",
+        "responseType": "databasemanagement.CreateDatabaseManagementManagedDatabaseOptimizerStatisticsCollectionOperationResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseManagementManagedDatabaseOptimizerStatisticsCollectionOperation",
+        "requestType": "databasemanagement.GetDatabaseManagementManagedDatabaseOptimizerStatisticsCollectionOperationRequest",
+        "responseType": "databasemanagement.GetDatabaseManagementManagedDatabaseOptimizerStatisticsCollectionOperationResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseManagementManagedDatabaseOptimizerStatisticsCollectionOperation",
+        "requestType": "databasemanagement.ListDatabaseManagementManagedDatabaseOptimizerStatisticsCollectionOperationRequest",
+        "responseType": "databasemanagement.ListDatabaseManagementManagedDatabaseOptimizerStatisticsCollectionOperationResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseManagementManagedDatabaseOptimizerStatisticsCollectionOperation",
+        "requestType": "databasemanagement.UpdateDatabaseManagementManagedDatabaseOptimizerStatisticsCollectionOperationRequest",
+        "responseType": "databasemanagement.UpdateDatabaseManagementManagedDatabaseOptimizerStatisticsCollectionOperationResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseManagementManagedDatabaseOptimizerStatisticsCollectionOperation",
+        "requestType": "databasemanagement.DeleteDatabaseManagementManagedDatabaseOptimizerStatisticsCollectionOperationRequest",
+        "responseType": "databasemanagement.DeleteDatabaseManagementManagedDatabaseOptimizerStatisticsCollectionOperationResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_databasemanagement_databasemanagementmanageddatabaseoptimizerstatisticscollectionoperation",
+    "collectionField": "databasemanagementmanageddatabaseoptimizerstatisticscollectionoperation",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasemanagement/databasemanagementmanageddatabaseoptimizerstatisticscollectionoperation/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasemanagement/databasemanagementmanageddatabaseoptimizerstatisticscollectionoperation/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for databasemanagement/databasemanagementmanageddatabaseoptimizerstatisticscollectionoperation; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

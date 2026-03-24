@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "cloudguard",
+  "slug": "cloudguardsecurityzone",
+  "kind": "CloudGuardSecurityZone",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_cloud_guard_security_zone",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCloudGuardSecurityZone",
+        "requestType": "cloudguard.CreateCloudGuardSecurityZoneRequest",
+        "responseType": "cloudguard.CreateCloudGuardSecurityZoneResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCloudGuardSecurityZone",
+        "requestType": "cloudguard.GetCloudGuardSecurityZoneRequest",
+        "responseType": "cloudguard.GetCloudGuardSecurityZoneResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCloudGuardSecurityZone",
+        "requestType": "cloudguard.ListCloudGuardSecurityZoneRequest",
+        "responseType": "cloudguard.ListCloudGuardSecurityZoneResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCloudGuardSecurityZone",
+        "requestType": "cloudguard.UpdateCloudGuardSecurityZoneRequest",
+        "responseType": "cloudguard.UpdateCloudGuardSecurityZoneResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCloudGuardSecurityZone",
+        "requestType": "cloudguard.DeleteCloudGuardSecurityZoneRequest",
+        "responseType": "cloudguard.DeleteCloudGuardSecurityZoneResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_cloudguard_cloudguardsecurityzone",
+    "collectionField": "cloudguardsecurityzone",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/cloudguard/cloudguardsecurityzone/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/cloudguard/cloudguardsecurityzone/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for cloudguard/cloudguardsecurityzone; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

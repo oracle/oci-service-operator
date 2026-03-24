@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "loganalytics",
+  "slug": "loganalyticslogsetscount",
+  "kind": "LogAnalyticsLogSetsCount",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_log_analytics_log_sets_count",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateLogAnalyticsLogSetsCount",
+        "requestType": "loganalytics.CreateLogAnalyticsLogSetsCountRequest",
+        "responseType": "loganalytics.CreateLogAnalyticsLogSetsCountResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetLogAnalyticsLogSetsCount",
+        "requestType": "loganalytics.GetLogAnalyticsLogSetsCountRequest",
+        "responseType": "loganalytics.GetLogAnalyticsLogSetsCountResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListLogAnalyticsLogSetsCount",
+        "requestType": "loganalytics.ListLogAnalyticsLogSetsCountRequest",
+        "responseType": "loganalytics.ListLogAnalyticsLogSetsCountResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateLogAnalyticsLogSetsCount",
+        "requestType": "loganalytics.UpdateLogAnalyticsLogSetsCountRequest",
+        "responseType": "loganalytics.UpdateLogAnalyticsLogSetsCountResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteLogAnalyticsLogSetsCount",
+        "requestType": "loganalytics.DeleteLogAnalyticsLogSetsCountRequest",
+        "responseType": "loganalytics.DeleteLogAnalyticsLogSetsCountResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_loganalytics_loganalyticslogsetscount",
+    "collectionField": "loganalyticslogsetscount",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/loganalytics/loganalyticslogsetscount/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/loganalytics/loganalyticslogsetscount/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for loganalytics/loganalyticslogsetscount; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

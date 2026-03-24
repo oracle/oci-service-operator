@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "artifacts",
+  "slug": "artifactscontainerimagesignature",
+  "kind": "ArtifactsContainerImageSignature",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_artifacts_container_image_signature",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateArtifactsContainerImageSignature",
+        "requestType": "artifacts.CreateArtifactsContainerImageSignatureRequest",
+        "responseType": "artifacts.CreateArtifactsContainerImageSignatureResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetArtifactsContainerImageSignature",
+        "requestType": "artifacts.GetArtifactsContainerImageSignatureRequest",
+        "responseType": "artifacts.GetArtifactsContainerImageSignatureResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListArtifactsContainerImageSignature",
+        "requestType": "artifacts.ListArtifactsContainerImageSignatureRequest",
+        "responseType": "artifacts.ListArtifactsContainerImageSignatureResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateArtifactsContainerImageSignature",
+        "requestType": "artifacts.UpdateArtifactsContainerImageSignatureRequest",
+        "responseType": "artifacts.UpdateArtifactsContainerImageSignatureResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteArtifactsContainerImageSignature",
+        "requestType": "artifacts.DeleteArtifactsContainerImageSignatureRequest",
+        "responseType": "artifacts.DeleteArtifactsContainerImageSignatureResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_artifacts_artifactscontainerimagesignature",
+    "collectionField": "artifactscontainerimagesignature",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/artifacts/artifactscontainerimagesignature/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/artifacts/artifactscontainerimagesignature/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for artifacts/artifactscontainerimagesignature; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

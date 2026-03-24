@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "privateip",
+  "kind": "PrivateIp",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_core_privateip",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreatePrivateIp",
+        "requestType": "core.CreatePrivateIpRequest",
+        "responseType": "core.CreatePrivateIpResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetPrivateIp",
+        "requestType": "core.GetPrivateIpRequest",
+        "responseType": "core.GetPrivateIpResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListPrivateIp",
+        "requestType": "core.ListPrivateIpRequest",
+        "responseType": "core.ListPrivateIpResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdatePrivateIp",
+        "requestType": "core.UpdatePrivateIpRequest",
+        "responseType": "core.UpdatePrivateIpResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeletePrivateIp",
+        "requestType": "core.DeletePrivateIpRequest",
+        "responseType": "core.DeletePrivateIpResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_core_privateip",
+    "collectionField": "privateip",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/privateip/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/privateip/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for core/privateip; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

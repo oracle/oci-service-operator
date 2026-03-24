@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "opensearch",
+  "slug": "opensearchopensearchcluster",
+  "kind": "OpensearchOpensearchCluster",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_opensearch_opensearch_cluster",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOpensearchOpensearchCluster",
+        "requestType": "opensearch.CreateOpensearchOpensearchClusterRequest",
+        "responseType": "opensearch.CreateOpensearchOpensearchClusterResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOpensearchOpensearchCluster",
+        "requestType": "opensearch.GetOpensearchOpensearchClusterRequest",
+        "responseType": "opensearch.GetOpensearchOpensearchClusterResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOpensearchOpensearchCluster",
+        "requestType": "opensearch.ListOpensearchOpensearchClusterRequest",
+        "responseType": "opensearch.ListOpensearchOpensearchClusterResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOpensearchOpensearchCluster",
+        "requestType": "opensearch.UpdateOpensearchOpensearchClusterRequest",
+        "responseType": "opensearch.UpdateOpensearchOpensearchClusterResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOpensearchOpensearchCluster",
+        "requestType": "opensearch.DeleteOpensearchOpensearchClusterRequest",
+        "responseType": "opensearch.DeleteOpensearchOpensearchClusterResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_opensearch_opensearchopensearchcluster",
+    "collectionField": "opensearchopensearchcluster",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/opensearch/opensearchopensearchcluster/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/opensearch/opensearchopensearchcluster/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for opensearch/opensearchopensearchcluster; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

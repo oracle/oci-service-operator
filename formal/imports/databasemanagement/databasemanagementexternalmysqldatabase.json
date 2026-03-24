@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasemanagement",
+  "slug": "databasemanagementexternalmysqldatabase",
+  "kind": "DatabaseManagementExternalMySqlDatabase",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_management_external_my_sql_database",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseManagementExternalMySqlDatabase",
+        "requestType": "databasemanagement.CreateDatabaseManagementExternalMySqlDatabaseRequest",
+        "responseType": "databasemanagement.CreateDatabaseManagementExternalMySqlDatabaseResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseManagementExternalMySqlDatabase",
+        "requestType": "databasemanagement.GetDatabaseManagementExternalMySqlDatabaseRequest",
+        "responseType": "databasemanagement.GetDatabaseManagementExternalMySqlDatabaseResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseManagementExternalMySqlDatabase",
+        "requestType": "databasemanagement.ListDatabaseManagementExternalMySqlDatabaseRequest",
+        "responseType": "databasemanagement.ListDatabaseManagementExternalMySqlDatabaseResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseManagementExternalMySqlDatabase",
+        "requestType": "databasemanagement.UpdateDatabaseManagementExternalMySqlDatabaseRequest",
+        "responseType": "databasemanagement.UpdateDatabaseManagementExternalMySqlDatabaseResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseManagementExternalMySqlDatabase",
+        "requestType": "databasemanagement.DeleteDatabaseManagementExternalMySqlDatabaseRequest",
+        "responseType": "databasemanagement.DeleteDatabaseManagementExternalMySqlDatabaseResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_databasemanagement_databasemanagementexternalmysqldatabase",
+    "collectionField": "databasemanagementexternalmysqldatabase",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasemanagement/databasemanagementexternalmysqldatabase/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasemanagement/databasemanagementexternalmysqldatabase/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for databasemanagement/databasemanagementexternalmysqldatabase; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

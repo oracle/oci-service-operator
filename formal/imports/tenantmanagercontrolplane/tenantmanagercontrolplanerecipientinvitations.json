@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "tenantmanagercontrolplane",
+  "slug": "tenantmanagercontrolplanerecipientinvitations",
+  "kind": "TenantmanagercontrolplaneRecipientInvitations",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_tenantmanagercontrolplane_recipient_invitations",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateTenantmanagercontrolplaneRecipientInvitations",
+        "requestType": "tenantmanagercontrolplane.CreateTenantmanagercontrolplaneRecipientInvitationsRequest",
+        "responseType": "tenantmanagercontrolplane.CreateTenantmanagercontrolplaneRecipientInvitationsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetTenantmanagercontrolplaneRecipientInvitations",
+        "requestType": "tenantmanagercontrolplane.GetTenantmanagercontrolplaneRecipientInvitationsRequest",
+        "responseType": "tenantmanagercontrolplane.GetTenantmanagercontrolplaneRecipientInvitationsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListTenantmanagercontrolplaneRecipientInvitations",
+        "requestType": "tenantmanagercontrolplane.ListTenantmanagercontrolplaneRecipientInvitationsRequest",
+        "responseType": "tenantmanagercontrolplane.ListTenantmanagercontrolplaneRecipientInvitationsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateTenantmanagercontrolplaneRecipientInvitations",
+        "requestType": "tenantmanagercontrolplane.UpdateTenantmanagercontrolplaneRecipientInvitationsRequest",
+        "responseType": "tenantmanagercontrolplane.UpdateTenantmanagercontrolplaneRecipientInvitationsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteTenantmanagercontrolplaneRecipientInvitations",
+        "requestType": "tenantmanagercontrolplane.DeleteTenantmanagercontrolplaneRecipientInvitationsRequest",
+        "responseType": "tenantmanagercontrolplane.DeleteTenantmanagercontrolplaneRecipientInvitationsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_tenantmanagercontrolplane_tenantmanagercontrolplanerecipientinvitations",
+    "collectionField": "tenantmanagercontrolplanerecipientinvitations",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/tenantmanagercontrolplane/tenantmanagercontrolplanerecipientinvitations/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/tenantmanagercontrolplane/tenantmanagercontrolplanerecipientinvitations/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for tenantmanagercontrolplane/tenantmanagercontrolplanerecipientinvitations; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

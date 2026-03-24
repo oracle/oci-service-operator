@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "datasafelibrarymaskingformats",
+  "kind": "DataSafeLibraryMaskingFormats",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_library_masking_formats",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDataSafeLibraryMaskingFormats",
+        "requestType": "datasafe.CreateDataSafeLibraryMaskingFormatsRequest",
+        "responseType": "datasafe.CreateDataSafeLibraryMaskingFormatsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDataSafeLibraryMaskingFormats",
+        "requestType": "datasafe.GetDataSafeLibraryMaskingFormatsRequest",
+        "responseType": "datasafe.GetDataSafeLibraryMaskingFormatsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDataSafeLibraryMaskingFormats",
+        "requestType": "datasafe.ListDataSafeLibraryMaskingFormatsRequest",
+        "responseType": "datasafe.ListDataSafeLibraryMaskingFormatsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDataSafeLibraryMaskingFormats",
+        "requestType": "datasafe.UpdateDataSafeLibraryMaskingFormatsRequest",
+        "responseType": "datasafe.UpdateDataSafeLibraryMaskingFormatsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDataSafeLibraryMaskingFormats",
+        "requestType": "datasafe.DeleteDataSafeLibraryMaskingFormatsRequest",
+        "responseType": "datasafe.DeleteDataSafeLibraryMaskingFormatsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_datasafe_datasafelibrarymaskingformats",
+    "collectionField": "datasafelibrarymaskingformats",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/datasafelibrarymaskingformats/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/datasafelibrarymaskingformats/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for datasafe/datasafelibrarymaskingformats; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

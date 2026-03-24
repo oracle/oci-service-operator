@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "waas",
+  "slug": "waasedgesubnets",
+  "kind": "WaasEdgeSubnets",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_waas_edge_subnets",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateWaasEdgeSubnets",
+        "requestType": "waas.CreateWaasEdgeSubnetsRequest",
+        "responseType": "waas.CreateWaasEdgeSubnetsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetWaasEdgeSubnets",
+        "requestType": "waas.GetWaasEdgeSubnetsRequest",
+        "responseType": "waas.GetWaasEdgeSubnetsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListWaasEdgeSubnets",
+        "requestType": "waas.ListWaasEdgeSubnetsRequest",
+        "responseType": "waas.ListWaasEdgeSubnetsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateWaasEdgeSubnets",
+        "requestType": "waas.UpdateWaasEdgeSubnetsRequest",
+        "responseType": "waas.UpdateWaasEdgeSubnetsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteWaasEdgeSubnets",
+        "requestType": "waas.DeleteWaasEdgeSubnetsRequest",
+        "responseType": "waas.DeleteWaasEdgeSubnetsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_waas_waasedgesubnets",
+    "collectionField": "waasedgesubnets",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/waas/waasedgesubnets/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/waas/waasedgesubnets/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for waas/waasedgesubnets; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

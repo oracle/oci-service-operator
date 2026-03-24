@@ -1,0 +1,67 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Activity - psql/ConnectionDetail
+skinparam activity {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  diamondBackgroundColor #e2e8f0
+  diamondBorderColor #1d4ed8
+  diamondFontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+  barColor #1d4ed8
+}
+start
+:Start from shared flow\nshared/diagrams/shared-reconcile-activity.svg;
+:Load desired ConnectionDetail spec and status\nfrom Kubernetes;
+:Resolve OCI state via GetConnectionDetail with\nListConnectionDetail fallback;
+:Use scaffold_psql_connectiondetail filters\ncompartment_id, state when OCID lookup or\nbind-versus-create needs list resolution;
+if (Resource exists?) then (yes)
+:Update path calls UpdateConnectionDetail;
+:Guard mutable fields display_name and\nforce-new fields compartment_id;
+else (no)
+:Create path calls CreateConnectionDetail;
+endif
+:Run provider helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=template action=CREATED;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource;
+:Apply repo-authored secret policy none;
+:Delete path uses DeleteConnectionDetail with\nrequired via GetConnectionDetail or\nListConnectionDetail to DELETED confirmation;
+:Project required status and finalizer policy\nretain-until-confirmed-delete;
+:Requeue on provisioning, updating, terminating;
+stop
+note right
+shared diagram:
+shared/diagrams/shared-reconcile-activity.svg
+Start from the shared reconcile activity and
+specialize provider-backed CRUD, wait, and
+status-projection details here.
+Controller-local activity diagrams add
+list-lookup hints, secret policies, delete
+handling, and open formal gaps.
+archetype batch: Generated service-manager
+controllers specialize the shared reconcile path
+with formal runtime ownership.
+service: psql
+slug: connectiondetail
+kind: ConnectionDetail
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create PROVISIONING; update
+UPDATING; delete DELETING
+mutable/forceNew: display_name / compartment_id
+open gaps: none
+Scaffold metadata only; replace with
+controller-specific runtime states before
+promotion.
+end note
+@enduml

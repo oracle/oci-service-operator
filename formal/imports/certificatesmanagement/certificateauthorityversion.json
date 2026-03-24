@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "certificatesmanagement",
+  "slug": "certificateauthorityversion",
+  "kind": "CertificateAuthorityVersion",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_certificatesmanagement_certificateauthorityversion",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCertificateAuthorityVersion",
+        "requestType": "certificatesmanagement.CreateCertificateAuthorityVersionRequest",
+        "responseType": "certificatesmanagement.CreateCertificateAuthorityVersionResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCertificateAuthorityVersion",
+        "requestType": "certificatesmanagement.GetCertificateAuthorityVersionRequest",
+        "responseType": "certificatesmanagement.GetCertificateAuthorityVersionResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCertificateAuthorityVersion",
+        "requestType": "certificatesmanagement.ListCertificateAuthorityVersionRequest",
+        "responseType": "certificatesmanagement.ListCertificateAuthorityVersionResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCertificateAuthorityVersion",
+        "requestType": "certificatesmanagement.UpdateCertificateAuthorityVersionRequest",
+        "responseType": "certificatesmanagement.UpdateCertificateAuthorityVersionResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCertificateAuthorityVersion",
+        "requestType": "certificatesmanagement.DeleteCertificateAuthorityVersionRequest",
+        "responseType": "certificatesmanagement.DeleteCertificateAuthorityVersionResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_certificatesmanagement_certificateauthorityversion",
+    "collectionField": "certificateauthorityversion",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/certificatesmanagement/certificateauthorityversion/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/certificatesmanagement/certificateauthorityversion/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for certificatesmanagement/certificateauthorityversion; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

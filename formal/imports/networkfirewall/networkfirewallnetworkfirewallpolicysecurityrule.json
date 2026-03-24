@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "networkfirewall",
+  "slug": "networkfirewallnetworkfirewallpolicysecurityrule",
+  "kind": "NetworkFirewallNetworkFirewallPolicySecurityRule",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_network_firewall_network_firewall_policy_security_rule",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateNetworkFirewallNetworkFirewallPolicySecurityRule",
+        "requestType": "networkfirewall.CreateNetworkFirewallNetworkFirewallPolicySecurityRuleRequest",
+        "responseType": "networkfirewall.CreateNetworkFirewallNetworkFirewallPolicySecurityRuleResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetNetworkFirewallNetworkFirewallPolicySecurityRule",
+        "requestType": "networkfirewall.GetNetworkFirewallNetworkFirewallPolicySecurityRuleRequest",
+        "responseType": "networkfirewall.GetNetworkFirewallNetworkFirewallPolicySecurityRuleResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListNetworkFirewallNetworkFirewallPolicySecurityRule",
+        "requestType": "networkfirewall.ListNetworkFirewallNetworkFirewallPolicySecurityRuleRequest",
+        "responseType": "networkfirewall.ListNetworkFirewallNetworkFirewallPolicySecurityRuleResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateNetworkFirewallNetworkFirewallPolicySecurityRule",
+        "requestType": "networkfirewall.UpdateNetworkFirewallNetworkFirewallPolicySecurityRuleRequest",
+        "responseType": "networkfirewall.UpdateNetworkFirewallNetworkFirewallPolicySecurityRuleResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteNetworkFirewallNetworkFirewallPolicySecurityRule",
+        "requestType": "networkfirewall.DeleteNetworkFirewallNetworkFirewallPolicySecurityRuleRequest",
+        "responseType": "networkfirewall.DeleteNetworkFirewallNetworkFirewallPolicySecurityRuleResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_networkfirewall_networkfirewallnetworkfirewallpolicysecurityrule",
+    "collectionField": "networkfirewallnetworkfirewallpolicysecurityrule",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/networkfirewall/networkfirewallnetworkfirewallpolicysecurityrule/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/networkfirewall/networkfirewallnetworkfirewallpolicysecurityrule/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for networkfirewall/networkfirewallnetworkfirewallpolicysecurityrule; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

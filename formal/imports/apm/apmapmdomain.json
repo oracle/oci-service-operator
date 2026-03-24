@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "apm",
+  "slug": "apmapmdomain",
+  "kind": "ApmApmDomain",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_apm_apm_domain",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateApmApmDomain",
+        "requestType": "apm.CreateApmApmDomainRequest",
+        "responseType": "apm.CreateApmApmDomainResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetApmApmDomain",
+        "requestType": "apm.GetApmApmDomainRequest",
+        "responseType": "apm.GetApmApmDomainResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListApmApmDomain",
+        "requestType": "apm.ListApmApmDomainRequest",
+        "responseType": "apm.ListApmApmDomainResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateApmApmDomain",
+        "requestType": "apm.UpdateApmApmDomainRequest",
+        "responseType": "apm.UpdateApmApmDomainResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteApmApmDomain",
+        "requestType": "apm.DeleteApmApmDomainRequest",
+        "responseType": "apm.DeleteApmApmDomainResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_apm_apmapmdomain",
+    "collectionField": "apmapmdomain",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/apm/apmapmdomain/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/apm/apmapmdomain/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for apm/apmapmdomain; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

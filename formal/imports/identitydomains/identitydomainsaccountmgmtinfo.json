@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "identitydomains",
+  "slug": "identitydomainsaccountmgmtinfo",
+  "kind": "IdentityDomainsAccountMgmtInfo",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_identity_domains_account_mgmt_info",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateIdentityDomainsAccountMgmtInfo",
+        "requestType": "identitydomains.CreateIdentityDomainsAccountMgmtInfoRequest",
+        "responseType": "identitydomains.CreateIdentityDomainsAccountMgmtInfoResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetIdentityDomainsAccountMgmtInfo",
+        "requestType": "identitydomains.GetIdentityDomainsAccountMgmtInfoRequest",
+        "responseType": "identitydomains.GetIdentityDomainsAccountMgmtInfoResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListIdentityDomainsAccountMgmtInfo",
+        "requestType": "identitydomains.ListIdentityDomainsAccountMgmtInfoRequest",
+        "responseType": "identitydomains.ListIdentityDomainsAccountMgmtInfoResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateIdentityDomainsAccountMgmtInfo",
+        "requestType": "identitydomains.UpdateIdentityDomainsAccountMgmtInfoRequest",
+        "responseType": "identitydomains.UpdateIdentityDomainsAccountMgmtInfoResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteIdentityDomainsAccountMgmtInfo",
+        "requestType": "identitydomains.DeleteIdentityDomainsAccountMgmtInfoRequest",
+        "responseType": "identitydomains.DeleteIdentityDomainsAccountMgmtInfoResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_identitydomains_identitydomainsaccountmgmtinfo",
+    "collectionField": "identitydomainsaccountmgmtinfo",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/identitydomains/identitydomainsaccountmgmtinfo/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/identitydomains/identitydomainsaccountmgmtinfo/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for identitydomains/identitydomainsaccountmgmtinfo; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

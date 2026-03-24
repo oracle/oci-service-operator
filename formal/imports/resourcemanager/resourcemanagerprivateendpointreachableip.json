@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "resourcemanager",
+  "slug": "resourcemanagerprivateendpointreachableip",
+  "kind": "ResourcemanagerPrivateEndpointReachableIp",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_resourcemanager_private_endpoint_reachable_ip",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateResourcemanagerPrivateEndpointReachableIp",
+        "requestType": "resourcemanager.CreateResourcemanagerPrivateEndpointReachableIpRequest",
+        "responseType": "resourcemanager.CreateResourcemanagerPrivateEndpointReachableIpResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetResourcemanagerPrivateEndpointReachableIp",
+        "requestType": "resourcemanager.GetResourcemanagerPrivateEndpointReachableIpRequest",
+        "responseType": "resourcemanager.GetResourcemanagerPrivateEndpointReachableIpResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListResourcemanagerPrivateEndpointReachableIp",
+        "requestType": "resourcemanager.ListResourcemanagerPrivateEndpointReachableIpRequest",
+        "responseType": "resourcemanager.ListResourcemanagerPrivateEndpointReachableIpResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateResourcemanagerPrivateEndpointReachableIp",
+        "requestType": "resourcemanager.UpdateResourcemanagerPrivateEndpointReachableIpRequest",
+        "responseType": "resourcemanager.UpdateResourcemanagerPrivateEndpointReachableIpResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteResourcemanagerPrivateEndpointReachableIp",
+        "requestType": "resourcemanager.DeleteResourcemanagerPrivateEndpointReachableIpRequest",
+        "responseType": "resourcemanager.DeleteResourcemanagerPrivateEndpointReachableIpResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_resourcemanager_resourcemanagerprivateendpointreachableip",
+    "collectionField": "resourcemanagerprivateendpointreachableip",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/resourcemanager/resourcemanagerprivateendpointreachableip/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/resourcemanager/resourcemanagerprivateendpointreachableip/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for resourcemanager/resourcemanagerprivateendpointreachableip; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

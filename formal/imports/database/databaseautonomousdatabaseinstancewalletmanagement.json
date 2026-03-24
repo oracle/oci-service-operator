@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "databaseautonomousdatabaseinstancewalletmanagement",
+  "kind": "DatabaseAutonomousDatabaseInstanceWalletManagement",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_autonomous_database_instance_wallet_management",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseAutonomousDatabaseInstanceWalletManagement",
+        "requestType": "database.CreateDatabaseAutonomousDatabaseInstanceWalletManagementRequest",
+        "responseType": "database.CreateDatabaseAutonomousDatabaseInstanceWalletManagementResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseAutonomousDatabaseInstanceWalletManagement",
+        "requestType": "database.GetDatabaseAutonomousDatabaseInstanceWalletManagementRequest",
+        "responseType": "database.GetDatabaseAutonomousDatabaseInstanceWalletManagementResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseAutonomousDatabaseInstanceWalletManagement",
+        "requestType": "database.ListDatabaseAutonomousDatabaseInstanceWalletManagementRequest",
+        "responseType": "database.ListDatabaseAutonomousDatabaseInstanceWalletManagementResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseAutonomousDatabaseInstanceWalletManagement",
+        "requestType": "database.UpdateDatabaseAutonomousDatabaseInstanceWalletManagementRequest",
+        "responseType": "database.UpdateDatabaseAutonomousDatabaseInstanceWalletManagementResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseAutonomousDatabaseInstanceWalletManagement",
+        "requestType": "database.DeleteDatabaseAutonomousDatabaseInstanceWalletManagementRequest",
+        "responseType": "database.DeleteDatabaseAutonomousDatabaseInstanceWalletManagementResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_databaseautonomousdatabaseinstancewalletmanagement",
+    "collectionField": "databaseautonomousdatabaseinstancewalletmanagement",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/databaseautonomousdatabaseinstancewalletmanagement/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/databaseautonomousdatabaseinstancewalletmanagement/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/databaseautonomousdatabaseinstancewalletmanagement; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

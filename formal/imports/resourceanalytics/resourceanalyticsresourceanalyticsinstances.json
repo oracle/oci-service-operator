@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "resourceanalytics",
+  "slug": "resourceanalyticsresourceanalyticsinstances",
+  "kind": "ResourceAnalyticsResourceAnalyticsInstances",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_resource_analytics_resource_analytics_instances",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateResourceAnalyticsResourceAnalyticsInstances",
+        "requestType": "resourceanalytics.CreateResourceAnalyticsResourceAnalyticsInstancesRequest",
+        "responseType": "resourceanalytics.CreateResourceAnalyticsResourceAnalyticsInstancesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetResourceAnalyticsResourceAnalyticsInstances",
+        "requestType": "resourceanalytics.GetResourceAnalyticsResourceAnalyticsInstancesRequest",
+        "responseType": "resourceanalytics.GetResourceAnalyticsResourceAnalyticsInstancesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListResourceAnalyticsResourceAnalyticsInstances",
+        "requestType": "resourceanalytics.ListResourceAnalyticsResourceAnalyticsInstancesRequest",
+        "responseType": "resourceanalytics.ListResourceAnalyticsResourceAnalyticsInstancesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateResourceAnalyticsResourceAnalyticsInstances",
+        "requestType": "resourceanalytics.UpdateResourceAnalyticsResourceAnalyticsInstancesRequest",
+        "responseType": "resourceanalytics.UpdateResourceAnalyticsResourceAnalyticsInstancesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteResourceAnalyticsResourceAnalyticsInstances",
+        "requestType": "resourceanalytics.DeleteResourceAnalyticsResourceAnalyticsInstancesRequest",
+        "responseType": "resourceanalytics.DeleteResourceAnalyticsResourceAnalyticsInstancesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_resourceanalytics_resourceanalyticsresourceanalyticsinstances",
+    "collectionField": "resourceanalyticsresourceanalyticsinstances",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/resourceanalytics/resourceanalyticsresourceanalyticsinstances/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/resourceanalytics/resourceanalyticsresourceanalyticsinstances/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for resourceanalytics/resourceanalyticsresourceanalyticsinstances; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

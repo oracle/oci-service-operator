@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "redis",
+  "slug": "redisocicacheconfigsetlistassociatedocicachecluster",
+  "kind": "RedisOciCacheConfigSetlistAssociatedOciCacheCluster",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_redis_oci_cache_config_setlist_associated_oci_cache_cluster",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateRedisOciCacheConfigSetlistAssociatedOciCacheCluster",
+        "requestType": "redis.CreateRedisOciCacheConfigSetlistAssociatedOciCacheClusterRequest",
+        "responseType": "redis.CreateRedisOciCacheConfigSetlistAssociatedOciCacheClusterResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetRedisOciCacheConfigSetlistAssociatedOciCacheCluster",
+        "requestType": "redis.GetRedisOciCacheConfigSetlistAssociatedOciCacheClusterRequest",
+        "responseType": "redis.GetRedisOciCacheConfigSetlistAssociatedOciCacheClusterResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListRedisOciCacheConfigSetlistAssociatedOciCacheCluster",
+        "requestType": "redis.ListRedisOciCacheConfigSetlistAssociatedOciCacheClusterRequest",
+        "responseType": "redis.ListRedisOciCacheConfigSetlistAssociatedOciCacheClusterResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateRedisOciCacheConfigSetlistAssociatedOciCacheCluster",
+        "requestType": "redis.UpdateRedisOciCacheConfigSetlistAssociatedOciCacheClusterRequest",
+        "responseType": "redis.UpdateRedisOciCacheConfigSetlistAssociatedOciCacheClusterResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteRedisOciCacheConfigSetlistAssociatedOciCacheCluster",
+        "requestType": "redis.DeleteRedisOciCacheConfigSetlistAssociatedOciCacheClusterRequest",
+        "responseType": "redis.DeleteRedisOciCacheConfigSetlistAssociatedOciCacheClusterResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_redis_redisocicacheconfigsetlistassociatedocicachecluster",
+    "collectionField": "redisocicacheconfigsetlistassociatedocicachecluster",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/redis/redisocicacheconfigsetlistassociatedocicachecluster/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/redis/redisocicacheconfigsetlistassociatedocicachecluster/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for redis/redisocicacheconfigsetlistassociatedocicachecluster; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

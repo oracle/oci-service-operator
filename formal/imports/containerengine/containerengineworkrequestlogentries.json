@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "containerengine",
+  "slug": "containerengineworkrequestlogentries",
+  "kind": "ContainerengineWorkRequestLogEntries",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_containerengine_work_request_log_entries",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateContainerengineWorkRequestLogEntries",
+        "requestType": "containerengine.CreateContainerengineWorkRequestLogEntriesRequest",
+        "responseType": "containerengine.CreateContainerengineWorkRequestLogEntriesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetContainerengineWorkRequestLogEntries",
+        "requestType": "containerengine.GetContainerengineWorkRequestLogEntriesRequest",
+        "responseType": "containerengine.GetContainerengineWorkRequestLogEntriesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListContainerengineWorkRequestLogEntries",
+        "requestType": "containerengine.ListContainerengineWorkRequestLogEntriesRequest",
+        "responseType": "containerengine.ListContainerengineWorkRequestLogEntriesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateContainerengineWorkRequestLogEntries",
+        "requestType": "containerengine.UpdateContainerengineWorkRequestLogEntriesRequest",
+        "responseType": "containerengine.UpdateContainerengineWorkRequestLogEntriesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteContainerengineWorkRequestLogEntries",
+        "requestType": "containerengine.DeleteContainerengineWorkRequestLogEntriesRequest",
+        "responseType": "containerengine.DeleteContainerengineWorkRequestLogEntriesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_containerengine_containerengineworkrequestlogentries",
+    "collectionField": "containerengineworkrequestlogentries",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/containerengine/containerengineworkrequestlogentries/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/containerengine/containerengineworkrequestlogentries/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for containerengine/containerengineworkrequestlogentries; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

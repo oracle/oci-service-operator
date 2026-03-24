@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "usageproxy",
+  "slug": "usageproxysubscriptionredemption",
+  "kind": "UsageProxySubscriptionRedemption",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_usage_proxy_subscription_redemption",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateUsageProxySubscriptionRedemption",
+        "requestType": "usageproxy.CreateUsageProxySubscriptionRedemptionRequest",
+        "responseType": "usageproxy.CreateUsageProxySubscriptionRedemptionResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetUsageProxySubscriptionRedemption",
+        "requestType": "usageproxy.GetUsageProxySubscriptionRedemptionRequest",
+        "responseType": "usageproxy.GetUsageProxySubscriptionRedemptionResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListUsageProxySubscriptionRedemption",
+        "requestType": "usageproxy.ListUsageProxySubscriptionRedemptionRequest",
+        "responseType": "usageproxy.ListUsageProxySubscriptionRedemptionResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateUsageProxySubscriptionRedemption",
+        "requestType": "usageproxy.UpdateUsageProxySubscriptionRedemptionRequest",
+        "responseType": "usageproxy.UpdateUsageProxySubscriptionRedemptionResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteUsageProxySubscriptionRedemption",
+        "requestType": "usageproxy.DeleteUsageProxySubscriptionRedemptionRequest",
+        "responseType": "usageproxy.DeleteUsageProxySubscriptionRedemptionResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_usageproxy_usageproxysubscriptionredemption",
+    "collectionField": "usageproxysubscriptionredemption",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/usageproxy/usageproxysubscriptionredemption/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/usageproxy/usageproxysubscriptionredemption/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for usageproxy/usageproxysubscriptionredemption; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "announcementsservice",
+  "slug": "announcementsserviceannouncementsubscriptions",
+  "kind": "AnnouncementsServiceAnnouncementSubscriptions",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_announcements_service_announcement_subscriptions",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateAnnouncementsServiceAnnouncementSubscriptions",
+        "requestType": "announcementsservice.CreateAnnouncementsServiceAnnouncementSubscriptionsRequest",
+        "responseType": "announcementsservice.CreateAnnouncementsServiceAnnouncementSubscriptionsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetAnnouncementsServiceAnnouncementSubscriptions",
+        "requestType": "announcementsservice.GetAnnouncementsServiceAnnouncementSubscriptionsRequest",
+        "responseType": "announcementsservice.GetAnnouncementsServiceAnnouncementSubscriptionsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListAnnouncementsServiceAnnouncementSubscriptions",
+        "requestType": "announcementsservice.ListAnnouncementsServiceAnnouncementSubscriptionsRequest",
+        "responseType": "announcementsservice.ListAnnouncementsServiceAnnouncementSubscriptionsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateAnnouncementsServiceAnnouncementSubscriptions",
+        "requestType": "announcementsservice.UpdateAnnouncementsServiceAnnouncementSubscriptionsRequest",
+        "responseType": "announcementsservice.UpdateAnnouncementsServiceAnnouncementSubscriptionsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteAnnouncementsServiceAnnouncementSubscriptions",
+        "requestType": "announcementsservice.DeleteAnnouncementsServiceAnnouncementSubscriptionsRequest",
+        "responseType": "announcementsservice.DeleteAnnouncementsServiceAnnouncementSubscriptionsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_announcementsservice_announcementsserviceannouncementsubscriptions",
+    "collectionField": "announcementsserviceannouncementsubscriptions",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/announcementsservice/announcementsserviceannouncementsubscriptions/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/announcementsservice/announcementsserviceannouncementsubscriptions/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for announcementsservice/announcementsserviceannouncementsubscriptions; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

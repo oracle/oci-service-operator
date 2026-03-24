@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "vnicattachment",
+  "kind": "VnicAttachment",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_core_vnicattachment",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateVnicAttachment",
+        "requestType": "core.CreateVnicAttachmentRequest",
+        "responseType": "core.CreateVnicAttachmentResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetVnicAttachment",
+        "requestType": "core.GetVnicAttachmentRequest",
+        "responseType": "core.GetVnicAttachmentResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListVnicAttachment",
+        "requestType": "core.ListVnicAttachmentRequest",
+        "responseType": "core.ListVnicAttachmentResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateVnicAttachment",
+        "requestType": "core.UpdateVnicAttachmentRequest",
+        "responseType": "core.UpdateVnicAttachmentResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteVnicAttachment",
+        "requestType": "core.DeleteVnicAttachmentRequest",
+        "responseType": "core.DeleteVnicAttachmentResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_core_vnicattachment",
+    "collectionField": "vnicattachment",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/vnicattachment/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/vnicattachment/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for core/vnicattachment; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "nosql",
+  "slug": "workrequestlog",
+  "kind": "WorkRequestLog",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_nosql_workrequestlog",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateWorkRequestLog",
+        "requestType": "nosql.CreateWorkRequestLogRequest",
+        "responseType": "nosql.CreateWorkRequestLogResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetWorkRequestLog",
+        "requestType": "nosql.GetWorkRequestLogRequest",
+        "responseType": "nosql.GetWorkRequestLogResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListWorkRequestLog",
+        "requestType": "nosql.ListWorkRequestLogRequest",
+        "responseType": "nosql.ListWorkRequestLogResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateWorkRequestLog",
+        "requestType": "nosql.UpdateWorkRequestLogRequest",
+        "responseType": "nosql.UpdateWorkRequestLogResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteWorkRequestLog",
+        "requestType": "nosql.DeleteWorkRequestLogRequest",
+        "responseType": "nosql.DeleteWorkRequestLogResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_nosql_workrequestlog",
+    "collectionField": "workrequestlog",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/nosql/workrequestlog/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/nosql/workrequestlog/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for nosql/workrequestlog; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

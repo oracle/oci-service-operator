@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "databasedatabaseupgradehistoryentry",
+  "kind": "DatabaseDatabaseUpgradeHistoryEntry",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_database_upgrade_history_entry",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseDatabaseUpgradeHistoryEntry",
+        "requestType": "database.CreateDatabaseDatabaseUpgradeHistoryEntryRequest",
+        "responseType": "database.CreateDatabaseDatabaseUpgradeHistoryEntryResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseDatabaseUpgradeHistoryEntry",
+        "requestType": "database.GetDatabaseDatabaseUpgradeHistoryEntryRequest",
+        "responseType": "database.GetDatabaseDatabaseUpgradeHistoryEntryResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseDatabaseUpgradeHistoryEntry",
+        "requestType": "database.ListDatabaseDatabaseUpgradeHistoryEntryRequest",
+        "responseType": "database.ListDatabaseDatabaseUpgradeHistoryEntryResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseDatabaseUpgradeHistoryEntry",
+        "requestType": "database.UpdateDatabaseDatabaseUpgradeHistoryEntryRequest",
+        "responseType": "database.UpdateDatabaseDatabaseUpgradeHistoryEntryResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseDatabaseUpgradeHistoryEntry",
+        "requestType": "database.DeleteDatabaseDatabaseUpgradeHistoryEntryRequest",
+        "responseType": "database.DeleteDatabaseDatabaseUpgradeHistoryEntryResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_databasedatabaseupgradehistoryentry",
+    "collectionField": "databasedatabaseupgradehistoryentry",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/databasedatabaseupgradehistoryentry/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/databasedatabaseupgradehistoryentry/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/databasedatabaseupgradehistoryentry; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "corebootvolumeattachments",
+  "kind": "CoreBootVolumeAttachments",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_core_boot_volume_attachments",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCoreBootVolumeAttachments",
+        "requestType": "core.CreateCoreBootVolumeAttachmentsRequest",
+        "responseType": "core.CreateCoreBootVolumeAttachmentsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCoreBootVolumeAttachments",
+        "requestType": "core.GetCoreBootVolumeAttachmentsRequest",
+        "responseType": "core.GetCoreBootVolumeAttachmentsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCoreBootVolumeAttachments",
+        "requestType": "core.ListCoreBootVolumeAttachmentsRequest",
+        "responseType": "core.ListCoreBootVolumeAttachmentsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCoreBootVolumeAttachments",
+        "requestType": "core.UpdateCoreBootVolumeAttachmentsRequest",
+        "responseType": "core.UpdateCoreBootVolumeAttachmentsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCoreBootVolumeAttachments",
+        "requestType": "core.DeleteCoreBootVolumeAttachmentsRequest",
+        "responseType": "core.DeleteCoreBootVolumeAttachmentsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_core_corebootvolumeattachments",
+    "collectionField": "corebootvolumeattachments",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/corebootvolumeattachments/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/corebootvolumeattachments/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for core/corebootvolumeattachments; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

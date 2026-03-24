@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "osmanagementhub",
+  "slug": "osmanagementhubscheduledjob",
+  "kind": "OsManagementHubScheduledJob",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_os_management_hub_scheduled_job",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOsManagementHubScheduledJob",
+        "requestType": "osmanagementhub.CreateOsManagementHubScheduledJobRequest",
+        "responseType": "osmanagementhub.CreateOsManagementHubScheduledJobResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOsManagementHubScheduledJob",
+        "requestType": "osmanagementhub.GetOsManagementHubScheduledJobRequest",
+        "responseType": "osmanagementhub.GetOsManagementHubScheduledJobResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOsManagementHubScheduledJob",
+        "requestType": "osmanagementhub.ListOsManagementHubScheduledJobRequest",
+        "responseType": "osmanagementhub.ListOsManagementHubScheduledJobResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOsManagementHubScheduledJob",
+        "requestType": "osmanagementhub.UpdateOsManagementHubScheduledJobRequest",
+        "responseType": "osmanagementhub.UpdateOsManagementHubScheduledJobResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOsManagementHubScheduledJob",
+        "requestType": "osmanagementhub.DeleteOsManagementHubScheduledJobRequest",
+        "responseType": "osmanagementhub.DeleteOsManagementHubScheduledJobResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_osmanagementhub_osmanagementhubscheduledjob",
+    "collectionField": "osmanagementhubscheduledjob",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/osmanagementhub/osmanagementhubscheduledjob/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/osmanagementhub/osmanagementhubscheduledjob/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for osmanagementhub/osmanagementhubscheduledjob; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

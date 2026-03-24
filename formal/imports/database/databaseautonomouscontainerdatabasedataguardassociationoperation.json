@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "databaseautonomouscontainerdatabasedataguardassociationoperation",
+  "kind": "DatabaseAutonomousContainerDatabaseDataguardAssociationOperation",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_autonomous_container_database_dataguard_association_operation",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseAutonomousContainerDatabaseDataguardAssociationOperation",
+        "requestType": "database.CreateDatabaseAutonomousContainerDatabaseDataguardAssociationOperationRequest",
+        "responseType": "database.CreateDatabaseAutonomousContainerDatabaseDataguardAssociationOperationResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseAutonomousContainerDatabaseDataguardAssociationOperation",
+        "requestType": "database.GetDatabaseAutonomousContainerDatabaseDataguardAssociationOperationRequest",
+        "responseType": "database.GetDatabaseAutonomousContainerDatabaseDataguardAssociationOperationResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseAutonomousContainerDatabaseDataguardAssociationOperation",
+        "requestType": "database.ListDatabaseAutonomousContainerDatabaseDataguardAssociationOperationRequest",
+        "responseType": "database.ListDatabaseAutonomousContainerDatabaseDataguardAssociationOperationResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseAutonomousContainerDatabaseDataguardAssociationOperation",
+        "requestType": "database.UpdateDatabaseAutonomousContainerDatabaseDataguardAssociationOperationRequest",
+        "responseType": "database.UpdateDatabaseAutonomousContainerDatabaseDataguardAssociationOperationResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseAutonomousContainerDatabaseDataguardAssociationOperation",
+        "requestType": "database.DeleteDatabaseAutonomousContainerDatabaseDataguardAssociationOperationRequest",
+        "responseType": "database.DeleteDatabaseAutonomousContainerDatabaseDataguardAssociationOperationResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_databaseautonomouscontainerdatabasedataguardassociationoperation",
+    "collectionField": "databaseautonomouscontainerdatabasedataguardassociationoperation",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/databaseautonomouscontainerdatabasedataguardassociationoperation/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/databaseautonomouscontainerdatabasedataguardassociationoperation/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/databaseautonomouscontainerdatabasedataguardassociationoperation; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

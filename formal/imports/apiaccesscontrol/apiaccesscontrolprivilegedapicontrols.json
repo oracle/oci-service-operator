@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "apiaccesscontrol",
+  "slug": "apiaccesscontrolprivilegedapicontrols",
+  "kind": "ApiaccesscontrolPrivilegedApiControls",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_apiaccesscontrol_privileged_api_controls",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateApiaccesscontrolPrivilegedApiControls",
+        "requestType": "apiaccesscontrol.CreateApiaccesscontrolPrivilegedApiControlsRequest",
+        "responseType": "apiaccesscontrol.CreateApiaccesscontrolPrivilegedApiControlsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetApiaccesscontrolPrivilegedApiControls",
+        "requestType": "apiaccesscontrol.GetApiaccesscontrolPrivilegedApiControlsRequest",
+        "responseType": "apiaccesscontrol.GetApiaccesscontrolPrivilegedApiControlsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListApiaccesscontrolPrivilegedApiControls",
+        "requestType": "apiaccesscontrol.ListApiaccesscontrolPrivilegedApiControlsRequest",
+        "responseType": "apiaccesscontrol.ListApiaccesscontrolPrivilegedApiControlsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateApiaccesscontrolPrivilegedApiControls",
+        "requestType": "apiaccesscontrol.UpdateApiaccesscontrolPrivilegedApiControlsRequest",
+        "responseType": "apiaccesscontrol.UpdateApiaccesscontrolPrivilegedApiControlsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteApiaccesscontrolPrivilegedApiControls",
+        "requestType": "apiaccesscontrol.DeleteApiaccesscontrolPrivilegedApiControlsRequest",
+        "responseType": "apiaccesscontrol.DeleteApiaccesscontrolPrivilegedApiControlsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_apiaccesscontrol_apiaccesscontrolprivilegedapicontrols",
+    "collectionField": "apiaccesscontrolprivilegedapicontrols",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/apiaccesscontrol/apiaccesscontrolprivilegedapicontrols/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/apiaccesscontrol/apiaccesscontrolprivilegedapicontrols/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for apiaccesscontrol/apiaccesscontrolprivilegedapicontrols; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

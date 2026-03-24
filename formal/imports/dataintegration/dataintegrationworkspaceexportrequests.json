@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "dataintegration",
+  "slug": "dataintegrationworkspaceexportrequests",
+  "kind": "DataintegrationWorkspaceExportRequests",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_dataintegration_workspace_export_requests",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDataintegrationWorkspaceExportRequests",
+        "requestType": "dataintegration.CreateDataintegrationWorkspaceExportRequestsRequest",
+        "responseType": "dataintegration.CreateDataintegrationWorkspaceExportRequestsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDataintegrationWorkspaceExportRequests",
+        "requestType": "dataintegration.GetDataintegrationWorkspaceExportRequestsRequest",
+        "responseType": "dataintegration.GetDataintegrationWorkspaceExportRequestsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDataintegrationWorkspaceExportRequests",
+        "requestType": "dataintegration.ListDataintegrationWorkspaceExportRequestsRequest",
+        "responseType": "dataintegration.ListDataintegrationWorkspaceExportRequestsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDataintegrationWorkspaceExportRequests",
+        "requestType": "dataintegration.UpdateDataintegrationWorkspaceExportRequestsRequest",
+        "responseType": "dataintegration.UpdateDataintegrationWorkspaceExportRequestsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDataintegrationWorkspaceExportRequests",
+        "requestType": "dataintegration.DeleteDataintegrationWorkspaceExportRequestsRequest",
+        "responseType": "dataintegration.DeleteDataintegrationWorkspaceExportRequestsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_dataintegration_dataintegrationworkspaceexportrequests",
+    "collectionField": "dataintegrationworkspaceexportrequests",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/dataintegration/dataintegrationworkspaceexportrequests/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/dataintegration/dataintegrationworkspaceexportrequests/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for dataintegration/dataintegrationworkspaceexportrequests; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

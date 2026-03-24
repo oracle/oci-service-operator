@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "lustrefilestorage",
+  "slug": "lustrefilestorageavailableoverridemaintenancestarttimes",
+  "kind": "LustreFileStorageAvailableOverrideMaintenanceStartTimes",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_lustre_file_storage_available_override_maintenance_start_times",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateLustreFileStorageAvailableOverrideMaintenanceStartTimes",
+        "requestType": "lustrefilestorage.CreateLustreFileStorageAvailableOverrideMaintenanceStartTimesRequest",
+        "responseType": "lustrefilestorage.CreateLustreFileStorageAvailableOverrideMaintenanceStartTimesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetLustreFileStorageAvailableOverrideMaintenanceStartTimes",
+        "requestType": "lustrefilestorage.GetLustreFileStorageAvailableOverrideMaintenanceStartTimesRequest",
+        "responseType": "lustrefilestorage.GetLustreFileStorageAvailableOverrideMaintenanceStartTimesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListLustreFileStorageAvailableOverrideMaintenanceStartTimes",
+        "requestType": "lustrefilestorage.ListLustreFileStorageAvailableOverrideMaintenanceStartTimesRequest",
+        "responseType": "lustrefilestorage.ListLustreFileStorageAvailableOverrideMaintenanceStartTimesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateLustreFileStorageAvailableOverrideMaintenanceStartTimes",
+        "requestType": "lustrefilestorage.UpdateLustreFileStorageAvailableOverrideMaintenanceStartTimesRequest",
+        "responseType": "lustrefilestorage.UpdateLustreFileStorageAvailableOverrideMaintenanceStartTimesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteLustreFileStorageAvailableOverrideMaintenanceStartTimes",
+        "requestType": "lustrefilestorage.DeleteLustreFileStorageAvailableOverrideMaintenanceStartTimesRequest",
+        "responseType": "lustrefilestorage.DeleteLustreFileStorageAvailableOverrideMaintenanceStartTimesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_lustrefilestorage_lustrefilestorageavailableoverridemaintenancestarttimes",
+    "collectionField": "lustrefilestorageavailableoverridemaintenancestarttimes",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/lustrefilestorage/lustrefilestorageavailableoverridemaintenancestarttimes/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/lustrefilestorage/lustrefilestorageavailableoverridemaintenancestarttimes/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for lustrefilestorage/lustrefilestorageavailableoverridemaintenancestarttimes; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

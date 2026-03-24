@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "bds",
+  "slug": "bdsbdsinstanceidentityconfiguration",
+  "kind": "BdsBdsInstanceIdentityConfiguration",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_bds_bds_instance_identity_configuration",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateBdsBdsInstanceIdentityConfiguration",
+        "requestType": "bds.CreateBdsBdsInstanceIdentityConfigurationRequest",
+        "responseType": "bds.CreateBdsBdsInstanceIdentityConfigurationResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetBdsBdsInstanceIdentityConfiguration",
+        "requestType": "bds.GetBdsBdsInstanceIdentityConfigurationRequest",
+        "responseType": "bds.GetBdsBdsInstanceIdentityConfigurationResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListBdsBdsInstanceIdentityConfiguration",
+        "requestType": "bds.ListBdsBdsInstanceIdentityConfigurationRequest",
+        "responseType": "bds.ListBdsBdsInstanceIdentityConfigurationResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateBdsBdsInstanceIdentityConfiguration",
+        "requestType": "bds.UpdateBdsBdsInstanceIdentityConfigurationRequest",
+        "responseType": "bds.UpdateBdsBdsInstanceIdentityConfigurationResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteBdsBdsInstanceIdentityConfiguration",
+        "requestType": "bds.DeleteBdsBdsInstanceIdentityConfigurationRequest",
+        "responseType": "bds.DeleteBdsBdsInstanceIdentityConfigurationResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_bds_bdsbdsinstanceidentityconfiguration",
+    "collectionField": "bdsbdsinstanceidentityconfiguration",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/bds/bdsbdsinstanceidentityconfiguration/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/bds/bdsbdsinstanceidentityconfiguration/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for bds/bdsbdsinstanceidentityconfiguration; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

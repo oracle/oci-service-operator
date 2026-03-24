@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "identitydomains",
+  "slug": "identitydomainsapprovalworkflowstep",
+  "kind": "IdentityDomainsApprovalWorkflowStep",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_identity_domains_approval_workflow_step",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateIdentityDomainsApprovalWorkflowStep",
+        "requestType": "identitydomains.CreateIdentityDomainsApprovalWorkflowStepRequest",
+        "responseType": "identitydomains.CreateIdentityDomainsApprovalWorkflowStepResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetIdentityDomainsApprovalWorkflowStep",
+        "requestType": "identitydomains.GetIdentityDomainsApprovalWorkflowStepRequest",
+        "responseType": "identitydomains.GetIdentityDomainsApprovalWorkflowStepResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListIdentityDomainsApprovalWorkflowStep",
+        "requestType": "identitydomains.ListIdentityDomainsApprovalWorkflowStepRequest",
+        "responseType": "identitydomains.ListIdentityDomainsApprovalWorkflowStepResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateIdentityDomainsApprovalWorkflowStep",
+        "requestType": "identitydomains.UpdateIdentityDomainsApprovalWorkflowStepRequest",
+        "responseType": "identitydomains.UpdateIdentityDomainsApprovalWorkflowStepResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteIdentityDomainsApprovalWorkflowStep",
+        "requestType": "identitydomains.DeleteIdentityDomainsApprovalWorkflowStepRequest",
+        "responseType": "identitydomains.DeleteIdentityDomainsApprovalWorkflowStepResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_identitydomains_identitydomainsapprovalworkflowstep",
+    "collectionField": "identitydomainsapprovalworkflowstep",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/identitydomains/identitydomainsapprovalworkflowstep/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/identitydomains/identitydomainsapprovalworkflowstep/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for identitydomains/identitydomainsapprovalworkflowstep; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

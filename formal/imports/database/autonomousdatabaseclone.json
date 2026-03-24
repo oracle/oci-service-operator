@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "autonomousdatabaseclone",
+  "kind": "AutonomousDatabaseClone",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_database_autonomousdatabaseclone",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateAutonomousDatabaseClone",
+        "requestType": "database.CreateAutonomousDatabaseCloneRequest",
+        "responseType": "database.CreateAutonomousDatabaseCloneResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetAutonomousDatabaseClone",
+        "requestType": "database.GetAutonomousDatabaseCloneRequest",
+        "responseType": "database.GetAutonomousDatabaseCloneResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListAutonomousDatabaseClone",
+        "requestType": "database.ListAutonomousDatabaseCloneRequest",
+        "responseType": "database.ListAutonomousDatabaseCloneResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateAutonomousDatabaseClone",
+        "requestType": "database.UpdateAutonomousDatabaseCloneRequest",
+        "responseType": "database.UpdateAutonomousDatabaseCloneResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteAutonomousDatabaseClone",
+        "requestType": "database.DeleteAutonomousDatabaseCloneRequest",
+        "responseType": "database.DeleteAutonomousDatabaseCloneResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_autonomousdatabaseclone",
+    "collectionField": "autonomousdatabaseclone",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/autonomousdatabaseclone/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/autonomousdatabaseclone/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/autonomousdatabaseclone; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

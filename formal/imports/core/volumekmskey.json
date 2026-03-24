@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "volumekmskey",
+  "kind": "VolumeKmsKey",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_core_volumekmskey",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateVolumeKmsKey",
+        "requestType": "core.CreateVolumeKmsKeyRequest",
+        "responseType": "core.CreateVolumeKmsKeyResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetVolumeKmsKey",
+        "requestType": "core.GetVolumeKmsKeyRequest",
+        "responseType": "core.GetVolumeKmsKeyResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListVolumeKmsKey",
+        "requestType": "core.ListVolumeKmsKeyRequest",
+        "responseType": "core.ListVolumeKmsKeyResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateVolumeKmsKey",
+        "requestType": "core.UpdateVolumeKmsKeyRequest",
+        "responseType": "core.UpdateVolumeKmsKeyResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteVolumeKmsKey",
+        "requestType": "core.DeleteVolumeKmsKeyRequest",
+        "responseType": "core.DeleteVolumeKmsKeyResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_core_volumekmskey",
+    "collectionField": "volumekmskey",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/volumekmskey/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/volumekmskey/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for core/volumekmskey; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

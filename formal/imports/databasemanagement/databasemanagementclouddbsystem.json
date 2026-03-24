@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasemanagement",
+  "slug": "databasemanagementclouddbsystem",
+  "kind": "DatabaseManagementCloudDbSystem",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_management_cloud_db_system",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseManagementCloudDbSystem",
+        "requestType": "databasemanagement.CreateDatabaseManagementCloudDbSystemRequest",
+        "responseType": "databasemanagement.CreateDatabaseManagementCloudDbSystemResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseManagementCloudDbSystem",
+        "requestType": "databasemanagement.GetDatabaseManagementCloudDbSystemRequest",
+        "responseType": "databasemanagement.GetDatabaseManagementCloudDbSystemResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseManagementCloudDbSystem",
+        "requestType": "databasemanagement.ListDatabaseManagementCloudDbSystemRequest",
+        "responseType": "databasemanagement.ListDatabaseManagementCloudDbSystemResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseManagementCloudDbSystem",
+        "requestType": "databasemanagement.UpdateDatabaseManagementCloudDbSystemRequest",
+        "responseType": "databasemanagement.UpdateDatabaseManagementCloudDbSystemResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseManagementCloudDbSystem",
+        "requestType": "databasemanagement.DeleteDatabaseManagementCloudDbSystemRequest",
+        "responseType": "databasemanagement.DeleteDatabaseManagementCloudDbSystemResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_databasemanagement_databasemanagementclouddbsystem",
+    "collectionField": "databasemanagementclouddbsystem",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasemanagement/databasemanagementclouddbsystem/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasemanagement/databasemanagementclouddbsystem/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for databasemanagement/databasemanagementclouddbsystem; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

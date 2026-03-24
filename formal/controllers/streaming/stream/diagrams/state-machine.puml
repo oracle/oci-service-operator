@@ -1,0 +1,66 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title State Machine - streaming/Stream
+skinparam state {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+}
+state "provisioning\nprovider: CREATING" as provisioning
+state "active\nprovider: ACTIVE" as active
+state "updating\nprovider: UPDATING" as updating
+state "terminating\nprovider: DELETING" as terminating
+state "failed\nprovider: repo-authored failure bucket" as failed
+[*] --> provisioning : CreateStream
+provisioning --> active : ACTIVE
+active --> updating : ChangeStreamCompartment,\nUpdateStream
+updating --> active : ACTIVE
+active --> terminating : DeleteStream
+terminating --> [*] : DELETED
+provisioning --> failed : unresolved OCI error or\nopen gap
+updating --> failed : unresolved OCI error or\nopen gap
+terminating --> failed : unresolved OCI error or\nopen gap
+failed --> [*] : operator intervention
+note right of active
+shared diagram:
+shared/diagrams/shared-controller-state-machine.svg
+Start from the shared controller phase model and
+specialize imported provider states, delete
+targets, and failure exits here.
+archetype batch: Legacy-adapter controllers map
+provider states into the shared controller
+phases while open gaps keep additional
+transitions explicit.
+service: streaming
+slug: stream
+kind: Stream
+archetype: legacy-adapter
+status/finalizer: manual / none
+requeue: provisioning, updating, terminating
+provider states: create CREATING; update
+UPDATING; delete DELETING
+mutable/forceNew: compartment_id, defined_tags,
+freeform_tags, stream_pool_id / name,
+partitions, retention_in_hours
+open gaps: bind-versus-create,
+delete-confirmation, endpoint-materialization,
+legacy-adapter, list-lookup (+2 more)
+Create or bind selection depends on name-based
+list lookup with optional pool and compartment
+filters.
+Endpoint secret materialization happens only
+after ACTIVE.
+Delete is best-effort today; DELETING is treated
+as sufficient for cleanup and finalizer removal.
+end note
+@enduml

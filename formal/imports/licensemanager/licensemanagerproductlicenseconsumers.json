@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "licensemanager",
+  "slug": "licensemanagerproductlicenseconsumers",
+  "kind": "LicenseManagerProductLicenseConsumers",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_license_manager_product_license_consumers",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateLicenseManagerProductLicenseConsumers",
+        "requestType": "licensemanager.CreateLicenseManagerProductLicenseConsumersRequest",
+        "responseType": "licensemanager.CreateLicenseManagerProductLicenseConsumersResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetLicenseManagerProductLicenseConsumers",
+        "requestType": "licensemanager.GetLicenseManagerProductLicenseConsumersRequest",
+        "responseType": "licensemanager.GetLicenseManagerProductLicenseConsumersResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListLicenseManagerProductLicenseConsumers",
+        "requestType": "licensemanager.ListLicenseManagerProductLicenseConsumersRequest",
+        "responseType": "licensemanager.ListLicenseManagerProductLicenseConsumersResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateLicenseManagerProductLicenseConsumers",
+        "requestType": "licensemanager.UpdateLicenseManagerProductLicenseConsumersRequest",
+        "responseType": "licensemanager.UpdateLicenseManagerProductLicenseConsumersResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteLicenseManagerProductLicenseConsumers",
+        "requestType": "licensemanager.DeleteLicenseManagerProductLicenseConsumersRequest",
+        "responseType": "licensemanager.DeleteLicenseManagerProductLicenseConsumersResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_licensemanager_licensemanagerproductlicenseconsumers",
+    "collectionField": "licensemanagerproductlicenseconsumers",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/licensemanager/licensemanagerproductlicenseconsumers/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/licensemanager/licensemanagerproductlicenseconsumers/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for licensemanager/licensemanagerproductlicenseconsumers; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasemanagement",
+  "slug": "databasemanagementexternalmysqldatabaseconnectors",
+  "kind": "DatabaseManagementExternalMySqlDatabaseConnectors",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_management_external_my_sql_database_connectors",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseManagementExternalMySqlDatabaseConnectors",
+        "requestType": "databasemanagement.CreateDatabaseManagementExternalMySqlDatabaseConnectorsRequest",
+        "responseType": "databasemanagement.CreateDatabaseManagementExternalMySqlDatabaseConnectorsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseManagementExternalMySqlDatabaseConnectors",
+        "requestType": "databasemanagement.GetDatabaseManagementExternalMySqlDatabaseConnectorsRequest",
+        "responseType": "databasemanagement.GetDatabaseManagementExternalMySqlDatabaseConnectorsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseManagementExternalMySqlDatabaseConnectors",
+        "requestType": "databasemanagement.ListDatabaseManagementExternalMySqlDatabaseConnectorsRequest",
+        "responseType": "databasemanagement.ListDatabaseManagementExternalMySqlDatabaseConnectorsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseManagementExternalMySqlDatabaseConnectors",
+        "requestType": "databasemanagement.UpdateDatabaseManagementExternalMySqlDatabaseConnectorsRequest",
+        "responseType": "databasemanagement.UpdateDatabaseManagementExternalMySqlDatabaseConnectorsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseManagementExternalMySqlDatabaseConnectors",
+        "requestType": "databasemanagement.DeleteDatabaseManagementExternalMySqlDatabaseConnectorsRequest",
+        "responseType": "databasemanagement.DeleteDatabaseManagementExternalMySqlDatabaseConnectorsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_databasemanagement_databasemanagementexternalmysqldatabaseconnectors",
+    "collectionField": "databasemanagementexternalmysqldatabaseconnectors",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasemanagement/databasemanagementexternalmysqldatabaseconnectors/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasemanagement/databasemanagementexternalmysqldatabaseconnectors/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for databasemanagement/databasemanagementexternalmysqldatabaseconnectors; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

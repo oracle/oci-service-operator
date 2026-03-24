@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "fusionapps",
+  "slug": "fusionappsfusionenvironmentrefreshactivity",
+  "kind": "FusionAppsFusionEnvironmentRefreshActivity",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_fusion_apps_fusion_environment_refresh_activity",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateFusionAppsFusionEnvironmentRefreshActivity",
+        "requestType": "fusionapps.CreateFusionAppsFusionEnvironmentRefreshActivityRequest",
+        "responseType": "fusionapps.CreateFusionAppsFusionEnvironmentRefreshActivityResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetFusionAppsFusionEnvironmentRefreshActivity",
+        "requestType": "fusionapps.GetFusionAppsFusionEnvironmentRefreshActivityRequest",
+        "responseType": "fusionapps.GetFusionAppsFusionEnvironmentRefreshActivityResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListFusionAppsFusionEnvironmentRefreshActivity",
+        "requestType": "fusionapps.ListFusionAppsFusionEnvironmentRefreshActivityRequest",
+        "responseType": "fusionapps.ListFusionAppsFusionEnvironmentRefreshActivityResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateFusionAppsFusionEnvironmentRefreshActivity",
+        "requestType": "fusionapps.UpdateFusionAppsFusionEnvironmentRefreshActivityRequest",
+        "responseType": "fusionapps.UpdateFusionAppsFusionEnvironmentRefreshActivityResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteFusionAppsFusionEnvironmentRefreshActivity",
+        "requestType": "fusionapps.DeleteFusionAppsFusionEnvironmentRefreshActivityRequest",
+        "responseType": "fusionapps.DeleteFusionAppsFusionEnvironmentRefreshActivityResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_fusionapps_fusionappsfusionenvironmentrefreshactivity",
+    "collectionField": "fusionappsfusionenvironmentrefreshactivity",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/fusionapps/fusionappsfusionenvironmentrefreshactivity/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/fusionapps/fusionappsfusionenvironmentrefreshactivity/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for fusionapps/fusionappsfusionenvironmentrefreshactivity; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

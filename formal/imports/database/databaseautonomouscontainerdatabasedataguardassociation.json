@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "databaseautonomouscontainerdatabasedataguardassociation",
+  "kind": "DatabaseAutonomousContainerDatabaseDataguardAssociation",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_autonomous_container_database_dataguard_association",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseAutonomousContainerDatabaseDataguardAssociation",
+        "requestType": "database.CreateDatabaseAutonomousContainerDatabaseDataguardAssociationRequest",
+        "responseType": "database.CreateDatabaseAutonomousContainerDatabaseDataguardAssociationResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseAutonomousContainerDatabaseDataguardAssociation",
+        "requestType": "database.GetDatabaseAutonomousContainerDatabaseDataguardAssociationRequest",
+        "responseType": "database.GetDatabaseAutonomousContainerDatabaseDataguardAssociationResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseAutonomousContainerDatabaseDataguardAssociation",
+        "requestType": "database.ListDatabaseAutonomousContainerDatabaseDataguardAssociationRequest",
+        "responseType": "database.ListDatabaseAutonomousContainerDatabaseDataguardAssociationResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseAutonomousContainerDatabaseDataguardAssociation",
+        "requestType": "database.UpdateDatabaseAutonomousContainerDatabaseDataguardAssociationRequest",
+        "responseType": "database.UpdateDatabaseAutonomousContainerDatabaseDataguardAssociationResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseAutonomousContainerDatabaseDataguardAssociation",
+        "requestType": "database.DeleteDatabaseAutonomousContainerDatabaseDataguardAssociationRequest",
+        "responseType": "database.DeleteDatabaseAutonomousContainerDatabaseDataguardAssociationResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_databaseautonomouscontainerdatabasedataguardassociation",
+    "collectionField": "databaseautonomouscontainerdatabasedataguardassociation",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/databaseautonomouscontainerdatabasedataguardassociation/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/databaseautonomouscontainerdatabasedataguardassociation/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/databaseautonomouscontainerdatabasedataguardassociation; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

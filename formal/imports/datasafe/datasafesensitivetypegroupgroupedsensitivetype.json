@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "datasafesensitivetypegroupgroupedsensitivetype",
+  "kind": "DataSafeSensitiveTypeGroupGroupedSensitiveType",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_sensitive_type_group_grouped_sensitive_type",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDataSafeSensitiveTypeGroupGroupedSensitiveType",
+        "requestType": "datasafe.CreateDataSafeSensitiveTypeGroupGroupedSensitiveTypeRequest",
+        "responseType": "datasafe.CreateDataSafeSensitiveTypeGroupGroupedSensitiveTypeResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDataSafeSensitiveTypeGroupGroupedSensitiveType",
+        "requestType": "datasafe.GetDataSafeSensitiveTypeGroupGroupedSensitiveTypeRequest",
+        "responseType": "datasafe.GetDataSafeSensitiveTypeGroupGroupedSensitiveTypeResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDataSafeSensitiveTypeGroupGroupedSensitiveType",
+        "requestType": "datasafe.ListDataSafeSensitiveTypeGroupGroupedSensitiveTypeRequest",
+        "responseType": "datasafe.ListDataSafeSensitiveTypeGroupGroupedSensitiveTypeResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDataSafeSensitiveTypeGroupGroupedSensitiveType",
+        "requestType": "datasafe.UpdateDataSafeSensitiveTypeGroupGroupedSensitiveTypeRequest",
+        "responseType": "datasafe.UpdateDataSafeSensitiveTypeGroupGroupedSensitiveTypeResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDataSafeSensitiveTypeGroupGroupedSensitiveType",
+        "requestType": "datasafe.DeleteDataSafeSensitiveTypeGroupGroupedSensitiveTypeRequest",
+        "responseType": "datasafe.DeleteDataSafeSensitiveTypeGroupGroupedSensitiveTypeResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_datasafe_datasafesensitivetypegroupgroupedsensitivetype",
+    "collectionField": "datasafesensitivetypegroupgroupedsensitivetype",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/datasafesensitivetypegroupgroupedsensitivetype/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/datasafesensitivetypegroupgroupedsensitivetype/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for datasafe/datasafesensitivetypegroupgroupedsensitivetype; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "redis",
+  "slug": "redisredisclusternodes",
+  "kind": "RedisRedisClusterNodes",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_redis_redis_cluster_nodes",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateRedisRedisClusterNodes",
+        "requestType": "redis.CreateRedisRedisClusterNodesRequest",
+        "responseType": "redis.CreateRedisRedisClusterNodesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetRedisRedisClusterNodes",
+        "requestType": "redis.GetRedisRedisClusterNodesRequest",
+        "responseType": "redis.GetRedisRedisClusterNodesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListRedisRedisClusterNodes",
+        "requestType": "redis.ListRedisRedisClusterNodesRequest",
+        "responseType": "redis.ListRedisRedisClusterNodesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateRedisRedisClusterNodes",
+        "requestType": "redis.UpdateRedisRedisClusterNodesRequest",
+        "responseType": "redis.UpdateRedisRedisClusterNodesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteRedisRedisClusterNodes",
+        "requestType": "redis.DeleteRedisRedisClusterNodesRequest",
+        "responseType": "redis.DeleteRedisRedisClusterNodesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_redis_redisredisclusternodes",
+    "collectionField": "redisredisclusternodes",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/redis/redisredisclusternodes/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/redis/redisredisclusternodes/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for redis/redisredisclusternodes; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

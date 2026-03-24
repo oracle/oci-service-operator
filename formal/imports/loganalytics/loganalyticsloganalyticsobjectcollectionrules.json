@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "loganalytics",
+  "slug": "loganalyticsloganalyticsobjectcollectionrules",
+  "kind": "LogAnalyticsLogAnalyticsObjectCollectionRules",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_log_analytics_log_analytics_object_collection_rules",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateLogAnalyticsLogAnalyticsObjectCollectionRules",
+        "requestType": "loganalytics.CreateLogAnalyticsLogAnalyticsObjectCollectionRulesRequest",
+        "responseType": "loganalytics.CreateLogAnalyticsLogAnalyticsObjectCollectionRulesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetLogAnalyticsLogAnalyticsObjectCollectionRules",
+        "requestType": "loganalytics.GetLogAnalyticsLogAnalyticsObjectCollectionRulesRequest",
+        "responseType": "loganalytics.GetLogAnalyticsLogAnalyticsObjectCollectionRulesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListLogAnalyticsLogAnalyticsObjectCollectionRules",
+        "requestType": "loganalytics.ListLogAnalyticsLogAnalyticsObjectCollectionRulesRequest",
+        "responseType": "loganalytics.ListLogAnalyticsLogAnalyticsObjectCollectionRulesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateLogAnalyticsLogAnalyticsObjectCollectionRules",
+        "requestType": "loganalytics.UpdateLogAnalyticsLogAnalyticsObjectCollectionRulesRequest",
+        "responseType": "loganalytics.UpdateLogAnalyticsLogAnalyticsObjectCollectionRulesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteLogAnalyticsLogAnalyticsObjectCollectionRules",
+        "requestType": "loganalytics.DeleteLogAnalyticsLogAnalyticsObjectCollectionRulesRequest",
+        "responseType": "loganalytics.DeleteLogAnalyticsLogAnalyticsObjectCollectionRulesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_loganalytics_loganalyticsloganalyticsobjectcollectionrules",
+    "collectionField": "loganalyticsloganalyticsobjectcollectionrules",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/loganalytics/loganalyticsloganalyticsobjectcollectionrules/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/loganalytics/loganalyticsloganalyticsobjectcollectionrules/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for loganalytics/loganalyticsloganalyticsobjectcollectionrules; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

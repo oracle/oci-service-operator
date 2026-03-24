@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "stackmonitoring",
+  "slug": "stackmonitoringmonitoringtemplates",
+  "kind": "StackMonitoringMonitoringTemplates",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_stack_monitoring_monitoring_templates",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateStackMonitoringMonitoringTemplates",
+        "requestType": "stackmonitoring.CreateStackMonitoringMonitoringTemplatesRequest",
+        "responseType": "stackmonitoring.CreateStackMonitoringMonitoringTemplatesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetStackMonitoringMonitoringTemplates",
+        "requestType": "stackmonitoring.GetStackMonitoringMonitoringTemplatesRequest",
+        "responseType": "stackmonitoring.GetStackMonitoringMonitoringTemplatesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListStackMonitoringMonitoringTemplates",
+        "requestType": "stackmonitoring.ListStackMonitoringMonitoringTemplatesRequest",
+        "responseType": "stackmonitoring.ListStackMonitoringMonitoringTemplatesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateStackMonitoringMonitoringTemplates",
+        "requestType": "stackmonitoring.UpdateStackMonitoringMonitoringTemplatesRequest",
+        "responseType": "stackmonitoring.UpdateStackMonitoringMonitoringTemplatesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteStackMonitoringMonitoringTemplates",
+        "requestType": "stackmonitoring.DeleteStackMonitoringMonitoringTemplatesRequest",
+        "responseType": "stackmonitoring.DeleteStackMonitoringMonitoringTemplatesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_stackmonitoring_stackmonitoringmonitoringtemplates",
+    "collectionField": "stackmonitoringmonitoringtemplates",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/stackmonitoring/stackmonitoringmonitoringtemplates/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/stackmonitoring/stackmonitoringmonitoringtemplates/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for stackmonitoring/stackmonitoringmonitoringtemplates; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

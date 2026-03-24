@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "coreappcatalogsubscriptions",
+  "kind": "CoreAppCatalogSubscriptions",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_core_app_catalog_subscriptions",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCoreAppCatalogSubscriptions",
+        "requestType": "core.CreateCoreAppCatalogSubscriptionsRequest",
+        "responseType": "core.CreateCoreAppCatalogSubscriptionsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCoreAppCatalogSubscriptions",
+        "requestType": "core.GetCoreAppCatalogSubscriptionsRequest",
+        "responseType": "core.GetCoreAppCatalogSubscriptionsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCoreAppCatalogSubscriptions",
+        "requestType": "core.ListCoreAppCatalogSubscriptionsRequest",
+        "responseType": "core.ListCoreAppCatalogSubscriptionsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCoreAppCatalogSubscriptions",
+        "requestType": "core.UpdateCoreAppCatalogSubscriptionsRequest",
+        "responseType": "core.UpdateCoreAppCatalogSubscriptionsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCoreAppCatalogSubscriptions",
+        "requestType": "core.DeleteCoreAppCatalogSubscriptionsRequest",
+        "responseType": "core.DeleteCoreAppCatalogSubscriptionsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_core_coreappcatalogsubscriptions",
+    "collectionField": "coreappcatalogsubscriptions",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/coreappcatalogsubscriptions/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/coreappcatalogsubscriptions/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for core/coreappcatalogsubscriptions; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

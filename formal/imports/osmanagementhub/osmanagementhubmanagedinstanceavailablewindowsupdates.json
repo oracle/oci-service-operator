@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "osmanagementhub",
+  "slug": "osmanagementhubmanagedinstanceavailablewindowsupdates",
+  "kind": "OsManagementHubManagedInstanceAvailableWindowsUpdates",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_os_management_hub_managed_instance_available_windows_updates",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOsManagementHubManagedInstanceAvailableWindowsUpdates",
+        "requestType": "osmanagementhub.CreateOsManagementHubManagedInstanceAvailableWindowsUpdatesRequest",
+        "responseType": "osmanagementhub.CreateOsManagementHubManagedInstanceAvailableWindowsUpdatesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOsManagementHubManagedInstanceAvailableWindowsUpdates",
+        "requestType": "osmanagementhub.GetOsManagementHubManagedInstanceAvailableWindowsUpdatesRequest",
+        "responseType": "osmanagementhub.GetOsManagementHubManagedInstanceAvailableWindowsUpdatesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOsManagementHubManagedInstanceAvailableWindowsUpdates",
+        "requestType": "osmanagementhub.ListOsManagementHubManagedInstanceAvailableWindowsUpdatesRequest",
+        "responseType": "osmanagementhub.ListOsManagementHubManagedInstanceAvailableWindowsUpdatesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOsManagementHubManagedInstanceAvailableWindowsUpdates",
+        "requestType": "osmanagementhub.UpdateOsManagementHubManagedInstanceAvailableWindowsUpdatesRequest",
+        "responseType": "osmanagementhub.UpdateOsManagementHubManagedInstanceAvailableWindowsUpdatesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOsManagementHubManagedInstanceAvailableWindowsUpdates",
+        "requestType": "osmanagementhub.DeleteOsManagementHubManagedInstanceAvailableWindowsUpdatesRequest",
+        "responseType": "osmanagementhub.DeleteOsManagementHubManagedInstanceAvailableWindowsUpdatesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_osmanagementhub_osmanagementhubmanagedinstanceavailablewindowsupdates",
+    "collectionField": "osmanagementhubmanagedinstanceavailablewindowsupdates",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/osmanagementhub/osmanagementhubmanagedinstanceavailablewindowsupdates/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/osmanagementhub/osmanagementhubmanagedinstanceavailablewindowsupdates/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for osmanagementhub/osmanagementhubmanagedinstanceavailablewindowsupdates; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "identitydomains",
+  "slug": "identitydomainsociconsolesignonpolicyconsents",
+  "kind": "IdentityDomainsOciConsoleSignOnPolicyConsents",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_identity_domains_oci_console_sign_on_policy_consents",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateIdentityDomainsOciConsoleSignOnPolicyConsents",
+        "requestType": "identitydomains.CreateIdentityDomainsOciConsoleSignOnPolicyConsentsRequest",
+        "responseType": "identitydomains.CreateIdentityDomainsOciConsoleSignOnPolicyConsentsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetIdentityDomainsOciConsoleSignOnPolicyConsents",
+        "requestType": "identitydomains.GetIdentityDomainsOciConsoleSignOnPolicyConsentsRequest",
+        "responseType": "identitydomains.GetIdentityDomainsOciConsoleSignOnPolicyConsentsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListIdentityDomainsOciConsoleSignOnPolicyConsents",
+        "requestType": "identitydomains.ListIdentityDomainsOciConsoleSignOnPolicyConsentsRequest",
+        "responseType": "identitydomains.ListIdentityDomainsOciConsoleSignOnPolicyConsentsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateIdentityDomainsOciConsoleSignOnPolicyConsents",
+        "requestType": "identitydomains.UpdateIdentityDomainsOciConsoleSignOnPolicyConsentsRequest",
+        "responseType": "identitydomains.UpdateIdentityDomainsOciConsoleSignOnPolicyConsentsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteIdentityDomainsOciConsoleSignOnPolicyConsents",
+        "requestType": "identitydomains.DeleteIdentityDomainsOciConsoleSignOnPolicyConsentsRequest",
+        "responseType": "identitydomains.DeleteIdentityDomainsOciConsoleSignOnPolicyConsentsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_identitydomains_identitydomainsociconsolesignonpolicyconsents",
+    "collectionField": "identitydomainsociconsolesignonpolicyconsents",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/identitydomains/identitydomainsociconsolesignonpolicyconsents/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/identitydomains/identitydomainsociconsolesignonpolicyconsents/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for identitydomains/identitydomainsociconsolesignonpolicyconsents; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

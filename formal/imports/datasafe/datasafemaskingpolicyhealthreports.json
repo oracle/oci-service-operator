@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "datasafemaskingpolicyhealthreports",
+  "kind": "DataSafeMaskingPolicyHealthReports",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_masking_policy_health_reports",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDataSafeMaskingPolicyHealthReports",
+        "requestType": "datasafe.CreateDataSafeMaskingPolicyHealthReportsRequest",
+        "responseType": "datasafe.CreateDataSafeMaskingPolicyHealthReportsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDataSafeMaskingPolicyHealthReports",
+        "requestType": "datasafe.GetDataSafeMaskingPolicyHealthReportsRequest",
+        "responseType": "datasafe.GetDataSafeMaskingPolicyHealthReportsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDataSafeMaskingPolicyHealthReports",
+        "requestType": "datasafe.ListDataSafeMaskingPolicyHealthReportsRequest",
+        "responseType": "datasafe.ListDataSafeMaskingPolicyHealthReportsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDataSafeMaskingPolicyHealthReports",
+        "requestType": "datasafe.UpdateDataSafeMaskingPolicyHealthReportsRequest",
+        "responseType": "datasafe.UpdateDataSafeMaskingPolicyHealthReportsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDataSafeMaskingPolicyHealthReports",
+        "requestType": "datasafe.DeleteDataSafeMaskingPolicyHealthReportsRequest",
+        "responseType": "datasafe.DeleteDataSafeMaskingPolicyHealthReportsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_datasafe_datasafemaskingpolicyhealthreports",
+    "collectionField": "datasafemaskingpolicyhealthreports",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/datasafemaskingpolicyhealthreports/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/datasafemaskingpolicyhealthreports/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for datasafe/datasafemaskingpolicyhealthreports; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

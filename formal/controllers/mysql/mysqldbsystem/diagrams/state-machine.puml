@@ -1,0 +1,64 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title State Machine - mysql/MySqlDbSystem
+skinparam state {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+}
+state "provisioning\nprovider: CREATING, UPDATING" as provisioning
+state "active\nprovider: ACTIVE" as active
+state "updating\nprovider: UPDATING" as updating
+state "failed\nprovider: repo-authored failure bucket" as failed
+[*] --> provisioning : CreateDbSystem
+provisioning --> active : ACTIVE
+active --> updating : UpdateDbSystem
+updating --> active : ACTIVE
+provisioning --> failed : unresolved OCI error or\nopen gap
+updating --> failed : unresolved OCI error or\nopen gap
+failed --> [*] : operator intervention
+note right of active
+shared diagram:
+shared/diagrams/shared-controller-state-machine.svg
+Start from the shared controller phase model and
+specialize imported provider states, delete
+targets, and failure exits here.
+archetype batch: Legacy-adapter controllers map
+provider states into the shared controller
+phases while open gaps keep additional
+transitions explicit.
+service: mysql
+slug: mysqldbsystem
+kind: MySqlDbSystem
+archetype: legacy-adapter
+status/finalizer: manual / none
+requeue: provisioning, updating
+provider states: create CREATING, UPDATING;
+update UPDATING; delete DELETING
+mutable/forceNew: access_mode,
+backup_policy.copy_policies.backup_copy_retention_in_days,
+backup_policy.copy_policies.copy_to_region,
+backup_policy.defined_tags (+50 more) /
+admin_password, admin_username,
+availability_domain, compartment_id (+12 more)
+open gaps: bind-versus-create,
+delete-confirmation, endpoint-materialization,
+legacy-adapter, list-lookup (+3 more)
+Create reads username and password secrets
+before submitting the OCI request.
+Endpoint secret materialization only happens
+after the DB system reaches ACTIVE.
+Delete remains an unsupported legacy path, so no
+confirmed terminating phase exists today.
+end note
+@enduml

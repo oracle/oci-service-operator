@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "apiaccesscontrol",
+  "slug": "apiaccesscontrolapimetadata",
+  "kind": "ApiaccesscontrolApiMetadata",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_apiaccesscontrol_api_metadata",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateApiaccesscontrolApiMetadata",
+        "requestType": "apiaccesscontrol.CreateApiaccesscontrolApiMetadataRequest",
+        "responseType": "apiaccesscontrol.CreateApiaccesscontrolApiMetadataResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetApiaccesscontrolApiMetadata",
+        "requestType": "apiaccesscontrol.GetApiaccesscontrolApiMetadataRequest",
+        "responseType": "apiaccesscontrol.GetApiaccesscontrolApiMetadataResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListApiaccesscontrolApiMetadata",
+        "requestType": "apiaccesscontrol.ListApiaccesscontrolApiMetadataRequest",
+        "responseType": "apiaccesscontrol.ListApiaccesscontrolApiMetadataResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateApiaccesscontrolApiMetadata",
+        "requestType": "apiaccesscontrol.UpdateApiaccesscontrolApiMetadataRequest",
+        "responseType": "apiaccesscontrol.UpdateApiaccesscontrolApiMetadataResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteApiaccesscontrolApiMetadata",
+        "requestType": "apiaccesscontrol.DeleteApiaccesscontrolApiMetadataRequest",
+        "responseType": "apiaccesscontrol.DeleteApiaccesscontrolApiMetadataResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_apiaccesscontrol_apiaccesscontrolapimetadata",
+    "collectionField": "apiaccesscontrolapimetadata",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/apiaccesscontrol/apiaccesscontrolapimetadata/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/apiaccesscontrol/apiaccesscontrolapimetadata/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for apiaccesscontrol/apiaccesscontrolapimetadata; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

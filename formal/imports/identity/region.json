@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "identity",
+  "slug": "region",
+  "kind": "Region",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_identity_region",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateRegion",
+        "requestType": "identity.CreateRegionRequest",
+        "responseType": "identity.CreateRegionResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetRegion",
+        "requestType": "identity.GetRegionRequest",
+        "responseType": "identity.GetRegionResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListRegion",
+        "requestType": "identity.ListRegionRequest",
+        "responseType": "identity.ListRegionResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateRegion",
+        "requestType": "identity.UpdateRegionRequest",
+        "responseType": "identity.UpdateRegionResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteRegion",
+        "requestType": "identity.DeleteRegionRequest",
+        "responseType": "identity.DeleteRegionResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_identity_region",
+    "collectionField": "region",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/identity/region/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/identity/region/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for identity/region; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

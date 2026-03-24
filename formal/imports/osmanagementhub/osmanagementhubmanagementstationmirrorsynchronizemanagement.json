@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "osmanagementhub",
+  "slug": "osmanagementhubmanagementstationmirrorsynchronizemanagement",
+  "kind": "OsManagementHubManagementStationMirrorSynchronizeManagement",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_os_management_hub_management_station_mirror_synchronize_management",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOsManagementHubManagementStationMirrorSynchronizeManagement",
+        "requestType": "osmanagementhub.CreateOsManagementHubManagementStationMirrorSynchronizeManagementRequest",
+        "responseType": "osmanagementhub.CreateOsManagementHubManagementStationMirrorSynchronizeManagementResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOsManagementHubManagementStationMirrorSynchronizeManagement",
+        "requestType": "osmanagementhub.GetOsManagementHubManagementStationMirrorSynchronizeManagementRequest",
+        "responseType": "osmanagementhub.GetOsManagementHubManagementStationMirrorSynchronizeManagementResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOsManagementHubManagementStationMirrorSynchronizeManagement",
+        "requestType": "osmanagementhub.ListOsManagementHubManagementStationMirrorSynchronizeManagementRequest",
+        "responseType": "osmanagementhub.ListOsManagementHubManagementStationMirrorSynchronizeManagementResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOsManagementHubManagementStationMirrorSynchronizeManagement",
+        "requestType": "osmanagementhub.UpdateOsManagementHubManagementStationMirrorSynchronizeManagementRequest",
+        "responseType": "osmanagementhub.UpdateOsManagementHubManagementStationMirrorSynchronizeManagementResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOsManagementHubManagementStationMirrorSynchronizeManagement",
+        "requestType": "osmanagementhub.DeleteOsManagementHubManagementStationMirrorSynchronizeManagementRequest",
+        "responseType": "osmanagementhub.DeleteOsManagementHubManagementStationMirrorSynchronizeManagementResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_osmanagementhub_osmanagementhubmanagementstationmirrorsynchronizemanagement",
+    "collectionField": "osmanagementhubmanagementstationmirrorsynchronizemanagement",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/osmanagementhub/osmanagementhubmanagementstationmirrorsynchronizemanagement/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/osmanagementhub/osmanagementhubmanagementstationmirrorsynchronizemanagement/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for osmanagementhub/osmanagementhubmanagementstationmirrorsynchronizemanagement; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

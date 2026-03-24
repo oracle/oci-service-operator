@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "devops",
+  "slug": "devopsrepositorymirrorrecords",
+  "kind": "DevopsRepositoryMirrorRecords",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_devops_repository_mirror_records",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDevopsRepositoryMirrorRecords",
+        "requestType": "devops.CreateDevopsRepositoryMirrorRecordsRequest",
+        "responseType": "devops.CreateDevopsRepositoryMirrorRecordsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDevopsRepositoryMirrorRecords",
+        "requestType": "devops.GetDevopsRepositoryMirrorRecordsRequest",
+        "responseType": "devops.GetDevopsRepositoryMirrorRecordsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDevopsRepositoryMirrorRecords",
+        "requestType": "devops.ListDevopsRepositoryMirrorRecordsRequest",
+        "responseType": "devops.ListDevopsRepositoryMirrorRecordsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDevopsRepositoryMirrorRecords",
+        "requestType": "devops.UpdateDevopsRepositoryMirrorRecordsRequest",
+        "responseType": "devops.UpdateDevopsRepositoryMirrorRecordsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDevopsRepositoryMirrorRecords",
+        "requestType": "devops.DeleteDevopsRepositoryMirrorRecordsRequest",
+        "responseType": "devops.DeleteDevopsRepositoryMirrorRecordsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_devops_devopsrepositorymirrorrecords",
+    "collectionField": "devopsrepositorymirrorrecords",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/devops/devopsrepositorymirrorrecords/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/devops/devopsrepositorymirrorrecords/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for devops/devopsrepositorymirrorrecords; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

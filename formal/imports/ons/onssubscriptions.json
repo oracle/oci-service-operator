@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "ons",
+  "slug": "onssubscriptions",
+  "kind": "OnsSubscriptions",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_ons_subscriptions",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOnsSubscriptions",
+        "requestType": "ons.CreateOnsSubscriptionsRequest",
+        "responseType": "ons.CreateOnsSubscriptionsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOnsSubscriptions",
+        "requestType": "ons.GetOnsSubscriptionsRequest",
+        "responseType": "ons.GetOnsSubscriptionsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOnsSubscriptions",
+        "requestType": "ons.ListOnsSubscriptionsRequest",
+        "responseType": "ons.ListOnsSubscriptionsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOnsSubscriptions",
+        "requestType": "ons.UpdateOnsSubscriptionsRequest",
+        "responseType": "ons.UpdateOnsSubscriptionsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOnsSubscriptions",
+        "requestType": "ons.DeleteOnsSubscriptionsRequest",
+        "responseType": "ons.DeleteOnsSubscriptionsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_ons_onssubscriptions",
+    "collectionField": "onssubscriptions",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/ons/onssubscriptions/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/ons/onssubscriptions/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for ons/onssubscriptions; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

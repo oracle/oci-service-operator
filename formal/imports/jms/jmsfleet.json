@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "jms",
+  "slug": "jmsfleet",
+  "kind": "JmsFleet",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_jms_fleet",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateJmsFleet",
+        "requestType": "jms.CreateJmsFleetRequest",
+        "responseType": "jms.CreateJmsFleetResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetJmsFleet",
+        "requestType": "jms.GetJmsFleetRequest",
+        "responseType": "jms.GetJmsFleetResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListJmsFleet",
+        "requestType": "jms.ListJmsFleetRequest",
+        "responseType": "jms.ListJmsFleetResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateJmsFleet",
+        "requestType": "jms.UpdateJmsFleetRequest",
+        "responseType": "jms.UpdateJmsFleetResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteJmsFleet",
+        "requestType": "jms.DeleteJmsFleetRequest",
+        "responseType": "jms.DeleteJmsFleetResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_jms_jmsfleet",
+    "collectionField": "jmsfleet",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/jms/jmsfleet/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/jms/jmsfleet/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for jms/jmsfleet; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

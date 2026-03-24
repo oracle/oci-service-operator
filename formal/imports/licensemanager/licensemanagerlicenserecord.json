@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "licensemanager",
+  "slug": "licensemanagerlicenserecord",
+  "kind": "LicenseManagerLicenseRecord",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_license_manager_license_record",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateLicenseManagerLicenseRecord",
+        "requestType": "licensemanager.CreateLicenseManagerLicenseRecordRequest",
+        "responseType": "licensemanager.CreateLicenseManagerLicenseRecordResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetLicenseManagerLicenseRecord",
+        "requestType": "licensemanager.GetLicenseManagerLicenseRecordRequest",
+        "responseType": "licensemanager.GetLicenseManagerLicenseRecordResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListLicenseManagerLicenseRecord",
+        "requestType": "licensemanager.ListLicenseManagerLicenseRecordRequest",
+        "responseType": "licensemanager.ListLicenseManagerLicenseRecordResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateLicenseManagerLicenseRecord",
+        "requestType": "licensemanager.UpdateLicenseManagerLicenseRecordRequest",
+        "responseType": "licensemanager.UpdateLicenseManagerLicenseRecordResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteLicenseManagerLicenseRecord",
+        "requestType": "licensemanager.DeleteLicenseManagerLicenseRecordRequest",
+        "responseType": "licensemanager.DeleteLicenseManagerLicenseRecordResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_licensemanager_licensemanagerlicenserecord",
+    "collectionField": "licensemanagerlicenserecord",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/licensemanager/licensemanagerlicenserecord/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/licensemanager/licensemanagerlicenserecord/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for licensemanager/licensemanagerlicenserecord; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

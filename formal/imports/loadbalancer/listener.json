@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "loadbalancer",
+  "slug": "listener",
+  "kind": "Listener",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_loadbalancer_listener",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateListener",
+        "requestType": "loadbalancer.CreateListenerRequest",
+        "responseType": "loadbalancer.CreateListenerResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetListener",
+        "requestType": "loadbalancer.GetListenerRequest",
+        "responseType": "loadbalancer.GetListenerResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListListener",
+        "requestType": "loadbalancer.ListListenerRequest",
+        "responseType": "loadbalancer.ListListenerResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateListener",
+        "requestType": "loadbalancer.UpdateListenerRequest",
+        "responseType": "loadbalancer.UpdateListenerResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteListener",
+        "requestType": "loadbalancer.DeleteListenerRequest",
+        "responseType": "loadbalancer.DeleteListenerResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_loadbalancer_listener",
+    "collectionField": "listener",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/loadbalancer/listener/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/loadbalancer/listener/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for loadbalancer/listener; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

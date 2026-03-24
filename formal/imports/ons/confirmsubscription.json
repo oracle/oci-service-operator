@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "ons",
+  "slug": "confirmsubscription",
+  "kind": "ConfirmSubscription",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_ons_confirmsubscription",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateConfirmSubscription",
+        "requestType": "ons.CreateConfirmSubscriptionRequest",
+        "responseType": "ons.CreateConfirmSubscriptionResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetConfirmSubscription",
+        "requestType": "ons.GetConfirmSubscriptionRequest",
+        "responseType": "ons.GetConfirmSubscriptionResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListConfirmSubscription",
+        "requestType": "ons.ListConfirmSubscriptionRequest",
+        "responseType": "ons.ListConfirmSubscriptionResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateConfirmSubscription",
+        "requestType": "ons.UpdateConfirmSubscriptionRequest",
+        "responseType": "ons.UpdateConfirmSubscriptionResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteConfirmSubscription",
+        "requestType": "ons.DeleteConfirmSubscriptionRequest",
+        "responseType": "ons.DeleteConfirmSubscriptionResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_ons_confirmsubscription",
+    "collectionField": "confirmsubscription",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/ons/confirmsubscription/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/ons/confirmsubscription/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for ons/confirmsubscription; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

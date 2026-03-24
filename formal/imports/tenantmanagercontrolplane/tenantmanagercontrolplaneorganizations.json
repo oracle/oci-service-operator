@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "tenantmanagercontrolplane",
+  "slug": "tenantmanagercontrolplaneorganizations",
+  "kind": "TenantmanagercontrolplaneOrganizations",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_tenantmanagercontrolplane_organizations",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateTenantmanagercontrolplaneOrganizations",
+        "requestType": "tenantmanagercontrolplane.CreateTenantmanagercontrolplaneOrganizationsRequest",
+        "responseType": "tenantmanagercontrolplane.CreateTenantmanagercontrolplaneOrganizationsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetTenantmanagercontrolplaneOrganizations",
+        "requestType": "tenantmanagercontrolplane.GetTenantmanagercontrolplaneOrganizationsRequest",
+        "responseType": "tenantmanagercontrolplane.GetTenantmanagercontrolplaneOrganizationsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListTenantmanagercontrolplaneOrganizations",
+        "requestType": "tenantmanagercontrolplane.ListTenantmanagercontrolplaneOrganizationsRequest",
+        "responseType": "tenantmanagercontrolplane.ListTenantmanagercontrolplaneOrganizationsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateTenantmanagercontrolplaneOrganizations",
+        "requestType": "tenantmanagercontrolplane.UpdateTenantmanagercontrolplaneOrganizationsRequest",
+        "responseType": "tenantmanagercontrolplane.UpdateTenantmanagercontrolplaneOrganizationsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteTenantmanagercontrolplaneOrganizations",
+        "requestType": "tenantmanagercontrolplane.DeleteTenantmanagercontrolplaneOrganizationsRequest",
+        "responseType": "tenantmanagercontrolplane.DeleteTenantmanagercontrolplaneOrganizationsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_tenantmanagercontrolplane_tenantmanagercontrolplaneorganizations",
+    "collectionField": "tenantmanagercontrolplaneorganizations",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/tenantmanagercontrolplane/tenantmanagercontrolplaneorganizations/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/tenantmanagercontrolplane/tenantmanagercontrolplaneorganizations/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for tenantmanagercontrolplane/tenantmanagercontrolplaneorganizations; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

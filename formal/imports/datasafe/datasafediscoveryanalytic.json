@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "datasafediscoveryanalytic",
+  "kind": "DataSafeDiscoveryAnalytic",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_discovery_analytic",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDataSafeDiscoveryAnalytic",
+        "requestType": "datasafe.CreateDataSafeDiscoveryAnalyticRequest",
+        "responseType": "datasafe.CreateDataSafeDiscoveryAnalyticResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDataSafeDiscoveryAnalytic",
+        "requestType": "datasafe.GetDataSafeDiscoveryAnalyticRequest",
+        "responseType": "datasafe.GetDataSafeDiscoveryAnalyticResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDataSafeDiscoveryAnalytic",
+        "requestType": "datasafe.ListDataSafeDiscoveryAnalyticRequest",
+        "responseType": "datasafe.ListDataSafeDiscoveryAnalyticResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDataSafeDiscoveryAnalytic",
+        "requestType": "datasafe.UpdateDataSafeDiscoveryAnalyticRequest",
+        "responseType": "datasafe.UpdateDataSafeDiscoveryAnalyticResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDataSafeDiscoveryAnalytic",
+        "requestType": "datasafe.DeleteDataSafeDiscoveryAnalyticRequest",
+        "responseType": "datasafe.DeleteDataSafeDiscoveryAnalyticResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_datasafe_datasafediscoveryanalytic",
+    "collectionField": "datasafediscoveryanalytic",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/datasafediscoveryanalytic/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/datasafediscoveryanalytic/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for datasafe/datasafediscoveryanalytic; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

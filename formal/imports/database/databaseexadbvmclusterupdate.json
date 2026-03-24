@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "databaseexadbvmclusterupdate",
+  "kind": "DatabaseExadbVmClusterUpdate",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_exadb_vm_cluster_update",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseExadbVmClusterUpdate",
+        "requestType": "database.CreateDatabaseExadbVmClusterUpdateRequest",
+        "responseType": "database.CreateDatabaseExadbVmClusterUpdateResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseExadbVmClusterUpdate",
+        "requestType": "database.GetDatabaseExadbVmClusterUpdateRequest",
+        "responseType": "database.GetDatabaseExadbVmClusterUpdateResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseExadbVmClusterUpdate",
+        "requestType": "database.ListDatabaseExadbVmClusterUpdateRequest",
+        "responseType": "database.ListDatabaseExadbVmClusterUpdateResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseExadbVmClusterUpdate",
+        "requestType": "database.UpdateDatabaseExadbVmClusterUpdateRequest",
+        "responseType": "database.UpdateDatabaseExadbVmClusterUpdateResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseExadbVmClusterUpdate",
+        "requestType": "database.DeleteDatabaseExadbVmClusterUpdateRequest",
+        "responseType": "database.DeleteDatabaseExadbVmClusterUpdateResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_databaseexadbvmclusterupdate",
+    "collectionField": "databaseexadbvmclusterupdate",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/databaseexadbvmclusterupdate/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/databaseexadbvmclusterupdate/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/databaseexadbvmclusterupdate; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

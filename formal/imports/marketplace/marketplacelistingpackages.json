@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "marketplace",
+  "slug": "marketplacelistingpackages",
+  "kind": "MarketplaceListingPackages",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_marketplace_listing_packages",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateMarketplaceListingPackages",
+        "requestType": "marketplace.CreateMarketplaceListingPackagesRequest",
+        "responseType": "marketplace.CreateMarketplaceListingPackagesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetMarketplaceListingPackages",
+        "requestType": "marketplace.GetMarketplaceListingPackagesRequest",
+        "responseType": "marketplace.GetMarketplaceListingPackagesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListMarketplaceListingPackages",
+        "requestType": "marketplace.ListMarketplaceListingPackagesRequest",
+        "responseType": "marketplace.ListMarketplaceListingPackagesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateMarketplaceListingPackages",
+        "requestType": "marketplace.UpdateMarketplaceListingPackagesRequest",
+        "responseType": "marketplace.UpdateMarketplaceListingPackagesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteMarketplaceListingPackages",
+        "requestType": "marketplace.DeleteMarketplaceListingPackagesRequest",
+        "responseType": "marketplace.DeleteMarketplaceListingPackagesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_marketplace_marketplacelistingpackages",
+    "collectionField": "marketplacelistingpackages",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/marketplace/marketplacelistingpackages/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/marketplace/marketplacelistingpackages/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for marketplace/marketplacelistingpackages; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

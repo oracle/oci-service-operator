@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "datasafemaskingpolicyreferentialrelations",
+  "kind": "DataSafeMaskingPolicyReferentialRelations",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_masking_policy_referential_relations",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDataSafeMaskingPolicyReferentialRelations",
+        "requestType": "datasafe.CreateDataSafeMaskingPolicyReferentialRelationsRequest",
+        "responseType": "datasafe.CreateDataSafeMaskingPolicyReferentialRelationsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDataSafeMaskingPolicyReferentialRelations",
+        "requestType": "datasafe.GetDataSafeMaskingPolicyReferentialRelationsRequest",
+        "responseType": "datasafe.GetDataSafeMaskingPolicyReferentialRelationsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDataSafeMaskingPolicyReferentialRelations",
+        "requestType": "datasafe.ListDataSafeMaskingPolicyReferentialRelationsRequest",
+        "responseType": "datasafe.ListDataSafeMaskingPolicyReferentialRelationsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDataSafeMaskingPolicyReferentialRelations",
+        "requestType": "datasafe.UpdateDataSafeMaskingPolicyReferentialRelationsRequest",
+        "responseType": "datasafe.UpdateDataSafeMaskingPolicyReferentialRelationsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDataSafeMaskingPolicyReferentialRelations",
+        "requestType": "datasafe.DeleteDataSafeMaskingPolicyReferentialRelationsRequest",
+        "responseType": "datasafe.DeleteDataSafeMaskingPolicyReferentialRelationsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_datasafe_datasafemaskingpolicyreferentialrelations",
+    "collectionField": "datasafemaskingpolicyreferentialrelations",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/datasafemaskingpolicyreferentialrelations/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/datasafemaskingpolicyreferentialrelations/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for datasafe/datasafemaskingpolicyreferentialrelations; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

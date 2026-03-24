@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "email",
+  "slug": "emailconfiguration",
+  "kind": "EmailConfiguration",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_email_configuration",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateEmailConfiguration",
+        "requestType": "email.CreateEmailConfigurationRequest",
+        "responseType": "email.CreateEmailConfigurationResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetEmailConfiguration",
+        "requestType": "email.GetEmailConfigurationRequest",
+        "responseType": "email.GetEmailConfigurationResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListEmailConfiguration",
+        "requestType": "email.ListEmailConfigurationRequest",
+        "responseType": "email.ListEmailConfigurationResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateEmailConfiguration",
+        "requestType": "email.UpdateEmailConfigurationRequest",
+        "responseType": "email.UpdateEmailConfigurationResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteEmailConfiguration",
+        "requestType": "email.DeleteEmailConfigurationRequest",
+        "responseType": "email.DeleteEmailConfigurationResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_email_emailconfiguration",
+    "collectionField": "emailconfiguration",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/email/emailconfiguration/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/email/emailconfiguration/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for email/emailconfiguration; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

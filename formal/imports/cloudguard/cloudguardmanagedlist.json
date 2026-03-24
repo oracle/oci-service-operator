@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "cloudguard",
+  "slug": "cloudguardmanagedlist",
+  "kind": "CloudGuardManagedList",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_cloud_guard_managed_list",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCloudGuardManagedList",
+        "requestType": "cloudguard.CreateCloudGuardManagedListRequest",
+        "responseType": "cloudguard.CreateCloudGuardManagedListResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCloudGuardManagedList",
+        "requestType": "cloudguard.GetCloudGuardManagedListRequest",
+        "responseType": "cloudguard.GetCloudGuardManagedListResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCloudGuardManagedList",
+        "requestType": "cloudguard.ListCloudGuardManagedListRequest",
+        "responseType": "cloudguard.ListCloudGuardManagedListResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCloudGuardManagedList",
+        "requestType": "cloudguard.UpdateCloudGuardManagedListRequest",
+        "responseType": "cloudguard.UpdateCloudGuardManagedListResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCloudGuardManagedList",
+        "requestType": "cloudguard.DeleteCloudGuardManagedListRequest",
+        "responseType": "cloudguard.DeleteCloudGuardManagedListResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_cloudguard_cloudguardmanagedlist",
+    "collectionField": "cloudguardmanagedlist",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/cloudguard/cloudguardmanagedlist/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/cloudguard/cloudguardmanagedlist/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for cloudguard/cloudguardmanagedlist; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "osmanagementhub",
+  "slug": "osmanagementhublifecycleenvironments",
+  "kind": "OsManagementHubLifecycleEnvironments",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_os_management_hub_lifecycle_environments",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOsManagementHubLifecycleEnvironments",
+        "requestType": "osmanagementhub.CreateOsManagementHubLifecycleEnvironmentsRequest",
+        "responseType": "osmanagementhub.CreateOsManagementHubLifecycleEnvironmentsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOsManagementHubLifecycleEnvironments",
+        "requestType": "osmanagementhub.GetOsManagementHubLifecycleEnvironmentsRequest",
+        "responseType": "osmanagementhub.GetOsManagementHubLifecycleEnvironmentsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOsManagementHubLifecycleEnvironments",
+        "requestType": "osmanagementhub.ListOsManagementHubLifecycleEnvironmentsRequest",
+        "responseType": "osmanagementhub.ListOsManagementHubLifecycleEnvironmentsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOsManagementHubLifecycleEnvironments",
+        "requestType": "osmanagementhub.UpdateOsManagementHubLifecycleEnvironmentsRequest",
+        "responseType": "osmanagementhub.UpdateOsManagementHubLifecycleEnvironmentsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOsManagementHubLifecycleEnvironments",
+        "requestType": "osmanagementhub.DeleteOsManagementHubLifecycleEnvironmentsRequest",
+        "responseType": "osmanagementhub.DeleteOsManagementHubLifecycleEnvironmentsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_osmanagementhub_osmanagementhublifecycleenvironments",
+    "collectionField": "osmanagementhublifecycleenvironments",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/osmanagementhub/osmanagementhublifecycleenvironments/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/osmanagementhub/osmanagementhublifecycleenvironments/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for osmanagementhub/osmanagementhublifecycleenvironments; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

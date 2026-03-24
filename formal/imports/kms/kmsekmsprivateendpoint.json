@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "kms",
+  "slug": "kmsekmsprivateendpoint",
+  "kind": "KmsEkmsPrivateEndpoint",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_kms_ekms_private_endpoint",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateKmsEkmsPrivateEndpoint",
+        "requestType": "kms.CreateKmsEkmsPrivateEndpointRequest",
+        "responseType": "kms.CreateKmsEkmsPrivateEndpointResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetKmsEkmsPrivateEndpoint",
+        "requestType": "kms.GetKmsEkmsPrivateEndpointRequest",
+        "responseType": "kms.GetKmsEkmsPrivateEndpointResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListKmsEkmsPrivateEndpoint",
+        "requestType": "kms.ListKmsEkmsPrivateEndpointRequest",
+        "responseType": "kms.ListKmsEkmsPrivateEndpointResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateKmsEkmsPrivateEndpoint",
+        "requestType": "kms.UpdateKmsEkmsPrivateEndpointRequest",
+        "responseType": "kms.UpdateKmsEkmsPrivateEndpointResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteKmsEkmsPrivateEndpoint",
+        "requestType": "kms.DeleteKmsEkmsPrivateEndpointRequest",
+        "responseType": "kms.DeleteKmsEkmsPrivateEndpointResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_kms_kmsekmsprivateendpoint",
+    "collectionField": "kmsekmsprivateendpoint",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/kms/kmsekmsprivateendpoint/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/kms/kmsekmsprivateendpoint/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for kms/kmsekmsprivateendpoint; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

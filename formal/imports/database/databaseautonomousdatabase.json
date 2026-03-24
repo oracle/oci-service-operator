@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "databaseautonomousdatabase",
+  "kind": "DatabaseAutonomousDatabase",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_autonomous_database",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseAutonomousDatabase",
+        "requestType": "database.CreateDatabaseAutonomousDatabaseRequest",
+        "responseType": "database.CreateDatabaseAutonomousDatabaseResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseAutonomousDatabase",
+        "requestType": "database.GetDatabaseAutonomousDatabaseRequest",
+        "responseType": "database.GetDatabaseAutonomousDatabaseResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseAutonomousDatabase",
+        "requestType": "database.ListDatabaseAutonomousDatabaseRequest",
+        "responseType": "database.ListDatabaseAutonomousDatabaseResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseAutonomousDatabase",
+        "requestType": "database.UpdateDatabaseAutonomousDatabaseRequest",
+        "responseType": "database.UpdateDatabaseAutonomousDatabaseResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseAutonomousDatabase",
+        "requestType": "database.DeleteDatabaseAutonomousDatabaseRequest",
+        "responseType": "database.DeleteDatabaseAutonomousDatabaseResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_databaseautonomousdatabase",
+    "collectionField": "databaseautonomousdatabase",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/databaseautonomousdatabase/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/databaseautonomousdatabase/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/databaseautonomousdatabase; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

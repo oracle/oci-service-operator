@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "nosql",
+  "slug": "tableusage",
+  "kind": "TableUsage",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_nosql_tableusage",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateTableUsage",
+        "requestType": "nosql.CreateTableUsageRequest",
+        "responseType": "nosql.CreateTableUsageResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetTableUsage",
+        "requestType": "nosql.GetTableUsageRequest",
+        "responseType": "nosql.GetTableUsageResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListTableUsage",
+        "requestType": "nosql.ListTableUsageRequest",
+        "responseType": "nosql.ListTableUsageResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateTableUsage",
+        "requestType": "nosql.UpdateTableUsageRequest",
+        "responseType": "nosql.UpdateTableUsageResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteTableUsage",
+        "requestType": "nosql.DeleteTableUsageRequest",
+        "responseType": "nosql.DeleteTableUsageResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_nosql_tableusage",
+    "collectionField": "tableusage",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/nosql/tableusage/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/nosql/tableusage/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for nosql/tableusage; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasemigration",
+  "slug": "databasemigrationassessments",
+  "kind": "DatabaseMigrationAssessments",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_migration_assessments",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseMigrationAssessments",
+        "requestType": "databasemigration.CreateDatabaseMigrationAssessmentsRequest",
+        "responseType": "databasemigration.CreateDatabaseMigrationAssessmentsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseMigrationAssessments",
+        "requestType": "databasemigration.GetDatabaseMigrationAssessmentsRequest",
+        "responseType": "databasemigration.GetDatabaseMigrationAssessmentsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseMigrationAssessments",
+        "requestType": "databasemigration.ListDatabaseMigrationAssessmentsRequest",
+        "responseType": "databasemigration.ListDatabaseMigrationAssessmentsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseMigrationAssessments",
+        "requestType": "databasemigration.UpdateDatabaseMigrationAssessmentsRequest",
+        "responseType": "databasemigration.UpdateDatabaseMigrationAssessmentsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseMigrationAssessments",
+        "requestType": "databasemigration.DeleteDatabaseMigrationAssessmentsRequest",
+        "responseType": "databasemigration.DeleteDatabaseMigrationAssessmentsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_databasemigration_databasemigrationassessments",
+    "collectionField": "databasemigrationassessments",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasemigration/databasemigrationassessments/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasemigration/databasemigrationassessments/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for databasemigration/databasemigrationassessments; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

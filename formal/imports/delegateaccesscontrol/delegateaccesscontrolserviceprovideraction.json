@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "delegateaccesscontrol",
+  "slug": "delegateaccesscontrolserviceprovideraction",
+  "kind": "DelegateAccessControlServiceProviderAction",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_delegate_access_control_service_provider_action",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDelegateAccessControlServiceProviderAction",
+        "requestType": "delegateaccesscontrol.CreateDelegateAccessControlServiceProviderActionRequest",
+        "responseType": "delegateaccesscontrol.CreateDelegateAccessControlServiceProviderActionResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDelegateAccessControlServiceProviderAction",
+        "requestType": "delegateaccesscontrol.GetDelegateAccessControlServiceProviderActionRequest",
+        "responseType": "delegateaccesscontrol.GetDelegateAccessControlServiceProviderActionResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDelegateAccessControlServiceProviderAction",
+        "requestType": "delegateaccesscontrol.ListDelegateAccessControlServiceProviderActionRequest",
+        "responseType": "delegateaccesscontrol.ListDelegateAccessControlServiceProviderActionResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDelegateAccessControlServiceProviderAction",
+        "requestType": "delegateaccesscontrol.UpdateDelegateAccessControlServiceProviderActionRequest",
+        "responseType": "delegateaccesscontrol.UpdateDelegateAccessControlServiceProviderActionResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDelegateAccessControlServiceProviderAction",
+        "requestType": "delegateaccesscontrol.DeleteDelegateAccessControlServiceProviderActionRequest",
+        "responseType": "delegateaccesscontrol.DeleteDelegateAccessControlServiceProviderActionResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_delegateaccesscontrol_delegateaccesscontrolserviceprovideraction",
+    "collectionField": "delegateaccesscontrolserviceprovideraction",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/delegateaccesscontrol/delegateaccesscontrolserviceprovideraction/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/delegateaccesscontrol/delegateaccesscontrolserviceprovideraction/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for delegateaccesscontrol/delegateaccesscontrolserviceprovideraction; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

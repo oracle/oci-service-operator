@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "applicationvip",
+  "kind": "ApplicationVip",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_database_applicationvip",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateApplicationVip",
+        "requestType": "database.CreateApplicationVipRequest",
+        "responseType": "database.CreateApplicationVipResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetApplicationVip",
+        "requestType": "database.GetApplicationVipRequest",
+        "responseType": "database.GetApplicationVipResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListApplicationVip",
+        "requestType": "database.ListApplicationVipRequest",
+        "responseType": "database.ListApplicationVipResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateApplicationVip",
+        "requestType": "database.UpdateApplicationVipRequest",
+        "responseType": "database.UpdateApplicationVipResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteApplicationVip",
+        "requestType": "database.DeleteApplicationVipRequest",
+        "responseType": "database.DeleteApplicationVipResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_applicationvip",
+    "collectionField": "applicationvip",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/applicationvip/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/applicationvip/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/applicationvip; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

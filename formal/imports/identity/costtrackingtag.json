@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "identity",
+  "slug": "costtrackingtag",
+  "kind": "CostTrackingTag",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_identity_costtrackingtag",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCostTrackingTag",
+        "requestType": "identity.CreateCostTrackingTagRequest",
+        "responseType": "identity.CreateCostTrackingTagResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCostTrackingTag",
+        "requestType": "identity.GetCostTrackingTagRequest",
+        "responseType": "identity.GetCostTrackingTagResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCostTrackingTag",
+        "requestType": "identity.ListCostTrackingTagRequest",
+        "responseType": "identity.ListCostTrackingTagResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCostTrackingTag",
+        "requestType": "identity.UpdateCostTrackingTagRequest",
+        "responseType": "identity.UpdateCostTrackingTagResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCostTrackingTag",
+        "requestType": "identity.DeleteCostTrackingTagRequest",
+        "responseType": "identity.DeleteCostTrackingTagResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_identity_costtrackingtag",
+    "collectionField": "costtrackingtag",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/identity/costtrackingtag/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/identity/costtrackingtag/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for identity/costtrackingtag; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

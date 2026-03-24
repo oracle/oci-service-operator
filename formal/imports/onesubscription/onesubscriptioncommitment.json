@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "onesubscription",
+  "slug": "onesubscriptioncommitment",
+  "kind": "OnesubscriptionCommitment",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_onesubscription_commitment",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOnesubscriptionCommitment",
+        "requestType": "onesubscription.CreateOnesubscriptionCommitmentRequest",
+        "responseType": "onesubscription.CreateOnesubscriptionCommitmentResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOnesubscriptionCommitment",
+        "requestType": "onesubscription.GetOnesubscriptionCommitmentRequest",
+        "responseType": "onesubscription.GetOnesubscriptionCommitmentResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOnesubscriptionCommitment",
+        "requestType": "onesubscription.ListOnesubscriptionCommitmentRequest",
+        "responseType": "onesubscription.ListOnesubscriptionCommitmentResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOnesubscriptionCommitment",
+        "requestType": "onesubscription.UpdateOnesubscriptionCommitmentRequest",
+        "responseType": "onesubscription.UpdateOnesubscriptionCommitmentResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOnesubscriptionCommitment",
+        "requestType": "onesubscription.DeleteOnesubscriptionCommitmentRequest",
+        "responseType": "onesubscription.DeleteOnesubscriptionCommitmentResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_onesubscription_onesubscriptioncommitment",
+    "collectionField": "onesubscriptioncommitment",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/onesubscription/onesubscriptioncommitment/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/onesubscription/onesubscriptioncommitment/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for onesubscription/onesubscriptioncommitment; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

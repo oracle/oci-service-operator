@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "ocvp",
+  "slug": "ocvpsddc",
+  "kind": "OcvpSddc",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_ocvp_sddc",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOcvpSddc",
+        "requestType": "ocvp.CreateOcvpSddcRequest",
+        "responseType": "ocvp.CreateOcvpSddcResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOcvpSddc",
+        "requestType": "ocvp.GetOcvpSddcRequest",
+        "responseType": "ocvp.GetOcvpSddcResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOcvpSddc",
+        "requestType": "ocvp.ListOcvpSddcRequest",
+        "responseType": "ocvp.ListOcvpSddcResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOcvpSddc",
+        "requestType": "ocvp.UpdateOcvpSddcRequest",
+        "responseType": "ocvp.UpdateOcvpSddcResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOcvpSddc",
+        "requestType": "ocvp.DeleteOcvpSddcRequest",
+        "responseType": "ocvp.DeleteOcvpSddcResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_ocvp_ocvpsddc",
+    "collectionField": "ocvpsddc",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/ocvp/ocvpsddc/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/ocvp/ocvpsddc/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for ocvp/ocvpsddc; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

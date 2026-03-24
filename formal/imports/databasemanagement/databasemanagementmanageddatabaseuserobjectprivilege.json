@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasemanagement",
+  "slug": "databasemanagementmanageddatabaseuserobjectprivilege",
+  "kind": "DatabaseManagementManagedDatabaseUserObjectPrivilege",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_management_managed_database_user_object_privilege",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseManagementManagedDatabaseUserObjectPrivilege",
+        "requestType": "databasemanagement.CreateDatabaseManagementManagedDatabaseUserObjectPrivilegeRequest",
+        "responseType": "databasemanagement.CreateDatabaseManagementManagedDatabaseUserObjectPrivilegeResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseManagementManagedDatabaseUserObjectPrivilege",
+        "requestType": "databasemanagement.GetDatabaseManagementManagedDatabaseUserObjectPrivilegeRequest",
+        "responseType": "databasemanagement.GetDatabaseManagementManagedDatabaseUserObjectPrivilegeResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseManagementManagedDatabaseUserObjectPrivilege",
+        "requestType": "databasemanagement.ListDatabaseManagementManagedDatabaseUserObjectPrivilegeRequest",
+        "responseType": "databasemanagement.ListDatabaseManagementManagedDatabaseUserObjectPrivilegeResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseManagementManagedDatabaseUserObjectPrivilege",
+        "requestType": "databasemanagement.UpdateDatabaseManagementManagedDatabaseUserObjectPrivilegeRequest",
+        "responseType": "databasemanagement.UpdateDatabaseManagementManagedDatabaseUserObjectPrivilegeResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseManagementManagedDatabaseUserObjectPrivilege",
+        "requestType": "databasemanagement.DeleteDatabaseManagementManagedDatabaseUserObjectPrivilegeRequest",
+        "responseType": "databasemanagement.DeleteDatabaseManagementManagedDatabaseUserObjectPrivilegeResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_databasemanagement_databasemanagementmanageddatabaseuserobjectprivilege",
+    "collectionField": "databasemanagementmanageddatabaseuserobjectprivilege",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasemanagement/databasemanagementmanageddatabaseuserobjectprivilege/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasemanagement/databasemanagementmanageddatabaseuserobjectprivilege/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for databasemanagement/databasemanagementmanageddatabaseuserobjectprivilege; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

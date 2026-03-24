@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "fleetappsmanagement",
+  "slug": "fleetappsmanagementcompliancepolicyrule",
+  "kind": "FleetAppsManagementCompliancePolicyRule",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_fleet_apps_management_compliance_policy_rule",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateFleetAppsManagementCompliancePolicyRule",
+        "requestType": "fleetappsmanagement.CreateFleetAppsManagementCompliancePolicyRuleRequest",
+        "responseType": "fleetappsmanagement.CreateFleetAppsManagementCompliancePolicyRuleResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetFleetAppsManagementCompliancePolicyRule",
+        "requestType": "fleetappsmanagement.GetFleetAppsManagementCompliancePolicyRuleRequest",
+        "responseType": "fleetappsmanagement.GetFleetAppsManagementCompliancePolicyRuleResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListFleetAppsManagementCompliancePolicyRule",
+        "requestType": "fleetappsmanagement.ListFleetAppsManagementCompliancePolicyRuleRequest",
+        "responseType": "fleetappsmanagement.ListFleetAppsManagementCompliancePolicyRuleResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateFleetAppsManagementCompliancePolicyRule",
+        "requestType": "fleetappsmanagement.UpdateFleetAppsManagementCompliancePolicyRuleRequest",
+        "responseType": "fleetappsmanagement.UpdateFleetAppsManagementCompliancePolicyRuleResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteFleetAppsManagementCompliancePolicyRule",
+        "requestType": "fleetappsmanagement.DeleteFleetAppsManagementCompliancePolicyRuleRequest",
+        "responseType": "fleetappsmanagement.DeleteFleetAppsManagementCompliancePolicyRuleResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_fleetappsmanagement_fleetappsmanagementcompliancepolicyrule",
+    "collectionField": "fleetappsmanagementcompliancepolicyrule",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/fleetappsmanagement/fleetappsmanagementcompliancepolicyrule/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/fleetappsmanagement/fleetappsmanagementcompliancepolicyrule/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for fleetappsmanagement/fleetappsmanagementcompliancepolicyrule; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

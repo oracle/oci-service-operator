@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasemanagement",
+  "slug": "databasemanagementcloudexadatastorageservers",
+  "kind": "DatabaseManagementCloudExadataStorageServers",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_management_cloud_exadata_storage_servers",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseManagementCloudExadataStorageServers",
+        "requestType": "databasemanagement.CreateDatabaseManagementCloudExadataStorageServersRequest",
+        "responseType": "databasemanagement.CreateDatabaseManagementCloudExadataStorageServersResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseManagementCloudExadataStorageServers",
+        "requestType": "databasemanagement.GetDatabaseManagementCloudExadataStorageServersRequest",
+        "responseType": "databasemanagement.GetDatabaseManagementCloudExadataStorageServersResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseManagementCloudExadataStorageServers",
+        "requestType": "databasemanagement.ListDatabaseManagementCloudExadataStorageServersRequest",
+        "responseType": "databasemanagement.ListDatabaseManagementCloudExadataStorageServersResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseManagementCloudExadataStorageServers",
+        "requestType": "databasemanagement.UpdateDatabaseManagementCloudExadataStorageServersRequest",
+        "responseType": "databasemanagement.UpdateDatabaseManagementCloudExadataStorageServersResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseManagementCloudExadataStorageServers",
+        "requestType": "databasemanagement.DeleteDatabaseManagementCloudExadataStorageServersRequest",
+        "responseType": "databasemanagement.DeleteDatabaseManagementCloudExadataStorageServersResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_databasemanagement_databasemanagementcloudexadatastorageservers",
+    "collectionField": "databasemanagementcloudexadatastorageservers",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasemanagement/databasemanagementcloudexadatastorageservers/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasemanagement/databasemanagementcloudexadatastorageservers/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for databasemanagement/databasemanagementcloudexadatastorageservers; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

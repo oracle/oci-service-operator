@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "coreipsecconnection",
+  "kind": "CoreIpSecConnection",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_core_ipsec",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCoreIpSecConnection",
+        "requestType": "core.CreateCoreIpSecConnectionRequest",
+        "responseType": "core.CreateCoreIpSecConnectionResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCoreIpSecConnection",
+        "requestType": "core.GetCoreIpSecConnectionRequest",
+        "responseType": "core.GetCoreIpSecConnectionResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCoreIpSecConnection",
+        "requestType": "core.ListCoreIpSecConnectionRequest",
+        "responseType": "core.ListCoreIpSecConnectionResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCoreIpSecConnection",
+        "requestType": "core.UpdateCoreIpSecConnectionRequest",
+        "responseType": "core.UpdateCoreIpSecConnectionResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCoreIpSecConnection",
+        "requestType": "core.DeleteCoreIpSecConnectionRequest",
+        "responseType": "core.DeleteCoreIpSecConnectionResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_core_coreipsecconnection",
+    "collectionField": "coreipsecconnection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/coreipsecconnection/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/coreipsecconnection/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for core/coreipsecconnection; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

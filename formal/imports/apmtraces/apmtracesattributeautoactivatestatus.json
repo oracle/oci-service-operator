@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "apmtraces",
+  "slug": "apmtracesattributeautoactivatestatus",
+  "kind": "ApmTracesAttributeAutoActivateStatus",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_apm_traces_attribute_auto_activate_status",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateApmTracesAttributeAutoActivateStatus",
+        "requestType": "apmtraces.CreateApmTracesAttributeAutoActivateStatusRequest",
+        "responseType": "apmtraces.CreateApmTracesAttributeAutoActivateStatusResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetApmTracesAttributeAutoActivateStatus",
+        "requestType": "apmtraces.GetApmTracesAttributeAutoActivateStatusRequest",
+        "responseType": "apmtraces.GetApmTracesAttributeAutoActivateStatusResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListApmTracesAttributeAutoActivateStatus",
+        "requestType": "apmtraces.ListApmTracesAttributeAutoActivateStatusRequest",
+        "responseType": "apmtraces.ListApmTracesAttributeAutoActivateStatusResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateApmTracesAttributeAutoActivateStatus",
+        "requestType": "apmtraces.UpdateApmTracesAttributeAutoActivateStatusRequest",
+        "responseType": "apmtraces.UpdateApmTracesAttributeAutoActivateStatusResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteApmTracesAttributeAutoActivateStatus",
+        "requestType": "apmtraces.DeleteApmTracesAttributeAutoActivateStatusRequest",
+        "responseType": "apmtraces.DeleteApmTracesAttributeAutoActivateStatusResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_apmtraces_apmtracesattributeautoactivatestatus",
+    "collectionField": "apmtracesattributeautoactivatestatus",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/apmtraces/apmtracesattributeautoactivatestatus/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/apmtraces/apmtracesattributeautoactivatestatus/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for apmtraces/apmtracesattributeautoactivatestatus; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

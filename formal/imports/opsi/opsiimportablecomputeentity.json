@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "opsi",
+  "slug": "opsiimportablecomputeentity",
+  "kind": "OpsiImportableComputeEntity",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_opsi_importable_compute_entity",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOpsiImportableComputeEntity",
+        "requestType": "opsi.CreateOpsiImportableComputeEntityRequest",
+        "responseType": "opsi.CreateOpsiImportableComputeEntityResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOpsiImportableComputeEntity",
+        "requestType": "opsi.GetOpsiImportableComputeEntityRequest",
+        "responseType": "opsi.GetOpsiImportableComputeEntityResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOpsiImportableComputeEntity",
+        "requestType": "opsi.ListOpsiImportableComputeEntityRequest",
+        "responseType": "opsi.ListOpsiImportableComputeEntityResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOpsiImportableComputeEntity",
+        "requestType": "opsi.UpdateOpsiImportableComputeEntityRequest",
+        "responseType": "opsi.UpdateOpsiImportableComputeEntityResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOpsiImportableComputeEntity",
+        "requestType": "opsi.DeleteOpsiImportableComputeEntityRequest",
+        "responseType": "opsi.DeleteOpsiImportableComputeEntityResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_opsi_opsiimportablecomputeentity",
+    "collectionField": "opsiimportablecomputeentity",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/opsi/opsiimportablecomputeentity/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/opsi/opsiimportablecomputeentity/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for opsi/opsiimportablecomputeentity; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

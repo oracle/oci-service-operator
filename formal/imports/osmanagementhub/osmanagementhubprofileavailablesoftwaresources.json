@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "osmanagementhub",
+  "slug": "osmanagementhubprofileavailablesoftwaresources",
+  "kind": "OsManagementHubProfileAvailableSoftwareSources",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_os_management_hub_profile_available_software_sources",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOsManagementHubProfileAvailableSoftwareSources",
+        "requestType": "osmanagementhub.CreateOsManagementHubProfileAvailableSoftwareSourcesRequest",
+        "responseType": "osmanagementhub.CreateOsManagementHubProfileAvailableSoftwareSourcesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOsManagementHubProfileAvailableSoftwareSources",
+        "requestType": "osmanagementhub.GetOsManagementHubProfileAvailableSoftwareSourcesRequest",
+        "responseType": "osmanagementhub.GetOsManagementHubProfileAvailableSoftwareSourcesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOsManagementHubProfileAvailableSoftwareSources",
+        "requestType": "osmanagementhub.ListOsManagementHubProfileAvailableSoftwareSourcesRequest",
+        "responseType": "osmanagementhub.ListOsManagementHubProfileAvailableSoftwareSourcesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOsManagementHubProfileAvailableSoftwareSources",
+        "requestType": "osmanagementhub.UpdateOsManagementHubProfileAvailableSoftwareSourcesRequest",
+        "responseType": "osmanagementhub.UpdateOsManagementHubProfileAvailableSoftwareSourcesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOsManagementHubProfileAvailableSoftwareSources",
+        "requestType": "osmanagementhub.DeleteOsManagementHubProfileAvailableSoftwareSourcesRequest",
+        "responseType": "osmanagementhub.DeleteOsManagementHubProfileAvailableSoftwareSourcesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_osmanagementhub_osmanagementhubprofileavailablesoftwaresources",
+    "collectionField": "osmanagementhubprofileavailablesoftwaresources",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/osmanagementhub/osmanagementhubprofileavailablesoftwaresources/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/osmanagementhub/osmanagementhubprofileavailablesoftwaresources/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for osmanagementhub/osmanagementhubprofileavailablesoftwaresources; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

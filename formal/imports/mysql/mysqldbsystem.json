@@ -1,0 +1,190 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "mysql",
+  "slug": "mysqldbsystem",
+  "kind": "MySqlDbSystem",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_mysql_mysql_db_system",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDbSystem",
+        "requestType": "mysql.CreateDbSystemRequest",
+        "responseType": "mysql.CreateDbSystemResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDbSystem",
+        "requestType": "mysql.GetDbSystemRequest",
+        "responseType": "mysql.GetDbSystemResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDbSystems",
+        "requestType": "mysql.ListDbSystemsRequest",
+        "responseType": "mysql.ListDbSystemsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDbSystem",
+        "requestType": "mysql.UpdateDbSystemRequest",
+        "responseType": "mysql.UpdateDbSystemResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDbSystem",
+        "requestType": "mysql.DeleteDbSystemRequest",
+        "responseType": "mysql.DeleteDbSystemResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING",
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "access_mode",
+      "backup_policy.copy_policies.backup_copy_retention_in_days",
+      "backup_policy.copy_policies.copy_to_region",
+      "backup_policy.defined_tags",
+      "backup_policy.freeform_tags",
+      "backup_policy.is_enabled",
+      "backup_policy.pitr_policy.is_enabled",
+      "backup_policy.retention_in_days",
+      "backup_policy.soft_delete",
+      "backup_policy.window_start_time",
+      "configuration_id",
+      "crash_recovery",
+      "customer_contacts.email",
+      "data_storage.is_auto_expand_storage_enabled",
+      "data_storage.max_storage_size_in_gbs",
+      "data_storage_size_in_gb",
+      "database_console.port",
+      "database_console.status",
+      "database_management",
+      "database_mode",
+      "defined_tags",
+      "deletion_policy.automatic_backup_retention",
+      "deletion_policy.final_backup",
+      "deletion_policy.is_delete_protected",
+      "description",
+      "display_name",
+      "encrypt_data.key_generation_type",
+      "encrypt_data.key_id",
+      "freeform_tags",
+      "hostname_label",
+      "is_highly_available",
+      "maintenance.maintenance_disabled_windows.time_end",
+      "maintenance.maintenance_disabled_windows.time_start",
+      "maintenance.maintenance_schedule_type",
+      "maintenance.version_preference",
+      "maintenance.version_track_preference",
+      "maintenance.window_start_time",
+      "nsg_ids",
+      "read_endpoint.exclude_ips",
+      "read_endpoint.is_enabled",
+      "read_endpoint.read_endpoint_hostname_label",
+      "read_endpoint.read_endpoint_ip_address",
+      "rest.configuration",
+      "rest.port",
+      "secure_connections.certificate_generation_type",
+      "secure_connections.certificate_id",
+      "security_attributes",
+      "shape_name",
+      "shutdown_type",
+      "state",
+      "telemetry_configuration.logs.destination",
+      "telemetry_configuration.logs.destination_configurations.key",
+      "telemetry_configuration.logs.destination_configurations.value",
+      "telemetry_configuration.logs.log_types"
+    ],
+    "forceNew": [
+      "admin_password",
+      "admin_username",
+      "availability_domain",
+      "compartment_id",
+      "fault_domain",
+      "ip_address",
+      "mysql_version",
+      "port",
+      "port_x",
+      "source",
+      "source.backup_id",
+      "source.db_system_id",
+      "source.recovery_point",
+      "source.source_type",
+      "source.source_url",
+      "subnet_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_mysql_mysql_db_systems",
+    "collectionField": "db_systems",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "configuration_id",
+      "database_management",
+      "db_system_id",
+      "display_name",
+      "is_heat_wave_cluster_attached",
+      "is_up_to_date",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/mysql/mysqldbsystem/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/mysql/mysqldbsystem/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "list-lookup",
+      "secret-input",
+      "endpoint-materialization",
+      "status-projection",
+      "update-guard",
+      "delete-confirmation",
+      "legacy-adapter"
+    ]
+  },
+  "notes": [
+    "Seed stub; run formal-import to refresh provider facts."
+  ]
+}

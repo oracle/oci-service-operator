@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "databaseexadatainfrastructuredownloadconfigfile",
+  "kind": "DatabaseExadataInfrastructureDownloadConfigFile",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_exadata_infrastructure_download_config_file",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseExadataInfrastructureDownloadConfigFile",
+        "requestType": "database.CreateDatabaseExadataInfrastructureDownloadConfigFileRequest",
+        "responseType": "database.CreateDatabaseExadataInfrastructureDownloadConfigFileResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseExadataInfrastructureDownloadConfigFile",
+        "requestType": "database.GetDatabaseExadataInfrastructureDownloadConfigFileRequest",
+        "responseType": "database.GetDatabaseExadataInfrastructureDownloadConfigFileResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseExadataInfrastructureDownloadConfigFile",
+        "requestType": "database.ListDatabaseExadataInfrastructureDownloadConfigFileRequest",
+        "responseType": "database.ListDatabaseExadataInfrastructureDownloadConfigFileResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseExadataInfrastructureDownloadConfigFile",
+        "requestType": "database.UpdateDatabaseExadataInfrastructureDownloadConfigFileRequest",
+        "responseType": "database.UpdateDatabaseExadataInfrastructureDownloadConfigFileResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseExadataInfrastructureDownloadConfigFile",
+        "requestType": "database.DeleteDatabaseExadataInfrastructureDownloadConfigFileRequest",
+        "responseType": "database.DeleteDatabaseExadataInfrastructureDownloadConfigFileResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_databaseexadatainfrastructuredownloadconfigfile",
+    "collectionField": "databaseexadatainfrastructuredownloadconfigfile",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/databaseexadatainfrastructuredownloadconfigfile/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/databaseexadatainfrastructuredownloadconfigfile/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/databaseexadatainfrastructuredownloadconfigfile; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

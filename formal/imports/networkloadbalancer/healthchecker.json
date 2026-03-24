@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "networkloadbalancer",
+  "slug": "healthchecker",
+  "kind": "HealthChecker",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_networkloadbalancer_healthchecker",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateHealthChecker",
+        "requestType": "networkloadbalancer.CreateHealthCheckerRequest",
+        "responseType": "networkloadbalancer.CreateHealthCheckerResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetHealthChecker",
+        "requestType": "networkloadbalancer.GetHealthCheckerRequest",
+        "responseType": "networkloadbalancer.GetHealthCheckerResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListHealthChecker",
+        "requestType": "networkloadbalancer.ListHealthCheckerRequest",
+        "responseType": "networkloadbalancer.ListHealthCheckerResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateHealthChecker",
+        "requestType": "networkloadbalancer.UpdateHealthCheckerRequest",
+        "responseType": "networkloadbalancer.UpdateHealthCheckerResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteHealthChecker",
+        "requestType": "networkloadbalancer.DeleteHealthCheckerRequest",
+        "responseType": "networkloadbalancer.DeleteHealthCheckerResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_networkloadbalancer_healthchecker",
+    "collectionField": "healthchecker",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/networkloadbalancer/healthchecker/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/networkloadbalancer/healthchecker/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for networkloadbalancer/healthchecker; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

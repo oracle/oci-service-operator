@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "datasafesecurityassessmentcomparison",
+  "kind": "DataSafeSecurityAssessmentComparison",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_security_assessment_comparison",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDataSafeSecurityAssessmentComparison",
+        "requestType": "datasafe.CreateDataSafeSecurityAssessmentComparisonRequest",
+        "responseType": "datasafe.CreateDataSafeSecurityAssessmentComparisonResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDataSafeSecurityAssessmentComparison",
+        "requestType": "datasafe.GetDataSafeSecurityAssessmentComparisonRequest",
+        "responseType": "datasafe.GetDataSafeSecurityAssessmentComparisonResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDataSafeSecurityAssessmentComparison",
+        "requestType": "datasafe.ListDataSafeSecurityAssessmentComparisonRequest",
+        "responseType": "datasafe.ListDataSafeSecurityAssessmentComparisonResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDataSafeSecurityAssessmentComparison",
+        "requestType": "datasafe.UpdateDataSafeSecurityAssessmentComparisonRequest",
+        "responseType": "datasafe.UpdateDataSafeSecurityAssessmentComparisonResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDataSafeSecurityAssessmentComparison",
+        "requestType": "datasafe.DeleteDataSafeSecurityAssessmentComparisonRequest",
+        "responseType": "datasafe.DeleteDataSafeSecurityAssessmentComparisonResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_datasafe_datasafesecurityassessmentcomparison",
+    "collectionField": "datasafesecurityassessmentcomparison",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/datasafesecurityassessmentcomparison/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/datasafesecurityassessmentcomparison/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for datasafe/datasafesecurityassessmentcomparison; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

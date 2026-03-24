@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasemanagement",
+  "slug": "databasemanagementdbmanagementprivateendpointassociateddatabase",
+  "kind": "DatabaseManagementDbManagementPrivateEndpointAssociatedDatabase",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_management_db_management_private_endpoint_associated_database",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseManagementDbManagementPrivateEndpointAssociatedDatabase",
+        "requestType": "databasemanagement.CreateDatabaseManagementDbManagementPrivateEndpointAssociatedDatabaseRequest",
+        "responseType": "databasemanagement.CreateDatabaseManagementDbManagementPrivateEndpointAssociatedDatabaseResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseManagementDbManagementPrivateEndpointAssociatedDatabase",
+        "requestType": "databasemanagement.GetDatabaseManagementDbManagementPrivateEndpointAssociatedDatabaseRequest",
+        "responseType": "databasemanagement.GetDatabaseManagementDbManagementPrivateEndpointAssociatedDatabaseResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseManagementDbManagementPrivateEndpointAssociatedDatabase",
+        "requestType": "databasemanagement.ListDatabaseManagementDbManagementPrivateEndpointAssociatedDatabaseRequest",
+        "responseType": "databasemanagement.ListDatabaseManagementDbManagementPrivateEndpointAssociatedDatabaseResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseManagementDbManagementPrivateEndpointAssociatedDatabase",
+        "requestType": "databasemanagement.UpdateDatabaseManagementDbManagementPrivateEndpointAssociatedDatabaseRequest",
+        "responseType": "databasemanagement.UpdateDatabaseManagementDbManagementPrivateEndpointAssociatedDatabaseResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseManagementDbManagementPrivateEndpointAssociatedDatabase",
+        "requestType": "databasemanagement.DeleteDatabaseManagementDbManagementPrivateEndpointAssociatedDatabaseRequest",
+        "responseType": "databasemanagement.DeleteDatabaseManagementDbManagementPrivateEndpointAssociatedDatabaseResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_databasemanagement_databasemanagementdbmanagementprivateendpointassociateddatabase",
+    "collectionField": "databasemanagementdbmanagementprivateendpointassociateddatabase",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasemanagement/databasemanagementdbmanagementprivateendpointassociateddatabase/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasemanagement/databasemanagementdbmanagementprivateendpointassociateddatabase/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for databasemanagement/databasemanagementdbmanagementprivateendpointassociateddatabase; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

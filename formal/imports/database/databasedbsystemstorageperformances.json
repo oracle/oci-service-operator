@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "databasedbsystemstorageperformances",
+  "kind": "DatabaseDbSystemStoragePerformances",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_db_system_storage_performances",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseDbSystemStoragePerformances",
+        "requestType": "database.CreateDatabaseDbSystemStoragePerformancesRequest",
+        "responseType": "database.CreateDatabaseDbSystemStoragePerformancesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseDbSystemStoragePerformances",
+        "requestType": "database.GetDatabaseDbSystemStoragePerformancesRequest",
+        "responseType": "database.GetDatabaseDbSystemStoragePerformancesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseDbSystemStoragePerformances",
+        "requestType": "database.ListDatabaseDbSystemStoragePerformancesRequest",
+        "responseType": "database.ListDatabaseDbSystemStoragePerformancesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseDbSystemStoragePerformances",
+        "requestType": "database.UpdateDatabaseDbSystemStoragePerformancesRequest",
+        "responseType": "database.UpdateDatabaseDbSystemStoragePerformancesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseDbSystemStoragePerformances",
+        "requestType": "database.DeleteDatabaseDbSystemStoragePerformancesRequest",
+        "responseType": "database.DeleteDatabaseDbSystemStoragePerformancesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_databasedbsystemstorageperformances",
+    "collectionField": "databasedbsystemstorageperformances",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/databasedbsystemstorageperformances/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/databasedbsystemstorageperformances/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/databasedbsystemstorageperformances; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

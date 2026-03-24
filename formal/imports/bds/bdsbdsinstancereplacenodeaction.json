@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "bds",
+  "slug": "bdsbdsinstancereplacenodeaction",
+  "kind": "BdsBdsInstanceReplaceNodeAction",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_bds_bds_instance_replace_node_action",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateBdsBdsInstanceReplaceNodeAction",
+        "requestType": "bds.CreateBdsBdsInstanceReplaceNodeActionRequest",
+        "responseType": "bds.CreateBdsBdsInstanceReplaceNodeActionResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetBdsBdsInstanceReplaceNodeAction",
+        "requestType": "bds.GetBdsBdsInstanceReplaceNodeActionRequest",
+        "responseType": "bds.GetBdsBdsInstanceReplaceNodeActionResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListBdsBdsInstanceReplaceNodeAction",
+        "requestType": "bds.ListBdsBdsInstanceReplaceNodeActionRequest",
+        "responseType": "bds.ListBdsBdsInstanceReplaceNodeActionResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateBdsBdsInstanceReplaceNodeAction",
+        "requestType": "bds.UpdateBdsBdsInstanceReplaceNodeActionRequest",
+        "responseType": "bds.UpdateBdsBdsInstanceReplaceNodeActionResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteBdsBdsInstanceReplaceNodeAction",
+        "requestType": "bds.DeleteBdsBdsInstanceReplaceNodeActionRequest",
+        "responseType": "bds.DeleteBdsBdsInstanceReplaceNodeActionResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_bds_bdsbdsinstancereplacenodeaction",
+    "collectionField": "bdsbdsinstancereplacenodeaction",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/bds/bdsbdsinstancereplacenodeaction/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/bds/bdsbdsinstancereplacenodeaction/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for bds/bdsbdsinstancereplacenodeaction; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

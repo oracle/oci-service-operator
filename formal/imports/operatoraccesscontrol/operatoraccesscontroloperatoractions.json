@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "operatoraccesscontrol",
+  "slug": "operatoraccesscontroloperatoractions",
+  "kind": "OperatorAccessControlOperatorActions",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_operator_access_control_operator_actions",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOperatorAccessControlOperatorActions",
+        "requestType": "operatoraccesscontrol.CreateOperatorAccessControlOperatorActionsRequest",
+        "responseType": "operatoraccesscontrol.CreateOperatorAccessControlOperatorActionsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOperatorAccessControlOperatorActions",
+        "requestType": "operatoraccesscontrol.GetOperatorAccessControlOperatorActionsRequest",
+        "responseType": "operatoraccesscontrol.GetOperatorAccessControlOperatorActionsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOperatorAccessControlOperatorActions",
+        "requestType": "operatoraccesscontrol.ListOperatorAccessControlOperatorActionsRequest",
+        "responseType": "operatoraccesscontrol.ListOperatorAccessControlOperatorActionsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOperatorAccessControlOperatorActions",
+        "requestType": "operatoraccesscontrol.UpdateOperatorAccessControlOperatorActionsRequest",
+        "responseType": "operatoraccesscontrol.UpdateOperatorAccessControlOperatorActionsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOperatorAccessControlOperatorActions",
+        "requestType": "operatoraccesscontrol.DeleteOperatorAccessControlOperatorActionsRequest",
+        "responseType": "operatoraccesscontrol.DeleteOperatorAccessControlOperatorActionsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_operatoraccesscontrol_operatoraccesscontroloperatoractions",
+    "collectionField": "operatoraccesscontroloperatoractions",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/operatoraccesscontrol/operatoraccesscontroloperatoractions/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/operatoraccesscontrol/operatoraccesscontroloperatoractions/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for operatoraccesscontrol/operatoraccesscontroloperatoractions; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

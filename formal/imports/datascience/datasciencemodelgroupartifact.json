@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datascience",
+  "slug": "datasciencemodelgroupartifact",
+  "kind": "DatascienceModelGroupArtifact",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_datascience_model_group_artifact",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatascienceModelGroupArtifact",
+        "requestType": "datascience.CreateDatascienceModelGroupArtifactRequest",
+        "responseType": "datascience.CreateDatascienceModelGroupArtifactResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatascienceModelGroupArtifact",
+        "requestType": "datascience.GetDatascienceModelGroupArtifactRequest",
+        "responseType": "datascience.GetDatascienceModelGroupArtifactResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatascienceModelGroupArtifact",
+        "requestType": "datascience.ListDatascienceModelGroupArtifactRequest",
+        "responseType": "datascience.ListDatascienceModelGroupArtifactResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatascienceModelGroupArtifact",
+        "requestType": "datascience.UpdateDatascienceModelGroupArtifactRequest",
+        "responseType": "datascience.UpdateDatascienceModelGroupArtifactResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatascienceModelGroupArtifact",
+        "requestType": "datascience.DeleteDatascienceModelGroupArtifactRequest",
+        "responseType": "datascience.DeleteDatascienceModelGroupArtifactResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_datascience_datasciencemodelgroupartifact",
+    "collectionField": "datasciencemodelgroupartifact",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datascience/datasciencemodelgroupartifact/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datascience/datasciencemodelgroupartifact/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for datascience/datasciencemodelgroupartifact; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

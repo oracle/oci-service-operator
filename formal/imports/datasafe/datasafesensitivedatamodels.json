@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "datasafesensitivedatamodels",
+  "kind": "DataSafeSensitiveDataModels",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_sensitive_data_models",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDataSafeSensitiveDataModels",
+        "requestType": "datasafe.CreateDataSafeSensitiveDataModelsRequest",
+        "responseType": "datasafe.CreateDataSafeSensitiveDataModelsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDataSafeSensitiveDataModels",
+        "requestType": "datasafe.GetDataSafeSensitiveDataModelsRequest",
+        "responseType": "datasafe.GetDataSafeSensitiveDataModelsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDataSafeSensitiveDataModels",
+        "requestType": "datasafe.ListDataSafeSensitiveDataModelsRequest",
+        "responseType": "datasafe.ListDataSafeSensitiveDataModelsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDataSafeSensitiveDataModels",
+        "requestType": "datasafe.UpdateDataSafeSensitiveDataModelsRequest",
+        "responseType": "datasafe.UpdateDataSafeSensitiveDataModelsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDataSafeSensitiveDataModels",
+        "requestType": "datasafe.DeleteDataSafeSensitiveDataModelsRequest",
+        "responseType": "datasafe.DeleteDataSafeSensitiveDataModelsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_datasafe_datasafesensitivedatamodels",
+    "collectionField": "datasafesensitivedatamodels",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/datasafesensitivedatamodels/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/datasafesensitivedatamodels/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for datasafe/datasafesensitivedatamodels; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

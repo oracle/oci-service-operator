@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "mysql",
+  "slug": "mysqlchannel",
+  "kind": "MysqlChannel",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_mysql_channel",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateMysqlChannel",
+        "requestType": "mysql.CreateMysqlChannelRequest",
+        "responseType": "mysql.CreateMysqlChannelResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetMysqlChannel",
+        "requestType": "mysql.GetMysqlChannelRequest",
+        "responseType": "mysql.GetMysqlChannelResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListMysqlChannel",
+        "requestType": "mysql.ListMysqlChannelRequest",
+        "responseType": "mysql.ListMysqlChannelResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateMysqlChannel",
+        "requestType": "mysql.UpdateMysqlChannelRequest",
+        "responseType": "mysql.UpdateMysqlChannelResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteMysqlChannel",
+        "requestType": "mysql.DeleteMysqlChannelRequest",
+        "responseType": "mysql.DeleteMysqlChannelResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_mysql_mysqlchannel",
+    "collectionField": "mysqlchannel",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/mysql/mysqlchannel/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/mysql/mysqlchannel/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for mysql/mysqlchannel; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

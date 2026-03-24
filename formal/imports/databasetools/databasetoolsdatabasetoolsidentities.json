@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasetools",
+  "slug": "databasetoolsdatabasetoolsidentities",
+  "kind": "DatabaseToolsDatabaseToolsIdentities",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_tools_database_tools_identities",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseToolsDatabaseToolsIdentities",
+        "requestType": "databasetools.CreateDatabaseToolsDatabaseToolsIdentitiesRequest",
+        "responseType": "databasetools.CreateDatabaseToolsDatabaseToolsIdentitiesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseToolsDatabaseToolsIdentities",
+        "requestType": "databasetools.GetDatabaseToolsDatabaseToolsIdentitiesRequest",
+        "responseType": "databasetools.GetDatabaseToolsDatabaseToolsIdentitiesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseToolsDatabaseToolsIdentities",
+        "requestType": "databasetools.ListDatabaseToolsDatabaseToolsIdentitiesRequest",
+        "responseType": "databasetools.ListDatabaseToolsDatabaseToolsIdentitiesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseToolsDatabaseToolsIdentities",
+        "requestType": "databasetools.UpdateDatabaseToolsDatabaseToolsIdentitiesRequest",
+        "responseType": "databasetools.UpdateDatabaseToolsDatabaseToolsIdentitiesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseToolsDatabaseToolsIdentities",
+        "requestType": "databasetools.DeleteDatabaseToolsDatabaseToolsIdentitiesRequest",
+        "responseType": "databasetools.DeleteDatabaseToolsDatabaseToolsIdentitiesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_databasetools_databasetoolsdatabasetoolsidentities",
+    "collectionField": "databasetoolsdatabasetoolsidentities",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasetools/databasetoolsdatabasetoolsidentities/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasetools/databasetoolsdatabasetoolsidentities/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for databasetools/databasetoolsdatabasetoolsidentities; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

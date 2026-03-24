@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "osmanagementhub",
+  "slug": "osmanagementhubmanagementstationrefreshmanagement",
+  "kind": "OsManagementHubManagementStationRefreshManagement",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_os_management_hub_management_station_refresh_management",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOsManagementHubManagementStationRefreshManagement",
+        "requestType": "osmanagementhub.CreateOsManagementHubManagementStationRefreshManagementRequest",
+        "responseType": "osmanagementhub.CreateOsManagementHubManagementStationRefreshManagementResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOsManagementHubManagementStationRefreshManagement",
+        "requestType": "osmanagementhub.GetOsManagementHubManagementStationRefreshManagementRequest",
+        "responseType": "osmanagementhub.GetOsManagementHubManagementStationRefreshManagementResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOsManagementHubManagementStationRefreshManagement",
+        "requestType": "osmanagementhub.ListOsManagementHubManagementStationRefreshManagementRequest",
+        "responseType": "osmanagementhub.ListOsManagementHubManagementStationRefreshManagementResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOsManagementHubManagementStationRefreshManagement",
+        "requestType": "osmanagementhub.UpdateOsManagementHubManagementStationRefreshManagementRequest",
+        "responseType": "osmanagementhub.UpdateOsManagementHubManagementStationRefreshManagementResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOsManagementHubManagementStationRefreshManagement",
+        "requestType": "osmanagementhub.DeleteOsManagementHubManagementStationRefreshManagementRequest",
+        "responseType": "osmanagementhub.DeleteOsManagementHubManagementStationRefreshManagementResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_osmanagementhub_osmanagementhubmanagementstationrefreshmanagement",
+    "collectionField": "osmanagementhubmanagementstationrefreshmanagement",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/osmanagementhub/osmanagementhubmanagementstationrefreshmanagement/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/osmanagementhub/osmanagementhubmanagementstationrefreshmanagement/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for osmanagementhub/osmanagementhubmanagementstationrefreshmanagement; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

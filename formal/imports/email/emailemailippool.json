@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "email",
+  "slug": "emailemailippool",
+  "kind": "EmailEmailIpPool",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_email_email_ip_pool",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateEmailEmailIpPool",
+        "requestType": "email.CreateEmailEmailIpPoolRequest",
+        "responseType": "email.CreateEmailEmailIpPoolResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetEmailEmailIpPool",
+        "requestType": "email.GetEmailEmailIpPoolRequest",
+        "responseType": "email.GetEmailEmailIpPoolResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListEmailEmailIpPool",
+        "requestType": "email.ListEmailEmailIpPoolRequest",
+        "responseType": "email.ListEmailEmailIpPoolResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateEmailEmailIpPool",
+        "requestType": "email.UpdateEmailEmailIpPoolRequest",
+        "responseType": "email.UpdateEmailEmailIpPoolResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteEmailEmailIpPool",
+        "requestType": "email.DeleteEmailEmailIpPoolRequest",
+        "responseType": "email.DeleteEmailEmailIpPoolResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_email_emailemailippool",
+    "collectionField": "emailemailippool",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/email/emailemailippool/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/email/emailemailippool/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for email/emailemailippool; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

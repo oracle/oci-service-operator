@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "jms",
+  "slug": "jmsfleetexportsetting",
+  "kind": "JmsFleetExportSetting",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_jms_fleet_export_setting",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateJmsFleetExportSetting",
+        "requestType": "jms.CreateJmsFleetExportSettingRequest",
+        "responseType": "jms.CreateJmsFleetExportSettingResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetJmsFleetExportSetting",
+        "requestType": "jms.GetJmsFleetExportSettingRequest",
+        "responseType": "jms.GetJmsFleetExportSettingResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListJmsFleetExportSetting",
+        "requestType": "jms.ListJmsFleetExportSettingRequest",
+        "responseType": "jms.ListJmsFleetExportSettingResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateJmsFleetExportSetting",
+        "requestType": "jms.UpdateJmsFleetExportSettingRequest",
+        "responseType": "jms.UpdateJmsFleetExportSettingResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteJmsFleetExportSetting",
+        "requestType": "jms.DeleteJmsFleetExportSettingRequest",
+        "responseType": "jms.DeleteJmsFleetExportSettingResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_jms_jmsfleetexportsetting",
+    "collectionField": "jmsfleetexportsetting",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/jms/jmsfleetexportsetting/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/jms/jmsfleetexportsetting/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for jms/jmsfleetexportsetting; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

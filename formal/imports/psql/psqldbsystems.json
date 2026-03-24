@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "psql",
+  "slug": "psqldbsystems",
+  "kind": "PsqlDbSystems",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_psql_db_systems",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreatePsqlDbSystems",
+        "requestType": "psql.CreatePsqlDbSystemsRequest",
+        "responseType": "psql.CreatePsqlDbSystemsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetPsqlDbSystems",
+        "requestType": "psql.GetPsqlDbSystemsRequest",
+        "responseType": "psql.GetPsqlDbSystemsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListPsqlDbSystems",
+        "requestType": "psql.ListPsqlDbSystemsRequest",
+        "responseType": "psql.ListPsqlDbSystemsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdatePsqlDbSystems",
+        "requestType": "psql.UpdatePsqlDbSystemsRequest",
+        "responseType": "psql.UpdatePsqlDbSystemsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeletePsqlDbSystems",
+        "requestType": "psql.DeletePsqlDbSystemsRequest",
+        "responseType": "psql.DeletePsqlDbSystemsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_psql_psqldbsystems",
+    "collectionField": "psqldbsystems",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/psql/psqldbsystems/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/psql/psqldbsystems/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for psql/psqldbsystems; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "databaseflexcomponents",
+  "kind": "DatabaseFlexComponents",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_flex_components",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseFlexComponents",
+        "requestType": "database.CreateDatabaseFlexComponentsRequest",
+        "responseType": "database.CreateDatabaseFlexComponentsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseFlexComponents",
+        "requestType": "database.GetDatabaseFlexComponentsRequest",
+        "responseType": "database.GetDatabaseFlexComponentsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseFlexComponents",
+        "requestType": "database.ListDatabaseFlexComponentsRequest",
+        "responseType": "database.ListDatabaseFlexComponentsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseFlexComponents",
+        "requestType": "database.UpdateDatabaseFlexComponentsRequest",
+        "responseType": "database.UpdateDatabaseFlexComponentsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseFlexComponents",
+        "requestType": "database.DeleteDatabaseFlexComponentsRequest",
+        "responseType": "database.DeleteDatabaseFlexComponentsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_databaseflexcomponents",
+    "collectionField": "databaseflexcomponents",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/databaseflexcomponents/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/databaseflexcomponents/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/databaseflexcomponents; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

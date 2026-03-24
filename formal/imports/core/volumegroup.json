@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "volumegroup",
+  "kind": "VolumeGroup",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_core_volumegroup",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateVolumeGroup",
+        "requestType": "core.CreateVolumeGroupRequest",
+        "responseType": "core.CreateVolumeGroupResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetVolumeGroup",
+        "requestType": "core.GetVolumeGroupRequest",
+        "responseType": "core.GetVolumeGroupResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListVolumeGroup",
+        "requestType": "core.ListVolumeGroupRequest",
+        "responseType": "core.ListVolumeGroupResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateVolumeGroup",
+        "requestType": "core.UpdateVolumeGroupRequest",
+        "responseType": "core.UpdateVolumeGroupResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteVolumeGroup",
+        "requestType": "core.DeleteVolumeGroupRequest",
+        "responseType": "core.DeleteVolumeGroupResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_core_volumegroup",
+    "collectionField": "volumegroup",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/volumegroup/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/volumegroup/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for core/volumegroup; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

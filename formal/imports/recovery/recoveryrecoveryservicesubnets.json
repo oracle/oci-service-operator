@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "recovery",
+  "slug": "recoveryrecoveryservicesubnets",
+  "kind": "RecoveryRecoveryServiceSubnets",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_recovery_recovery_service_subnets",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateRecoveryRecoveryServiceSubnets",
+        "requestType": "recovery.CreateRecoveryRecoveryServiceSubnetsRequest",
+        "responseType": "recovery.CreateRecoveryRecoveryServiceSubnetsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetRecoveryRecoveryServiceSubnets",
+        "requestType": "recovery.GetRecoveryRecoveryServiceSubnetsRequest",
+        "responseType": "recovery.GetRecoveryRecoveryServiceSubnetsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListRecoveryRecoveryServiceSubnets",
+        "requestType": "recovery.ListRecoveryRecoveryServiceSubnetsRequest",
+        "responseType": "recovery.ListRecoveryRecoveryServiceSubnetsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateRecoveryRecoveryServiceSubnets",
+        "requestType": "recovery.UpdateRecoveryRecoveryServiceSubnetsRequest",
+        "responseType": "recovery.UpdateRecoveryRecoveryServiceSubnetsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteRecoveryRecoveryServiceSubnets",
+        "requestType": "recovery.DeleteRecoveryRecoveryServiceSubnetsRequest",
+        "responseType": "recovery.DeleteRecoveryRecoveryServiceSubnetsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_recovery_recoveryrecoveryservicesubnets",
+    "collectionField": "recoveryrecoveryservicesubnets",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/recovery/recoveryrecoveryservicesubnets/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/recovery/recoveryrecoveryservicesubnets/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for recovery/recoveryrecoveryservicesubnets; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

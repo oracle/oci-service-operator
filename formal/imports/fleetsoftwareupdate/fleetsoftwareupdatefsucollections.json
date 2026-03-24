@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "fleetsoftwareupdate",
+  "slug": "fleetsoftwareupdatefsucollections",
+  "kind": "FleetSoftwareUpdateFsuCollections",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_fleet_software_update_fsu_collections",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateFleetSoftwareUpdateFsuCollections",
+        "requestType": "fleetsoftwareupdate.CreateFleetSoftwareUpdateFsuCollectionsRequest",
+        "responseType": "fleetsoftwareupdate.CreateFleetSoftwareUpdateFsuCollectionsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetFleetSoftwareUpdateFsuCollections",
+        "requestType": "fleetsoftwareupdate.GetFleetSoftwareUpdateFsuCollectionsRequest",
+        "responseType": "fleetsoftwareupdate.GetFleetSoftwareUpdateFsuCollectionsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListFleetSoftwareUpdateFsuCollections",
+        "requestType": "fleetsoftwareupdate.ListFleetSoftwareUpdateFsuCollectionsRequest",
+        "responseType": "fleetsoftwareupdate.ListFleetSoftwareUpdateFsuCollectionsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateFleetSoftwareUpdateFsuCollections",
+        "requestType": "fleetsoftwareupdate.UpdateFleetSoftwareUpdateFsuCollectionsRequest",
+        "responseType": "fleetsoftwareupdate.UpdateFleetSoftwareUpdateFsuCollectionsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteFleetSoftwareUpdateFsuCollections",
+        "requestType": "fleetsoftwareupdate.DeleteFleetSoftwareUpdateFsuCollectionsRequest",
+        "responseType": "fleetsoftwareupdate.DeleteFleetSoftwareUpdateFsuCollectionsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_fleetsoftwareupdate_fleetsoftwareupdatefsucollections",
+    "collectionField": "fleetsoftwareupdatefsucollections",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/fleetsoftwareupdate/fleetsoftwareupdatefsucollections/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/fleetsoftwareupdate/fleetsoftwareupdatefsucollections/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for fleetsoftwareupdate/fleetsoftwareupdatefsucollections; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

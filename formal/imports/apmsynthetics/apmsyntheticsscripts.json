@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "apmsynthetics",
+  "slug": "apmsyntheticsscripts",
+  "kind": "ApmSyntheticsScripts",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_apm_synthetics_scripts",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateApmSyntheticsScripts",
+        "requestType": "apmsynthetics.CreateApmSyntheticsScriptsRequest",
+        "responseType": "apmsynthetics.CreateApmSyntheticsScriptsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetApmSyntheticsScripts",
+        "requestType": "apmsynthetics.GetApmSyntheticsScriptsRequest",
+        "responseType": "apmsynthetics.GetApmSyntheticsScriptsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListApmSyntheticsScripts",
+        "requestType": "apmsynthetics.ListApmSyntheticsScriptsRequest",
+        "responseType": "apmsynthetics.ListApmSyntheticsScriptsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateApmSyntheticsScripts",
+        "requestType": "apmsynthetics.UpdateApmSyntheticsScriptsRequest",
+        "responseType": "apmsynthetics.UpdateApmSyntheticsScriptsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteApmSyntheticsScripts",
+        "requestType": "apmsynthetics.DeleteApmSyntheticsScriptsRequest",
+        "responseType": "apmsynthetics.DeleteApmSyntheticsScriptsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_apmsynthetics_apmsyntheticsscripts",
+    "collectionField": "apmsyntheticsscripts",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/apmsynthetics/apmsyntheticsscripts/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/apmsynthetics/apmsyntheticsscripts/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for apmsynthetics/apmsyntheticsscripts; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

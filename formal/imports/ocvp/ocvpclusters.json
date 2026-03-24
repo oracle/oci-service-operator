@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "ocvp",
+  "slug": "ocvpclusters",
+  "kind": "OcvpClusters",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_ocvp_clusters",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOcvpClusters",
+        "requestType": "ocvp.CreateOcvpClustersRequest",
+        "responseType": "ocvp.CreateOcvpClustersResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOcvpClusters",
+        "requestType": "ocvp.GetOcvpClustersRequest",
+        "responseType": "ocvp.GetOcvpClustersResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOcvpClusters",
+        "requestType": "ocvp.ListOcvpClustersRequest",
+        "responseType": "ocvp.ListOcvpClustersResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOcvpClusters",
+        "requestType": "ocvp.UpdateOcvpClustersRequest",
+        "responseType": "ocvp.UpdateOcvpClustersResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOcvpClusters",
+        "requestType": "ocvp.DeleteOcvpClustersRequest",
+        "responseType": "ocvp.DeleteOcvpClustersResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_ocvp_ocvpclusters",
+    "collectionField": "ocvpclusters",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/ocvp/ocvpclusters/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/ocvp/ocvpclusters/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for ocvp/ocvpclusters; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

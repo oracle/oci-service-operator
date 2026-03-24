@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "stackmonitoring",
+  "slug": "stackmonitoringmonitoringtemplatemonitoringtemplateongivenresourcesmanagement",
+  "kind": "StackMonitoringMonitoringTemplateMonitoringTemplateOnGivenResourcesManagement",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_stack_monitoring_monitoring_template_monitoring_template_on_given_resources_management",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateStackMonitoringMonitoringTemplateMonitoringTemplateOnGivenResourcesManagement",
+        "requestType": "stackmonitoring.CreateStackMonitoringMonitoringTemplateMonitoringTemplateOnGivenResourcesManagementRequest",
+        "responseType": "stackmonitoring.CreateStackMonitoringMonitoringTemplateMonitoringTemplateOnGivenResourcesManagementResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetStackMonitoringMonitoringTemplateMonitoringTemplateOnGivenResourcesManagement",
+        "requestType": "stackmonitoring.GetStackMonitoringMonitoringTemplateMonitoringTemplateOnGivenResourcesManagementRequest",
+        "responseType": "stackmonitoring.GetStackMonitoringMonitoringTemplateMonitoringTemplateOnGivenResourcesManagementResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListStackMonitoringMonitoringTemplateMonitoringTemplateOnGivenResourcesManagement",
+        "requestType": "stackmonitoring.ListStackMonitoringMonitoringTemplateMonitoringTemplateOnGivenResourcesManagementRequest",
+        "responseType": "stackmonitoring.ListStackMonitoringMonitoringTemplateMonitoringTemplateOnGivenResourcesManagementResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateStackMonitoringMonitoringTemplateMonitoringTemplateOnGivenResourcesManagement",
+        "requestType": "stackmonitoring.UpdateStackMonitoringMonitoringTemplateMonitoringTemplateOnGivenResourcesManagementRequest",
+        "responseType": "stackmonitoring.UpdateStackMonitoringMonitoringTemplateMonitoringTemplateOnGivenResourcesManagementResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteStackMonitoringMonitoringTemplateMonitoringTemplateOnGivenResourcesManagement",
+        "requestType": "stackmonitoring.DeleteStackMonitoringMonitoringTemplateMonitoringTemplateOnGivenResourcesManagementRequest",
+        "responseType": "stackmonitoring.DeleteStackMonitoringMonitoringTemplateMonitoringTemplateOnGivenResourcesManagementResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_stackmonitoring_stackmonitoringmonitoringtemplatemonitoringtemplateongivenresourcesmanagement",
+    "collectionField": "stackmonitoringmonitoringtemplatemonitoringtemplateongivenresourcesmanagement",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/stackmonitoring/stackmonitoringmonitoringtemplatemonitoringtemplateongivenresourcesmanagement/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/stackmonitoring/stackmonitoringmonitoringtemplatemonitoringtemplateongivenresourcesmanagement/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for stackmonitoring/stackmonitoringmonitoringtemplatemonitoringtemplateongivenresourcesmanagement; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

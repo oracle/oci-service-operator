@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasemanagement",
+  "slug": "databasemanagementmanageddatabasegroups",
+  "kind": "DatabaseManagementManagedDatabaseGroups",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_management_managed_database_groups",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseManagementManagedDatabaseGroups",
+        "requestType": "databasemanagement.CreateDatabaseManagementManagedDatabaseGroupsRequest",
+        "responseType": "databasemanagement.CreateDatabaseManagementManagedDatabaseGroupsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseManagementManagedDatabaseGroups",
+        "requestType": "databasemanagement.GetDatabaseManagementManagedDatabaseGroupsRequest",
+        "responseType": "databasemanagement.GetDatabaseManagementManagedDatabaseGroupsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseManagementManagedDatabaseGroups",
+        "requestType": "databasemanagement.ListDatabaseManagementManagedDatabaseGroupsRequest",
+        "responseType": "databasemanagement.ListDatabaseManagementManagedDatabaseGroupsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseManagementManagedDatabaseGroups",
+        "requestType": "databasemanagement.UpdateDatabaseManagementManagedDatabaseGroupsRequest",
+        "responseType": "databasemanagement.UpdateDatabaseManagementManagedDatabaseGroupsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseManagementManagedDatabaseGroups",
+        "requestType": "databasemanagement.DeleteDatabaseManagementManagedDatabaseGroupsRequest",
+        "responseType": "databasemanagement.DeleteDatabaseManagementManagedDatabaseGroupsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_databasemanagement_databasemanagementmanageddatabasegroups",
+    "collectionField": "databasemanagementmanageddatabasegroups",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasemanagement/databasemanagementmanageddatabasegroups/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasemanagement/databasemanagementmanageddatabasegroups/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for databasemanagement/databasemanagementmanageddatabasegroups; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

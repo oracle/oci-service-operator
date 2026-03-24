@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "stackmonitoring",
+  "slug": "stackmonitoringmonitoredresourceslistmember",
+  "kind": "StackMonitoringMonitoredResourcesListMember",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_stack_monitoring_monitored_resources_list_member",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateStackMonitoringMonitoredResourcesListMember",
+        "requestType": "stackmonitoring.CreateStackMonitoringMonitoredResourcesListMemberRequest",
+        "responseType": "stackmonitoring.CreateStackMonitoringMonitoredResourcesListMemberResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetStackMonitoringMonitoredResourcesListMember",
+        "requestType": "stackmonitoring.GetStackMonitoringMonitoredResourcesListMemberRequest",
+        "responseType": "stackmonitoring.GetStackMonitoringMonitoredResourcesListMemberResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListStackMonitoringMonitoredResourcesListMember",
+        "requestType": "stackmonitoring.ListStackMonitoringMonitoredResourcesListMemberRequest",
+        "responseType": "stackmonitoring.ListStackMonitoringMonitoredResourcesListMemberResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateStackMonitoringMonitoredResourcesListMember",
+        "requestType": "stackmonitoring.UpdateStackMonitoringMonitoredResourcesListMemberRequest",
+        "responseType": "stackmonitoring.UpdateStackMonitoringMonitoredResourcesListMemberResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteStackMonitoringMonitoredResourcesListMember",
+        "requestType": "stackmonitoring.DeleteStackMonitoringMonitoredResourcesListMemberRequest",
+        "responseType": "stackmonitoring.DeleteStackMonitoringMonitoredResourcesListMemberResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_stackmonitoring_stackmonitoringmonitoredresourceslistmember",
+    "collectionField": "stackmonitoringmonitoredresourceslistmember",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/stackmonitoring/stackmonitoringmonitoredresourceslistmember/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/stackmonitoring/stackmonitoringmonitoredresourceslistmember/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for stackmonitoring/stackmonitoringmonitoredresourceslistmember; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

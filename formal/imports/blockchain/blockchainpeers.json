@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "blockchain",
+  "slug": "blockchainpeers",
+  "kind": "BlockchainPeers",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_blockchain_peers",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateBlockchainPeers",
+        "requestType": "blockchain.CreateBlockchainPeersRequest",
+        "responseType": "blockchain.CreateBlockchainPeersResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetBlockchainPeers",
+        "requestType": "blockchain.GetBlockchainPeersRequest",
+        "responseType": "blockchain.GetBlockchainPeersResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListBlockchainPeers",
+        "requestType": "blockchain.ListBlockchainPeersRequest",
+        "responseType": "blockchain.ListBlockchainPeersResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateBlockchainPeers",
+        "requestType": "blockchain.UpdateBlockchainPeersRequest",
+        "responseType": "blockchain.UpdateBlockchainPeersResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteBlockchainPeers",
+        "requestType": "blockchain.DeleteBlockchainPeersRequest",
+        "responseType": "blockchain.DeleteBlockchainPeersResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_blockchain_blockchainpeers",
+    "collectionField": "blockchainpeers",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/blockchain/blockchainpeers/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/blockchain/blockchainpeers/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for blockchain/blockchainpeers; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "identitydomains",
+  "slug": "identitydomainsmypendingapproval",
+  "kind": "IdentityDomainsMyPendingApproval",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_identity_domains_my_pending_approval",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateIdentityDomainsMyPendingApproval",
+        "requestType": "identitydomains.CreateIdentityDomainsMyPendingApprovalRequest",
+        "responseType": "identitydomains.CreateIdentityDomainsMyPendingApprovalResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetIdentityDomainsMyPendingApproval",
+        "requestType": "identitydomains.GetIdentityDomainsMyPendingApprovalRequest",
+        "responseType": "identitydomains.GetIdentityDomainsMyPendingApprovalResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListIdentityDomainsMyPendingApproval",
+        "requestType": "identitydomains.ListIdentityDomainsMyPendingApprovalRequest",
+        "responseType": "identitydomains.ListIdentityDomainsMyPendingApprovalResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateIdentityDomainsMyPendingApproval",
+        "requestType": "identitydomains.UpdateIdentityDomainsMyPendingApprovalRequest",
+        "responseType": "identitydomains.UpdateIdentityDomainsMyPendingApprovalResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteIdentityDomainsMyPendingApproval",
+        "requestType": "identitydomains.DeleteIdentityDomainsMyPendingApprovalRequest",
+        "responseType": "identitydomains.DeleteIdentityDomainsMyPendingApprovalResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_identitydomains_identitydomainsmypendingapproval",
+    "collectionField": "identitydomainsmypendingapproval",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/identitydomains/identitydomainsmypendingapproval/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/identitydomains/identitydomainsmypendingapproval/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for identitydomains/identitydomainsmypendingapproval; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

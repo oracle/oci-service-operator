@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasemanagement",
+  "slug": "databasemanagementmanageddatabasealertlogcount",
+  "kind": "DatabaseManagementManagedDatabaseAlertLogCount",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_management_managed_database_alert_log_count",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseManagementManagedDatabaseAlertLogCount",
+        "requestType": "databasemanagement.CreateDatabaseManagementManagedDatabaseAlertLogCountRequest",
+        "responseType": "databasemanagement.CreateDatabaseManagementManagedDatabaseAlertLogCountResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseManagementManagedDatabaseAlertLogCount",
+        "requestType": "databasemanagement.GetDatabaseManagementManagedDatabaseAlertLogCountRequest",
+        "responseType": "databasemanagement.GetDatabaseManagementManagedDatabaseAlertLogCountResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseManagementManagedDatabaseAlertLogCount",
+        "requestType": "databasemanagement.ListDatabaseManagementManagedDatabaseAlertLogCountRequest",
+        "responseType": "databasemanagement.ListDatabaseManagementManagedDatabaseAlertLogCountResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseManagementManagedDatabaseAlertLogCount",
+        "requestType": "databasemanagement.UpdateDatabaseManagementManagedDatabaseAlertLogCountRequest",
+        "responseType": "databasemanagement.UpdateDatabaseManagementManagedDatabaseAlertLogCountResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseManagementManagedDatabaseAlertLogCount",
+        "requestType": "databasemanagement.DeleteDatabaseManagementManagedDatabaseAlertLogCountRequest",
+        "responseType": "databasemanagement.DeleteDatabaseManagementManagedDatabaseAlertLogCountResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_databasemanagement_databasemanagementmanageddatabasealertlogcount",
+    "collectionField": "databasemanagementmanageddatabasealertlogcount",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasemanagement/databasemanagementmanageddatabasealertlogcount/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasemanagement/databasemanagementmanageddatabasealertlogcount/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for databasemanagement/databasemanagementmanageddatabasealertlogcount; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

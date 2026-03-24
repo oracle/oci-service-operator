@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "ospgateway",
+  "slug": "ospgatewaysubscriptions",
+  "kind": "OspGatewaySubscriptions",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_osp_gateway_subscriptions",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOspGatewaySubscriptions",
+        "requestType": "ospgateway.CreateOspGatewaySubscriptionsRequest",
+        "responseType": "ospgateway.CreateOspGatewaySubscriptionsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOspGatewaySubscriptions",
+        "requestType": "ospgateway.GetOspGatewaySubscriptionsRequest",
+        "responseType": "ospgateway.GetOspGatewaySubscriptionsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOspGatewaySubscriptions",
+        "requestType": "ospgateway.ListOspGatewaySubscriptionsRequest",
+        "responseType": "ospgateway.ListOspGatewaySubscriptionsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOspGatewaySubscriptions",
+        "requestType": "ospgateway.UpdateOspGatewaySubscriptionsRequest",
+        "responseType": "ospgateway.UpdateOspGatewaySubscriptionsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOspGatewaySubscriptions",
+        "requestType": "ospgateway.DeleteOspGatewaySubscriptionsRequest",
+        "responseType": "ospgateway.DeleteOspGatewaySubscriptionsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_ospgateway_ospgatewaysubscriptions",
+    "collectionField": "ospgatewaysubscriptions",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/ospgateway/ospgatewaysubscriptions/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/ospgateway/ospgatewaysubscriptions/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for ospgateway/ospgatewaysubscriptions; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

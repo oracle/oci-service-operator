@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "monitoring",
+  "slug": "monitoringalarmsuppressions",
+  "kind": "MonitoringAlarmSuppressions",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_monitoring_alarm_suppressions",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateMonitoringAlarmSuppressions",
+        "requestType": "monitoring.CreateMonitoringAlarmSuppressionsRequest",
+        "responseType": "monitoring.CreateMonitoringAlarmSuppressionsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetMonitoringAlarmSuppressions",
+        "requestType": "monitoring.GetMonitoringAlarmSuppressionsRequest",
+        "responseType": "monitoring.GetMonitoringAlarmSuppressionsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListMonitoringAlarmSuppressions",
+        "requestType": "monitoring.ListMonitoringAlarmSuppressionsRequest",
+        "responseType": "monitoring.ListMonitoringAlarmSuppressionsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateMonitoringAlarmSuppressions",
+        "requestType": "monitoring.UpdateMonitoringAlarmSuppressionsRequest",
+        "responseType": "monitoring.UpdateMonitoringAlarmSuppressionsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteMonitoringAlarmSuppressions",
+        "requestType": "monitoring.DeleteMonitoringAlarmSuppressionsRequest",
+        "responseType": "monitoring.DeleteMonitoringAlarmSuppressionsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_monitoring_monitoringalarmsuppressions",
+    "collectionField": "monitoringalarmsuppressions",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/monitoring/monitoringalarmsuppressions/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/monitoring/monitoringalarmsuppressions/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for monitoring/monitoringalarmsuppressions; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

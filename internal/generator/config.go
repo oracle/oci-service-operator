@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/oracle/oci-service-operator/internal/formal"
 	"sigs.k8s.io/yaml"
 )
 
@@ -23,6 +24,7 @@ type Config struct {
 	GeneratorEntrypoint string                    `yaml:"generatorEntrypoint"`
 	PackageProfiles     map[string]PackageProfile `yaml:"packageProfiles"`
 	Services            []ServiceConfig           `yaml:"services"`
+	configDir           string                    `yaml:"-"`
 }
 
 const (
@@ -56,6 +58,7 @@ type GenerationSurfaceConfig struct {
 // ResourceGenerationOverride captures per-kind rollout and override metadata.
 type ResourceGenerationOverride struct {
 	Kind           string                           `yaml:"kind"`
+	FormalSpec     string                           `yaml:"formalSpec,omitempty"`
 	Controller     ControllerGenerationOverride     `yaml:"controller,omitempty"`
 	ServiceManager ServiceManagerGenerationOverride `yaml:"serviceManager,omitempty"`
 	Webhooks       GenerationSurfaceConfig          `yaml:"webhooks,omitempty"`
@@ -83,6 +86,7 @@ type ServiceConfig struct {
 	Phase          string              `yaml:"phase"`
 	SampleOrder    int                 `yaml:"sampleOrder,omitempty"`
 	PackageProfile string              `yaml:"packageProfile"`
+	FormalSpec     string              `yaml:"formalSpec,omitempty"`
 	ParityFile     string              `yaml:"parityFile,omitempty"`
 	Compatibility  CompatibilityConfig `yaml:"compatibility,omitempty"`
 	ObservedState  ObservedStateConfig `yaml:"observedState,omitempty"`
@@ -111,6 +115,7 @@ func LoadConfig(path string) (*Config, error) {
 	if err := yaml.UnmarshalStrict(content, &cfg); err != nil {
 		return nil, fmt.Errorf("decode generator config %q: %w", path, err)
 	}
+	cfg.configDir = filepath.Dir(path)
 	if err := cfg.loadParity(filepath.Dir(path)); err != nil {
 		return nil, fmt.Errorf("load generator config %q parity inputs: %w", path, err)
 	}
@@ -170,6 +175,9 @@ func (c *Config) Validate() error {
 		}
 		if _, ok := c.PackageProfiles[service.PackageProfile]; !ok {
 			return fmt.Errorf("service %q references unknown packageProfile %q", service.Service, service.PackageProfile)
+		}
+		if err := validateFormalSpec(fmt.Sprintf("service %q formalSpec", service.Service), service.FormalSpec); err != nil {
+			return err
 		}
 		if err := service.Generation.Validate(service.Service); err != nil {
 			return err
@@ -253,6 +261,12 @@ func (g GenerationConfig) Validate(serviceName string) error {
 		); err != nil {
 			return err
 		}
+		if err := validateFormalSpec(
+			fmt.Sprintf("service %q generation.resources[%q].formalSpec", serviceName, kind),
+			resource.FormalSpec,
+		); err != nil {
+			return err
+		}
 		if resource.Controller.MaxConcurrentReconciles < 0 {
 			return fmt.Errorf(
 				"service %q generation.resources[%q].controller.maxConcurrentReconciles must be >= 0",
@@ -323,7 +337,10 @@ func validateWebhookStrategy(field string, strategy string) error {
 }
 
 func (r ResourceGenerationOverride) hasOverrides() bool {
-	return r.Controller.hasOverrides() || r.ServiceManager.hasOverrides() || strings.TrimSpace(r.Webhooks.Strategy) != ""
+	return strings.TrimSpace(r.FormalSpec) != "" ||
+		r.Controller.hasOverrides() ||
+		r.ServiceManager.hasOverrides() ||
+		strings.TrimSpace(r.Webhooks.Strategy) != ""
 }
 
 func (c ControllerGenerationOverride) hasOverrides() bool {
@@ -332,6 +349,21 @@ func (c ControllerGenerationOverride) hasOverrides() bool {
 
 func (s ServiceManagerGenerationOverride) hasOverrides() bool {
 	return strings.TrimSpace(s.Strategy) != "" || strings.TrimSpace(s.PackagePath) != ""
+}
+
+func validateFormalSpec(field string, value string) error {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return nil
+	}
+	if strings.ContainsAny(value, `/\`) {
+		return fmt.Errorf("%s %q must be a single formal slug, not a path", field, value)
+	}
+	cleaned := path.Clean(value)
+	if cleaned == "." || cleaned == ".." || strings.HasPrefix(cleaned, "../") || cleaned != value {
+		return fmt.Errorf("%s %q must be a clean formal slug", field, value)
+	}
+	return nil
 }
 
 // SelectServices resolves the requested services from the config.
@@ -355,6 +387,43 @@ func (c *Config) SelectServices(serviceName string, all bool) ([]ServiceConfig, 
 	}
 
 	return nil, fmt.Errorf("service %q was not found in the generator config", serviceName)
+}
+
+// FormalRoot returns the repo-local formal catalog root implied by the config location.
+func (c *Config) FormalRoot() string {
+	if strings.TrimSpace(c.configDir) == "" {
+		return ""
+	}
+	return filepath.Clean(filepath.Join(c.configDir, "..", "..", "..", "formal"))
+}
+
+// HasFormalSpecs reports whether the config includes any formalSpec references.
+func (c *Config) HasFormalSpecs() bool {
+	if c == nil {
+		return false
+	}
+	for _, service := range c.Services {
+		if service.HasFormalSpecs() {
+			return true
+		}
+	}
+	return false
+}
+
+// VerifyFormalInputs validates the repo-local formal catalog when the config references formal specs.
+func (c *Config) VerifyFormalInputs() error {
+	if !c.HasFormalSpecs() {
+		return nil
+	}
+
+	formalRoot := c.FormalRoot()
+	if strings.TrimSpace(formalRoot) == "" {
+		return fmt.Errorf("formal root is unknown for configs with formalSpec references")
+	}
+	if _, err := formal.Verify(formalRoot); err != nil {
+		return fmt.Errorf("verify formal inputs %q: %w", formalRoot, err)
+	}
+	return nil
 }
 
 // VersionOrDefault returns the configured version or the config default.
@@ -421,6 +490,27 @@ func (s ServiceConfig) ServiceManagerPackagePathFor(kind string, fileStem string
 		return override.ServiceManager.PackagePath
 	}
 	return path.Join(s.Group, fileStem)
+}
+
+// FormalSpecFor resolves the effective formal slug for one generated resource.
+func (s ServiceConfig) FormalSpecFor(kind string) string {
+	if override, ok := s.resourceGenerationOverride(kind); ok && strings.TrimSpace(override.FormalSpec) != "" {
+		return strings.TrimSpace(override.FormalSpec)
+	}
+	return strings.TrimSpace(s.FormalSpec)
+}
+
+// HasFormalSpecs reports whether the service or any resource override uses formal specs.
+func (s ServiceConfig) HasFormalSpecs() bool {
+	if strings.TrimSpace(s.FormalSpec) != "" {
+		return true
+	}
+	for _, resource := range s.Generation.Resources {
+		if strings.TrimSpace(resource.FormalSpec) != "" {
+			return true
+		}
+	}
+	return false
 }
 
 // RegistrationGenerationStrategy returns the runtime-registration rollout strategy for the service.

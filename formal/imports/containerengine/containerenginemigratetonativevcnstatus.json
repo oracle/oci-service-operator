@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "containerengine",
+  "slug": "containerenginemigratetonativevcnstatus",
+  "kind": "ContainerengineMigrateToNativeVcnStatus",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_containerengine_migrate_to_native_vcn_status",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateContainerengineMigrateToNativeVcnStatus",
+        "requestType": "containerengine.CreateContainerengineMigrateToNativeVcnStatusRequest",
+        "responseType": "containerengine.CreateContainerengineMigrateToNativeVcnStatusResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetContainerengineMigrateToNativeVcnStatus",
+        "requestType": "containerengine.GetContainerengineMigrateToNativeVcnStatusRequest",
+        "responseType": "containerengine.GetContainerengineMigrateToNativeVcnStatusResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListContainerengineMigrateToNativeVcnStatus",
+        "requestType": "containerengine.ListContainerengineMigrateToNativeVcnStatusRequest",
+        "responseType": "containerengine.ListContainerengineMigrateToNativeVcnStatusResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateContainerengineMigrateToNativeVcnStatus",
+        "requestType": "containerengine.UpdateContainerengineMigrateToNativeVcnStatusRequest",
+        "responseType": "containerengine.UpdateContainerengineMigrateToNativeVcnStatusResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteContainerengineMigrateToNativeVcnStatus",
+        "requestType": "containerengine.DeleteContainerengineMigrateToNativeVcnStatusRequest",
+        "responseType": "containerengine.DeleteContainerengineMigrateToNativeVcnStatusResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_containerengine_containerenginemigratetonativevcnstatus",
+    "collectionField": "containerenginemigratetonativevcnstatus",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/containerengine/containerenginemigratetonativevcnstatus/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/containerengine/containerenginemigratetonativevcnstatus/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for containerengine/containerenginemigratetonativevcnstatus; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

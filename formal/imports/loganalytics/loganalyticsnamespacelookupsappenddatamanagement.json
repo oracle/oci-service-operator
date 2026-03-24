@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "loganalytics",
+  "slug": "loganalyticsnamespacelookupsappenddatamanagement",
+  "kind": "LogAnalyticsNamespaceLookupsAppendDataManagement",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_log_analytics_namespace_lookups_append_data_management",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateLogAnalyticsNamespaceLookupsAppendDataManagement",
+        "requestType": "loganalytics.CreateLogAnalyticsNamespaceLookupsAppendDataManagementRequest",
+        "responseType": "loganalytics.CreateLogAnalyticsNamespaceLookupsAppendDataManagementResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetLogAnalyticsNamespaceLookupsAppendDataManagement",
+        "requestType": "loganalytics.GetLogAnalyticsNamespaceLookupsAppendDataManagementRequest",
+        "responseType": "loganalytics.GetLogAnalyticsNamespaceLookupsAppendDataManagementResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListLogAnalyticsNamespaceLookupsAppendDataManagement",
+        "requestType": "loganalytics.ListLogAnalyticsNamespaceLookupsAppendDataManagementRequest",
+        "responseType": "loganalytics.ListLogAnalyticsNamespaceLookupsAppendDataManagementResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateLogAnalyticsNamespaceLookupsAppendDataManagement",
+        "requestType": "loganalytics.UpdateLogAnalyticsNamespaceLookupsAppendDataManagementRequest",
+        "responseType": "loganalytics.UpdateLogAnalyticsNamespaceLookupsAppendDataManagementResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteLogAnalyticsNamespaceLookupsAppendDataManagement",
+        "requestType": "loganalytics.DeleteLogAnalyticsNamespaceLookupsAppendDataManagementRequest",
+        "responseType": "loganalytics.DeleteLogAnalyticsNamespaceLookupsAppendDataManagementResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_loganalytics_loganalyticsnamespacelookupsappenddatamanagement",
+    "collectionField": "loganalyticsnamespacelookupsappenddatamanagement",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/loganalytics/loganalyticsnamespacelookupsappenddatamanagement/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/loganalytics/loganalyticsnamespacelookupsappenddatamanagement/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for loganalytics/loganalyticsnamespacelookupsappenddatamanagement; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

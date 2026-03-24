@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "opsi",
+  "slug": "opsichargebackplans",
+  "kind": "OpsiChargebackPlans",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_opsi_chargeback_plans",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOpsiChargebackPlans",
+        "requestType": "opsi.CreateOpsiChargebackPlansRequest",
+        "responseType": "opsi.CreateOpsiChargebackPlansResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOpsiChargebackPlans",
+        "requestType": "opsi.GetOpsiChargebackPlansRequest",
+        "responseType": "opsi.GetOpsiChargebackPlansResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOpsiChargebackPlans",
+        "requestType": "opsi.ListOpsiChargebackPlansRequest",
+        "responseType": "opsi.ListOpsiChargebackPlansResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOpsiChargebackPlans",
+        "requestType": "opsi.UpdateOpsiChargebackPlansRequest",
+        "responseType": "opsi.UpdateOpsiChargebackPlansResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOpsiChargebackPlans",
+        "requestType": "opsi.DeleteOpsiChargebackPlansRequest",
+        "responseType": "opsi.DeleteOpsiChargebackPlansResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_opsi_opsichargebackplans",
+    "collectionField": "opsichargebackplans",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/opsi/opsichargebackplans/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/opsi/opsichargebackplans/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for opsi/opsichargebackplans; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

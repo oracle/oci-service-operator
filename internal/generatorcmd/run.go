@@ -67,6 +67,9 @@ func execute(ctx context.Context, opts options, stdout io.Writer) error {
 	if err != nil {
 		return err
 	}
+	if err := cfg.VerifyFormalInputs(); err != nil {
+		return err
+	}
 
 	pipeline := generator.New()
 	preserveRoot := ""

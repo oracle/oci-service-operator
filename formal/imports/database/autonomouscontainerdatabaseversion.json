@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "autonomouscontainerdatabaseversion",
+  "kind": "AutonomousContainerDatabaseVersion",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_database_autonomouscontainerdatabaseversion",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateAutonomousContainerDatabaseVersion",
+        "requestType": "database.CreateAutonomousContainerDatabaseVersionRequest",
+        "responseType": "database.CreateAutonomousContainerDatabaseVersionResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetAutonomousContainerDatabaseVersion",
+        "requestType": "database.GetAutonomousContainerDatabaseVersionRequest",
+        "responseType": "database.GetAutonomousContainerDatabaseVersionResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListAutonomousContainerDatabaseVersion",
+        "requestType": "database.ListAutonomousContainerDatabaseVersionRequest",
+        "responseType": "database.ListAutonomousContainerDatabaseVersionResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateAutonomousContainerDatabaseVersion",
+        "requestType": "database.UpdateAutonomousContainerDatabaseVersionRequest",
+        "responseType": "database.UpdateAutonomousContainerDatabaseVersionResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteAutonomousContainerDatabaseVersion",
+        "requestType": "database.DeleteAutonomousContainerDatabaseVersionRequest",
+        "responseType": "database.DeleteAutonomousContainerDatabaseVersionResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_autonomouscontainerdatabaseversion",
+    "collectionField": "autonomouscontainerdatabaseversion",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/autonomouscontainerdatabaseversion/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/autonomouscontainerdatabaseversion/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/autonomouscontainerdatabaseversion; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

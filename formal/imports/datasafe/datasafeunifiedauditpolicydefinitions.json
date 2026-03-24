@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "datasafeunifiedauditpolicydefinitions",
+  "kind": "DataSafeUnifiedAuditPolicyDefinitions",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_unified_audit_policy_definitions",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDataSafeUnifiedAuditPolicyDefinitions",
+        "requestType": "datasafe.CreateDataSafeUnifiedAuditPolicyDefinitionsRequest",
+        "responseType": "datasafe.CreateDataSafeUnifiedAuditPolicyDefinitionsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDataSafeUnifiedAuditPolicyDefinitions",
+        "requestType": "datasafe.GetDataSafeUnifiedAuditPolicyDefinitionsRequest",
+        "responseType": "datasafe.GetDataSafeUnifiedAuditPolicyDefinitionsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDataSafeUnifiedAuditPolicyDefinitions",
+        "requestType": "datasafe.ListDataSafeUnifiedAuditPolicyDefinitionsRequest",
+        "responseType": "datasafe.ListDataSafeUnifiedAuditPolicyDefinitionsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDataSafeUnifiedAuditPolicyDefinitions",
+        "requestType": "datasafe.UpdateDataSafeUnifiedAuditPolicyDefinitionsRequest",
+        "responseType": "datasafe.UpdateDataSafeUnifiedAuditPolicyDefinitionsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDataSafeUnifiedAuditPolicyDefinitions",
+        "requestType": "datasafe.DeleteDataSafeUnifiedAuditPolicyDefinitionsRequest",
+        "responseType": "datasafe.DeleteDataSafeUnifiedAuditPolicyDefinitionsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_datasafe_datasafeunifiedauditpolicydefinitions",
+    "collectionField": "datasafeunifiedauditpolicydefinitions",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/datasafeunifiedauditpolicydefinitions/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/datasafeunifiedauditpolicydefinitions/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for datasafe/datasafeunifiedauditpolicydefinitions; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

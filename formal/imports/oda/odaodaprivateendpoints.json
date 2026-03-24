@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "oda",
+  "slug": "odaodaprivateendpoints",
+  "kind": "OdaOdaPrivateEndpoints",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_oda_oda_private_endpoints",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOdaOdaPrivateEndpoints",
+        "requestType": "oda.CreateOdaOdaPrivateEndpointsRequest",
+        "responseType": "oda.CreateOdaOdaPrivateEndpointsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOdaOdaPrivateEndpoints",
+        "requestType": "oda.GetOdaOdaPrivateEndpointsRequest",
+        "responseType": "oda.GetOdaOdaPrivateEndpointsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOdaOdaPrivateEndpoints",
+        "requestType": "oda.ListOdaOdaPrivateEndpointsRequest",
+        "responseType": "oda.ListOdaOdaPrivateEndpointsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOdaOdaPrivateEndpoints",
+        "requestType": "oda.UpdateOdaOdaPrivateEndpointsRequest",
+        "responseType": "oda.UpdateOdaOdaPrivateEndpointsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOdaOdaPrivateEndpoints",
+        "requestType": "oda.DeleteOdaOdaPrivateEndpointsRequest",
+        "responseType": "oda.DeleteOdaOdaPrivateEndpointsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_oda_odaodaprivateendpoints",
+    "collectionField": "odaodaprivateendpoints",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/oda/odaodaprivateendpoints/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/oda/odaodaprivateendpoints/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for oda/odaodaprivateendpoints; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

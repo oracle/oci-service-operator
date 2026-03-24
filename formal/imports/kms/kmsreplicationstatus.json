@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "kms",
+  "slug": "kmsreplicationstatus",
+  "kind": "KmsReplicationStatus",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_kms_replication_status",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateKmsReplicationStatus",
+        "requestType": "kms.CreateKmsReplicationStatusRequest",
+        "responseType": "kms.CreateKmsReplicationStatusResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetKmsReplicationStatus",
+        "requestType": "kms.GetKmsReplicationStatusRequest",
+        "responseType": "kms.GetKmsReplicationStatusResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListKmsReplicationStatus",
+        "requestType": "kms.ListKmsReplicationStatusRequest",
+        "responseType": "kms.ListKmsReplicationStatusResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateKmsReplicationStatus",
+        "requestType": "kms.UpdateKmsReplicationStatusRequest",
+        "responseType": "kms.UpdateKmsReplicationStatusResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteKmsReplicationStatus",
+        "requestType": "kms.DeleteKmsReplicationStatusRequest",
+        "responseType": "kms.DeleteKmsReplicationStatusResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_kms_kmsreplicationstatus",
+    "collectionField": "kmsreplicationstatus",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/kms/kmsreplicationstatus/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/kms/kmsreplicationstatus/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for kms/kmsreplicationstatus; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

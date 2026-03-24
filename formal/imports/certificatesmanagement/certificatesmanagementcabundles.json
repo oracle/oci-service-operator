@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "certificatesmanagement",
+  "slug": "certificatesmanagementcabundles",
+  "kind": "CertificatesManagementCaBundles",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_certificates_management_ca_bundles",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCertificatesManagementCaBundles",
+        "requestType": "certificatesmanagement.CreateCertificatesManagementCaBundlesRequest",
+        "responseType": "certificatesmanagement.CreateCertificatesManagementCaBundlesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCertificatesManagementCaBundles",
+        "requestType": "certificatesmanagement.GetCertificatesManagementCaBundlesRequest",
+        "responseType": "certificatesmanagement.GetCertificatesManagementCaBundlesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCertificatesManagementCaBundles",
+        "requestType": "certificatesmanagement.ListCertificatesManagementCaBundlesRequest",
+        "responseType": "certificatesmanagement.ListCertificatesManagementCaBundlesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCertificatesManagementCaBundles",
+        "requestType": "certificatesmanagement.UpdateCertificatesManagementCaBundlesRequest",
+        "responseType": "certificatesmanagement.UpdateCertificatesManagementCaBundlesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCertificatesManagementCaBundles",
+        "requestType": "certificatesmanagement.DeleteCertificatesManagementCaBundlesRequest",
+        "responseType": "certificatesmanagement.DeleteCertificatesManagementCaBundlesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_certificatesmanagement_certificatesmanagementcabundles",
+    "collectionField": "certificatesmanagementcabundles",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/certificatesmanagement/certificatesmanagementcabundles/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/certificatesmanagement/certificatesmanagementcabundles/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for certificatesmanagement/certificatesmanagementcabundles; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

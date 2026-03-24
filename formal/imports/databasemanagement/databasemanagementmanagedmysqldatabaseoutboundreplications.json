@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasemanagement",
+  "slug": "databasemanagementmanagedmysqldatabaseoutboundreplications",
+  "kind": "DatabaseManagementManagedMySqlDatabaseOutboundReplications",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_management_managed_my_sql_database_outbound_replications",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseManagementManagedMySqlDatabaseOutboundReplications",
+        "requestType": "databasemanagement.CreateDatabaseManagementManagedMySqlDatabaseOutboundReplicationsRequest",
+        "responseType": "databasemanagement.CreateDatabaseManagementManagedMySqlDatabaseOutboundReplicationsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseManagementManagedMySqlDatabaseOutboundReplications",
+        "requestType": "databasemanagement.GetDatabaseManagementManagedMySqlDatabaseOutboundReplicationsRequest",
+        "responseType": "databasemanagement.GetDatabaseManagementManagedMySqlDatabaseOutboundReplicationsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseManagementManagedMySqlDatabaseOutboundReplications",
+        "requestType": "databasemanagement.ListDatabaseManagementManagedMySqlDatabaseOutboundReplicationsRequest",
+        "responseType": "databasemanagement.ListDatabaseManagementManagedMySqlDatabaseOutboundReplicationsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseManagementManagedMySqlDatabaseOutboundReplications",
+        "requestType": "databasemanagement.UpdateDatabaseManagementManagedMySqlDatabaseOutboundReplicationsRequest",
+        "responseType": "databasemanagement.UpdateDatabaseManagementManagedMySqlDatabaseOutboundReplicationsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseManagementManagedMySqlDatabaseOutboundReplications",
+        "requestType": "databasemanagement.DeleteDatabaseManagementManagedMySqlDatabaseOutboundReplicationsRequest",
+        "responseType": "databasemanagement.DeleteDatabaseManagementManagedMySqlDatabaseOutboundReplicationsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_databasemanagement_databasemanagementmanagedmysqldatabaseoutboundreplications",
+    "collectionField": "databasemanagementmanagedmysqldatabaseoutboundreplications",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasemanagement/databasemanagementmanagedmysqldatabaseoutboundreplications/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasemanagement/databasemanagementmanagedmysqldatabaseoutboundreplications/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for databasemanagement/databasemanagementmanagedmysqldatabaseoutboundreplications; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

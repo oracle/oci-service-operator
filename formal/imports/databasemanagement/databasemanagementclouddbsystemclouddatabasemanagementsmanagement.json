@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasemanagement",
+  "slug": "databasemanagementclouddbsystemclouddatabasemanagementsmanagement",
+  "kind": "DatabaseManagementCloudDbSystemCloudDatabaseManagementsManagement",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_management_cloud_db_system_cloud_database_managements_management",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseManagementCloudDbSystemCloudDatabaseManagementsManagement",
+        "requestType": "databasemanagement.CreateDatabaseManagementCloudDbSystemCloudDatabaseManagementsManagementRequest",
+        "responseType": "databasemanagement.CreateDatabaseManagementCloudDbSystemCloudDatabaseManagementsManagementResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseManagementCloudDbSystemCloudDatabaseManagementsManagement",
+        "requestType": "databasemanagement.GetDatabaseManagementCloudDbSystemCloudDatabaseManagementsManagementRequest",
+        "responseType": "databasemanagement.GetDatabaseManagementCloudDbSystemCloudDatabaseManagementsManagementResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseManagementCloudDbSystemCloudDatabaseManagementsManagement",
+        "requestType": "databasemanagement.ListDatabaseManagementCloudDbSystemCloudDatabaseManagementsManagementRequest",
+        "responseType": "databasemanagement.ListDatabaseManagementCloudDbSystemCloudDatabaseManagementsManagementResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseManagementCloudDbSystemCloudDatabaseManagementsManagement",
+        "requestType": "databasemanagement.UpdateDatabaseManagementCloudDbSystemCloudDatabaseManagementsManagementRequest",
+        "responseType": "databasemanagement.UpdateDatabaseManagementCloudDbSystemCloudDatabaseManagementsManagementResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseManagementCloudDbSystemCloudDatabaseManagementsManagement",
+        "requestType": "databasemanagement.DeleteDatabaseManagementCloudDbSystemCloudDatabaseManagementsManagementRequest",
+        "responseType": "databasemanagement.DeleteDatabaseManagementCloudDbSystemCloudDatabaseManagementsManagementResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_databasemanagement_databasemanagementclouddbsystemclouddatabasemanagementsmanagement",
+    "collectionField": "databasemanagementclouddbsystemclouddatabasemanagementsmanagement",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasemanagement/databasemanagementclouddbsystemclouddatabasemanagementsmanagement/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasemanagement/databasemanagementclouddbsystemclouddatabasemanagementsmanagement/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for databasemanagement/databasemanagementclouddbsystemclouddatabasemanagementsmanagement; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

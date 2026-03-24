@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "ipsecconnectiondevicestatus",
+  "kind": "IPSecConnectionDeviceStatus",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_core_ipsecconnectiondevicestatus",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateIPSecConnectionDeviceStatus",
+        "requestType": "core.CreateIPSecConnectionDeviceStatusRequest",
+        "responseType": "core.CreateIPSecConnectionDeviceStatusResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetIPSecConnectionDeviceStatus",
+        "requestType": "core.GetIPSecConnectionDeviceStatusRequest",
+        "responseType": "core.GetIPSecConnectionDeviceStatusResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListIPSecConnectionDeviceStatus",
+        "requestType": "core.ListIPSecConnectionDeviceStatusRequest",
+        "responseType": "core.ListIPSecConnectionDeviceStatusResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateIPSecConnectionDeviceStatus",
+        "requestType": "core.UpdateIPSecConnectionDeviceStatusRequest",
+        "responseType": "core.UpdateIPSecConnectionDeviceStatusResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteIPSecConnectionDeviceStatus",
+        "requestType": "core.DeleteIPSecConnectionDeviceStatusRequest",
+        "responseType": "core.DeleteIPSecConnectionDeviceStatusResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_core_ipsecconnectiondevicestatus",
+    "collectionField": "ipsecconnectiondevicestatus",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/ipsecconnectiondevicestatus/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/ipsecconnectiondevicestatus/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for core/ipsecconnectiondevicestatus; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

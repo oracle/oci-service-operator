@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasetools",
+  "slug": "databasetoolsdatabasetoolsprivateendpoint",
+  "kind": "DatabaseToolsDatabaseToolsPrivateEndpoint",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_tools_database_tools_private_endpoint",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseToolsDatabaseToolsPrivateEndpoint",
+        "requestType": "databasetools.CreateDatabaseToolsDatabaseToolsPrivateEndpointRequest",
+        "responseType": "databasetools.CreateDatabaseToolsDatabaseToolsPrivateEndpointResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseToolsDatabaseToolsPrivateEndpoint",
+        "requestType": "databasetools.GetDatabaseToolsDatabaseToolsPrivateEndpointRequest",
+        "responseType": "databasetools.GetDatabaseToolsDatabaseToolsPrivateEndpointResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseToolsDatabaseToolsPrivateEndpoint",
+        "requestType": "databasetools.ListDatabaseToolsDatabaseToolsPrivateEndpointRequest",
+        "responseType": "databasetools.ListDatabaseToolsDatabaseToolsPrivateEndpointResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseToolsDatabaseToolsPrivateEndpoint",
+        "requestType": "databasetools.UpdateDatabaseToolsDatabaseToolsPrivateEndpointRequest",
+        "responseType": "databasetools.UpdateDatabaseToolsDatabaseToolsPrivateEndpointResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseToolsDatabaseToolsPrivateEndpoint",
+        "requestType": "databasetools.DeleteDatabaseToolsDatabaseToolsPrivateEndpointRequest",
+        "responseType": "databasetools.DeleteDatabaseToolsDatabaseToolsPrivateEndpointResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_databasetools_databasetoolsdatabasetoolsprivateendpoint",
+    "collectionField": "databasetoolsdatabasetoolsprivateendpoint",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasetools/databasetoolsdatabasetoolsprivateendpoint/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasetools/databasetoolsdatabasetoolsprivateendpoint/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for databasetools/databasetoolsdatabasetoolsprivateendpoint; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

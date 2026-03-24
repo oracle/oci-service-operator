@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "jms",
+  "slug": "jmspluginerrors",
+  "kind": "JmsPluginErrors",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_jms_plugin_errors",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateJmsPluginErrors",
+        "requestType": "jms.CreateJmsPluginErrorsRequest",
+        "responseType": "jms.CreateJmsPluginErrorsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetJmsPluginErrors",
+        "requestType": "jms.GetJmsPluginErrorsRequest",
+        "responseType": "jms.GetJmsPluginErrorsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListJmsPluginErrors",
+        "requestType": "jms.ListJmsPluginErrorsRequest",
+        "responseType": "jms.ListJmsPluginErrorsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateJmsPluginErrors",
+        "requestType": "jms.UpdateJmsPluginErrorsRequest",
+        "responseType": "jms.UpdateJmsPluginErrorsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteJmsPluginErrors",
+        "requestType": "jms.DeleteJmsPluginErrorsRequest",
+        "responseType": "jms.DeleteJmsPluginErrorsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_jms_jmspluginerrors",
+    "collectionField": "jmspluginerrors",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/jms/jmspluginerrors/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/jms/jmspluginerrors/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for jms/jmspluginerrors; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

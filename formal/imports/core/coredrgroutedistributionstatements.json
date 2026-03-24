@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "coredrgroutedistributionstatements",
+  "kind": "CoreDrgRouteDistributionStatements",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_core_drg_route_distribution_statements",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCoreDrgRouteDistributionStatements",
+        "requestType": "core.CreateCoreDrgRouteDistributionStatementsRequest",
+        "responseType": "core.CreateCoreDrgRouteDistributionStatementsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCoreDrgRouteDistributionStatements",
+        "requestType": "core.GetCoreDrgRouteDistributionStatementsRequest",
+        "responseType": "core.GetCoreDrgRouteDistributionStatementsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCoreDrgRouteDistributionStatements",
+        "requestType": "core.ListCoreDrgRouteDistributionStatementsRequest",
+        "responseType": "core.ListCoreDrgRouteDistributionStatementsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCoreDrgRouteDistributionStatements",
+        "requestType": "core.UpdateCoreDrgRouteDistributionStatementsRequest",
+        "responseType": "core.UpdateCoreDrgRouteDistributionStatementsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCoreDrgRouteDistributionStatements",
+        "requestType": "core.DeleteCoreDrgRouteDistributionStatementsRequest",
+        "responseType": "core.DeleteCoreDrgRouteDistributionStatementsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_core_coredrgroutedistributionstatements",
+    "collectionField": "coredrgroutedistributionstatements",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/coredrgroutedistributionstatements/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/coredrgroutedistributionstatements/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for core/coredrgroutedistributionstatements; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "appcataloglistingresourceversionagreement",
+  "kind": "AppCatalogListingResourceVersionAgreement",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_core_app_catalog_listing_resource_version_agreement",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateAppCatalogListingResourceVersionAgreement",
+        "requestType": "core.CreateAppCatalogListingResourceVersionAgreementRequest",
+        "responseType": "core.CreateAppCatalogListingResourceVersionAgreementResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetAppCatalogListingResourceVersionAgreement",
+        "requestType": "core.GetAppCatalogListingResourceVersionAgreementRequest",
+        "responseType": "core.GetAppCatalogListingResourceVersionAgreementResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListAppCatalogListingResourceVersionAgreement",
+        "requestType": "core.ListAppCatalogListingResourceVersionAgreementRequest",
+        "responseType": "core.ListAppCatalogListingResourceVersionAgreementResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateAppCatalogListingResourceVersionAgreement",
+        "requestType": "core.UpdateAppCatalogListingResourceVersionAgreementRequest",
+        "responseType": "core.UpdateAppCatalogListingResourceVersionAgreementResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteAppCatalogListingResourceVersionAgreement",
+        "requestType": "core.DeleteAppCatalogListingResourceVersionAgreementRequest",
+        "responseType": "core.DeleteAppCatalogListingResourceVersionAgreementResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_core_appcataloglistingresourceversionagreement",
+    "collectionField": "appcataloglistingresourceversionagreement",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/appcataloglistingresourceversionagreement/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/appcataloglistingresourceversionagreement/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for core/appcataloglistingresourceversionagreement; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

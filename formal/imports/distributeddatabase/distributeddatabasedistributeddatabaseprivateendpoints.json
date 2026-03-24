@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "distributeddatabase",
+  "slug": "distributeddatabasedistributeddatabaseprivateendpoints",
+  "kind": "DistributedDatabaseDistributedDatabasePrivateEndpoints",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_distributed_database_distributed_database_private_endpoints",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDistributedDatabaseDistributedDatabasePrivateEndpoints",
+        "requestType": "distributeddatabase.CreateDistributedDatabaseDistributedDatabasePrivateEndpointsRequest",
+        "responseType": "distributeddatabase.CreateDistributedDatabaseDistributedDatabasePrivateEndpointsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDistributedDatabaseDistributedDatabasePrivateEndpoints",
+        "requestType": "distributeddatabase.GetDistributedDatabaseDistributedDatabasePrivateEndpointsRequest",
+        "responseType": "distributeddatabase.GetDistributedDatabaseDistributedDatabasePrivateEndpointsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDistributedDatabaseDistributedDatabasePrivateEndpoints",
+        "requestType": "distributeddatabase.ListDistributedDatabaseDistributedDatabasePrivateEndpointsRequest",
+        "responseType": "distributeddatabase.ListDistributedDatabaseDistributedDatabasePrivateEndpointsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDistributedDatabaseDistributedDatabasePrivateEndpoints",
+        "requestType": "distributeddatabase.UpdateDistributedDatabaseDistributedDatabasePrivateEndpointsRequest",
+        "responseType": "distributeddatabase.UpdateDistributedDatabaseDistributedDatabasePrivateEndpointsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDistributedDatabaseDistributedDatabasePrivateEndpoints",
+        "requestType": "distributeddatabase.DeleteDistributedDatabaseDistributedDatabasePrivateEndpointsRequest",
+        "responseType": "distributeddatabase.DeleteDistributedDatabaseDistributedDatabasePrivateEndpointsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_distributeddatabase_distributeddatabasedistributeddatabaseprivateendpoints",
+    "collectionField": "distributeddatabasedistributeddatabaseprivateendpoints",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/distributeddatabase/distributeddatabasedistributeddatabaseprivateendpoints/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/distributeddatabase/distributeddatabasedistributeddatabaseprivateendpoints/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for distributeddatabase/distributeddatabasedistributeddatabaseprivateendpoints; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

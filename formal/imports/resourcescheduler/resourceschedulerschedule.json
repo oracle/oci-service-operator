@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "resourcescheduler",
+  "slug": "resourceschedulerschedule",
+  "kind": "ResourceSchedulerSchedule",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_resource_scheduler_schedule",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateResourceSchedulerSchedule",
+        "requestType": "resourcescheduler.CreateResourceSchedulerScheduleRequest",
+        "responseType": "resourcescheduler.CreateResourceSchedulerScheduleResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetResourceSchedulerSchedule",
+        "requestType": "resourcescheduler.GetResourceSchedulerScheduleRequest",
+        "responseType": "resourcescheduler.GetResourceSchedulerScheduleResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListResourceSchedulerSchedule",
+        "requestType": "resourcescheduler.ListResourceSchedulerScheduleRequest",
+        "responseType": "resourcescheduler.ListResourceSchedulerScheduleResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateResourceSchedulerSchedule",
+        "requestType": "resourcescheduler.UpdateResourceSchedulerScheduleRequest",
+        "responseType": "resourcescheduler.UpdateResourceSchedulerScheduleResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteResourceSchedulerSchedule",
+        "requestType": "resourcescheduler.DeleteResourceSchedulerScheduleRequest",
+        "responseType": "resourcescheduler.DeleteResourceSchedulerScheduleResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_resourcescheduler_resourceschedulerschedule",
+    "collectionField": "resourceschedulerschedule",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/resourcescheduler/resourceschedulerschedule/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/resourcescheduler/resourceschedulerschedule/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for resourcescheduler/resourceschedulerschedule; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

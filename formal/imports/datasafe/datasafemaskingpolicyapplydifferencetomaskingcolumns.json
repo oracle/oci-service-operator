@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "datasafemaskingpolicyapplydifferencetomaskingcolumns",
+  "kind": "DataSafeMaskingPolicyApplyDifferenceToMaskingColumns",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_masking_policies_apply_difference_to_masking_columns",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDataSafeMaskingPolicyApplyDifferenceToMaskingColumns",
+        "requestType": "datasafe.CreateDataSafeMaskingPolicyApplyDifferenceToMaskingColumnsRequest",
+        "responseType": "datasafe.CreateDataSafeMaskingPolicyApplyDifferenceToMaskingColumnsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDataSafeMaskingPolicyApplyDifferenceToMaskingColumns",
+        "requestType": "datasafe.GetDataSafeMaskingPolicyApplyDifferenceToMaskingColumnsRequest",
+        "responseType": "datasafe.GetDataSafeMaskingPolicyApplyDifferenceToMaskingColumnsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDataSafeMaskingPolicyApplyDifferenceToMaskingColumns",
+        "requestType": "datasafe.ListDataSafeMaskingPolicyApplyDifferenceToMaskingColumnsRequest",
+        "responseType": "datasafe.ListDataSafeMaskingPolicyApplyDifferenceToMaskingColumnsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDataSafeMaskingPolicyApplyDifferenceToMaskingColumns",
+        "requestType": "datasafe.UpdateDataSafeMaskingPolicyApplyDifferenceToMaskingColumnsRequest",
+        "responseType": "datasafe.UpdateDataSafeMaskingPolicyApplyDifferenceToMaskingColumnsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDataSafeMaskingPolicyApplyDifferenceToMaskingColumns",
+        "requestType": "datasafe.DeleteDataSafeMaskingPolicyApplyDifferenceToMaskingColumnsRequest",
+        "responseType": "datasafe.DeleteDataSafeMaskingPolicyApplyDifferenceToMaskingColumnsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_datasafe_datasafemaskingpolicyapplydifferencetomaskingcolumns",
+    "collectionField": "datasafemaskingpolicyapplydifferencetomaskingcolumns",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/datasafemaskingpolicyapplydifferencetomaskingcolumns/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/datasafemaskingpolicyapplydifferencetomaskingcolumns/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for datasafe/datasafemaskingpolicyapplydifferencetomaskingcolumns; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

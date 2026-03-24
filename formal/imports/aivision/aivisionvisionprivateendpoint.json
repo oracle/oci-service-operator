@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "aivision",
+  "slug": "aivisionvisionprivateendpoint",
+  "kind": "AiVisionVisionPrivateEndpoint",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_ai_vision_vision_private_endpoint",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateAiVisionVisionPrivateEndpoint",
+        "requestType": "aivision.CreateAiVisionVisionPrivateEndpointRequest",
+        "responseType": "aivision.CreateAiVisionVisionPrivateEndpointResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetAiVisionVisionPrivateEndpoint",
+        "requestType": "aivision.GetAiVisionVisionPrivateEndpointRequest",
+        "responseType": "aivision.GetAiVisionVisionPrivateEndpointResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListAiVisionVisionPrivateEndpoint",
+        "requestType": "aivision.ListAiVisionVisionPrivateEndpointRequest",
+        "responseType": "aivision.ListAiVisionVisionPrivateEndpointResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateAiVisionVisionPrivateEndpoint",
+        "requestType": "aivision.UpdateAiVisionVisionPrivateEndpointRequest",
+        "responseType": "aivision.UpdateAiVisionVisionPrivateEndpointResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteAiVisionVisionPrivateEndpoint",
+        "requestType": "aivision.DeleteAiVisionVisionPrivateEndpointRequest",
+        "responseType": "aivision.DeleteAiVisionVisionPrivateEndpointResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_aivision_aivisionvisionprivateendpoint",
+    "collectionField": "aivisionvisionprivateendpoint",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/aivision/aivisionvisionprivateendpoint/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/aivision/aivisionvisionprivateendpoint/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for aivision/aivisionvisionprivateendpoint; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

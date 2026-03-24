@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasemanagement",
+  "slug": "databasemanagementcloudexadatainfrastructures",
+  "kind": "DatabaseManagementCloudExadataInfrastructures",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_management_cloud_exadata_infrastructures",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseManagementCloudExadataInfrastructures",
+        "requestType": "databasemanagement.CreateDatabaseManagementCloudExadataInfrastructuresRequest",
+        "responseType": "databasemanagement.CreateDatabaseManagementCloudExadataInfrastructuresResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseManagementCloudExadataInfrastructures",
+        "requestType": "databasemanagement.GetDatabaseManagementCloudExadataInfrastructuresRequest",
+        "responseType": "databasemanagement.GetDatabaseManagementCloudExadataInfrastructuresResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseManagementCloudExadataInfrastructures",
+        "requestType": "databasemanagement.ListDatabaseManagementCloudExadataInfrastructuresRequest",
+        "responseType": "databasemanagement.ListDatabaseManagementCloudExadataInfrastructuresResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseManagementCloudExadataInfrastructures",
+        "requestType": "databasemanagement.UpdateDatabaseManagementCloudExadataInfrastructuresRequest",
+        "responseType": "databasemanagement.UpdateDatabaseManagementCloudExadataInfrastructuresResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseManagementCloudExadataInfrastructures",
+        "requestType": "databasemanagement.DeleteDatabaseManagementCloudExadataInfrastructuresRequest",
+        "responseType": "databasemanagement.DeleteDatabaseManagementCloudExadataInfrastructuresResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_databasemanagement_databasemanagementcloudexadatainfrastructures",
+    "collectionField": "databasemanagementcloudexadatainfrastructures",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasemanagement/databasemanagementcloudexadatainfrastructures/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasemanagement/databasemanagementcloudexadatainfrastructures/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for databasemanagement/databasemanagementcloudexadatainfrastructures; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

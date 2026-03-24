@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "batch",
+  "slug": "batchbatchtaskenvironment",
+  "kind": "BatchBatchTaskEnvironment",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_batch_batch_task_environment",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateBatchBatchTaskEnvironment",
+        "requestType": "batch.CreateBatchBatchTaskEnvironmentRequest",
+        "responseType": "batch.CreateBatchBatchTaskEnvironmentResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetBatchBatchTaskEnvironment",
+        "requestType": "batch.GetBatchBatchTaskEnvironmentRequest",
+        "responseType": "batch.GetBatchBatchTaskEnvironmentResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListBatchBatchTaskEnvironment",
+        "requestType": "batch.ListBatchBatchTaskEnvironmentRequest",
+        "responseType": "batch.ListBatchBatchTaskEnvironmentResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateBatchBatchTaskEnvironment",
+        "requestType": "batch.UpdateBatchBatchTaskEnvironmentRequest",
+        "responseType": "batch.UpdateBatchBatchTaskEnvironmentResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteBatchBatchTaskEnvironment",
+        "requestType": "batch.DeleteBatchBatchTaskEnvironmentRequest",
+        "responseType": "batch.DeleteBatchBatchTaskEnvironmentResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_batch_batchbatchtaskenvironment",
+    "collectionField": "batchbatchtaskenvironment",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/batch/batchbatchtaskenvironment/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/batch/batchbatchtaskenvironment/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for batch/batchbatchtaskenvironment; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

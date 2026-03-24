@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "osmanagementhub",
+  "slug": "osmanagementhubmanagedinstancegroupavailablemodules",
+  "kind": "OsManagementHubManagedInstanceGroupAvailableModules",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_os_management_hub_managed_instance_group_available_modules",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOsManagementHubManagedInstanceGroupAvailableModules",
+        "requestType": "osmanagementhub.CreateOsManagementHubManagedInstanceGroupAvailableModulesRequest",
+        "responseType": "osmanagementhub.CreateOsManagementHubManagedInstanceGroupAvailableModulesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOsManagementHubManagedInstanceGroupAvailableModules",
+        "requestType": "osmanagementhub.GetOsManagementHubManagedInstanceGroupAvailableModulesRequest",
+        "responseType": "osmanagementhub.GetOsManagementHubManagedInstanceGroupAvailableModulesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOsManagementHubManagedInstanceGroupAvailableModules",
+        "requestType": "osmanagementhub.ListOsManagementHubManagedInstanceGroupAvailableModulesRequest",
+        "responseType": "osmanagementhub.ListOsManagementHubManagedInstanceGroupAvailableModulesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOsManagementHubManagedInstanceGroupAvailableModules",
+        "requestType": "osmanagementhub.UpdateOsManagementHubManagedInstanceGroupAvailableModulesRequest",
+        "responseType": "osmanagementhub.UpdateOsManagementHubManagedInstanceGroupAvailableModulesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOsManagementHubManagedInstanceGroupAvailableModules",
+        "requestType": "osmanagementhub.DeleteOsManagementHubManagedInstanceGroupAvailableModulesRequest",
+        "responseType": "osmanagementhub.DeleteOsManagementHubManagedInstanceGroupAvailableModulesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_osmanagementhub_osmanagementhubmanagedinstancegroupavailablemodules",
+    "collectionField": "osmanagementhubmanagedinstancegroupavailablemodules",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/osmanagementhub/osmanagementhubmanagedinstancegroupavailablemodules/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/osmanagementhub/osmanagementhubmanagedinstancegroupavailablemodules/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for osmanagementhub/osmanagementhubmanagedinstancegroupavailablemodules; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

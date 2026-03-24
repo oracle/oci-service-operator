@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "multicloud",
+  "slug": "multicloudomhubmulticloudmetadata",
+  "kind": "MulticloudOmHubMultiCloudMetadata",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_multicloud_om_hub_multi_cloud_metadata",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateMulticloudOmHubMultiCloudMetadata",
+        "requestType": "multicloud.CreateMulticloudOmHubMultiCloudMetadataRequest",
+        "responseType": "multicloud.CreateMulticloudOmHubMultiCloudMetadataResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetMulticloudOmHubMultiCloudMetadata",
+        "requestType": "multicloud.GetMulticloudOmHubMultiCloudMetadataRequest",
+        "responseType": "multicloud.GetMulticloudOmHubMultiCloudMetadataResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListMulticloudOmHubMultiCloudMetadata",
+        "requestType": "multicloud.ListMulticloudOmHubMultiCloudMetadataRequest",
+        "responseType": "multicloud.ListMulticloudOmHubMultiCloudMetadataResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateMulticloudOmHubMultiCloudMetadata",
+        "requestType": "multicloud.UpdateMulticloudOmHubMultiCloudMetadataRequest",
+        "responseType": "multicloud.UpdateMulticloudOmHubMultiCloudMetadataResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteMulticloudOmHubMultiCloudMetadata",
+        "requestType": "multicloud.DeleteMulticloudOmHubMultiCloudMetadataRequest",
+        "responseType": "multicloud.DeleteMulticloudOmHubMultiCloudMetadataResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_multicloud_multicloudomhubmulticloudmetadata",
+    "collectionField": "multicloudomhubmulticloudmetadata",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/multicloud/multicloudomhubmulticloudmetadata/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/multicloud/multicloudomhubmulticloudmetadata/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for multicloud/multicloudomhubmulticloudmetadata; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

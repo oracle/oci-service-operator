@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "identity",
+  "slug": "identitytagnamespace",
+  "kind": "IdentityTagNamespace",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_identity_tag_namespace",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateIdentityTagNamespace",
+        "requestType": "identity.CreateIdentityTagNamespaceRequest",
+        "responseType": "identity.CreateIdentityTagNamespaceResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetIdentityTagNamespace",
+        "requestType": "identity.GetIdentityTagNamespaceRequest",
+        "responseType": "identity.GetIdentityTagNamespaceResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListIdentityTagNamespace",
+        "requestType": "identity.ListIdentityTagNamespaceRequest",
+        "responseType": "identity.ListIdentityTagNamespaceResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateIdentityTagNamespace",
+        "requestType": "identity.UpdateIdentityTagNamespaceRequest",
+        "responseType": "identity.UpdateIdentityTagNamespaceResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteIdentityTagNamespace",
+        "requestType": "identity.DeleteIdentityTagNamespaceRequest",
+        "responseType": "identity.DeleteIdentityTagNamespaceResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_identity_identitytagnamespace",
+    "collectionField": "identitytagnamespace",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/identity/identitytagnamespace/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/identity/identitytagnamespace/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for identity/identitytagnamespace; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

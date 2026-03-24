@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "cloudbridge",
+  "slug": "cloudbridgeenvironments",
+  "kind": "CloudBridgeEnvironments",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_cloud_bridge_environments",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCloudBridgeEnvironments",
+        "requestType": "cloudbridge.CreateCloudBridgeEnvironmentsRequest",
+        "responseType": "cloudbridge.CreateCloudBridgeEnvironmentsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCloudBridgeEnvironments",
+        "requestType": "cloudbridge.GetCloudBridgeEnvironmentsRequest",
+        "responseType": "cloudbridge.GetCloudBridgeEnvironmentsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCloudBridgeEnvironments",
+        "requestType": "cloudbridge.ListCloudBridgeEnvironmentsRequest",
+        "responseType": "cloudbridge.ListCloudBridgeEnvironmentsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCloudBridgeEnvironments",
+        "requestType": "cloudbridge.UpdateCloudBridgeEnvironmentsRequest",
+        "responseType": "cloudbridge.UpdateCloudBridgeEnvironmentsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCloudBridgeEnvironments",
+        "requestType": "cloudbridge.DeleteCloudBridgeEnvironmentsRequest",
+        "responseType": "cloudbridge.DeleteCloudBridgeEnvironmentsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_cloudbridge_cloudbridgeenvironments",
+    "collectionField": "cloudbridgeenvironments",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/cloudbridge/cloudbridgeenvironments/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/cloudbridge/cloudbridgeenvironments/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for cloudbridge/cloudbridgeenvironments; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

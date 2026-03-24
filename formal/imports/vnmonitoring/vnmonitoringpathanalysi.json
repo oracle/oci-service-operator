@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "vnmonitoring",
+  "slug": "vnmonitoringpathanalysi",
+  "kind": "VnMonitoringPathAnalysi",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_vn_monitoring_path_analysi",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateVnMonitoringPathAnalysi",
+        "requestType": "vnmonitoring.CreateVnMonitoringPathAnalysiRequest",
+        "responseType": "vnmonitoring.CreateVnMonitoringPathAnalysiResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetVnMonitoringPathAnalysi",
+        "requestType": "vnmonitoring.GetVnMonitoringPathAnalysiRequest",
+        "responseType": "vnmonitoring.GetVnMonitoringPathAnalysiResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListVnMonitoringPathAnalysi",
+        "requestType": "vnmonitoring.ListVnMonitoringPathAnalysiRequest",
+        "responseType": "vnmonitoring.ListVnMonitoringPathAnalysiResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateVnMonitoringPathAnalysi",
+        "requestType": "vnmonitoring.UpdateVnMonitoringPathAnalysiRequest",
+        "responseType": "vnmonitoring.UpdateVnMonitoringPathAnalysiResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteVnMonitoringPathAnalysi",
+        "requestType": "vnmonitoring.DeleteVnMonitoringPathAnalysiRequest",
+        "responseType": "vnmonitoring.DeleteVnMonitoringPathAnalysiResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_vnmonitoring_vnmonitoringpathanalysi",
+    "collectionField": "vnmonitoringpathanalysi",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/vnmonitoring/vnmonitoringpathanalysi/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/vnmonitoring/vnmonitoringpathanalysi/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for vnmonitoring/vnmonitoringpathanalysi; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

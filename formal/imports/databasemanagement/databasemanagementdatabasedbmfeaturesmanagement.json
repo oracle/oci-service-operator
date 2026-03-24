@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasemanagement",
+  "slug": "databasemanagementdatabasedbmfeaturesmanagement",
+  "kind": "DatabaseManagementDatabaseDbmFeaturesManagement",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_management_database_dbm_features_management",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseManagementDatabaseDbmFeaturesManagement",
+        "requestType": "databasemanagement.CreateDatabaseManagementDatabaseDbmFeaturesManagementRequest",
+        "responseType": "databasemanagement.CreateDatabaseManagementDatabaseDbmFeaturesManagementResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseManagementDatabaseDbmFeaturesManagement",
+        "requestType": "databasemanagement.GetDatabaseManagementDatabaseDbmFeaturesManagementRequest",
+        "responseType": "databasemanagement.GetDatabaseManagementDatabaseDbmFeaturesManagementResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseManagementDatabaseDbmFeaturesManagement",
+        "requestType": "databasemanagement.ListDatabaseManagementDatabaseDbmFeaturesManagementRequest",
+        "responseType": "databasemanagement.ListDatabaseManagementDatabaseDbmFeaturesManagementResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseManagementDatabaseDbmFeaturesManagement",
+        "requestType": "databasemanagement.UpdateDatabaseManagementDatabaseDbmFeaturesManagementRequest",
+        "responseType": "databasemanagement.UpdateDatabaseManagementDatabaseDbmFeaturesManagementResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseManagementDatabaseDbmFeaturesManagement",
+        "requestType": "databasemanagement.DeleteDatabaseManagementDatabaseDbmFeaturesManagementRequest",
+        "responseType": "databasemanagement.DeleteDatabaseManagementDatabaseDbmFeaturesManagementResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_databasemanagement_databasemanagementdatabasedbmfeaturesmanagement",
+    "collectionField": "databasemanagementdatabasedbmfeaturesmanagement",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasemanagement/databasemanagementdatabasedbmfeaturesmanagement/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasemanagement/databasemanagementdatabasedbmfeaturesmanagement/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for databasemanagement/databasemanagementdatabasedbmfeaturesmanagement; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

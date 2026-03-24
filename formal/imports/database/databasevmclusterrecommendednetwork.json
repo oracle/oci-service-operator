@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "databasevmclusterrecommendednetwork",
+  "kind": "DatabaseVmClusterRecommendedNetwork",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_vm_cluster_recommended_network",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseVmClusterRecommendedNetwork",
+        "requestType": "database.CreateDatabaseVmClusterRecommendedNetworkRequest",
+        "responseType": "database.CreateDatabaseVmClusterRecommendedNetworkResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseVmClusterRecommendedNetwork",
+        "requestType": "database.GetDatabaseVmClusterRecommendedNetworkRequest",
+        "responseType": "database.GetDatabaseVmClusterRecommendedNetworkResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseVmClusterRecommendedNetwork",
+        "requestType": "database.ListDatabaseVmClusterRecommendedNetworkRequest",
+        "responseType": "database.ListDatabaseVmClusterRecommendedNetworkResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseVmClusterRecommendedNetwork",
+        "requestType": "database.UpdateDatabaseVmClusterRecommendedNetworkRequest",
+        "responseType": "database.UpdateDatabaseVmClusterRecommendedNetworkResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseVmClusterRecommendedNetwork",
+        "requestType": "database.DeleteDatabaseVmClusterRecommendedNetworkRequest",
+        "responseType": "database.DeleteDatabaseVmClusterRecommendedNetworkResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_databasevmclusterrecommendednetwork",
+    "collectionField": "databasevmclusterrecommendednetwork",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/databasevmclusterrecommendednetwork/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/databasevmclusterrecommendednetwork/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/databasevmclusterrecommendednetwork; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "marketplace",
+  "slug": "marketplacemarketplaceexternalattestedmetadata",
+  "kind": "MarketplaceMarketplaceExternalAttestedMetadata",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_marketplace_marketplace_external_attested_metadata",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateMarketplaceMarketplaceExternalAttestedMetadata",
+        "requestType": "marketplace.CreateMarketplaceMarketplaceExternalAttestedMetadataRequest",
+        "responseType": "marketplace.CreateMarketplaceMarketplaceExternalAttestedMetadataResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetMarketplaceMarketplaceExternalAttestedMetadata",
+        "requestType": "marketplace.GetMarketplaceMarketplaceExternalAttestedMetadataRequest",
+        "responseType": "marketplace.GetMarketplaceMarketplaceExternalAttestedMetadataResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListMarketplaceMarketplaceExternalAttestedMetadata",
+        "requestType": "marketplace.ListMarketplaceMarketplaceExternalAttestedMetadataRequest",
+        "responseType": "marketplace.ListMarketplaceMarketplaceExternalAttestedMetadataResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateMarketplaceMarketplaceExternalAttestedMetadata",
+        "requestType": "marketplace.UpdateMarketplaceMarketplaceExternalAttestedMetadataRequest",
+        "responseType": "marketplace.UpdateMarketplaceMarketplaceExternalAttestedMetadataResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteMarketplaceMarketplaceExternalAttestedMetadata",
+        "requestType": "marketplace.DeleteMarketplaceMarketplaceExternalAttestedMetadataRequest",
+        "responseType": "marketplace.DeleteMarketplaceMarketplaceExternalAttestedMetadataResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_marketplace_marketplacemarketplaceexternalattestedmetadata",
+    "collectionField": "marketplacemarketplaceexternalattestedmetadata",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/marketplace/marketplacemarketplaceexternalattestedmetadata/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/marketplace/marketplacemarketplaceexternalattestedmetadata/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for marketplace/marketplacemarketplaceexternalattestedmetadata; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

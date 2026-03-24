@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "objectstorage",
+  "slug": "multipartupload",
+  "kind": "MultipartUpload",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_objectstorage_multipartupload",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateMultipartUpload",
+        "requestType": "objectstorage.CreateMultipartUploadRequest",
+        "responseType": "objectstorage.CreateMultipartUploadResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetMultipartUpload",
+        "requestType": "objectstorage.GetMultipartUploadRequest",
+        "responseType": "objectstorage.GetMultipartUploadResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListMultipartUpload",
+        "requestType": "objectstorage.ListMultipartUploadRequest",
+        "responseType": "objectstorage.ListMultipartUploadResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateMultipartUpload",
+        "requestType": "objectstorage.UpdateMultipartUploadRequest",
+        "responseType": "objectstorage.UpdateMultipartUploadResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteMultipartUpload",
+        "requestType": "objectstorage.DeleteMultipartUploadRequest",
+        "responseType": "objectstorage.DeleteMultipartUploadResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_objectstorage_multipartupload",
+    "collectionField": "multipartupload",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/objectstorage/multipartupload/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/objectstorage/multipartupload/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for objectstorage/multipartupload; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

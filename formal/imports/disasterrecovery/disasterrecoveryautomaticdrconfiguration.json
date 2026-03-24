@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "disasterrecovery",
+  "slug": "disasterrecoveryautomaticdrconfiguration",
+  "kind": "DisasterRecoveryAutomaticDrConfiguration",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_disaster_recovery_automatic_dr_configuration",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDisasterRecoveryAutomaticDrConfiguration",
+        "requestType": "disasterrecovery.CreateDisasterRecoveryAutomaticDrConfigurationRequest",
+        "responseType": "disasterrecovery.CreateDisasterRecoveryAutomaticDrConfigurationResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDisasterRecoveryAutomaticDrConfiguration",
+        "requestType": "disasterrecovery.GetDisasterRecoveryAutomaticDrConfigurationRequest",
+        "responseType": "disasterrecovery.GetDisasterRecoveryAutomaticDrConfigurationResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDisasterRecoveryAutomaticDrConfiguration",
+        "requestType": "disasterrecovery.ListDisasterRecoveryAutomaticDrConfigurationRequest",
+        "responseType": "disasterrecovery.ListDisasterRecoveryAutomaticDrConfigurationResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDisasterRecoveryAutomaticDrConfiguration",
+        "requestType": "disasterrecovery.UpdateDisasterRecoveryAutomaticDrConfigurationRequest",
+        "responseType": "disasterrecovery.UpdateDisasterRecoveryAutomaticDrConfigurationResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDisasterRecoveryAutomaticDrConfiguration",
+        "requestType": "disasterrecovery.DeleteDisasterRecoveryAutomaticDrConfigurationRequest",
+        "responseType": "disasterrecovery.DeleteDisasterRecoveryAutomaticDrConfigurationResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_disasterrecovery_disasterrecoveryautomaticdrconfiguration",
+    "collectionField": "disasterrecoveryautomaticdrconfiguration",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/disasterrecovery/disasterrecoveryautomaticdrconfiguration/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/disasterrecovery/disasterrecoveryautomaticdrconfiguration/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for disasterrecovery/disasterrecoveryautomaticdrconfiguration; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

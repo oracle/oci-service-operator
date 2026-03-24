@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "datasafetargetdatabaseroles",
+  "kind": "DataSafeTargetDatabaseRoles",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_target_database_role",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDataSafeTargetDatabaseRoles",
+        "requestType": "datasafe.CreateDataSafeTargetDatabaseRolesRequest",
+        "responseType": "datasafe.CreateDataSafeTargetDatabaseRolesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDataSafeTargetDatabaseRoles",
+        "requestType": "datasafe.GetDataSafeTargetDatabaseRolesRequest",
+        "responseType": "datasafe.GetDataSafeTargetDatabaseRolesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDataSafeTargetDatabaseRoles",
+        "requestType": "datasafe.ListDataSafeTargetDatabaseRolesRequest",
+        "responseType": "datasafe.ListDataSafeTargetDatabaseRolesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDataSafeTargetDatabaseRoles",
+        "requestType": "datasafe.UpdateDataSafeTargetDatabaseRolesRequest",
+        "responseType": "datasafe.UpdateDataSafeTargetDatabaseRolesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDataSafeTargetDatabaseRoles",
+        "requestType": "datasafe.DeleteDataSafeTargetDatabaseRolesRequest",
+        "responseType": "datasafe.DeleteDataSafeTargetDatabaseRolesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_datasafe_datasafetargetdatabaseroles",
+    "collectionField": "datasafetargetdatabaseroles",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/datasafetargetdatabaseroles/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/datasafetargetdatabaseroles/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for datasafe/datasafetargetdatabaseroles; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

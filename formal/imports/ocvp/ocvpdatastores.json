@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "ocvp",
+  "slug": "ocvpdatastores",
+  "kind": "OcvpDatastores",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_ocvp_datastores",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOcvpDatastores",
+        "requestType": "ocvp.CreateOcvpDatastoresRequest",
+        "responseType": "ocvp.CreateOcvpDatastoresResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOcvpDatastores",
+        "requestType": "ocvp.GetOcvpDatastoresRequest",
+        "responseType": "ocvp.GetOcvpDatastoresResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOcvpDatastores",
+        "requestType": "ocvp.ListOcvpDatastoresRequest",
+        "responseType": "ocvp.ListOcvpDatastoresResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOcvpDatastores",
+        "requestType": "ocvp.UpdateOcvpDatastoresRequest",
+        "responseType": "ocvp.UpdateOcvpDatastoresResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOcvpDatastores",
+        "requestType": "ocvp.DeleteOcvpDatastoresRequest",
+        "responseType": "ocvp.DeleteOcvpDatastoresResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_ocvp_ocvpdatastores",
+    "collectionField": "ocvpdatastores",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/ocvp/ocvpdatastores/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/ocvp/ocvpdatastores/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for ocvp/ocvpdatastores; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

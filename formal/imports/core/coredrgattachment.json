@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "coredrgattachment",
+  "kind": "CoreDrgAttachment",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_core_drg_attachment",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCoreDrgAttachment",
+        "requestType": "core.CreateCoreDrgAttachmentRequest",
+        "responseType": "core.CreateCoreDrgAttachmentResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCoreDrgAttachment",
+        "requestType": "core.GetCoreDrgAttachmentRequest",
+        "responseType": "core.GetCoreDrgAttachmentResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCoreDrgAttachment",
+        "requestType": "core.ListCoreDrgAttachmentRequest",
+        "responseType": "core.ListCoreDrgAttachmentResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCoreDrgAttachment",
+        "requestType": "core.UpdateCoreDrgAttachmentRequest",
+        "responseType": "core.UpdateCoreDrgAttachmentResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCoreDrgAttachment",
+        "requestType": "core.DeleteCoreDrgAttachmentRequest",
+        "responseType": "core.DeleteCoreDrgAttachmentResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_core_coredrgattachment",
+    "collectionField": "coredrgattachment",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/coredrgattachment/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/coredrgattachment/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for core/coredrgattachment; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

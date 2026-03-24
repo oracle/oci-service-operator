@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "dataflow",
+  "slug": "dataflowsqlendpoints",
+  "kind": "DataflowSqlEndpoints",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_dataflow_sql_endpoints",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDataflowSqlEndpoints",
+        "requestType": "dataflow.CreateDataflowSqlEndpointsRequest",
+        "responseType": "dataflow.CreateDataflowSqlEndpointsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDataflowSqlEndpoints",
+        "requestType": "dataflow.GetDataflowSqlEndpointsRequest",
+        "responseType": "dataflow.GetDataflowSqlEndpointsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDataflowSqlEndpoints",
+        "requestType": "dataflow.ListDataflowSqlEndpointsRequest",
+        "responseType": "dataflow.ListDataflowSqlEndpointsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDataflowSqlEndpoints",
+        "requestType": "dataflow.UpdateDataflowSqlEndpointsRequest",
+        "responseType": "dataflow.UpdateDataflowSqlEndpointsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDataflowSqlEndpoints",
+        "requestType": "dataflow.DeleteDataflowSqlEndpointsRequest",
+        "responseType": "dataflow.DeleteDataflowSqlEndpointsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_dataflow_dataflowsqlendpoints",
+    "collectionField": "dataflowsqlendpoints",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/dataflow/dataflowsqlendpoints/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/dataflow/dataflowsqlendpoints/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for dataflow/dataflowsqlendpoints; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

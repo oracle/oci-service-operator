@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "datasafereport",
+  "kind": "DataSafeReport",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_report",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDataSafeReport",
+        "requestType": "datasafe.CreateDataSafeReportRequest",
+        "responseType": "datasafe.CreateDataSafeReportResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDataSafeReport",
+        "requestType": "datasafe.GetDataSafeReportRequest",
+        "responseType": "datasafe.GetDataSafeReportResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDataSafeReport",
+        "requestType": "datasafe.ListDataSafeReportRequest",
+        "responseType": "datasafe.ListDataSafeReportResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDataSafeReport",
+        "requestType": "datasafe.UpdateDataSafeReportRequest",
+        "responseType": "datasafe.UpdateDataSafeReportResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDataSafeReport",
+        "requestType": "datasafe.DeleteDataSafeReportRequest",
+        "responseType": "datasafe.DeleteDataSafeReportResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_datasafe_datasafereport",
+    "collectionField": "datasafereport",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/datasafereport/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/datasafereport/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for datasafe/datasafereport; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

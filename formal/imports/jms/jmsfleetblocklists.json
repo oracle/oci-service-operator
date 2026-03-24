@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "jms",
+  "slug": "jmsfleetblocklists",
+  "kind": "JmsFleetBlocklists",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_jms_fleet_blocklists",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateJmsFleetBlocklists",
+        "requestType": "jms.CreateJmsFleetBlocklistsRequest",
+        "responseType": "jms.CreateJmsFleetBlocklistsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetJmsFleetBlocklists",
+        "requestType": "jms.GetJmsFleetBlocklistsRequest",
+        "responseType": "jms.GetJmsFleetBlocklistsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListJmsFleetBlocklists",
+        "requestType": "jms.ListJmsFleetBlocklistsRequest",
+        "responseType": "jms.ListJmsFleetBlocklistsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateJmsFleetBlocklists",
+        "requestType": "jms.UpdateJmsFleetBlocklistsRequest",
+        "responseType": "jms.UpdateJmsFleetBlocklistsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteJmsFleetBlocklists",
+        "requestType": "jms.DeleteJmsFleetBlocklistsRequest",
+        "responseType": "jms.DeleteJmsFleetBlocklistsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_jms_jmsfleetblocklists",
+    "collectionField": "jmsfleetblocklists",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/jms/jmsfleetblocklists/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/jms/jmsfleetblocklists/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for jms/jmsfleetblocklists; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

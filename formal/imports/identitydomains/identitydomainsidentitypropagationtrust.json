@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "identitydomains",
+  "slug": "identitydomainsidentitypropagationtrust",
+  "kind": "IdentityDomainsIdentityPropagationTrust",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_identity_domains_identity_propagation_trust",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateIdentityDomainsIdentityPropagationTrust",
+        "requestType": "identitydomains.CreateIdentityDomainsIdentityPropagationTrustRequest",
+        "responseType": "identitydomains.CreateIdentityDomainsIdentityPropagationTrustResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetIdentityDomainsIdentityPropagationTrust",
+        "requestType": "identitydomains.GetIdentityDomainsIdentityPropagationTrustRequest",
+        "responseType": "identitydomains.GetIdentityDomainsIdentityPropagationTrustResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListIdentityDomainsIdentityPropagationTrust",
+        "requestType": "identitydomains.ListIdentityDomainsIdentityPropagationTrustRequest",
+        "responseType": "identitydomains.ListIdentityDomainsIdentityPropagationTrustResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateIdentityDomainsIdentityPropagationTrust",
+        "requestType": "identitydomains.UpdateIdentityDomainsIdentityPropagationTrustRequest",
+        "responseType": "identitydomains.UpdateIdentityDomainsIdentityPropagationTrustResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteIdentityDomainsIdentityPropagationTrust",
+        "requestType": "identitydomains.DeleteIdentityDomainsIdentityPropagationTrustRequest",
+        "responseType": "identitydomains.DeleteIdentityDomainsIdentityPropagationTrustResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_identitydomains_identitydomainsidentitypropagationtrust",
+    "collectionField": "identitydomainsidentitypropagationtrust",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/identitydomains/identitydomainsidentitypropagationtrust/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/identitydomains/identitydomainsidentitypropagationtrust/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for identitydomains/identitydomainsidentitypropagationtrust; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

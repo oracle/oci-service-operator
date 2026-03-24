@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasemanagement",
+  "slug": "databasemanagementjobexecutionsstatus",
+  "kind": "DatabaseManagementJobExecutionsStatus",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_management_job_executions_status",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseManagementJobExecutionsStatus",
+        "requestType": "databasemanagement.CreateDatabaseManagementJobExecutionsStatusRequest",
+        "responseType": "databasemanagement.CreateDatabaseManagementJobExecutionsStatusResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseManagementJobExecutionsStatus",
+        "requestType": "databasemanagement.GetDatabaseManagementJobExecutionsStatusRequest",
+        "responseType": "databasemanagement.GetDatabaseManagementJobExecutionsStatusResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseManagementJobExecutionsStatus",
+        "requestType": "databasemanagement.ListDatabaseManagementJobExecutionsStatusRequest",
+        "responseType": "databasemanagement.ListDatabaseManagementJobExecutionsStatusResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseManagementJobExecutionsStatus",
+        "requestType": "databasemanagement.UpdateDatabaseManagementJobExecutionsStatusRequest",
+        "responseType": "databasemanagement.UpdateDatabaseManagementJobExecutionsStatusResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseManagementJobExecutionsStatus",
+        "requestType": "databasemanagement.DeleteDatabaseManagementJobExecutionsStatusRequest",
+        "responseType": "databasemanagement.DeleteDatabaseManagementJobExecutionsStatusResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_databasemanagement_databasemanagementjobexecutionsstatus",
+    "collectionField": "databasemanagementjobexecutionsstatus",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasemanagement/databasemanagementjobexecutionsstatus/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasemanagement/databasemanagementjobexecutionsstatus/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for databasemanagement/databasemanagementjobexecutionsstatus; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "capacitymanagement",
+  "slug": "capacitymanagementocccapacityrequests",
+  "kind": "CapacityManagementOccCapacityRequests",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_capacity_management_occ_capacity_requests",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCapacityManagementOccCapacityRequests",
+        "requestType": "capacitymanagement.CreateCapacityManagementOccCapacityRequestsRequest",
+        "responseType": "capacitymanagement.CreateCapacityManagementOccCapacityRequestsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCapacityManagementOccCapacityRequests",
+        "requestType": "capacitymanagement.GetCapacityManagementOccCapacityRequestsRequest",
+        "responseType": "capacitymanagement.GetCapacityManagementOccCapacityRequestsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCapacityManagementOccCapacityRequests",
+        "requestType": "capacitymanagement.ListCapacityManagementOccCapacityRequestsRequest",
+        "responseType": "capacitymanagement.ListCapacityManagementOccCapacityRequestsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCapacityManagementOccCapacityRequests",
+        "requestType": "capacitymanagement.UpdateCapacityManagementOccCapacityRequestsRequest",
+        "responseType": "capacitymanagement.UpdateCapacityManagementOccCapacityRequestsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCapacityManagementOccCapacityRequests",
+        "requestType": "capacitymanagement.DeleteCapacityManagementOccCapacityRequestsRequest",
+        "responseType": "capacitymanagement.DeleteCapacityManagementOccCapacityRequestsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_capacitymanagement_capacitymanagementocccapacityrequests",
+    "collectionField": "capacitymanagementocccapacityrequests",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/capacitymanagement/capacitymanagementocccapacityrequests/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/capacitymanagement/capacitymanagementocccapacityrequests/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for capacitymanagement/capacitymanagementocccapacityrequests; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

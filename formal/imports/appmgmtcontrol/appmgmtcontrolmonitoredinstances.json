@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "appmgmtcontrol",
+  "slug": "appmgmtcontrolmonitoredinstances",
+  "kind": "AppmgmtControlMonitoredInstances",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_appmgmt_control_monitored_instances",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateAppmgmtControlMonitoredInstances",
+        "requestType": "appmgmtcontrol.CreateAppmgmtControlMonitoredInstancesRequest",
+        "responseType": "appmgmtcontrol.CreateAppmgmtControlMonitoredInstancesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetAppmgmtControlMonitoredInstances",
+        "requestType": "appmgmtcontrol.GetAppmgmtControlMonitoredInstancesRequest",
+        "responseType": "appmgmtcontrol.GetAppmgmtControlMonitoredInstancesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListAppmgmtControlMonitoredInstances",
+        "requestType": "appmgmtcontrol.ListAppmgmtControlMonitoredInstancesRequest",
+        "responseType": "appmgmtcontrol.ListAppmgmtControlMonitoredInstancesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateAppmgmtControlMonitoredInstances",
+        "requestType": "appmgmtcontrol.UpdateAppmgmtControlMonitoredInstancesRequest",
+        "responseType": "appmgmtcontrol.UpdateAppmgmtControlMonitoredInstancesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteAppmgmtControlMonitoredInstances",
+        "requestType": "appmgmtcontrol.DeleteAppmgmtControlMonitoredInstancesRequest",
+        "responseType": "appmgmtcontrol.DeleteAppmgmtControlMonitoredInstancesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_appmgmtcontrol_appmgmtcontrolmonitoredinstances",
+    "collectionField": "appmgmtcontrolmonitoredinstances",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/appmgmtcontrol/appmgmtcontrolmonitoredinstances/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/appmgmtcontrol/appmgmtcontrolmonitoredinstances/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for appmgmtcontrol/appmgmtcontrolmonitoredinstances; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

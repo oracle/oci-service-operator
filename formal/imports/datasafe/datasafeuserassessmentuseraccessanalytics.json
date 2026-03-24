@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "datasafeuserassessmentuseraccessanalytics",
+  "kind": "DataSafeUserAssessmentUserAccessAnalytics",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_user_assessment_user_access_analytics",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDataSafeUserAssessmentUserAccessAnalytics",
+        "requestType": "datasafe.CreateDataSafeUserAssessmentUserAccessAnalyticsRequest",
+        "responseType": "datasafe.CreateDataSafeUserAssessmentUserAccessAnalyticsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDataSafeUserAssessmentUserAccessAnalytics",
+        "requestType": "datasafe.GetDataSafeUserAssessmentUserAccessAnalyticsRequest",
+        "responseType": "datasafe.GetDataSafeUserAssessmentUserAccessAnalyticsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDataSafeUserAssessmentUserAccessAnalytics",
+        "requestType": "datasafe.ListDataSafeUserAssessmentUserAccessAnalyticsRequest",
+        "responseType": "datasafe.ListDataSafeUserAssessmentUserAccessAnalyticsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDataSafeUserAssessmentUserAccessAnalytics",
+        "requestType": "datasafe.UpdateDataSafeUserAssessmentUserAccessAnalyticsRequest",
+        "responseType": "datasafe.UpdateDataSafeUserAssessmentUserAccessAnalyticsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDataSafeUserAssessmentUserAccessAnalytics",
+        "requestType": "datasafe.DeleteDataSafeUserAssessmentUserAccessAnalyticsRequest",
+        "responseType": "datasafe.DeleteDataSafeUserAssessmentUserAccessAnalyticsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_datasafe_datasafeuserassessmentuseraccessanalytics",
+    "collectionField": "datasafeuserassessmentuseraccessanalytics",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/datasafeuserassessmentuseraccessanalytics/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/datasafeuserassessmentuseraccessanalytics/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for datasafe/datasafeuserassessmentuseraccessanalytics; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

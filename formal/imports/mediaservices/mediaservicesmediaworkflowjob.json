@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "mediaservices",
+  "slug": "mediaservicesmediaworkflowjob",
+  "kind": "MediaServicesMediaWorkflowJob",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_media_services_media_workflow_job",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateMediaServicesMediaWorkflowJob",
+        "requestType": "mediaservices.CreateMediaServicesMediaWorkflowJobRequest",
+        "responseType": "mediaservices.CreateMediaServicesMediaWorkflowJobResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetMediaServicesMediaWorkflowJob",
+        "requestType": "mediaservices.GetMediaServicesMediaWorkflowJobRequest",
+        "responseType": "mediaservices.GetMediaServicesMediaWorkflowJobResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListMediaServicesMediaWorkflowJob",
+        "requestType": "mediaservices.ListMediaServicesMediaWorkflowJobRequest",
+        "responseType": "mediaservices.ListMediaServicesMediaWorkflowJobResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateMediaServicesMediaWorkflowJob",
+        "requestType": "mediaservices.UpdateMediaServicesMediaWorkflowJobRequest",
+        "responseType": "mediaservices.UpdateMediaServicesMediaWorkflowJobResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteMediaServicesMediaWorkflowJob",
+        "requestType": "mediaservices.DeleteMediaServicesMediaWorkflowJobRequest",
+        "responseType": "mediaservices.DeleteMediaServicesMediaWorkflowJobResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_mediaservices_mediaservicesmediaworkflowjob",
+    "collectionField": "mediaservicesmediaworkflowjob",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/mediaservices/mediaservicesmediaworkflowjob/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/mediaservices/mediaservicesmediaworkflowjob/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for mediaservices/mediaservicesmediaworkflowjob; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

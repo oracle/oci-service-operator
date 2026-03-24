@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "loganalytics",
+  "slug": "loganalyticsnamespaceparseractions",
+  "kind": "LogAnalyticsNamespaceParserActions",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_log_analytics_namespace_parser_actions",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateLogAnalyticsNamespaceParserActions",
+        "requestType": "loganalytics.CreateLogAnalyticsNamespaceParserActionsRequest",
+        "responseType": "loganalytics.CreateLogAnalyticsNamespaceParserActionsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetLogAnalyticsNamespaceParserActions",
+        "requestType": "loganalytics.GetLogAnalyticsNamespaceParserActionsRequest",
+        "responseType": "loganalytics.GetLogAnalyticsNamespaceParserActionsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListLogAnalyticsNamespaceParserActions",
+        "requestType": "loganalytics.ListLogAnalyticsNamespaceParserActionsRequest",
+        "responseType": "loganalytics.ListLogAnalyticsNamespaceParserActionsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateLogAnalyticsNamespaceParserActions",
+        "requestType": "loganalytics.UpdateLogAnalyticsNamespaceParserActionsRequest",
+        "responseType": "loganalytics.UpdateLogAnalyticsNamespaceParserActionsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteLogAnalyticsNamespaceParserActions",
+        "requestType": "loganalytics.DeleteLogAnalyticsNamespaceParserActionsRequest",
+        "responseType": "loganalytics.DeleteLogAnalyticsNamespaceParserActionsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_loganalytics_loganalyticsnamespaceparseractions",
+    "collectionField": "loganalyticsnamespaceparseractions",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/loganalytics/loganalyticsnamespaceparseractions/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/loganalytics/loganalyticsnamespaceparseractions/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for loganalytics/loganalyticsnamespaceparseractions; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

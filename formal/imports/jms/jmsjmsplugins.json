@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "jms",
+  "slug": "jmsjmsplugins",
+  "kind": "JmsJmsPlugins",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_jms_jms_plugins",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateJmsJmsPlugins",
+        "requestType": "jms.CreateJmsJmsPluginsRequest",
+        "responseType": "jms.CreateJmsJmsPluginsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetJmsJmsPlugins",
+        "requestType": "jms.GetJmsJmsPluginsRequest",
+        "responseType": "jms.GetJmsJmsPluginsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListJmsJmsPlugins",
+        "requestType": "jms.ListJmsJmsPluginsRequest",
+        "responseType": "jms.ListJmsJmsPluginsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateJmsJmsPlugins",
+        "requestType": "jms.UpdateJmsJmsPluginsRequest",
+        "responseType": "jms.UpdateJmsJmsPluginsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteJmsJmsPlugins",
+        "requestType": "jms.DeleteJmsJmsPluginsRequest",
+        "responseType": "jms.DeleteJmsJmsPluginsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_jms_jmsjmsplugins",
+    "collectionField": "jmsjmsplugins",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/jms/jmsjmsplugins/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/jms/jmsjmsplugins/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for jms/jmsjmsplugins; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

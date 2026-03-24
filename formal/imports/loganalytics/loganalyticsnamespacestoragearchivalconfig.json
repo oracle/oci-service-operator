@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "loganalytics",
+  "slug": "loganalyticsnamespacestoragearchivalconfig",
+  "kind": "LogAnalyticsNamespaceStorageArchivalConfig",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_log_analytics_namespace_storage_archival_config",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateLogAnalyticsNamespaceStorageArchivalConfig",
+        "requestType": "loganalytics.CreateLogAnalyticsNamespaceStorageArchivalConfigRequest",
+        "responseType": "loganalytics.CreateLogAnalyticsNamespaceStorageArchivalConfigResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetLogAnalyticsNamespaceStorageArchivalConfig",
+        "requestType": "loganalytics.GetLogAnalyticsNamespaceStorageArchivalConfigRequest",
+        "responseType": "loganalytics.GetLogAnalyticsNamespaceStorageArchivalConfigResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListLogAnalyticsNamespaceStorageArchivalConfig",
+        "requestType": "loganalytics.ListLogAnalyticsNamespaceStorageArchivalConfigRequest",
+        "responseType": "loganalytics.ListLogAnalyticsNamespaceStorageArchivalConfigResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateLogAnalyticsNamespaceStorageArchivalConfig",
+        "requestType": "loganalytics.UpdateLogAnalyticsNamespaceStorageArchivalConfigRequest",
+        "responseType": "loganalytics.UpdateLogAnalyticsNamespaceStorageArchivalConfigResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteLogAnalyticsNamespaceStorageArchivalConfig",
+        "requestType": "loganalytics.DeleteLogAnalyticsNamespaceStorageArchivalConfigRequest",
+        "responseType": "loganalytics.DeleteLogAnalyticsNamespaceStorageArchivalConfigResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_loganalytics_loganalyticsnamespacestoragearchivalconfig",
+    "collectionField": "loganalyticsnamespacestoragearchivalconfig",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/loganalytics/loganalyticsnamespacestoragearchivalconfig/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/loganalytics/loganalyticsnamespacestoragearchivalconfig/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for loganalytics/loganalyticsnamespacestoragearchivalconfig; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

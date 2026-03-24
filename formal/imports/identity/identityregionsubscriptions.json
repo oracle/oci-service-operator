@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "identity",
+  "slug": "identityregionsubscriptions",
+  "kind": "IdentityRegionSubscriptions",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_identity_region_subscriptions",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateIdentityRegionSubscriptions",
+        "requestType": "identity.CreateIdentityRegionSubscriptionsRequest",
+        "responseType": "identity.CreateIdentityRegionSubscriptionsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetIdentityRegionSubscriptions",
+        "requestType": "identity.GetIdentityRegionSubscriptionsRequest",
+        "responseType": "identity.GetIdentityRegionSubscriptionsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListIdentityRegionSubscriptions",
+        "requestType": "identity.ListIdentityRegionSubscriptionsRequest",
+        "responseType": "identity.ListIdentityRegionSubscriptionsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateIdentityRegionSubscriptions",
+        "requestType": "identity.UpdateIdentityRegionSubscriptionsRequest",
+        "responseType": "identity.UpdateIdentityRegionSubscriptionsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteIdentityRegionSubscriptions",
+        "requestType": "identity.DeleteIdentityRegionSubscriptionsRequest",
+        "responseType": "identity.DeleteIdentityRegionSubscriptionsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_identity_identityregionsubscriptions",
+    "collectionField": "identityregionsubscriptions",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/identity/identityregionsubscriptions/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/identity/identityregionsubscriptions/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for identity/identityregionsubscriptions; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

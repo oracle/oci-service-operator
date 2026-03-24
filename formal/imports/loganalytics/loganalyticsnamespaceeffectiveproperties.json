@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "loganalytics",
+  "slug": "loganalyticsnamespaceeffectiveproperties",
+  "kind": "LogAnalyticsNamespaceEffectiveProperties",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_log_analytics_namespace_effective_properties",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateLogAnalyticsNamespaceEffectiveProperties",
+        "requestType": "loganalytics.CreateLogAnalyticsNamespaceEffectivePropertiesRequest",
+        "responseType": "loganalytics.CreateLogAnalyticsNamespaceEffectivePropertiesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetLogAnalyticsNamespaceEffectiveProperties",
+        "requestType": "loganalytics.GetLogAnalyticsNamespaceEffectivePropertiesRequest",
+        "responseType": "loganalytics.GetLogAnalyticsNamespaceEffectivePropertiesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListLogAnalyticsNamespaceEffectiveProperties",
+        "requestType": "loganalytics.ListLogAnalyticsNamespaceEffectivePropertiesRequest",
+        "responseType": "loganalytics.ListLogAnalyticsNamespaceEffectivePropertiesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateLogAnalyticsNamespaceEffectiveProperties",
+        "requestType": "loganalytics.UpdateLogAnalyticsNamespaceEffectivePropertiesRequest",
+        "responseType": "loganalytics.UpdateLogAnalyticsNamespaceEffectivePropertiesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteLogAnalyticsNamespaceEffectiveProperties",
+        "requestType": "loganalytics.DeleteLogAnalyticsNamespaceEffectivePropertiesRequest",
+        "responseType": "loganalytics.DeleteLogAnalyticsNamespaceEffectivePropertiesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_loganalytics_loganalyticsnamespaceeffectiveproperties",
+    "collectionField": "loganalyticsnamespaceeffectiveproperties",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/loganalytics/loganalyticsnamespaceeffectiveproperties/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/loganalytics/loganalyticsnamespaceeffectiveproperties/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for loganalytics/loganalyticsnamespaceeffectiveproperties; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

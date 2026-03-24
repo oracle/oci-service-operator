@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "datasafeunsetuserassessmentbaseline",
+  "kind": "DataSafeUnsetUserAssessmentBaseline",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_unset_user_assessment_baseline",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDataSafeUnsetUserAssessmentBaseline",
+        "requestType": "datasafe.CreateDataSafeUnsetUserAssessmentBaselineRequest",
+        "responseType": "datasafe.CreateDataSafeUnsetUserAssessmentBaselineResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDataSafeUnsetUserAssessmentBaseline",
+        "requestType": "datasafe.GetDataSafeUnsetUserAssessmentBaselineRequest",
+        "responseType": "datasafe.GetDataSafeUnsetUserAssessmentBaselineResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDataSafeUnsetUserAssessmentBaseline",
+        "requestType": "datasafe.ListDataSafeUnsetUserAssessmentBaselineRequest",
+        "responseType": "datasafe.ListDataSafeUnsetUserAssessmentBaselineResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDataSafeUnsetUserAssessmentBaseline",
+        "requestType": "datasafe.UpdateDataSafeUnsetUserAssessmentBaselineRequest",
+        "responseType": "datasafe.UpdateDataSafeUnsetUserAssessmentBaselineResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDataSafeUnsetUserAssessmentBaseline",
+        "requestType": "datasafe.DeleteDataSafeUnsetUserAssessmentBaselineRequest",
+        "responseType": "datasafe.DeleteDataSafeUnsetUserAssessmentBaselineResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_datasafe_datasafeunsetuserassessmentbaseline",
+    "collectionField": "datasafeunsetuserassessmentbaseline",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/datasafeunsetuserassessmentbaseline/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/datasafeunsetuserassessmentbaseline/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for datasafe/datasafeunsetuserassessmentbaseline; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

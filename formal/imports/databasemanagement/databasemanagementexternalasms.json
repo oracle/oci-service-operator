@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasemanagement",
+  "slug": "databasemanagementexternalasms",
+  "kind": "DatabaseManagementExternalAsms",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_management_external_asms",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseManagementExternalAsms",
+        "requestType": "databasemanagement.CreateDatabaseManagementExternalAsmsRequest",
+        "responseType": "databasemanagement.CreateDatabaseManagementExternalAsmsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseManagementExternalAsms",
+        "requestType": "databasemanagement.GetDatabaseManagementExternalAsmsRequest",
+        "responseType": "databasemanagement.GetDatabaseManagementExternalAsmsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseManagementExternalAsms",
+        "requestType": "databasemanagement.ListDatabaseManagementExternalAsmsRequest",
+        "responseType": "databasemanagement.ListDatabaseManagementExternalAsmsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseManagementExternalAsms",
+        "requestType": "databasemanagement.UpdateDatabaseManagementExternalAsmsRequest",
+        "responseType": "databasemanagement.UpdateDatabaseManagementExternalAsmsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseManagementExternalAsms",
+        "requestType": "databasemanagement.DeleteDatabaseManagementExternalAsmsRequest",
+        "responseType": "databasemanagement.DeleteDatabaseManagementExternalAsmsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_databasemanagement_databasemanagementexternalasms",
+    "collectionField": "databasemanagementexternalasms",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasemanagement/databasemanagementexternalasms/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasemanagement/databasemanagementexternalasms/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for databasemanagement/databasemanagementexternalasms; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

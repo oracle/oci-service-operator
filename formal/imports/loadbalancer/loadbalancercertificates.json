@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "loadbalancer",
+  "slug": "loadbalancercertificates",
+  "kind": "LoadBalancerCertificates",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_load_balancer_certificates",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateLoadBalancerCertificates",
+        "requestType": "loadbalancer.CreateLoadBalancerCertificatesRequest",
+        "responseType": "loadbalancer.CreateLoadBalancerCertificatesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetLoadBalancerCertificates",
+        "requestType": "loadbalancer.GetLoadBalancerCertificatesRequest",
+        "responseType": "loadbalancer.GetLoadBalancerCertificatesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListLoadBalancerCertificates",
+        "requestType": "loadbalancer.ListLoadBalancerCertificatesRequest",
+        "responseType": "loadbalancer.ListLoadBalancerCertificatesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateLoadBalancerCertificates",
+        "requestType": "loadbalancer.UpdateLoadBalancerCertificatesRequest",
+        "responseType": "loadbalancer.UpdateLoadBalancerCertificatesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteLoadBalancerCertificates",
+        "requestType": "loadbalancer.DeleteLoadBalancerCertificatesRequest",
+        "responseType": "loadbalancer.DeleteLoadBalancerCertificatesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_loadbalancer_loadbalancercertificates",
+    "collectionField": "loadbalancercertificates",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/loadbalancer/loadbalancercertificates/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/loadbalancer/loadbalancercertificates/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for loadbalancer/loadbalancercertificates; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

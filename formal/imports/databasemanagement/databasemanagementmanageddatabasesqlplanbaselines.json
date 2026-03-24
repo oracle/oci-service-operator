@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasemanagement",
+  "slug": "databasemanagementmanageddatabasesqlplanbaselines",
+  "kind": "DatabaseManagementManagedDatabaseSqlPlanBaselines",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_management_managed_database_sql_plan_baselines",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseManagementManagedDatabaseSqlPlanBaselines",
+        "requestType": "databasemanagement.CreateDatabaseManagementManagedDatabaseSqlPlanBaselinesRequest",
+        "responseType": "databasemanagement.CreateDatabaseManagementManagedDatabaseSqlPlanBaselinesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseManagementManagedDatabaseSqlPlanBaselines",
+        "requestType": "databasemanagement.GetDatabaseManagementManagedDatabaseSqlPlanBaselinesRequest",
+        "responseType": "databasemanagement.GetDatabaseManagementManagedDatabaseSqlPlanBaselinesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseManagementManagedDatabaseSqlPlanBaselines",
+        "requestType": "databasemanagement.ListDatabaseManagementManagedDatabaseSqlPlanBaselinesRequest",
+        "responseType": "databasemanagement.ListDatabaseManagementManagedDatabaseSqlPlanBaselinesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseManagementManagedDatabaseSqlPlanBaselines",
+        "requestType": "databasemanagement.UpdateDatabaseManagementManagedDatabaseSqlPlanBaselinesRequest",
+        "responseType": "databasemanagement.UpdateDatabaseManagementManagedDatabaseSqlPlanBaselinesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseManagementManagedDatabaseSqlPlanBaselines",
+        "requestType": "databasemanagement.DeleteDatabaseManagementManagedDatabaseSqlPlanBaselinesRequest",
+        "responseType": "databasemanagement.DeleteDatabaseManagementManagedDatabaseSqlPlanBaselinesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_databasemanagement_databasemanagementmanageddatabasesqlplanbaselines",
+    "collectionField": "databasemanagementmanageddatabasesqlplanbaselines",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasemanagement/databasemanagementmanageddatabasesqlplanbaselines/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasemanagement/databasemanagementmanageddatabasesqlplanbaselines/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for databasemanagement/databasemanagementmanageddatabasesqlplanbaselines; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

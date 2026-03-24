@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "networkloadbalancer",
+  "slug": "backendhealth",
+  "kind": "BackendHealth",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_networkloadbalancer_backendhealth",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateBackendHealth",
+        "requestType": "networkloadbalancer.CreateBackendHealthRequest",
+        "responseType": "networkloadbalancer.CreateBackendHealthResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetBackendHealth",
+        "requestType": "networkloadbalancer.GetBackendHealthRequest",
+        "responseType": "networkloadbalancer.GetBackendHealthResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListBackendHealth",
+        "requestType": "networkloadbalancer.ListBackendHealthRequest",
+        "responseType": "networkloadbalancer.ListBackendHealthResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateBackendHealth",
+        "requestType": "networkloadbalancer.UpdateBackendHealthRequest",
+        "responseType": "networkloadbalancer.UpdateBackendHealthResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteBackendHealth",
+        "requestType": "networkloadbalancer.DeleteBackendHealthRequest",
+        "responseType": "networkloadbalancer.DeleteBackendHealthResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_networkloadbalancer_backendhealth",
+    "collectionField": "backendhealth",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/networkloadbalancer/backendhealth/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/networkloadbalancer/backendhealth/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for networkloadbalancer/backendhealth; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

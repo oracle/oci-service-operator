@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "jms",
+  "slug": "jmsfleetagentconfiguration",
+  "kind": "JmsFleetAgentConfiguration",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_jms_fleet_agent_configuration",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateJmsFleetAgentConfiguration",
+        "requestType": "jms.CreateJmsFleetAgentConfigurationRequest",
+        "responseType": "jms.CreateJmsFleetAgentConfigurationResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetJmsFleetAgentConfiguration",
+        "requestType": "jms.GetJmsFleetAgentConfigurationRequest",
+        "responseType": "jms.GetJmsFleetAgentConfigurationResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListJmsFleetAgentConfiguration",
+        "requestType": "jms.ListJmsFleetAgentConfigurationRequest",
+        "responseType": "jms.ListJmsFleetAgentConfigurationResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateJmsFleetAgentConfiguration",
+        "requestType": "jms.UpdateJmsFleetAgentConfigurationRequest",
+        "responseType": "jms.UpdateJmsFleetAgentConfigurationResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteJmsFleetAgentConfiguration",
+        "requestType": "jms.DeleteJmsFleetAgentConfigurationRequest",
+        "responseType": "jms.DeleteJmsFleetAgentConfigurationResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_jms_jmsfleetagentconfiguration",
+    "collectionField": "jmsfleetagentconfiguration",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/jms/jmsfleetagentconfiguration/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/jms/jmsfleetagentconfiguration/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for jms/jmsfleetagentconfiguration; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

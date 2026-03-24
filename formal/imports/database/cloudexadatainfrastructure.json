@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "cloudexadatainfrastructure",
+  "kind": "CloudExadataInfrastructure",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_database_cloudexadatainfrastructure",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCloudExadataInfrastructure",
+        "requestType": "database.CreateCloudExadataInfrastructureRequest",
+        "responseType": "database.CreateCloudExadataInfrastructureResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCloudExadataInfrastructure",
+        "requestType": "database.GetCloudExadataInfrastructureRequest",
+        "responseType": "database.GetCloudExadataInfrastructureResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCloudExadataInfrastructure",
+        "requestType": "database.ListCloudExadataInfrastructureRequest",
+        "responseType": "database.ListCloudExadataInfrastructureResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCloudExadataInfrastructure",
+        "requestType": "database.UpdateCloudExadataInfrastructureRequest",
+        "responseType": "database.UpdateCloudExadataInfrastructureResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCloudExadataInfrastructure",
+        "requestType": "database.DeleteCloudExadataInfrastructureRequest",
+        "responseType": "database.DeleteCloudExadataInfrastructureResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_cloudexadatainfrastructure",
+    "collectionField": "cloudexadatainfrastructure",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/cloudexadatainfrastructure/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/cloudexadatainfrastructure/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/cloudexadatainfrastructure; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

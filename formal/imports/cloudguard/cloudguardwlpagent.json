@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "cloudguard",
+  "slug": "cloudguardwlpagent",
+  "kind": "CloudGuardWlpAgent",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_cloud_guard_wlp_agent",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCloudGuardWlpAgent",
+        "requestType": "cloudguard.CreateCloudGuardWlpAgentRequest",
+        "responseType": "cloudguard.CreateCloudGuardWlpAgentResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCloudGuardWlpAgent",
+        "requestType": "cloudguard.GetCloudGuardWlpAgentRequest",
+        "responseType": "cloudguard.GetCloudGuardWlpAgentResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCloudGuardWlpAgent",
+        "requestType": "cloudguard.ListCloudGuardWlpAgentRequest",
+        "responseType": "cloudguard.ListCloudGuardWlpAgentResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCloudGuardWlpAgent",
+        "requestType": "cloudguard.UpdateCloudGuardWlpAgentRequest",
+        "responseType": "cloudguard.UpdateCloudGuardWlpAgentResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCloudGuardWlpAgent",
+        "requestType": "cloudguard.DeleteCloudGuardWlpAgentRequest",
+        "responseType": "cloudguard.DeleteCloudGuardWlpAgentResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_cloudguard_cloudguardwlpagent",
+    "collectionField": "cloudguardwlpagent",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/cloudguard/cloudguardwlpagent/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/cloudguard/cloudguardwlpagent/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for cloudguard/cloudguardwlpagent; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

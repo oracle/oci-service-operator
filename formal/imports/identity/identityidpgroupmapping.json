@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "identity",
+  "slug": "identityidpgroupmapping",
+  "kind": "IdentityIdpGroupMapping",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_identity_idp_group_mapping",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateIdentityIdpGroupMapping",
+        "requestType": "identity.CreateIdentityIdpGroupMappingRequest",
+        "responseType": "identity.CreateIdentityIdpGroupMappingResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetIdentityIdpGroupMapping",
+        "requestType": "identity.GetIdentityIdpGroupMappingRequest",
+        "responseType": "identity.GetIdentityIdpGroupMappingResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListIdentityIdpGroupMapping",
+        "requestType": "identity.ListIdentityIdpGroupMappingRequest",
+        "responseType": "identity.ListIdentityIdpGroupMappingResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateIdentityIdpGroupMapping",
+        "requestType": "identity.UpdateIdentityIdpGroupMappingRequest",
+        "responseType": "identity.UpdateIdentityIdpGroupMappingResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteIdentityIdpGroupMapping",
+        "requestType": "identity.DeleteIdentityIdpGroupMappingRequest",
+        "responseType": "identity.DeleteIdentityIdpGroupMappingResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_identity_identityidpgroupmapping",
+    "collectionField": "identityidpgroupmapping",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/identity/identityidpgroupmapping/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/identity/identityidpgroupmapping/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for identity/identityidpgroupmapping; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "functions",
+  "slug": "functionspbflisting",
+  "kind": "FunctionsPbfListing",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_functions_pbf_listing",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateFunctionsPbfListing",
+        "requestType": "functions.CreateFunctionsPbfListingRequest",
+        "responseType": "functions.CreateFunctionsPbfListingResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetFunctionsPbfListing",
+        "requestType": "functions.GetFunctionsPbfListingRequest",
+        "responseType": "functions.GetFunctionsPbfListingResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListFunctionsPbfListing",
+        "requestType": "functions.ListFunctionsPbfListingRequest",
+        "responseType": "functions.ListFunctionsPbfListingResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateFunctionsPbfListing",
+        "requestType": "functions.UpdateFunctionsPbfListingRequest",
+        "responseType": "functions.UpdateFunctionsPbfListingResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteFunctionsPbfListing",
+        "requestType": "functions.DeleteFunctionsPbfListingRequest",
+        "responseType": "functions.DeleteFunctionsPbfListingResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_functions_functionspbflisting",
+    "collectionField": "functionspbflisting",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/functions/functionspbflisting/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/functions/functionspbflisting/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for functions/functionspbflisting; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

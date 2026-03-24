@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "mysql",
+  "slug": "heatwavecluster",
+  "kind": "HeatWaveCluster",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_mysql_heatwavecluster",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateHeatWaveCluster",
+        "requestType": "mysql.CreateHeatWaveClusterRequest",
+        "responseType": "mysql.CreateHeatWaveClusterResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetHeatWaveCluster",
+        "requestType": "mysql.GetHeatWaveClusterRequest",
+        "responseType": "mysql.GetHeatWaveClusterResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListHeatWaveCluster",
+        "requestType": "mysql.ListHeatWaveClusterRequest",
+        "responseType": "mysql.ListHeatWaveClusterResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateHeatWaveCluster",
+        "requestType": "mysql.UpdateHeatWaveClusterRequest",
+        "responseType": "mysql.UpdateHeatWaveClusterResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteHeatWaveCluster",
+        "requestType": "mysql.DeleteHeatWaveClusterRequest",
+        "responseType": "mysql.DeleteHeatWaveClusterResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_mysql_heatwavecluster",
+    "collectionField": "heatwavecluster",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/mysql/heatwavecluster/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/mysql/heatwavecluster/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for mysql/heatwavecluster; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

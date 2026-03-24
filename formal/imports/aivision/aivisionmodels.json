@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "aivision",
+  "slug": "aivisionmodels",
+  "kind": "AiVisionModels",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_ai_vision_models",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateAiVisionModels",
+        "requestType": "aivision.CreateAiVisionModelsRequest",
+        "responseType": "aivision.CreateAiVisionModelsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetAiVisionModels",
+        "requestType": "aivision.GetAiVisionModelsRequest",
+        "responseType": "aivision.GetAiVisionModelsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListAiVisionModels",
+        "requestType": "aivision.ListAiVisionModelsRequest",
+        "responseType": "aivision.ListAiVisionModelsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateAiVisionModels",
+        "requestType": "aivision.UpdateAiVisionModelsRequest",
+        "responseType": "aivision.UpdateAiVisionModelsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteAiVisionModels",
+        "requestType": "aivision.DeleteAiVisionModelsRequest",
+        "responseType": "aivision.DeleteAiVisionModelsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_aivision_aivisionmodels",
+    "collectionField": "aivisionmodels",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/aivision/aivisionmodels/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/aivision/aivisionmodels/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for aivision/aivisionmodels; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

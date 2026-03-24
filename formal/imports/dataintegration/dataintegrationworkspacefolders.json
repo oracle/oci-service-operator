@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "dataintegration",
+  "slug": "dataintegrationworkspacefolders",
+  "kind": "DataintegrationWorkspaceFolders",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_dataintegration_workspace_folders",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDataintegrationWorkspaceFolders",
+        "requestType": "dataintegration.CreateDataintegrationWorkspaceFoldersRequest",
+        "responseType": "dataintegration.CreateDataintegrationWorkspaceFoldersResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDataintegrationWorkspaceFolders",
+        "requestType": "dataintegration.GetDataintegrationWorkspaceFoldersRequest",
+        "responseType": "dataintegration.GetDataintegrationWorkspaceFoldersResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDataintegrationWorkspaceFolders",
+        "requestType": "dataintegration.ListDataintegrationWorkspaceFoldersRequest",
+        "responseType": "dataintegration.ListDataintegrationWorkspaceFoldersResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDataintegrationWorkspaceFolders",
+        "requestType": "dataintegration.UpdateDataintegrationWorkspaceFoldersRequest",
+        "responseType": "dataintegration.UpdateDataintegrationWorkspaceFoldersResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDataintegrationWorkspaceFolders",
+        "requestType": "dataintegration.DeleteDataintegrationWorkspaceFoldersRequest",
+        "responseType": "dataintegration.DeleteDataintegrationWorkspaceFoldersResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_dataintegration_dataintegrationworkspacefolders",
+    "collectionField": "dataintegrationworkspacefolders",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/dataintegration/dataintegrationworkspacefolders/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/dataintegration/dataintegrationworkspacefolders/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for dataintegration/dataintegrationworkspacefolders; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

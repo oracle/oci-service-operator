@@ -1,0 +1,13 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: loadbalancer
+slug: loadbalancerbackendhealth
+kind: LoadBalancerBackendHealth
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+notes:
+  - Scaffold metadata only; replace with controller-specific runtime states before promotion.

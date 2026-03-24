@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasemanagement",
+  "slug": "databasemanagementmanageddatabasesqlplanbaselinejobs",
+  "kind": "DatabaseManagementManagedDatabaseSqlPlanBaselineJobs",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_management_managed_database_sql_plan_baseline_jobs",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseManagementManagedDatabaseSqlPlanBaselineJobs",
+        "requestType": "databasemanagement.CreateDatabaseManagementManagedDatabaseSqlPlanBaselineJobsRequest",
+        "responseType": "databasemanagement.CreateDatabaseManagementManagedDatabaseSqlPlanBaselineJobsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseManagementManagedDatabaseSqlPlanBaselineJobs",
+        "requestType": "databasemanagement.GetDatabaseManagementManagedDatabaseSqlPlanBaselineJobsRequest",
+        "responseType": "databasemanagement.GetDatabaseManagementManagedDatabaseSqlPlanBaselineJobsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseManagementManagedDatabaseSqlPlanBaselineJobs",
+        "requestType": "databasemanagement.ListDatabaseManagementManagedDatabaseSqlPlanBaselineJobsRequest",
+        "responseType": "databasemanagement.ListDatabaseManagementManagedDatabaseSqlPlanBaselineJobsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseManagementManagedDatabaseSqlPlanBaselineJobs",
+        "requestType": "databasemanagement.UpdateDatabaseManagementManagedDatabaseSqlPlanBaselineJobsRequest",
+        "responseType": "databasemanagement.UpdateDatabaseManagementManagedDatabaseSqlPlanBaselineJobsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseManagementManagedDatabaseSqlPlanBaselineJobs",
+        "requestType": "databasemanagement.DeleteDatabaseManagementManagedDatabaseSqlPlanBaselineJobsRequest",
+        "responseType": "databasemanagement.DeleteDatabaseManagementManagedDatabaseSqlPlanBaselineJobsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_databasemanagement_databasemanagementmanageddatabasesqlplanbaselinejobs",
+    "collectionField": "databasemanagementmanageddatabasesqlplanbaselinejobs",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasemanagement/databasemanagementmanageddatabasesqlplanbaselinejobs/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasemanagement/databasemanagementmanageddatabasesqlplanbaselinejobs/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for databasemanagement/databasemanagementmanageddatabasesqlplanbaselinejobs; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

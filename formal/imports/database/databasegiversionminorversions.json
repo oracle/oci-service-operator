@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "databasegiversionminorversions",
+  "kind": "DatabaseGiVersionMinorVersions",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_gi_version_minor_versions",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseGiVersionMinorVersions",
+        "requestType": "database.CreateDatabaseGiVersionMinorVersionsRequest",
+        "responseType": "database.CreateDatabaseGiVersionMinorVersionsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseGiVersionMinorVersions",
+        "requestType": "database.GetDatabaseGiVersionMinorVersionsRequest",
+        "responseType": "database.GetDatabaseGiVersionMinorVersionsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseGiVersionMinorVersions",
+        "requestType": "database.ListDatabaseGiVersionMinorVersionsRequest",
+        "responseType": "database.ListDatabaseGiVersionMinorVersionsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseGiVersionMinorVersions",
+        "requestType": "database.UpdateDatabaseGiVersionMinorVersionsRequest",
+        "responseType": "database.UpdateDatabaseGiVersionMinorVersionsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseGiVersionMinorVersions",
+        "requestType": "database.DeleteDatabaseGiVersionMinorVersionsRequest",
+        "responseType": "database.DeleteDatabaseGiVersionMinorVersionsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_databasegiversionminorversions",
+    "collectionField": "databasegiversionminorversions",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/databasegiversionminorversions/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/databasegiversionminorversions/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/databasegiversionminorversions; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

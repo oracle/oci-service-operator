@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "osmanagementhub",
+  "slug": "osmanagementhubsoftwaresource",
+  "kind": "OsManagementHubSoftwareSource",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_os_management_hub_software_source",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOsManagementHubSoftwareSource",
+        "requestType": "osmanagementhub.CreateOsManagementHubSoftwareSourceRequest",
+        "responseType": "osmanagementhub.CreateOsManagementHubSoftwareSourceResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOsManagementHubSoftwareSource",
+        "requestType": "osmanagementhub.GetOsManagementHubSoftwareSourceRequest",
+        "responseType": "osmanagementhub.GetOsManagementHubSoftwareSourceResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOsManagementHubSoftwareSource",
+        "requestType": "osmanagementhub.ListOsManagementHubSoftwareSourceRequest",
+        "responseType": "osmanagementhub.ListOsManagementHubSoftwareSourceResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOsManagementHubSoftwareSource",
+        "requestType": "osmanagementhub.UpdateOsManagementHubSoftwareSourceRequest",
+        "responseType": "osmanagementhub.UpdateOsManagementHubSoftwareSourceResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOsManagementHubSoftwareSource",
+        "requestType": "osmanagementhub.DeleteOsManagementHubSoftwareSourceRequest",
+        "responseType": "osmanagementhub.DeleteOsManagementHubSoftwareSourceResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_osmanagementhub_osmanagementhubsoftwaresource",
+    "collectionField": "osmanagementhubsoftwaresource",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/osmanagementhub/osmanagementhubsoftwaresource/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/osmanagementhub/osmanagementhubsoftwaresource/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for osmanagementhub/osmanagementhubsoftwaresource; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

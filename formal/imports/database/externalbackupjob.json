@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "externalbackupjob",
+  "kind": "ExternalBackupJob",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_database_externalbackupjob",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateExternalBackupJob",
+        "requestType": "database.CreateExternalBackupJobRequest",
+        "responseType": "database.CreateExternalBackupJobResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetExternalBackupJob",
+        "requestType": "database.GetExternalBackupJobRequest",
+        "responseType": "database.GetExternalBackupJobResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListExternalBackupJob",
+        "requestType": "database.ListExternalBackupJobRequest",
+        "responseType": "database.ListExternalBackupJobResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateExternalBackupJob",
+        "requestType": "database.UpdateExternalBackupJobRequest",
+        "responseType": "database.UpdateExternalBackupJobResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteExternalBackupJob",
+        "requestType": "database.DeleteExternalBackupJobRequest",
+        "responseType": "database.DeleteExternalBackupJobResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_externalbackupjob",
+    "collectionField": "externalbackupjob",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/externalbackupjob/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/externalbackupjob/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/externalbackupjob; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

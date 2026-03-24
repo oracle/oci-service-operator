@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "datasafesecurityassessmentfindingschangeauditlogs",
+  "kind": "DataSafeSecurityAssessmentFindingsChangeAuditLogs",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_security_assessment_findings_change_audit_logs",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDataSafeSecurityAssessmentFindingsChangeAuditLogs",
+        "requestType": "datasafe.CreateDataSafeSecurityAssessmentFindingsChangeAuditLogsRequest",
+        "responseType": "datasafe.CreateDataSafeSecurityAssessmentFindingsChangeAuditLogsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDataSafeSecurityAssessmentFindingsChangeAuditLogs",
+        "requestType": "datasafe.GetDataSafeSecurityAssessmentFindingsChangeAuditLogsRequest",
+        "responseType": "datasafe.GetDataSafeSecurityAssessmentFindingsChangeAuditLogsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDataSafeSecurityAssessmentFindingsChangeAuditLogs",
+        "requestType": "datasafe.ListDataSafeSecurityAssessmentFindingsChangeAuditLogsRequest",
+        "responseType": "datasafe.ListDataSafeSecurityAssessmentFindingsChangeAuditLogsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDataSafeSecurityAssessmentFindingsChangeAuditLogs",
+        "requestType": "datasafe.UpdateDataSafeSecurityAssessmentFindingsChangeAuditLogsRequest",
+        "responseType": "datasafe.UpdateDataSafeSecurityAssessmentFindingsChangeAuditLogsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDataSafeSecurityAssessmentFindingsChangeAuditLogs",
+        "requestType": "datasafe.DeleteDataSafeSecurityAssessmentFindingsChangeAuditLogsRequest",
+        "responseType": "datasafe.DeleteDataSafeSecurityAssessmentFindingsChangeAuditLogsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_datasafe_datasafesecurityassessmentfindingschangeauditlogs",
+    "collectionField": "datasafesecurityassessmentfindingschangeauditlogs",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/datasafesecurityassessmentfindingschangeauditlogs/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/datasafesecurityassessmentfindingschangeauditlogs/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for datasafe/datasafesecurityassessmentfindingschangeauditlogs; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

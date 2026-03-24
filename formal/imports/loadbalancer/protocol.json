@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "loadbalancer",
+  "slug": "protocol",
+  "kind": "Protocol",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_loadbalancer_protocol",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateProtocol",
+        "requestType": "loadbalancer.CreateProtocolRequest",
+        "responseType": "loadbalancer.CreateProtocolResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetProtocol",
+        "requestType": "loadbalancer.GetProtocolRequest",
+        "responseType": "loadbalancer.GetProtocolResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListProtocol",
+        "requestType": "loadbalancer.ListProtocolRequest",
+        "responseType": "loadbalancer.ListProtocolResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateProtocol",
+        "requestType": "loadbalancer.UpdateProtocolRequest",
+        "responseType": "loadbalancer.UpdateProtocolResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteProtocol",
+        "requestType": "loadbalancer.DeleteProtocolRequest",
+        "responseType": "loadbalancer.DeleteProtocolResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_loadbalancer_protocol",
+    "collectionField": "protocol",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/loadbalancer/protocol/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/loadbalancer/protocol/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for loadbalancer/protocol; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

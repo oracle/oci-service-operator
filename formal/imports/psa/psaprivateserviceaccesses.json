@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "psa",
+  "slug": "psaprivateserviceaccesses",
+  "kind": "PsaPrivateServiceAccesses",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_psa_private_service_accesses",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreatePsaPrivateServiceAccesses",
+        "requestType": "psa.CreatePsaPrivateServiceAccessesRequest",
+        "responseType": "psa.CreatePsaPrivateServiceAccessesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetPsaPrivateServiceAccesses",
+        "requestType": "psa.GetPsaPrivateServiceAccessesRequest",
+        "responseType": "psa.GetPsaPrivateServiceAccessesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListPsaPrivateServiceAccesses",
+        "requestType": "psa.ListPsaPrivateServiceAccessesRequest",
+        "responseType": "psa.ListPsaPrivateServiceAccessesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdatePsaPrivateServiceAccesses",
+        "requestType": "psa.UpdatePsaPrivateServiceAccessesRequest",
+        "responseType": "psa.UpdatePsaPrivateServiceAccessesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeletePsaPrivateServiceAccesses",
+        "requestType": "psa.DeletePsaPrivateServiceAccessesRequest",
+        "responseType": "psa.DeletePsaPrivateServiceAccessesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_psa_psaprivateserviceaccesses",
+    "collectionField": "psaprivateserviceaccesses",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/psa/psaprivateserviceaccesses/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/psa/psaprivateserviceaccesses/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for psa/psaprivateserviceaccesses; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

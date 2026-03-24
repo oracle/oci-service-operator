@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "certificates",
+  "slug": "certificateauthoritybundleversion",
+  "kind": "CertificateAuthorityBundleVersion",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_certificates_certificateauthoritybundleversion",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCertificateAuthorityBundleVersion",
+        "requestType": "certificates.CreateCertificateAuthorityBundleVersionRequest",
+        "responseType": "certificates.CreateCertificateAuthorityBundleVersionResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCertificateAuthorityBundleVersion",
+        "requestType": "certificates.GetCertificateAuthorityBundleVersionRequest",
+        "responseType": "certificates.GetCertificateAuthorityBundleVersionResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCertificateAuthorityBundleVersion",
+        "requestType": "certificates.ListCertificateAuthorityBundleVersionRequest",
+        "responseType": "certificates.ListCertificateAuthorityBundleVersionResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCertificateAuthorityBundleVersion",
+        "requestType": "certificates.UpdateCertificateAuthorityBundleVersionRequest",
+        "responseType": "certificates.UpdateCertificateAuthorityBundleVersionResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCertificateAuthorityBundleVersion",
+        "requestType": "certificates.DeleteCertificateAuthorityBundleVersionRequest",
+        "responseType": "certificates.DeleteCertificateAuthorityBundleVersionResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_certificates_certificateauthoritybundleversion",
+    "collectionField": "certificateauthoritybundleversion",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/certificates/certificateauthoritybundleversion/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/certificates/certificateauthoritybundleversion/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for certificates/certificateauthoritybundleversion; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

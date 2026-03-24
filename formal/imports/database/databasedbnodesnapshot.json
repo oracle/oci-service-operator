@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "databasedbnodesnapshot",
+  "kind": "DatabaseDbNodeSnapshot",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_db_node_snapshot",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseDbNodeSnapshot",
+        "requestType": "database.CreateDatabaseDbNodeSnapshotRequest",
+        "responseType": "database.CreateDatabaseDbNodeSnapshotResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseDbNodeSnapshot",
+        "requestType": "database.GetDatabaseDbNodeSnapshotRequest",
+        "responseType": "database.GetDatabaseDbNodeSnapshotResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseDbNodeSnapshot",
+        "requestType": "database.ListDatabaseDbNodeSnapshotRequest",
+        "responseType": "database.ListDatabaseDbNodeSnapshotResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseDbNodeSnapshot",
+        "requestType": "database.UpdateDatabaseDbNodeSnapshotRequest",
+        "responseType": "database.UpdateDatabaseDbNodeSnapshotResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseDbNodeSnapshot",
+        "requestType": "database.DeleteDatabaseDbNodeSnapshotRequest",
+        "responseType": "database.DeleteDatabaseDbNodeSnapshotResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_databasedbnodesnapshot",
+    "collectionField": "databasedbnodesnapshot",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/databasedbnodesnapshot/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/databasedbnodesnapshot/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/databasedbnodesnapshot; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

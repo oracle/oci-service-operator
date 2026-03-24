@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "identitydomains",
+  "slug": "identitydomainssecurityquestion",
+  "kind": "IdentityDomainsSecurityQuestion",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_identity_domains_security_question",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateIdentityDomainsSecurityQuestion",
+        "requestType": "identitydomains.CreateIdentityDomainsSecurityQuestionRequest",
+        "responseType": "identitydomains.CreateIdentityDomainsSecurityQuestionResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetIdentityDomainsSecurityQuestion",
+        "requestType": "identitydomains.GetIdentityDomainsSecurityQuestionRequest",
+        "responseType": "identitydomains.GetIdentityDomainsSecurityQuestionResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListIdentityDomainsSecurityQuestion",
+        "requestType": "identitydomains.ListIdentityDomainsSecurityQuestionRequest",
+        "responseType": "identitydomains.ListIdentityDomainsSecurityQuestionResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateIdentityDomainsSecurityQuestion",
+        "requestType": "identitydomains.UpdateIdentityDomainsSecurityQuestionRequest",
+        "responseType": "identitydomains.UpdateIdentityDomainsSecurityQuestionResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteIdentityDomainsSecurityQuestion",
+        "requestType": "identitydomains.DeleteIdentityDomainsSecurityQuestionRequest",
+        "responseType": "identitydomains.DeleteIdentityDomainsSecurityQuestionResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_identitydomains_identitydomainssecurityquestion",
+    "collectionField": "identitydomainssecurityquestion",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/identitydomains/identitydomainssecurityquestion/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/identitydomains/identitydomainssecurityquestion/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for identitydomains/identitydomainssecurityquestion; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

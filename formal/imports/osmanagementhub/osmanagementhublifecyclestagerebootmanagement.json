@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "osmanagementhub",
+  "slug": "osmanagementhublifecyclestagerebootmanagement",
+  "kind": "OsManagementHubLifecycleStageRebootManagement",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_os_management_hub_lifecycle_stage_reboot_management",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOsManagementHubLifecycleStageRebootManagement",
+        "requestType": "osmanagementhub.CreateOsManagementHubLifecycleStageRebootManagementRequest",
+        "responseType": "osmanagementhub.CreateOsManagementHubLifecycleStageRebootManagementResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOsManagementHubLifecycleStageRebootManagement",
+        "requestType": "osmanagementhub.GetOsManagementHubLifecycleStageRebootManagementRequest",
+        "responseType": "osmanagementhub.GetOsManagementHubLifecycleStageRebootManagementResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOsManagementHubLifecycleStageRebootManagement",
+        "requestType": "osmanagementhub.ListOsManagementHubLifecycleStageRebootManagementRequest",
+        "responseType": "osmanagementhub.ListOsManagementHubLifecycleStageRebootManagementResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOsManagementHubLifecycleStageRebootManagement",
+        "requestType": "osmanagementhub.UpdateOsManagementHubLifecycleStageRebootManagementRequest",
+        "responseType": "osmanagementhub.UpdateOsManagementHubLifecycleStageRebootManagementResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOsManagementHubLifecycleStageRebootManagement",
+        "requestType": "osmanagementhub.DeleteOsManagementHubLifecycleStageRebootManagementRequest",
+        "responseType": "osmanagementhub.DeleteOsManagementHubLifecycleStageRebootManagementResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_osmanagementhub_osmanagementhublifecyclestagerebootmanagement",
+    "collectionField": "osmanagementhublifecyclestagerebootmanagement",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/osmanagementhub/osmanagementhublifecyclestagerebootmanagement/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/osmanagementhub/osmanagementhublifecyclestagerebootmanagement/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for osmanagementhub/osmanagementhublifecyclestagerebootmanagement; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

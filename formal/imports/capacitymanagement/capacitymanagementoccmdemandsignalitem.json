@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "capacitymanagement",
+  "slug": "capacitymanagementoccmdemandsignalitem",
+  "kind": "CapacityManagementOccmDemandSignalItem",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_capacity_management_occm_demand_signal_item",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCapacityManagementOccmDemandSignalItem",
+        "requestType": "capacitymanagement.CreateCapacityManagementOccmDemandSignalItemRequest",
+        "responseType": "capacitymanagement.CreateCapacityManagementOccmDemandSignalItemResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCapacityManagementOccmDemandSignalItem",
+        "requestType": "capacitymanagement.GetCapacityManagementOccmDemandSignalItemRequest",
+        "responseType": "capacitymanagement.GetCapacityManagementOccmDemandSignalItemResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCapacityManagementOccmDemandSignalItem",
+        "requestType": "capacitymanagement.ListCapacityManagementOccmDemandSignalItemRequest",
+        "responseType": "capacitymanagement.ListCapacityManagementOccmDemandSignalItemResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCapacityManagementOccmDemandSignalItem",
+        "requestType": "capacitymanagement.UpdateCapacityManagementOccmDemandSignalItemRequest",
+        "responseType": "capacitymanagement.UpdateCapacityManagementOccmDemandSignalItemResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCapacityManagementOccmDemandSignalItem",
+        "requestType": "capacitymanagement.DeleteCapacityManagementOccmDemandSignalItemRequest",
+        "responseType": "capacitymanagement.DeleteCapacityManagementOccmDemandSignalItemResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_capacitymanagement_capacitymanagementoccmdemandsignalitem",
+    "collectionField": "capacitymanagementoccmdemandsignalitem",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/capacitymanagement/capacitymanagementoccmdemandsignalitem/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/capacitymanagement/capacitymanagementoccmdemandsignalitem/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for capacitymanagement/capacitymanagementoccmdemandsignalitem; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

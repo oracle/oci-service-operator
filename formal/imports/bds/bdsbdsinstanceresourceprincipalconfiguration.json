@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "bds",
+  "slug": "bdsbdsinstanceresourceprincipalconfiguration",
+  "kind": "BdsBdsInstanceResourcePrincipalConfiguration",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_bds_bds_instance_resource_principal_configuration",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateBdsBdsInstanceResourcePrincipalConfiguration",
+        "requestType": "bds.CreateBdsBdsInstanceResourcePrincipalConfigurationRequest",
+        "responseType": "bds.CreateBdsBdsInstanceResourcePrincipalConfigurationResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetBdsBdsInstanceResourcePrincipalConfiguration",
+        "requestType": "bds.GetBdsBdsInstanceResourcePrincipalConfigurationRequest",
+        "responseType": "bds.GetBdsBdsInstanceResourcePrincipalConfigurationResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListBdsBdsInstanceResourcePrincipalConfiguration",
+        "requestType": "bds.ListBdsBdsInstanceResourcePrincipalConfigurationRequest",
+        "responseType": "bds.ListBdsBdsInstanceResourcePrincipalConfigurationResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateBdsBdsInstanceResourcePrincipalConfiguration",
+        "requestType": "bds.UpdateBdsBdsInstanceResourcePrincipalConfigurationRequest",
+        "responseType": "bds.UpdateBdsBdsInstanceResourcePrincipalConfigurationResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteBdsBdsInstanceResourcePrincipalConfiguration",
+        "requestType": "bds.DeleteBdsBdsInstanceResourcePrincipalConfigurationRequest",
+        "responseType": "bds.DeleteBdsBdsInstanceResourcePrincipalConfigurationResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_bds_bdsbdsinstanceresourceprincipalconfiguration",
+    "collectionField": "bdsbdsinstanceresourceprincipalconfiguration",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/bds/bdsbdsinstanceresourceprincipalconfiguration/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/bds/bdsbdsinstanceresourceprincipalconfiguration/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for bds/bdsbdsinstanceresourceprincipalconfiguration; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

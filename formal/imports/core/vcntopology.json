@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "vcntopology",
+  "kind": "VcnTopology",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_core_vcntopology",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateVcnTopology",
+        "requestType": "core.CreateVcnTopologyRequest",
+        "responseType": "core.CreateVcnTopologyResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetVcnTopology",
+        "requestType": "core.GetVcnTopologyRequest",
+        "responseType": "core.GetVcnTopologyResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListVcnTopology",
+        "requestType": "core.ListVcnTopologyRequest",
+        "responseType": "core.ListVcnTopologyResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateVcnTopology",
+        "requestType": "core.UpdateVcnTopologyRequest",
+        "responseType": "core.UpdateVcnTopologyResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteVcnTopology",
+        "requestType": "core.DeleteVcnTopologyRequest",
+        "responseType": "core.DeleteVcnTopologyResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_core_vcntopology",
+    "collectionField": "vcntopology",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/vcntopology/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/vcntopology/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for core/vcntopology; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

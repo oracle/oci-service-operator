@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "desktops",
+  "slug": "desktopsdesktoppoolvolumes",
+  "kind": "DesktopsDesktopPoolVolumes",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_desktops_desktop_pool_volumes",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDesktopsDesktopPoolVolumes",
+        "requestType": "desktops.CreateDesktopsDesktopPoolVolumesRequest",
+        "responseType": "desktops.CreateDesktopsDesktopPoolVolumesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDesktopsDesktopPoolVolumes",
+        "requestType": "desktops.GetDesktopsDesktopPoolVolumesRequest",
+        "responseType": "desktops.GetDesktopsDesktopPoolVolumesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDesktopsDesktopPoolVolumes",
+        "requestType": "desktops.ListDesktopsDesktopPoolVolumesRequest",
+        "responseType": "desktops.ListDesktopsDesktopPoolVolumesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDesktopsDesktopPoolVolumes",
+        "requestType": "desktops.UpdateDesktopsDesktopPoolVolumesRequest",
+        "responseType": "desktops.UpdateDesktopsDesktopPoolVolumesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDesktopsDesktopPoolVolumes",
+        "requestType": "desktops.DeleteDesktopsDesktopPoolVolumesRequest",
+        "responseType": "desktops.DeleteDesktopsDesktopPoolVolumesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_desktops_desktopsdesktoppoolvolumes",
+    "collectionField": "desktopsdesktoppoolvolumes",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/desktops/desktopsdesktoppoolvolumes/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/desktops/desktopsdesktoppoolvolumes/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for desktops/desktopsdesktoppoolvolumes; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

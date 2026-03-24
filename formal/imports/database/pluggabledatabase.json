@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "pluggabledatabase",
+  "kind": "PluggableDatabase",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_database_pluggabledatabase",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreatePluggableDatabase",
+        "requestType": "database.CreatePluggableDatabaseRequest",
+        "responseType": "database.CreatePluggableDatabaseResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetPluggableDatabase",
+        "requestType": "database.GetPluggableDatabaseRequest",
+        "responseType": "database.GetPluggableDatabaseResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListPluggableDatabase",
+        "requestType": "database.ListPluggableDatabaseRequest",
+        "responseType": "database.ListPluggableDatabaseResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdatePluggableDatabase",
+        "requestType": "database.UpdatePluggableDatabaseRequest",
+        "responseType": "database.UpdatePluggableDatabaseResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeletePluggableDatabase",
+        "requestType": "database.DeletePluggableDatabaseRequest",
+        "responseType": "database.DeletePluggableDatabaseResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_pluggabledatabase",
+    "collectionField": "pluggabledatabase",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/pluggabledatabase/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/pluggabledatabase/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/pluggabledatabase; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

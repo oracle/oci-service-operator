@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "identity",
+  "slug": "identityavailabilitydomains",
+  "kind": "IdentityAvailabilityDomains",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_identity_availability_domains",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateIdentityAvailabilityDomains",
+        "requestType": "identity.CreateIdentityAvailabilityDomainsRequest",
+        "responseType": "identity.CreateIdentityAvailabilityDomainsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetIdentityAvailabilityDomains",
+        "requestType": "identity.GetIdentityAvailabilityDomainsRequest",
+        "responseType": "identity.GetIdentityAvailabilityDomainsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListIdentityAvailabilityDomains",
+        "requestType": "identity.ListIdentityAvailabilityDomainsRequest",
+        "responseType": "identity.ListIdentityAvailabilityDomainsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateIdentityAvailabilityDomains",
+        "requestType": "identity.UpdateIdentityAvailabilityDomainsRequest",
+        "responseType": "identity.UpdateIdentityAvailabilityDomainsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteIdentityAvailabilityDomains",
+        "requestType": "identity.DeleteIdentityAvailabilityDomainsRequest",
+        "responseType": "identity.DeleteIdentityAvailabilityDomainsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_identity_identityavailabilitydomains",
+    "collectionField": "identityavailabilitydomains",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/identity/identityavailabilitydomains/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/identity/identityavailabilitydomains/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for identity/identityavailabilitydomains; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

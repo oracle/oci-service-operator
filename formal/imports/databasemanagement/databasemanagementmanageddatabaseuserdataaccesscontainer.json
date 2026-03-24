@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasemanagement",
+  "slug": "databasemanagementmanageddatabaseuserdataaccesscontainer",
+  "kind": "DatabaseManagementManagedDatabaseUserDataAccessContainer",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_management_managed_database_user_data_access_container",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseManagementManagedDatabaseUserDataAccessContainer",
+        "requestType": "databasemanagement.CreateDatabaseManagementManagedDatabaseUserDataAccessContainerRequest",
+        "responseType": "databasemanagement.CreateDatabaseManagementManagedDatabaseUserDataAccessContainerResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseManagementManagedDatabaseUserDataAccessContainer",
+        "requestType": "databasemanagement.GetDatabaseManagementManagedDatabaseUserDataAccessContainerRequest",
+        "responseType": "databasemanagement.GetDatabaseManagementManagedDatabaseUserDataAccessContainerResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseManagementManagedDatabaseUserDataAccessContainer",
+        "requestType": "databasemanagement.ListDatabaseManagementManagedDatabaseUserDataAccessContainerRequest",
+        "responseType": "databasemanagement.ListDatabaseManagementManagedDatabaseUserDataAccessContainerResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseManagementManagedDatabaseUserDataAccessContainer",
+        "requestType": "databasemanagement.UpdateDatabaseManagementManagedDatabaseUserDataAccessContainerRequest",
+        "responseType": "databasemanagement.UpdateDatabaseManagementManagedDatabaseUserDataAccessContainerResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseManagementManagedDatabaseUserDataAccessContainer",
+        "requestType": "databasemanagement.DeleteDatabaseManagementManagedDatabaseUserDataAccessContainerRequest",
+        "responseType": "databasemanagement.DeleteDatabaseManagementManagedDatabaseUserDataAccessContainerResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_databasemanagement_databasemanagementmanageddatabaseuserdataaccesscontainer",
+    "collectionField": "databasemanagementmanageddatabaseuserdataaccesscontainer",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasemanagement/databasemanagementmanageddatabaseuserdataaccesscontainer/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasemanagement/databasemanagementmanageddatabaseuserdataaccesscontainer/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for databasemanagement/databasemanagementmanageddatabaseuserdataaccesscontainer; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

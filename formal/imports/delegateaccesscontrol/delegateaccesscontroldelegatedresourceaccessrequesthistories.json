@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "delegateaccesscontrol",
+  "slug": "delegateaccesscontroldelegatedresourceaccessrequesthistories",
+  "kind": "DelegateAccessControlDelegatedResourceAccessRequestHistories",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_delegate_access_control_delegated_resource_access_request_histories",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDelegateAccessControlDelegatedResourceAccessRequestHistories",
+        "requestType": "delegateaccesscontrol.CreateDelegateAccessControlDelegatedResourceAccessRequestHistoriesRequest",
+        "responseType": "delegateaccesscontrol.CreateDelegateAccessControlDelegatedResourceAccessRequestHistoriesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDelegateAccessControlDelegatedResourceAccessRequestHistories",
+        "requestType": "delegateaccesscontrol.GetDelegateAccessControlDelegatedResourceAccessRequestHistoriesRequest",
+        "responseType": "delegateaccesscontrol.GetDelegateAccessControlDelegatedResourceAccessRequestHistoriesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDelegateAccessControlDelegatedResourceAccessRequestHistories",
+        "requestType": "delegateaccesscontrol.ListDelegateAccessControlDelegatedResourceAccessRequestHistoriesRequest",
+        "responseType": "delegateaccesscontrol.ListDelegateAccessControlDelegatedResourceAccessRequestHistoriesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDelegateAccessControlDelegatedResourceAccessRequestHistories",
+        "requestType": "delegateaccesscontrol.UpdateDelegateAccessControlDelegatedResourceAccessRequestHistoriesRequest",
+        "responseType": "delegateaccesscontrol.UpdateDelegateAccessControlDelegatedResourceAccessRequestHistoriesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDelegateAccessControlDelegatedResourceAccessRequestHistories",
+        "requestType": "delegateaccesscontrol.DeleteDelegateAccessControlDelegatedResourceAccessRequestHistoriesRequest",
+        "responseType": "delegateaccesscontrol.DeleteDelegateAccessControlDelegatedResourceAccessRequestHistoriesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_delegateaccesscontrol_delegateaccesscontroldelegatedresourceaccessrequesthistories",
+    "collectionField": "delegateaccesscontroldelegatedresourceaccessrequesthistories",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/delegateaccesscontrol/delegateaccesscontroldelegatedresourceaccessrequesthistories/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/delegateaccesscontrol/delegateaccesscontroldelegatedresourceaccessrequesthistories/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for delegateaccesscontrol/delegateaccesscontroldelegatedresourceaccessrequesthistories; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

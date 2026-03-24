@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasemanagement",
+  "slug": "databasemanagementmanageddatabasesdatabaseparameter",
+  "kind": "DatabaseManagementManagedDatabasesDatabaseParameter",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_management_managed_databases_database_parameter",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseManagementManagedDatabasesDatabaseParameter",
+        "requestType": "databasemanagement.CreateDatabaseManagementManagedDatabasesDatabaseParameterRequest",
+        "responseType": "databasemanagement.CreateDatabaseManagementManagedDatabasesDatabaseParameterResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseManagementManagedDatabasesDatabaseParameter",
+        "requestType": "databasemanagement.GetDatabaseManagementManagedDatabasesDatabaseParameterRequest",
+        "responseType": "databasemanagement.GetDatabaseManagementManagedDatabasesDatabaseParameterResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseManagementManagedDatabasesDatabaseParameter",
+        "requestType": "databasemanagement.ListDatabaseManagementManagedDatabasesDatabaseParameterRequest",
+        "responseType": "databasemanagement.ListDatabaseManagementManagedDatabasesDatabaseParameterResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseManagementManagedDatabasesDatabaseParameter",
+        "requestType": "databasemanagement.UpdateDatabaseManagementManagedDatabasesDatabaseParameterRequest",
+        "responseType": "databasemanagement.UpdateDatabaseManagementManagedDatabasesDatabaseParameterResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseManagementManagedDatabasesDatabaseParameter",
+        "requestType": "databasemanagement.DeleteDatabaseManagementManagedDatabasesDatabaseParameterRequest",
+        "responseType": "databasemanagement.DeleteDatabaseManagementManagedDatabasesDatabaseParameterResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_databasemanagement_databasemanagementmanageddatabasesdatabaseparameter",
+    "collectionField": "databasemanagementmanageddatabasesdatabaseparameter",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasemanagement/databasemanagementmanageddatabasesdatabaseparameter/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasemanagement/databasemanagementmanageddatabasesdatabaseparameter/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for databasemanagement/databasemanagementmanageddatabasesdatabaseparameter; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

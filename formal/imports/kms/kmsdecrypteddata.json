@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "kms",
+  "slug": "kmsdecrypteddata",
+  "kind": "KmsDecryptedData",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_kms_decrypted_data",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateKmsDecryptedData",
+        "requestType": "kms.CreateKmsDecryptedDataRequest",
+        "responseType": "kms.CreateKmsDecryptedDataResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetKmsDecryptedData",
+        "requestType": "kms.GetKmsDecryptedDataRequest",
+        "responseType": "kms.GetKmsDecryptedDataResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListKmsDecryptedData",
+        "requestType": "kms.ListKmsDecryptedDataRequest",
+        "responseType": "kms.ListKmsDecryptedDataResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateKmsDecryptedData",
+        "requestType": "kms.UpdateKmsDecryptedDataRequest",
+        "responseType": "kms.UpdateKmsDecryptedDataResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteKmsDecryptedData",
+        "requestType": "kms.DeleteKmsDecryptedDataRequest",
+        "responseType": "kms.DeleteKmsDecryptedDataResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_kms_kmsdecrypteddata",
+    "collectionField": "kmsdecrypteddata",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/kms/kmsdecrypteddata/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/kms/kmsdecrypteddata/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for kms/kmsdecrypteddata; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

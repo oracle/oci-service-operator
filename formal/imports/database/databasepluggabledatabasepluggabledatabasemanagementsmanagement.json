@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "databasepluggabledatabasepluggabledatabasemanagementsmanagement",
+  "kind": "DatabasePluggableDatabasePluggabledatabasemanagementsManagement",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_pluggable_database_pluggabledatabasemanagements_management",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabasePluggableDatabasePluggabledatabasemanagementsManagement",
+        "requestType": "database.CreateDatabasePluggableDatabasePluggabledatabasemanagementsManagementRequest",
+        "responseType": "database.CreateDatabasePluggableDatabasePluggabledatabasemanagementsManagementResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabasePluggableDatabasePluggabledatabasemanagementsManagement",
+        "requestType": "database.GetDatabasePluggableDatabasePluggabledatabasemanagementsManagementRequest",
+        "responseType": "database.GetDatabasePluggableDatabasePluggabledatabasemanagementsManagementResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabasePluggableDatabasePluggabledatabasemanagementsManagement",
+        "requestType": "database.ListDatabasePluggableDatabasePluggabledatabasemanagementsManagementRequest",
+        "responseType": "database.ListDatabasePluggableDatabasePluggabledatabasemanagementsManagementResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabasePluggableDatabasePluggabledatabasemanagementsManagement",
+        "requestType": "database.UpdateDatabasePluggableDatabasePluggabledatabasemanagementsManagementRequest",
+        "responseType": "database.UpdateDatabasePluggableDatabasePluggabledatabasemanagementsManagementResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabasePluggableDatabasePluggabledatabasemanagementsManagement",
+        "requestType": "database.DeleteDatabasePluggableDatabasePluggabledatabasemanagementsManagementRequest",
+        "responseType": "database.DeleteDatabasePluggableDatabasePluggabledatabasemanagementsManagementResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_databasepluggabledatabasepluggabledatabasemanagementsmanagement",
+    "collectionField": "databasepluggabledatabasepluggabledatabasemanagementsmanagement",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/databasepluggabledatabasepluggabledatabasemanagementsmanagement/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/databasepluggabledatabasepluggabledatabasemanagementsmanagement/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/databasepluggabledatabasepluggabledatabasemanagementsmanagement; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

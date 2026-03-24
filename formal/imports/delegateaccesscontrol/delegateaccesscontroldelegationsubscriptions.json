@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "delegateaccesscontrol",
+  "slug": "delegateaccesscontroldelegationsubscriptions",
+  "kind": "DelegateAccessControlDelegationSubscriptions",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_delegate_access_control_delegation_subscriptions",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDelegateAccessControlDelegationSubscriptions",
+        "requestType": "delegateaccesscontrol.CreateDelegateAccessControlDelegationSubscriptionsRequest",
+        "responseType": "delegateaccesscontrol.CreateDelegateAccessControlDelegationSubscriptionsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDelegateAccessControlDelegationSubscriptions",
+        "requestType": "delegateaccesscontrol.GetDelegateAccessControlDelegationSubscriptionsRequest",
+        "responseType": "delegateaccesscontrol.GetDelegateAccessControlDelegationSubscriptionsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDelegateAccessControlDelegationSubscriptions",
+        "requestType": "delegateaccesscontrol.ListDelegateAccessControlDelegationSubscriptionsRequest",
+        "responseType": "delegateaccesscontrol.ListDelegateAccessControlDelegationSubscriptionsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDelegateAccessControlDelegationSubscriptions",
+        "requestType": "delegateaccesscontrol.UpdateDelegateAccessControlDelegationSubscriptionsRequest",
+        "responseType": "delegateaccesscontrol.UpdateDelegateAccessControlDelegationSubscriptionsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDelegateAccessControlDelegationSubscriptions",
+        "requestType": "delegateaccesscontrol.DeleteDelegateAccessControlDelegationSubscriptionsRequest",
+        "responseType": "delegateaccesscontrol.DeleteDelegateAccessControlDelegationSubscriptionsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_delegateaccesscontrol_delegateaccesscontroldelegationsubscriptions",
+    "collectionField": "delegateaccesscontroldelegationsubscriptions",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/delegateaccesscontrol/delegateaccesscontroldelegationsubscriptions/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/delegateaccesscontrol/delegateaccesscontroldelegationsubscriptions/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for delegateaccesscontrol/delegateaccesscontroldelegationsubscriptions; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "filestorage",
+  "slug": "filestorageoutboundconnector",
+  "kind": "FileStorageOutboundConnector",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_file_storage_outbound_connector",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateFileStorageOutboundConnector",
+        "requestType": "filestorage.CreateFileStorageOutboundConnectorRequest",
+        "responseType": "filestorage.CreateFileStorageOutboundConnectorResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetFileStorageOutboundConnector",
+        "requestType": "filestorage.GetFileStorageOutboundConnectorRequest",
+        "responseType": "filestorage.GetFileStorageOutboundConnectorResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListFileStorageOutboundConnector",
+        "requestType": "filestorage.ListFileStorageOutboundConnectorRequest",
+        "responseType": "filestorage.ListFileStorageOutboundConnectorResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateFileStorageOutboundConnector",
+        "requestType": "filestorage.UpdateFileStorageOutboundConnectorRequest",
+        "responseType": "filestorage.UpdateFileStorageOutboundConnectorResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteFileStorageOutboundConnector",
+        "requestType": "filestorage.DeleteFileStorageOutboundConnectorRequest",
+        "responseType": "filestorage.DeleteFileStorageOutboundConnectorResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_filestorage_filestorageoutboundconnector",
+    "collectionField": "filestorageoutboundconnector",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/filestorage/filestorageoutboundconnector/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/filestorage/filestorageoutboundconnector/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for filestorage/filestorageoutboundconnector; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

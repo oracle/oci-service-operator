@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "multicloud",
+  "slug": "multicloudnetworkanchor",
+  "kind": "MulticloudNetworkAnchor",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_multicloud_network_anchor",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateMulticloudNetworkAnchor",
+        "requestType": "multicloud.CreateMulticloudNetworkAnchorRequest",
+        "responseType": "multicloud.CreateMulticloudNetworkAnchorResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetMulticloudNetworkAnchor",
+        "requestType": "multicloud.GetMulticloudNetworkAnchorRequest",
+        "responseType": "multicloud.GetMulticloudNetworkAnchorResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListMulticloudNetworkAnchor",
+        "requestType": "multicloud.ListMulticloudNetworkAnchorRequest",
+        "responseType": "multicloud.ListMulticloudNetworkAnchorResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateMulticloudNetworkAnchor",
+        "requestType": "multicloud.UpdateMulticloudNetworkAnchorRequest",
+        "responseType": "multicloud.UpdateMulticloudNetworkAnchorResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteMulticloudNetworkAnchor",
+        "requestType": "multicloud.DeleteMulticloudNetworkAnchorRequest",
+        "responseType": "multicloud.DeleteMulticloudNetworkAnchorResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_multicloud_multicloudnetworkanchor",
+    "collectionField": "multicloudnetworkanchor",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/multicloud/multicloudnetworkanchor/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/multicloud/multicloudnetworkanchor/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for multicloud/multicloudnetworkanchor; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

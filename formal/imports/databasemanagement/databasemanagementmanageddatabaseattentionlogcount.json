@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasemanagement",
+  "slug": "databasemanagementmanageddatabaseattentionlogcount",
+  "kind": "DatabaseManagementManagedDatabaseAttentionLogCount",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_management_managed_database_attention_log_count",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseManagementManagedDatabaseAttentionLogCount",
+        "requestType": "databasemanagement.CreateDatabaseManagementManagedDatabaseAttentionLogCountRequest",
+        "responseType": "databasemanagement.CreateDatabaseManagementManagedDatabaseAttentionLogCountResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseManagementManagedDatabaseAttentionLogCount",
+        "requestType": "databasemanagement.GetDatabaseManagementManagedDatabaseAttentionLogCountRequest",
+        "responseType": "databasemanagement.GetDatabaseManagementManagedDatabaseAttentionLogCountResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseManagementManagedDatabaseAttentionLogCount",
+        "requestType": "databasemanagement.ListDatabaseManagementManagedDatabaseAttentionLogCountRequest",
+        "responseType": "databasemanagement.ListDatabaseManagementManagedDatabaseAttentionLogCountResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseManagementManagedDatabaseAttentionLogCount",
+        "requestType": "databasemanagement.UpdateDatabaseManagementManagedDatabaseAttentionLogCountRequest",
+        "responseType": "databasemanagement.UpdateDatabaseManagementManagedDatabaseAttentionLogCountResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseManagementManagedDatabaseAttentionLogCount",
+        "requestType": "databasemanagement.DeleteDatabaseManagementManagedDatabaseAttentionLogCountRequest",
+        "responseType": "databasemanagement.DeleteDatabaseManagementManagedDatabaseAttentionLogCountResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_databasemanagement_databasemanagementmanageddatabaseattentionlogcount",
+    "collectionField": "databasemanagementmanageddatabaseattentionlogcount",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasemanagement/databasemanagementmanageddatabaseattentionlogcount/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasemanagement/databasemanagementmanageddatabaseattentionlogcount/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for databasemanagement/databasemanagementmanageddatabaseattentionlogcount; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

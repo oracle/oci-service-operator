@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "devops",
+  "slug": "devopsrepositorypaths",
+  "kind": "DevopsRepositoryPaths",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_devops_repository_paths",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDevopsRepositoryPaths",
+        "requestType": "devops.CreateDevopsRepositoryPathsRequest",
+        "responseType": "devops.CreateDevopsRepositoryPathsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDevopsRepositoryPaths",
+        "requestType": "devops.GetDevopsRepositoryPathsRequest",
+        "responseType": "devops.GetDevopsRepositoryPathsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDevopsRepositoryPaths",
+        "requestType": "devops.ListDevopsRepositoryPathsRequest",
+        "responseType": "devops.ListDevopsRepositoryPathsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDevopsRepositoryPaths",
+        "requestType": "devops.UpdateDevopsRepositoryPathsRequest",
+        "responseType": "devops.UpdateDevopsRepositoryPathsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDevopsRepositoryPaths",
+        "requestType": "devops.DeleteDevopsRepositoryPathsRequest",
+        "responseType": "devops.DeleteDevopsRepositoryPathsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_devops_devopsrepositorypaths",
+    "collectionField": "devopsrepositorypaths",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/devops/devopsrepositorypaths/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/devops/devopsrepositorypaths/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for devops/devopsrepositorypaths; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

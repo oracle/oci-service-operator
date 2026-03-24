@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "resourceanalytics",
+  "slug": "resourceanalyticsmonitoredregion",
+  "kind": "ResourceAnalyticsMonitoredRegion",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_resource_analytics_monitored_region",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateResourceAnalyticsMonitoredRegion",
+        "requestType": "resourceanalytics.CreateResourceAnalyticsMonitoredRegionRequest",
+        "responseType": "resourceanalytics.CreateResourceAnalyticsMonitoredRegionResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetResourceAnalyticsMonitoredRegion",
+        "requestType": "resourceanalytics.GetResourceAnalyticsMonitoredRegionRequest",
+        "responseType": "resourceanalytics.GetResourceAnalyticsMonitoredRegionResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListResourceAnalyticsMonitoredRegion",
+        "requestType": "resourceanalytics.ListResourceAnalyticsMonitoredRegionRequest",
+        "responseType": "resourceanalytics.ListResourceAnalyticsMonitoredRegionResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateResourceAnalyticsMonitoredRegion",
+        "requestType": "resourceanalytics.UpdateResourceAnalyticsMonitoredRegionRequest",
+        "responseType": "resourceanalytics.UpdateResourceAnalyticsMonitoredRegionResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteResourceAnalyticsMonitoredRegion",
+        "requestType": "resourceanalytics.DeleteResourceAnalyticsMonitoredRegionRequest",
+        "responseType": "resourceanalytics.DeleteResourceAnalyticsMonitoredRegionResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_resourceanalytics_resourceanalyticsmonitoredregion",
+    "collectionField": "resourceanalyticsmonitoredregion",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/resourceanalytics/resourceanalyticsmonitoredregion/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/resourceanalytics/resourceanalyticsmonitoredregion/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for resourceanalytics/resourceanalyticsmonitoredregion; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

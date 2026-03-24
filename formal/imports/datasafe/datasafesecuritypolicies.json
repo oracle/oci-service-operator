@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "datasafesecuritypolicies",
+  "kind": "DataSafeSecurityPolicies",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_security_policies",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDataSafeSecurityPolicies",
+        "requestType": "datasafe.CreateDataSafeSecurityPoliciesRequest",
+        "responseType": "datasafe.CreateDataSafeSecurityPoliciesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDataSafeSecurityPolicies",
+        "requestType": "datasafe.GetDataSafeSecurityPoliciesRequest",
+        "responseType": "datasafe.GetDataSafeSecurityPoliciesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDataSafeSecurityPolicies",
+        "requestType": "datasafe.ListDataSafeSecurityPoliciesRequest",
+        "responseType": "datasafe.ListDataSafeSecurityPoliciesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDataSafeSecurityPolicies",
+        "requestType": "datasafe.UpdateDataSafeSecurityPoliciesRequest",
+        "responseType": "datasafe.UpdateDataSafeSecurityPoliciesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDataSafeSecurityPolicies",
+        "requestType": "datasafe.DeleteDataSafeSecurityPoliciesRequest",
+        "responseType": "datasafe.DeleteDataSafeSecurityPoliciesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_datasafe_datasafesecuritypolicies",
+    "collectionField": "datasafesecuritypolicies",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/datasafesecuritypolicies/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/datasafesecuritypolicies/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for datasafe/datasafesecuritypolicies; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

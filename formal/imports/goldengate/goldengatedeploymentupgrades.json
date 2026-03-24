@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "goldengate",
+  "slug": "goldengatedeploymentupgrades",
+  "kind": "GoldenGateDeploymentUpgrades",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_golden_gate_deployment_upgrades",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateGoldenGateDeploymentUpgrades",
+        "requestType": "goldengate.CreateGoldenGateDeploymentUpgradesRequest",
+        "responseType": "goldengate.CreateGoldenGateDeploymentUpgradesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetGoldenGateDeploymentUpgrades",
+        "requestType": "goldengate.GetGoldenGateDeploymentUpgradesRequest",
+        "responseType": "goldengate.GetGoldenGateDeploymentUpgradesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListGoldenGateDeploymentUpgrades",
+        "requestType": "goldengate.ListGoldenGateDeploymentUpgradesRequest",
+        "responseType": "goldengate.ListGoldenGateDeploymentUpgradesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateGoldenGateDeploymentUpgrades",
+        "requestType": "goldengate.UpdateGoldenGateDeploymentUpgradesRequest",
+        "responseType": "goldengate.UpdateGoldenGateDeploymentUpgradesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteGoldenGateDeploymentUpgrades",
+        "requestType": "goldengate.DeleteGoldenGateDeploymentUpgradesRequest",
+        "responseType": "goldengate.DeleteGoldenGateDeploymentUpgradesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_goldengate_goldengatedeploymentupgrades",
+    "collectionField": "goldengatedeploymentupgrades",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/goldengate/goldengatedeploymentupgrades/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/goldengate/goldengatedeploymentupgrades/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for goldengate/goldengatedeploymentupgrades; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

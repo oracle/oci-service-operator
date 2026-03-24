@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "optimizer",
+  "slug": "optimizerrecommendationstrategy",
+  "kind": "OptimizerRecommendationStrategy",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_optimizer_recommendation_strategy",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOptimizerRecommendationStrategy",
+        "requestType": "optimizer.CreateOptimizerRecommendationStrategyRequest",
+        "responseType": "optimizer.CreateOptimizerRecommendationStrategyResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOptimizerRecommendationStrategy",
+        "requestType": "optimizer.GetOptimizerRecommendationStrategyRequest",
+        "responseType": "optimizer.GetOptimizerRecommendationStrategyResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOptimizerRecommendationStrategy",
+        "requestType": "optimizer.ListOptimizerRecommendationStrategyRequest",
+        "responseType": "optimizer.ListOptimizerRecommendationStrategyResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOptimizerRecommendationStrategy",
+        "requestType": "optimizer.UpdateOptimizerRecommendationStrategyRequest",
+        "responseType": "optimizer.UpdateOptimizerRecommendationStrategyResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOptimizerRecommendationStrategy",
+        "requestType": "optimizer.DeleteOptimizerRecommendationStrategyRequest",
+        "responseType": "optimizer.DeleteOptimizerRecommendationStrategyResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_optimizer_optimizerrecommendationstrategy",
+    "collectionField": "optimizerrecommendationstrategy",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/optimizer/optimizerrecommendationstrategy/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/optimizer/optimizerrecommendationstrategy/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for optimizer/optimizerrecommendationstrategy; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

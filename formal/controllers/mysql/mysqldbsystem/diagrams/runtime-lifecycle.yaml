@@ -1,0 +1,15 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: mysql
+slug: mysqldbsystem
+kind: MySqlDbSystem
+archetype: legacy-adapter
+states:
+  - provisioning
+  - active
+  - updating
+  - failed
+notes:
+  - Create reads username and password secrets before submitting the OCI request.
+  - Endpoint secret materialization only happens after the DB system reaches ACTIVE.
+  - Delete remains an unsupported legacy path, so no confirmed terminating phase exists today.

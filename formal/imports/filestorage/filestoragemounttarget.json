@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "filestorage",
+  "slug": "filestoragemounttarget",
+  "kind": "FileStorageMountTarget",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_file_storage_mount_target",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateFileStorageMountTarget",
+        "requestType": "filestorage.CreateFileStorageMountTargetRequest",
+        "responseType": "filestorage.CreateFileStorageMountTargetResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetFileStorageMountTarget",
+        "requestType": "filestorage.GetFileStorageMountTargetRequest",
+        "responseType": "filestorage.GetFileStorageMountTargetResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListFileStorageMountTarget",
+        "requestType": "filestorage.ListFileStorageMountTargetRequest",
+        "responseType": "filestorage.ListFileStorageMountTargetResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateFileStorageMountTarget",
+        "requestType": "filestorage.UpdateFileStorageMountTargetRequest",
+        "responseType": "filestorage.UpdateFileStorageMountTargetResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteFileStorageMountTarget",
+        "requestType": "filestorage.DeleteFileStorageMountTargetRequest",
+        "responseType": "filestorage.DeleteFileStorageMountTargetResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_filestorage_filestoragemounttarget",
+    "collectionField": "filestoragemounttarget",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/filestorage/filestoragemounttarget/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/filestorage/filestoragemounttarget/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for filestorage/filestoragemounttarget; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "datasafeauditevents",
+  "kind": "DataSafeAuditEvents",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_audit_events",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDataSafeAuditEvents",
+        "requestType": "datasafe.CreateDataSafeAuditEventsRequest",
+        "responseType": "datasafe.CreateDataSafeAuditEventsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDataSafeAuditEvents",
+        "requestType": "datasafe.GetDataSafeAuditEventsRequest",
+        "responseType": "datasafe.GetDataSafeAuditEventsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDataSafeAuditEvents",
+        "requestType": "datasafe.ListDataSafeAuditEventsRequest",
+        "responseType": "datasafe.ListDataSafeAuditEventsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDataSafeAuditEvents",
+        "requestType": "datasafe.UpdateDataSafeAuditEventsRequest",
+        "responseType": "datasafe.UpdateDataSafeAuditEventsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDataSafeAuditEvents",
+        "requestType": "datasafe.DeleteDataSafeAuditEventsRequest",
+        "responseType": "datasafe.DeleteDataSafeAuditEventsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_datasafe_datasafeauditevents",
+    "collectionField": "datasafeauditevents",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/datasafeauditevents/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/datasafeauditevents/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for datasafe/datasafeauditevents; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

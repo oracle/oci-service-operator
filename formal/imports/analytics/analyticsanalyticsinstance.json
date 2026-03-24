@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "analytics",
+  "slug": "analyticsanalyticsinstance",
+  "kind": "AnalyticsAnalyticsInstance",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_analytics_analytics_instance",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateAnalyticsAnalyticsInstance",
+        "requestType": "analytics.CreateAnalyticsAnalyticsInstanceRequest",
+        "responseType": "analytics.CreateAnalyticsAnalyticsInstanceResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetAnalyticsAnalyticsInstance",
+        "requestType": "analytics.GetAnalyticsAnalyticsInstanceRequest",
+        "responseType": "analytics.GetAnalyticsAnalyticsInstanceResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListAnalyticsAnalyticsInstance",
+        "requestType": "analytics.ListAnalyticsAnalyticsInstanceRequest",
+        "responseType": "analytics.ListAnalyticsAnalyticsInstanceResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateAnalyticsAnalyticsInstance",
+        "requestType": "analytics.UpdateAnalyticsAnalyticsInstanceRequest",
+        "responseType": "analytics.UpdateAnalyticsAnalyticsInstanceResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteAnalyticsAnalyticsInstance",
+        "requestType": "analytics.DeleteAnalyticsAnalyticsInstanceRequest",
+        "responseType": "analytics.DeleteAnalyticsAnalyticsInstanceResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_analytics_analyticsanalyticsinstance",
+    "collectionField": "analyticsanalyticsinstance",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/analytics/analyticsanalyticsinstance/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/analytics/analyticsanalyticsinstance/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for analytics/analyticsanalyticsinstance; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

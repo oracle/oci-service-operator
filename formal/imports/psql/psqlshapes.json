@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "psql",
+  "slug": "psqlshapes",
+  "kind": "PsqlShapes",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_psql_shapes",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreatePsqlShapes",
+        "requestType": "psql.CreatePsqlShapesRequest",
+        "responseType": "psql.CreatePsqlShapesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetPsqlShapes",
+        "requestType": "psql.GetPsqlShapesRequest",
+        "responseType": "psql.GetPsqlShapesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListPsqlShapes",
+        "requestType": "psql.ListPsqlShapesRequest",
+        "responseType": "psql.ListPsqlShapesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdatePsqlShapes",
+        "requestType": "psql.UpdatePsqlShapesRequest",
+        "responseType": "psql.UpdatePsqlShapesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeletePsqlShapes",
+        "requestType": "psql.DeletePsqlShapesRequest",
+        "responseType": "psql.DeletePsqlShapesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_psql_psqlshapes",
+    "collectionField": "psqlshapes",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/psql/psqlshapes/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/psql/psqlshapes/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for psql/psqlshapes; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

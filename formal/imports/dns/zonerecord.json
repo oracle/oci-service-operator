@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "dns",
+  "slug": "zonerecord",
+  "kind": "ZoneRecord",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_dns_zonerecord",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateZoneRecord",
+        "requestType": "dns.CreateZoneRecordRequest",
+        "responseType": "dns.CreateZoneRecordResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetZoneRecord",
+        "requestType": "dns.GetZoneRecordRequest",
+        "responseType": "dns.GetZoneRecordResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListZoneRecord",
+        "requestType": "dns.ListZoneRecordRequest",
+        "responseType": "dns.ListZoneRecordResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateZoneRecord",
+        "requestType": "dns.UpdateZoneRecordRequest",
+        "responseType": "dns.UpdateZoneRecordResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteZoneRecord",
+        "requestType": "dns.DeleteZoneRecordRequest",
+        "responseType": "dns.DeleteZoneRecordResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_dns_zonerecord",
+    "collectionField": "zonerecord",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/dns/zonerecord/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/dns/zonerecord/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for dns/zonerecord; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

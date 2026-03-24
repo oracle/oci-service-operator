@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "containerinstances",
+  "slug": "containerinstancescontainerinstances",
+  "kind": "ContainerInstancesContainerInstances",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_container_instances_container_instances",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateContainerInstancesContainerInstances",
+        "requestType": "containerinstances.CreateContainerInstancesContainerInstancesRequest",
+        "responseType": "containerinstances.CreateContainerInstancesContainerInstancesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetContainerInstancesContainerInstances",
+        "requestType": "containerinstances.GetContainerInstancesContainerInstancesRequest",
+        "responseType": "containerinstances.GetContainerInstancesContainerInstancesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListContainerInstancesContainerInstances",
+        "requestType": "containerinstances.ListContainerInstancesContainerInstancesRequest",
+        "responseType": "containerinstances.ListContainerInstancesContainerInstancesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateContainerInstancesContainerInstances",
+        "requestType": "containerinstances.UpdateContainerInstancesContainerInstancesRequest",
+        "responseType": "containerinstances.UpdateContainerInstancesContainerInstancesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteContainerInstancesContainerInstances",
+        "requestType": "containerinstances.DeleteContainerInstancesContainerInstancesRequest",
+        "responseType": "containerinstances.DeleteContainerInstancesContainerInstancesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_containerinstances_containerinstancescontainerinstances",
+    "collectionField": "containerinstancescontainerinstances",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/containerinstances/containerinstancescontainerinstances/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/containerinstances/containerinstancescontainerinstances/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for containerinstances/containerinstancescontainerinstances; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

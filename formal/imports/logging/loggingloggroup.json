@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "logging",
+  "slug": "loggingloggroup",
+  "kind": "LoggingLogGroup",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_logging_log_group",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateLoggingLogGroup",
+        "requestType": "logging.CreateLoggingLogGroupRequest",
+        "responseType": "logging.CreateLoggingLogGroupResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetLoggingLogGroup",
+        "requestType": "logging.GetLoggingLogGroupRequest",
+        "responseType": "logging.GetLoggingLogGroupResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListLoggingLogGroup",
+        "requestType": "logging.ListLoggingLogGroupRequest",
+        "responseType": "logging.ListLoggingLogGroupResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateLoggingLogGroup",
+        "requestType": "logging.UpdateLoggingLogGroupRequest",
+        "responseType": "logging.UpdateLoggingLogGroupResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteLoggingLogGroup",
+        "requestType": "logging.DeleteLoggingLogGroupRequest",
+        "responseType": "logging.DeleteLoggingLogGroupResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_logging_loggingloggroup",
+    "collectionField": "loggingloggroup",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/logging/loggingloggroup/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/logging/loggingloggroup/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for logging/loggingloggroup; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

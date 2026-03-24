@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "datasafediscoveryjobsresult",
+  "kind": "DataSafeDiscoveryJobsResult",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_discovery_jobs_result",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDataSafeDiscoveryJobsResult",
+        "requestType": "datasafe.CreateDataSafeDiscoveryJobsResultRequest",
+        "responseType": "datasafe.CreateDataSafeDiscoveryJobsResultResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDataSafeDiscoveryJobsResult",
+        "requestType": "datasafe.GetDataSafeDiscoveryJobsResultRequest",
+        "responseType": "datasafe.GetDataSafeDiscoveryJobsResultResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDataSafeDiscoveryJobsResult",
+        "requestType": "datasafe.ListDataSafeDiscoveryJobsResultRequest",
+        "responseType": "datasafe.ListDataSafeDiscoveryJobsResultResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDataSafeDiscoveryJobsResult",
+        "requestType": "datasafe.UpdateDataSafeDiscoveryJobsResultRequest",
+        "responseType": "datasafe.UpdateDataSafeDiscoveryJobsResultResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDataSafeDiscoveryJobsResult",
+        "requestType": "datasafe.DeleteDataSafeDiscoveryJobsResultRequest",
+        "responseType": "datasafe.DeleteDataSafeDiscoveryJobsResultResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_datasafe_datasafediscoveryjobsresult",
+    "collectionField": "datasafediscoveryjobsresult",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/datasafediscoveryjobsresult/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/datasafediscoveryjobsresult/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for datasafe/datasafediscoveryjobsresult; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "objectstorage",
+  "slug": "namespace",
+  "kind": "Namespace",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_objectstorage_namespace",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateNamespace",
+        "requestType": "objectstorage.CreateNamespaceRequest",
+        "responseType": "objectstorage.CreateNamespaceResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetNamespace",
+        "requestType": "objectstorage.GetNamespaceRequest",
+        "responseType": "objectstorage.GetNamespaceResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListNamespace",
+        "requestType": "objectstorage.ListNamespaceRequest",
+        "responseType": "objectstorage.ListNamespaceResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateNamespace",
+        "requestType": "objectstorage.UpdateNamespaceRequest",
+        "responseType": "objectstorage.UpdateNamespaceResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteNamespace",
+        "requestType": "objectstorage.DeleteNamespaceRequest",
+        "responseType": "objectstorage.DeleteNamespaceResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_objectstorage_namespace",
+    "collectionField": "namespace",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/objectstorage/namespace/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/objectstorage/namespace/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for objectstorage/namespace; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

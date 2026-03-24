@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "databasedbnodeconsoleconnection",
+  "kind": "DatabaseDbNodeConsoleConnection",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_db_node_console_connection",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseDbNodeConsoleConnection",
+        "requestType": "database.CreateDatabaseDbNodeConsoleConnectionRequest",
+        "responseType": "database.CreateDatabaseDbNodeConsoleConnectionResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseDbNodeConsoleConnection",
+        "requestType": "database.GetDatabaseDbNodeConsoleConnectionRequest",
+        "responseType": "database.GetDatabaseDbNodeConsoleConnectionResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseDbNodeConsoleConnection",
+        "requestType": "database.ListDatabaseDbNodeConsoleConnectionRequest",
+        "responseType": "database.ListDatabaseDbNodeConsoleConnectionResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseDbNodeConsoleConnection",
+        "requestType": "database.UpdateDatabaseDbNodeConsoleConnectionRequest",
+        "responseType": "database.UpdateDatabaseDbNodeConsoleConnectionResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseDbNodeConsoleConnection",
+        "requestType": "database.DeleteDatabaseDbNodeConsoleConnectionRequest",
+        "responseType": "database.DeleteDatabaseDbNodeConsoleConnectionResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_databasedbnodeconsoleconnection",
+    "collectionField": "databasedbnodeconsoleconnection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/databasedbnodeconsoleconnection/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/databasedbnodeconsoleconnection/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/databasedbnodeconsoleconnection; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

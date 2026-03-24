@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "computecloudatcustomer",
+  "slug": "computecloudatcustomercccinfrastructures",
+  "kind": "ComputeCloudAtCustomerCccInfrastructures",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_compute_cloud_at_customer_ccc_infrastructures",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateComputeCloudAtCustomerCccInfrastructures",
+        "requestType": "computecloudatcustomer.CreateComputeCloudAtCustomerCccInfrastructuresRequest",
+        "responseType": "computecloudatcustomer.CreateComputeCloudAtCustomerCccInfrastructuresResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetComputeCloudAtCustomerCccInfrastructures",
+        "requestType": "computecloudatcustomer.GetComputeCloudAtCustomerCccInfrastructuresRequest",
+        "responseType": "computecloudatcustomer.GetComputeCloudAtCustomerCccInfrastructuresResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListComputeCloudAtCustomerCccInfrastructures",
+        "requestType": "computecloudatcustomer.ListComputeCloudAtCustomerCccInfrastructuresRequest",
+        "responseType": "computecloudatcustomer.ListComputeCloudAtCustomerCccInfrastructuresResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateComputeCloudAtCustomerCccInfrastructures",
+        "requestType": "computecloudatcustomer.UpdateComputeCloudAtCustomerCccInfrastructuresRequest",
+        "responseType": "computecloudatcustomer.UpdateComputeCloudAtCustomerCccInfrastructuresResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteComputeCloudAtCustomerCccInfrastructures",
+        "requestType": "computecloudatcustomer.DeleteComputeCloudAtCustomerCccInfrastructuresRequest",
+        "responseType": "computecloudatcustomer.DeleteComputeCloudAtCustomerCccInfrastructuresResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_computecloudatcustomer_computecloudatcustomercccinfrastructures",
+    "collectionField": "computecloudatcustomercccinfrastructures",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/computecloudatcustomer/computecloudatcustomercccinfrastructures/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/computecloudatcustomer/computecloudatcustomercccinfrastructures/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for computecloudatcustomer/computecloudatcustomercccinfrastructures; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

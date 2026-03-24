@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "devops",
+  "slug": "devopsrepositoryprotectedbranches",
+  "kind": "DevopsRepositoryProtectedBranches",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_devops_repository_protected_branches",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDevopsRepositoryProtectedBranches",
+        "requestType": "devops.CreateDevopsRepositoryProtectedBranchesRequest",
+        "responseType": "devops.CreateDevopsRepositoryProtectedBranchesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDevopsRepositoryProtectedBranches",
+        "requestType": "devops.GetDevopsRepositoryProtectedBranchesRequest",
+        "responseType": "devops.GetDevopsRepositoryProtectedBranchesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDevopsRepositoryProtectedBranches",
+        "requestType": "devops.ListDevopsRepositoryProtectedBranchesRequest",
+        "responseType": "devops.ListDevopsRepositoryProtectedBranchesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDevopsRepositoryProtectedBranches",
+        "requestType": "devops.UpdateDevopsRepositoryProtectedBranchesRequest",
+        "responseType": "devops.UpdateDevopsRepositoryProtectedBranchesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDevopsRepositoryProtectedBranches",
+        "requestType": "devops.DeleteDevopsRepositoryProtectedBranchesRequest",
+        "responseType": "devops.DeleteDevopsRepositoryProtectedBranchesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_devops_devopsrepositoryprotectedbranches",
+    "collectionField": "devopsrepositoryprotectedbranches",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/devops/devopsrepositoryprotectedbranches/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/devops/devopsrepositoryprotectedbranches/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for devops/devopsrepositoryprotectedbranches; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasemanagement",
+  "slug": "databasemanagementmanageddatabasesusersystemprivileges",
+  "kind": "DatabaseManagementManagedDatabasesUserSystemPrivileges",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_management_managed_databases_user_system_privileges",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseManagementManagedDatabasesUserSystemPrivileges",
+        "requestType": "databasemanagement.CreateDatabaseManagementManagedDatabasesUserSystemPrivilegesRequest",
+        "responseType": "databasemanagement.CreateDatabaseManagementManagedDatabasesUserSystemPrivilegesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseManagementManagedDatabasesUserSystemPrivileges",
+        "requestType": "databasemanagement.GetDatabaseManagementManagedDatabasesUserSystemPrivilegesRequest",
+        "responseType": "databasemanagement.GetDatabaseManagementManagedDatabasesUserSystemPrivilegesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseManagementManagedDatabasesUserSystemPrivileges",
+        "requestType": "databasemanagement.ListDatabaseManagementManagedDatabasesUserSystemPrivilegesRequest",
+        "responseType": "databasemanagement.ListDatabaseManagementManagedDatabasesUserSystemPrivilegesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseManagementManagedDatabasesUserSystemPrivileges",
+        "requestType": "databasemanagement.UpdateDatabaseManagementManagedDatabasesUserSystemPrivilegesRequest",
+        "responseType": "databasemanagement.UpdateDatabaseManagementManagedDatabasesUserSystemPrivilegesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseManagementManagedDatabasesUserSystemPrivileges",
+        "requestType": "databasemanagement.DeleteDatabaseManagementManagedDatabasesUserSystemPrivilegesRequest",
+        "responseType": "databasemanagement.DeleteDatabaseManagementManagedDatabasesUserSystemPrivilegesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_databasemanagement_databasemanagementmanageddatabasesusersystemprivileges",
+    "collectionField": "databasemanagementmanageddatabasesusersystemprivileges",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasemanagement/databasemanagementmanageddatabasesusersystemprivileges/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasemanagement/databasemanagementmanageddatabasesusersystemprivileges/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for databasemanagement/databasemanagementmanageddatabasesusersystemprivileges; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

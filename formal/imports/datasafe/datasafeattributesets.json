@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "datasafeattributesets",
+  "kind": "DataSafeAttributeSets",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_attribute_sets",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDataSafeAttributeSets",
+        "requestType": "datasafe.CreateDataSafeAttributeSetsRequest",
+        "responseType": "datasafe.CreateDataSafeAttributeSetsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDataSafeAttributeSets",
+        "requestType": "datasafe.GetDataSafeAttributeSetsRequest",
+        "responseType": "datasafe.GetDataSafeAttributeSetsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDataSafeAttributeSets",
+        "requestType": "datasafe.ListDataSafeAttributeSetsRequest",
+        "responseType": "datasafe.ListDataSafeAttributeSetsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDataSafeAttributeSets",
+        "requestType": "datasafe.UpdateDataSafeAttributeSetsRequest",
+        "responseType": "datasafe.UpdateDataSafeAttributeSetsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDataSafeAttributeSets",
+        "requestType": "datasafe.DeleteDataSafeAttributeSetsRequest",
+        "responseType": "datasafe.DeleteDataSafeAttributeSetsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_datasafe_datasafeattributesets",
+    "collectionField": "datasafeattributesets",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/datasafeattributesets/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/datasafeattributesets/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for datasafe/datasafeattributesets; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "devops",
+  "slug": "devopsrepositoryfileline",
+  "kind": "DevopsRepositoryFileLine",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_devops_repository_file_line",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDevopsRepositoryFileLine",
+        "requestType": "devops.CreateDevopsRepositoryFileLineRequest",
+        "responseType": "devops.CreateDevopsRepositoryFileLineResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDevopsRepositoryFileLine",
+        "requestType": "devops.GetDevopsRepositoryFileLineRequest",
+        "responseType": "devops.GetDevopsRepositoryFileLineResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDevopsRepositoryFileLine",
+        "requestType": "devops.ListDevopsRepositoryFileLineRequest",
+        "responseType": "devops.ListDevopsRepositoryFileLineResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDevopsRepositoryFileLine",
+        "requestType": "devops.UpdateDevopsRepositoryFileLineRequest",
+        "responseType": "devops.UpdateDevopsRepositoryFileLineResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDevopsRepositoryFileLine",
+        "requestType": "devops.DeleteDevopsRepositoryFileLineRequest",
+        "responseType": "devops.DeleteDevopsRepositoryFileLineResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_devops_devopsrepositoryfileline",
+    "collectionField": "devopsrepositoryfileline",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/devops/devopsrepositoryfileline/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/devops/devopsrepositoryfileline/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for devops/devopsrepositoryfileline; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "identity",
+  "slug": "identitypolicy",
+  "kind": "IdentityPolicy",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_identity_policy",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateIdentityPolicy",
+        "requestType": "identity.CreateIdentityPolicyRequest",
+        "responseType": "identity.CreateIdentityPolicyResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetIdentityPolicy",
+        "requestType": "identity.GetIdentityPolicyRequest",
+        "responseType": "identity.GetIdentityPolicyResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListIdentityPolicy",
+        "requestType": "identity.ListIdentityPolicyRequest",
+        "responseType": "identity.ListIdentityPolicyResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateIdentityPolicy",
+        "requestType": "identity.UpdateIdentityPolicyRequest",
+        "responseType": "identity.UpdateIdentityPolicyResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteIdentityPolicy",
+        "requestType": "identity.DeleteIdentityPolicyRequest",
+        "responseType": "identity.DeleteIdentityPolicyResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_identity_identitypolicy",
+    "collectionField": "identitypolicy",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/identity/identitypolicy/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/identity/identitypolicy/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for identity/identitypolicy; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

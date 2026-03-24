@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "exadatainfrastructureunallocatedresource",
+  "kind": "ExadataInfrastructureUnAllocatedResource",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_database_exadatainfrastructureunallocatedresource",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateExadataInfrastructureUnAllocatedResource",
+        "requestType": "database.CreateExadataInfrastructureUnAllocatedResourceRequest",
+        "responseType": "database.CreateExadataInfrastructureUnAllocatedResourceResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetExadataInfrastructureUnAllocatedResource",
+        "requestType": "database.GetExadataInfrastructureUnAllocatedResourceRequest",
+        "responseType": "database.GetExadataInfrastructureUnAllocatedResourceResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListExadataInfrastructureUnAllocatedResource",
+        "requestType": "database.ListExadataInfrastructureUnAllocatedResourceRequest",
+        "responseType": "database.ListExadataInfrastructureUnAllocatedResourceResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateExadataInfrastructureUnAllocatedResource",
+        "requestType": "database.UpdateExadataInfrastructureUnAllocatedResourceRequest",
+        "responseType": "database.UpdateExadataInfrastructureUnAllocatedResourceResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteExadataInfrastructureUnAllocatedResource",
+        "requestType": "database.DeleteExadataInfrastructureUnAllocatedResourceRequest",
+        "responseType": "database.DeleteExadataInfrastructureUnAllocatedResourceResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_exadatainfrastructureunallocatedresource",
+    "collectionField": "exadatainfrastructureunallocatedresource",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/exadatainfrastructureunallocatedresource/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/exadatainfrastructureunallocatedresource/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/exadatainfrastructureunallocatedresource; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

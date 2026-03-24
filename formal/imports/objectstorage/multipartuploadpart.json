@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "objectstorage",
+  "slug": "multipartuploadpart",
+  "kind": "MultipartUploadPart",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_objectstorage_multipartuploadpart",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateMultipartUploadPart",
+        "requestType": "objectstorage.CreateMultipartUploadPartRequest",
+        "responseType": "objectstorage.CreateMultipartUploadPartResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetMultipartUploadPart",
+        "requestType": "objectstorage.GetMultipartUploadPartRequest",
+        "responseType": "objectstorage.GetMultipartUploadPartResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListMultipartUploadPart",
+        "requestType": "objectstorage.ListMultipartUploadPartRequest",
+        "responseType": "objectstorage.ListMultipartUploadPartResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateMultipartUploadPart",
+        "requestType": "objectstorage.UpdateMultipartUploadPartRequest",
+        "responseType": "objectstorage.UpdateMultipartUploadPartResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteMultipartUploadPart",
+        "requestType": "objectstorage.DeleteMultipartUploadPartRequest",
+        "responseType": "objectstorage.DeleteMultipartUploadPartResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_objectstorage_multipartuploadpart",
+    "collectionField": "multipartuploadpart",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/objectstorage/multipartuploadpart/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/objectstorage/multipartuploadpart/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for objectstorage/multipartuploadpart; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

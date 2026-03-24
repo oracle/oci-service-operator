@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "fastconnectproviderservice",
+  "kind": "FastConnectProviderService",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_core_fastconnectproviderservice",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateFastConnectProviderService",
+        "requestType": "core.CreateFastConnectProviderServiceRequest",
+        "responseType": "core.CreateFastConnectProviderServiceResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetFastConnectProviderService",
+        "requestType": "core.GetFastConnectProviderServiceRequest",
+        "responseType": "core.GetFastConnectProviderServiceResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListFastConnectProviderService",
+        "requestType": "core.ListFastConnectProviderServiceRequest",
+        "responseType": "core.ListFastConnectProviderServiceResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateFastConnectProviderService",
+        "requestType": "core.UpdateFastConnectProviderServiceRequest",
+        "responseType": "core.UpdateFastConnectProviderServiceResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteFastConnectProviderService",
+        "requestType": "core.DeleteFastConnectProviderServiceRequest",
+        "responseType": "core.DeleteFastConnectProviderServiceResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_core_fastconnectproviderservice",
+    "collectionField": "fastconnectproviderservice",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/fastconnectproviderservice/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/fastconnectproviderservice/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for core/fastconnectproviderservice; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

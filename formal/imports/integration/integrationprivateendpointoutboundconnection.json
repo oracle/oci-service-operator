@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "integration",
+  "slug": "integrationprivateendpointoutboundconnection",
+  "kind": "IntegrationPrivateEndpointOutboundConnection",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_integration_private_endpoint_outbound_connection",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateIntegrationPrivateEndpointOutboundConnection",
+        "requestType": "integration.CreateIntegrationPrivateEndpointOutboundConnectionRequest",
+        "responseType": "integration.CreateIntegrationPrivateEndpointOutboundConnectionResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetIntegrationPrivateEndpointOutboundConnection",
+        "requestType": "integration.GetIntegrationPrivateEndpointOutboundConnectionRequest",
+        "responseType": "integration.GetIntegrationPrivateEndpointOutboundConnectionResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListIntegrationPrivateEndpointOutboundConnection",
+        "requestType": "integration.ListIntegrationPrivateEndpointOutboundConnectionRequest",
+        "responseType": "integration.ListIntegrationPrivateEndpointOutboundConnectionResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateIntegrationPrivateEndpointOutboundConnection",
+        "requestType": "integration.UpdateIntegrationPrivateEndpointOutboundConnectionRequest",
+        "responseType": "integration.UpdateIntegrationPrivateEndpointOutboundConnectionResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteIntegrationPrivateEndpointOutboundConnection",
+        "requestType": "integration.DeleteIntegrationPrivateEndpointOutboundConnectionRequest",
+        "responseType": "integration.DeleteIntegrationPrivateEndpointOutboundConnectionResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_integration_integrationprivateendpointoutboundconnection",
+    "collectionField": "integrationprivateendpointoutboundconnection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/integration/integrationprivateendpointoutboundconnection/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/integration/integrationprivateendpointoutboundconnection/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for integration/integrationprivateendpointoutboundconnection; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

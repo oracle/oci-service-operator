@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "bootvolumebackup",
+  "kind": "BootVolumeBackup",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_core_bootvolumebackup",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateBootVolumeBackup",
+        "requestType": "core.CreateBootVolumeBackupRequest",
+        "responseType": "core.CreateBootVolumeBackupResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetBootVolumeBackup",
+        "requestType": "core.GetBootVolumeBackupRequest",
+        "responseType": "core.GetBootVolumeBackupResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListBootVolumeBackup",
+        "requestType": "core.ListBootVolumeBackupRequest",
+        "responseType": "core.ListBootVolumeBackupResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateBootVolumeBackup",
+        "requestType": "core.UpdateBootVolumeBackupRequest",
+        "responseType": "core.UpdateBootVolumeBackupResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteBootVolumeBackup",
+        "requestType": "core.DeleteBootVolumeBackupRequest",
+        "responseType": "core.DeleteBootVolumeBackupResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_core_bootvolumebackup",
+    "collectionField": "bootvolumebackup",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/bootvolumebackup/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/bootvolumebackup/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for core/bootvolumebackup; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

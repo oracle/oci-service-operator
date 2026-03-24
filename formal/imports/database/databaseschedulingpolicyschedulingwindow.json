@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "databaseschedulingpolicyschedulingwindow",
+  "kind": "DatabaseSchedulingPolicySchedulingWindow",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_scheduling_policy_scheduling_window",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseSchedulingPolicySchedulingWindow",
+        "requestType": "database.CreateDatabaseSchedulingPolicySchedulingWindowRequest",
+        "responseType": "database.CreateDatabaseSchedulingPolicySchedulingWindowResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseSchedulingPolicySchedulingWindow",
+        "requestType": "database.GetDatabaseSchedulingPolicySchedulingWindowRequest",
+        "responseType": "database.GetDatabaseSchedulingPolicySchedulingWindowResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseSchedulingPolicySchedulingWindow",
+        "requestType": "database.ListDatabaseSchedulingPolicySchedulingWindowRequest",
+        "responseType": "database.ListDatabaseSchedulingPolicySchedulingWindowResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseSchedulingPolicySchedulingWindow",
+        "requestType": "database.UpdateDatabaseSchedulingPolicySchedulingWindowRequest",
+        "responseType": "database.UpdateDatabaseSchedulingPolicySchedulingWindowResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseSchedulingPolicySchedulingWindow",
+        "requestType": "database.DeleteDatabaseSchedulingPolicySchedulingWindowRequest",
+        "responseType": "database.DeleteDatabaseSchedulingPolicySchedulingWindowResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_databaseschedulingpolicyschedulingwindow",
+    "collectionField": "databaseschedulingpolicyschedulingwindow",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/databaseschedulingpolicyschedulingwindow/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/databaseschedulingpolicyschedulingwindow/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/databaseschedulingpolicyschedulingwindow; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "databasedatabasesnapshotstandby",
+  "kind": "DatabaseDatabaseSnapshotStandby",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_database_snapshot_standby",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseDatabaseSnapshotStandby",
+        "requestType": "database.CreateDatabaseDatabaseSnapshotStandbyRequest",
+        "responseType": "database.CreateDatabaseDatabaseSnapshotStandbyResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseDatabaseSnapshotStandby",
+        "requestType": "database.GetDatabaseDatabaseSnapshotStandbyRequest",
+        "responseType": "database.GetDatabaseDatabaseSnapshotStandbyResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseDatabaseSnapshotStandby",
+        "requestType": "database.ListDatabaseDatabaseSnapshotStandbyRequest",
+        "responseType": "database.ListDatabaseDatabaseSnapshotStandbyResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseDatabaseSnapshotStandby",
+        "requestType": "database.UpdateDatabaseDatabaseSnapshotStandbyRequest",
+        "responseType": "database.UpdateDatabaseDatabaseSnapshotStandbyResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseDatabaseSnapshotStandby",
+        "requestType": "database.DeleteDatabaseDatabaseSnapshotStandbyRequest",
+        "responseType": "database.DeleteDatabaseDatabaseSnapshotStandbyResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_databasedatabasesnapshotstandby",
+    "collectionField": "databasedatabasesnapshotstandby",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/databasedatabasesnapshotstandby/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/databasedatabasesnapshotstandby/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/databasedatabasesnapshotstandby; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

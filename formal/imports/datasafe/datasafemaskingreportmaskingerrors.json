@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "datasafemaskingreportmaskingerrors",
+  "kind": "DataSafeMaskingReportMaskingErrors",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_masking_report_masking_errors",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDataSafeMaskingReportMaskingErrors",
+        "requestType": "datasafe.CreateDataSafeMaskingReportMaskingErrorsRequest",
+        "responseType": "datasafe.CreateDataSafeMaskingReportMaskingErrorsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDataSafeMaskingReportMaskingErrors",
+        "requestType": "datasafe.GetDataSafeMaskingReportMaskingErrorsRequest",
+        "responseType": "datasafe.GetDataSafeMaskingReportMaskingErrorsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDataSafeMaskingReportMaskingErrors",
+        "requestType": "datasafe.ListDataSafeMaskingReportMaskingErrorsRequest",
+        "responseType": "datasafe.ListDataSafeMaskingReportMaskingErrorsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDataSafeMaskingReportMaskingErrors",
+        "requestType": "datasafe.UpdateDataSafeMaskingReportMaskingErrorsRequest",
+        "responseType": "datasafe.UpdateDataSafeMaskingReportMaskingErrorsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDataSafeMaskingReportMaskingErrors",
+        "requestType": "datasafe.DeleteDataSafeMaskingReportMaskingErrorsRequest",
+        "responseType": "datasafe.DeleteDataSafeMaskingReportMaskingErrorsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_datasafe_datasafemaskingreportmaskingerrors",
+    "collectionField": "datasafemaskingreportmaskingerrors",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/datasafemaskingreportmaskingerrors/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/datasafemaskingreportmaskingerrors/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for datasafe/datasafemaskingreportmaskingerrors; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "email",
+  "slug": "emailemaildomains",
+  "kind": "EmailEmailDomains",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_email_email_domains",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateEmailEmailDomains",
+        "requestType": "email.CreateEmailEmailDomainsRequest",
+        "responseType": "email.CreateEmailEmailDomainsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetEmailEmailDomains",
+        "requestType": "email.GetEmailEmailDomainsRequest",
+        "responseType": "email.GetEmailEmailDomainsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListEmailEmailDomains",
+        "requestType": "email.ListEmailEmailDomainsRequest",
+        "responseType": "email.ListEmailEmailDomainsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateEmailEmailDomains",
+        "requestType": "email.UpdateEmailEmailDomainsRequest",
+        "responseType": "email.UpdateEmailEmailDomainsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteEmailEmailDomains",
+        "requestType": "email.DeleteEmailEmailDomainsRequest",
+        "responseType": "email.DeleteEmailEmailDomainsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_email_emailemaildomains",
+    "collectionField": "emailemaildomains",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/email/emailemaildomains/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/email/emailemaildomains/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for email/emailemaildomains; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

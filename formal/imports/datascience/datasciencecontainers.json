@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datascience",
+  "slug": "datasciencecontainers",
+  "kind": "DatascienceContainers",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_datascience_containers",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatascienceContainers",
+        "requestType": "datascience.CreateDatascienceContainersRequest",
+        "responseType": "datascience.CreateDatascienceContainersResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatascienceContainers",
+        "requestType": "datascience.GetDatascienceContainersRequest",
+        "responseType": "datascience.GetDatascienceContainersResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatascienceContainers",
+        "requestType": "datascience.ListDatascienceContainersRequest",
+        "responseType": "datascience.ListDatascienceContainersResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatascienceContainers",
+        "requestType": "datascience.UpdateDatascienceContainersRequest",
+        "responseType": "datascience.UpdateDatascienceContainersResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatascienceContainers",
+        "requestType": "datascience.DeleteDatascienceContainersRequest",
+        "responseType": "datascience.DeleteDatascienceContainersResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_datascience_datasciencecontainers",
+    "collectionField": "datasciencecontainers",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datascience/datasciencecontainers/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datascience/datasciencecontainers/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for datascience/datasciencecontainers; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

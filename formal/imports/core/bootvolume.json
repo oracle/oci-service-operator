@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "bootvolume",
+  "kind": "BootVolume",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_core_bootvolume",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateBootVolume",
+        "requestType": "core.CreateBootVolumeRequest",
+        "responseType": "core.CreateBootVolumeResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetBootVolume",
+        "requestType": "core.GetBootVolumeRequest",
+        "responseType": "core.GetBootVolumeResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListBootVolume",
+        "requestType": "core.ListBootVolumeRequest",
+        "responseType": "core.ListBootVolumeResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateBootVolume",
+        "requestType": "core.UpdateBootVolumeRequest",
+        "responseType": "core.UpdateBootVolumeResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteBootVolume",
+        "requestType": "core.DeleteBootVolumeRequest",
+        "responseType": "core.DeleteBootVolumeResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_core_bootvolume",
+    "collectionField": "bootvolume",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/bootvolume/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/bootvolume/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for core/bootvolume; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

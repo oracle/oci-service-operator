@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "vnic",
+  "kind": "Vnic",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_core_vnic",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateVnic",
+        "requestType": "core.CreateVnicRequest",
+        "responseType": "core.CreateVnicResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetVnic",
+        "requestType": "core.GetVnicRequest",
+        "responseType": "core.GetVnicResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListVnic",
+        "requestType": "core.ListVnicRequest",
+        "responseType": "core.ListVnicResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateVnic",
+        "requestType": "core.UpdateVnicRequest",
+        "responseType": "core.UpdateVnicResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteVnic",
+        "requestType": "core.DeleteVnicRequest",
+        "responseType": "core.DeleteVnicResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_core_vnic",
+    "collectionField": "vnic",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/vnic/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/vnic/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for core/vnic; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

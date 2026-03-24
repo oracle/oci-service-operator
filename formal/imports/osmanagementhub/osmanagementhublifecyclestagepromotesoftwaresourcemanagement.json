@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "osmanagementhub",
+  "slug": "osmanagementhublifecyclestagepromotesoftwaresourcemanagement",
+  "kind": "OsManagementHubLifecycleStagePromoteSoftwareSourceManagement",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_os_management_hub_lifecycle_stage_promote_software_source_management",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOsManagementHubLifecycleStagePromoteSoftwareSourceManagement",
+        "requestType": "osmanagementhub.CreateOsManagementHubLifecycleStagePromoteSoftwareSourceManagementRequest",
+        "responseType": "osmanagementhub.CreateOsManagementHubLifecycleStagePromoteSoftwareSourceManagementResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOsManagementHubLifecycleStagePromoteSoftwareSourceManagement",
+        "requestType": "osmanagementhub.GetOsManagementHubLifecycleStagePromoteSoftwareSourceManagementRequest",
+        "responseType": "osmanagementhub.GetOsManagementHubLifecycleStagePromoteSoftwareSourceManagementResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOsManagementHubLifecycleStagePromoteSoftwareSourceManagement",
+        "requestType": "osmanagementhub.ListOsManagementHubLifecycleStagePromoteSoftwareSourceManagementRequest",
+        "responseType": "osmanagementhub.ListOsManagementHubLifecycleStagePromoteSoftwareSourceManagementResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOsManagementHubLifecycleStagePromoteSoftwareSourceManagement",
+        "requestType": "osmanagementhub.UpdateOsManagementHubLifecycleStagePromoteSoftwareSourceManagementRequest",
+        "responseType": "osmanagementhub.UpdateOsManagementHubLifecycleStagePromoteSoftwareSourceManagementResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOsManagementHubLifecycleStagePromoteSoftwareSourceManagement",
+        "requestType": "osmanagementhub.DeleteOsManagementHubLifecycleStagePromoteSoftwareSourceManagementRequest",
+        "responseType": "osmanagementhub.DeleteOsManagementHubLifecycleStagePromoteSoftwareSourceManagementResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_osmanagementhub_osmanagementhublifecyclestagepromotesoftwaresourcemanagement",
+    "collectionField": "osmanagementhublifecyclestagepromotesoftwaresourcemanagement",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/osmanagementhub/osmanagementhublifecyclestagepromotesoftwaresourcemanagement/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/osmanagementhub/osmanagementhublifecyclestagepromotesoftwaresourcemanagement/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for osmanagementhub/osmanagementhublifecyclestagepromotesoftwaresourcemanagement; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

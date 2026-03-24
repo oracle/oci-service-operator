@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "databaseautonomousdatabaseresourcepoolmembers",
+  "kind": "DatabaseAutonomousDatabaseResourcePoolMembers",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_autonomous_database_resource_pool_members",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseAutonomousDatabaseResourcePoolMembers",
+        "requestType": "database.CreateDatabaseAutonomousDatabaseResourcePoolMembersRequest",
+        "responseType": "database.CreateDatabaseAutonomousDatabaseResourcePoolMembersResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseAutonomousDatabaseResourcePoolMembers",
+        "requestType": "database.GetDatabaseAutonomousDatabaseResourcePoolMembersRequest",
+        "responseType": "database.GetDatabaseAutonomousDatabaseResourcePoolMembersResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseAutonomousDatabaseResourcePoolMembers",
+        "requestType": "database.ListDatabaseAutonomousDatabaseResourcePoolMembersRequest",
+        "responseType": "database.ListDatabaseAutonomousDatabaseResourcePoolMembersResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseAutonomousDatabaseResourcePoolMembers",
+        "requestType": "database.UpdateDatabaseAutonomousDatabaseResourcePoolMembersRequest",
+        "responseType": "database.UpdateDatabaseAutonomousDatabaseResourcePoolMembersResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseAutonomousDatabaseResourcePoolMembers",
+        "requestType": "database.DeleteDatabaseAutonomousDatabaseResourcePoolMembersRequest",
+        "responseType": "database.DeleteDatabaseAutonomousDatabaseResourcePoolMembersResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_databaseautonomousdatabaseresourcepoolmembers",
+    "collectionField": "databaseautonomousdatabaseresourcepoolmembers",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/databaseautonomousdatabaseresourcepoolmembers/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/databaseautonomousdatabaseresourcepoolmembers/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/databaseautonomousdatabaseresourcepoolmembers; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

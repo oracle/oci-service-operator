@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "corevolumegroup",
+  "kind": "CoreVolumeGroup",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_core_volume_group",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCoreVolumeGroup",
+        "requestType": "core.CreateCoreVolumeGroupRequest",
+        "responseType": "core.CreateCoreVolumeGroupResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCoreVolumeGroup",
+        "requestType": "core.GetCoreVolumeGroupRequest",
+        "responseType": "core.GetCoreVolumeGroupResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCoreVolumeGroup",
+        "requestType": "core.ListCoreVolumeGroupRequest",
+        "responseType": "core.ListCoreVolumeGroupResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCoreVolumeGroup",
+        "requestType": "core.UpdateCoreVolumeGroupRequest",
+        "responseType": "core.UpdateCoreVolumeGroupResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCoreVolumeGroup",
+        "requestType": "core.DeleteCoreVolumeGroupRequest",
+        "responseType": "core.DeleteCoreVolumeGroupResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_core_corevolumegroup",
+    "collectionField": "corevolumegroup",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/corevolumegroup/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/corevolumegroup/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for core/corevolumegroup; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

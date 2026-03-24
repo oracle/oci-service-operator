@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "loganalytics",
+  "slug": "loganalyticsnamespaceingesttimerule",
+  "kind": "LogAnalyticsNamespaceIngestTimeRule",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_log_analytics_namespace_ingest_time_rule",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateLogAnalyticsNamespaceIngestTimeRule",
+        "requestType": "loganalytics.CreateLogAnalyticsNamespaceIngestTimeRuleRequest",
+        "responseType": "loganalytics.CreateLogAnalyticsNamespaceIngestTimeRuleResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetLogAnalyticsNamespaceIngestTimeRule",
+        "requestType": "loganalytics.GetLogAnalyticsNamespaceIngestTimeRuleRequest",
+        "responseType": "loganalytics.GetLogAnalyticsNamespaceIngestTimeRuleResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListLogAnalyticsNamespaceIngestTimeRule",
+        "requestType": "loganalytics.ListLogAnalyticsNamespaceIngestTimeRuleRequest",
+        "responseType": "loganalytics.ListLogAnalyticsNamespaceIngestTimeRuleResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateLogAnalyticsNamespaceIngestTimeRule",
+        "requestType": "loganalytics.UpdateLogAnalyticsNamespaceIngestTimeRuleRequest",
+        "responseType": "loganalytics.UpdateLogAnalyticsNamespaceIngestTimeRuleResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteLogAnalyticsNamespaceIngestTimeRule",
+        "requestType": "loganalytics.DeleteLogAnalyticsNamespaceIngestTimeRuleRequest",
+        "responseType": "loganalytics.DeleteLogAnalyticsNamespaceIngestTimeRuleResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_loganalytics_loganalyticsnamespaceingesttimerule",
+    "collectionField": "loganalyticsnamespaceingesttimerule",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/loganalytics/loganalyticsnamespaceingesttimerule/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/loganalytics/loganalyticsnamespaceingesttimerule/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for loganalytics/loganalyticsnamespaceingesttimerule; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

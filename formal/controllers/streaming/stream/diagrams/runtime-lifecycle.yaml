@@ -1,0 +1,16 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: streaming
+slug: stream
+kind: Stream
+archetype: legacy-adapter
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+  - failed
+notes:
+  - Create or bind selection depends on name-based list lookup with optional pool and compartment filters.
+  - Endpoint secret materialization happens only after ACTIVE.
+  - Delete is best-effort today; DELETING is treated as sufficient for cleanup and finalizer removal.

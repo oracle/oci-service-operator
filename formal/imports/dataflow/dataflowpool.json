@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "dataflow",
+  "slug": "dataflowpool",
+  "kind": "DataflowPool",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_dataflow_pool",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDataflowPool",
+        "requestType": "dataflow.CreateDataflowPoolRequest",
+        "responseType": "dataflow.CreateDataflowPoolResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDataflowPool",
+        "requestType": "dataflow.GetDataflowPoolRequest",
+        "responseType": "dataflow.GetDataflowPoolResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDataflowPool",
+        "requestType": "dataflow.ListDataflowPoolRequest",
+        "responseType": "dataflow.ListDataflowPoolResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDataflowPool",
+        "requestType": "dataflow.UpdateDataflowPoolRequest",
+        "responseType": "dataflow.UpdateDataflowPoolResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDataflowPool",
+        "requestType": "dataflow.DeleteDataflowPoolRequest",
+        "responseType": "dataflow.DeleteDataflowPoolResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_dataflow_dataflowpool",
+    "collectionField": "dataflowpool",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/dataflow/dataflowpool/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/dataflow/dataflowpool/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for dataflow/dataflowpool; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

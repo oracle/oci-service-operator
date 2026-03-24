@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "filestorage",
+  "slug": "filestoragefilesystemsnapshotpolicy",
+  "kind": "FileStorageFilesystemSnapshotPolicy",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_file_storage_filesystem_snapshot_policy",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateFileStorageFilesystemSnapshotPolicy",
+        "requestType": "filestorage.CreateFileStorageFilesystemSnapshotPolicyRequest",
+        "responseType": "filestorage.CreateFileStorageFilesystemSnapshotPolicyResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetFileStorageFilesystemSnapshotPolicy",
+        "requestType": "filestorage.GetFileStorageFilesystemSnapshotPolicyRequest",
+        "responseType": "filestorage.GetFileStorageFilesystemSnapshotPolicyResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListFileStorageFilesystemSnapshotPolicy",
+        "requestType": "filestorage.ListFileStorageFilesystemSnapshotPolicyRequest",
+        "responseType": "filestorage.ListFileStorageFilesystemSnapshotPolicyResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateFileStorageFilesystemSnapshotPolicy",
+        "requestType": "filestorage.UpdateFileStorageFilesystemSnapshotPolicyRequest",
+        "responseType": "filestorage.UpdateFileStorageFilesystemSnapshotPolicyResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteFileStorageFilesystemSnapshotPolicy",
+        "requestType": "filestorage.DeleteFileStorageFilesystemSnapshotPolicyRequest",
+        "responseType": "filestorage.DeleteFileStorageFilesystemSnapshotPolicyResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_filestorage_filestoragefilesystemsnapshotpolicy",
+    "collectionField": "filestoragefilesystemsnapshotpolicy",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/filestorage/filestoragefilesystemsnapshotpolicy/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/filestorage/filestoragefilesystemsnapshotpolicy/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for filestorage/filestoragefilesystemsnapshotpolicy; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

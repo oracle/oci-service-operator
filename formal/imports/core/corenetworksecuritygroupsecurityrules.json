@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "corenetworksecuritygroupsecurityrules",
+  "kind": "CoreNetworkSecurityGroupSecurityRules",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_core_network_security_group_security_rules",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCoreNetworkSecurityGroupSecurityRules",
+        "requestType": "core.CreateCoreNetworkSecurityGroupSecurityRulesRequest",
+        "responseType": "core.CreateCoreNetworkSecurityGroupSecurityRulesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCoreNetworkSecurityGroupSecurityRules",
+        "requestType": "core.GetCoreNetworkSecurityGroupSecurityRulesRequest",
+        "responseType": "core.GetCoreNetworkSecurityGroupSecurityRulesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCoreNetworkSecurityGroupSecurityRules",
+        "requestType": "core.ListCoreNetworkSecurityGroupSecurityRulesRequest",
+        "responseType": "core.ListCoreNetworkSecurityGroupSecurityRulesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCoreNetworkSecurityGroupSecurityRules",
+        "requestType": "core.UpdateCoreNetworkSecurityGroupSecurityRulesRequest",
+        "responseType": "core.UpdateCoreNetworkSecurityGroupSecurityRulesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCoreNetworkSecurityGroupSecurityRules",
+        "requestType": "core.DeleteCoreNetworkSecurityGroupSecurityRulesRequest",
+        "responseType": "core.DeleteCoreNetworkSecurityGroupSecurityRulesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_core_corenetworksecuritygroupsecurityrules",
+    "collectionField": "corenetworksecuritygroupsecurityrules",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/corenetworksecuritygroupsecurityrules/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/corenetworksecuritygroupsecurityrules/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for core/corenetworksecuritygroupsecurityrules; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

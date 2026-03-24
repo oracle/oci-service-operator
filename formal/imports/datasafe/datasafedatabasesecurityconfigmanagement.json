@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "datasafedatabasesecurityconfigmanagement",
+  "kind": "DataSafeDatabaseSecurityConfigManagement",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_database_security_config_management",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDataSafeDatabaseSecurityConfigManagement",
+        "requestType": "datasafe.CreateDataSafeDatabaseSecurityConfigManagementRequest",
+        "responseType": "datasafe.CreateDataSafeDatabaseSecurityConfigManagementResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDataSafeDatabaseSecurityConfigManagement",
+        "requestType": "datasafe.GetDataSafeDatabaseSecurityConfigManagementRequest",
+        "responseType": "datasafe.GetDataSafeDatabaseSecurityConfigManagementResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDataSafeDatabaseSecurityConfigManagement",
+        "requestType": "datasafe.ListDataSafeDatabaseSecurityConfigManagementRequest",
+        "responseType": "datasafe.ListDataSafeDatabaseSecurityConfigManagementResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDataSafeDatabaseSecurityConfigManagement",
+        "requestType": "datasafe.UpdateDataSafeDatabaseSecurityConfigManagementRequest",
+        "responseType": "datasafe.UpdateDataSafeDatabaseSecurityConfigManagementResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDataSafeDatabaseSecurityConfigManagement",
+        "requestType": "datasafe.DeleteDataSafeDatabaseSecurityConfigManagementRequest",
+        "responseType": "datasafe.DeleteDataSafeDatabaseSecurityConfigManagementResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_datasafe_datasafedatabasesecurityconfigmanagement",
+    "collectionField": "datasafedatabasesecurityconfigmanagement",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/datasafedatabasesecurityconfigmanagement/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/datasafedatabasesecurityconfigmanagement/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for datasafe/datasafedatabasesecurityconfigmanagement; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "dataflow",
+  "slug": "dataflowrunlog",
+  "kind": "DataflowRunLog",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_dataflow_run_log",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDataflowRunLog",
+        "requestType": "dataflow.CreateDataflowRunLogRequest",
+        "responseType": "dataflow.CreateDataflowRunLogResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDataflowRunLog",
+        "requestType": "dataflow.GetDataflowRunLogRequest",
+        "responseType": "dataflow.GetDataflowRunLogResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDataflowRunLog",
+        "requestType": "dataflow.ListDataflowRunLogRequest",
+        "responseType": "dataflow.ListDataflowRunLogResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDataflowRunLog",
+        "requestType": "dataflow.UpdateDataflowRunLogRequest",
+        "responseType": "dataflow.UpdateDataflowRunLogResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDataflowRunLog",
+        "requestType": "dataflow.DeleteDataflowRunLogRequest",
+        "responseType": "dataflow.DeleteDataflowRunLogResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_dataflow_dataflowrunlog",
+    "collectionField": "dataflowrunlog",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/dataflow/dataflowrunlog/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/dataflow/dataflowrunlog/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for dataflow/dataflowrunlog; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

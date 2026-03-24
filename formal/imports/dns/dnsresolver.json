@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "dns",
+  "slug": "dnsresolver",
+  "kind": "DnsResolver",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_dns_resolver",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDnsResolver",
+        "requestType": "dns.CreateDnsResolverRequest",
+        "responseType": "dns.CreateDnsResolverResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDnsResolver",
+        "requestType": "dns.GetDnsResolverRequest",
+        "responseType": "dns.GetDnsResolverResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDnsResolver",
+        "requestType": "dns.ListDnsResolverRequest",
+        "responseType": "dns.ListDnsResolverResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDnsResolver",
+        "requestType": "dns.UpdateDnsResolverRequest",
+        "responseType": "dns.UpdateDnsResolverResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDnsResolver",
+        "requestType": "dns.DeleteDnsResolverRequest",
+        "responseType": "dns.DeleteDnsResolverResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_dns_dnsresolver",
+    "collectionField": "dnsresolver",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/dns/dnsresolver/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/dns/dnsresolver/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for dns/dnsresolver; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "corecrossconnectgroup",
+  "kind": "CoreCrossConnectGroup",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_core_cross_connect_group",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCoreCrossConnectGroup",
+        "requestType": "core.CreateCoreCrossConnectGroupRequest",
+        "responseType": "core.CreateCoreCrossConnectGroupResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCoreCrossConnectGroup",
+        "requestType": "core.GetCoreCrossConnectGroupRequest",
+        "responseType": "core.GetCoreCrossConnectGroupResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCoreCrossConnectGroup",
+        "requestType": "core.ListCoreCrossConnectGroupRequest",
+        "responseType": "core.ListCoreCrossConnectGroupResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCoreCrossConnectGroup",
+        "requestType": "core.UpdateCoreCrossConnectGroupRequest",
+        "responseType": "core.UpdateCoreCrossConnectGroupResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCoreCrossConnectGroup",
+        "requestType": "core.DeleteCoreCrossConnectGroupRequest",
+        "responseType": "core.DeleteCoreCrossConnectGroupResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_core_corecrossconnectgroup",
+    "collectionField": "corecrossconnectgroup",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/corecrossconnectgroup/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/corecrossconnectgroup/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for core/corecrossconnectgroup; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "jmsjavadownloads",
+  "slug": "jmsjavadownloadsjavalicenseacceptancerecord",
+  "kind": "JmsJavaDownloadsJavaLicenseAcceptanceRecord",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_jms_java_downloads_java_license_acceptance_record",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateJmsJavaDownloadsJavaLicenseAcceptanceRecord",
+        "requestType": "jmsjavadownloads.CreateJmsJavaDownloadsJavaLicenseAcceptanceRecordRequest",
+        "responseType": "jmsjavadownloads.CreateJmsJavaDownloadsJavaLicenseAcceptanceRecordResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetJmsJavaDownloadsJavaLicenseAcceptanceRecord",
+        "requestType": "jmsjavadownloads.GetJmsJavaDownloadsJavaLicenseAcceptanceRecordRequest",
+        "responseType": "jmsjavadownloads.GetJmsJavaDownloadsJavaLicenseAcceptanceRecordResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListJmsJavaDownloadsJavaLicenseAcceptanceRecord",
+        "requestType": "jmsjavadownloads.ListJmsJavaDownloadsJavaLicenseAcceptanceRecordRequest",
+        "responseType": "jmsjavadownloads.ListJmsJavaDownloadsJavaLicenseAcceptanceRecordResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateJmsJavaDownloadsJavaLicenseAcceptanceRecord",
+        "requestType": "jmsjavadownloads.UpdateJmsJavaDownloadsJavaLicenseAcceptanceRecordRequest",
+        "responseType": "jmsjavadownloads.UpdateJmsJavaDownloadsJavaLicenseAcceptanceRecordResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteJmsJavaDownloadsJavaLicenseAcceptanceRecord",
+        "requestType": "jmsjavadownloads.DeleteJmsJavaDownloadsJavaLicenseAcceptanceRecordRequest",
+        "responseType": "jmsjavadownloads.DeleteJmsJavaDownloadsJavaLicenseAcceptanceRecordResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_jmsjavadownloads_jmsjavadownloadsjavalicenseacceptancerecord",
+    "collectionField": "jmsjavadownloadsjavalicenseacceptancerecord",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/jmsjavadownloads/jmsjavadownloadsjavalicenseacceptancerecord/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/jmsjavadownloads/jmsjavadownloadsjavalicenseacceptancerecord/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for jmsjavadownloads/jmsjavadownloadsjavalicenseacceptancerecord; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

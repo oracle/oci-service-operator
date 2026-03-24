@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "psql",
+  "slug": "psqldbsystemconnectiondetail",
+  "kind": "PsqlDbSystemConnectionDetail",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_psql_db_system_connection_detail",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreatePsqlDbSystemConnectionDetail",
+        "requestType": "psql.CreatePsqlDbSystemConnectionDetailRequest",
+        "responseType": "psql.CreatePsqlDbSystemConnectionDetailResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetPsqlDbSystemConnectionDetail",
+        "requestType": "psql.GetPsqlDbSystemConnectionDetailRequest",
+        "responseType": "psql.GetPsqlDbSystemConnectionDetailResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListPsqlDbSystemConnectionDetail",
+        "requestType": "psql.ListPsqlDbSystemConnectionDetailRequest",
+        "responseType": "psql.ListPsqlDbSystemConnectionDetailResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdatePsqlDbSystemConnectionDetail",
+        "requestType": "psql.UpdatePsqlDbSystemConnectionDetailRequest",
+        "responseType": "psql.UpdatePsqlDbSystemConnectionDetailResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeletePsqlDbSystemConnectionDetail",
+        "requestType": "psql.DeletePsqlDbSystemConnectionDetailRequest",
+        "responseType": "psql.DeletePsqlDbSystemConnectionDetailResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_psql_psqldbsystemconnectiondetail",
+    "collectionField": "psqldbsystemconnectiondetail",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/psql/psqldbsystemconnectiondetail/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/psql/psqldbsystemconnectiondetail/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for psql/psqldbsystemconnectiondetail; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

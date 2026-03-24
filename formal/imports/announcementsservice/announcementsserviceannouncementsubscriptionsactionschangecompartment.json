@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "announcementsservice",
+  "slug": "announcementsserviceannouncementsubscriptionsactionschangecompartment",
+  "kind": "AnnouncementsServiceAnnouncementSubscriptionsActionsChangeCompartment",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_announcements_service_announcement_subscriptions_actions_change_compartment",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateAnnouncementsServiceAnnouncementSubscriptionsActionsChangeCompartment",
+        "requestType": "announcementsservice.CreateAnnouncementsServiceAnnouncementSubscriptionsActionsChangeCompartmentRequest",
+        "responseType": "announcementsservice.CreateAnnouncementsServiceAnnouncementSubscriptionsActionsChangeCompartmentResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetAnnouncementsServiceAnnouncementSubscriptionsActionsChangeCompartment",
+        "requestType": "announcementsservice.GetAnnouncementsServiceAnnouncementSubscriptionsActionsChangeCompartmentRequest",
+        "responseType": "announcementsservice.GetAnnouncementsServiceAnnouncementSubscriptionsActionsChangeCompartmentResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListAnnouncementsServiceAnnouncementSubscriptionsActionsChangeCompartment",
+        "requestType": "announcementsservice.ListAnnouncementsServiceAnnouncementSubscriptionsActionsChangeCompartmentRequest",
+        "responseType": "announcementsservice.ListAnnouncementsServiceAnnouncementSubscriptionsActionsChangeCompartmentResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateAnnouncementsServiceAnnouncementSubscriptionsActionsChangeCompartment",
+        "requestType": "announcementsservice.UpdateAnnouncementsServiceAnnouncementSubscriptionsActionsChangeCompartmentRequest",
+        "responseType": "announcementsservice.UpdateAnnouncementsServiceAnnouncementSubscriptionsActionsChangeCompartmentResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteAnnouncementsServiceAnnouncementSubscriptionsActionsChangeCompartment",
+        "requestType": "announcementsservice.DeleteAnnouncementsServiceAnnouncementSubscriptionsActionsChangeCompartmentRequest",
+        "responseType": "announcementsservice.DeleteAnnouncementsServiceAnnouncementSubscriptionsActionsChangeCompartmentResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_announcementsservice_announcementsserviceannouncementsubscriptionsactionschangecompartment",
+    "collectionField": "announcementsserviceannouncementsubscriptionsactionschangecompartment",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/announcementsservice/announcementsserviceannouncementsubscriptionsactionschangecompartment/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/announcementsservice/announcementsserviceannouncementsubscriptionsactionschangecompartment/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for announcementsservice/announcementsserviceannouncementsubscriptionsactionschangecompartment; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

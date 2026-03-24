@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "databaseexternalpluggabledatabasesstackmonitoring",
+  "kind": "DatabaseExternalpluggabledatabasesStackMonitoring",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_externalpluggabledatabases_stack_monitoring",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseExternalpluggabledatabasesStackMonitoring",
+        "requestType": "database.CreateDatabaseExternalpluggabledatabasesStackMonitoringRequest",
+        "responseType": "database.CreateDatabaseExternalpluggabledatabasesStackMonitoringResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseExternalpluggabledatabasesStackMonitoring",
+        "requestType": "database.GetDatabaseExternalpluggabledatabasesStackMonitoringRequest",
+        "responseType": "database.GetDatabaseExternalpluggabledatabasesStackMonitoringResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseExternalpluggabledatabasesStackMonitoring",
+        "requestType": "database.ListDatabaseExternalpluggabledatabasesStackMonitoringRequest",
+        "responseType": "database.ListDatabaseExternalpluggabledatabasesStackMonitoringResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseExternalpluggabledatabasesStackMonitoring",
+        "requestType": "database.UpdateDatabaseExternalpluggabledatabasesStackMonitoringRequest",
+        "responseType": "database.UpdateDatabaseExternalpluggabledatabasesStackMonitoringResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseExternalpluggabledatabasesStackMonitoring",
+        "requestType": "database.DeleteDatabaseExternalpluggabledatabasesStackMonitoringRequest",
+        "responseType": "database.DeleteDatabaseExternalpluggabledatabasesStackMonitoringResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_databaseexternalpluggabledatabasesstackmonitoring",
+    "collectionField": "databaseexternalpluggabledatabasesstackmonitoring",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/databaseexternalpluggabledatabasesstackmonitoring/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/databaseexternalpluggabledatabasesstackmonitoring/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/databaseexternalpluggabledatabasesstackmonitoring; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

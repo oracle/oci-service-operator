@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "apmsynthetics",
+  "slug": "apmsyntheticsmonitors",
+  "kind": "ApmSyntheticsMonitors",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_apm_synthetics_monitors",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateApmSyntheticsMonitors",
+        "requestType": "apmsynthetics.CreateApmSyntheticsMonitorsRequest",
+        "responseType": "apmsynthetics.CreateApmSyntheticsMonitorsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetApmSyntheticsMonitors",
+        "requestType": "apmsynthetics.GetApmSyntheticsMonitorsRequest",
+        "responseType": "apmsynthetics.GetApmSyntheticsMonitorsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListApmSyntheticsMonitors",
+        "requestType": "apmsynthetics.ListApmSyntheticsMonitorsRequest",
+        "responseType": "apmsynthetics.ListApmSyntheticsMonitorsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateApmSyntheticsMonitors",
+        "requestType": "apmsynthetics.UpdateApmSyntheticsMonitorsRequest",
+        "responseType": "apmsynthetics.UpdateApmSyntheticsMonitorsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteApmSyntheticsMonitors",
+        "requestType": "apmsynthetics.DeleteApmSyntheticsMonitorsRequest",
+        "responseType": "apmsynthetics.DeleteApmSyntheticsMonitorsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_apmsynthetics_apmsyntheticsmonitors",
+    "collectionField": "apmsyntheticsmonitors",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/apmsynthetics/apmsyntheticsmonitors/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/apmsynthetics/apmsyntheticsmonitors/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for apmsynthetics/apmsyntheticsmonitors; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

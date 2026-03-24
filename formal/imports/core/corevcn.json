@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "corevcn",
+  "kind": "CoreVcn",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_core_vcn",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCoreVcn",
+        "requestType": "core.CreateCoreVcnRequest",
+        "responseType": "core.CreateCoreVcnResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCoreVcn",
+        "requestType": "core.GetCoreVcnRequest",
+        "responseType": "core.GetCoreVcnResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCoreVcn",
+        "requestType": "core.ListCoreVcnRequest",
+        "responseType": "core.ListCoreVcnResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCoreVcn",
+        "requestType": "core.UpdateCoreVcnRequest",
+        "responseType": "core.UpdateCoreVcnResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCoreVcn",
+        "requestType": "core.DeleteCoreVcnRequest",
+        "responseType": "core.DeleteCoreVcnResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_core_corevcn",
+    "collectionField": "corevcn",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/corevcn/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/corevcn/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for core/corevcn; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

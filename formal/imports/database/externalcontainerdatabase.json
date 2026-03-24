@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "externalcontainerdatabase",
+  "kind": "ExternalContainerDatabase",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_database_externalcontainerdatabase",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateExternalContainerDatabase",
+        "requestType": "database.CreateExternalContainerDatabaseRequest",
+        "responseType": "database.CreateExternalContainerDatabaseResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetExternalContainerDatabase",
+        "requestType": "database.GetExternalContainerDatabaseRequest",
+        "responseType": "database.GetExternalContainerDatabaseResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListExternalContainerDatabase",
+        "requestType": "database.ListExternalContainerDatabaseRequest",
+        "responseType": "database.ListExternalContainerDatabaseResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateExternalContainerDatabase",
+        "requestType": "database.UpdateExternalContainerDatabaseRequest",
+        "responseType": "database.UpdateExternalContainerDatabaseResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteExternalContainerDatabase",
+        "requestType": "database.DeleteExternalContainerDatabaseRequest",
+        "responseType": "database.DeleteExternalContainerDatabaseResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_externalcontainerdatabase",
+    "collectionField": "externalcontainerdatabase",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/externalcontainerdatabase/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/externalcontainerdatabase/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/externalcontainerdatabase; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

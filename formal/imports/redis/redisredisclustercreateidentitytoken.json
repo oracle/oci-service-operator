@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "redis",
+  "slug": "redisredisclustercreateidentitytoken",
+  "kind": "RedisRedisClusterCreateIdentityToken",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_redis_redis_cluster_create_identity_token",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateRedisRedisClusterCreateIdentityToken",
+        "requestType": "redis.CreateRedisRedisClusterCreateIdentityTokenRequest",
+        "responseType": "redis.CreateRedisRedisClusterCreateIdentityTokenResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetRedisRedisClusterCreateIdentityToken",
+        "requestType": "redis.GetRedisRedisClusterCreateIdentityTokenRequest",
+        "responseType": "redis.GetRedisRedisClusterCreateIdentityTokenResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListRedisRedisClusterCreateIdentityToken",
+        "requestType": "redis.ListRedisRedisClusterCreateIdentityTokenRequest",
+        "responseType": "redis.ListRedisRedisClusterCreateIdentityTokenResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateRedisRedisClusterCreateIdentityToken",
+        "requestType": "redis.UpdateRedisRedisClusterCreateIdentityTokenRequest",
+        "responseType": "redis.UpdateRedisRedisClusterCreateIdentityTokenResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteRedisRedisClusterCreateIdentityToken",
+        "requestType": "redis.DeleteRedisRedisClusterCreateIdentityTokenRequest",
+        "responseType": "redis.DeleteRedisRedisClusterCreateIdentityTokenResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_redis_redisredisclustercreateidentitytoken",
+    "collectionField": "redisredisclustercreateidentitytoken",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/redis/redisredisclustercreateidentitytoken/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/redis/redisredisclustercreateidentitytoken/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for redis/redisredisclustercreateidentitytoken; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

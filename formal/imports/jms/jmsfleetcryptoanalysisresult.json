@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "jms",
+  "slug": "jmsfleetcryptoanalysisresult",
+  "kind": "JmsFleetCryptoAnalysisResult",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_jms_fleet_crypto_analysis_result",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateJmsFleetCryptoAnalysisResult",
+        "requestType": "jms.CreateJmsFleetCryptoAnalysisResultRequest",
+        "responseType": "jms.CreateJmsFleetCryptoAnalysisResultResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetJmsFleetCryptoAnalysisResult",
+        "requestType": "jms.GetJmsFleetCryptoAnalysisResultRequest",
+        "responseType": "jms.GetJmsFleetCryptoAnalysisResultResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListJmsFleetCryptoAnalysisResult",
+        "requestType": "jms.ListJmsFleetCryptoAnalysisResultRequest",
+        "responseType": "jms.ListJmsFleetCryptoAnalysisResultResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateJmsFleetCryptoAnalysisResult",
+        "requestType": "jms.UpdateJmsFleetCryptoAnalysisResultRequest",
+        "responseType": "jms.UpdateJmsFleetCryptoAnalysisResultResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteJmsFleetCryptoAnalysisResult",
+        "requestType": "jms.DeleteJmsFleetCryptoAnalysisResultRequest",
+        "responseType": "jms.DeleteJmsFleetCryptoAnalysisResultResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_jms_jmsfleetcryptoanalysisresult",
+    "collectionField": "jmsfleetcryptoanalysisresult",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/jms/jmsfleetcryptoanalysisresult/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/jms/jmsfleetcryptoanalysisresult/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for jms/jmsfleetcryptoanalysisresult; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

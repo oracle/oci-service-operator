@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "loadbalancer",
+  "slug": "loadbalancerbackends",
+  "kind": "LoadBalancerBackends",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_load_balancer_backends",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateLoadBalancerBackends",
+        "requestType": "loadbalancer.CreateLoadBalancerBackendsRequest",
+        "responseType": "loadbalancer.CreateLoadBalancerBackendsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetLoadBalancerBackends",
+        "requestType": "loadbalancer.GetLoadBalancerBackendsRequest",
+        "responseType": "loadbalancer.GetLoadBalancerBackendsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListLoadBalancerBackends",
+        "requestType": "loadbalancer.ListLoadBalancerBackendsRequest",
+        "responseType": "loadbalancer.ListLoadBalancerBackendsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateLoadBalancerBackends",
+        "requestType": "loadbalancer.UpdateLoadBalancerBackendsRequest",
+        "responseType": "loadbalancer.UpdateLoadBalancerBackendsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteLoadBalancerBackends",
+        "requestType": "loadbalancer.DeleteLoadBalancerBackendsRequest",
+        "responseType": "loadbalancer.DeleteLoadBalancerBackendsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_loadbalancer_loadbalancerbackends",
+    "collectionField": "loadbalancerbackends",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/loadbalancer/loadbalancerbackends/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/loadbalancer/loadbalancerbackends/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for loadbalancer/loadbalancerbackends; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

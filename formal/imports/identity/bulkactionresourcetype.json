@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "identity",
+  "slug": "bulkactionresourcetype",
+  "kind": "BulkActionResourceType",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_identity_bulkactionresourcetype",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateBulkActionResourceType",
+        "requestType": "identity.CreateBulkActionResourceTypeRequest",
+        "responseType": "identity.CreateBulkActionResourceTypeResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetBulkActionResourceType",
+        "requestType": "identity.GetBulkActionResourceTypeRequest",
+        "responseType": "identity.GetBulkActionResourceTypeResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListBulkActionResourceType",
+        "requestType": "identity.ListBulkActionResourceTypeRequest",
+        "responseType": "identity.ListBulkActionResourceTypeResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateBulkActionResourceType",
+        "requestType": "identity.UpdateBulkActionResourceTypeRequest",
+        "responseType": "identity.UpdateBulkActionResourceTypeResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteBulkActionResourceType",
+        "requestType": "identity.DeleteBulkActionResourceTypeRequest",
+        "responseType": "identity.DeleteBulkActionResourceTypeResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_identity_bulkactionresourcetype",
+    "collectionField": "bulkactionresourcetype",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/identity/bulkactionresourcetype/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/identity/bulkactionresourcetype/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for identity/bulkactionresourcetype; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

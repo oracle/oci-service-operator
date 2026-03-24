@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "datasafesecurityassessmentfindinganalytics",
+  "kind": "DataSafeSecurityAssessmentFindingAnalytics",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_security_assessment_finding_analytics",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDataSafeSecurityAssessmentFindingAnalytics",
+        "requestType": "datasafe.CreateDataSafeSecurityAssessmentFindingAnalyticsRequest",
+        "responseType": "datasafe.CreateDataSafeSecurityAssessmentFindingAnalyticsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDataSafeSecurityAssessmentFindingAnalytics",
+        "requestType": "datasafe.GetDataSafeSecurityAssessmentFindingAnalyticsRequest",
+        "responseType": "datasafe.GetDataSafeSecurityAssessmentFindingAnalyticsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDataSafeSecurityAssessmentFindingAnalytics",
+        "requestType": "datasafe.ListDataSafeSecurityAssessmentFindingAnalyticsRequest",
+        "responseType": "datasafe.ListDataSafeSecurityAssessmentFindingAnalyticsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDataSafeSecurityAssessmentFindingAnalytics",
+        "requestType": "datasafe.UpdateDataSafeSecurityAssessmentFindingAnalyticsRequest",
+        "responseType": "datasafe.UpdateDataSafeSecurityAssessmentFindingAnalyticsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDataSafeSecurityAssessmentFindingAnalytics",
+        "requestType": "datasafe.DeleteDataSafeSecurityAssessmentFindingAnalyticsRequest",
+        "responseType": "datasafe.DeleteDataSafeSecurityAssessmentFindingAnalyticsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_datasafe_datasafesecurityassessmentfindinganalytics",
+    "collectionField": "datasafesecurityassessmentfindinganalytics",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/datasafesecurityassessmentfindinganalytics/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/datasafesecurityassessmentfindinganalytics/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for datasafe/datasafesecurityassessmentfindinganalytics; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

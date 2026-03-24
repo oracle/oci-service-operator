@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "fleetappsmanagement",
+  "slug": "fleetappsmanagementonboarding",
+  "kind": "FleetAppsManagementOnboarding",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_fleet_apps_management_onboarding",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateFleetAppsManagementOnboarding",
+        "requestType": "fleetappsmanagement.CreateFleetAppsManagementOnboardingRequest",
+        "responseType": "fleetappsmanagement.CreateFleetAppsManagementOnboardingResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetFleetAppsManagementOnboarding",
+        "requestType": "fleetappsmanagement.GetFleetAppsManagementOnboardingRequest",
+        "responseType": "fleetappsmanagement.GetFleetAppsManagementOnboardingResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListFleetAppsManagementOnboarding",
+        "requestType": "fleetappsmanagement.ListFleetAppsManagementOnboardingRequest",
+        "responseType": "fleetappsmanagement.ListFleetAppsManagementOnboardingResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateFleetAppsManagementOnboarding",
+        "requestType": "fleetappsmanagement.UpdateFleetAppsManagementOnboardingRequest",
+        "responseType": "fleetappsmanagement.UpdateFleetAppsManagementOnboardingResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteFleetAppsManagementOnboarding",
+        "requestType": "fleetappsmanagement.DeleteFleetAppsManagementOnboardingRequest",
+        "responseType": "fleetappsmanagement.DeleteFleetAppsManagementOnboardingResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_fleetappsmanagement_fleetappsmanagementonboarding",
+    "collectionField": "fleetappsmanagementonboarding",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/fleetappsmanagement/fleetappsmanagementonboarding/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/fleetappsmanagement/fleetappsmanagementonboarding/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for fleetappsmanagement/fleetappsmanagementonboarding; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

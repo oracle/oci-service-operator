@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "fleetappsmanagement",
+  "slug": "fleetappsmanagementproperty",
+  "kind": "FleetAppsManagementProperty",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_fleet_apps_management_property",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateFleetAppsManagementProperty",
+        "requestType": "fleetappsmanagement.CreateFleetAppsManagementPropertyRequest",
+        "responseType": "fleetappsmanagement.CreateFleetAppsManagementPropertyResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetFleetAppsManagementProperty",
+        "requestType": "fleetappsmanagement.GetFleetAppsManagementPropertyRequest",
+        "responseType": "fleetappsmanagement.GetFleetAppsManagementPropertyResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListFleetAppsManagementProperty",
+        "requestType": "fleetappsmanagement.ListFleetAppsManagementPropertyRequest",
+        "responseType": "fleetappsmanagement.ListFleetAppsManagementPropertyResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateFleetAppsManagementProperty",
+        "requestType": "fleetappsmanagement.UpdateFleetAppsManagementPropertyRequest",
+        "responseType": "fleetappsmanagement.UpdateFleetAppsManagementPropertyResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteFleetAppsManagementProperty",
+        "requestType": "fleetappsmanagement.DeleteFleetAppsManagementPropertyRequest",
+        "responseType": "fleetappsmanagement.DeleteFleetAppsManagementPropertyResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_fleetappsmanagement_fleetappsmanagementproperty",
+    "collectionField": "fleetappsmanagementproperty",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/fleetappsmanagement/fleetappsmanagementproperty/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/fleetappsmanagement/fleetappsmanagementproperty/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for fleetappsmanagement/fleetappsmanagementproperty; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "dblm",
+  "slug": "dblmpatchmanagement",
+  "kind": "DblmPatchManagement",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_dblm_patch_management",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDblmPatchManagement",
+        "requestType": "dblm.CreateDblmPatchManagementRequest",
+        "responseType": "dblm.CreateDblmPatchManagementResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDblmPatchManagement",
+        "requestType": "dblm.GetDblmPatchManagementRequest",
+        "responseType": "dblm.GetDblmPatchManagementResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDblmPatchManagement",
+        "requestType": "dblm.ListDblmPatchManagementRequest",
+        "responseType": "dblm.ListDblmPatchManagementResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDblmPatchManagement",
+        "requestType": "dblm.UpdateDblmPatchManagementRequest",
+        "responseType": "dblm.UpdateDblmPatchManagementResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDblmPatchManagement",
+        "requestType": "dblm.DeleteDblmPatchManagementRequest",
+        "responseType": "dblm.DeleteDblmPatchManagementResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_dblm_dblmpatchmanagement",
+    "collectionField": "dblmpatchmanagement",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/dblm/dblmpatchmanagement/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/dblm/dblmpatchmanagement/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for dblm/dblmpatchmanagement; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

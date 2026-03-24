@@ -1,0 +1,91 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Sequence - mysql/Version
+hide footbox
+skinparam sequence {
+  actorBorderColor #0f172a
+  actorBackgroundColor #e2e8f0
+  participantBorderColor #0f172a
+  participantBackgroundColor #e2e8f0
+  participantFontColor #0f172a
+  lifeLineBorderColor #94a3b8
+  groupBorderColor #cbd5e1
+  groupBackgroundColor #f8fafc
+}
+actor Kubernetes
+participant Controller
+participant BaseReconciler
+participant "OSOKServiceManager" as ServiceManager
+participant OCI
+note over BaseReconciler,ServiceManager
+shared resolution:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete:
+shared/diagrams/shared-delete-sequence.svg
+end note
+Kubernetes -> Controller: enqueue Version reconcile
+Controller -> BaseReconciler: Reconcile(request)
+BaseReconciler -> ServiceManager: reconcile desired Version
+ServiceManager -> OCI: GetVersion
+opt list lookup fallback
+ServiceManager -> OCI: ListVersion(filters: compartment_id,\nstate)
+OCI --> ServiceManager: matching collection items
+end
+alt create or bind path
+ServiceManager -> OCI: CreateVersion
+loop create pending PROVISIONING
+ServiceManager -> OCI: GetVersion
+end
+else update or drift path
+ServiceManager -> OCI: UpdateVersion
+loop update pending UPDATING
+ServiceManager -> OCI: GetVersion
+end
+end
+opt delete requested
+ServiceManager -> OCI: DeleteVersion
+loop delete confirmation DELETING
+ServiceManager -> OCI: GetVersion or ListVersion
+end
+end
+ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
+BaseReconciler --> Controller: requeue on provisioning, updating,\nterminating
+note right of ServiceManager
+shared diagram:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete diagram:
+shared/diagrams/shared-delete-sequence.svg
+Start from the shared resolution sequence for
+OCID binding, datasource pagination, and
+create-or-update dispatch.
+Layer the shared delete sequence when finalizer
+retention, delete confirmation, work-request
+polling, or Secret cleanup apply.
+archetype batch: Generated service-manager
+controllers follow the shared resolution and
+delete sequences with imported waits and
+controller-local policy.
+service: mysql
+slug: version
+kind: Version
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create PROVISIONING; update
+UPDATING; delete DELETING
+mutable/forceNew: display_name / compartment_id
+open gaps: none
+Scaffold metadata only; replace with
+controller-specific runtime states before
+promotion.
+end note
+@enduml

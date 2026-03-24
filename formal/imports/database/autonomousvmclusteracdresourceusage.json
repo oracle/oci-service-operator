@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "autonomousvmclusteracdresourceusage",
+  "kind": "AutonomousVmClusterAcdResourceUsage",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_database_autonomousvmclusteracdresourceusage",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateAutonomousVmClusterAcdResourceUsage",
+        "requestType": "database.CreateAutonomousVmClusterAcdResourceUsageRequest",
+        "responseType": "database.CreateAutonomousVmClusterAcdResourceUsageResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetAutonomousVmClusterAcdResourceUsage",
+        "requestType": "database.GetAutonomousVmClusterAcdResourceUsageRequest",
+        "responseType": "database.GetAutonomousVmClusterAcdResourceUsageResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListAutonomousVmClusterAcdResourceUsage",
+        "requestType": "database.ListAutonomousVmClusterAcdResourceUsageRequest",
+        "responseType": "database.ListAutonomousVmClusterAcdResourceUsageResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateAutonomousVmClusterAcdResourceUsage",
+        "requestType": "database.UpdateAutonomousVmClusterAcdResourceUsageRequest",
+        "responseType": "database.UpdateAutonomousVmClusterAcdResourceUsageResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteAutonomousVmClusterAcdResourceUsage",
+        "requestType": "database.DeleteAutonomousVmClusterAcdResourceUsageRequest",
+        "responseType": "database.DeleteAutonomousVmClusterAcdResourceUsageResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_autonomousvmclusteracdresourceusage",
+    "collectionField": "autonomousvmclusteracdresourceusage",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/autonomousvmclusteracdresourceusage/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/autonomousvmclusteracdresourceusage/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/autonomousvmclusteracdresourceusage; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

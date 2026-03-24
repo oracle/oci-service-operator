@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "limits",
+  "slug": "limitdefinition",
+  "kind": "LimitDefinition",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_limits_limitdefinition",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateLimitDefinition",
+        "requestType": "limits.CreateLimitDefinitionRequest",
+        "responseType": "limits.CreateLimitDefinitionResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetLimitDefinition",
+        "requestType": "limits.GetLimitDefinitionRequest",
+        "responseType": "limits.GetLimitDefinitionResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListLimitDefinition",
+        "requestType": "limits.ListLimitDefinitionRequest",
+        "responseType": "limits.ListLimitDefinitionResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateLimitDefinition",
+        "requestType": "limits.UpdateLimitDefinitionRequest",
+        "responseType": "limits.UpdateLimitDefinitionResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteLimitDefinition",
+        "requestType": "limits.DeleteLimitDefinitionRequest",
+        "responseType": "limits.DeleteLimitDefinitionResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_limits_limitdefinition",
+    "collectionField": "limitdefinition",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/limits/limitdefinition/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/limits/limitdefinition/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for limits/limitdefinition; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

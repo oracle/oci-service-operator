@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "distributeddatabase",
+  "slug": "distributeddatabasedistributedautonomousdatabase",
+  "kind": "DistributedDatabaseDistributedAutonomousDatabase",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_distributed_database_distributed_autonomous_database",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDistributedDatabaseDistributedAutonomousDatabase",
+        "requestType": "distributeddatabase.CreateDistributedDatabaseDistributedAutonomousDatabaseRequest",
+        "responseType": "distributeddatabase.CreateDistributedDatabaseDistributedAutonomousDatabaseResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDistributedDatabaseDistributedAutonomousDatabase",
+        "requestType": "distributeddatabase.GetDistributedDatabaseDistributedAutonomousDatabaseRequest",
+        "responseType": "distributeddatabase.GetDistributedDatabaseDistributedAutonomousDatabaseResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDistributedDatabaseDistributedAutonomousDatabase",
+        "requestType": "distributeddatabase.ListDistributedDatabaseDistributedAutonomousDatabaseRequest",
+        "responseType": "distributeddatabase.ListDistributedDatabaseDistributedAutonomousDatabaseResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDistributedDatabaseDistributedAutonomousDatabase",
+        "requestType": "distributeddatabase.UpdateDistributedDatabaseDistributedAutonomousDatabaseRequest",
+        "responseType": "distributeddatabase.UpdateDistributedDatabaseDistributedAutonomousDatabaseResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDistributedDatabaseDistributedAutonomousDatabase",
+        "requestType": "distributeddatabase.DeleteDistributedDatabaseDistributedAutonomousDatabaseRequest",
+        "responseType": "distributeddatabase.DeleteDistributedDatabaseDistributedAutonomousDatabaseResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_distributeddatabase_distributeddatabasedistributedautonomousdatabase",
+    "collectionField": "distributeddatabasedistributedautonomousdatabase",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/distributeddatabase/distributeddatabasedistributedautonomousdatabase/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/distributeddatabase/distributeddatabasedistributedautonomousdatabase/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for distributeddatabase/distributeddatabasedistributedautonomousdatabase; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

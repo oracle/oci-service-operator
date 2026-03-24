@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "systemversion",
+  "kind": "SystemVersion",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_database_systemversion",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateSystemVersion",
+        "requestType": "database.CreateSystemVersionRequest",
+        "responseType": "database.CreateSystemVersionResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetSystemVersion",
+        "requestType": "database.GetSystemVersionRequest",
+        "responseType": "database.GetSystemVersionResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListSystemVersion",
+        "requestType": "database.ListSystemVersionRequest",
+        "responseType": "database.ListSystemVersionResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateSystemVersion",
+        "requestType": "database.UpdateSystemVersionRequest",
+        "responseType": "database.UpdateSystemVersionResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteSystemVersion",
+        "requestType": "database.DeleteSystemVersionRequest",
+        "responseType": "database.DeleteSystemVersionResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_systemversion",
+    "collectionField": "systemversion",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/systemversion/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/systemversion/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/systemversion; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

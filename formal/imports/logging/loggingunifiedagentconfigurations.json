@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "logging",
+  "slug": "loggingunifiedagentconfigurations",
+  "kind": "LoggingUnifiedAgentConfigurations",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_logging_unified_agent_configurations",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateLoggingUnifiedAgentConfigurations",
+        "requestType": "logging.CreateLoggingUnifiedAgentConfigurationsRequest",
+        "responseType": "logging.CreateLoggingUnifiedAgentConfigurationsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetLoggingUnifiedAgentConfigurations",
+        "requestType": "logging.GetLoggingUnifiedAgentConfigurationsRequest",
+        "responseType": "logging.GetLoggingUnifiedAgentConfigurationsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListLoggingUnifiedAgentConfigurations",
+        "requestType": "logging.ListLoggingUnifiedAgentConfigurationsRequest",
+        "responseType": "logging.ListLoggingUnifiedAgentConfigurationsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateLoggingUnifiedAgentConfigurations",
+        "requestType": "logging.UpdateLoggingUnifiedAgentConfigurationsRequest",
+        "responseType": "logging.UpdateLoggingUnifiedAgentConfigurationsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteLoggingUnifiedAgentConfigurations",
+        "requestType": "logging.DeleteLoggingUnifiedAgentConfigurationsRequest",
+        "responseType": "logging.DeleteLoggingUnifiedAgentConfigurationsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_logging_loggingunifiedagentconfigurations",
+    "collectionField": "loggingunifiedagentconfigurations",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/logging/loggingunifiedagentconfigurations/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/logging/loggingunifiedagentconfigurations/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for logging/loggingunifiedagentconfigurations; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

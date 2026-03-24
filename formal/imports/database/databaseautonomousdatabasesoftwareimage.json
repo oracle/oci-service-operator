@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "databaseautonomousdatabasesoftwareimage",
+  "kind": "DatabaseAutonomousDatabaseSoftwareImage",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_autonomous_database_software_image",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseAutonomousDatabaseSoftwareImage",
+        "requestType": "database.CreateDatabaseAutonomousDatabaseSoftwareImageRequest",
+        "responseType": "database.CreateDatabaseAutonomousDatabaseSoftwareImageResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseAutonomousDatabaseSoftwareImage",
+        "requestType": "database.GetDatabaseAutonomousDatabaseSoftwareImageRequest",
+        "responseType": "database.GetDatabaseAutonomousDatabaseSoftwareImageResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseAutonomousDatabaseSoftwareImage",
+        "requestType": "database.ListDatabaseAutonomousDatabaseSoftwareImageRequest",
+        "responseType": "database.ListDatabaseAutonomousDatabaseSoftwareImageResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseAutonomousDatabaseSoftwareImage",
+        "requestType": "database.UpdateDatabaseAutonomousDatabaseSoftwareImageRequest",
+        "responseType": "database.UpdateDatabaseAutonomousDatabaseSoftwareImageResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseAutonomousDatabaseSoftwareImage",
+        "requestType": "database.DeleteDatabaseAutonomousDatabaseSoftwareImageRequest",
+        "responseType": "database.DeleteDatabaseAutonomousDatabaseSoftwareImageResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_databaseautonomousdatabasesoftwareimage",
+    "collectionField": "databaseautonomousdatabasesoftwareimage",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/databaseautonomousdatabasesoftwareimage/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/databaseautonomousdatabasesoftwareimage/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/databaseautonomousdatabasesoftwareimage; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

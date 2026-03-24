@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "jms",
+  "slug": "jmssummarizelibraryinventory",
+  "kind": "JmsSummarizeLibraryInventory",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_jms_fleet_summarize_library_inventory",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateJmsSummarizeLibraryInventory",
+        "requestType": "jms.CreateJmsSummarizeLibraryInventoryRequest",
+        "responseType": "jms.CreateJmsSummarizeLibraryInventoryResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetJmsSummarizeLibraryInventory",
+        "requestType": "jms.GetJmsSummarizeLibraryInventoryRequest",
+        "responseType": "jms.GetJmsSummarizeLibraryInventoryResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListJmsSummarizeLibraryInventory",
+        "requestType": "jms.ListJmsSummarizeLibraryInventoryRequest",
+        "responseType": "jms.ListJmsSummarizeLibraryInventoryResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateJmsSummarizeLibraryInventory",
+        "requestType": "jms.UpdateJmsSummarizeLibraryInventoryRequest",
+        "responseType": "jms.UpdateJmsSummarizeLibraryInventoryResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteJmsSummarizeLibraryInventory",
+        "requestType": "jms.DeleteJmsSummarizeLibraryInventoryRequest",
+        "responseType": "jms.DeleteJmsSummarizeLibraryInventoryResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_jms_jmssummarizelibraryinventory",
+    "collectionField": "jmssummarizelibraryinventory",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/jms/jmssummarizelibraryinventory/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/jms/jmssummarizelibraryinventory/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for jms/jmssummarizelibraryinventory; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

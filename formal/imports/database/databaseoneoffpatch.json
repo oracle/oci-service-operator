@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "databaseoneoffpatch",
+  "kind": "DatabaseOneoffPatch",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_oneoff_patch",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseOneoffPatch",
+        "requestType": "database.CreateDatabaseOneoffPatchRequest",
+        "responseType": "database.CreateDatabaseOneoffPatchResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseOneoffPatch",
+        "requestType": "database.GetDatabaseOneoffPatchRequest",
+        "responseType": "database.GetDatabaseOneoffPatchResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseOneoffPatch",
+        "requestType": "database.ListDatabaseOneoffPatchRequest",
+        "responseType": "database.ListDatabaseOneoffPatchResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseOneoffPatch",
+        "requestType": "database.UpdateDatabaseOneoffPatchRequest",
+        "responseType": "database.UpdateDatabaseOneoffPatchResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseOneoffPatch",
+        "requestType": "database.DeleteDatabaseOneoffPatchRequest",
+        "responseType": "database.DeleteDatabaseOneoffPatchResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_databaseoneoffpatch",
+    "collectionField": "databaseoneoffpatch",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/databaseoneoffpatch/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/databaseoneoffpatch/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/databaseoneoffpatch; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "analytics",
+  "slug": "analyticsanalyticsinstancevanityurl",
+  "kind": "AnalyticsAnalyticsInstanceVanityUrl",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_analytics_analytics_instance_vanity_url",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateAnalyticsAnalyticsInstanceVanityUrl",
+        "requestType": "analytics.CreateAnalyticsAnalyticsInstanceVanityUrlRequest",
+        "responseType": "analytics.CreateAnalyticsAnalyticsInstanceVanityUrlResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetAnalyticsAnalyticsInstanceVanityUrl",
+        "requestType": "analytics.GetAnalyticsAnalyticsInstanceVanityUrlRequest",
+        "responseType": "analytics.GetAnalyticsAnalyticsInstanceVanityUrlResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListAnalyticsAnalyticsInstanceVanityUrl",
+        "requestType": "analytics.ListAnalyticsAnalyticsInstanceVanityUrlRequest",
+        "responseType": "analytics.ListAnalyticsAnalyticsInstanceVanityUrlResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateAnalyticsAnalyticsInstanceVanityUrl",
+        "requestType": "analytics.UpdateAnalyticsAnalyticsInstanceVanityUrlRequest",
+        "responseType": "analytics.UpdateAnalyticsAnalyticsInstanceVanityUrlResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteAnalyticsAnalyticsInstanceVanityUrl",
+        "requestType": "analytics.DeleteAnalyticsAnalyticsInstanceVanityUrlRequest",
+        "responseType": "analytics.DeleteAnalyticsAnalyticsInstanceVanityUrlResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_analytics_analyticsanalyticsinstancevanityurl",
+    "collectionField": "analyticsanalyticsinstancevanityurl",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/analytics/analyticsanalyticsinstancevanityurl/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/analytics/analyticsanalyticsinstancevanityurl/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for analytics/analyticsanalyticsinstancevanityurl; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datascience",
+  "slug": "datascienceschedule",
+  "kind": "DatascienceSchedule",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_datascience_schedule",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatascienceSchedule",
+        "requestType": "datascience.CreateDatascienceScheduleRequest",
+        "responseType": "datascience.CreateDatascienceScheduleResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatascienceSchedule",
+        "requestType": "datascience.GetDatascienceScheduleRequest",
+        "responseType": "datascience.GetDatascienceScheduleResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatascienceSchedule",
+        "requestType": "datascience.ListDatascienceScheduleRequest",
+        "responseType": "datascience.ListDatascienceScheduleResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatascienceSchedule",
+        "requestType": "datascience.UpdateDatascienceScheduleRequest",
+        "responseType": "datascience.UpdateDatascienceScheduleResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatascienceSchedule",
+        "requestType": "datascience.DeleteDatascienceScheduleRequest",
+        "responseType": "datascience.DeleteDatascienceScheduleResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_datascience_datascienceschedule",
+    "collectionField": "datascienceschedule",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datascience/datascienceschedule/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datascience/datascienceschedule/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for datascience/datascienceschedule; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

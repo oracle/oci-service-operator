@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "osmanagementhub",
+  "slug": "osmanagementhubmanagedinstanceavailablesoftwaresources",
+  "kind": "OsManagementHubManagedInstanceAvailableSoftwareSources",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_os_management_hub_managed_instance_available_software_sources",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOsManagementHubManagedInstanceAvailableSoftwareSources",
+        "requestType": "osmanagementhub.CreateOsManagementHubManagedInstanceAvailableSoftwareSourcesRequest",
+        "responseType": "osmanagementhub.CreateOsManagementHubManagedInstanceAvailableSoftwareSourcesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOsManagementHubManagedInstanceAvailableSoftwareSources",
+        "requestType": "osmanagementhub.GetOsManagementHubManagedInstanceAvailableSoftwareSourcesRequest",
+        "responseType": "osmanagementhub.GetOsManagementHubManagedInstanceAvailableSoftwareSourcesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOsManagementHubManagedInstanceAvailableSoftwareSources",
+        "requestType": "osmanagementhub.ListOsManagementHubManagedInstanceAvailableSoftwareSourcesRequest",
+        "responseType": "osmanagementhub.ListOsManagementHubManagedInstanceAvailableSoftwareSourcesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOsManagementHubManagedInstanceAvailableSoftwareSources",
+        "requestType": "osmanagementhub.UpdateOsManagementHubManagedInstanceAvailableSoftwareSourcesRequest",
+        "responseType": "osmanagementhub.UpdateOsManagementHubManagedInstanceAvailableSoftwareSourcesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOsManagementHubManagedInstanceAvailableSoftwareSources",
+        "requestType": "osmanagementhub.DeleteOsManagementHubManagedInstanceAvailableSoftwareSourcesRequest",
+        "responseType": "osmanagementhub.DeleteOsManagementHubManagedInstanceAvailableSoftwareSourcesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_osmanagementhub_osmanagementhubmanagedinstanceavailablesoftwaresources",
+    "collectionField": "osmanagementhubmanagedinstanceavailablesoftwaresources",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/osmanagementhub/osmanagementhubmanagedinstanceavailablesoftwaresources/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/osmanagementhub/osmanagementhubmanagedinstanceavailablesoftwaresources/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for osmanagementhub/osmanagementhubmanagedinstanceavailablesoftwaresources; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

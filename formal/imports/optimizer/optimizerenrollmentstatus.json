@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "optimizer",
+  "slug": "optimizerenrollmentstatus",
+  "kind": "OptimizerEnrollmentStatus",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_optimizer_enrollment_status",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOptimizerEnrollmentStatus",
+        "requestType": "optimizer.CreateOptimizerEnrollmentStatusRequest",
+        "responseType": "optimizer.CreateOptimizerEnrollmentStatusResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOptimizerEnrollmentStatus",
+        "requestType": "optimizer.GetOptimizerEnrollmentStatusRequest",
+        "responseType": "optimizer.GetOptimizerEnrollmentStatusResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOptimizerEnrollmentStatus",
+        "requestType": "optimizer.ListOptimizerEnrollmentStatusRequest",
+        "responseType": "optimizer.ListOptimizerEnrollmentStatusResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOptimizerEnrollmentStatus",
+        "requestType": "optimizer.UpdateOptimizerEnrollmentStatusRequest",
+        "responseType": "optimizer.UpdateOptimizerEnrollmentStatusResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOptimizerEnrollmentStatus",
+        "requestType": "optimizer.DeleteOptimizerEnrollmentStatusRequest",
+        "responseType": "optimizer.DeleteOptimizerEnrollmentStatusResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_optimizer_optimizerenrollmentstatus",
+    "collectionField": "optimizerenrollmentstatus",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/optimizer/optimizerenrollmentstatus/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/optimizer/optimizerenrollmentstatus/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for optimizer/optimizerenrollmentstatus; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

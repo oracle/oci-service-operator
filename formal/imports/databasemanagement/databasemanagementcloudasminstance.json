@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasemanagement",
+  "slug": "databasemanagementcloudasminstance",
+  "kind": "DatabaseManagementCloudAsmInstance",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_management_cloud_asm_instance",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseManagementCloudAsmInstance",
+        "requestType": "databasemanagement.CreateDatabaseManagementCloudAsmInstanceRequest",
+        "responseType": "databasemanagement.CreateDatabaseManagementCloudAsmInstanceResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseManagementCloudAsmInstance",
+        "requestType": "databasemanagement.GetDatabaseManagementCloudAsmInstanceRequest",
+        "responseType": "databasemanagement.GetDatabaseManagementCloudAsmInstanceResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseManagementCloudAsmInstance",
+        "requestType": "databasemanagement.ListDatabaseManagementCloudAsmInstanceRequest",
+        "responseType": "databasemanagement.ListDatabaseManagementCloudAsmInstanceResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseManagementCloudAsmInstance",
+        "requestType": "databasemanagement.UpdateDatabaseManagementCloudAsmInstanceRequest",
+        "responseType": "databasemanagement.UpdateDatabaseManagementCloudAsmInstanceResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseManagementCloudAsmInstance",
+        "requestType": "databasemanagement.DeleteDatabaseManagementCloudAsmInstanceRequest",
+        "responseType": "databasemanagement.DeleteDatabaseManagementCloudAsmInstanceResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_databasemanagement_databasemanagementcloudasminstance",
+    "collectionField": "databasemanagementcloudasminstance",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasemanagement/databasemanagementcloudasminstance/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasemanagement/databasemanagementcloudasminstance/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for databasemanagement/databasemanagementcloudasminstance; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

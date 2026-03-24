@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "networkloadbalancer",
+  "slug": "networkloadbalancerlisteners",
+  "kind": "NetworkLoadBalancerListeners",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_network_load_balancer_listeners",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateNetworkLoadBalancerListeners",
+        "requestType": "networkloadbalancer.CreateNetworkLoadBalancerListenersRequest",
+        "responseType": "networkloadbalancer.CreateNetworkLoadBalancerListenersResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetNetworkLoadBalancerListeners",
+        "requestType": "networkloadbalancer.GetNetworkLoadBalancerListenersRequest",
+        "responseType": "networkloadbalancer.GetNetworkLoadBalancerListenersResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListNetworkLoadBalancerListeners",
+        "requestType": "networkloadbalancer.ListNetworkLoadBalancerListenersRequest",
+        "responseType": "networkloadbalancer.ListNetworkLoadBalancerListenersResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateNetworkLoadBalancerListeners",
+        "requestType": "networkloadbalancer.UpdateNetworkLoadBalancerListenersRequest",
+        "responseType": "networkloadbalancer.UpdateNetworkLoadBalancerListenersResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteNetworkLoadBalancerListeners",
+        "requestType": "networkloadbalancer.DeleteNetworkLoadBalancerListenersRequest",
+        "responseType": "networkloadbalancer.DeleteNetworkLoadBalancerListenersResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_networkloadbalancer_networkloadbalancerlisteners",
+    "collectionField": "networkloadbalancerlisteners",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/networkloadbalancer/networkloadbalancerlisteners/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/networkloadbalancer/networkloadbalancerlisteners/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for networkloadbalancer/networkloadbalancerlisteners; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

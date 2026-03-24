@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "consoleconnection",
+  "kind": "ConsoleConnection",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_database_consoleconnection",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateConsoleConnection",
+        "requestType": "database.CreateConsoleConnectionRequest",
+        "responseType": "database.CreateConsoleConnectionResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetConsoleConnection",
+        "requestType": "database.GetConsoleConnectionRequest",
+        "responseType": "database.GetConsoleConnectionResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListConsoleConnection",
+        "requestType": "database.ListConsoleConnectionRequest",
+        "responseType": "database.ListConsoleConnectionResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateConsoleConnection",
+        "requestType": "database.UpdateConsoleConnectionRequest",
+        "responseType": "database.UpdateConsoleConnectionResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteConsoleConnection",
+        "requestType": "database.DeleteConsoleConnectionRequest",
+        "responseType": "database.DeleteConsoleConnectionResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_consoleconnection",
+    "collectionField": "consoleconnection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/consoleconnection/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/consoleconnection/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/consoleconnection; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

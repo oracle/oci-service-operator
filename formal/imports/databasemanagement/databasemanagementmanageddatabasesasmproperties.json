@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasemanagement",
+  "slug": "databasemanagementmanageddatabasesasmproperties",
+  "kind": "DatabaseManagementManagedDatabasesAsmProperties",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_management_managed_databases_asm_properties",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseManagementManagedDatabasesAsmProperties",
+        "requestType": "databasemanagement.CreateDatabaseManagementManagedDatabasesAsmPropertiesRequest",
+        "responseType": "databasemanagement.CreateDatabaseManagementManagedDatabasesAsmPropertiesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseManagementManagedDatabasesAsmProperties",
+        "requestType": "databasemanagement.GetDatabaseManagementManagedDatabasesAsmPropertiesRequest",
+        "responseType": "databasemanagement.GetDatabaseManagementManagedDatabasesAsmPropertiesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseManagementManagedDatabasesAsmProperties",
+        "requestType": "databasemanagement.ListDatabaseManagementManagedDatabasesAsmPropertiesRequest",
+        "responseType": "databasemanagement.ListDatabaseManagementManagedDatabasesAsmPropertiesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseManagementManagedDatabasesAsmProperties",
+        "requestType": "databasemanagement.UpdateDatabaseManagementManagedDatabasesAsmPropertiesRequest",
+        "responseType": "databasemanagement.UpdateDatabaseManagementManagedDatabasesAsmPropertiesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseManagementManagedDatabasesAsmProperties",
+        "requestType": "databasemanagement.DeleteDatabaseManagementManagedDatabasesAsmPropertiesRequest",
+        "responseType": "databasemanagement.DeleteDatabaseManagementManagedDatabasesAsmPropertiesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_databasemanagement_databasemanagementmanageddatabasesasmproperties",
+    "collectionField": "databasemanagementmanageddatabasesasmproperties",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasemanagement/databasemanagementmanageddatabasesasmproperties/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasemanagement/databasemanagementmanageddatabasesasmproperties/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for databasemanagement/databasemanagementmanageddatabasesasmproperties; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

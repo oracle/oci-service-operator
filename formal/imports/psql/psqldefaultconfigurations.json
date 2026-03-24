@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "psql",
+  "slug": "psqldefaultconfigurations",
+  "kind": "PsqlDefaultConfigurations",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_psql_default_configurations",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreatePsqlDefaultConfigurations",
+        "requestType": "psql.CreatePsqlDefaultConfigurationsRequest",
+        "responseType": "psql.CreatePsqlDefaultConfigurationsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetPsqlDefaultConfigurations",
+        "requestType": "psql.GetPsqlDefaultConfigurationsRequest",
+        "responseType": "psql.GetPsqlDefaultConfigurationsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListPsqlDefaultConfigurations",
+        "requestType": "psql.ListPsqlDefaultConfigurationsRequest",
+        "responseType": "psql.ListPsqlDefaultConfigurationsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdatePsqlDefaultConfigurations",
+        "requestType": "psql.UpdatePsqlDefaultConfigurationsRequest",
+        "responseType": "psql.UpdatePsqlDefaultConfigurationsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeletePsqlDefaultConfigurations",
+        "requestType": "psql.DeletePsqlDefaultConfigurationsRequest",
+        "responseType": "psql.DeletePsqlDefaultConfigurationsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_psql_psqldefaultconfigurations",
+    "collectionField": "psqldefaultconfigurations",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/psql/psqldefaultconfigurations/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/psql/psqldefaultconfigurations/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for psql/psqldefaultconfigurations; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

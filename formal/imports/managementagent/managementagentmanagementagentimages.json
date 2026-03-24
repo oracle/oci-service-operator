@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "managementagent",
+  "slug": "managementagentmanagementagentimages",
+  "kind": "ManagementAgentManagementAgentImages",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_management_agent_management_agent_images",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateManagementAgentManagementAgentImages",
+        "requestType": "managementagent.CreateManagementAgentManagementAgentImagesRequest",
+        "responseType": "managementagent.CreateManagementAgentManagementAgentImagesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetManagementAgentManagementAgentImages",
+        "requestType": "managementagent.GetManagementAgentManagementAgentImagesRequest",
+        "responseType": "managementagent.GetManagementAgentManagementAgentImagesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListManagementAgentManagementAgentImages",
+        "requestType": "managementagent.ListManagementAgentManagementAgentImagesRequest",
+        "responseType": "managementagent.ListManagementAgentManagementAgentImagesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateManagementAgentManagementAgentImages",
+        "requestType": "managementagent.UpdateManagementAgentManagementAgentImagesRequest",
+        "responseType": "managementagent.UpdateManagementAgentManagementAgentImagesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteManagementAgentManagementAgentImages",
+        "requestType": "managementagent.DeleteManagementAgentManagementAgentImagesRequest",
+        "responseType": "managementagent.DeleteManagementAgentManagementAgentImagesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_managementagent_managementagentmanagementagentimages",
+    "collectionField": "managementagentmanagementagentimages",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/managementagent/managementagentmanagementagentimages/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/managementagent/managementagentmanagementagentimages/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for managementagent/managementagentmanagementagentimages; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

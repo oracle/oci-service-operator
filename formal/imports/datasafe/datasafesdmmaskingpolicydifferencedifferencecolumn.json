@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "datasafesdmmaskingpolicydifferencedifferencecolumn",
+  "kind": "DataSafeSdmMaskingPolicyDifferenceDifferenceColumn",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_sdm_masking_policy_difference_difference_column",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDataSafeSdmMaskingPolicyDifferenceDifferenceColumn",
+        "requestType": "datasafe.CreateDataSafeSdmMaskingPolicyDifferenceDifferenceColumnRequest",
+        "responseType": "datasafe.CreateDataSafeSdmMaskingPolicyDifferenceDifferenceColumnResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDataSafeSdmMaskingPolicyDifferenceDifferenceColumn",
+        "requestType": "datasafe.GetDataSafeSdmMaskingPolicyDifferenceDifferenceColumnRequest",
+        "responseType": "datasafe.GetDataSafeSdmMaskingPolicyDifferenceDifferenceColumnResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDataSafeSdmMaskingPolicyDifferenceDifferenceColumn",
+        "requestType": "datasafe.ListDataSafeSdmMaskingPolicyDifferenceDifferenceColumnRequest",
+        "responseType": "datasafe.ListDataSafeSdmMaskingPolicyDifferenceDifferenceColumnResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDataSafeSdmMaskingPolicyDifferenceDifferenceColumn",
+        "requestType": "datasafe.UpdateDataSafeSdmMaskingPolicyDifferenceDifferenceColumnRequest",
+        "responseType": "datasafe.UpdateDataSafeSdmMaskingPolicyDifferenceDifferenceColumnResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDataSafeSdmMaskingPolicyDifferenceDifferenceColumn",
+        "requestType": "datasafe.DeleteDataSafeSdmMaskingPolicyDifferenceDifferenceColumnRequest",
+        "responseType": "datasafe.DeleteDataSafeSdmMaskingPolicyDifferenceDifferenceColumnResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_datasafe_datasafesdmmaskingpolicydifferencedifferencecolumn",
+    "collectionField": "datasafesdmmaskingpolicydifferencedifferencecolumn",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/datasafesdmmaskingpolicydifferencedifferencecolumn/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/datasafesdmmaskingpolicydifferencedifferencecolumn/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for datasafe/datasafesdmmaskingpolicydifferencedifferencecolumn; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

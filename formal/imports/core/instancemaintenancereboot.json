@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "instancemaintenancereboot",
+  "kind": "InstanceMaintenanceReboot",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_core_instancemaintenancereboot",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateInstanceMaintenanceReboot",
+        "requestType": "core.CreateInstanceMaintenanceRebootRequest",
+        "responseType": "core.CreateInstanceMaintenanceRebootResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetInstanceMaintenanceReboot",
+        "requestType": "core.GetInstanceMaintenanceRebootRequest",
+        "responseType": "core.GetInstanceMaintenanceRebootResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListInstanceMaintenanceReboot",
+        "requestType": "core.ListInstanceMaintenanceRebootRequest",
+        "responseType": "core.ListInstanceMaintenanceRebootResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateInstanceMaintenanceReboot",
+        "requestType": "core.UpdateInstanceMaintenanceRebootRequest",
+        "responseType": "core.UpdateInstanceMaintenanceRebootResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteInstanceMaintenanceReboot",
+        "requestType": "core.DeleteInstanceMaintenanceRebootRequest",
+        "responseType": "core.DeleteInstanceMaintenanceRebootResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_core_instancemaintenancereboot",
+    "collectionField": "instancemaintenancereboot",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/instancemaintenancereboot/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/instancemaintenancereboot/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for core/instancemaintenancereboot; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

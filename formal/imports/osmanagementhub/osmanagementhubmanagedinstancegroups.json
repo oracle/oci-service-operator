@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "osmanagementhub",
+  "slug": "osmanagementhubmanagedinstancegroups",
+  "kind": "OsManagementHubManagedInstanceGroups",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_os_management_hub_managed_instance_groups",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOsManagementHubManagedInstanceGroups",
+        "requestType": "osmanagementhub.CreateOsManagementHubManagedInstanceGroupsRequest",
+        "responseType": "osmanagementhub.CreateOsManagementHubManagedInstanceGroupsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOsManagementHubManagedInstanceGroups",
+        "requestType": "osmanagementhub.GetOsManagementHubManagedInstanceGroupsRequest",
+        "responseType": "osmanagementhub.GetOsManagementHubManagedInstanceGroupsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOsManagementHubManagedInstanceGroups",
+        "requestType": "osmanagementhub.ListOsManagementHubManagedInstanceGroupsRequest",
+        "responseType": "osmanagementhub.ListOsManagementHubManagedInstanceGroupsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOsManagementHubManagedInstanceGroups",
+        "requestType": "osmanagementhub.UpdateOsManagementHubManagedInstanceGroupsRequest",
+        "responseType": "osmanagementhub.UpdateOsManagementHubManagedInstanceGroupsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOsManagementHubManagedInstanceGroups",
+        "requestType": "osmanagementhub.DeleteOsManagementHubManagedInstanceGroupsRequest",
+        "responseType": "osmanagementhub.DeleteOsManagementHubManagedInstanceGroupsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_osmanagementhub_osmanagementhubmanagedinstancegroups",
+    "collectionField": "osmanagementhubmanagedinstancegroups",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/osmanagementhub/osmanagementhubmanagedinstancegroups/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/osmanagementhub/osmanagementhubmanagedinstancegroups/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for osmanagementhub/osmanagementhubmanagedinstancegroups; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

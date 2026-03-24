@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "wlms",
+  "slug": "wlmswlsdomainserverbackups",
+  "kind": "WlmsWlsDomainServerBackups",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_wlms_wls_domain_server_backups",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateWlmsWlsDomainServerBackups",
+        "requestType": "wlms.CreateWlmsWlsDomainServerBackupsRequest",
+        "responseType": "wlms.CreateWlmsWlsDomainServerBackupsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetWlmsWlsDomainServerBackups",
+        "requestType": "wlms.GetWlmsWlsDomainServerBackupsRequest",
+        "responseType": "wlms.GetWlmsWlsDomainServerBackupsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListWlmsWlsDomainServerBackups",
+        "requestType": "wlms.ListWlmsWlsDomainServerBackupsRequest",
+        "responseType": "wlms.ListWlmsWlsDomainServerBackupsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateWlmsWlsDomainServerBackups",
+        "requestType": "wlms.UpdateWlmsWlsDomainServerBackupsRequest",
+        "responseType": "wlms.UpdateWlmsWlsDomainServerBackupsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteWlmsWlsDomainServerBackups",
+        "requestType": "wlms.DeleteWlmsWlsDomainServerBackupsRequest",
+        "responseType": "wlms.DeleteWlmsWlsDomainServerBackupsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_wlms_wlmswlsdomainserverbackups",
+    "collectionField": "wlmswlsdomainserverbackups",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/wlms/wlmswlsdomainserverbackups/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/wlms/wlmswlsdomainserverbackups/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for wlms/wlmswlsdomainserverbackups; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

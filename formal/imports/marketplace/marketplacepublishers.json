@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "marketplace",
+  "slug": "marketplacepublishers",
+  "kind": "MarketplacePublishers",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_marketplace_publishers",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateMarketplacePublishers",
+        "requestType": "marketplace.CreateMarketplacePublishersRequest",
+        "responseType": "marketplace.CreateMarketplacePublishersResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetMarketplacePublishers",
+        "requestType": "marketplace.GetMarketplacePublishersRequest",
+        "responseType": "marketplace.GetMarketplacePublishersResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListMarketplacePublishers",
+        "requestType": "marketplace.ListMarketplacePublishersRequest",
+        "responseType": "marketplace.ListMarketplacePublishersResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateMarketplacePublishers",
+        "requestType": "marketplace.UpdateMarketplacePublishersRequest",
+        "responseType": "marketplace.UpdateMarketplacePublishersResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteMarketplacePublishers",
+        "requestType": "marketplace.DeleteMarketplacePublishersRequest",
+        "responseType": "marketplace.DeleteMarketplacePublishersResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_marketplace_marketplacepublishers",
+    "collectionField": "marketplacepublishers",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/marketplace/marketplacepublishers/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/marketplace/marketplacepublishers/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for marketplace/marketplacepublishers; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

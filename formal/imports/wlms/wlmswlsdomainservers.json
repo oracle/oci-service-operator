@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "wlms",
+  "slug": "wlmswlsdomainservers",
+  "kind": "WlmsWlsDomainServers",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_wlms_wls_domain_servers",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateWlmsWlsDomainServers",
+        "requestType": "wlms.CreateWlmsWlsDomainServersRequest",
+        "responseType": "wlms.CreateWlmsWlsDomainServersResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetWlmsWlsDomainServers",
+        "requestType": "wlms.GetWlmsWlsDomainServersRequest",
+        "responseType": "wlms.GetWlmsWlsDomainServersResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListWlmsWlsDomainServers",
+        "requestType": "wlms.ListWlmsWlsDomainServersRequest",
+        "responseType": "wlms.ListWlmsWlsDomainServersResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateWlmsWlsDomainServers",
+        "requestType": "wlms.UpdateWlmsWlsDomainServersRequest",
+        "responseType": "wlms.UpdateWlmsWlsDomainServersResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteWlmsWlsDomainServers",
+        "requestType": "wlms.DeleteWlmsWlsDomainServersRequest",
+        "responseType": "wlms.DeleteWlmsWlsDomainServersResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_wlms_wlmswlsdomainservers",
+    "collectionField": "wlmswlsdomainservers",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/wlms/wlmswlsdomainservers/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/wlms/wlmswlsdomainservers/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for wlms/wlmswlsdomainservers; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

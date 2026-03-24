@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "multicloud",
+  "slug": "multicloudexternallocationsmetadata",
+  "kind": "MulticloudExternalLocationsMetadata",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_multicloud_external_locations_metadata",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateMulticloudExternalLocationsMetadata",
+        "requestType": "multicloud.CreateMulticloudExternalLocationsMetadataRequest",
+        "responseType": "multicloud.CreateMulticloudExternalLocationsMetadataResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetMulticloudExternalLocationsMetadata",
+        "requestType": "multicloud.GetMulticloudExternalLocationsMetadataRequest",
+        "responseType": "multicloud.GetMulticloudExternalLocationsMetadataResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListMulticloudExternalLocationsMetadata",
+        "requestType": "multicloud.ListMulticloudExternalLocationsMetadataRequest",
+        "responseType": "multicloud.ListMulticloudExternalLocationsMetadataResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateMulticloudExternalLocationsMetadata",
+        "requestType": "multicloud.UpdateMulticloudExternalLocationsMetadataRequest",
+        "responseType": "multicloud.UpdateMulticloudExternalLocationsMetadataResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteMulticloudExternalLocationsMetadata",
+        "requestType": "multicloud.DeleteMulticloudExternalLocationsMetadataRequest",
+        "responseType": "multicloud.DeleteMulticloudExternalLocationsMetadataResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_multicloud_multicloudexternallocationsmetadata",
+    "collectionField": "multicloudexternallocationsmetadata",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/multicloud/multicloudexternallocationsmetadata/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/multicloud/multicloudexternallocationsmetadata/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for multicloud/multicloudexternallocationsmetadata; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

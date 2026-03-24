@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "datasafesecuritypolicydeploymentsecuritypolicyentrystate",
+  "kind": "DataSafeSecurityPolicyDeploymentSecurityPolicyEntryState",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_security_policy_deployment_security_policy_entry_state",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDataSafeSecurityPolicyDeploymentSecurityPolicyEntryState",
+        "requestType": "datasafe.CreateDataSafeSecurityPolicyDeploymentSecurityPolicyEntryStateRequest",
+        "responseType": "datasafe.CreateDataSafeSecurityPolicyDeploymentSecurityPolicyEntryStateResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDataSafeSecurityPolicyDeploymentSecurityPolicyEntryState",
+        "requestType": "datasafe.GetDataSafeSecurityPolicyDeploymentSecurityPolicyEntryStateRequest",
+        "responseType": "datasafe.GetDataSafeSecurityPolicyDeploymentSecurityPolicyEntryStateResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDataSafeSecurityPolicyDeploymentSecurityPolicyEntryState",
+        "requestType": "datasafe.ListDataSafeSecurityPolicyDeploymentSecurityPolicyEntryStateRequest",
+        "responseType": "datasafe.ListDataSafeSecurityPolicyDeploymentSecurityPolicyEntryStateResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDataSafeSecurityPolicyDeploymentSecurityPolicyEntryState",
+        "requestType": "datasafe.UpdateDataSafeSecurityPolicyDeploymentSecurityPolicyEntryStateRequest",
+        "responseType": "datasafe.UpdateDataSafeSecurityPolicyDeploymentSecurityPolicyEntryStateResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDataSafeSecurityPolicyDeploymentSecurityPolicyEntryState",
+        "requestType": "datasafe.DeleteDataSafeSecurityPolicyDeploymentSecurityPolicyEntryStateRequest",
+        "responseType": "datasafe.DeleteDataSafeSecurityPolicyDeploymentSecurityPolicyEntryStateResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_datasafe_datasafesecuritypolicydeploymentsecuritypolicyentrystate",
+    "collectionField": "datasafesecuritypolicydeploymentsecuritypolicyentrystate",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/datasafesecuritypolicydeploymentsecuritypolicyentrystate/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/datasafesecuritypolicydeploymentsecuritypolicyentrystate/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for datasafe/datasafesecuritypolicydeploymentsecuritypolicyentrystate; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

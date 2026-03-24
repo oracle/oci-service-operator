@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "ocvp",
+  "slug": "ocvpsupportedvmwaresoftwareversions",
+  "kind": "OcvpSupportedVmwareSoftwareVersions",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_ocvp_supported_vmware_software_versions",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOcvpSupportedVmwareSoftwareVersions",
+        "requestType": "ocvp.CreateOcvpSupportedVmwareSoftwareVersionsRequest",
+        "responseType": "ocvp.CreateOcvpSupportedVmwareSoftwareVersionsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOcvpSupportedVmwareSoftwareVersions",
+        "requestType": "ocvp.GetOcvpSupportedVmwareSoftwareVersionsRequest",
+        "responseType": "ocvp.GetOcvpSupportedVmwareSoftwareVersionsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOcvpSupportedVmwareSoftwareVersions",
+        "requestType": "ocvp.ListOcvpSupportedVmwareSoftwareVersionsRequest",
+        "responseType": "ocvp.ListOcvpSupportedVmwareSoftwareVersionsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOcvpSupportedVmwareSoftwareVersions",
+        "requestType": "ocvp.UpdateOcvpSupportedVmwareSoftwareVersionsRequest",
+        "responseType": "ocvp.UpdateOcvpSupportedVmwareSoftwareVersionsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOcvpSupportedVmwareSoftwareVersions",
+        "requestType": "ocvp.DeleteOcvpSupportedVmwareSoftwareVersionsRequest",
+        "responseType": "ocvp.DeleteOcvpSupportedVmwareSoftwareVersionsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_ocvp_ocvpsupportedvmwaresoftwareversions",
+    "collectionField": "ocvpsupportedvmwaresoftwareversions",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/ocvp/ocvpsupportedvmwaresoftwareversions/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/ocvp/ocvpsupportedvmwaresoftwareversions/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for ocvp/ocvpsupportedvmwaresoftwareversions; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

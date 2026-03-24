@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "redis",
+  "slug": "redisocicachedefaultconfigset",
+  "kind": "RedisOciCacheDefaultConfigSet",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_redis_oci_cache_default_config_set",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateRedisOciCacheDefaultConfigSet",
+        "requestType": "redis.CreateRedisOciCacheDefaultConfigSetRequest",
+        "responseType": "redis.CreateRedisOciCacheDefaultConfigSetResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetRedisOciCacheDefaultConfigSet",
+        "requestType": "redis.GetRedisOciCacheDefaultConfigSetRequest",
+        "responseType": "redis.GetRedisOciCacheDefaultConfigSetResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListRedisOciCacheDefaultConfigSet",
+        "requestType": "redis.ListRedisOciCacheDefaultConfigSetRequest",
+        "responseType": "redis.ListRedisOciCacheDefaultConfigSetResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateRedisOciCacheDefaultConfigSet",
+        "requestType": "redis.UpdateRedisOciCacheDefaultConfigSetRequest",
+        "responseType": "redis.UpdateRedisOciCacheDefaultConfigSetResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteRedisOciCacheDefaultConfigSet",
+        "requestType": "redis.DeleteRedisOciCacheDefaultConfigSetRequest",
+        "responseType": "redis.DeleteRedisOciCacheDefaultConfigSetResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_redis_redisocicachedefaultconfigset",
+    "collectionField": "redisocicachedefaultconfigset",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/redis/redisocicachedefaultconfigset/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/redis/redisocicachedefaultconfigset/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for redis/redisocicachedefaultconfigset; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

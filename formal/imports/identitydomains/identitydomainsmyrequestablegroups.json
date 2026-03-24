@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "identitydomains",
+  "slug": "identitydomainsmyrequestablegroups",
+  "kind": "IdentityDomainsMyRequestableGroups",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_identity_domains_my_requestable_groups",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateIdentityDomainsMyRequestableGroups",
+        "requestType": "identitydomains.CreateIdentityDomainsMyRequestableGroupsRequest",
+        "responseType": "identitydomains.CreateIdentityDomainsMyRequestableGroupsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetIdentityDomainsMyRequestableGroups",
+        "requestType": "identitydomains.GetIdentityDomainsMyRequestableGroupsRequest",
+        "responseType": "identitydomains.GetIdentityDomainsMyRequestableGroupsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListIdentityDomainsMyRequestableGroups",
+        "requestType": "identitydomains.ListIdentityDomainsMyRequestableGroupsRequest",
+        "responseType": "identitydomains.ListIdentityDomainsMyRequestableGroupsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateIdentityDomainsMyRequestableGroups",
+        "requestType": "identitydomains.UpdateIdentityDomainsMyRequestableGroupsRequest",
+        "responseType": "identitydomains.UpdateIdentityDomainsMyRequestableGroupsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteIdentityDomainsMyRequestableGroups",
+        "requestType": "identitydomains.DeleteIdentityDomainsMyRequestableGroupsRequest",
+        "responseType": "identitydomains.DeleteIdentityDomainsMyRequestableGroupsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_identitydomains_identitydomainsmyrequestablegroups",
+    "collectionField": "identitydomainsmyrequestablegroups",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/identitydomains/identitydomainsmyrequestablegroups/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/identitydomains/identitydomainsmyrequestablegroups/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for identitydomains/identitydomainsmyrequestablegroups; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

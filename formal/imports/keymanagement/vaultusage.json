@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "keymanagement",
+  "slug": "vaultusage",
+  "kind": "VaultUsage",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_keymanagement_vaultusage",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateVaultUsage",
+        "requestType": "keymanagement.CreateVaultUsageRequest",
+        "responseType": "keymanagement.CreateVaultUsageResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetVaultUsage",
+        "requestType": "keymanagement.GetVaultUsageRequest",
+        "responseType": "keymanagement.GetVaultUsageResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListVaultUsage",
+        "requestType": "keymanagement.ListVaultUsageRequest",
+        "responseType": "keymanagement.ListVaultUsageResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateVaultUsage",
+        "requestType": "keymanagement.UpdateVaultUsageRequest",
+        "responseType": "keymanagement.UpdateVaultUsageResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteVaultUsage",
+        "requestType": "keymanagement.DeleteVaultUsageRequest",
+        "responseType": "keymanagement.DeleteVaultUsageResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_keymanagement_vaultusage",
+    "collectionField": "vaultusage",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/keymanagement/vaultusage/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/keymanagement/vaultusage/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for keymanagement/vaultusage; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

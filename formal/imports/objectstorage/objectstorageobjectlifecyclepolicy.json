@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "objectstorage",
+  "slug": "objectstorageobjectlifecyclepolicy",
+  "kind": "ObjectStorageObjectLifecyclePolicy",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_objectstorage_object_lifecycle_policy",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateObjectStorageObjectLifecyclePolicy",
+        "requestType": "objectstorage.CreateObjectStorageObjectLifecyclePolicyRequest",
+        "responseType": "objectstorage.CreateObjectStorageObjectLifecyclePolicyResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetObjectStorageObjectLifecyclePolicy",
+        "requestType": "objectstorage.GetObjectStorageObjectLifecyclePolicyRequest",
+        "responseType": "objectstorage.GetObjectStorageObjectLifecyclePolicyResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListObjectStorageObjectLifecyclePolicy",
+        "requestType": "objectstorage.ListObjectStorageObjectLifecyclePolicyRequest",
+        "responseType": "objectstorage.ListObjectStorageObjectLifecyclePolicyResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateObjectStorageObjectLifecyclePolicy",
+        "requestType": "objectstorage.UpdateObjectStorageObjectLifecyclePolicyRequest",
+        "responseType": "objectstorage.UpdateObjectStorageObjectLifecyclePolicyResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteObjectStorageObjectLifecyclePolicy",
+        "requestType": "objectstorage.DeleteObjectStorageObjectLifecyclePolicyRequest",
+        "responseType": "objectstorage.DeleteObjectStorageObjectLifecyclePolicyResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_objectstorage_objectstorageobjectlifecyclepolicy",
+    "collectionField": "objectstorageobjectlifecyclepolicy",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/objectstorage/objectstorageobjectlifecyclepolicy/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/objectstorage/objectstorageobjectlifecyclepolicy/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for objectstorage/objectstorageobjectlifecyclepolicy; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

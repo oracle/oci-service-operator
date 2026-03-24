@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "jmsjavadownloads",
+  "slug": "jmsjavadownloadsjavadownloadreportcontent",
+  "kind": "JmsJavaDownloadsJavaDownloadReportContent",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_jms_java_downloads_java_download_report_content",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateJmsJavaDownloadsJavaDownloadReportContent",
+        "requestType": "jmsjavadownloads.CreateJmsJavaDownloadsJavaDownloadReportContentRequest",
+        "responseType": "jmsjavadownloads.CreateJmsJavaDownloadsJavaDownloadReportContentResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetJmsJavaDownloadsJavaDownloadReportContent",
+        "requestType": "jmsjavadownloads.GetJmsJavaDownloadsJavaDownloadReportContentRequest",
+        "responseType": "jmsjavadownloads.GetJmsJavaDownloadsJavaDownloadReportContentResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListJmsJavaDownloadsJavaDownloadReportContent",
+        "requestType": "jmsjavadownloads.ListJmsJavaDownloadsJavaDownloadReportContentRequest",
+        "responseType": "jmsjavadownloads.ListJmsJavaDownloadsJavaDownloadReportContentResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateJmsJavaDownloadsJavaDownloadReportContent",
+        "requestType": "jmsjavadownloads.UpdateJmsJavaDownloadsJavaDownloadReportContentRequest",
+        "responseType": "jmsjavadownloads.UpdateJmsJavaDownloadsJavaDownloadReportContentResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteJmsJavaDownloadsJavaDownloadReportContent",
+        "requestType": "jmsjavadownloads.DeleteJmsJavaDownloadsJavaDownloadReportContentRequest",
+        "responseType": "jmsjavadownloads.DeleteJmsJavaDownloadsJavaDownloadReportContentResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_jmsjavadownloads_jmsjavadownloadsjavadownloadreportcontent",
+    "collectionField": "jmsjavadownloadsjavadownloadreportcontent",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/jmsjavadownloads/jmsjavadownloadsjavadownloadreportcontent/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/jmsjavadownloads/jmsjavadownloadsjavadownloadreportcontent/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for jmsjavadownloads/jmsjavadownloadsjavadownloadreportcontent; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

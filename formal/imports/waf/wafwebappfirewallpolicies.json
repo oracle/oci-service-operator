@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "waf",
+  "slug": "wafwebappfirewallpolicies",
+  "kind": "WafWebAppFirewallPolicies",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_waf_web_app_firewall_policies",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateWafWebAppFirewallPolicies",
+        "requestType": "waf.CreateWafWebAppFirewallPoliciesRequest",
+        "responseType": "waf.CreateWafWebAppFirewallPoliciesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetWafWebAppFirewallPolicies",
+        "requestType": "waf.GetWafWebAppFirewallPoliciesRequest",
+        "responseType": "waf.GetWafWebAppFirewallPoliciesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListWafWebAppFirewallPolicies",
+        "requestType": "waf.ListWafWebAppFirewallPoliciesRequest",
+        "responseType": "waf.ListWafWebAppFirewallPoliciesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateWafWebAppFirewallPolicies",
+        "requestType": "waf.UpdateWafWebAppFirewallPoliciesRequest",
+        "responseType": "waf.UpdateWafWebAppFirewallPoliciesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteWafWebAppFirewallPolicies",
+        "requestType": "waf.DeleteWafWebAppFirewallPoliciesRequest",
+        "responseType": "waf.DeleteWafWebAppFirewallPoliciesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_waf_wafwebappfirewallpolicies",
+    "collectionField": "wafwebappfirewallpolicies",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/waf/wafwebappfirewallpolicies/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/waf/wafwebappfirewallpolicies/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for waf/wafwebappfirewallpolicies; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

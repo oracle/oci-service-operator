@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "keymanagement",
+  "slug": "ekmsprivateendpoint",
+  "kind": "EkmsPrivateEndpoint",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_keymanagement_ekmsprivateendpoint",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateEkmsPrivateEndpoint",
+        "requestType": "keymanagement.CreateEkmsPrivateEndpointRequest",
+        "responseType": "keymanagement.CreateEkmsPrivateEndpointResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetEkmsPrivateEndpoint",
+        "requestType": "keymanagement.GetEkmsPrivateEndpointRequest",
+        "responseType": "keymanagement.GetEkmsPrivateEndpointResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListEkmsPrivateEndpoint",
+        "requestType": "keymanagement.ListEkmsPrivateEndpointRequest",
+        "responseType": "keymanagement.ListEkmsPrivateEndpointResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateEkmsPrivateEndpoint",
+        "requestType": "keymanagement.UpdateEkmsPrivateEndpointRequest",
+        "responseType": "keymanagement.UpdateEkmsPrivateEndpointResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteEkmsPrivateEndpoint",
+        "requestType": "keymanagement.DeleteEkmsPrivateEndpointRequest",
+        "responseType": "keymanagement.DeleteEkmsPrivateEndpointResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_keymanagement_ekmsprivateendpoint",
+    "collectionField": "ekmsprivateendpoint",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/keymanagement/ekmsprivateendpoint/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/keymanagement/ekmsprivateendpoint/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for keymanagement/ekmsprivateendpoint; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "visualbuilder",
+  "slug": "visualbuildervbinstanceapplications",
+  "kind": "VisualBuilderVbInstanceApplications",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_visual_builder_vb_instance_applications",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateVisualBuilderVbInstanceApplications",
+        "requestType": "visualbuilder.CreateVisualBuilderVbInstanceApplicationsRequest",
+        "responseType": "visualbuilder.CreateVisualBuilderVbInstanceApplicationsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetVisualBuilderVbInstanceApplications",
+        "requestType": "visualbuilder.GetVisualBuilderVbInstanceApplicationsRequest",
+        "responseType": "visualbuilder.GetVisualBuilderVbInstanceApplicationsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListVisualBuilderVbInstanceApplications",
+        "requestType": "visualbuilder.ListVisualBuilderVbInstanceApplicationsRequest",
+        "responseType": "visualbuilder.ListVisualBuilderVbInstanceApplicationsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateVisualBuilderVbInstanceApplications",
+        "requestType": "visualbuilder.UpdateVisualBuilderVbInstanceApplicationsRequest",
+        "responseType": "visualbuilder.UpdateVisualBuilderVbInstanceApplicationsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteVisualBuilderVbInstanceApplications",
+        "requestType": "visualbuilder.DeleteVisualBuilderVbInstanceApplicationsRequest",
+        "responseType": "visualbuilder.DeleteVisualBuilderVbInstanceApplicationsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_visualbuilder_visualbuildervbinstanceapplications",
+    "collectionField": "visualbuildervbinstanceapplications",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/visualbuilder/visualbuildervbinstanceapplications/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/visualbuilder/visualbuildervbinstanceapplications/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for visualbuilder/visualbuildervbinstanceapplications; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

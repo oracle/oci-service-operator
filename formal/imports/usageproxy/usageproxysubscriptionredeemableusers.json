@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "usageproxy",
+  "slug": "usageproxysubscriptionredeemableusers",
+  "kind": "UsageProxySubscriptionRedeemableUsers",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_usage_proxy_subscription_redeemable_users",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateUsageProxySubscriptionRedeemableUsers",
+        "requestType": "usageproxy.CreateUsageProxySubscriptionRedeemableUsersRequest",
+        "responseType": "usageproxy.CreateUsageProxySubscriptionRedeemableUsersResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetUsageProxySubscriptionRedeemableUsers",
+        "requestType": "usageproxy.GetUsageProxySubscriptionRedeemableUsersRequest",
+        "responseType": "usageproxy.GetUsageProxySubscriptionRedeemableUsersResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListUsageProxySubscriptionRedeemableUsers",
+        "requestType": "usageproxy.ListUsageProxySubscriptionRedeemableUsersRequest",
+        "responseType": "usageproxy.ListUsageProxySubscriptionRedeemableUsersResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateUsageProxySubscriptionRedeemableUsers",
+        "requestType": "usageproxy.UpdateUsageProxySubscriptionRedeemableUsersRequest",
+        "responseType": "usageproxy.UpdateUsageProxySubscriptionRedeemableUsersResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteUsageProxySubscriptionRedeemableUsers",
+        "requestType": "usageproxy.DeleteUsageProxySubscriptionRedeemableUsersRequest",
+        "responseType": "usageproxy.DeleteUsageProxySubscriptionRedeemableUsersResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_usageproxy_usageproxysubscriptionredeemableusers",
+    "collectionField": "usageproxysubscriptionredeemableusers",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/usageproxy/usageproxysubscriptionredeemableusers/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/usageproxy/usageproxysubscriptionredeemableusers/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for usageproxy/usageproxysubscriptionredeemableusers; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

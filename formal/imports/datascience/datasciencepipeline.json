@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datascience",
+  "slug": "datasciencepipeline",
+  "kind": "DatasciencePipeline",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_datascience_pipeline",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatasciencePipeline",
+        "requestType": "datascience.CreateDatasciencePipelineRequest",
+        "responseType": "datascience.CreateDatasciencePipelineResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatasciencePipeline",
+        "requestType": "datascience.GetDatasciencePipelineRequest",
+        "responseType": "datascience.GetDatasciencePipelineResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatasciencePipeline",
+        "requestType": "datascience.ListDatasciencePipelineRequest",
+        "responseType": "datascience.ListDatasciencePipelineResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatasciencePipeline",
+        "requestType": "datascience.UpdateDatasciencePipelineRequest",
+        "responseType": "datascience.UpdateDatasciencePipelineResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatasciencePipeline",
+        "requestType": "datascience.DeleteDatasciencePipelineRequest",
+        "responseType": "datascience.DeleteDatasciencePipelineResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_datascience_datasciencepipeline",
+    "collectionField": "datasciencepipeline",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datascience/datasciencepipeline/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datascience/datasciencepipeline/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for datascience/datasciencepipeline; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "stackmonitoring",
+  "slug": "stackmonitoringmetricextensionmetricextensionongivenresourcesmanagement",
+  "kind": "StackMonitoringMetricExtensionMetricExtensionOnGivenResourcesManagement",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_stack_monitoring_metric_extension_metric_extension_on_given_resources_management",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateStackMonitoringMetricExtensionMetricExtensionOnGivenResourcesManagement",
+        "requestType": "stackmonitoring.CreateStackMonitoringMetricExtensionMetricExtensionOnGivenResourcesManagementRequest",
+        "responseType": "stackmonitoring.CreateStackMonitoringMetricExtensionMetricExtensionOnGivenResourcesManagementResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetStackMonitoringMetricExtensionMetricExtensionOnGivenResourcesManagement",
+        "requestType": "stackmonitoring.GetStackMonitoringMetricExtensionMetricExtensionOnGivenResourcesManagementRequest",
+        "responseType": "stackmonitoring.GetStackMonitoringMetricExtensionMetricExtensionOnGivenResourcesManagementResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListStackMonitoringMetricExtensionMetricExtensionOnGivenResourcesManagement",
+        "requestType": "stackmonitoring.ListStackMonitoringMetricExtensionMetricExtensionOnGivenResourcesManagementRequest",
+        "responseType": "stackmonitoring.ListStackMonitoringMetricExtensionMetricExtensionOnGivenResourcesManagementResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateStackMonitoringMetricExtensionMetricExtensionOnGivenResourcesManagement",
+        "requestType": "stackmonitoring.UpdateStackMonitoringMetricExtensionMetricExtensionOnGivenResourcesManagementRequest",
+        "responseType": "stackmonitoring.UpdateStackMonitoringMetricExtensionMetricExtensionOnGivenResourcesManagementResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteStackMonitoringMetricExtensionMetricExtensionOnGivenResourcesManagement",
+        "requestType": "stackmonitoring.DeleteStackMonitoringMetricExtensionMetricExtensionOnGivenResourcesManagementRequest",
+        "responseType": "stackmonitoring.DeleteStackMonitoringMetricExtensionMetricExtensionOnGivenResourcesManagementResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_stackmonitoring_stackmonitoringmetricextensionmetricextensionongivenresourcesmanagement",
+    "collectionField": "stackmonitoringmetricextensionmetricextensionongivenresourcesmanagement",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/stackmonitoring/stackmonitoringmetricextensionmetricextensionongivenresourcesmanagement/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/stackmonitoring/stackmonitoringmetricextensionmetricextensionongivenresourcesmanagement/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for stackmonitoring/stackmonitoringmetricextensionmetricextensionongivenresourcesmanagement; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

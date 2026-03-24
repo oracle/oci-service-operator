@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasemanagement",
+  "slug": "databasemanagementmanagedmysqldatabasebinaryloginformation",
+  "kind": "DatabaseManagementManagedMySqlDatabaseBinaryLogInformation",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_management_managed_my_sql_database_binary_log_information",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseManagementManagedMySqlDatabaseBinaryLogInformation",
+        "requestType": "databasemanagement.CreateDatabaseManagementManagedMySqlDatabaseBinaryLogInformationRequest",
+        "responseType": "databasemanagement.CreateDatabaseManagementManagedMySqlDatabaseBinaryLogInformationResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseManagementManagedMySqlDatabaseBinaryLogInformation",
+        "requestType": "databasemanagement.GetDatabaseManagementManagedMySqlDatabaseBinaryLogInformationRequest",
+        "responseType": "databasemanagement.GetDatabaseManagementManagedMySqlDatabaseBinaryLogInformationResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseManagementManagedMySqlDatabaseBinaryLogInformation",
+        "requestType": "databasemanagement.ListDatabaseManagementManagedMySqlDatabaseBinaryLogInformationRequest",
+        "responseType": "databasemanagement.ListDatabaseManagementManagedMySqlDatabaseBinaryLogInformationResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseManagementManagedMySqlDatabaseBinaryLogInformation",
+        "requestType": "databasemanagement.UpdateDatabaseManagementManagedMySqlDatabaseBinaryLogInformationRequest",
+        "responseType": "databasemanagement.UpdateDatabaseManagementManagedMySqlDatabaseBinaryLogInformationResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseManagementManagedMySqlDatabaseBinaryLogInformation",
+        "requestType": "databasemanagement.DeleteDatabaseManagementManagedMySqlDatabaseBinaryLogInformationRequest",
+        "responseType": "databasemanagement.DeleteDatabaseManagementManagedMySqlDatabaseBinaryLogInformationResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_databasemanagement_databasemanagementmanagedmysqldatabasebinaryloginformation",
+    "collectionField": "databasemanagementmanagedmysqldatabasebinaryloginformation",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasemanagement/databasemanagementmanagedmysqldatabasebinaryloginformation/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasemanagement/databasemanagementmanagedmysqldatabasebinaryloginformation/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for databasemanagement/databasemanagementmanagedmysqldatabasebinaryloginformation; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

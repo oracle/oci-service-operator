@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "autoscaling",
+  "slug": "autoscalingautoscalingconfiguration",
+  "kind": "AutoScalingAutoScalingConfiguration",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_autoscaling_auto_scaling_configuration",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateAutoScalingAutoScalingConfiguration",
+        "requestType": "autoscaling.CreateAutoScalingAutoScalingConfigurationRequest",
+        "responseType": "autoscaling.CreateAutoScalingAutoScalingConfigurationResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetAutoScalingAutoScalingConfiguration",
+        "requestType": "autoscaling.GetAutoScalingAutoScalingConfigurationRequest",
+        "responseType": "autoscaling.GetAutoScalingAutoScalingConfigurationResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListAutoScalingAutoScalingConfiguration",
+        "requestType": "autoscaling.ListAutoScalingAutoScalingConfigurationRequest",
+        "responseType": "autoscaling.ListAutoScalingAutoScalingConfigurationResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateAutoScalingAutoScalingConfiguration",
+        "requestType": "autoscaling.UpdateAutoScalingAutoScalingConfigurationRequest",
+        "responseType": "autoscaling.UpdateAutoScalingAutoScalingConfigurationResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteAutoScalingAutoScalingConfiguration",
+        "requestType": "autoscaling.DeleteAutoScalingAutoScalingConfigurationRequest",
+        "responseType": "autoscaling.DeleteAutoScalingAutoScalingConfigurationResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_autoscaling_autoscalingautoscalingconfiguration",
+    "collectionField": "autoscalingautoscalingconfiguration",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/autoscaling/autoscalingautoscalingconfiguration/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/autoscaling/autoscalingautoscalingconfiguration/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for autoscaling/autoscalingautoscalingconfiguration; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

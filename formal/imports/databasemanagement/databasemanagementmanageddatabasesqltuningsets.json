@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasemanagement",
+  "slug": "databasemanagementmanageddatabasesqltuningsets",
+  "kind": "DatabaseManagementManagedDatabaseSqlTuningSets",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_management_managed_database_sql_tuning_sets",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseManagementManagedDatabaseSqlTuningSets",
+        "requestType": "databasemanagement.CreateDatabaseManagementManagedDatabaseSqlTuningSetsRequest",
+        "responseType": "databasemanagement.CreateDatabaseManagementManagedDatabaseSqlTuningSetsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseManagementManagedDatabaseSqlTuningSets",
+        "requestType": "databasemanagement.GetDatabaseManagementManagedDatabaseSqlTuningSetsRequest",
+        "responseType": "databasemanagement.GetDatabaseManagementManagedDatabaseSqlTuningSetsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseManagementManagedDatabaseSqlTuningSets",
+        "requestType": "databasemanagement.ListDatabaseManagementManagedDatabaseSqlTuningSetsRequest",
+        "responseType": "databasemanagement.ListDatabaseManagementManagedDatabaseSqlTuningSetsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseManagementManagedDatabaseSqlTuningSets",
+        "requestType": "databasemanagement.UpdateDatabaseManagementManagedDatabaseSqlTuningSetsRequest",
+        "responseType": "databasemanagement.UpdateDatabaseManagementManagedDatabaseSqlTuningSetsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseManagementManagedDatabaseSqlTuningSets",
+        "requestType": "databasemanagement.DeleteDatabaseManagementManagedDatabaseSqlTuningSetsRequest",
+        "responseType": "databasemanagement.DeleteDatabaseManagementManagedDatabaseSqlTuningSetsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_databasemanagement_databasemanagementmanageddatabasesqltuningsets",
+    "collectionField": "databasemanagementmanageddatabasesqltuningsets",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasemanagement/databasemanagementmanageddatabasesqltuningsets/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasemanagement/databasemanagementmanageddatabasesqltuningsets/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for databasemanagement/databasemanagementmanageddatabasesqltuningsets; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

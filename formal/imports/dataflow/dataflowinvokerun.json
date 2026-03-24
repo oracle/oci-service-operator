@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "dataflow",
+  "slug": "dataflowinvokerun",
+  "kind": "DataflowInvokeRun",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_dataflow_invoke_run",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDataflowInvokeRun",
+        "requestType": "dataflow.CreateDataflowInvokeRunRequest",
+        "responseType": "dataflow.CreateDataflowInvokeRunResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDataflowInvokeRun",
+        "requestType": "dataflow.GetDataflowInvokeRunRequest",
+        "responseType": "dataflow.GetDataflowInvokeRunResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDataflowInvokeRun",
+        "requestType": "dataflow.ListDataflowInvokeRunRequest",
+        "responseType": "dataflow.ListDataflowInvokeRunResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDataflowInvokeRun",
+        "requestType": "dataflow.UpdateDataflowInvokeRunRequest",
+        "responseType": "dataflow.UpdateDataflowInvokeRunResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDataflowInvokeRun",
+        "requestType": "dataflow.DeleteDataflowInvokeRunRequest",
+        "responseType": "dataflow.DeleteDataflowInvokeRunResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_dataflow_dataflowinvokerun",
+    "collectionField": "dataflowinvokerun",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/dataflow/dataflowinvokerun/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/dataflow/dataflowinvokerun/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for dataflow/dataflowinvokerun; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

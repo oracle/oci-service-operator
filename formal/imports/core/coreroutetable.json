@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "coreroutetable",
+  "kind": "CoreRouteTable",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_core_route_table",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCoreRouteTable",
+        "requestType": "core.CreateCoreRouteTableRequest",
+        "responseType": "core.CreateCoreRouteTableResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCoreRouteTable",
+        "requestType": "core.GetCoreRouteTableRequest",
+        "responseType": "core.GetCoreRouteTableResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCoreRouteTable",
+        "requestType": "core.ListCoreRouteTableRequest",
+        "responseType": "core.ListCoreRouteTableResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCoreRouteTable",
+        "requestType": "core.UpdateCoreRouteTableRequest",
+        "responseType": "core.UpdateCoreRouteTableResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCoreRouteTable",
+        "requestType": "core.DeleteCoreRouteTableRequest",
+        "responseType": "core.DeleteCoreRouteTableResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_core_coreroutetable",
+    "collectionField": "coreroutetable",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/coreroutetable/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/coreroutetable/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for core/coreroutetable; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

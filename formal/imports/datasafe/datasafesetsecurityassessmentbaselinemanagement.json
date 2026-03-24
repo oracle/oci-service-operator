@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "datasafesetsecurityassessmentbaselinemanagement",
+  "kind": "DataSafeSetSecurityAssessmentBaselineManagement",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_set_security_assessment_baseline_management",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDataSafeSetSecurityAssessmentBaselineManagement",
+        "requestType": "datasafe.CreateDataSafeSetSecurityAssessmentBaselineManagementRequest",
+        "responseType": "datasafe.CreateDataSafeSetSecurityAssessmentBaselineManagementResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDataSafeSetSecurityAssessmentBaselineManagement",
+        "requestType": "datasafe.GetDataSafeSetSecurityAssessmentBaselineManagementRequest",
+        "responseType": "datasafe.GetDataSafeSetSecurityAssessmentBaselineManagementResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDataSafeSetSecurityAssessmentBaselineManagement",
+        "requestType": "datasafe.ListDataSafeSetSecurityAssessmentBaselineManagementRequest",
+        "responseType": "datasafe.ListDataSafeSetSecurityAssessmentBaselineManagementResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDataSafeSetSecurityAssessmentBaselineManagement",
+        "requestType": "datasafe.UpdateDataSafeSetSecurityAssessmentBaselineManagementRequest",
+        "responseType": "datasafe.UpdateDataSafeSetSecurityAssessmentBaselineManagementResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDataSafeSetSecurityAssessmentBaselineManagement",
+        "requestType": "datasafe.DeleteDataSafeSetSecurityAssessmentBaselineManagementRequest",
+        "responseType": "datasafe.DeleteDataSafeSetSecurityAssessmentBaselineManagementResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_datasafe_datasafesetsecurityassessmentbaselinemanagement",
+    "collectionField": "datasafesetsecurityassessmentbaselinemanagement",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/datasafesetsecurityassessmentbaselinemanagement/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/datasafesetsecurityassessmentbaselinemanagement/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for datasafe/datasafesetsecurityassessmentbaselinemanagement; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

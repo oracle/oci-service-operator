@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "onesubscription",
+  "slug": "onesubscriptionbillingschedules",
+  "kind": "OnesubscriptionBillingSchedules",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_onesubscription_billing_schedules",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOnesubscriptionBillingSchedules",
+        "requestType": "onesubscription.CreateOnesubscriptionBillingSchedulesRequest",
+        "responseType": "onesubscription.CreateOnesubscriptionBillingSchedulesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOnesubscriptionBillingSchedules",
+        "requestType": "onesubscription.GetOnesubscriptionBillingSchedulesRequest",
+        "responseType": "onesubscription.GetOnesubscriptionBillingSchedulesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOnesubscriptionBillingSchedules",
+        "requestType": "onesubscription.ListOnesubscriptionBillingSchedulesRequest",
+        "responseType": "onesubscription.ListOnesubscriptionBillingSchedulesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOnesubscriptionBillingSchedules",
+        "requestType": "onesubscription.UpdateOnesubscriptionBillingSchedulesRequest",
+        "responseType": "onesubscription.UpdateOnesubscriptionBillingSchedulesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOnesubscriptionBillingSchedules",
+        "requestType": "onesubscription.DeleteOnesubscriptionBillingSchedulesRequest",
+        "responseType": "onesubscription.DeleteOnesubscriptionBillingSchedulesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_onesubscription_onesubscriptionbillingschedules",
+    "collectionField": "onesubscriptionbillingschedules",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/onesubscription/onesubscriptionbillingschedules/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/onesubscription/onesubscriptionbillingschedules/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for onesubscription/onesubscriptionbillingschedules; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

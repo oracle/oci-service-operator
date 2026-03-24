@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "databasevmclusternetworkdownloadconfigfile",
+  "kind": "DatabaseVmClusterNetworkDownloadConfigFile",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_vm_cluster_network_download_config_file",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseVmClusterNetworkDownloadConfigFile",
+        "requestType": "database.CreateDatabaseVmClusterNetworkDownloadConfigFileRequest",
+        "responseType": "database.CreateDatabaseVmClusterNetworkDownloadConfigFileResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseVmClusterNetworkDownloadConfigFile",
+        "requestType": "database.GetDatabaseVmClusterNetworkDownloadConfigFileRequest",
+        "responseType": "database.GetDatabaseVmClusterNetworkDownloadConfigFileResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseVmClusterNetworkDownloadConfigFile",
+        "requestType": "database.ListDatabaseVmClusterNetworkDownloadConfigFileRequest",
+        "responseType": "database.ListDatabaseVmClusterNetworkDownloadConfigFileResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseVmClusterNetworkDownloadConfigFile",
+        "requestType": "database.UpdateDatabaseVmClusterNetworkDownloadConfigFileRequest",
+        "responseType": "database.UpdateDatabaseVmClusterNetworkDownloadConfigFileResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseVmClusterNetworkDownloadConfigFile",
+        "requestType": "database.DeleteDatabaseVmClusterNetworkDownloadConfigFileRequest",
+        "responseType": "database.DeleteDatabaseVmClusterNetworkDownloadConfigFileResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_databasevmclusternetworkdownloadconfigfile",
+    "collectionField": "databasevmclusternetworkdownloadconfigfile",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/databasevmclusternetworkdownloadconfigfile/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/databasevmclusternetworkdownloadconfigfile/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/databasevmclusternetworkdownloadconfigfile; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

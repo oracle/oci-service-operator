@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "loganalytics",
+  "slug": "loganalyticsloganalyticsimportcustomcontent",
+  "kind": "LogAnalyticsLogAnalyticsImportCustomContent",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_log_analytics_log_analytics_import_custom_content",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateLogAnalyticsLogAnalyticsImportCustomContent",
+        "requestType": "loganalytics.CreateLogAnalyticsLogAnalyticsImportCustomContentRequest",
+        "responseType": "loganalytics.CreateLogAnalyticsLogAnalyticsImportCustomContentResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetLogAnalyticsLogAnalyticsImportCustomContent",
+        "requestType": "loganalytics.GetLogAnalyticsLogAnalyticsImportCustomContentRequest",
+        "responseType": "loganalytics.GetLogAnalyticsLogAnalyticsImportCustomContentResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListLogAnalyticsLogAnalyticsImportCustomContent",
+        "requestType": "loganalytics.ListLogAnalyticsLogAnalyticsImportCustomContentRequest",
+        "responseType": "loganalytics.ListLogAnalyticsLogAnalyticsImportCustomContentResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateLogAnalyticsLogAnalyticsImportCustomContent",
+        "requestType": "loganalytics.UpdateLogAnalyticsLogAnalyticsImportCustomContentRequest",
+        "responseType": "loganalytics.UpdateLogAnalyticsLogAnalyticsImportCustomContentResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteLogAnalyticsLogAnalyticsImportCustomContent",
+        "requestType": "loganalytics.DeleteLogAnalyticsLogAnalyticsImportCustomContentRequest",
+        "responseType": "loganalytics.DeleteLogAnalyticsLogAnalyticsImportCustomContentResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_loganalytics_loganalyticsloganalyticsimportcustomcontent",
+    "collectionField": "loganalyticsloganalyticsimportcustomcontent",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/loganalytics/loganalyticsloganalyticsimportcustomcontent/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/loganalytics/loganalyticsloganalyticsimportcustomcontent/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for loganalytics/loganalyticsloganalyticsimportcustomcontent; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

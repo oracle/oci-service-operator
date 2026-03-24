@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "databasedatabasesoftwareimage",
+  "kind": "DatabaseDatabaseSoftwareImage",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_database_software_image",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseDatabaseSoftwareImage",
+        "requestType": "database.CreateDatabaseDatabaseSoftwareImageRequest",
+        "responseType": "database.CreateDatabaseDatabaseSoftwareImageResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseDatabaseSoftwareImage",
+        "requestType": "database.GetDatabaseDatabaseSoftwareImageRequest",
+        "responseType": "database.GetDatabaseDatabaseSoftwareImageResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseDatabaseSoftwareImage",
+        "requestType": "database.ListDatabaseDatabaseSoftwareImageRequest",
+        "responseType": "database.ListDatabaseDatabaseSoftwareImageResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseDatabaseSoftwareImage",
+        "requestType": "database.UpdateDatabaseDatabaseSoftwareImageRequest",
+        "responseType": "database.UpdateDatabaseDatabaseSoftwareImageResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseDatabaseSoftwareImage",
+        "requestType": "database.DeleteDatabaseDatabaseSoftwareImageRequest",
+        "responseType": "database.DeleteDatabaseDatabaseSoftwareImageResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_databasedatabasesoftwareimage",
+    "collectionField": "databasedatabasesoftwareimage",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/databasedatabasesoftwareimage/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/databasedatabasesoftwareimage/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/databasedatabasesoftwareimage; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "stackmonitoring",
+  "slug": "stackmonitoringprocesssets",
+  "kind": "StackMonitoringProcessSets",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_stack_monitoring_process_sets",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateStackMonitoringProcessSets",
+        "requestType": "stackmonitoring.CreateStackMonitoringProcessSetsRequest",
+        "responseType": "stackmonitoring.CreateStackMonitoringProcessSetsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetStackMonitoringProcessSets",
+        "requestType": "stackmonitoring.GetStackMonitoringProcessSetsRequest",
+        "responseType": "stackmonitoring.GetStackMonitoringProcessSetsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListStackMonitoringProcessSets",
+        "requestType": "stackmonitoring.ListStackMonitoringProcessSetsRequest",
+        "responseType": "stackmonitoring.ListStackMonitoringProcessSetsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateStackMonitoringProcessSets",
+        "requestType": "stackmonitoring.UpdateStackMonitoringProcessSetsRequest",
+        "responseType": "stackmonitoring.UpdateStackMonitoringProcessSetsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteStackMonitoringProcessSets",
+        "requestType": "stackmonitoring.DeleteStackMonitoringProcessSetsRequest",
+        "responseType": "stackmonitoring.DeleteStackMonitoringProcessSetsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_stackmonitoring_stackmonitoringprocesssets",
+    "collectionField": "stackmonitoringprocesssets",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/stackmonitoring/stackmonitoringprocesssets/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/stackmonitoring/stackmonitoringprocesssets/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for stackmonitoring/stackmonitoringprocesssets; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "managementagent",
+  "slug": "managementagentmanagementagentplugins",
+  "kind": "ManagementAgentManagementAgentPlugins",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_management_agent_management_agent_plugins",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateManagementAgentManagementAgentPlugins",
+        "requestType": "managementagent.CreateManagementAgentManagementAgentPluginsRequest",
+        "responseType": "managementagent.CreateManagementAgentManagementAgentPluginsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetManagementAgentManagementAgentPlugins",
+        "requestType": "managementagent.GetManagementAgentManagementAgentPluginsRequest",
+        "responseType": "managementagent.GetManagementAgentManagementAgentPluginsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListManagementAgentManagementAgentPlugins",
+        "requestType": "managementagent.ListManagementAgentManagementAgentPluginsRequest",
+        "responseType": "managementagent.ListManagementAgentManagementAgentPluginsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateManagementAgentManagementAgentPlugins",
+        "requestType": "managementagent.UpdateManagementAgentManagementAgentPluginsRequest",
+        "responseType": "managementagent.UpdateManagementAgentManagementAgentPluginsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteManagementAgentManagementAgentPlugins",
+        "requestType": "managementagent.DeleteManagementAgentManagementAgentPluginsRequest",
+        "responseType": "managementagent.DeleteManagementAgentManagementAgentPluginsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_managementagent_managementagentmanagementagentplugins",
+    "collectionField": "managementagentmanagementagentplugins",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/managementagent/managementagentmanagementagentplugins/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/managementagent/managementagentmanagementagentplugins/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for managementagent/managementagentmanagementagentplugins; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

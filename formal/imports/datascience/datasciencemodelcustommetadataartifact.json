@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datascience",
+  "slug": "datasciencemodelcustommetadataartifact",
+  "kind": "DatascienceModelCustomMetadataArtifact",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_datascience_model_custom_metadata_artifact",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatascienceModelCustomMetadataArtifact",
+        "requestType": "datascience.CreateDatascienceModelCustomMetadataArtifactRequest",
+        "responseType": "datascience.CreateDatascienceModelCustomMetadataArtifactResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatascienceModelCustomMetadataArtifact",
+        "requestType": "datascience.GetDatascienceModelCustomMetadataArtifactRequest",
+        "responseType": "datascience.GetDatascienceModelCustomMetadataArtifactResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatascienceModelCustomMetadataArtifact",
+        "requestType": "datascience.ListDatascienceModelCustomMetadataArtifactRequest",
+        "responseType": "datascience.ListDatascienceModelCustomMetadataArtifactResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatascienceModelCustomMetadataArtifact",
+        "requestType": "datascience.UpdateDatascienceModelCustomMetadataArtifactRequest",
+        "responseType": "datascience.UpdateDatascienceModelCustomMetadataArtifactResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatascienceModelCustomMetadataArtifact",
+        "requestType": "datascience.DeleteDatascienceModelCustomMetadataArtifactRequest",
+        "responseType": "datascience.DeleteDatascienceModelCustomMetadataArtifactResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_datascience_datasciencemodelcustommetadataartifact",
+    "collectionField": "datasciencemodelcustommetadataartifact",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datascience/datasciencemodelcustommetadataartifact/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datascience/datasciencemodelcustommetadataartifact/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for datascience/datasciencemodelcustommetadataartifact; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

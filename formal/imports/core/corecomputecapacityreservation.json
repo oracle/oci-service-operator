@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "corecomputecapacityreservation",
+  "kind": "CoreComputeCapacityReservation",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_core_compute_capacity_reservation",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCoreComputeCapacityReservation",
+        "requestType": "core.CreateCoreComputeCapacityReservationRequest",
+        "responseType": "core.CreateCoreComputeCapacityReservationResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCoreComputeCapacityReservation",
+        "requestType": "core.GetCoreComputeCapacityReservationRequest",
+        "responseType": "core.GetCoreComputeCapacityReservationResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCoreComputeCapacityReservation",
+        "requestType": "core.ListCoreComputeCapacityReservationRequest",
+        "responseType": "core.ListCoreComputeCapacityReservationResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCoreComputeCapacityReservation",
+        "requestType": "core.UpdateCoreComputeCapacityReservationRequest",
+        "responseType": "core.UpdateCoreComputeCapacityReservationResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCoreComputeCapacityReservation",
+        "requestType": "core.DeleteCoreComputeCapacityReservationRequest",
+        "responseType": "core.DeleteCoreComputeCapacityReservationResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_core_corecomputecapacityreservation",
+    "collectionField": "corecomputecapacityreservation",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/corecomputecapacityreservation/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/corecomputecapacityreservation/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for core/corecomputecapacityreservation; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

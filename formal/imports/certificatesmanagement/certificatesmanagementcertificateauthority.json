@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "certificatesmanagement",
+  "slug": "certificatesmanagementcertificateauthority",
+  "kind": "CertificatesManagementCertificateAuthority",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_certificates_management_certificate_authority",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCertificatesManagementCertificateAuthority",
+        "requestType": "certificatesmanagement.CreateCertificatesManagementCertificateAuthorityRequest",
+        "responseType": "certificatesmanagement.CreateCertificatesManagementCertificateAuthorityResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCertificatesManagementCertificateAuthority",
+        "requestType": "certificatesmanagement.GetCertificatesManagementCertificateAuthorityRequest",
+        "responseType": "certificatesmanagement.GetCertificatesManagementCertificateAuthorityResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCertificatesManagementCertificateAuthority",
+        "requestType": "certificatesmanagement.ListCertificatesManagementCertificateAuthorityRequest",
+        "responseType": "certificatesmanagement.ListCertificatesManagementCertificateAuthorityResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCertificatesManagementCertificateAuthority",
+        "requestType": "certificatesmanagement.UpdateCertificatesManagementCertificateAuthorityRequest",
+        "responseType": "certificatesmanagement.UpdateCertificatesManagementCertificateAuthorityResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCertificatesManagementCertificateAuthority",
+        "requestType": "certificatesmanagement.DeleteCertificatesManagementCertificateAuthorityRequest",
+        "responseType": "certificatesmanagement.DeleteCertificatesManagementCertificateAuthorityResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_certificatesmanagement_certificatesmanagementcertificateauthority",
+    "collectionField": "certificatesmanagementcertificateauthority",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/certificatesmanagement/certificatesmanagementcertificateauthority/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/certificatesmanagement/certificatesmanagementcertificateauthority/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for certificatesmanagement/certificatesmanagementcertificateauthority; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

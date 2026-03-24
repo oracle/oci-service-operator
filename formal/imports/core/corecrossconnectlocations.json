@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "corecrossconnectlocations",
+  "kind": "CoreCrossConnectLocations",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_core_cross_connect_locations",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCoreCrossConnectLocations",
+        "requestType": "core.CreateCoreCrossConnectLocationsRequest",
+        "responseType": "core.CreateCoreCrossConnectLocationsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCoreCrossConnectLocations",
+        "requestType": "core.GetCoreCrossConnectLocationsRequest",
+        "responseType": "core.GetCoreCrossConnectLocationsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCoreCrossConnectLocations",
+        "requestType": "core.ListCoreCrossConnectLocationsRequest",
+        "responseType": "core.ListCoreCrossConnectLocationsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCoreCrossConnectLocations",
+        "requestType": "core.UpdateCoreCrossConnectLocationsRequest",
+        "responseType": "core.UpdateCoreCrossConnectLocationsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCoreCrossConnectLocations",
+        "requestType": "core.DeleteCoreCrossConnectLocationsRequest",
+        "responseType": "core.DeleteCoreCrossConnectLocationsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_core_corecrossconnectlocations",
+    "collectionField": "corecrossconnectlocations",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/corecrossconnectlocations/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/corecrossconnectlocations/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for core/corecrossconnectlocations; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

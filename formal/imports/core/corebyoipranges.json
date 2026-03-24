@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "corebyoipranges",
+  "kind": "CoreByoipRanges",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_core_byoip_ranges",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCoreByoipRanges",
+        "requestType": "core.CreateCoreByoipRangesRequest",
+        "responseType": "core.CreateCoreByoipRangesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCoreByoipRanges",
+        "requestType": "core.GetCoreByoipRangesRequest",
+        "responseType": "core.GetCoreByoipRangesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCoreByoipRanges",
+        "requestType": "core.ListCoreByoipRangesRequest",
+        "responseType": "core.ListCoreByoipRangesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCoreByoipRanges",
+        "requestType": "core.UpdateCoreByoipRangesRequest",
+        "responseType": "core.UpdateCoreByoipRangesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCoreByoipRanges",
+        "requestType": "core.DeleteCoreByoipRangesRequest",
+        "responseType": "core.DeleteCoreByoipRangesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_core_corebyoipranges",
+    "collectionField": "corebyoipranges",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/corebyoipranges/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/corebyoipranges/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for core/corebyoipranges; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

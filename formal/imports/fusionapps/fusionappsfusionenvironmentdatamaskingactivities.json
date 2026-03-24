@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "fusionapps",
+  "slug": "fusionappsfusionenvironmentdatamaskingactivities",
+  "kind": "FusionAppsFusionEnvironmentDataMaskingActivities",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_fusion_apps_fusion_environment_data_masking_activities",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateFusionAppsFusionEnvironmentDataMaskingActivities",
+        "requestType": "fusionapps.CreateFusionAppsFusionEnvironmentDataMaskingActivitiesRequest",
+        "responseType": "fusionapps.CreateFusionAppsFusionEnvironmentDataMaskingActivitiesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetFusionAppsFusionEnvironmentDataMaskingActivities",
+        "requestType": "fusionapps.GetFusionAppsFusionEnvironmentDataMaskingActivitiesRequest",
+        "responseType": "fusionapps.GetFusionAppsFusionEnvironmentDataMaskingActivitiesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListFusionAppsFusionEnvironmentDataMaskingActivities",
+        "requestType": "fusionapps.ListFusionAppsFusionEnvironmentDataMaskingActivitiesRequest",
+        "responseType": "fusionapps.ListFusionAppsFusionEnvironmentDataMaskingActivitiesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateFusionAppsFusionEnvironmentDataMaskingActivities",
+        "requestType": "fusionapps.UpdateFusionAppsFusionEnvironmentDataMaskingActivitiesRequest",
+        "responseType": "fusionapps.UpdateFusionAppsFusionEnvironmentDataMaskingActivitiesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteFusionAppsFusionEnvironmentDataMaskingActivities",
+        "requestType": "fusionapps.DeleteFusionAppsFusionEnvironmentDataMaskingActivitiesRequest",
+        "responseType": "fusionapps.DeleteFusionAppsFusionEnvironmentDataMaskingActivitiesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_fusionapps_fusionappsfusionenvironmentdatamaskingactivities",
+    "collectionField": "fusionappsfusionenvironmentdatamaskingactivities",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/fusionapps/fusionappsfusionenvironmentdatamaskingactivities/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/fusionapps/fusionappsfusionenvironmentdatamaskingactivities/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for fusionapps/fusionappsfusionenvironmentdatamaskingactivities; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

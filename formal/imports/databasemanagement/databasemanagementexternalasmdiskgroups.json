@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasemanagement",
+  "slug": "databasemanagementexternalasmdiskgroups",
+  "kind": "DatabaseManagementExternalAsmDiskGroups",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_management_external_asm_disk_groups",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseManagementExternalAsmDiskGroups",
+        "requestType": "databasemanagement.CreateDatabaseManagementExternalAsmDiskGroupsRequest",
+        "responseType": "databasemanagement.CreateDatabaseManagementExternalAsmDiskGroupsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseManagementExternalAsmDiskGroups",
+        "requestType": "databasemanagement.GetDatabaseManagementExternalAsmDiskGroupsRequest",
+        "responseType": "databasemanagement.GetDatabaseManagementExternalAsmDiskGroupsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseManagementExternalAsmDiskGroups",
+        "requestType": "databasemanagement.ListDatabaseManagementExternalAsmDiskGroupsRequest",
+        "responseType": "databasemanagement.ListDatabaseManagementExternalAsmDiskGroupsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseManagementExternalAsmDiskGroups",
+        "requestType": "databasemanagement.UpdateDatabaseManagementExternalAsmDiskGroupsRequest",
+        "responseType": "databasemanagement.UpdateDatabaseManagementExternalAsmDiskGroupsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseManagementExternalAsmDiskGroups",
+        "requestType": "databasemanagement.DeleteDatabaseManagementExternalAsmDiskGroupsRequest",
+        "responseType": "databasemanagement.DeleteDatabaseManagementExternalAsmDiskGroupsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_databasemanagement_databasemanagementexternalasmdiskgroups",
+    "collectionField": "databasemanagementexternalasmdiskgroups",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasemanagement/databasemanagementexternalasmdiskgroups/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasemanagement/databasemanagementexternalasmdiskgroups/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for databasemanagement/databasemanagementexternalasmdiskgroups; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

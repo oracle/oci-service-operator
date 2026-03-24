@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "corevcndnsresolverassociation",
+  "kind": "CoreVcnDnsResolverAssociation",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_core_vcn_dns_resolver_association",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCoreVcnDnsResolverAssociation",
+        "requestType": "core.CreateCoreVcnDnsResolverAssociationRequest",
+        "responseType": "core.CreateCoreVcnDnsResolverAssociationResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCoreVcnDnsResolverAssociation",
+        "requestType": "core.GetCoreVcnDnsResolverAssociationRequest",
+        "responseType": "core.GetCoreVcnDnsResolverAssociationResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCoreVcnDnsResolverAssociation",
+        "requestType": "core.ListCoreVcnDnsResolverAssociationRequest",
+        "responseType": "core.ListCoreVcnDnsResolverAssociationResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCoreVcnDnsResolverAssociation",
+        "requestType": "core.UpdateCoreVcnDnsResolverAssociationRequest",
+        "responseType": "core.UpdateCoreVcnDnsResolverAssociationResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCoreVcnDnsResolverAssociation",
+        "requestType": "core.DeleteCoreVcnDnsResolverAssociationRequest",
+        "responseType": "core.DeleteCoreVcnDnsResolverAssociationResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_core_corevcndnsresolverassociation",
+    "collectionField": "corevcndnsresolverassociation",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/corevcndnsresolverassociation/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/corevcndnsresolverassociation/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for core/corevcndnsresolverassociation; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

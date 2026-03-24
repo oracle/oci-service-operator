@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "ons",
+  "slug": "onsnotificationtopic",
+  "kind": "OnsNotificationTopic",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_ons_notification_topic",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOnsNotificationTopic",
+        "requestType": "ons.CreateOnsNotificationTopicRequest",
+        "responseType": "ons.CreateOnsNotificationTopicResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOnsNotificationTopic",
+        "requestType": "ons.GetOnsNotificationTopicRequest",
+        "responseType": "ons.GetOnsNotificationTopicResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOnsNotificationTopic",
+        "requestType": "ons.ListOnsNotificationTopicRequest",
+        "responseType": "ons.ListOnsNotificationTopicResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOnsNotificationTopic",
+        "requestType": "ons.UpdateOnsNotificationTopicRequest",
+        "responseType": "ons.UpdateOnsNotificationTopicResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOnsNotificationTopic",
+        "requestType": "ons.DeleteOnsNotificationTopicRequest",
+        "responseType": "ons.DeleteOnsNotificationTopicResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_ons_onsnotificationtopic",
+    "collectionField": "onsnotificationtopic",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/ons/onsnotificationtopic/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/ons/onsnotificationtopic/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for ons/onsnotificationtopic; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

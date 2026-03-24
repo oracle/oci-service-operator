@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "identitydomains",
+  "slug": "identitydomainsauthenticationfactorsetting",
+  "kind": "IdentityDomainsAuthenticationFactorSetting",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_identity_domains_authentication_factor_setting",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateIdentityDomainsAuthenticationFactorSetting",
+        "requestType": "identitydomains.CreateIdentityDomainsAuthenticationFactorSettingRequest",
+        "responseType": "identitydomains.CreateIdentityDomainsAuthenticationFactorSettingResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetIdentityDomainsAuthenticationFactorSetting",
+        "requestType": "identitydomains.GetIdentityDomainsAuthenticationFactorSettingRequest",
+        "responseType": "identitydomains.GetIdentityDomainsAuthenticationFactorSettingResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListIdentityDomainsAuthenticationFactorSetting",
+        "requestType": "identitydomains.ListIdentityDomainsAuthenticationFactorSettingRequest",
+        "responseType": "identitydomains.ListIdentityDomainsAuthenticationFactorSettingResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateIdentityDomainsAuthenticationFactorSetting",
+        "requestType": "identitydomains.UpdateIdentityDomainsAuthenticationFactorSettingRequest",
+        "responseType": "identitydomains.UpdateIdentityDomainsAuthenticationFactorSettingResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteIdentityDomainsAuthenticationFactorSetting",
+        "requestType": "identitydomains.DeleteIdentityDomainsAuthenticationFactorSettingRequest",
+        "responseType": "identitydomains.DeleteIdentityDomainsAuthenticationFactorSettingResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_identitydomains_identitydomainsauthenticationfactorsetting",
+    "collectionField": "identitydomainsauthenticationfactorsetting",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/identitydomains/identitydomainsauthenticationfactorsetting/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/identitydomains/identitydomainsauthenticationfactorsetting/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for identitydomains/identitydomainsauthenticationfactorsetting; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

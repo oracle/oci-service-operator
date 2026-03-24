@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "kms",
+  "slug": "kmskeyversion",
+  "kind": "KmsKeyVersion",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_kms_key_version",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateKmsKeyVersion",
+        "requestType": "kms.CreateKmsKeyVersionRequest",
+        "responseType": "kms.CreateKmsKeyVersionResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetKmsKeyVersion",
+        "requestType": "kms.GetKmsKeyVersionRequest",
+        "responseType": "kms.GetKmsKeyVersionResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListKmsKeyVersion",
+        "requestType": "kms.ListKmsKeyVersionRequest",
+        "responseType": "kms.ListKmsKeyVersionResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateKmsKeyVersion",
+        "requestType": "kms.UpdateKmsKeyVersionRequest",
+        "responseType": "kms.UpdateKmsKeyVersionResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteKmsKeyVersion",
+        "requestType": "kms.DeleteKmsKeyVersionRequest",
+        "responseType": "kms.DeleteKmsKeyVersionResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_kms_kmskeyversion",
+    "collectionField": "kmskeyversion",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/kms/kmskeyversion/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/kms/kmskeyversion/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for kms/kmskeyversion; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

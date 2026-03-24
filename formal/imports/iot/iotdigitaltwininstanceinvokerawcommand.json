@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "iot",
+  "slug": "iotdigitaltwininstanceinvokerawcommand",
+  "kind": "IotDigitalTwinInstanceInvokeRawCommand",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_iot_digital_twin_instance_invoke_raw_command",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateIotDigitalTwinInstanceInvokeRawCommand",
+        "requestType": "iot.CreateIotDigitalTwinInstanceInvokeRawCommandRequest",
+        "responseType": "iot.CreateIotDigitalTwinInstanceInvokeRawCommandResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetIotDigitalTwinInstanceInvokeRawCommand",
+        "requestType": "iot.GetIotDigitalTwinInstanceInvokeRawCommandRequest",
+        "responseType": "iot.GetIotDigitalTwinInstanceInvokeRawCommandResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListIotDigitalTwinInstanceInvokeRawCommand",
+        "requestType": "iot.ListIotDigitalTwinInstanceInvokeRawCommandRequest",
+        "responseType": "iot.ListIotDigitalTwinInstanceInvokeRawCommandResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateIotDigitalTwinInstanceInvokeRawCommand",
+        "requestType": "iot.UpdateIotDigitalTwinInstanceInvokeRawCommandRequest",
+        "responseType": "iot.UpdateIotDigitalTwinInstanceInvokeRawCommandResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteIotDigitalTwinInstanceInvokeRawCommand",
+        "requestType": "iot.DeleteIotDigitalTwinInstanceInvokeRawCommandRequest",
+        "responseType": "iot.DeleteIotDigitalTwinInstanceInvokeRawCommandResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_iot_iotdigitaltwininstanceinvokerawcommand",
+    "collectionField": "iotdigitaltwininstanceinvokerawcommand",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/iot/iotdigitaltwininstanceinvokerawcommand/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/iot/iotdigitaltwininstanceinvokerawcommand/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for iot/iotdigitaltwininstanceinvokerawcommand; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

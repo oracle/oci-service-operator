@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "logging",
+  "slug": "logginglogsavedsearch",
+  "kind": "LoggingLogSavedSearch",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_logging_log_saved_search",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateLoggingLogSavedSearch",
+        "requestType": "logging.CreateLoggingLogSavedSearchRequest",
+        "responseType": "logging.CreateLoggingLogSavedSearchResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetLoggingLogSavedSearch",
+        "requestType": "logging.GetLoggingLogSavedSearchRequest",
+        "responseType": "logging.GetLoggingLogSavedSearchResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListLoggingLogSavedSearch",
+        "requestType": "logging.ListLoggingLogSavedSearchRequest",
+        "responseType": "logging.ListLoggingLogSavedSearchResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateLoggingLogSavedSearch",
+        "requestType": "logging.UpdateLoggingLogSavedSearchRequest",
+        "responseType": "logging.UpdateLoggingLogSavedSearchResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteLoggingLogSavedSearch",
+        "requestType": "logging.DeleteLoggingLogSavedSearchRequest",
+        "responseType": "logging.DeleteLoggingLogSavedSearchResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_logging_logginglogsavedsearch",
+    "collectionField": "logginglogsavedsearch",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/logging/logginglogsavedsearch/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/logging/logginglogsavedsearch/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for logging/logginglogsavedsearch; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "analytics",
+  "slug": "analyticsanalyticsinstanceprivateaccesschannel",
+  "kind": "AnalyticsAnalyticsInstancePrivateAccessChannel",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_analytics_analytics_instance_private_access_channel",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateAnalyticsAnalyticsInstancePrivateAccessChannel",
+        "requestType": "analytics.CreateAnalyticsAnalyticsInstancePrivateAccessChannelRequest",
+        "responseType": "analytics.CreateAnalyticsAnalyticsInstancePrivateAccessChannelResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetAnalyticsAnalyticsInstancePrivateAccessChannel",
+        "requestType": "analytics.GetAnalyticsAnalyticsInstancePrivateAccessChannelRequest",
+        "responseType": "analytics.GetAnalyticsAnalyticsInstancePrivateAccessChannelResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListAnalyticsAnalyticsInstancePrivateAccessChannel",
+        "requestType": "analytics.ListAnalyticsAnalyticsInstancePrivateAccessChannelRequest",
+        "responseType": "analytics.ListAnalyticsAnalyticsInstancePrivateAccessChannelResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateAnalyticsAnalyticsInstancePrivateAccessChannel",
+        "requestType": "analytics.UpdateAnalyticsAnalyticsInstancePrivateAccessChannelRequest",
+        "responseType": "analytics.UpdateAnalyticsAnalyticsInstancePrivateAccessChannelResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteAnalyticsAnalyticsInstancePrivateAccessChannel",
+        "requestType": "analytics.DeleteAnalyticsAnalyticsInstancePrivateAccessChannelRequest",
+        "responseType": "analytics.DeleteAnalyticsAnalyticsInstancePrivateAccessChannelResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_analytics_analyticsanalyticsinstanceprivateaccesschannel",
+    "collectionField": "analyticsanalyticsinstanceprivateaccesschannel",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/analytics/analyticsanalyticsinstanceprivateaccesschannel/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/analytics/analyticsanalyticsinstanceprivateaccesschannel/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for analytics/analyticsanalyticsinstanceprivateaccesschannel; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

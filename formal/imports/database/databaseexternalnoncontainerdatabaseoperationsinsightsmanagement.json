@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "databaseexternalnoncontainerdatabaseoperationsinsightsmanagement",
+  "kind": "DatabaseExternalNonContainerDatabaseOperationsInsightsManagement",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_external_non_container_database_operations_insights_management",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseExternalNonContainerDatabaseOperationsInsightsManagement",
+        "requestType": "database.CreateDatabaseExternalNonContainerDatabaseOperationsInsightsManagementRequest",
+        "responseType": "database.CreateDatabaseExternalNonContainerDatabaseOperationsInsightsManagementResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseExternalNonContainerDatabaseOperationsInsightsManagement",
+        "requestType": "database.GetDatabaseExternalNonContainerDatabaseOperationsInsightsManagementRequest",
+        "responseType": "database.GetDatabaseExternalNonContainerDatabaseOperationsInsightsManagementResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseExternalNonContainerDatabaseOperationsInsightsManagement",
+        "requestType": "database.ListDatabaseExternalNonContainerDatabaseOperationsInsightsManagementRequest",
+        "responseType": "database.ListDatabaseExternalNonContainerDatabaseOperationsInsightsManagementResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseExternalNonContainerDatabaseOperationsInsightsManagement",
+        "requestType": "database.UpdateDatabaseExternalNonContainerDatabaseOperationsInsightsManagementRequest",
+        "responseType": "database.UpdateDatabaseExternalNonContainerDatabaseOperationsInsightsManagementResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseExternalNonContainerDatabaseOperationsInsightsManagement",
+        "requestType": "database.DeleteDatabaseExternalNonContainerDatabaseOperationsInsightsManagementRequest",
+        "responseType": "database.DeleteDatabaseExternalNonContainerDatabaseOperationsInsightsManagementResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_databaseexternalnoncontainerdatabaseoperationsinsightsmanagement",
+    "collectionField": "databaseexternalnoncontainerdatabaseoperationsinsightsmanagement",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/databaseexternalnoncontainerdatabaseoperationsinsightsmanagement/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/databaseexternalnoncontainerdatabaseoperationsinsightsmanagement/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/databaseexternalnoncontainerdatabaseoperationsinsightsmanagement; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

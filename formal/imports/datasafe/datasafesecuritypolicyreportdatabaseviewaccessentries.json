@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "datasafesecuritypolicyreportdatabaseviewaccessentries",
+  "kind": "DataSafeSecurityPolicyReportDatabaseViewAccessEntries",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_security_policy_report_database_view_access_entries",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDataSafeSecurityPolicyReportDatabaseViewAccessEntries",
+        "requestType": "datasafe.CreateDataSafeSecurityPolicyReportDatabaseViewAccessEntriesRequest",
+        "responseType": "datasafe.CreateDataSafeSecurityPolicyReportDatabaseViewAccessEntriesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDataSafeSecurityPolicyReportDatabaseViewAccessEntries",
+        "requestType": "datasafe.GetDataSafeSecurityPolicyReportDatabaseViewAccessEntriesRequest",
+        "responseType": "datasafe.GetDataSafeSecurityPolicyReportDatabaseViewAccessEntriesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDataSafeSecurityPolicyReportDatabaseViewAccessEntries",
+        "requestType": "datasafe.ListDataSafeSecurityPolicyReportDatabaseViewAccessEntriesRequest",
+        "responseType": "datasafe.ListDataSafeSecurityPolicyReportDatabaseViewAccessEntriesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDataSafeSecurityPolicyReportDatabaseViewAccessEntries",
+        "requestType": "datasafe.UpdateDataSafeSecurityPolicyReportDatabaseViewAccessEntriesRequest",
+        "responseType": "datasafe.UpdateDataSafeSecurityPolicyReportDatabaseViewAccessEntriesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDataSafeSecurityPolicyReportDatabaseViewAccessEntries",
+        "requestType": "datasafe.DeleteDataSafeSecurityPolicyReportDatabaseViewAccessEntriesRequest",
+        "responseType": "datasafe.DeleteDataSafeSecurityPolicyReportDatabaseViewAccessEntriesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_datasafe_datasafesecuritypolicyreportdatabaseviewaccessentries",
+    "collectionField": "datasafesecuritypolicyreportdatabaseviewaccessentries",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/datasafesecuritypolicyreportdatabaseviewaccessentries/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/datasafesecuritypolicyreportdatabaseviewaccessentries/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for datasafe/datasafesecuritypolicyreportdatabaseviewaccessentries; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

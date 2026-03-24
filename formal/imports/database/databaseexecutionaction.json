@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "databaseexecutionaction",
+  "kind": "DatabaseExecutionAction",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_execution_action",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseExecutionAction",
+        "requestType": "database.CreateDatabaseExecutionActionRequest",
+        "responseType": "database.CreateDatabaseExecutionActionResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseExecutionAction",
+        "requestType": "database.GetDatabaseExecutionActionRequest",
+        "responseType": "database.GetDatabaseExecutionActionResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseExecutionAction",
+        "requestType": "database.ListDatabaseExecutionActionRequest",
+        "responseType": "database.ListDatabaseExecutionActionResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseExecutionAction",
+        "requestType": "database.UpdateDatabaseExecutionActionRequest",
+        "responseType": "database.UpdateDatabaseExecutionActionResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseExecutionAction",
+        "requestType": "database.DeleteDatabaseExecutionActionRequest",
+        "responseType": "database.DeleteDatabaseExecutionActionResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_databaseexecutionaction",
+    "collectionField": "databaseexecutionaction",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/databaseexecutionaction/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/databaseexecutionaction/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/databaseexecutionaction; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "opsi",
+  "slug": "opsiopsiconfiguration",
+  "kind": "OpsiOpsiConfiguration",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_opsi_opsi_configuration",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOpsiOpsiConfiguration",
+        "requestType": "opsi.CreateOpsiOpsiConfigurationRequest",
+        "responseType": "opsi.CreateOpsiOpsiConfigurationResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOpsiOpsiConfiguration",
+        "requestType": "opsi.GetOpsiOpsiConfigurationRequest",
+        "responseType": "opsi.GetOpsiOpsiConfigurationResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOpsiOpsiConfiguration",
+        "requestType": "opsi.ListOpsiOpsiConfigurationRequest",
+        "responseType": "opsi.ListOpsiOpsiConfigurationResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOpsiOpsiConfiguration",
+        "requestType": "opsi.UpdateOpsiOpsiConfigurationRequest",
+        "responseType": "opsi.UpdateOpsiOpsiConfigurationResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOpsiOpsiConfiguration",
+        "requestType": "opsi.DeleteOpsiOpsiConfigurationRequest",
+        "responseType": "opsi.DeleteOpsiOpsiConfigurationResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_opsi_opsiopsiconfiguration",
+    "collectionField": "opsiopsiconfiguration",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/opsi/opsiopsiconfiguration/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/opsi/opsiopsiconfiguration/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for opsi/opsiopsiconfiguration; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

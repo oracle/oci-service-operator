@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "visualbuilder",
+  "slug": "visualbuildervbinstances",
+  "kind": "VisualBuilderVbInstances",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_visual_builder_vb_instances",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateVisualBuilderVbInstances",
+        "requestType": "visualbuilder.CreateVisualBuilderVbInstancesRequest",
+        "responseType": "visualbuilder.CreateVisualBuilderVbInstancesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetVisualBuilderVbInstances",
+        "requestType": "visualbuilder.GetVisualBuilderVbInstancesRequest",
+        "responseType": "visualbuilder.GetVisualBuilderVbInstancesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListVisualBuilderVbInstances",
+        "requestType": "visualbuilder.ListVisualBuilderVbInstancesRequest",
+        "responseType": "visualbuilder.ListVisualBuilderVbInstancesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateVisualBuilderVbInstances",
+        "requestType": "visualbuilder.UpdateVisualBuilderVbInstancesRequest",
+        "responseType": "visualbuilder.UpdateVisualBuilderVbInstancesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteVisualBuilderVbInstances",
+        "requestType": "visualbuilder.DeleteVisualBuilderVbInstancesRequest",
+        "responseType": "visualbuilder.DeleteVisualBuilderVbInstancesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_visualbuilder_visualbuildervbinstances",
+    "collectionField": "visualbuildervbinstances",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/visualbuilder/visualbuildervbinstances/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/visualbuilder/visualbuildervbinstances/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for visualbuilder/visualbuildervbinstances; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

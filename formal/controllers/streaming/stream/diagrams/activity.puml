@@ -1,0 +1,75 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Activity - streaming/Stream
+skinparam activity {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  diamondBackgroundColor #e2e8f0
+  diamondBorderColor #1d4ed8
+  diamondFontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+  barColor #1d4ed8
+}
+start
+:Start from shared flow\nshared/diagrams/shared-reconcile-activity.svg;
+:Load desired Stream spec and status from\nKubernetes;
+:Resolve OCI state via GetStream with\nListStreams fallback;
+:Use oci_streaming_streams filters\ncompartment_id, id, name, state (+1 more) when\nOCID lookup or bind-versus-create needs list\nresolution;
+if (Resource exists?) then (yes)
+:Update path calls ChangeStreamCompartment,\nUpdateStream;
+:Guard mutable fields compartment_id,\ndefined_tags, freeform_tags, stream_pool_id\nand force-new fields name, partitions,\nretention_in_hours;
+else (no)
+:Create path calls CreateStream;
+endif
+:Run provider helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource,\ntfresource.WaitForUpdatedState;\ndelete=tfresource.DeleteResource;
+:Apply repo-authored secret policy ready-only\nwrites after ACTIVE;
+:Delete path uses DeleteStream with best-effort\nvia GetStream or ListStreams to DELETED\nconfirmation;
+:Project manual status and finalizer policy\nnone;
+:Requeue on provisioning, updating, terminating;
+:Keep promotion blocked on bind-versus-create,\ndelete-confirmation, endpoint-materialization,\nlegacy-adapter, list-lookup (+2 more);
+stop
+note right
+shared diagram:
+shared/diagrams/shared-reconcile-activity.svg
+Start from the shared reconcile activity and
+specialize provider-backed CRUD, wait, and
+status-projection details here.
+Controller-local activity diagrams add
+list-lookup hints, secret policies, delete
+handling, and open formal gaps.
+archetype batch: Legacy-adapter controllers
+specialize the shared reconcile path while
+explicit gaps still block generated promotion.
+service: streaming
+slug: stream
+kind: Stream
+archetype: legacy-adapter
+status/finalizer: manual / none
+requeue: provisioning, updating, terminating
+provider states: create CREATING; update
+UPDATING; delete DELETING
+mutable/forceNew: compartment_id, defined_tags,
+freeform_tags, stream_pool_id / name,
+partitions, retention_in_hours
+open gaps: bind-versus-create,
+delete-confirmation, endpoint-materialization,
+legacy-adapter, list-lookup (+2 more)
+Create or bind selection depends on name-based
+list lookup with optional pool and compartment
+filters.
+Endpoint secret materialization happens only
+after ACTIVE.
+Delete is best-effort today; DELETING is treated
+as sufficient for cleanup and finalizer removal.
+end note
+@enduml

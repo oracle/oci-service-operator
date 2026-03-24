@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "meteringcomputation",
+  "slug": "meteringcomputationcustomtables",
+  "kind": "MeteringComputationCustomTables",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_metering_computation_custom_tables",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateMeteringComputationCustomTables",
+        "requestType": "meteringcomputation.CreateMeteringComputationCustomTablesRequest",
+        "responseType": "meteringcomputation.CreateMeteringComputationCustomTablesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetMeteringComputationCustomTables",
+        "requestType": "meteringcomputation.GetMeteringComputationCustomTablesRequest",
+        "responseType": "meteringcomputation.GetMeteringComputationCustomTablesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListMeteringComputationCustomTables",
+        "requestType": "meteringcomputation.ListMeteringComputationCustomTablesRequest",
+        "responseType": "meteringcomputation.ListMeteringComputationCustomTablesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateMeteringComputationCustomTables",
+        "requestType": "meteringcomputation.UpdateMeteringComputationCustomTablesRequest",
+        "responseType": "meteringcomputation.UpdateMeteringComputationCustomTablesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteMeteringComputationCustomTables",
+        "requestType": "meteringcomputation.DeleteMeteringComputationCustomTablesRequest",
+        "responseType": "meteringcomputation.DeleteMeteringComputationCustomTablesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_meteringcomputation_meteringcomputationcustomtables",
+    "collectionField": "meteringcomputationcustomtables",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/meteringcomputation/meteringcomputationcustomtables/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/meteringcomputation/meteringcomputationcustomtables/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for meteringcomputation/meteringcomputationcustomtables; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

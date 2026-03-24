@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "databaseschedulingplans",
+  "kind": "DatabaseSchedulingPlans",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_scheduling_plans",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseSchedulingPlans",
+        "requestType": "database.CreateDatabaseSchedulingPlansRequest",
+        "responseType": "database.CreateDatabaseSchedulingPlansResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseSchedulingPlans",
+        "requestType": "database.GetDatabaseSchedulingPlansRequest",
+        "responseType": "database.GetDatabaseSchedulingPlansResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseSchedulingPlans",
+        "requestType": "database.ListDatabaseSchedulingPlansRequest",
+        "responseType": "database.ListDatabaseSchedulingPlansResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseSchedulingPlans",
+        "requestType": "database.UpdateDatabaseSchedulingPlansRequest",
+        "responseType": "database.UpdateDatabaseSchedulingPlansResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseSchedulingPlans",
+        "requestType": "database.DeleteDatabaseSchedulingPlansRequest",
+        "responseType": "database.DeleteDatabaseSchedulingPlansResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_databaseschedulingplans",
+    "collectionField": "databaseschedulingplans",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/databaseschedulingplans/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/databaseschedulingplans/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/databaseschedulingplans; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

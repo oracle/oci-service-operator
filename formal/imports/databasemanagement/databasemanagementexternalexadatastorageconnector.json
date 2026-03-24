@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasemanagement",
+  "slug": "databasemanagementexternalexadatastorageconnector",
+  "kind": "DatabaseManagementExternalExadataStorageConnector",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_management_external_exadata_storage_connector",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseManagementExternalExadataStorageConnector",
+        "requestType": "databasemanagement.CreateDatabaseManagementExternalExadataStorageConnectorRequest",
+        "responseType": "databasemanagement.CreateDatabaseManagementExternalExadataStorageConnectorResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseManagementExternalExadataStorageConnector",
+        "requestType": "databasemanagement.GetDatabaseManagementExternalExadataStorageConnectorRequest",
+        "responseType": "databasemanagement.GetDatabaseManagementExternalExadataStorageConnectorResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseManagementExternalExadataStorageConnector",
+        "requestType": "databasemanagement.ListDatabaseManagementExternalExadataStorageConnectorRequest",
+        "responseType": "databasemanagement.ListDatabaseManagementExternalExadataStorageConnectorResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseManagementExternalExadataStorageConnector",
+        "requestType": "databasemanagement.UpdateDatabaseManagementExternalExadataStorageConnectorRequest",
+        "responseType": "databasemanagement.UpdateDatabaseManagementExternalExadataStorageConnectorResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseManagementExternalExadataStorageConnector",
+        "requestType": "databasemanagement.DeleteDatabaseManagementExternalExadataStorageConnectorRequest",
+        "responseType": "databasemanagement.DeleteDatabaseManagementExternalExadataStorageConnectorResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_databasemanagement_databasemanagementexternalexadatastorageconnector",
+    "collectionField": "databasemanagementexternalexadatastorageconnector",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasemanagement/databasemanagementexternalexadatastorageconnector/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasemanagement/databasemanagementexternalexadatastorageconnector/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for databasemanagement/databasemanagementexternalexadatastorageconnector; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "dbmulticloud",
+  "slug": "dbmulticloudoracledbawsidentityconnector",
+  "kind": "DbmulticloudOracleDbAwsIdentityConnector",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_dbmulticloud_oracle_db_aws_identity_connector",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDbmulticloudOracleDbAwsIdentityConnector",
+        "requestType": "dbmulticloud.CreateDbmulticloudOracleDbAwsIdentityConnectorRequest",
+        "responseType": "dbmulticloud.CreateDbmulticloudOracleDbAwsIdentityConnectorResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDbmulticloudOracleDbAwsIdentityConnector",
+        "requestType": "dbmulticloud.GetDbmulticloudOracleDbAwsIdentityConnectorRequest",
+        "responseType": "dbmulticloud.GetDbmulticloudOracleDbAwsIdentityConnectorResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDbmulticloudOracleDbAwsIdentityConnector",
+        "requestType": "dbmulticloud.ListDbmulticloudOracleDbAwsIdentityConnectorRequest",
+        "responseType": "dbmulticloud.ListDbmulticloudOracleDbAwsIdentityConnectorResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDbmulticloudOracleDbAwsIdentityConnector",
+        "requestType": "dbmulticloud.UpdateDbmulticloudOracleDbAwsIdentityConnectorRequest",
+        "responseType": "dbmulticloud.UpdateDbmulticloudOracleDbAwsIdentityConnectorResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDbmulticloudOracleDbAwsIdentityConnector",
+        "requestType": "dbmulticloud.DeleteDbmulticloudOracleDbAwsIdentityConnectorRequest",
+        "responseType": "dbmulticloud.DeleteDbmulticloudOracleDbAwsIdentityConnectorResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_dbmulticloud_dbmulticloudoracledbawsidentityconnector",
+    "collectionField": "dbmulticloudoracledbawsidentityconnector",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/dbmulticloud/dbmulticloudoracledbawsidentityconnector/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/dbmulticloud/dbmulticloudoracledbawsidentityconnector/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for dbmulticloud/dbmulticloudoracledbawsidentityconnector; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

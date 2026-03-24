@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "healthchecks",
+  "slug": "healthcheckspingproberesults",
+  "kind": "HealthChecksPingProbeResults",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_health_checks_ping_probe_results",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateHealthChecksPingProbeResults",
+        "requestType": "healthchecks.CreateHealthChecksPingProbeResultsRequest",
+        "responseType": "healthchecks.CreateHealthChecksPingProbeResultsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetHealthChecksPingProbeResults",
+        "requestType": "healthchecks.GetHealthChecksPingProbeResultsRequest",
+        "responseType": "healthchecks.GetHealthChecksPingProbeResultsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListHealthChecksPingProbeResults",
+        "requestType": "healthchecks.ListHealthChecksPingProbeResultsRequest",
+        "responseType": "healthchecks.ListHealthChecksPingProbeResultsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateHealthChecksPingProbeResults",
+        "requestType": "healthchecks.UpdateHealthChecksPingProbeResultsRequest",
+        "responseType": "healthchecks.UpdateHealthChecksPingProbeResultsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteHealthChecksPingProbeResults",
+        "requestType": "healthchecks.DeleteHealthChecksPingProbeResultsRequest",
+        "responseType": "healthchecks.DeleteHealthChecksPingProbeResultsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_healthchecks_healthcheckspingproberesults",
+    "collectionField": "healthcheckspingproberesults",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/healthchecks/healthcheckspingproberesults/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/healthchecks/healthcheckspingproberesults/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for healthchecks/healthcheckspingproberesults; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "ailanguage",
+  "slug": "ailanguagemodelevaluationresults",
+  "kind": "AiLanguageModelEvaluationResults",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_ai_language_model_evaluation_results",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateAiLanguageModelEvaluationResults",
+        "requestType": "ailanguage.CreateAiLanguageModelEvaluationResultsRequest",
+        "responseType": "ailanguage.CreateAiLanguageModelEvaluationResultsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetAiLanguageModelEvaluationResults",
+        "requestType": "ailanguage.GetAiLanguageModelEvaluationResultsRequest",
+        "responseType": "ailanguage.GetAiLanguageModelEvaluationResultsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListAiLanguageModelEvaluationResults",
+        "requestType": "ailanguage.ListAiLanguageModelEvaluationResultsRequest",
+        "responseType": "ailanguage.ListAiLanguageModelEvaluationResultsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateAiLanguageModelEvaluationResults",
+        "requestType": "ailanguage.UpdateAiLanguageModelEvaluationResultsRequest",
+        "responseType": "ailanguage.UpdateAiLanguageModelEvaluationResultsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteAiLanguageModelEvaluationResults",
+        "requestType": "ailanguage.DeleteAiLanguageModelEvaluationResultsRequest",
+        "responseType": "ailanguage.DeleteAiLanguageModelEvaluationResultsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_ailanguage_ailanguagemodelevaluationresults",
+    "collectionField": "ailanguagemodelevaluationresults",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/ailanguage/ailanguagemodelevaluationresults/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/ailanguage/ailanguagemodelevaluationresults/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for ailanguage/ailanguagemodelevaluationresults; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

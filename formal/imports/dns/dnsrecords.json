@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "dns",
+  "slug": "dnsrecords",
+  "kind": "DnsRecords",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_dns_records",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDnsRecords",
+        "requestType": "dns.CreateDnsRecordsRequest",
+        "responseType": "dns.CreateDnsRecordsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDnsRecords",
+        "requestType": "dns.GetDnsRecordsRequest",
+        "responseType": "dns.GetDnsRecordsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDnsRecords",
+        "requestType": "dns.ListDnsRecordsRequest",
+        "responseType": "dns.ListDnsRecordsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDnsRecords",
+        "requestType": "dns.UpdateDnsRecordsRequest",
+        "responseType": "dns.UpdateDnsRecordsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDnsRecords",
+        "requestType": "dns.DeleteDnsRecordsRequest",
+        "responseType": "dns.DeleteDnsRecordsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_dns_dnsrecords",
+    "collectionField": "dnsrecords",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/dns/dnsrecords/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/dns/dnsrecords/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for dns/dnsrecords; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

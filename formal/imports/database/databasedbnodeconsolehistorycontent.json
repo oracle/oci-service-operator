@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "databasedbnodeconsolehistorycontent",
+  "kind": "DatabaseDbNodeConsoleHistoryContent",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_db_node_console_history_content",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseDbNodeConsoleHistoryContent",
+        "requestType": "database.CreateDatabaseDbNodeConsoleHistoryContentRequest",
+        "responseType": "database.CreateDatabaseDbNodeConsoleHistoryContentResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseDbNodeConsoleHistoryContent",
+        "requestType": "database.GetDatabaseDbNodeConsoleHistoryContentRequest",
+        "responseType": "database.GetDatabaseDbNodeConsoleHistoryContentResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseDbNodeConsoleHistoryContent",
+        "requestType": "database.ListDatabaseDbNodeConsoleHistoryContentRequest",
+        "responseType": "database.ListDatabaseDbNodeConsoleHistoryContentResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseDbNodeConsoleHistoryContent",
+        "requestType": "database.UpdateDatabaseDbNodeConsoleHistoryContentRequest",
+        "responseType": "database.UpdateDatabaseDbNodeConsoleHistoryContentResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseDbNodeConsoleHistoryContent",
+        "requestType": "database.DeleteDatabaseDbNodeConsoleHistoryContentRequest",
+        "responseType": "database.DeleteDatabaseDbNodeConsoleHistoryContentResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_databasedbnodeconsolehistorycontent",
+    "collectionField": "databasedbnodeconsolehistorycontent",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/databasedbnodeconsolehistorycontent/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/databasedbnodeconsolehistorycontent/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/databasedbnodeconsolehistorycontent; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

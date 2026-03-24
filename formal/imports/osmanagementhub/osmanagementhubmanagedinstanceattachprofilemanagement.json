@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "osmanagementhub",
+  "slug": "osmanagementhubmanagedinstanceattachprofilemanagement",
+  "kind": "OsManagementHubManagedInstanceAttachProfileManagement",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_os_management_hub_managed_instance_attach_profile_management",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOsManagementHubManagedInstanceAttachProfileManagement",
+        "requestType": "osmanagementhub.CreateOsManagementHubManagedInstanceAttachProfileManagementRequest",
+        "responseType": "osmanagementhub.CreateOsManagementHubManagedInstanceAttachProfileManagementResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOsManagementHubManagedInstanceAttachProfileManagement",
+        "requestType": "osmanagementhub.GetOsManagementHubManagedInstanceAttachProfileManagementRequest",
+        "responseType": "osmanagementhub.GetOsManagementHubManagedInstanceAttachProfileManagementResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOsManagementHubManagedInstanceAttachProfileManagement",
+        "requestType": "osmanagementhub.ListOsManagementHubManagedInstanceAttachProfileManagementRequest",
+        "responseType": "osmanagementhub.ListOsManagementHubManagedInstanceAttachProfileManagementResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOsManagementHubManagedInstanceAttachProfileManagement",
+        "requestType": "osmanagementhub.UpdateOsManagementHubManagedInstanceAttachProfileManagementRequest",
+        "responseType": "osmanagementhub.UpdateOsManagementHubManagedInstanceAttachProfileManagementResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOsManagementHubManagedInstanceAttachProfileManagement",
+        "requestType": "osmanagementhub.DeleteOsManagementHubManagedInstanceAttachProfileManagementRequest",
+        "responseType": "osmanagementhub.DeleteOsManagementHubManagedInstanceAttachProfileManagementResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_osmanagementhub_osmanagementhubmanagedinstanceattachprofilemanagement",
+    "collectionField": "osmanagementhubmanagedinstanceattachprofilemanagement",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/osmanagementhub/osmanagementhubmanagedinstanceattachprofilemanagement/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/osmanagementhub/osmanagementhubmanagedinstanceattachprofilemanagement/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for osmanagementhub/osmanagementhubmanagedinstanceattachprofilemanagement; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

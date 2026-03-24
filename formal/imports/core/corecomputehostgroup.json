@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "corecomputehostgroup",
+  "kind": "CoreComputeHostGroup",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_core_compute_host_group",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCoreComputeHostGroup",
+        "requestType": "core.CreateCoreComputeHostGroupRequest",
+        "responseType": "core.CreateCoreComputeHostGroupResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCoreComputeHostGroup",
+        "requestType": "core.GetCoreComputeHostGroupRequest",
+        "responseType": "core.GetCoreComputeHostGroupResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCoreComputeHostGroup",
+        "requestType": "core.ListCoreComputeHostGroupRequest",
+        "responseType": "core.ListCoreComputeHostGroupResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCoreComputeHostGroup",
+        "requestType": "core.UpdateCoreComputeHostGroupRequest",
+        "responseType": "core.UpdateCoreComputeHostGroupResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCoreComputeHostGroup",
+        "requestType": "core.DeleteCoreComputeHostGroupRequest",
+        "responseType": "core.DeleteCoreComputeHostGroupResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_core_corecomputehostgroup",
+    "collectionField": "corecomputehostgroup",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/corecomputehostgroup/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/corecomputehostgroup/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for core/corecomputehostgroup; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

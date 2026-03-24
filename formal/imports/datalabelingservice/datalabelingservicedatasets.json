@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datalabelingservice",
+  "slug": "datalabelingservicedatasets",
+  "kind": "DataLabelingServiceDatasets",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_labeling_service_datasets",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDataLabelingServiceDatasets",
+        "requestType": "datalabelingservice.CreateDataLabelingServiceDatasetsRequest",
+        "responseType": "datalabelingservice.CreateDataLabelingServiceDatasetsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDataLabelingServiceDatasets",
+        "requestType": "datalabelingservice.GetDataLabelingServiceDatasetsRequest",
+        "responseType": "datalabelingservice.GetDataLabelingServiceDatasetsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDataLabelingServiceDatasets",
+        "requestType": "datalabelingservice.ListDataLabelingServiceDatasetsRequest",
+        "responseType": "datalabelingservice.ListDataLabelingServiceDatasetsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDataLabelingServiceDatasets",
+        "requestType": "datalabelingservice.UpdateDataLabelingServiceDatasetsRequest",
+        "responseType": "datalabelingservice.UpdateDataLabelingServiceDatasetsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDataLabelingServiceDatasets",
+        "requestType": "datalabelingservice.DeleteDataLabelingServiceDatasetsRequest",
+        "responseType": "datalabelingservice.DeleteDataLabelingServiceDatasetsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_datalabelingservice_datalabelingservicedatasets",
+    "collectionField": "datalabelingservicedatasets",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datalabelingservice/datalabelingservicedatasets/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datalabelingservice/datalabelingservicedatasets/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for datalabelingservice/datalabelingservicedatasets; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

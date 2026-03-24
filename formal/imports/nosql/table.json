@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "nosql",
+  "slug": "table",
+  "kind": "Table",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_nosql_table",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateTable",
+        "requestType": "nosql.CreateTableRequest",
+        "responseType": "nosql.CreateTableResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetTable",
+        "requestType": "nosql.GetTableRequest",
+        "responseType": "nosql.GetTableResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListTable",
+        "requestType": "nosql.ListTableRequest",
+        "responseType": "nosql.ListTableResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateTable",
+        "requestType": "nosql.UpdateTableRequest",
+        "responseType": "nosql.UpdateTableResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteTable",
+        "requestType": "nosql.DeleteTableRequest",
+        "responseType": "nosql.DeleteTableResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_nosql_table",
+    "collectionField": "table",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/nosql/table/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/nosql/table/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for nosql/table; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

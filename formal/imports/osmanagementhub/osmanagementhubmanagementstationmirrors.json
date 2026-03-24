@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "osmanagementhub",
+  "slug": "osmanagementhubmanagementstationmirrors",
+  "kind": "OsManagementHubManagementStationMirrors",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_os_management_hub_management_station_mirrors",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOsManagementHubManagementStationMirrors",
+        "requestType": "osmanagementhub.CreateOsManagementHubManagementStationMirrorsRequest",
+        "responseType": "osmanagementhub.CreateOsManagementHubManagementStationMirrorsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOsManagementHubManagementStationMirrors",
+        "requestType": "osmanagementhub.GetOsManagementHubManagementStationMirrorsRequest",
+        "responseType": "osmanagementhub.GetOsManagementHubManagementStationMirrorsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOsManagementHubManagementStationMirrors",
+        "requestType": "osmanagementhub.ListOsManagementHubManagementStationMirrorsRequest",
+        "responseType": "osmanagementhub.ListOsManagementHubManagementStationMirrorsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOsManagementHubManagementStationMirrors",
+        "requestType": "osmanagementhub.UpdateOsManagementHubManagementStationMirrorsRequest",
+        "responseType": "osmanagementhub.UpdateOsManagementHubManagementStationMirrorsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOsManagementHubManagementStationMirrors",
+        "requestType": "osmanagementhub.DeleteOsManagementHubManagementStationMirrorsRequest",
+        "responseType": "osmanagementhub.DeleteOsManagementHubManagementStationMirrorsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_osmanagementhub_osmanagementhubmanagementstationmirrors",
+    "collectionField": "osmanagementhubmanagementstationmirrors",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/osmanagementhub/osmanagementhubmanagementstationmirrors/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/osmanagementhub/osmanagementhubmanagementstationmirrors/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for osmanagementhub/osmanagementhubmanagementstationmirrors; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

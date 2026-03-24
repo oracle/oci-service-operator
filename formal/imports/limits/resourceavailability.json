@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "limits",
+  "slug": "resourceavailability",
+  "kind": "ResourceAvailability",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_limits_resourceavailability",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateResourceAvailability",
+        "requestType": "limits.CreateResourceAvailabilityRequest",
+        "responseType": "limits.CreateResourceAvailabilityResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetResourceAvailability",
+        "requestType": "limits.GetResourceAvailabilityRequest",
+        "responseType": "limits.GetResourceAvailabilityResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListResourceAvailability",
+        "requestType": "limits.ListResourceAvailabilityRequest",
+        "responseType": "limits.ListResourceAvailabilityResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateResourceAvailability",
+        "requestType": "limits.UpdateResourceAvailabilityRequest",
+        "responseType": "limits.UpdateResourceAvailabilityResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteResourceAvailability",
+        "requestType": "limits.DeleteResourceAvailabilityRequest",
+        "responseType": "limits.DeleteResourceAvailabilityResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_limits_resourceavailability",
+    "collectionField": "resourceavailability",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/limits/resourceavailability/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/limits/resourceavailability/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for limits/resourceavailability; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "stackmonitoring",
+  "slug": "stackmonitoringdiscoveryjoblogs",
+  "kind": "StackMonitoringDiscoveryJobLogs",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_stack_monitoring_discovery_job_logs",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateStackMonitoringDiscoveryJobLogs",
+        "requestType": "stackmonitoring.CreateStackMonitoringDiscoveryJobLogsRequest",
+        "responseType": "stackmonitoring.CreateStackMonitoringDiscoveryJobLogsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetStackMonitoringDiscoveryJobLogs",
+        "requestType": "stackmonitoring.GetStackMonitoringDiscoveryJobLogsRequest",
+        "responseType": "stackmonitoring.GetStackMonitoringDiscoveryJobLogsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListStackMonitoringDiscoveryJobLogs",
+        "requestType": "stackmonitoring.ListStackMonitoringDiscoveryJobLogsRequest",
+        "responseType": "stackmonitoring.ListStackMonitoringDiscoveryJobLogsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateStackMonitoringDiscoveryJobLogs",
+        "requestType": "stackmonitoring.UpdateStackMonitoringDiscoveryJobLogsRequest",
+        "responseType": "stackmonitoring.UpdateStackMonitoringDiscoveryJobLogsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteStackMonitoringDiscoveryJobLogs",
+        "requestType": "stackmonitoring.DeleteStackMonitoringDiscoveryJobLogsRequest",
+        "responseType": "stackmonitoring.DeleteStackMonitoringDiscoveryJobLogsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_stackmonitoring_stackmonitoringdiscoveryjoblogs",
+    "collectionField": "stackmonitoringdiscoveryjoblogs",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/stackmonitoring/stackmonitoringdiscoveryjoblogs/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/stackmonitoring/stackmonitoringdiscoveryjoblogs/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for stackmonitoring/stackmonitoringdiscoveryjoblogs; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

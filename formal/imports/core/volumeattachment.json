@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "volumeattachment",
+  "kind": "VolumeAttachment",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_core_volumeattachment",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateVolumeAttachment",
+        "requestType": "core.CreateVolumeAttachmentRequest",
+        "responseType": "core.CreateVolumeAttachmentResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetVolumeAttachment",
+        "requestType": "core.GetVolumeAttachmentRequest",
+        "responseType": "core.GetVolumeAttachmentResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListVolumeAttachment",
+        "requestType": "core.ListVolumeAttachmentRequest",
+        "responseType": "core.ListVolumeAttachmentResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateVolumeAttachment",
+        "requestType": "core.UpdateVolumeAttachmentRequest",
+        "responseType": "core.UpdateVolumeAttachmentResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteVolumeAttachment",
+        "requestType": "core.DeleteVolumeAttachmentRequest",
+        "responseType": "core.DeleteVolumeAttachmentResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_core_volumeattachment",
+    "collectionField": "volumeattachment",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/volumeattachment/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/volumeattachment/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for core/volumeattachment; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

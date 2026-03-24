@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "generativeai",
+  "slug": "generativeaigenerativeaiprivateendpoint",
+  "kind": "GenerativeAiGenerativeAiPrivateEndpoint",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_generative_ai_generative_ai_private_endpoint",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateGenerativeAiGenerativeAiPrivateEndpoint",
+        "requestType": "generativeai.CreateGenerativeAiGenerativeAiPrivateEndpointRequest",
+        "responseType": "generativeai.CreateGenerativeAiGenerativeAiPrivateEndpointResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetGenerativeAiGenerativeAiPrivateEndpoint",
+        "requestType": "generativeai.GetGenerativeAiGenerativeAiPrivateEndpointRequest",
+        "responseType": "generativeai.GetGenerativeAiGenerativeAiPrivateEndpointResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListGenerativeAiGenerativeAiPrivateEndpoint",
+        "requestType": "generativeai.ListGenerativeAiGenerativeAiPrivateEndpointRequest",
+        "responseType": "generativeai.ListGenerativeAiGenerativeAiPrivateEndpointResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateGenerativeAiGenerativeAiPrivateEndpoint",
+        "requestType": "generativeai.UpdateGenerativeAiGenerativeAiPrivateEndpointRequest",
+        "responseType": "generativeai.UpdateGenerativeAiGenerativeAiPrivateEndpointResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteGenerativeAiGenerativeAiPrivateEndpoint",
+        "requestType": "generativeai.DeleteGenerativeAiGenerativeAiPrivateEndpointRequest",
+        "responseType": "generativeai.DeleteGenerativeAiGenerativeAiPrivateEndpointResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_generativeai_generativeaigenerativeaiprivateendpoint",
+    "collectionField": "generativeaigenerativeaiprivateendpoint",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/generativeai/generativeaigenerativeaiprivateendpoint/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/generativeai/generativeaigenerativeaiprivateendpoint/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for generativeai/generativeaigenerativeaiprivateendpoint; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

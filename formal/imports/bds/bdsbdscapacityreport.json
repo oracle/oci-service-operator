@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "bds",
+  "slug": "bdsbdscapacityreport",
+  "kind": "BdsBdsCapacityReport",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_bds_bds_capacity_report",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateBdsBdsCapacityReport",
+        "requestType": "bds.CreateBdsBdsCapacityReportRequest",
+        "responseType": "bds.CreateBdsBdsCapacityReportResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetBdsBdsCapacityReport",
+        "requestType": "bds.GetBdsBdsCapacityReportRequest",
+        "responseType": "bds.GetBdsBdsCapacityReportResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListBdsBdsCapacityReport",
+        "requestType": "bds.ListBdsBdsCapacityReportRequest",
+        "responseType": "bds.ListBdsBdsCapacityReportResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateBdsBdsCapacityReport",
+        "requestType": "bds.UpdateBdsBdsCapacityReportRequest",
+        "responseType": "bds.UpdateBdsBdsCapacityReportResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteBdsBdsCapacityReport",
+        "requestType": "bds.DeleteBdsBdsCapacityReportRequest",
+        "responseType": "bds.DeleteBdsBdsCapacityReportResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_bds_bdsbdscapacityreport",
+    "collectionField": "bdsbdscapacityreport",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/bds/bdsbdscapacityreport/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/bds/bdsbdscapacityreport/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for bds/bdsbdscapacityreport; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

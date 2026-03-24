@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "limits",
+  "slug": "quota",
+  "kind": "Quota",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_limits_quota",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateQuota",
+        "requestType": "limits.CreateQuotaRequest",
+        "responseType": "limits.CreateQuotaResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetQuota",
+        "requestType": "limits.GetQuotaRequest",
+        "responseType": "limits.GetQuotaResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListQuota",
+        "requestType": "limits.ListQuotaRequest",
+        "responseType": "limits.ListQuotaResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateQuota",
+        "requestType": "limits.UpdateQuotaRequest",
+        "responseType": "limits.UpdateQuotaResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteQuota",
+        "requestType": "limits.DeleteQuotaRequest",
+        "responseType": "limits.DeleteQuotaResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_limits_quota",
+    "collectionField": "quota",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/limits/quota/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/limits/quota/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for limits/quota; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

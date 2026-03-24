@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datascience",
+  "slug": "datasciencejob",
+  "kind": "DatascienceJob",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_datascience_job",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatascienceJob",
+        "requestType": "datascience.CreateDatascienceJobRequest",
+        "responseType": "datascience.CreateDatascienceJobResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatascienceJob",
+        "requestType": "datascience.GetDatascienceJobRequest",
+        "responseType": "datascience.GetDatascienceJobResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatascienceJob",
+        "requestType": "datascience.ListDatascienceJobRequest",
+        "responseType": "datascience.ListDatascienceJobResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatascienceJob",
+        "requestType": "datascience.UpdateDatascienceJobRequest",
+        "responseType": "datascience.UpdateDatascienceJobResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatascienceJob",
+        "requestType": "datascience.DeleteDatascienceJobRequest",
+        "responseType": "datascience.DeleteDatascienceJobResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_datascience_datasciencejob",
+    "collectionField": "datasciencejob",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datascience/datasciencejob/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datascience/datasciencejob/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for datascience/datasciencejob; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

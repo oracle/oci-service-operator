@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "dbmulticloud",
+  "slug": "dbmulticloudoracledbawskey",
+  "kind": "DbmulticloudOracleDbAwsKey",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_dbmulticloud_oracle_db_aws_key",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDbmulticloudOracleDbAwsKey",
+        "requestType": "dbmulticloud.CreateDbmulticloudOracleDbAwsKeyRequest",
+        "responseType": "dbmulticloud.CreateDbmulticloudOracleDbAwsKeyResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDbmulticloudOracleDbAwsKey",
+        "requestType": "dbmulticloud.GetDbmulticloudOracleDbAwsKeyRequest",
+        "responseType": "dbmulticloud.GetDbmulticloudOracleDbAwsKeyResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDbmulticloudOracleDbAwsKey",
+        "requestType": "dbmulticloud.ListDbmulticloudOracleDbAwsKeyRequest",
+        "responseType": "dbmulticloud.ListDbmulticloudOracleDbAwsKeyResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDbmulticloudOracleDbAwsKey",
+        "requestType": "dbmulticloud.UpdateDbmulticloudOracleDbAwsKeyRequest",
+        "responseType": "dbmulticloud.UpdateDbmulticloudOracleDbAwsKeyResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDbmulticloudOracleDbAwsKey",
+        "requestType": "dbmulticloud.DeleteDbmulticloudOracleDbAwsKeyRequest",
+        "responseType": "dbmulticloud.DeleteDbmulticloudOracleDbAwsKeyResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_dbmulticloud_dbmulticloudoracledbawskey",
+    "collectionField": "dbmulticloudoracledbawskey",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/dbmulticloud/dbmulticloudoracledbawskey/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/dbmulticloud/dbmulticloudoracledbawskey/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for dbmulticloud/dbmulticloudoracledbawskey; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

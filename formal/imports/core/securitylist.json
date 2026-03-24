@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "securitylist",
+  "kind": "SecurityList",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_core_securitylist",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateSecurityList",
+        "requestType": "core.CreateSecurityListRequest",
+        "responseType": "core.CreateSecurityListResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetSecurityList",
+        "requestType": "core.GetSecurityListRequest",
+        "responseType": "core.GetSecurityListResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListSecurityList",
+        "requestType": "core.ListSecurityListRequest",
+        "responseType": "core.ListSecurityListResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateSecurityList",
+        "requestType": "core.UpdateSecurityListRequest",
+        "responseType": "core.UpdateSecurityListResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteSecurityList",
+        "requestType": "core.DeleteSecurityListRequest",
+        "responseType": "core.DeleteSecurityListResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_core_securitylist",
+    "collectionField": "securitylist",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/securitylist/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/securitylist/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for core/securitylist; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

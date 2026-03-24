@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "fleetappsmanagement",
+  "slug": "fleetappsmanagementschedulerdefinition",
+  "kind": "FleetAppsManagementSchedulerDefinition",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_fleet_apps_management_scheduler_definition",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateFleetAppsManagementSchedulerDefinition",
+        "requestType": "fleetappsmanagement.CreateFleetAppsManagementSchedulerDefinitionRequest",
+        "responseType": "fleetappsmanagement.CreateFleetAppsManagementSchedulerDefinitionResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetFleetAppsManagementSchedulerDefinition",
+        "requestType": "fleetappsmanagement.GetFleetAppsManagementSchedulerDefinitionRequest",
+        "responseType": "fleetappsmanagement.GetFleetAppsManagementSchedulerDefinitionResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListFleetAppsManagementSchedulerDefinition",
+        "requestType": "fleetappsmanagement.ListFleetAppsManagementSchedulerDefinitionRequest",
+        "responseType": "fleetappsmanagement.ListFleetAppsManagementSchedulerDefinitionResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateFleetAppsManagementSchedulerDefinition",
+        "requestType": "fleetappsmanagement.UpdateFleetAppsManagementSchedulerDefinitionRequest",
+        "responseType": "fleetappsmanagement.UpdateFleetAppsManagementSchedulerDefinitionResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteFleetAppsManagementSchedulerDefinition",
+        "requestType": "fleetappsmanagement.DeleteFleetAppsManagementSchedulerDefinitionRequest",
+        "responseType": "fleetappsmanagement.DeleteFleetAppsManagementSchedulerDefinitionResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_fleetappsmanagement_fleetappsmanagementschedulerdefinition",
+    "collectionField": "fleetappsmanagementschedulerdefinition",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/fleetappsmanagement/fleetappsmanagementschedulerdefinition/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/fleetappsmanagement/fleetappsmanagementschedulerdefinition/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for fleetappsmanagement/fleetappsmanagementschedulerdefinition; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

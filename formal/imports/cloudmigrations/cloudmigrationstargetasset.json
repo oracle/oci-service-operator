@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "cloudmigrations",
+  "slug": "cloudmigrationstargetasset",
+  "kind": "CloudMigrationsTargetAsset",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_cloud_migrations_target_asset",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCloudMigrationsTargetAsset",
+        "requestType": "cloudmigrations.CreateCloudMigrationsTargetAssetRequest",
+        "responseType": "cloudmigrations.CreateCloudMigrationsTargetAssetResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCloudMigrationsTargetAsset",
+        "requestType": "cloudmigrations.GetCloudMigrationsTargetAssetRequest",
+        "responseType": "cloudmigrations.GetCloudMigrationsTargetAssetResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCloudMigrationsTargetAsset",
+        "requestType": "cloudmigrations.ListCloudMigrationsTargetAssetRequest",
+        "responseType": "cloudmigrations.ListCloudMigrationsTargetAssetResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCloudMigrationsTargetAsset",
+        "requestType": "cloudmigrations.UpdateCloudMigrationsTargetAssetRequest",
+        "responseType": "cloudmigrations.UpdateCloudMigrationsTargetAssetResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCloudMigrationsTargetAsset",
+        "requestType": "cloudmigrations.DeleteCloudMigrationsTargetAssetRequest",
+        "responseType": "cloudmigrations.DeleteCloudMigrationsTargetAssetResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_cloudmigrations_cloudmigrationstargetasset",
+    "collectionField": "cloudmigrationstargetasset",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/cloudmigrations/cloudmigrationstargetasset/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/cloudmigrations/cloudmigrationstargetasset/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for cloudmigrations/cloudmigrationstargetasset; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

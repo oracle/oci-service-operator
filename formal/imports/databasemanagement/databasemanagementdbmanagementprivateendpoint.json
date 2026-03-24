@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasemanagement",
+  "slug": "databasemanagementdbmanagementprivateendpoint",
+  "kind": "DatabaseManagementDbManagementPrivateEndpoint",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_management_db_management_private_endpoint",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseManagementDbManagementPrivateEndpoint",
+        "requestType": "databasemanagement.CreateDatabaseManagementDbManagementPrivateEndpointRequest",
+        "responseType": "databasemanagement.CreateDatabaseManagementDbManagementPrivateEndpointResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseManagementDbManagementPrivateEndpoint",
+        "requestType": "databasemanagement.GetDatabaseManagementDbManagementPrivateEndpointRequest",
+        "responseType": "databasemanagement.GetDatabaseManagementDbManagementPrivateEndpointResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseManagementDbManagementPrivateEndpoint",
+        "requestType": "databasemanagement.ListDatabaseManagementDbManagementPrivateEndpointRequest",
+        "responseType": "databasemanagement.ListDatabaseManagementDbManagementPrivateEndpointResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseManagementDbManagementPrivateEndpoint",
+        "requestType": "databasemanagement.UpdateDatabaseManagementDbManagementPrivateEndpointRequest",
+        "responseType": "databasemanagement.UpdateDatabaseManagementDbManagementPrivateEndpointResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseManagementDbManagementPrivateEndpoint",
+        "requestType": "databasemanagement.DeleteDatabaseManagementDbManagementPrivateEndpointRequest",
+        "responseType": "databasemanagement.DeleteDatabaseManagementDbManagementPrivateEndpointResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_databasemanagement_databasemanagementdbmanagementprivateendpoint",
+    "collectionField": "databasemanagementdbmanagementprivateendpoint",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasemanagement/databasemanagementdbmanagementprivateendpoint/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasemanagement/databasemanagementdbmanagementprivateendpoint/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for databasemanagement/databasemanagementdbmanagementprivateendpoint; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

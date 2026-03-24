@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "fleetappsmanagement",
+  "slug": "fleetappsmanagementschedulerjobjobactivityresources",
+  "kind": "FleetAppsManagementSchedulerJobJobActivityResources",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_fleet_apps_management_scheduler_job_job_activity_resources",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateFleetAppsManagementSchedulerJobJobActivityResources",
+        "requestType": "fleetappsmanagement.CreateFleetAppsManagementSchedulerJobJobActivityResourcesRequest",
+        "responseType": "fleetappsmanagement.CreateFleetAppsManagementSchedulerJobJobActivityResourcesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetFleetAppsManagementSchedulerJobJobActivityResources",
+        "requestType": "fleetappsmanagement.GetFleetAppsManagementSchedulerJobJobActivityResourcesRequest",
+        "responseType": "fleetappsmanagement.GetFleetAppsManagementSchedulerJobJobActivityResourcesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListFleetAppsManagementSchedulerJobJobActivityResources",
+        "requestType": "fleetappsmanagement.ListFleetAppsManagementSchedulerJobJobActivityResourcesRequest",
+        "responseType": "fleetappsmanagement.ListFleetAppsManagementSchedulerJobJobActivityResourcesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateFleetAppsManagementSchedulerJobJobActivityResources",
+        "requestType": "fleetappsmanagement.UpdateFleetAppsManagementSchedulerJobJobActivityResourcesRequest",
+        "responseType": "fleetappsmanagement.UpdateFleetAppsManagementSchedulerJobJobActivityResourcesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteFleetAppsManagementSchedulerJobJobActivityResources",
+        "requestType": "fleetappsmanagement.DeleteFleetAppsManagementSchedulerJobJobActivityResourcesRequest",
+        "responseType": "fleetappsmanagement.DeleteFleetAppsManagementSchedulerJobJobActivityResourcesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_fleetappsmanagement_fleetappsmanagementschedulerjobjobactivityresources",
+    "collectionField": "fleetappsmanagementschedulerjobjobactivityresources",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/fleetappsmanagement/fleetappsmanagementschedulerjobjobactivityresources/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/fleetappsmanagement/fleetappsmanagementschedulerjobjobactivityresources/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for fleetappsmanagement/fleetappsmanagementschedulerjobjobactivityresources; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasemanagement",
+  "slug": "databasemanagementexternaldbhomes",
+  "kind": "DatabaseManagementExternalDbHomes",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_management_external_db_homes",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseManagementExternalDbHomes",
+        "requestType": "databasemanagement.CreateDatabaseManagementExternalDbHomesRequest",
+        "responseType": "databasemanagement.CreateDatabaseManagementExternalDbHomesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseManagementExternalDbHomes",
+        "requestType": "databasemanagement.GetDatabaseManagementExternalDbHomesRequest",
+        "responseType": "databasemanagement.GetDatabaseManagementExternalDbHomesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseManagementExternalDbHomes",
+        "requestType": "databasemanagement.ListDatabaseManagementExternalDbHomesRequest",
+        "responseType": "databasemanagement.ListDatabaseManagementExternalDbHomesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseManagementExternalDbHomes",
+        "requestType": "databasemanagement.UpdateDatabaseManagementExternalDbHomesRequest",
+        "responseType": "databasemanagement.UpdateDatabaseManagementExternalDbHomesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseManagementExternalDbHomes",
+        "requestType": "databasemanagement.DeleteDatabaseManagementExternalDbHomesRequest",
+        "responseType": "databasemanagement.DeleteDatabaseManagementExternalDbHomesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_databasemanagement_databasemanagementexternaldbhomes",
+    "collectionField": "databasemanagementexternaldbhomes",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasemanagement/databasemanagementexternaldbhomes/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasemanagement/databasemanagementexternaldbhomes/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for databasemanagement/databasemanagementexternaldbhomes; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

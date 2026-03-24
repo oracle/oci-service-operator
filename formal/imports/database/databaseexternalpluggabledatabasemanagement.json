@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "databaseexternalpluggabledatabasemanagement",
+  "kind": "DatabaseExternalPluggableDatabaseManagement",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_external_pluggable_database_management",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseExternalPluggableDatabaseManagement",
+        "requestType": "database.CreateDatabaseExternalPluggableDatabaseManagementRequest",
+        "responseType": "database.CreateDatabaseExternalPluggableDatabaseManagementResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseExternalPluggableDatabaseManagement",
+        "requestType": "database.GetDatabaseExternalPluggableDatabaseManagementRequest",
+        "responseType": "database.GetDatabaseExternalPluggableDatabaseManagementResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseExternalPluggableDatabaseManagement",
+        "requestType": "database.ListDatabaseExternalPluggableDatabaseManagementRequest",
+        "responseType": "database.ListDatabaseExternalPluggableDatabaseManagementResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseExternalPluggableDatabaseManagement",
+        "requestType": "database.UpdateDatabaseExternalPluggableDatabaseManagementRequest",
+        "responseType": "database.UpdateDatabaseExternalPluggableDatabaseManagementResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseExternalPluggableDatabaseManagement",
+        "requestType": "database.DeleteDatabaseExternalPluggableDatabaseManagementRequest",
+        "responseType": "database.DeleteDatabaseExternalPluggableDatabaseManagementResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_databaseexternalpluggabledatabasemanagement",
+    "collectionField": "databaseexternalpluggabledatabasemanagement",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/databaseexternalpluggabledatabasemanagement/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/databaseexternalpluggabledatabasemanagement/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/databaseexternalpluggabledatabasemanagement; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

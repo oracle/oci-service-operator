@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "oce",
+  "slug": "oceoceinstance",
+  "kind": "OceOceInstance",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_oce_oce_instance",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOceOceInstance",
+        "requestType": "oce.CreateOceOceInstanceRequest",
+        "responseType": "oce.CreateOceOceInstanceResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOceOceInstance",
+        "requestType": "oce.GetOceOceInstanceRequest",
+        "responseType": "oce.GetOceOceInstanceResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOceOceInstance",
+        "requestType": "oce.ListOceOceInstanceRequest",
+        "responseType": "oce.ListOceOceInstanceResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOceOceInstance",
+        "requestType": "oce.UpdateOceOceInstanceRequest",
+        "responseType": "oce.UpdateOceOceInstanceResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOceOceInstance",
+        "requestType": "oce.DeleteOceOceInstanceRequest",
+        "responseType": "oce.DeleteOceOceInstanceResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_oce_oceoceinstance",
+    "collectionField": "oceoceinstance",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/oce/oceoceinstance/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/oce/oceoceinstance/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for oce/oceoceinstance; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

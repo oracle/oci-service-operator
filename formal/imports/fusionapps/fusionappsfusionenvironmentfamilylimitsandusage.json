@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "fusionapps",
+  "slug": "fusionappsfusionenvironmentfamilylimitsandusage",
+  "kind": "FusionAppsFusionEnvironmentFamilyLimitsAndUsage",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_fusion_apps_fusion_environment_family_limits_and_usage",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateFusionAppsFusionEnvironmentFamilyLimitsAndUsage",
+        "requestType": "fusionapps.CreateFusionAppsFusionEnvironmentFamilyLimitsAndUsageRequest",
+        "responseType": "fusionapps.CreateFusionAppsFusionEnvironmentFamilyLimitsAndUsageResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetFusionAppsFusionEnvironmentFamilyLimitsAndUsage",
+        "requestType": "fusionapps.GetFusionAppsFusionEnvironmentFamilyLimitsAndUsageRequest",
+        "responseType": "fusionapps.GetFusionAppsFusionEnvironmentFamilyLimitsAndUsageResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListFusionAppsFusionEnvironmentFamilyLimitsAndUsage",
+        "requestType": "fusionapps.ListFusionAppsFusionEnvironmentFamilyLimitsAndUsageRequest",
+        "responseType": "fusionapps.ListFusionAppsFusionEnvironmentFamilyLimitsAndUsageResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateFusionAppsFusionEnvironmentFamilyLimitsAndUsage",
+        "requestType": "fusionapps.UpdateFusionAppsFusionEnvironmentFamilyLimitsAndUsageRequest",
+        "responseType": "fusionapps.UpdateFusionAppsFusionEnvironmentFamilyLimitsAndUsageResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteFusionAppsFusionEnvironmentFamilyLimitsAndUsage",
+        "requestType": "fusionapps.DeleteFusionAppsFusionEnvironmentFamilyLimitsAndUsageRequest",
+        "responseType": "fusionapps.DeleteFusionAppsFusionEnvironmentFamilyLimitsAndUsageResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_fusionapps_fusionappsfusionenvironmentfamilylimitsandusage",
+    "collectionField": "fusionappsfusionenvironmentfamilylimitsandusage",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/fusionapps/fusionappsfusionenvironmentfamilylimitsandusage/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/fusionapps/fusionappsfusionenvironmentfamilylimitsandusage/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for fusionapps/fusionappsfusionenvironmentfamilylimitsandusage; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

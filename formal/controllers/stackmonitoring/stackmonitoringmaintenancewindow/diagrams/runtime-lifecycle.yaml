@@ -1,0 +1,13 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: stackmonitoring
+slug: stackmonitoringmaintenancewindow
+kind: StackMonitoringMaintenanceWindow
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+notes:
+  - Scaffold metadata only; replace with controller-specific runtime states before promotion.

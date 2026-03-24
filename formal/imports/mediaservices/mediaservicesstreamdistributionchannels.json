@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "mediaservices",
+  "slug": "mediaservicesstreamdistributionchannels",
+  "kind": "MediaServicesStreamDistributionChannels",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_media_services_stream_distribution_channels",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateMediaServicesStreamDistributionChannels",
+        "requestType": "mediaservices.CreateMediaServicesStreamDistributionChannelsRequest",
+        "responseType": "mediaservices.CreateMediaServicesStreamDistributionChannelsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetMediaServicesStreamDistributionChannels",
+        "requestType": "mediaservices.GetMediaServicesStreamDistributionChannelsRequest",
+        "responseType": "mediaservices.GetMediaServicesStreamDistributionChannelsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListMediaServicesStreamDistributionChannels",
+        "requestType": "mediaservices.ListMediaServicesStreamDistributionChannelsRequest",
+        "responseType": "mediaservices.ListMediaServicesStreamDistributionChannelsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateMediaServicesStreamDistributionChannels",
+        "requestType": "mediaservices.UpdateMediaServicesStreamDistributionChannelsRequest",
+        "responseType": "mediaservices.UpdateMediaServicesStreamDistributionChannelsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteMediaServicesStreamDistributionChannels",
+        "requestType": "mediaservices.DeleteMediaServicesStreamDistributionChannelsRequest",
+        "responseType": "mediaservices.DeleteMediaServicesStreamDistributionChannelsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_mediaservices_mediaservicesstreamdistributionchannels",
+    "collectionField": "mediaservicesstreamdistributionchannels",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/mediaservices/mediaservicesstreamdistributionchannels/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/mediaservices/mediaservicesstreamdistributionchannels/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for mediaservices/mediaservicesstreamdistributionchannels; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

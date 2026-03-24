@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "identitydomains",
+  "slug": "identitydomainsgroup",
+  "kind": "IdentityDomainsGroup",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_identity_domains_group",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateIdentityDomainsGroup",
+        "requestType": "identitydomains.CreateIdentityDomainsGroupRequest",
+        "responseType": "identitydomains.CreateIdentityDomainsGroupResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetIdentityDomainsGroup",
+        "requestType": "identitydomains.GetIdentityDomainsGroupRequest",
+        "responseType": "identitydomains.GetIdentityDomainsGroupResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListIdentityDomainsGroup",
+        "requestType": "identitydomains.ListIdentityDomainsGroupRequest",
+        "responseType": "identitydomains.ListIdentityDomainsGroupResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateIdentityDomainsGroup",
+        "requestType": "identitydomains.UpdateIdentityDomainsGroupRequest",
+        "responseType": "identitydomains.UpdateIdentityDomainsGroupResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteIdentityDomainsGroup",
+        "requestType": "identitydomains.DeleteIdentityDomainsGroupRequest",
+        "responseType": "identitydomains.DeleteIdentityDomainsGroupResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_identitydomains_identitydomainsgroup",
+    "collectionField": "identitydomainsgroup",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/identitydomains/identitydomainsgroup/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/identitydomains/identitydomainsgroup/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for identitydomains/identitydomainsgroup; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

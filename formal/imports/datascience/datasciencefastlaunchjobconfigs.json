@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datascience",
+  "slug": "datasciencefastlaunchjobconfigs",
+  "kind": "DatascienceFastLaunchJobConfigs",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_datascience_fast_launch_job_configs",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatascienceFastLaunchJobConfigs",
+        "requestType": "datascience.CreateDatascienceFastLaunchJobConfigsRequest",
+        "responseType": "datascience.CreateDatascienceFastLaunchJobConfigsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatascienceFastLaunchJobConfigs",
+        "requestType": "datascience.GetDatascienceFastLaunchJobConfigsRequest",
+        "responseType": "datascience.GetDatascienceFastLaunchJobConfigsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatascienceFastLaunchJobConfigs",
+        "requestType": "datascience.ListDatascienceFastLaunchJobConfigsRequest",
+        "responseType": "datascience.ListDatascienceFastLaunchJobConfigsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatascienceFastLaunchJobConfigs",
+        "requestType": "datascience.UpdateDatascienceFastLaunchJobConfigsRequest",
+        "responseType": "datascience.UpdateDatascienceFastLaunchJobConfigsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatascienceFastLaunchJobConfigs",
+        "requestType": "datascience.DeleteDatascienceFastLaunchJobConfigsRequest",
+        "responseType": "datascience.DeleteDatascienceFastLaunchJobConfigsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_datascience_datasciencefastlaunchjobconfigs",
+    "collectionField": "datasciencefastlaunchjobconfigs",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datascience/datasciencefastlaunchjobconfigs/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datascience/datasciencefastlaunchjobconfigs/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for datascience/datasciencefastlaunchjobconfigs; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

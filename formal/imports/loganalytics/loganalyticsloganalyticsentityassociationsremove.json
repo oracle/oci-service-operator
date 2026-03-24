@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "loganalytics",
+  "slug": "loganalyticsloganalyticsentityassociationsremove",
+  "kind": "LogAnalyticsLogAnalyticsEntityAssociationsRemove",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_log_analytics_log_analytics_entity_associations_remove",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateLogAnalyticsLogAnalyticsEntityAssociationsRemove",
+        "requestType": "loganalytics.CreateLogAnalyticsLogAnalyticsEntityAssociationsRemoveRequest",
+        "responseType": "loganalytics.CreateLogAnalyticsLogAnalyticsEntityAssociationsRemoveResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetLogAnalyticsLogAnalyticsEntityAssociationsRemove",
+        "requestType": "loganalytics.GetLogAnalyticsLogAnalyticsEntityAssociationsRemoveRequest",
+        "responseType": "loganalytics.GetLogAnalyticsLogAnalyticsEntityAssociationsRemoveResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListLogAnalyticsLogAnalyticsEntityAssociationsRemove",
+        "requestType": "loganalytics.ListLogAnalyticsLogAnalyticsEntityAssociationsRemoveRequest",
+        "responseType": "loganalytics.ListLogAnalyticsLogAnalyticsEntityAssociationsRemoveResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateLogAnalyticsLogAnalyticsEntityAssociationsRemove",
+        "requestType": "loganalytics.UpdateLogAnalyticsLogAnalyticsEntityAssociationsRemoveRequest",
+        "responseType": "loganalytics.UpdateLogAnalyticsLogAnalyticsEntityAssociationsRemoveResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteLogAnalyticsLogAnalyticsEntityAssociationsRemove",
+        "requestType": "loganalytics.DeleteLogAnalyticsLogAnalyticsEntityAssociationsRemoveRequest",
+        "responseType": "loganalytics.DeleteLogAnalyticsLogAnalyticsEntityAssociationsRemoveResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_loganalytics_loganalyticsloganalyticsentityassociationsremove",
+    "collectionField": "loganalyticsloganalyticsentityassociationsremove",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/loganalytics/loganalyticsloganalyticsentityassociationsremove/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/loganalytics/loganalyticsloganalyticsentityassociationsremove/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for loganalytics/loganalyticsloganalyticsentityassociationsremove; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

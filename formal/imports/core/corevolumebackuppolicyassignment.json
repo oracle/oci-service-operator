@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "corevolumebackuppolicyassignment",
+  "kind": "CoreVolumeBackupPolicyAssignment",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_core_volume_backup_policy_assignment",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCoreVolumeBackupPolicyAssignment",
+        "requestType": "core.CreateCoreVolumeBackupPolicyAssignmentRequest",
+        "responseType": "core.CreateCoreVolumeBackupPolicyAssignmentResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCoreVolumeBackupPolicyAssignment",
+        "requestType": "core.GetCoreVolumeBackupPolicyAssignmentRequest",
+        "responseType": "core.GetCoreVolumeBackupPolicyAssignmentResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCoreVolumeBackupPolicyAssignment",
+        "requestType": "core.ListCoreVolumeBackupPolicyAssignmentRequest",
+        "responseType": "core.ListCoreVolumeBackupPolicyAssignmentResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCoreVolumeBackupPolicyAssignment",
+        "requestType": "core.UpdateCoreVolumeBackupPolicyAssignmentRequest",
+        "responseType": "core.UpdateCoreVolumeBackupPolicyAssignmentResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCoreVolumeBackupPolicyAssignment",
+        "requestType": "core.DeleteCoreVolumeBackupPolicyAssignmentRequest",
+        "responseType": "core.DeleteCoreVolumeBackupPolicyAssignmentResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_core_corevolumebackuppolicyassignment",
+    "collectionField": "corevolumebackuppolicyassignment",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/corevolumebackuppolicyassignment/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/corevolumebackuppolicyassignment/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for core/corevolumebackuppolicyassignment; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

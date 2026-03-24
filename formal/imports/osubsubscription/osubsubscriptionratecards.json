@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "osubsubscription",
+  "slug": "osubsubscriptionratecards",
+  "kind": "OsubSubscriptionRatecards",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_osub_subscription_ratecards",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOsubSubscriptionRatecards",
+        "requestType": "osubsubscription.CreateOsubSubscriptionRatecardsRequest",
+        "responseType": "osubsubscription.CreateOsubSubscriptionRatecardsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOsubSubscriptionRatecards",
+        "requestType": "osubsubscription.GetOsubSubscriptionRatecardsRequest",
+        "responseType": "osubsubscription.GetOsubSubscriptionRatecardsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOsubSubscriptionRatecards",
+        "requestType": "osubsubscription.ListOsubSubscriptionRatecardsRequest",
+        "responseType": "osubsubscription.ListOsubSubscriptionRatecardsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOsubSubscriptionRatecards",
+        "requestType": "osubsubscription.UpdateOsubSubscriptionRatecardsRequest",
+        "responseType": "osubsubscription.UpdateOsubSubscriptionRatecardsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOsubSubscriptionRatecards",
+        "requestType": "osubsubscription.DeleteOsubSubscriptionRatecardsRequest",
+        "responseType": "osubsubscription.DeleteOsubSubscriptionRatecardsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_osubsubscription_osubsubscriptionratecards",
+    "collectionField": "osubsubscriptionratecards",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/osubsubscription/osubsubscriptionratecards/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/osubsubscription/osubsubscriptionratecards/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for osubsubscription/osubsubscriptionratecards; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

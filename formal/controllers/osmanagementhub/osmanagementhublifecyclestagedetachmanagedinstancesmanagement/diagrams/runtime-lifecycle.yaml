@@ -1,0 +1,13 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: osmanagementhub
+slug: osmanagementhublifecyclestagedetachmanagedinstancesmanagement
+kind: OsManagementHubLifecycleStageDetachManagedInstancesManagement
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+notes:
+  - Scaffold metadata only; replace with controller-specific runtime states before promotion.

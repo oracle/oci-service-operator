@@ -1,0 +1,91 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Sequence - core/CoreComputeGlobalImageCapabilitySchemas
+hide footbox
+skinparam sequence {
+  actorBorderColor #0f172a
+  actorBackgroundColor #e2e8f0
+  participantBorderColor #0f172a
+  participantBackgroundColor #e2e8f0
+  participantFontColor #0f172a
+  lifeLineBorderColor #94a3b8
+  groupBorderColor #cbd5e1
+  groupBackgroundColor #f8fafc
+}
+actor Kubernetes
+participant Controller
+participant BaseReconciler
+participant "OSOKServiceManager" as ServiceManager
+participant OCI
+note over BaseReconciler,ServiceManager
+shared resolution:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete:
+shared/diagrams/shared-delete-sequence.svg
+end note
+Kubernetes -> Controller: enqueue\nCoreComputeGlobalImageCapabilitySchemas\nreconcile
+Controller -> BaseReconciler: Reconcile(request)
+BaseReconciler -> ServiceManager: reconcile desired\nCoreComputeGlobalImageCapabilitySchemas
+ServiceManager -> OCI: GetCoreComputeGlobalImageCapabilitySchemas
+opt list lookup fallback
+ServiceManager -> OCI: ListCoreComputeGlobalImageCapabilitySchemas(filters:\ncompartment_id, state)
+OCI --> ServiceManager: matching collection items
+end
+alt create or bind path
+ServiceManager -> OCI: CreateCoreComputeGlobalImageCapabilitySchemas
+loop create pending PROVISIONING
+ServiceManager -> OCI: GetCoreComputeGlobalImageCapabilitySchemas
+end
+else update or drift path
+ServiceManager -> OCI: UpdateCoreComputeGlobalImageCapabilitySchemas
+loop update pending UPDATING
+ServiceManager -> OCI: GetCoreComputeGlobalImageCapabilitySchemas
+end
+end
+opt delete requested
+ServiceManager -> OCI: DeleteCoreComputeGlobalImageCapabilitySchemas
+loop delete confirmation DELETING
+ServiceManager -> OCI: GetCoreComputeGlobalImageCapabilitySchemas\nor\nListCoreComputeGlobalImageCapabilitySchemas
+end
+end
+ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
+BaseReconciler --> Controller: requeue on provisioning, updating,\nterminating
+note right of ServiceManager
+shared diagram:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete diagram:
+shared/diagrams/shared-delete-sequence.svg
+Start from the shared resolution sequence for
+OCID binding, datasource pagination, and
+create-or-update dispatch.
+Layer the shared delete sequence when finalizer
+retention, delete confirmation, work-request
+polling, or Secret cleanup apply.
+archetype batch: Generated service-manager
+controllers follow the shared resolution and
+delete sequences with imported waits and
+controller-local policy.
+service: core
+slug: corecomputeglobalimagecapabilityschemas
+kind: CoreComputeGlobalImageCapabilitySchemas
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create PROVISIONING; update
+UPDATING; delete DELETING
+mutable/forceNew: display_name / compartment_id
+open gaps: none
+Scaffold metadata only; replace with
+controller-specific runtime states before
+promotion.
+end note
+@enduml

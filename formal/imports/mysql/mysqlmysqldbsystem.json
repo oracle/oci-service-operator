@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "mysql",
+  "slug": "mysqlmysqldbsystem",
+  "kind": "MysqlMysqlDbSystem",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_mysql_mysql_db_system",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateMysqlMysqlDbSystem",
+        "requestType": "mysql.CreateMysqlMysqlDbSystemRequest",
+        "responseType": "mysql.CreateMysqlMysqlDbSystemResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetMysqlMysqlDbSystem",
+        "requestType": "mysql.GetMysqlMysqlDbSystemRequest",
+        "responseType": "mysql.GetMysqlMysqlDbSystemResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListMysqlMysqlDbSystem",
+        "requestType": "mysql.ListMysqlMysqlDbSystemRequest",
+        "responseType": "mysql.ListMysqlMysqlDbSystemResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateMysqlMysqlDbSystem",
+        "requestType": "mysql.UpdateMysqlMysqlDbSystemRequest",
+        "responseType": "mysql.UpdateMysqlMysqlDbSystemResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteMysqlMysqlDbSystem",
+        "requestType": "mysql.DeleteMysqlMysqlDbSystemRequest",
+        "responseType": "mysql.DeleteMysqlMysqlDbSystemResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_mysql_mysqlmysqldbsystem",
+    "collectionField": "mysqlmysqldbsystem",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/mysql/mysqlmysqldbsystem/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/mysql/mysqlmysqldbsystem/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for mysql/mysqlmysqldbsystem; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

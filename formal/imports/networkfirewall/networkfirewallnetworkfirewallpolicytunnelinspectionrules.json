@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "networkfirewall",
+  "slug": "networkfirewallnetworkfirewallpolicytunnelinspectionrules",
+  "kind": "NetworkFirewallNetworkFirewallPolicyTunnelInspectionRules",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_network_firewall_network_firewall_policy_tunnel_inspection_rules",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateNetworkFirewallNetworkFirewallPolicyTunnelInspectionRules",
+        "requestType": "networkfirewall.CreateNetworkFirewallNetworkFirewallPolicyTunnelInspectionRulesRequest",
+        "responseType": "networkfirewall.CreateNetworkFirewallNetworkFirewallPolicyTunnelInspectionRulesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetNetworkFirewallNetworkFirewallPolicyTunnelInspectionRules",
+        "requestType": "networkfirewall.GetNetworkFirewallNetworkFirewallPolicyTunnelInspectionRulesRequest",
+        "responseType": "networkfirewall.GetNetworkFirewallNetworkFirewallPolicyTunnelInspectionRulesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListNetworkFirewallNetworkFirewallPolicyTunnelInspectionRules",
+        "requestType": "networkfirewall.ListNetworkFirewallNetworkFirewallPolicyTunnelInspectionRulesRequest",
+        "responseType": "networkfirewall.ListNetworkFirewallNetworkFirewallPolicyTunnelInspectionRulesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateNetworkFirewallNetworkFirewallPolicyTunnelInspectionRules",
+        "requestType": "networkfirewall.UpdateNetworkFirewallNetworkFirewallPolicyTunnelInspectionRulesRequest",
+        "responseType": "networkfirewall.UpdateNetworkFirewallNetworkFirewallPolicyTunnelInspectionRulesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteNetworkFirewallNetworkFirewallPolicyTunnelInspectionRules",
+        "requestType": "networkfirewall.DeleteNetworkFirewallNetworkFirewallPolicyTunnelInspectionRulesRequest",
+        "responseType": "networkfirewall.DeleteNetworkFirewallNetworkFirewallPolicyTunnelInspectionRulesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_networkfirewall_networkfirewallnetworkfirewallpolicytunnelinspectionrules",
+    "collectionField": "networkfirewallnetworkfirewallpolicytunnelinspectionrules",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/networkfirewall/networkfirewallnetworkfirewallpolicytunnelinspectionrules/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/networkfirewall/networkfirewallnetworkfirewallpolicytunnelinspectionrules/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for networkfirewall/networkfirewallnetworkfirewallpolicytunnelinspectionrules; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

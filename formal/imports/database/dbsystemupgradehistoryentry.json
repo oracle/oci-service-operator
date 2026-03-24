@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "dbsystemupgradehistoryentry",
+  "kind": "DbSystemUpgradeHistoryEntry",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_database_dbsystemupgradehistoryentry",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDbSystemUpgradeHistoryEntry",
+        "requestType": "database.CreateDbSystemUpgradeHistoryEntryRequest",
+        "responseType": "database.CreateDbSystemUpgradeHistoryEntryResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDbSystemUpgradeHistoryEntry",
+        "requestType": "database.GetDbSystemUpgradeHistoryEntryRequest",
+        "responseType": "database.GetDbSystemUpgradeHistoryEntryResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDbSystemUpgradeHistoryEntry",
+        "requestType": "database.ListDbSystemUpgradeHistoryEntryRequest",
+        "responseType": "database.ListDbSystemUpgradeHistoryEntryResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDbSystemUpgradeHistoryEntry",
+        "requestType": "database.UpdateDbSystemUpgradeHistoryEntryRequest",
+        "responseType": "database.UpdateDbSystemUpgradeHistoryEntryResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDbSystemUpgradeHistoryEntry",
+        "requestType": "database.DeleteDbSystemUpgradeHistoryEntryRequest",
+        "responseType": "database.DeleteDbSystemUpgradeHistoryEntryResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_dbsystemupgradehistoryentry",
+    "collectionField": "dbsystemupgradehistoryentry",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/dbsystemupgradehistoryentry/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/dbsystemupgradehistoryentry/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/dbsystemupgradehistoryentry; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

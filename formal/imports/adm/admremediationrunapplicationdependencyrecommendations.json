@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "adm",
+  "slug": "admremediationrunapplicationdependencyrecommendations",
+  "kind": "AdmRemediationRunApplicationDependencyRecommendations",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_adm_remediation_run_application_dependency_recommendations",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateAdmRemediationRunApplicationDependencyRecommendations",
+        "requestType": "adm.CreateAdmRemediationRunApplicationDependencyRecommendationsRequest",
+        "responseType": "adm.CreateAdmRemediationRunApplicationDependencyRecommendationsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetAdmRemediationRunApplicationDependencyRecommendations",
+        "requestType": "adm.GetAdmRemediationRunApplicationDependencyRecommendationsRequest",
+        "responseType": "adm.GetAdmRemediationRunApplicationDependencyRecommendationsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListAdmRemediationRunApplicationDependencyRecommendations",
+        "requestType": "adm.ListAdmRemediationRunApplicationDependencyRecommendationsRequest",
+        "responseType": "adm.ListAdmRemediationRunApplicationDependencyRecommendationsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateAdmRemediationRunApplicationDependencyRecommendations",
+        "requestType": "adm.UpdateAdmRemediationRunApplicationDependencyRecommendationsRequest",
+        "responseType": "adm.UpdateAdmRemediationRunApplicationDependencyRecommendationsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteAdmRemediationRunApplicationDependencyRecommendations",
+        "requestType": "adm.DeleteAdmRemediationRunApplicationDependencyRecommendationsRequest",
+        "responseType": "adm.DeleteAdmRemediationRunApplicationDependencyRecommendationsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_adm_admremediationrunapplicationdependencyrecommendations",
+    "collectionField": "admremediationrunapplicationdependencyrecommendations",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/adm/admremediationrunapplicationdependencyrecommendations/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/adm/admremediationrunapplicationdependencyrecommendations/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for adm/admremediationrunapplicationdependencyrecommendations; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

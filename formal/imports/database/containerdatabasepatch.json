@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "containerdatabasepatch",
+  "kind": "ContainerDatabasePatch",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_database_containerdatabasepatch",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateContainerDatabasePatch",
+        "requestType": "database.CreateContainerDatabasePatchRequest",
+        "responseType": "database.CreateContainerDatabasePatchResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetContainerDatabasePatch",
+        "requestType": "database.GetContainerDatabasePatchRequest",
+        "responseType": "database.GetContainerDatabasePatchResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListContainerDatabasePatch",
+        "requestType": "database.ListContainerDatabasePatchRequest",
+        "responseType": "database.ListContainerDatabasePatchResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateContainerDatabasePatch",
+        "requestType": "database.UpdateContainerDatabasePatchRequest",
+        "responseType": "database.UpdateContainerDatabasePatchResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteContainerDatabasePatch",
+        "requestType": "database.DeleteContainerDatabasePatchRequest",
+        "responseType": "database.DeleteContainerDatabasePatchResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_containerdatabasepatch",
+    "collectionField": "containerdatabasepatch",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/containerdatabasepatch/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/containerdatabasepatch/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/containerdatabasepatch; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

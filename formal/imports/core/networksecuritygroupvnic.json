@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "networksecuritygroupvnic",
+  "kind": "NetworkSecurityGroupVnic",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_core_networksecuritygroupvnic",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateNetworkSecurityGroupVnic",
+        "requestType": "core.CreateNetworkSecurityGroupVnicRequest",
+        "responseType": "core.CreateNetworkSecurityGroupVnicResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetNetworkSecurityGroupVnic",
+        "requestType": "core.GetNetworkSecurityGroupVnicRequest",
+        "responseType": "core.GetNetworkSecurityGroupVnicResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListNetworkSecurityGroupVnic",
+        "requestType": "core.ListNetworkSecurityGroupVnicRequest",
+        "responseType": "core.ListNetworkSecurityGroupVnicResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateNetworkSecurityGroupVnic",
+        "requestType": "core.UpdateNetworkSecurityGroupVnicRequest",
+        "responseType": "core.UpdateNetworkSecurityGroupVnicResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteNetworkSecurityGroupVnic",
+        "requestType": "core.DeleteNetworkSecurityGroupVnicRequest",
+        "responseType": "core.DeleteNetworkSecurityGroupVnicResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_core_networksecuritygroupvnic",
+    "collectionField": "networksecuritygroupvnic",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/networksecuritygroupvnic/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/networksecuritygroupvnic/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for core/networksecuritygroupvnic; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

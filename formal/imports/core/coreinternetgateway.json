@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "coreinternetgateway",
+  "kind": "CoreInternetGateway",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_core_internet_gateway",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCoreInternetGateway",
+        "requestType": "core.CreateCoreInternetGatewayRequest",
+        "responseType": "core.CreateCoreInternetGatewayResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCoreInternetGateway",
+        "requestType": "core.GetCoreInternetGatewayRequest",
+        "responseType": "core.GetCoreInternetGatewayResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCoreInternetGateway",
+        "requestType": "core.ListCoreInternetGatewayRequest",
+        "responseType": "core.ListCoreInternetGatewayResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCoreInternetGateway",
+        "requestType": "core.UpdateCoreInternetGatewayRequest",
+        "responseType": "core.UpdateCoreInternetGatewayResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCoreInternetGateway",
+        "requestType": "core.DeleteCoreInternetGatewayRequest",
+        "responseType": "core.DeleteCoreInternetGatewayResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_core_coreinternetgateway",
+    "collectionField": "coreinternetgateway",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/coreinternetgateway/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/coreinternetgateway/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for core/coreinternetgateway; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

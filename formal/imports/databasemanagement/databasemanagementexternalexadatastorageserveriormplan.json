@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasemanagement",
+  "slug": "databasemanagementexternalexadatastorageserveriormplan",
+  "kind": "DatabaseManagementExternalExadataStorageServerIormPlan",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_management_external_exadata_storage_server_iorm_plan",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseManagementExternalExadataStorageServerIormPlan",
+        "requestType": "databasemanagement.CreateDatabaseManagementExternalExadataStorageServerIormPlanRequest",
+        "responseType": "databasemanagement.CreateDatabaseManagementExternalExadataStorageServerIormPlanResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseManagementExternalExadataStorageServerIormPlan",
+        "requestType": "databasemanagement.GetDatabaseManagementExternalExadataStorageServerIormPlanRequest",
+        "responseType": "databasemanagement.GetDatabaseManagementExternalExadataStorageServerIormPlanResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseManagementExternalExadataStorageServerIormPlan",
+        "requestType": "databasemanagement.ListDatabaseManagementExternalExadataStorageServerIormPlanRequest",
+        "responseType": "databasemanagement.ListDatabaseManagementExternalExadataStorageServerIormPlanResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseManagementExternalExadataStorageServerIormPlan",
+        "requestType": "databasemanagement.UpdateDatabaseManagementExternalExadataStorageServerIormPlanRequest",
+        "responseType": "databasemanagement.UpdateDatabaseManagementExternalExadataStorageServerIormPlanResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseManagementExternalExadataStorageServerIormPlan",
+        "requestType": "databasemanagement.DeleteDatabaseManagementExternalExadataStorageServerIormPlanRequest",
+        "responseType": "databasemanagement.DeleteDatabaseManagementExternalExadataStorageServerIormPlanResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_databasemanagement_databasemanagementexternalexadatastorageserveriormplan",
+    "collectionField": "databasemanagementexternalexadatastorageserveriormplan",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasemanagement/databasemanagementexternalexadatastorageserveriormplan/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasemanagement/databasemanagementexternalexadatastorageserveriormplan/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for databasemanagement/databasemanagementexternalexadatastorageserveriormplan; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

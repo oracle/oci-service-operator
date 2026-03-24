@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasemanagement",
+  "slug": "databasemanagementmanageddatabasesresetdatabaseparameter",
+  "kind": "DatabaseManagementManagedDatabasesResetDatabaseParameter",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_management_managed_databases_reset_database_parameter",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseManagementManagedDatabasesResetDatabaseParameter",
+        "requestType": "databasemanagement.CreateDatabaseManagementManagedDatabasesResetDatabaseParameterRequest",
+        "responseType": "databasemanagement.CreateDatabaseManagementManagedDatabasesResetDatabaseParameterResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseManagementManagedDatabasesResetDatabaseParameter",
+        "requestType": "databasemanagement.GetDatabaseManagementManagedDatabasesResetDatabaseParameterRequest",
+        "responseType": "databasemanagement.GetDatabaseManagementManagedDatabasesResetDatabaseParameterResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseManagementManagedDatabasesResetDatabaseParameter",
+        "requestType": "databasemanagement.ListDatabaseManagementManagedDatabasesResetDatabaseParameterRequest",
+        "responseType": "databasemanagement.ListDatabaseManagementManagedDatabasesResetDatabaseParameterResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseManagementManagedDatabasesResetDatabaseParameter",
+        "requestType": "databasemanagement.UpdateDatabaseManagementManagedDatabasesResetDatabaseParameterRequest",
+        "responseType": "databasemanagement.UpdateDatabaseManagementManagedDatabasesResetDatabaseParameterResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseManagementManagedDatabasesResetDatabaseParameter",
+        "requestType": "databasemanagement.DeleteDatabaseManagementManagedDatabasesResetDatabaseParameterRequest",
+        "responseType": "databasemanagement.DeleteDatabaseManagementManagedDatabasesResetDatabaseParameterResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_databasemanagement_databasemanagementmanageddatabasesresetdatabaseparameter",
+    "collectionField": "databasemanagementmanageddatabasesresetdatabaseparameter",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasemanagement/databasemanagementmanageddatabasesresetdatabaseparameter/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasemanagement/databasemanagementmanageddatabasesresetdatabaseparameter/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for databasemanagement/databasemanagementmanageddatabasesresetdatabaseparameter; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

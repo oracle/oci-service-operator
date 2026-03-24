@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "wlms",
+  "slug": "wlmswlsdomainserverbackupcontent",
+  "kind": "WlmsWlsDomainServerBackupContent",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_wlms_wls_domain_server_backup_content",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateWlmsWlsDomainServerBackupContent",
+        "requestType": "wlms.CreateWlmsWlsDomainServerBackupContentRequest",
+        "responseType": "wlms.CreateWlmsWlsDomainServerBackupContentResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetWlmsWlsDomainServerBackupContent",
+        "requestType": "wlms.GetWlmsWlsDomainServerBackupContentRequest",
+        "responseType": "wlms.GetWlmsWlsDomainServerBackupContentResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListWlmsWlsDomainServerBackupContent",
+        "requestType": "wlms.ListWlmsWlsDomainServerBackupContentRequest",
+        "responseType": "wlms.ListWlmsWlsDomainServerBackupContentResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateWlmsWlsDomainServerBackupContent",
+        "requestType": "wlms.UpdateWlmsWlsDomainServerBackupContentRequest",
+        "responseType": "wlms.UpdateWlmsWlsDomainServerBackupContentResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteWlmsWlsDomainServerBackupContent",
+        "requestType": "wlms.DeleteWlmsWlsDomainServerBackupContentRequest",
+        "responseType": "wlms.DeleteWlmsWlsDomainServerBackupContentResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_wlms_wlmswlsdomainserverbackupcontent",
+    "collectionField": "wlmswlsdomainserverbackupcontent",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/wlms/wlmswlsdomainserverbackupcontent/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/wlms/wlmswlsdomainserverbackupcontent/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for wlms/wlmswlsdomainserverbackupcontent; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

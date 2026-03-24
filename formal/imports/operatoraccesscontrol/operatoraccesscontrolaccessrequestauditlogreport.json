@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "operatoraccesscontrol",
+  "slug": "operatoraccesscontrolaccessrequestauditlogreport",
+  "kind": "OperatorAccessControlAccessRequestAuditLogReport",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_operator_access_control_access_request_audit_log_report",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOperatorAccessControlAccessRequestAuditLogReport",
+        "requestType": "operatoraccesscontrol.CreateOperatorAccessControlAccessRequestAuditLogReportRequest",
+        "responseType": "operatoraccesscontrol.CreateOperatorAccessControlAccessRequestAuditLogReportResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOperatorAccessControlAccessRequestAuditLogReport",
+        "requestType": "operatoraccesscontrol.GetOperatorAccessControlAccessRequestAuditLogReportRequest",
+        "responseType": "operatoraccesscontrol.GetOperatorAccessControlAccessRequestAuditLogReportResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOperatorAccessControlAccessRequestAuditLogReport",
+        "requestType": "operatoraccesscontrol.ListOperatorAccessControlAccessRequestAuditLogReportRequest",
+        "responseType": "operatoraccesscontrol.ListOperatorAccessControlAccessRequestAuditLogReportResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOperatorAccessControlAccessRequestAuditLogReport",
+        "requestType": "operatoraccesscontrol.UpdateOperatorAccessControlAccessRequestAuditLogReportRequest",
+        "responseType": "operatoraccesscontrol.UpdateOperatorAccessControlAccessRequestAuditLogReportResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOperatorAccessControlAccessRequestAuditLogReport",
+        "requestType": "operatoraccesscontrol.DeleteOperatorAccessControlAccessRequestAuditLogReportRequest",
+        "responseType": "operatoraccesscontrol.DeleteOperatorAccessControlAccessRequestAuditLogReportResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_operatoraccesscontrol_operatoraccesscontrolaccessrequestauditlogreport",
+    "collectionField": "operatoraccesscontrolaccessrequestauditlogreport",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/operatoraccesscontrol/operatoraccesscontrolaccessrequestauditlogreport/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/operatoraccesscontrol/operatoraccesscontrolaccessrequestauditlogreport/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for operatoraccesscontrol/operatoraccesscontrolaccessrequestauditlogreport; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

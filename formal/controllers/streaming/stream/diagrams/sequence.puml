@@ -1,0 +1,102 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Sequence - streaming/Stream
+hide footbox
+skinparam sequence {
+  actorBorderColor #0f172a
+  actorBackgroundColor #e2e8f0
+  participantBorderColor #0f172a
+  participantBackgroundColor #e2e8f0
+  participantFontColor #0f172a
+  lifeLineBorderColor #94a3b8
+  groupBorderColor #cbd5e1
+  groupBackgroundColor #f8fafc
+}
+actor Kubernetes
+participant Controller
+participant BaseReconciler
+participant "LegacyAdapter" as ServiceManager
+participant OCI
+participant "Kubernetes Secret" as SecretStore
+note over BaseReconciler,ServiceManager
+shared resolution:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete:
+shared/diagrams/shared-delete-sequence.svg
+end note
+Kubernetes -> Controller: enqueue Stream reconcile
+Controller -> BaseReconciler: Reconcile(request)
+BaseReconciler -> ServiceManager: reconcile desired Stream
+ServiceManager -> OCI: GetStream
+opt list lookup fallback
+ServiceManager -> OCI: ListStreams(filters: compartment_id,\nid, name, state (+1 more))
+OCI --> ServiceManager: matching collection items
+end
+alt create or bind path
+ServiceManager -> OCI: CreateStream
+loop create pending CREATING
+ServiceManager -> OCI: GetStream
+end
+else update or drift path
+ServiceManager -> OCI: ChangeStreamCompartment,\nUpdateStream
+loop update pending UPDATING
+ServiceManager -> OCI: GetStream
+end
+end
+opt repo-authored secret side effects
+ServiceManager -> SecretStore: write ready-only connection secret
+end
+opt delete requested
+ServiceManager -> OCI: DeleteStream
+loop delete confirmation DELETING
+ServiceManager -> OCI: GetStream or ListStreams
+end
+end
+ServiceManager --> BaseReconciler: status=manual, finalizer=none
+BaseReconciler --> Controller: requeue on provisioning, updating,\nterminating
+note right of ServiceManager
+shared diagram:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete diagram:
+shared/diagrams/shared-delete-sequence.svg
+Start from the shared resolution sequence for
+OCID binding, datasource pagination, and
+create-or-update dispatch.
+Layer the shared delete sequence when finalizer
+retention, delete confirmation, work-request
+polling, or Secret cleanup apply.
+archetype batch: Legacy-adapter controllers
+follow the shared resolution and delete
+sequences but preserve handwritten stop
+conditions until promotion is safe.
+service: streaming
+slug: stream
+kind: Stream
+archetype: legacy-adapter
+status/finalizer: manual / none
+requeue: provisioning, updating, terminating
+provider states: create CREATING; update
+UPDATING; delete DELETING
+mutable/forceNew: compartment_id, defined_tags,
+freeform_tags, stream_pool_id / name,
+partitions, retention_in_hours
+open gaps: bind-versus-create,
+delete-confirmation, endpoint-materialization,
+legacy-adapter, list-lookup (+2 more)
+Create or bind selection depends on name-based
+list lookup with optional pool and compartment
+filters.
+Endpoint secret materialization happens only
+after ACTIVE.
+Delete is best-effort today; DELETING is treated
+as sufficient for cleanup and finalizer removal.
+end note
+@enduml

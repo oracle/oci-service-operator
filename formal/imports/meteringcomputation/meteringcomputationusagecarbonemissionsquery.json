@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "meteringcomputation",
+  "slug": "meteringcomputationusagecarbonemissionsquery",
+  "kind": "MeteringComputationUsageCarbonEmissionsQuery",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_metering_computation_usage_carbon_emissions_query",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateMeteringComputationUsageCarbonEmissionsQuery",
+        "requestType": "meteringcomputation.CreateMeteringComputationUsageCarbonEmissionsQueryRequest",
+        "responseType": "meteringcomputation.CreateMeteringComputationUsageCarbonEmissionsQueryResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetMeteringComputationUsageCarbonEmissionsQuery",
+        "requestType": "meteringcomputation.GetMeteringComputationUsageCarbonEmissionsQueryRequest",
+        "responseType": "meteringcomputation.GetMeteringComputationUsageCarbonEmissionsQueryResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListMeteringComputationUsageCarbonEmissionsQuery",
+        "requestType": "meteringcomputation.ListMeteringComputationUsageCarbonEmissionsQueryRequest",
+        "responseType": "meteringcomputation.ListMeteringComputationUsageCarbonEmissionsQueryResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateMeteringComputationUsageCarbonEmissionsQuery",
+        "requestType": "meteringcomputation.UpdateMeteringComputationUsageCarbonEmissionsQueryRequest",
+        "responseType": "meteringcomputation.UpdateMeteringComputationUsageCarbonEmissionsQueryResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteMeteringComputationUsageCarbonEmissionsQuery",
+        "requestType": "meteringcomputation.DeleteMeteringComputationUsageCarbonEmissionsQueryRequest",
+        "responseType": "meteringcomputation.DeleteMeteringComputationUsageCarbonEmissionsQueryResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_meteringcomputation_meteringcomputationusagecarbonemissionsquery",
+    "collectionField": "meteringcomputationusagecarbonemissionsquery",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/meteringcomputation/meteringcomputationusagecarbonemissionsquery/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/meteringcomputation/meteringcomputationusagecarbonemissionsquery/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for meteringcomputation/meteringcomputationusagecarbonemissionsquery; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

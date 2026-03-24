@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "osmanagementhub",
+  "slug": "osmanagementhubmanagedinstanceupdatepackagesmanagement",
+  "kind": "OsManagementHubManagedInstanceUpdatePackagesManagement",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_os_management_hub_managed_instance_update_packages_management",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOsManagementHubManagedInstanceUpdatePackagesManagement",
+        "requestType": "osmanagementhub.CreateOsManagementHubManagedInstanceUpdatePackagesManagementRequest",
+        "responseType": "osmanagementhub.CreateOsManagementHubManagedInstanceUpdatePackagesManagementResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOsManagementHubManagedInstanceUpdatePackagesManagement",
+        "requestType": "osmanagementhub.GetOsManagementHubManagedInstanceUpdatePackagesManagementRequest",
+        "responseType": "osmanagementhub.GetOsManagementHubManagedInstanceUpdatePackagesManagementResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOsManagementHubManagedInstanceUpdatePackagesManagement",
+        "requestType": "osmanagementhub.ListOsManagementHubManagedInstanceUpdatePackagesManagementRequest",
+        "responseType": "osmanagementhub.ListOsManagementHubManagedInstanceUpdatePackagesManagementResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOsManagementHubManagedInstanceUpdatePackagesManagement",
+        "requestType": "osmanagementhub.UpdateOsManagementHubManagedInstanceUpdatePackagesManagementRequest",
+        "responseType": "osmanagementhub.UpdateOsManagementHubManagedInstanceUpdatePackagesManagementResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOsManagementHubManagedInstanceUpdatePackagesManagement",
+        "requestType": "osmanagementhub.DeleteOsManagementHubManagedInstanceUpdatePackagesManagementRequest",
+        "responseType": "osmanagementhub.DeleteOsManagementHubManagedInstanceUpdatePackagesManagementResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_osmanagementhub_osmanagementhubmanagedinstanceupdatepackagesmanagement",
+    "collectionField": "osmanagementhubmanagedinstanceupdatepackagesmanagement",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/osmanagementhub/osmanagementhubmanagedinstanceupdatepackagesmanagement/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/osmanagementhub/osmanagementhubmanagedinstanceupdatepackagesmanagement/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for osmanagementhub/osmanagementhubmanagedinstanceupdatepackagesmanagement; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

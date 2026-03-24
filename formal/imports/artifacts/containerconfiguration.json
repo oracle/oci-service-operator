@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "artifacts",
+  "slug": "containerconfiguration",
+  "kind": "ContainerConfiguration",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_artifacts_containerconfiguration",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateContainerConfiguration",
+        "requestType": "artifacts.CreateContainerConfigurationRequest",
+        "responseType": "artifacts.CreateContainerConfigurationResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetContainerConfiguration",
+        "requestType": "artifacts.GetContainerConfigurationRequest",
+        "responseType": "artifacts.GetContainerConfigurationResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListContainerConfiguration",
+        "requestType": "artifacts.ListContainerConfigurationRequest",
+        "responseType": "artifacts.ListContainerConfigurationResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateContainerConfiguration",
+        "requestType": "artifacts.UpdateContainerConfigurationRequest",
+        "responseType": "artifacts.UpdateContainerConfigurationResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteContainerConfiguration",
+        "requestType": "artifacts.DeleteContainerConfigurationRequest",
+        "responseType": "artifacts.DeleteContainerConfigurationResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_artifacts_containerconfiguration",
+    "collectionField": "containerconfiguration",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/artifacts/containerconfiguration/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/artifacts/containerconfiguration/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for artifacts/containerconfiguration; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

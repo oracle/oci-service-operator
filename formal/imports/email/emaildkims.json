@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "email",
+  "slug": "emaildkims",
+  "kind": "EmailDkims",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_email_dkims",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateEmailDkims",
+        "requestType": "email.CreateEmailDkimsRequest",
+        "responseType": "email.CreateEmailDkimsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetEmailDkims",
+        "requestType": "email.GetEmailDkimsRequest",
+        "responseType": "email.GetEmailDkimsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListEmailDkims",
+        "requestType": "email.ListEmailDkimsRequest",
+        "responseType": "email.ListEmailDkimsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateEmailDkims",
+        "requestType": "email.UpdateEmailDkimsRequest",
+        "responseType": "email.UpdateEmailDkimsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteEmailDkims",
+        "requestType": "email.DeleteEmailDkimsRequest",
+        "responseType": "email.DeleteEmailDkimsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_email_emaildkims",
+    "collectionField": "emaildkims",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/email/emaildkims/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/email/emaildkims/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for email/emaildkims; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

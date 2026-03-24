@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasemigration",
+  "slug": "databasemigrationjobs",
+  "kind": "DatabaseMigrationJobs",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_migration_jobs",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseMigrationJobs",
+        "requestType": "databasemigration.CreateDatabaseMigrationJobsRequest",
+        "responseType": "databasemigration.CreateDatabaseMigrationJobsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseMigrationJobs",
+        "requestType": "databasemigration.GetDatabaseMigrationJobsRequest",
+        "responseType": "databasemigration.GetDatabaseMigrationJobsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseMigrationJobs",
+        "requestType": "databasemigration.ListDatabaseMigrationJobsRequest",
+        "responseType": "databasemigration.ListDatabaseMigrationJobsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseMigrationJobs",
+        "requestType": "databasemigration.UpdateDatabaseMigrationJobsRequest",
+        "responseType": "databasemigration.UpdateDatabaseMigrationJobsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseMigrationJobs",
+        "requestType": "databasemigration.DeleteDatabaseMigrationJobsRequest",
+        "responseType": "databasemigration.DeleteDatabaseMigrationJobsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_databasemigration_databasemigrationjobs",
+    "collectionField": "databasemigrationjobs",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasemigration/databasemigrationjobs/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasemigration/databasemigrationjobs/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for databasemigration/databasemigrationjobs; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "database",
+  "slug": "pdbconversionhistoryentry",
+  "kind": "PdbConversionHistoryEntry",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_database_pdbconversionhistoryentry",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreatePdbConversionHistoryEntry",
+        "requestType": "database.CreatePdbConversionHistoryEntryRequest",
+        "responseType": "database.CreatePdbConversionHistoryEntryResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetPdbConversionHistoryEntry",
+        "requestType": "database.GetPdbConversionHistoryEntryRequest",
+        "responseType": "database.GetPdbConversionHistoryEntryResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListPdbConversionHistoryEntry",
+        "requestType": "database.ListPdbConversionHistoryEntryRequest",
+        "responseType": "database.ListPdbConversionHistoryEntryResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdatePdbConversionHistoryEntry",
+        "requestType": "database.UpdatePdbConversionHistoryEntryRequest",
+        "responseType": "database.UpdatePdbConversionHistoryEntryResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeletePdbConversionHistoryEntry",
+        "requestType": "database.DeletePdbConversionHistoryEntryRequest",
+        "responseType": "database.DeletePdbConversionHistoryEntryResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_database_pdbconversionhistoryentry",
+    "collectionField": "pdbconversionhistoryentry",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/database/pdbconversionhistoryentry/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/database/pdbconversionhistoryentry/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for database/pdbconversionhistoryentry; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

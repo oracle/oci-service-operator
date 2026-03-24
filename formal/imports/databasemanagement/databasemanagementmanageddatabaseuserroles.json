@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasemanagement",
+  "slug": "databasemanagementmanageddatabaseuserroles",
+  "kind": "DatabaseManagementManagedDatabaseUserRoles",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_management_managed_database_user_roles",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseManagementManagedDatabaseUserRoles",
+        "requestType": "databasemanagement.CreateDatabaseManagementManagedDatabaseUserRolesRequest",
+        "responseType": "databasemanagement.CreateDatabaseManagementManagedDatabaseUserRolesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseManagementManagedDatabaseUserRoles",
+        "requestType": "databasemanagement.GetDatabaseManagementManagedDatabaseUserRolesRequest",
+        "responseType": "databasemanagement.GetDatabaseManagementManagedDatabaseUserRolesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseManagementManagedDatabaseUserRoles",
+        "requestType": "databasemanagement.ListDatabaseManagementManagedDatabaseUserRolesRequest",
+        "responseType": "databasemanagement.ListDatabaseManagementManagedDatabaseUserRolesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseManagementManagedDatabaseUserRoles",
+        "requestType": "databasemanagement.UpdateDatabaseManagementManagedDatabaseUserRolesRequest",
+        "responseType": "databasemanagement.UpdateDatabaseManagementManagedDatabaseUserRolesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseManagementManagedDatabaseUserRoles",
+        "requestType": "databasemanagement.DeleteDatabaseManagementManagedDatabaseUserRolesRequest",
+        "responseType": "databasemanagement.DeleteDatabaseManagementManagedDatabaseUserRolesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_databasemanagement_databasemanagementmanageddatabaseuserroles",
+    "collectionField": "databasemanagementmanageddatabaseuserroles",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasemanagement/databasemanagementmanageddatabaseuserroles/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasemanagement/databasemanagementmanageddatabaseuserroles/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for databasemanagement/databasemanagementmanageddatabaseuserroles; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "meteringcomputation",
+  "slug": "meteringcomputationschedule",
+  "kind": "MeteringComputationSchedule",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_metering_computation_schedule",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateMeteringComputationSchedule",
+        "requestType": "meteringcomputation.CreateMeteringComputationScheduleRequest",
+        "responseType": "meteringcomputation.CreateMeteringComputationScheduleResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetMeteringComputationSchedule",
+        "requestType": "meteringcomputation.GetMeteringComputationScheduleRequest",
+        "responseType": "meteringcomputation.GetMeteringComputationScheduleResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListMeteringComputationSchedule",
+        "requestType": "meteringcomputation.ListMeteringComputationScheduleRequest",
+        "responseType": "meteringcomputation.ListMeteringComputationScheduleResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateMeteringComputationSchedule",
+        "requestType": "meteringcomputation.UpdateMeteringComputationScheduleRequest",
+        "responseType": "meteringcomputation.UpdateMeteringComputationScheduleResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteMeteringComputationSchedule",
+        "requestType": "meteringcomputation.DeleteMeteringComputationScheduleRequest",
+        "responseType": "meteringcomputation.DeleteMeteringComputationScheduleResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_meteringcomputation_meteringcomputationschedule",
+    "collectionField": "meteringcomputationschedule",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/meteringcomputation/meteringcomputationschedule/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/meteringcomputation/meteringcomputationschedule/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for meteringcomputation/meteringcomputationschedule; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

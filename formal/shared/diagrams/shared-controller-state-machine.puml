@@ -1,0 +1,47 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Shared Controller State Machine
+skinparam state {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+}
+state "provisioning" as provisioning
+state "active" as active
+state "updating" as updating
+state "terminating" as terminating
+state "failed" as failed
+[*] --> provisioning : create or bind
+provisioning --> active : target state reached
+active --> updating : mutable drift or spec change
+updating --> active : update target reached
+active --> terminating : delete requested
+terminating --> [*] : delete confirmed
+provisioning --> failed : unresolved OCI error
+updating --> failed : unresolved OCI error
+terminating --> failed : unresolved OCI error
+failed --> [*] : operator intervention
+note right of active
+Common controller phases specialized by
+provider-backed lifecycle states
+Step 1. Provisioning, Active, Updating,
+Terminating, and Failed are the shared
+controller phases.
+Step 2. Controller-local state machines map
+imported provider states into those phases and
+keep delete targets explicit.
+Step 3. Open gaps and legacy adapters stay
+visible instead of being hidden behind a generic
+steady-state path.
+end note
+@enduml

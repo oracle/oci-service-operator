@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "stackmonitoring",
+  "slug": "stackmonitoringbaselineablemetric",
+  "kind": "StackMonitoringBaselineableMetric",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_stack_monitoring_baselineable_metric",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateStackMonitoringBaselineableMetric",
+        "requestType": "stackmonitoring.CreateStackMonitoringBaselineableMetricRequest",
+        "responseType": "stackmonitoring.CreateStackMonitoringBaselineableMetricResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetStackMonitoringBaselineableMetric",
+        "requestType": "stackmonitoring.GetStackMonitoringBaselineableMetricRequest",
+        "responseType": "stackmonitoring.GetStackMonitoringBaselineableMetricResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListStackMonitoringBaselineableMetric",
+        "requestType": "stackmonitoring.ListStackMonitoringBaselineableMetricRequest",
+        "responseType": "stackmonitoring.ListStackMonitoringBaselineableMetricResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateStackMonitoringBaselineableMetric",
+        "requestType": "stackmonitoring.UpdateStackMonitoringBaselineableMetricRequest",
+        "responseType": "stackmonitoring.UpdateStackMonitoringBaselineableMetricResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteStackMonitoringBaselineableMetric",
+        "requestType": "stackmonitoring.DeleteStackMonitoringBaselineableMetricRequest",
+        "responseType": "stackmonitoring.DeleteStackMonitoringBaselineableMetricResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_stackmonitoring_stackmonitoringbaselineablemetric",
+    "collectionField": "stackmonitoringbaselineablemetric",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/stackmonitoring/stackmonitoringbaselineablemetric/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/stackmonitoring/stackmonitoringbaselineablemetric/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for stackmonitoring/stackmonitoringbaselineablemetric; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

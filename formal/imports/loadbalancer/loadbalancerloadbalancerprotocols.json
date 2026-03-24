@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "loadbalancer",
+  "slug": "loadbalancerloadbalancerprotocols",
+  "kind": "LoadBalancerLoadBalancerProtocols",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_load_balancer_protocols",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateLoadBalancerLoadBalancerProtocols",
+        "requestType": "loadbalancer.CreateLoadBalancerLoadBalancerProtocolsRequest",
+        "responseType": "loadbalancer.CreateLoadBalancerLoadBalancerProtocolsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetLoadBalancerLoadBalancerProtocols",
+        "requestType": "loadbalancer.GetLoadBalancerLoadBalancerProtocolsRequest",
+        "responseType": "loadbalancer.GetLoadBalancerLoadBalancerProtocolsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListLoadBalancerLoadBalancerProtocols",
+        "requestType": "loadbalancer.ListLoadBalancerLoadBalancerProtocolsRequest",
+        "responseType": "loadbalancer.ListLoadBalancerLoadBalancerProtocolsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateLoadBalancerLoadBalancerProtocols",
+        "requestType": "loadbalancer.UpdateLoadBalancerLoadBalancerProtocolsRequest",
+        "responseType": "loadbalancer.UpdateLoadBalancerLoadBalancerProtocolsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteLoadBalancerLoadBalancerProtocols",
+        "requestType": "loadbalancer.DeleteLoadBalancerLoadBalancerProtocolsRequest",
+        "responseType": "loadbalancer.DeleteLoadBalancerLoadBalancerProtocolsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_loadbalancer_loadbalancerloadbalancerprotocols",
+    "collectionField": "loadbalancerloadbalancerprotocols",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/loadbalancer/loadbalancerloadbalancerprotocols/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/loadbalancer/loadbalancerloadbalancerprotocols/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for loadbalancer/loadbalancerloadbalancerprotocols; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

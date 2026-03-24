@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "corevolumegroupreplica",
+  "kind": "CoreVolumeGroupReplica",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_core_volume_group_replica",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCoreVolumeGroupReplica",
+        "requestType": "core.CreateCoreVolumeGroupReplicaRequest",
+        "responseType": "core.CreateCoreVolumeGroupReplicaResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCoreVolumeGroupReplica",
+        "requestType": "core.GetCoreVolumeGroupReplicaRequest",
+        "responseType": "core.GetCoreVolumeGroupReplicaResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCoreVolumeGroupReplica",
+        "requestType": "core.ListCoreVolumeGroupReplicaRequest",
+        "responseType": "core.ListCoreVolumeGroupReplicaResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCoreVolumeGroupReplica",
+        "requestType": "core.UpdateCoreVolumeGroupReplicaRequest",
+        "responseType": "core.UpdateCoreVolumeGroupReplicaResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCoreVolumeGroupReplica",
+        "requestType": "core.DeleteCoreVolumeGroupReplicaRequest",
+        "responseType": "core.DeleteCoreVolumeGroupReplicaResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_core_corevolumegroupreplica",
+    "collectionField": "corevolumegroupreplica",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/corevolumegroupreplica/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/corevolumegroupreplica/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for core/corevolumegroupreplica; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

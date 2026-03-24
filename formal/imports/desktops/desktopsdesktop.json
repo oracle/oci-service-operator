@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "desktops",
+  "slug": "desktopsdesktop",
+  "kind": "DesktopsDesktop",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_desktops_desktop",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDesktopsDesktop",
+        "requestType": "desktops.CreateDesktopsDesktopRequest",
+        "responseType": "desktops.CreateDesktopsDesktopResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDesktopsDesktop",
+        "requestType": "desktops.GetDesktopsDesktopRequest",
+        "responseType": "desktops.GetDesktopsDesktopResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDesktopsDesktop",
+        "requestType": "desktops.ListDesktopsDesktopRequest",
+        "responseType": "desktops.ListDesktopsDesktopResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDesktopsDesktop",
+        "requestType": "desktops.UpdateDesktopsDesktopRequest",
+        "responseType": "desktops.UpdateDesktopsDesktopResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDesktopsDesktop",
+        "requestType": "desktops.DeleteDesktopsDesktopRequest",
+        "responseType": "desktops.DeleteDesktopsDesktopResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_desktops_desktopsdesktop",
+    "collectionField": "desktopsdesktop",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/desktops/desktopsdesktop/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/desktops/desktopsdesktop/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for desktops/desktopsdesktop; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

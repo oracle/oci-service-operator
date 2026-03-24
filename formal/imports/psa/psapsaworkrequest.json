@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "psa",
+  "slug": "psapsaworkrequest",
+  "kind": "PsaPsaWorkRequest",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_psa_psa_work_request",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreatePsaPsaWorkRequest",
+        "requestType": "psa.CreatePsaPsaWorkRequestRequest",
+        "responseType": "psa.CreatePsaPsaWorkRequestResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetPsaPsaWorkRequest",
+        "requestType": "psa.GetPsaPsaWorkRequestRequest",
+        "responseType": "psa.GetPsaPsaWorkRequestResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListPsaPsaWorkRequest",
+        "requestType": "psa.ListPsaPsaWorkRequestRequest",
+        "responseType": "psa.ListPsaPsaWorkRequestResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdatePsaPsaWorkRequest",
+        "requestType": "psa.UpdatePsaPsaWorkRequestRequest",
+        "responseType": "psa.UpdatePsaPsaWorkRequestResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeletePsaPsaWorkRequest",
+        "requestType": "psa.DeletePsaPsaWorkRequestRequest",
+        "responseType": "psa.DeletePsaPsaWorkRequestResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_psa_psapsaworkrequest",
+    "collectionField": "psapsaworkrequest",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/psa/psapsaworkrequest/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/psa/psapsaworkrequest/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for psa/psapsaworkrequest; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

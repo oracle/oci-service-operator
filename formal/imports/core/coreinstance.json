@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "coreinstance",
+  "kind": "CoreInstance",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_core_instance",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCoreInstance",
+        "requestType": "core.CreateCoreInstanceRequest",
+        "responseType": "core.CreateCoreInstanceResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCoreInstance",
+        "requestType": "core.GetCoreInstanceRequest",
+        "responseType": "core.GetCoreInstanceResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCoreInstance",
+        "requestType": "core.ListCoreInstanceRequest",
+        "responseType": "core.ListCoreInstanceResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCoreInstance",
+        "requestType": "core.UpdateCoreInstanceRequest",
+        "responseType": "core.UpdateCoreInstanceResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCoreInstance",
+        "requestType": "core.DeleteCoreInstanceRequest",
+        "responseType": "core.DeleteCoreInstanceResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_core_coreinstance",
+    "collectionField": "coreinstance",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/coreinstance/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/coreinstance/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for core/coreinstance; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

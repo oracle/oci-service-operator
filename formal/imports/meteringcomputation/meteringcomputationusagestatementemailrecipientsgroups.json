@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "meteringcomputation",
+  "slug": "meteringcomputationusagestatementemailrecipientsgroups",
+  "kind": "MeteringComputationUsageStatementEmailRecipientsGroups",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_metering_computation_usage_statement_email_recipients_groups",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateMeteringComputationUsageStatementEmailRecipientsGroups",
+        "requestType": "meteringcomputation.CreateMeteringComputationUsageStatementEmailRecipientsGroupsRequest",
+        "responseType": "meteringcomputation.CreateMeteringComputationUsageStatementEmailRecipientsGroupsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetMeteringComputationUsageStatementEmailRecipientsGroups",
+        "requestType": "meteringcomputation.GetMeteringComputationUsageStatementEmailRecipientsGroupsRequest",
+        "responseType": "meteringcomputation.GetMeteringComputationUsageStatementEmailRecipientsGroupsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListMeteringComputationUsageStatementEmailRecipientsGroups",
+        "requestType": "meteringcomputation.ListMeteringComputationUsageStatementEmailRecipientsGroupsRequest",
+        "responseType": "meteringcomputation.ListMeteringComputationUsageStatementEmailRecipientsGroupsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateMeteringComputationUsageStatementEmailRecipientsGroups",
+        "requestType": "meteringcomputation.UpdateMeteringComputationUsageStatementEmailRecipientsGroupsRequest",
+        "responseType": "meteringcomputation.UpdateMeteringComputationUsageStatementEmailRecipientsGroupsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteMeteringComputationUsageStatementEmailRecipientsGroups",
+        "requestType": "meteringcomputation.DeleteMeteringComputationUsageStatementEmailRecipientsGroupsRequest",
+        "responseType": "meteringcomputation.DeleteMeteringComputationUsageStatementEmailRecipientsGroupsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_meteringcomputation_meteringcomputationusagestatementemailrecipientsgroups",
+    "collectionField": "meteringcomputationusagestatementemailrecipientsgroups",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/meteringcomputation/meteringcomputationusagestatementemailrecipientsgroups/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/meteringcomputation/meteringcomputationusagestatementemailrecipientsgroups/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for meteringcomputation/meteringcomputationusagestatementemailrecipientsgroups; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

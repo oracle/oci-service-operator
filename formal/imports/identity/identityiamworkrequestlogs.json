@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "identity",
+  "slug": "identityiamworkrequestlogs",
+  "kind": "IdentityIamWorkRequestLogs",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_identity_iam_work_request_logs",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateIdentityIamWorkRequestLogs",
+        "requestType": "identity.CreateIdentityIamWorkRequestLogsRequest",
+        "responseType": "identity.CreateIdentityIamWorkRequestLogsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetIdentityIamWorkRequestLogs",
+        "requestType": "identity.GetIdentityIamWorkRequestLogsRequest",
+        "responseType": "identity.GetIdentityIamWorkRequestLogsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListIdentityIamWorkRequestLogs",
+        "requestType": "identity.ListIdentityIamWorkRequestLogsRequest",
+        "responseType": "identity.ListIdentityIamWorkRequestLogsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateIdentityIamWorkRequestLogs",
+        "requestType": "identity.UpdateIdentityIamWorkRequestLogsRequest",
+        "responseType": "identity.UpdateIdentityIamWorkRequestLogsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteIdentityIamWorkRequestLogs",
+        "requestType": "identity.DeleteIdentityIamWorkRequestLogsRequest",
+        "responseType": "identity.DeleteIdentityIamWorkRequestLogsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_identity_identityiamworkrequestlogs",
+    "collectionField": "identityiamworkrequestlogs",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/identity/identityiamworkrequestlogs/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/identity/identityiamworkrequestlogs/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for identity/identityiamworkrequestlogs; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

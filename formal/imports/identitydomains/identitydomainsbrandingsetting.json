@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "identitydomains",
+  "slug": "identitydomainsbrandingsetting",
+  "kind": "IdentityDomainsBrandingSetting",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_identity_domains_branding_setting",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateIdentityDomainsBrandingSetting",
+        "requestType": "identitydomains.CreateIdentityDomainsBrandingSettingRequest",
+        "responseType": "identitydomains.CreateIdentityDomainsBrandingSettingResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetIdentityDomainsBrandingSetting",
+        "requestType": "identitydomains.GetIdentityDomainsBrandingSettingRequest",
+        "responseType": "identitydomains.GetIdentityDomainsBrandingSettingResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListIdentityDomainsBrandingSetting",
+        "requestType": "identitydomains.ListIdentityDomainsBrandingSettingRequest",
+        "responseType": "identitydomains.ListIdentityDomainsBrandingSettingResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateIdentityDomainsBrandingSetting",
+        "requestType": "identitydomains.UpdateIdentityDomainsBrandingSettingRequest",
+        "responseType": "identitydomains.UpdateIdentityDomainsBrandingSettingResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteIdentityDomainsBrandingSetting",
+        "requestType": "identitydomains.DeleteIdentityDomainsBrandingSettingRequest",
+        "responseType": "identitydomains.DeleteIdentityDomainsBrandingSettingResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_identitydomains_identitydomainsbrandingsetting",
+    "collectionField": "identitydomainsbrandingsetting",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/identitydomains/identitydomainsbrandingsetting/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/identitydomains/identitydomainsbrandingsetting/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for identitydomains/identitydomainsbrandingsetting; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

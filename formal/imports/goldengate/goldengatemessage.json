@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "goldengate",
+  "slug": "goldengatemessage",
+  "kind": "GoldenGateMessage",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_golden_gate_message",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateGoldenGateMessage",
+        "requestType": "goldengate.CreateGoldenGateMessageRequest",
+        "responseType": "goldengate.CreateGoldenGateMessageResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetGoldenGateMessage",
+        "requestType": "goldengate.GetGoldenGateMessageRequest",
+        "responseType": "goldengate.GetGoldenGateMessageResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListGoldenGateMessage",
+        "requestType": "goldengate.ListGoldenGateMessageRequest",
+        "responseType": "goldengate.ListGoldenGateMessageResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateGoldenGateMessage",
+        "requestType": "goldengate.UpdateGoldenGateMessageRequest",
+        "responseType": "goldengate.UpdateGoldenGateMessageResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteGoldenGateMessage",
+        "requestType": "goldengate.DeleteGoldenGateMessageRequest",
+        "responseType": "goldengate.DeleteGoldenGateMessageResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_goldengate_goldengatemessage",
+    "collectionField": "goldengatemessage",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/goldengate/goldengatemessage/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/goldengate/goldengatemessage/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for goldengate/goldengatemessage; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

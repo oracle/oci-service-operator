@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "usageproxy",
+  "slug": "usageproxyresources",
+  "kind": "UsageProxyResources",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_usage_proxy_resources",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateUsageProxyResources",
+        "requestType": "usageproxy.CreateUsageProxyResourcesRequest",
+        "responseType": "usageproxy.CreateUsageProxyResourcesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetUsageProxyResources",
+        "requestType": "usageproxy.GetUsageProxyResourcesRequest",
+        "responseType": "usageproxy.GetUsageProxyResourcesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListUsageProxyResources",
+        "requestType": "usageproxy.ListUsageProxyResourcesRequest",
+        "responseType": "usageproxy.ListUsageProxyResourcesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateUsageProxyResources",
+        "requestType": "usageproxy.UpdateUsageProxyResourcesRequest",
+        "responseType": "usageproxy.UpdateUsageProxyResourcesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteUsageProxyResources",
+        "requestType": "usageproxy.DeleteUsageProxyResourcesRequest",
+        "responseType": "usageproxy.DeleteUsageProxyResourcesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_usageproxy_usageproxyresources",
+    "collectionField": "usageproxyresources",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/usageproxy/usageproxyresources/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/usageproxy/usageproxyresources/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for usageproxy/usageproxyresources; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

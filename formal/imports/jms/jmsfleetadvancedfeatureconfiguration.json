@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "jms",
+  "slug": "jmsfleetadvancedfeatureconfiguration",
+  "kind": "JmsFleetAdvancedFeatureConfiguration",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_jms_fleet_advanced_feature_configuration",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateJmsFleetAdvancedFeatureConfiguration",
+        "requestType": "jms.CreateJmsFleetAdvancedFeatureConfigurationRequest",
+        "responseType": "jms.CreateJmsFleetAdvancedFeatureConfigurationResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetJmsFleetAdvancedFeatureConfiguration",
+        "requestType": "jms.GetJmsFleetAdvancedFeatureConfigurationRequest",
+        "responseType": "jms.GetJmsFleetAdvancedFeatureConfigurationResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListJmsFleetAdvancedFeatureConfiguration",
+        "requestType": "jms.ListJmsFleetAdvancedFeatureConfigurationRequest",
+        "responseType": "jms.ListJmsFleetAdvancedFeatureConfigurationResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateJmsFleetAdvancedFeatureConfiguration",
+        "requestType": "jms.UpdateJmsFleetAdvancedFeatureConfigurationRequest",
+        "responseType": "jms.UpdateJmsFleetAdvancedFeatureConfigurationResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteJmsFleetAdvancedFeatureConfiguration",
+        "requestType": "jms.DeleteJmsFleetAdvancedFeatureConfigurationRequest",
+        "responseType": "jms.DeleteJmsFleetAdvancedFeatureConfigurationResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_jms_jmsfleetadvancedfeatureconfiguration",
+    "collectionField": "jmsfleetadvancedfeatureconfiguration",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/jms/jmsfleetadvancedfeatureconfiguration/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/jms/jmsfleetadvancedfeatureconfiguration/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for jms/jmsfleetadvancedfeatureconfiguration; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

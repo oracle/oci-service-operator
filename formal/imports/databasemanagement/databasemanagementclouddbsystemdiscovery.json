@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasemanagement",
+  "slug": "databasemanagementclouddbsystemdiscovery",
+  "kind": "DatabaseManagementCloudDbSystemDiscovery",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_management_cloud_db_system_discovery",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseManagementCloudDbSystemDiscovery",
+        "requestType": "databasemanagement.CreateDatabaseManagementCloudDbSystemDiscoveryRequest",
+        "responseType": "databasemanagement.CreateDatabaseManagementCloudDbSystemDiscoveryResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseManagementCloudDbSystemDiscovery",
+        "requestType": "databasemanagement.GetDatabaseManagementCloudDbSystemDiscoveryRequest",
+        "responseType": "databasemanagement.GetDatabaseManagementCloudDbSystemDiscoveryResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseManagementCloudDbSystemDiscovery",
+        "requestType": "databasemanagement.ListDatabaseManagementCloudDbSystemDiscoveryRequest",
+        "responseType": "databasemanagement.ListDatabaseManagementCloudDbSystemDiscoveryResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseManagementCloudDbSystemDiscovery",
+        "requestType": "databasemanagement.UpdateDatabaseManagementCloudDbSystemDiscoveryRequest",
+        "responseType": "databasemanagement.UpdateDatabaseManagementCloudDbSystemDiscoveryResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseManagementCloudDbSystemDiscovery",
+        "requestType": "databasemanagement.DeleteDatabaseManagementCloudDbSystemDiscoveryRequest",
+        "responseType": "databasemanagement.DeleteDatabaseManagementCloudDbSystemDiscoveryResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_databasemanagement_databasemanagementclouddbsystemdiscovery",
+    "collectionField": "databasemanagementclouddbsystemdiscovery",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasemanagement/databasemanagementclouddbsystemdiscovery/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasemanagement/databasemanagementclouddbsystemdiscovery/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for databasemanagement/databasemanagementclouddbsystemdiscovery; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

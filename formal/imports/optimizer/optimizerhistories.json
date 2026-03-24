@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "optimizer",
+  "slug": "optimizerhistories",
+  "kind": "OptimizerHistories",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_optimizer_histories",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOptimizerHistories",
+        "requestType": "optimizer.CreateOptimizerHistoriesRequest",
+        "responseType": "optimizer.CreateOptimizerHistoriesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOptimizerHistories",
+        "requestType": "optimizer.GetOptimizerHistoriesRequest",
+        "responseType": "optimizer.GetOptimizerHistoriesResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOptimizerHistories",
+        "requestType": "optimizer.ListOptimizerHistoriesRequest",
+        "responseType": "optimizer.ListOptimizerHistoriesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOptimizerHistories",
+        "requestType": "optimizer.UpdateOptimizerHistoriesRequest",
+        "responseType": "optimizer.UpdateOptimizerHistoriesResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOptimizerHistories",
+        "requestType": "optimizer.DeleteOptimizerHistoriesRequest",
+        "responseType": "optimizer.DeleteOptimizerHistoriesResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_optimizer_optimizerhistories",
+    "collectionField": "optimizerhistories",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/optimizer/optimizerhistories/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/optimizer/optimizerhistories/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for optimizer/optimizerhistories; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

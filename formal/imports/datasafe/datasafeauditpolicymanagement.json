@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "datasafeauditpolicymanagement",
+  "kind": "DataSafeAuditPolicyManagement",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_audit_policy_management",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDataSafeAuditPolicyManagement",
+        "requestType": "datasafe.CreateDataSafeAuditPolicyManagementRequest",
+        "responseType": "datasafe.CreateDataSafeAuditPolicyManagementResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDataSafeAuditPolicyManagement",
+        "requestType": "datasafe.GetDataSafeAuditPolicyManagementRequest",
+        "responseType": "datasafe.GetDataSafeAuditPolicyManagementResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDataSafeAuditPolicyManagement",
+        "requestType": "datasafe.ListDataSafeAuditPolicyManagementRequest",
+        "responseType": "datasafe.ListDataSafeAuditPolicyManagementResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDataSafeAuditPolicyManagement",
+        "requestType": "datasafe.UpdateDataSafeAuditPolicyManagementRequest",
+        "responseType": "datasafe.UpdateDataSafeAuditPolicyManagementResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDataSafeAuditPolicyManagement",
+        "requestType": "datasafe.DeleteDataSafeAuditPolicyManagementRequest",
+        "responseType": "datasafe.DeleteDataSafeAuditPolicyManagementResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_datasafe_datasafeauditpolicymanagement",
+    "collectionField": "datasafeauditpolicymanagement",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/datasafeauditpolicymanagement/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/datasafeauditpolicymanagement/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for datasafe/datasafeauditpolicymanagement; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

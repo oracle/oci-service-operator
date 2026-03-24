@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "bds",
+  "slug": "bdsbdsinstancenodebackups",
+  "kind": "BdsBdsInstanceNodeBackups",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_bds_bds_instance_node_backups",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateBdsBdsInstanceNodeBackups",
+        "requestType": "bds.CreateBdsBdsInstanceNodeBackupsRequest",
+        "responseType": "bds.CreateBdsBdsInstanceNodeBackupsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetBdsBdsInstanceNodeBackups",
+        "requestType": "bds.GetBdsBdsInstanceNodeBackupsRequest",
+        "responseType": "bds.GetBdsBdsInstanceNodeBackupsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListBdsBdsInstanceNodeBackups",
+        "requestType": "bds.ListBdsBdsInstanceNodeBackupsRequest",
+        "responseType": "bds.ListBdsBdsInstanceNodeBackupsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateBdsBdsInstanceNodeBackups",
+        "requestType": "bds.UpdateBdsBdsInstanceNodeBackupsRequest",
+        "responseType": "bds.UpdateBdsBdsInstanceNodeBackupsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteBdsBdsInstanceNodeBackups",
+        "requestType": "bds.DeleteBdsBdsInstanceNodeBackupsRequest",
+        "responseType": "bds.DeleteBdsBdsInstanceNodeBackupsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_bds_bdsbdsinstancenodebackups",
+    "collectionField": "bdsbdsinstancenodebackups",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/bds/bdsbdsinstancenodebackups/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/bds/bdsbdsinstancenodebackups/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for bds/bdsbdsinstancenodebackups; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

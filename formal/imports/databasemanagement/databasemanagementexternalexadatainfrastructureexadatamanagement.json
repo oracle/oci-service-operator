@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasemanagement",
+  "slug": "databasemanagementexternalexadatainfrastructureexadatamanagement",
+  "kind": "DatabaseManagementExternalExadataInfrastructureExadataManagement",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_management_external_exadata_infrastructure_exadata_management",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseManagementExternalExadataInfrastructureExadataManagement",
+        "requestType": "databasemanagement.CreateDatabaseManagementExternalExadataInfrastructureExadataManagementRequest",
+        "responseType": "databasemanagement.CreateDatabaseManagementExternalExadataInfrastructureExadataManagementResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseManagementExternalExadataInfrastructureExadataManagement",
+        "requestType": "databasemanagement.GetDatabaseManagementExternalExadataInfrastructureExadataManagementRequest",
+        "responseType": "databasemanagement.GetDatabaseManagementExternalExadataInfrastructureExadataManagementResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseManagementExternalExadataInfrastructureExadataManagement",
+        "requestType": "databasemanagement.ListDatabaseManagementExternalExadataInfrastructureExadataManagementRequest",
+        "responseType": "databasemanagement.ListDatabaseManagementExternalExadataInfrastructureExadataManagementResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseManagementExternalExadataInfrastructureExadataManagement",
+        "requestType": "databasemanagement.UpdateDatabaseManagementExternalExadataInfrastructureExadataManagementRequest",
+        "responseType": "databasemanagement.UpdateDatabaseManagementExternalExadataInfrastructureExadataManagementResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseManagementExternalExadataInfrastructureExadataManagement",
+        "requestType": "databasemanagement.DeleteDatabaseManagementExternalExadataInfrastructureExadataManagementRequest",
+        "responseType": "databasemanagement.DeleteDatabaseManagementExternalExadataInfrastructureExadataManagementResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_databasemanagement_databasemanagementexternalexadatainfrastructureexadatamanagement",
+    "collectionField": "databasemanagementexternalexadatainfrastructureexadatamanagement",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasemanagement/databasemanagementexternalexadatainfrastructureexadatamanagement/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasemanagement/databasemanagementexternalexadatainfrastructureexadatamanagement/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for databasemanagement/databasemanagementexternalexadatainfrastructureexadatamanagement; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

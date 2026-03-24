@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "osmanagementhub",
+  "slug": "osmanagementhubmanagedinstancegroupinstallwindowsupdatesmanagement",
+  "kind": "OsManagementHubManagedInstanceGroupInstallWindowsUpdatesManagement",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_os_management_hub_managed_instance_group_install_windows_updates_management",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOsManagementHubManagedInstanceGroupInstallWindowsUpdatesManagement",
+        "requestType": "osmanagementhub.CreateOsManagementHubManagedInstanceGroupInstallWindowsUpdatesManagementRequest",
+        "responseType": "osmanagementhub.CreateOsManagementHubManagedInstanceGroupInstallWindowsUpdatesManagementResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOsManagementHubManagedInstanceGroupInstallWindowsUpdatesManagement",
+        "requestType": "osmanagementhub.GetOsManagementHubManagedInstanceGroupInstallWindowsUpdatesManagementRequest",
+        "responseType": "osmanagementhub.GetOsManagementHubManagedInstanceGroupInstallWindowsUpdatesManagementResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOsManagementHubManagedInstanceGroupInstallWindowsUpdatesManagement",
+        "requestType": "osmanagementhub.ListOsManagementHubManagedInstanceGroupInstallWindowsUpdatesManagementRequest",
+        "responseType": "osmanagementhub.ListOsManagementHubManagedInstanceGroupInstallWindowsUpdatesManagementResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOsManagementHubManagedInstanceGroupInstallWindowsUpdatesManagement",
+        "requestType": "osmanagementhub.UpdateOsManagementHubManagedInstanceGroupInstallWindowsUpdatesManagementRequest",
+        "responseType": "osmanagementhub.UpdateOsManagementHubManagedInstanceGroupInstallWindowsUpdatesManagementResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOsManagementHubManagedInstanceGroupInstallWindowsUpdatesManagement",
+        "requestType": "osmanagementhub.DeleteOsManagementHubManagedInstanceGroupInstallWindowsUpdatesManagementRequest",
+        "responseType": "osmanagementhub.DeleteOsManagementHubManagedInstanceGroupInstallWindowsUpdatesManagementResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_osmanagementhub_osmanagementhubmanagedinstancegroupinstallwindowsupdatesmanagement",
+    "collectionField": "osmanagementhubmanagedinstancegroupinstallwindowsupdatesmanagement",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/osmanagementhub/osmanagementhubmanagedinstancegroupinstallwindowsupdatesmanagement/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/osmanagementhub/osmanagementhubmanagedinstancegroupinstallwindowsupdatesmanagement/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for osmanagementhub/osmanagementhubmanagedinstancegroupinstallwindowsupdatesmanagement; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "redis",
+  "slug": "redisredisclustergetocicacheuser",
+  "kind": "RedisRedisClusterGetOciCacheUser",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_redis_redis_cluster_get_oci_cache_user",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateRedisRedisClusterGetOciCacheUser",
+        "requestType": "redis.CreateRedisRedisClusterGetOciCacheUserRequest",
+        "responseType": "redis.CreateRedisRedisClusterGetOciCacheUserResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetRedisRedisClusterGetOciCacheUser",
+        "requestType": "redis.GetRedisRedisClusterGetOciCacheUserRequest",
+        "responseType": "redis.GetRedisRedisClusterGetOciCacheUserResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListRedisRedisClusterGetOciCacheUser",
+        "requestType": "redis.ListRedisRedisClusterGetOciCacheUserRequest",
+        "responseType": "redis.ListRedisRedisClusterGetOciCacheUserResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateRedisRedisClusterGetOciCacheUser",
+        "requestType": "redis.UpdateRedisRedisClusterGetOciCacheUserRequest",
+        "responseType": "redis.UpdateRedisRedisClusterGetOciCacheUserResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteRedisRedisClusterGetOciCacheUser",
+        "requestType": "redis.DeleteRedisRedisClusterGetOciCacheUserRequest",
+        "responseType": "redis.DeleteRedisRedisClusterGetOciCacheUserResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_redis_redisredisclustergetocicacheuser",
+    "collectionField": "redisredisclustergetocicacheuser",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/redis/redisredisclustergetocicacheuser/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/redis/redisredisclustergetocicacheuser/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for redis/redisredisclustergetocicacheuser; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

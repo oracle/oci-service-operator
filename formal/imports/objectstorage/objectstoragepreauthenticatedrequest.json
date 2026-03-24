@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "objectstorage",
+  "slug": "objectstoragepreauthenticatedrequest",
+  "kind": "ObjectStoragePreauthenticatedRequest",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_objectstorage_preauthrequest",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateObjectStoragePreauthenticatedRequest",
+        "requestType": "objectstorage.CreateObjectStoragePreauthenticatedRequestRequest",
+        "responseType": "objectstorage.CreateObjectStoragePreauthenticatedRequestResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetObjectStoragePreauthenticatedRequest",
+        "requestType": "objectstorage.GetObjectStoragePreauthenticatedRequestRequest",
+        "responseType": "objectstorage.GetObjectStoragePreauthenticatedRequestResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListObjectStoragePreauthenticatedRequest",
+        "requestType": "objectstorage.ListObjectStoragePreauthenticatedRequestRequest",
+        "responseType": "objectstorage.ListObjectStoragePreauthenticatedRequestResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateObjectStoragePreauthenticatedRequest",
+        "requestType": "objectstorage.UpdateObjectStoragePreauthenticatedRequestRequest",
+        "responseType": "objectstorage.UpdateObjectStoragePreauthenticatedRequestResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteObjectStoragePreauthenticatedRequest",
+        "requestType": "objectstorage.DeleteObjectStoragePreauthenticatedRequestRequest",
+        "responseType": "objectstorage.DeleteObjectStoragePreauthenticatedRequestResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_objectstorage_objectstoragepreauthenticatedrequest",
+    "collectionField": "objectstoragepreauthenticatedrequest",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/objectstorage/objectstoragepreauthenticatedrequest/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/objectstorage/objectstoragepreauthenticatedrequest/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for objectstorage/objectstoragepreauthenticatedrequest; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

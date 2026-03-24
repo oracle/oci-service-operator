@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "objectstorage",
+  "slug": "objectstorageobjects",
+  "kind": "ObjectStorageObjects",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_objectstorage_objects",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateObjectStorageObjects",
+        "requestType": "objectstorage.CreateObjectStorageObjectsRequest",
+        "responseType": "objectstorage.CreateObjectStorageObjectsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetObjectStorageObjects",
+        "requestType": "objectstorage.GetObjectStorageObjectsRequest",
+        "responseType": "objectstorage.GetObjectStorageObjectsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListObjectStorageObjects",
+        "requestType": "objectstorage.ListObjectStorageObjectsRequest",
+        "responseType": "objectstorage.ListObjectStorageObjectsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateObjectStorageObjects",
+        "requestType": "objectstorage.UpdateObjectStorageObjectsRequest",
+        "responseType": "objectstorage.UpdateObjectStorageObjectsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteObjectStorageObjects",
+        "requestType": "objectstorage.DeleteObjectStorageObjectsRequest",
+        "responseType": "objectstorage.DeleteObjectStorageObjectsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_objectstorage_objectstorageobjects",
+    "collectionField": "objectstorageobjects",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/objectstorage/objectstorageobjects/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/objectstorage/objectstorageobjects/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for objectstorage/objectstorageobjects; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

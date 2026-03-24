@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "budget",
+  "slug": "budgetcostanomalyeventanalytics",
+  "kind": "BudgetCostAnomalyEventAnalytics",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_budget_cost_anomaly_event_analytics",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateBudgetCostAnomalyEventAnalytics",
+        "requestType": "budget.CreateBudgetCostAnomalyEventAnalyticsRequest",
+        "responseType": "budget.CreateBudgetCostAnomalyEventAnalyticsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetBudgetCostAnomalyEventAnalytics",
+        "requestType": "budget.GetBudgetCostAnomalyEventAnalyticsRequest",
+        "responseType": "budget.GetBudgetCostAnomalyEventAnalyticsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListBudgetCostAnomalyEventAnalytics",
+        "requestType": "budget.ListBudgetCostAnomalyEventAnalyticsRequest",
+        "responseType": "budget.ListBudgetCostAnomalyEventAnalyticsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateBudgetCostAnomalyEventAnalytics",
+        "requestType": "budget.UpdateBudgetCostAnomalyEventAnalyticsRequest",
+        "responseType": "budget.UpdateBudgetCostAnomalyEventAnalyticsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteBudgetCostAnomalyEventAnalytics",
+        "requestType": "budget.DeleteBudgetCostAnomalyEventAnalyticsRequest",
+        "responseType": "budget.DeleteBudgetCostAnomalyEventAnalyticsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_budget_budgetcostanomalyeventanalytics",
+    "collectionField": "budgetcostanomalyeventanalytics",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/budget/budgetcostanomalyeventanalytics/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/budget/budgetcostanomalyeventanalytics/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for budget/budgetcostanomalyeventanalytics; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

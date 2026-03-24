@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "networkfirewall",
+  "slug": "networkfirewallnetworkfirewallpolicyservicelist",
+  "kind": "NetworkFirewallNetworkFirewallPolicyServiceList",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_network_firewall_network_firewall_policy_service_list",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateNetworkFirewallNetworkFirewallPolicyServiceList",
+        "requestType": "networkfirewall.CreateNetworkFirewallNetworkFirewallPolicyServiceListRequest",
+        "responseType": "networkfirewall.CreateNetworkFirewallNetworkFirewallPolicyServiceListResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetNetworkFirewallNetworkFirewallPolicyServiceList",
+        "requestType": "networkfirewall.GetNetworkFirewallNetworkFirewallPolicyServiceListRequest",
+        "responseType": "networkfirewall.GetNetworkFirewallNetworkFirewallPolicyServiceListResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListNetworkFirewallNetworkFirewallPolicyServiceList",
+        "requestType": "networkfirewall.ListNetworkFirewallNetworkFirewallPolicyServiceListRequest",
+        "responseType": "networkfirewall.ListNetworkFirewallNetworkFirewallPolicyServiceListResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateNetworkFirewallNetworkFirewallPolicyServiceList",
+        "requestType": "networkfirewall.UpdateNetworkFirewallNetworkFirewallPolicyServiceListRequest",
+        "responseType": "networkfirewall.UpdateNetworkFirewallNetworkFirewallPolicyServiceListResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteNetworkFirewallNetworkFirewallPolicyServiceList",
+        "requestType": "networkfirewall.DeleteNetworkFirewallNetworkFirewallPolicyServiceListRequest",
+        "responseType": "networkfirewall.DeleteNetworkFirewallNetworkFirewallPolicyServiceListResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_networkfirewall_networkfirewallnetworkfirewallpolicyservicelist",
+    "collectionField": "networkfirewallnetworkfirewallpolicyservicelist",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/networkfirewall/networkfirewallnetworkfirewallpolicyservicelist/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/networkfirewall/networkfirewallnetworkfirewallpolicyservicelist/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for networkfirewall/networkfirewallnetworkfirewallpolicyservicelist; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "capacitymanagement",
+  "slug": "capacitymanagementinternaloccmdemandsignaldelivery",
+  "kind": "CapacityManagementInternalOccmDemandSignalDelivery",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_capacity_management_internal_occm_demand_signal_delivery",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCapacityManagementInternalOccmDemandSignalDelivery",
+        "requestType": "capacitymanagement.CreateCapacityManagementInternalOccmDemandSignalDeliveryRequest",
+        "responseType": "capacitymanagement.CreateCapacityManagementInternalOccmDemandSignalDeliveryResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCapacityManagementInternalOccmDemandSignalDelivery",
+        "requestType": "capacitymanagement.GetCapacityManagementInternalOccmDemandSignalDeliveryRequest",
+        "responseType": "capacitymanagement.GetCapacityManagementInternalOccmDemandSignalDeliveryResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCapacityManagementInternalOccmDemandSignalDelivery",
+        "requestType": "capacitymanagement.ListCapacityManagementInternalOccmDemandSignalDeliveryRequest",
+        "responseType": "capacitymanagement.ListCapacityManagementInternalOccmDemandSignalDeliveryResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCapacityManagementInternalOccmDemandSignalDelivery",
+        "requestType": "capacitymanagement.UpdateCapacityManagementInternalOccmDemandSignalDeliveryRequest",
+        "responseType": "capacitymanagement.UpdateCapacityManagementInternalOccmDemandSignalDeliveryResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCapacityManagementInternalOccmDemandSignalDelivery",
+        "requestType": "capacitymanagement.DeleteCapacityManagementInternalOccmDemandSignalDeliveryRequest",
+        "responseType": "capacitymanagement.DeleteCapacityManagementInternalOccmDemandSignalDeliveryResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_capacitymanagement_capacitymanagementinternaloccmdemandsignaldelivery",
+    "collectionField": "capacitymanagementinternaloccmdemandsignaldelivery",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/capacitymanagement/capacitymanagementinternaloccmdemandsignaldelivery/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/capacitymanagement/capacitymanagementinternaloccmdemandsignaldelivery/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for capacitymanagement/capacitymanagementinternaloccmdemandsignaldelivery; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

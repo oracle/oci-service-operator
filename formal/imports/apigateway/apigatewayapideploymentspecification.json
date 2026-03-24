@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "apigateway",
+  "slug": "apigatewayapideploymentspecification",
+  "kind": "ApigatewayApiDeploymentSpecification",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_apigateway_api_deployment_specification",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateApigatewayApiDeploymentSpecification",
+        "requestType": "apigateway.CreateApigatewayApiDeploymentSpecificationRequest",
+        "responseType": "apigateway.CreateApigatewayApiDeploymentSpecificationResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetApigatewayApiDeploymentSpecification",
+        "requestType": "apigateway.GetApigatewayApiDeploymentSpecificationRequest",
+        "responseType": "apigateway.GetApigatewayApiDeploymentSpecificationResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListApigatewayApiDeploymentSpecification",
+        "requestType": "apigateway.ListApigatewayApiDeploymentSpecificationRequest",
+        "responseType": "apigateway.ListApigatewayApiDeploymentSpecificationResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateApigatewayApiDeploymentSpecification",
+        "requestType": "apigateway.UpdateApigatewayApiDeploymentSpecificationRequest",
+        "responseType": "apigateway.UpdateApigatewayApiDeploymentSpecificationResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteApigatewayApiDeploymentSpecification",
+        "requestType": "apigateway.DeleteApigatewayApiDeploymentSpecificationRequest",
+        "responseType": "apigateway.DeleteApigatewayApiDeploymentSpecificationResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_apigateway_apigatewayapideploymentspecification",
+    "collectionField": "apigatewayapideploymentspecification",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/apigateway/apigatewayapideploymentspecification/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/apigateway/apigatewayapideploymentspecification/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for apigateway/apigatewayapideploymentspecification; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

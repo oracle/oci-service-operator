@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "loadbalancer",
+  "slug": "loadbalancerbackendhealth",
+  "kind": "LoadBalancerBackendHealth",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_load_balancer_backend_health",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateLoadBalancerBackendHealth",
+        "requestType": "loadbalancer.CreateLoadBalancerBackendHealthRequest",
+        "responseType": "loadbalancer.CreateLoadBalancerBackendHealthResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetLoadBalancerBackendHealth",
+        "requestType": "loadbalancer.GetLoadBalancerBackendHealthRequest",
+        "responseType": "loadbalancer.GetLoadBalancerBackendHealthResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListLoadBalancerBackendHealth",
+        "requestType": "loadbalancer.ListLoadBalancerBackendHealthRequest",
+        "responseType": "loadbalancer.ListLoadBalancerBackendHealthResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateLoadBalancerBackendHealth",
+        "requestType": "loadbalancer.UpdateLoadBalancerBackendHealthRequest",
+        "responseType": "loadbalancer.UpdateLoadBalancerBackendHealthResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteLoadBalancerBackendHealth",
+        "requestType": "loadbalancer.DeleteLoadBalancerBackendHealthRequest",
+        "responseType": "loadbalancer.DeleteLoadBalancerBackendHealthResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_loadbalancer_loadbalancerbackendhealth",
+    "collectionField": "loadbalancerbackendhealth",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/loadbalancer/loadbalancerbackendhealth/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/loadbalancer/loadbalancerbackendhealth/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for loadbalancer/loadbalancerbackendhealth; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

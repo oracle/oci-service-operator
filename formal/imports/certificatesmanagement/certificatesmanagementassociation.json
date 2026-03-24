@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "certificatesmanagement",
+  "slug": "certificatesmanagementassociation",
+  "kind": "CertificatesManagementAssociation",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_certificates_management_association",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCertificatesManagementAssociation",
+        "requestType": "certificatesmanagement.CreateCertificatesManagementAssociationRequest",
+        "responseType": "certificatesmanagement.CreateCertificatesManagementAssociationResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCertificatesManagementAssociation",
+        "requestType": "certificatesmanagement.GetCertificatesManagementAssociationRequest",
+        "responseType": "certificatesmanagement.GetCertificatesManagementAssociationResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCertificatesManagementAssociation",
+        "requestType": "certificatesmanagement.ListCertificatesManagementAssociationRequest",
+        "responseType": "certificatesmanagement.ListCertificatesManagementAssociationResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCertificatesManagementAssociation",
+        "requestType": "certificatesmanagement.UpdateCertificatesManagementAssociationRequest",
+        "responseType": "certificatesmanagement.UpdateCertificatesManagementAssociationResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCertificatesManagementAssociation",
+        "requestType": "certificatesmanagement.DeleteCertificatesManagementAssociationRequest",
+        "responseType": "certificatesmanagement.DeleteCertificatesManagementAssociationResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_certificatesmanagement_certificatesmanagementassociation",
+    "collectionField": "certificatesmanagementassociation",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/certificatesmanagement/certificatesmanagementassociation/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/certificatesmanagement/certificatesmanagementassociation/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for certificatesmanagement/certificatesmanagementassociation; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

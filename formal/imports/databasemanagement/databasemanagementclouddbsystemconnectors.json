@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasemanagement",
+  "slug": "databasemanagementclouddbsystemconnectors",
+  "kind": "DatabaseManagementCloudDbSystemConnectors",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_management_cloud_db_system_connectors",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseManagementCloudDbSystemConnectors",
+        "requestType": "databasemanagement.CreateDatabaseManagementCloudDbSystemConnectorsRequest",
+        "responseType": "databasemanagement.CreateDatabaseManagementCloudDbSystemConnectorsResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseManagementCloudDbSystemConnectors",
+        "requestType": "databasemanagement.GetDatabaseManagementCloudDbSystemConnectorsRequest",
+        "responseType": "databasemanagement.GetDatabaseManagementCloudDbSystemConnectorsResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseManagementCloudDbSystemConnectors",
+        "requestType": "databasemanagement.ListDatabaseManagementCloudDbSystemConnectorsRequest",
+        "responseType": "databasemanagement.ListDatabaseManagementCloudDbSystemConnectorsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseManagementCloudDbSystemConnectors",
+        "requestType": "databasemanagement.UpdateDatabaseManagementCloudDbSystemConnectorsRequest",
+        "responseType": "databasemanagement.UpdateDatabaseManagementCloudDbSystemConnectorsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseManagementCloudDbSystemConnectors",
+        "requestType": "databasemanagement.DeleteDatabaseManagementCloudDbSystemConnectorsRequest",
+        "responseType": "databasemanagement.DeleteDatabaseManagementCloudDbSystemConnectorsResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_databasemanagement_databasemanagementclouddbsystemconnectors",
+    "collectionField": "databasemanagementclouddbsystemconnectors",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasemanagement/databasemanagementclouddbsystemconnectors/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasemanagement/databasemanagementclouddbsystemconnectors/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for databasemanagement/databasemanagementclouddbsystemconnectors; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "identity",
+  "slug": "identityprovidergroup",
+  "kind": "IdentityProviderGroup",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_identity_identityprovidergroup",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateIdentityProviderGroup",
+        "requestType": "identity.CreateIdentityProviderGroupRequest",
+        "responseType": "identity.CreateIdentityProviderGroupResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetIdentityProviderGroup",
+        "requestType": "identity.GetIdentityProviderGroupRequest",
+        "responseType": "identity.GetIdentityProviderGroupResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListIdentityProviderGroup",
+        "requestType": "identity.ListIdentityProviderGroupRequest",
+        "responseType": "identity.ListIdentityProviderGroupResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateIdentityProviderGroup",
+        "requestType": "identity.UpdateIdentityProviderGroupRequest",
+        "responseType": "identity.UpdateIdentityProviderGroupResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteIdentityProviderGroup",
+        "requestType": "identity.DeleteIdentityProviderGroupRequest",
+        "responseType": "identity.DeleteIdentityProviderGroupResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_identity_identityprovidergroup",
+    "collectionField": "identityprovidergroup",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/identity/identityprovidergroup/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/identity/identityprovidergroup/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for identity/identityprovidergroup; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "computecloudatcustomer",
+  "slug": "computecloudatcustomercccupgradeschedule",
+  "kind": "ComputeCloudAtCustomerCccUpgradeSchedule",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_compute_cloud_at_customer_ccc_upgrade_schedule",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateComputeCloudAtCustomerCccUpgradeSchedule",
+        "requestType": "computecloudatcustomer.CreateComputeCloudAtCustomerCccUpgradeScheduleRequest",
+        "responseType": "computecloudatcustomer.CreateComputeCloudAtCustomerCccUpgradeScheduleResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetComputeCloudAtCustomerCccUpgradeSchedule",
+        "requestType": "computecloudatcustomer.GetComputeCloudAtCustomerCccUpgradeScheduleRequest",
+        "responseType": "computecloudatcustomer.GetComputeCloudAtCustomerCccUpgradeScheduleResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListComputeCloudAtCustomerCccUpgradeSchedule",
+        "requestType": "computecloudatcustomer.ListComputeCloudAtCustomerCccUpgradeScheduleRequest",
+        "responseType": "computecloudatcustomer.ListComputeCloudAtCustomerCccUpgradeScheduleResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateComputeCloudAtCustomerCccUpgradeSchedule",
+        "requestType": "computecloudatcustomer.UpdateComputeCloudAtCustomerCccUpgradeScheduleRequest",
+        "responseType": "computecloudatcustomer.UpdateComputeCloudAtCustomerCccUpgradeScheduleResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteComputeCloudAtCustomerCccUpgradeSchedule",
+        "requestType": "computecloudatcustomer.DeleteComputeCloudAtCustomerCccUpgradeScheduleRequest",
+        "responseType": "computecloudatcustomer.DeleteComputeCloudAtCustomerCccUpgradeScheduleResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_computecloudatcustomer_computecloudatcustomercccupgradeschedule",
+    "collectionField": "computecloudatcustomercccupgradeschedule",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/computecloudatcustomer/computecloudatcustomercccupgradeschedule/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/computecloudatcustomer/computecloudatcustomercccupgradeschedule/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for computecloudatcustomer/computecloudatcustomercccupgradeschedule; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasemanagement",
+  "slug": "databasemanagementmanageddatabaseuserdataaccesscontainers",
+  "kind": "DatabaseManagementManagedDatabaseUserDataAccessContainers",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_management_managed_database_user_data_access_containers",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseManagementManagedDatabaseUserDataAccessContainers",
+        "requestType": "databasemanagement.CreateDatabaseManagementManagedDatabaseUserDataAccessContainersRequest",
+        "responseType": "databasemanagement.CreateDatabaseManagementManagedDatabaseUserDataAccessContainersResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseManagementManagedDatabaseUserDataAccessContainers",
+        "requestType": "databasemanagement.GetDatabaseManagementManagedDatabaseUserDataAccessContainersRequest",
+        "responseType": "databasemanagement.GetDatabaseManagementManagedDatabaseUserDataAccessContainersResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseManagementManagedDatabaseUserDataAccessContainers",
+        "requestType": "databasemanagement.ListDatabaseManagementManagedDatabaseUserDataAccessContainersRequest",
+        "responseType": "databasemanagement.ListDatabaseManagementManagedDatabaseUserDataAccessContainersResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseManagementManagedDatabaseUserDataAccessContainers",
+        "requestType": "databasemanagement.UpdateDatabaseManagementManagedDatabaseUserDataAccessContainersRequest",
+        "responseType": "databasemanagement.UpdateDatabaseManagementManagedDatabaseUserDataAccessContainersResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseManagementManagedDatabaseUserDataAccessContainers",
+        "requestType": "databasemanagement.DeleteDatabaseManagementManagedDatabaseUserDataAccessContainersRequest",
+        "responseType": "databasemanagement.DeleteDatabaseManagementManagedDatabaseUserDataAccessContainersResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_databasemanagement_databasemanagementmanageddatabaseuserdataaccesscontainers",
+    "collectionField": "databasemanagementmanageddatabaseuserdataaccesscontainers",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasemanagement/databasemanagementmanageddatabaseuserdataaccesscontainers/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasemanagement/databasemanagementmanageddatabaseuserdataaccesscontainers/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for databasemanagement/databasemanagementmanageddatabaseuserdataaccesscontainers; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

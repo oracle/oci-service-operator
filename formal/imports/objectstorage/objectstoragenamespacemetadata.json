@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "objectstorage",
+  "slug": "objectstoragenamespacemetadata",
+  "kind": "ObjectStorageNamespaceMetadata",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_objectstorage_namespace_metadata",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateObjectStorageNamespaceMetadata",
+        "requestType": "objectstorage.CreateObjectStorageNamespaceMetadataRequest",
+        "responseType": "objectstorage.CreateObjectStorageNamespaceMetadataResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetObjectStorageNamespaceMetadata",
+        "requestType": "objectstorage.GetObjectStorageNamespaceMetadataRequest",
+        "responseType": "objectstorage.GetObjectStorageNamespaceMetadataResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListObjectStorageNamespaceMetadata",
+        "requestType": "objectstorage.ListObjectStorageNamespaceMetadataRequest",
+        "responseType": "objectstorage.ListObjectStorageNamespaceMetadataResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateObjectStorageNamespaceMetadata",
+        "requestType": "objectstorage.UpdateObjectStorageNamespaceMetadataRequest",
+        "responseType": "objectstorage.UpdateObjectStorageNamespaceMetadataResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteObjectStorageNamespaceMetadata",
+        "requestType": "objectstorage.DeleteObjectStorageNamespaceMetadataRequest",
+        "responseType": "objectstorage.DeleteObjectStorageNamespaceMetadataResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_objectstorage_objectstoragenamespacemetadata",
+    "collectionField": "objectstoragenamespacemetadata",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/objectstorage/objectstoragenamespacemetadata/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/objectstorage/objectstoragenamespacemetadata/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for objectstorage/objectstoragenamespacemetadata; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

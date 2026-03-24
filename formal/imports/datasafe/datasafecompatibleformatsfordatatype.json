@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "datasafecompatibleformatsfordatatype",
+  "kind": "DataSafeCompatibleFormatsForDataType",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_compatible_formats_for_data_type",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDataSafeCompatibleFormatsForDataType",
+        "requestType": "datasafe.CreateDataSafeCompatibleFormatsForDataTypeRequest",
+        "responseType": "datasafe.CreateDataSafeCompatibleFormatsForDataTypeResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDataSafeCompatibleFormatsForDataType",
+        "requestType": "datasafe.GetDataSafeCompatibleFormatsForDataTypeRequest",
+        "responseType": "datasafe.GetDataSafeCompatibleFormatsForDataTypeResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDataSafeCompatibleFormatsForDataType",
+        "requestType": "datasafe.ListDataSafeCompatibleFormatsForDataTypeRequest",
+        "responseType": "datasafe.ListDataSafeCompatibleFormatsForDataTypeResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDataSafeCompatibleFormatsForDataType",
+        "requestType": "datasafe.UpdateDataSafeCompatibleFormatsForDataTypeRequest",
+        "responseType": "datasafe.UpdateDataSafeCompatibleFormatsForDataTypeResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDataSafeCompatibleFormatsForDataType",
+        "requestType": "datasafe.DeleteDataSafeCompatibleFormatsForDataTypeRequest",
+        "responseType": "datasafe.DeleteDataSafeCompatibleFormatsForDataTypeResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_datasafe_datasafecompatibleformatsfordatatype",
+    "collectionField": "datasafecompatibleformatsfordatatype",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/datasafecompatibleformatsfordatatype/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/datasafecompatibleformatsfordatatype/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for datasafe/datasafecompatibleformatsfordatatype; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

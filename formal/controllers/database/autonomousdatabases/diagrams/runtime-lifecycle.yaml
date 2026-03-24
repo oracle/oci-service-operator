@@ -1,0 +1,15 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: database
+slug: autonomousdatabases
+kind: AutonomousDatabases
+archetype: legacy-adapter
+states:
+  - provisioning
+  - active
+  - updating
+  - failed
+notes:
+  - Create first lists by displayName and compartment before deciding to bind or create.
+  - Wallet secret generation is optional and only runs after the database is active.
+  - Delete remains an unsupported legacy path, so no terminating state is confirmed today.
