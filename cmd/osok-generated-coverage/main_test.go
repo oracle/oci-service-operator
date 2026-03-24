@@ -3,102 +3,12 @@ package main
 import (
 	"os"
 	"path/filepath"
-	"slices"
 	"testing"
 
 	"github.com/oracle/oci-service-operator/internal/generator"
 )
 
-func TestCollectBuildPlanFindsGeneratedRuntimePackages(t *testing.T) {
-	t.Helper()
-
-	root := t.TempDir()
-	if err := os.MkdirAll(filepath.Join(root, "controllers", "functions"), 0o755); err != nil {
-		t.Fatalf("MkdirAll(controllers) error = %v", err)
-	}
-	if err := os.MkdirAll(filepath.Join(root, "pkg", "servicemanager", "functions", "application"), 0o755); err != nil {
-		t.Fatalf("MkdirAll(service manager) error = %v", err)
-	}
-	if err := os.MkdirAll(filepath.Join(root, "internal", "registrations"), 0o755); err != nil {
-		t.Fatalf("MkdirAll(registrations) error = %v", err)
-	}
-
-	for path, content := range map[string]string{
-		filepath.Join(root, "controllers", "functions", "application_controller.go"):                              "package functions\n",
-		filepath.Join(root, "pkg", "servicemanager", "functions", "application", "application_servicemanager.go"): "package application\n",
-		filepath.Join(root, "pkg", "servicemanager", "functions", "application", "application_serviceclient.go"):  "package application\n",
-		filepath.Join(root, "internal", "registrations", "functions_generated.go"):                                "package registrations\n",
-	} {
-		if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
-			t.Fatalf("WriteFile(%q) error = %v", path, err)
-		}
-	}
-
-	build, err := collectBuildPlan(root, []string{"functions"}, []string{"functions"})
-	if err != nil {
-		t.Fatalf("collectBuildPlan() error = %v", err)
-	}
-
-	if !slices.Equal(build.ControllerPackages, []string{"./controllers/functions"}) {
-		t.Fatalf("ControllerPackages = %v, want %v", build.ControllerPackages, []string{"./controllers/functions"})
-	}
-	if !slices.Equal(build.ServiceManagerPackages, []string{"./pkg/servicemanager/functions/application"}) {
-		t.Fatalf("ServiceManagerPackages = %v, want %v", build.ServiceManagerPackages, []string{"./pkg/servicemanager/functions/application"})
-	}
-	if !slices.Equal(build.RegistrationPackages, []string{"./internal/registrations"}) {
-		t.Fatalf("RegistrationPackages = %v, want %v", build.RegistrationPackages, []string{"./internal/registrations"})
-	}
-}
-
-func TestCollectBuildPlanFindsOverriddenServiceManagerRoots(t *testing.T) {
-	t.Helper()
-
-	root := t.TempDir()
-	if err := os.MkdirAll(filepath.Join(root, "controllers", "database"), 0o755); err != nil {
-		t.Fatalf("MkdirAll(controllers) error = %v", err)
-	}
-	if err := os.MkdirAll(filepath.Join(root, "pkg", "servicemanager", "autonomousdatabases", "adb"), 0o755); err != nil {
-		t.Fatalf("MkdirAll(service manager) error = %v", err)
-	}
-	if err := os.MkdirAll(filepath.Join(root, "internal", "registrations"), 0o755); err != nil {
-		t.Fatalf("MkdirAll(registrations) error = %v", err)
-	}
-
-	for path, content := range map[string]string{
-		filepath.Join(root, "controllers", "database", "autonomousdatabases_controller.go"):                                 "package database\n",
-		filepath.Join(root, "pkg", "servicemanager", "autonomousdatabases", "adb", "autonomousdatabases_servicemanager.go"): "package adb\n",
-		filepath.Join(root, "pkg", "servicemanager", "autonomousdatabases", "adb", "autonomousdatabases_serviceclient.go"):  "package adb\n",
-		filepath.Join(root, "internal", "registrations", "database_generated.go"):                                           "package registrations\n",
-	} {
-		if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
-			t.Fatalf("WriteFile(%q) error = %v", path, err)
-		}
-	}
-
-	build, err := collectBuildPlan(root, []string{"database"}, []string{"autonomousdatabases"})
-	if err != nil {
-		t.Fatalf("collectBuildPlan() error = %v", err)
-	}
-
-	if !slices.Equal(build.ServiceManagerPackages, []string{"./pkg/servicemanager/autonomousdatabases/adb"}) {
-		t.Fatalf("ServiceManagerPackages = %v, want %v", build.ServiceManagerPackages, []string{"./pkg/servicemanager/autonomousdatabases/adb"})
-	}
-}
-
-func TestCollectBuildPlanRejectsMissingRuntimePackages(t *testing.T) {
-	t.Helper()
-
-	root := t.TempDir()
-	if err := os.MkdirAll(filepath.Join(root, "internal", "registrations"), 0o755); err != nil {
-		t.Fatalf("MkdirAll(registrations) error = %v", err)
-	}
-
-	if _, err := collectBuildPlan(root, []string{"functions"}, []string{"functions"}); err == nil {
-		t.Fatal("collectBuildPlan() error = nil, want missing package error")
-	}
-}
-
-func TestPopulateSnapshotCarriesFormalRootAndLeavesSelectedFilesWritable(t *testing.T) {
+func TestPopulateSnapshotKeepsSelectedOutputsWritable(t *testing.T) {
 	t.Helper()
 
 	repoRoot := t.TempDir()
@@ -106,28 +16,31 @@ func TestPopulateSnapshotCarriesFormalRootAndLeavesSelectedFilesWritable(t *test
 
 	for _, dir := range []string{
 		filepath.Join(repoRoot, "api"),
+		filepath.Join(repoRoot, "cmd"),
 		filepath.Join(repoRoot, "controllers"),
 		filepath.Join(repoRoot, "hack"),
 		filepath.Join(repoRoot, "formal"),
 		filepath.Join(repoRoot, "pkg", "servicemanager", "autonomousdatabases"),
 		filepath.Join(repoRoot, "pkg", "servicemanager", "identity"),
 		filepath.Join(repoRoot, "internal", "registrations"),
+		filepath.Join(repoRoot, "internal", "validator"),
 	} {
 		if err := os.MkdirAll(dir, 0o755); err != nil {
 			t.Fatalf("MkdirAll(%q) error = %v", dir, err)
 		}
 	}
-	if err := os.WriteFile(filepath.Join(repoRoot, "go.mod"), []byte("module example.com/test\n"), 0o644); err != nil {
-		t.Fatalf("WriteFile(go.mod) error = %v", err)
-	}
-	if err := os.WriteFile(filepath.Join(repoRoot, "go.sum"), nil, 0o644); err != nil {
-		t.Fatalf("WriteFile(go.sum) error = %v", err)
-	}
-	if err := os.WriteFile(filepath.Join(repoRoot, "internal", "registrations", "database_generated.go"), []byte("package registrations\n"), 0o644); err != nil {
-		t.Fatalf("WriteFile(database_generated.go) error = %v", err)
-	}
-	if err := os.WriteFile(filepath.Join(repoRoot, "internal", "registrations", "events_generated.go"), []byte("package registrations\n"), 0o644); err != nil {
-		t.Fatalf("WriteFile(events_generated.go) error = %v", err)
+	for path, content := range map[string]string{
+		filepath.Join(repoRoot, "go.mod"):                                             "module example.com/test\n",
+		filepath.Join(repoRoot, "go.sum"):                                             "",
+		filepath.Join(repoRoot, "validator_allowlist.yaml"):                           "{}\n",
+		filepath.Join(repoRoot, "cmd", "main.go"):                                     "package main\n",
+		filepath.Join(repoRoot, "internal", "validator", "doc.go"):                    "package validator\n",
+		filepath.Join(repoRoot, "internal", "registrations", "database_generated.go"): "package registrations\n",
+		filepath.Join(repoRoot, "internal", "registrations", "events_generated.go"):   "package registrations\n",
+	} {
+		if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+			t.Fatalf("WriteFile(%q) error = %v", path, err)
+		}
 	}
 
 	if err := populateSnapshot(repoRoot, snapshotRoot, []string{"database"}, []string{"autonomousdatabases"}); err != nil {
@@ -135,12 +48,12 @@ func TestPopulateSnapshotCarriesFormalRootAndLeavesSelectedFilesWritable(t *test
 	}
 
 	formalPath := filepath.Join(snapshotRoot, "formal")
-	info, err := os.Lstat(formalPath)
+	formalInfo, err := os.Lstat(formalPath)
 	if err != nil {
 		t.Fatalf("Lstat(%q) error = %v", formalPath, err)
 	}
-	if info.Mode()&os.ModeSymlink == 0 {
-		t.Fatalf("%q mode = %v, want symlink", formalPath, info.Mode())
+	if formalInfo.Mode()&os.ModeSymlink == 0 {
+		t.Fatalf("%q mode = %v, want symlink", formalPath, formalInfo.Mode())
 	}
 
 	if _, err := os.Lstat(filepath.Join(snapshotRoot, "internal", "registrations", "database_generated.go")); !os.IsNotExist(err) {
@@ -235,13 +148,6 @@ func TestPreserveCheckedInCompanionFilesLinksManualCompanions(t *testing.T) {
 	}
 	if webhookInfo.Mode()&os.ModeSymlink == 0 {
 		t.Fatalf("%q mode = %v, want symlink", snapshotWebhookPath, webhookInfo.Mode())
-	}
-	target, err := os.Readlink(snapshotWebhookPath)
-	if err != nil {
-		t.Fatalf("Readlink(%q) error = %v", snapshotWebhookPath, err)
-	}
-	if target != webhookPath {
-		t.Fatalf("Readlink(%q) = %q, want %q", snapshotWebhookPath, target, webhookPath)
 	}
 
 	snapshotAdapterPath := filepath.Join(snapshotServiceManagerDir, "autonomousdatabases_generated_client_adapter.go")

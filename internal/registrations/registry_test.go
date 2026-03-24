@@ -160,6 +160,26 @@ func TestAllIncludesGeneratedGroupsAfterManualGroups(t *testing.T) {
 	}
 }
 
+func TestAllReturnsUniqueGroupsWithManualPrefix(t *testing.T) {
+	t.Parallel()
+
+	registrations := All()
+	if len(registrations) < len(manualGroupRegistrations) {
+		t.Fatalf("len(All()) = %d, want at least %d manual groups", len(registrations), len(manualGroupRegistrations))
+	}
+
+	seen := make(map[string]struct{}, len(registrations))
+	for index, registration := range registrations {
+		if _, ok := seen[registration.Group]; ok {
+			t.Fatalf("All() returned duplicate group %q", registration.Group)
+		}
+		seen[registration.Group] = struct{}{}
+		if index < len(manualGroupRegistrations) && registration.Group != manualGroupRegistrations[index].Group {
+			t.Fatalf("All()[%d].Group = %q, want manual prefix %q", index, registration.Group, manualGroupRegistrations[index].Group)
+		}
+	}
+}
+
 func TestAllSkipsGeneratedGroupsThatDuplicateManualEntries(t *testing.T) {
 	restoreGeneratedGroupRegistrations(t)
 	registerGeneratedGroup(GroupRegistration{Group: "mysql"})

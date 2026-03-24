@@ -58,6 +58,30 @@ func TestMakeGeneratedCoverageUsesControllerGenCompatibilityRunner(t *testing.T)
 	}
 }
 
+func TestMakeFormalScaffoldUsesEffectiveGeneratorConfig(t *testing.T) {
+	output := runMakeDryRun(t, "formal-scaffold", nil)
+
+	if !strings.Contains(output, "go run ./cmd/formal-scaffold --root formal --config internal/generator/config/services.yaml") {
+		t.Fatalf("make -n formal-scaffold output did not invoke cmd/formal-scaffold with the effective generator config:\n%s", output)
+	}
+}
+
+func TestMakeFormalDiagramsUsesFormalRoot(t *testing.T) {
+	output := runMakeDryRun(t, "formal-diagrams", nil)
+
+	if !strings.Contains(output, "go run ./cmd/formal-diagrams --root formal") {
+		t.Fatalf("make -n formal-diagrams output did not invoke cmd/formal-diagrams with the formal root:\n%s", output)
+	}
+}
+
+func TestMakeFormalScaffoldVerifyUsesProviderPath(t *testing.T) {
+	output := runMakeDryRun(t, "formal-scaffold-verify", []string{"FORMAL_PROVIDER_PATH=/tmp/provider"})
+
+	if !strings.Contains(output, "go run ./cmd/formal-scaffold-verify --root formal --config internal/generator/config/services.yaml --provider-path /tmp/provider") {
+		t.Fatalf("make -n formal-scaffold-verify output did not invoke cmd/formal-scaffold-verify with the provider path:\n%s", output)
+	}
+}
+
 func TestMakeTestKeepsEnvtestOutsideRepoByDefault(t *testing.T) {
 	root, err := findRepoRoot()
 	if err != nil {
@@ -80,6 +104,20 @@ func TestMakeTestKeepsEnvtestOutsideRepoByDefault(t *testing.T) {
 	}
 	if !strings.Contains(output, filepath.Join(expectedRoot, "testbin")) {
 		t.Fatalf("make -n test output did not use temp-based ENVTEST_ASSETS_DIR under %q:\n%s", filepath.Join(expectedRoot, "testbin"), output)
+	}
+}
+
+func TestMakeTestSetupEnvtestUsesIsolatedGoPath(t *testing.T) {
+	tmpDir := filepath.Join(t.TempDir(), "envtest-root")
+	output := runMakeDryRun(t, "test", []string{"TMPDIR=" + tmpDir})
+
+	if !strings.Contains(output, "env -u GOMODCACHE") {
+		t.Fatalf("make -n test output did not unset inherited GOMODCACHE for setup-envtest:\n%s", output)
+	}
+
+	expectedGoPath := filepath.Join(tmpDir, "oci-service-operator-envtest", "gopath")
+	if !strings.Contains(output, "GOPATH="+expectedGoPath) {
+		t.Fatalf("make -n test output did not use isolated setup-envtest GOPATH %q:\n%s", expectedGoPath, output)
 	}
 }
 

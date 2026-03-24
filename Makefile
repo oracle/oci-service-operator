@@ -170,10 +170,34 @@ SCHEMA_VALIDATOR_FORMAT ?= json
 SCHEMA_VALIDATOR_REPORT ?= validator-report.json
 SCHEMA_VALIDATOR_SERVICE ?=
 SCHEMA_VALIDATOR_SERVICE_ARG = $(if $(strip $(SCHEMA_VALIDATOR_SERVICE)),--service $(SCHEMA_VALIDATOR_SERVICE),)
+FORMAL_ROOT ?= formal
+FORMAL_IMPORT_PROVIDER_PATH ?=
+FORMAL_IMPORT_PROVIDER_REVISION ?=
+FORMAL_IMPORT_SOURCE_NAME ?= terraform-provider-oci
+FORMAL_PROVIDER_PATH ?= $(FORMAL_IMPORT_PROVIDER_PATH)
+FORMAL_PROVIDER_PATH_ARG = $(if $(strip $(FORMAL_PROVIDER_PATH)),--provider-path $(FORMAL_PROVIDER_PATH),)
+FORMAL_IMPORT_PROVIDER_REVISION_ARG = $(if $(strip $(FORMAL_IMPORT_PROVIDER_REVISION)),--provider-revision $(FORMAL_IMPORT_PROVIDER_REVISION),)
 
 schema-validator: ## Run OSOK schema validator and write report to SCHEMA_VALIDATOR_REPORT.
 	go run ./cmd/osok-schema-validator --provider-path $(SCHEMA_VALIDATOR_PROVIDER_PATH) $(SCHEMA_VALIDATOR_SERVICE_ARG) --format $(SCHEMA_VALIDATOR_FORMAT) > $(SCHEMA_VALIDATOR_REPORT)
 	@echo "Wrote schema validator report to $(SCHEMA_VALIDATOR_REPORT)"
+
+formal-diagrams: ## Regenerate shared and controller-local formal diagram artifacts from formal metadata.
+	go run ./cmd/formal-diagrams --root $(FORMAL_ROOT)
+
+formal-import: ## Refresh provider-fact JSON and pin sources.lock from FORMAL_IMPORT_PROVIDER_PATH.
+	@test -n "$(FORMAL_IMPORT_PROVIDER_PATH)" || (echo "Set FORMAL_IMPORT_PROVIDER_PATH=/path/to/terraform-provider-oci" && exit 1)
+	go run ./cmd/formal-import --root $(FORMAL_ROOT) --provider-path $(FORMAL_IMPORT_PROVIDER_PATH) --source-name $(FORMAL_IMPORT_SOURCE_NAME) $(FORMAL_IMPORT_PROVIDER_REVISION_ARG)
+
+formal-verify: ## Validate the repo-local formal schema scaffold, bindings, and gap categories.
+	go run ./cmd/formal-verify --root $(FORMAL_ROOT)
+
+formal-scaffold: ## Expand scaffold-only formal entries from the published API inventory and optional terraform-provider-oci coverage.
+	go run ./cmd/formal-scaffold --root $(FORMAL_ROOT) --config $(EFFECTIVE_GENERATOR_CONFIG) $(FORMAL_PROVIDER_PATH_ARG)
+
+formal-scaffold-verify: ## Verify formal scaffold coverage against the published API inventory plus terraform-provider-oci.
+	@test -n "$(FORMAL_PROVIDER_PATH)" || (echo "Set FORMAL_PROVIDER_PATH=/path/to/terraform-provider-oci" && exit 1)
+	go run ./cmd/formal-scaffold-verify --root $(FORMAL_ROOT) --config $(EFFECTIVE_GENERATOR_CONFIG) --provider-path $(FORMAL_PROVIDER_PATH)
 
 GENERATED_COVERAGE_REPORT ?= generated-coverage-report.json
 GENERATED_COVERAGE_SERVICE ?=
@@ -232,13 +256,15 @@ ENVTEST_CACHE_DIR ?= $(ENVTEST_HOME)/.cache
 ENVTEST_CONFIG_DIR ?= $(ENVTEST_HOME)/.config
 ENVTEST_K8S_VERSION ?= 1.28.0
 ENVTEST_ENV ?= HOME=$(ENVTEST_HOME) XDG_CACHE_HOME=$(ENVTEST_CACHE_DIR) XDG_CONFIG_HOME=$(ENVTEST_CONFIG_DIR)
+SETUP_ENVTEST_GOPATH ?= $(ENVTEST_ROOT)/gopath
+SETUP_ENVTEST_ENV ?= env -u GOMODCACHE $(ENVTEST_ENV) GOPATH=$(SETUP_ENVTEST_GOPATH)
 # setup-envtest is published from a separate tool module; pin the release-0.17-compatible revision.
 SETUP_ENVTEST_VERSION ?= v0.0.0-20240812162837-9557f1031fe4
 SETUP_ENVTEST_GOFLAGS ?= $(strip $(filter-out -mod=%,$(GOFLAGS)) -mod=mod)
-SETUP_ENVTEST ?= $(ENVTEST_ENV) GOFLAGS="$(SETUP_ENVTEST_GOFLAGS)" go run sigs.k8s.io/controller-runtime/tools/setup-envtest@$(SETUP_ENVTEST_VERSION) use $(ENVTEST_K8S_VERSION) -p path --bin-dir $(ENVTEST_ASSETS_DIR) --use-deprecated-gcs=false
+SETUP_ENVTEST ?= $(SETUP_ENVTEST_ENV) GOFLAGS="$(SETUP_ENVTEST_GOFLAGS)" go run sigs.k8s.io/controller-runtime/tools/setup-envtest@$(SETUP_ENVTEST_VERSION) use $(ENVTEST_K8S_VERSION) -p path --bin-dir $(ENVTEST_ASSETS_DIR) --use-deprecated-gcs=false
 
 test: manifests generate fmt vet ## Run tests.
-	mkdir -p $(ENVTEST_ASSETS_DIR) $(ENVTEST_CACHE_DIR) $(ENVTEST_CONFIG_DIR)
+	mkdir -p $(ENVTEST_ASSETS_DIR) $(ENVTEST_CACHE_DIR) $(ENVTEST_CONFIG_DIR) $(SETUP_ENVTEST_GOPATH)
 	$(BASH) -o pipefail -ec '\
 		envtest_assets="$$( $(SETUP_ENVTEST) )"; \
 		$(ENVTEST_ENV) KUBEBUILDER_ASSETS="$$envtest_assets" go test ./... -coverprofile cover.out | tee unittests.cover'
@@ -250,7 +276,7 @@ functionaltest: ## Run functionaltest (placeholder — no functional tests yet).
 ##@ Build Service
 
 test-sample: fmt vet ## Run tests.
-	mkdir -p $(ENVTEST_ASSETS_DIR) $(ENVTEST_CACHE_DIR) $(ENVTEST_CONFIG_DIR)
+	mkdir -p $(ENVTEST_ASSETS_DIR) $(ENVTEST_CACHE_DIR) $(ENVTEST_CONFIG_DIR) $(SETUP_ENVTEST_GOPATH)
 	$(BASH) -o pipefail -ec '\
 		envtest_assets="$$( $(SETUP_ENVTEST) )"; \
 		$(ENVTEST_ENV) KUBEBUILDER_ASSETS="$$envtest_assets" go test -v ./... -coverprofile cover.out -args -ginkgo.v'

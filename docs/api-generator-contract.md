@@ -22,11 +22,13 @@ Each service record defines:
 | `version` | API version. Default is `v1beta1` unless a record overrides it. |
 | `phase` | Current rollout bucket used by the generator epic. |
 | `packageProfile` | Install posture for the group: `controller-backed` or `crd-only`. |
+| `formalSpec` | Optional controller slug from `formal/controller_manifest.tsv` when one formal row covers the service-level runtime contract. |
 | `generation.controller.strategy` | Service-wide controller rollout: `none`, `manual`, or `generated`. |
 | `generation.serviceManager.strategy` | Service-wide service-manager rollout: `none`, `manual`, or `generated`. |
 | `generation.registration.strategy` | Group-level runtime registration rollout: `none`, `manual`, or `generated`. |
 | `generation.webhooks.strategy` | Webhook ownership seam: `manual` or `none`. |
 | `generation.resources[]` | Per-kind overrides keyed by the final OSOK kind after compatibility overrides are applied. |
+| `generation.resources[].formalSpec` | Optional per-kind controller slug from `formal/controller_manifest.tsv` when only selected resources are formally promoted. |
 | `generation.resources[].controller.maxConcurrentReconciles` | Optional controller concurrency override for one kind. |
 | `generation.resources[].controller.extraRBACMarkers` | Optional additional kubebuilder RBAC marker payloads for one kind. |
 | `generation.resources[].serviceManager.packagePath` | Optional existing package path relative to `pkg/servicemanager/` when a manual layout must be preserved. |
@@ -281,6 +283,84 @@ Generated package scaffolding must include:
   future rollout work needs a pre-promotion snapshot, point
   `GENERATED_RUNTIME_CONFIG` at an alternate config explicitly.
 
+### Formal onboarding and promotion flow
+
+Formal coverage is resource-scoped. One `formal/controller_manifest.tsv` row
+maps to one published OSOK kind, even when several rows belong to the same API
+group.
+
+Use this flow when onboarding a new service or promoting an existing resource
+from scaffold coverage into generated runtime:
+
+1. Keep service inventory and rollout metadata in
+   `internal/generator/config/services.yaml`. New services start as
+   `packageProfile: crd-only`; add `formalSpec` at the service level or under
+   `generation.resources[]` once the published OSOK kind has a matching formal
+   manifest row.
+2. Run `make formal-scaffold` to create or refresh scaffold-only rows for the
+   published API inventory. Pass
+   `FORMAL_PROVIDER_PATH=/path/to/terraform-provider-oci` when provider-wide
+   scaffold coverage should also be refreshed. The scaffold flow keeps
+   `runtime-lifecycle.yaml` as structured metadata, generates shared
+   `activity`, `sequence`, `state-machine`, and `legend` `.puml` and `.svg`
+   artifacts under `formal/shared/diagrams/`, and renders deterministic
+   controller-local `activity`, `sequence`, and `state-machine` `.puml` and
+   `.svg` files under each controller diagram directory. The SVGs come from the
+   `plantuml` CLI, so keep `plantuml` available on `PATH` before running the
+   formal targets. Then update the matching `formal/` artifacts:
+   `formal/controller_manifest.tsv`,
+   `formal/controllers/<service>/<slug>/spec.cfg`,
+   `formal/controllers/<service>/<slug>/logic-gaps.md`,
+   `formal/controllers/<service>/<slug>/diagrams/`, and
+   `formal/imports/<service>/<slug>.json`.
+3. Refresh provider facts with an explicit pinned provider source:
+
+   ```sh
+   make formal-import FORMAL_IMPORT_PROVIDER_PATH=/path/to/terraform-provider-oci
+   ```
+
+   `FORMAL_IMPORT_PROVIDER_PATH` is an operator-supplied external input. The
+   repo does not assume a sibling checkout or a writable provider tree.
+4. Run formal validation before generation:
+
+   ```sh
+   make formal-verify
+   ```
+
+   When provider-backed coverage is in scope, also run:
+
+   ```sh
+   make formal-scaffold-verify FORMAL_PROVIDER_PATH=/path/to/terraform-provider-oci
+   ```
+
+   `formal-verify` checks generated `.puml` sources plus the embedded PlantUML
+   metadata inside rendered SVGs, so diagram-affecting formal changes must be
+   followed by `make formal-diagrams` or `make formal-scaffold`.
+
+5. Record every unsupported or legacy-only behavior in `logic-gaps.md` front
+   matter with an explicit `stopCondition`, and file follow-up `bd` issues for
+   promotion blockers instead of hidden TODOs. Open logic gaps block
+   formal-driven promotion for that resource.
+6. Regenerate and gate the promoted path:
+
+   ```sh
+   make generator-generate GENERATOR_ALL=true
+   go run ./hack/update_validator_registries.go --write
+   make generated-coverage-gate
+   make generated-runtime-gate
+   ```
+
+7. Move a service from `crd-only` to `controller-backed` in `services.yaml`
+   only after controller, service-manager, registration, validator, webhook,
+   and package prerequisites land. For existing controller-backed parity
+   resources, keep `_generated_client_adapter.go` shims, manual webhook files,
+   and other checked-in legacy seams explicit until the corresponding
+   `logic-gaps.md` stop conditions are closed.
+
+Scaffold coverage alone does not move a group into generated runtime or replace
+legacy adapters. Runtime ownership still follows `generation.*` rollout and
+explicit `formalSpec` references.
+
 Workflow integration for both package profiles uses the same targets:
 
 - `make package-generate GROUP=<group>` refreshes package-local generated CRDs
@@ -322,28 +402,36 @@ make api-refresh API_SERVICE=mysql API_OVERWRITE=true
 Expected regeneration and validation flow:
 
 1. Update `internal/generator/config/services.yaml` if service scope,
-   compatibility behavior, or runtime rollout changed.
-2. Run `make generator-generate ...` to emit API packages, sample manifests, sample
+   compatibility behavior, runtime rollout, or `formalSpec` bindings changed.
+2. If formal scope changed, run `make formal-scaffold` to refresh scaffold rows
+   and rendered diagram artifacts. Use
+   `FORMAL_PROVIDER_PATH=/path/to/terraform-provider-oci` when provider-backed
+   coverage changed. Update any non-scaffold `logic-gaps.md` entries, run
+   `make formal-import FORMAL_IMPORT_PROVIDER_PATH=/path/to/terraform-provider-oci`
+   for non-scaffold rows, then run `make formal-verify` and, when provider
+   coverage is expected, `make formal-scaffold-verify
+   FORMAL_PROVIDER_PATH=/path/to/terraform-provider-oci`.
+3. Run `make generator-generate ...` to emit API packages, sample manifests, sample
    kustomization, and package scaffolding for the selected services.
-3. Run `make generator-refresh ...` when deepcopy output and CRD manifests also need
+4. Run `make generator-refresh ...` when deepcopy output and CRD manifests also need
    to be refreshed in the same step. That path now also syncs the shared
    `config/crd/kustomization.yaml` resource list from `config/crd/bases/*.yaml`.
-4. Run `go run ./hack/update_validator_registries.go --write` so validator
+5. Run `go run ./hack/update_validator_registries.go --write` so validator
    coverage targets stay aligned with `services.yaml` and the generated API
    packages. Any generated spec that still has no mapped SDK payload will remain
    visible as `untracked` in validator output until its `SDKStructs` mapping is
    filled in.
-5. Run `make generated-coverage-gate` to keep the generated API snapshot and
+6. Run `make generated-coverage-gate` to keep the generated API snapshot and
    validator coverage baseline from regressing.
-6. Run `make generated-runtime-gate` to compile-check the generated
+7. Run `make generated-runtime-gate` to compile-check the generated
    controller/service-manager/registration snapshot defined by the active
    generator config (by default `internal/generator/config/services.yaml`).
    Override `GENERATED_RUNTIME_CONFIG` when staging an alternate rollout config
    ahead of promotion.
-7. Run `make fmt`.
-8. Run `make vet`.
-9. Run `make test`.
-10. Run `make build`.
+8. Run `make fmt`.
+9. Run `make vet`.
+10. Run `make test`.
+11. Run `make build`.
 
 The checked-in generator emits API/package outputs for all configured services
 and can also emit controller, service-manager, and registration outputs for
