@@ -35,32 +35,62 @@ end note
 Kubernetes -> Controller: enqueue MySqlDbSystem reconcile
 Controller -> BaseReconciler: Reconcile(request)
 BaseReconciler -> ServiceManager: reconcile desired MySqlDbSystem
+group Lookup and bind
+alt tracked or explicit OCI identity already exists
 ServiceManager -> OCI: GetDbSystem
-opt list lookup fallback
+else tracked identity is missing
 ServiceManager -> OCI: ListDbSystems(filters:\ncompartment_id, configuration_id,\ndatabase_management, db_system_id\n(+4 more))
-OCI --> ServiceManager: matching collection items
-end
-alt create or bind path
+alt reusable OCI resource is not found
 ServiceManager -> OCI: CreateDbSystem
 loop create pending CREATING, UPDATING
 ServiceManager -> OCI: GetDbSystem
 end
-else update or drift path
-ServiceManager -> OCI: UpdateDbSystem
-loop update pending UPDATING
+else reusable OCI resource already exists
 ServiceManager -> OCI: GetDbSystem
 end
+ServiceManager --> BaseReconciler: persist resolved OCI identity in status
 end
-opt repo-authored secret side effects
-ServiceManager -> SecretStore: read required input secret and write\nready-only connection secret
-end
-opt delete requested
+alt delete requested
+group Delete
 note right of ServiceManager
 delete remains repo-authored unsupported
 despite DeleteDbSystem
 end note
 end
+else OCI state is retryable
+ServiceManager --> BaseReconciler: requeue while OCI remains in\nCREATING, UPDATING, DELETING
+else live state requires field-aware\ndrift evaluation
+group Drift handling
+note over ServiceManager,OCI
+Supported update surface: access_mode,
+backup_policy.copy_policies.backup_copy_retention_in_days,
+backup_policy.copy_policies.copy_to_region,
+backup_policy.defined_tags (+50 more)
+Reject before mutate: force-new fields
+admin_password, admin_username,
+availability_domain, compartment_id (+12
+more)
+Lookup filters: compartment_id,
+configuration_id, database_management,
+db_system_id (+4 more)
+end note
+opt force-new or conflicting drift is detected
+ServiceManager --> BaseReconciler: reject before OCI mutation
+end
+opt supported mutable drift is detected
+ServiceManager -> OCI: Apply UpdateDbSystem only for\nmutable fields access_mode,\nbackup_policy.copy_policies.backup_copy_retention_in_days,\nbackup_policy.copy_policies.copy_to_region,\nbackup_policy.defined_tags (+50\nmore)
+loop update pending UPDATING
+ServiceManager -> OCI: GetDbSystem
+end
+end
+ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
+ServiceManager -> SecretStore: read required input secret and write\nready-only connection secret
+alt Secret sync fails
+ServiceManager --> BaseReconciler: block success and retry
+end
+end
 ServiceManager --> BaseReconciler: status=manual, finalizer=none
+end
 BaseReconciler --> Controller: requeue on provisioning, updating
 note right of ServiceManager
 shared diagram:
@@ -85,12 +115,17 @@ status/finalizer: manual / none
 requeue: provisioning, updating
 provider states: create CREATING, UPDATING;
 update UPDATING; delete DELETING
-mutable/forceNew: access_mode,
+supported drift: access_mode,
 backup_policy.copy_policies.backup_copy_retention_in_days,
 backup_policy.copy_policies.copy_to_region,
-backup_policy.defined_tags (+50 more) /
+backup_policy.defined_tags (+50 more)
+reject before mutate: force-new fields
 admin_password, admin_username,
 availability_domain, compartment_id (+12 more)
+list lookup: oci_mysql_mysql_db_systems filters
+compartment_id, configuration_id,
+database_management, db_system_id (+4 more)
+conflicts: none
 open gaps: bind-versus-create,
 delete-confirmation, endpoint-materialization,
 legacy-adapter, list-lookup (+3 more)

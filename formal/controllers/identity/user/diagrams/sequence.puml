@@ -34,26 +34,57 @@ end note
 Kubernetes -> Controller: enqueue User reconcile
 Controller -> BaseReconciler: Reconcile(request)
 BaseReconciler -> ServiceManager: reconcile desired User
+group Lookup and bind
+alt tracked or explicit OCI identity already exists
 ServiceManager -> OCI: GetUser
-opt list lookup fallback
+else tracked identity is missing
 ServiceManager -> OCI: ListUsers(filters: compartment_id,\nexternal_identifier,\nidentity_provider_id, name (+1\nmore))
-OCI --> ServiceManager: matching collection items
-end
-alt create or bind path
+alt reusable OCI resource is not found
 ServiceManager -> OCI: CreateUser
 loop create pending CREATING
 ServiceManager -> OCI: GetUser
 end
-else update or drift path
-ServiceManager -> OCI: UpdateUser
+else reusable OCI resource already exists
+ServiceManager -> OCI: GetUser
 end
-opt delete requested
+ServiceManager --> BaseReconciler: persist resolved OCI identity in status
+end
+alt delete requested
+group Delete
 ServiceManager -> OCI: DeleteUser
-loop delete confirmation DELETING
+ServiceManager -> OCI: confirm delete via GetUser or\nListUsers
+loop delete pending DELETING
 ServiceManager -> OCI: GetUser or ListUsers
 end
+alt cleanup or finalizer release is blocked
+ServiceManager --> BaseReconciler: retain delete state and retry
+else delete completion observed
+ServiceManager --> BaseReconciler: release finalizer after delete completion
+end
+end
+else OCI state is retryable
+ServiceManager --> BaseReconciler: requeue while OCI remains in\nCREATING, DELETING
+else live state requires field-aware\ndrift evaluation
+group Drift handling
+note over ServiceManager,OCI
+Supported update surface: defined_tags,
+description, email, freeform_tags
+Reject before mutate: force-new fields
+compartment_id, name
+Lookup filters: compartment_id,
+external_identifier,
+identity_provider_id, name (+1 more)
+end note
+opt force-new or conflicting drift is detected
+ServiceManager --> BaseReconciler: reject before OCI mutation
+end
+opt supported mutable drift is detected
+ServiceManager -> OCI: Apply UpdateUser only for mutable\nfields defined_tags, description,\nemail, freeform_tags
+end
+ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
 end
 ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
+end
 BaseReconciler --> Controller: requeue on provisioning, updating,\nterminating
 note right of ServiceManager
 shared diagram:
@@ -79,8 +110,14 @@ retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
 provider states: create CREATING; update none;
 delete DELETING
-mutable/forceNew: defined_tags, description,
-email, freeform_tags / compartment_id, name
+supported drift: defined_tags, description,
+email, freeform_tags
+reject before mutate: force-new fields
+compartment_id, name
+list lookup: oci_identity_users filters
+compartment_id, external_identifier,
+identity_provider_id, name (+1 more)
+conflicts: none
 open gaps: none
 The generated runtime reads back the OCI user
 after create or update and projects the response

@@ -265,63 +265,83 @@ func renderActivityPUML(ctx diagramContext) []byte {
 	template := ctx.Strategy.Activity
 	lines := append(activityPlantUMLHeader(fmt.Sprintf("%s - %s/%s", template.Title, binding.Manifest.Service, binding.Manifest.Kind)),
 		"start",
+		`partition "Observe and Bind" {`,
 		plantUMLAction(fmt.Sprintf("Start from shared flow %s", template.SharedDiagram)),
-		plantUMLAction(fmt.Sprintf("Load desired %s spec and status from Kubernetes", binding.Manifest.Kind)),
-		plantUMLAction(fmt.Sprintf("Resolve OCI state via %s", observePathSummary(binding))),
+		plantUMLAction(fmt.Sprintf("Read desired %s spec, tracked status, and delete intent", binding.Manifest.Kind)),
 	)
-
-	if binding.Import.ListLookup != nil {
-		lines = append(lines, plantUMLAction(fmt.Sprintf(
-			"Use %s filters %s when OCID lookup or bind-versus-create needs list resolution",
-			binding.Import.ListLookup.Datasource,
-			summarizeValues(binding.Import.ListLookup.FilterFields, 4),
-		)))
-	}
-
-	switch {
-	case len(binding.Import.Operations.Create) > 0 && len(binding.Import.Operations.Update) > 0:
+	lines = append(lines, renderObserveAndBindActivity(ctx)...)
+	lines = append(lines, "}")
+	lines = append(lines, `if ("Delete requested?") then (yes)`)
+	lines = append(lines, renderDeleteActivity(ctx)...)
+	lines = append(lines, "stop")
+	lines = append(lines, "else (no)")
+	lines = append(lines,
+		`partition "Lifecycle Classification" {`,
+	)
+	if retryable := retryableStateSummary(binding); retryable != "none" {
 		lines = append(lines,
-			"if (Resource exists?) then (yes)",
-			plantUMLAction(fmt.Sprintf("Update path calls %s", summarizeOperations(binding.Import.Operations.Update, 3))),
-		)
-		if len(binding.Import.Mutation.Mutable) > 0 || len(binding.Import.Mutation.ForceNew) > 0 {
-			lines = append(lines, plantUMLAction(fmt.Sprintf(
-				"Guard mutable fields %s and force-new fields %s",
-				summarizeValues(binding.Import.Mutation.Mutable, 4),
-				summarizeValues(binding.Import.Mutation.ForceNew, 4),
-			)))
-		}
-		lines = append(lines,
-			"else (no)",
-			plantUMLAction(fmt.Sprintf("Create path calls %s", summarizeOperations(binding.Import.Operations.Create, 3))),
+			`if ("OCI state in retryable set?") then (yes)`,
+			plantUMLAction(fmt.Sprintf("Request requeue while OCI remains in %s", retryable)),
+			"stop",
 			"endif",
 		)
-	case len(binding.Import.Operations.Update) > 0:
-		lines = append(lines, plantUMLAction(fmt.Sprintf("Update path calls %s", summarizeOperations(binding.Import.Operations.Update, 3))))
-		if len(binding.Import.Mutation.Mutable) > 0 || len(binding.Import.Mutation.ForceNew) > 0 {
-			lines = append(lines, plantUMLAction(fmt.Sprintf(
-				"Guard mutable fields %s and force-new fields %s",
-				summarizeValues(binding.Import.Mutation.Mutable, 4),
-				summarizeValues(binding.Import.Mutation.ForceNew, 4),
-			)))
-		}
-	case len(binding.Import.Operations.Create) > 0:
-		lines = append(lines, plantUMLAction(fmt.Sprintf("Create path calls %s", summarizeOperations(binding.Import.Operations.Create, 3))))
-	}
-
-	if hooks := hookPhaseSummary(ctx); hooks != "none" {
-		lines = append(lines, plantUMLAction(fmt.Sprintf("Run provider helper hooks %s", hooks)))
 	}
 	lines = append(lines,
-		plantUMLAction(fmt.Sprintf("Apply repo-authored secret policy %s", secretPolicySummary(ctx))),
-		deleteActivityLine(ctx),
+		`if ("OCI state is outside success targets?") then (yes)`,
+		plantUMLAction(fmt.Sprintf("Return an unsuccessful reconcile result until OCI reaches %s", successTargetSummary(binding))),
+		"stop",
+		"endif",
+		"}",
+		`partition "Ready and Drift Handling" {`,
+		plantUMLAction("Compare live OCI state against the imported field surface"),
+	)
+	if hasRejectableDrift(ctx) {
+		lines = append(lines,
+			`if ("Force-new or conflicting drift detected?") then (yes)`,
+			plantUMLAction(rejectDriftActivitySummary(ctx)),
+			"stop",
+			"endif",
+		)
+	}
+	if len(ctx.ConflictSets) > 0 {
+		lines = append(lines, plantUMLAction(fmt.Sprintf(
+			"Enforce conflictsWith rules %s before any OCI mutation",
+			summarizeValues(ctx.ConflictSets, 3),
+		)))
+	}
+	if len(binding.Import.Mutation.Mutable) > 0 && len(binding.Import.Operations.Update) > 0 {
+		lines = append(lines,
+			`if ("Supported mutable drift detected?") then (yes)`,
+			plantUMLAction(updateActivitySummary(binding)),
+			"else (no)",
+			plantUMLAction("Skip the no-op mutation path"),
+			"endif",
+		)
+	} else if len(binding.Import.Operations.Update) > 0 {
+		lines = append(lines, plantUMLAction(fmt.Sprintf(
+			"No imported mutable field surface opens %s",
+			summarizeOperations(binding.Import.Operations.Update, 3),
+		)))
+	}
+	if hooks := hookPhaseSummary(ctx); hooks != "none" {
+		lines = append(lines, plantUMLAction(fmt.Sprintf(
+			"Run provider helper hooks %s when the matching field-driven path executes",
+			hooks,
+		)))
+	}
+	lines = append(lines, renderSecretActivity(ctx)...)
+	lines = append(lines,
 		plantUMLAction(fmt.Sprintf("Project %s status and finalizer policy %s", binding.Spec.StatusProjection, binding.Spec.FinalizerPolicy)),
 		plantUMLAction(fmt.Sprintf("Requeue on %s", summarizeValues(binding.Spec.RequeueConditions, 4))),
 	)
 	if len(ctx.OpenGaps) > 0 {
 		lines = append(lines, plantUMLAction(fmt.Sprintf("Keep promotion blocked on %s", summarizeValues(ctx.OpenGaps, 5))))
 	}
-	lines = append(lines, "stop")
+	lines = append(lines,
+		"}",
+		"endif",
+		"stop",
+	)
 	lines = append(lines, renderActivityNote(ctx)...)
 	lines = append(lines, "@enduml")
 	return []byte(strings.Join(lines, "\n") + "\n")
@@ -344,69 +364,24 @@ func renderSequencePUML(ctx diagramContext) []byte {
 		"Controller -> BaseReconciler: Reconcile(request)",
 		fmt.Sprintf("BaseReconciler -> ServiceManager: %s", wrapPlantUMLText(fmt.Sprintf("reconcile desired %s", binding.Manifest.Kind), 36)),
 	)
-	if len(binding.Import.Operations.Get) > 0 {
-		lines = append(lines, fmt.Sprintf("ServiceManager -> OCI: %s", wrapPlantUMLText(summarizeOperations(binding.Import.Operations.Get, 2), 36)))
-	}
-	if binding.Import.ListLookup != nil {
+	lines = append(lines, renderObserveAndBindSequence(ctx)...)
+	lines = append(lines, "alt delete requested")
+	lines = append(lines, renderDeleteSequence(ctx)...)
+	if retryable := retryableStateSummary(binding); retryable != "none" {
 		lines = append(lines,
-			"opt list lookup fallback",
-			fmt.Sprintf("ServiceManager -> OCI: %s", wrapPlantUMLText(fmt.Sprintf("%s(filters: %s)", summarizeOperations(binding.Import.Operations.List, 2), summarizeValues(binding.Import.ListLookup.FilterFields, 4)), 36)),
-			"OCI --> ServiceManager: matching collection items",
-			"end",
+			fmt.Sprintf("else %s", wrapPlantUMLText("OCI state is retryable", 36)),
+			fmt.Sprintf("ServiceManager --> BaseReconciler: %s", wrapPlantUMLText(fmt.Sprintf("requeue while OCI remains in %s", retryable), 36)),
 		)
-	}
-	if len(binding.Import.Operations.Create) > 0 || len(binding.Import.Operations.Update) > 0 {
-		lines = append(lines, "alt create or bind path")
-		if len(binding.Import.Operations.Create) > 0 {
-			lines = append(lines, fmt.Sprintf("ServiceManager -> OCI: %s", wrapPlantUMLText(summarizeOperations(binding.Import.Operations.Create, 3), 36)))
-			if len(binding.Import.Lifecycle.Create.Pending) > 0 && len(binding.Import.Operations.Get) > 0 {
-				lines = append(lines,
-					fmt.Sprintf("loop %s", wrapPlantUMLText(fmt.Sprintf("create pending %s", summarizeValues(binding.Import.Lifecycle.Create.Pending, 4)), 36)),
-					fmt.Sprintf("ServiceManager -> OCI: %s", wrapPlantUMLText(summarizeOperations(binding.Import.Operations.Get, 2), 36)),
-					"end",
-				)
-			}
-		}
-		lines = append(lines, "else update or drift path")
-		if len(binding.Import.Operations.Update) > 0 {
-			lines = append(lines, fmt.Sprintf("ServiceManager -> OCI: %s", wrapPlantUMLText(summarizeOperations(binding.Import.Operations.Update, 3), 36)))
-			if len(binding.Import.Lifecycle.Update.Pending) > 0 && len(binding.Import.Operations.Get) > 0 {
-				lines = append(lines,
-					fmt.Sprintf("loop %s", wrapPlantUMLText(fmt.Sprintf("update pending %s", summarizeValues(binding.Import.Lifecycle.Update.Pending, 4)), 36)),
-					fmt.Sprintf("ServiceManager -> OCI: %s", wrapPlantUMLText(summarizeOperations(binding.Import.Operations.Get, 2), 36)),
-					"end",
-				)
-			}
-		}
-		lines = append(lines, "end")
-	}
-	if includeSecretsParticipant(ctx) {
-		lines = append(lines,
-			"opt repo-authored secret side effects",
-			fmt.Sprintf("ServiceManager -> SecretStore: %s", wrapPlantUMLText(secretSequenceAction(ctx), 36)),
-			"end",
-		)
-	}
-	if len(binding.Import.Operations.Delete) > 0 {
-		lines = append(lines, "opt delete requested")
-		if binding.Spec.DeleteConfirmation == "not-supported" {
-			lines = append(lines, "note right of ServiceManager")
-			lines = append(lines, wrapPlantUMLNoteLines(46, fmt.Sprintf("delete remains repo-authored unsupported despite %s", summarizeOperations(binding.Import.Operations.Delete, 2)))...)
-			lines = append(lines, "end note")
-		} else {
-			lines = append(lines, fmt.Sprintf("ServiceManager -> OCI: %s", wrapPlantUMLText(summarizeOperations(binding.Import.Operations.Delete, 2), 36)))
-			if len(binding.Import.DeleteConfirmation.Pending) > 0 && (len(binding.Import.Operations.Get) > 0 || len(binding.Import.Operations.List) > 0) {
-				lines = append(lines,
-					fmt.Sprintf("loop %s", wrapPlantUMLText(fmt.Sprintf("delete confirmation %s", summarizeValues(binding.Import.DeleteConfirmation.Pending, 3)), 36)),
-					fmt.Sprintf("ServiceManager -> OCI: %s", wrapPlantUMLText(deleteObserveSummary(binding), 36)),
-					"end",
-				)
-			}
-		}
-		lines = append(lines, "end")
 	}
 	lines = append(lines,
+		fmt.Sprintf("else %s", wrapPlantUMLText("live state requires field-aware drift evaluation", 36)),
+		"group Drift handling",
+	)
+	lines = append(lines, renderDriftHandlingSequence(ctx)...)
+	lines = append(lines,
+		"end",
 		fmt.Sprintf("ServiceManager --> BaseReconciler: %s", wrapPlantUMLText(fmt.Sprintf("status=%s, finalizer=%s", binding.Spec.StatusProjection, binding.Spec.FinalizerPolicy), 36)),
+		"end",
 		fmt.Sprintf("BaseReconciler --> Controller: %s", wrapPlantUMLText(fmt.Sprintf("requeue on %s", summarizeValues(binding.Spec.RequeueConditions, 4)), 36)),
 	)
 	lines = append(lines, renderSequenceNote(ctx)...)
@@ -417,41 +392,108 @@ func renderSequencePUML(ctx diagramContext) []byte {
 func renderStateMachinePUML(ctx diagramContext) []byte {
 	binding := ctx.Binding
 	template := ctx.Strategy.StateMachine
-	stateAliases := make(map[string]string, len(ctx.Diagram.States))
 	lines := statePlantUMLHeader(fmt.Sprintf("%s - %s/%s", template.Title, binding.Manifest.Service, binding.Manifest.Kind))
-
-	for _, state := range ctx.Diagram.States {
-		alias := stateAlias(state)
-		stateAliases[state] = alias
-		lines = append(lines, fmt.Sprintf("state %q as %s", stateLabel(state, ctx), alias))
+	lines = append(lines,
+		"left to right direction",
+		"hide empty description",
+		`state "Observe" as observe`,
+		`state "EvaluateReady" as evaluate_ready`,
+		`state "Ready" as ready`,
+		`state "Retryable" as retryable`,
+		`state "Failed" as failed`,
+		"observe : read spec, tracked status, delete intent,\\nand current OCI lifecycle",
+	)
+	if binding.Import.ListLookup != nil {
+		lines = append(lines, `state "ResolveByLookup" as resolve_by_lookup`)
 	}
-
-	startState := preferredState(ctx.Diagram.States, "provisioning", "active", "updating", "terminating", "failed")
-	if startState != "" {
-		lines = append(lines, fmt.Sprintf("[*] --> %s : %s", stateAliases[startState], wrapPlantUMLText(createEntryLabel(binding), 26)))
+	if hasRejectableDrift(ctx) {
+		lines = append(lines, `state "RejectUnsupportedDrift" as reject_unsupported_drift`)
 	}
-	if hasState(ctx.Diagram.States, "provisioning") && hasState(ctx.Diagram.States, "active") {
-		lines = append(lines, fmt.Sprintf("%s --> %s : %s", stateAliases["provisioning"], stateAliases["active"], wrapPlantUMLText(transitionSummary(binding.Import.Lifecycle.Create.Target, "create targets"), 26)))
+	if len(binding.Import.Mutation.Mutable) > 0 && len(binding.Import.Operations.Update) > 0 {
+		lines = append(lines, `state "ApplyUpdate" as apply_update`)
 	}
-	if hasState(ctx.Diagram.States, "active") && hasState(ctx.Diagram.States, "updating") && len(binding.Import.Operations.Update) > 0 {
-		lines = append(lines, fmt.Sprintf("%s --> %s : %s", stateAliases["active"], stateAliases["updating"], wrapPlantUMLText(summarizeOperations(binding.Import.Operations.Update, 2), 26)))
+	if includeSecretsParticipant(ctx) {
+		lines = append(lines,
+			`state "SyncSecret" as sync_secret`,
+			`state "SecretBlocked" as secret_blocked`,
+		)
 	}
-	if hasState(ctx.Diagram.States, "updating") && hasState(ctx.Diagram.States, "active") {
-		lines = append(lines, fmt.Sprintf("%s --> %s : %s", stateAliases["updating"], stateAliases["active"], wrapPlantUMLText(transitionSummary(binding.Import.Lifecycle.Update.Target, "update targets"), 26)))
-	}
-	if hasState(ctx.Diagram.States, "active") && hasState(ctx.Diagram.States, "terminating") && len(binding.Import.Operations.Delete) > 0 && binding.Spec.DeleteConfirmation != "not-supported" {
-		lines = append(lines, fmt.Sprintf("%s --> %s : %s", stateAliases["active"], stateAliases["terminating"], wrapPlantUMLText(summarizeOperations(binding.Import.Operations.Delete, 2), 26)))
-		lines = append(lines, fmt.Sprintf("%s --> [*] : %s", stateAliases["terminating"], wrapPlantUMLText(transitionSummary(binding.Import.DeleteConfirmation.Target, "delete targets"), 26)))
-	}
-	if hasState(ctx.Diagram.States, "failed") {
-		for _, source := range []string{"provisioning", "updating", "terminating"} {
-			if hasState(ctx.Diagram.States, source) {
-				lines = append(lines, fmt.Sprintf("%s --> %s : %s", stateAliases[source], stateAliases["failed"], wrapPlantUMLText("unresolved OCI error or open gap", 26)))
-			}
+	if len(binding.Import.Operations.Delete) > 0 {
+		lines = append(lines,
+			`state "DeletePending" as delete_pending`,
+			`state "Deleted" as deleted`,
+		)
+		if includeSecretsParticipant(ctx) || binding.Spec.FinalizerPolicy == "retain-until-confirmed-delete" {
+			lines = append(lines, `state "DeleteCleanupBlocked" as delete_cleanup_blocked`)
 		}
-		lines = append(lines, fmt.Sprintf("%s --> [*] : %s", stateAliases["failed"], wrapPlantUMLText("operator intervention", 26)))
+	}
+	lines = append(lines, fmt.Sprintf("[*] --> observe : %s", wrapPlantUMLText(createEntryLabel(binding), 28)))
+	if binding.Import.ListLookup != nil {
+		lines = append(lines, "observe --> resolve_by_lookup : tracked identity missing")
+		lines = append(lines, fmt.Sprintf("resolve_by_lookup --> evaluate_ready : %s", wrapPlantUMLText(fmt.Sprintf("lookup or create reaches %s", successTargetSummary(binding)), 28)))
+		if retryable := retryableStateSummary(binding); retryable != "none" {
+			lines = append(lines, fmt.Sprintf("resolve_by_lookup --> retryable : %s", wrapPlantUMLText(fmt.Sprintf("OCI state in %s", retryable), 28)))
+		}
+		lines = append(lines, "resolve_by_lookup --> failed : unresolved OCI error or non-success state")
+	}
+	lines = append(lines, fmt.Sprintf("observe --> evaluate_ready : %s", wrapPlantUMLText(fmt.Sprintf("OCI state in %s", successTargetSummary(binding)), 28)))
+	if retryable := retryableStateSummary(binding); retryable != "none" {
+		lines = append(lines, fmt.Sprintf("observe --> retryable : %s", wrapPlantUMLText(fmt.Sprintf("OCI state in %s", retryable), 28)))
+	}
+	lines = append(lines, "observe --> failed : unresolved OCI error or non-success state")
+	if hasRejectableDrift(ctx) {
+		lines = append(lines,
+			fmt.Sprintf("evaluate_ready --> reject_unsupported_drift : %s", wrapPlantUMLText("force-new or conflicting drift detected", 28)),
+			"reject_unsupported_drift --> ready : wait for spec or live state change",
+		)
+	}
+	if len(binding.Import.Mutation.Mutable) > 0 && len(binding.Import.Operations.Update) > 0 {
+		lines = append(lines, fmt.Sprintf(
+			"evaluate_ready --> apply_update : %s",
+			wrapPlantUMLText(fmt.Sprintf("supported mutable drift for %s", summarizeValues(binding.Import.Mutation.Mutable, 3)), 28),
+		))
+		if includeSecretsParticipant(ctx) {
+			lines = append(lines, "apply_update --> sync_secret : update path completes")
+		} else {
+			lines = append(lines, "apply_update --> ready : update path completes")
+		}
+	}
+	if includeSecretsParticipant(ctx) {
+		lines = append(lines,
+			fmt.Sprintf("evaluate_ready --> sync_secret : %s", wrapPlantUMLText(fmt.Sprintf("apply secret policy %s", secretPolicySummary(ctx)), 28)),
+			"sync_secret --> secret_blocked : Secret sync fails",
+			"secret_blocked --> sync_secret : retry Secret sync",
+			"sync_secret --> ready : Secret side effects succeed",
+		)
+	} else {
+		lines = append(lines, "evaluate_ready --> ready : no supported drift remains")
+	}
+	lines = append(lines,
+		"ready --> ready : no supported drift remains",
+		"retryable --> retryable : OCI remains retryable",
+		"failed --> failed : OCI remains terminal",
+	)
+	if len(binding.Import.Operations.Delete) > 0 {
+		for _, from := range []string{"ready", "retryable", "failed"} {
+			lines = append(lines, fmt.Sprintf("%s --> delete_pending : delete requested", from))
+		}
+		if includeSecretsParticipant(ctx) || binding.Spec.FinalizerPolicy == "retain-until-confirmed-delete" {
+			lines = append(lines,
+				"delete_pending --> delete_cleanup_blocked : cleanup or finalizer release remains blocked",
+				"delete_cleanup_blocked --> deleted : retry delete completion until allowed",
+			)
+		} else {
+			lines = append(lines, fmt.Sprintf(
+				"delete_pending --> deleted : %s",
+				wrapPlantUMLText(fmt.Sprintf("delete completes at %s", transitionSummary(binding.Import.DeleteConfirmation.Target, "resource absent")), 28),
+			))
+		}
+		lines = append(lines, "deleted --> deleted : terminal stutter")
 	}
 	lines = append(lines, renderStateMachineNote(ctx)...)
+	if len(binding.Import.Operations.Delete) > 0 {
+		lines = append(lines, renderDeleteStateMachineNote(ctx)...)
+	}
 	lines = append(lines, "@enduml")
 	return []byte(strings.Join(lines, "\n") + "\n")
 }
@@ -465,11 +507,7 @@ func renderActivityNote(ctx diagramContext) []string {
 }
 
 func renderStateMachineNote(ctx diagramContext) []string {
-	anchor := preferredState(ctx.Diagram.States, "active", "provisioning", "updating", "terminating", "failed")
-	if anchor == "" {
-		return nil
-	}
-	lines := []string{fmt.Sprintf("note right of %s", stateAlias(anchor))}
+	lines := []string{"note right of ready"}
 	lines = append(lines, wrapPlantUMLNoteLines(48, templateNoteLines(ctx.Strategy.StateMachine, ctx.Diagram.Archetype)...)...)
 	lines = append(lines, wrapPlantUMLNoteLines(48, commonNoteLines(ctx)...)...)
 	lines = append(lines, "end note")
@@ -498,10 +536,10 @@ func commonNoteLines(ctx diagramContext) []string {
 			transitionSummary(binding.Import.Lifecycle.Update.Pending, "none"),
 			transitionSummary(binding.Import.DeleteConfirmation.Pending, "none"),
 		),
-		fmt.Sprintf("mutable/forceNew: %s / %s",
-			summarizeValues(binding.Import.Mutation.Mutable, 4),
-			summarizeValues(binding.Import.Mutation.ForceNew, 4),
-		),
+		fmt.Sprintf("supported drift: %s", summarizeValues(binding.Import.Mutation.Mutable, 4)),
+		fmt.Sprintf("reject before mutate: %s", rejectSurfaceSummary(ctx)),
+		fmt.Sprintf("list lookup: %s", listLookupSummary(binding)),
+		fmt.Sprintf("conflicts: %s", summarizeValues(ctx.ConflictSets, 3)),
 		fmt.Sprintf("open gaps: %s", summarizeValues(ctx.OpenGaps, 5)),
 	}
 	for _, note := range ctx.Diagram.Notes {
@@ -614,6 +652,281 @@ func deleteActivityLine(ctx diagramContext) string {
 		summarizeOperations(binding.Import.Operations.Delete, 2),
 		deleteConfirmationSummary(binding),
 	))
+}
+
+func renderObserveAndBindActivity(ctx diagramContext) []string {
+	binding := ctx.Binding
+	if len(binding.Import.Operations.Get) == 0 && binding.Import.ListLookup == nil && len(binding.Import.Operations.Create) == 0 {
+		return []string{plantUMLAction(fmt.Sprintf("Resolve OCI state via %s", observePathSummary(binding)))}
+	}
+
+	lines := []string{`if ("Tracked or explicit OCI identity present?") then (yes)`}
+	if len(binding.Import.Operations.Get) > 0 {
+		lines = append(lines, plantUMLAction(fmt.Sprintf("Get the current OCI resource via %s", summarizeOperations(binding.Import.Operations.Get, 2))))
+	} else {
+		lines = append(lines, plantUMLAction("Use the tracked OCI identity for follow-up reconciliation"))
+	}
+	lines = append(lines, "else (no)")
+	if binding.Import.ListLookup != nil {
+		lines = append(lines, plantUMLAction(fmt.Sprintf(
+			"Resolve an existing OCI resource through %s using filters %s",
+			summarizeOperations(binding.Import.Operations.List, 2),
+			summarizeValues(binding.Import.ListLookup.FilterFields, 4),
+		)))
+	}
+	if len(binding.Import.Operations.Create) > 0 {
+		createAction := fmt.Sprintf("Create the OCI resource via %s when no reusable match is found", summarizeOperations(binding.Import.Operations.Create, 3))
+		if binding.Import.ListLookup == nil {
+			createAction = fmt.Sprintf("Create the OCI resource via %s when no tracked identity is present", summarizeOperations(binding.Import.Operations.Create, 3))
+		}
+		lines = append(lines, plantUMLAction(createAction))
+	}
+	if binding.Import.ListLookup != nil || len(binding.Import.Operations.Create) > 0 {
+		lines = append(lines, plantUMLAction("Persist the resolved or created OCI identity into status"))
+	}
+	lines = append(lines, "endif")
+	return lines
+}
+
+func renderDeleteActivity(ctx diagramContext) []string {
+	binding := ctx.Binding
+	lines := []string{`partition "Delete" {`}
+	lines = append(lines, deleteActivityLine(ctx))
+	if binding.Spec.DeleteConfirmation != "not-supported" {
+		lines = append(lines, plantUMLAction(fmt.Sprintf(
+			"Confirm deletion via %s until OCI reaches %s",
+			deleteObserveSummary(binding),
+			transitionSummary(binding.Import.DeleteConfirmation.Target, "resource absent"),
+		)))
+	}
+	if includeSecretsParticipant(ctx) {
+		lines = append(lines, plantUMLAction("Delete owned Secret side effects only after OCI delete confirmation"))
+	}
+	switch binding.Spec.FinalizerPolicy {
+	case "retain-until-confirmed-delete":
+		lines = append(lines,
+			`if ("Delete cleanup and finalizer release succeed?") then (yes)`,
+			plantUMLAction("Remove the finalizer after delete completion"),
+			"else (no)",
+			plantUMLAction("Stay blocked until cleanup or finalizer release succeeds"),
+			"endif",
+		)
+	case "none":
+		lines = append(lines, plantUMLAction("Allow best-effort completion without finalizer retention"))
+	}
+	lines = append(lines, "}")
+	return lines
+}
+
+func renderSecretActivity(ctx diagramContext) []string {
+	if !includeSecretsParticipant(ctx) {
+		return []string{plantUMLAction(fmt.Sprintf("Return success for the %s success state", successTargetSummary(ctx.Binding)))}
+	}
+	return []string{
+		plantUMLAction(fmt.Sprintf("Apply repo-authored secret policy %s", secretPolicySummary(ctx))),
+		`if ("Secret sync succeeds?") then (yes)`,
+		plantUMLAction(fmt.Sprintf("Return success for the %s success state", successTargetSummary(ctx.Binding))),
+		"else (no)",
+		plantUMLAction("Block successful completion until Secret sync succeeds"),
+		"endif",
+	}
+}
+
+func renderObserveAndBindSequence(ctx diagramContext) []string {
+	binding := ctx.Binding
+	lines := []string{"group Lookup and bind"}
+	if len(binding.Import.Operations.Get) > 0 {
+		lines = append(lines,
+			"alt tracked or explicit OCI identity already exists",
+			fmt.Sprintf("ServiceManager -> OCI: %s", wrapPlantUMLText(summarizeOperations(binding.Import.Operations.Get, 2), 36)),
+		)
+	}
+	if binding.Import.ListLookup != nil || len(binding.Import.Operations.Create) > 0 {
+		lines = append(lines, "else tracked identity is missing")
+		if binding.Import.ListLookup != nil {
+			lines = append(lines,
+				fmt.Sprintf("ServiceManager -> OCI: %s", wrapPlantUMLText(
+					fmt.Sprintf("%s(filters: %s)", summarizeOperations(binding.Import.Operations.List, 2), summarizeValues(binding.Import.ListLookup.FilterFields, 4)),
+					36,
+				)),
+			)
+		}
+		if len(binding.Import.Operations.Create) > 0 {
+			lines = append(lines,
+				"alt reusable OCI resource is not found",
+				fmt.Sprintf("ServiceManager -> OCI: %s", wrapPlantUMLText(summarizeOperations(binding.Import.Operations.Create, 3), 36)),
+			)
+			if len(binding.Import.Lifecycle.Create.Pending) > 0 && len(binding.Import.Operations.Get) > 0 {
+				lines = append(lines,
+					fmt.Sprintf("loop %s", wrapPlantUMLText(fmt.Sprintf("create pending %s", summarizeValues(binding.Import.Lifecycle.Create.Pending, 4)), 36)),
+					fmt.Sprintf("ServiceManager -> OCI: %s", wrapPlantUMLText(summarizeOperations(binding.Import.Operations.Get, 2), 36)),
+					"end",
+				)
+			}
+			lines = append(lines, "else reusable OCI resource already exists")
+			if len(binding.Import.Operations.Get) > 0 {
+				lines = append(lines, fmt.Sprintf("ServiceManager -> OCI: %s", wrapPlantUMLText(summarizeOperations(binding.Import.Operations.Get, 2), 36)))
+			}
+			lines = append(lines, "end")
+		}
+		lines = append(lines, "ServiceManager --> BaseReconciler: persist resolved OCI identity in status")
+	}
+	lines = append(lines, "end")
+	return lines
+}
+
+func renderDeleteSequence(ctx diagramContext) []string {
+	binding := ctx.Binding
+	lines := []string{"group Delete"}
+	if binding.Spec.DeleteConfirmation == "not-supported" {
+		lines = append(lines, "note right of ServiceManager")
+		lines = append(lines, wrapPlantUMLNoteLines(46, fmt.Sprintf("delete remains repo-authored unsupported despite %s", summarizeOperations(binding.Import.Operations.Delete, 2)))...)
+		lines = append(lines, "end note", "end")
+		return lines
+	}
+	lines = append(lines,
+		fmt.Sprintf("ServiceManager -> OCI: %s", wrapPlantUMLText(summarizeOperations(binding.Import.Operations.Delete, 2), 36)),
+		fmt.Sprintf("ServiceManager -> OCI: %s", wrapPlantUMLText(fmt.Sprintf("confirm delete via %s", deleteObserveSummary(binding)), 36)),
+	)
+	if len(binding.Import.DeleteConfirmation.Pending) > 0 && (len(binding.Import.Operations.Get) > 0 || len(binding.Import.Operations.List) > 0) {
+		lines = append(lines,
+			fmt.Sprintf("loop %s", wrapPlantUMLText(fmt.Sprintf("delete pending %s", summarizeValues(binding.Import.DeleteConfirmation.Pending, 3)), 36)),
+			fmt.Sprintf("ServiceManager -> OCI: %s", wrapPlantUMLText(deleteObserveSummary(binding), 36)),
+			"end",
+		)
+	}
+	if includeSecretsParticipant(ctx) {
+		lines = append(lines, fmt.Sprintf("ServiceManager -> SecretStore: %s", wrapPlantUMLText("delete owned Secret after OCI delete confirmation", 36)))
+	}
+	switch binding.Spec.FinalizerPolicy {
+	case "retain-until-confirmed-delete":
+		lines = append(lines,
+			"alt cleanup or finalizer release is blocked",
+			"ServiceManager --> BaseReconciler: retain delete state and retry",
+			"else delete completion observed",
+			"ServiceManager --> BaseReconciler: release finalizer after delete completion",
+			"end",
+		)
+	default:
+		lines = append(lines, "ServiceManager --> BaseReconciler: best-effort delete completion observed")
+	}
+	lines = append(lines, "end")
+	return lines
+}
+
+func renderDriftHandlingSequence(ctx diagramContext) []string {
+	binding := ctx.Binding
+	lines := []string{"note over ServiceManager,OCI"}
+	lines = append(lines, wrapPlantUMLNoteLines(40, driftHandlingNoteLines(ctx)...)...)
+	lines = append(lines, "end note")
+	if hasRejectableDrift(ctx) {
+		lines = append(lines,
+			"opt force-new or conflicting drift is detected",
+			"ServiceManager --> BaseReconciler: reject before OCI mutation",
+			"end",
+		)
+	}
+	if len(binding.Import.Mutation.Mutable) > 0 && len(binding.Import.Operations.Update) > 0 {
+		lines = append(lines,
+			"opt supported mutable drift is detected",
+			fmt.Sprintf("ServiceManager -> OCI: %s", wrapPlantUMLText(updateActivitySummary(binding), 36)),
+		)
+		if len(binding.Import.Lifecycle.Update.Pending) > 0 && len(binding.Import.Operations.Get) > 0 {
+			lines = append(lines,
+				fmt.Sprintf("loop %s", wrapPlantUMLText(fmt.Sprintf("update pending %s", summarizeValues(binding.Import.Lifecycle.Update.Pending, 4)), 36)),
+				fmt.Sprintf("ServiceManager -> OCI: %s", wrapPlantUMLText(summarizeOperations(binding.Import.Operations.Get, 2), 36)),
+				"end",
+			)
+		}
+		lines = append(lines, "end")
+	}
+	if hooks := hookPhaseSummary(ctx); hooks != "none" {
+		lines = append(lines, fmt.Sprintf("ServiceManager -> OCI: %s", wrapPlantUMLText(fmt.Sprintf("run helper hooks %s", hooks), 36)))
+	}
+	if includeSecretsParticipant(ctx) {
+		lines = append(lines,
+			fmt.Sprintf("ServiceManager -> SecretStore: %s", wrapPlantUMLText(secretSequenceAction(ctx), 36)),
+			"alt Secret sync fails",
+			"ServiceManager --> BaseReconciler: block success and retry",
+			"end",
+		)
+	}
+	return lines
+}
+
+func renderDeleteStateMachineNote(ctx diagramContext) []string {
+	lines := []string{"note right of delete_pending"}
+	lines = append(lines, wrapPlantUMLNoteLines(48,
+		fmt.Sprintf("delete policy: %s", ctx.Binding.Spec.DeleteConfirmation),
+		fmt.Sprintf("delete observe: %s", deleteObserveSummary(ctx.Binding)),
+		fmt.Sprintf("delete targets: %s", transitionSummary(ctx.Binding.Import.DeleteConfirmation.Target, "resource absent")),
+	)...)
+	if includeSecretsParticipant(ctx) {
+		lines = append(lines, wrapPlantUMLNoteLines(48, "Secret cleanup waits for OCI delete confirmation.")...)
+	}
+	lines = append(lines, "end note")
+	return lines
+}
+
+func hasRejectableDrift(ctx diagramContext) bool {
+	return len(ctx.Binding.Import.Mutation.ForceNew) > 0 || len(ctx.ConflictSets) > 0
+}
+
+func updateActivitySummary(binding ControllerBinding) string {
+	return fmt.Sprintf(
+		"Apply %s only for mutable fields %s",
+		summarizeOperations(binding.Import.Operations.Update, 3),
+		summarizeValues(binding.Import.Mutation.Mutable, 4),
+	)
+}
+
+func rejectDriftActivitySummary(ctx diagramContext) string {
+	return fmt.Sprintf("Reject drift before OCI mutation for %s", rejectSurfaceSummary(ctx))
+}
+
+func rejectSurfaceSummary(ctx diagramContext) string {
+	parts := make([]string, 0, 2)
+	if len(ctx.Binding.Import.Mutation.ForceNew) > 0 {
+		parts = append(parts, fmt.Sprintf("force-new fields %s", summarizeValues(ctx.Binding.Import.Mutation.ForceNew, 4)))
+	}
+	if len(ctx.ConflictSets) > 0 {
+		parts = append(parts, fmt.Sprintf("conflicts %s", summarizeValues(ctx.ConflictSets, 3)))
+	}
+	if len(parts) == 0 {
+		return "none"
+	}
+	return strings.Join(parts, " and ")
+}
+
+func successTargetSummary(binding ControllerBinding) string {
+	switch binding.Spec.SuccessCondition {
+	case "terminal":
+		return transitionSummary(binding.Import.DeleteConfirmation.Target, "terminal OCI state")
+	default:
+		targets := append(append([]string(nil), binding.Import.Lifecycle.Create.Target...), binding.Import.Lifecycle.Update.Target...)
+		return transitionSummary(targets, "usable OCI state")
+	}
+}
+
+func retryableStateSummary(binding ControllerBinding) string {
+	values := append([]string(nil), binding.Import.Lifecycle.Create.Pending...)
+	values = append(values, binding.Import.Lifecycle.Update.Pending...)
+	values = append(values, binding.Import.DeleteConfirmation.Pending...)
+	return summarizeValues(values, 4)
+}
+
+func driftHandlingNoteLines(ctx diagramContext) []string {
+	lines := []string{
+		fmt.Sprintf("Supported update surface: %s", summarizeValues(ctx.Binding.Import.Mutation.Mutable, 4)),
+		fmt.Sprintf("Reject before mutate: %s", rejectSurfaceSummary(ctx)),
+	}
+	if len(ctx.ConflictSets) > 0 {
+		lines = append(lines, fmt.Sprintf("Conflicts: %s", summarizeValues(ctx.ConflictSets, 3)))
+	}
+	if ctx.Binding.Import.ListLookup != nil {
+		lines = append(lines, fmt.Sprintf("Lookup filters: %s", summarizeValues(ctx.Binding.Import.ListLookup.FilterFields, 4)))
+	}
+	return lines
 }
 
 func deleteConfirmationSummary(binding ControllerBinding) string {

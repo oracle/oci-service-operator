@@ -19,9 +19,10 @@ func TestRenderDiagramsEmbedsPlantUMLMetadataInActivitySVG(t *testing.T) {
 	for _, needle := range []string{
 		"<?plantuml ",
 		"<?plantuml-src ",
-		"Resource exists?",
+		"Tracked or explicit OCI identity present?",
+		"Force-new or conflicting drift detected?",
 		"CreateTemplate",
-		"UpdateTemplate",
+		"display_name",
 	} {
 		if !strings.Contains(text, needle) {
 			t.Fatalf("activity.svg missing %q:\n%s", needle, text)
@@ -44,6 +45,7 @@ func TestRenderDiagramsEmbedsPlantUMLMetadataInSequenceSVG(t *testing.T) {
 		"BaseReconciler",
 		"OSOKServiceManager",
 		"CreateTemplate",
+		"display_name",
 	} {
 		if !strings.Contains(text, needle) {
 			t.Fatalf("sequence.svg missing %q:\n%s", needle, text)
@@ -62,12 +64,58 @@ func TestRenderDiagramsEmbedsPlantUMLMetadataInStateMachineSVG(t *testing.T) {
 	text := string(data)
 	for _, needle := range []string{
 		`data-diagram-type="STATE"`,
-		"provisioning",
-		"active",
-		"terminating",
+		"Observe",
+		"Ready",
+		"DeletePending",
 	} {
 		if !strings.Contains(text, needle) {
 			t.Fatalf("state-machine.svg missing %q:\n%s", needle, text)
+		}
+	}
+}
+
+func TestRenderDiagramsWriteFieldAwarePlantUMLSources(t *testing.T) {
+	root := writeScaffold(t)
+
+	type check struct {
+		path    string
+		needles []string
+	}
+	for _, tc := range []check{
+		{
+			path: filepath.Join(root, "controllers", "template", "diagrams", "activity.puml"),
+			needles: []string{
+				`"Force-new or conflicting drift detected?"`,
+				`Reject drift before OCI mutation for force-new`,
+				`Apply UpdateTemplate only for mutable fields`,
+			},
+		},
+		{
+			path: filepath.Join(root, "controllers", "template", "diagrams", "sequence.puml"),
+			needles: []string{
+				`group Lookup and bind`,
+				`Supported update surface: display_name`,
+				`Reject before mutate: force-new fields`,
+			},
+		},
+		{
+			path: filepath.Join(root, "controllers", "template", "diagrams", "state-machine.puml"),
+			needles: []string{
+				`state "Observe" as observe`,
+				`state "ApplyUpdate" as apply_update`,
+				`state "DeletePending" as delete_pending`,
+			},
+		},
+	} {
+		data, err := os.ReadFile(tc.path)
+		if err != nil {
+			t.Fatalf("ReadFile(%q) error = %v", tc.path, err)
+		}
+		text := string(data)
+		for _, needle := range tc.needles {
+			if !strings.Contains(text, needle) {
+				t.Fatalf("%s missing %q:\n%s", tc.path, needle, text)
+			}
 		}
 	}
 }

@@ -35,32 +35,69 @@ end note
 Kubernetes -> Controller: enqueue AutonomousDatabases\nreconcile
 Controller -> BaseReconciler: Reconcile(request)
 BaseReconciler -> ServiceManager: reconcile desired\nAutonomousDatabases
+group Lookup and bind
+alt tracked or explicit OCI identity already exists
 ServiceManager -> OCI: GetAutonomousDatabase
-opt list lookup fallback
+else tracked identity is missing
 ServiceManager -> OCI: ListAutonomousDatabases(filters:\nautonomous_container_database_id,\ncompartment_id, db_version,\ndb_workload (+9 more))
-OCI --> ServiceManager: matching collection items
-end
-alt create or bind path
+alt reusable OCI resource is not found
 ServiceManager -> OCI: CreateAutonomousDatabase,\nUpdateAutonomousDatabase
 loop create pending PROVISIONING,\nSTARTING
 ServiceManager -> OCI: GetAutonomousDatabase
 end
-else update or drift path
-ServiceManager -> OCI: ChangeAutonomousDatabaseCompartment,\nChangeAutonomousDatabaseSubscription,\nConfigureAutonomousDatabaseVaultKey\n(+7 more)
-loop update pending\nMAINTENANCE_IN_PROGRESS,\nPROVISIONING, RESTARTING,\nSCALE_IN_PROGRESS (+5 more)
+else reusable OCI resource already exists
 ServiceManager -> OCI: GetAutonomousDatabase
 end
+ServiceManager --> BaseReconciler: persist resolved OCI identity in status
 end
-opt repo-authored secret side effects
-ServiceManager -> SecretStore: read required input secret and write\nready-only connection secret
-end
-opt delete requested
+alt delete requested
+group Delete
 note right of ServiceManager
 delete remains repo-authored unsupported
 despite DeleteAutonomousDatabase
 end note
 end
+else OCI state is retryable
+ServiceManager --> BaseReconciler: requeue while OCI remains in\nPROVISIONING, STARTING,\nMAINTENANCE_IN_PROGRESS, RESTARTING\n(+6 more)
+else live state requires field-aware\ndrift evaluation
+group Drift handling
+note over ServiceManager,OCI
+Supported update surface:
+admin_password,
+are_primary_whitelisted_ips_used,
+auto_refresh_frequency_in_seconds,
+auto_refresh_point_lag_in_seconds (+107
+more)
+Reject before mutate: force-new fields
+autonomous_container_database_id,
+autonomous_database_backup_id,
+autonomous_database_id, character_set
+(+12 more) and conflicts is_shrink_only
+-> shrink_adb_trigger
+Conflicts: is_shrink_only ->
+shrink_adb_trigger
+Lookup filters:
+autonomous_container_database_id,
+compartment_id, db_version, db_workload
+(+9 more)
+end note
+opt force-new or conflicting drift is detected
+ServiceManager --> BaseReconciler: reject before OCI mutation
+end
+opt supported mutable drift is detected
+ServiceManager -> OCI: Apply\nChangeAutonomousDatabaseCompartment,\nChangeAutonomousDatabaseSubscription,\nConfigureAutonomousDatabaseVaultKey\n(+7 more) only for mutable fields\nadmin_password,\nare_primary_whitelisted_ips_used,\nauto_refresh_frequency_in_seconds,\nauto_refresh_point_lag_in_seconds\n(+107 more)
+loop update pending\nMAINTENANCE_IN_PROGRESS,\nPROVISIONING, RESTARTING,\nSCALE_IN_PROGRESS (+5 more)
+ServiceManager -> OCI: GetAutonomousDatabase
+end
+end
+ServiceManager -> OCI: run helper hooks\ncreate=tfresource.WaitForWorkRequestWithErrorHandling\nentity=database action=CREATED,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=database action=UPDATED;\nupdate=tfresource.WaitForWorkRequestWithErrorHandling\nentity=database action=UPDATED;\ndelete=tfresource.DeleteResource
+ServiceManager -> SecretStore: read required input secret and write\nready-only connection secret
+alt Secret sync fails
+ServiceManager --> BaseReconciler: block success and retry
+end
+end
 ServiceManager --> BaseReconciler: status=manual, finalizer=none
+end
 BaseReconciler --> Controller: requeue on provisioning, updating
 note right of ServiceManager
 shared diagram:
@@ -87,13 +124,21 @@ provider states: create PROVISIONING, STARTING;
 update MAINTENANCE_IN_PROGRESS, PROVISIONING,
 RESTARTING, SCALE_IN_PROGRESS (+5 more); delete
 TERMINATING, UNAVAILABLE
-mutable/forceNew: admin_password,
+supported drift: admin_password,
 are_primary_whitelisted_ips_used,
 auto_refresh_frequency_in_seconds,
-auto_refresh_point_lag_in_seconds (+107 more) /
+auto_refresh_point_lag_in_seconds (+107 more)
+reject before mutate: force-new fields
 autonomous_container_database_id,
 autonomous_database_backup_id,
 autonomous_database_id, character_set (+12 more)
+and conflicts is_shrink_only ->
+shrink_adb_trigger
+list lookup: oci_database_autonomous_databases
+filters autonomous_container_database_id,
+compartment_id, db_version, db_workload (+9
+more)
+conflicts: is_shrink_only -> shrink_adb_trigger
 open gaps: bind-versus-create,
 delete-confirmation, legacy-adapter,
 list-lookup, manual-webhook (+4 more)

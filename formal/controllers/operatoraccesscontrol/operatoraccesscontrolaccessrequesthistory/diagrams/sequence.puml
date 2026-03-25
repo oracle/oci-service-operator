@@ -34,29 +34,57 @@ end note
 Kubernetes -> Controller: enqueue\nOperatorAccessControlAccessRequestHistory\nreconcile
 Controller -> BaseReconciler: Reconcile(request)
 BaseReconciler -> ServiceManager: reconcile desired\nOperatorAccessControlAccessRequestHistory
+group Lookup and bind
+alt tracked or explicit OCI identity already exists
 ServiceManager -> OCI: GetOperatorAccessControlAccessRequestHistory
-opt list lookup fallback
+else tracked identity is missing
 ServiceManager -> OCI: ListOperatorAccessControlAccessRequestHistory(filters:\ncompartment_id, state)
-OCI --> ServiceManager: matching collection items
-end
-alt create or bind path
+alt reusable OCI resource is not found
 ServiceManager -> OCI: CreateOperatorAccessControlAccessRequestHistory
 loop create pending PROVISIONING
 ServiceManager -> OCI: GetOperatorAccessControlAccessRequestHistory
 end
-else update or drift path
-ServiceManager -> OCI: UpdateOperatorAccessControlAccessRequestHistory
+else reusable OCI resource already exists
+ServiceManager -> OCI: GetOperatorAccessControlAccessRequestHistory
+end
+ServiceManager --> BaseReconciler: persist resolved OCI identity in status
+end
+alt delete requested
+group Delete
+ServiceManager -> OCI: DeleteOperatorAccessControlAccessRequestHistory
+ServiceManager -> OCI: confirm delete via\nGetOperatorAccessControlAccessRequestHistory\nor\nListOperatorAccessControlAccessRequestHistory
+loop delete pending DELETING
+ServiceManager -> OCI: GetOperatorAccessControlAccessRequestHistory\nor\nListOperatorAccessControlAccessRequestHistory
+end
+alt cleanup or finalizer release is blocked
+ServiceManager --> BaseReconciler: retain delete state and retry
+else delete completion observed
+ServiceManager --> BaseReconciler: release finalizer after delete completion
+end
+end
+else OCI state is retryable
+ServiceManager --> BaseReconciler: requeue while OCI remains in\nPROVISIONING, UPDATING, DELETING
+else live state requires field-aware\ndrift evaluation
+group Drift handling
+note over ServiceManager,OCI
+Supported update surface: display_name
+Reject before mutate: force-new fields
+compartment_id
+Lookup filters: compartment_id, state
+end note
+opt force-new or conflicting drift is detected
+ServiceManager --> BaseReconciler: reject before OCI mutation
+end
+opt supported mutable drift is detected
+ServiceManager -> OCI: Apply\nUpdateOperatorAccessControlAccessRequestHistory\nonly for mutable fields display_name
 loop update pending UPDATING
 ServiceManager -> OCI: GetOperatorAccessControlAccessRequestHistory
 end
 end
-opt delete requested
-ServiceManager -> OCI: DeleteOperatorAccessControlAccessRequestHistory
-loop delete confirmation DELETING
-ServiceManager -> OCI: GetOperatorAccessControlAccessRequestHistory\nor\nListOperatorAccessControlAccessRequestHistory
-end
+ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=template action=CREATED;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
 end
 ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
+end
 BaseReconciler --> Controller: requeue on provisioning, updating,\nterminating
 note right of ServiceManager
 shared diagram:
@@ -82,7 +110,13 @@ retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
 provider states: create PROVISIONING; update
 UPDATING; delete DELETING
-mutable/forceNew: display_name / compartment_id
+supported drift: display_name
+reject before mutate: force-new fields
+compartment_id
+list lookup:
+scaffold_operatoraccesscontrol_operatoraccesscontrolaccessrequesthistory
+filters compartment_id, state
+conflicts: none
 open gaps: none
 Scaffold metadata only; replace with
 controller-specific runtime states before

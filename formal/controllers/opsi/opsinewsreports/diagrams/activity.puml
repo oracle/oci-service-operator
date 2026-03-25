@@ -21,21 +21,56 @@ skinparam activity {
   barColor #1d4ed8
 }
 start
+partition "Observe and Bind" {
 :Start from shared flow\nshared/diagrams/shared-reconcile-activity.svg;
-:Load desired OpsiNewsReports spec and status\nfrom Kubernetes;
-:Resolve OCI state via GetOpsiNewsReports with\nListOpsiNewsReports fallback;
-:Use scaffold_opsi_opsinewsreports filters\ncompartment_id, state when OCID lookup or\nbind-versus-create needs list resolution;
-if (Resource exists?) then (yes)
-:Update path calls UpdateOpsiNewsReports;
-:Guard mutable fields display_name and\nforce-new fields compartment_id;
+:Read desired OpsiNewsReports spec, tracked\nstatus, and delete intent;
+if ("Tracked or explicit OCI identity present?") then (yes)
+:Get the current OCI resource via\nGetOpsiNewsReports;
 else (no)
-:Create path calls CreateOpsiNewsReports;
+:Resolve an existing OCI resource through\nListOpsiNewsReports using filters\ncompartment_id, state;
+:Create the OCI resource via\nCreateOpsiNewsReports when no reusable match\nis found;
+:Persist the resolved or created OCI identity\ninto status;
 endif
-:Run provider helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=template action=CREATED;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource;
-:Apply repo-authored secret policy none;
+}
+if ("Delete requested?") then (yes)
+partition "Delete" {
 :Delete path uses DeleteOpsiNewsReports with\nrequired via GetOpsiNewsReports or\nListOpsiNewsReports to DELETED confirmation;
+:Confirm deletion via GetOpsiNewsReports or\nListOpsiNewsReports until OCI reaches DELETED;
+if ("Delete cleanup and finalizer release succeed?") then (yes)
+:Remove the finalizer after delete completion;
+else (no)
+:Stay blocked until cleanup or finalizer\nrelease succeeds;
+endif
+}
+stop
+else (no)
+partition "Lifecycle Classification" {
+if ("OCI state in retryable set?") then (yes)
+:Request requeue while OCI remains in\nPROVISIONING, UPDATING, DELETING;
+stop
+endif
+if ("OCI state is outside success targets?") then (yes)
+:Return an unsuccessful reconcile result until\nOCI reaches ACTIVE;
+stop
+endif
+}
+partition "Ready and Drift Handling" {
+:Compare live OCI state against the imported\nfield surface;
+if ("Force-new or conflicting drift detected?") then (yes)
+:Reject drift before OCI mutation for force-new\nfields compartment_id;
+stop
+endif
+if ("Supported mutable drift detected?") then (yes)
+:Apply UpdateOpsiNewsReports only for mutable\nfields display_name;
+else (no)
+:Skip the no-op mutation path;
+endif
+:Run provider helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=template action=CREATED;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
+:Return success for the ACTIVE success state;
 :Project required status and finalizer policy\nretain-until-confirmed-delete;
 :Requeue on provisioning, updating, terminating;
+}
+endif
 stop
 note right
 shared diagram:
@@ -58,7 +93,12 @@ retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
 provider states: create PROVISIONING; update
 UPDATING; delete DELETING
-mutable/forceNew: display_name / compartment_id
+supported drift: display_name
+reject before mutate: force-new fields
+compartment_id
+list lookup: scaffold_opsi_opsinewsreports
+filters compartment_id, state
+conflicts: none
 open gaps: none
 Scaffold metadata only; replace with
 controller-specific runtime states before

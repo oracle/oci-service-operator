@@ -16,17 +16,43 @@ skinparam state {
   startColor #1d4ed8
   endColor #0f172a
 }
-state "provisioning\nprovider: PROVISIONING" as provisioning
-state "active\nprovider: ACTIVE" as active
-state "updating\nprovider: UPDATING" as updating
-state "terminating\nprovider: DELETING" as terminating
-[*] --> provisioning : CreateKmsKeyVersion
-provisioning --> active : ACTIVE
-active --> updating : UpdateKmsKeyVersion
-updating --> active : ACTIVE
-active --> terminating : DeleteKmsKeyVersion
-terminating --> [*] : DELETED
-note right of active
+left to right direction
+hide empty description
+state "Observe" as observe
+state "EvaluateReady" as evaluate_ready
+state "Ready" as ready
+state "Retryable" as retryable
+state "Failed" as failed
+observe : read spec, tracked status, delete intent,\nand current OCI lifecycle
+state "ResolveByLookup" as resolve_by_lookup
+state "RejectUnsupportedDrift" as reject_unsupported_drift
+state "ApplyUpdate" as apply_update
+state "DeletePending" as delete_pending
+state "Deleted" as deleted
+state "DeleteCleanupBlocked" as delete_cleanup_blocked
+[*] --> observe : CreateKmsKeyVersion
+observe --> resolve_by_lookup : tracked identity missing
+resolve_by_lookup --> evaluate_ready : lookup or create reaches\nACTIVE
+resolve_by_lookup --> retryable : OCI state in PROVISIONING,\nUPDATING, DELETING
+resolve_by_lookup --> failed : unresolved OCI error or non-success state
+observe --> evaluate_ready : OCI state in ACTIVE
+observe --> retryable : OCI state in PROVISIONING,\nUPDATING, DELETING
+observe --> failed : unresolved OCI error or non-success state
+evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
+reject_unsupported_drift --> ready : wait for spec or live state change
+evaluate_ready --> apply_update : supported mutable drift for\ndisplay_name
+apply_update --> ready : update path completes
+evaluate_ready --> ready : no supported drift remains
+ready --> ready : no supported drift remains
+retryable --> retryable : OCI remains retryable
+failed --> failed : OCI remains terminal
+ready --> delete_pending : delete requested
+retryable --> delete_pending : delete requested
+failed --> delete_pending : delete requested
+delete_pending --> delete_cleanup_blocked : cleanup or finalizer release remains blocked
+delete_cleanup_blocked --> deleted : retry delete completion until allowed
+deleted --> deleted : terminal stutter
+note right of ready
 shared diagram:
 shared/diagrams/shared-controller-state-machine.svg
 Start from the shared controller phase model and
@@ -45,10 +71,21 @@ retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
 provider states: create PROVISIONING; update
 UPDATING; delete DELETING
-mutable/forceNew: display_name / compartment_id
+supported drift: display_name
+reject before mutate: force-new fields
+compartment_id
+list lookup: scaffold_kms_kmskeyversion filters
+compartment_id, state
+conflicts: none
 open gaps: none
 Scaffold metadata only; replace with
 controller-specific runtime states before
 promotion.
+end note
+note right of delete_pending
+delete policy: required
+delete observe: GetKmsKeyVersion or
+ListKmsKeyVersion
+delete targets: DELETED
 end note
 @enduml

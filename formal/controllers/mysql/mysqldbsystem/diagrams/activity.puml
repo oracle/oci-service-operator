@@ -21,22 +21,58 @@ skinparam activity {
   barColor #1d4ed8
 }
 start
+partition "Observe and Bind" {
 :Start from shared flow\nshared/diagrams/shared-reconcile-activity.svg;
-:Load desired MySqlDbSystem spec and status\nfrom Kubernetes;
-:Resolve OCI state via GetDbSystem with\nListDbSystems fallback;
-:Use oci_mysql_mysql_db_systems filters\ncompartment_id, configuration_id,\ndatabase_management, db_system_id (+4 more)\nwhen OCID lookup or bind-versus-create needs\nlist resolution;
-if (Resource exists?) then (yes)
-:Update path calls UpdateDbSystem;
-:Guard mutable fields access_mode,\nbackup_policy.copy_policies.backup_copy_retention_in_days,\nbackup_policy.copy_policies.copy_to_region,\nbackup_policy.defined_tags (+50 more) and\nforce-new fields admin_password,\nadmin_username, availability_domain,\ncompartment_id (+12 more);
+:Read desired MySqlDbSystem spec, tracked\nstatus, and delete intent;
+if ("Tracked or explicit OCI identity present?") then (yes)
+:Get the current OCI resource via GetDbSystem;
 else (no)
-:Create path calls CreateDbSystem;
+:Resolve an existing OCI resource through\nListDbSystems using filters compartment_id,\nconfiguration_id, database_management,\ndb_system_id (+4 more);
+:Create the OCI resource via CreateDbSystem\nwhen no reusable match is found;
+:Persist the resolved or created OCI identity\ninto status;
 endif
-:Run provider helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource;
-:Apply repo-authored secret policy ready-only\nwrites after ACTIVE plus secret-input reads;
+}
+if ("Delete requested?") then (yes)
+partition "Delete" {
 :Delete stays repo-authored not-supported\ndespite provider op DeleteDbSystem;
+:Delete owned Secret side effects only after\nOCI delete confirmation;
+:Allow best-effort completion without finalizer\nretention;
+}
+stop
+else (no)
+partition "Lifecycle Classification" {
+if ("OCI state in retryable set?") then (yes)
+:Request requeue while OCI remains in CREATING,\nUPDATING, DELETING;
+stop
+endif
+if ("OCI state is outside success targets?") then (yes)
+:Return an unsuccessful reconcile result until\nOCI reaches ACTIVE;
+stop
+endif
+}
+partition "Ready and Drift Handling" {
+:Compare live OCI state against the imported\nfield surface;
+if ("Force-new or conflicting drift detected?") then (yes)
+:Reject drift before OCI mutation for force-new\nfields admin_password, admin_username,\navailability_domain, compartment_id (+12 more);
+stop
+endif
+if ("Supported mutable drift detected?") then (yes)
+:Apply UpdateDbSystem only for mutable fields\naccess_mode,\nbackup_policy.copy_policies.backup_copy_retention_in_days,\nbackup_policy.copy_policies.copy_to_region,\nbackup_policy.defined_tags (+50 more);
+else (no)
+:Skip the no-op mutation path;
+endif
+:Run provider helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
+:Apply repo-authored secret policy ready-only\nwrites after ACTIVE plus secret-input reads;
+if ("Secret sync succeeds?") then (yes)
+:Return success for the ACTIVE success state;
+else (no)
+:Block successful completion until Secret sync\nsucceeds;
+endif
 :Project manual status and finalizer policy\nnone;
 :Requeue on provisioning, updating;
 :Keep promotion blocked on bind-versus-create,\ndelete-confirmation, endpoint-materialization,\nlegacy-adapter, list-lookup (+3 more);
+}
+endif
 stop
 note right
 shared diagram:
@@ -58,12 +94,17 @@ status/finalizer: manual / none
 requeue: provisioning, updating
 provider states: create CREATING, UPDATING;
 update UPDATING; delete DELETING
-mutable/forceNew: access_mode,
+supported drift: access_mode,
 backup_policy.copy_policies.backup_copy_retention_in_days,
 backup_policy.copy_policies.copy_to_region,
-backup_policy.defined_tags (+50 more) /
+backup_policy.defined_tags (+50 more)
+reject before mutate: force-new fields
 admin_password, admin_username,
 availability_domain, compartment_id (+12 more)
+list lookup: oci_mysql_mysql_db_systems filters
+compartment_id, configuration_id,
+database_management, db_system_id (+4 more)
+conflicts: none
 open gaps: bind-versus-create,
 delete-confirmation, endpoint-materialization,
 legacy-adapter, list-lookup (+3 more)

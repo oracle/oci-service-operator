@@ -21,21 +21,56 @@ skinparam activity {
   barColor #1d4ed8
 }
 start
+partition "Observe and Bind" {
 :Start from shared flow\nshared/diagrams/shared-reconcile-activity.svg;
-:Load desired User spec and status from\nKubernetes;
-:Resolve OCI state via GetUser with ListUsers\nfallback;
-:Use oci_identity_users filters compartment_id,\nexternal_identifier, identity_provider_id,\nname (+1 more) when OCID lookup or\nbind-versus-create needs list resolution;
-if (Resource exists?) then (yes)
-:Update path calls UpdateUser;
-:Guard mutable fields defined_tags,\ndescription, email, freeform_tags and\nforce-new fields compartment_id, name;
+:Read desired User spec, tracked status, and\ndelete intent;
+if ("Tracked or explicit OCI identity present?") then (yes)
+:Get the current OCI resource via GetUser;
 else (no)
-:Create path calls CreateUser;
+:Resolve an existing OCI resource through\nListUsers using filters compartment_id,\nexternal_identifier, identity_provider_id,\nname (+1 more);
+:Create the OCI resource via CreateUser when no\nreusable match is found;
+:Persist the resolved or created OCI identity\ninto status;
 endif
-:Run provider helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource;
-:Apply repo-authored secret policy none;
+}
+if ("Delete requested?") then (yes)
+partition "Delete" {
 :Delete path uses DeleteUser with required via\nGetUser or ListUsers to DELETED confirmation;
+:Confirm deletion via GetUser or ListUsers\nuntil OCI reaches DELETED;
+if ("Delete cleanup and finalizer release succeed?") then (yes)
+:Remove the finalizer after delete completion;
+else (no)
+:Stay blocked until cleanup or finalizer\nrelease succeeds;
+endif
+}
+stop
+else (no)
+partition "Lifecycle Classification" {
+if ("OCI state in retryable set?") then (yes)
+:Request requeue while OCI remains in CREATING,\nDELETING;
+stop
+endif
+if ("OCI state is outside success targets?") then (yes)
+:Return an unsuccessful reconcile result until\nOCI reaches ACTIVE;
+stop
+endif
+}
+partition "Ready and Drift Handling" {
+:Compare live OCI state against the imported\nfield surface;
+if ("Force-new or conflicting drift detected?") then (yes)
+:Reject drift before OCI mutation for force-new\nfields compartment_id, name;
+stop
+endif
+if ("Supported mutable drift detected?") then (yes)
+:Apply UpdateUser only for mutable fields\ndefined_tags, description, email,\nfreeform_tags;
+else (no)
+:Skip the no-op mutation path;
+endif
+:Run provider helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
+:Return success for the ACTIVE success state;
 :Project required status and finalizer policy\nretain-until-confirmed-delete;
 :Requeue on provisioning, updating, terminating;
+}
+endif
 stop
 note right
 shared diagram:
@@ -58,8 +93,14 @@ retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
 provider states: create CREATING; update none;
 delete DELETING
-mutable/forceNew: defined_tags, description,
-email, freeform_tags / compartment_id, name
+supported drift: defined_tags, description,
+email, freeform_tags
+reject before mutate: force-new fields
+compartment_id, name
+list lookup: oci_identity_users filters
+compartment_id, external_identifier,
+identity_provider_id, name (+1 more)
+conflicts: none
 open gaps: none
 The generated runtime reads back the OCI user
 after create or update and projects the response

@@ -16,22 +16,43 @@ skinparam state {
   startColor #1d4ed8
   endColor #0f172a
 }
-state "provisioning\nprovider: CREATING" as provisioning
-state "active\nprovider: ACTIVE" as active
-state "updating" as updating
-state "terminating\nprovider: DELETING" as terminating
-state "failed\nprovider: repo-authored failure bucket" as failed
-[*] --> provisioning : CreateUser
-provisioning --> active : ACTIVE
-active --> updating : UpdateUser
-updating --> active : update targets
-active --> terminating : DeleteUser
-terminating --> [*] : DELETED
-provisioning --> failed : unresolved OCI error or\nopen gap
-updating --> failed : unresolved OCI error or\nopen gap
-terminating --> failed : unresolved OCI error or\nopen gap
-failed --> [*] : operator intervention
-note right of active
+left to right direction
+hide empty description
+state "Observe" as observe
+state "EvaluateReady" as evaluate_ready
+state "Ready" as ready
+state "Retryable" as retryable
+state "Failed" as failed
+observe : read spec, tracked status, delete intent,\nand current OCI lifecycle
+state "ResolveByLookup" as resolve_by_lookup
+state "RejectUnsupportedDrift" as reject_unsupported_drift
+state "ApplyUpdate" as apply_update
+state "DeletePending" as delete_pending
+state "Deleted" as deleted
+state "DeleteCleanupBlocked" as delete_cleanup_blocked
+[*] --> observe : CreateUser
+observe --> resolve_by_lookup : tracked identity missing
+resolve_by_lookup --> evaluate_ready : lookup or create reaches\nACTIVE
+resolve_by_lookup --> retryable : OCI state in CREATING,\nDELETING
+resolve_by_lookup --> failed : unresolved OCI error or non-success state
+observe --> evaluate_ready : OCI state in ACTIVE
+observe --> retryable : OCI state in CREATING,\nDELETING
+observe --> failed : unresolved OCI error or non-success state
+evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
+reject_unsupported_drift --> ready : wait for spec or live state change
+evaluate_ready --> apply_update : supported mutable drift for\ndefined_tags, description,\nemail (+1 more)
+apply_update --> ready : update path completes
+evaluate_ready --> ready : no supported drift remains
+ready --> ready : no supported drift remains
+retryable --> retryable : OCI remains retryable
+failed --> failed : OCI remains terminal
+ready --> delete_pending : delete requested
+retryable --> delete_pending : delete requested
+failed --> delete_pending : delete requested
+delete_pending --> delete_cleanup_blocked : cleanup or finalizer release remains blocked
+delete_cleanup_blocked --> deleted : retry delete completion until allowed
+deleted --> deleted : terminal stutter
+note right of ready
 shared diagram:
 shared/diagrams/shared-controller-state-machine.svg
 Start from the shared controller phase model and
@@ -50,8 +71,14 @@ retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
 provider states: create CREATING; update none;
 delete DELETING
-mutable/forceNew: defined_tags, description,
-email, freeform_tags / compartment_id, name
+supported drift: defined_tags, description,
+email, freeform_tags
+reject before mutate: force-new fields
+compartment_id, name
+list lookup: oci_identity_users filters
+compartment_id, external_identifier,
+identity_provider_id, name (+1 more)
+conflicts: none
 open gaps: none
 The generated runtime reads back the OCI user
 after create or update and projects the response
@@ -60,5 +87,10 @@ Finalizer removal waits for delete confirmation
 through Get or list fallback.
 No secret side effects or legacy adapter seams
 are involved in the current User path.
+end note
+note right of delete_pending
+delete policy: required
+delete observe: GetUser or ListUsers
+delete targets: DELETED
 end note
 @enduml

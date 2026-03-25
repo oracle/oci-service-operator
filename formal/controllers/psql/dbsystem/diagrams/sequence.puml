@@ -34,26 +34,59 @@ end note
 Kubernetes -> Controller: enqueue DbSystem reconcile
 Controller -> BaseReconciler: Reconcile(request)
 BaseReconciler -> ServiceManager: reconcile desired DbSystem
+group Lookup and bind
+alt tracked or explicit OCI identity already exists
 ServiceManager -> OCI: GetDbSystem
-opt list lookup fallback
+else tracked identity is missing
 ServiceManager -> OCI: ListDbSystems(filters:\ncompartment_id, display_name, id,\nstate)
-OCI --> ServiceManager: matching collection items
-end
-alt create or bind path
+alt reusable OCI resource is not found
 ServiceManager -> OCI: CreateDbSystem
 loop create pending CREATING
 ServiceManager -> OCI: GetDbSystem
 end
-else update or drift path
-ServiceManager -> OCI: ChangeDbSystemCompartment,\nPatchDbSystem,\nResetMasterUserPassword (+1 more)
+else reusable OCI resource already exists
+ServiceManager -> OCI: GetDbSystem
 end
-opt delete requested
+ServiceManager --> BaseReconciler: persist resolved OCI identity in status
+end
+alt delete requested
+group Delete
 ServiceManager -> OCI: DeleteDbSystem
-loop delete confirmation DELETING
+ServiceManager -> OCI: confirm delete via GetDbSystem or\nListDbSystems
+loop delete pending DELETING
 ServiceManager -> OCI: GetDbSystem or ListDbSystems
 end
+alt cleanup or finalizer release is blocked
+ServiceManager --> BaseReconciler: retain delete state and retry
+else delete completion observed
+ServiceManager --> BaseReconciler: release finalizer after delete completion
+end
+end
+else OCI state is retryable
+ServiceManager --> BaseReconciler: requeue while OCI remains in\nCREATING, DELETING
+else live state requires field-aware\ndrift evaluation
+group Drift handling
+note over ServiceManager,OCI
+Supported update surface: apply_config,
+compartment_id, config_id,
+credentials.password_details.password
+(+29 more)
+Reject before mutate: force-new fields
+credentials, credentials.username,
+db_version, instances_details (+13 more)
+Lookup filters: compartment_id,
+display_name, id, state
+end note
+opt force-new or conflicting drift is detected
+ServiceManager --> BaseReconciler: reject before OCI mutation
+end
+opt supported mutable drift is detected
+ServiceManager -> OCI: Apply ChangeDbSystemCompartment,\nPatchDbSystem,\nResetMasterUserPassword (+1 more)\nonly for mutable fields\napply_config, compartment_id,\nconfig_id,\ncredentials.password_details.password\n(+29 more)
+end
+ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource,\ntfresource.WaitForUpdatedState;\ndelete=tfresource.DeleteResource
 end
 ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
+end
 BaseReconciler --> Controller: requeue on provisioning, updating,\nterminating
 note right of ServiceManager
 shared diagram:
@@ -79,10 +112,15 @@ retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
 provider states: create CREATING; update none;
 delete DELETING
-mutable/forceNew: apply_config, compartment_id,
+supported drift: apply_config, compartment_id,
 config_id, credentials.password_details.password
-(+29 more) / credentials, credentials.username,
-db_version, instances_details (+13 more)
+(+29 more)
+reject before mutate: force-new fields
+credentials, credentials.username, db_version,
+instances_details (+13 more)
+list lookup: oci_psql_db_systems filters
+compartment_id, display_name, id, state
+conflicts: none
 open gaps: bind-versus-create, list-lookup,
 mutation-policy, waiter-work-request
 Scaffold metadata only; replace with
