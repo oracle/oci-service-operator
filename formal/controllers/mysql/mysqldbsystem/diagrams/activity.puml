@@ -31,7 +31,7 @@ if (Resource exists?) then (yes)
 else (no)
 :Create path calls CreateDbSystem;
 endif
-:Run provider helper hooks\ndelete=tfresource.DeleteResource;
+:Run provider helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource;
 :Apply repo-authored secret policy ready-only\nwrites after ACTIVE plus secret-input reads;
 :Delete stays repo-authored not-supported\ndespite provider op DeleteDbSystem;
 :Project manual status and finalizer policy\nnone;

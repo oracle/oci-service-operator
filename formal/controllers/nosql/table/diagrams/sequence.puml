@@ -36,24 +36,21 @@ Controller -> BaseReconciler: Reconcile(request)
 BaseReconciler -> ServiceManager: reconcile desired Table
 ServiceManager -> OCI: GetTable
 opt list lookup fallback
-ServiceManager -> OCI: ListTable(filters: compartment_id,\nstate)
+ServiceManager -> OCI: ListTables(filters: compartment_id,\nname, state)
 OCI --> ServiceManager: matching collection items
 end
 alt create or bind path
 ServiceManager -> OCI: CreateTable
-loop create pending PROVISIONING
+loop create pending CREATING
 ServiceManager -> OCI: GetTable
 end
 else update or drift path
-ServiceManager -> OCI: UpdateTable
-loop update pending UPDATING
-ServiceManager -> OCI: GetTable
-end
+ServiceManager -> OCI: ChangeTableCompartment, UpdateTable
 end
 opt delete requested
 ServiceManager -> OCI: DeleteTable
 loop delete confirmation DELETING
-ServiceManager -> OCI: GetTable or ListTable
+ServiceManager -> OCI: GetTable or ListTables
 end
 end
 ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
@@ -80,10 +77,13 @@ archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
-provider states: create PROVISIONING; update
-UPDATING; delete DELETING
-mutable/forceNew: display_name / compartment_id
-open gaps: none
+provider states: create CREATING; update none;
+delete DELETING
+mutable/forceNew: compartment_id, ddl_statement,
+defined_tags, freeform_tags (+4 more) /
+is_auto_reclaimable, name
+open gaps: bind-versus-create, list-lookup,
+mutation-policy, waiter-work-request
 Scaffold metadata only; replace with
 controller-specific runtime states before
 promotion.

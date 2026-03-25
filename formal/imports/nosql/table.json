@@ -5,7 +5,7 @@
   "slug": "table",
   "kind": "Table",
   "sourceRef": "terraform-provider-oci",
-  "providerResource": "scaffold_nosql_table",
+  "providerResource": "oci_nosql_table",
   "operations": {
     "create": [
       {
@@ -23,12 +23,17 @@
     ],
     "list": [
       {
-        "operation": "ListTable",
-        "requestType": "nosql.ListTableRequest",
-        "responseType": "nosql.ListTableResponse"
+        "operation": "ListTables",
+        "requestType": "nosql.ListTablesRequest",
+        "responseType": "nosql.ListTablesResponse"
       }
     ],
     "update": [
+      {
+        "operation": "ChangeTableCompartment",
+        "requestType": "nosql.ChangeTableCompartmentRequest",
+        "responseType": "nosql.ChangeTableCompartmentResponse"
+      },
       {
         "operation": "UpdateTable",
         "requestType": "nosql.UpdateTableRequest",
@@ -46,27 +51,28 @@
   "lifecycle": {
     "create": {
       "pending": [
-        "PROVISIONING"
+        "CREATING"
       ],
       "target": [
         "ACTIVE"
       ]
     },
-    "update": {
-      "pending": [
-        "UPDATING"
-      ],
-      "target": [
-        "ACTIVE"
-      ]
-    }
+    "update": {}
   },
   "mutation": {
     "mutable": [
-      "display_name"
+      "compartment_id",
+      "ddl_statement",
+      "defined_tags",
+      "freeform_tags",
+      "table_limits.capacity_mode",
+      "table_limits.max_read_units",
+      "table_limits.max_storage_in_gbs",
+      "table_limits.max_write_units"
     ],
     "forceNew": [
-      "compartment_id"
+      "is_auto_reclaimable",
+      "name"
     ],
     "conflictsWith": {}
   },
@@ -74,11 +80,6 @@
     "create": [
       {
         "helper": "tfresource.CreateResource"
-      },
-      {
-        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
-        "entityType": "template",
-        "action": "CREATED"
       }
     ],
     "update": [
@@ -101,11 +102,12 @@
     ]
   },
   "listLookup": {
-    "datasource": "scaffold_nosql_table",
-    "collectionField": "table",
+    "datasource": "oci_nosql_tables",
+    "collectionField": "table_collection",
     "responseItemsField": "Items",
     "filterFields": [
       "compartment_id",
+      "name",
       "state"
     ]
   },
@@ -115,11 +117,15 @@
     "repoAuthoredLogicGapsPath": "controllers/nosql/table/logic-gaps.md",
     "excludedSemantics": [
       "bind-versus-create",
-      "secret-output",
-      "delete-confirmation"
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "delete-confirmation",
+      "waiter-work-request"
     ]
   },
   "notes": [
-    "Scaffold placeholder for nosql/table; replace imported facts before promoting this row beyond scaffold."
+    "Pinned provider facts imported from terraform-provider-oci for the published Table resource.",
+    "The provider update path combines ChangeTableCompartment with work-request-backed UpdateTable calls, so bind, mutation, and waiter closure stay repo-authored follow-up work."
   ]
 }

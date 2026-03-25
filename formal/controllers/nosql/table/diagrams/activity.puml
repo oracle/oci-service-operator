@@ -23,19 +23,20 @@ skinparam activity {
 start
 :Start from shared flow\nshared/diagrams/shared-reconcile-activity.svg;
 :Load desired Table spec and status from\nKubernetes;
-:Resolve OCI state via GetTable with ListTable\nfallback;
-:Use scaffold_nosql_table filters\ncompartment_id, state when OCID lookup or\nbind-versus-create needs list resolution;
+:Resolve OCI state via GetTable with ListTables\nfallback;
+:Use oci_nosql_tables filters compartment_id,\nname, state when OCID lookup or\nbind-versus-create needs list resolution;
 if (Resource exists?) then (yes)
-:Update path calls UpdateTable;
-:Guard mutable fields display_name and\nforce-new fields compartment_id;
+:Update path calls ChangeTableCompartment,\nUpdateTable;
+:Guard mutable fields compartment_id,\nddl_statement, defined_tags, freeform_tags (+4\nmore) and force-new fields\nis_auto_reclaimable, name;
 else (no)
 :Create path calls CreateTable;
 endif
-:Run provider helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=template action=CREATED;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource;
+:Run provider helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource;
 :Apply repo-authored secret policy none;
-:Delete path uses DeleteTable with required via\nGetTable or ListTable to DELETED confirmation;
+:Delete path uses DeleteTable with required via\nGetTable or ListTables to DELETED confirmation;
 :Project required status and finalizer policy\nretain-until-confirmed-delete;
 :Requeue on provisioning, updating, terminating;
+:Keep promotion blocked on bind-versus-create,\nlist-lookup, mutation-policy,\nwaiter-work-request;
 stop
 note right
 shared diagram:
@@ -56,10 +57,13 @@ archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
-provider states: create PROVISIONING; update
-UPDATING; delete DELETING
-mutable/forceNew: display_name / compartment_id
-open gaps: none
+provider states: create CREATING; update none;
+delete DELETING
+mutable/forceNew: compartment_id, ddl_statement,
+defined_tags, freeform_tags (+4 more) /
+is_auto_reclaimable, name
+open gaps: bind-versus-create, list-lookup,
+mutation-policy, waiter-work-request
 Scaffold metadata only; replace with
 controller-specific runtime states before
 promotion.

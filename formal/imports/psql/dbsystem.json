@@ -5,7 +5,7 @@
   "slug": "dbsystem",
   "kind": "DbSystem",
   "sourceRef": "terraform-provider-oci",
-  "providerResource": "scaffold_psql_dbsystem",
+  "providerResource": "oci_psql_db_system",
   "operations": {
     "create": [
       {
@@ -23,12 +23,27 @@
     ],
     "list": [
       {
-        "operation": "ListDbSystem",
-        "requestType": "psql.ListDbSystemRequest",
-        "responseType": "psql.ListDbSystemResponse"
+        "operation": "ListDbSystems",
+        "requestType": "psql.ListDbSystemsRequest",
+        "responseType": "psql.ListDbSystemsResponse"
       }
     ],
     "update": [
+      {
+        "operation": "ChangeDbSystemCompartment",
+        "requestType": "psql.ChangeDbSystemCompartmentRequest",
+        "responseType": "psql.ChangeDbSystemCompartmentResponse"
+      },
+      {
+        "operation": "PatchDbSystem",
+        "requestType": "psql.PatchDbSystemRequest",
+        "responseType": "psql.PatchDbSystemResponse"
+      },
+      {
+        "operation": "ResetMasterUserPassword",
+        "requestType": "psql.ResetMasterUserPasswordRequest",
+        "responseType": "psql.ResetMasterUserPasswordResponse"
+      },
       {
         "operation": "UpdateDbSystem",
         "requestType": "psql.UpdateDbSystemRequest",
@@ -46,27 +61,69 @@
   "lifecycle": {
     "create": {
       "pending": [
-        "PROVISIONING"
+        "CREATING"
       ],
       "target": [
-        "ACTIVE"
+        "ACTIVE",
+        "NEEDS_ATTENTION"
       ]
     },
-    "update": {
-      "pending": [
-        "UPDATING"
-      ],
-      "target": [
-        "ACTIVE"
-      ]
-    }
+    "update": {}
   },
   "mutation": {
     "mutable": [
-      "display_name"
+      "apply_config",
+      "compartment_id",
+      "config_id",
+      "credentials.password_details.password",
+      "credentials.password_details.password_type",
+      "credentials.password_details.secret_id",
+      "credentials.password_details.secret_version",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "instance_count",
+      "instance_memory_size_in_gbs",
+      "instance_ocpu_count",
+      "management_policy.backup_policy.backup_start",
+      "management_policy.backup_policy.copy_policy.compartment_id",
+      "management_policy.backup_policy.copy_policy.regions",
+      "management_policy.backup_policy.copy_policy.retention_period",
+      "management_policy.backup_policy.days_of_the_month",
+      "management_policy.backup_policy.days_of_the_week",
+      "management_policy.backup_policy.kind",
+      "management_policy.backup_policy.retention_days",
+      "management_policy.maintenance_window_start",
+      "network_details.is_reader_endpoint_enabled",
+      "network_details.nsg_ids",
+      "patch_operations.from",
+      "patch_operations.operation",
+      "patch_operations.position",
+      "patch_operations.selected_item",
+      "patch_operations.selection",
+      "patch_operations.value",
+      "shape",
+      "storage_details.iops"
     ],
     "forceNew": [
-      "compartment_id"
+      "credentials",
+      "credentials.username",
+      "db_version",
+      "instances_details",
+      "instances_details.description",
+      "instances_details.display_name",
+      "instances_details.private_ip",
+      "network_details.primary_db_endpoint_private_ip",
+      "network_details.subnet_id",
+      "source",
+      "source.backup_id",
+      "source.is_having_restore_config_overrides",
+      "source.source_type",
+      "storage_details.availability_domain",
+      "storage_details.is_regionally_durable",
+      "storage_details.system_type",
+      "system_type"
     ],
     "conflictsWith": {}
   },
@@ -74,16 +131,14 @@
     "create": [
       {
         "helper": "tfresource.CreateResource"
-      },
-      {
-        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
-        "entityType": "template",
-        "action": "CREATED"
       }
     ],
     "update": [
       {
         "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
       }
     ],
     "delete": [
@@ -101,11 +156,13 @@
     ]
   },
   "listLookup": {
-    "datasource": "scaffold_psql_dbsystem",
-    "collectionField": "dbsystem",
+    "datasource": "oci_psql_db_systems",
+    "collectionField": "db_system_collection",
     "responseItemsField": "Items",
     "filterFields": [
       "compartment_id",
+      "display_name",
+      "id",
       "state"
     ]
   },
@@ -115,11 +172,15 @@
     "repoAuthoredLogicGapsPath": "controllers/psql/dbsystem/logic-gaps.md",
     "excludedSemantics": [
       "bind-versus-create",
-      "secret-output",
-      "delete-confirmation"
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "delete-confirmation",
+      "waiter-work-request"
     ]
   },
   "notes": [
-    "Scaffold placeholder for psql/dbsystem; replace imported facts before promoting this row beyond scaffold."
+    "Pinned provider facts imported from terraform-provider-oci for the published DbSystem resource.",
+    "The provider datasource and create/update wait behavior still need repo-authored formal closure before generated-runtime promotion."
   ]
 }

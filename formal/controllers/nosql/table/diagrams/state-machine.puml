@@ -16,14 +16,14 @@ skinparam state {
   startColor #1d4ed8
   endColor #0f172a
 }
-state "provisioning\nprovider: PROVISIONING" as provisioning
+state "provisioning\nprovider: CREATING" as provisioning
 state "active\nprovider: ACTIVE" as active
-state "updating\nprovider: UPDATING" as updating
+state "updating" as updating
 state "terminating\nprovider: DELETING" as terminating
 [*] --> provisioning : CreateTable
 provisioning --> active : ACTIVE
-active --> updating : UpdateTable
-updating --> active : ACTIVE
+active --> updating : ChangeTableCompartment,\nUpdateTable
+updating --> active : update targets
 active --> terminating : DeleteTable
 terminating --> [*] : DELETED
 note right of active
@@ -43,10 +43,13 @@ archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
-provider states: create PROVISIONING; update
-UPDATING; delete DELETING
-mutable/forceNew: display_name / compartment_id
-open gaps: none
+provider states: create CREATING; update none;
+delete DELETING
+mutable/forceNew: compartment_id, ddl_statement,
+defined_tags, freeform_tags (+4 more) /
+is_auto_reclaimable, name
+open gaps: bind-versus-create, list-lookup,
+mutation-policy, waiter-work-request
 Scaffold metadata only; replace with
 controller-specific runtime states before
 promotion.

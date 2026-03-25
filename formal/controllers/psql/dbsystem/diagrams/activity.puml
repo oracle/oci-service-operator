@@ -23,19 +23,20 @@ skinparam activity {
 start
 :Start from shared flow\nshared/diagrams/shared-reconcile-activity.svg;
 :Load desired DbSystem spec and status from\nKubernetes;
-:Resolve OCI state via GetDbSystem with\nListDbSystem fallback;
-:Use scaffold_psql_dbsystem filters\ncompartment_id, state when OCID lookup or\nbind-versus-create needs list resolution;
+:Resolve OCI state via GetDbSystem with\nListDbSystems fallback;
+:Use oci_psql_db_systems filters\ncompartment_id, display_name, id, state when\nOCID lookup or bind-versus-create needs list\nresolution;
 if (Resource exists?) then (yes)
-:Update path calls UpdateDbSystem;
-:Guard mutable fields display_name and\nforce-new fields compartment_id;
+:Update path calls ChangeDbSystemCompartment,\nPatchDbSystem, ResetMasterUserPassword (+1\nmore);
+:Guard mutable fields apply_config,\ncompartment_id, config_id,\ncredentials.password_details.password (+29\nmore) and force-new fields credentials,\ncredentials.username, db_version,\ninstances_details (+13 more);
 else (no)
 :Create path calls CreateDbSystem;
 endif
-:Run provider helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=template action=CREATED;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource;
+:Run provider helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource,\ntfresource.WaitForUpdatedState;\ndelete=tfresource.DeleteResource;
 :Apply repo-authored secret policy none;
-:Delete path uses DeleteDbSystem with required\nvia GetDbSystem or ListDbSystem to DELETED\nconfirmation;
+:Delete path uses DeleteDbSystem with required\nvia GetDbSystem or ListDbSystems to DELETED\nconfirmation;
 :Project required status and finalizer policy\nretain-until-confirmed-delete;
 :Requeue on provisioning, updating, terminating;
+:Keep promotion blocked on bind-versus-create,\nlist-lookup, mutation-policy,\nwaiter-work-request;
 stop
 note right
 shared diagram:
@@ -56,10 +57,14 @@ archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
-provider states: create PROVISIONING; update
-UPDATING; delete DELETING
-mutable/forceNew: display_name / compartment_id
-open gaps: none
+provider states: create CREATING; update none;
+delete DELETING
+mutable/forceNew: apply_config, compartment_id,
+config_id, credentials.password_details.password
+(+29 more) / credentials, credentials.username,
+db_version, instances_details (+13 more)
+open gaps: bind-versus-create, list-lookup,
+mutation-policy, waiter-work-request
 Scaffold metadata only; replace with
 controller-specific runtime states before
 promotion.

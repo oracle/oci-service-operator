@@ -36,24 +36,21 @@ Controller -> BaseReconciler: Reconcile(request)
 BaseReconciler -> ServiceManager: reconcile desired DbSystem
 ServiceManager -> OCI: GetDbSystem
 opt list lookup fallback
-ServiceManager -> OCI: ListDbSystem(filters:\ncompartment_id, state)
+ServiceManager -> OCI: ListDbSystems(filters:\ncompartment_id, display_name, id,\nstate)
 OCI --> ServiceManager: matching collection items
 end
 alt create or bind path
 ServiceManager -> OCI: CreateDbSystem
-loop create pending PROVISIONING
+loop create pending CREATING
 ServiceManager -> OCI: GetDbSystem
 end
 else update or drift path
-ServiceManager -> OCI: UpdateDbSystem
-loop update pending UPDATING
-ServiceManager -> OCI: GetDbSystem
-end
+ServiceManager -> OCI: ChangeDbSystemCompartment,\nPatchDbSystem,\nResetMasterUserPassword (+1 more)
 end
 opt delete requested
 ServiceManager -> OCI: DeleteDbSystem
 loop delete confirmation DELETING
-ServiceManager -> OCI: GetDbSystem or ListDbSystem
+ServiceManager -> OCI: GetDbSystem or ListDbSystems
 end
 end
 ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
@@ -80,10 +77,14 @@ archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
-provider states: create PROVISIONING; update
-UPDATING; delete DELETING
-mutable/forceNew: display_name / compartment_id
-open gaps: none
+provider states: create CREATING; update none;
+delete DELETING
+mutable/forceNew: apply_config, compartment_id,
+config_id, credentials.password_details.password
+(+29 more) / credentials, credentials.username,
+db_version, instances_details (+13 more)
+open gaps: bind-versus-create, list-lookup,
+mutation-policy, waiter-work-request
 Scaffold metadata only; replace with
 controller-specific runtime states before
 promotion.

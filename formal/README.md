@@ -1,5 +1,8 @@
 # Formal Scaffold
 
+Start here before designing or changing reconciliation logic. The diagrams in
+this tree are part of the design input, not just generated output.
+
 This tree is the repo-local source of truth for formal runtime inputs.
 
 - `imports/` holds provider-fact JSON only.

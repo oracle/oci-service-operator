@@ -140,6 +140,16 @@
     "conflictsWith": {}
   },
   "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
     "delete": [
       {
         "helper": "tfresource.DeleteResource"
@@ -179,12 +189,13 @@
       "secret-input",
       "endpoint-materialization",
       "status-projection",
-      "update-guard",
+      "mutation-policy",
       "delete-confirmation",
       "legacy-adapter"
     ]
   },
   "notes": [
-    "Seed stub; run formal-import to refresh provider facts."
+    "Pinned provider facts imported from terraform-provider-oci for the published MySqlDbSystem resource.",
+    "Legacy adapter behavior still narrows bind, secret, mutation, status, and delete semantics beyond the imported provider surface."
   ]
 }
