@@ -165,6 +165,13 @@ fmt: ## Run go fmt against code.
 vet: ## Run go vet against code.
 	go vet ./...
 
+lint: ## Run golangci-lint against handwritten repo code.
+	@command -v golangci-lint >/dev/null 2>&1 || { \
+		echo "golangci-lint is required but not installed. Install it locally and retry 'make lint'."; \
+		exit 1; \
+	}
+	golangci-lint run ./...
+
 SCHEMA_VALIDATOR_PROVIDER_PATH ?= .
 SCHEMA_VALIDATOR_FORMAT ?= json
 SCHEMA_VALIDATOR_REPORT ?= validator-report.json
