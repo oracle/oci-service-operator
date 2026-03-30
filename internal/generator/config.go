@@ -87,11 +87,9 @@ type ServiceConfig struct {
 	SampleOrder    int                 `yaml:"sampleOrder,omitempty"`
 	PackageProfile string              `yaml:"packageProfile"`
 	FormalSpec     string              `yaml:"formalSpec,omitempty"`
-	ParityFile     string              `yaml:"parityFile,omitempty"`
 	Compatibility  CompatibilityConfig `yaml:"compatibility,omitempty"`
 	ObservedState  ObservedStateConfig `yaml:"observedState,omitempty"`
 	Generation     GenerationConfig    `yaml:"generation,omitempty"`
-	Parity         *ParityConfig       `yaml:"-"`
 }
 
 // CompatibilityConfig holds explicit backwards-compatibility hints for published kinds.
@@ -116,31 +114,11 @@ func LoadConfig(path string) (*Config, error) {
 		return nil, fmt.Errorf("decode generator config %q: %w", path, err)
 	}
 	cfg.configDir = filepath.Dir(path)
-	if err := cfg.loadParity(filepath.Dir(path)); err != nil {
-		return nil, fmt.Errorf("load generator config %q parity inputs: %w", path, err)
-	}
 	if err := cfg.Validate(); err != nil {
 		return nil, fmt.Errorf("validate generator config %q: %w", path, err)
 	}
 
 	return &cfg, nil
-}
-
-func (c *Config) loadParity(baseDir string) error {
-	for i := range c.Services {
-		parityFile := strings.TrimSpace(c.Services[i].ParityFile)
-		if parityFile == "" {
-			continue
-		}
-
-		parity, err := loadParityConfig(ResolveParityFile(baseDir, parityFile))
-		if err != nil {
-			return fmt.Errorf("service %q: %w", c.Services[i].Service, err)
-		}
-		c.Services[i].Parity = parity
-	}
-
-	return nil
 }
 
 // Validate ensures the config is coherent before generation begins.

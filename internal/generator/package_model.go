@@ -14,15 +14,7 @@ import (
 
 func buildPackageModel(cfg *Config, service ServiceConfig, discovered []ResourceModel) (*PackageModel, error) {
 	version := service.VersionOrDefault(cfg.DefaultVersion)
-	resources := discovered
-	if service.Parity != nil {
-		var err error
-		resources, err = buildParityResources(service, version, discovered)
-		if err != nil {
-			return nil, err
-		}
-	}
-	resources = assignHelperTypeNames(resources)
+	resources := assignHelperTypeNames(discovered)
 	resources = assignStatusTypeNames(resources)
 	resources = applyDefaultSamples(service, version, resources)
 	controllerOutput := buildControllerOutputModel(service, cfg.Domain, resources)
@@ -47,80 +39,6 @@ func buildPackageModel(cfg *Config, service ServiceConfig, discovered []Resource
 		PackageOutput:   buildPackageOutputModel(service, resources),
 		ServiceManagers: serviceManagers,
 	}, nil
-}
-
-func buildParityResources(service ServiceConfig, version string, discovered []ResourceModel) ([]ResourceModel, error) {
-	discoveredBySource := make(map[string]ResourceModel, len(discovered))
-	for _, resource := range discovered {
-		discoveredBySource[resource.SDKName] = resource
-	}
-
-	overridesBySource := make(map[string]ParityResource, len(service.Parity.Resources))
-	for _, override := range service.Parity.Resources {
-		if _, ok := discoveredBySource[override.SourceResource]; !ok {
-			return nil, fmt.Errorf("parity resource %q for service %q was not found in SDK discovery", override.SourceResource, service.Service)
-		}
-		overridesBySource[override.SourceResource] = override
-	}
-
-	resources := make([]ResourceModel, 0, len(discovered))
-	for _, resource := range discovered {
-		override, ok := overridesBySource[resource.SDKName]
-		if ok {
-			resource = buildParityResourceModel(service, version, resource, override)
-		}
-		resources = append(resources, resource)
-	}
-
-	sort.Slice(resources, func(i, j int) bool {
-		return resources[i].Kind < resources[j].Kind
-	})
-
-	return resources, nil
-}
-
-func buildParityResourceModel(service ServiceConfig, version string, discoveredResource ResourceModel, override ParityResource) ResourceModel {
-	fileStem := override.FileStem
-	if strings.TrimSpace(fileStem) == "" {
-		fileStem = strings.ToLower(override.Kind)
-	}
-
-	printColumns := convertPrintColumns(override.PrintColumns)
-	if len(printColumns) == 0 {
-		printColumns = discoveredResource.PrintColumns
-	}
-
-	statusFields := convertFields(override.StatusFields)
-	if len(statusFields) == 0 {
-		statusFields = defaultStatusFields()
-	}
-
-	return ResourceModel{
-		SDKName:         discoveredResource.SDKName,
-		Kind:            override.Kind,
-		FileStem:        fileStem,
-		KindPlural:      strings.ToLower(pluralize(override.Kind)),
-		Operations:      discoveredResource.Operations,
-		Runtime:         discoveredResource.Runtime,
-		LeadingComments: override.LeadingComments,
-		SpecComments:    override.SpecComments,
-		HelperTypes:     convertHelperTypes(override.HelperTypes),
-		SpecFields:      convertFields(override.SpecFields),
-		StatusTypeName:  defaultStatusTypeName(override.Kind),
-		StatusComments:  override.StatusComments,
-		StatusFields:    statusFields,
-		PrintColumns:    printColumns,
-		ObjectComments:  override.ObjectComments,
-		ListComments:    override.ListComments,
-		Sample: SampleModel{
-			Body:         override.Sample.Body,
-			FileName:     sampleFileName(service.Group, version, fileStem),
-			MetadataName: override.Sample.MetadataName,
-			Spec:         override.Sample.Spec,
-		},
-		PrimaryDisplayField: discoveredResource.PrimaryDisplayField,
-		CompatibilityLocked: true,
-	}
 }
 
 func buildPackageOutputModel(service ServiceConfig, resources []ResourceModel) PackageOutputModel {
@@ -150,9 +68,6 @@ func buildPackageOutputModel(service ServiceConfig, resources []ResourceModel) P
 			"../../../config/rbac/leader_election_role.yaml",
 			"../../../config/rbac/leader_election_role_binding.yaml",
 		)
-		if service.Parity != nil {
-			output.Install.Resources = appendUniqueStrings(output.Install.Resources, service.Parity.Package.ExtraResources...)
-		}
 	case PackageProfileCRDOnly:
 		output.Install.Resources = append(output.Install.Resources, "generated/crd")
 	default:
@@ -410,47 +325,6 @@ func appendUniqueStrings(existing []string, extras ...string) []string {
 		existing = append(existing, value)
 	}
 	return existing
-}
-
-func convertHelperTypes(overrides []TypeOverride) []TypeModel {
-	types := make([]TypeModel, 0, len(overrides))
-	for _, override := range overrides {
-		types = append(types, TypeModel{
-			Name:     override.Name,
-			Comments: override.Comments,
-			Fields:   convertFields(override.Fields),
-		})
-	}
-	return types
-}
-
-func convertFields(overrides []FieldOverride) []FieldModel {
-	fields := make([]FieldModel, 0, len(overrides))
-	for _, override := range overrides {
-		fields = append(fields, FieldModel{
-			Name:     override.Name,
-			Type:     override.Type,
-			Tag:      override.Tag,
-			Comments: override.Comments,
-			Markers:  override.Markers,
-			Embedded: strings.TrimSpace(override.Name) == "",
-		})
-	}
-	return fields
-}
-
-func convertPrintColumns(overrides []PrintColumnOverride) []PrintColumnModel {
-	printColumns := make([]PrintColumnModel, 0, len(overrides))
-	for _, override := range overrides {
-		printColumns = append(printColumns, PrintColumnModel{
-			Name:        override.Name,
-			Type:        override.Type,
-			JSONPath:    override.JSONPath,
-			Description: override.Description,
-			Priority:    override.Priority,
-		})
-	}
-	return printColumns
 }
 
 func sampleFileName(group string, version string, fileStem string) string {

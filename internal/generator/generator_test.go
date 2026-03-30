@@ -1511,8 +1511,10 @@ func TestGenerateRendersPackageOutputsByProfile(t *testing.T) {
 				"- generated/crd",
 				"- generated/rbac",
 				"- ../../../config/manager",
-				"- ../../../config/rbac/mysqldbsystem_editor_role.yaml",
-				"- ../../../config/rbac/mysqldbsystem_viewer_role.yaml",
+			},
+			wantInstallNotContains: []string{
+				"mysqldbsystem_editor_role.yaml",
+				"mysqldbsystem_viewer_role.yaml",
 			},
 		},
 		{
@@ -1774,7 +1776,7 @@ func TestGenerateRejectsGeneratedRegistrationWithoutGeneratedRuntimeSurfaces(t *
 	}
 }
 
-func TestGenerateControllerBackedPackagesWithoutParityDoNotReferenceEditorViewerRoles(t *testing.T) {
+func TestGenerateControllerBackedPackagesDoNotReferenceEditorViewerRolesByDefault(t *testing.T) {
 	t.Parallel()
 
 	cfg := &Config{
@@ -2086,7 +2088,7 @@ func TestGeneratedServiceManagerScaffoldCompiles(t *testing.T) {
 	}
 }
 
-func TestCurrentServiceParityMatchesCheckedInArtifacts(t *testing.T) {
+func TestCheckedInCompatibilityLockedServicesMatchGenerator(t *testing.T) {
 	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
 	cfg, err := LoadConfig(cfgPath)
 	if err != nil {
@@ -2100,7 +2102,7 @@ func TestCurrentServiceParityMatchesCheckedInArtifacts(t *testing.T) {
 		}
 	}
 	if len(services) != 3 {
-		t.Fatalf("selected %d parity services, want 3", len(services))
+		t.Fatalf("selected %d compatibility-locked services, want 3", len(services))
 	}
 
 	outputRoot := t.TempDir()
@@ -2146,7 +2148,7 @@ func TestCurrentServiceParityMatchesCheckedInArtifacts(t *testing.T) {
 		"api/streaming/v1beta1/streampool_types.go",
 	}
 	for _, relativePath := range apiFiles {
-		assertGoParity(t, filepath.Join(repoRoot(t), relativePath), filepath.Join(outputRoot, relativePath))
+		assertGeneratedGoMatches(t, filepath.Join(repoRoot(t), relativePath), filepath.Join(outputRoot, relativePath))
 	}
 
 	exactFiles := []string{
@@ -2188,7 +2190,7 @@ func TestCurrentServiceParityMatchesCheckedInArtifacts(t *testing.T) {
 		"internal/registrations/streaming_generated.go",
 	}
 	for _, relativePath := range runtimeFiles {
-		assertGoParity(t, filepath.Join(repoRoot(t), relativePath), filepath.Join(outputRoot, relativePath))
+		assertGeneratedGoMatches(t, filepath.Join(repoRoot(t), relativePath), filepath.Join(outputRoot, relativePath))
 	}
 
 	assertResourceOrderContainsSubset(
@@ -2245,7 +2247,7 @@ func TestCheckedInPromotedCoreRuntimeArtifactsMatchGenerator(t *testing.T) {
 		"internal/registrations/core_generated.go",
 	}
 	for _, relativePath := range runtimeFiles {
-		assertGoParity(t, filepath.Join(repoRoot(t), relativePath), filepath.Join(outputRoot, relativePath))
+		assertGeneratedGoMatches(t, filepath.Join(repoRoot(t), relativePath), filepath.Join(outputRoot, relativePath))
 	}
 
 	exactFiles := []string{
@@ -2302,8 +2304,8 @@ func TestCheckedInIdentityUserRuntimeArtifactsMatchGenerator(t *testing.T) {
 
 	serviceClientPath := "pkg/servicemanager/identity/user/user_serviceclient.go"
 	serviceManagerPath := "pkg/servicemanager/identity/user/user_servicemanager.go"
-	assertGoParity(t, filepath.Join(repoRoot(t), serviceClientPath), filepath.Join(outputRoot, serviceClientPath))
-	assertGoParity(t, filepath.Join(repoRoot(t), serviceManagerPath), filepath.Join(outputRoot, serviceManagerPath))
+	assertGeneratedGoMatches(t, filepath.Join(repoRoot(t), serviceClientPath), filepath.Join(outputRoot, serviceClientPath))
+	assertGeneratedGoMatches(t, filepath.Join(repoRoot(t), serviceManagerPath), filepath.Join(outputRoot, serviceManagerPath))
 
 	content := readFile(t, filepath.Join(outputRoot, serviceClientPath))
 	assertContains(t, content, []string{
@@ -2458,7 +2460,7 @@ func TestCheckedInConfigIncludesONSObservedStateAlias(t *testing.T) {
 	}
 }
 
-func TestMySQLParityIncludesOptionalDesiredStateFields(t *testing.T) {
+func TestMySQLCompatibilityLockedKindIncludesOptionalDesiredStateFields(t *testing.T) {
 	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
 	cfg, err := LoadConfig(cfgPath)
 	if err != nil {
@@ -2487,17 +2489,17 @@ func TestMySQLParityIncludesOptionalDesiredStateFields(t *testing.T) {
 	content := readFile(t, filepath.Join(outputRoot, "api", "mysql", "v1beta1", "mysqldbsystem_types.go"))
 	normalized := strings.Join(strings.Fields(content), " ")
 	assertContains(t, normalized, []string{
-		"type DeletionPolicyDetails struct {",
+		"type MySqlDbSystemDeletionPolicy struct {",
 		"AutomaticBackupRetention string `json:\"automaticBackupRetention,omitempty\"`",
 		"FinalBackup string `json:\"finalBackup,omitempty\"`",
 		"IsDeleteProtected bool `json:\"isDeleteProtected,omitempty\"`",
-		"type SecureConnectionDetails struct {",
-		"CertificateGenerationType string `json:\"certificateGenerationType,omitempty\"`",
-		"CertificateId shared.OCID `json:\"certificateId,omitempty\"`",
-		"DeletionPolicy DeletionPolicyDetails `json:\"deletionPolicy,omitempty\"`",
+		"type MySqlDbSystemSecureConnections struct {",
+		"CertificateGenerationType string `json:\"certificateGenerationType\"`",
+		"CertificateId string `json:\"certificateId,omitempty\"`",
+		"DeletionPolicy MySqlDbSystemDeletionPolicy `json:\"deletionPolicy,omitempty\"`",
 		"CrashRecovery string `json:\"crashRecovery,omitempty\"`",
 		"DatabaseManagement string `json:\"databaseManagement,omitempty\"`",
-		"SecureConnections SecureConnectionDetails `json:\"secureConnections,omitempty\"`",
+		"SecureConnections MySqlDbSystemSecureConnections `json:\"secureConnections,omitempty\"`",
 	})
 }
 
@@ -2559,40 +2561,11 @@ func newTestGenerator(t *testing.T) *Generator {
 }
 
 func testServiceConfig(profile string) ServiceConfig {
-	parity := &ParityConfig{
-		Resources: []ParityResource{
-			{
-				SourceResource: "DbSystem",
-				Kind:           "MySqlDbSystem",
-				FileStem:       "mysqldbsystem",
-				SpecFields: []FieldOverride{
-					{Name: "MySqlDbSystemId", Type: "shared.OCID", Tag: `json:"id,omitempty"`},
-					{Name: "CompartmentId", Type: "shared.OCID", Tag: `json:"compartmentId,omitempty"`},
-					{Name: "DisplayName", Type: "string", Tag: `json:"displayName,omitempty"`},
-					{Name: "Port", Type: "int", Tag: `json:"port,omitempty"`},
-				},
-				Sample: SampleOverride{
-					MetadataName: "mysqldbsystem-sample",
-					Spec: `  compartmentId: ocid1.compartment.oc1..aaaaaaaaXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-  displayName: SampleDB
-  port: 3306`,
-				},
-			},
-		},
-	}
-	if profile == PackageProfileControllerBacked {
-		parity.Package.ExtraResources = []string{
-			"../../../config/rbac/mysqldbsystem_editor_role.yaml",
-			"../../../config/rbac/mysqldbsystem_viewer_role.yaml",
-		}
-	}
-
 	return ServiceConfig{
 		Service:        "mysql",
 		SDKPackage:     "github.com/oracle/oci-service-operator/internal/generator/testdata/sdk/sample",
 		Group:          "mysql",
 		PackageProfile: profile,
-		Parity:         parity,
 		Compatibility: CompatibilityConfig{
 			ExistingKinds: []string{"MySqlDbSystem"},
 		},
@@ -2650,13 +2623,13 @@ func assertResourceOrderContainsSubset(t *testing.T, fullPath string, subsetPath
 	}
 }
 
-func assertGoParity(t *testing.T, wantPath string, gotPath string) {
+func assertGeneratedGoMatches(t *testing.T, wantPath string, gotPath string) {
 	t.Helper()
 
-	want := normalizeGoForParity(t, readFile(t, wantPath))
-	got := normalizeGoForParity(t, readFile(t, gotPath))
+	want := normalizeGeneratedGo(t, readFile(t, wantPath))
+	got := normalizeGeneratedGo(t, readFile(t, gotPath))
 	if want != got {
-		t.Fatalf("Go parity mismatch for %s\nwant:\n%s\n\ngot:\n%s", wantPath, want, got)
+		t.Fatalf("Go output mismatch for %s\nwant:\n%s\n\ngot:\n%s", wantPath, want, got)
 	}
 }
 
@@ -2748,14 +2721,13 @@ func repoRoot(t *testing.T) string {
 	return filepath.Clean(filepath.Join(generatorTestDir(t), "..", ".."))
 }
 
-func normalizeGoForParity(t *testing.T, source string) string {
+func normalizeGeneratedGo(t *testing.T, source string) string {
 	t.Helper()
 
 	source = strings.ReplaceAll(source, "// Code generated by generator. DO NOT EDIT.\n\n", "")
-	source = strings.ReplaceAll(source, "// Code generated by osok-api-generator. DO NOT EDIT.\n\n", "")
 
 	fileSet := token.NewFileSet()
-	file, err := parser.ParseFile(fileSet, "parity.go", source, parser.SkipObjectResolution)
+	file, err := parser.ParseFile(fileSet, "generated.go", source, parser.SkipObjectResolution)
 	if err != nil {
 		t.Fatalf("ParseFile() error = %v\nsource:\n%s", err, source)
 	}

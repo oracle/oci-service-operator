@@ -85,7 +85,7 @@ func main() {
 	flag.StringVar(&opts.baselinePath, "baseline", "", "Optional generated coverage baseline JSON to compare against.")
 	flag.StringVar(&opts.writeBaseline, "write-baseline", "", "Write the current generated coverage baseline to the given path.")
 	flag.BoolVar(&opts.failOnRegression, "fail-on-regression", false, "Exit with a non-zero status when the generated coverage report regresses compared to --baseline.")
-	flag.BoolVar(&opts.preserveSpec, "preserve-existing-spec-surface", false, "Preserve the current checked-in spec/helper surface for selected packages while regenerating status/read-model outputs in the snapshot.")
+	flag.BoolVar(&opts.preserveSpec, "preserve-existing-spec-surface", false, "Preserve the current checked-in API/spec helper surface, including compatibility-locked checked-in artifacts, while regenerating status/read-model outputs in the snapshot.")
 	flag.Parse()
 
 	if err := run(context.Background(), opts); err != nil {

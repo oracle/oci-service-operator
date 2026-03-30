@@ -142,10 +142,9 @@ services:
     sdkPackage: github.com/oracle/oci-go-sdk/v65/database
     group: database
     version: v1beta1
-    phase: parity
+    phase: data-and-storage
     sampleOrder: 10
     packageProfile: controller-backed
-    parityFile: parity/database.yaml
     compatibility:
       existingKinds:
         - AutonomousDatabases
@@ -376,10 +375,9 @@ services:
     sdkPackage: github.com/oracle/oci-go-sdk/v65/mysql
     group: mysql
     version: v1beta1
-    phase: parity
+    phase: data-and-storage
     sampleOrder: 30
     packageProfile: controller-backed
-    parityFile: parity/mysql.yaml
     compatibility:
       existingKinds:
         - MySqlDbSystem
@@ -548,10 +546,9 @@ services:
     sdkPackage: github.com/oracle/oci-go-sdk/v65/streaming
     group: streaming
     version: v1beta1
-    phase: parity
+    phase: eventing-messaging-and-observability
     sampleOrder: 20
     packageProfile: controller-backed
-    parityFile: parity/streaming.yaml
     compatibility:
       existingKinds:
         - Stream

@@ -816,7 +816,7 @@ func TestCheckedInConfigOptsOutEndpointBasedGeneratedRuntimeResources(t *testing
 	}
 }
 
-func TestCheckedInGeneratedNonParityServicesUseSharedManagerRollout(t *testing.T) {
+func TestCheckedInGeneratedServicesWithoutCompatibilityLockedKindsUseSharedManagerRollout(t *testing.T) {
 	t.Parallel()
 
 	servicesPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
@@ -825,14 +825,14 @@ func TestCheckedInGeneratedNonParityServicesUseSharedManagerRollout(t *testing.T
 		t.Fatalf("LoadConfig(%q) error = %v", servicesPath, err)
 	}
 
-	parityServices := map[string]struct{}{
+	compatibilityLockedServices := map[string]struct{}{
 		"database":  {},
 		"mysql":     {},
 		"streaming": {},
 	}
 	promotedNames := make([]string, 0)
 	for _, service := range servicesCfg.Services {
-		if _, ok := parityServices[service.Service]; ok {
+		if _, ok := compatibilityLockedServices[service.Service]; ok {
 			continue
 		}
 
@@ -856,7 +856,24 @@ func TestCheckedInGeneratedNonParityServicesUseSharedManagerRollout(t *testing.T
 	slices.Sort(promotedNames)
 
 	if len(promotedNames) == 0 {
-		t.Fatal("expected at least one promoted non-parity service in services.yaml")
+		t.Fatal("expected at least one generated service without compatibility-locked published kinds in services.yaml")
+	}
+}
+
+func TestCheckedInServicesConfigDoesNotUseParityInputs(t *testing.T) {
+	t.Parallel()
+
+	content, err := os.ReadFile(filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml"))
+	if err != nil {
+		t.Fatalf("ReadFile(services.yaml) error = %v", err)
+	}
+
+	rendered := string(content)
+	if strings.Contains(rendered, "phase: parity") {
+		t.Fatalf("services.yaml still contains a parity phase:\n%s", rendered)
+	}
+	if strings.Contains(rendered, "parityFile:") {
+		t.Fatalf("services.yaml still contains parityFile inputs:\n%s", rendered)
 	}
 }
 
