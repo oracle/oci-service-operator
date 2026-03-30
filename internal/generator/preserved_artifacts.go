@@ -28,28 +28,18 @@ func loadPreservedPackageArtifacts(root string, pkg *PackageModel) (preservedPac
 		return preserved, nil
 	}
 
+	hasCompatibilityLockedResource := false
 	for _, resource := range pkg.Resources {
 		if !resource.CompatibilityLocked {
 			continue
 		}
-
-		resourcePath := filepath.Join("api", pkg.Service.Group, pkg.Version, resource.FileStem+"_types.go")
-		file, err := readPreservedFile(filepath.Join(root, resourcePath))
-		if err != nil {
-			return preserved, fmt.Errorf("load checked-in API artifact %q: %w", resourcePath, err)
-		}
-		if file != nil {
-			if preserved.packageFiles == nil {
-				preserved.packageFiles = make(map[string]preservedFile)
-			}
-			preserved.packageFiles[resourcePath] = *file
-		}
+		hasCompatibilityLockedResource = true
 
 		if strings.TrimSpace(resource.Sample.FileName) == "" {
 			continue
 		}
 		samplePath := filepath.Join("config", "samples", resource.Sample.FileName)
-		file, err = readPreservedFile(filepath.Join(root, samplePath))
+		file, err := readPreservedFile(filepath.Join(root, samplePath))
 		if err != nil {
 			return preserved, fmt.Errorf("load checked-in sample artifact %q: %w", samplePath, err)
 		}
@@ -61,7 +51,7 @@ func loadPreservedPackageArtifacts(root string, pkg *PackageModel) (preservedPac
 		}
 	}
 
-	if len(preserved.packageFiles) == 0 {
+	if !hasCompatibilityLockedResource {
 		return preserved, nil
 	}
 
@@ -71,6 +61,9 @@ func loadPreservedPackageArtifacts(root string, pkg *PackageModel) (preservedPac
 		return preserved, fmt.Errorf("load checked-in package artifact %q: %w", installPath, err)
 	}
 	if file != nil {
+		if preserved.packageFiles == nil {
+			preserved.packageFiles = make(map[string]preservedFile)
+		}
 		preserved.packageFiles[installPath] = *file
 	}
 

@@ -63,11 +63,11 @@ func TestGeneratePreservesExistingSpecSurfaceFromSeparateRoot(t *testing.T) {
 		t.Fatalf("Widget spec fields = %v, want [CompartmentId Source]", gotFields)
 	}
 
-	if len(surface.HelperTypes) != 1 || surface.HelperTypes[0].Name != "WidgetExistingSource" {
-		t.Fatalf("Widget helper types = %#v, want WidgetExistingSource only", surface.HelperTypes)
+	if len(surface.SpecHelperTypes) != 1 || surface.SpecHelperTypes[0].Name != "WidgetExistingSource" {
+		t.Fatalf("Widget helper types = %#v, want WidgetExistingSource only", surface.SpecHelperTypes)
 	}
-	if !hasField(surface.HelperTypes[0].Fields, "Type") {
-		t.Fatalf("WidgetExistingSource fields = %#v, want Type", surface.HelperTypes[0].Fields)
+	if !hasField(surface.SpecHelperTypes[0].Fields, "Type") {
+		t.Fatalf("WidgetExistingSource fields = %#v, want Type", surface.SpecHelperTypes[0].Fields)
 	}
 
 	content := readFile(t, widgetPath)

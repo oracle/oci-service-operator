@@ -43,7 +43,8 @@ Runtime rollout defaults:
 - Services with compatibility-locked published kinds keep that published API
   surface in `services.yaml` and use
   `--preserve-existing-spec-surface` when regenerating the
-  checked-in API, sample, and package artifacts.
+  checked-in spec/helper surface plus compatibility-locked sample/package
+  artifacts.
 
 Package profile behavior:
 

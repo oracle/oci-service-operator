@@ -268,9 +268,9 @@ Generated package scaffolding must include:
 
 - New services start as `crd-only` and normally omit the `generation` block.
 - Services with compatibility-locked published kinds stay `controller-backed`
-  and preserve those checked-in API, sample, and package artifacts through
-  `compatibility.existingKinds` plus the checked-in artifact preservation flag
-  instead of special-case overlay files.
+  and preserve the checked-in spec/helper surface plus compatibility-locked
+  sample and package artifacts through `compatibility.existingKinds` plus the
+  checked-in artifact preservation flag instead of special-case overlay files.
 - A service moves from `crd-only` to `controller-backed` only when controller,
   service-manager, and registration rollout is explicitly enabled and the
   shared manager/package integration issue lands.
@@ -398,8 +398,9 @@ Expected regeneration and validation flow:
    sample kustomization, and package scaffolding for the selected services.
    When refreshing checked-in compatibility-locked published resources, pass
    `--preserve-existing-spec-surface` so the checked-in
-   API, sample, and package artifacts remain intact while the rest of the
-   service regenerates from normal config.
+   spec/helper surface plus compatibility-locked sample/package artifacts
+   remain intact while status/read-model outputs and the rest of the service
+   regenerate from normal config.
 4. When deepcopy output and CRD manifests also need refresh, run `make generate`
    and `make manifests` after the generator command. That flow also syncs the shared
    `config/crd/kustomization.yaml` resource list from `config/crd/bases/*.yaml`.

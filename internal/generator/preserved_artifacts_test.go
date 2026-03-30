@@ -59,11 +59,24 @@ func TestGeneratePreservesCheckedInCompatibilityLockedArtifactsFromSeparateRoot(
 		t.Fatalf("Generate() error = %v", err)
 	}
 
-	assertExactFileMatch(
-		t,
-		resourcePath,
-		filepath.Join(outputRoot, "api", "mysql", "v1beta1", "mysqldbsystem_types.go"),
-	)
+	renderedResourcePath := filepath.Join(outputRoot, "api", "mysql", "v1beta1", "mysqldbsystem_types.go")
+	content := readFile(t, renderedResourcePath)
+	if content == readFile(t, resourcePath) {
+		t.Fatalf("Generate() copied %s verbatim instead of regenerating status/read-model output", renderedResourcePath)
+	}
+	assertContains(t, content, []string{
+		"Port int `json:\"port,omitempty\"`",
+		"OsokStatus",
+		"shared.OSOKStatus",
+		"`json:\"status\"`",
+		"LastSuccessfulSync",
+		"`json:\"lastSuccessfulSync,omitempty\"`",
+		"LifecycleState",
+		"`json:\"lifecycleState,omitempty\"`",
+	})
+	assertNotContains(t, content, []string{
+		"Preserved custom checked-in MySqlDbSystem marker.",
+	})
 	assertExactFileMatch(
 		t,
 		installPath,
@@ -87,7 +100,7 @@ type MySqlDbSystemSpec struct {
 
 // MySqlDbSystemStatus defines the observed state of MySqlDbSystem.
 type MySqlDbSystemStatus struct {
-	State string ` + "`json:\"state,omitempty\"`" + `
+	LastSuccessfulSync string ` + "`json:\"lastSuccessfulSync,omitempty\"`" + `
 }
 
 // +kubebuilder:object:root=true

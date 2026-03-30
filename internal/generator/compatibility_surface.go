@@ -19,9 +19,11 @@ import (
 )
 
 type existingSpecSurface struct {
-	SpecComments []string
-	SpecFields   []FieldModel
-	HelperTypes  []TypeModel
+	SpecComments      []string
+	SpecFields        []FieldModel
+	SpecHelperTypes   []TypeModel
+	StatusFields      []FieldModel
+	StatusHelperTypes []TypeModel
 }
 
 func preservePackageSpecSurfaces(root string, pkg *PackageModel) error {
@@ -61,13 +63,17 @@ func preservePackageSpecSurfaces(root string, pkg *PackageModel) error {
 }
 
 func overlayExistingSpecSurface(resource ResourceModel, surface existingSpecSurface) ResourceModel {
-	statusFields := append([]FieldModel(nil), resource.StatusFields...)
-	statusHelpers := referencedHelperTypes(statusFields, resource.HelperTypes)
-	statusFields, helperTypes := mergeSpecAndStatusHelperTypes(surface.HelperTypes, statusFields, statusHelpers)
+	generatedStatusFields := append([]FieldModel(nil), resource.StatusFields...)
+	generatedStatusHelpers := referencedHelperTypes(generatedStatusFields, resource.HelperTypes)
+	generatedStatusFields, helperTypes := mergeSpecAndStatusHelperTypes(surface.SpecHelperTypes, generatedStatusFields, generatedStatusHelpers)
+
+	preservedStatusFields := appendMissingStatusFields(surface.StatusFields, generatedStatusFields)
+	preservedStatusHelpers := referencedHelperTypes(preservedStatusFields, surface.StatusHelperTypes)
+	preservedStatusFields, helperTypes = mergeSpecAndStatusHelperTypes(helperTypes, preservedStatusFields, preservedStatusHelpers)
 
 	resource.SpecComments = append([]string(nil), surface.SpecComments...)
 	resource.SpecFields = append([]FieldModel(nil), surface.SpecFields...)
-	resource.StatusFields = statusFields
+	resource.StatusFields = append(generatedStatusFields, preservedStatusFields...)
 	resource.HelperTypes = helperTypes
 	resource.PrimaryDisplayField = inferPrimaryDisplayField(resource.SpecFields)
 	resource.PrintColumns = defaultPrintColumns(resource.Kind, resource.PrimaryDisplayField)
@@ -126,6 +132,34 @@ func mergeSpecAndStatusHelperTypes(specHelpers []TypeModel, statusFields []Field
 	}
 
 	return statusFields, append(preserved, mergedStatus...)
+}
+
+func appendMissingStatusFields(existing []FieldModel, generated []FieldModel) []FieldModel {
+	if len(existing) == 0 {
+		return nil
+	}
+
+	generatedFields := make(map[string]struct{}, len(generated))
+	for _, field := range generated {
+		generatedFields[fieldMergeKey(field)] = struct{}{}
+	}
+
+	preserved := make([]FieldModel, 0, len(existing))
+	for _, field := range existing {
+		if _, ok := generatedFields[fieldMergeKey(field)]; ok {
+			continue
+		}
+		preserved = append(preserved, field)
+	}
+
+	return preserved
+}
+
+func fieldMergeKey(field FieldModel) string {
+	if field.Embedded {
+		return "embedded:" + field.Type
+	}
+	return "field:" + field.Name
 }
 
 func uniqueCompatibilityHelperName(name string, usedNames map[string]struct{}) string {
@@ -233,19 +267,30 @@ func loadExistingSpecSurface(path string, kind string) (existingSpecSurface, boo
 	if !ok {
 		return existingSpecSurface{}, false, fmt.Errorf("existing resource file %q does not contain %s", path, specTypeName)
 	}
+	statusTypeName := kind + "Status"
+	statusType, hasStatus := typeIndex[statusTypeName]
 
 	helperCandidates := make([]TypeModel, 0, len(typeOrder))
 	for _, name := range typeOrder {
-		if name == specTypeName {
+		if name == specTypeName || name == statusTypeName {
 			continue
 		}
 		helperCandidates = append(helperCandidates, typeIndex[name])
 	}
 
+	statusFields := []FieldModel(nil)
+	statusHelperTypes := []TypeModel(nil)
+	if hasStatus {
+		statusFields = append([]FieldModel(nil), statusType.Fields...)
+		statusHelperTypes = referencedHelperTypes(statusType.Fields, helperCandidates)
+	}
+
 	return existingSpecSurface{
-		SpecComments: append([]string(nil), specType.Comments...),
-		SpecFields:   append([]FieldModel(nil), specType.Fields...),
-		HelperTypes:  referencedHelperTypes(specType.Fields, helperCandidates),
+		SpecComments:      append([]string(nil), specType.Comments...),
+		SpecFields:        append([]FieldModel(nil), specType.Fields...),
+		SpecHelperTypes:   referencedHelperTypes(specType.Fields, helperCandidates),
+		StatusFields:      statusFields,
+		StatusHelperTypes: statusHelperTypes,
 	}, true, nil
 }
 
