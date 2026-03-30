@@ -52,10 +52,11 @@ func TestSplitCamelAndLowerCamel(t *testing.T) {
 		lower  string
 	}{
 		{
-			name:   "simple camel case",
-			input:  "AutonomousDatabase",
-			tokens: []string{"autonomous", "database"},
-			lower:  "autonomousDatabase",
+			name:          "suffix match for mysql",
+			rawName:       "DbSystem",
+			compatibility: CompatibilityConfig{ExistingKinds: []string{"LegacyDbSystem"}},
+			wantKind:      "LegacyDbSystem",
+			wantMatch:     true,
 		},
 		{
 			name:   "acronym boundary",

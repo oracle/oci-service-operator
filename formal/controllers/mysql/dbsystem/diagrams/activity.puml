@@ -8,7 +8,7 @@ skinparam noteBackgroundColor #fff7d6
 skinparam noteBorderColor #b45309
 skinparam noteFontColor #334155
 skinparam roundcorner 16
-title Activity - mysql/MySqlDbSystem
+title Activity - mysql/DbSystem
 skinparam activity {
   backgroundColor #f8fafc
   borderColor #0f172a
@@ -23,7 +23,7 @@ skinparam activity {
 start
 partition "Observe and Bind" {
 :Start from shared flow\nshared/diagrams/shared-reconcile-activity.svg;
-:Read desired MySqlDbSystem spec, tracked\nstatus, and delete intent;
+:Read desired DbSystem spec, tracked status,\nand delete intent;
 if ("Tracked or explicit OCI identity present?") then (yes)
 :Get the current OCI resource via GetDbSystem;
 else (no)
@@ -34,9 +34,13 @@ endif
 }
 if ("Delete requested?") then (yes)
 partition "Delete" {
-:Delete stays repo-authored not-supported\ndespite provider op DeleteDbSystem;
-:Delete owned Secret side effects only after\nOCI delete confirmation;
-:Allow best-effort completion without finalizer\nretention;
+:Delete path uses DeleteDbSystem with required\nvia GetDbSystem or ListDbSystems to DELETED\nconfirmation;
+:Confirm deletion via GetDbSystem or\nListDbSystems until OCI reaches DELETED;
+if ("Delete cleanup and finalizer release succeed?") then (yes)
+:Remove the finalizer after delete completion;
+else (no)
+:Stay blocked until cleanup or finalizer\nrelease succeeds;
+endif
 }
 stop
 else (no)
@@ -62,15 +66,10 @@ else (no)
 :Skip the no-op mutation path;
 endif
 :Run provider helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
-:Apply repo-authored secret policy ready-only\nwrites after ACTIVE plus secret-input reads;
-if ("Secret sync succeeds?") then (yes)
 :Return success for the ACTIVE success state;
-else (no)
-:Block successful completion until Secret sync\nsucceeds;
-endif
-:Project manual status and finalizer policy\nnone;
-:Requeue on provisioning, updating;
-:Keep promotion blocked on bind-versus-create,\ndelete-confirmation, endpoint-materialization,\nlegacy-adapter, list-lookup (+3 more);
+:Project required status and finalizer policy\nretain-until-confirmed-delete;
+:Requeue on provisioning, updating, terminating;
+:Keep promotion blocked on bind-versus-create,\nlist-lookup, mutation-policy,\nwaiter-work-request;
 }
 endif
 stop
@@ -83,15 +82,16 @@ status-projection details here.
 Controller-local activity diagrams add
 list-lookup hints, secret policies, delete
 handling, and open formal gaps.
-archetype batch: Legacy-adapter controllers
-specialize the shared reconcile path while
-explicit gaps still block generated promotion.
+archetype batch: Generated service-manager
+controllers specialize the shared reconcile path
+with formal runtime ownership.
 service: mysql
-slug: mysqldbsystem
-kind: MySqlDbSystem
-archetype: legacy-adapter
-status/finalizer: manual / none
-requeue: provisioning, updating
+slug: dbsystem
+kind: DbSystem
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
 provider states: create CREATING, UPDATING;
 update UPDATING; delete DELETING
 supported drift: access_mode,
@@ -105,14 +105,10 @@ list lookup: oci_mysql_mysql_db_systems filters
 compartment_id, configuration_id,
 database_management, db_system_id (+4 more)
 conflicts: none
-open gaps: bind-versus-create,
-delete-confirmation, endpoint-materialization,
-legacy-adapter, list-lookup (+3 more)
-Create reads username and password secrets
-before submitting the OCI request.
-Endpoint secret materialization only happens
-after the DB system reaches ACTIVE.
-Delete remains an unsupported legacy path, so no
-confirmed terminating phase exists today.
+open gaps: bind-versus-create, list-lookup,
+mutation-policy, waiter-work-request
+Generated runtime only; replace with
+controller-specific lifecycle notes before
+promotion.
 end note
 @enduml

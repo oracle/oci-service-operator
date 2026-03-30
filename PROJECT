@@ -34,7 +34,7 @@ resources:
   controller: true
   domain: oracle.com
   group: mysql
-  kind: MySqlDbSystem
+  kind: DbSystem
   path: github.com/oracle/oci-service-operator/api/mysql/v1beta1
   version: v1beta1
 version: "3"

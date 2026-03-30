@@ -292,7 +292,7 @@ func TestGetCrdStatus_Happy(t *testing.T) {
 func TestGetCrdStatus_WrongType(t *testing.T) {
 	mgr := newTestManager()
 
-	dbSystem := &mysqlv1beta1.MySqlDbSystem{}
+	dbSystem := &mysqlv1beta1.DbSystem{}
 	_, err := mgr.GetCrdStatus(dbSystem)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "failed to convert the type assertion for Autonomous Databases")
@@ -310,7 +310,7 @@ func TestDelete_NoOcid(t *testing.T) {
 func TestCreateOrUpdate_BadType(t *testing.T) {
 	mgr := newTestManager()
 
-	dbSystem := &mysqlv1beta1.MySqlDbSystem{}
+	dbSystem := &mysqlv1beta1.DbSystem{}
 	resp, err := mgr.CreateOrUpdate(context.Background(), dbSystem, ctrl.Request{})
 	assert.Error(t, err)
 	assert.False(t, resp.IsSuccessful)

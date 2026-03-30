@@ -376,10 +376,6 @@ services:
     phase: data-and-storage
     sampleOrder: 30
     packageProfile: controller-backed
-    observedState:
-      excludedFieldPaths:
-        DbSystem:
-          - Source.SourceUrl
     generation:
       controller:
         strategy: generated
@@ -390,13 +386,10 @@ services:
       webhooks:
         strategy: manual
       resources:
-        - kind: MySqlDbSystem
-          sdkName: DbSystem
+        - kind: DbSystem
+          formalSpec: dbsystem
           controller:
             maxConcurrentReconciles: 3
-            extraRBACMarkers:
-              - groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
-              - groups="",resources=events,verbs=get;list;watch;create;update;patch;delete
           serviceManager:
             packagePath: mysql/dbsystem
 

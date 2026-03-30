@@ -41,11 +41,12 @@ Rules:
   explicitly says otherwise.
 - Omitted `generation` fields default to controller, service-manager, and
   registration rollout `none`, with webhooks defaulting to `manual`.
-- `generation.resources[].kind` uses the published OSOK kind.
-- `generation.resources[].sdkName` is only needed when the checked-in OSOK kind
-  differs from the discovered OCI SDK resource family name.
-- Service-specific rollout or naming behavior belongs in the mapping file, not
-  in hardcoded generator branches.
+- `generation.resources[].kind` uses the final OSOK kind after compatibility
+  overrides are applied.
+- Service-specific compatibility or rollout behavior belongs in the mapping
+  file, not in hardcoded generator branches.
+- The existing manual groups with locked compatibility kinds are:
+  `database/AutonomousDatabases` and `streaming/Stream`.
 
 ## Output Ownership
 
@@ -99,13 +100,11 @@ and service-manager generation is enabled.
 - The generator pipeline should normalize OCI SDK CRUD request families
   (`Create*`, `Get*`, `List*`, `Update*`, `Delete*`) into a shared resource
   stem and render that stem as the OSOK kind.
-- If the published OSOK kind must keep an existing checked-in name, record the
-  raw SDK family under `generation.resources[].sdkName` in
-  `internal/generator/config/services.yaml` rather than adding special-case Go
-  code.
-- The current checked-in renamed kind mappings are
-  `database/AutonomousDatabases <- AutonomousDatabase` and
-  `mysql/MySqlDbSystem <- DbSystem`.
+- If the discovered kind would break an existing published OSOK GVK, the
+  compatibility override belongs in `internal/generator/config/services.yaml`
+  rather than in special-case Go code.
+- Existing locked compatibility kinds are:
+  `AutonomousDatabases` and `Stream`.
 
 ### Controller outputs
 
@@ -168,9 +167,9 @@ and service-manager generation is enabled.
 - Group registration setup consumes `internal/registrations.Context`, which
   combines the controller-runtime manager/client/recorder seam with
   `servicemanager.RuntimeDeps`.
-- Existing manual `database`, `mysql`, and `streaming` groups can bridge into
-  this contract through handwritten files under `internal/registrations/`
-  without changing the shared manager bootstrap shape in `main.go`.
+- Existing manual `database` and `streaming` groups can bridge into this
+  contract through handwritten files under `internal/registrations/` without
+  changing the shared manager bootstrap shape in `main.go`.
 
 ### Webhook ownership
 

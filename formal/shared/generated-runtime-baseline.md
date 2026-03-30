@@ -1,7 +1,7 @@
 # Shared Generated Runtime Baseline
 
-This checklist seeds `nosql/Table`, `psql/DbSystem`, and
-`mysql/MySqlDbSystem` from the same reference points:
+This checklist seeds `nosql/Table`, `psql/DbSystem`, and `mysql/DbSystem` from
+the same reference points:
 
 - `formal/controllers/identity/user` is the generated-runtime precedent for
   required status projection, read-after-write, and finalizer retention until
@@ -10,9 +10,8 @@ This checklist seeds `nosql/Table`, `psql/DbSystem`, and
   `pkg/servicemanager/streams` package are the legacy reference for
   bind-versus-create, lifecycle-sensitive list lookup, and delete-side lookup
   branching.
-- `mysql/MySqlDbSystem` stays in the legacy-adapter batch in this issue; it
-  uses the same category names as the shared checklist but does not inherit the
-  generated-runtime answers yet.
+- `mysql/DbSystem` now follows the generated-runtime path and uses the same
+  category names as the shared checklist.
 
 ## Checklist
 
@@ -25,10 +24,11 @@ This checklist seeds `nosql/Table`, `psql/DbSystem`, and
   state to decide whether create is required.
 - `psql/DbSystem`: use `ListDbSystems` with `compartment_id`, `display_name`,
   `id`, and lifecycle state to decide whether create is required.
-- `mysql/MySqlDbSystem`: keep the legacy bind-by-display-name plus compartment
-  lookup path explicit until the adapter blocker closes.
-- Owner: shared generated-runtime prerequisite for `nosql/Table` and
-  `psql/DbSystem`; legacy-only for `mysql/MySqlDbSystem`.
+- `mysql/DbSystem`: use `ListDbSystems` with `compartmentId`,
+  `configurationId`, `databaseManagement`, `dbSystemId`, `displayName`, and
+  lifecycle state to decide whether create is required.
+- Owner: shared generated-runtime prerequisite plus kind-specific filter
+  closure for all three resources.
 
 ### List-lookup
 
@@ -38,8 +38,7 @@ This checklist seeds `nosql/Table`, `psql/DbSystem`, and
 - `psql/DbSystem`: the provider exposes `oci_psql_db_systems`; the seeded
   baseline carries that datasource shape explicitly even though the current
   formal importer does not auto-wire it.
-- `mysql/MySqlDbSystem`: imported provider facts cover
-  `oci_mysql_mysql_db_systems`.
+- `mysql/DbSystem`: imported provider facts cover `oci_mysql_mysql_db_systems`.
 - Owner: shared identity-resolution prerequisite plus kind-specific filter
   closure.
 
@@ -51,10 +50,10 @@ This checklist seeds `nosql/Table`, `psql/DbSystem`, and
   update, and delete.
 - `psql/DbSystem`: create is work-request-backed and update also exposes
   `tfresource.WaitForUpdatedState`.
-- `mysql/MySqlDbSystem`: keep the legacy adapter's behavior explicit; this
-  issue does not settle mysql waiter behavior.
-- Owner: shared generated-runtime prerequisite for `nosql/Table` and
-  `psql/DbSystem`; legacy-only for `mysql/MySqlDbSystem`.
+- `mysql/DbSystem`: the generated runtime currently uses read-after-write for
+  create and update plus confirm-delete for delete, while the remaining
+  `waiter-work-request` stop condition stays explicit in formal semantics.
+- Owner: shared generated-runtime prerequisite for all three resources.
 
 ### Mutation policy
 
@@ -66,21 +65,19 @@ This checklist seeds `nosql/Table`, `psql/DbSystem`, and
 - `psql/DbSystem`: downstream work must classify `displayName`,
   `compartmentId`, `dbVersion`, `storageDetails`, `shape`, `networkDetails`,
   `credentials`, `source`, `configId`, and tags.
-- `mysql/MySqlDbSystem`: keep the handwritten narrower update surface explicit
-  even though provider facts expose a much broader mutable set.
-- Owner: kind-specific closure for `nosql/Table` and `psql/DbSystem`;
-  legacy-only for `mysql/MySqlDbSystem`.
+- `mysql/DbSystem`: downstream work must classify the broader generated
+  `DbSystem` surface, including `displayName`, `description`,
+  `configurationId`, `backupPolicy`, `maintenance`, `deletionPolicy`,
+  `secureConnections`, and tag fields.
+- Owner: kind-specific closure for all three resources.
 
 ### Status projection
 
 - Shared rule: `identity/User` is the generated-runtime precedent for required
   status projection plus OSOK lifecycle conditions.
-- `nosql/Table` and `psql/DbSystem`: seed the generated-runtime baseline with
-  required status projection.
-- `mysql/MySqlDbSystem`: keep the current manual `OsokStatus`-only projection
-  explicit.
-- Owner: shared generated-runtime baseline for `nosql/Table` and
-  `psql/DbSystem`; legacy-only for `mysql/MySqlDbSystem`.
+- `nosql/Table`, `psql/DbSystem`, and `mysql/DbSystem`: seed the
+  generated-runtime baseline with required status projection.
+- Owner: shared generated-runtime baseline for all three resources.
 
 ### Secret inputs or outputs
 
@@ -89,18 +86,15 @@ This checklist seeds `nosql/Table`, `psql/DbSystem`, and
 - `nosql/Table`: no repo-authored secret reads or writes.
 - `psql/DbSystem`: no Kubernetes secret reads or writes; credential fields
   remain OCI payload inputs.
-- `mysql/MySqlDbSystem`: keep admin credential secret reads and ready-only
-  endpoint secret writes explicit.
-- Owner: no additional secret seam for `nosql/Table` or `psql/DbSystem`;
-  legacy-only for `mysql/MySqlDbSystem`.
+- `mysql/DbSystem`: no repo-authored Kubernetes secret reads or writes; the v2
+  generated surface carries admin credentials as direct spec inputs and does
+  not materialize endpoint secrets.
+- Owner: no additional secret seam for these generated-runtime rows.
 
 ### Delete semantics
 
 - Shared rule: `identity/User` is the generated-runtime precedent for retaining
   the finalizer until `Get` or list fallback confirms deletion.
-- `nosql/Table` and `psql/DbSystem`: seed required delete confirmation plus
-  `retain-until-confirmed-delete`.
-- `mysql/MySqlDbSystem`: delete remains unresolved and legacy-only in this
-  issue.
-- Owner: shared generated-runtime baseline for `nosql/Table` and
-  `psql/DbSystem`; legacy-only blocker for `mysql/MySqlDbSystem`.
+- `nosql/Table`, `psql/DbSystem`, and `mysql/DbSystem`: seed required delete
+  confirmation plus `retain-until-confirmed-delete`.
+- Owner: shared generated-runtime baseline for all three resources.

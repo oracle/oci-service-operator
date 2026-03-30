@@ -244,8 +244,7 @@ services:
       webhooks:
         strategy: manual
       resources:
-        - kind: MySqlDbSystem
-          sdkName: DbSystem
+        - kind: DbSystem
           controller:
             maxConcurrentReconciles: 3
             extraRBACMarkers:
@@ -281,8 +280,8 @@ services:
 	}
 
 	override := mysqlService.Generation.Resources[0]
-	if override.Kind != "MySqlDbSystem" {
-		t.Fatalf("mysql override kind = %q, want %q", override.Kind, "MySqlDbSystem")
+	if override.Kind != "DbSystem" {
+		t.Fatalf("mysql override kind = %q, want %q", override.Kind, "DbSystem")
 	}
 	if override.SDKName != "DbSystem" {
 		t.Fatalf("mysql override sdkName = %q, want %q", override.SDKName, "DbSystem")
@@ -348,8 +347,8 @@ services:
 	if got := service.FormalSpecFor("Widget"); got != "widget" {
 		t.Fatalf("FormalSpecFor(Widget) = %q, want %q", got, "widget")
 	}
-	if got := service.FormalSpecFor("MySqlDbSystem"); got != "dbsystem" {
-		t.Fatalf("FormalSpecFor(MySqlDbSystem) = %q, want %q", got, "dbsystem")
+	if got := service.FormalSpecFor("DbSystem"); got != "dbsystem" {
+		t.Fatalf("FormalSpecFor(DbSystem) = %q, want %q", got, "dbsystem")
 	}
 	if got := filepath.ToSlash(cfg.FormalRoot()); got != "formal" && !strings.HasSuffix(got, "/formal") {
 		t.Fatalf("FormalRoot() = %q, want a formal/ path", got)
@@ -414,7 +413,7 @@ func TestServiceConfigControllerGenerationConfigFor(t *testing.T) {
 			Controller: GenerationSurfaceConfig{Strategy: GenerationStrategyManual},
 			Resources: []ResourceGenerationOverride{
 				{
-					Kind: "MySqlDbSystem",
+					Kind: "DbSystem",
 					Controller: ControllerGenerationOverride{
 						Strategy:                GenerationStrategyGenerated,
 						MaxConcurrentReconciles: 3,
@@ -427,19 +426,19 @@ func TestServiceConfigControllerGenerationConfigFor(t *testing.T) {
 		},
 	}
 
-	if got := service.ControllerGenerationStrategyFor("MySqlDbSystem"); got != GenerationStrategyGenerated {
-		t.Fatalf("ControllerGenerationStrategyFor(MySqlDbSystem) = %q, want %q", got, GenerationStrategyGenerated)
+	if got := service.ControllerGenerationStrategyFor("DbSystem"); got != GenerationStrategyGenerated {
+		t.Fatalf("ControllerGenerationStrategyFor(DbSystem) = %q, want %q", got, GenerationStrategyGenerated)
 	}
 
-	config := service.ControllerGenerationConfigFor("MySqlDbSystem")
+	config := service.ControllerGenerationConfigFor("DbSystem")
 	if config.Strategy != GenerationStrategyGenerated {
-		t.Fatalf("ControllerGenerationConfigFor(MySqlDbSystem).Strategy = %q, want %q", config.Strategy, GenerationStrategyGenerated)
+		t.Fatalf("ControllerGenerationConfigFor(DbSystem).Strategy = %q, want %q", config.Strategy, GenerationStrategyGenerated)
 	}
 	if config.MaxConcurrentReconciles != 3 {
-		t.Fatalf("ControllerGenerationConfigFor(MySqlDbSystem).MaxConcurrentReconciles = %d, want 3", config.MaxConcurrentReconciles)
+		t.Fatalf("ControllerGenerationConfigFor(DbSystem).MaxConcurrentReconciles = %d, want 3", config.MaxConcurrentReconciles)
 	}
 	if !slices.Equal(config.ExtraRBACMarkers, []string{`groups="",resources=secrets,verbs=get;list;watch`}) {
-		t.Fatalf("ControllerGenerationConfigFor(MySqlDbSystem).ExtraRBACMarkers = %v", config.ExtraRBACMarkers)
+		t.Fatalf("ControllerGenerationConfigFor(DbSystem).ExtraRBACMarkers = %v", config.ExtraRBACMarkers)
 	}
 
 	if got := service.ControllerGenerationStrategyFor("Widget"); got != GenerationStrategyManual {
@@ -509,11 +508,11 @@ func TestValidateRejectsInvalidGenerationConfig(t *testing.T) {
 			name: "duplicate resource override",
 			mutate: func(cfg *Config) {
 				cfg.Services[0].Generation.Resources = []ResourceGenerationOverride{
-					{Kind: "MySqlDbSystem", Controller: ControllerGenerationOverride{Strategy: GenerationStrategyManual}},
-					{Kind: "MySqlDbSystem", ServiceManager: ServiceManagerGenerationOverride{PackagePath: "mysql/dbsystem"}},
+					{Kind: "DbSystem", Controller: ControllerGenerationOverride{Strategy: GenerationStrategyManual}},
+					{Kind: "DbSystem", ServiceManager: ServiceManagerGenerationOverride{PackagePath: "mysql/dbsystem"}},
 				}
 			},
-			wantErr: `duplicate kind "MySqlDbSystem"`,
+			wantErr: `duplicate kind "DbSystem"`,
 		},
 		{
 			name: "duplicate sdk name override",
@@ -530,7 +529,7 @@ func TestValidateRejectsInvalidGenerationConfig(t *testing.T) {
 			mutate: func(cfg *Config) {
 				cfg.Services[0].Generation.Resources = []ResourceGenerationOverride{
 					{
-						Kind: "MySqlDbSystem",
+						Kind: "DbSystem",
 						Controller: ControllerGenerationOverride{
 							ExtraRBACMarkers: []string{" "},
 						},
@@ -544,7 +543,7 @@ func TestValidateRejectsInvalidGenerationConfig(t *testing.T) {
 			mutate: func(cfg *Config) {
 				cfg.Services[0].Generation.Resources = []ResourceGenerationOverride{
 					{
-						Kind: "MySqlDbSystem",
+						Kind: "DbSystem",
 						ServiceManager: ServiceManagerGenerationOverride{
 							PackagePath: "../mysql/dbsystem",
 						},
@@ -557,10 +556,10 @@ func TestValidateRejectsInvalidGenerationConfig(t *testing.T) {
 			name: "empty resource override",
 			mutate: func(cfg *Config) {
 				cfg.Services[0].Generation.Resources = []ResourceGenerationOverride{
-					{Kind: "MySqlDbSystem"},
+					{Kind: "DbSystem"},
 				}
 			},
-			wantErr: `generation.resources["MySqlDbSystem"] does not override any runtime output`,
+			wantErr: `generation.resources["DbSystem"] does not override any runtime output`,
 		},
 		{
 			name: "invalid service formal spec",
@@ -574,7 +573,7 @@ func TestValidateRejectsInvalidGenerationConfig(t *testing.T) {
 			mutate: func(cfg *Config) {
 				cfg.Services[0].Generation.Resources = []ResourceGenerationOverride{
 					{
-						Kind:       "MySqlDbSystem",
+						Kind:       "DbSystem",
 						FormalSpec: "../dbsystem",
 					},
 				}
@@ -633,9 +632,96 @@ func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
 		})
 	}
 
-	assertCheckedInDatabaseRuntimeRolloutMetadata(t, services["database"])
-	assertCheckedInMySQLRuntimeRolloutMetadata(t, services["mysql"])
-	assertCheckedInStreamingRuntimeRolloutMetadata(t, services["streaming"])
+	var databaseService *ServiceConfig
+	var mysqlService *ServiceConfig
+	var streamingService *ServiceConfig
+	var coreService *ServiceConfig
+	for i := range cfg.Services {
+		switch cfg.Services[i].Service {
+		case "database":
+			databaseService = &cfg.Services[i]
+		case "mysql":
+			mysqlService = &cfg.Services[i]
+		case "streaming":
+			streamingService = &cfg.Services[i]
+		case "core":
+			coreService = &cfg.Services[i]
+		}
+	}
+	if databaseService == nil || mysqlService == nil || streamingService == nil || coreService == nil {
+		t.Fatal("expected database, mysql, streaming, and core services in services.yaml")
+	}
+
+	for _, service := range []*ServiceConfig{databaseService, mysqlService, streamingService} {
+		if got := service.ControllerGenerationStrategy(); got != GenerationStrategyGenerated {
+			t.Fatalf("%s controller strategy = %q, want %q", service.Service, got, GenerationStrategyGenerated)
+		}
+		if got := service.ServiceManagerGenerationStrategy(); got != GenerationStrategyGenerated {
+			t.Fatalf("%s service-manager strategy = %q, want %q", service.Service, got, GenerationStrategyGenerated)
+		}
+		if got := service.RegistrationGenerationStrategy(); got != GenerationStrategyGenerated {
+			t.Fatalf("%s registration strategy = %q, want %q", service.Service, got, GenerationStrategyGenerated)
+		}
+		if got := service.WebhookGenerationStrategy(); got != GenerationStrategyManual {
+			t.Fatalf("%s webhook strategy = %q, want %q", service.Service, got, GenerationStrategyManual)
+		}
+	}
+
+	if len(databaseService.Generation.Resources) != 1 {
+		t.Fatalf("database generation overrides = %d, want 1", len(databaseService.Generation.Resources))
+	}
+	if len(mysqlService.Generation.Resources) != 1 {
+		t.Fatalf("mysql generation overrides = %d, want 1", len(mysqlService.Generation.Resources))
+	}
+	if len(streamingService.Generation.Resources) != 5 {
+		t.Fatalf("streaming generation overrides = %d, want 5", len(streamingService.Generation.Resources))
+	}
+
+	if !slices.Equal(
+		databaseService.Generation.Resources[0].Controller.ExtraRBACMarkers,
+		[]string{
+			`groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete`,
+			`groups="",resources=events,verbs=get;list;watch;create;update;patch;delete`,
+		},
+	) {
+		t.Fatalf("database extra RBAC markers = %v", databaseService.Generation.Resources[0].Controller.ExtraRBACMarkers)
+	}
+	if databaseService.Generation.Resources[0].ServiceManager.PackagePath != "autonomousdatabases/adb" {
+		t.Fatalf("database packagePath = %q, want %q", databaseService.Generation.Resources[0].ServiceManager.PackagePath, "autonomousdatabases/adb")
+	}
+	if got := generationStrategyOrDefault(databaseService.Generation.Resources[0].Webhooks.Strategy, GenerationStrategyManual); got != GenerationStrategyManual {
+		t.Fatalf("database resource webhook strategy = %q, want %q", got, GenerationStrategyManual)
+	}
+
+	if mysqlService.Generation.Resources[0].Controller.MaxConcurrentReconciles != 3 {
+		t.Fatalf("mysql maxConcurrentReconciles = %d, want 3", mysqlService.Generation.Resources[0].Controller.MaxConcurrentReconciles)
+	}
+	if len(mysqlService.Generation.Resources[0].Controller.ExtraRBACMarkers) != 0 {
+		t.Fatalf("mysql extra RBAC markers = %v", mysqlService.Generation.Resources[0].Controller.ExtraRBACMarkers)
+	}
+	if mysqlService.Generation.Resources[0].ServiceManager.PackagePath != "mysql/dbsystem" {
+		t.Fatalf("mysql packagePath = %q, want %q", mysqlService.Generation.Resources[0].ServiceManager.PackagePath, "mysql/dbsystem")
+	}
+
+	streamingOverrides := make(map[string]ResourceGenerationOverride, len(streamingService.Generation.Resources))
+	for _, override := range streamingService.Generation.Resources {
+		streamingOverrides[override.Kind] = override
+	}
+	if streamingOverrides["Stream"].ServiceManager.PackagePath != "streaming/stream" {
+		t.Fatalf("streaming packagePath = %q, want %q", streamingOverrides["Stream"].ServiceManager.PackagePath, "streaming/stream")
+	}
+	for _, kind := range []string{"Cursor", "Group", "GroupCursor", "Message"} {
+		override, ok := streamingOverrides[kind]
+		if !ok {
+			t.Fatalf("streaming override for %s was not found", kind)
+		}
+		if override.Controller.Strategy != GenerationStrategyNone {
+			t.Fatalf("streaming %s controller strategy = %q, want %q", kind, override.Controller.Strategy, GenerationStrategyNone)
+		}
+		if override.ServiceManager.Strategy != GenerationStrategyNone {
+			t.Fatalf("streaming %s service-manager strategy = %q, want %q", kind, override.ServiceManager.Strategy, GenerationStrategyNone)
+		}
+	}
 
 	coreService := services["core"]
 	if coreService.PackageProfile != PackageProfileControllerBacked {
@@ -655,11 +741,46 @@ func TestCheckedInConfigPromotesOnlyIdentityUserFormalSpec(t *testing.T) {
 	cfg := loadCheckedInConfig(t)
 	services := serviceConfigsByName(t, cfg, "identity", "database", "mysql", "streaming")
 
-	assertServiceFormalSpec(t, services["identity"], "User", "user")
-	assertServiceFormalSpec(t, services["identity"], "Compartment", "")
-	assertServiceFormalSpec(t, services["database"], "AutonomousDatabases", "")
-	assertServiceFormalSpec(t, services["mysql"], "MySqlDbSystem", "")
-	assertServiceFormalSpec(t, services["streaming"], "Stream", "")
+	var identityService *ServiceConfig
+	var databaseService *ServiceConfig
+	var mysqlService *ServiceConfig
+	var streamingService *ServiceConfig
+	for i := range cfg.Services {
+		switch cfg.Services[i].Service {
+		case "identity":
+			identityService = &cfg.Services[i]
+		case "database":
+			databaseService = &cfg.Services[i]
+		case "mysql":
+			mysqlService = &cfg.Services[i]
+		case "streaming":
+			streamingService = &cfg.Services[i]
+		}
+	}
+	if identityService == nil || databaseService == nil || mysqlService == nil || streamingService == nil {
+		t.Fatal("expected identity, database, mysql, and streaming services in services.yaml")
+	}
+
+	if got := identityService.FormalSpecFor("User"); got != "user" {
+		t.Fatalf("identity User formalSpec = %q, want %q", got, "user")
+	}
+	if got := identityService.FormalSpecFor("Compartment"); got != "" {
+		t.Fatalf("identity Compartment formalSpec = %q, want empty", got)
+	}
+
+	for _, test := range []struct {
+		service *ServiceConfig
+		kind    string
+		want    string
+	}{
+		{service: databaseService, kind: "AutonomousDatabases", want: ""},
+		{service: mysqlService, kind: "DbSystem", want: "dbsystem"},
+		{service: streamingService, kind: "Stream", want: ""},
+	} {
+		if got := test.service.FormalSpecFor(test.kind); got != test.want {
+			t.Fatalf("%s %s formalSpec = %q, want %q", test.service.Service, test.kind, got, test.want)
+		}
+	}
 }
 
 func TestCheckedInConfigOptsOutEndpointBasedGeneratedRuntimeResources(t *testing.T) {

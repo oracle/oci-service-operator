@@ -25,15 +25,14 @@
     - [Bind](oss.md#binding-to-an-existing-stream)
     - [Update](oss.md#updating-stream)
     - [Delete](oss.md#delete-stream)
-  - [Oracle MySQL Database Service](mysql.md#mysql-dbsystem-services)
+  - [Oracle MySQL Database Service](mysql.md#oracle-mysql-database-service)
     - [Introduction](mysql.md#introduction)
-    - [MySQL DB Systems Pre-requisites](mysql.md##pre-requisites-for-setting-up-mysql-dbsystems)
-    - [MySQL DB Systems Specification Parameters](mysql.md##mysql-dbsystem-specification-parameters)
-    - [MySQL DB Systems Status Parameters](mysql.md##mysql-dbsystem-status-parameters)
-    - [Provision](mysql.md##provisioning-a-mysql-dbsystem)
-    - [Bind](mysql.md##binding-to-an-existing-mysql-dbsystem)
-    - [Update](mysql.md##updating-a-mysql-dbsystem)
-    - [Access Information in Kubernetes Secret](mysql.md##access-information-in-kubernetes-secrets)
+    - [MySQL DbSystem Pre-requisites](mysql.md#pre-requisites-for-setting-up-mysql-dbsystems)
+    - [MySQL DbSystem Specification Parameters](mysql.md#mysql-dbsystem-specification-parameters)
+    - [MySQL DbSystem Status Parameters](mysql.md#mysql-dbsystem-status-parameters)
+    - [Provision](mysql.md#provisioning-a-mysql-dbsystem)
+    - [Update](mysql.md#updating-a-mysql-dbsystem)
+    - [Kubernetes Secrets](mysql.md#kubernetes-secrets)
 
 ## Introduction
 

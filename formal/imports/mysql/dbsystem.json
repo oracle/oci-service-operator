@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "surface": "provider-facts",
   "service": "mysql",
-  "slug": "mysqldbsystem",
-  "kind": "MySqlDbSystem",
+  "slug": "dbsystem",
+  "kind": "DbSystem",
   "sourceRef": "terraform-provider-oci",
   "providerResource": "oci_mysql_mysql_db_system",
   "operations": {
@@ -181,21 +181,19 @@
   },
   "boundary": {
     "providerFactsOnly": true,
-    "repoAuthoredSpecPath": "controllers/mysql/mysqldbsystem/spec.cfg",
-    "repoAuthoredLogicGapsPath": "controllers/mysql/mysqldbsystem/logic-gaps.md",
+    "repoAuthoredSpecPath": "controllers/mysql/dbsystem/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/mysql/dbsystem/logic-gaps.md",
     "excludedSemantics": [
       "bind-versus-create",
       "list-lookup",
-      "secret-input",
-      "endpoint-materialization",
-      "status-projection",
       "mutation-policy",
+      "status-projection",
       "delete-confirmation",
-      "legacy-adapter"
+      "waiter-work-request"
     ]
   },
   "notes": [
-    "Pinned provider facts imported from terraform-provider-oci for the published MySqlDbSystem resource.",
-    "Legacy adapter behavior still narrows bind, secret, mutation, status, and delete semantics beyond the imported provider surface."
+    "Pinned provider facts imported from terraform-provider-oci for the published DbSystem resource.",
+    "The generated mysql DbSystem runtime no longer uses the legacy secret-backed adapter, but bind-by-lookup, mutation policy, and provider helper semantics still need repo-authored formal closure."
   ]
 }

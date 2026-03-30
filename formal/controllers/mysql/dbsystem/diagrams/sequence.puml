@@ -8,7 +8,7 @@ skinparam noteBackgroundColor #fff7d6
 skinparam noteBorderColor #b45309
 skinparam noteFontColor #334155
 skinparam roundcorner 16
-title Sequence - mysql/MySqlDbSystem
+title Sequence - mysql/DbSystem
 hide footbox
 skinparam sequence {
   actorBorderColor #0f172a
@@ -23,18 +23,17 @@ skinparam sequence {
 actor Kubernetes
 participant Controller
 participant BaseReconciler
-participant "LegacyAdapter" as ServiceManager
+participant "OSOKServiceManager" as ServiceManager
 participant OCI
-participant "Kubernetes Secret" as SecretStore
 note over BaseReconciler,ServiceManager
 shared resolution:
 shared/diagrams/shared-resolution-sequence.svg
 shared delete:
 shared/diagrams/shared-delete-sequence.svg
 end note
-Kubernetes -> Controller: enqueue MySqlDbSystem reconcile
+Kubernetes -> Controller: enqueue DbSystem reconcile
 Controller -> BaseReconciler: Reconcile(request)
-BaseReconciler -> ServiceManager: reconcile desired MySqlDbSystem
+BaseReconciler -> ServiceManager: reconcile desired DbSystem
 group Lookup and bind
 alt tracked or explicit OCI identity already exists
 ServiceManager -> OCI: GetDbSystem
@@ -52,10 +51,16 @@ ServiceManager --> BaseReconciler: persist resolved OCI identity in status
 end
 alt delete requested
 group Delete
-note right of ServiceManager
-delete remains repo-authored unsupported
-despite DeleteDbSystem
-end note
+ServiceManager -> OCI: DeleteDbSystem
+ServiceManager -> OCI: confirm delete via GetDbSystem or\nListDbSystems
+loop delete pending DELETING
+ServiceManager -> OCI: GetDbSystem or ListDbSystems
+end
+alt cleanup or finalizer release is blocked
+ServiceManager --> BaseReconciler: retain delete state and retry
+else delete completion observed
+ServiceManager --> BaseReconciler: release finalizer after delete completion
+end
 end
 else OCI state is retryable
 ServiceManager --> BaseReconciler: requeue while OCI remains in\nCREATING, UPDATING, DELETING
@@ -84,14 +89,10 @@ ServiceManager -> OCI: GetDbSystem
 end
 end
 ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
-ServiceManager -> SecretStore: read required input secret and write\nready-only connection secret
-alt Secret sync fails
-ServiceManager --> BaseReconciler: block success and retry
 end
+ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
 end
-ServiceManager --> BaseReconciler: status=manual, finalizer=none
-end
-BaseReconciler --> Controller: requeue on provisioning, updating
+BaseReconciler --> Controller: requeue on provisioning, updating,\nterminating
 note right of ServiceManager
 shared diagram:
 shared/diagrams/shared-resolution-sequence.svg
@@ -103,16 +104,17 @@ create-or-update dispatch.
 Layer the shared delete sequence when finalizer
 retention, delete confirmation, work-request
 polling, or Secret cleanup apply.
-archetype batch: Legacy-adapter controllers
-follow the shared resolution and delete
-sequences but preserve handwritten stop
-conditions until promotion is safe.
+archetype batch: Generated service-manager
+controllers follow the shared resolution and
+delete sequences with imported waits and
+controller-local policy.
 service: mysql
-slug: mysqldbsystem
-kind: MySqlDbSystem
-archetype: legacy-adapter
-status/finalizer: manual / none
-requeue: provisioning, updating
+slug: dbsystem
+kind: DbSystem
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
 provider states: create CREATING, UPDATING;
 update UPDATING; delete DELETING
 supported drift: access_mode,
@@ -126,14 +128,10 @@ list lookup: oci_mysql_mysql_db_systems filters
 compartment_id, configuration_id,
 database_management, db_system_id (+4 more)
 conflicts: none
-open gaps: bind-versus-create,
-delete-confirmation, endpoint-materialization,
-legacy-adapter, list-lookup (+3 more)
-Create reads username and password secrets
-before submitting the OCI request.
-Endpoint secret materialization only happens
-after the DB system reaches ACTIVE.
-Delete remains an unsupported legacy path, so no
-confirmed terminating phase exists today.
+open gaps: bind-versus-create, list-lookup,
+mutation-policy, waiter-work-request
+Generated runtime only; replace with
+controller-specific lifecycle notes before
+promotion.
 end note
 @enduml
