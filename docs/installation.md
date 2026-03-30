@@ -165,6 +165,47 @@ Allow group <OSOK_OPERATOR_GROUP> to manage <OCI_SERVICE_4> in compartment <NAME
 ```
 Note: the <OCI_SERVICE_1>, <OCI_SERVICE_2> represents in the OCI Services like "autonomous-database-family", "instance_family", etc.
 
+### Enable Security Token
+
+OSOK also supports OCI security-token authentication for deployments outside OCI.
+This mode uses the OCI SDK session-token provider, so the manager pod must read a
+config file, private key, and security token from mounted files.
+
+When `auth_type=security_token` is present in the `ocicredentials` secret, the
+manager mounts that secret at `/etc/oci` and loads the OCI config from
+`/etc/oci/config` by default. You can override the config path with the optional
+secret key `config_file_path`, and override the OCI profile with the optional
+secret key `config_file_profile` (default: `DEFAULT`).
+
+Create a config file whose paths match the files inside the manager pod. A
+working example is:
+
+```ini
+[DEFAULT]
+tenancy=ocid1.tenancy.oc1..<example>
+region=us-ashburn-1
+fingerprint=<USER_PUBLIC_API_KEY_FINGERPRINT>
+key_file=/etc/oci/privatekey
+security_token_file=/etc/oci/security_token
+```
+
+Create the `ocicredentials` secret with the config, private key, and security
+token files:
+
+```bash
+$ kubectl -n oci-service-operator-system create secret generic ocicredentials \
+--from-literal=auth_type=security_token \
+--from-literal=config_file_profile=DEFAULT \
+--from-file=config=<PATH_TO_OCI_CONFIG_FILE> \
+--from-file=privatekey=<PATH_TO_USER_PRIVATE_API_KEY> \
+--from-file=security_token=<PATH_TO_SECURITY_TOKEN_FILE> \
+--from-literal=passphrase=<PASSPHRASE_STRING>
+```
+
+The `config` file stored in the secret must reference the in-pod paths
+(`/etc/oci/privatekey` and `/etc/oci/security_token`), not local workstation
+paths such as `~/.oci/...`.
+
 ### Deploy OSOK
 
 The OCI Service Operator for Kubernetes is packaged as Operator Lifecycle Manager (OLM) Bundle for making it easy to install in Kubernetes Clusters. The bundle can be downloaded as docker image using below command.

@@ -39,6 +39,11 @@ func GetConfigDetails(log loggerutil.OSOKLogger) osokConfig {
 
 func SetUserConfigDetails(log loggerutil.OSOKLogger) {
 	log.InfoLog("Setting UserConfig Details")
+	authType := os.Getenv("AUTH_TYPE")
+	if authType != "" {
+		configDetails.auth.AuthType = authType
+	}
+
 	user := os.Getenv("USER")
 	if user != "" {
 		configDetails.auth.User = user
@@ -67,6 +72,16 @@ func SetUserConfigDetails(log loggerutil.OSOKLogger) {
 	privateKey := os.Getenv("PRIVATEKEY")
 	if privateKey != "" {
 		configDetails.auth.PrivateKey = privateKey
+	}
+
+	configFilePath := os.Getenv("OCI_CONFIG_FILE_PATH")
+	if configFilePath != "" {
+		configDetails.auth.ConfigFilePath = configFilePath
+	}
+
+	configFileProfile := os.Getenv("OCI_CONFIG_PROFILE")
+	if configFileProfile != "" {
+		configDetails.auth.ConfigFileProfile = configFileProfile
 	}
 }
 
