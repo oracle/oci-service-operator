@@ -28,11 +28,6 @@ linters:
       - .*\.pb\.go$
       - .*_generated\.go$
       - .*zz_generated.*\.go$
-    rules:
-      - path: _test\.go
-        linters:
-          - gocognit
-          - gocyclo
 
 issues:
   new: true
