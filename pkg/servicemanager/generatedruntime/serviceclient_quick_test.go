@@ -14,6 +14,7 @@ import (
 	"testing"
 	"testing/quick"
 
+	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
@@ -73,48 +74,76 @@ func TestServiceClientCreateOrUpdateQuickClearsStatusOnlyTrackedIDsAfter404(t *t
 	}
 }
 
+const (
+	streamMutationQuickCompartmentID    = "ocid1.compartment.oc1..match"
+	streamMutationQuickExistingID       = "ocid1.thing.oc1..existing"
+	streamMutationQuickCreatedID        = "ocid1.thing.oc1..created"
+	streamMutationQuickResourceName     = "wanted"
+	streamMutationQuickLiveDisplayName  = "steady-name"
+	streamMutationQuickDriftDisplayName = "desired-name"
+	streamMutationQuickLiveRetention    = 24
+	streamMutationQuickDriftRetention   = 48
+
+	streamStaleQuickCompartmentID   = "ocid1.compartment.oc1..match"
+	streamStaleQuickStaleID         = "ocid1.thing.oc1..stale"
+	streamStaleQuickReplacementID   = "ocid1.thing.oc1..replacement"
+	streamStaleQuickCreatedID       = "ocid1.thing.oc1..created"
+	streamStaleQuickResourceName    = "wanted"
+	streamStaleQuickCreatedResource = "created-name"
+)
+
+type streamMutationQuickEnv struct {
+	tc               streamMutationQuickCase
+	resource         *fakeResource
+	desiredDisplay   string
+	desiredRetention int
+	createCalls      int
+	getCalls         int
+	listCalls        int
+	updateCalls      int
+}
+
 func evaluateStreamMutationQuickCase(tc streamMutationQuickCase) error {
-	const (
-		compartmentID    = "ocid1.compartment.oc1..match"
-		existingID       = "ocid1.thing.oc1..existing"
-		createdID        = "ocid1.thing.oc1..created"
-		resourceName     = "wanted"
-		liveDisplayName  = "steady-name"
-		driftDisplayName = "desired-name"
-		liveRetention    = 24
-		driftRetention   = 48
-	)
+	env := newStreamMutationQuickEnv(tc)
+	response, err := env.newClient().CreateOrUpdate(context.Background(), env.resource, ctrl.Request{})
+	if err := env.assertCommonCalls(); err != nil {
+		return err
+	}
+	return env.assertOutcome(response, err)
+}
 
-	listCalls := 0
-	getCalls := 0
-	createCalls := 0
-	updateCalls := 0
-
-	desiredDisplay := liveDisplayName
+func newStreamMutationQuickEnv(tc streamMutationQuickCase) *streamMutationQuickEnv {
+	env := &streamMutationQuickEnv{
+		tc:               tc,
+		desiredDisplay:   streamMutationQuickLiveDisplayName,
+		desiredRetention: streamMutationQuickLiveRetention,
+	}
 	if tc.MutableDrift {
-		desiredDisplay = driftDisplayName
+		env.desiredDisplay = streamMutationQuickDriftDisplayName
 	}
-	desiredRetention := liveRetention
 	if tc.ForceNewDrift {
-		desiredRetention = driftRetention
+		env.desiredRetention = streamMutationQuickDriftRetention
 	}
 
-	resource := &fakeResource{
+	env.resource = &fakeResource{
 		Spec: fakeSpec{
-			CompartmentId:    compartmentID,
-			Name:             resourceName,
-			DisplayName:      desiredDisplay,
-			RetentionInHours: desiredRetention,
+			CompartmentId:    streamMutationQuickCompartmentID,
+			Name:             streamMutationQuickResourceName,
+			DisplayName:      env.desiredDisplay,
+			RetentionInHours: env.desiredRetention,
 		},
 	}
 	if !tc.PreCreateReuse {
-		resource.Status = fakeStatus{
-			OsokStatus: shared.OSOKStatus{Ocid: existingID},
-			Id:         existingID,
+		env.resource.Status = fakeStatus{
+			OsokStatus: shared.OSOKStatus{Ocid: streamMutationQuickExistingID},
+			Id:         streamMutationQuickExistingID,
 		}
 	}
+	return env
+}
 
-	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+func (env *streamMutationQuickEnv) newClient() ServiceClient[*fakeResource] {
+	return NewServiceClient[*fakeResource](Config[*fakeResource]{
 		Kind:    "Thing",
 		SDKName: "Thing",
 		Semantics: &Semantics{
@@ -132,70 +161,21 @@ func evaluateStreamMutationQuickCase(tc streamMutationQuickCase) error {
 		},
 		Create: &Operation{
 			NewRequest: func() any { return &fakeCreateThingRequest{} },
-			Call: func(_ context.Context, _ any) (any, error) {
-				createCalls++
-				return fakeCreateThingResponse{
-					Thing: fakeThing{
-						Id:               createdID,
-						Name:             resourceName,
-						CompartmentId:    compartmentID,
-						DisplayName:      desiredDisplay,
-						RetentionInHours: desiredRetention,
-						LifecycleState:   "ACTIVE",
-					},
-				}, nil
-			},
+			Call:       env.createThing,
 			Fields: []RequestField{
 				{FieldName: "FakeCreateThingDetails", Contribution: "body"},
 			},
 		},
 		Get: &Operation{
 			NewRequest: func() any { return &fakeGetThingRequest{} },
-			Call: func(_ context.Context, _ any) (any, error) {
-				getCalls++
-				if tc.PreCreateReuse && tc.LiveGetMisses {
-					return nil, fakeServiceError{
-						code:       "NotAuthorizedOrNotFound",
-						message:    "thing not found",
-						statusCode: 404,
-						opcID:      "opc-test",
-					}
-				}
-				return fakeGetThingResponse{
-					Thing: fakeThing{
-						Id:               existingID,
-						Name:             resourceName,
-						CompartmentId:    compartmentID,
-						DisplayName:      liveDisplayName,
-						RetentionInHours: liveRetention,
-						LifecycleState:   "ACTIVE",
-					},
-				}, nil
-			},
+			Call:       env.getThing,
 			Fields: []RequestField{
 				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
 			},
 		},
 		List: &Operation{
 			NewRequest: func() any { return &fakeListThingRequest{} },
-			Call: func(_ context.Context, _ any) (any, error) {
-				listCalls++
-				if !tc.PreCreateReuse {
-					return fakeListThingResponse{Collection: fakeThingCollection{}}, nil
-				}
-				return fakeListThingResponse{
-					Collection: fakeThingCollection{
-						Items: []fakeThingSummary{
-							{
-								Id:             existingID,
-								Name:           resourceName,
-								CompartmentId:  compartmentID,
-								LifecycleState: "ACTIVE",
-							},
-						},
-					},
-				}, nil
-			},
+			Call:       env.listThing,
 			Fields: []RequestField{
 				{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
 				{FieldName: "Name", RequestName: "name", Contribution: "query"},
@@ -203,138 +183,258 @@ func evaluateStreamMutationQuickCase(tc streamMutationQuickCase) error {
 		},
 		Update: &Operation{
 			NewRequest: func() any { return &fakeUpdateThingRequest{} },
-			Call: func(_ context.Context, _ any) (any, error) {
-				updateCalls++
-				return fakeUpdateThingResponse{
-					Thing: fakeThing{
-						Id:               existingID,
-						Name:             resourceName,
-						CompartmentId:    compartmentID,
-						DisplayName:      desiredDisplay,
-						RetentionInHours: liveRetention,
-						LifecycleState:   "ACTIVE",
-					},
-				}, nil
-			},
+			Call:       env.updateThing,
 			Fields: []RequestField{
 				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
 				{FieldName: "FakeUpdateThingDetails", Contribution: "body"},
 			},
 		},
 	})
+}
 
-	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+func (env *streamMutationQuickEnv) createThing(_ context.Context, _ any) (any, error) {
+	env.createCalls++
+	return fakeCreateThingResponse{
+		Thing: fakeThing{
+			Id:               streamMutationQuickCreatedID,
+			Name:             streamMutationQuickResourceName,
+			CompartmentId:    streamMutationQuickCompartmentID,
+			DisplayName:      env.desiredDisplay,
+			RetentionInHours: env.desiredRetention,
+			LifecycleState:   "ACTIVE",
+		},
+	}, nil
+}
 
+func (env *streamMutationQuickEnv) getThing(_ context.Context, _ any) (any, error) {
+	env.getCalls++
+	if env.tc.PreCreateReuse && env.tc.LiveGetMisses {
+		return nil, fakeServiceError{
+			code:       "NotAuthorizedOrNotFound",
+			message:    "thing not found",
+			statusCode: 404,
+			opcID:      "opc-test",
+		}
+	}
+	return fakeGetThingResponse{
+		Thing: fakeThing{
+			Id:               streamMutationQuickExistingID,
+			Name:             streamMutationQuickResourceName,
+			CompartmentId:    streamMutationQuickCompartmentID,
+			DisplayName:      streamMutationQuickLiveDisplayName,
+			RetentionInHours: streamMutationQuickLiveRetention,
+			LifecycleState:   "ACTIVE",
+		},
+	}, nil
+}
+
+func (env *streamMutationQuickEnv) listThing(_ context.Context, _ any) (any, error) {
+	env.listCalls++
+	if !env.tc.PreCreateReuse {
+		return fakeListThingResponse{Collection: fakeThingCollection{}}, nil
+	}
+	return fakeListThingResponse{
+		Collection: fakeThingCollection{
+			Items: []fakeThingSummary{
+				{
+					Id:             streamMutationQuickExistingID,
+					Name:           streamMutationQuickResourceName,
+					CompartmentId:  streamMutationQuickCompartmentID,
+					LifecycleState: "ACTIVE",
+				},
+			},
+		},
+	}, nil
+}
+
+func (env *streamMutationQuickEnv) updateThing(_ context.Context, _ any) (any, error) {
+	env.updateCalls++
+	return fakeUpdateThingResponse{
+		Thing: fakeThing{
+			Id:               streamMutationQuickExistingID,
+			Name:             streamMutationQuickResourceName,
+			CompartmentId:    streamMutationQuickCompartmentID,
+			DisplayName:      env.desiredDisplay,
+			RetentionInHours: streamMutationQuickLiveRetention,
+			LifecycleState:   "ACTIVE",
+		},
+	}, nil
+}
+
+func (env *streamMutationQuickEnv) assertCommonCalls() error {
 	wantListCalls := 0
-	if tc.PreCreateReuse {
+	if env.tc.PreCreateReuse {
 		wantListCalls = 1
 	}
-	if listCalls != wantListCalls {
-		return fmt.Errorf("listCalls=%d, want %d for %+v", listCalls, wantListCalls, tc)
+	if env.listCalls != wantListCalls {
+		return fmt.Errorf("listCalls=%d, want %d for %+v", env.listCalls, wantListCalls, env.tc)
 	}
-	if getCalls != 1 {
-		return fmt.Errorf("getCalls=%d, want 1 for %+v", getCalls, tc)
+	if env.getCalls != 1 {
+		return fmt.Errorf("getCalls=%d, want 1 for %+v", env.getCalls, env.tc)
 	}
+	return nil
+}
 
+func (env *streamMutationQuickEnv) assertOutcome(response servicemanager.OSOKResponse, err error) error {
 	switch {
-	case tc.PreCreateReuse && tc.LiveGetMisses:
-		if err != nil {
-			return fmt.Errorf("CreateOrUpdate() error=%v, want create fallback success for %+v", err, tc)
-		}
-		if !response.IsSuccessful || response.ShouldRequeue {
-			return fmt.Errorf("response=%+v, want immediate success for %+v", response, tc)
-		}
-		if createCalls != 1 || updateCalls != 0 {
-			return fmt.Errorf("createCalls=%d updateCalls=%d, want create=1 update=0 for %+v", createCalls, updateCalls, tc)
-		}
-		if got := string(resource.Status.OsokStatus.Ocid); got != createdID {
-			return fmt.Errorf("status.ocid=%q, want %q for %+v", got, createdID, tc)
-		}
-		return nil
-	case tc.ForceNewDrift:
-		if err == nil || !strings.Contains(err.Error(), "require replacement when retentionInHours changes") {
-			return fmt.Errorf("CreateOrUpdate() error=%v, want live force-new replacement failure for %+v", err, tc)
-		}
-		if createCalls != 0 || updateCalls != 0 {
-			return fmt.Errorf("createCalls=%d updateCalls=%d, want create=0 update=0 for %+v", createCalls, updateCalls, tc)
-		}
-		if !tc.PreCreateReuse {
-			if got := string(resource.Status.OsokStatus.Ocid); got != existingID {
-				return fmt.Errorf("status.ocid=%q, want %q for %+v", got, existingID, tc)
-			}
-		} else if resource.Status.Id != existingID {
-			return fmt.Errorf("status.id=%q, want %q for %+v", resource.Status.Id, existingID, tc)
-		}
-		if resource.Status.RetentionInHours != liveRetention {
-			return fmt.Errorf("status.retentionInHours=%d, want %d from live GET for %+v", resource.Status.RetentionInHours, liveRetention, tc)
-		}
-		return nil
-	case tc.MutableDrift:
-		if err != nil {
-			return fmt.Errorf("CreateOrUpdate() error=%v, want update success for %+v", err, tc)
-		}
-		if !response.IsSuccessful || response.ShouldRequeue {
-			return fmt.Errorf("response=%+v, want update success without requeue for %+v", response, tc)
-		}
-		if createCalls != 0 || updateCalls != 1 {
-			return fmt.Errorf("createCalls=%d updateCalls=%d, want create=0 update=1 for %+v", createCalls, updateCalls, tc)
-		}
-		if resource.Status.DisplayName != desiredDisplay {
-			return fmt.Errorf("status.displayName=%q, want %q for %+v", resource.Status.DisplayName, desiredDisplay, tc)
-		}
-		return nil
+	case env.tc.PreCreateReuse && env.tc.LiveGetMisses:
+		return env.assertCreateFallback(response, err)
+	case env.tc.ForceNewDrift:
+		return env.assertForceNewFailure(err)
+	case env.tc.MutableDrift:
+		return env.assertUpdate(response, err)
 	default:
-		if err != nil {
-			return fmt.Errorf("CreateOrUpdate() error=%v, want observe success for %+v", err, tc)
-		}
-		if !response.IsSuccessful || response.ShouldRequeue {
-			return fmt.Errorf("response=%+v, want observe success without requeue for %+v", response, tc)
-		}
-		if createCalls != 0 || updateCalls != 0 {
-			return fmt.Errorf("createCalls=%d updateCalls=%d, want create=0 update=0 for %+v", createCalls, updateCalls, tc)
-		}
-		if resource.Status.DisplayName != liveDisplayName {
-			return fmt.Errorf("status.displayName=%q, want %q for %+v", resource.Status.DisplayName, liveDisplayName, tc)
-		}
-		return nil
+		return env.assertObserve(response, err)
 	}
 }
 
+func (env *streamMutationQuickEnv) assertCreateFallback(response servicemanager.OSOKResponse, err error) error {
+	if err := assertQuickImmediateSuccess(response, err, env.tc, "create fallback success"); err != nil {
+		return err
+	}
+	if err := env.assertCreateUpdateCalls(1, 0); err != nil {
+		return err
+	}
+	if got := string(env.resource.Status.OsokStatus.Ocid); got != streamMutationQuickCreatedID {
+		return fmt.Errorf("status.ocid=%q, want %q for %+v", got, streamMutationQuickCreatedID, env.tc)
+	}
+	return nil
+}
+
+func (env *streamMutationQuickEnv) assertForceNewFailure(err error) error {
+	if err == nil || !strings.Contains(err.Error(), "require replacement when retentionInHours changes") {
+		return fmt.Errorf("CreateOrUpdate() error=%v, want live force-new replacement failure for %+v", err, env.tc)
+	}
+	if err := env.assertCreateUpdateCalls(0, 0); err != nil {
+		return err
+	}
+	if err := env.assertExistingStatusID(); err != nil {
+		return err
+	}
+	if env.resource.Status.RetentionInHours != streamMutationQuickLiveRetention {
+		return fmt.Errorf(
+			"status.retentionInHours=%d, want %d from live GET for %+v",
+			env.resource.Status.RetentionInHours,
+			streamMutationQuickLiveRetention,
+			env.tc,
+		)
+	}
+	return nil
+}
+
+func (env *streamMutationQuickEnv) assertUpdate(response servicemanager.OSOKResponse, err error) error {
+	if err := assertQuickImmediateSuccess(response, err, env.tc, "update success without requeue"); err != nil {
+		return err
+	}
+	if err := env.assertCreateUpdateCalls(0, 1); err != nil {
+		return err
+	}
+	if env.resource.Status.DisplayName != env.desiredDisplay {
+		return fmt.Errorf("status.displayName=%q, want %q for %+v", env.resource.Status.DisplayName, env.desiredDisplay, env.tc)
+	}
+	return nil
+}
+
+func (env *streamMutationQuickEnv) assertObserve(response servicemanager.OSOKResponse, err error) error {
+	if err := assertQuickImmediateSuccess(response, err, env.tc, "observe success without requeue"); err != nil {
+		return err
+	}
+	if err := env.assertCreateUpdateCalls(0, 0); err != nil {
+		return err
+	}
+	if env.resource.Status.DisplayName != streamMutationQuickLiveDisplayName {
+		return fmt.Errorf(
+			"status.displayName=%q, want %q for %+v",
+			env.resource.Status.DisplayName,
+			streamMutationQuickLiveDisplayName,
+			env.tc,
+		)
+	}
+	return nil
+}
+
+func (env *streamMutationQuickEnv) assertCreateUpdateCalls(wantCreate int, wantUpdate int) error {
+	if env.createCalls != wantCreate || env.updateCalls != wantUpdate {
+		return fmt.Errorf(
+			"createCalls=%d updateCalls=%d, want create=%d update=%d for %+v",
+			env.createCalls,
+			env.updateCalls,
+			wantCreate,
+			wantUpdate,
+			env.tc,
+		)
+	}
+	return nil
+}
+
+func (env *streamMutationQuickEnv) assertExistingStatusID() error {
+	if !env.tc.PreCreateReuse {
+		if got := string(env.resource.Status.OsokStatus.Ocid); got != streamMutationQuickExistingID {
+			return fmt.Errorf("status.ocid=%q, want %q for %+v", got, streamMutationQuickExistingID, env.tc)
+		}
+		return nil
+	}
+	if env.resource.Status.Id != streamMutationQuickExistingID {
+		return fmt.Errorf("status.id=%q, want %q for %+v", env.resource.Status.Id, streamMutationQuickExistingID, env.tc)
+	}
+	return nil
+}
+
+type streamStaleTrackedIDQuickEnv struct {
+	tc          streamStaleTrackedIDQuickCase
+	resource    *fakeResource
+	createCalls int
+	getCalls    int
+	listCalls   int
+	updateCalls int
+	getRequest  fakeGetThingRequest
+	listRequest fakeListThingRequest
+}
+
 func evaluateStreamStaleTrackedIDQuickCase(tc streamStaleTrackedIDQuickCase) error {
-	const (
-		compartmentID   = "ocid1.compartment.oc1..match"
-		staleID         = "ocid1.thing.oc1..stale"
-		replacementID   = "ocid1.thing.oc1..replacement"
-		createdID       = "ocid1.thing.oc1..created"
-		resourceName    = "wanted"
-		createdResource = "created-name"
-	)
+	env := newStreamStaleTrackedIDQuickEnv(tc)
+	response, err := env.newClient().CreateOrUpdate(context.Background(), env.resource, ctrl.Request{})
+	if err := assertQuickImmediateSuccess(response, err, tc, "immediate success"); err != nil {
+		return err
+	}
+	if err := env.assertCommonCalls(); err != nil {
+		return err
+	}
+	if err := env.assertRequests(); err != nil {
+		return err
+	}
+	return env.assertStatus()
+}
 
-	listCalls := 0
-	getCalls := 0
-	createCalls := 0
-	updateCalls := 0
-	var getRequest fakeGetThingRequest
-	var listRequest fakeListThingRequest
-
-	resource := &fakeResource{
-		Spec: fakeSpec{
-			CompartmentId: compartmentID,
-			Name:          resourceName,
-			DisplayName:   createdResource,
+func newStreamStaleTrackedIDQuickEnv(tc streamStaleTrackedIDQuickCase) *streamStaleTrackedIDQuickEnv {
+	env := &streamStaleTrackedIDQuickEnv{
+		tc: tc,
+		resource: &fakeResource{
+			Spec: fakeSpec{
+				CompartmentId: streamStaleQuickCompartmentID,
+				Name:          streamStaleQuickResourceName,
+				DisplayName:   streamStaleQuickCreatedResource,
+			},
 		},
 	}
-	switch tc.StatusIDSource {
-	case 0:
-		resource.Status.OsokStatus.Ocid = staleID
-	case 1:
-		resource.Status.Id = staleID
-	default:
-		resource.Status.OsokStatus.Ocid = staleID
-		resource.Status.Id = staleID
-	}
+	env.seedTrackedStatusID()
+	return env
+}
 
-	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+func (env *streamStaleTrackedIDQuickEnv) seedTrackedStatusID() {
+	switch env.tc.StatusIDSource {
+	case 0:
+		env.resource.Status.OsokStatus.Ocid = streamStaleQuickStaleID
+	case 1:
+		env.resource.Status.Id = streamStaleQuickStaleID
+	default:
+		env.resource.Status.OsokStatus.Ocid = streamStaleQuickStaleID
+		env.resource.Status.Id = streamStaleQuickStaleID
+	}
+}
+
+func (env *streamStaleTrackedIDQuickEnv) newClient() ServiceClient[*fakeResource] {
+	return NewServiceClient[*fakeResource](Config[*fakeResource]{
 		Kind:    "Thing",
 		SDKName: "Thing",
 		Semantics: &Semantics{
@@ -348,59 +448,21 @@ func evaluateStreamStaleTrackedIDQuickCase(tc streamStaleTrackedIDQuickCase) err
 		},
 		Create: &Operation{
 			NewRequest: func() any { return &fakeCreateThingRequest{} },
-			Call: func(_ context.Context, _ any) (any, error) {
-				createCalls++
-				return fakeCreateThingResponse{
-					Thing: fakeThing{
-						Id:             createdID,
-						Name:           resourceName,
-						CompartmentId:  compartmentID,
-						DisplayName:    createdResource,
-						LifecycleState: "ACTIVE",
-					},
-				}, nil
-			},
+			Call:       env.createThing,
 			Fields: []RequestField{
 				{FieldName: "FakeCreateThingDetails", Contribution: "body"},
 			},
 		},
 		Get: &Operation{
 			NewRequest: func() any { return &fakeGetThingRequest{} },
-			Call: func(_ context.Context, request any) (any, error) {
-				getCalls++
-				getRequest = *request.(*fakeGetThingRequest)
-				return nil, fakeServiceError{
-					code:       "NotAuthorizedOrNotFound",
-					message:    "thing not found",
-					statusCode: 404,
-					opcID:      "opc-test",
-				}
-			},
+			Call:       env.getThing,
 			Fields: []RequestField{
 				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
 			},
 		},
 		List: &Operation{
 			NewRequest: func() any { return &fakeListThingRequest{} },
-			Call: func(_ context.Context, request any) (any, error) {
-				listCalls++
-				listRequest = *request.(*fakeListThingRequest)
-				if !tc.ReplacementExists {
-					return fakeListThingResponse{Collection: fakeThingCollection{}}, nil
-				}
-				return fakeListThingResponse{
-					Collection: fakeThingCollection{
-						Items: []fakeThingSummary{
-							{
-								Id:             replacementID,
-								Name:           resourceName,
-								CompartmentId:  compartmentID,
-								LifecycleState: "ACTIVE",
-							},
-						},
-					},
-				}, nil
-			},
+			Call:       env.listThing,
 			Fields: []RequestField{
 				{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
 				{FieldName: "Id", RequestName: "id", Contribution: "query"},
@@ -409,53 +471,117 @@ func evaluateStreamStaleTrackedIDQuickCase(tc streamStaleTrackedIDQuickCase) err
 		},
 		Update: &Operation{
 			NewRequest: func() any { return &fakeUpdateThingRequest{} },
-			Call: func(_ context.Context, _ any) (any, error) {
-				updateCalls++
-				return fakeUpdateThingResponse{}, nil
-			},
+			Call:       env.updateThing,
 		},
 	})
+}
 
-	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
-	if err != nil {
-		return fmt.Errorf("CreateOrUpdate() error=%v for %+v", err, tc)
-	}
-	if !response.IsSuccessful || response.ShouldRequeue {
-		return fmt.Errorf("response=%+v, want immediate success for %+v", response, tc)
-	}
-	if getCalls != 1 {
-		return fmt.Errorf("getCalls=%d, want 1 for %+v", getCalls, tc)
-	}
-	if listCalls != 1 {
-		return fmt.Errorf("listCalls=%d, want 1 for %+v", listCalls, tc)
-	}
-	if updateCalls != 0 {
-		return fmt.Errorf("updateCalls=%d, want 0 for %+v", updateCalls, tc)
-	}
-	if getRequest.ThingId == nil || *getRequest.ThingId != staleID {
-		return fmt.Errorf("get request thingId=%v, want stale ID %q for %+v", getRequest.ThingId, staleID, tc)
-	}
-	if listRequest.Id != "" {
-		return fmt.Errorf("list request id=%q, want stale tracked ID cleared for %+v", listRequest.Id, tc)
-	}
-	if listRequest.Name != resourceName || listRequest.CompartmentId != compartmentID {
-		return fmt.Errorf("list request=%+v, want name=%q compartmentId=%q for %+v", listRequest, resourceName, compartmentID, tc)
-	}
+func (env *streamStaleTrackedIDQuickEnv) createThing(_ context.Context, _ any) (any, error) {
+	env.createCalls++
+	return fakeCreateThingResponse{
+		Thing: fakeThing{
+			Id:             streamStaleQuickCreatedID,
+			Name:           streamStaleQuickResourceName,
+			CompartmentId:  streamStaleQuickCompartmentID,
+			DisplayName:    streamStaleQuickCreatedResource,
+			LifecycleState: "ACTIVE",
+		},
+	}, nil
+}
 
-	wantID := replacementID
+func (env *streamStaleTrackedIDQuickEnv) getThing(_ context.Context, request any) (any, error) {
+	env.getCalls++
+	env.getRequest = *request.(*fakeGetThingRequest)
+	return nil, fakeServiceError{
+		code:       "NotAuthorizedOrNotFound",
+		message:    "thing not found",
+		statusCode: 404,
+		opcID:      "opc-test",
+	}
+}
+
+func (env *streamStaleTrackedIDQuickEnv) listThing(_ context.Context, request any) (any, error) {
+	env.listCalls++
+	env.listRequest = *request.(*fakeListThingRequest)
+	if !env.tc.ReplacementExists {
+		return fakeListThingResponse{Collection: fakeThingCollection{}}, nil
+	}
+	return fakeListThingResponse{
+		Collection: fakeThingCollection{
+			Items: []fakeThingSummary{
+				{
+					Id:             streamStaleQuickReplacementID,
+					Name:           streamStaleQuickResourceName,
+					CompartmentId:  streamStaleQuickCompartmentID,
+					LifecycleState: "ACTIVE",
+				},
+			},
+		},
+	}, nil
+}
+
+func (env *streamStaleTrackedIDQuickEnv) updateThing(_ context.Context, _ any) (any, error) {
+	env.updateCalls++
+	return fakeUpdateThingResponse{}, nil
+}
+
+func (env *streamStaleTrackedIDQuickEnv) assertCommonCalls() error {
+	if env.getCalls != 1 {
+		return fmt.Errorf("getCalls=%d, want 1 for %+v", env.getCalls, env.tc)
+	}
+	if env.listCalls != 1 {
+		return fmt.Errorf("listCalls=%d, want 1 for %+v", env.listCalls, env.tc)
+	}
+	if env.updateCalls != 0 {
+		return fmt.Errorf("updateCalls=%d, want 0 for %+v", env.updateCalls, env.tc)
+	}
+	return nil
+}
+
+func (env *streamStaleTrackedIDQuickEnv) assertRequests() error {
+	if env.getRequest.ThingId == nil || *env.getRequest.ThingId != streamStaleQuickStaleID {
+		return fmt.Errorf("get request thingId=%v, want stale ID %q for %+v", env.getRequest.ThingId, streamStaleQuickStaleID, env.tc)
+	}
+	if env.listRequest.Id != "" {
+		return fmt.Errorf("list request id=%q, want stale tracked ID cleared for %+v", env.listRequest.Id, env.tc)
+	}
+	if env.listRequest.Name != streamStaleQuickResourceName || env.listRequest.CompartmentId != streamStaleQuickCompartmentID {
+		return fmt.Errorf(
+			"list request=%+v, want name=%q compartmentId=%q for %+v",
+			env.listRequest,
+			streamStaleQuickResourceName,
+			streamStaleQuickCompartmentID,
+			env.tc,
+		)
+	}
+	return nil
+}
+
+func (env *streamStaleTrackedIDQuickEnv) assertStatus() error {
+	wantID := streamStaleQuickReplacementID
 	wantCreates := 0
-	if !tc.ReplacementExists {
-		wantID = createdID
+	if !env.tc.ReplacementExists {
+		wantID = streamStaleQuickCreatedID
 		wantCreates = 1
 	}
-	if createCalls != wantCreates {
-		return fmt.Errorf("createCalls=%d, want %d for %+v", createCalls, wantCreates, tc)
+	if env.createCalls != wantCreates {
+		return fmt.Errorf("createCalls=%d, want %d for %+v", env.createCalls, wantCreates, env.tc)
 	}
-	if got := string(resource.Status.OsokStatus.Ocid); got != wantID {
-		return fmt.Errorf("status.ocid=%q, want %q for %+v", got, wantID, tc)
+	if got := string(env.resource.Status.OsokStatus.Ocid); got != wantID {
+		return fmt.Errorf("status.ocid=%q, want %q for %+v", got, wantID, env.tc)
 	}
-	if resource.Status.Id != wantID {
-		return fmt.Errorf("status.id=%q, want %q for %+v", resource.Status.Id, wantID, tc)
+	if env.resource.Status.Id != wantID {
+		return fmt.Errorf("status.id=%q, want %q for %+v", env.resource.Status.Id, wantID, env.tc)
+	}
+	return nil
+}
+
+func assertQuickImmediateSuccess(response servicemanager.OSOKResponse, err error, tc any, description string) error {
+	if err != nil {
+		return fmt.Errorf("CreateOrUpdate() error=%v, want %s for %+v", err, description, tc)
+	}
+	if !response.IsSuccessful || response.ShouldRequeue {
+		return fmt.Errorf("response=%+v, want %s for %+v", response, description, tc)
 	}
 	return nil
 }
