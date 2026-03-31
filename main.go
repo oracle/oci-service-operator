@@ -6,7 +6,7 @@
 package main
 
 import (
-	"flag"
+	"fmt"
 	"os"
 
 	"github.com/oracle/oci-go-sdk/v65/common"
@@ -23,8 +23,6 @@ import (
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
-	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
 	"github.com/oracle/oci-service-operator/pkg/authhelper"
 	"github.com/oracle/oci-service-operator/pkg/config"
@@ -50,120 +48,109 @@ func init() {
 }
 
 func main() {
-	// Check for fips compliance
-	go_ensurefips.Compliant()
+	if err := run(); err != nil {
+		setupLog.ErrorLog(err, "manager exited")
+		os.Exit(1)
+	}
+}
 
-	// Allow OCI go sdk to use instance metadata service for region lookup
+func run() error {
+	go_ensurefips.Compliant()
 	common.EnableInstanceMetadataServiceLookup()
 
-	var configFile string
-	flag.StringVar(&configFile, "config", "",
-		"The controller will load its initial configuration from this file. "+
-			"Omit this flag to use the default configuration values. "+
-			"Command-line flags override configuration from this file.")
-	var metricsAddr string
-	var enableLeaderElection bool
-	var probeAddr string
-	var initOSOKResources bool
-	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
-	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
-	flag.BoolVar(&enableLeaderElection, "leader-elect", true,
-		"Enable leader election for controller manager. "+
-			"Enabling this will ensure there is only one active controller manager.")
-	flag.BoolVar(&initOSOKResources, "init-osok-resources", false,
-		"Install OSOK prerequisites like CRDs and Webhooks at manager bootup")
-	opts := zap.Options{
-		Development: true,
-	}
-	opts.BindFlags(flag.CommandLine)
-	flag.Parse()
+	startup := parseStartupFlags()
 
-	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
-
-	var err error
-	options := ctrl.Options{Scheme: scheme}
-	if configFile != "" {
-		setupLog.InfoLog("Loading the configuration from the ControllerManagerConfig configMap")
-		options, err = options.AndFrom(ctrl.ConfigFile().AtPath(configFile))
-		if err != nil {
-			setupLog.ErrorLog(err, "unable to load the config file")
-			os.Exit(1)
-		}
-	} else {
-		setupLog.InfoLog("Loading the configuration from the command arguments")
-		options = ctrl.Options{
-			Scheme:                 scheme,
-			Metrics:                metricsserver.Options{BindAddress: metricsAddr},
-			HealthProbeBindAddress: probeAddr,
-			LeaderElection:         enableLeaderElection,
-			LeaderElectionID:       "40558063.oci",
-		}
+	options, err := resolveManagerOptions(startup)
+	if err != nil {
+		return err
 	}
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), options)
 	if err != nil {
-		setupLog.ErrorLog(err, "unable to start manager")
-		os.Exit(1)
+		return fmt.Errorf("unable to start manager: %w", err)
 	}
 
-	if initOSOKResources {
+	if startup.initOSOKResources {
 		util.InitOSOK(mgr.GetConfig(), loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("setup").WithName("initOSOK")})
 	}
 
+	runtimeDeps, err := buildRuntimeDeps(mgr)
+	if err != nil {
+		return err
+	}
+
+	if err := setupRuntimeRegistrations(mgr, runtimeDeps); err != nil {
+		return err
+	}
+
+	// +kubebuilder:scaffold:builder
+
+	if err := addManagerChecks(mgr); err != nil {
+		return err
+	}
+
+	setupLog.InfoLog("starting manager")
+	return mgr.Start(ctrl.SetupSignalHandler())
+}
+
+func buildRuntimeDeps(mgr ctrl.Manager) (servicemanager.RuntimeDeps, error) {
 	setupLog.InfoLog("Getting the config details")
-	osokCfg := config.GetConfigDetails(loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("setup").WithName("config")})
+	configLogger := loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("setup").WithName("config")}
+	osokCfg := config.GetConfigDetails(configLogger)
 
-	authConfigProvider := &authhelper.AuthConfigProvider{
-		Log: loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("setup").WithName("config")}}
-
+	authConfigProvider := &authhelper.AuthConfigProvider{Log: configLogger}
 	provider, err := authConfigProvider.GetAuthProvider(osokCfg)
 	if err != nil {
-		setupLog.ErrorLog(err, "unable to get the oci configuration provider. Exiting setup")
-		os.Exit(1)
+		return servicemanager.RuntimeDeps{}, fmt.Errorf("unable to get the oci configuration provider: %w", err)
 	}
 
 	metricsClient := metrics.Init("osok", loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("metrics")})
-
 	credClient := &kubesecret.KubeSecretClient{
 		Client:  mgr.GetClient(),
 		Log:     loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("credential-helper").WithName("KubeSecretClient")},
 		Metrics: metricsClient,
 	}
 
-	registrationContext := registrations.NewContext(mgr, servicemanager.RuntimeDeps{
+	return servicemanager.RuntimeDeps{
 		Provider:         provider,
 		CredentialClient: credClient,
 		Scheme:           mgr.GetScheme(),
 		Metrics:          metricsClient,
-	})
+	}, nil
+}
 
+func setupRuntimeRegistrations(mgr ctrl.Manager, runtimeDeps servicemanager.RuntimeDeps) error {
+	registrationContext := registrations.NewContext(mgr, runtimeDeps)
+	if err := setupControllerRegistrations(registrationContext); err != nil {
+		return err
+	}
+	return setupExplicitWebhooks(mgr)
+}
+
+func setupControllerRegistrations(registrationContext registrations.Context) error {
 	for _, registration := range registrations.All() {
-		if err = registration.SetupWithManager(registrationContext); err != nil {
-			setupLog.ErrorLog(err, "unable to create controller registration", "group", registration.Group)
-			os.Exit(1)
+		if err := registration.SetupWithManager(registrationContext); err != nil {
+			return fmt.Errorf("unable to create controller registration for group %q: %w", registration.Group, err)
 		}
 	}
+	return nil
+}
+
+func setupExplicitWebhooks(mgr ctrl.Manager) error {
 	for _, webhook := range registrations.ExplicitWebhooks() {
-		if err = webhook.SetupWithManager(mgr); err != nil {
-			setupLog.ErrorLog(err, "unable to create webhook", "webhook", webhook.Name)
-			os.Exit(1)
+		if err := webhook.SetupWithManager(mgr); err != nil {
+			return fmt.Errorf("unable to create webhook %q: %w", webhook.Name, err)
 		}
 	}
+	return nil
+}
 
-	// +kubebuilder:scaffold:builder
-
+func addManagerChecks(mgr ctrl.Manager) error {
 	if err := mgr.AddHealthzCheck("health", healthz.Ping); err != nil {
-		setupLog.ErrorLog(err, "unable to set up health check")
-		os.Exit(1)
+		return fmt.Errorf("unable to set up health check: %w", err)
 	}
 	if err := mgr.AddReadyzCheck("check", healthz.Ping); err != nil {
-		setupLog.ErrorLog(err, "unable to set up ready check")
-		os.Exit(1)
+		return fmt.Errorf("unable to set up ready check: %w", err)
 	}
-
-	setupLog.InfoLog("starting manager")
-	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
-		setupLog.ErrorLog(err, "problem running manager")
-		os.Exit(1)
-	}
+	return nil
 }

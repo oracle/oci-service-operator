@@ -14,7 +14,7 @@ func TestPopulateSnapshotKeepsSelectedOutputsWritable(t *testing.T) {
 	repoRoot := t.TempDir()
 	snapshotRoot := t.TempDir()
 
-	for _, dir := range []string{
+	mustMkdirAll(t, []string{
 		filepath.Join(repoRoot, "api"),
 		filepath.Join(repoRoot, "cmd"),
 		filepath.Join(repoRoot, "controllers"),
@@ -24,12 +24,8 @@ func TestPopulateSnapshotKeepsSelectedOutputsWritable(t *testing.T) {
 		filepath.Join(repoRoot, "pkg", "servicemanager", "identity"),
 		filepath.Join(repoRoot, "internal", "registrations"),
 		filepath.Join(repoRoot, "internal", "validator"),
-	} {
-		if err := os.MkdirAll(dir, 0o755); err != nil {
-			t.Fatalf("MkdirAll(%q) error = %v", dir, err)
-		}
-	}
-	for path, content := range map[string]string{
+	})
+	writeTestFiles(t, map[string]string{
 		filepath.Join(repoRoot, "go.mod"):                                             "module example.com/test\n",
 		filepath.Join(repoRoot, "go.sum"):                                             "",
 		filepath.Join(repoRoot, "validator_allowlist.yaml"):                           "{}\n",
@@ -37,48 +33,17 @@ func TestPopulateSnapshotKeepsSelectedOutputsWritable(t *testing.T) {
 		filepath.Join(repoRoot, "internal", "validator", "doc.go"):                    "package validator\n",
 		filepath.Join(repoRoot, "internal", "registrations", "database_generated.go"): "package registrations\n",
 		filepath.Join(repoRoot, "internal", "registrations", "events_generated.go"):   "package registrations\n",
-	} {
-		if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
-			t.Fatalf("WriteFile(%q) error = %v", path, err)
-		}
-	}
+	})
 
 	if err := populateSnapshot(repoRoot, snapshotRoot, []string{"database"}, []string{"autonomousdatabases"}); err != nil {
 		t.Fatalf("populateSnapshot() error = %v", err)
 	}
 
-	formalPath := filepath.Join(snapshotRoot, "formal")
-	formalInfo, err := os.Lstat(formalPath)
-	if err != nil {
-		t.Fatalf("Lstat(%q) error = %v", formalPath, err)
-	}
-	if formalInfo.Mode()&os.ModeSymlink == 0 {
-		t.Fatalf("%q mode = %v, want symlink", formalPath, formalInfo.Mode())
-	}
-
-	if _, err := os.Lstat(filepath.Join(snapshotRoot, "internal", "registrations", "database_generated.go")); !os.IsNotExist(err) {
-		t.Fatalf("Lstat(selected registration) error = %v, want not exist", err)
-	}
-	eventsPath := filepath.Join(snapshotRoot, "internal", "registrations", "events_generated.go")
-	eventsInfo, err := os.Lstat(eventsPath)
-	if err != nil {
-		t.Fatalf("Lstat(%q) error = %v", eventsPath, err)
-	}
-	if eventsInfo.Mode()&os.ModeSymlink == 0 {
-		t.Fatalf("%q mode = %v, want symlink", eventsPath, eventsInfo.Mode())
-	}
-
-	if _, err := os.Lstat(filepath.Join(snapshotRoot, "pkg", "servicemanager", "autonomousdatabases")); !os.IsNotExist(err) {
-		t.Fatalf("Lstat(selected service-manager root) error = %v, want not exist", err)
-	}
-	identityPath := filepath.Join(snapshotRoot, "pkg", "servicemanager", "identity")
-	identityInfo, err := os.Lstat(identityPath)
-	if err != nil {
-		t.Fatalf("Lstat(%q) error = %v", identityPath, err)
-	}
-	if identityInfo.Mode()&os.ModeSymlink == 0 {
-		t.Fatalf("%q mode = %v, want symlink", identityPath, identityInfo.Mode())
-	}
+	assertSymlink(t, filepath.Join(snapshotRoot, "formal"))
+	assertNotExists(t, filepath.Join(snapshotRoot, "internal", "registrations", "database_generated.go"), "selected registration")
+	assertSymlink(t, filepath.Join(snapshotRoot, "internal", "registrations", "events_generated.go"))
+	assertNotExists(t, filepath.Join(snapshotRoot, "pkg", "servicemanager", "autonomousdatabases"), "selected service-manager root")
+	assertSymlink(t, filepath.Join(snapshotRoot, "pkg", "servicemanager", "identity"))
 }
 
 func TestPreserveCheckedInCompanionFilesLinksCheckedInCompatibilityCompanions(t *testing.T) {
@@ -88,47 +53,33 @@ func TestPreserveCheckedInCompanionFilesLinksCheckedInCompatibilityCompanions(t 
 	snapshotRoot := t.TempDir()
 
 	apiSourceDir := filepath.Join(repoRoot, "api", "database", "v1beta1")
-	if err := os.MkdirAll(apiSourceDir, 0o755); err != nil {
-		t.Fatalf("MkdirAll(%q) error = %v", apiSourceDir, err)
-	}
+	mustMkdirAll(t, []string{apiSourceDir})
 	webhookPath := filepath.Join(apiSourceDir, "autonomousdatabases_webhook.go")
-	if err := os.WriteFile(webhookPath, []byte("package v1beta1\n"), 0o644); err != nil {
-		t.Fatalf("WriteFile(%q) error = %v", webhookPath, err)
-	}
 	typesPath := filepath.Join(apiSourceDir, "autonomousdatabases_types.go")
-	if err := os.WriteFile(typesPath, []byte("package v1beta1\n"), 0o644); err != nil {
-		t.Fatalf("WriteFile(%q) error = %v", typesPath, err)
-	}
+	writeTestFiles(t, map[string]string{
+		webhookPath: "package v1beta1\n",
+		typesPath:   "package v1beta1\n",
+	})
 
 	serviceManagerSourceDir := filepath.Join(repoRoot, "pkg", "servicemanager", "autonomousdatabases", "adb")
-	if err := os.MkdirAll(serviceManagerSourceDir, 0o755); err != nil {
-		t.Fatalf("MkdirAll(%q) error = %v", serviceManagerSourceDir, err)
-	}
+	mustMkdirAll(t, []string{serviceManagerSourceDir})
 	legacyServiceClientPath := filepath.Join(serviceManagerSourceDir, "adb_serviceclient.go")
-	if err := os.WriteFile(legacyServiceClientPath, []byte("package adb\n"), 0o644); err != nil {
-		t.Fatalf("WriteFile(%q) error = %v", legacyServiceClientPath, err)
-	}
 	legacyServiceManagerPath := filepath.Join(serviceManagerSourceDir, "adb_servicemanager.go")
-	if err := os.WriteFile(legacyServiceManagerPath, []byte("package adb\n"), 0o644); err != nil {
-		t.Fatalf("WriteFile(%q) error = %v", legacyServiceManagerPath, err)
-	}
 	adapterPath := filepath.Join(serviceManagerSourceDir, "autonomousdatabases_generated_client_adapter.go")
-	if err := os.WriteFile(adapterPath, []byte("package adb\n"), 0o644); err != nil {
-		t.Fatalf("WriteFile(%q) error = %v", adapterPath, err)
-	}
 	generatedServiceClientPath := filepath.Join(serviceManagerSourceDir, "autonomousdatabases_serviceclient.go")
-	if err := os.WriteFile(generatedServiceClientPath, []byte("package adb\n"), 0o644); err != nil {
-		t.Fatalf("WriteFile(%q) error = %v", generatedServiceClientPath, err)
-	}
+	writeTestFiles(t, map[string]string{
+		legacyServiceClientPath:    "package adb\n",
+		legacyServiceManagerPath:   "package adb\n",
+		adapterPath:                "package adb\n",
+		generatedServiceClientPath: "package adb\n",
+	})
 
 	snapshotServiceManagerDir := filepath.Join(snapshotRoot, "pkg", "servicemanager", "autonomousdatabases", "adb")
-	if err := os.MkdirAll(snapshotServiceManagerDir, 0o755); err != nil {
-		t.Fatalf("MkdirAll(%q) error = %v", snapshotServiceManagerDir, err)
-	}
+	mustMkdirAll(t, []string{snapshotServiceManagerDir})
 	snapshotGeneratedServiceClientPath := filepath.Join(snapshotServiceManagerDir, "autonomousdatabases_serviceclient.go")
-	if err := os.WriteFile(snapshotGeneratedServiceClientPath, []byte("package adb\n"), 0o644); err != nil {
-		t.Fatalf("WriteFile(%q) error = %v", snapshotGeneratedServiceClientPath, err)
-	}
+	writeTestFiles(t, map[string]string{
+		snapshotGeneratedServiceClientPath: "package adb\n",
+	})
 
 	services := []generator.ServiceConfig{
 		{
@@ -149,52 +100,60 @@ func TestPreserveCheckedInCompanionFilesLinksCheckedInCompatibilityCompanions(t 
 		t.Fatalf("preserveCheckedInCompanionFiles() error = %v", err)
 	}
 
-	snapshotWebhookPath := filepath.Join(snapshotRoot, "api", "database", "v1beta1", "autonomousdatabases_webhook.go")
-	webhookInfo, err := os.Lstat(snapshotWebhookPath)
-	if err != nil {
-		t.Fatalf("Lstat(%q) error = %v", snapshotWebhookPath, err)
-	}
-	if webhookInfo.Mode()&os.ModeSymlink == 0 {
-		t.Fatalf("%q mode = %v, want symlink", snapshotWebhookPath, webhookInfo.Mode())
-	}
-
 	snapshotAdapterPath := filepath.Join(snapshotServiceManagerDir, "autonomousdatabases_generated_client_adapter.go")
-	adapterInfo, err := os.Lstat(snapshotAdapterPath)
-	if err != nil {
-		t.Fatalf("Lstat(%q) error = %v", snapshotAdapterPath, err)
-	}
-	if adapterInfo.Mode()&os.ModeSymlink == 0 {
-		t.Fatalf("%q mode = %v, want symlink", snapshotAdapterPath, adapterInfo.Mode())
-	}
-
 	snapshotLegacyServiceClientPath := filepath.Join(snapshotServiceManagerDir, "adb_serviceclient.go")
-	legacyServiceClientInfo, err := os.Lstat(snapshotLegacyServiceClientPath)
-	if err != nil {
-		t.Fatalf("Lstat(%q) error = %v", snapshotLegacyServiceClientPath, err)
-	}
-	if legacyServiceClientInfo.Mode()&os.ModeSymlink == 0 {
-		t.Fatalf("%q mode = %v, want symlink", snapshotLegacyServiceClientPath, legacyServiceClientInfo.Mode())
-	}
-
 	snapshotLegacyServiceManagerPath := filepath.Join(snapshotServiceManagerDir, "adb_servicemanager.go")
-	legacyServiceManagerInfo, err := os.Lstat(snapshotLegacyServiceManagerPath)
-	if err != nil {
-		t.Fatalf("Lstat(%q) error = %v", snapshotLegacyServiceManagerPath, err)
-	}
-	if legacyServiceManagerInfo.Mode()&os.ModeSymlink == 0 {
-		t.Fatalf("%q mode = %v, want symlink", snapshotLegacyServiceManagerPath, legacyServiceManagerInfo.Mode())
-	}
+	assertSymlink(t, filepath.Join(snapshotRoot, "api", "database", "v1beta1", "autonomousdatabases_webhook.go"))
+	assertSymlink(t, snapshotAdapterPath)
+	assertSymlink(t, snapshotLegacyServiceClientPath)
+	assertSymlink(t, snapshotLegacyServiceManagerPath)
+	assertRegularFile(t, snapshotGeneratedServiceClientPath)
+	assertNotExists(t, filepath.Join(snapshotRoot, "api", "database", "v1beta1", "autonomousdatabases_types.go"), "generated api type file")
+}
 
-	generatedInfo, err := os.Lstat(snapshotGeneratedServiceClientPath)
-	if err != nil {
-		t.Fatalf("Lstat(%q) error = %v", snapshotGeneratedServiceClientPath, err)
+func mustMkdirAll(t *testing.T, dirs []string) {
+	t.Helper()
+	for _, dir := range dirs {
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			t.Fatalf("MkdirAll(%q) error = %v", dir, err)
+		}
 	}
-	if generatedInfo.Mode()&os.ModeSymlink != 0 {
-		t.Fatalf("%q mode = %v, want regular file", snapshotGeneratedServiceClientPath, generatedInfo.Mode())
-	}
+}
 
-	snapshotTypesPath := filepath.Join(snapshotRoot, "api", "database", "v1beta1", "autonomousdatabases_types.go")
-	if _, err := os.Stat(snapshotTypesPath); !os.IsNotExist(err) {
-		t.Fatalf("Stat(%q) error = %v, want not exist", snapshotTypesPath, err)
+func writeTestFiles(t *testing.T, files map[string]string) {
+	t.Helper()
+	for path, content := range files {
+		if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+			t.Fatalf("WriteFile(%q) error = %v", path, err)
+		}
+	}
+}
+
+func assertSymlink(t *testing.T, path string) {
+	t.Helper()
+	info, err := os.Lstat(path)
+	if err != nil {
+		t.Fatalf("Lstat(%q) error = %v", path, err)
+	}
+	if info.Mode()&os.ModeSymlink == 0 {
+		t.Fatalf("%q mode = %v, want symlink", path, info.Mode())
+	}
+}
+
+func assertRegularFile(t *testing.T, path string) {
+	t.Helper()
+	info, err := os.Lstat(path)
+	if err != nil {
+		t.Fatalf("Lstat(%q) error = %v", path, err)
+	}
+	if info.Mode()&os.ModeSymlink != 0 {
+		t.Fatalf("%q mode = %v, want regular file", path, info.Mode())
+	}
+}
+
+func assertNotExists(t *testing.T, path string, label string) {
+	t.Helper()
+	if _, err := os.Lstat(path); !os.IsNotExist(err) {
+		t.Fatalf("Lstat(%s) error = %v, want not exist", label, err)
 	}
 }
