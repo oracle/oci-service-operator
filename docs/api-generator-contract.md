@@ -247,11 +247,6 @@ current repo that includes `database`, `mysql`, and `streaming`, all of which
 already declare generated controller, service-manager, and registration
 surfaces while keeping manual webhook seams where needed.
 
-`controller-backed` does not imply that every runtime seam is still manual.
-`database` and `mysql` retain explicit legacy adapters during parity rollout,
-while `streaming/Stream` now uses the generated runtime path directly except
-for the endpoint-secret companion.
-
 Generated package scaffolding must include:
 
 - `packages/<group>/metadata.env` with `RBAC_PATHS=./controllers/<group>/...`
@@ -360,11 +355,10 @@ from scaffold coverage into generated runtime:
 7. Move a service from `crd-only` to `controller-backed` in `services.yaml`
    only after controller, service-manager, registration, validator, webhook,
    and package prerequisites land. For existing controller-backed published
-   resources with preserved checked-in seams, keep manual webhook files and
-   other checked-in legacy seams explicit until the corresponding
-   `logic-gaps.md` stop conditions are closed. Some resources still retain
-   `_generated_client_adapter.go` shims (currently `database` and `mysql`),
-   while `streaming/Stream` is limited to the endpoint-secret companion.
+   resources with preserved checked-in seams, keep
+   `_generated_client_adapter.go` shims, manual webhook files, and other
+   checked-in legacy seams explicit until the corresponding `logic-gaps.md`
+   stop conditions are closed.
 
 Scaffold coverage alone does not move a group into generated runtime or replace
 legacy adapters. Runtime ownership still follows `generation.*` rollout and

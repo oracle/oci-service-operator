@@ -22,11 +22,6 @@ Package profiles:
 - `crd-only`: used by generator-first API groups that ship CRDs and samples
   before controller, service-manager, and registration rollout is enabled.
 
-Being `controller-backed` does not require every runtime seam to stay manual.
-`database` and `mysql` still retain explicit parity adapters, while
-`streaming/Stream` now runs on the generated runtime path directly except for
-the endpoint-secret companion.
-
 Current workflow:
 
 1. `go run ./cmd/generator --config internal/generator/config/services.yaml --service <service>`
@@ -45,11 +40,10 @@ Runtime rollout defaults:
 
 - Services without a `generation` block default to controller, service-manager,
   and registration rollout `none`, while webhook ownership remains `manual`.
-- Existing parity services keep their rollout metadata in `services.yaml`.
-  `database`, `mysql`, and `streaming` are already `controller-backed`, with
-  generated controller, service-manager, and registration rollout enabled.
-  Remaining handwritten seams stay explicit in repo-owned files instead of
-  being implied by the package profile.
+- Services that need checked-in naming or observed-state overrides keep those
+  mappings in `services.yaml` and can use
+  `--preserve-existing-spec-surface` when regenerating checked-in
+  spec/helper/sample/package artifacts.
 
 Package profile behavior:
 
@@ -58,6 +52,10 @@ Package profile behavior:
   runtime pieces are currently manual or generated.
 - `crd-only` overlays render only generated CRDs until controller support
   exists for that group.
+
+Runtime seam ownership stays explicit in checked-in files rather than being
+implied by the package profile. `database` and `mysql` still retain parity
+adapters, while `streaming/Stream` only retains the endpoint-secret companion.
 
 Package profile transitions:
 

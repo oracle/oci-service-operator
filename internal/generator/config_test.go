@@ -649,17 +649,16 @@ func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
 	})
 }
 
-func TestCheckedInConfigPromotesIdentityUserAndStreamingStreamFormalSpec(t *testing.T) {
+func TestCheckedInConfigPromotesOnlyIdentityUserFormalSpec(t *testing.T) {
 	t.Parallel()
 
 	cfg := loadCheckedInConfig(t)
-	services := serviceConfigsByName(t, cfg, "identity", "database", "mysql", "streaming")
+	services := serviceConfigsByName(t, cfg, "identity", "database", "mysql")
 
 	assertServiceFormalSpec(t, services["identity"], "User", "user")
 	assertServiceFormalSpec(t, services["identity"], "Compartment", "")
 	assertServiceFormalSpec(t, services["database"], "AutonomousDatabases", "")
 	assertServiceFormalSpec(t, services["mysql"], "MySqlDbSystem", "")
-	assertServiceFormalSpec(t, services["streaming"], "Stream", "stream")
 }
 
 func TestCheckedInConfigOptsOutEndpointBasedGeneratedRuntimeResources(t *testing.T) {
@@ -730,6 +729,32 @@ func TestCheckedInServicesConfigDoesNotUseParityOrCompatibilityInputs(t *testing
 	}
 	if strings.Contains(rendered, "existingKinds:") {
 		t.Fatalf("services.yaml still contains existingKinds inputs:\n%s", rendered)
+	}
+}
+
+func TestCheckedInConfigPromotesStreamingStreamFormalSpec(t *testing.T) {
+	t.Parallel()
+
+	cfg := loadCheckedInConfig(t)
+	service := serviceConfigsByName(t, cfg, "streaming")["streaming"]
+
+	assertServiceFormalSpec(t, service, "Stream", "stream")
+}
+
+func TestCheckedInStreamingRuntimeRolloutIncludesSecretRBAC(t *testing.T) {
+	t.Parallel()
+
+	cfg := loadCheckedInConfig(t)
+	service := serviceConfigsByName(t, cfg, "streaming")["streaming"]
+
+	overrides := resourceGenerationOverridesByKind(service.Generation.Resources)
+	if !slices.Equal(
+		overrides["Stream"].Controller.ExtraRBACMarkers,
+		[]string{
+			`groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete`,
+		},
+	) {
+		t.Fatalf("streaming Stream extra RBAC markers = %v", overrides["Stream"].Controller.ExtraRBACMarkers)
 	}
 }
 
@@ -887,14 +912,6 @@ func assertCheckedInStreamingRuntimeRolloutMetadata(t *testing.T, service *Servi
 	}
 
 	overrides := resourceGenerationOverridesByKind(service.Generation.Resources)
-	if !slices.Equal(
-		overrides["Stream"].Controller.ExtraRBACMarkers,
-		[]string{
-			`groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete`,
-		},
-	) {
-		t.Fatalf("streaming Stream extra RBAC markers = %v", overrides["Stream"].Controller.ExtraRBACMarkers)
-	}
 	if overrides["Stream"].ServiceManager.PackagePath != "streaming/stream" {
 		t.Fatalf("streaming packagePath = %q, want %q", overrides["Stream"].ServiceManager.PackagePath, "streaming/stream")
 	}
