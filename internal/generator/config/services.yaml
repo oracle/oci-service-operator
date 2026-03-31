@@ -145,6 +145,10 @@ services:
     phase: data-and-storage
     sampleOrder: 10
     packageProfile: controller-backed
+    package:
+      extraResources:
+        - ../../../config/rbac/autonomousdatabases_editor_role.yaml
+        - ../../../config/rbac/autonomousdatabases_viewer_role.yaml
     generation:
       controller:
         strategy: generated

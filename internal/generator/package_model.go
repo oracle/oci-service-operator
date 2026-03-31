@@ -68,6 +68,10 @@ func buildPackageOutputModel(service ServiceConfig, resources []ResourceModel) P
 			"../../../config/rbac/leader_election_role.yaml",
 			"../../../config/rbac/leader_election_role_binding.yaml",
 		)
+		output.Install.Resources = appendUniqueStrings(output.Install.Resources, service.Package.ExtraResources...)
+		if service.Parity != nil {
+			output.Install.Resources = appendUniqueStrings(output.Install.Resources, service.Parity.Package.ExtraResources...)
+		}
 	case PackageProfileCRDOnly:
 		output.Install.Resources = append(output.Install.Resources, "generated/crd")
 	default:

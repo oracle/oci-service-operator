@@ -1229,6 +1229,44 @@ func TestGenerateControllerBackedPackagesDoNotReferenceEditorViewerRolesByDefaul
 	})
 }
 
+func TestGenerateControllerBackedPackagesIncludeServicePackageExtraResources(t *testing.T) {
+	t.Parallel()
+
+	cfg := &Config{
+		Domain:         "oracle.com",
+		DefaultVersion: "v1beta1",
+	}
+	service := ServiceConfig{
+		Service:        "database",
+		SDKPackage:     "example.com/test/sdk",
+		Group:          "database",
+		PackageProfile: PackageProfileControllerBacked,
+		Package: PackageConfig{
+			ExtraResources: []string{
+				"../../../config/rbac/autonomousdatabases_editor_role.yaml",
+				"../../../config/rbac/autonomousdatabases_viewer_role.yaml",
+			},
+		},
+	}
+	pipeline := newTestGenerator(t)
+
+	outputRoot := t.TempDir()
+	if _, err := pipeline.Generate(context.Background(), cfg, []ServiceConfig{service}, Options{
+		OutputRoot: outputRoot,
+	}); err != nil {
+		t.Fatalf("Generate() error = %v", err)
+	}
+
+	installContent := readFile(t, filepath.Join(outputRoot, "packages", "database", "install", "kustomization.yaml"))
+	assertContains(t, installContent, []string{
+		"- generated/crd",
+		"- generated/rbac",
+		"- ../../../config/manager",
+		"- ../../../config/rbac/autonomousdatabases_editor_role.yaml",
+		"- ../../../config/rbac/autonomousdatabases_viewer_role.yaml",
+	})
+}
+
 func TestGeneratedControllerCompiles(t *testing.T) {
 	cfg := &Config{
 		Domain:         "oracle.com",

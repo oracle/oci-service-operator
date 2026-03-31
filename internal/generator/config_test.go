@@ -695,6 +695,15 @@ func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
 	if databaseService.Generation.Resources[0].FormalSpec != "databaseautonomousdatabase" {
 		t.Fatalf("database formalSpec = %q, want %q", databaseService.Generation.Resources[0].FormalSpec, "databaseautonomousdatabase")
 	}
+	if !slices.Equal(
+		databaseService.Package.ExtraResources,
+		[]string{
+			"../../../config/rbac/autonomousdatabases_editor_role.yaml",
+			"../../../config/rbac/autonomousdatabases_viewer_role.yaml",
+		},
+	) {
+		t.Fatalf("database package extraResources = %v", databaseService.Package.ExtraResources)
+	}
 	if databaseService.Generation.Resources[0].ServiceManager.PackagePath != "" {
 		t.Fatalf("database packagePath = %q, want empty to use default package layout", databaseService.Generation.Resources[0].ServiceManager.PackagePath)
 	}

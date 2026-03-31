@@ -41,6 +41,11 @@ type PackageProfile struct {
 	Description string `yaml:"description"`
 }
 
+// PackageConfig describes service-scoped package overlay details.
+type PackageConfig struct {
+	ExtraResources []string `yaml:"extraResources,omitempty"`
+}
+
 // GenerationConfig defines controller/service-manager/runtime rollout for a service.
 type GenerationConfig struct {
 	Controller     GenerationSurfaceConfig      `yaml:"controller,omitempty"`
@@ -87,6 +92,7 @@ type ServiceConfig struct {
 	Phase          string              `yaml:"phase"`
 	SampleOrder    int                 `yaml:"sampleOrder,omitempty"`
 	PackageProfile string              `yaml:"packageProfile"`
+	Package        PackageConfig       `yaml:"package,omitempty"`
 	FormalSpec     string              `yaml:"formalSpec,omitempty"`
 	ObservedState  ObservedStateConfig `yaml:"observedState,omitempty"`
 	Generation     GenerationConfig    `yaml:"generation,omitempty"`
@@ -151,6 +157,11 @@ func (c *Config) Validate() error {
 		}
 		if _, ok := c.PackageProfiles[service.PackageProfile]; !ok {
 			return fmt.Errorf("service %q references unknown packageProfile %q", service.Service, service.PackageProfile)
+		}
+		for _, extraResource := range service.Package.ExtraResources {
+			if strings.TrimSpace(extraResource) == "" {
+				return fmt.Errorf("service %q package.extraResources contains a blank path", service.Service)
+			}
 		}
 		if err := validateFormalSpec(fmt.Sprintf("service %q formalSpec", service.Service), service.FormalSpec); err != nil {
 			return err
