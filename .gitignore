@@ -7,6 +7,7 @@ unittests.percent
 generated-coverage-report.json
 generated-runtime-report.json
 validator-report.json
+codex-session.log
 bin/
 testbin/
 .envtest-home/
