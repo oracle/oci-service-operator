@@ -31,9 +31,9 @@ OSOK's checked-in generator config currently publishes these API groups:
 
 All checked-in services currently use generated controller, service-manager, and
 registration rollout. The remaining explicit compatibility seams are limited to
-resource-level parity overlays, companion adapters, and webhook files for the
-historical published resources `AutonomousDatabases`, `MySqlDbSystem`, and
-`Stream`.
+resource-level parity overlays and companion adapters for the historical
+published resources `AutonomousDatabases`, `MySqlDbSystem`, and `Stream`, plus
+the checked-in `database/AutonomousDatabases` webhook seam.
 
 Use the generated examples under `config/samples/` as the starting point for CR
 manifests. For rollout details, see `docs/api-generator-contract.md` and
