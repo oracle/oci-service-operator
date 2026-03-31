@@ -38,8 +38,8 @@ patches:
 # endpoint w/o any authn/z, please comment the following line.
 #- path: manager_auth_proxy_patch.yaml
 
-# Mount the controller config file for loading manager configurations
-# through a ComponentConfig type
+# Mount the controller config file and pass --config so the packaged manager
+# loads ControllerManagerConfig instead of the built-in flag defaults.
 - path: manager_config_patch.yaml
 
 # [WEBHOOK] To enable webhook, uncomment all the sections with [WEBHOOK] prefix including the one in

@@ -24,6 +24,23 @@ and [config/samples](config/samples) for generated manifest examples.
 
 See the [Installation](docs/installation.md#install-operator-sdk) instructions for detailed installation and configuration of OCI Service Operator for Kubernetes.
 
+## Controller Manager Config
+
+The default `config/default` deployment turns
+`config/manager/controller_manager_config.yaml` into the `manager-config`
+ConfigMap and starts the manager with `--config=controller_manager_config.yaml`.
+When that flag is present, the file is authoritative for controller-runtime
+settings such as metrics, health probes, webhooks, cache behavior, and leader
+election instead of the built-in flag defaults.
+
+The file must keep
+`apiVersion: controller-runtime.sigs.k8s.io/v1alpha1` and
+`kind: ControllerManagerConfig`. OSOK now unmarshals this file strictly, so
+unknown fields or mismatched type metadata fail startup instead of silently
+falling back to defaults. See
+[docs/installation.md](docs/installation.md#controller-manager-config) for the
+deployment wiring details.
+
 ## Documentation
 
 See the [Documentation](docs/README.md#oci-service-operator-for-kubernetes) for complete details on installation, security and service related configurations of OCI Service Operator for Kubernetes.

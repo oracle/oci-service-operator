@@ -25,7 +25,15 @@ spec:
       kind: Stream
       name: streams.streaming.oracle.com
       version: v1beta1
-  description: Oci Service Operator description. TODO.
+  description: |-
+    OCI Service Operator for Kubernetes exposes generator-owned OCI API groups
+    and runtime scaffolding from the checked-in service map.
+
+    The default deployment mounts a ControllerManagerConfig file and starts the
+    manager with `--config=controller_manager_config.yaml`, so controller-runtime
+    settings come from that file rather than the built-in flag defaults.
+    Unknown fields or mismatched `apiVersion` / `kind` values fail startup
+    during strict validation.
   displayName: Oci Service Operator
   icon:
   - base64data: ""
