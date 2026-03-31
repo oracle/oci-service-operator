@@ -7,7 +7,7 @@ rules:
 - apiGroups:
   - streaming.oracle.com
   resources:
-  - connectharnesss
+  - connectharnesses
   - streampools
   - streams
   verbs:
@@ -21,7 +21,7 @@ rules:
 - apiGroups:
   - streaming.oracle.com
   resources:
-  - connectharnesss/finalizers
+  - connectharnesses/finalizers
   - streampools/finalizers
   - streams/finalizers
   verbs:
@@ -29,7 +29,7 @@ rules:
 - apiGroups:
   - streaming.oracle.com
   resources:
-  - connectharnesss/status
+  - connectharnesses/status
   - streampools/status
   - streams/status
   verbs:
