@@ -1,0 +1,462 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: channels.mysql.oracle.com
+spec:
+  group: mysql.oracle.com
+  names:
+    kind: Channel
+    listKind: ChannelList
+    plural: channels
+    singular: channel
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the Channel
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the Channel
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Channel is the Schema for the channels API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ChannelSpec defines the desired state of Channel.
+            properties:
+              compartmentId:
+                description: The OCID of the compartment.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of predefined tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: User provided information about the Channel.
+                type: string
+              displayName:
+                description: The user-friendly name for the Channel. It does not have
+                  to be unique.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              isEnabled:
+                description: |-
+                  Whether the Channel should be enabled upon creation. If set to true, the Channel
+                  will be asynchronously started as a result of the create Channel operation.
+                type: boolean
+              source:
+                description: ChannelSource defines nested fields for Channel.Source.
+                properties:
+                  anonymousTransactionsHandling:
+                    description: ChannelSourceAnonymousTransactionsHandling defines
+                      nested fields for Channel.Source.AnonymousTransactionsHandling.
+                    properties:
+                      jsonData:
+                        type: string
+                      lastConfiguredLogFilename:
+                        description: |-
+                          Specifies one of the coordinates (file) at which the replica should begin
+                          reading the source's log. As this value specifies the point where replication
+                          starts from, it is only used once, when it starts. It is never used again,
+                          unless a new UpdateChannel operation modifies it.
+                        type: string
+                      lastConfiguredLogOffset:
+                        description: |-
+                          Specifies one of the coordinates (offset) at which the replica should begin
+                          reading the source's log. As this value specifies the point where replication
+                          starts from, it is only used once, when it starts. It is never used again,
+                          unless a new UpdateChannel operation modifies it.
+                        format: int64
+                        type: integer
+                      policy:
+                        type: string
+                      uuid:
+                        description: |-
+                          The UUID that is used as a prefix when generating transaction identifiers for anonymous transactions
+                          coming from the source. You can change the UUID later.
+                        type: string
+                    type: object
+                  hostname:
+                    description: The network address of the MySQL instance.
+                    type: string
+                  jsonData:
+                    type: string
+                  password:
+                    description: |-
+                      The password for the replication user. The password must be
+                      between 8 and 32 characters long, and must contain at least 1
+                      numeric character, 1 lowercase character, 1 uppercase character,
+                      and 1 special (nonalphanumeric) character.
+                    type: string
+                  port:
+                    description: The port the source MySQL instance listens on.
+                    type: integer
+                  sourceType:
+                    type: string
+                  sslCaCertificate:
+                    description: ChannelSourceSslCaCertificate defines nested fields
+                      for Channel.Source.SslCaCertificate.
+                    properties:
+                      certificateType:
+                        type: string
+                      contents:
+                        description: The string containing the CA certificate in PEM
+                          format.
+                        type: string
+                      jsonData:
+                        type: string
+                    required:
+                    - contents
+                    type: object
+                  sslMode:
+                    description: The SSL mode of the Channel.
+                    type: string
+                  username:
+                    description: |-
+                      The name of the replication user on the source MySQL instance.
+                      The username has a maximum length of 96 characters. For more information,
+                      please see the MySQL documentation (https://dev.mysql.com/doc/refman/8.0/en/change-master-to.html)
+                    type: string
+                required:
+                - hostname
+                - password
+                - sslMode
+                - username
+                type: object
+              target:
+                description: ChannelTarget defines nested fields for Channel.Target.
+                properties:
+                  applierUsername:
+                    description: The username for the replication applier of the target
+                      MySQL DB System.
+                    type: string
+                  channelName:
+                    description: |-
+                      The case-insensitive name that identifies the replication channel. Channel names
+                      must follow the rules defined for MySQL identifiers (https://dev.mysql.com/doc/refman/8.0/en/identifiers.html).
+                      The names of non-Deleted Channels must be unique for each DB System.
+                    type: string
+                  dbSystemId:
+                    description: The OCID of the target DB System.
+                    type: string
+                  delayInSeconds:
+                    description: |-
+                      Specifies the amount of time, in seconds, that the channel waits before
+                      applying a transaction received from the source.
+                    type: integer
+                  filters:
+                    description: Replication filter rules to be applied at the DB
+                      System Channel target.
+                    items:
+                      description: ChannelTargetFilter defines nested fields for Channel.Target.Filter.
+                      properties:
+                        type:
+                          description: |-
+                            The type of the filter rule.
+                            For details on each type, see
+                            Replication Filtering Rules (https://dev.mysql.com/doc/refman/8.0/en/replication-rules.html)
+                          type: string
+                        value:
+                          description: |-
+                            The body of the filter rule. This can represent a database, a table, or a database pair (represented as
+                            "db1->db2"). For more information, see
+                            Replication Filtering Rules (https://dev.mysql.com/doc/refman/8.0/en/replication-rules.html).
+                          type: string
+                      required:
+                      - type
+                      - value
+                      type: object
+                    type: array
+                  jsonData:
+                    type: string
+                  tablesWithoutPrimaryKeyHandling:
+                    description: |-
+                      Specifies how a replication channel handles the creation and alteration of tables
+                      that do not have a primary key. The default value is set to ALLOW.
+                    type: string
+                  targetType:
+                    type: string
+                required:
+                - dbSystemId
+                type: object
+            required:
+            - source
+            - target
+            type: object
+          status:
+            description: ChannelStatus defines the observed state of Channel.
+            properties:
+              compartmentId:
+                description: The OCID of the compartment.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of predefined tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: User provided description of the Channel.
+                type: string
+              displayName:
+                description: The user-friendly name for the Channel. It does not have
+                  to be unique.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              id:
+                description: The OCID of the Channel.
+                type: string
+              isEnabled:
+                description: Whether the Channel has been enabled by the user.
+                type: boolean
+              lifecycleDetails:
+                description: A message describing the state of the Channel.
+                type: string
+              lifecycleState:
+                description: The state of the Channel.
+                type: string
+              source:
+                description: ChannelSource defines nested fields for Channel.Source.
+                properties:
+                  anonymousTransactionsHandling:
+                    description: ChannelSourceAnonymousTransactionsHandling defines
+                      nested fields for Channel.Source.AnonymousTransactionsHandling.
+                    properties:
+                      jsonData:
+                        type: string
+                      lastConfiguredLogFilename:
+                        description: |-
+                          Specifies one of the coordinates (file) at which the replica should begin
+                          reading the source's log. As this value specifies the point where replication
+                          starts from, it is only used once, when it starts. It is never used again,
+                          unless a new UpdateChannel operation modifies it.
+                        type: string
+                      lastConfiguredLogOffset:
+                        description: |-
+                          Specifies one of the coordinates (offset) at which the replica should begin
+                          reading the source's log. As this value specifies the point where replication
+                          starts from, it is only used once, when it starts. It is never used again,
+                          unless a new UpdateChannel operation modifies it.
+                        format: int64
+                        type: integer
+                      policy:
+                        type: string
+                      uuid:
+                        description: |-
+                          The UUID that is used as a prefix when generating transaction identifiers for anonymous transactions
+                          coming from the source. You can change the UUID later.
+                        type: string
+                    type: object
+                  hostname:
+                    description: The network address of the MySQL instance.
+                    type: string
+                  jsonData:
+                    type: string
+                  password:
+                    description: |-
+                      The password for the replication user. The password must be
+                      between 8 and 32 characters long, and must contain at least 1
+                      numeric character, 1 lowercase character, 1 uppercase character,
+                      and 1 special (nonalphanumeric) character.
+                    type: string
+                  port:
+                    description: The port the source MySQL instance listens on.
+                    type: integer
+                  sourceType:
+                    type: string
+                  sslCaCertificate:
+                    description: ChannelSourceSslCaCertificate defines nested fields
+                      for Channel.Source.SslCaCertificate.
+                    properties:
+                      certificateType:
+                        type: string
+                      contents:
+                        description: The string containing the CA certificate in PEM
+                          format.
+                        type: string
+                      jsonData:
+                        type: string
+                    required:
+                    - contents
+                    type: object
+                  sslMode:
+                    description: The SSL mode of the Channel.
+                    type: string
+                  username:
+                    description: |-
+                      The name of the replication user on the source MySQL instance.
+                      The username has a maximum length of 96 characters. For more information,
+                      please see the MySQL documentation (https://dev.mysql.com/doc/refman/8.0/en/change-master-to.html)
+                    type: string
+                required:
+                - hostname
+                - password
+                - sslMode
+                - username
+                type: object
+              status:
+                properties:
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              target:
+                description: ChannelTarget defines nested fields for Channel.Target.
+                properties:
+                  applierUsername:
+                    description: The username for the replication applier of the target
+                      MySQL DB System.
+                    type: string
+                  channelName:
+                    description: |-
+                      The case-insensitive name that identifies the replication channel. Channel names
+                      must follow the rules defined for MySQL identifiers (https://dev.mysql.com/doc/refman/8.0/en/identifiers.html).
+                      The names of non-Deleted Channels must be unique for each DB System.
+                    type: string
+                  dbSystemId:
+                    description: The OCID of the target DB System.
+                    type: string
+                  delayInSeconds:
+                    description: |-
+                      Specifies the amount of time, in seconds, that the channel waits before
+                      applying a transaction received from the source.
+                    type: integer
+                  filters:
+                    description: Replication filter rules to be applied at the DB
+                      System Channel target.
+                    items:
+                      description: ChannelTargetFilter defines nested fields for Channel.Target.Filter.
+                      properties:
+                        type:
+                          description: |-
+                            The type of the filter rule.
+                            For details on each type, see
+                            Replication Filtering Rules (https://dev.mysql.com/doc/refman/8.0/en/replication-rules.html)
+                          type: string
+                        value:
+                          description: |-
+                            The body of the filter rule. This can represent a database, a table, or a database pair (represented as
+                            "db1->db2"). For more information, see
+                            Replication Filtering Rules (https://dev.mysql.com/doc/refman/8.0/en/replication-rules.html).
+                          type: string
+                      required:
+                      - type
+                      - value
+                      type: object
+                    type: array
+                  jsonData:
+                    type: string
+                  tablesWithoutPrimaryKeyHandling:
+                    description: |-
+                      Specifies how a replication channel handles the creation and alteration of tables
+                      that do not have a primary key. The default value is set to ALLOW.
+                    type: string
+                  targetType:
+                    type: string
+                required:
+                - dbSystemId
+                type: object
+              timeCreated:
+                description: The date and time the Channel was created, as described
+                  by RFC 3339 (https://tools.ietf.org/rfc/rfc3339).
+                type: string
+              timeUpdated:
+                description: The time the Channel was last updated, as described by
+                  RFC 3339 (https://tools.ietf.org/rfc/rfc3339).
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

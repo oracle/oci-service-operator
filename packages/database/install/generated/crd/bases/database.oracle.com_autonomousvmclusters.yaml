@@ -1,0 +1,537 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: autonomousvmclusters.database.oracle.com
+spec:
+  group: database.oracle.com
+  names:
+    kind: AutonomousVmCluster
+    listKind: AutonomousVmClusterList
+    plural: autonomousvmclusters
+    singular: autonomousvmcluster
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the AutonomousVmCluster
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the AutonomousVmCluster
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: AutonomousVmCluster is the Schema for the autonomousvmclusters
+          API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: AutonomousVmClusterSpec defines the desired state of AutonomousVmCluster.
+            properties:
+              autonomousDataStorageSizeInTBs:
+                description: The data disk group size to be allocated for Autonomous
+                  Databases, in TBs.
+                type: number
+              compartmentId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the compartment.
+                type: string
+              computeModel:
+                description: The compute model of the Autonomous VM Cluster. ECPU
+                  compute model is the recommended model and OCPU compute model is
+                  legacy.
+                type: string
+              cpuCoreCountPerNode:
+                description: The number of CPU cores to enable per VM cluster node.
+                type: integer
+              dbServers:
+                description: The list of OCIDs (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the Db servers.
+                items:
+                  type: string
+                type: array
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                type: object
+              displayName:
+                description: The user-friendly name for the Autonomous VM cluster.
+                  The name does not need to be unique.
+                type: string
+              exadataInfrastructureId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the Exadata infrastructure.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              isLocalBackupEnabled:
+                description: If true, database backup on local Exadata storage is
+                  configured for the Autonomous VM cluster. If false, database backup
+                  on local Exadata storage is not available in the Autonomous VM cluster.
+                type: boolean
+              isMtlsEnabled:
+                description: Enable mutual TLS(mTLS) authentication for database while
+                  provisioning a VMCluster. Default is TLS.
+                type: boolean
+              licenseModel:
+                description: The Oracle license model that applies to the Autonomous
+                  VM cluster. The default is BRING_YOUR_OWN_LICENSE.
+                type: string
+              maintenanceWindowDetails:
+                description: AutonomousVmClusterMaintenanceWindowDetails defines nested
+                  fields for AutonomousVmCluster.MaintenanceWindowDetails.
+                properties:
+                  customActionTimeoutInMins:
+                    description: |-
+                      Determines the amount of time the system will wait before the start of each database server patching operation.
+                      Custom action timeout is in minutes and valid value is between 15 to 120 (inclusive).
+                    type: integer
+                  daysOfWeek:
+                    description: Days during the week when maintenance should be performed.
+                    items:
+                      description: AutonomousVmClusterMaintenanceWindowDetailsDaysOfWeek
+                        defines nested fields for AutonomousVmCluster.MaintenanceWindowDetails.DaysOfWeek.
+                      properties:
+                        name:
+                          description: Name of the day of the week.
+                          type: string
+                      required:
+                      - name
+                      type: object
+                    type: array
+                  hoursOfDay:
+                    description: |-
+                      The window of hours during the day when maintenance should be performed. The window is a 4 hour slot. Valid values are
+                      - 0 - represents time slot 0:00 - 3:59 UTC - 4 - represents time slot 4:00 - 7:59 UTC - 8 - represents time slot 8:00 - 11:59 UTC - 12 - represents time slot 12:00 - 15:59 UTC - 16 - represents time slot 16:00 - 19:59 UTC - 20 - represents time slot 20:00 - 23:59 UTC
+                    items:
+                      type: integer
+                    type: array
+                  isCustomActionTimeoutEnabled:
+                    description: If true, enables the configuration of a custom action
+                      timeout (waiting period) between database server patching operations.
+                    type: boolean
+                  isMonthlyPatchingEnabled:
+                    description: If true, enables the monthly patching option.
+                    type: boolean
+                  leadTimeInWeeks:
+                    description: Lead time window allows user to set a lead time to
+                      prepare for a down time. The lead time is in weeks and valid
+                      value is between 1 to 4.
+                    type: integer
+                  months:
+                    description: Months during the year when maintenance should be
+                      performed.
+                    items:
+                      description: AutonomousVmClusterMaintenanceWindowDetailsMonth
+                        defines nested fields for AutonomousVmCluster.MaintenanceWindowDetails.Month.
+                      properties:
+                        name:
+                          description: Name of the month of the year.
+                          type: string
+                      required:
+                      - name
+                      type: object
+                    type: array
+                  patchingMode:
+                    description: |-
+                      Cloud Exadata infrastructure node patching method, either "ROLLING" or "NONROLLING". Default value is ROLLING.
+                      *IMPORTANT*: Non-rolling infrastructure patching involves system down time. See Oracle-Managed Infrastructure Maintenance Updates (https://docs.cloud.oracle.com/iaas/Content/Database/Concepts/examaintenance.htm#Oracle) for more information.
+                    type: string
+                  preference:
+                    description: The maintenance window scheduling preference.
+                    type: string
+                  weeksOfMonth:
+                    description: |-
+                      Weeks during the month when maintenance should be performed. Weeks start on the 1st, 8th, 15th, and 22nd days of the month, and have a duration of 7 days. Weeks start and end based on calendar dates, not days of the week.
+                      For example, to allow maintenance during the 2nd week of the month (from the 8th day to the 14th day of the month), use the value 2. Maintenance cannot be scheduled for the fifth week of months that contain more than 28 days.
+                      Note that this parameter works in conjunction with the  daysOfWeek and hoursOfDay parameters to allow you to specify specific days of the week and hours that maintenance will be performed.
+                    items:
+                      type: integer
+                    type: array
+                type: object
+              memoryPerOracleComputeUnitInGBs:
+                description: The amount of memory (in GBs) to be enabled per OCPU
+                  or ECPU.
+                type: integer
+              scanListenerPortNonTls:
+                description: The SCAN Listener Non TLS port number. Default value
+                  is 1521.
+                type: integer
+              scanListenerPortTls:
+                description: The SCAN Listener TLS port number. Default value is 2484.
+                type: integer
+              timeZone:
+                description: The time zone to use for the Autonomous VM cluster. For
+                  details, see DB System Time Zones (https://docs.cloud.oracle.com/Content/Database/References/timezones.htm).
+                type: string
+              totalContainerDatabases:
+                description: The total number of Autonomous Container Databases that
+                  can be created.
+                type: integer
+              vmClusterNetworkId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the VM cluster network.
+                type: string
+            required:
+            - compartmentId
+            - displayName
+            - exadataInfrastructureId
+            - vmClusterNetworkId
+            type: object
+          status:
+            description: AutonomousVmClusterStatus defines the observed state of AutonomousVmCluster.
+            properties:
+              autonomousDataStoragePercentage:
+                description: The percentage of the data storage used for the Autonomous
+                  Databases in an Autonomous VM Cluster.
+                type: number
+              autonomousDataStorageSizeInTBs:
+                description: The data disk group size allocated for Autonomous Databases,
+                  in TBs.
+                type: number
+              availableAutonomousDataStorageSizeInTBs:
+                description: The data disk group size available for Autonomous Databases,
+                  in TBs.
+                type: number
+              availableContainerDatabases:
+                description: The number of Autonomous Container Databases that can
+                  be created with the currently available local storage.
+                type: integer
+              availableCpus:
+                description: The numnber of CPU cores available.
+                type: integer
+              availableDataStorageSizeInTBs:
+                description: '**Deprecated.** Use `availableAutonomousDataStorageSizeInTBs`
+                  for Autonomous Databases'' data storage availability in TBs.'
+                type: number
+              compartmentId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the compartment.
+                type: string
+              computeModel:
+                description: 'The compute model of the Autonomous VM Cluster. ECPU
+                  compute model is the recommended model and OCPU compute model is
+                  legacy. See Compute Models in Autonomous Database on Dedicated Exadata
+                  #Infrastructure (https://docs.oracle.com/en/cloud/paas/autonomous-database/dedicated/adbak)
+                  for more details.'
+                type: string
+              cpuCoreCountPerNode:
+                description: The number of CPU cores enabled per VM cluster node.
+                type: integer
+              cpuPercentage:
+                description: The percentage of total number of CPUs used in an Autonomous
+                  VM Cluster.
+                type: number
+              cpusEnabled:
+                description: The number of enabled CPU cores.
+                type: integer
+              cpusLowestScaledValue:
+                description: The lowest value to which cpus can be scaled down.
+                type: integer
+              dataStorageSizeInGBs:
+                description: The total data storage allocated in GBs.
+                type: number
+              dataStorageSizeInTBs:
+                description: The total data storage allocated in TBs
+                type: number
+              dbNodeStorageSizeInGBs:
+                description: The local node storage allocated in GBs.
+                type: integer
+              dbServers:
+                description: The list of OCIDs (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the Db servers.
+                items:
+                  type: string
+                type: array
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                type: object
+              displayName:
+                description: The user-friendly name for the Autonomous VM cluster.
+                  The name does not need to be unique.
+                type: string
+              exadataInfrastructureId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the Exadata infrastructure.
+                type: string
+              exadataStorageInTBsLowestScaledValue:
+                description: The lowest value to which exadataStorage(in TBs) can
+                  be scaled down.
+                type: number
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              id:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the Autonomous VM cluster.
+                type: string
+              isLocalBackupEnabled:
+                description: If true, database backup on local Exadata storage is
+                  configured for the Autonomous VM cluster. If false, database backup
+                  on local Exadata storage is not available in the Autonomous VM cluster.
+                type: boolean
+              isMtlsEnabled:
+                description: Enable mutual TLS(mTLS) authentication for database while
+                  provisioning a VMCluster. Default is TLS.
+                type: boolean
+              lastMaintenanceRunId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the last maintenance run.
+                type: string
+              licenseModel:
+                description: The Oracle license model that applies to the Autonomous
+                  VM cluster. The default is LICENSE_INCLUDED.
+                type: string
+              lifecycleDetails:
+                description: Additional information about the current lifecycle state.
+                type: string
+              lifecycleState:
+                description: The current state of the Autonomous VM cluster.
+                type: string
+              maintenanceWindow:
+                description: AutonomousVmClusterMaintenanceWindow defines nested fields
+                  for AutonomousVmCluster.MaintenanceWindow.
+                properties:
+                  customActionTimeoutInMins:
+                    description: |-
+                      Determines the amount of time the system will wait before the start of each database server patching operation.
+                      Custom action timeout is in minutes and valid value is between 15 to 120 (inclusive).
+                    type: integer
+                  daysOfWeek:
+                    description: Days during the week when maintenance should be performed.
+                    items:
+                      description: AutonomousVmClusterMaintenanceWindowDaysOfWeek
+                        defines nested fields for AutonomousVmCluster.MaintenanceWindow.DaysOfWeek.
+                      properties:
+                        name:
+                          description: Name of the day of the week.
+                          type: string
+                      type: object
+                    type: array
+                  hoursOfDay:
+                    description: |-
+                      The window of hours during the day when maintenance should be performed. The window is a 4 hour slot. Valid values are
+                      - 0 - represents time slot 0:00 - 3:59 UTC - 4 - represents time slot 4:00 - 7:59 UTC - 8 - represents time slot 8:00 - 11:59 UTC - 12 - represents time slot 12:00 - 15:59 UTC - 16 - represents time slot 16:00 - 19:59 UTC - 20 - represents time slot 20:00 - 23:59 UTC
+                    items:
+                      type: integer
+                    type: array
+                  isCustomActionTimeoutEnabled:
+                    description: If true, enables the configuration of a custom action
+                      timeout (waiting period) between database server patching operations.
+                    type: boolean
+                  isMonthlyPatchingEnabled:
+                    description: If true, enables the monthly patching option.
+                    type: boolean
+                  leadTimeInWeeks:
+                    description: Lead time window allows user to set a lead time to
+                      prepare for a down time. The lead time is in weeks and valid
+                      value is between 1 to 4.
+                    type: integer
+                  months:
+                    description: Months during the year when maintenance should be
+                      performed.
+                    items:
+                      description: AutonomousVmClusterMaintenanceWindowMonth defines
+                        nested fields for AutonomousVmCluster.MaintenanceWindow.Month.
+                      properties:
+                        name:
+                          description: Name of the month of the year.
+                          type: string
+                      type: object
+                    type: array
+                  patchingMode:
+                    description: |-
+                      Cloud Exadata infrastructure node patching method, either "ROLLING" or "NONROLLING". Default value is ROLLING.
+                      *IMPORTANT*: Non-rolling infrastructure patching involves system down time. See Oracle-Managed Infrastructure Maintenance Updates (https://docs.cloud.oracle.com/iaas/Content/Database/Concepts/examaintenance.htm#Oracle) for more information.
+                    type: string
+                  preference:
+                    description: The maintenance window scheduling preference.
+                    type: string
+                  weeksOfMonth:
+                    description: |-
+                      Weeks during the month when maintenance should be performed. Weeks start on the 1st, 8th, 15th, and 22nd days of the month, and have a duration of 7 days. Weeks start and end based on calendar dates, not days of the week.
+                      For example, to allow maintenance during the 2nd week of the month (from the 8th day to the 14th day of the month), use the value 2. Maintenance cannot be scheduled for the fifth week of months that contain more than 28 days.
+                      Note that this parameter works in conjunction with the  daysOfWeek and hoursOfDay parameters to allow you to specify specific days of the week and hours that maintenance will be performed.
+                    items:
+                      type: integer
+                    type: array
+                type: object
+              maxAcdsLowestScaledValue:
+                description: The lowest value to which maximum number of ACDs can
+                  be scaled down.
+                type: integer
+              memoryPerOracleComputeUnitInGBs:
+                description: The amount of memory (in GBs) to be enabled per OCPU
+                  or ECPU.
+                type: integer
+              memorySizeInGBs:
+                description: The memory allocated in GBs.
+                type: integer
+              nextMaintenanceRunId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the next maintenance run.
+                type: string
+              nodeCount:
+                description: The number of nodes in the Autonomous VM Cluster.
+                type: integer
+              nonProvisionableAutonomousContainerDatabases:
+                description: The number of non-provisionable Autonomous Container
+                  Databases in an Autonomous VM Cluster.
+                type: integer
+              ocpusEnabled:
+                description: The number of enabled OCPU cores.
+                type: number
+              provisionableAutonomousContainerDatabases:
+                description: '**Deprecated.** Use field totalContainerDatabases.'
+                type: integer
+              provisionedAutonomousContainerDatabases:
+                description: The number of provisioned Autonomous Container Databases
+                  in an Autonomous VM Cluster.
+                type: integer
+              provisionedCpus:
+                description: The number of CPUs provisioned in an Autonomous VM Cluster.
+                type: number
+              reclaimableCpus:
+                description: CPUs that continue to be included in the count of CPUs
+                  available to the Autonomous Container Database even after one of
+                  its Autonomous Database is terminated or scaled down. You can release
+                  them to the available CPUs at its parent Autonomous VM Cluster level
+                  by restarting the Autonomous Container Database.
+                type: integer
+              reservedCpus:
+                description: The number of CPUs reserved in an Autonomous VM Cluster.
+                type: number
+              scanListenerPortNonTls:
+                description: The SCAN Listener Non TLS port number. Default value
+                  is 1521.
+                type: integer
+              scanListenerPortTls:
+                description: The SCAN Listener TLS port number. Default value is 2484.
+                type: integer
+              status:
+                properties:
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              timeCreated:
+                description: The date and time that the Autonomous VM cluster was
+                  created.
+                type: string
+              timeDatabaseSslCertificateExpires:
+                description: The date and time of the Database SSL certificate expiration.
+                type: string
+              timeOrdsCertificateExpires:
+                description: The date and time of the ORDS certificate expiration.
+                type: string
+              timeZone:
+                description: The time zone to use for the Autonomous VM cluster. For
+                  details, see DB System Time Zones (https://docs.cloud.oracle.com/Content/Database/References/timezones.htm).
+                type: string
+              totalAutonomousDataStorageInTBs:
+                description: The total data disk group size for Autonomous Databases,
+                  in TBs.
+                type: number
+              totalContainerDatabases:
+                description: The total number of Autonomous Container Databases that
+                  can be created.
+                type: integer
+              vmClusterNetworkId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the VM cluster network.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

@@ -776,6 +776,36 @@ func TestServiceClientRejectsMalformedFormalListSemanticsAtInit(t *testing.T) {
 	}
 }
 
+func TestServiceClientRejectsMalformedAuxiliaryOperationTypeMetadataAtInit(t *testing.T) {
+	t.Parallel()
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Semantics: &Semantics{
+			AuxiliaryOperations: []AuxiliaryOperation{
+				{
+					Phase:            "update",
+					MethodName:       "EnableThing",
+					RequestTypeName:  "example.DisableThingRequest",
+					ResponseTypeName: "example.EnableThingResponse",
+				},
+			},
+		},
+		Create: &Operation{
+			NewRequest: func() any { return &fakeCreateThingRequest{} },
+			Call: func(_ context.Context, _ any) (any, error) {
+				t.Fatal("Create() should not be called when auxiliary metadata is malformed")
+				return nil, nil
+			},
+		},
+	})
+
+	if _, err := client.CreateOrUpdate(context.Background(), &fakeResource{}, ctrl.Request{}); err == nil || !strings.Contains(err.Error(), `update auxiliary operation EnableThing request type "example.DisableThingRequest" must end with "EnableThingRequest"`) {
+		t.Fatalf("CreateOrUpdate() error = %v, want init failure for malformed auxiliary request type metadata", err)
+	}
+}
+
 func TestServiceClientRejectsRequiredDeleteSemanticsWithoutTerminalStatesAtInit(t *testing.T) {
 	t.Parallel()
 

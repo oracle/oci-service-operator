@@ -952,6 +952,9 @@ func validateFormalSemantics(kind string, semantics *Semantics) error {
 	}
 
 	var problems []string
+	for _, operation := range semantics.AuxiliaryOperations {
+		problems = append(problems, validateAuxiliaryOperationSemantics(operation)...)
+	}
 	if semantics.List != nil && strings.TrimSpace(semantics.List.ResponseItemsField) == "" {
 		problems = append(problems, "list semantics require responseItemsField")
 	}
@@ -962,6 +965,50 @@ func validateFormalSemantics(kind string, semantics *Semantics) error {
 		return nil
 	}
 	return fmt.Errorf("%s formal semantics blocked: %s", kind, strings.Join(problems, "; "))
+}
+
+func validateAuxiliaryOperationSemantics(operation AuxiliaryOperation) []string {
+	phase := strings.TrimSpace(operation.Phase)
+	if phase == "" {
+		phase = "auxiliary"
+	}
+
+	methodName := strings.TrimSpace(operation.MethodName)
+	if methodName == "" {
+		return []string{fmt.Sprintf("%s operation requires methodName", phase)}
+	}
+
+	var problems []string
+	if problem := validateAuxiliaryOperationTypeName(phase, methodName, operation.RequestTypeName, "request"); problem != "" {
+		problems = append(problems, problem)
+	}
+	if problem := validateAuxiliaryOperationTypeName(phase, methodName, operation.ResponseTypeName, "response"); problem != "" {
+		problems = append(problems, problem)
+	}
+	return problems
+}
+
+func validateAuxiliaryOperationTypeName(phase, methodName, typeName, kind string) string {
+	trimmed := strings.TrimSpace(typeName)
+	if trimmed == "" {
+		return fmt.Sprintf("%s auxiliary operation %s requires %s type metadata", phase, methodName, kind)
+	}
+
+	expectedSuffix := methodName + "Request"
+	if kind == "response" {
+		expectedSuffix = methodName + "Response"
+	}
+	if auxiliaryOperationTypeBase(trimmed) != expectedSuffix {
+		return fmt.Sprintf("%s auxiliary operation %s %s type %q must end with %q", phase, methodName, kind, trimmed, expectedSuffix)
+	}
+	return ""
+}
+
+func auxiliaryOperationTypeBase(typeName string) string {
+	if index := strings.LastIndex(typeName, "."); index >= 0 {
+		return typeName[index+1:]
+	}
+	return typeName
 }
 
 func normalizeOCIError(err error) error {

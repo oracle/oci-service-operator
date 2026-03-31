@@ -1,0 +1,142 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: groups.streaming.oracle.com
+spec:
+  group: streaming.oracle.com
+  names:
+    kind: Group
+    listKind: GroupList
+    plural: groups
+    singular: group
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: status of the Group
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the Group
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Group is the Schema for the groups API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: GroupSpec defines the desired state of Group.
+            properties:
+              time:
+                description: The time to consume from if type is AT_TIME.
+                type: string
+              type:
+                description: The type of the cursor.
+                type: string
+            type: object
+          status:
+            description: GroupStatus defines the observed state of Group.
+            properties:
+              groupName:
+                description: The name of the consumer group.
+                type: string
+              reservations:
+                description: An array of the partition reservations of a group.
+                items:
+                  description: GroupReservation defines nested fields for Group.Reservation.
+                  properties:
+                    committedOffset:
+                      description: The latest offset which has been committed for
+                        this partition.
+                      format: int64
+                      type: integer
+                    partition:
+                      description: The partition for which the reservation applies.
+                      type: string
+                    reservedInstance:
+                      description: The consumer instance which currently has the partition
+                        reserved.
+                      type: string
+                    timeReservedUntil:
+                      description: A timestamp when the current reservation expires.
+                      type: string
+                  type: object
+                type: array
+              status:
+                properties:
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              streamId:
+                description: The streamId for which the group exists.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

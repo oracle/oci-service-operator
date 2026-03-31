@@ -1,0 +1,637 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: exadatainfrastructures.database.oracle.com
+spec:
+  group: database.oracle.com
+  names:
+    kind: ExadataInfrastructure
+    listKind: ExadataInfrastructureList
+    plural: exadatainfrastructures
+    singular: exadatainfrastructure
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the ExadataInfrastructure
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the ExadataInfrastructure
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: ExadataInfrastructure is the Schema for the exadatainfrastructures
+          API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ExadataInfrastructureSpec defines the desired state of ExadataInfrastructure.
+            properties:
+              additionalComputeCount:
+                description: The requested number of additional compute servers for
+                  the Exadata infrastructure.
+                type: integer
+              additionalComputeSystemModel:
+                description: |-
+                  Oracle Exadata System Model specification. The system model determines the amount of compute or storage
+                  server resources available for use. For more information, please see System and Shape Configuration Options
+                   (https://docs.oracle.com/en/engineered-systems/exadata-cloud-at-customer/ecccm/ecc-system-config-options.html#GUID-9E090174-5C57-4EB1-9243-B470F9F10D6B)
+                type: string
+              additionalStorageCount:
+                description: The requested number of additional storage servers for
+                  the Exadata infrastructure.
+                type: integer
+              adminNetworkCIDR:
+                description: The CIDR block for the Exadata administration network.
+                type: string
+              cloudControlPlaneServer1:
+                description: The IP address for the first control plane server.
+                type: string
+              cloudControlPlaneServer2:
+                description: The IP address for the second control plane server.
+                type: string
+              compartmentId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the compartment.
+                type: string
+              computeCount:
+                description: The number of compute servers for the Exadata infrastructure.
+                type: integer
+              contacts:
+                description: The list of contacts for the Exadata infrastructure.
+                items:
+                  description: ExadataInfrastructureContact defines nested fields
+                    for ExadataInfrastructure.Contact.
+                  properties:
+                    email:
+                      description: The email for the Exadata Infrastructure contact.
+                      type: string
+                    isContactMosValidated:
+                      description: If `true`, this Exadata Infrastructure contact
+                        is a valid My Oracle Support (MOS) contact. If `false`, this
+                        Exadata Infrastructure contact is not a valid MOS contact.
+                      type: boolean
+                    isPrimary:
+                      description: If `true`, this Exadata Infrastructure contact
+                        is a primary contact. If `false`, this Exadata Infrastructure
+                        is a secondary contact.
+                      type: boolean
+                    name:
+                      description: The name of the Exadata Infrastructure contact.
+                      type: string
+                    phoneNumber:
+                      description: The phone number for the Exadata Infrastructure
+                        contact.
+                      type: string
+                  required:
+                  - email
+                  - isPrimary
+                  - name
+                  type: object
+                type: array
+              corporateProxy:
+                description: |-
+                  The corporate network proxy for access to the control plane network. Oracle recommends using an HTTPS proxy when possible
+                  for enhanced security.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                type: object
+              displayName:
+                description: The user-friendly name for the Exadata infrastructure.
+                  The name does not need to be unique.
+                type: string
+              dnsServer:
+                description: The list of DNS server IP addresses. Maximum of 3 allowed.
+                items:
+                  type: string
+                type: array
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              gateway:
+                description: The gateway for the control plane network.
+                type: string
+              infiniBandNetworkCIDR:
+                description: The CIDR block for the Exadata InfiniBand interconnect.
+                type: string
+              isCpsOfflineReportEnabled:
+                description: |-
+                  Indicates whether cps offline diagnostic report is enabled for this Exadata infrastructure. This will allow a customer to quickly check status themselves and fix problems on their end, saving time and frustration
+                  for both Oracle and the customer when they find the CPS in a disconnected state.You can enable offline diagnostic report during Exadata infrastructure provisioning. You can also disable or enable it at any time
+                  using the UpdateExadatainfrastructure API.
+                type: boolean
+              isMultiRackDeployment:
+                description: Indicates if deployment is Multi-Rack or not.
+                type: boolean
+              maintenanceWindow:
+                description: ExadataInfrastructureMaintenanceWindow defines nested
+                  fields for ExadataInfrastructure.MaintenanceWindow.
+                properties:
+                  customActionTimeoutInMins:
+                    description: |-
+                      Determines the amount of time the system will wait before the start of each database server patching operation.
+                      Custom action timeout is in minutes and valid value is between 15 to 120 (inclusive).
+                    type: integer
+                  daysOfWeek:
+                    description: Days during the week when maintenance should be performed.
+                    items:
+                      description: ExadataInfrastructureMaintenanceWindowDaysOfWeek
+                        defines nested fields for ExadataInfrastructure.MaintenanceWindow.DaysOfWeek.
+                      properties:
+                        name:
+                          description: Name of the day of the week.
+                          type: string
+                      required:
+                      - name
+                      type: object
+                    type: array
+                  hoursOfDay:
+                    description: |-
+                      The window of hours during the day when maintenance should be performed. The window is a 4 hour slot. Valid values are
+                      - 0 - represents time slot 0:00 - 3:59 UTC - 4 - represents time slot 4:00 - 7:59 UTC - 8 - represents time slot 8:00 - 11:59 UTC - 12 - represents time slot 12:00 - 15:59 UTC - 16 - represents time slot 16:00 - 19:59 UTC - 20 - represents time slot 20:00 - 23:59 UTC
+                    items:
+                      type: integer
+                    type: array
+                  isCustomActionTimeoutEnabled:
+                    description: If true, enables the configuration of a custom action
+                      timeout (waiting period) between database server patching operations.
+                    type: boolean
+                  isMonthlyPatchingEnabled:
+                    description: If true, enables the monthly patching option.
+                    type: boolean
+                  leadTimeInWeeks:
+                    description: Lead time window allows user to set a lead time to
+                      prepare for a down time. The lead time is in weeks and valid
+                      value is between 1 to 4.
+                    type: integer
+                  months:
+                    description: Months during the year when maintenance should be
+                      performed.
+                    items:
+                      description: ExadataInfrastructureMaintenanceWindowMonth defines
+                        nested fields for ExadataInfrastructure.MaintenanceWindow.Month.
+                      properties:
+                        name:
+                          description: Name of the month of the year.
+                          type: string
+                      required:
+                      - name
+                      type: object
+                    type: array
+                  patchingMode:
+                    description: |-
+                      Cloud Exadata infrastructure node patching method, either "ROLLING" or "NONROLLING". Default value is ROLLING.
+                      *IMPORTANT*: Non-rolling infrastructure patching involves system down time. See Oracle-Managed Infrastructure Maintenance Updates (https://docs.cloud.oracle.com/iaas/Content/Database/Concepts/examaintenance.htm#Oracle) for more information.
+                    type: string
+                  preference:
+                    description: The maintenance window scheduling preference.
+                    type: string
+                  weeksOfMonth:
+                    description: |-
+                      Weeks during the month when maintenance should be performed. Weeks start on the 1st, 8th, 15th, and 22nd days of the month, and have a duration of 7 days. Weeks start and end based on calendar dates, not days of the week.
+                      For example, to allow maintenance during the 2nd week of the month (from the 8th day to the 14th day of the month), use the value 2. Maintenance cannot be scheduled for the fifth week of months that contain more than 28 days.
+                      Note that this parameter works in conjunction with the  daysOfWeek and hoursOfDay parameters to allow you to specify specific days of the week and hours that maintenance will be performed.
+                    items:
+                      type: integer
+                    type: array
+                type: object
+              multiRackConfigurationFile:
+                description: The base64 encoded Multi-Rack configuration json file.
+                type: string
+              netmask:
+                description: The netmask for the control plane network.
+                type: string
+              networkBondingModeDetails:
+                description: ExadataInfrastructureNetworkBondingModeDetails defines
+                  nested fields for ExadataInfrastructure.NetworkBondingModeDetails.
+                properties:
+                  backupNetworkBondingMode:
+                    description: The network bonding mode for the Exadata infrastructure.
+                    type: string
+                  clientNetworkBondingMode:
+                    description: The network bonding mode for the Exadata infrastructure.
+                    type: string
+                  drNetworkBondingMode:
+                    description: The network bonding mode for the Exadata infrastructure.
+                    type: string
+                type: object
+              ntpServer:
+                description: The list of NTP server IP addresses. Maximum of 3 allowed.
+                items:
+                  type: string
+                type: array
+              shape:
+                description: The shape of the Exadata infrastructure. The shape determines
+                  the amount of CPU, storage, and memory resources allocated to the
+                  instance.
+                type: string
+              storageCount:
+                description: The number of storage servers for the Exadata infrastructure.
+                type: integer
+              timeZone:
+                description: The time zone of the Exadata infrastructure. For details,
+                  see Exadata Infrastructure Time Zones (https://docs.cloud.oracle.com/Content/Database/References/timezones.htm).
+                type: string
+            required:
+            - adminNetworkCIDR
+            - cloudControlPlaneServer1
+            - cloudControlPlaneServer2
+            - compartmentId
+            - displayName
+            - dnsServer
+            - gateway
+            - infiniBandNetworkCIDR
+            - netmask
+            - ntpServer
+            - shape
+            - timeZone
+            type: object
+          status:
+            description: ExadataInfrastructureStatus defines the observed state of
+              ExadataInfrastructure.
+            properties:
+              activatedStorageCount:
+                description: The requested number of additional storage servers activated
+                  for the Exadata infrastructure.
+                type: integer
+              additionalComputeCount:
+                description: The requested number of additional compute servers for
+                  the Exadata infrastructure.
+                type: integer
+              additionalComputeSystemModel:
+                description: |-
+                  Oracle Exadata System Model specification. The system model determines the amount of compute or storage
+                  server resources available for use. For more information, please see System and Shape Configuration Options
+                   (https://docs.oracle.com/en/engineered-systems/exadata-cloud-at-customer/ecccm/ecc-system-config-options.html#GUID-9E090174-5C57-4EB1-9243-B470F9F10D6B)
+                type: string
+              additionalStorageCount:
+                description: The requested number of additional storage servers for
+                  the Exadata infrastructure.
+                type: integer
+              adminNetworkCIDR:
+                description: The CIDR block for the Exadata administration network.
+                type: string
+              availabilityDomain:
+                description: The name of the availability domain that the Exadata
+                  infrastructure is located in.
+                type: string
+              cloudControlPlaneServer1:
+                description: The IP address for the first control plane server.
+                type: string
+              cloudControlPlaneServer2:
+                description: The IP address for the second control plane server.
+                type: string
+              compartmentId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the compartment.
+                type: string
+              computeCount:
+                description: The number of compute servers for the Exadata infrastructure.
+                type: integer
+              contacts:
+                description: The list of contacts for the Exadata infrastructure.
+                items:
+                  description: ExadataInfrastructureContact defines nested fields
+                    for ExadataInfrastructure.Contact.
+                  properties:
+                    email:
+                      description: The email for the Exadata Infrastructure contact.
+                      type: string
+                    isContactMosValidated:
+                      description: If `true`, this Exadata Infrastructure contact
+                        is a valid My Oracle Support (MOS) contact. If `false`, this
+                        Exadata Infrastructure contact is not a valid MOS contact.
+                      type: boolean
+                    isPrimary:
+                      description: If `true`, this Exadata Infrastructure contact
+                        is a primary contact. If `false`, this Exadata Infrastructure
+                        is a secondary contact.
+                      type: boolean
+                    name:
+                      description: The name of the Exadata Infrastructure contact.
+                      type: string
+                    phoneNumber:
+                      description: The phone number for the Exadata Infrastructure
+                        contact.
+                      type: string
+                  required:
+                  - email
+                  - isPrimary
+                  - name
+                  type: object
+                type: array
+              corporateProxy:
+                description: The corporate network proxy for access to the control
+                  plane network.
+                type: string
+              cpusEnabled:
+                description: The number of enabled CPU cores.
+                type: integer
+              csiNumber:
+                description: The CSI Number of the Exadata infrastructure.
+                type: string
+              dataStorageSizeInTBs:
+                description: Size, in terabytes, of the DATA disk group.
+                type: number
+              dbNodeStorageSizeInGBs:
+                description: The local node storage allocated in GBs.
+                type: integer
+              dbServerVersion:
+                description: The software version of the database servers (dom0) in
+                  the Exadata infrastructure.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                type: object
+              displayName:
+                description: The user-friendly name for the Exadata Cloud@Customer
+                  infrastructure. The name does not need to be unique.
+                type: string
+              dnsServer:
+                description: The list of DNS server IP addresses. Maximum of 3 allowed.
+                items:
+                  type: string
+                type: array
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              gateway:
+                description: The gateway for the control plane network.
+                type: string
+              id:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the Exadata infrastructure.
+                type: string
+              infiniBandNetworkCIDR:
+                description: The CIDR block for the Exadata InfiniBand interconnect.
+                type: string
+              isCpsOfflineReportEnabled:
+                description: |-
+                  Indicates whether cps offline diagnostic report is enabled for this Exadata infrastructure. This will allow a customer to quickly check status themselves and fix problems on their end, saving time and frustration
+                  for both Oracle and the customer when they find the CPS in a disconnected state.You can enable offline diagnostic report during Exadata infrastructure provisioning. You can also disable or enable it at any time
+                  using the UpdateExadatainfrastructure API.
+                type: boolean
+              isMultiRackDeployment:
+                description: Indicates if deployment is Multi-Rack or not.
+                type: boolean
+              lastMaintenanceRunId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the last maintenance run.
+                type: string
+              lifecycleDetails:
+                description: Additional information about the current lifecycle state.
+                type: string
+              lifecycleState:
+                description: The current lifecycle state of the Exadata infrastructure.
+                type: string
+              maintenanceSLOStatus:
+                description: A field to capture ‘Maintenance SLO Status’ for the Exadata
+                  infrastructure with values ‘OK’, ‘DEGRADED’. Default is ‘OK’ when
+                  the infrastructure is provisioned.
+                type: string
+              maintenanceWindow:
+                description: ExadataInfrastructureMaintenanceWindow defines nested
+                  fields for ExadataInfrastructure.MaintenanceWindow.
+                properties:
+                  customActionTimeoutInMins:
+                    description: |-
+                      Determines the amount of time the system will wait before the start of each database server patching operation.
+                      Custom action timeout is in minutes and valid value is between 15 to 120 (inclusive).
+                    type: integer
+                  daysOfWeek:
+                    description: Days during the week when maintenance should be performed.
+                    items:
+                      description: ExadataInfrastructureMaintenanceWindowDaysOfWeek
+                        defines nested fields for ExadataInfrastructure.MaintenanceWindow.DaysOfWeek.
+                      properties:
+                        name:
+                          description: Name of the day of the week.
+                          type: string
+                      required:
+                      - name
+                      type: object
+                    type: array
+                  hoursOfDay:
+                    description: |-
+                      The window of hours during the day when maintenance should be performed. The window is a 4 hour slot. Valid values are
+                      - 0 - represents time slot 0:00 - 3:59 UTC - 4 - represents time slot 4:00 - 7:59 UTC - 8 - represents time slot 8:00 - 11:59 UTC - 12 - represents time slot 12:00 - 15:59 UTC - 16 - represents time slot 16:00 - 19:59 UTC - 20 - represents time slot 20:00 - 23:59 UTC
+                    items:
+                      type: integer
+                    type: array
+                  isCustomActionTimeoutEnabled:
+                    description: If true, enables the configuration of a custom action
+                      timeout (waiting period) between database server patching operations.
+                    type: boolean
+                  isMonthlyPatchingEnabled:
+                    description: If true, enables the monthly patching option.
+                    type: boolean
+                  leadTimeInWeeks:
+                    description: Lead time window allows user to set a lead time to
+                      prepare for a down time. The lead time is in weeks and valid
+                      value is between 1 to 4.
+                    type: integer
+                  months:
+                    description: Months during the year when maintenance should be
+                      performed.
+                    items:
+                      description: ExadataInfrastructureMaintenanceWindowMonth defines
+                        nested fields for ExadataInfrastructure.MaintenanceWindow.Month.
+                      properties:
+                        name:
+                          description: Name of the month of the year.
+                          type: string
+                      required:
+                      - name
+                      type: object
+                    type: array
+                  patchingMode:
+                    description: |-
+                      Cloud Exadata infrastructure node patching method, either "ROLLING" or "NONROLLING". Default value is ROLLING.
+                      *IMPORTANT*: Non-rolling infrastructure patching involves system down time. See Oracle-Managed Infrastructure Maintenance Updates (https://docs.cloud.oracle.com/iaas/Content/Database/Concepts/examaintenance.htm#Oracle) for more information.
+                    type: string
+                  preference:
+                    description: The maintenance window scheduling preference.
+                    type: string
+                  weeksOfMonth:
+                    description: |-
+                      Weeks during the month when maintenance should be performed. Weeks start on the 1st, 8th, 15th, and 22nd days of the month, and have a duration of 7 days. Weeks start and end based on calendar dates, not days of the week.
+                      For example, to allow maintenance during the 2nd week of the month (from the 8th day to the 14th day of the month), use the value 2. Maintenance cannot be scheduled for the fifth week of months that contain more than 28 days.
+                      Note that this parameter works in conjunction with the  daysOfWeek and hoursOfDay parameters to allow you to specify specific days of the week and hours that maintenance will be performed.
+                    items:
+                      type: integer
+                    type: array
+                type: object
+              maxCpuCount:
+                description: The total number of CPU cores available.
+                type: integer
+              maxDataStorageInTBs:
+                description: The total available DATA disk group size.
+                type: number
+              maxDbNodeStorageInGBs:
+                description: The total local node storage available in GBs.
+                type: integer
+              maxMemoryInGBs:
+                description: The total memory available in GBs.
+                type: integer
+              memorySizeInGBs:
+                description: The memory allocated in GBs.
+                type: integer
+              monthlyDbServerVersion:
+                description: The monthly software version of the database servers
+                  (dom0) in the Exadata infrastructure.
+                type: string
+              multiRackConfigurationFile:
+                description: The base64 encoded Multi-Rack configuration json file.
+                type: string
+              netmask:
+                description: The netmask for the control plane network.
+                type: string
+              networkBondingModeDetails:
+                description: ExadataInfrastructureNetworkBondingModeDetails defines
+                  nested fields for ExadataInfrastructure.NetworkBondingModeDetails.
+                properties:
+                  backupNetworkBondingMode:
+                    description: The network bonding mode for the Exadata infrastructure.
+                    type: string
+                  clientNetworkBondingMode:
+                    description: The network bonding mode for the Exadata infrastructure.
+                    type: string
+                  drNetworkBondingMode:
+                    description: The network bonding mode for the Exadata infrastructure.
+                    type: string
+                type: object
+              nextMaintenanceRunId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the next maintenance run.
+                type: string
+              ntpServer:
+                description: The list of NTP server IP addresses. Maximum of 3 allowed.
+                items:
+                  type: string
+                type: array
+              rackSerialNumber:
+                description: The serial number for the Exadata infrastructure.
+                type: string
+              shape:
+                description: The shape of the Exadata infrastructure. The shape determines
+                  the amount of CPU, storage, and memory resources allocated to the
+                  instance.
+                type: string
+              status:
+                properties:
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              storageCount:
+                description: The number of Exadata storage servers for the Exadata
+                  infrastructure.
+                type: integer
+              storageServerVersion:
+                description: The software version of the storage servers (cells) in
+                  the Exadata infrastructure.
+                type: string
+              timeCreated:
+                description: The date and time the Exadata infrastructure was created.
+                type: string
+              timeZone:
+                description: The time zone of the Exadata infrastructure. For details,
+                  see Exadata Infrastructure Time Zones (https://docs.cloud.oracle.com/Content/Database/References/timezones.htm).
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

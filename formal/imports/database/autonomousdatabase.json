@@ -66,17 +66,17 @@
       },
       {
         "operation": "EnableAutonomousDatabaseManagement",
-        "requestType": "database.DisableAutonomousDatabaseManagementRequest",
+        "requestType": "database.EnableAutonomousDatabaseManagementRequest",
         "responseType": "database.EnableAutonomousDatabaseManagementResponse"
       },
       {
         "operation": "EnableAutonomousDatabaseOperationsInsights",
-        "requestType": "database.DisableAutonomousDatabaseOperationsInsightsRequest",
+        "requestType": "database.EnableAutonomousDatabaseOperationsInsightsRequest",
         "responseType": "database.EnableAutonomousDatabaseOperationsInsightsResponse"
       },
       {
         "operation": "RegisterAutonomousDatabaseDataSafe",
-        "requestType": "database.DeregisterAutonomousDatabaseDataSafeRequest",
+        "requestType": "database.RegisterAutonomousDatabaseDataSafeRequest",
         "responseType": "database.RegisterAutonomousDatabaseDataSafeResponse"
       },
       {
