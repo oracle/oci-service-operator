@@ -124,6 +124,12 @@ func applyLeaderElectionConfigOverlay(options ctrl.Options, cfg *leaderElectionC
 	if cfg == nil {
 		return options
 	}
+	options = applyLeaderElectionIdentityConfigOverlay(options, cfg)
+	options = applyLeaderElectionDurationConfigOverlay(options, cfg)
+	return options
+}
+
+func applyLeaderElectionIdentityConfigOverlay(options ctrl.Options, cfg *leaderElectionConfigFile) ctrl.Options {
 	if !options.LeaderElection && cfg.LeaderElect != nil {
 		options.LeaderElection = *cfg.LeaderElect
 	}
@@ -136,6 +142,10 @@ func applyLeaderElectionConfigOverlay(options ctrl.Options, cfg *leaderElectionC
 	if options.LeaderElectionID == "" && cfg.ResourceName != "" {
 		options.LeaderElectionID = cfg.ResourceName
 	}
+	return options
+}
+
+func applyLeaderElectionDurationConfigOverlay(options ctrl.Options, cfg *leaderElectionConfigFile) ctrl.Options {
 	if options.LeaseDuration == nil && cfg.LeaseDuration != nil {
 		leaseDuration := cfg.LeaseDuration.Duration
 		options.LeaseDuration = &leaseDuration
