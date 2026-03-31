@@ -248,6 +248,24 @@ type DbSystemHeatWaveCluster struct {
 	IsLakehouseEnabled bool `json:"isLakehouseEnabled,omitempty"`
 }
 
+// DbSystemSourceObservedState defines nested fields for DbSystem.Source.
+type DbSystemSourceObservedState struct {
+	JsonData   string `json:"jsonData,omitempty"`
+	SourceType string `json:"sourceType,omitempty"`
+	// The OCID of the backup to be used as the source for the new DB System.
+	BackupId string `json:"backupId,omitempty"`
+	// The OCID of the DB System from which a backup shall be selected to be
+	// restored when creating the new DB System. Use this together with
+	// recovery point to perform a point in time recovery operation.
+	DbSystemId string `json:"dbSystemId,omitempty"`
+	// The date and time, as per RFC 3339, of the change up to which the
+	// new DB System shall be restored to, using a backup and logs from the
+	// original DB System. In case no point in time is specified, then this
+	// new DB System shall be restored up to the latest change recorded for
+	// the original DB System.
+	RecoveryPoint string `json:"recoveryPoint,omitempty"`
+}
+
 // DbSystemEndpoint defines nested fields for DbSystem.Endpoint.
 type DbSystemEndpoint struct {
 	// The IP address the DB System is configured to listen on.
@@ -434,9 +452,9 @@ type DbSystemStatus struct {
 	// and memory for VM shapes; CPU cores, memory and storage for non-VM
 	// (or bare metal) shapes. To get a list of shapes, use (the
 	// ListShapes operation.
-	ShapeName    string               `json:"shapeName,omitempty"`
-	BackupPolicy DbSystemBackupPolicy `json:"backupPolicy,omitempty"`
-	Source       DbSystemSource       `json:"source,omitempty"`
+	ShapeName    string                      `json:"shapeName,omitempty"`
+	BackupPolicy DbSystemBackupPolicy        `json:"backupPolicy,omitempty"`
+	Source       DbSystemSourceObservedState `json:"source,omitempty"`
 	// The OCID of the Configuration to be used for Instances in this DB System.
 	ConfigurationId string `json:"configurationId,omitempty"`
 	// The hostname for the primary endpoint of the DB System. Used for DNS.

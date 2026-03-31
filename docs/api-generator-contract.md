@@ -264,8 +264,7 @@ Generated package scaffolding must include:
 
 - New services start as `crd-only` and normally omit the `generation` block.
 - Existing controller-backed generated services remain `controller-backed`
-  without parity overlays or compatibility-kind preservation. The parity
-  removal is documented in `docs/api-generator-parity.md`.
+  without parity overlays or compatibility-kind preservation.
 - A service moves from `crd-only` to `controller-backed` only when controller,
   service-manager, and registration rollout is explicitly enabled and the
   shared manager/package integration issue lands.

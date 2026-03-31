@@ -920,7 +920,7 @@ func TestObservedStateExcludedFieldPaths(t *testing.T) {
 	}
 }
 
-func TestCheckedInConfigLeavesMySQLObservedStateUnconfigured(t *testing.T) {
+func TestCheckedInConfigExcludesMySQLDbSystemSourceURLFromObservedState(t *testing.T) {
 	t.Parallel()
 
 	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
@@ -941,8 +941,15 @@ func TestCheckedInConfigLeavesMySQLObservedStateUnconfigured(t *testing.T) {
 	}
 
 	excluded := mysqlService.ObservedStateExcludedFieldPaths("DbSystem")
-	if len(excluded) != 0 {
-		t.Fatalf("mysql DbSystem excluded observed-state paths = %v, want none", excluded)
+	wantKey, err := normalizeObservedStateFieldPath("Source.SourceUrl")
+	if err != nil {
+		t.Fatalf("normalizeObservedStateFieldPath() error = %v", err)
+	}
+	if len(excluded) != 1 {
+		t.Fatalf("mysql DbSystem excluded observed-state paths = %v, want exactly %q", excluded, wantKey)
+	}
+	if _, ok := excluded[wantKey]; !ok {
+		t.Fatalf("mysql DbSystem excluded observed-state paths = %v, want %q", excluded, wantKey)
 	}
 }
 

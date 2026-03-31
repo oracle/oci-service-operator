@@ -402,6 +402,43 @@ func TestBuildPackageModelSynthesizesPSQLObservedStateFields(t *testing.T) {
 	})
 }
 
+func TestBuildPackageModelExcludesMySQLDbSystemSourceURLFromObservedState(t *testing.T) {
+	t.Parallel()
+
+	cfg := &Config{
+		Domain:         "oracle.com",
+		DefaultVersion: "v1beta1",
+	}
+	service := ServiceConfig{
+		Service:        "mysql",
+		SDKPackage:     "github.com/oracle/oci-go-sdk/v65/mysql",
+		Group:          "mysql",
+		PackageProfile: PackageProfileCRDOnly,
+		ObservedState: ObservedStateConfig{
+			ExcludedFieldPaths: map[string][]string{
+				"DbSystem": {"Source.SourceUrl"},
+			},
+		},
+	}
+
+	pkg, err := NewDiscoverer().BuildPackageModel(context.Background(), cfg, service)
+	if err != nil {
+		t.Fatalf("BuildPackageModel() error = %v", err)
+	}
+
+	dbSystem := findResource(t, pkg.Resources, "DbSystem")
+
+	specSource := findFieldModel(t, dbSystem.SpecFields, "Source")
+	assertFieldType(t, "DbSystem spec Source", specSource, "DbSystemSource")
+	assertHelperTypeFields(t, findHelperType(t, dbSystem.HelperTypes, "DbSystemSource"), "JsonData", "SourceType", "BackupId", "SourceUrl", "DbSystemId", "RecoveryPoint")
+
+	statusSource := findFieldModel(t, dbSystem.StatusFields, "Source")
+	assertFieldType(t, "DbSystem status Source", statusSource, "DbSystemSourceObservedState")
+	statusSourceType := findHelperType(t, dbSystem.HelperTypes, "DbSystemSourceObservedState")
+	assertHelperTypeFields(t, statusSourceType, "JsonData", "SourceType", "BackupId", "DbSystemId", "RecoveryPoint")
+	assertFieldNamesAbsent(t, statusSourceType.Name+" fields", statusSourceType.Fields, "SourceUrl")
+}
+
 func TestBuildPackageModelSynthesizesQueueObservedStateFields(t *testing.T) {
 	t.Parallel()
 

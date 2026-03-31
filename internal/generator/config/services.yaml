@@ -389,6 +389,10 @@ services:
             maxConcurrentReconciles: 3
             extraRBACMarkers:
               - groups="",resources=events,verbs=get;list;watch;create;update;patch;delete
+    observedState:
+      excludedFieldPaths:
+        DbSystem:
+          - Source.SourceUrl
 
   - service: networkloadbalancer
     sdkPackage: github.com/oracle/oci-go-sdk/v65/networkloadbalancer
