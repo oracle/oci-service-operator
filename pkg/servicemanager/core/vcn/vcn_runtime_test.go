@@ -8,6 +8,7 @@ package vcn
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/oracle/oci-go-sdk/v65/common"
 	coresdk "github.com/oracle/oci-go-sdk/v65/core"
@@ -387,6 +388,45 @@ func TestCreateOrUpdate_RecreatesOnExplicitNotFound(t *testing.T) {
 	assert.Equal(t, "ocid1.vcn.oc1..recreated", resource.Status.Id)
 	assert.NotNil(t, resource.Status.OsokStatus.CreatedAt)
 	assert.NotEqual(t, oldCreatedAt, *resource.Status.OsokStatus.CreatedAt)
+}
+
+func TestCreateOrUpdate_RecreateClearsStaleNestedOsokStatusMetadata(t *testing.T) {
+	manager := newTestManager(&fakeVcnOCIClient{
+		getFn: func(_ context.Context, _ coresdk.GetVcnRequest) (coresdk.GetVcnResponse, error) {
+			return coresdk.GetVcnResponse{}, fakeServiceError{
+				statusCode: 404,
+				code:       "NotFound",
+				message:    "missing",
+			}
+		},
+		createFn: func(_ context.Context, _ coresdk.CreateVcnRequest) (coresdk.CreateVcnResponse, error) {
+			return coresdk.CreateVcnResponse{
+				Vcn: makeSDKVcn("ocid1.vcn.oc1..recreated", "test-vcn", coresdk.VcnLifecycleStateAvailable),
+			}, nil
+		},
+	})
+
+	resource := makeSpecVcn()
+	resource.Status.Id = "ocid1.vcn.oc1..deleted"
+	resource.Status.OsokStatus = shared.OSOKStatus{
+		Ocid:      "ocid1.vcn.oc1..deleted",
+		Message:   "old delete message",
+		Reason:    string(shared.Terminating),
+		DeletedAt: &metav1.Time{Time: time.Now()},
+		Conditions: []shared.OSOKCondition{
+			{Type: shared.Terminating, Status: "True"},
+		},
+	}
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.Equal(t, shared.OCID("ocid1.vcn.oc1..recreated"), resource.Status.OsokStatus.Ocid)
+	assert.Nil(t, resource.Status.OsokStatus.DeletedAt)
+	assert.Equal(t, string(shared.Active), resource.Status.OsokStatus.Reason)
+	assert.Len(t, resource.Status.OsokStatus.Conditions, 1)
+	assert.Equal(t, shared.Active, resource.Status.OsokStatus.Conditions[0].Type)
 }
 
 func TestCreateOrUpdate_DoesNotRecreateOnAuthAmbiguity(t *testing.T) {

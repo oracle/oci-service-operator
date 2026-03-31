@@ -392,9 +392,7 @@ func (c *vcnRuntimeClient) markDeleted(resource *corev1beta1.Vcn, message string
 
 func (c *vcnRuntimeClient) clearTrackedIdentity(resource *corev1beta1.Vcn) {
 	resource.Status.Id = ""
-	resource.Status.OsokStatus.Ocid = ""
-	resource.Status.OsokStatus.CreatedAt = nil
-	resource.Status.OsokStatus.Message = ""
+	resource.Status.OsokStatus = shared.OSOKStatus{}
 }
 
 func (c *vcnRuntimeClient) markTerminating(resource *corev1beta1.Vcn, current coresdk.Vcn) {
