@@ -105,19 +105,22 @@ func (c *KubeSecretClient) GetSecret(ctx context.Context, secretName string, sec
 
 func (c *KubeSecretClient) UpdateSecret(ctx context.Context, secretName string, secretNamespace string, labels map[string]string,
 	updatedData map[string][]byte) (bool, error) {
-	existingSecret := &v1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      secretName,
-			Namespace: secretNamespace,
-			Labels:    labels,
-		},
-		Data: updatedData,
+	existingSecret := &v1.Secret{}
+	err := c.Client.Get(ctx, types.NamespacedName{Name: secretName, Namespace: secretNamespace}, existingSecret)
+	if err != nil {
+		c.Log.ErrorLog(err, "Failed to get kubernetes secret before update", "Secret Name", secretName, "Secret Namespace", secretNamespace)
+		return false, err
 	}
-	err := c.Client.Update(ctx, existingSecret)
+	if labels != nil {
+		existingSecret.Labels = labels
+	}
+	existingSecret.Data = updatedData
+	err = c.Client.Update(ctx, existingSecret)
 	if err != nil {
 		c.Log.ErrorLog(err, "Failed to update kubernetes secret", "Secret Name", secretName, "Secret Namespace", secretNamespace)
 		return false, err
 	}
+	c.Log.InfoLog("Secret updated successfully", "Secret Name", secretName, "Secret Namespace", secretNamespace)
 	return true, nil
 }
 

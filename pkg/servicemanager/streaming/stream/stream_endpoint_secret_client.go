@@ -8,6 +8,7 @@ package stream
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"strings"
 
 	"github.com/oracle/oci-go-sdk/v65/common"
@@ -16,6 +17,7 @@ import (
 	"github.com/oracle/oci-service-operator/pkg/credhelper"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -121,8 +123,20 @@ func (c streamEndpointSecretClient) syncEndpointSecret(ctx context.Context, reso
 		return err
 	}
 
-	_, err = c.credentialClient.CreateSecret(ctx, resource.Name, resource.Namespace, nil, data)
-	return err
+	currentData, err := c.credentialClient.GetSecret(ctx, resource.Name, resource.Namespace)
+	switch {
+	case err == nil:
+		if reflect.DeepEqual(currentData, data) {
+			return nil
+		}
+		_, err = c.credentialClient.UpdateSecret(ctx, resource.Name, resource.Namespace, nil, data)
+		return err
+	case apierrors.IsNotFound(err):
+		_, err = c.credentialClient.CreateSecret(ctx, resource.Name, resource.Namespace, nil, data)
+		return err
+	default:
+		return err
+	}
 }
 
 func streamEndpointSecretData(stream streamingsdk.Stream) (map[string][]byte, error) {
