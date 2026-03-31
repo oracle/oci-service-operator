@@ -8,14 +8,16 @@ rules:
   - ""
   resources:
   - events
-  - secrets
   verbs:
   - create
-  - delete
+  - patch
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
   - get
   - list
-  - patch
-  - update
   - watch
 - apiGroups:
   - artifacts.oracle.com

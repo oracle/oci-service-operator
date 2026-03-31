@@ -191,8 +191,8 @@ services:
           formalSpec: databaseautonomousdatabase
           controller:
             extraRBACMarkers:
-              - groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
-              - groups="",resources=events,verbs=get;list;watch;create;update;patch;delete
+              - groups="",resources=secrets,verbs=get;list;watch
+              - groups="",resources=events,verbs=create;patch
 
   - service: dns
     sdkPackage: github.com/oracle/oci-go-sdk/v65/dns

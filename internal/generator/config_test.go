@@ -763,8 +763,8 @@ func assertDatabaseRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) 
 	if !slices.Equal(
 		override.Controller.ExtraRBACMarkers,
 		[]string{
-			`groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete`,
-			`groups="",resources=events,verbs=get;list;watch;create;update;patch;delete`,
+			`groups="",resources=secrets,verbs=get;list;watch`,
+			`groups="",resources=events,verbs=create;patch`,
 		},
 	) {
 		t.Fatalf("database extra RBAC markers = %v", override.Controller.ExtraRBACMarkers)
