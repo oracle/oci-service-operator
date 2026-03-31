@@ -67,6 +67,7 @@ type runInputs struct {
 	services                    []generator.ServiceConfig
 	controllerGenPath           string
 	selectedGroups              []string
+	selectedRegistrationGroups  []string
 	selectedServiceManagerRoots []string
 	preserveRoot                string
 }
@@ -165,6 +166,7 @@ func resolveRunInputs(opts options) (runInputs, error) {
 		services:                    services,
 		controllerGenPath:           controllerGenPath,
 		selectedGroups:              serviceGroups(services),
+		selectedRegistrationGroups:  registrationGroups(services),
 		selectedServiceManagerRoots: serviceManagerRoots(services),
 		preserveRoot:                preserveRoot,
 	}, nil
@@ -221,7 +223,12 @@ func validateRuntimeSnapshot(snapshotRoot string, inputs runInputs) (outputBuild
 		return outputBuild{}, fmt.Errorf("generate deepcopy code in runtime snapshot: %w", err)
 	}
 
-	build, err := collectBuildPlan(snapshotRoot, inputs.selectedGroups, inputs.selectedServiceManagerRoots)
+	build, err := collectBuildPlan(
+		snapshotRoot,
+		inputs.selectedGroups,
+		inputs.selectedRegistrationGroups,
+		inputs.selectedServiceManagerRoots,
+	)
 	if err != nil {
 		return outputBuild{}, err
 	}
@@ -326,6 +333,23 @@ func serviceNames(services []generator.ServiceConfig) []string {
 func serviceGroups(services []generator.ServiceConfig) []string {
 	set := make(map[string]struct{}, len(services))
 	for _, service := range services {
+		set[service.Group] = struct{}{}
+	}
+
+	groups := make([]string, 0, len(set))
+	for group := range set {
+		groups = append(groups, group)
+	}
+	sort.Strings(groups)
+	return groups
+}
+
+func registrationGroups(services []generator.ServiceConfig) []string {
+	set := make(map[string]struct{}, len(services))
+	for _, service := range services {
+		if service.RegistrationGenerationStrategy() != generator.GenerationStrategyGenerated {
+			continue
+		}
 		set[service.Group] = struct{}{}
 	}
 
@@ -549,7 +573,12 @@ func populateRegistrations(repoRoot, snapshotRoot string, selectedGroups []strin
 	return nil
 }
 
-func collectBuildPlan(snapshotRoot string, selectedGroups []string, selectedServiceManagerRoots []string) (outputBuild, error) {
+func collectBuildPlan(
+	snapshotRoot string,
+	selectedGroups []string,
+	selectedRegistrationGroups []string,
+	selectedServiceManagerRoots []string,
+) (outputBuild, error) {
 	build := outputBuild{}
 
 	controllerPackages, err := collectControllerPackages(snapshotRoot, selectedGroups)
@@ -560,7 +589,7 @@ func collectBuildPlan(snapshotRoot string, selectedGroups []string, selectedServ
 	if err != nil {
 		return build, err
 	}
-	registrationPackages, err := collectRegistrationPackages(snapshotRoot)
+	registrationPackages, err := collectRegistrationPackages(snapshotRoot, selectedRegistrationGroups)
 	if err != nil {
 		return build, err
 	}
@@ -674,19 +703,29 @@ func serviceManagerRoots(services []generator.ServiceConfig) []string {
 	return roots
 }
 
-func collectRegistrationPackages(snapshotRoot string) ([]string, error) {
-	registrationsRoot := filepath.Join(snapshotRoot, "internal", "registrations")
-	entries, err := os.ReadDir(registrationsRoot)
-	if err != nil {
-		return nil, err
+func collectRegistrationPackages(snapshotRoot string, selectedGroups []string) ([]string, error) {
+	if len(selectedGroups) == 0 {
+		return nil, nil
 	}
-	for _, entry := range entries {
-		if entry.IsDir() || filepath.Ext(entry.Name()) != ".go" || !strings.HasSuffix(entry.Name(), "_generated.go") {
+
+	missing := make([]string, 0, len(selectedGroups))
+	for _, group := range selectedGroups {
+		filename := group + "_generated.go"
+		path := filepath.Join(snapshotRoot, "internal", "registrations", filename)
+		if isGeneratedRegistrationFile(path, filename) {
 			continue
 		}
-		return []string{"./internal/registrations"}, nil
+		if _, err := os.Stat(path); err != nil && !os.IsNotExist(err) {
+			return nil, err
+		}
+		missing = append(missing, filename)
 	}
-	return nil, nil
+	if len(missing) > 0 {
+		sort.Strings(missing)
+		return nil, fmt.Errorf("missing generated registration outputs in snapshot: %s", strings.Join(missing, ", "))
+	}
+
+	return []string{"./internal/registrations"}, nil
 }
 
 func preserveCheckedInCompanionFiles(repoRoot, snapshotRoot, defaultVersion string, services []generator.ServiceConfig) error {
@@ -768,6 +807,17 @@ func isGeneratedServiceManagerFile(path, name string) bool {
 		return false
 	}
 
+	return hasGeneratedMarker(path)
+}
+
+func isGeneratedRegistrationFile(path, name string) bool {
+	if filepath.Ext(name) != ".go" || !strings.HasSuffix(name, "_generated.go") {
+		return false
+	}
+	return hasGeneratedMarker(path)
+}
+
+func hasGeneratedMarker(path string) bool {
 	content, err := os.ReadFile(path)
 	if err != nil {
 		return false

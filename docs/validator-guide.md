@@ -263,8 +263,10 @@ Use the runtime gate when generator work changes controller, service-manager, or
 registration templates. By default it uses
 `internal/generator/config/services.yaml`, creates an isolated snapshot repo,
 generates runtime-enabled outputs there, regenerates deepcopy code for the
-selected API groups, and then compile-checks the generated controller,
-service-manager, and registration packages.
+selected API groups, verifies that each selected
+`internal/registrations/<group>_generated.go` output exists, and then
+compile-checks the generated controller, service-manager, and registration
+packages.
 
 When future rollout work needs a pre-promotion snapshot, override
 `GENERATED_RUNTIME_CONFIG` or `--config` with an alternate config explicitly.
@@ -314,7 +316,7 @@ The runtime summary JSON includes:
 
 - `build.controllerPackages` — generated controller packages compiled from the snapshot.
 - `build.serviceManagerPackages` — generated service-manager packages compiled from the snapshot.
-- `build.registrationPackages` — generated registration packages compiled from the snapshot.
+- `build.registrationPackages` — the shared registration package compiled after the selected `<group>_generated.go` outputs are present in the snapshot.
 - `snapshot.root` — present only when the snapshot is retained.
 
 For the current checked-in config, the runtime targets default

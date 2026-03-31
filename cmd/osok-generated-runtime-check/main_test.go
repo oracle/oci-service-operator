@@ -44,10 +44,10 @@ func TestCollectBuildPlanFindsGeneratedRuntimePackages(t *testing.T) {
 		filepath.Join(root, "controllers", "functions", "application_controller.go"):                              "package functions\n",
 		filepath.Join(root, "pkg", "servicemanager", "functions", "application", "application_servicemanager.go"): generatedServiceManagerSource("application"),
 		filepath.Join(root, "pkg", "servicemanager", "functions", "application", "application_serviceclient.go"):  generatedServiceManagerSource("application"),
-		filepath.Join(root, "internal", "registrations", "functions_generated.go"):                                "package registrations\n",
+		filepath.Join(root, "internal", "registrations", "functions_generated.go"):                                generatedRegistrationSource(),
 	})
 
-	build, err := collectBuildPlan(root, []string{"functions"}, []string{"functions"})
+	build, err := collectBuildPlan(root, []string{"functions"}, []string{"functions"}, []string{"functions"})
 	if err != nil {
 		t.Fatalf("collectBuildPlan() error = %v", err)
 	}
@@ -77,10 +77,10 @@ func TestCollectBuildPlanFindsOverriddenServiceManagerRoots(t *testing.T) {
 		filepath.Join(root, "controllers", "database", "autonomousdatabases_controller.go"):                                 "package database\n",
 		filepath.Join(root, "pkg", "servicemanager", "autonomousdatabases", "adb", "autonomousdatabases_servicemanager.go"): generatedServiceManagerSource("adb"),
 		filepath.Join(root, "pkg", "servicemanager", "autonomousdatabases", "adb", "autonomousdatabases_serviceclient.go"):  generatedServiceManagerSource("adb"),
-		filepath.Join(root, "internal", "registrations", "database_generated.go"):                                           "package registrations\n",
+		filepath.Join(root, "internal", "registrations", "database_generated.go"):                                           generatedRegistrationSource(),
 	})
 
-	build, err := collectBuildPlan(root, []string{"database"}, []string{"autonomousdatabases"})
+	build, err := collectBuildPlan(root, []string{"database"}, []string{"database"}, []string{"autonomousdatabases"})
 	if err != nil {
 		t.Fatalf("collectBuildPlan() error = %v", err)
 	}
@@ -96,7 +96,7 @@ func TestCollectBuildPlanRejectsMissingRuntimePackages(t *testing.T) {
 	root := t.TempDir()
 	mustMkdirAll(t, []string{filepath.Join(root, "internal", "registrations")})
 
-	if _, err := collectBuildPlan(root, []string{"functions"}, []string{"functions"}); err == nil {
+	if _, err := collectBuildPlan(root, []string{"functions"}, []string{"functions"}, []string{"functions"}); err == nil {
 		t.Fatal("collectBuildPlan() error = nil, want missing package error")
 	}
 }
@@ -115,15 +115,41 @@ func TestCollectBuildPlanRejectsLegacyOnlyServiceManagerPackages(t *testing.T) {
 		filepath.Join(root, "controllers", "database", "autonomousdatabases_controller.go"):                 "package database\n",
 		filepath.Join(root, "pkg", "servicemanager", "autonomousdatabases", "adb", "adb_servicemanager.go"): "package adb\n",
 		filepath.Join(root, "pkg", "servicemanager", "autonomousdatabases", "adb", "adb_serviceclient.go"):  "package adb\n",
-		filepath.Join(root, "internal", "registrations", "database_generated.go"):                           "package registrations\n",
+		filepath.Join(root, "internal", "registrations", "database_generated.go"):                           generatedRegistrationSource(),
 	})
 
-	_, err := collectBuildPlan(root, []string{"database"}, []string{"autonomousdatabases"})
+	_, err := collectBuildPlan(root, []string{"database"}, []string{"database"}, []string{"autonomousdatabases"})
 	if err == nil {
 		t.Fatal("collectBuildPlan() error = nil, want missing generated service-manager packages error")
 	}
 	if err.Error() != "no generated service-manager packages detected in snapshot" {
 		t.Fatalf("collectBuildPlan() error = %v, want %q", err, "no generated service-manager packages detected in snapshot")
+	}
+}
+
+func TestCollectBuildPlanRejectsMissingSelectedRegistrationOutputs(t *testing.T) {
+	t.Helper()
+
+	root := t.TempDir()
+	mustMkdirAll(t, []string{
+		filepath.Join(root, "controllers", "functions"),
+		filepath.Join(root, "pkg", "servicemanager", "functions", "application"),
+		filepath.Join(root, "internal", "registrations"),
+	})
+
+	writeTestFiles(t, map[string]string{
+		filepath.Join(root, "controllers", "functions", "application_controller.go"):                              "package functions\n",
+		filepath.Join(root, "pkg", "servicemanager", "functions", "application", "application_servicemanager.go"): generatedServiceManagerSource("application"),
+		filepath.Join(root, "pkg", "servicemanager", "functions", "application", "application_serviceclient.go"):  generatedServiceManagerSource("application"),
+		filepath.Join(root, "internal", "registrations", "events_generated.go"):                                   generatedRegistrationSource(),
+	})
+
+	_, err := collectBuildPlan(root, []string{"functions"}, []string{"functions"}, []string{"functions"})
+	if err == nil {
+		t.Fatal("collectBuildPlan() error = nil, want missing selected registration output error")
+	}
+	if err.Error() != "missing generated registration outputs in snapshot: functions_generated.go" {
+		t.Fatalf("collectBuildPlan() error = %v, want %q", err, "missing generated registration outputs in snapshot: functions_generated.go")
 	}
 }
 
@@ -246,6 +272,10 @@ func writeTestFiles(t *testing.T, files map[string]string) {
 
 func generatedServiceManagerSource(packageName string) string {
 	return "package " + packageName + "\n\n" + generatedFileMarker + "\n"
+}
+
+func generatedRegistrationSource() string {
+	return "package registrations\n\n" + generatedFileMarker + "\n"
 }
 
 func assertSymlink(t *testing.T, path string) {
