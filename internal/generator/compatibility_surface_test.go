@@ -3,14 +3,12 @@
   Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
 */
 
-//nolint:gocognit,gocyclo // This compatibility test pins the preserve/regenerate flow end to end with full artifact assertions.
 package generator
 
 import (
 	"context"
 	"os"
 	"path/filepath"
-	"slices"
 	"testing"
 )
 
@@ -29,13 +27,7 @@ func TestGeneratePreservesExistingSpecSurfaceFromSeparateRoot(t *testing.T) {
 	}
 
 	preserveRoot := t.TempDir()
-	preserveDir := filepath.Join(preserveRoot, "api", "sample", "v1beta1")
-	if err := os.MkdirAll(preserveDir, 0o755); err != nil {
-		t.Fatalf("MkdirAll(%s) error = %v", preserveDir, err)
-	}
-	if err := os.WriteFile(filepath.Join(preserveDir, "widget_types.go"), []byte(existingWidgetSpecSurface), 0o644); err != nil {
-		t.Fatalf("WriteFile(widget_types.go) error = %v", err)
-	}
+	writeExistingWidgetSpecSurface(t, preserveRoot)
 
 	outputRoot := t.TempDir()
 	pipeline := newTestGenerator(t)
@@ -48,46 +40,7 @@ func TestGeneratePreservesExistingSpecSurfaceFromSeparateRoot(t *testing.T) {
 	}
 
 	widgetPath := filepath.Join(outputRoot, "api", "sample", "v1beta1", "widget_types.go")
-	surface, ok, err := loadExistingSpecSurface(widgetPath, "Widget")
-	if err != nil {
-		t.Fatalf("loadExistingSpecSurface(%s) error = %v", widgetPath, err)
-	}
-	if !ok {
-		t.Fatalf("loadExistingSpecSurface(%s) returned ok=false", widgetPath)
-	}
-
-	gotFields := make([]string, 0, len(surface.SpecFields))
-	for _, field := range surface.SpecFields {
-		gotFields = append(gotFields, field.Name)
-	}
-	if !slices.Equal(gotFields, []string{"CompartmentId", "Source"}) {
-		t.Fatalf("Widget spec fields = %v, want [CompartmentId Source]", gotFields)
-	}
-
-	if len(surface.SpecHelperTypes) != 1 || surface.SpecHelperTypes[0].Name != "WidgetExistingSource" {
-		t.Fatalf("Widget helper types = %#v, want WidgetExistingSource only", surface.SpecHelperTypes)
-	}
-	if !hasField(surface.SpecHelperTypes[0].Fields, "Type") {
-		t.Fatalf("WidgetExistingSource fields = %#v, want Type", surface.SpecHelperTypes[0].Fields)
-	}
-
-	content := readFile(t, widgetPath)
-	assertContains(t, content, []string{
-		"Source WidgetExistingSource `json:\"source,omitempty\"`",
-		"type WidgetExistingSource struct {",
-		"LifecycleState",
-		"TimeUpdated",
-	})
-	assertNotContains(t, content, []string{
-		"DisplayName string `json:\"displayName\"`",
-		"Name string `json:\"name,omitempty\"`",
-		"Count int `json:\"count,omitempty\"`",
-		"Enabled bool `json:\"enabled,omitempty\"`",
-		"Labels map[string]string `json:\"labels,omitempty\"`",
-		"Mode ModeEnum `json:\"mode,omitempty\"`",
-		"CreatedAt",
-		"type WidgetSource struct {",
-	})
+	assertPreservedWidgetSurface(t, widgetPath)
 }
 
 const existingWidgetSpecSurface = `package v1beta1
@@ -108,3 +61,53 @@ type WidgetExistingSource struct {
 	Type string ` + "`json:\"type,omitempty\"`" + `
 }
 `
+
+func writeExistingWidgetSpecSurface(t *testing.T, preserveRoot string) {
+	t.Helper()
+
+	preserveDir := filepath.Join(preserveRoot, "api", "sample", "v1beta1")
+	if err := os.MkdirAll(preserveDir, 0o755); err != nil {
+		t.Fatalf("MkdirAll(%s) error = %v", preserveDir, err)
+	}
+	if err := os.WriteFile(filepath.Join(preserveDir, "widget_types.go"), []byte(existingWidgetSpecSurface), 0o644); err != nil {
+		t.Fatalf("WriteFile(widget_types.go) error = %v", err)
+	}
+}
+
+func assertPreservedWidgetSurface(t *testing.T, widgetPath string) {
+	t.Helper()
+
+	surface, ok, err := loadExistingSpecSurface(widgetPath, "Widget")
+	if err != nil {
+		t.Fatalf("loadExistingSpecSurface(%s) error = %v", widgetPath, err)
+	}
+	if !ok {
+		t.Fatalf("loadExistingSpecSurface(%s) returned ok=false", widgetPath)
+	}
+
+	assertFieldNamesPresent(t, "Widget spec fields", surface.SpecFields, "CompartmentId", "Source")
+	if len(surface.SpecFields) != 2 {
+		t.Fatalf("Widget spec fields = %#v, want only CompartmentId and Source", surface.SpecFields)
+	}
+	if len(surface.SpecHelperTypes) != 1 || surface.SpecHelperTypes[0].Name != "WidgetExistingSource" {
+		t.Fatalf("Widget helper types = %#v, want WidgetExistingSource only", surface.SpecHelperTypes)
+	}
+	assertHelperTypeFields(t, surface.SpecHelperTypes[0], "Type")
+
+	assertFileContains(t, widgetPath, []string{
+		"Source WidgetExistingSource `json:\"source,omitempty\"`",
+		"type WidgetExistingSource struct {",
+		"LifecycleState",
+		"TimeUpdated",
+	})
+	assertFileDoesNotContain(t, widgetPath, []string{
+		"DisplayName string `json:\"displayName\"`",
+		"Name string `json:\"name,omitempty\"`",
+		"Count int `json:\"count,omitempty\"`",
+		"Enabled bool `json:\"enabled,omitempty\"`",
+		"Labels map[string]string `json:\"labels,omitempty\"`",
+		"Mode ModeEnum `json:\"mode,omitempty\"`",
+		"CreatedAt",
+		"type WidgetSource struct {",
+	})
+}
