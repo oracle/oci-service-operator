@@ -245,6 +245,7 @@ services:
         strategy: manual
       resources:
         - kind: MySqlDbSystem
+          sdkName: DbSystem
           controller:
             maxConcurrentReconciles: 3
             extraRBACMarkers:
@@ -282,6 +283,9 @@ services:
 	override := mysqlService.Generation.Resources[0]
 	if override.Kind != "MySqlDbSystem" {
 		t.Fatalf("mysql override kind = %q, want %q", override.Kind, "MySqlDbSystem")
+	}
+	if override.SDKName != "DbSystem" {
+		t.Fatalf("mysql override sdkName = %q, want %q", override.SDKName, "DbSystem")
 	}
 	if override.Controller.MaxConcurrentReconciles != 3 {
 		t.Fatalf("mysql maxConcurrentReconciles = %d, want 3", override.Controller.MaxConcurrentReconciles)
@@ -512,6 +516,16 @@ func TestValidateRejectsInvalidGenerationConfig(t *testing.T) {
 			wantErr: `duplicate kind "MySqlDbSystem"`,
 		},
 		{
+			name: "duplicate sdk name override",
+			mutate: func(cfg *Config) {
+				cfg.Services[0].Generation.Resources = []ResourceGenerationOverride{
+					{Kind: "MySqlDbSystem", SDKName: "DbSystem", Controller: ControllerGenerationOverride{Strategy: GenerationStrategyManual}},
+					{Kind: "Widget", SDKName: "DbSystem", ServiceManager: ServiceManagerGenerationOverride{PackagePath: "mysql/widget"}},
+				}
+			},
+			wantErr: `duplicate sdkName "DbSystem"`,
+		},
+		{
 			name: "blank extra rbac marker",
 			mutate: func(cfg *Config) {
 				cfg.Services[0].Generation.Resources = []ResourceGenerationOverride{
@@ -664,7 +678,7 @@ func TestCheckedInConfigOptsOutEndpointBasedGeneratedRuntimeResources(t *testing
 	}
 }
 
-func TestCheckedInGeneratedServicesWithoutCompatibilityLockedKindsUseSharedManagerRollout(t *testing.T) {
+func TestCheckedInGeneratedServicesUseSharedManagerRollout(t *testing.T) {
 	t.Parallel()
 
 	servicesPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
@@ -673,18 +687,9 @@ func TestCheckedInGeneratedServicesWithoutCompatibilityLockedKindsUseSharedManag
 		t.Fatalf("LoadConfig(%q) error = %v", servicesPath, err)
 	}
 
-	compatibilityLockedServices := map[string]struct{}{
-		"database":  {},
-		"mysql":     {},
-		"streaming": {},
-	}
-	promotedNames := make([]string, 0)
+	serviceNames := make([]string, 0, len(servicesCfg.Services))
 	for _, service := range servicesCfg.Services {
-		if _, ok := compatibilityLockedServices[service.Service]; ok {
-			continue
-		}
-
-		promotedNames = append(promotedNames, service.Service)
+		serviceNames = append(serviceNames, service.Service)
 		if service.PackageProfile != PackageProfileControllerBacked {
 			t.Fatalf("%s packageProfile = %q, want %q", service.Service, service.PackageProfile, PackageProfileControllerBacked)
 		}
@@ -697,18 +702,15 @@ func TestCheckedInGeneratedServicesWithoutCompatibilityLockedKindsUseSharedManag
 		if got := service.RegistrationGenerationStrategy(); got != GenerationStrategyGenerated {
 			t.Fatalf("%s registration strategy = %q, want %q", service.Service, got, GenerationStrategyGenerated)
 		}
-		if got := service.WebhookGenerationStrategy(); got != GenerationStrategyNone {
-			t.Fatalf("%s webhook strategy = %q, want %q", service.Service, got, GenerationStrategyNone)
-		}
 	}
-	slices.Sort(promotedNames)
+	slices.Sort(serviceNames)
 
-	if len(promotedNames) == 0 {
-		t.Fatal("expected at least one generated service without compatibility-locked published kinds in services.yaml")
+	if len(serviceNames) == 0 {
+		t.Fatal("expected at least one configured generated service in services.yaml")
 	}
 }
 
-func TestCheckedInServicesConfigDoesNotUseParityInputs(t *testing.T) {
+func TestCheckedInServicesConfigDoesNotUseParityOrCompatibilityInputs(t *testing.T) {
 	t.Parallel()
 
 	content, err := os.ReadFile(filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml"))
@@ -722,6 +724,12 @@ func TestCheckedInServicesConfigDoesNotUseParityInputs(t *testing.T) {
 	}
 	if strings.Contains(rendered, "parityFile:") {
 		t.Fatalf("services.yaml still contains parityFile inputs:\n%s", rendered)
+	}
+	if strings.Contains(rendered, "compatibility:") {
+		t.Fatalf("services.yaml still contains compatibility inputs:\n%s", rendered)
+	}
+	if strings.Contains(rendered, "existingKinds:") {
+		t.Fatalf("services.yaml still contains existingKinds inputs:\n%s", rendered)
 	}
 }
 
@@ -823,6 +831,9 @@ func assertCheckedInDatabaseRuntimeRolloutMetadata(t *testing.T, service *Servic
 	}
 
 	override := service.Generation.Resources[0]
+	if override.SDKName != "AutonomousDatabase" {
+		t.Fatalf("database sdkName = %q, want %q", override.SDKName, "AutonomousDatabase")
+	}
 	if !slices.Equal(
 		override.Controller.ExtraRBACMarkers,
 		[]string{
@@ -848,6 +859,9 @@ func assertCheckedInMySQLRuntimeRolloutMetadata(t *testing.T, service *ServiceCo
 	}
 
 	override := service.Generation.Resources[0]
+	if override.SDKName != "DbSystem" {
+		t.Fatalf("mysql sdkName = %q, want %q", override.SDKName, "DbSystem")
+	}
 	if override.Controller.MaxConcurrentReconciles != 3 {
 		t.Fatalf("mysql maxConcurrentReconciles = %d, want 3", override.Controller.MaxConcurrentReconciles)
 	}

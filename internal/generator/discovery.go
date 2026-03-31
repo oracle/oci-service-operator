@@ -203,7 +203,7 @@ func buildResourceModel(index *ocisdk.Package, service ServiceConfig, entry reso
 		return ResourceModel{}, fmt.Errorf("discover runtime metadata for %q: %w", entry.rawName, err)
 	}
 
-	kind, compatibilityLocked := resolvedResourceKind(entry.rawName, service.Compatibility)
+	kind := service.PublishedKind(entry.rawName)
 	fieldSet := synthesizeResourceFieldSet(index, service, kind, entry.rawName, desiredStateStructCandidates(entry.rawName, entry.requestBodyPayloads))
 	displayField := primaryDisplayField(fieldSet.SpecFields)
 	kindPlural := strings.ToLower(pluralize(kind))
@@ -226,7 +226,6 @@ func buildResourceModel(index *ocisdk.Package, service ServiceConfig, entry reso
 		ObjectComments:      []string{fmt.Sprintf("%s is the Schema for the %s API.", kind, kindPlural)},
 		ListComments:        []string{fmt.Sprintf("%sList contains a list of %s.", kind, kind)},
 		PrimaryDisplayField: displayField,
-		CompatibilityLocked: compatibilityLocked,
 	}, nil
 }
 
@@ -237,13 +236,6 @@ func sortedOperations(operations map[string]struct{}) []string {
 	}
 	sort.Strings(sorted)
 	return sorted
-}
-
-func resolvedResourceKind(rawName string, compatibility CompatibilityConfig) (string, bool) {
-	if kind, ok := compatibilityKind(rawName, compatibility); ok {
-		return kind, true
-	}
-	return rawName, false
 }
 
 func primaryDisplayField(fields []FieldModel) string {

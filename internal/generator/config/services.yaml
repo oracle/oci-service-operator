@@ -145,9 +145,6 @@ services:
     phase: data-and-storage
     sampleOrder: 10
     packageProfile: controller-backed
-    compatibility:
-      existingKinds:
-        - AutonomousDatabases
     generation:
       controller:
         strategy: generated
@@ -159,6 +156,7 @@ services:
         strategy: manual
       resources:
         - kind: AutonomousDatabases
+          sdkName: AutonomousDatabase
           controller:
             extraRBACMarkers:
               - groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
@@ -378,9 +376,6 @@ services:
     phase: data-and-storage
     sampleOrder: 30
     packageProfile: controller-backed
-    compatibility:
-      existingKinds:
-        - MySqlDbSystem
     observedState:
       excludedFieldPaths:
         DbSystem:
@@ -396,6 +391,7 @@ services:
         strategy: manual
       resources:
         - kind: MySqlDbSystem
+          sdkName: DbSystem
           controller:
             maxConcurrentReconciles: 3
             extraRBACMarkers:
@@ -553,9 +549,6 @@ services:
     phase: eventing-messaging-and-observability
     sampleOrder: 20
     packageProfile: controller-backed
-    compatibility:
-      existingKinds:
-        - Stream
     generation:
       controller:
         strategy: generated

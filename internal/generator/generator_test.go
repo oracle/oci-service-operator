@@ -35,8 +35,13 @@ func TestBuildPackageModelDiscoversResources(t *testing.T) {
 		SDKPackage:     "example.com/test/sdk",
 		Group:          "mysql",
 		PackageProfile: "controller-backed",
-		Compatibility: CompatibilityConfig{
-			ExistingKinds: []string{"MySqlDbSystem"},
+		Generation: GenerationConfig{
+			Resources: []ResourceGenerationOverride{
+				{
+					Kind:    "MySqlDbSystem",
+					SDKName: "DbSystem",
+				},
+			},
 		},
 	}
 
@@ -1006,7 +1011,8 @@ func TestGenerateRendersControllerOutputs(t *testing.T) {
 	service.Generation.Controller.Strategy = GenerationStrategyGenerated
 	service.Generation.Resources = []ResourceGenerationOverride{
 		{
-			Kind: "MySqlDbSystem",
+			Kind:    "MySqlDbSystem",
+			SDKName: "DbSystem",
 			Controller: ControllerGenerationOverride{
 				MaxConcurrentReconciles: 3,
 				ExtraRBACMarkers: []string{
@@ -1232,7 +1238,8 @@ func TestGeneratedControllerCompiles(t *testing.T) {
 	service.Generation.Controller.Strategy = GenerationStrategyManual
 	service.Generation.Resources = []ResourceGenerationOverride{
 		{
-			Kind: "MySqlDbSystem",
+			Kind:    "MySqlDbSystem",
+			SDKName: "DbSystem",
 			Controller: ControllerGenerationOverride{
 				Strategy:                GenerationStrategyGenerated,
 				MaxConcurrentReconciles: 3,
@@ -1442,7 +1449,8 @@ func TestGenerateRendersServiceManagerScaffoldAtOverridePath(t *testing.T) {
 	service.Generation.ServiceManager.Strategy = GenerationStrategyGenerated
 	service.Generation.Resources = []ResourceGenerationOverride{
 		{
-			Kind: "MySqlDbSystem",
+			Kind:    "MySqlDbSystem",
+			SDKName: "DbSystem",
 			ServiceManager: ServiceManagerGenerationOverride{
 				PackagePath: "mysql/dbsystem",
 			},
@@ -1501,7 +1509,7 @@ func TestGeneratedServiceManagerScaffoldCompiles(t *testing.T) {
 	}
 }
 
-func TestCheckedInCompatibilityLockedServicesMatchGenerator(t *testing.T) {
+func TestCheckedInServicesMatchGenerator(t *testing.T) {
 	cfg := loadCheckedInConfig(t)
 	selectedServices := serviceConfigsByName(t, cfg, "database", "mysql", "streaming")
 	services := []ServiceConfig{*selectedServices["database"], *selectedServices["mysql"], *selectedServices["streaming"]}
@@ -1815,7 +1823,7 @@ func TestCheckedInConfigIncludesONSObservedStateAlias(t *testing.T) {
 	}
 }
 
-func TestMySQLCompatibilityLockedKindIncludesOptionalDesiredStateFields(t *testing.T) {
+func TestMySQLPublishedKindIncludesOptionalDesiredStateFields(t *testing.T) {
 	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
 	cfg, err := LoadConfig(cfgPath)
 	if err != nil {
@@ -1914,9 +1922,6 @@ func assertDiscoveredMySQLDbSystem(t *testing.T, dbSystem ResourceModel) {
 
 	if dbSystem.SDKName != "DbSystem" {
 		t.Fatalf("MySqlDbSystem SDK name = %q, want %q", dbSystem.SDKName, "DbSystem")
-	}
-	if !dbSystem.CompatibilityLocked {
-		t.Fatal("MySqlDbSystem compatibility override was not applied")
 	}
 	assertResourceSpecFields(t, dbSystem, "Port")
 	assertResourceSpecFieldsAbsent(t, dbSystem, "Id")
@@ -2161,8 +2166,13 @@ func testServiceConfig(profile string) ServiceConfig {
 		SDKPackage:     "github.com/oracle/oci-service-operator/internal/generator/testdata/sdk/sample",
 		Group:          "mysql",
 		PackageProfile: profile,
-		Compatibility: CompatibilityConfig{
-			ExistingKinds: []string{"MySqlDbSystem"},
+		Generation: GenerationConfig{
+			Resources: []ResourceGenerationOverride{
+				{
+					Kind:    "MySqlDbSystem",
+					SDKName: "DbSystem",
+				},
+			},
 		},
 	}
 }

@@ -112,7 +112,7 @@ func mergeSpecAndStatusHelperTypes(specHelpers []TypeModel, statusFields []Field
 				continue
 			}
 
-			renamed := uniqueCompatibilityHelperName(helper.Name, usedNames)
+			renamed := uniquePreservedHelperName(helper.Name, usedNames)
 			renames[helper.Name] = renamed
 			helper = renameHelperType(helper, renamed)
 		}
@@ -162,7 +162,7 @@ func fieldMergeKey(field FieldModel) string {
 	return "field:" + field.Name
 }
 
-func uniqueCompatibilityHelperName(name string, usedNames map[string]struct{}) string {
+func uniquePreservedHelperName(name string, usedNames map[string]struct{}) string {
 	candidates := []string{
 		name + "ObservedState",
 		name + "Status",
@@ -222,7 +222,7 @@ func collectReferencedHelperTypes(typeExpr string, helperIndex map[string]TypeMo
 	}
 }
 
-//nolint:gocognit,gocyclo // Existing API parsing keeps the compatibility surface extraction in one pass over the parsed file.
+//nolint:gocognit,gocyclo // Existing API parsing keeps preserved spec-surface extraction in one pass over the parsed file.
 func loadExistingSpecSurface(path string, kind string) (existingSpecSurface, bool, error) {
 	content, err := os.ReadFile(path)
 	if os.IsNotExist(err) {

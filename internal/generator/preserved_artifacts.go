@@ -22,20 +22,14 @@ type preservedPackageArtifacts struct {
 	sampleFiles  map[string]preservedFile
 }
 
-//nolint:gocognit,gocyclo // Preserved artifact loading keeps compatibility-locked sample/package decisions in one traversal.
+//nolint:gocognit,gocyclo // Preserved artifact loading keeps checked-in sample/package decisions in one traversal.
 func loadPreservedPackageArtifacts(root string, pkg *PackageModel) (preservedPackageArtifacts, error) {
 	preserved := preservedPackageArtifacts{}
 	if strings.TrimSpace(root) == "" || pkg == nil {
 		return preserved, nil
 	}
 
-	hasCompatibilityLockedResource := false
 	for _, resource := range pkg.Resources {
-		if !resource.CompatibilityLocked {
-			continue
-		}
-		hasCompatibilityLockedResource = true
-
 		if strings.TrimSpace(resource.Sample.FileName) == "" {
 			continue
 		}
@@ -50,10 +44,6 @@ func loadPreservedPackageArtifacts(root string, pkg *PackageModel) (preservedPac
 			}
 			preserved.sampleFiles[samplePath] = *file
 		}
-	}
-
-	if !hasCompatibilityLockedResource {
-		return preserved, nil
 	}
 
 	installPath := filepath.Join("packages", pkg.Service.Group, "install", "kustomization.yaml")

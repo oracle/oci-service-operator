@@ -6,7 +6,6 @@
 package generator
 
 import (
-	"slices"
 	"strings"
 	"unicode"
 )
@@ -116,25 +115,4 @@ func normalizedTokens(name string) []string {
 		tokens[i] = singularize(token)
 	}
 	return tokens
-}
-
-func compatibilityKind(rawName string, compatibility CompatibilityConfig) (string, bool) {
-	resourceTokens := normalizedTokens(rawName)
-	for _, existingKind := range compatibility.ExistingKinds {
-		existingTokens := normalizedTokens(existingKind)
-		if slices.Equal(resourceTokens, existingTokens) {
-			return existingKind, true
-		}
-		if len(resourceTokens) > 1 && len(existingTokens) > 1 &&
-			len(existingTokens) >= len(resourceTokens) &&
-			slices.Equal(existingTokens[len(existingTokens)-len(resourceTokens):], resourceTokens) {
-			return existingKind, true
-		}
-		if len(resourceTokens) > 1 && len(existingTokens) > 1 &&
-			len(resourceTokens) >= len(existingTokens) &&
-			slices.Equal(resourceTokens[len(resourceTokens)-len(existingTokens):], existingTokens) {
-			return existingKind, true
-		}
-	}
-	return "", false
 }

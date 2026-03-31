@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-func TestGeneratePreservesCheckedInCompatibilityLockedArtifactsFromSeparateRoot(t *testing.T) {
+func TestGeneratePreservesCheckedInPackageArtifactsFromSeparateRoot(t *testing.T) {
 	t.Parallel()
 
 	cfg := &Config{
@@ -27,7 +27,7 @@ func TestGeneratePreservesCheckedInCompatibilityLockedArtifactsFromSeparateRoot(
 		t.Fatalf("MkdirAll(%s) error = %v", resourceDir, err)
 	}
 	resourcePath := filepath.Join(resourceDir, "mysqldbsystem_types.go")
-	if err := os.WriteFile(resourcePath, []byte(existingLockedMySQLTypes), 0o644); err != nil {
+	if err := os.WriteFile(resourcePath, []byte(existingCheckedInMySQLTypes), 0o644); err != nil {
 		t.Fatalf("WriteFile(%s) error = %v", resourcePath, err)
 	}
 
@@ -36,7 +36,7 @@ func TestGeneratePreservesCheckedInCompatibilityLockedArtifactsFromSeparateRoot(
 		t.Fatalf("MkdirAll(%s) error = %v", installDir, err)
 	}
 	installPath := filepath.Join(installDir, "kustomization.yaml")
-	if err := os.WriteFile(installPath, []byte(existingLockedMySQLInstallKustomization), 0o644); err != nil {
+	if err := os.WriteFile(installPath, []byte(existingCheckedInMySQLInstallKustomization), 0o644); err != nil {
 		t.Fatalf("WriteFile(%s) error = %v", installPath, err)
 	}
 
@@ -45,7 +45,7 @@ func TestGeneratePreservesCheckedInCompatibilityLockedArtifactsFromSeparateRoot(
 		t.Fatalf("MkdirAll(%s) error = %v", samplesDir, err)
 	}
 	samplePath := filepath.Join(samplesDir, "mysql_v1beta1_mysqldbsystem.yaml")
-	if err := os.WriteFile(samplePath, []byte(existingLockedMySQLSample), 0o644); err != nil {
+	if err := os.WriteFile(samplePath, []byte(existingCheckedInMySQLSample), 0o644); err != nil {
 		t.Fatalf("WriteFile(%s) error = %v", samplePath, err)
 	}
 
@@ -89,7 +89,7 @@ func TestGeneratePreservesCheckedInCompatibilityLockedArtifactsFromSeparateRoot(
 	)
 }
 
-const existingLockedMySQLTypes = `package v1beta1
+const existingCheckedInMySQLTypes = `package v1beta1
 
 import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -121,7 +121,7 @@ type MySqlDbSystemList struct {
 }
 `
 
-const existingLockedMySQLInstallKustomization = `apiVersion: kustomize.config.k8s.io/v1beta1
+const existingCheckedInMySQLInstallKustomization = `apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
@@ -129,7 +129,7 @@ resources:
 - preserved/editor-role.yaml
 `
 
-const existingLockedMySQLSample = `apiVersion: mysql.oracle.com/v1beta1
+const existingCheckedInMySQLSample = `apiVersion: mysql.oracle.com/v1beta1
 kind: MySqlDbSystem
 metadata:
   name: preserved-mysqldbsystem

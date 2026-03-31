@@ -49,7 +49,7 @@ func run(ctx context.Context, programName string, args []string, stdout io.Write
 	flagSet.BoolVar(&opts.all, "all", false, "Generate all configured services.")
 	flagSet.StringVar(&opts.outputRoot, "output-root", ".", "Root directory where generated outputs are written.")
 	flagSet.BoolVar(&opts.overwrite, "overwrite", false, "Overwrite existing generated package files when the target directory already exists.")
-	flagSet.BoolVar(&opts.preserve, "preserve-existing-spec-surface", false, "Preserve the current checked-in API spec/helper surface plus compatibility-locked sample/package artifacts while regenerating status/read-model and other outputs.")
+	flagSet.BoolVar(&opts.preserve, "preserve-existing-spec-surface", false, "Preserve the current checked-in API spec/helper surface plus any existing checked-in sample/package artifacts while regenerating status/read-model and other outputs.")
 	if err := flagSet.Parse(args); err != nil {
 		return err
 	}
