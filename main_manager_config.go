@@ -82,7 +82,7 @@ func parseStartupFlags() startupFlags {
 	flag.StringVar(&flags.configFile, "config", "",
 		"The controller will load its initial configuration from this file. "+
 			"Omit this flag to use the default configuration values. "+
-			"Command-line flags override configuration from this file.")
+			"When this flag is set, manager options come from this file instead of the default flag values.")
 	flag.StringVar(&flags.metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&flags.probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
 	flag.BoolVar(&flags.enableLeaderElection, "leader-elect", true,
