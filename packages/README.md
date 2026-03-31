@@ -16,11 +16,16 @@ Expected layout:
 Package profiles:
 
 - `controller-backed`: used by groups that already participate in the shared
-  manager install. Today that is still the manual `database`, `mysql`, and
-  `streaming` groups, but later generator-owned runtime outputs also transition
-  here.
+  manager install. Today that includes the parity groups `database`, `mysql`,
+  and `streaming`, all of which declare this package profile directly in
+  `services.yaml`.
 - `crd-only`: used by generator-first API groups that ship CRDs and samples
   before controller, service-manager, and registration rollout is enabled.
+
+Being `controller-backed` does not require every runtime seam to stay manual.
+`database` and `mysql` still retain explicit parity adapters, while
+`streaming/Stream` now runs on the generated runtime path directly except for
+the endpoint-secret companion.
 
 Current workflow:
 
@@ -46,9 +51,11 @@ Runtime rollout defaults:
 
 - Services without a `generation` block default to controller, service-manager,
   and registration rollout `none`, while webhook ownership remains `manual`.
-- Existing parity services stay `controller-backed` with
-  `generation.*.strategy=manual` until follow-on migration work opts them into
-  generated runtime outputs.
+- Existing parity services keep their rollout metadata in `services.yaml`.
+  `database`, `mysql`, and `streaming` are already `controller-backed`, with
+  generated controller, service-manager, and registration rollout enabled.
+  Remaining handwritten seams stay explicit in repo-owned files instead of
+  being implied by the package profile.
 
 Package profile behavior:
 
