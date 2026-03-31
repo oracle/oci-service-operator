@@ -6,10 +6,19 @@ The OCI Service Operator for Kubernetes (OSOK) makes it easy to create, manage, 
 
 OSOK is based on the [Operator Framework](https://operatorframework.io/), an open-source toolkit used to manage Operators. It uses the [controller-runtime](https://github.com/kubernetes-sigs/controller-runtime) library, which provides high-level APIs and abstractions to write operational logic and also provides tools for scaffolding and code generation for Operators.
 
-**Services Supported**
-1. [Autonomous Database Service](https://www.oracle.com/in/autonomous-database/)
-1. [Oracle Streaming Service](https://docs.cloud.oracle.com/iaas/Content/Streaming/Concepts/streamingoverview.htm)
-1. [MySQL DB System Service](https://www.oracle.com/mysql/)
+**Supported API Groups**
+
+OSOK now ships generator-owned APIs and runtime scaffolding from the checked-in
+service map in `internal/generator/config/services.yaml`. The current inventory
+spans `artifacts`, `certificates`, `certificatesmanagement`,
+`containerengine`, `core`, `database`, `dns`, `events`, `functions`,
+`identity`, `keymanagement`, `limits`, `loadbalancer`, `logging`,
+`monitoring`, `mysql`, `networkloadbalancer`, `nosql`, `objectstorage`,
+`ons`, `psql`, `queue`, `secrets`, `streaming`, `vault`, and
+`workrequests`.
+
+See [docs/services.md](docs/services.md#services) for the supported service map
+and [config/samples](config/samples) for generated manifest examples.
 
 ## Installation
 
