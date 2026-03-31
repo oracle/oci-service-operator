@@ -15,6 +15,7 @@ import (
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/stretchr/testify/assert"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -280,6 +281,8 @@ func TestCreateOrUpdate_RecreatesOnExplicitNotFound(t *testing.T) {
 	resource.Status.Id = "ocid1.vcn.oc1..existing"
 	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.vcn.oc1..existing")
 	resource.Status.OsokStatus.Message = "stale"
+	oldCreatedAt := metav1.Now()
+	resource.Status.OsokStatus.CreatedAt = &oldCreatedAt
 
 	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
 
@@ -289,6 +292,8 @@ func TestCreateOrUpdate_RecreatesOnExplicitNotFound(t *testing.T) {
 	assert.Equal(t, 1, createCalls)
 	assert.Equal(t, "ocid1.vcn.oc1..recreated", string(resource.Status.OsokStatus.Ocid))
 	assert.Equal(t, "ocid1.vcn.oc1..recreated", resource.Status.Id)
+	assert.NotNil(t, resource.Status.OsokStatus.CreatedAt)
+	assert.NotEqual(t, oldCreatedAt, *resource.Status.OsokStatus.CreatedAt)
 }
 
 func TestCreateOrUpdate_DoesNotRecreateOnAuthAmbiguity(t *testing.T) {
