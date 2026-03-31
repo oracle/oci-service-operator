@@ -52,20 +52,34 @@ The Complete Specification of the `Streams` Custom Resource (CR) is as detailed 
 
 ## Streams Service Status Parameters
 
-| Parameter                                         | Description                                                         | Type   | Mandatory |
-| --------------------------------------------------| ------------------------------------------------------------------- | ------ | --------- |
-| `status.osokstatus.conditions.type`               | Lifecycle state of the Streams Service. The following values are valid: <ul><li>**Provisioning** - indicates a Stream is provisioning. </li><li>**Active** - indicates a Stream is Active. </li><li>**Failed** - indicates a Stream failed provisioning. </li><li>**Terminating** - indicates a Stream is Deleting. </li></ul>|  string  |  no  |
-| `status.osokstatus.conditions.status`             | Status of the Stream Custom Resource during the condition update. |  string  |  no  |
-| `status.osokstatus.conditions.lastTransitionTime` | Last time the Stream CR was Updated. |  string  |  no  | 
-| `status.osokstatus.conditions.message`            | Message of the status condition of the CR. | string | no | 
-| `status.osokstatus.conditions.reason`             | Resource if any of status condition of the CR. | string | no |
-| `status.osokstatus.ocid`                          | The Stream [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm). |  string  | yes |
-| `status.osokstatus.message`                       | Overall status message of the CR.  |  string  | no  |
-| `status.osokstatus.reason`                        | Overall status reason of the CR.   | string | no |
-| `status.osokstatus.createdAt`                     | Created time of the Streams Service.            | string | no |  
-| `status.osokstatus.updatedAt`                     | Updated time of the Streams Service.            | string | no |
-| `status.osokstatus.requestedAt`                   | Requested time of the CR.          | string | no |
-| `status.osokstatus.deletedAt`                     | Deleted time of the CR.            | string | no | 
+The Stream controller publishes OSOK lifecycle bookkeeping under `status.status.*` and the live OCI Stream read model as top-level fields on `status`.
+
+| Parameter | Description | Type | Mandatory |
+| --------- | ----------- | ---- | --------- |
+| `status.status.conditions.type` | Lifecycle state of the Stream resource. The following values are valid: <ul><li>**Provisioning** - indicates a Stream is provisioning.</li><li>**Active** - indicates a Stream is active.</li><li>**Failed** - indicates a Stream failed provisioning.</li><li>**Terminating** - indicates a Stream is deleting.</li></ul> | string | no |
+| `status.status.conditions.status` | Status of the Stream custom resource during the condition update. | string | no |
+| `status.status.conditions.lastTransitionTime` | Last time the Stream condition changed. | string | no |
+| `status.status.conditions.message` | Message associated with the current Stream condition. | string | no |
+| `status.status.conditions.reason` | Reason associated with the current Stream condition. | string | no |
+| `status.status.ocid` | The Stream [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) tracked by OSOK. | string | yes |
+| `status.status.message` | Overall OSOK status message for the Stream custom resource. | string | no |
+| `status.status.reason` | Overall OSOK status reason for the Stream custom resource. | string | no |
+| `status.status.createdAt` | Created time recorded for the Stream custom resource. | string | no |
+| `status.status.updatedAt` | Last updated time recorded for the Stream custom resource. | string | no |
+| `status.status.requestedAt` | Requested time of the Stream custom resource. | string | no |
+| `status.status.deletedAt` | Deleted time of the Stream custom resource. | string | no |
+| `status.name` | The name of the stream. Avoid entering confidential information. | string | no |
+| `status.id` | The Stream [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) returned by the live OCI read model. | string | yes |
+| `status.partitions` | The number of partitions in the stream. | integer | no |
+| `status.retentionInHours` | The retention period of the stream, in hours. This field is read-only. | integer | no |
+| `status.compartmentId` | The compartment [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the stream. | string | no |
+| `status.streamPoolId` | The stream pool [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) that contains the stream. | string | no |
+| `status.lifecycleState` | The current OCI lifecycle state of the stream. | string | no |
+| `status.timeCreated` | The creation time of the stream in RFC 3339 timestamp format. | string | no |
+| `status.messagesEndpoint` | The endpoint used by `StreamClient` to consume or publish messages in the stream. OSOK also materializes this value into the companion endpoint secret after the stream becomes active. | string | no |
+| `status.lifecycleStateDetails` | Additional details about the current OCI lifecycle state of the stream. | string | no |
+| `status.freeformTags` | Free-form tags returned by OCI for the stream. | object | no |
+| `status.definedTags` | Defined tags returned by OCI for the stream. | object | no |
 
 ## Create a Stream
 
@@ -109,8 +123,8 @@ stream-sample             Active         4d
 The Stream CR can list the streams in the cluster with detailed information: 
 ```sh
 $ kubectl get streams -o wide
-NAME                         DISPLAYNAME   STATUS         OCID                                   AGE
-streams-sample             StreamTest    Active         ocid1.streams.oc1........   4d
+NAME                       NAME          STATUS   OCID                        AGE
+stream-sample              StreamTest    Active   ocid1.stream.oc1..<id>      4d
 ```
 
 The Stream CR can be described:
