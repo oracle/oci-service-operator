@@ -37,17 +37,17 @@ Allow group <SERVICE_BROKER_GROUP> to manage streampools in compartment <COMPART
 
 ## Streams Service Specification Parameters
 
-The Complete Specification of the `Streams` Custom Resource (CR) is as detailed below:
+The complete specification of the `Stream` custom resource (CR) is detailed below:
 
 | Parameter                          | Description                                                         | Type   | Mandatory |
 | ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
-| `spec.Id `           | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the stream                                        | string | No       |
+| `spec.Id`            | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the stream                                        | string | No       |
 | `spec.name`          | The name of the stream. Avoid entering confidential information.                    | string | Yes       |
 | `spec.compartmentId` | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment that contains the stream. | string | Yes       |
 | `spec.partitions`   | The number of partitions in the stream.                        | number | Yes       |
 | `spec.retentionInHours` | The retention period of the stream, in hours. Accepted values are between 24 and 168 (7 days). If not specified, the stream will have a retention period of 24 hours. | number | No       |
 | `spec.streamPoolId`  | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the stream pool that contains the stream.  | string | Yes |
-| `spec.freeFormTags`  | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see [Resource Tags](https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). `Example: {"Department": "Finance"}` | object | No        |
+| `spec.freeformTags`  | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see [Resource Tags](https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). `Example: {"Department": "Finance"}` | object | No        |
 | `spec.definedTags`   | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see [Resource Tags](https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). `Example: {"Operations": {"CostCenter": "42"}}` | object | No        |
 
 ## Streams Service Status Parameters
@@ -88,7 +88,7 @@ The OSOK Stream controller provisions a stream when customer provides mandatory 
 Following is a sample CR yaml for Stream.
 
 ```yaml
-apiVersion: oci.oracle.com/v1beta1
+apiVersion: streaming.oracle.com/v1beta1
 kind: Stream
 metadata:
   name: <CR_OBJECT_NAME>
@@ -100,10 +100,10 @@ spec:
 # Either compartmentId or streamPoolId should be provided.  
   streamPoolId: <STREAM_POOL_OCID>
   freeformTags:
+    <KEY1>: <VALUE1>
+  definedTags:
+    <TAGNAMESPACE1>:
       <KEY1>: <VALUE1>
-    definedTags:
-      <TAGNAMESPACE1>:
-        <KEY1>: <VALUE1>
 ```
 
 Run the following command to create a CR to the cluster:
@@ -137,7 +137,7 @@ $ kubectl describe stream <NAME_OF_CR_OBJECT>
 OSOK allows you to bind to an existing stream instance. In this case, `Id` is the only required field in the CR `spec`. The message endpoint of the stream will be created as a secret.
 
 ```yaml
-apiVersion: oci.oracle.com/v1beta1
+apiVersion: streaming.oracle.com/v1beta1
 kind: Stream
 metadata:
   name: <CR_OBJECT_NAME>
@@ -153,10 +153,10 @@ kubectl apply -f <BIND_YAML>.yaml
 
 ## Updating Stream
 
-You can update `streamPoolId`, `freeFormTags`, and `definedTags` of the stream instance.
+You can update `streamPoolId`, `freeformTags`, and `definedTags` of the stream instance.
 
 ```yaml
-apiVersion: oci.oracle.com/v1beta1
+apiVersion: streaming.oracle.com/v1beta1
 kind: Stream
 metadata:
   name: <CR_OBJECT_NAME>
@@ -164,10 +164,10 @@ spec:
   Id: <STREAM_OCID>   
   streamPoolId: <STREAM_POOL_OCID>
   freeformTags:
+    <KEY1>: <VALUE1>
+  definedTags:
+    <TAGNAMESPACE1>:
       <KEY1>: <VALUE1>
-    definedTags:
-      <TAGNAMESPACE1>:
-        <KEY1>: <VALUE1>
 ```
 
 Run the following command to create a CR that updates an existing stream instance:
