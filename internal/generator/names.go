@@ -106,3 +106,78 @@ func normalizedTokens(name string) []string {
 	}
 	return tokens
 }
+
+func applySpecialSingularRules(name string) (string, bool) {
+	for _, rule := range specialSingularRules {
+		if singular, ok := applySpecialSingularRule(name, rule); ok {
+			return singular, true
+		}
+	}
+
+	return "", false
+}
+
+func applySpecialSingularRule(name string, rule singularRule) (string, bool) {
+	if !strings.HasSuffix(name, rule.suffix) {
+		return "", false
+	}
+
+	stem := strings.TrimSuffix(name, rule.suffix)
+	if stem == "" && rule.preserveExact {
+		return name, true
+	}
+	if rule.recursive {
+		return singularize(stem) + rule.replacement, true
+	}
+
+	return stem + rule.replacement, true
+}
+
+func singularizeStandardSuffix(name string) (string, bool) {
+	switch {
+	case strings.HasSuffix(name, "ies") && len(name) > 3:
+		return strings.TrimSuffix(name, "ies") + "y", true
+	case hasPluralESSuffix(name):
+		return strings.TrimSuffix(name, "es"), true
+	case strings.HasSuffix(name, "s") && !strings.HasSuffix(name, "ss"):
+		return strings.TrimSuffix(name, "s"), true
+	default:
+		return "", false
+	}
+}
+
+func hasPluralESSuffix(name string) bool {
+	for _, suffix := range esPluralSuffixes {
+		if strings.HasSuffix(name, suffix) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func shouldSplitCamelToken(runes []rune, index int) bool {
+	if index == 0 {
+		return false
+	}
+
+	current := runes[index]
+	if !unicode.IsUpper(current) {
+		return false
+	}
+
+	prev := runes[index-1]
+	return unicode.IsLower(prev) || unicode.IsDigit(prev) || endsUpperRunBeforeLower(runes, index, prev)
+}
+
+func endsUpperRunBeforeLower(runes []rune, index int, prev rune) bool {
+	return unicode.IsUpper(prev) && index+1 < len(runes) && unicode.IsLower(runes[index+1])
+}
+
+func appendLowerToken(tokens []string, current []rune) []string {
+	if len(current) == 0 {
+		return tokens
+	}
+
+	return append(tokens, strings.ToLower(string(current)))
+}

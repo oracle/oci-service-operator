@@ -59,6 +59,10 @@ func (g *Generator) Generate(ctx context.Context, cfg *Config, services []Servic
 		if err != nil {
 			return result, fmt.Errorf("build package model for service %q: %w", service.Service, err)
 		}
+		preserved, err := loadPreservedPackageArtifacts(options.OutputRoot, pkg)
+		if err != nil {
+			return result, fmt.Errorf("load preserved artifacts for service %q: %w", service.Service, err)
+		}
 
 		outputDir, err := g.renderer.RenderPackage(options.OutputRoot, pkg, options.Overwrite)
 		if err != nil {

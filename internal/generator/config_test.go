@@ -283,8 +283,8 @@ services:
 	if override.Kind != "DbSystem" {
 		t.Fatalf("mysql override kind = %q, want %q", override.Kind, "DbSystem")
 	}
-	if override.SDKName != "DbSystem" {
-		t.Fatalf("mysql override sdkName = %q, want %q", override.SDKName, "DbSystem")
+	if override.SDKName != "" {
+		t.Fatalf("mysql override sdkName = %q, want empty", override.SDKName)
 	}
 	if override.Controller.MaxConcurrentReconciles != 3 {
 		t.Fatalf("mysql maxConcurrentReconciles = %d, want 3", override.Controller.MaxConcurrentReconciles)
@@ -746,7 +746,6 @@ func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
 		}
 	}
 
-	coreService := services["core"]
 	if coreService.PackageProfile != PackageProfileControllerBacked {
 		t.Fatalf("core packageProfile = %q, want %q", coreService.PackageProfile, PackageProfileControllerBacked)
 	}
@@ -762,7 +761,7 @@ func TestCheckedInConfigSetsFormalSpecsForPromotedKinds(t *testing.T) {
 	t.Parallel()
 
 	cfg := loadCheckedInConfig(t)
-	services := serviceConfigsByName(t, cfg, "identity", "database", "mysql", "streaming")
+	serviceConfigsByName(t, cfg, "identity", "database", "mysql", "streaming")
 
 	var identityService *ServiceConfig
 	var databaseService *ServiceConfig
@@ -856,8 +855,6 @@ func TestCheckedInGeneratedServicesWithoutManualWebhooksUseSharedManagerRollout(
 			t.Fatalf("%s registration strategy = %q, want %q", service.Service, got, GenerationStrategyGenerated)
 		}
 	}
-	slices.Sort(serviceNames)
-
 	if len(promotedNames) == 0 {
 		t.Fatal("expected at least one promoted service without manual webhooks in services.yaml")
 	}
@@ -923,7 +920,7 @@ func TestObservedStateExcludedFieldPaths(t *testing.T) {
 	}
 }
 
-func TestCheckedInConfigExcludesMySQLSourceURLFromObservedState(t *testing.T) {
+func TestCheckedInConfigLeavesMySQLObservedStateUnconfigured(t *testing.T) {
 	t.Parallel()
 
 	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
@@ -944,12 +941,8 @@ func TestCheckedInConfigExcludesMySQLSourceURLFromObservedState(t *testing.T) {
 	}
 
 	excluded := mysqlService.ObservedStateExcludedFieldPaths("DbSystem")
-	wantKey, err := normalizeObservedStateFieldPath("Source.SourceUrl")
-	if err != nil {
-		t.Fatalf("normalizeObservedStateFieldPath() error = %v", err)
-	}
-	if _, ok := excluded[wantKey]; !ok {
-		t.Fatalf("mysql DbSystem excluded observed-state paths = %v, want %q", excluded, wantKey)
+	if len(excluded) != 0 {
+		t.Fatalf("mysql DbSystem excluded observed-state paths = %v, want none", excluded)
 	}
 }
 

@@ -6,7 +6,6 @@
 package generator
 
 import (
-	"slices"
 	"testing"
 )
 

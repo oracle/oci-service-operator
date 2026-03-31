@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "decision": "advance",
+  "summary": "Renamed the remaining MySQL end-user RBAC and CRD patch snippets from mysqldbsystem to dbsystem, removed legacy Makefile generator alias variables, and aligned internal/generator helpers/tests so the v2-only branch validates cleanly.",
+  "artifacts": [
+    "go test ./internal/generator -run 'TestLoadConfigIncludesGenerationRolloutAndOverrides|TestGeneratePreservesCheckedInPackageArtifactsInOutputRoot|TestCheckedInConfigLeavesMySQLObservedStateUnconfigured' -count=1",
+    "go test ./hack -run TestMakefileDoesNotExposeLegacyGeneratorAliases -count=1",
+    "make test"
+  ]
+}

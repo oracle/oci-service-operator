@@ -2,23 +2,27 @@
 # Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
 # Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
 #
-# permissions for end users to view mysqldbsystems.
+# permissions for end users to edit dbsystems.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: mysqldbsystem-viewer-role
+  name: dbsystem-editor-role
 rules:
 - apiGroups:
   - mysql.oracle.com
   resources:
-  - mysqldbsystems
+  - dbsystems
   verbs:
+  - create
+  - delete
   - get
   - list
+  - patch
+  - update
   - watch
 - apiGroups:
   - mysql.oracle.com
   resources:
-  - mysqldbsystems/status
+  - dbsystems/status
   verbs:
   - get

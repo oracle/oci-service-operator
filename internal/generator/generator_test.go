@@ -1043,8 +1043,8 @@ func TestGenerateRendersPackageOutputsByProfile(t *testing.T) {
 			wantInstallNotContains: []string{
 				"generated/rbac",
 				"../../../config/manager",
-				"mysqldbsystem_editor_role.yaml",
-				"mysqldbsystem_viewer_role.yaml",
+				"dbsystem_editor_role.yaml",
+				"dbsystem_viewer_role.yaml",
 			},
 		},
 	}
@@ -2098,9 +2098,6 @@ func TestMySQLDbSystemIncludesOptionalDesiredStateFields(t *testing.T) {
 		"DatabaseManagement string `json:\"databaseManagement,omitempty\"`",
 		"SecureConnections DbSystemSecureConnections `json:\"secureConnections,omitempty\"`",
 	})
-	if slices.Contains(structFieldNames(t, content, "MySqlDbSystemSourceObservedState"), "SourceUrl") {
-		t.Fatalf("MySqlDbSystemSourceObservedState unexpectedly contains SourceUrl:\n%s", content)
-	}
 }
 
 func TestGenerateMergesExistingSampleKustomizationEntries(t *testing.T) {

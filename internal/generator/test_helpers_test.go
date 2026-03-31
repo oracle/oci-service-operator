@@ -269,7 +269,7 @@ func assertGeneratedGoMatchesAll(t *testing.T, wantRoot string, gotRoot string, 
 	t.Helper()
 
 	for _, relativePath := range relativePaths {
-		assertGeneratedGoMatches(t, filepath.Join(wantRoot, relativePath), filepath.Join(gotRoot, relativePath))
+		assertGoEquivalent(t, filepath.Join(wantRoot, relativePath), filepath.Join(gotRoot, relativePath))
 	}
 }
 
