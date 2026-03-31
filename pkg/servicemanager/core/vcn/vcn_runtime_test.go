@@ -12,6 +12,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/common"
 	coresdk "github.com/oracle/oci-go-sdk/v65/core"
 	corev1beta1 "github.com/oracle/oci-service-operator/api/core/v1beta1"
+	"github.com/oracle/oci-service-operator/pkg/errorutil"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/stretchr/testify/assert"
@@ -445,6 +446,11 @@ func TestDelete_DoesNotConfirmDeletionOnAuthAmbiguity(t *testing.T) {
 }
 
 func TestIsNotFoundOCI_RejectsAuthAmbiguity(t *testing.T) {
+	assert.False(t, isNotFoundOCI(errorutil.UnauthorizedAndNotFoundOciError{
+		HTTPStatusCode: 404,
+		ErrorCode:      errorutil.NotAuthorizedOrNotFound,
+		Description:    "normalized auth ambiguity",
+	}))
 	assert.False(t, isNotFoundOCI(fakeServiceError{
 		statusCode: 404,
 		code:       "NotAuthorizedOrNotFound",
@@ -454,5 +460,15 @@ func TestIsNotFoundOCI_RejectsAuthAmbiguity(t *testing.T) {
 		statusCode: 404,
 		code:       "NotFound",
 		message:    "not found",
+	}))
+	assert.True(t, isNotFoundOCI(fakeServiceError{
+		statusCode: 404,
+		code:       "UnexpectedCode",
+		message:    "resource not found",
+	}))
+	assert.False(t, isNotFoundOCI(fakeServiceError{
+		statusCode: 404,
+		code:       "UnexpectedCode",
+		message:    "resource not authorized",
 	}))
 }
