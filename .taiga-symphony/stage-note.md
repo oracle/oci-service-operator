@@ -1,7 +1,7 @@
-Updated `packages/README.md` to remove the last stale compatibility-style wording from the checked-in package contract.
+Refactored `internal/generator/names.go` to split `singularize` and `splitCamel` into smaller helpers, clearing the last `gocyclo` violations in the generator cleanup branch without adding broad lint suppressions.
 
-The README now describes `database`, `mysql`, and `streaming` as normal `controller-backed` services whose rollout metadata is declared directly in `internal/generator/config/services.yaml`, and it documents `--preserve-existing-spec-surface` as the generic checked-in artifact preservation flow for naming and observed-state overrides.
+Added focused `internal/generator/names_test.go` coverage for camel-token splitting and lower-camel conversion so acronym and digit-boundary behavior stays locked down with the helper-based implementation.
 
 Validation:
-- `rg -n 'compatibility-locked|existingKinds|parity-only|osok-api-generator|api-generate|api-refresh' packages/README.md docs/api-generator-contract.md internal/generator/config/services.yaml Makefile cmd internal/generator -S`
-- `git diff --check -- packages/README.md`
+- `GOCACHE=/tmp/admin-osok_3-go-build GOLANGCI_LINT_CACHE=/tmp/admin-osok_3-golangci-lint make lint`
+- `GOCACHE=/tmp/admin-osok_3-go-build go test ./internal/generator/...`
