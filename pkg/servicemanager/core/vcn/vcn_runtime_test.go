@@ -255,6 +255,70 @@ func TestCreateOrUpdate_RejectsUnsupportedCreateOnlyDrift(t *testing.T) {
 	assert.Equal(t, 0, updateCalls)
 }
 
+func TestCreateOrUpdate_RecreatesOnExplicitNotFound(t *testing.T) {
+	getCalls := 0
+	createCalls := 0
+	manager := newTestManager(&fakeVcnOCIClient{
+		getFn: func(_ context.Context, _ coresdk.GetVcnRequest) (coresdk.GetVcnResponse, error) {
+			getCalls++
+			return coresdk.GetVcnResponse{}, fakeServiceError{
+				statusCode: 404,
+				code:       "NotFound",
+				message:    "missing",
+			}
+		},
+		createFn: func(_ context.Context, req coresdk.CreateVcnRequest) (coresdk.CreateVcnResponse, error) {
+			createCalls++
+			assert.Equal(t, common.String("ocid1.compartment.oc1..example"), req.CompartmentId)
+			return coresdk.CreateVcnResponse{
+				Vcn: makeSDKVcn("ocid1.vcn.oc1..recreated", "test-vcn", coresdk.VcnLifecycleStateAvailable),
+			}, nil
+		},
+	})
+
+	resource := makeSpecVcn()
+	resource.Status.Id = "ocid1.vcn.oc1..existing"
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.vcn.oc1..existing")
+	resource.Status.OsokStatus.Message = "stale"
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.Equal(t, 1, getCalls)
+	assert.Equal(t, 1, createCalls)
+	assert.Equal(t, "ocid1.vcn.oc1..recreated", string(resource.Status.OsokStatus.Ocid))
+	assert.Equal(t, "ocid1.vcn.oc1..recreated", resource.Status.Id)
+}
+
+func TestCreateOrUpdate_DoesNotRecreateOnAuthAmbiguity(t *testing.T) {
+	createCalls := 0
+	manager := newTestManager(&fakeVcnOCIClient{
+		getFn: func(_ context.Context, _ coresdk.GetVcnRequest) (coresdk.GetVcnResponse, error) {
+			return coresdk.GetVcnResponse{}, fakeServiceError{
+				statusCode: 404,
+				code:       "NotAuthorizedOrNotFound",
+				message:    "auth ambiguity",
+			}
+		},
+		createFn: func(_ context.Context, _ coresdk.CreateVcnRequest) (coresdk.CreateVcnResponse, error) {
+			createCalls++
+			return coresdk.CreateVcnResponse{}, nil
+		},
+	})
+
+	resource := makeSpecVcn()
+	resource.Status.Id = "ocid1.vcn.oc1..existing"
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.vcn.oc1..existing")
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.Error(t, err)
+	assert.False(t, resp.IsSuccessful)
+	assert.Equal(t, 0, createCalls)
+	assert.Equal(t, "ocid1.vcn.oc1..existing", string(resource.Status.OsokStatus.Ocid))
+}
+
 func TestDelete_ConfirmsDeletionOnNotFound(t *testing.T) {
 	manager := newTestManager(&fakeVcnOCIClient{
 		deleteFn: func(_ context.Context, req coresdk.DeleteVcnRequest) (coresdk.DeleteVcnResponse, error) {

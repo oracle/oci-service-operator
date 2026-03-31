@@ -68,7 +68,8 @@ func (c *vcnRuntimeClient) CreateOrUpdate(ctx context.Context, resource *corev1b
 	current, err := c.get(ctx, trackedID)
 	if err != nil {
 		if isNotFoundOCI(err) {
-			return c.fail(resource, fmt.Errorf("tracked Vcn %s no longer exists", trackedID))
+			c.clearTrackedIdentity(resource)
+			return c.create(ctx, resource)
 		}
 		return c.fail(resource, normalizeOCIError(err))
 	}
@@ -359,6 +360,12 @@ func (c *vcnRuntimeClient) markDeleted(resource *corev1beta1.Vcn, message string
 	status.Message = message
 	status.Reason = string(shared.Terminating)
 	resource.Status.OsokStatus = util.UpdateOSOKStatusCondition(resource.Status.OsokStatus, shared.Terminating, v1.ConditionTrue, "", message, c.manager.Log)
+}
+
+func (c *vcnRuntimeClient) clearTrackedIdentity(resource *corev1beta1.Vcn) {
+	resource.Status.Id = ""
+	resource.Status.OsokStatus.Ocid = ""
+	resource.Status.OsokStatus.Message = ""
 }
 
 func (c *vcnRuntimeClient) markTerminating(resource *corev1beta1.Vcn, current coresdk.Vcn) {
