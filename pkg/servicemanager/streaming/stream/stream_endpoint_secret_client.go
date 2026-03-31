@@ -178,5 +178,8 @@ func (c streamEndpointSecretClient) deleteEndpointSecret(ctx context.Context, re
 	}
 
 	_, err := c.credentialClient.DeleteSecret(ctx, resource.Name, resource.Namespace)
+	if apierrors.IsNotFound(err) {
+		return nil
+	}
 	return err
 }

@@ -448,6 +448,42 @@ func TestStreamEndpointSecretClientDeletesSecretAfterDelete(t *testing.T) {
 	}
 }
 
+func TestStreamEndpointSecretClientDeleteIgnoresMissingSecret(t *testing.T) {
+	t.Parallel()
+
+	credClient := &fakeCredentialClient{}
+	credClient.deleteSecretFn = func(_ context.Context, name string, namespace string) (bool, error) {
+		if name != "test-stream" || namespace != "default" {
+			t.Fatalf("DeleteSecret() target = %s/%s, want default/test-stream", namespace, name)
+		}
+		return false, apierrors.NewNotFound(v1.Resource("secret"), name)
+	}
+
+	client := streamEndpointSecretClient{
+		delegate: fakeStreamServiceClient{
+			deleteFn: func(_ context.Context, _ *streamingv1beta1.Stream) (bool, error) {
+				return true, nil
+			},
+		},
+		credentialClient: credClient,
+	}
+
+	resource := &streamingv1beta1.Stream{}
+	resource.Name = "test-stream"
+	resource.Namespace = "default"
+
+	deleted, err := client.Delete(context.Background(), resource)
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
+	}
+	if !deleted {
+		t.Fatal("Delete() should report success when the companion secret is already absent")
+	}
+	if !credClient.deleteCalled {
+		t.Fatal("DeleteSecret() should be attempted even when the companion secret is already absent")
+	}
+}
+
 func TestStreamEndpointSecretDataRequiresMessagesEndpoint(t *testing.T) {
 	t.Parallel()
 
@@ -472,6 +508,18 @@ func (streamEndpointSecretQuickCase) Generate(r *rand.Rand, _ int) reflect.Value
 	})
 }
 
+type streamEndpointSecretDeleteQuickCase struct {
+	InitialPresent bool
+	DeleteRace     bool
+}
+
+func (streamEndpointSecretDeleteQuickCase) Generate(r *rand.Rand, _ int) reflect.Value {
+	return reflect.ValueOf(streamEndpointSecretDeleteQuickCase{
+		InitialPresent: r.Intn(2) == 0,
+		DeleteRace:     r.Intn(2) == 0,
+	})
+}
+
 func TestStreamEndpointSecretClientQuickSyncIsIdempotent(t *testing.T) {
 	t.Parallel()
 
@@ -481,6 +529,18 @@ func TestStreamEndpointSecretClientQuickSyncIsIdempotent(t *testing.T) {
 		return evalErr == nil
 	}, streamEndpointSecretQuickConfig(1774907911310275)); err != nil {
 		t.Fatalf("stream endpoint secret idempotence property failed: %v: %v", err, evalErr)
+	}
+}
+
+func TestStreamEndpointSecretClientQuickDeleteIsBestEffort(t *testing.T) {
+	t.Parallel()
+
+	var evalErr error
+	if err := quick.Check(func(tc streamEndpointSecretDeleteQuickCase) bool {
+		evalErr = evaluateStreamEndpointSecretDeleteQuickCase(tc)
+		return evalErr == nil
+	}, streamEndpointSecretQuickConfig(1774907911310276)); err != nil {
+		t.Fatalf("stream endpoint secret delete property failed: %v: %v", err, evalErr)
 	}
 }
 
@@ -585,6 +645,63 @@ func evaluateStreamEndpointSecretQuickCase(tc streamEndpointSecretQuickCase) err
 		}
 	}
 
+	return nil
+}
+
+func evaluateStreamEndpointSecretDeleteQuickCase(tc streamEndpointSecretDeleteQuickCase) error {
+	const secretName = "test-stream"
+	const secretNamespace = "default"
+
+	resource := &streamingv1beta1.Stream{}
+	resource.Name = secretName
+	resource.Namespace = secretNamespace
+
+	secretPresent := tc.InitialPresent
+	deleteCalls := 0
+	credClient := &fakeCredentialClient{}
+	credClient.deleteSecretFn = func(_ context.Context, name string, namespace string) (bool, error) {
+		deleteCalls++
+		if name != secretName || namespace != secretNamespace {
+			return false, fmt.Errorf("DeleteSecret() target=%s/%s, want %s/%s", namespace, name, secretNamespace, secretName)
+		}
+		if !secretPresent {
+			return false, apierrors.NewNotFound(v1.Resource("secret"), name)
+		}
+		secretPresent = false
+		if tc.DeleteRace && deleteCalls == 1 {
+			return false, apierrors.NewNotFound(v1.Resource("secret"), name)
+		}
+		return true, nil
+	}
+
+	client := streamEndpointSecretClient{
+		delegate: fakeStreamServiceClient{
+			deleteFn: func(_ context.Context, resource *streamingv1beta1.Stream) (bool, error) {
+				if resource != nil && (resource.Name != secretName || resource.Namespace != secretNamespace) {
+					return false, fmt.Errorf("Delete() target=%s/%s, want %s/%s", resource.Namespace, resource.Name, secretNamespace, secretName)
+				}
+				return true, nil
+			},
+		},
+		credentialClient: credClient,
+	}
+
+	for attempt := 1; attempt <= 2; attempt++ {
+		deleted, err := client.Delete(context.Background(), resource)
+		if err != nil {
+			return fmt.Errorf("delete attempt %d: %w", attempt, err)
+		}
+		if !deleted {
+			return fmt.Errorf("delete attempt %d: deleted=false for %+v", attempt, tc)
+		}
+	}
+
+	if secretPresent {
+		return fmt.Errorf("secret still present after repeated delete completion for %+v", tc)
+	}
+	if deleteCalls != 2 {
+		return fmt.Errorf("DeleteSecret() calls=%d, want 2 repeated best-effort attempts for %+v", deleteCalls, tc)
+	}
 	return nil
 }
 
