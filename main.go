@@ -143,7 +143,7 @@ func main() {
 			os.Exit(1)
 		}
 	}
-	for _, webhook := range registrations.ManualWebhooks() {
+	for _, webhook := range registrations.ExplicitWebhooks() {
 		if err = webhook.SetupWithManager(mgr); err != nil {
 			setupLog.ErrorLog(err, "unable to create webhook", "webhook", webhook.Name)
 			os.Exit(1)

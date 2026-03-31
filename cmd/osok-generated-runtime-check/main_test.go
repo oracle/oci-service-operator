@@ -168,7 +168,7 @@ func TestPopulateSnapshotCarriesFormalRootAndLeavesSelectedFilesWritable(t *test
 	}
 }
 
-func TestPreserveCheckedInCompanionFilesLinksManualCompanions(t *testing.T) {
+func TestPreserveCheckedInCompanionFilesLinksCheckedInCompatibilityCompanions(t *testing.T) {
 	t.Helper()
 
 	repoRoot := t.TempDir()
@@ -190,6 +190,14 @@ func TestPreserveCheckedInCompanionFilesLinksManualCompanions(t *testing.T) {
 	serviceManagerSourceDir := filepath.Join(repoRoot, "pkg", "servicemanager", "autonomousdatabases", "adb")
 	if err := os.MkdirAll(serviceManagerSourceDir, 0o755); err != nil {
 		t.Fatalf("MkdirAll(%q) error = %v", serviceManagerSourceDir, err)
+	}
+	legacyServiceClientPath := filepath.Join(serviceManagerSourceDir, "adb_serviceclient.go")
+	if err := os.WriteFile(legacyServiceClientPath, []byte("package adb\n"), 0o644); err != nil {
+		t.Fatalf("WriteFile(%q) error = %v", legacyServiceClientPath, err)
+	}
+	legacyServiceManagerPath := filepath.Join(serviceManagerSourceDir, "adb_servicemanager.go")
+	if err := os.WriteFile(legacyServiceManagerPath, []byte("package adb\n"), 0o644); err != nil {
+		t.Fatalf("WriteFile(%q) error = %v", legacyServiceManagerPath, err)
 	}
 	adapterPath := filepath.Join(serviceManagerSourceDir, "autonomousdatabases_generated_client_adapter.go")
 	if err := os.WriteFile(adapterPath, []byte("package adb\n"), 0o644); err != nil {
@@ -251,6 +259,24 @@ func TestPreserveCheckedInCompanionFilesLinksManualCompanions(t *testing.T) {
 	}
 	if adapterInfo.Mode()&os.ModeSymlink == 0 {
 		t.Fatalf("%q mode = %v, want symlink", snapshotAdapterPath, adapterInfo.Mode())
+	}
+
+	snapshotLegacyServiceClientPath := filepath.Join(snapshotServiceManagerDir, "adb_serviceclient.go")
+	legacyServiceClientInfo, err := os.Lstat(snapshotLegacyServiceClientPath)
+	if err != nil {
+		t.Fatalf("Lstat(%q) error = %v", snapshotLegacyServiceClientPath, err)
+	}
+	if legacyServiceClientInfo.Mode()&os.ModeSymlink == 0 {
+		t.Fatalf("%q mode = %v, want symlink", snapshotLegacyServiceClientPath, legacyServiceClientInfo.Mode())
+	}
+
+	snapshotLegacyServiceManagerPath := filepath.Join(snapshotServiceManagerDir, "adb_servicemanager.go")
+	legacyServiceManagerInfo, err := os.Lstat(snapshotLegacyServiceManagerPath)
+	if err != nil {
+		t.Fatalf("Lstat(%q) error = %v", snapshotLegacyServiceManagerPath, err)
+	}
+	if legacyServiceManagerInfo.Mode()&os.ModeSymlink == 0 {
+		t.Fatalf("%q mode = %v, want symlink", snapshotLegacyServiceManagerPath, legacyServiceManagerInfo.Mode())
 	}
 
 	generatedInfo, err := os.Lstat(snapshotGeneratedServiceClientPath)

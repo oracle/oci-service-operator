@@ -24,7 +24,7 @@ defaultVersion: v1beta1
 generatorEntrypoint: ./cmd/generator
 packageProfiles:
   controller-backed:
-    description: manual controllers
+    description: runtime-integrated groups
 services:
   - service: mysql
     sdkPackage: github.com/oracle/oci-go-sdk/v65/mysql
@@ -53,7 +53,7 @@ func TestSelectServices(t *testing.T) {
 		Domain:         "oracle.com",
 		DefaultVersion: "v1beta1",
 		PackageProfiles: map[string]PackageProfile{
-			"controller-backed": {Description: "manual controllers"},
+			"controller-backed": {Description: "runtime-integrated groups"},
 		},
 		Services: []ServiceConfig{
 			{Service: "database", SDKPackage: "example/database", Group: "database", PackageProfile: "controller-backed"},
@@ -217,7 +217,7 @@ services:
     packageProfile: controller-backed
     generation:
       controller:
-        strategy: manual
+        strategy: generated
       serviceManager:
         strategy: generated
       registration:
@@ -250,8 +250,8 @@ services:
 	}
 
 	mysqlService := cfg.Services[0]
-	if got := mysqlService.ControllerGenerationStrategy(); got != GenerationStrategyManual {
-		t.Fatalf("mysql controller strategy = %q, want %q", got, GenerationStrategyManual)
+	if got := mysqlService.ControllerGenerationStrategy(); got != GenerationStrategyGenerated {
+		t.Fatalf("mysql controller strategy = %q, want %q", got, GenerationStrategyGenerated)
 	}
 	if got := mysqlService.ServiceManagerGenerationStrategy(); got != GenerationStrategyGenerated {
 		t.Fatalf("mysql service-manager strategy = %q, want %q", got, GenerationStrategyGenerated)

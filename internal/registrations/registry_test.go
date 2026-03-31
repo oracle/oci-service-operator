@@ -24,7 +24,7 @@ import (
 	ctrlclientfake "sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
-func TestAllAddToSchemeRegistersManualGroupKinds(t *testing.T) {
+func TestAllAddToSchemeRegistersKnownGroupKinds(t *testing.T) {
 	t.Parallel()
 
 	scheme := runtime.NewScheme()
@@ -50,15 +50,15 @@ func TestAllAddToSchemeRegistersManualGroupKinds(t *testing.T) {
 	}
 }
 
-func TestAllExposesManualWebhooksSeparately(t *testing.T) {
+func TestAllExposesExplicitWebhooksSeparately(t *testing.T) {
 	t.Parallel()
 
-	webhooks := ManualWebhooks()
+	webhooks := ExplicitWebhooks()
 	if len(webhooks) != 1 {
-		t.Fatalf("len(ManualWebhooks()) = %d, want 1", len(webhooks))
+		t.Fatalf("len(ExplicitWebhooks()) = %d, want 1", len(webhooks))
 	}
 	if webhooks[0].Name != "AutonomousDatabases" {
-		t.Fatalf("ManualWebhooks()[0].Name = %q, want %q", webhooks[0].Name, "AutonomousDatabases")
+		t.Fatalf("ExplicitWebhooks()[0].Name = %q, want %q", webhooks[0].Name, "AutonomousDatabases")
 	}
 }
 
@@ -147,25 +147,25 @@ func (fakeServiceManager) GetCrdStatus(runtime.Object) (*shared.OSOKStatus, erro
 
 var _ servicemanager.OSOKServiceManager = fakeServiceManager{}
 
-func TestAllIncludesGeneratedGroupsAfterManualGroups(t *testing.T) {
+func TestAllIncludesGeneratedGroupsAfterExplicitPrefix(t *testing.T) {
 	restoreGeneratedGroupRegistrations(t)
 	registerGeneratedGroup(GroupRegistration{Group: "events"})
 
 	registrations := All()
-	if len(registrations) != len(manualGroupRegistrations)+1 {
-		t.Fatalf("len(All()) = %d, want %d", len(registrations), len(manualGroupRegistrations)+1)
+	if len(registrations) != len(explicitGroupRegistrations)+1 {
+		t.Fatalf("len(All()) = %d, want %d", len(registrations), len(explicitGroupRegistrations)+1)
 	}
 	if registrations[len(registrations)-1].Group != "events" {
 		t.Fatalf("All()[last].Group = %q, want %q", registrations[len(registrations)-1].Group, "events")
 	}
 }
 
-func TestAllReturnsUniqueGroupsWithManualPrefix(t *testing.T) {
+func TestAllReturnsUniqueGroupsWithExplicitPrefix(t *testing.T) {
 	t.Parallel()
 
 	registrations := All()
-	if len(registrations) < len(manualGroupRegistrations) {
-		t.Fatalf("len(All()) = %d, want at least %d manual groups", len(registrations), len(manualGroupRegistrations))
+	if len(registrations) < len(explicitGroupRegistrations) {
+		t.Fatalf("len(All()) = %d, want at least %d explicit groups", len(registrations), len(explicitGroupRegistrations))
 	}
 
 	seen := make(map[string]struct{}, len(registrations))
@@ -174,13 +174,13 @@ func TestAllReturnsUniqueGroupsWithManualPrefix(t *testing.T) {
 			t.Fatalf("All() returned duplicate group %q", registration.Group)
 		}
 		seen[registration.Group] = struct{}{}
-		if index < len(manualGroupRegistrations) && registration.Group != manualGroupRegistrations[index].Group {
-			t.Fatalf("All()[%d].Group = %q, want manual prefix %q", index, registration.Group, manualGroupRegistrations[index].Group)
+		if index < len(explicitGroupRegistrations) && registration.Group != explicitGroupRegistrations[index].Group {
+			t.Fatalf("All()[%d].Group = %q, want explicit prefix %q", index, registration.Group, explicitGroupRegistrations[index].Group)
 		}
 	}
 }
 
-func TestAllSkipsGeneratedGroupsThatDuplicateManualEntries(t *testing.T) {
+func TestAllSkipsGeneratedGroupsThatDuplicateExplicitEntries(t *testing.T) {
 	restoreGeneratedGroupRegistrations(t)
 	registerGeneratedGroup(GroupRegistration{Group: "mysql"})
 

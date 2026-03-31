@@ -54,8 +54,8 @@ legacy published resources through targeted parity overlays:
   `pkg/servicemanager/streaming/stream`.
 - legacy behavior for those historical resources is preserved through
   handwritten client-adapter files that plug the generated service-manager
-  scaffolds into the existing manual implementations.
-- `database` webhook setup stays manual through
+  scaffolds into the checked-in compatibility implementations.
+- `database` keeps explicit webhook files under
   `api/database/v1beta1/*_webhook.go`.
 
 ## Why adapters still exist
@@ -83,5 +83,5 @@ The parity regression path now validates that:
   outputs for the three parity groups still match the checked-in artifacts
 - the parity overlays preserve the historical published resources while the
   rest of each service still generates from full SDK discovery
-- registration tests keep manual webhooks explicit and reject duplicate group
-  registrations
+- registration tests keep explicit webhook seams separate from generated group
+  registrations and reject duplicate group registrations

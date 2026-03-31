@@ -10,9 +10,9 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
-var manualGroupRegistrations = []GroupRegistration{}
+var explicitGroupRegistrations = []GroupRegistration{}
 
-var manualWebhookRegistrations = []WebhookRegistration{
+var explicitWebhookRegistrations = []WebhookRegistration{
 	{
 		Name: "AutonomousDatabases",
 		SetupWithManager: func(mgr ctrl.Manager) error {

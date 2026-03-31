@@ -81,7 +81,7 @@ func registerGeneratedGroup(registration GroupRegistration) {
 
 // All returns the currently wired group registrations in startup order.
 func All() []GroupRegistration {
-	registrations := append([]GroupRegistration(nil), manualGroupRegistrations...)
+	registrations := append([]GroupRegistration(nil), explicitGroupRegistrations...)
 	if len(generatedGroupRegistrations) == 0 {
 		return registrations
 	}
@@ -93,9 +93,9 @@ func All() []GroupRegistration {
 	return appendUniqueGroupRegistrations(registrations, generated...)
 }
 
-// ManualWebhooks returns explicit webhook hooks that stay outside generated runtime registration.
-func ManualWebhooks() []WebhookRegistration {
-	return append([]WebhookRegistration(nil), manualWebhookRegistrations...)
+// ExplicitWebhooks returns checked-in webhook hooks that stay outside generated runtime registration.
+func ExplicitWebhooks() []WebhookRegistration {
+	return append([]WebhookRegistration(nil), explicitWebhookRegistrations...)
 }
 
 func appendUniqueGroupRegistrations(existing []GroupRegistration, extras ...GroupRegistration) []GroupRegistration {

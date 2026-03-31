@@ -1,7 +1,40 @@
 # Services
 
-The OCI Service Operator for Kubernetes supports the following OCI Services
+OSOK's checked-in generator config currently publishes these API groups:
 
-1. [Autonomous Database Service](adb.md#autonomous-databases-service)
-1. [Oracle Streaming Service](oss.md#oracle-streaming-service)
-1. [Oracle MySQL Database Service](mysql.md#oracle-mysql-database-service)
+- `artifacts`
+- `certificates`
+- `certificatesmanagement`
+- `containerengine`
+- `core`
+- `database`
+- `dns`
+- `events`
+- `functions`
+- `identity`
+- `keymanagement`
+- `limits`
+- `loadbalancer`
+- `logging`
+- `monitoring`
+- `mysql`
+- `networkloadbalancer`
+- `nosql`
+- `objectstorage`
+- `ons`
+- `psql`
+- `queue`
+- `secrets`
+- `streaming`
+- `vault`
+- `workrequests`
+
+All checked-in services currently use generated controller, service-manager, and
+registration rollout. The remaining explicit compatibility seams are limited to
+resource-level parity overlays, companion adapters, and webhook files for the
+historical published resources `AutonomousDatabases`, `MySqlDbSystem`, and
+`Stream`.
+
+Use the generated examples under `config/samples/` as the starting point for CR
+manifests. For rollout details, see `docs/api-generator-contract.md` and
+`docs/api-generator-parity.md`.

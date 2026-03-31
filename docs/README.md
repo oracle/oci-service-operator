@@ -2,41 +2,24 @@
 
 - [Introduction](#introduction)
 - [Installation](installation.md#installation)
-  - [Pre-Requisites](installation.md#pre-requisites)
-  - [Install Operator SDK](installation.md#install-operator-sdk)
-  - [Install Operator Lifecycle Manager (OLM)](installation.md#install-olm)
-  - [Deploy OCI Service Operator for Kuberentes](installation.md#deploy-osok)
 - [Services](services.md#services)
-  - [Oracle Autonomous Database Service](adb.md#autonomous-databases-service)
-    - [Introduction](adb.md#introduction)
-    - [OCI Permission requirement](adb.md#oci-permission-requirement)
-    - [Access Information in Kubernetes Secret](adb.md#access-information-in-kubernetes-secrets)
-    - [Autonomous Database Specification Parameters](adb.md#autonomous-database-specification-parameters)
-    - [Autonomous Database Status Parameters](adb.md#autonomous-database-status-parameters)
-    - [Provision](adb.md#provisioning-an-adb)
-    - [Bind](adb.md#binding-to-an-existing-adb)
-    - [Update](adb.md#updating-an-adb)
-  - [Oracle Streaming Service](oss.md#oracle-streaming-service)
-    - [Introduction](oss.md#introduction)
-    - [OCI Permission requirement](oss.md#oci-permission-requirement)
-    - [Streaming Service Specification Parameters](oss.md#streams-service-specification-parameters)
-    - [Streaming Service Status Parameters](oss.md#streams-service-status-parameters)
-    - [Create Stream](oss.md#create-stream)
-    - [Bind](oss.md#binding-to-an-existing-stream)
-    - [Update](oss.md#updating-stream)
-    - [Delete](oss.md#delete-stream)
-  - [Oracle MySQL Database Service](mysql.md#mysql-dbsystem-services)
-    - [Introduction](mysql.md#introduction)
-    - [MySQL DB Systems Pre-requisites](mysql.md##pre-requisites-for-setting-up-mysql-dbsystems)
-    - [MySQL DB Systems Specification Parameters](mysql.md##mysql-dbsystem-specification-parameters)
-    - [MySQL DB Systems Status Parameters](mysql.md##mysql-dbsystem-status-parameters)
-    - [Provision](mysql.md##provisioning-a-mysql-dbsystem)
-    - [Bind](mysql.md##binding-to-an-existing-mysql-dbsystem)
-    - [Update](mysql.md##updating-a-mysql-dbsystem)
-    - [Access Information in Kubernetes Secret](mysql.md##access-information-in-kubernetes-secrets)
+- [Generator Contract](api-generator-contract.md#osok-generator-contract)
+- [Parity Strategy](api-generator-parity.md#generator-parity-strategy)
+- [Validator Guide](validator-guide.md#osok-validator-guide)
+- [Troubleshooting](TROUBLESHOOT.md)
 
 ## Introduction
 
-The OCI Service Operator for Kuberentes (OSOK) simplifies the process and provide a seamless experience for the container-native application in managing and connecting to OCI services/resources. 
+The OCI Service Operator for Kubernetes (OSOK) now ships generator-owned API,
+controller, service-manager, registration, and package outputs from the checked-in
+service map in `internal/generator/config/services.yaml`.
 
-OSOK is based on the [operator framework](https://operatorframework.io/) which is an open-source toolkit to manage Operators. It uses the [controller-runtime](https://github.com/kubernetes-sigs/controller-runtime) library which provides high-level APIs and abstractions to write operational logic and also provides tools for scaffolding and code generation for operators.
+The legacy Autonomous Database, MySQL, and Streaming walkthroughs were removed
+because they described the pre-v2 handwritten workflow rather than the current
+generated-runtime contract. Start with:
+
+- `config/samples/` for concrete manifests
+- `docs/services.md` for the supported API groups
+- `docs/api-generator-contract.md` for ownership and regeneration rules
+- `docs/api-generator-parity.md` for the historical parity resources
+- `docs/validator-guide.md` for validation and regression gates
