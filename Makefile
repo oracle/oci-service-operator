@@ -62,18 +62,12 @@ GENERATOR_SERVICE ?=
 GENERATOR_ALL ?=
 GENERATOR_OVERWRITE ?=
 GENERATOR_PRESERVE_EXISTING_SPEC_SURFACE ?=
-API_GENERATOR_CONFIG ?=
-API_GENERATOR_OUTPUT_ROOT ?=
-API_SERVICE ?=
-API_ALL ?=
-API_OVERWRITE ?=
-API_PRESERVE_EXISTING_SPEC_SURFACE ?=
-EFFECTIVE_GENERATOR_CONFIG = $(or $(strip $(GENERATOR_CONFIG)),$(strip $(API_GENERATOR_CONFIG)),internal/generator/config/services.yaml)
-EFFECTIVE_GENERATOR_OUTPUT_ROOT = $(or $(strip $(GENERATOR_OUTPUT_ROOT)),$(strip $(API_GENERATOR_OUTPUT_ROOT)),.)
-EFFECTIVE_GENERATOR_SERVICE = $(or $(strip $(GENERATOR_SERVICE)),$(strip $(API_SERVICE)))
-EFFECTIVE_GENERATOR_ALL = $(or $(strip $(GENERATOR_ALL)),$(strip $(API_ALL)))
-EFFECTIVE_GENERATOR_OVERWRITE = $(or $(strip $(GENERATOR_OVERWRITE)),$(strip $(API_OVERWRITE)))
-EFFECTIVE_GENERATOR_PRESERVE_EXISTING_SPEC_SURFACE = $(or $(strip $(GENERATOR_PRESERVE_EXISTING_SPEC_SURFACE)),$(strip $(API_PRESERVE_EXISTING_SPEC_SURFACE)))
+EFFECTIVE_GENERATOR_CONFIG = $(or $(strip $(GENERATOR_CONFIG)),internal/generator/config/services.yaml)
+EFFECTIVE_GENERATOR_OUTPUT_ROOT = $(or $(strip $(GENERATOR_OUTPUT_ROOT)),.)
+EFFECTIVE_GENERATOR_SERVICE = $(strip $(GENERATOR_SERVICE))
+EFFECTIVE_GENERATOR_ALL = $(strip $(GENERATOR_ALL))
+EFFECTIVE_GENERATOR_OVERWRITE = $(strip $(GENERATOR_OVERWRITE))
+EFFECTIVE_GENERATOR_PRESERVE_EXISTING_SPEC_SURFACE = $(strip $(GENERATOR_PRESERVE_EXISTING_SPEC_SURFACE))
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
@@ -117,7 +111,7 @@ DEEPCOPY_GEN_PATHS ?= "./api/...;./pkg/shared"
 generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
 	"$(CONTROLLER_GEN_RUNNER)" "$(CONTROLLER_GEN)" object:headerFile="hack/boilerplate.go.txt" paths=$(DEEPCOPY_GEN_PATHS)
 
-generator-generate: ## Run the OSOK generator. Use GENERATOR_SERVICE=<service> or GENERATOR_ALL=true. Compatibility aliases: API_SERVICE, API_ALL, and api-generate.
+generator-generate: ## Run the OSOK generator. Use GENERATOR_SERVICE=<service> or GENERATOR_ALL=true.
 	@set -e; \
 	is_true() { case "$$1" in 1|true|TRUE|yes|YES) return 0 ;; *) return 1 ;; esac; }; \
 	service="$(EFFECTIVE_GENERATOR_SERVICE)"; \
@@ -148,16 +142,10 @@ generator-generate: ## Run the OSOK generator. Use GENERATOR_SERVICE=<service> o
 	fi; \
 	go run $(GENERATOR_ENTRYPOINT) $$args
 
-api-generate: ## Compatibility alias for generator-generate.
-	@$(MAKE) generator-generate
-
-generator-refresh: ## Run the OSOK generator, then refresh deepcopy and manifest artifacts. Compatibility aliases: api-refresh.
+generator-refresh: ## Run the OSOK generator, then refresh deepcopy and manifest artifacts.
 	@$(MAKE) generator-generate
 	@$(MAKE) generate
 	@$(MAKE) manifests
-
-api-refresh: ## Compatibility alias for generator-refresh.
-	@$(MAKE) generator-refresh
 
 fmt: ## Run go fmt against code.
 	go fmt ./...

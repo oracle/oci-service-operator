@@ -141,7 +141,6 @@ type ResourceModel struct {
 	ListComments        []string
 	Sample              SampleModel
 	PrimaryDisplayField string
-	CompatibilityLocked bool
 }
 
 // RuntimeModel describes the OCI SDK client and methods that back a generated resource.

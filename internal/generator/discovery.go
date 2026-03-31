@@ -116,90 +116,25 @@ func findModuleRoot() (string, error) {
 	}
 }
 
+type resourceCandidate struct {
+	rawName             string
+	operations          map[string]struct{}
+	requestBodyPayloads []string
+}
+
 func resourceModels(index *ocisdk.Package, service ServiceConfig) ([]ResourceModel, error) {
-	type candidate struct {
-		rawName             string
-		operations          map[string]struct{}
-		requestBodyPayloads []string
+	candidates, err := discoverResourceCandidates(index)
+	if err != nil {
+		return nil, err
 	}
 
-	candidates := make(map[string]*candidate)
-	for _, typeName := range index.TypeNames() {
-		matches := operationPattern.FindStringSubmatch(typeName)
-		if len(matches) == 0 {
-			continue
-		}
-
-		rawName := singularize(matches[2])
-		if rawName == "" {
-			continue
-		}
-		entry, ok := candidates[rawName]
-		if !ok {
-			entry = &candidate{
-				rawName:    rawName,
-				operations: make(map[string]struct{}),
-			}
-			candidates[rawName] = entry
-		}
-		entry.operations[matches[1]] = struct{}{}
-		if matches[3] == "Request" {
-			entry.requestBodyPayloads = appendUniqueStrings(entry.requestBodyPayloads, index.RequestBodyPayloads(typeName)...)
-		}
-	}
-
-	if len(candidates) == 0 {
-		return nil, fmt.Errorf("no CRUD request/response families discovered")
-	}
-
-	var resources []ResourceModel
+	resources := make([]ResourceModel, 0, len(candidates))
 	for _, entry := range candidates {
-		operations := make([]string, 0, len(entry.operations))
-		for operation := range entry.operations {
-			operations = append(operations, operation)
+		resource, buildErr := buildResourceModel(index, service, entry)
+		if buildErr != nil {
+			return nil, buildErr
 		}
-		sort.Strings(operations)
-
-		runtimeModel, err := buildRuntimeModel(index, entry.rawName, operations, index.ResourceOperations(entry.rawName))
-		if err != nil {
-			return nil, fmt.Errorf("discover runtime metadata for %q: %w", entry.rawName, err)
-		}
-
-		kind := entry.rawName
-		compatibilityLocked := false
-		if compatibilityKindName, ok := compatibilityKind(entry.rawName, service.Compatibility); ok {
-			kind = compatibilityKindName
-			compatibilityLocked = true
-		}
-
-		fieldSet := synthesizeResourceFieldSet(index, service, kind, entry.rawName, desiredStateStructCandidates(entry.rawName, entry.requestBodyPayloads))
-		displayField := ""
-		switch {
-		case hasField(fieldSet.SpecFields, "DisplayName"):
-			displayField = "DisplayName"
-		case hasField(fieldSet.SpecFields, "Name"):
-			displayField = "Name"
-		}
-
-		resources = append(resources, ResourceModel{
-			SDKName:             entry.rawName,
-			Kind:                kind,
-			FileStem:            fileStem(kind),
-			KindPlural:          strings.ToLower(pluralize(kind)),
-			Operations:          operations,
-			Runtime:             runtimeModel,
-			SpecComments:        []string{fmt.Sprintf("%sSpec defines the desired state of %s.", kind, kind)},
-			HelperTypes:         fieldSet.HelperTypes,
-			SpecFields:          fieldSet.SpecFields,
-			StatusTypeName:      defaultStatusTypeName(kind),
-			StatusComments:      []string{fmt.Sprintf("%s defines the observed state of %s.", defaultStatusTypeName(kind), kind)},
-			StatusFields:        fieldSet.StatusFields,
-			PrintColumns:        defaultPrintColumns(kind, displayField),
-			ObjectComments:      []string{fmt.Sprintf("%s is the Schema for the %s API.", kind, strings.ToLower(pluralize(kind)))},
-			ListComments:        []string{fmt.Sprintf("%sList contains a list of %s.", kind, kind)},
-			PrimaryDisplayField: displayField,
-			CompatibilityLocked: compatibilityLocked,
-		})
+		resources = append(resources, resource)
 	}
 
 	sort.Slice(resources, func(i, j int) bool {
@@ -207,6 +142,111 @@ func resourceModels(index *ocisdk.Package, service ServiceConfig) ([]ResourceMod
 	})
 
 	return resources, nil
+}
+
+func discoverResourceCandidates(index *ocisdk.Package) ([]resourceCandidate, error) {
+	candidateMap := make(map[string]*resourceCandidate)
+	for _, typeName := range index.TypeNames() {
+		operation, rawName, requestType, ok := operationTypeParts(typeName)
+		if !ok {
+			continue
+		}
+
+		entry, exists := candidateMap[rawName]
+		if !exists {
+			entry = &resourceCandidate{
+				rawName:    rawName,
+				operations: make(map[string]struct{}),
+			}
+			candidateMap[rawName] = entry
+		}
+
+		entry.operations[operation] = struct{}{}
+		if requestType {
+			entry.requestBodyPayloads = appendUniqueStrings(entry.requestBodyPayloads, index.RequestBodyPayloads(typeName)...)
+		}
+	}
+
+	if len(candidateMap) == 0 {
+		return nil, fmt.Errorf("no CRUD request/response families discovered")
+	}
+
+	candidates := make([]resourceCandidate, 0, len(candidateMap))
+	for _, entry := range candidateMap {
+		candidates = append(candidates, *entry)
+	}
+	sort.Slice(candidates, func(i, j int) bool {
+		return candidates[i].rawName < candidates[j].rawName
+	})
+
+	return candidates, nil
+}
+
+func operationTypeParts(typeName string) (operation string, rawName string, requestType bool, ok bool) {
+	matches := operationPattern.FindStringSubmatch(typeName)
+	if len(matches) == 0 {
+		return "", "", false, false
+	}
+
+	rawName = singularize(matches[2])
+	if rawName == "" {
+		return "", "", false, false
+	}
+
+	return matches[1], rawName, matches[3] == "Request", true
+}
+
+func buildResourceModel(index *ocisdk.Package, service ServiceConfig, entry resourceCandidate) (ResourceModel, error) {
+	operations := sortedOperations(entry.operations)
+	runtimeModel, err := buildRuntimeModel(index, entry.rawName, operations, index.ResourceOperations(entry.rawName))
+	if err != nil {
+		return ResourceModel{}, fmt.Errorf("discover runtime metadata for %q: %w", entry.rawName, err)
+	}
+
+	kind := service.PublishedKind(entry.rawName)
+	fieldSet := synthesizeResourceFieldSet(index, service, kind, entry.rawName, desiredStateStructCandidates(entry.rawName, entry.requestBodyPayloads))
+	displayField := primaryDisplayField(fieldSet.SpecFields)
+	kindPlural := strings.ToLower(pluralize(kind))
+	statusTypeName := defaultStatusTypeName(kind)
+
+	return ResourceModel{
+		SDKName:             entry.rawName,
+		Kind:                kind,
+		FileStem:            fileStem(kind),
+		KindPlural:          kindPlural,
+		Operations:          operations,
+		Runtime:             runtimeModel,
+		SpecComments:        []string{fmt.Sprintf("%sSpec defines the desired state of %s.", kind, kind)},
+		HelperTypes:         fieldSet.HelperTypes,
+		SpecFields:          fieldSet.SpecFields,
+		StatusTypeName:      statusTypeName,
+		StatusComments:      []string{fmt.Sprintf("%s defines the observed state of %s.", statusTypeName, kind)},
+		StatusFields:        fieldSet.StatusFields,
+		PrintColumns:        defaultPrintColumns(kind, displayField),
+		ObjectComments:      []string{fmt.Sprintf("%s is the Schema for the %s API.", kind, kindPlural)},
+		ListComments:        []string{fmt.Sprintf("%sList contains a list of %s.", kind, kind)},
+		PrimaryDisplayField: displayField,
+	}, nil
+}
+
+func sortedOperations(operations map[string]struct{}) []string {
+	sorted := make([]string, 0, len(operations))
+	for operation := range operations {
+		sorted = append(sorted, operation)
+	}
+	sort.Strings(sorted)
+	return sorted
+}
+
+func primaryDisplayField(fields []FieldModel) string {
+	switch {
+	case hasField(fields, "DisplayName"):
+		return "DisplayName"
+	case hasField(fields, "Name"):
+		return "Name"
+	default:
+		return ""
+	}
 }
 
 func buildRuntimeModel(pkg *ocisdk.Package, rawName string, operations []string, discovered map[string]ocisdk.OperationMethod) (*RuntimeModel, error) {
@@ -217,17 +257,10 @@ func buildRuntimeModel(pkg *ocisdk.Package, rawName string, operations []string,
 		return nil, fmt.Errorf("sdk package metadata is required")
 	}
 
-	var clientType string
-	for _, method := range discovered {
-		if clientType == "" {
-			clientType = method.ClientType
-			continue
-		}
-		if method.ClientType != clientType {
-			return nil, fmt.Errorf("resource %q spans multiple SDK clients: %q and %q", rawName, clientType, method.ClientType)
-		}
+	clientType, err := runtimeClientType(rawName, discovered)
+	if err != nil {
+		return nil, err
 	}
-
 	constructor, ok := pkg.ClientConstructor(clientType)
 	if !ok {
 		return nil, fmt.Errorf("client %q does not expose a WithConfigurationProvider constructor", clientType)
@@ -247,21 +280,43 @@ func buildRuntimeModel(pkg *ocisdk.Package, rawName string, operations []string,
 		if err != nil {
 			return nil, err
 		}
-		switch operation {
-		case "Create":
-			model.Create = binding
-		case "Get":
-			model.Get = binding
-		case "List":
-			model.List = binding
-		case "Update":
-			model.Update = binding
-		case "Delete":
-			model.Delete = binding
-		}
+		assignRuntimeOperation(model, operation, binding)
 	}
 
 	return model, nil
+}
+
+func runtimeClientType(rawName string, discovered map[string]ocisdk.OperationMethod) (string, error) {
+	var clientType string
+	for _, method := range discovered {
+		if clientType == "" {
+			clientType = method.ClientType
+			continue
+		}
+		if method.ClientType != clientType {
+			return "", fmt.Errorf("resource %q spans multiple SDK clients: %q and %q", rawName, clientType, method.ClientType)
+		}
+	}
+	return clientType, nil
+}
+
+func assignRuntimeOperation(model *RuntimeModel, operation string, binding *RuntimeOperationModel) {
+	if model == nil {
+		return
+	}
+
+	switch operation {
+	case "Create":
+		model.Create = binding
+	case "Get":
+		model.Get = binding
+	case "List":
+		model.List = binding
+	case "Update":
+		model.Update = binding
+	case "Delete":
+		model.Delete = binding
+	}
 }
 
 func buildRuntimeOperationModel(pkg *ocisdk.Package, rawName string, operation string, method ocisdk.OperationMethod) (*RuntimeOperationModel, error) {
@@ -284,41 +339,71 @@ func runtimeRequestFields(pkg *ocisdk.Package, rawName string, operation string,
 		return nil, nil
 	}
 
-	fields := make([]RuntimeRequestFieldModel, 0)
+	fields := runtimeRequestStructFields(pkg, rawName, operation, method)
+	fields = append(fields, runtimeRequestPayloadFields(pkg, method)...)
+	return fields, nil
+}
+
+func runtimeRequestStructFields(pkg *ocisdk.Package, rawName string, operation string, method ocisdk.OperationMethod) []RuntimeRequestFieldModel {
 	requestStruct, ok := pkg.Struct(method.RequestType)
-	if ok {
-		pathFieldCount := 0
-		for _, field := range requestStruct.Fields {
-			if field.Contribution == ocisdk.FieldContributionPath {
-				pathFieldCount++
-			}
-		}
-		for _, field := range requestStruct.Fields {
-			if field.Name == "RequestMetadata" {
-				continue
-			}
-			switch field.Contribution {
-			case ocisdk.FieldContributionHeader, ocisdk.FieldContributionBinary:
-				continue
-			}
-			fields = append(fields, RuntimeRequestFieldModel{
-				FieldName:        field.Name,
-				RequestName:      field.RequestName,
-				Contribution:     string(field.Contribution),
-				PreferResourceID: shouldPreferResourceID(operation, rawName, field, pathFieldCount),
-			})
-		}
+	if !ok {
+		return nil
 	}
 
-	for _, payloadType := range pkg.RequestBodyPayloads(method.RequestType) {
+	pathFieldCount := countFieldsByContribution(requestStruct.Fields, ocisdk.FieldContributionPath)
+	fields := make([]RuntimeRequestFieldModel, 0, len(requestStruct.Fields))
+	for _, field := range requestStruct.Fields {
+		if !includeRuntimeRequestField(field) {
+			continue
+		}
+		fields = append(fields, buildRuntimeRequestFieldModel(field, shouldPreferResourceID(operation, rawName, field, pathFieldCount)))
+	}
+
+	return fields
+}
+
+func runtimeRequestPayloadFields(pkg *ocisdk.Package, method ocisdk.OperationMethod) []RuntimeRequestFieldModel {
+	payloads := pkg.RequestBodyPayloads(method.RequestType)
+	fields := make([]RuntimeRequestFieldModel, 0, len(payloads))
+	for _, payloadType := range payloads {
 		fields = append(fields, RuntimeRequestFieldModel{
 			FieldName:    payloadType,
 			RequestName:  payloadType,
 			Contribution: string(ocisdk.FieldContributionBody),
 		})
 	}
+	return fields
+}
 
-	return fields, nil
+func countFieldsByContribution(fields []ocisdk.Field, contribution ocisdk.FieldContribution) int {
+	count := 0
+	for _, field := range fields {
+		if field.Contribution == contribution {
+			count++
+		}
+	}
+	return count
+}
+
+func includeRuntimeRequestField(field ocisdk.Field) bool {
+	if field.Name == "RequestMetadata" {
+		return false
+	}
+	switch field.Contribution {
+	case ocisdk.FieldContributionHeader, ocisdk.FieldContributionBinary:
+		return false
+	default:
+		return true
+	}
+}
+
+func buildRuntimeRequestFieldModel(field ocisdk.Field, preferResourceID bool) RuntimeRequestFieldModel {
+	return RuntimeRequestFieldModel{
+		FieldName:        field.Name,
+		RequestName:      field.RequestName,
+		Contribution:     string(field.Contribution),
+		PreferResourceID: preferResourceID,
+	}
 }
 
 func shouldPreferResourceID(operation string, rawName string, field ocisdk.Field, pathFieldCount int) bool {
@@ -344,69 +429,59 @@ func hasField(fields []FieldModel, name string) bool {
 }
 
 func (d *Discoverer) attachFormalModels(cfg *Config, service ServiceConfig, pkg *PackageModel) error {
-	if pkg == nil {
+	if pkg == nil || !serviceNeedsFormalModels(service, pkg.Resources) {
 		return nil
 	}
 
-	needsFormal := false
-	for _, resource := range pkg.Resources {
-		if strings.TrimSpace(service.FormalSpecFor(resource.Kind)) != "" {
-			needsFormal = true
-			break
-		}
+	formalRoot, err := serviceFormalRoot(cfg, service)
+	if err != nil {
+		return err
 	}
-	if !needsFormal {
-		return nil
-	}
-	if cfg == nil {
-		return fmt.Errorf("generator config is required to resolve formal specs")
-	}
-
-	formalRoot := cfg.FormalRoot()
-	if strings.TrimSpace(formalRoot) == "" {
-		return fmt.Errorf("service %q declares formalSpec references but the generator config root is unknown", service.Service)
-	}
-
 	catalog, err := d.formalCatalog(formalRoot)
 	if err != nil {
 		return fmt.Errorf("load formal catalog %q: %w", formalRoot, err)
 	}
 
+	formalByKind, err := attachResourceFormalModels(service, pkg, catalog)
+	if err != nil {
+		return err
+	}
+	attachServiceManagerFormalModels(pkg, formalByKind)
+	return nil
+}
+
+func serviceNeedsFormalModels(service ServiceConfig, resources []ResourceModel) bool {
+	for _, resource := range resources {
+		if strings.TrimSpace(service.FormalSpecFor(resource.Kind)) != "" {
+			return true
+		}
+	}
+	return false
+}
+
+func serviceFormalRoot(cfg *Config, service ServiceConfig) (string, error) {
+	if cfg == nil {
+		return "", fmt.Errorf("generator config is required to resolve formal specs")
+	}
+
+	formalRoot := cfg.FormalRoot()
+	if strings.TrimSpace(formalRoot) == "" {
+		return "", fmt.Errorf("service %q declares formalSpec references but the generator config root is unknown", service.Service)
+	}
+	return formalRoot, nil
+}
+
+func attachResourceFormalModels(service ServiceConfig, pkg *PackageModel, catalog *formal.Catalog) (map[string]*FormalModel, error) {
 	formalByKind := make(map[string]*FormalModel, len(pkg.Resources))
 	for index := range pkg.Resources {
-		slug := service.FormalSpecFor(pkg.Resources[index].Kind)
-		if strings.TrimSpace(slug) == "" {
+		model, err := resourceFormalModel(catalog, service, pkg.Resources[index].Kind)
+		if err != nil {
+			return nil, err
+		}
+		if model == nil {
 			continue
 		}
 
-		binding, ok := catalog.Lookup(service.Service, slug)
-		if !ok {
-			return fmt.Errorf(
-				"service %q kind %q formalSpec %q was not found in %s",
-				service.Service,
-				pkg.Resources[index].Kind,
-				slug,
-				filepath.ToSlash(filepath.Join(catalog.Root, "controller_manifest.tsv")),
-			)
-		}
-		if binding.Manifest.Kind != pkg.Resources[index].Kind {
-			return fmt.Errorf(
-				"service %q kind %q formalSpec %q resolves to manifest kind %q",
-				service.Service,
-				pkg.Resources[index].Kind,
-				slug,
-				binding.Manifest.Kind,
-			)
-		}
-
-		model := &FormalModel{
-			Reference: FormalReferenceModel{
-				Service: service.Service,
-				Slug:    slug,
-			},
-			Binding:  binding,
-			Diagrams: formal.DiagramFilesForRow(binding.Manifest),
-		}
 		pkg.Resources[index].Formal = model
 		if pkg.Resources[index].Runtime != nil {
 			pkg.Resources[index].Runtime.Semantics = buildRuntimeSemanticsModel(model, pkg.Resources[index].Runtime)
@@ -414,16 +489,57 @@ func (d *Discoverer) attachFormalModels(cfg *Config, service ServiceConfig, pkg 
 		formalByKind[pkg.Resources[index].Kind] = model
 	}
 
-	for index := range pkg.ServiceManagers {
-		if model, ok := formalByKind[pkg.ServiceManagers[index].Kind]; ok {
-			pkg.ServiceManagers[index].Formal = model
-			if runtime := findResourceRuntime(pkg.Resources, pkg.ServiceManagers[index].Kind); runtime != nil {
-				pkg.ServiceManagers[index].Semantics = runtime.Semantics
-			}
-		}
+	return formalByKind, nil
+}
+
+func resourceFormalModel(catalog *formal.Catalog, service ServiceConfig, kind string) (*FormalModel, error) {
+	slug := service.FormalSpecFor(kind)
+	if strings.TrimSpace(slug) == "" {
+		return nil, nil
 	}
 
-	return nil
+	binding, ok := catalog.Lookup(service.Service, slug)
+	if !ok {
+		return nil, fmt.Errorf(
+			"service %q kind %q formalSpec %q was not found in %s",
+			service.Service,
+			kind,
+			slug,
+			filepath.ToSlash(filepath.Join(catalog.Root, "controller_manifest.tsv")),
+		)
+	}
+	if binding.Manifest.Kind != kind {
+		return nil, fmt.Errorf(
+			"service %q kind %q formalSpec %q resolves to manifest kind %q",
+			service.Service,
+			kind,
+			slug,
+			binding.Manifest.Kind,
+		)
+	}
+
+	return &FormalModel{
+		Reference: FormalReferenceModel{
+			Service: service.Service,
+			Slug:    slug,
+		},
+		Binding:  binding,
+		Diagrams: formal.DiagramFilesForRow(binding.Manifest),
+	}, nil
+}
+
+func attachServiceManagerFormalModels(pkg *PackageModel, formalByKind map[string]*FormalModel) {
+	for index := range pkg.ServiceManagers {
+		model, ok := formalByKind[pkg.ServiceManagers[index].Kind]
+		if !ok {
+			continue
+		}
+
+		pkg.ServiceManagers[index].Formal = model
+		if runtime := findResourceRuntime(pkg.Resources, pkg.ServiceManagers[index].Kind); runtime != nil {
+			pkg.ServiceManagers[index].Semantics = runtime.Semantics
+		}
+	}
 }
 
 func findResourceRuntime(resources []ResourceModel, kind string) *RuntimeModel {
@@ -455,30 +571,6 @@ func (d *Discoverer) formalCatalog(root string) (*formal.Catalog, error) {
 	return catalog, nil
 }
 
-func resourceFields(index *ocisdk.Package, rawName string) ([]FieldModel, []FieldModel) {
-	specFields, _ := mergeStructFields(index, []string{
-		"Create" + rawName + "Details",
-		"Update" + rawName + "Details",
-	}, nil, fieldRenderingOptions{scope: fieldScopeSpec})
-
-	statusFields := defaultStatusFields()
-	statusJSONNames := fieldJSONNames(statusFields)
-	observedFields, _ := mergeStructFields(index, []string{
-		rawName,
-		rawName + "Summary",
-	}, nil, fieldRenderingOptions{scope: fieldScopeStatus, escapeStatusJSONCollision: true})
-	for _, field := range observedFields {
-		jsonName := tagJSONName(field.Tag)
-		if _, exists := statusJSONNames[jsonName]; exists {
-			continue
-		}
-		statusFields = append(statusFields, field)
-		statusJSONNames[jsonName] = struct{}{}
-	}
-
-	return specFields, statusFields
-}
-
 type fieldScope string
 
 const (
@@ -489,39 +581,7 @@ const (
 type fieldRenderingOptions struct {
 	scope                     fieldScope
 	escapeStatusJSONCollision bool
-}
-
-func mergeStructFields(index *ocisdk.Package, candidates []string, initial []FieldModel, options fieldRenderingOptions) ([]FieldModel, map[string]struct{}) {
-	merged := make([]FieldModel, 0, len(initial)+8)
-	seenJSONNames := make(map[string]struct{}, len(initial)+8)
-	for _, field := range initial {
-		merged = append(merged, field)
-		seenJSONNames[tagJSONName(field.Tag)] = struct{}{}
-	}
-
-	for _, candidate := range candidates {
-		structDef, ok := index.Struct(candidate)
-		if !ok {
-			continue
-		}
-		for _, field := range structDef.Fields {
-			if field.RenderableType == "" {
-				continue
-			}
-			jsonName := field.JSONName
-			if jsonName == "" {
-				jsonName = lowerCamel(field.Name)
-			}
-			if _, exists := seenJSONNames[jsonName]; exists {
-				continue
-			}
-
-			merged = append(merged, buildFieldModel(field, jsonName, options))
-			seenJSONNames[jsonName] = struct{}{}
-		}
-	}
-
-	return merged, seenJSONNames
+	excludedFieldPaths        map[string]struct{}
 }
 
 func buildFieldModel(field ocisdk.Field, jsonName string, options fieldRenderingOptions) FieldModel {

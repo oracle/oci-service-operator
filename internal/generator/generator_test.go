@@ -35,8 +35,13 @@ func TestBuildPackageModelDiscoversResources(t *testing.T) {
 		SDKPackage:     "example.com/test/sdk",
 		Group:          "mysql",
 		PackageProfile: "controller-backed",
-		Compatibility: CompatibilityConfig{
-			ExistingKinds: []string{"MySqlDbSystem"},
+		Generation: GenerationConfig{
+			Resources: []ResourceGenerationOverride{
+				{
+					Kind:    "MySqlDbSystem",
+					SDKName: "DbSystem",
+				},
+			},
 		},
 	}
 
@@ -51,56 +56,15 @@ func TestBuildPackageModelDiscoversResources(t *testing.T) {
 		t.Fatalf("BuildPackageModel() error = %v", err)
 	}
 
-	assertEqual(t, "BuildPackageModel() group DNS name", pkg.GroupDNSName, "mysql.oracle.com")
+	if pkg.GroupDNSName != "mysql.oracle.com" {
+		t.Fatalf("BuildPackageModel() group DNS name = %q, want %q", pkg.GroupDNSName, "mysql.oracle.com")
+	}
 
-	dbSystem := findResource(t, pkg.Resources, "MySqlDbSystem")
-	assertEqual(t, "MySqlDbSystem SDK name", dbSystem.SDKName, "DbSystem")
-	assertEqual(t, "MySqlDbSystem compatibility override", dbSystem.CompatibilityLocked, true)
-	assertFieldsPresent(t, "MySqlDbSystem spec", dbSystem.SpecFields, []string{"Port"})
-	assertFieldsAbsent(t, "MySqlDbSystem spec", dbSystem.SpecFields, []string{"Id"})
-	assertEqual(t, "MySqlDbSystem primary display field", dbSystem.PrimaryDisplayField, "DisplayName")
-
-	widget := findResource(t, pkg.Resources, "Widget")
-	assertEqual(t, "Widget operations", len(widget.Operations), 5)
-	assertFieldsPresent(t, "Widget spec", widget.SpecFields, []string{"Mode", "CreatedAt"})
-	assertFieldsAbsent(t, "Widget spec", widget.SpecFields, []string{"LifecycleState", "TimeUpdated"})
-	assertFieldsPresent(t, "Widget status", widget.StatusFields, []string{"LifecycleState", "TimeUpdated"})
-
-	compartmentID := findFieldModel(t, widget.SpecFields, "CompartmentId")
-	assertFieldMatches(t, "Widget CompartmentId", compartmentID, fieldExpectation{
-		Tag:      `json:"compartmentId"`,
-		Comments: []string{"The OCID of the widget compartment."},
-		Markers:  []string{"+kubebuilder:validation:Required"},
-	})
-
-	labels := findFieldModel(t, widget.SpecFields, "Labels")
-	assertFieldMatches(t, "Widget Labels", labels, fieldExpectation{
-		Tag:      `json:"labels,omitempty"`,
-		Comments: []string{"Additional labels for the widget."},
-		Markers:  []string{"+kubebuilder:validation:Optional"},
-	})
-
-	serverState := findFieldModel(t, widget.SpecFields, "ServerState")
-	assertFieldMatches(t, "Widget ServerState", serverState, fieldExpectation{
-		Tag:     `json:"serverState,omitempty"`,
-		Markers: []string{},
-	})
-
-	lifecycleState := findFieldModel(t, widget.StatusFields, "LifecycleState")
-	assertFieldMatches(t, "Widget LifecycleState", lifecycleState, fieldExpectation{
-		Comments: []string{"The lifecycle state of the widget."},
-		Markers:  []string{},
-	})
-
-	report := findResource(t, pkg.Resources, "Report")
-	assertNoFields(t, "Report spec", report.SpecFields)
-	assertFieldsPresent(t, "Report status", report.StatusFields, []string{"Id", "LifecycleState", "DisplayName"})
-
-	reportByName := findResource(t, pkg.Resources, "ReportByName")
-	assertFieldsPresent(t, "ReportByName spec", reportByName.SpecFields, []string{"DisplayName"})
-
-	oauthClientCredential := findResource(t, pkg.Resources, "OAuthClientCredential")
-	assertFieldsPresent(t, "OAuthClientCredential spec", oauthClientCredential.SpecFields, []string{"Name", "Description", "Scopes"})
+	assertDiscoveredMySQLDbSystem(t, findResource(t, pkg.Resources, "MySqlDbSystem"))
+	assertDiscoveredWidget(t, findResource(t, pkg.Resources, "Widget"))
+	assertDiscoveredReport(t, findResource(t, pkg.Resources, "Report"))
+	assertResourceSpecFields(t, findResource(t, pkg.Resources, "ReportByName"), "DisplayName")
+	assertResourceSpecFields(t, findResource(t, pkg.Resources, "OAuthClientCredential"), "Name", "Description", "Scopes")
 }
 
 func TestBuildPackageModelAttachesFormalModelFromResourceOverride(t *testing.T) {
@@ -146,26 +110,14 @@ services:
 		t.Fatalf("BuildPackageModel() error = %v", err)
 	}
 
-	widget := findResource(t, pkg.Resources, "Widget")
-	if widget.Formal == nil {
-		t.Fatal("Widget formal model was not attached")
-	}
-	assertEqual(t, "Widget formal service", widget.Formal.Reference.Service, "mysql")
-	assertEqual(t, "Widget formal slug", widget.Formal.Reference.Slug, "widget")
-	assertEqual(t, "Widget provider resource", widget.Formal.Binding.Import.ProviderResource, "widget_resource")
-	assertEqual(t, "Widget formal kind", widget.Formal.Binding.Spec.Kind, "Widget")
-	assertEqual(t, "Widget activity diagram path", widget.Formal.Diagrams.ActivitySourcePath, "controllers/mysql/widget/diagrams/activity.puml")
+	assertWidgetFormalModel(t, findResource(t, pkg.Resources, "Widget"))
 
 	report := findResource(t, pkg.Resources, "Report")
 	if report.Formal != nil {
 		t.Fatalf("Report formal model = %#v, want nil", report.Formal)
 	}
 
-	serviceManager := findServiceManagerModel(t, pkg.ServiceManagers, "Widget")
-	if serviceManager.Formal == nil {
-		t.Fatal("Widget service manager formal model was not attached")
-	}
-	assertEqual(t, "Widget service manager formal slug", serviceManager.Formal.Reference.Slug, "widget")
+	assertWidgetServiceManagerFormalModel(t, findServiceManagerModel(t, pkg.ServiceManagers, "Widget"))
 }
 
 func TestBuildPackageModelDerivesRuntimeSemanticsFromFormalSpec(t *testing.T) {
@@ -210,27 +162,8 @@ services:
 		t.Fatalf("BuildPackageModel() error = %v", err)
 	}
 
-	widget := findResource(t, pkg.Resources, "Widget")
-	if widget.Runtime == nil || widget.Runtime.Semantics == nil {
-		t.Fatal("Widget runtime semantics were not attached")
-	}
-	assertSliceEqual(t, "Widget provisioning states", widget.Runtime.Semantics.Lifecycle.ProvisioningStates, []string{"PROVISIONING"})
-	assertSliceEqual(t, "Widget active states", widget.Runtime.Semantics.Lifecycle.ActiveStates, []string{"ACTIVE"})
-	assertEqual(t, "Widget delete policy", widget.Runtime.Semantics.Delete.Policy, "required")
-	if widget.Runtime.Semantics.List == nil {
-		t.Fatal("Widget list semantics were not attached")
-	}
-	assertEqual(t, "Widget list responseItemsField", widget.Runtime.Semantics.List.ResponseItemsField, "Items")
-	assertSliceEqual(t, "Widget list match fields", widget.Runtime.Semantics.List.MatchFields, []string{"compartmentId", "state"})
-	assertSliceEqual(t, "Widget forceNew", widget.Runtime.Semantics.Mutation.ForceNew, []string{"compartmentId"})
-	assertEqual(t, "Widget create follow-up", widget.Runtime.Semantics.CreateFollowUp.Strategy, followUpStrategyReadAfterWrite)
-	assertEqual(t, "Widget open gaps", len(widget.Runtime.Semantics.OpenGaps), 0)
-
-	serviceManager := findServiceManagerModel(t, pkg.ServiceManagers, "Widget")
-	if serviceManager.Semantics == nil {
-		t.Fatal("Widget service manager semantics were not attached")
-	}
-	assertEqual(t, "Widget service manager formal slug", serviceManager.Semantics.FormalSlug, "widget")
+	assertWidgetRuntimeSemantics(t, findResource(t, pkg.Resources, "Widget"))
+	assertWidgetServiceManagerSemantics(t, findServiceManagerModel(t, pkg.ServiceManagers, "Widget"))
 }
 
 func TestBuildPackageModelSynthesizesComplexSDKFields(t *testing.T) {
@@ -252,7 +185,7 @@ func TestBuildPackageModelSynthesizesComplexSDKFields(t *testing.T) {
 				Group:          "functions",
 				PackageProfile: PackageProfileCRDOnly,
 			},
-			assert: assertFunctionsComplexSDKFields,
+			assert: assertFunctionsSDKFields,
 		},
 		{
 			name: "core",
@@ -262,7 +195,7 @@ func TestBuildPackageModelSynthesizesComplexSDKFields(t *testing.T) {
 				Group:          "core",
 				PackageProfile: PackageProfileCRDOnly,
 			},
-			assert: assertCoreComplexSDKFields,
+			assert: assertCoreSDKFields,
 		},
 		{
 			name: "certificates",
@@ -272,7 +205,7 @@ func TestBuildPackageModelSynthesizesComplexSDKFields(t *testing.T) {
 				Group:          "certificates",
 				PackageProfile: PackageProfileCRDOnly,
 			},
-			assert: assertCertificatesComplexSDKFields,
+			assert: assertCertificatesSDKFields,
 		},
 		{
 			name: "nosql",
@@ -282,7 +215,7 @@ func TestBuildPackageModelSynthesizesComplexSDKFields(t *testing.T) {
 				Group:          "nosql",
 				PackageProfile: PackageProfileCRDOnly,
 			},
-			assert: assertNoSQLComplexSDKFields,
+			assert: assertNoSQLSDKFields,
 		},
 		{
 			name: "secrets",
@@ -297,7 +230,7 @@ func TestBuildPackageModelSynthesizesComplexSDKFields(t *testing.T) {
 					},
 				},
 			},
-			assert: assertSecretsComplexSDKFields,
+			assert: assertSecretsSDKFields,
 		},
 		{
 			name: "vault",
@@ -307,7 +240,7 @@ func TestBuildPackageModelSynthesizesComplexSDKFields(t *testing.T) {
 				Group:          "vault",
 				PackageProfile: PackageProfileCRDOnly,
 			},
-			assert: assertVaultComplexSDKFields,
+			assert: assertVaultSDKFields,
 		},
 		{
 			name: "artifacts",
@@ -317,7 +250,7 @@ func TestBuildPackageModelSynthesizesComplexSDKFields(t *testing.T) {
 				Group:          "artifacts",
 				PackageProfile: PackageProfileCRDOnly,
 			},
-			assert: assertArtifactsComplexSDKFields,
+			assert: assertArtifactsSDKFields,
 		},
 		{
 			name: "networkloadbalancer",
@@ -327,7 +260,7 @@ func TestBuildPackageModelSynthesizesComplexSDKFields(t *testing.T) {
 				Group:          "networkloadbalancer",
 				PackageProfile: PackageProfileCRDOnly,
 			},
-			assert: assertNetworkLoadBalancerComplexSDKFields,
+			assert: assertNetworkLoadBalancerSDKFields,
 		},
 	}
 
@@ -342,90 +275,6 @@ func TestBuildPackageModelSynthesizesComplexSDKFields(t *testing.T) {
 			test.assert(t, pkg)
 		})
 	}
-}
-
-func assertFunctionsComplexSDKFields(t *testing.T, pkg *PackageModel) {
-	t.Helper()
-
-	application := findResource(t, pkg.Resources, "Application")
-	assertFieldMatches(t, "Application TraceConfig", findFieldModel(t, application.SpecFields, "TraceConfig"), fieldExpectation{Type: "ApplicationTraceConfig"})
-	assertFieldMatches(t, "Application ImagePolicyConfig", findFieldModel(t, application.SpecFields, "ImagePolicyConfig"), fieldExpectation{Type: "ApplicationImagePolicyConfig"})
-	assertFieldMatches(t, "Application DefinedTags", findFieldModel(t, application.SpecFields, "DefinedTags"), fieldExpectation{Type: "map[string]shared.MapValue"})
-	assertFieldsPresent(t, "ApplicationTraceConfig", findHelperType(t, application.HelperTypes, "ApplicationTraceConfig").Fields, []string{"DomainId"})
-	assertFieldsPresent(t, "ApplicationImagePolicyConfig", findHelperType(t, application.HelperTypes, "ApplicationImagePolicyConfig").Fields, []string{"IsPolicyEnabled"})
-
-	function := findResource(t, pkg.Resources, "Function")
-	assertFieldMatches(t, "Function SourceDetails", findFieldModel(t, function.SpecFields, "SourceDetails"), fieldExpectation{Type: "FunctionSourceDetails"})
-	assertFieldsPresent(t, "FunctionSourceDetails", findHelperType(t, function.HelperTypes, "FunctionSourceDetails").Fields, []string{"SourceType", "PbfListingId"})
-	assertFieldMatches(t, "Function ProvisionedConcurrencyConfig", findFieldModel(t, function.SpecFields, "ProvisionedConcurrencyConfig"), fieldExpectation{Type: "FunctionProvisionedConcurrencyConfig"})
-	assertFieldsPresent(t, "FunctionProvisionedConcurrencyConfig", findHelperType(t, function.HelperTypes, "FunctionProvisionedConcurrencyConfig").Fields, []string{"Strategy", "Count"})
-}
-
-func assertCoreComplexSDKFields(t *testing.T, pkg *PackageModel) {
-	t.Helper()
-
-	tunnel := findResource(t, pkg.Resources, "IPSecConnectionTunnel")
-	assertFieldMatches(t, "IPSecConnectionTunnel BgpSessionConfig", findFieldModel(t, tunnel.SpecFields, "BgpSessionConfig"), fieldExpectation{Type: "IPSecConnectionTunnelBgpSessionConfig"})
-	assertFieldMatches(t, "IPSecConnectionTunnel PhaseOneConfig", findFieldModel(t, tunnel.SpecFields, "PhaseOneConfig"), fieldExpectation{Type: "IPSecConnectionTunnelPhaseOneConfig"})
-	assertFieldMatches(t, "IPSecConnectionTunnel PhaseTwoConfig", findFieldModel(t, tunnel.SpecFields, "PhaseTwoConfig"), fieldExpectation{Type: "IPSecConnectionTunnelPhaseTwoConfig"})
-	assertFieldsPresent(t, "IPSecConnectionTunnelBgpSessionConfig", findHelperType(t, tunnel.HelperTypes, "IPSecConnectionTunnelBgpSessionConfig").Fields, []string{"CustomerBgpAsn"})
-	assertFieldsPresent(t, "IPSecConnectionTunnelPhaseOneConfig", findHelperType(t, tunnel.HelperTypes, "IPSecConnectionTunnelPhaseOneConfig").Fields, []string{"DiffieHelmanGroup"})
-}
-
-func assertCertificatesComplexSDKFields(t *testing.T, pkg *PackageModel) {
-	t.Helper()
-
-	bundle := findResource(t, pkg.Resources, "CertificateBundle")
-	assertFieldMatches(t, "CertificateBundle Validity", findFieldModel(t, bundle.StatusFields, "Validity"), fieldExpectation{Type: "CertificateBundleValidity"})
-	assertFieldMatches(t, "CertificateBundle RevocationStatus", findFieldModel(t, bundle.StatusFields, "RevocationStatus"), fieldExpectation{Type: "CertificateBundleRevocationStatus"})
-	assertFieldsPresent(t, "CertificateBundleValidity", findHelperType(t, bundle.HelperTypes, "CertificateBundleValidity").Fields, []string{"TimeOfValidityNotBefore"})
-	assertFieldsPresent(t, "CertificateBundleRevocationStatus", findHelperType(t, bundle.HelperTypes, "CertificateBundleRevocationStatus").Fields, []string{"RevocationReason"})
-}
-
-func assertNoSQLComplexSDKFields(t *testing.T, pkg *PackageModel) {
-	t.Helper()
-
-	row := findResource(t, pkg.Resources, "Row")
-	assertFieldMatches(t, "Row Value", findFieldModel(t, row.SpecFields, "Value"), fieldExpectation{Type: "map[string]shared.JSONValue"})
-}
-
-func assertSecretsComplexSDKFields(t *testing.T, pkg *PackageModel) {
-	t.Helper()
-
-	bundle := findResource(t, pkg.Resources, "SecretBundle")
-	assertFieldMatches(t, "SecretBundle SecretBundleContent", findFieldModel(t, bundle.StatusFields, "SecretBundleContent"), fieldExpectation{Type: "SecretBundleContent"})
-	assertFieldsPresent(t, "SecretBundleContent", findHelperType(t, bundle.HelperTypes, "SecretBundleContent").Fields, []string{"ContentType", "Content"})
-	assertResourceStatusFields(t, pkg, "SecretBundleByName", []string{"SecretId", "VersionNumber", "SecretBundleContent", "Metadata"})
-}
-
-func assertVaultComplexSDKFields(t *testing.T, pkg *PackageModel) {
-	t.Helper()
-
-	secret := findResource(t, pkg.Resources, "Secret")
-	assertFieldMatches(t, "Secret Metadata", findFieldModel(t, secret.SpecFields, "Metadata"), fieldExpectation{Type: "map[string]shared.JSONValue"})
-}
-
-func assertArtifactsComplexSDKFields(t *testing.T, pkg *PackageModel) {
-	t.Helper()
-
-	assertResourceStatusFields(t, pkg, "ContainerConfiguration", []string{"IsRepositoryCreatedOnFirstPush"})
-	containerImage := findResource(t, pkg.Resources, "ContainerImage")
-	assertFieldsPresent(t, "ContainerImage status", containerImage.StatusFields, []string{"FreeformTags"})
-	assertFieldMatches(t, "ContainerImage DefinedTags", findFieldModel(t, containerImage.StatusFields, "DefinedTags"), fieldExpectation{Type: "map[string]shared.MapValue"})
-	assertResourceStatusFields(t, pkg, "ContainerImageSignature", []string{"CompartmentId", "ImageId", "Message", "Signature", "SigningAlgorithm"})
-	containerRepository := findResource(t, pkg.Resources, "ContainerRepository")
-	assertFieldsPresent(t, "ContainerRepository status", containerRepository.StatusFields, []string{"CompartmentId", "DisplayName", "IsImmutable", "IsPublic", "FreeformTags", "DefinedTags"})
-	assertFieldMatches(t, "ContainerRepository Readme", findFieldModel(t, containerRepository.StatusFields, "Readme"), fieldExpectation{Type: "ContainerRepositoryReadme"})
-	assertResourceStatusFields(t, pkg, "GenericArtifact", []string{"FreeformTags"})
-	assertResourceStatusFields(t, pkg, "Repository", []string{"DisplayName", "Description", "CompartmentId", "IsImmutable", "FreeformTags", "DefinedTags"})
-}
-
-func assertNetworkLoadBalancerComplexSDKFields(t *testing.T, pkg *PackageModel) {
-	t.Helper()
-
-	healthChecker := findResource(t, pkg.Resources, "HealthChecker")
-	assertFieldMatches(t, "HealthChecker RequestData", findFieldModel(t, healthChecker.SpecFields, "RequestData"), fieldExpectation{Type: "string"})
-	assertFieldMatches(t, "HealthChecker ResponseData", findFieldModel(t, healthChecker.SpecFields, "ResponseData"), fieldExpectation{Type: "string"})
 }
 
 func TestBuildPackageModelSynthesizesPSQLObservedStateFields(t *testing.T) {
@@ -453,11 +302,13 @@ func TestBuildPackageModelSynthesizesPSQLObservedStateFields(t *testing.T) {
 		t.Fatalf("BuildPackageModel() error = %v", err)
 	}
 
-	assertResourceStatusFields(t, pkg, "DbSystem", []string{"DisplayName", "CompartmentId", "Shape", "DbVersion"})
-	assertResourceStatusFields(t, pkg, "Configuration", []string{"DisplayName", "Shape", "DbVersion", "InstanceOcpuCount"})
-	assertResourceStatusFields(t, pkg, "Backup", []string{"DisplayName", "CompartmentId", "DbSystemId", "RetentionPeriod"})
-	assertResourceStatusFields(t, pkg, "PrimaryDbInstance", []string{"DbInstanceId"})
-	assertResourceStatusFields(t, pkg, "WorkRequestLog", []string{"Message", "Timestamp"})
+	assertPackageResourceStatusFields(t, pkg, map[string][]string{
+		"DbSystem":          {"DisplayName", "CompartmentId", "Shape", "DbVersion"},
+		"Configuration":     {"DisplayName", "Shape", "DbVersion", "InstanceOcpuCount"},
+		"Backup":            {"DisplayName", "CompartmentId", "DbSystemId", "RetentionPeriod"},
+		"PrimaryDbInstance": {"DbInstanceId"},
+		"WorkRequestLog":    {"Message", "Timestamp"},
+	})
 }
 
 func TestBuildPackageModelSynthesizesQueueObservedStateFields(t *testing.T) {
@@ -548,18 +399,22 @@ func TestBuildPackageModelSynthesizesContainerEngineObservedStateFields(t *testi
 		t.Fatalf("BuildPackageModel() error = %v", err)
 	}
 
-	assertResourceStatusFields(t, pkg, "Cluster", []string{"Name", "CompartmentId", "EndpointConfig", "VcnId", "KubernetesVersion", "KmsKeyId", "FreeformTags", "DefinedTags", "Options", "ImagePolicyConfig", "ClusterPodNetworkOptions", "Type"})
-	assertResourceStatusFields(t, pkg, "NodePool", []string{"CompartmentId", "ClusterId", "Name", "KubernetesVersion", "NodeMetadata", "NodeImageName", "NodeSourceDetails", "NodeShapeConfig", "InitialNodeLabels", "SshPublicKey", "QuantityPerSubnet", "SubnetIds", "NodeConfigDetails", "FreeformTags", "DefinedTags", "NodeEvictionNodePoolSettings", "NodePoolCyclingDetails"})
-	assertResourceStatusFields(t, pkg, "VirtualNodePool", []string{"CompartmentId", "ClusterId", "DisplayName", "PlacementConfigurations", "InitialVirtualNodeLabels", "Taints", "Size", "NsgIds", "PodConfiguration", "FreeformTags", "DefinedTags", "VirtualNodeTags"})
-	assertResourceStatusFields(t, pkg, "Addon", []string{"Version", "Configurations"})
-	assertResourceStatusFields(t, pkg, "WorkloadMapping", []string{"Namespace", "MappedCompartmentId", "FreeformTags", "DefinedTags"})
-	assertResourceStatusFields(t, pkg, "WorkRequestLog", []string{"Message", "Timestamp"})
+	assertPackageResourceStatusFields(t, pkg, map[string][]string{
+		"Cluster":         {"Name", "CompartmentId", "EndpointConfig", "VcnId", "KubernetesVersion", "KmsKeyId", "FreeformTags", "DefinedTags", "Options", "ImagePolicyConfig", "ClusterPodNetworkOptions", "Type"},
+		"NodePool":        {"CompartmentId", "ClusterId", "Name", "KubernetesVersion", "NodeMetadata", "NodeImageName", "NodeSourceDetails", "NodeShapeConfig", "InitialNodeLabels", "SshPublicKey", "QuantityPerSubnet", "SubnetIds", "NodeConfigDetails", "FreeformTags", "DefinedTags", "NodeEvictionNodePoolSettings", "NodePoolCyclingDetails"},
+		"VirtualNodePool": {"CompartmentId", "ClusterId", "DisplayName", "PlacementConfigurations", "InitialVirtualNodeLabels", "Taints", "Size", "NsgIds", "PodConfiguration", "FreeformTags", "DefinedTags", "VirtualNodeTags"},
+		"Addon":           {"Version", "Configurations"},
+		"WorkloadMapping": {"Namespace", "MappedCompartmentId", "FreeformTags", "DefinedTags"},
+		"WorkRequestLog":  {"Message", "Timestamp"},
+	})
 
-	workRequestStatus := findFieldModel(t, findResource(t, pkg.Resources, "WorkRequest").StatusFields, "Status")
-	assertFieldMatches(t, "WorkRequest Status", workRequestStatus, fieldExpectation{Tag: `json:"sdkStatus,omitempty"`})
+	workRequest := findResource(t, pkg.Resources, "WorkRequest")
+	workRequestStatus := findFieldModel(t, workRequest.StatusFields, "Status")
+	assertFieldTag(t, "WorkRequest Status", workRequestStatus, `json:"sdkStatus,omitempty"`)
 
-	credentialRotationObservedStatus := findFieldModel(t, findResource(t, pkg.Resources, "CredentialRotationStatus").StatusFields, "Status")
-	assertFieldMatches(t, "CredentialRotationStatus Status", credentialRotationObservedStatus, fieldExpectation{Tag: `json:"sdkStatus,omitempty"`})
+	credentialRotationStatus := findResource(t, pkg.Resources, "CredentialRotationStatus")
+	credentialRotationObservedStatus := findFieldModel(t, credentialRotationStatus.StatusFields, "Status")
+	assertFieldTag(t, "CredentialRotationStatus Status", credentialRotationObservedStatus, `json:"sdkStatus,omitempty"`)
 }
 
 func TestBuildPackageModelSynthesizesDNSObservedStateAliases(t *testing.T) {
@@ -751,19 +606,22 @@ func TestBuildPackageModelSynthesizesIdentityObservedStateAliases(t *testing.T) 
 		t.Fatalf("BuildPackageModel() error = %v", err)
 	}
 
-	assertResourceStatusFields(t, pkg, "BulkActionResourceType", []string{"Items"})
-	assertResourceStatusFields(t, pkg, "BulkEditTagsResourceType", []string{"Items"})
-	assertResourceStatusFields(t, pkg, "CostTrackingTag", []string{"TagNamespaceId", "TagNamespaceName", "IsRetired", "Validator"})
-	assertResourceStatusFields(t, pkg, "IdentityProvider", []string{"CompartmentId", "Name", "Description", "Metadata", "MetadataUrl", "ProductType"})
-	assertResourceStatusFields(t, pkg, "NetworkSource", []string{"CompartmentId", "Name", "Description", "PublicSourceList", "Services", "VirtualSourceList"})
-	assertResourceStatusFields(t, pkg, "OrResetUIPassword", []string{"Password", "UserId", "TimeCreated", "LifecycleState", "InactiveStatus"})
-	assertResourceStatusFields(t, pkg, "StandardTagNamespace", []string{"Description", "StandardTagNamespaceName", "TagDefinitionTemplates"})
-	assertFieldMatches(t, "StandardTagNamespace Status", findFieldModel(t, findResource(t, pkg.Resources, "StandardTagNamespace").StatusFields, "Status"), fieldExpectation{
-		Tag: `json:"sdkStatus,omitempty"`,
+	assertPackageResourceStatusFields(t, pkg, map[string][]string{
+		"BulkActionResourceType":    {"Items"},
+		"BulkEditTagsResourceType":  {"Items"},
+		"CostTrackingTag":           {"TagNamespaceId", "TagNamespaceName", "IsRetired", "Validator"},
+		"IdentityProvider":          {"CompartmentId", "Name", "Description", "Metadata", "MetadataUrl", "ProductType"},
+		"NetworkSource":             {"CompartmentId", "Name", "Description", "PublicSourceList", "Services", "VirtualSourceList"},
+		"OrResetUIPassword":         {"Password", "UserId", "TimeCreated", "LifecycleState", "InactiveStatus"},
+		"StandardTagNamespace":      {"Description", "StandardTagNamespaceName", "TagDefinitionTemplates"},
+		"StandardTagTemplate":       {"Description", "TagDefinitionName", "Type", "IsCostTracking"},
+		"UserState":                 {"Id", "CompartmentId", "Name", "LifecycleState", "Capabilities"},
+		"UserUIPasswordInformation": {"UserId", "TimeCreated", "LifecycleState"},
 	})
-	assertResourceStatusFields(t, pkg, "StandardTagTemplate", []string{"Description", "TagDefinitionName", "Type", "IsCostTracking"})
-	assertResourceStatusFields(t, pkg, "UserState", []string{"Id", "CompartmentId", "Name", "LifecycleState", "Capabilities"})
-	assertResourceStatusFields(t, pkg, "UserUIPasswordInformation", []string{"UserId", "TimeCreated", "LifecycleState"})
+
+	standardTagNamespace := findResource(t, pkg.Resources, "StandardTagNamespace")
+	standardTagNamespaceStatus := findFieldModel(t, standardTagNamespace.StatusFields, "Status")
+	assertFieldTag(t, "StandardTagNamespace Status", standardTagNamespaceStatus, `json:"sdkStatus,omitempty"`)
 }
 
 func TestBuildPackageModelSynthesizesCoreObservedStateAliases(t *testing.T) {
@@ -808,25 +666,27 @@ func TestBuildPackageModelSynthesizesCoreObservedStateAliases(t *testing.T) {
 		t.Fatalf("BuildPackageModel() error = %v", err)
 	}
 
-	assertResourceStatusFields(t, pkg, "ClusterNetworkInstance", []string{"AvailabilityDomain", "CompartmentId", "Region", "State", "TimeCreated"})
-	assertResourceStatusFields(t, pkg, "ComputeCapacityReservationInstance", []string{"AvailabilityDomain", "CompartmentId", "Id", "Shape"})
-	assertResourceStatusFields(t, pkg, "ComputeGlobalImageCapabilitySchema", []string{"ComputeGlobalImageCapabilitySchemaId", "Name"})
-	assertResourceStatusFields(t, pkg, "NetworkSecurityGroupSecurityRule", []string{"Direction", "Protocol", "Id", "TcpOptions", "UdpOptions"})
-	assertResourceStatusFields(t, pkg, "IPSecConnectionTunnelError", []string{"ErrorCode", "ErrorDescription", "Id", "Solution", "Timestamp"})
-	assertResourceStatusFields(t, pkg, "IPSecConnectionTunnelRoute", []string{"Advertiser", "AsPath", "IsBestPath", "Prefix"})
-	assertResourceStatusFields(t, pkg, "IPSecConnectionTunnelSecurityAssociation", []string{"CpeSubnet", "OracleSubnet", "TunnelSaStatus"})
-	assertResourceStatusFields(t, pkg, "InstanceDevice", []string{"IsAvailable", "Name"})
-	assertResourceStatusFields(t, pkg, "VolumeBackupPolicyAssetAssignment", []string{"AssetId", "Id", "PolicyId", "TimeCreated"})
-	assertResourceStatusFields(t, pkg, "WindowsInstanceInitialCredential", []string{"Password", "Username"})
-	assertResourceStatusFields(t, pkg, "FastConnectProviderVirtualCircuitBandwidthShape", []string{"BandwidthInMbps", "Name"})
-	assertResourceStatusFields(t, pkg, "CrossconnectPortSpeedShape", []string{"Name", "PortSpeedInGbps"})
-	assertResourceStatusFields(t, pkg, "AllDrgAttachment", []string{"Id"})
-	assertResourceStatusFields(t, pkg, "AllowedPeerRegionsForRemotePeering", []string{"Name"})
-	assertResourceStatusFields(t, pkg, "AppCatalogListingAgreement", []string{"ListingId", "ListingResourceVersion", "OracleTermsOfUseLink", "EulaLink", "TimeRetrieved", "Signature"})
-	assertResourceStatusFields(t, pkg, "CrossConnectLetterOfAuthority", []string{"CrossConnectId", "FacilityLocation", "TimeExpires"})
-	assertResourceStatusFields(t, pkg, "CrossConnectMapping", []string{"Ipv4BgpStatus", "Ipv6BgpStatus", "OciLogicalDeviceName"})
-	assertResourceStatusFields(t, pkg, "DhcpOption", []string{"CompartmentId", "DisplayName", "LifecycleState", "Options", "TimeCreated", "VcnId"})
-	assertResourceStatusFields(t, pkg, "VirtualCircuitAssociatedTunnel", []string{"TunnelId", "TunnelType"})
+	assertPackageResourceStatusFields(t, pkg, map[string][]string{
+		"ClusterNetworkInstance":                          {"AvailabilityDomain", "CompartmentId", "Region", "State", "TimeCreated"},
+		"ComputeCapacityReservationInstance":              {"AvailabilityDomain", "CompartmentId", "Id", "Shape"},
+		"ComputeGlobalImageCapabilitySchema":              {"ComputeGlobalImageCapabilitySchemaId", "Name"},
+		"NetworkSecurityGroupSecurityRule":                {"Direction", "Protocol", "Id", "TcpOptions", "UdpOptions"},
+		"IPSecConnectionTunnelError":                      {"ErrorCode", "ErrorDescription", "Id", "Solution", "Timestamp"},
+		"IPSecConnectionTunnelRoute":                      {"Advertiser", "AsPath", "IsBestPath", "Prefix"},
+		"IPSecConnectionTunnelSecurityAssociation":        {"CpeSubnet", "OracleSubnet", "TunnelSaStatus"},
+		"InstanceDevice":                                  {"IsAvailable", "Name"},
+		"VolumeBackupPolicyAssetAssignment":               {"AssetId", "Id", "PolicyId", "TimeCreated"},
+		"WindowsInstanceInitialCredential":                {"Password", "Username"},
+		"FastConnectProviderVirtualCircuitBandwidthShape": {"BandwidthInMbps", "Name"},
+		"CrossconnectPortSpeedShape":                      {"Name", "PortSpeedInGbps"},
+		"AllDrgAttachment":                                {"Id"},
+		"AllowedPeerRegionsForRemotePeering":              {"Name"},
+		"AppCatalogListingAgreement":                      {"ListingId", "ListingResourceVersion", "OracleTermsOfUseLink", "EulaLink", "TimeRetrieved", "Signature"},
+		"CrossConnectLetterOfAuthority":                   {"CrossConnectId", "FacilityLocation", "TimeExpires"},
+		"CrossConnectMapping":                             {"Ipv4BgpStatus", "Ipv6BgpStatus", "OciLogicalDeviceName"},
+		"DhcpOption":                                      {"CompartmentId", "DisplayName", "LifecycleState", "Options", "TimeCreated", "VcnId"},
+		"VirtualCircuitAssociatedTunnel":                  {"TunnelId", "TunnelType"},
+	})
 }
 
 func TestBuildPackageModelAvoidsStatusTypeCollisions(t *testing.T) {
@@ -965,18 +825,22 @@ func TestGenerateRendersAndSkipsExisting(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Generate() error = %v", err)
 	}
-	assertEqual(t, "Generate() generated services", len(result.Generated), 1)
+	if len(result.Generated) != 1 {
+		t.Fatalf("Generate() generated = %d services, want 1", len(result.Generated))
+	}
 
 	groupVersionPath := filepath.Join(outputRoot, "api", "mysql", "v1beta1", "groupversion_info.go")
-	groupVersionContent := readFile(t, groupVersionPath)
-	assertStringContains(t, "groupversion_info.go generator banner", groupVersionContent, "// Code generated by generator. DO NOT EDIT.")
-	assertStringContains(t, "groupversion_info.go GroupVersion", groupVersionContent, `GroupVersion = schema.GroupVersion{Group: "mysql.oracle.com", Version: "v1beta1"}`)
+	assertFileContains(t, groupVersionPath, []string{
+		"// Code generated by generator. DO NOT EDIT.",
+		`GroupVersion = schema.GroupVersion{Group: "mysql.oracle.com", Version: "v1beta1"}`,
+	})
 
 	resourcePath := filepath.Join(outputRoot, "api", "mysql", "v1beta1", "mysqldbsystem_types.go")
-	resourceContent := readFile(t, resourcePath)
-	assertStringContains(t, "mysqldbsystem_types.go kind", resourceContent, "type MySqlDbSystemSpec struct")
-	assertStringContains(t, "mysqldbsystem_types.go Port field name", resourceContent, "Port")
-	assertStringContains(t, "mysqldbsystem_types.go Port field tag", resourceContent, `json:"port,omitempty"`)
+	assertFileContains(t, resourcePath, []string{
+		"type MySqlDbSystemSpec struct",
+		"Port",
+		`json:"port,omitempty"`,
+	})
 
 	result, err = pipeline.Generate(context.Background(), cfg, []ServiceConfig{service}, Options{
 		OutputRoot:   outputRoot,
@@ -985,7 +849,9 @@ func TestGenerateRendersAndSkipsExisting(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Generate() second run error = %v", err)
 	}
-	assertEqual(t, "Generate() skipped services", len(result.Skipped), 1)
+	if len(result.Skipped) != 1 {
+		t.Fatalf("Generate() skipped = %d services, want 1", len(result.Skipped))
+	}
 }
 
 func TestRenderResourceFileIncludesSDKDocumentationAndRequiredness(t *testing.T) {
@@ -1010,22 +876,18 @@ func TestRenderResourceFileIncludesSDKDocumentationAndRequiredness(t *testing.T)
 	application := findResource(t, pkg.Resources, "Application")
 
 	compartmentID := findFieldModel(t, application.SpecFields, "CompartmentId")
-	assertFieldMatches(t, "Application CompartmentId", compartmentID, fieldExpectation{
-		Tag:     `json:"compartmentId"`,
-		Markers: []string{"+kubebuilder:validation:Required"},
-	})
-	assertStringContains(t, "Application CompartmentId comments", strings.Join(compartmentID.Comments, "\n"), "compartment to create the application within")
+	assertFieldMarkers(t, "Application CompartmentId", compartmentID, []string{"+kubebuilder:validation:Required"})
+	assertFieldTag(t, "Application CompartmentId", compartmentID, `json:"compartmentId"`)
+	assertFieldCommentsContain(t, "Application CompartmentId", compartmentID, "compartment to create the application within")
 
 	config := findFieldModel(t, application.SpecFields, "Config")
-	assertFieldMatches(t, "Application Config", config, fieldExpectation{
-		Tag:     `json:"config,omitempty"`,
-		Markers: []string{"+kubebuilder:validation:Optional"},
-	})
-	assertStringContains(t, "Application Config comments", strings.Join(config.Comments, "\n"), "Application configuration")
+	assertFieldMarkers(t, "Application Config", config, []string{"+kubebuilder:validation:Optional"})
+	assertFieldTag(t, "Application Config", config, `json:"config,omitempty"`)
+	assertFieldCommentsContain(t, "Application Config", config, "Application configuration")
 
 	lifecycleState := findFieldModel(t, application.StatusFields, "LifecycleState")
-	assertFieldMatches(t, "Application LifecycleState", lifecycleState, fieldExpectation{Markers: []string{}})
-	assertStringContains(t, "Application LifecycleState comments", strings.Join(lifecycleState.Comments, "\n"), "current state of the application")
+	assertFieldHasNoMarkers(t, "Application LifecycleState", lifecycleState)
+	assertFieldCommentsContain(t, "Application LifecycleState", lifecycleState, "current state of the application")
 
 	content, err := renderResourceFile(pkg, application)
 	if err != nil {
@@ -1067,8 +929,10 @@ func TestGenerateRendersPackageOutputsByProfile(t *testing.T) {
 				"- generated/crd",
 				"- generated/rbac",
 				"- ../../../config/manager",
-				"- ../../../config/rbac/mysqldbsystem_editor_role.yaml",
-				"- ../../../config/rbac/mysqldbsystem_viewer_role.yaml",
+			},
+			wantInstallNotContains: []string{
+				"mysqldbsystem_editor_role.yaml",
+				"mysqldbsystem_viewer_role.yaml",
 			},
 		},
 		{
@@ -1147,7 +1011,8 @@ func TestGenerateRendersControllerOutputs(t *testing.T) {
 	service.Generation.Controller.Strategy = GenerationStrategyGenerated
 	service.Generation.Resources = []ResourceGenerationOverride{
 		{
-			Kind: "MySqlDbSystem",
+			Kind:    "MySqlDbSystem",
+			SDKName: "DbSystem",
 			Controller: ControllerGenerationOverride{
 				MaxConcurrentReconciles: 3,
 				ExtraRBACMarkers: []string{
@@ -1330,7 +1195,7 @@ func TestGenerateRejectsGeneratedRegistrationWithoutGeneratedRuntimeSurfaces(t *
 	}
 }
 
-func TestGenerateControllerBackedPackagesWithoutParityDoNotReferenceEditorViewerRoles(t *testing.T) {
+func TestGenerateControllerBackedPackagesDoNotReferenceEditorViewerRolesByDefault(t *testing.T) {
 	t.Parallel()
 
 	cfg := &Config{
@@ -1373,7 +1238,8 @@ func TestGeneratedControllerCompiles(t *testing.T) {
 	service.Generation.Controller.Strategy = GenerationStrategyManual
 	service.Generation.Resources = []ResourceGenerationOverride{
 		{
-			Kind: "MySqlDbSystem",
+			Kind:    "MySqlDbSystem",
+			SDKName: "DbSystem",
 			Controller: ControllerGenerationOverride{
 				Strategy:                GenerationStrategyGenerated,
 				MaxConcurrentReconciles: 3,
@@ -1583,7 +1449,8 @@ func TestGenerateRendersServiceManagerScaffoldAtOverridePath(t *testing.T) {
 	service.Generation.ServiceManager.Strategy = GenerationStrategyGenerated
 	service.Generation.Resources = []ResourceGenerationOverride{
 		{
-			Kind: "MySqlDbSystem",
+			Kind:    "MySqlDbSystem",
+			SDKName: "DbSystem",
 			ServiceManager: ServiceManagerGenerationOverride{
 				PackagePath: "mysql/dbsystem",
 			},
@@ -1642,13 +1509,21 @@ func TestGeneratedServiceManagerScaffoldCompiles(t *testing.T) {
 	}
 }
 
-func TestCurrentServiceParityMatchesCheckedInArtifacts(t *testing.T) {
+func TestCheckedInServicesMatchGenerator(t *testing.T) {
 	cfg := loadCheckedInConfig(t)
-	services := selectServices(t, cfg, []string{"database", "mysql", "streaming"})
-	assertEqual(t, "selected parity services", len(services), 3)
+	selectedServices := serviceConfigsByName(t, cfg, "database", "mysql", "streaming")
+	services := []ServiceConfig{*selectedServices["database"], *selectedServices["mysql"], *selectedServices["streaming"]}
 
-	outputRoot, result := generateCheckedInArtifacts(t, cfg, services)
-	assertEqual(t, "Generate() generated services", len(result.Generated), 3)
+	outputRoot := t.TempDir()
+	seedSamplesKustomization(t, outputRoot)
+	pipeline := New()
+	result, err := pipeline.Generate(context.Background(), cfg, services, Options{
+		OutputRoot:                      outputRoot,
+		PreserveExistingSpecSurfaceRoot: repoRoot(t),
+	})
+	if err != nil {
+		t.Fatalf("Generate() error = %v", err)
+	}
 	assertGeneratedServiceCounts(t, result.Generated, map[string]int{
 		"database":  79,
 		"mysql":     12,
@@ -1666,7 +1541,7 @@ func TestCurrentServiceParityMatchesCheckedInArtifacts(t *testing.T) {
 		"api/streaming/v1beta1/stream_types.go",
 		"api/streaming/v1beta1/streampool_types.go",
 	}
-	assertGoParityFiles(t, repoRoot(t), outputRoot, apiFiles)
+	assertGeneratedGoMatchesAll(t, repoRoot(t), outputRoot, apiFiles)
 
 	exactFiles := []string{
 		"config/samples/database_v1beta1_autonomousdatabases.yaml",
@@ -1679,7 +1554,7 @@ func TestCurrentServiceParityMatchesCheckedInArtifacts(t *testing.T) {
 		"packages/streaming/metadata.env",
 		"packages/streaming/install/kustomization.yaml",
 	}
-	assertExactFileMatchesSet(t, repoRoot(t), outputRoot, exactFiles)
+	assertExactFileMatchesAll(t, repoRoot(t), outputRoot, exactFiles)
 
 	runtimeFiles := []string{
 		"controllers/database/autonomousdatabases_controller.go",
@@ -1704,7 +1579,7 @@ func TestCurrentServiceParityMatchesCheckedInArtifacts(t *testing.T) {
 		"internal/registrations/mysql_generated.go",
 		"internal/registrations/streaming_generated.go",
 	}
-	assertGoParityFiles(t, repoRoot(t), outputRoot, runtimeFiles)
+	assertGeneratedGoMatchesAll(t, repoRoot(t), outputRoot, runtimeFiles)
 
 	assertResourceOrderContainsSubset(
 		t,
@@ -1713,13 +1588,13 @@ func TestCurrentServiceParityMatchesCheckedInArtifacts(t *testing.T) {
 	)
 }
 
-func TestCheckedInStreamingParityPreservesStreamNamePrinterColumn(t *testing.T) {
+func TestCheckedInStreamingPreservesStreamNamePrinterColumn(t *testing.T) {
 	t.Parallel()
 
 	cfg := loadCheckedInConfig(t)
-	service := requireService(t, cfg, "streaming")
+	streamingService := serviceConfigsByName(t, cfg, "streaming")["streaming"]
 
-	pkg, err := NewDiscoverer().BuildPackageModel(context.Background(), cfg, *service)
+	pkg, err := NewDiscoverer().BuildPackageModel(context.Background(), cfg, *streamingService)
 	if err != nil {
 		t.Fatalf("BuildPackageModel() error = %v", err)
 	}
@@ -1743,9 +1618,22 @@ func TestCheckedInStreamingParityPreservesStreamNamePrinterColumn(t *testing.T) 
 
 func TestCheckedInPromotedCoreRuntimeArtifactsMatchGenerator(t *testing.T) {
 	cfg := loadCheckedInConfig(t)
-	coreService := requireService(t, cfg, "core")
-	outputRoot, result := generateCheckedInArtifacts(t, cfg, []ServiceConfig{*coreService})
-	assertEqual(t, "Generate() generated services", len(result.Generated), 1)
+	coreService := serviceConfigsByName(t, cfg, "core")["core"]
+
+	outputRoot := t.TempDir()
+	seedSamplesKustomization(t, outputRoot)
+
+	pipeline := New()
+	result, err := pipeline.Generate(context.Background(), cfg, []ServiceConfig{*coreService}, Options{
+		OutputRoot:                      outputRoot,
+		PreserveExistingSpecSurfaceRoot: repoRoot(t),
+	})
+	if err != nil {
+		t.Fatalf("Generate() error = %v", err)
+	}
+	if len(result.Generated) != 1 {
+		t.Fatalf("Generate() generated %d services, want 1", len(result.Generated))
+	}
 
 	runtimeFiles := []string{
 		"controllers/core/vcn_controller.go",
@@ -1753,13 +1641,13 @@ func TestCheckedInPromotedCoreRuntimeArtifactsMatchGenerator(t *testing.T) {
 		"pkg/servicemanager/core/vcn/vcn_servicemanager.go",
 		"internal/registrations/core_generated.go",
 	}
-	assertGoParityFiles(t, repoRoot(t), outputRoot, runtimeFiles)
+	assertGeneratedGoMatchesAll(t, repoRoot(t), outputRoot, runtimeFiles)
 
 	exactFiles := []string{
 		"packages/core/metadata.env",
 		"packages/core/install/kustomization.yaml",
 	}
-	assertExactFileMatchesSet(t, repoRoot(t), outputRoot, exactFiles)
+	assertExactFileMatchesAll(t, repoRoot(t), outputRoot, exactFiles)
 }
 
 func TestCheckedInIdentityUserRuntimeArtifactsMatchGenerator(t *testing.T) {
@@ -1807,8 +1695,8 @@ func TestCheckedInIdentityUserRuntimeArtifactsMatchGenerator(t *testing.T) {
 
 	serviceClientPath := "pkg/servicemanager/identity/user/user_serviceclient.go"
 	serviceManagerPath := "pkg/servicemanager/identity/user/user_servicemanager.go"
-	assertGoParity(t, filepath.Join(repoRoot(t), serviceClientPath), filepath.Join(outputRoot, serviceClientPath))
-	assertGoParity(t, filepath.Join(repoRoot(t), serviceManagerPath), filepath.Join(outputRoot, serviceManagerPath))
+	assertGeneratedGoMatches(t, filepath.Join(repoRoot(t), serviceClientPath), filepath.Join(outputRoot, serviceClientPath))
+	assertGeneratedGoMatches(t, filepath.Join(repoRoot(t), serviceManagerPath), filepath.Join(outputRoot, serviceManagerPath))
 
 	content := readFile(t, filepath.Join(outputRoot, serviceClientPath))
 	assertContains(t, content, []string{
@@ -1963,7 +1851,7 @@ func TestCheckedInConfigIncludesONSObservedStateAlias(t *testing.T) {
 	}
 }
 
-func TestMySQLParityIncludesOptionalDesiredStateFields(t *testing.T) {
+func TestMySQLPublishedKindIncludesOptionalDesiredStateFields(t *testing.T) {
 	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
 	cfg, err := LoadConfig(cfgPath)
 	if err != nil {
@@ -1992,18 +1880,25 @@ func TestMySQLParityIncludesOptionalDesiredStateFields(t *testing.T) {
 	content := readFile(t, filepath.Join(outputRoot, "api", "mysql", "v1beta1", "mysqldbsystem_types.go"))
 	normalized := strings.Join(strings.Fields(content), " ")
 	assertContains(t, normalized, []string{
-		"type DeletionPolicyDetails struct {",
+		"type MySqlDbSystemDeletionPolicy struct {",
 		"AutomaticBackupRetention string `json:\"automaticBackupRetention,omitempty\"`",
 		"FinalBackup string `json:\"finalBackup,omitempty\"`",
 		"IsDeleteProtected bool `json:\"isDeleteProtected,omitempty\"`",
-		"type SecureConnectionDetails struct {",
-		"CertificateGenerationType string `json:\"certificateGenerationType,omitempty\"`",
-		"CertificateId shared.OCID `json:\"certificateId,omitempty\"`",
-		"DeletionPolicy DeletionPolicyDetails `json:\"deletionPolicy,omitempty\"`",
+		"type MySqlDbSystemSecureConnections struct {",
+		"CertificateGenerationType string `json:\"certificateGenerationType\"`",
+		"CertificateId string `json:\"certificateId,omitempty\"`",
+		"DeletionPolicy MySqlDbSystemDeletionPolicy `json:\"deletionPolicy,omitempty\"`",
 		"CrashRecovery string `json:\"crashRecovery,omitempty\"`",
 		"DatabaseManagement string `json:\"databaseManagement,omitempty\"`",
-		"SecureConnections SecureConnectionDetails `json:\"secureConnections,omitempty\"`",
+		"SecureConnections MySqlDbSystemSecureConnections `json:\"secureConnections,omitempty\"`",
+		"type MySqlDbSystemSourceObservedState struct {",
+		"Source MySqlDbSystemSourceObservedState `json:\"source,omitempty\"`",
+		"BackupId string `json:\"backupId\"`",
+		"DbSystemId string `json:\"dbSystemId\"`",
 	})
+	if slices.Contains(structFieldNames(t, content, "MySqlDbSystemSourceObservedState"), "SourceUrl") {
+		t.Fatalf("MySqlDbSystemSourceObservedState unexpectedly contains SourceUrl:\n%s", content)
+	}
 }
 
 func TestGenerateMergesExistingSampleKustomizationEntries(t *testing.T) {
@@ -2050,6 +1945,236 @@ func sampleSDKDir(t *testing.T) string {
 	return filepath.Join(generatorTestDir(t), "testdata", "sdk", "sample")
 }
 
+func assertDiscoveredMySQLDbSystem(t *testing.T, dbSystem ResourceModel) {
+	t.Helper()
+
+	if dbSystem.SDKName != "DbSystem" {
+		t.Fatalf("MySqlDbSystem SDK name = %q, want %q", dbSystem.SDKName, "DbSystem")
+	}
+	assertResourceSpecFields(t, dbSystem, "Port")
+	assertResourceSpecFieldsAbsent(t, dbSystem, "Id")
+	if dbSystem.PrimaryDisplayField != "DisplayName" {
+		t.Fatalf("MySqlDbSystem primary display field = %q, want DisplayName", dbSystem.PrimaryDisplayField)
+	}
+}
+
+func assertDiscoveredWidget(t *testing.T, widget ResourceModel) {
+	t.Helper()
+
+	if len(widget.Operations) != 5 {
+		t.Fatalf("Widget operations = %v, want 5 CRUD operations", widget.Operations)
+	}
+	assertResourceSpecFields(t, widget, "Mode", "CreatedAt")
+	assertResourceSpecFieldsAbsent(t, widget, "LifecycleState", "TimeUpdated")
+	assertResourceStatusFields(t, widget, "LifecycleState", "TimeUpdated")
+
+	compartmentID := findFieldModel(t, widget.SpecFields, "CompartmentId")
+	assertFieldTag(t, "Widget CompartmentId", compartmentID, `json:"compartmentId"`)
+	assertFieldCommentsEqual(t, "Widget CompartmentId", compartmentID, []string{"The OCID of the widget compartment."})
+	assertFieldMarkers(t, "Widget CompartmentId", compartmentID, []string{"+kubebuilder:validation:Required"})
+
+	labels := findFieldModel(t, widget.SpecFields, "Labels")
+	assertFieldTag(t, "Widget Labels", labels, `json:"labels,omitempty"`)
+	assertFieldCommentsEqual(t, "Widget Labels", labels, []string{"Additional labels for the widget."})
+	assertFieldMarkers(t, "Widget Labels", labels, []string{"+kubebuilder:validation:Optional"})
+
+	serverState := findFieldModel(t, widget.SpecFields, "ServerState")
+	assertFieldTag(t, "Widget ServerState", serverState, `json:"serverState,omitempty"`)
+	assertFieldHasNoMarkers(t, "Widget ServerState", serverState)
+
+	lifecycleState := findFieldModel(t, widget.StatusFields, "LifecycleState")
+	assertFieldCommentsEqual(t, "Widget LifecycleState", lifecycleState, []string{"The lifecycle state of the widget."})
+	assertFieldHasNoMarkers(t, "Widget LifecycleState", lifecycleState)
+}
+
+func assertDiscoveredReport(t *testing.T, report ResourceModel) {
+	t.Helper()
+
+	if len(report.SpecFields) != 0 {
+		t.Fatalf("Report spec fields = %#v, want empty spec when no create or update payload exists", report.SpecFields)
+	}
+	assertResourceStatusFields(t, report, "Id", "LifecycleState", "DisplayName")
+}
+
+func assertWidgetFormalModel(t *testing.T, widget ResourceModel) {
+	t.Helper()
+
+	if widget.Formal == nil {
+		t.Fatal("Widget formal model was not attached")
+	}
+	if widget.Formal.Reference.Service != "mysql" {
+		t.Fatalf("Widget formal service = %q, want %q", widget.Formal.Reference.Service, "mysql")
+	}
+	if widget.Formal.Reference.Slug != "widget" {
+		t.Fatalf("Widget formal slug = %q, want %q", widget.Formal.Reference.Slug, "widget")
+	}
+	if widget.Formal.Binding.Import.ProviderResource != "widget_resource" {
+		t.Fatalf("Widget provider resource = %q, want %q", widget.Formal.Binding.Import.ProviderResource, "widget_resource")
+	}
+	if widget.Formal.Binding.Spec.Kind != "Widget" {
+		t.Fatalf("Widget formal kind = %q, want %q", widget.Formal.Binding.Spec.Kind, "Widget")
+	}
+	if widget.Formal.Diagrams.ActivitySourcePath != "controllers/mysql/widget/diagrams/activity.puml" {
+		t.Fatalf("Widget activity diagram path = %q, want %q", widget.Formal.Diagrams.ActivitySourcePath, "controllers/mysql/widget/diagrams/activity.puml")
+	}
+}
+
+func assertWidgetServiceManagerFormalModel(t *testing.T, serviceManager ServiceManagerModel) {
+	t.Helper()
+
+	if serviceManager.Formal == nil {
+		t.Fatal("Widget service manager formal model was not attached")
+	}
+	if serviceManager.Formal.Reference.Slug != "widget" {
+		t.Fatalf("Widget service manager formal slug = %q, want %q", serviceManager.Formal.Reference.Slug, "widget")
+	}
+}
+
+func assertWidgetRuntimeSemantics(t *testing.T, widget ResourceModel) {
+	t.Helper()
+
+	if widget.Runtime == nil || widget.Runtime.Semantics == nil {
+		t.Fatal("Widget runtime semantics were not attached")
+	}
+
+	semantics := widget.Runtime.Semantics
+	assertWidgetLifecycleSemantics(t, semantics)
+	assertWidgetListAndMutationSemantics(t, semantics)
+}
+
+func assertWidgetLifecycleSemantics(t *testing.T, semantics *RuntimeSemanticsModel) {
+	t.Helper()
+
+	if !slices.Equal(semantics.Lifecycle.ProvisioningStates, []string{"PROVISIONING"}) {
+		t.Fatalf("Widget provisioning states = %v, want [PROVISIONING]", semantics.Lifecycle.ProvisioningStates)
+	}
+	if !slices.Equal(semantics.Lifecycle.ActiveStates, []string{"ACTIVE"}) {
+		t.Fatalf("Widget active states = %v, want [ACTIVE]", semantics.Lifecycle.ActiveStates)
+	}
+	if semantics.Delete.Policy != "required" {
+		t.Fatalf("Widget delete policy = %q, want required", semantics.Delete.Policy)
+	}
+	if semantics.List == nil || semantics.List.ResponseItemsField != "Items" {
+		t.Fatalf("Widget list semantics = %#v, want responseItemsField Items", semantics.List)
+	}
+}
+
+func assertWidgetListAndMutationSemantics(t *testing.T, semantics *RuntimeSemanticsModel) {
+	t.Helper()
+
+	if !slices.Equal(semantics.List.MatchFields, []string{"compartmentId", "state"}) {
+		t.Fatalf("Widget list match fields = %v, want [compartmentId state]", semantics.List.MatchFields)
+	}
+	if !slices.Equal(semantics.Mutation.ForceNew, []string{"compartmentId"}) {
+		t.Fatalf("Widget forceNew = %v, want [compartmentId]", semantics.Mutation.ForceNew)
+	}
+	if semantics.CreateFollowUp.Strategy != followUpStrategyReadAfterWrite {
+		t.Fatalf("Widget create follow-up = %q, want %q", semantics.CreateFollowUp.Strategy, followUpStrategyReadAfterWrite)
+	}
+	if len(semantics.OpenGaps) != 0 {
+		t.Fatalf("Widget open gaps = %#v, want none", semantics.OpenGaps)
+	}
+}
+
+func assertWidgetServiceManagerSemantics(t *testing.T, serviceManager ServiceManagerModel) {
+	t.Helper()
+
+	if serviceManager.Semantics == nil {
+		t.Fatal("Widget service manager semantics were not attached")
+	}
+	if serviceManager.Semantics.FormalSlug != "widget" {
+		t.Fatalf("Widget service manager formal slug = %q, want widget", serviceManager.Semantics.FormalSlug)
+	}
+}
+
+func assertFunctionsSDKFields(t *testing.T, pkg *PackageModel) {
+	t.Helper()
+
+	application := findResource(t, pkg.Resources, "Application")
+	assertFieldType(t, "Application TraceConfig", findFieldModel(t, application.SpecFields, "TraceConfig"), "ApplicationTraceConfig")
+	assertFieldType(t, "Application ImagePolicyConfig", findFieldModel(t, application.SpecFields, "ImagePolicyConfig"), "ApplicationImagePolicyConfig")
+	assertFieldType(t, "Application DefinedTags", findFieldModel(t, application.SpecFields, "DefinedTags"), "map[string]shared.MapValue")
+	assertHelperTypeFields(t, findHelperType(t, application.HelperTypes, "ApplicationTraceConfig"), "DomainId")
+	assertHelperTypeFields(t, findHelperType(t, application.HelperTypes, "ApplicationImagePolicyConfig"), "IsPolicyEnabled")
+
+	function := findResource(t, pkg.Resources, "Function")
+	assertFieldType(t, "Function SourceDetails", findFieldModel(t, function.SpecFields, "SourceDetails"), "FunctionSourceDetails")
+	assertHelperTypeFields(t, findHelperType(t, function.HelperTypes, "FunctionSourceDetails"), "SourceType", "PbfListingId")
+	assertFieldType(t, "Function ProvisionedConcurrencyConfig", findFieldModel(t, function.SpecFields, "ProvisionedConcurrencyConfig"), "FunctionProvisionedConcurrencyConfig")
+	assertHelperTypeFields(t, findHelperType(t, function.HelperTypes, "FunctionProvisionedConcurrencyConfig"), "Strategy", "Count")
+}
+
+func assertCoreSDKFields(t *testing.T, pkg *PackageModel) {
+	t.Helper()
+
+	tunnel := findResource(t, pkg.Resources, "IPSecConnectionTunnel")
+	assertFieldType(t, "IPSecConnectionTunnel BgpSessionConfig", findFieldModel(t, tunnel.SpecFields, "BgpSessionConfig"), "IPSecConnectionTunnelBgpSessionConfig")
+	assertFieldType(t, "IPSecConnectionTunnel PhaseOneConfig", findFieldModel(t, tunnel.SpecFields, "PhaseOneConfig"), "IPSecConnectionTunnelPhaseOneConfig")
+	assertFieldType(t, "IPSecConnectionTunnel PhaseTwoConfig", findFieldModel(t, tunnel.SpecFields, "PhaseTwoConfig"), "IPSecConnectionTunnelPhaseTwoConfig")
+	assertHelperTypeFields(t, findHelperType(t, tunnel.HelperTypes, "IPSecConnectionTunnelBgpSessionConfig"), "CustomerBgpAsn")
+	assertHelperTypeFields(t, findHelperType(t, tunnel.HelperTypes, "IPSecConnectionTunnelPhaseOneConfig"), "DiffieHelmanGroup")
+}
+
+func assertCertificatesSDKFields(t *testing.T, pkg *PackageModel) {
+	t.Helper()
+
+	bundle := findResource(t, pkg.Resources, "CertificateBundle")
+	assertFieldType(t, "CertificateBundle Validity", findFieldModel(t, bundle.StatusFields, "Validity"), "CertificateBundleValidity")
+	assertFieldType(t, "CertificateBundle RevocationStatus", findFieldModel(t, bundle.StatusFields, "RevocationStatus"), "CertificateBundleRevocationStatus")
+	assertHelperTypeFields(t, findHelperType(t, bundle.HelperTypes, "CertificateBundleValidity"), "TimeOfValidityNotBefore")
+	assertHelperTypeFields(t, findHelperType(t, bundle.HelperTypes, "CertificateBundleRevocationStatus"), "RevocationReason")
+}
+
+func assertNoSQLSDKFields(t *testing.T, pkg *PackageModel) {
+	t.Helper()
+
+	row := findResource(t, pkg.Resources, "Row")
+	assertFieldType(t, "Row Value", findFieldModel(t, row.SpecFields, "Value"), "map[string]shared.JSONValue")
+}
+
+func assertSecretsSDKFields(t *testing.T, pkg *PackageModel) {
+	t.Helper()
+
+	bundle := findResource(t, pkg.Resources, "SecretBundle")
+	assertFieldType(t, "SecretBundle SecretBundleContent", findFieldModel(t, bundle.StatusFields, "SecretBundleContent"), "SecretBundleContent")
+	assertHelperTypeFields(t, findHelperType(t, bundle.HelperTypes, "SecretBundleContent"), "ContentType", "Content")
+	assertResourceStatusFields(t, findResource(t, pkg.Resources, "SecretBundleByName"), "SecretId", "VersionNumber", "SecretBundleContent", "Metadata")
+}
+
+func assertVaultSDKFields(t *testing.T, pkg *PackageModel) {
+	t.Helper()
+
+	secret := findResource(t, pkg.Resources, "Secret")
+	assertFieldType(t, "Secret Metadata", findFieldModel(t, secret.SpecFields, "Metadata"), "map[string]shared.JSONValue")
+}
+
+func assertArtifactsSDKFields(t *testing.T, pkg *PackageModel) {
+	t.Helper()
+
+	assertPackageResourceStatusFields(t, pkg, map[string][]string{
+		"ContainerConfiguration":  {"IsRepositoryCreatedOnFirstPush"},
+		"ContainerImage":          {"FreeformTags"},
+		"ContainerImageSignature": {"CompartmentId", "ImageId", "Message", "Signature", "SigningAlgorithm"},
+		"ContainerRepository":     {"CompartmentId", "DisplayName", "IsImmutable", "IsPublic", "FreeformTags", "DefinedTags"},
+		"GenericArtifact":         {"FreeformTags"},
+		"Repository":              {"DisplayName", "Description", "CompartmentId", "IsImmutable", "FreeformTags", "DefinedTags"},
+	})
+
+	containerImage := findResource(t, pkg.Resources, "ContainerImage")
+	assertFieldType(t, "ContainerImage DefinedTags", findFieldModel(t, containerImage.StatusFields, "DefinedTags"), "map[string]shared.MapValue")
+
+	containerRepository := findResource(t, pkg.Resources, "ContainerRepository")
+	assertFieldType(t, "ContainerRepository Readme", findFieldModel(t, containerRepository.StatusFields, "Readme"), "ContainerRepositoryReadme")
+}
+
+func assertNetworkLoadBalancerSDKFields(t *testing.T, pkg *PackageModel) {
+	t.Helper()
+
+	healthChecker := findResource(t, pkg.Resources, "HealthChecker")
+	assertFieldType(t, "HealthChecker RequestData", findFieldModel(t, healthChecker.SpecFields, "RequestData"), "string")
+	assertFieldType(t, "HealthChecker ResponseData", findFieldModel(t, healthChecker.SpecFields, "ResponseData"), "string")
+}
+
 func newTestGenerator(t *testing.T) *Generator {
 	t.Helper()
 
@@ -2064,42 +2189,18 @@ func newTestGenerator(t *testing.T) *Generator {
 }
 
 func testServiceConfig(profile string) ServiceConfig {
-	parity := &ParityConfig{
-		Resources: []ParityResource{
-			{
-				SourceResource: "DbSystem",
-				Kind:           "MySqlDbSystem",
-				FileStem:       "mysqldbsystem",
-				SpecFields: []FieldOverride{
-					{Name: "MySqlDbSystemId", Type: "shared.OCID", Tag: `json:"id,omitempty"`},
-					{Name: "CompartmentId", Type: "shared.OCID", Tag: `json:"compartmentId,omitempty"`},
-					{Name: "DisplayName", Type: "string", Tag: `json:"displayName,omitempty"`},
-					{Name: "Port", Type: "int", Tag: `json:"port,omitempty"`},
-				},
-				Sample: SampleOverride{
-					MetadataName: "mysqldbsystem-sample",
-					Spec: `  compartmentId: ocid1.compartment.oc1..aaaaaaaaXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-  displayName: SampleDB
-  port: 3306`,
-				},
-			},
-		},
-	}
-	if profile == PackageProfileControllerBacked {
-		parity.Package.ExtraResources = []string{
-			"../../../config/rbac/mysqldbsystem_editor_role.yaml",
-			"../../../config/rbac/mysqldbsystem_viewer_role.yaml",
-		}
-	}
-
 	return ServiceConfig{
 		Service:        "mysql",
 		SDKPackage:     "github.com/oracle/oci-service-operator/internal/generator/testdata/sdk/sample",
 		Group:          "mysql",
 		PackageProfile: profile,
-		Parity:         parity,
-		Compatibility: CompatibilityConfig{
-			ExistingKinds: []string{"MySqlDbSystem"},
+		Generation: GenerationConfig{
+			Resources: []ResourceGenerationOverride{
+				{
+					Kind:    "MySqlDbSystem",
+					SDKName: "DbSystem",
+				},
+			},
 		},
 	}
 }
@@ -2115,13 +2216,6 @@ func readFile(t *testing.T, path string) string {
 	return string(content)
 }
 
-type fieldExpectation struct {
-	Type     string
-	Tag      string
-	Comments []string
-	Markers  []string
-}
-
 func assertExactFileMatch(t *testing.T, wantPath string, gotPath string) {
 	t.Helper()
 
@@ -2129,133 +2223,6 @@ func assertExactFileMatch(t *testing.T, wantPath string, gotPath string) {
 	got := readFile(t, gotPath)
 	if want != got {
 		t.Fatalf("file mismatch for %s", wantPath)
-	}
-}
-
-func assertEqual[T comparable](t *testing.T, label string, got T, want T) {
-	t.Helper()
-
-	if got != want {
-		t.Fatalf("%s = %v, want %v", label, got, want)
-	}
-}
-
-func assertSliceEqual[T comparable](t *testing.T, label string, got []T, want []T) {
-	t.Helper()
-
-	if !slices.Equal(got, want) {
-		t.Fatalf("%s = %v, want %v", label, got, want)
-	}
-}
-
-func assertStringContains(t *testing.T, label string, content string, want string) {
-	t.Helper()
-
-	if !strings.Contains(content, want) {
-		t.Fatalf("%s did not contain %q:\n%s", label, want, content)
-	}
-}
-
-func assertFieldsPresent(t *testing.T, label string, fields []FieldModel, want []string) {
-	t.Helper()
-
-	for _, fieldName := range want {
-		if !hasField(fields, fieldName) {
-			t.Fatalf("%s fields = %#v, want %s", label, fields, fieldName)
-		}
-	}
-}
-
-func assertFieldsAbsent(t *testing.T, label string, fields []FieldModel, want []string) {
-	t.Helper()
-
-	for _, fieldName := range want {
-		if hasField(fields, fieldName) {
-			t.Fatalf("%s fields = %#v, want no %s", label, fields, fieldName)
-		}
-	}
-}
-
-func assertNoFields(t *testing.T, label string, fields []FieldModel) {
-	t.Helper()
-
-	if len(fields) != 0 {
-		t.Fatalf("%s fields = %#v, want none", label, fields)
-	}
-}
-
-func assertFieldMatches(t *testing.T, label string, field FieldModel, want fieldExpectation) {
-	t.Helper()
-
-	if want.Type != "" {
-		assertEqual(t, label+" type", field.Type, want.Type)
-	}
-	if want.Tag != "" {
-		assertEqual(t, label+" tag", field.Tag, want.Tag)
-	}
-	if want.Comments != nil {
-		assertSliceEqual(t, label+" comments", field.Comments, want.Comments)
-	}
-	if want.Markers != nil {
-		assertSliceEqual(t, label+" markers", field.Markers, want.Markers)
-	}
-}
-
-func assertResourceStatusFields(t *testing.T, pkg *PackageModel, kind string, want []string) {
-	t.Helper()
-
-	assertFieldsPresent(t, kind+" status", findResource(t, pkg.Resources, kind).StatusFields, want)
-}
-
-func selectServices(t *testing.T, cfg *Config, names []string) []ServiceConfig {
-	t.Helper()
-
-	selected := make([]ServiceConfig, 0, len(names))
-	for _, service := range cfg.Services {
-		if slices.Contains(names, service.Service) {
-			selected = append(selected, service)
-		}
-	}
-	return selected
-}
-
-func seedCheckedInSamplesKustomization(t *testing.T, outputRoot string) {
-	t.Helper()
-
-	samplesDir := filepath.Join(outputRoot, "config", "samples")
-	if err := os.MkdirAll(samplesDir, 0o755); err != nil {
-		t.Fatalf("mkdir %s: %v", samplesDir, err)
-	}
-	checkedInSampleKustomization := readFile(t, filepath.Join(repoRoot(t), "config", "samples", "kustomization.yaml"))
-	if err := os.WriteFile(filepath.Join(samplesDir, "kustomization.yaml"), []byte(checkedInSampleKustomization), 0o644); err != nil {
-		t.Fatalf("write seeded samples kustomization: %v", err)
-	}
-}
-
-func generateCheckedInArtifacts(t *testing.T, cfg *Config, services []ServiceConfig) (string, RunResult) {
-	t.Helper()
-
-	outputRoot := t.TempDir()
-	seedCheckedInSamplesKustomization(t, outputRoot)
-	result, err := New().Generate(context.Background(), cfg, services, Options{
-		OutputRoot:                      outputRoot,
-		PreserveExistingSpecSurfaceRoot: repoRoot(t),
-	})
-	if err != nil {
-		t.Fatalf("Generate() error = %v", err)
-	}
-	return outputRoot, result
-}
-
-func assertGeneratedServiceCounts(t *testing.T, generated []ServiceResult, want map[string]int) {
-	t.Helper()
-
-	for _, service := range generated {
-		wantCount, ok := want[service.Service]
-		if !ok {
-			t.Fatalf("generated unexpected service %q", service.Service)
-		}
-		assertEqual(t, fmt.Sprintf("service %s generated resources", service.Service), service.ResourceCount, wantCount)
 	}
 }
 
@@ -2281,29 +2248,13 @@ func assertResourceOrderContainsSubset(t *testing.T, fullPath string, subsetPath
 	}
 }
 
-func assertGoParity(t *testing.T, wantPath string, gotPath string) {
+func assertGeneratedGoMatches(t *testing.T, wantPath string, gotPath string) {
 	t.Helper()
 
-	want := normalizeGoForParity(t, readFile(t, wantPath))
-	got := normalizeGoForParity(t, readFile(t, gotPath))
+	want := normalizeGeneratedGo(t, readFile(t, wantPath))
+	got := normalizeGeneratedGo(t, readFile(t, gotPath))
 	if want != got {
-		t.Fatalf("Go parity mismatch for %s\nwant:\n%s\n\ngot:\n%s", wantPath, want, got)
-	}
-}
-
-func assertGoParityFiles(t *testing.T, wantRoot string, gotRoot string, relativePaths []string) {
-	t.Helper()
-
-	for _, relativePath := range relativePaths {
-		assertGoParity(t, filepath.Join(wantRoot, relativePath), filepath.Join(gotRoot, relativePath))
-	}
-}
-
-func assertExactFileMatchesSet(t *testing.T, wantRoot string, gotRoot string, relativePaths []string) {
-	t.Helper()
-
-	for _, relativePath := range relativePaths {
-		assertExactFileMatch(t, filepath.Join(wantRoot, relativePath), filepath.Join(gotRoot, relativePath))
+		t.Fatalf("Go output mismatch for %s\nwant:\n%s\n\ngot:\n%s", wantPath, want, got)
 	}
 }
 
@@ -2353,6 +2304,14 @@ func findFieldModel(t *testing.T, fields []FieldModel, name string) FieldModel {
 	return FieldModel{}
 }
 
+func structFieldNames(t *testing.T, source string, typeName string) []string {
+	t.Helper()
+
+	_, file := parseTestGoFile(t, source)
+	structType := findStructType(t, file, source, typeName)
+	return structFieldNamesFromStruct(structType)
+}
+
 func findHelperType(t *testing.T, helperTypes []TypeModel, name string) TypeModel {
 	t.Helper()
 
@@ -2395,17 +2354,12 @@ func repoRoot(t *testing.T) string {
 	return filepath.Clean(filepath.Join(generatorTestDir(t), "..", ".."))
 }
 
-func normalizeGoForParity(t *testing.T, source string) string {
+func normalizeGeneratedGo(t *testing.T, source string) string {
 	t.Helper()
 
 	source = strings.ReplaceAll(source, "// Code generated by generator. DO NOT EDIT.\n\n", "")
-	source = strings.ReplaceAll(source, "// Code generated by osok-api-generator. DO NOT EDIT.\n\n", "")
 
-	fileSet := token.NewFileSet()
-	file, err := parser.ParseFile(fileSet, "parity.go", source, parser.SkipObjectResolution)
-	if err != nil {
-		t.Fatalf("ParseFile() error = %v\nsource:\n%s", err, source)
-	}
+	fileSet, file := parseTestGoFile(t, source)
 
 	stripGoComments(file)
 
@@ -2629,41 +2583,105 @@ func stripGoComments(file *ast.File) {
 	file.Comments = nil
 
 	for _, decl := range file.Decls {
-		stripGoDeclComments(decl)
+		stripDeclComments(decl)
 	}
 }
 
-func stripGoDeclComments(decl ast.Decl) {
+func parseTestGoFile(t *testing.T, source string) (*token.FileSet, *ast.File) {
+	t.Helper()
+
+	fileSet := token.NewFileSet()
+	file, err := parser.ParseFile(fileSet, "generated.go", source, parser.SkipObjectResolution)
+	if err != nil {
+		t.Fatalf("ParseFile() error = %v\nsource:\n%s", err, source)
+	}
+
+	return fileSet, file
+}
+
+func findStructType(t *testing.T, file *ast.File, source string, typeName string) *ast.StructType {
+	t.Helper()
+
+	typeSpec := findTypeSpec(t, file, source, typeName)
+	structType, ok := typeSpec.Type.(*ast.StructType)
+	if !ok || structType.Fields == nil {
+		t.Fatalf("type %q was not a struct in source:\n%s", typeName, source)
+	}
+
+	return structType
+}
+
+func findTypeSpec(t *testing.T, file *ast.File, source string, typeName string) *ast.TypeSpec {
+	t.Helper()
+
+	for _, decl := range file.Decls {
+		if typeSpec := typeSpecNamed(decl, typeName); typeSpec != nil {
+			return typeSpec
+		}
+	}
+
+	t.Fatalf("type %q was not found in source:\n%s", typeName, source)
+	return nil
+}
+
+func typeSpecNamed(decl ast.Decl, typeName string) *ast.TypeSpec {
+	genDecl, ok := decl.(*ast.GenDecl)
+	if !ok || genDecl.Tok != token.TYPE {
+		return nil
+	}
+
+	for _, spec := range genDecl.Specs {
+		typeSpec, ok := spec.(*ast.TypeSpec)
+		if ok && typeSpec.Name.Name == typeName {
+			return typeSpec
+		}
+	}
+
+	return nil
+}
+
+func structFieldNamesFromStruct(structType *ast.StructType) []string {
+	names := make([]string, 0, len(structType.Fields.List))
+	for _, field := range structType.Fields.List {
+		for _, name := range field.Names {
+			names = append(names, name.Name)
+		}
+	}
+
+	return names
+}
+
+func stripDeclComments(decl ast.Decl) {
 	switch concrete := decl.(type) {
 	case *ast.GenDecl:
-		stripGoGenDeclComments(concrete)
+		stripGenDeclComments(concrete)
 	case *ast.FuncDecl:
 		concrete.Doc = nil
 	}
 }
 
-func stripGoGenDeclComments(decl *ast.GenDecl) {
+func stripGenDeclComments(decl *ast.GenDecl) {
 	decl.Doc = nil
 	for _, spec := range decl.Specs {
-		stripGoSpecComments(spec)
+		stripSpecComments(spec)
 	}
 }
 
-func stripGoSpecComments(spec ast.Spec) {
+func stripSpecComments(spec ast.Spec) {
 	switch typed := spec.(type) {
 	case *ast.TypeSpec:
-		stripGoTypeSpecComments(typed)
+		stripTypeSpecComments(typed)
 	case *ast.ValueSpec:
 		typed.Doc = nil
 		typed.Comment = nil
 	}
 }
 
-func stripGoTypeSpecComments(spec *ast.TypeSpec) {
-	spec.Doc = nil
-	spec.Comment = nil
+func stripTypeSpecComments(typeSpec *ast.TypeSpec) {
+	typeSpec.Doc = nil
+	typeSpec.Comment = nil
 
-	structType, ok := spec.Type.(*ast.StructType)
+	structType, ok := typeSpec.Type.(*ast.StructType)
 	if !ok || structType.Fields == nil {
 		return
 	}

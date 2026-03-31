@@ -35,7 +35,7 @@ Allow group <OSOK_GROUP> to manage autonomous-database in compartment <COMPARTME
 
 ## Autonomous Database Specification Parameters
 
-The Complete Specification of the `AutonomousDatabase` Custom Resource (CR) is as detailed below:
+The complete specification of the `AutonomousDatabases` custom resource (CR) is detailed below:
 
 | Parameter                          | Description                                                         | Type   | Mandatory |
 | ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
@@ -55,7 +55,7 @@ The Complete Specification of the `AutonomousDatabase` Custom Resource (CR) is a
 | `spec.definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see [Resource Tags](https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). | string | no |
 | `spec.adminPassword.secret.secretName` | The Kubernetes Secret Name that contains admin password for Autonomous Database. The password must be between 12 and 30 characters long, and must contain at least 1 uppercase, 1 lowercase, and 1 numeric character. It cannot contain the double quote symbol (") or the username "admin", regardless of casing. | string | yes       |
 | `spec.wallet.walletName` | The Kubernetes Secret Name of the wallet which contains the downloaded wallet information. | string | yes       |
-| `spec.walletPassword.secret.secretName`| The Kubernetes Secret Name that contains the password to be used for downloading the Wallet. | string |  no  |
+| `spec.wallet.walletPassword.secret.secretName`| The Kubernetes Secret Name that contains the password to be used for downloading the Wallet. | string |  no  |
 
 ## Autonomous Database Status Parameters
 
@@ -82,16 +82,16 @@ The Kubernetes secret should contain the admin password in `password` field.
 kubectl create secret generic <ADMIN-PASSWORD-SECRET-NAME> --from-literal=password=<ADMIN-PASSWORD>
 ```
 
-The Autonomous Database can be accessed using the details in the wallet which will be downloaded as part of the provision/bind operation of the CR. OSOK acquires the wallet password from the Kubernetes secret whose name is provided in the `spec`. Also, we can configure the name of the wallet in the `spec`.
+The Autonomous Database can be accessed using the details in the wallet which will be downloaded as part of the provision/bind operation of the CR. OSOK acquires the wallet password from the Kubernetes secret whose name is provided in `spec.wallet.walletPassword.secret.secretName`. You can also configure the wallet secret name in the `spec`.
 
 ```sh
 kubectl create secret generic <WALLET-PASSWORD-SECRET-NAME> --from-literal=walletPassword=<WALLET-PASSWORD>
 ```
 
-The OSOK AutonomousDatabases controller automatically provisions an Autonomous Database when you provides mandatory fields to the `spec`. the following is a sample YAML for Autonomous Database.
+The OSOK `AutonomousDatabases` controller automatically provisions an Autonomous Database when you provide the mandatory fields in the `spec`. The following is a sample YAML for `AutonomousDatabases`.
 
 ```yaml
-apiVersion: oci.oracle.com/v1beta1
+apiVersion: database.oracle.com/v1beta1
 kind: AutonomousDatabases
 metadata:
   name: <CR_OBJECT_NAME>
@@ -101,7 +101,7 @@ spec:
   dbName: <DB_NAME>
   dbWorkload: <OLTP/DW>
   isDedicated: <false/true>
-  dbVersion: <ORABLE_DB_VERSION>
+  dbVersion: <ORACLE_DB_VERSION>
   dataStorageSizeInTBs: <SIZE_IN_TBs>
   cpuCoreCount: <COUNT>
   adminPassword:
@@ -109,7 +109,7 @@ spec:
       secretName: <ADMIN_PASSWORD_SECRET_NAME>
   isAutoScalingEnabled: <true/false>
   isFreeTier: <false/true>
-  licenseModel: <BRING_YOUR_OWN_LICENSE/LICENSE_INCLUDEE>
+  licenseModel: <BRING_YOUR_OWN_LICENSE/LICENSE_INCLUDED>
   wallet:
     walletName: <WALLET_SECRET_NAME>
     walletPassword:
@@ -153,7 +153,7 @@ $ kubectl describe autonomousdatabases <NAME_OF_CR_OBJECT>
 The OSOK allows you to bind to an existing Autonomous Database instance. In this case, `Id` is the only required field in the CR `spec`. The wallet information can be provided to obtain the access information of the Autonomous Database instance.
 
 ```yaml
-apiVersion: oci.oracle.com/v1beta1
+apiVersion: database.oracle.com/v1beta1
 kind: AutonomousDatabases
 metadata:
   name: <CR_OBJECT_NAME>
@@ -175,7 +175,7 @@ kubectl apply -f <BIND_YAML>.yaml
 
 Customers can also update a number of [parameters](https://docs.oracle.com/en-us/iaas/api/#/en/database/20160918/datatypes/UpdateAutonomousDatabaseDetails) of the Autonomous Database instance.
 ```yaml
-apiVersion: oci.oracle.com/v1beta1
+apiVersion: database.oracle.com/v1beta1
 kind: AutonomousDatabases
 metadata:
   name: <CR_OBJECT_NAME>
@@ -185,7 +185,7 @@ spec:
   dbName: <DB_NAME>
   dbWorkload: <OLTP/DW>
   isDedicated: <false/true>
-  dbVersion: <ORABLE_DB_VERSION>
+  dbVersion: <ORACLE_DB_VERSION>
   dataStorageSizeInTBs: <SIZE_IN_TBs>
   cpuCoreCount: <COUNT>
   adminPassword:
@@ -193,7 +193,7 @@ spec:
       secretName: <ADMIN_PASSWORD_SECRET_NAME>
   isAutoScalingEnabled: <true/false>
   isFreeTier: <false/true>
-  licenseModel: <BRING_YOUR_OWN_LICENSE/LICENSE_INCLUDEE>
+  licenseModel: <BRING_YOUR_OWN_LICENSE/LICENSE_INCLUDED>
   wallet:
     walletName: <WALLET_SECRET_NAME>
     walletPassword:

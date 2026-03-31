@@ -63,7 +63,7 @@ Without these policies, the service will not function correctly.
 
 ## MySQL DB System Specification Parameters
 
-The Complete Specification of the `mysqldbsystems` Custom Resource (CR) is as detailed below:
+The complete specification of the `MySqlDbSystem` custom resource (CR) is detailed below:
 
 | Parameter                          | Description                                                         | Type   | Mandatory |
 | ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
@@ -139,7 +139,7 @@ The OSOK MySqlDbSystem controller automatically provisions a MySQL DB System whe
 
 ```yaml
 
-apiVersion: oci.oracle.com/v1beta1
+apiVersion: mysql.oracle.com/v1beta1
 kind: MySqlDbSystem
 metadata:
   name: <CR_OBJECT_NAME>
@@ -150,7 +150,7 @@ spec:
   subnetId: <SUBNET_OCID>
   configuration:
     id: <CONFIGURATION_OCID>
-  availabilityDomain: <AVAIALABILITY_DOMAIN>
+  availabilityDomain: <AVAILABILITY_DOMAIN>
   adminUsername:
     secret:
       secretName: <ADMIN_SECRET>
@@ -200,7 +200,7 @@ $ kubectl describe mysqldbsystems <NAME_OF_CR_OBJECT>
 OSOK allows you to bind to an existing MySQL DB System. In this case, `Id` is the only required field in the CR `spec`.
 
 ```yaml
-apiVersion: oci.oracle.com/v1beta1
+apiVersion: mysql.oracle.com/v1beta1
 kind: MySqlDbSystem
 metadata:
   name: <CR_OBJECT_NAME>
@@ -217,7 +217,7 @@ kubectl apply -f <BIND_YAML>.yaml
 
 You can also update a number of [parameters](https://docs.oracle.com/en-us/iaas/mysql-database/doc/managing-db-system.html#GUID-24D56090-C7E8-4A21-B450-BCBFAD231911) of the MySQL DB System.
 ```yaml
-apiVersion: oci.oracle.com/v1beta1
+apiVersion: mysql.oracle.com/v1beta1
 kind: MySqlDbSystem
 metadata:
   name: <CR_OBJECT_NAME>

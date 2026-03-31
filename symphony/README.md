@@ -5,6 +5,8 @@ This repository intentionally does not track `WORKFLOW.md`.
 Keep the taiga-symphony workflow file local and untracked because it will
 carry secrets or other machine-local configuration. The root `.gitignore`
 already ignores `WORKFLOW.md` and `.taiga-symphony/`.
+Runtime-only files such as `.taiga-symphony/stage-note.md` and
+`.taiga-symphony/stage-result.json` must never be committed.
 
 When the local workflow uses the standard upstream stage names below,
 taiga-symphony will auto-load the matching guidance file from this directory:

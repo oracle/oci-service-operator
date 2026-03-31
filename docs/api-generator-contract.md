@@ -2,10 +2,8 @@
 
 This document defines the v2 source-of-truth mapping and output contract for the
 OSOK generator epic (`oci-service-operator-9q0*`). The canonical user-facing
-entrypoint is `./cmd/generator`, with `./cmd/osok-api-generator` and the legacy
-`api-*` Make targets retained as compatibility aliases during the transition.
-The contract now covers API, controller, service-manager, and
-runtime-registration surfaces.
+entrypoint is `./cmd/generator`. The contract now covers API, controller,
+service-manager, and runtime-registration surfaces.
 
 ## Source of Truth
 
@@ -23,16 +21,18 @@ Each service record defines:
 | `phase` | Current rollout bucket used by the generator epic. |
 | `packageProfile` | Install posture for the group: `controller-backed` or `crd-only`. |
 | `formalSpec` | Optional controller slug from `formal/controller_manifest.tsv` when one formal row covers the service-level runtime contract. |
+| `observedState.sdkAliases` | Optional observed-state SDK struct aliases keyed by the discovered SDK resource family when status synthesis must read a differently named response model. |
+| `observedState.excludedFieldPaths` | Optional dot-separated observed-state field paths keyed by the discovered SDK resource family when sensitive or unsupported SDK fields must be omitted from generated status surfaces. |
 | `generation.controller.strategy` | Service-wide controller rollout: `none`, `manual`, or `generated`. |
 | `generation.serviceManager.strategy` | Service-wide service-manager rollout: `none`, `manual`, or `generated`. |
 | `generation.registration.strategy` | Group-level runtime registration rollout: `none`, `manual`, or `generated`. |
 | `generation.webhooks.strategy` | Webhook ownership seam: `manual` or `none`. |
-| `generation.resources[]` | Per-kind overrides keyed by the final OSOK kind after compatibility overrides are applied. |
+| `generation.resources[]` | Per-kind overrides keyed by the published OSOK kind. |
+| `generation.resources[].sdkName` | Optional discovered OCI SDK resource family name when the published OSOK kind must keep an existing checked-in name that differs from the raw SDK name. |
 | `generation.resources[].formalSpec` | Optional per-kind controller slug from `formal/controller_manifest.tsv` when only selected resources are formally promoted. |
 | `generation.resources[].controller.maxConcurrentReconciles` | Optional controller concurrency override for one kind. |
 | `generation.resources[].controller.extraRBACMarkers` | Optional additional kubebuilder RBAC marker payloads for one kind. |
 | `generation.resources[].serviceManager.packagePath` | Optional existing package path relative to `pkg/servicemanager/` when a manual layout must be preserved. |
-| `compatibility.existingKinds` | Stable kinds already published by this repo that later generator output must preserve unless a follow-up issue explicitly changes them. |
 
 Rules:
 
@@ -41,13 +41,11 @@ Rules:
   explicitly says otherwise.
 - Omitted `generation` fields default to controller, service-manager, and
   registration rollout `none`, with webhooks defaulting to `manual`.
-- `generation.resources[].kind` uses the final OSOK kind after compatibility
-  overrides are applied.
-- Service-specific compatibility or rollout behavior belongs in the mapping
-  file, not in hardcoded generator branches.
-- The existing parity groups with locked compatibility kinds are:
-  `database/AutonomousDatabases`, `mysql/MySqlDbSystem`, and
-  `streaming/Stream`.
+- `generation.resources[].kind` uses the published OSOK kind.
+- `generation.resources[].sdkName` is only needed when the checked-in OSOK kind
+  differs from the discovered OCI SDK resource family name.
+- Service-specific rollout or naming behavior belongs in the mapping file, not
+  in hardcoded generator branches.
 
 ## Output Ownership
 
@@ -58,7 +56,6 @@ remains opt-in and non-destructive.
 | --- | --- | --- |
 | `internal/generator/config/services.yaml` | Manual source-of-truth | Edited by hand when onboarding, reclassifying, or rolling out services. |
 | `cmd/generator/**` | Manual implementation | Canonical user-facing generator entrypoint. |
-| `cmd/osok-api-generator/**` | Compatibility alias | Legacy wrapper kept so existing workflows keep working during the rename. |
 | `internal/generator/**` Go code | Manual implementation | Reads the service map, discovers SDK resources, and renders outputs. |
 | `api/<group>/<version>/groupversion_info.go` | generator | Derived from `group`, `version`, and repo domain. |
 | `api/<group>/<version>/*_types.go` | generator | Top-level kinds, spec/status types, kubebuilder markers, and imports. |
@@ -102,11 +99,13 @@ and service-manager generation is enabled.
 - The generator pipeline should normalize OCI SDK CRUD request families
   (`Create*`, `Get*`, `List*`, `Update*`, `Delete*`) into a shared resource
   stem and render that stem as the OSOK kind.
-- If the discovered kind would break an existing published OSOK GVK, the
-  compatibility override belongs in `internal/generator/config/services.yaml`
-  rather than in special-case Go code.
-- Existing locked compatibility kinds are:
-  `AutonomousDatabases`, `MySqlDbSystem`, and `Stream`.
+- If the published OSOK kind must keep an existing checked-in name, record the
+  raw SDK family under `generation.resources[].sdkName` in
+  `internal/generator/config/services.yaml` rather than adding special-case Go
+  code.
+- The current checked-in renamed kind mappings are
+  `database/AutonomousDatabases <- AutonomousDatabase` and
+  `mysql/MySqlDbSystem <- DbSystem`.
 
 ### Controller outputs
 
@@ -135,7 +134,7 @@ and service-manager generation is enabled.
 - Generated baseline packages contain `<file-stem>_serviceclient.go` and
   `<file-stem>_servicemanager.go`.
 - `<Kind>ServiceManager` exposes `New<Kind>ServiceManagerWithDeps(...)` plus a
-  compatibility constructor that expands the same runtime contract fields.
+  convenience constructor that expands the same runtime contract fields.
 - `<Kind>ServiceClient` is the handwritten extension seam. Generated
   `WithClient(...)`, typed conversion, and `GetCrdStatus(...)` helpers stay in
   the scaffold so manual logic can live in separate files without editing the
@@ -179,8 +178,8 @@ and service-manager generation is enabled.
 
 - Webhook ownership defaults to `manual`.
 - Webhook code remains under `api/<group>/<version>/*_webhook.go`.
-- Resource overrides may pin individual kinds to `manual` so existing parity
-  webhooks such as `AutonomousDatabases` stay explicit during migration.
+- Resource overrides may pin individual kinds to `manual` so existing webhook
+  seams such as `AutonomousDatabases` stay explicit during migration.
 - Webhook generation is not part of this epic.
 
 ### Kubebuilder markers
@@ -244,9 +243,9 @@ posture rather than whether the runtime pieces are handwritten or generated.
 ### `controller-backed`
 
 Use this for groups that participate in the shared manager install. In the
-current repo that includes the parity groups `database`, `mysql`, and
-`streaming`, all of which declare the controller-backed package profile
-directly in `services.yaml`.
+current repo that includes `database`, `mysql`, and `streaming`, all of which
+already declare generated controller, service-manager, and registration
+surfaces while keeping manual webhook seams where needed.
 
 `controller-backed` does not imply that every runtime seam is still manual.
 `database` and `mysql` retain explicit legacy adapters during parity rollout,
@@ -277,10 +276,10 @@ Generated package scaffolding must include:
 ### Transition rules
 
 - New services start as `crd-only` and normally omit the `generation` block.
-- Existing parity services remain `controller-backed` and now use parity
-  overlays to preserve their historical published resources while still
-  generating the full discovered service surface. The current overlay strategy
-  is documented in `docs/api-generator-parity.md`.
+- Services that need to keep existing checked-in API shapes or companion
+  artifacts stay `controller-backed` and use
+  `--preserve-existing-spec-surface` plus normal `generation.resources[]`
+  overrides instead of alternate migration-only config.
 - A service moves from `crd-only` to `controller-backed` only when controller,
   service-manager, and registration rollout is explicitly enabled and the
   shared manager/package integration issue lands.
@@ -352,7 +351,7 @@ from scaffold coverage into generated runtime:
 6. Regenerate and gate the promoted path:
 
    ```sh
-   make generator-generate GENERATOR_ALL=true
+   go run ./cmd/generator --config internal/generator/config/services.yaml --all
    go run ./hack/update_validator_registries.go --write
    make generated-coverage-gate
    make generated-runtime-gate
@@ -360,12 +359,12 @@ from scaffold coverage into generated runtime:
 
 7. Move a service from `crd-only` to `controller-backed` in `services.yaml`
    only after controller, service-manager, registration, validator, webhook,
-   and package prerequisites land. For existing controller-backed parity
-   resources, keep manual webhook files and any checked-in legacy seams
-   explicit until the corresponding `logic-gaps.md` stop conditions are
-   closed. Some resources still retain `_generated_client_adapter.go` shims
-   (currently `database` and `mysql`), while `streaming/Stream` is limited to
-   the endpoint-secret companion.
+   and package prerequisites land. For existing controller-backed published
+   resources with preserved checked-in seams, keep manual webhook files and
+   other checked-in legacy seams explicit until the corresponding
+   `logic-gaps.md` stop conditions are closed. Some resources still retain
+   `_generated_client_adapter.go` shims (currently `database` and `mysql`),
+   while `streaming/Stream` is limited to the endpoint-secret companion.
 
 Scaffold coverage alone does not move a group into generated runtime or replace
 legacy adapters. Runtime ownership still follows `generation.*` rollout and
@@ -381,38 +380,23 @@ Workflow integration for both package profiles uses the same targets:
 
 ## Regeneration and Validation Flow
 
-The generator supports direct invocation:
+The supported generator interface is direct invocation of `./cmd/generator`:
 
 ```sh
 go run ./cmd/generator --config internal/generator/config/services.yaml --all
 ```
 
-Single-service regeneration must also be supported:
+Single-service regeneration uses the same interface:
 
 ```sh
 go run ./cmd/generator --config internal/generator/config/services.yaml --service mysql
 ```
 
-The scripted repo entrypoints are:
-
-```sh
-make generator-generate GENERATOR_ALL=true
-make generator-generate GENERATOR_SERVICE=mysql GENERATOR_OVERWRITE=true
-make generator-refresh GENERATOR_SERVICE=mysql GENERATOR_OVERWRITE=true
-```
-
-Compatibility aliases remain available during the transition:
-
-```sh
-go run ./cmd/osok-api-generator --config internal/generator/config/services.yaml --service mysql
-make api-generate API_SERVICE=mysql API_OVERWRITE=true
-make api-refresh API_SERVICE=mysql API_OVERWRITE=true
-```
-
 Expected regeneration and validation flow:
 
 1. Update `internal/generator/config/services.yaml` if service scope,
-   compatibility behavior, runtime rollout, or `formalSpec` bindings changed.
+   resource naming (`sdkName`/`kind`), runtime rollout, or `formalSpec`
+   bindings changed.
 2. If formal scope changed, run `make formal-scaffold` to refresh scaffold rows
    and rendered diagram artifacts. Use
    `FORMAL_PROVIDER_PATH=/path/to/terraform-provider-oci` when provider-backed
@@ -421,10 +405,15 @@ Expected regeneration and validation flow:
    for non-scaffold rows, then run `make formal-verify` and, when provider
    coverage is expected, `make formal-scaffold-verify
    FORMAL_PROVIDER_PATH=/path/to/terraform-provider-oci`.
-3. Run `make generator-generate ...` to emit API packages, sample manifests, sample
-   kustomization, and package scaffolding for the selected services.
-4. Run `make generator-refresh ...` when deepcopy output and CRD manifests also need
-   to be refreshed in the same step. That path now also syncs the shared
+3. Run `go run ./cmd/generator ...` to emit API packages, sample manifests,
+   sample kustomization, and package scaffolding for the selected services.
+   When refreshing services that must keep checked-in API spec/helper surfaces
+   or companion sample/package artifacts, pass
+   `--preserve-existing-spec-surface` so those checked-in files remain intact
+   while status/read-model outputs and the rest of the service regenerate from
+   normal config.
+4. When deepcopy output and CRD manifests also need refresh, run `make generate`
+   and `make manifests` after the generator command. That flow also syncs the shared
    `config/crd/kustomization.yaml` resource list from `config/crd/bases/*.yaml`.
 5. Run `go run ./hack/update_validator_registries.go --write` so validator
    coverage targets stay aligned with `services.yaml` and the generated API

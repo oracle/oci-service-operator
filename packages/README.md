@@ -16,9 +16,9 @@ Expected layout:
 Package profiles:
 
 - `controller-backed`: used by groups that already participate in the shared
-  manager install. Today that includes the parity groups `database`, `mysql`,
-  and `streaming`, all of which declare this package profile directly in
-  `services.yaml`.
+  manager install. `database`, `mysql`, and `streaming` already live here with
+  generated controller, service-manager, and registration outputs declared
+  directly in `internal/generator/config/services.yaml`.
 - `crd-only`: used by generator-first API groups that ship CRDs and samples
   before controller, service-manager, and registration rollout is enabled.
 
@@ -29,23 +29,17 @@ the endpoint-secret companion.
 
 Current workflow:
 
-1. `make generator-generate GENERATOR_SERVICE=<service>` or
-   `make generator-generate GENERATOR_ALL=true`
+1. `go run ./cmd/generator --config internal/generator/config/services.yaml --service <service>`
+   or `go run ./cmd/generator --config internal/generator/config/services.yaml --all`
    writes generated API packages, sample manifests, sample kustomization,
    per-group package scaffolding, and any opt-in controller, service-manager,
    or registration outputs from `internal/generator/config/services.yaml`.
-2. `make generator-refresh ...` runs the generator first, then refreshes
-   `zz_generated.deepcopy.go` and `config/crd/` artifacts with
-   `controller-gen`.
+2. If the regenerated APIs also need deepcopy and CRD refresh, run
+   `make generate` and `make manifests` after the generator command.
 3. `make package-generate GROUP=<group>` generates CRDs and optional controller
    RBAC into `packages/<group>/install/generated/`.
 4. `make package-install GROUP=<group>` renders a single install YAML into
    `dist/packages/<group>/install.yaml` for either package profile.
-
-Compatibility aliases:
-
-- `make api-generate ...` forwards to `make generator-generate ...`
-- `make api-refresh ...` forwards to `make generator-refresh ...`
 
 Runtime rollout defaults:
 

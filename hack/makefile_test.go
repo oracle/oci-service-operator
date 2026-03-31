@@ -82,6 +82,34 @@ func TestMakeFormalScaffoldVerifyUsesProviderPath(t *testing.T) {
 	}
 }
 
+func TestMakefileDoesNotExposeLegacyGeneratorAliases(t *testing.T) {
+	root, err := findRepoRoot()
+	if err != nil {
+		t.Fatalf("findRepoRoot() error = %v", err)
+	}
+
+	content, err := os.ReadFile(filepath.Join(root, "Makefile"))
+	if err != nil {
+		t.Fatalf("ReadFile(Makefile) error = %v", err)
+	}
+
+	rendered := string(content)
+	for _, forbidden := range []string{
+		"API_GENERATOR_CONFIG ?=",
+		"API_GENERATOR_OUTPUT_ROOT ?=",
+		"API_SERVICE ?=",
+		"API_ALL ?=",
+		"API_OVERWRITE ?=",
+		"API_PRESERVE_EXISTING_SPEC_SURFACE ?=",
+		"api-generate:",
+		"api-refresh:",
+	} {
+		if strings.Contains(rendered, forbidden) {
+			t.Fatalf("Makefile still exposes legacy generator alias %q:\n%s", forbidden, rendered)
+		}
+	}
+}
+
 func TestMakeTestKeepsEnvtestOutsideRepoByDefault(t *testing.T) {
 	root, err := findRepoRoot()
 	if err != nil {
