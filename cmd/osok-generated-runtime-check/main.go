@@ -628,7 +628,7 @@ func collectServiceManagerPackagesUnderRoot(snapshotRoot, root string, seen map[
 		if err != nil {
 			return err
 		}
-		if d.IsDir() || !isGeneratedServiceManagerPackageFile(d.Name()) {
+		if d.IsDir() || !isGeneratedServiceManagerFile(path, d.Name()) {
 			return nil
 		}
 		rel, err := filepath.Rel(snapshotRoot, filepath.Dir(path))
@@ -638,13 +638,6 @@ func collectServiceManagerPackagesUnderRoot(snapshotRoot, root string, seen map[
 		seen["./"+filepath.ToSlash(rel)] = struct{}{}
 		return nil
 	})
-}
-
-func isGeneratedServiceManagerPackageFile(name string) bool {
-	if filepath.Ext(name) != ".go" {
-		return false
-	}
-	return strings.HasSuffix(name, "_servicemanager.go") || strings.HasSuffix(name, "_serviceclient.go")
 }
 
 func sortedPackageSet(seen map[string]struct{}) []string {

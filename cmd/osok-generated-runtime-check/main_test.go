@@ -42,8 +42,8 @@ func TestCollectBuildPlanFindsGeneratedRuntimePackages(t *testing.T) {
 
 	writeTestFiles(t, map[string]string{
 		filepath.Join(root, "controllers", "functions", "application_controller.go"):                              "package functions\n",
-		filepath.Join(root, "pkg", "servicemanager", "functions", "application", "application_servicemanager.go"): "package application\n",
-		filepath.Join(root, "pkg", "servicemanager", "functions", "application", "application_serviceclient.go"):  "package application\n",
+		filepath.Join(root, "pkg", "servicemanager", "functions", "application", "application_servicemanager.go"): generatedServiceManagerSource("application"),
+		filepath.Join(root, "pkg", "servicemanager", "functions", "application", "application_serviceclient.go"):  generatedServiceManagerSource("application"),
 		filepath.Join(root, "internal", "registrations", "functions_generated.go"):                                "package registrations\n",
 	})
 
@@ -75,8 +75,8 @@ func TestCollectBuildPlanFindsOverriddenServiceManagerRoots(t *testing.T) {
 
 	writeTestFiles(t, map[string]string{
 		filepath.Join(root, "controllers", "database", "autonomousdatabases_controller.go"):                                 "package database\n",
-		filepath.Join(root, "pkg", "servicemanager", "autonomousdatabases", "adb", "autonomousdatabases_servicemanager.go"): "package adb\n",
-		filepath.Join(root, "pkg", "servicemanager", "autonomousdatabases", "adb", "autonomousdatabases_serviceclient.go"):  "package adb\n",
+		filepath.Join(root, "pkg", "servicemanager", "autonomousdatabases", "adb", "autonomousdatabases_servicemanager.go"): generatedServiceManagerSource("adb"),
+		filepath.Join(root, "pkg", "servicemanager", "autonomousdatabases", "adb", "autonomousdatabases_serviceclient.go"):  generatedServiceManagerSource("adb"),
 		filepath.Join(root, "internal", "registrations", "database_generated.go"):                                           "package registrations\n",
 	})
 
@@ -98,6 +98,32 @@ func TestCollectBuildPlanRejectsMissingRuntimePackages(t *testing.T) {
 
 	if _, err := collectBuildPlan(root, []string{"functions"}, []string{"functions"}); err == nil {
 		t.Fatal("collectBuildPlan() error = nil, want missing package error")
+	}
+}
+
+func TestCollectBuildPlanRejectsLegacyOnlyServiceManagerPackages(t *testing.T) {
+	t.Helper()
+
+	root := t.TempDir()
+	mustMkdirAll(t, []string{
+		filepath.Join(root, "controllers", "database"),
+		filepath.Join(root, "pkg", "servicemanager", "autonomousdatabases", "adb"),
+		filepath.Join(root, "internal", "registrations"),
+	})
+
+	writeTestFiles(t, map[string]string{
+		filepath.Join(root, "controllers", "database", "autonomousdatabases_controller.go"):                 "package database\n",
+		filepath.Join(root, "pkg", "servicemanager", "autonomousdatabases", "adb", "adb_servicemanager.go"): "package adb\n",
+		filepath.Join(root, "pkg", "servicemanager", "autonomousdatabases", "adb", "adb_serviceclient.go"):  "package adb\n",
+		filepath.Join(root, "internal", "registrations", "database_generated.go"):                           "package registrations\n",
+	})
+
+	_, err := collectBuildPlan(root, []string{"database"}, []string{"autonomousdatabases"})
+	if err == nil {
+		t.Fatal("collectBuildPlan() error = nil, want missing generated service-manager packages error")
+	}
+	if err.Error() != "no generated service-manager packages detected in snapshot" {
+		t.Fatalf("collectBuildPlan() error = %v, want %q", err, "no generated service-manager packages detected in snapshot")
 	}
 }
 
@@ -159,14 +185,14 @@ func TestPreserveCheckedInCompanionFilesLinksCheckedInCompatibilityCompanions(t 
 		legacyServiceClientPath:    "package adb\n",
 		legacyServiceManagerPath:   "package adb\n",
 		adapterPath:                "package adb\n",
-		generatedServiceClientPath: "package adb\n",
+		generatedServiceClientPath: generatedServiceManagerSource("adb"),
 	})
 
 	snapshotServiceManagerDir := filepath.Join(snapshotRoot, "pkg", "servicemanager", "autonomousdatabases", "adb")
 	mustMkdirAll(t, []string{snapshotServiceManagerDir})
 	snapshotGeneratedServiceClientPath := filepath.Join(snapshotServiceManagerDir, "autonomousdatabases_serviceclient.go")
 	writeTestFiles(t, map[string]string{
-		snapshotGeneratedServiceClientPath: "package adb\n",
+		snapshotGeneratedServiceClientPath: generatedServiceManagerSource("adb"),
 	})
 
 	services := []generator.ServiceConfig{
@@ -216,6 +242,10 @@ func writeTestFiles(t *testing.T, files map[string]string) {
 			t.Fatalf("WriteFile(%q) error = %v", path, err)
 		}
 	}
+}
+
+func generatedServiceManagerSource(packageName string) string {
+	return "package " + packageName + "\n\n" + generatedFileMarker + "\n"
 }
 
 func assertSymlink(t *testing.T, path string) {
