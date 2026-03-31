@@ -1789,6 +1789,136 @@ func TestCheckedInIdentityUserRuntimeArtifactsMatchGenerator(t *testing.T) {
 	})
 }
 
+func TestCheckedInPromotedRuntimeArtifactsMatchGenerator(t *testing.T) {
+	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
+	cfg, err := LoadConfig(cfgPath)
+	if err != nil {
+		t.Fatalf("LoadConfig(%q) error = %v", cfgPath, err)
+	}
+
+	tests := []struct {
+		serviceName         string
+		kind                string
+		formalSlug          string
+		serviceClientPath   string
+		controllerPath      string
+		controllerContains  []string
+		controllerExcludes  []string
+		serviceClientChecks []string
+	}{
+		{
+			serviceName:       "database",
+			kind:              "AutonomousDatabase",
+			formalSlug:        "autonomousdatabase",
+			serviceClientPath: "pkg/servicemanager/database/autonomousdatabase/autonomousdatabase_serviceclient.go",
+			controllerPath:    "controllers/database/autonomousdatabase_controller.go",
+			controllerContains: []string{
+				`// +kubebuilder:rbac:groups="",resources=events,verbs=get;list;watch;create;update;patch;delete`,
+			},
+			controllerExcludes: []string{
+				`// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete`,
+			},
+			serviceClientChecks: []string{
+				"Semantics: &generatedruntime.Semantics{",
+				`FormalService:     "database"`,
+				`FormalSlug:        "autonomousdatabase"`,
+				`SecretSideEffects: "none"`,
+				`StatusProjection:  "required"`,
+			},
+		},
+		{
+			serviceName:       "mysql",
+			kind:              "DbSystem",
+			formalSlug:        "dbsystem",
+			serviceClientPath: "pkg/servicemanager/mysql/dbsystem/dbsystem_serviceclient.go",
+			controllerPath:    "controllers/mysql/dbsystem_controller.go",
+			controllerContains: []string{
+				`// +kubebuilder:rbac:groups="",resources=events,verbs=get;list;watch;create;update;patch;delete`,
+			},
+			controllerExcludes: []string{
+				`// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete`,
+			},
+			serviceClientChecks: []string{
+				"Semantics: &generatedruntime.Semantics{",
+				`FormalService:     "mysql"`,
+				`FormalSlug:        "dbsystem"`,
+				`SecretSideEffects: "none"`,
+				`StatusProjection:  "required"`,
+			},
+		},
+		{
+			serviceName:       "streaming",
+			kind:              "Stream",
+			formalSlug:        "stream",
+			serviceClientPath: "pkg/servicemanager/streaming/stream/stream_serviceclient.go",
+			controllerPath:    "controllers/streaming/stream_controller.go",
+			controllerContains: []string{
+				`// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete`,
+			},
+			serviceClientChecks: []string{
+				"Semantics: &generatedruntime.Semantics{",
+				`FormalService:     "streaming"`,
+				`FormalSlug:        "stream"`,
+				`SecretSideEffects: "ready-only"`,
+				`StatusProjection:  "manual"`,
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.serviceName, func(t *testing.T) {
+			var service *ServiceConfig
+			for i := range cfg.Services {
+				if cfg.Services[i].Service == test.serviceName {
+					service = &cfg.Services[i]
+					break
+				}
+			}
+			if service == nil {
+				t.Fatalf("%s service was not found in services.yaml", test.serviceName)
+			}
+			if got := service.FormalSpecFor(test.kind); got != test.formalSlug {
+				t.Fatalf("%s %s formalSpec = %q, want %q", test.serviceName, test.kind, got, test.formalSlug)
+			}
+
+			outputRoot := t.TempDir()
+			samplesDir := filepath.Join(outputRoot, "config", "samples")
+			if err := os.MkdirAll(samplesDir, 0o755); err != nil {
+				t.Fatalf("mkdir %s: %v", samplesDir, err)
+			}
+			checkedInSampleKustomization := readFile(t, filepath.Join(repoRoot(t), "config", "samples", "kustomization.yaml"))
+			if err := os.WriteFile(filepath.Join(samplesDir, "kustomization.yaml"), []byte(checkedInSampleKustomization), 0o644); err != nil {
+				t.Fatalf("write seeded samples kustomization: %v", err)
+			}
+
+			pipeline := New()
+			result, err := pipeline.Generate(context.Background(), cfg, []ServiceConfig{*service}, Options{
+				OutputRoot: outputRoot,
+			})
+			if err != nil {
+				t.Fatalf("Generate() error = %v", err)
+			}
+			if len(result.Generated) != 1 {
+				t.Fatalf("Generate() generated %d services, want 1", len(result.Generated))
+			}
+
+			assertGoEquivalent(t, filepath.Join(repoRoot(t), test.serviceClientPath), filepath.Join(outputRoot, test.serviceClientPath))
+			assertGoEquivalent(t, filepath.Join(repoRoot(t), test.controllerPath), filepath.Join(outputRoot, test.controllerPath))
+
+			serviceClientContent := readFile(t, filepath.Join(outputRoot, test.serviceClientPath))
+			assertContains(t, serviceClientContent, test.serviceClientChecks)
+
+			controllerContent := readFile(t, filepath.Join(outputRoot, test.controllerPath))
+			assertContains(t, controllerContent, test.controllerContains)
+			for _, excluded := range test.controllerExcludes {
+				if strings.Contains(controllerContent, excluded) {
+					t.Fatalf("%s unexpectedly contains %q", test.controllerPath, excluded)
+				}
+			}
+		})
+	}
+}
+
 func TestCheckedInConfigIncludesNetworkLoadBalancerObservedStateAlias(t *testing.T) {
 	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
 	cfg, err := LoadConfig(cfgPath)

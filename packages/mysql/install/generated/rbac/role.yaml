@@ -8,7 +8,6 @@ rules:
   - ""
   resources:
   - events
-  - secrets
   verbs:
   - create
   - delete

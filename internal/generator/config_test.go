@@ -673,18 +673,20 @@ func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
 	if len(mysqlService.Generation.Resources) != 1 {
 		t.Fatalf("mysql generation overrides = %d, want 1", len(mysqlService.Generation.Resources))
 	}
-	if len(streamingService.Generation.Resources) != 4 {
-		t.Fatalf("streaming generation overrides = %d, want 4", len(streamingService.Generation.Resources))
+	if len(streamingService.Generation.Resources) != 5 {
+		t.Fatalf("streaming generation overrides = %d, want 5", len(streamingService.Generation.Resources))
 	}
 
 	if !slices.Equal(
 		databaseService.Generation.Resources[0].Controller.ExtraRBACMarkers,
 		[]string{
-			`groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete`,
 			`groups="",resources=events,verbs=get;list;watch;create;update;patch;delete`,
 		},
 	) {
 		t.Fatalf("database extra RBAC markers = %v", databaseService.Generation.Resources[0].Controller.ExtraRBACMarkers)
+	}
+	if got := databaseService.Generation.Resources[0].FormalSpec; got != "autonomousdatabase" {
+		t.Fatalf("database formalSpec = %q, want %q", got, "autonomousdatabase")
 	}
 	if got := databaseService.ServiceManagerPackagePathFor("AutonomousDatabase", "autonomousdatabase"); got != "database/autonomousdatabase" {
 		t.Fatalf("database packagePath = %q, want %q", got, "database/autonomousdatabase")
@@ -699,11 +701,13 @@ func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
 	if !slices.Equal(
 		mysqlService.Generation.Resources[0].Controller.ExtraRBACMarkers,
 		[]string{
-			`groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete`,
 			`groups="",resources=events,verbs=get;list;watch;create;update;patch;delete`,
 		},
 	) {
 		t.Fatalf("mysql extra RBAC markers = %v", mysqlService.Generation.Resources[0].Controller.ExtraRBACMarkers)
+	}
+	if got := mysqlService.Generation.Resources[0].FormalSpec; got != "dbsystem" {
+		t.Fatalf("mysql formalSpec = %q, want %q", got, "dbsystem")
 	}
 	if got := mysqlService.ServiceManagerPackagePathFor("DbSystem", "dbsystem"); got != "mysql/dbsystem" {
 		t.Fatalf("mysql packagePath = %q, want %q", got, "mysql/dbsystem")
@@ -713,12 +717,25 @@ func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
 	for _, override := range streamingService.Generation.Resources {
 		streamingOverrides[override.Kind] = override
 	}
+	streamOverride, ok := streamingOverrides["Stream"]
+	if !ok {
+		t.Fatal("streaming override for Stream was not found")
+	}
+	if got := streamOverride.FormalSpec; got != "stream" {
+		t.Fatalf("streaming formalSpec = %q, want %q", got, "stream")
+	}
+	if !slices.Equal(
+		streamOverride.Controller.ExtraRBACMarkers,
+		[]string{`groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete`},
+	) {
+		t.Fatalf("streaming Stream extra RBAC markers = %v", streamOverride.Controller.ExtraRBACMarkers)
+	}
 	if got := streamingService.ServiceManagerPackagePathFor("Stream", "stream"); got != "streaming/stream" {
 		t.Fatalf("streaming packagePath = %q, want %q", got, "streaming/stream")
 	}
 	for _, kind := range []string{"Cursor", "Group", "GroupCursor", "Message"} {
-		override, ok := streamingOverrides[kind]
-		if !ok {
+		override, found := streamingOverrides[kind]
+		if !found {
 			t.Fatalf("streaming override for %s was not found", kind)
 		}
 		if override.Controller.Strategy != GenerationStrategyNone {
@@ -741,7 +758,7 @@ func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
 	})
 }
 
-func TestCheckedInConfigOnlySetsIdentityUserFormalSpec(t *testing.T) {
+func TestCheckedInConfigSetsFormalSpecsForPromotedKinds(t *testing.T) {
 	t.Parallel()
 
 	cfg := loadCheckedInConfig(t)
@@ -777,13 +794,14 @@ func TestCheckedInConfigOnlySetsIdentityUserFormalSpec(t *testing.T) {
 	for _, test := range []struct {
 		service *ServiceConfig
 		kind    string
+		want    string
 	}{
-		{service: databaseService, kind: "AutonomousDatabase"},
-		{service: mysqlService, kind: "DbSystem"},
-		{service: streamingService, kind: "Stream"},
+		{service: databaseService, kind: "AutonomousDatabase", want: "autonomousdatabase"},
+		{service: mysqlService, kind: "DbSystem", want: "dbsystem"},
+		{service: streamingService, kind: "Stream", want: "stream"},
 	} {
-		if got := test.service.FormalSpecFor(test.kind); got != "" {
-			t.Fatalf("%s %s formalSpec = %q, want empty because no formal spec is configured", test.service.Service, test.kind, got)
+		if got := test.service.FormalSpecFor(test.kind); got != test.want {
+			t.Fatalf("%s %s formalSpec = %q, want %q", test.service.Service, test.kind, got, test.want)
 		}
 	}
 }

@@ -156,9 +156,9 @@ services:
         strategy: manual
       resources:
         - kind: AutonomousDatabase
+          formalSpec: autonomousdatabase
           controller:
             extraRBACMarkers:
-              - groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
               - groups="",resources=events,verbs=get;list;watch;create;update;patch;delete
           webhooks:
             strategy: manual
@@ -384,10 +384,10 @@ services:
         strategy: manual
       resources:
         - kind: DbSystem
+          formalSpec: dbsystem
           controller:
             maxConcurrentReconciles: 3
             extraRBACMarkers:
-              - groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
               - groups="",resources=events,verbs=get;list;watch;create;update;patch;delete
 
   - service: networkloadbalancer
@@ -549,6 +549,11 @@ services:
       webhooks:
         strategy: manual
       resources:
+        - kind: Stream
+          formalSpec: stream
+          controller:
+            extraRBACMarkers:
+              - groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
         - kind: Cursor
           controller:
             strategy: none

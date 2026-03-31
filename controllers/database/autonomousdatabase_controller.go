@@ -24,7 +24,6 @@ type AutonomousDatabaseReconciler struct {
 // +kubebuilder:rbac:groups=database.oracle.com,resources=autonomousdatabases,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=database.oracle.com,resources=autonomousdatabases/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=database.oracle.com,resources=autonomousdatabases/finalizers,verbs=update
-// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="",resources=events,verbs=get;list;watch;create;update;patch;delete
 
 // Reconcile is part of the main Kubernetes reconciliation loop.
