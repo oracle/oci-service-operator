@@ -89,6 +89,14 @@ alias or the legacy kind name.
 | `spec.databaseManagement` | Database Management service mode. | string | no |
 | `spec.secureConnections` | TLS certificate configuration. | object | no |
 
+When `spec.source` is set, choose a `spec.source.sourceType` and provide only
+the matching variant field:
+
+- `BACKUP`: `spec.source.backupId`
+- `PITR`: `spec.source.dbSystemId` with optional `spec.source.recoveryPoint`
+- `IMPORTURL`: `spec.source.sourceUrl`
+- `NONE`: no additional source field
+
 ## MySQL DbSystem Status Parameters
 
 | Parameter | Description | Type |

@@ -161,20 +161,20 @@ type DbSystemSource struct {
 	// +kubebuilder:validation:Optional
 	SourceType string `json:"sourceType,omitempty"`
 	// The OCID of the backup to be used as the source for the new DB System.
-	// +kubebuilder:validation:Required
-	BackupId string `json:"backupId"`
+	// +kubebuilder:validation:Optional
+	BackupId string `json:"backupId,omitempty"`
 	// The Pre-Authenticated Request (PAR) of a bucket/prefix or PAR of a @.manifest.json object from the Object Storage.
 	// Check Using Pre-Authenticated Requests (https://docs.oracle.com/en-us/iaas/Content/Object/Tasks/usingpreauthenticatedrequests.htm)
 	// for information related to PAR creation.
 	// Please create PAR with "Permit object reads" access type and "Enable Object Listing" permission when using a bucket/prefix PAR.
 	// Please create PAR with "Permit object reads" access type when using a @.manifest.json object PAR.
-	// +kubebuilder:validation:Required
-	SourceUrl string `json:"sourceUrl"`
+	// +kubebuilder:validation:Optional
+	SourceUrl string `json:"sourceUrl,omitempty"`
 	// The OCID of the DB System from which a backup shall be selected to be
 	// restored when creating the new DB System. Use this together with
 	// recovery point to perform a point in time recovery operation.
-	// +kubebuilder:validation:Required
-	DbSystemId string `json:"dbSystemId"`
+	// +kubebuilder:validation:Optional
+	DbSystemId string `json:"dbSystemId,omitempty"`
 	// The date and time, as per RFC 3339, of the change up to which the
 	// new DB System shall be restored to, using a backup and logs from the
 	// original DB System. In case no point in time is specified, then this

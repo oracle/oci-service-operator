@@ -2049,6 +2049,43 @@ func TestMySQLDbSystemIncludesOptionalDesiredStateFields(t *testing.T) {
 	}
 }
 
+func TestMySQLDbSystemSourceVariantFieldsAreOptional(t *testing.T) {
+	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
+	cfg, err := LoadConfig(cfgPath)
+	if err != nil {
+		t.Fatalf("LoadConfig(%q) error = %v", cfgPath, err)
+	}
+
+	var mysqlService *ServiceConfig
+	for i := range cfg.Services {
+		if cfg.Services[i].Service == "mysql" {
+			mysqlService = &cfg.Services[i]
+			break
+		}
+	}
+	if mysqlService == nil {
+		t.Fatal("mysql service was not found in services.yaml")
+	}
+
+	pkg, err := NewDiscoverer().BuildPackageModel(context.Background(), cfg, *mysqlService)
+	if err != nil {
+		t.Fatalf("BuildPackageModel() error = %v", err)
+	}
+
+	dbSystem := findResource(t, pkg.Resources, "DbSystem")
+	source := findHelperType(t, dbSystem.HelperTypes, "DbSystemSource")
+
+	for _, fieldName := range []string{"BackupId", "DbSystemId", "SourceUrl"} {
+		field := findFieldModel(t, source.Fields, fieldName)
+		if !slices.Equal(field.Markers, []string{"+kubebuilder:validation:Optional"}) {
+			t.Fatalf("DbSystemSource.%s markers = %#v, want optional marker", fieldName, field.Markers)
+		}
+		if !strings.HasSuffix(field.Tag, ",omitempty\"") {
+			t.Fatalf("DbSystemSource.%s tag = %q, want omitempty json tag", fieldName, field.Tag)
+		}
+	}
+}
+
 func TestGenerateMergesExistingSampleKustomizationEntries(t *testing.T) {
 	t.Parallel()
 
