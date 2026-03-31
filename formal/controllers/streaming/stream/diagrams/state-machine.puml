@@ -42,9 +42,9 @@ observe --> retryable : OCI state in CREATING,\nUPDATING, DELETING
 observe --> failed : unresolved OCI error or non-success state
 evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
 reject_unsupported_drift --> ready : wait for spec or live state change
-evaluate_ready --> apply_update : supported mutable drift for\ncompartment_id,\ndefined_tags, freeform_tags\n(+1 more)
+evaluate_ready --> apply_update : supported mutable drift for\ndefined_tags, freeform_tags,\nstream_pool_id
 apply_update --> sync_secret : update path completes
-evaluate_ready --> sync_secret : apply secret policy\nready-only writes after\nACTIVE
+evaluate_ready --> sync_secret : apply secret policy\nready-only
 sync_secret --> secret_blocked : Secret sync fails
 secret_blocked --> sync_secret : retry Secret sync
 sync_secret --> ready : Secret side effects succeed
@@ -63,38 +63,37 @@ shared/diagrams/shared-controller-state-machine.svg
 Start from the shared controller phase model and
 specialize imported provider states, delete
 targets, and failure exits here.
-archetype batch: Legacy-adapter controllers map
-provider states into the shared controller
-phases while open gaps keep additional
-transitions explicit.
+archetype batch: Generated service-manager
+controllers map provider states into the shared
+controller phases with explicit finalizer and
+requeue policies.
 service: streaming
 slug: stream
 kind: Stream
-archetype: legacy-adapter
+archetype: generated-service-manager
 status/finalizer: manual / none
 requeue: provisioning, updating, terminating
 provider states: create CREATING; update
 UPDATING; delete DELETING
-supported drift: compartment_id, defined_tags,
-freeform_tags, stream_pool_id
+supported drift: defined_tags, freeform_tags,
+stream_pool_id
 reject before mutate: force-new fields name,
-partitions, retention_in_hours and conflicts
-compartment_id -> stream_pool_id, stream_pool_id
--> compartment_id
+partitions, retention_in_hours
 list lookup: oci_streaming_streams filters
 compartment_id, id, name, state (+1 more)
-conflicts: compartment_id -> stream_pool_id,
-stream_pool_id -> compartment_id
-open gaps: bind-versus-create,
-delete-confirmation, endpoint-materialization,
-legacy-adapter, list-lookup (+2 more)
-Create or bind selection depends on name-based
-list lookup with optional pool and compartment
-filters.
-Endpoint secret materialization happens only
-after ACTIVE.
-Delete is best-effort today; DELETING is treated
-as sufficient for cleanup and finalizer removal.
+conflicts: none
+open gaps: none
+The generated runtime reuses existing streams
+before create by listing on name plus the
+optional pool and compartment filters, while
+delete-phase lookup can still resolve
+terminating or failed matches when no OCI
+identifier is recorded.
+A narrow package-local companion writes the
+ready-only endpoint secret after ACTIVE and
+removes it during best-effort delete completion.
+Delete remains best-effort; DELETING or DELETED
+is sufficient for finalizer removal.
 end note
 note right of delete_pending
 delete policy: best-effort

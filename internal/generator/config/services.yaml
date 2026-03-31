@@ -566,6 +566,7 @@ services:
         strategy: manual
       resources:
         - kind: Stream
+          formalSpec: stream
           serviceManager:
             packagePath: streaming/stream
         - kind: Cursor

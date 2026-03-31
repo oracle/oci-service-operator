@@ -720,7 +720,7 @@ func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
 	}
 }
 
-func TestCheckedInConfigPromotesOnlyIdentityUserFormalSpec(t *testing.T) {
+func TestCheckedInConfigPromotesIdentityUserAndStreamingStreamFormalSpec(t *testing.T) {
 	t.Parallel()
 
 	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
@@ -755,6 +755,9 @@ func TestCheckedInConfigPromotesOnlyIdentityUserFormalSpec(t *testing.T) {
 	if got := identityService.FormalSpecFor("Compartment"); got != "" {
 		t.Fatalf("identity Compartment formalSpec = %q, want empty", got)
 	}
+	if got := streamingService.FormalSpecFor("Stream"); got != "stream" {
+		t.Fatalf("streaming Stream formalSpec = %q, want %q", got, "stream")
+	}
 
 	for _, test := range []struct {
 		service *ServiceConfig
@@ -762,10 +765,9 @@ func TestCheckedInConfigPromotesOnlyIdentityUserFormalSpec(t *testing.T) {
 	}{
 		{service: databaseService, kind: "AutonomousDatabases"},
 		{service: mysqlService, kind: "MySqlDbSystem"},
-		{service: streamingService, kind: "Stream"},
 	} {
 		if got := test.service.FormalSpecFor(test.kind); got != "" {
-			t.Fatalf("%s %s formalSpec = %q, want empty while legacy adapter remains active", test.service.Service, test.kind, got)
+			t.Fatalf("%s %s formalSpec = %q, want empty", test.service.Service, test.kind, got)
 		}
 	}
 }

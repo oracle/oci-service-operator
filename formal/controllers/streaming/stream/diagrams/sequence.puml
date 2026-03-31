@@ -23,7 +23,7 @@ skinparam sequence {
 actor Kubernetes
 participant Controller
 participant BaseReconciler
-participant "LegacyAdapter" as ServiceManager
+participant "OSOKServiceManager" as ServiceManager
 participant OCI
 participant "Kubernetes Secret" as SecretStore
 note over BaseReconciler,ServiceManager
@@ -65,17 +65,10 @@ ServiceManager --> BaseReconciler: requeue while OCI remains in\nCREATING, UPDAT
 else live state requires field-aware\ndrift evaluation
 group Drift handling
 note over ServiceManager,OCI
-Supported update surface:
-compartment_id, defined_tags,
+Supported update surface: defined_tags,
 freeform_tags, stream_pool_id
 Reject before mutate: force-new fields
-name, partitions, retention_in_hours and
-conflicts compartment_id ->
-stream_pool_id, stream_pool_id ->
-compartment_id
-Conflicts: compartment_id ->
-stream_pool_id, stream_pool_id ->
-compartment_id
+name, partitions, retention_in_hours
 Lookup filters: compartment_id, id,
 name, state (+1 more)
 end note
@@ -83,7 +76,7 @@ opt force-new or conflicting drift is detected
 ServiceManager --> BaseReconciler: reject before OCI mutation
 end
 opt supported mutable drift is detected
-ServiceManager -> OCI: Apply ChangeStreamCompartment,\nUpdateStream only for mutable fields\ncompartment_id, defined_tags,\nfreeform_tags, stream_pool_id
+ServiceManager -> OCI: Apply UpdateStream only for mutable\nfields defined_tags, freeform_tags,\nstream_pool_id
 loop update pending UPDATING
 ServiceManager -> OCI: GetStream
 end
@@ -108,37 +101,36 @@ create-or-update dispatch.
 Layer the shared delete sequence when finalizer
 retention, delete confirmation, work-request
 polling, or Secret cleanup apply.
-archetype batch: Legacy-adapter controllers
-follow the shared resolution and delete
-sequences but preserve handwritten stop
-conditions until promotion is safe.
+archetype batch: Generated service-manager
+controllers follow the shared resolution and
+delete sequences with imported waits and
+controller-local policy.
 service: streaming
 slug: stream
 kind: Stream
-archetype: legacy-adapter
+archetype: generated-service-manager
 status/finalizer: manual / none
 requeue: provisioning, updating, terminating
 provider states: create CREATING; update
 UPDATING; delete DELETING
-supported drift: compartment_id, defined_tags,
-freeform_tags, stream_pool_id
+supported drift: defined_tags, freeform_tags,
+stream_pool_id
 reject before mutate: force-new fields name,
-partitions, retention_in_hours and conflicts
-compartment_id -> stream_pool_id, stream_pool_id
--> compartment_id
+partitions, retention_in_hours
 list lookup: oci_streaming_streams filters
 compartment_id, id, name, state (+1 more)
-conflicts: compartment_id -> stream_pool_id,
-stream_pool_id -> compartment_id
-open gaps: bind-versus-create,
-delete-confirmation, endpoint-materialization,
-legacy-adapter, list-lookup (+2 more)
-Create or bind selection depends on name-based
-list lookup with optional pool and compartment
-filters.
-Endpoint secret materialization happens only
-after ACTIVE.
-Delete is best-effort today; DELETING is treated
-as sufficient for cleanup and finalizer removal.
+conflicts: none
+open gaps: none
+The generated runtime reuses existing streams
+before create by listing on name plus the
+optional pool and compartment filters, while
+delete-phase lookup can still resolve
+terminating or failed matches when no OCI
+identifier is recorded.
+A narrow package-local companion writes the
+ready-only endpoint secret after ACTIVE and
+removes it during best-effort delete completion.
+Delete remains best-effort; DELETING or DELETED
+is sufficient for finalizer removal.
 end note
 @enduml

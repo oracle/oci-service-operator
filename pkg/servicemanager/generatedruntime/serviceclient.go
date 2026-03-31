@@ -131,6 +131,15 @@ type ServiceClient[T any] struct {
 	config Config[T]
 }
 
+type readPhase string
+
+const (
+	readPhaseObserve readPhase = "observe"
+	readPhaseCreate  readPhase = "create"
+	readPhaseUpdate  readPhase = "update"
+	readPhaseDelete  readPhase = "delete"
+)
+
 func NewServiceClient[T any](cfg Config[T]) ServiceClient[T] {
 	if err := validateFormalSemantics(cfg.Kind, cfg.Semantics); err != nil {
 		cfg.InitError = errors.Join(cfg.InitError, err)
@@ -147,7 +156,29 @@ func (c ServiceClient[T]) CreateOrUpdate(ctx context.Context, resource T, _ ctrl
 	}
 
 	currentID := c.currentID(resource)
-	if err := c.validateMutationPolicy(resource, currentID != ""); err != nil {
+	existingResponse, err := c.resolveExistingBeforeCreate(ctx, resource)
+	if err != nil {
+		return servicemanager.OSOKResponse{IsSuccessful: false}, c.markFailure(resource, err)
+	}
+	if currentID == "" && existingResponse != nil {
+		currentID = responseID(existingResponse)
+		_ = mergeResponseIntoStatus(resource, existingResponse)
+	}
+
+	liveResponse := existingResponse
+	if currentID != "" && liveResponse == nil && c.requiresLiveMutationValidation() {
+		response, err := c.readResource(ctx, resource, currentID, readPhaseUpdate)
+		if err != nil {
+			if !errors.Is(err, errResourceNotFound) {
+				return servicemanager.OSOKResponse{IsSuccessful: false}, c.markFailure(resource, err)
+			}
+		} else {
+			liveResponse = response
+			_ = mergeResponseIntoStatus(resource, response)
+		}
+	}
+
+	if err := c.validateMutationPolicy(resource, currentID != "", liveResponse); err != nil {
 		return servicemanager.OSOKResponse{IsSuccessful: false}, c.markFailure(resource, err)
 	}
 	if currentID != "" {
@@ -163,9 +194,12 @@ func (c ServiceClient[T]) CreateOrUpdate(ctx context.Context, resource T, _ ctrl
 			return c.applySuccess(resource, response, shared.Updating)
 		}
 
-		response, err := c.readResource(ctx, resource, currentID)
-		if err != nil {
-			return servicemanager.OSOKResponse{IsSuccessful: false}, c.markFailure(resource, err)
+		response := liveResponse
+		if response == nil {
+			response, err = c.readResource(ctx, resource, currentID, readPhaseObserve)
+			if err != nil {
+				return servicemanager.OSOKResponse{IsSuccessful: false}, c.markFailure(resource, err)
+			}
 		}
 		return c.applySuccess(resource, response, shared.Active)
 	}
@@ -183,7 +217,7 @@ func (c ServiceClient[T]) CreateOrUpdate(ctx context.Context, resource T, _ ctrl
 		return c.applySuccess(resource, followUp, shared.Provisioning)
 	}
 
-	response, err := c.readResource(ctx, resource, "")
+	response, err := c.readResource(ctx, resource, "", readPhaseObserve)
 	if err != nil {
 		return servicemanager.OSOKResponse{IsSuccessful: false}, c.markFailure(resource, err)
 	}
@@ -224,7 +258,7 @@ func (c ServiceClient[T]) Delete(ctx context.Context, resource T) (bool, error) 
 		return true, nil
 	}
 
-	response, err := c.readResource(ctx, resource, currentID)
+	response, err := c.readResource(ctx, resource, currentID, readPhaseDelete)
 	if err != nil {
 		if isNotFound(err) || errors.Is(err, errResourceNotFound) {
 			c.markDeleted(resource, "OCI resource deleted")
@@ -248,7 +282,7 @@ func (c ServiceClient[T]) followUpAfterWrite(ctx context.Context, resource T, pr
 		return response, nil
 	}
 
-	refreshed, err := c.readResource(ctx, resource, preferredID)
+	refreshed, err := c.readResource(ctx, resource, preferredID, phaseReadPhase(phase))
 	if err == nil {
 		return refreshed, nil
 	}
@@ -270,6 +304,19 @@ func (c ServiceClient[T]) requiresWriteFollowUp(phase string) bool {
 		return c.config.Semantics.UpdateFollowUp.Strategy == "read-after-write"
 	default:
 		return false
+	}
+}
+
+func phaseReadPhase(phase string) readPhase {
+	switch phase {
+	case "create":
+		return readPhaseCreate
+	case "update":
+		return readPhaseUpdate
+	case "delete":
+		return readPhaseDelete
+	default:
+		return readPhaseObserve
 	}
 }
 
@@ -307,7 +354,7 @@ func (c ServiceClient[T]) deleteWithSemantics(ctx context.Context, resource T) (
 		return false, fmt.Errorf("%s formal delete confirmation requires a readable OCI operation", c.config.Kind)
 	}
 
-	response, err := c.readResource(ctx, resource, currentID)
+	response, err := c.readResource(ctx, resource, currentID, readPhaseDelete)
 	if err != nil {
 		if isNotFound(err) || errors.Is(err, errResourceNotFound) {
 			c.markDeleted(resource, "OCI resource deleted")
@@ -354,7 +401,7 @@ func (c ServiceClient[T]) resolveDeleteID(ctx context.Context, resource T) (stri
 		return "", errResourceNotFound
 	}
 
-	response, err := c.readResource(ctx, resource, "")
+	response, err := c.readResource(ctx, resource, "", readPhaseDelete)
 	if err != nil {
 		return "", err
 	}
@@ -366,7 +413,32 @@ func (c ServiceClient[T]) resolveDeleteID(ctx context.Context, resource T) (stri
 	return currentID, nil
 }
 
-func (c ServiceClient[T]) validateMutationPolicy(resource T, existing bool) error {
+func (c ServiceClient[T]) resolveExistingBeforeCreate(ctx context.Context, resource T) (any, error) {
+	if !c.shouldResolveExistingBeforeCreate() {
+		return nil, nil
+	}
+
+	response, err := c.readResource(ctx, resource, "", readPhaseCreate)
+	if err == nil {
+		return response, nil
+	}
+	if errors.Is(err, errResourceNotFound) {
+		return nil, nil
+	}
+	return nil, err
+}
+
+func (c ServiceClient[T]) shouldResolveExistingBeforeCreate() bool {
+	return c.config.Create != nil && c.config.List != nil && c.config.Semantics != nil && c.config.Semantics.List != nil
+}
+
+func (c ServiceClient[T]) requiresLiveMutationValidation() bool {
+	return c.config.Semantics != nil &&
+		len(c.config.Semantics.Mutation.ForceNew) > 0 &&
+		(c.config.Get != nil || c.config.List != nil)
+}
+
+func (c ServiceClient[T]) validateMutationPolicy(resource T, existing bool, currentResponse any) error {
 	semantics := c.config.Semantics
 	if semantics == nil {
 		return nil
@@ -377,7 +449,10 @@ func (c ServiceClient[T]) validateMutationPolicy(resource T, existing bool) erro
 		return err
 	}
 	specValues := jsonMap(fieldInterface(resourceValue, "Spec"))
-	statusValues := jsonMap(fieldInterface(resourceValue, "Status"))
+	currentValues := jsonMap(fieldInterface(resourceValue, "Status"))
+	if body, ok := responseBody(currentResponse); ok && body != nil {
+		currentValues = jsonMap(body)
+	}
 
 	for field, conflicts := range semantics.Mutation.ConflictsWith {
 		if _, ok := lookupMeaningfulValue(specValues, field); !ok {
@@ -395,7 +470,7 @@ func (c ServiceClient[T]) validateMutationPolicy(resource T, existing bool) erro
 	}
 	for _, field := range semantics.Mutation.ForceNew {
 		specValue, specOK := lookupValueByPath(specValues, field)
-		statusValue, statusOK := lookupValueByPath(statusValues, field)
+		statusValue, statusOK := lookupValueByPath(currentValues, field)
 		if !specOK || !statusOK {
 			continue
 		}
@@ -407,7 +482,7 @@ func (c ServiceClient[T]) validateMutationPolicy(resource T, existing bool) erro
 	return nil
 }
 
-func (c ServiceClient[T]) readResource(ctx context.Context, resource T, preferredID string) (any, error) {
+func (c ServiceClient[T]) readResource(ctx context.Context, resource T, preferredID string, phase readPhase) (any, error) {
 	if c.config.Get != nil {
 		response, err := c.invoke(ctx, c.config.Get, resource, preferredID)
 		if err == nil {
@@ -432,7 +507,7 @@ func (c ServiceClient[T]) readResource(ctx context.Context, resource T, preferre
 		return nil, fmt.Errorf("%s list response did not expose a body payload", c.config.Kind)
 	}
 
-	item, err := c.selectListItem(body, resource, preferredID)
+	item, err := c.selectListItem(body, resource, preferredID, phase)
 	if err != nil {
 		return nil, err
 	}
@@ -547,7 +622,7 @@ func (c ServiceClient[T]) currentID(resource T) string {
 	if err != nil {
 		return ""
 	}
-	return firstNonEmpty(values, "id", "ocid")
+	return firstNonEmpty(values, c.idFieldAliases()...)
 }
 
 func (c ServiceClient[T]) idFieldAliases() []string {
@@ -1025,7 +1100,7 @@ func isNotFound(err error) bool {
 	return false
 }
 
-func (c ServiceClient[T]) selectListItem(body any, resource T, preferredID string) (any, error) {
+func (c ServiceClient[T]) selectListItem(body any, resource T, preferredID string, phase readPhase) (any, error) {
 	responseItemsField := ""
 	if c.config.Semantics != nil && c.config.Semantics.List != nil {
 		responseItemsField = c.config.Semantics.List.ResponseItemsField
@@ -1047,7 +1122,7 @@ func (c ServiceClient[T]) selectListItem(body any, resource T, preferredID strin
 		criteria["ocid"] = preferredID
 	}
 	if c.config.Semantics != nil && c.config.Semantics.List != nil {
-		return c.selectFormalListItem(items, criteria, preferredID)
+		return c.selectFormalListItem(items, criteria, preferredID, phase)
 	}
 
 	targetID := firstNonEmpty(criteria, "ocid", "id")
@@ -1079,7 +1154,7 @@ func (c ServiceClient[T]) selectListItem(body any, resource T, preferredID strin
 	}
 }
 
-func (c ServiceClient[T]) selectFormalListItem(items []any, criteria map[string]any, preferredID string) (any, error) {
+func (c ServiceClient[T]) selectFormalListItem(items []any, criteria map[string]any, preferredID string, phase readPhase) (any, error) {
 	matchFields := []string{}
 	if c.config.Semantics != nil && c.config.Semantics.List != nil {
 		matchFields = append(matchFields, c.config.Semantics.List.MatchFields...)
@@ -1116,6 +1191,7 @@ func (c ServiceClient[T]) selectFormalListItem(items []any, criteria map[string]
 			matches = append(matches, item)
 		}
 	}
+	matches = c.filterPhaseMatches(matches, phase)
 
 	switch {
 	case len(matches) == 1:
@@ -1126,6 +1202,125 @@ func (c ServiceClient[T]) selectFormalListItem(items []any, criteria map[string]
 		return nil, errResourceNotFound
 	default:
 		return nil, fmt.Errorf("%s formal list semantics did not yield any match criteria", c.config.Kind)
+	}
+}
+
+func (c ServiceClient[T]) filterPhaseMatches(matches []any, phase readPhase) []any {
+	if len(matches) == 0 {
+		return nil
+	}
+
+	switch phase {
+	case readPhaseCreate, readPhaseUpdate, readPhaseObserve:
+		filtered := make([]any, 0, len(matches))
+		for _, item := range matches {
+			if c.allowListItemForReadPhase(item, phase) {
+				filtered = append(filtered, item)
+			}
+		}
+		return filtered
+	case readPhaseDelete:
+		bestPriority := 0
+		filtered := make([]any, 0, len(matches))
+		for _, item := range matches {
+			priority := c.deleteListItemPriority(item)
+			if priority > bestPriority {
+				bestPriority = priority
+				filtered = filtered[:0]
+			}
+			if priority == bestPriority {
+				filtered = append(filtered, item)
+			}
+		}
+		return filtered
+	default:
+		return matches
+	}
+}
+
+func (c ServiceClient[T]) allowListItemForReadPhase(item any, phase readPhase) bool {
+	switch c.listItemLifecycleCategory(item) {
+	case lifecycleCategoryProvisioning, lifecycleCategoryUpdating, lifecycleCategoryActive, lifecycleCategoryEmpty:
+		return true
+	case lifecycleCategoryUnknown:
+		return phase == readPhaseObserve
+	default:
+		return false
+	}
+}
+
+func (c ServiceClient[T]) deleteListItemPriority(item any) int {
+	switch c.listItemLifecycleCategory(item) {
+	case lifecycleCategoryProvisioning, lifecycleCategoryUpdating, lifecycleCategoryActive:
+		return 4
+	case lifecycleCategoryDeleting, lifecycleCategoryDeleted:
+		return 3
+	case lifecycleCategoryFailed:
+		return 2
+	default:
+		return 1
+	}
+}
+
+type lifecycleCategory string
+
+const (
+	lifecycleCategoryEmpty        lifecycleCategory = "empty"
+	lifecycleCategoryProvisioning lifecycleCategory = "provisioning"
+	lifecycleCategoryUpdating     lifecycleCategory = "updating"
+	lifecycleCategoryActive       lifecycleCategory = "active"
+	lifecycleCategoryDeleting     lifecycleCategory = "deleting"
+	lifecycleCategoryDeleted      lifecycleCategory = "deleted"
+	lifecycleCategoryFailed       lifecycleCategory = "failed"
+	lifecycleCategoryUnknown      lifecycleCategory = "unknown"
+)
+
+func (c ServiceClient[T]) listItemLifecycleCategory(item any) lifecycleCategory {
+	state := strings.ToUpper(firstNonEmpty(jsonMap(item), "lifecycleState", "status", "state"))
+	if state == "" {
+		return lifecycleCategoryEmpty
+	}
+
+	if c.config.Semantics != nil {
+		switch {
+		case containsString(c.config.Semantics.Lifecycle.ProvisioningStates, state):
+			return lifecycleCategoryProvisioning
+		case containsString(c.config.Semantics.Lifecycle.UpdatingStates, state):
+			return lifecycleCategoryUpdating
+		case containsString(c.config.Semantics.Lifecycle.ActiveStates, state):
+			return lifecycleCategoryActive
+		case containsString(c.config.Semantics.Delete.PendingStates, state):
+			return lifecycleCategoryDeleting
+		case containsString(c.config.Semantics.Delete.TerminalStates, state):
+			return lifecycleCategoryDeleted
+		}
+	}
+
+	switch {
+	case strings.Contains(state, "FAIL"),
+		strings.Contains(state, "ERROR"),
+		strings.Contains(state, "NEEDS_ATTENTION"),
+		strings.Contains(state, "INOPERABLE"):
+		return lifecycleCategoryFailed
+	case strings.Contains(state, "DELETED"),
+		strings.Contains(state, "TERMINATED"):
+		return lifecycleCategoryDeleted
+	case strings.Contains(state, "DELETE"),
+		strings.Contains(state, "TERMINAT"):
+		return lifecycleCategoryDeleting
+	case strings.Contains(state, "UPDAT"),
+		strings.Contains(state, "MODIFY"),
+		strings.Contains(state, "PATCH"):
+		return lifecycleCategoryUpdating
+	case strings.Contains(state, "CREATE"),
+		strings.Contains(state, "PROVISION"),
+		strings.Contains(state, "PENDING"),
+		strings.Contains(state, "IN_PROGRESS"),
+		strings.Contains(state, "ACCEPT"),
+		strings.Contains(state, "START"):
+		return lifecycleCategoryProvisioning
+	default:
+		return lifecycleCategoryUnknown
 	}
 }
 
@@ -1333,7 +1528,7 @@ func lookupValueByPath(values map[string]any, path string) (any, bool) {
 		if !ok {
 			return nil, false
 		}
-		next, ok := mapValue[segment]
+		next, ok := lookupMapKey(mapValue, segment)
 		if !ok {
 			return nil, false
 		}
@@ -1341,6 +1536,20 @@ func lookupValueByPath(values map[string]any, path string) (any, bool) {
 	}
 
 	return current, true
+}
+
+func lookupMapKey(values map[string]any, segment string) (any, bool) {
+	if value, ok := values[segment]; ok {
+		return value, true
+	}
+
+	normalized := lowerCamel(segment)
+	for key, value := range values {
+		if strings.EqualFold(key, segment) || lowerCamel(key) == normalized {
+			return value, true
+		}
+	}
+	return nil, false
 }
 
 func meaningfulValue(value any) bool {
@@ -1383,10 +1592,7 @@ func firstNonEmpty(values map[string]any, keys ...string) string {
 }
 
 func lookupString(values map[string]any, key string) string {
-	if values == nil {
-		return ""
-	}
-	raw, ok := values[key]
+	raw, ok := lookupValueByPath(values, key)
 	if !ok || raw == nil {
 		return ""
 	}

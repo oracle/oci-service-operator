@@ -44,9 +44,10 @@ gaps:
   delete decisions.
 - `mysql/MySqlDbSystem` keeps the same category names as the shared baseline
   but remains in the legacy-adapter batch in this issue.
-- `streaming/Stream` is the reference for naming bind, lookup, secret, and
-  delete categories; `identity/User` is the generated-runtime precedent that
-  mysql has not reached yet.
+- `streaming/Stream` is the generated-runtime reference for naming bind and
+  lookup categories, while `identity/User` remains the clean precedent for
+  required status projection and confirmed delete semantics that mysql has not
+  reached yet.
 
 ## Repo-authored semantics
 

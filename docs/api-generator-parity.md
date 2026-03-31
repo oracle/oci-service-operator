@@ -52,28 +52,30 @@ legacy published resources through targeted parity overlays:
   `pkg/servicemanager/autonomousdatabases/adb`,
   `pkg/servicemanager/mysql/dbsystem`, and
   `pkg/servicemanager/streaming/stream`.
-- legacy behavior for those historical resources is preserved through
-  handwritten client-adapter files that plug the generated service-manager
-  scaffolds into the existing manual implementations.
+- `database` and `mysql` still preserve legacy behavior through handwritten
+  client-adapter files that plug the generated service-manager scaffolds into
+  the existing manual implementations.
+- `streaming/Stream` now runs on the generated runtime path directly, with only
+  a narrow endpoint-secret companion left in the package.
 - `database` webhook setup stays manual through
   `api/database/v1beta1/*_webhook.go`.
 
 ## Why adapters still exist
 
-The generated foundations are still baseline-only for most resources. The
-historical parity resources retain handwritten OCI behavior that is materially
-richer than the current generated scaffolds:
+The generated foundations are still baseline-only for the parity resources that
+have not closed their runtime gaps yet. `database` and `mysql` retain
+handwritten OCI behavior that is materially richer than the current generated
+scaffolds:
 
 - `database` retains wallet handling, secret-reference reconciliation, and
   webhook-specific validation behavior.
 - `mysql` retains admin-secret ingestion, bind-versus-create branching, and
   custom update or retry handling.
-- `streaming` retains metrics emission, secret materialization, and custom
-  status or retry behavior.
 
-Those differences are the reason the current strategy is explicit opt-out
-rather than pretending the new generated scaffolds are already feature-parity
-replacements.
+`streaming/Stream` no longer needs a full client adapter. Its generated runtime
+now covers OCI CRUD, bind-versus-create reuse, drift checks, and delete
+semantics directly, while the remaining handwritten code is limited to the
+ready-only endpoint secret side effect.
 
 ## Validation
 
