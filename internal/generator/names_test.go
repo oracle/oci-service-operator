@@ -5,7 +5,10 @@
 
 package generator
 
-import "testing"
+import (
+	"slices"
+	"testing"
+)
 
 func TestSingularizeAndPluralize(t *testing.T) {
 	t.Parallel()
@@ -18,7 +21,7 @@ func TestSingularizeAndPluralize(t *testing.T) {
 	}{
 		{name: "simple s suffix", input: "Widgets", singular: "Widget", plural: "Widgets"},
 		{name: "ies suffix", input: "Policies", singular: "Policy", plural: "Policies"},
-		{name: "existing plural compatibility kind", input: "AutonomousDatabases", singular: "AutonomousDatabase", plural: "AutonomousDatabases"},
+		{name: "existing plural published kind", input: "AutonomousDatabases", singular: "AutonomousDatabase", plural: "AutonomousDatabases"},
 		{name: "status suffix is preserved", input: "AlarmsStatus", singular: "AlarmStatus", plural: "AlarmStatuses"},
 		{name: "statuses singularize to status", input: "AlarmStatuses", singular: "AlarmStatus", plural: "AlarmStatuses"},
 		{name: "stats stay plural", input: "Stats", singular: "Stats", plural: "Stats"},
@@ -39,41 +42,44 @@ func TestSingularizeAndPluralize(t *testing.T) {
 	}
 }
 
-func TestCompatibilityKind(t *testing.T) {
+func TestSplitCamelAndLowerCamel(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
-		name          string
-		rawName       string
-		compatibility CompatibilityConfig
-		wantKind      string
-		wantMatch     bool
+		name   string
+		input  string
+		tokens []string
+		lower  string
 	}{
 		{
-			name:          "suffix match for mysql",
-			rawName:       "DbSystem",
-			compatibility: CompatibilityConfig{ExistingKinds: []string{"MySqlDbSystem"}},
-			wantKind:      "MySqlDbSystem",
-			wantMatch:     true,
+			name:   "simple camel case",
+			input:  "AutonomousDatabase",
+			tokens: []string{"autonomous", "database"},
+			lower:  "autonomousDatabase",
 		},
 		{
-			name:          "plural match for autonomous database",
-			rawName:       "AutonomousDatabase",
-			compatibility: CompatibilityConfig{ExistingKinds: []string{"AutonomousDatabases"}},
-			wantKind:      "AutonomousDatabases",
-			wantMatch:     true,
+			name:   "acronym boundary",
+			input:  "HTTPRequest",
+			tokens: []string{"http", "request"},
+			lower:  "httpRequest",
 		},
 		{
-			name:          "no match",
-			rawName:       "Widget",
-			compatibility: CompatibilityConfig{ExistingKinds: []string{"Vault"}},
-			wantMatch:     false,
+			name:   "multiple acronyms",
+			input:  "MySQLDbSystem",
+			tokens: []string{"my", "sql", "db", "system"},
+			lower:  "mySqlDbSystem",
 		},
 		{
-			name:          "single token does not suffix match",
-			rawName:       "Database",
-			compatibility: CompatibilityConfig{ExistingKinds: []string{"AutonomousDatabases"}},
-			wantMatch:     false,
+			name:   "digit boundary",
+			input:  "OCI123Thing",
+			tokens: []string{"oci123", "thing"},
+			lower:  "oci123Thing",
+		},
+		{
+			name:   "blank string",
+			input:  "   ",
+			tokens: nil,
+			lower:  "",
 		},
 	}
 
@@ -82,12 +88,11 @@ func TestCompatibilityKind(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
-			gotKind, gotMatch := compatibilityKind(test.rawName, test.compatibility)
-			if gotMatch != test.wantMatch {
-				t.Fatalf("compatibilityKind(%q) match = %v, want %v", test.rawName, gotMatch, test.wantMatch)
+			if got := splitCamel(test.input); !slices.Equal(got, test.tokens) {
+				t.Fatalf("splitCamel(%q) = %v, want %v", test.input, got, test.tokens)
 			}
-			if gotKind != test.wantKind {
-				t.Fatalf("compatibilityKind(%q) kind = %q, want %q", test.rawName, gotKind, test.wantKind)
+			if got := lowerCamel(test.input); got != test.lower {
+				t.Fatalf("lowerCamel(%q) = %q, want %q", test.input, got, test.lower)
 			}
 		})
 	}

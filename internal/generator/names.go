@@ -6,42 +6,36 @@
 package generator
 
 import (
-	"slices"
 	"strings"
 	"unicode"
 )
 
+type singularRule struct {
+	suffix        string
+	replacement   string
+	recursive     bool
+	preserveExact bool
+}
+
+var specialSingularRules = []singularRule{
+	{suffix: "Statuses", replacement: "Status"},
+	{suffix: "statuses", replacement: "status"},
+	{suffix: "Status", replacement: "Status", recursive: true, preserveExact: true},
+	{suffix: "status", replacement: "status", recursive: true, preserveExact: true},
+	{suffix: "Stats", replacement: "Stats", recursive: true, preserveExact: true},
+	{suffix: "stats", replacement: "stats", recursive: true, preserveExact: true},
+}
+
+var esPluralSuffixes = []string{"sses", "shes", "ches", "xes", "zes"}
+
 func singularize(name string) string {
-	switch {
-	case strings.HasSuffix(name, "Statuses") && len(name) > len("Statuses"):
-		return strings.TrimSuffix(name, "Statuses") + "Status"
-	case strings.HasSuffix(name, "statuses") && len(name) > len("statuses"):
-		return strings.TrimSuffix(name, "statuses") + "status"
-	case strings.HasSuffix(name, "Status") && len(name) > len("Status"):
-		return singularize(strings.TrimSuffix(name, "Status")) + "Status"
-	case strings.HasSuffix(name, "status") && len(name) > len("status"):
-		return singularize(strings.TrimSuffix(name, "status")) + "status"
-	case name == "Status" || name == "status":
-		return name
-	case name == "Stats" || name == "stats":
-		return name
-	case strings.HasSuffix(name, "Stats") && len(name) > len("Stats"):
-		return singularize(strings.TrimSuffix(name, "Stats")) + "Stats"
-	case strings.HasSuffix(name, "stats") && len(name) > len("stats"):
-		return singularize(strings.TrimSuffix(name, "stats")) + "stats"
-	case strings.HasSuffix(name, "ies") && len(name) > 3:
-		return strings.TrimSuffix(name, "ies") + "y"
-	case strings.HasSuffix(name, "sses"),
-		strings.HasSuffix(name, "shes"),
-		strings.HasSuffix(name, "ches"),
-		strings.HasSuffix(name, "xes"),
-		strings.HasSuffix(name, "zes"):
-		return strings.TrimSuffix(name, "es")
-	case strings.HasSuffix(name, "s") && !strings.HasSuffix(name, "ss"):
-		return strings.TrimSuffix(name, "s")
-	default:
-		return name
+	if singular, ok := applySpecialSingularRules(name); ok {
+		return singular
 	}
+	if singular, ok := singularizeStandardSuffix(name); ok {
+		return singular
+	}
+	return name
 }
 
 func pluralize(name string) string {
@@ -93,21 +87,14 @@ func splitCamel(name string) []string {
 	var current []rune
 	runes := []rune(name)
 	for i, r := range runes {
-		if i > 0 {
-			prev := runes[i-1]
-			nextIsLower := i+1 < len(runes) && unicode.IsLower(runes[i+1])
-			if unicode.IsUpper(r) && (unicode.IsLower(prev) || unicode.IsDigit(prev) || (unicode.IsUpper(prev) && nextIsLower)) {
-				tokens = append(tokens, strings.ToLower(string(current)))
-				current = current[:0]
-			}
+		if shouldSplitCamelToken(runes, i) {
+			tokens = appendLowerToken(tokens, current)
+			current = current[:0]
 		}
 		current = append(current, r)
 	}
-	if len(current) > 0 {
-		tokens = append(tokens, strings.ToLower(string(current)))
-	}
 
-	return tokens
+	return appendLowerToken(tokens, current)
 }
 
 func normalizedTokens(name string) []string {
@@ -118,23 +105,77 @@ func normalizedTokens(name string) []string {
 	return tokens
 }
 
-func compatibilityKind(rawName string, compatibility CompatibilityConfig) (string, bool) {
-	resourceTokens := normalizedTokens(rawName)
-	for _, existingKind := range compatibility.ExistingKinds {
-		existingTokens := normalizedTokens(existingKind)
-		if slices.Equal(resourceTokens, existingTokens) {
-			return existingKind, true
-		}
-		if len(resourceTokens) > 1 && len(existingTokens) > 1 &&
-			len(existingTokens) >= len(resourceTokens) &&
-			slices.Equal(existingTokens[len(existingTokens)-len(resourceTokens):], resourceTokens) {
-			return existingKind, true
-		}
-		if len(resourceTokens) > 1 && len(existingTokens) > 1 &&
-			len(resourceTokens) >= len(existingTokens) &&
-			slices.Equal(resourceTokens[len(resourceTokens)-len(existingTokens):], existingTokens) {
-			return existingKind, true
+func applySpecialSingularRules(name string) (string, bool) {
+	for _, rule := range specialSingularRules {
+		if singular, ok := applySpecialSingularRule(name, rule); ok {
+			return singular, true
 		}
 	}
+
 	return "", false
+}
+
+func applySpecialSingularRule(name string, rule singularRule) (string, bool) {
+	if !strings.HasSuffix(name, rule.suffix) {
+		return "", false
+	}
+
+	stem := strings.TrimSuffix(name, rule.suffix)
+	if stem == "" && rule.preserveExact {
+		return name, true
+	}
+	if rule.recursive {
+		return singularize(stem) + rule.replacement, true
+	}
+
+	return stem + rule.replacement, true
+}
+
+func singularizeStandardSuffix(name string) (string, bool) {
+	switch {
+	case strings.HasSuffix(name, "ies") && len(name) > 3:
+		return strings.TrimSuffix(name, "ies") + "y", true
+	case hasPluralESSuffix(name):
+		return strings.TrimSuffix(name, "es"), true
+	case strings.HasSuffix(name, "s") && !strings.HasSuffix(name, "ss"):
+		return strings.TrimSuffix(name, "s"), true
+	default:
+		return "", false
+	}
+}
+
+func hasPluralESSuffix(name string) bool {
+	for _, suffix := range esPluralSuffixes {
+		if strings.HasSuffix(name, suffix) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func shouldSplitCamelToken(runes []rune, index int) bool {
+	if index == 0 {
+		return false
+	}
+
+	current := runes[index]
+	if !unicode.IsUpper(current) {
+		return false
+	}
+
+	prev := runes[index-1]
+	return unicode.IsLower(prev) || unicode.IsDigit(prev) || endsUpperRunBeforeLower(runes, index, prev)
+}
+
+func endsUpperRunBeforeLower(runes []rune, index int, prev rune) bool {
+	return unicode.IsUpper(prev) && index+1 < len(runes) && unicode.IsLower(runes[index+1])
+}
+
+func appendLowerToken(tokens []string, current []rune) []string {
+	if len(current) == 0 {
+		return tokens
+	}
+
+	return append(tokens, strings.ToLower(string(current)))
 }

@@ -34,7 +34,7 @@ spec:
     name: v1beta1
     schema:
       openAPIV3Schema:
-        description: Stream is the Schema for the streams API
+        description: Stream is the Schema for the streams API.
         properties:
           apiVersion:
             description: |-
@@ -92,12 +92,56 @@ spec:
                 type: string
             type: object
           status:
-            description: StreamStatus defines the observed state of Stream
+            description: StreamStatus defines the observed state of Stream.
             properties:
-              status:
+              compartmentId:
+                description: The OCID of the stream.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
                 description: |-
-                  INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-                  Important: Run "make" to regenerate code after modifying this file
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}'
+                type: object
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. Exists for cross-compatibility only.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              id:
+                description: The OCID of the stream.
+                type: string
+              lifecycleState:
+                description: The current state of the stream.
+                type: string
+              lifecycleStateDetails:
+                description: Any additional details about the current state of the
+                  stream.
+                type: string
+              messagesEndpoint:
+                description: |-
+                  The endpoint to use when creating the StreamClient to consume or publish messages in the stream.
+                  If the associated stream pool is private, the endpoint is also private and can only be accessed from inside the stream pool's associated subnet.
+                type: string
+              name:
+                description: |-
+                  The name of the stream. Avoid entering confidential information.
+                  Example: `TelemetryEvents`
+                type: string
+              partitions:
+                description: The number of partitions in the stream.
+                type: integer
+              retentionInHours:
+                description: The retention period of the stream, in hours. This property
+                  is read-only.
+                type: integer
+              status:
                 properties:
                   conditions:
                     items:
@@ -139,6 +183,14 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              streamPoolId:
+                description: The OCID of the stream pool that contains the stream.
+                type: string
+              timeCreated:
+                description: |-
+                  The date and time the stream was created, expressed in in RFC 3339 (https://tools.ietf.org/rfc/rfc3339) timestamp format.
+                  Example: `2018-04-20T00:00:07.405Z`
+                type: string
             required:
             - status
             type: object
