@@ -9,8 +9,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math/rand"
+	"reflect"
 	"strings"
 	"testing"
+	"testing/quick"
 
 	"github.com/oracle/oci-service-operator/pkg/credhelper"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
@@ -180,6 +183,86 @@ type fakeCredentialClient struct {
 }
 
 var _ credhelper.CredentialClient = (*fakeCredentialClient)(nil)
+
+type quickLifecycleBindingCase struct {
+	LifecycleState string
+	CompartmentID  string
+	Name           string
+}
+
+type quickMutableAliasDriftCase struct {
+	Current int
+	Desired int
+}
+
+type quickUnsupportedUpdateDriftCase struct {
+	CurrentCompartmentID string
+	DesiredCompartmentID string
+}
+
+func (quickLifecycleBindingCase) Generate(rand *rand.Rand, _ int) reflect.Value {
+	lifecycleStates := []string{"ACTIVE", "CREATING", "UPDATING", "DELETING", "DELETED", "FAILED", "", "CUSTOM"}
+	lifecycleState := lifecycleStates[rand.Intn(len(lifecycleStates))]
+	if lifecycleState == "CUSTOM" {
+		lifecycleState = fmt.Sprintf("custom-%d", rand.Intn(1_000_000))
+	}
+
+	return reflect.ValueOf(quickLifecycleBindingCase{
+		LifecycleState: randomizeCase(rand, lifecycleState),
+		CompartmentID:  fmt.Sprintf("ocid1.compartment.oc1..%06d", rand.Intn(1_000_000)),
+		Name:           fmt.Sprintf("wanted-%06d", rand.Intn(1_000_000)),
+	})
+}
+
+func (quickMutableAliasDriftCase) Generate(rand *rand.Rand, _ int) reflect.Value {
+	current := rand.Intn(4096) + 1
+	desired := rand.Intn(4096) + 1
+	if rand.Intn(4) == 0 {
+		desired = current
+	}
+
+	return reflect.ValueOf(quickMutableAliasDriftCase{
+		Current: current,
+		Desired: desired,
+	})
+}
+
+func (quickUnsupportedUpdateDriftCase) Generate(rand *rand.Rand, _ int) reflect.Value {
+	current := fmt.Sprintf("ocid1.compartment.oc1..current%06d", rand.Intn(1_000_000))
+	desired := fmt.Sprintf("ocid1.compartment.oc1..desired%06d", rand.Intn(1_000_000))
+	if rand.Intn(4) == 0 {
+		desired = current
+	}
+
+	return reflect.ValueOf(quickUnsupportedUpdateDriftCase{
+		CurrentCompartmentID: current,
+		DesiredCompartmentID: desired,
+	})
+}
+
+func randomizeCase(rand *rand.Rand, value string) string {
+	if value == "" {
+		return ""
+	}
+
+	var builder strings.Builder
+	builder.Grow(len(value))
+	for index := 0; index < len(value); index++ {
+		ch := value[index]
+		switch {
+		case ch >= 'a' && ch <= 'z':
+			if rand.Intn(2) == 0 {
+				ch = ch - ('a' - 'A')
+			}
+		case ch >= 'A' && ch <= 'Z':
+			if rand.Intn(2) == 0 {
+				ch = ch + ('a' - 'A')
+			}
+		}
+		builder.WriteByte(ch)
+	}
+	return builder.String()
+}
 
 func (f *fakeCredentialClient) CreateSecret(_ context.Context, _, _ string, _ map[string]string, _ map[string][]byte) (bool, error) {
 	return false, nil
@@ -772,10 +855,89 @@ func TestServiceClientCreateOrUpdateFormalListBindingRespectsReusableLifecycleSt
 	}
 }
 
+func TestServiceClientCreateOrUpdateFormalListBindingRespectsReusableLifecycleStatesQuick(t *testing.T) {
+	t.Parallel()
+
+	err := quick.Check(func(bindingCase quickLifecycleBindingCase) bool {
+		return checkLifecycleBindingQuickCase(t, bindingCase)
+	}, &quick.Config{MaxCount: 64})
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func checkLifecycleBindingQuickCase(t *testing.T, bindingCase quickLifecycleBindingCase) bool {
+	t.Helper()
+
+	wantCreate, wantRequeue, wantOcid := expectedLifecycleBindingOutcome(bindingCase.LifecycleState)
+	client, createCalled, listRequest, createRequest := newFormalListBindingLifecycleClient(
+		bindingCase.LifecycleState,
+		bindingCase.Name,
+		bindingCase.CompartmentID,
+	)
+	resource := &fakeResource{
+		Spec: fakeSpec{
+			CompartmentId: bindingCase.CompartmentID,
+			DisplayName:   "created-name",
+			Name:          bindingCase.Name,
+		},
+	}
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Logf("CreateOrUpdate(%q) error = %v", bindingCase.LifecycleState, err)
+		return false
+	}
+	if !response.IsSuccessful {
+		t.Logf("CreateOrUpdate(%q) reported unsuccessful response", bindingCase.LifecycleState)
+		return false
+	}
+	if *createCalled != wantCreate {
+		t.Logf("Create() called = %t, want %t for lifecycle %q", *createCalled, wantCreate, bindingCase.LifecycleState)
+		return false
+	}
+	if response.ShouldRequeue != wantRequeue {
+		t.Logf("response.ShouldRequeue = %t, want %t for lifecycle %q", response.ShouldRequeue, wantRequeue, bindingCase.LifecycleState)
+		return false
+	}
+	if listRequest.CompartmentId != bindingCase.CompartmentID {
+		t.Logf("list request compartmentId = %q, want %q", listRequest.CompartmentId, bindingCase.CompartmentID)
+		return false
+	}
+	if listRequest.Name != bindingCase.Name {
+		t.Logf("list request name = %q, want %q", listRequest.Name, bindingCase.Name)
+		return false
+	}
+	if wantCreate && createRequest.DisplayName != "created-name" {
+		t.Logf("create request displayName = %q, want created-name", createRequest.DisplayName)
+		return false
+	}
+	if string(resource.Status.OsokStatus.Ocid) != wantOcid {
+		t.Logf("status.ocid = %q, want %q", resource.Status.OsokStatus.Ocid, wantOcid)
+		return false
+	}
+	return true
+}
+
+func expectedLifecycleBindingOutcome(lifecycleState string) (wantCreate, wantRequeue bool, wantOcid string) {
+	switch strings.ToUpper(lifecycleState) {
+	case "ACTIVE":
+		return false, false, "ocid1.thing.oc1..existing"
+	case "CREATING", "UPDATING":
+		return false, true, "ocid1.thing.oc1..existing"
+	default:
+		return true, false, "ocid1.thing.oc1..created"
+	}
+}
+
 func runFormalListBindingLifecycleCase(t *testing.T, lifecycleState string, wantCreate, wantRequeue bool, wantOcid string) {
 	t.Helper()
 
-	client, createCalled, listRequest := newFormalListBindingLifecycleClient(t, lifecycleState)
+	client, createCalled, listRequest, createRequest := newFormalListBindingLifecycleClient(
+		lifecycleState,
+		"wanted",
+		"ocid1.compartment.oc1..match",
+	)
 	resource := &fakeResource{
 		Spec: fakeSpec{
 			CompartmentId: "ocid1.compartment.oc1..match",
@@ -803,15 +965,17 @@ func runFormalListBindingLifecycleCase(t *testing.T, lifecycleState string, want
 	if listRequest.Name != "wanted" {
 		t.Fatalf("list request name = %q, want wanted", listRequest.Name)
 	}
+	if wantCreate && createRequest.DisplayName != "created-name" {
+		t.Fatalf("create request displayName = %q, want created-name", createRequest.DisplayName)
+	}
 	if string(resource.Status.OsokStatus.Ocid) != wantOcid {
 		t.Fatalf("status.ocid = %q, want %q", resource.Status.OsokStatus.Ocid, wantOcid)
 	}
 }
 
-func newFormalListBindingLifecycleClient(t *testing.T, lifecycleState string) (ServiceClient[*fakeResource], *bool, *fakeListThingRequest) {
-	t.Helper()
-
+func newFormalListBindingLifecycleClient(lifecycleState, name, compartmentID string) (ServiceClient[*fakeResource], *bool, *fakeListThingRequest, *fakeCreateThingRequest) {
 	createCalled := false
+	createRequest := fakeCreateThingRequest{}
 	listRequest := fakeListThingRequest{}
 
 	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
@@ -835,10 +999,7 @@ func newFormalListBindingLifecycleClient(t *testing.T, lifecycleState string) (S
 		Create: &Operation{
 			NewRequest: func() any { return &fakeCreateThingRequest{} },
 			Call: func(_ context.Context, request any) (any, error) {
-				createRequest := *request.(*fakeCreateThingRequest)
-				if createRequest.DisplayName != "created-name" {
-					t.Fatalf("create request displayName = %q, want created-name", createRequest.DisplayName)
-				}
+				createRequest = *request.(*fakeCreateThingRequest)
 				createCalled = true
 				return fakeCreateThingResponse{
 					Thing: fakeThing{
@@ -858,8 +1019,8 @@ func newFormalListBindingLifecycleClient(t *testing.T, lifecycleState string) (S
 						Resources: []fakeThingSummary{
 							{
 								Id:             "ocid1.thing.oc1..existing",
-								Name:           "wanted",
-								CompartmentId:  "ocid1.compartment.oc1..match",
+								Name:           name,
+								CompartmentId:  compartmentID,
 								LifecycleState: lifecycleState,
 							},
 						},
@@ -873,7 +1034,7 @@ func newFormalListBindingLifecycleClient(t *testing.T, lifecycleState string) (S
 		},
 	})
 
-	return client, &createCalled, &listRequest
+	return client, &createCalled, &listRequest, &createRequest
 }
 
 func TestServiceClientCreateOrUpdateSkipsUpdateWhenNoSupportedDriftRemains(t *testing.T) {
@@ -1020,6 +1181,93 @@ func TestServiceClientAllowsMutableDriftThroughInGBsAlias(t *testing.T) {
 	}
 }
 
+func TestServiceClientAllowsMutableDriftThroughInGBsAliasQuick(t *testing.T) {
+	t.Parallel()
+
+	err := quick.Check(func(driftCase quickMutableAliasDriftCase) bool {
+		wantUpdate := driftCase.Current != driftCase.Desired
+		client, updateCalled, updateRequest := newMutableAliasUpdateClient()
+		resource := &fakeResource{
+			Spec: fakeSpec{
+				DataStorageSizeInGBs: driftCase.Desired,
+			},
+			Status: fakeStatus{
+				OsokStatus:           shared.OSOKStatus{Ocid: "ocid1.thing.oc1..existing"},
+				Id:                   "ocid1.thing.oc1..existing",
+				DataStorageSizeInGBs: driftCase.Current,
+			},
+		}
+
+		response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+		if err != nil {
+			t.Logf("CreateOrUpdate() error = %v for current=%d desired=%d", err, driftCase.Current, driftCase.Desired)
+			return false
+		}
+		if !response.IsSuccessful {
+			t.Logf("CreateOrUpdate() reported unsuccessful response for current=%d desired=%d", driftCase.Current, driftCase.Desired)
+			return false
+		}
+		if response.ShouldRequeue {
+			t.Logf("response.ShouldRequeue = true, want false for current=%d desired=%d", driftCase.Current, driftCase.Desired)
+			return false
+		}
+		if *updateCalled != wantUpdate {
+			t.Logf("Update() called = %t, want %t for current=%d desired=%d", *updateCalled, wantUpdate, driftCase.Current, driftCase.Desired)
+			return false
+		}
+		if wantUpdate && updateRequest.DataStorageSizeInGBs != driftCase.Desired {
+			t.Logf("update request dataStorageSizeInGBs = %d, want %d", updateRequest.DataStorageSizeInGBs, driftCase.Desired)
+			return false
+		}
+		if resource.Status.DataStorageSizeInGBs != driftCase.Desired {
+			t.Logf("status.dataStorageSizeInGBs = %d, want %d", resource.Status.DataStorageSizeInGBs, driftCase.Desired)
+			return false
+		}
+		return true
+	}, &quick.Config{MaxCount: 64})
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func newMutableAliasUpdateClient() (ServiceClient[*fakeResource], *bool, *fakeUpdateThingRequest) {
+	updateCalled := false
+	updateRequest := fakeUpdateThingRequest{}
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Semantics: &Semantics{
+			Lifecycle: LifecycleSemantics{
+				ActiveStates: []string{"ACTIVE"},
+			},
+			Delete: DeleteSemantics{
+				Policy:         "required",
+				TerminalStates: []string{"DELETED"},
+			},
+			Mutation: MutationSemantics{
+				Mutable: []string{"dataStorageSizeInGb"},
+			},
+		},
+		Update: &Operation{
+			NewRequest: func() any { return &fakeUpdateThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				updateCalled = true
+				updateRequest = *request.(*fakeUpdateThingRequest)
+				return fakeUpdateThingResponse{
+					Thing: fakeThing{
+						Id:                   "ocid1.thing.oc1..existing",
+						DataStorageSizeInGBs: updateRequest.DataStorageSizeInGBs,
+						LifecycleState:       "ACTIVE",
+					},
+				}, nil
+			},
+		},
+	})
+
+	return client, &updateCalled, &updateRequest
+}
+
 func TestServiceClientRejectsUnsupportedUpdateDrift(t *testing.T) {
 	t.Parallel()
 
@@ -1056,6 +1304,107 @@ func TestServiceClientRejectsUnsupportedUpdateDrift(t *testing.T) {
 	if _, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{}); err == nil || !strings.Contains(err.Error(), "reject unsupported update drift for compartmentId") {
 		t.Fatalf("CreateOrUpdate() error = %v, want unsupported update drift failure", err)
 	}
+}
+
+func TestServiceClientRejectsUnsupportedUpdateDriftQuick(t *testing.T) {
+	t.Parallel()
+
+	err := quick.Check(func(driftCase quickUnsupportedUpdateDriftCase) bool {
+		return checkUnsupportedUpdateDriftQuickCase(t, driftCase)
+	}, &quick.Config{MaxCount: 64})
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func checkUnsupportedUpdateDriftQuickCase(t *testing.T, driftCase quickUnsupportedUpdateDriftCase) bool {
+	t.Helper()
+
+	wantReject := driftCase.CurrentCompartmentID != driftCase.DesiredCompartmentID
+	client, updateCalled := newUnsupportedUpdateDriftClient()
+	resource := &fakeResource{
+		Spec: fakeSpec{
+			CompartmentId: driftCase.DesiredCompartmentID,
+			DisplayName:   "same-name",
+		},
+		Status: fakeStatus{
+			OsokStatus:    shared.OSOKStatus{Ocid: "ocid1.thing.oc1..existing"},
+			Id:            "ocid1.thing.oc1..existing",
+			CompartmentId: driftCase.CurrentCompartmentID,
+			DisplayName:   "same-name",
+		},
+	}
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if wantReject {
+		return checkRejectedUnsupportedUpdateDriftCase(t, driftCase, updateCalled, err)
+	}
+	return checkAllowedUnsupportedUpdateDriftCase(t, driftCase, updateCalled, response, err)
+}
+
+func checkRejectedUnsupportedUpdateDriftCase(t *testing.T, driftCase quickUnsupportedUpdateDriftCase, updateCalled *bool, err error) bool {
+	t.Helper()
+
+	if err == nil || !strings.Contains(err.Error(), "reject unsupported update drift for compartmentId") {
+		t.Logf("CreateOrUpdate() error = %v, want unsupported drift failure for current=%q desired=%q", err, driftCase.CurrentCompartmentID, driftCase.DesiredCompartmentID)
+		return false
+	}
+	if *updateCalled {
+		t.Logf("Update() called for rejected drift current=%q desired=%q", driftCase.CurrentCompartmentID, driftCase.DesiredCompartmentID)
+		return false
+	}
+	return true
+}
+
+func checkAllowedUnsupportedUpdateDriftCase(
+	t *testing.T,
+	driftCase quickUnsupportedUpdateDriftCase,
+	updateCalled *bool,
+	response servicemanager.OSOKResponse,
+	err error,
+) bool {
+	t.Helper()
+
+	if err != nil {
+		t.Logf("CreateOrUpdate() error = %v for equal current=%q desired=%q", err, driftCase.CurrentCompartmentID, driftCase.DesiredCompartmentID)
+		return false
+	}
+	if !response.IsSuccessful {
+		t.Logf("CreateOrUpdate() reported unsuccessful response for equal current=%q desired=%q", driftCase.CurrentCompartmentID, driftCase.DesiredCompartmentID)
+		return false
+	}
+	if response.ShouldRequeue {
+		t.Logf("response.ShouldRequeue = true, want false for equal current=%q desired=%q", driftCase.CurrentCompartmentID, driftCase.DesiredCompartmentID)
+		return false
+	}
+	if *updateCalled {
+		t.Logf("Update() called for equal current=%q desired=%q", driftCase.CurrentCompartmentID, driftCase.DesiredCompartmentID)
+		return false
+	}
+	return true
+}
+
+func newUnsupportedUpdateDriftClient() (ServiceClient[*fakeResource], *bool) {
+	updateCalled := false
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Semantics: &Semantics{
+			Mutation: MutationSemantics{
+				Mutable: []string{"displayName"},
+			},
+		},
+		Update: &Operation{
+			NewRequest: func() any { return &fakeUpdateThingRequest{} },
+			Call: func(_ context.Context, _ any) (any, error) {
+				updateCalled = true
+				return fakeUpdateThingResponse{}, nil
+			},
+		},
+	})
+
+	return client, &updateCalled
 }
 
 func TestServiceClientRejectsForceNewSecretSourceMutation(t *testing.T) {
