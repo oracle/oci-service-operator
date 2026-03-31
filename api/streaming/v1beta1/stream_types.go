@@ -12,8 +12,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
-
 // StreamSpec defines the desired state of Stream
 type StreamSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
@@ -30,11 +28,39 @@ type StreamSpec struct {
 	shared.TagResources `json:",inline"`
 }
 
-// StreamStatus defines the observed state of Stream
+// StreamStatus defines the observed state of Stream.
 type StreamStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The name of the stream. Avoid entering confidential information.
+	// Example: `TelemetryEvents`
+	Name string `json:"name,omitempty"`
+	// The OCID of the stream.
+	Id string `json:"id,omitempty"`
+	// The number of partitions in the stream.
+	Partitions int `json:"partitions,omitempty"`
+	// The retention period of the stream, in hours. This property is read-only.
+	RetentionInHours int `json:"retentionInHours,omitempty"`
+	// The OCID of the stream.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The OCID of the stream pool that contains the stream.
+	StreamPoolId string `json:"streamPoolId,omitempty"`
+	// The current state of the stream.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The date and time the stream was created, expressed in in RFC 3339 (https://tools.ietf.org/rfc/rfc3339) timestamp format.
+	// Example: `2018-04-20T00:00:07.405Z`
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The endpoint to use when creating the StreamClient to consume or publish messages in the stream.
+	// If the associated stream pool is private, the endpoint is also private and can only be accessed from inside the stream pool's associated subnet.
+	MessagesEndpoint string `json:"messagesEndpoint,omitempty"`
+	// Any additional details about the current state of the stream.
+	LifecycleStateDetails string `json:"lifecycleStateDetails,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. Exists for cross-compatibility only.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}'
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -43,7 +69,7 @@ type StreamStatus struct {
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.status.conditions[-1].type",description="status of the Stream",priority=0
 // +kubebuilder:printcolumn:name="Ocid",type="string",JSONPath=".status.status.ocid",description="Ocid of the Stream",priority=1
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0
-// Stream is the Schema for the streams API
+// Stream is the Schema for the streams API.
 type Stream struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -53,7 +79,7 @@ type Stream struct {
 }
 
 // +kubebuilder:object:root=true
-// StreamList contains a list of Stream
+// StreamList contains a list of Stream.
 type StreamList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`

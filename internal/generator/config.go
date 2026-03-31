@@ -58,6 +58,7 @@ type GenerationSurfaceConfig struct {
 // ResourceGenerationOverride captures per-kind rollout and override metadata.
 type ResourceGenerationOverride struct {
 	Kind           string                           `yaml:"kind"`
+	SDKName        string                           `yaml:"sdkName,omitempty"`
 	FormalSpec     string                           `yaml:"formalSpec,omitempty"`
 	Controller     ControllerGenerationOverride     `yaml:"controller,omitempty"`
 	ServiceManager ServiceManagerGenerationOverride `yaml:"serviceManager,omitempty"`
@@ -87,21 +88,14 @@ type ServiceConfig struct {
 	SampleOrder    int                 `yaml:"sampleOrder,omitempty"`
 	PackageProfile string              `yaml:"packageProfile"`
 	FormalSpec     string              `yaml:"formalSpec,omitempty"`
-	ParityFile     string              `yaml:"parityFile,omitempty"`
-	Compatibility  CompatibilityConfig `yaml:"compatibility,omitempty"`
 	ObservedState  ObservedStateConfig `yaml:"observedState,omitempty"`
 	Generation     GenerationConfig    `yaml:"generation,omitempty"`
-	Parity         *ParityConfig       `yaml:"-"`
-}
-
-// CompatibilityConfig holds explicit backwards-compatibility hints for published kinds.
-type CompatibilityConfig struct {
-	ExistingKinds []string `yaml:"existingKinds,omitempty"`
 }
 
 // ObservedStateConfig tunes how read-model fields are synthesized into status types.
 type ObservedStateConfig struct {
-	SDKAliases map[string][]string `yaml:"sdkAliases,omitempty"`
+	SDKAliases         map[string][]string `yaml:"sdkAliases,omitempty"`
+	ExcludedFieldPaths map[string][]string `yaml:"excludedFieldPaths,omitempty"`
 }
 
 // LoadConfig reads and validates the generator config file.
@@ -116,9 +110,6 @@ func LoadConfig(path string) (*Config, error) {
 		return nil, fmt.Errorf("decode generator config %q: %w", path, err)
 	}
 	cfg.configDir = filepath.Dir(path)
-	if err := cfg.loadParity(filepath.Dir(path)); err != nil {
-		return nil, fmt.Errorf("load generator config %q parity inputs: %w", path, err)
-	}
 	if err := cfg.Validate(); err != nil {
 		return nil, fmt.Errorf("validate generator config %q: %w", path, err)
 	}
@@ -126,24 +117,9 @@ func LoadConfig(path string) (*Config, error) {
 	return &cfg, nil
 }
 
-func (c *Config) loadParity(baseDir string) error {
-	for i := range c.Services {
-		parityFile := strings.TrimSpace(c.Services[i].ParityFile)
-		if parityFile == "" {
-			continue
-		}
-
-		parity, err := loadParityConfig(ResolveParityFile(baseDir, parityFile))
-		if err != nil {
-			return fmt.Errorf("service %q: %w", c.Services[i].Service, err)
-		}
-		c.Services[i].Parity = parity
-	}
-
-	return nil
-}
-
 // Validate ensures the config is coherent before generation begins.
+//
+//nolint:gocognit,gocyclo // Validation intentionally walks the full config contract in one pass to return precise field context.
 func (c *Config) Validate() error {
 	if strings.TrimSpace(c.SchemaVersion) == "" {
 		return fmt.Errorf("schemaVersion is required")
@@ -192,6 +168,16 @@ func (c *Config) Validate() error {
 				}
 			}
 		}
+		for rawName, paths := range service.ObservedState.ExcludedFieldPaths {
+			if strings.TrimSpace(rawName) == "" {
+				return fmt.Errorf("service %q observedState excludedFieldPaths contains a blank resource name", service.Service)
+			}
+			for _, path := range paths {
+				if _, err := normalizeObservedStateFieldPath(path); err != nil {
+					return fmt.Errorf("service %q observedState excludedFieldPaths[%q] %w", service.Service, rawName, err)
+				}
+			}
+		}
 		if _, exists := servicesByName[service.Service]; exists {
 			return fmt.Errorf("duplicate service %q", service.Service)
 		}
@@ -206,6 +192,8 @@ func (c *Config) Validate() error {
 }
 
 // Validate ensures runtime rollout metadata is coherent before generation begins.
+//
+//nolint:gocognit,gocyclo // Runtime rollout validation checks interdependent service and resource overrides together.
 func (g GenerationConfig) Validate(serviceName string) error {
 	if err := validateGenerationStrategy(
 		fmt.Sprintf("service %q generation.controller.strategy", serviceName),
@@ -233,6 +221,7 @@ func (g GenerationConfig) Validate(serviceName string) error {
 	}
 
 	resourceKinds := make(map[string]struct{}, len(g.Resources))
+	resourceSDKNames := make(map[string]struct{}, len(g.Resources))
 	for _, resource := range g.Resources {
 		kind := strings.TrimSpace(resource.Kind)
 		if kind == "" {
@@ -242,6 +231,12 @@ func (g GenerationConfig) Validate(serviceName string) error {
 			return fmt.Errorf("service %q generation.resources contains duplicate kind %q", serviceName, kind)
 		}
 		resourceKinds[kind] = struct{}{}
+		if sdkName := strings.TrimSpace(resource.SDKName); sdkName != "" {
+			if _, exists := resourceSDKNames[sdkName]; exists {
+				return fmt.Errorf("service %q generation.resources contains duplicate sdkName %q", serviceName, sdkName)
+			}
+			resourceSDKNames[sdkName] = struct{}{}
+		}
 
 		if err := validateGenerationStrategy(
 			fmt.Sprintf("service %q generation.resources[%q].controller.strategy", serviceName, kind),
@@ -337,7 +332,8 @@ func validateWebhookStrategy(field string, strategy string) error {
 }
 
 func (r ResourceGenerationOverride) hasOverrides() bool {
-	return strings.TrimSpace(r.FormalSpec) != "" ||
+	return strings.TrimSpace(r.SDKName) != "" ||
+		strings.TrimSpace(r.FormalSpec) != "" ||
 		r.Controller.hasOverrides() ||
 		r.ServiceManager.hasOverrides() ||
 		strings.TrimSpace(r.Webhooks.Strategy) != ""
@@ -531,12 +527,35 @@ func generationStrategyOrDefault(strategy string, defaultStrategy string) string
 	return strategy
 }
 
+// PublishedKind returns the rendered OSOK kind for one discovered OCI SDK resource family.
+func (s ServiceConfig) PublishedKind(rawName string) string {
+	if override, ok := s.resourceGenerationOverrideForSDKName(rawName); ok {
+		return override.Kind
+	}
+	return rawName
+}
+
 func (s ServiceConfig) resourceGenerationOverride(kind string) (ResourceGenerationOverride, bool) {
 	for _, override := range s.Generation.Resources {
 		if override.Kind == kind {
 			return override, true
 		}
 	}
+	return ResourceGenerationOverride{}, false
+}
+
+func (s ServiceConfig) resourceGenerationOverrideForSDKName(rawName string) (ResourceGenerationOverride, bool) {
+	rawName = strings.TrimSpace(rawName)
+	if rawName == "" {
+		return ResourceGenerationOverride{}, false
+	}
+
+	for _, override := range s.Generation.Resources {
+		if strings.TrimSpace(override.SDKName) == rawName {
+			return override, true
+		}
+	}
+
 	return ResourceGenerationOverride{}, false
 }
 
@@ -567,4 +586,60 @@ func (s ServiceConfig) ObservedStateStructCandidates(rawName string) []string {
 	}
 
 	return candidates
+}
+
+// ObservedStateExcludedFieldPaths returns the configured observed-state field paths that must not be published in status.
+func (s ServiceConfig) ObservedStateExcludedFieldPaths(rawName string) map[string]struct{} {
+	rawName = strings.TrimSpace(rawName)
+	if rawName == "" {
+		return nil
+	}
+
+	configured := s.ObservedState.ExcludedFieldPaths[rawName]
+	if len(configured) == 0 {
+		return nil
+	}
+
+	paths := make(map[string]struct{}, len(configured))
+	for _, path := range configured {
+		normalized, err := normalizeObservedStateFieldPath(path)
+		if err != nil {
+			continue
+		}
+		paths[normalized] = struct{}{}
+	}
+	if len(paths) == 0 {
+		return nil
+	}
+	return paths
+}
+
+func normalizeObservedStateFieldPath(path string) (string, error) {
+	path = strings.TrimSpace(path)
+	if path == "" {
+		return "", fmt.Errorf("contains a blank field path")
+	}
+
+	parts := strings.Split(path, ".")
+	return observedStateFieldPathKey(parts)
+}
+
+func observedStateFieldPathKey(parts []string) (string, error) {
+	if len(parts) == 0 {
+		return "", fmt.Errorf("contains a blank field path")
+	}
+
+	keys := make([]string, 0, len(parts))
+	for _, part := range parts {
+		part = strings.TrimSpace(part)
+		if part == "" {
+			return "", fmt.Errorf("contains a blank path segment")
+		}
+		key := normalizedTypeKey(part)
+		if key == "" {
+			return "", fmt.Errorf("contains a blank path segment")
+		}
+		keys = append(keys, key)
+	}
+	return strings.Join(keys, "."), nil
 }

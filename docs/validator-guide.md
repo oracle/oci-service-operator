@@ -218,6 +218,13 @@ the full configured service set. Use `make generated-coverage-report
 GENERATED_COVERAGE_SERVICE=<service>` for targeted local inspection, but keep
 the checked-in baseline scoped to `--all`.
 
+For the current checked-in config, the coverage targets default
+`GENERATED_COVERAGE_PRESERVE_EXISTING_SPEC_SURFACE=true` so the historical
+published ADB/MySQL/Stream resources keep their checked-in spec/helper/sample
+surfaces while the rest of the snapshot regenerates from `services.yaml`.
+Set that variable to `false` only when you intentionally want to inspect the
+fully regenerated spec surface instead of the preserved checked-in one.
+
 The gate checks two classes of failure:
 
 - **Scope changes** — service inventory, spec counts, or mapping counts changed from the baseline.
@@ -263,6 +270,11 @@ make generated-runtime-gate \
   GENERATED_RUNTIME_SNAPSHOT_DIR=/tmp/osok-generated-runtime \
   GENERATED_RUNTIME_REPORT=/tmp/generated-runtime-report.json
 
+# Disable preserved-spec mode when intentionally inspecting a fully regenerated
+# API surface for the selected services
+make generated-runtime-gate \
+  GENERATED_RUNTIME_PRESERVE_EXISTING_SPEC_SURFACE=false
+
 # Direct CLI usage
 go run ./cmd/osok-generated-runtime-check --all
 ```
@@ -277,6 +289,7 @@ Common variables and flags:
 | `GENERATED_RUNTIME_REPORT` / `--report-out` | `generated-runtime-report.json` | JSON summary file for the packages compiled from the snapshot. |
 | `GENERATED_RUNTIME_SNAPSHOT_DIR` / `--snapshot-dir` | empty | Keep the runtime snapshot at a specific path instead of using an auto-cleaned temp dir. |
 | `GENERATED_RUNTIME_KEEP_SNAPSHOT` / `--keep-snapshot` | empty / false | Keep an automatically created temp snapshot after a successful run. |
+| `GENERATED_RUNTIME_PRESERVE_EXISTING_SPEC_SURFACE` / `--preserve-existing-spec-surface` | `true` | Preserve the current checked-in API spec/helper/sample/package surfaces while generating the runtime snapshot for services that still keep published checked-in seams. |
 | `--controller-gen` | `<repo>/bin/controller-gen` | `controller-gen` binary used to regenerate deepcopy code inside the snapshot. |
 
 The runtime summary JSON includes:
@@ -285,6 +298,12 @@ The runtime summary JSON includes:
 - `build.serviceManagerPackages` — generated service-manager packages compiled from the snapshot.
 - `build.registrationPackages` — generated registration packages compiled from the snapshot.
 - `snapshot.root` — present only when the snapshot is retained.
+
+For the current checked-in config, the runtime targets default
+`GENERATED_RUNTIME_PRESERVE_EXISTING_SPEC_SURFACE=true` so the snapshot keeps
+the published ADB/MySQL/Stream spec surfaces while compile-checking the
+generated controller, service-manager, and registration outputs around those
+preserved seams.
 
 `generated-runtime-gate` does not use a baseline file. The build either
 compiles or it fails, which makes it a straightforward regression tripwire for

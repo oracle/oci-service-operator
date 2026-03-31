@@ -71,7 +71,8 @@ controller-backed promotion:
 5. Keep every unsupported behavior in `logic-gaps.md` front matter with an
    explicit `stopCondition`, and file linked `bd` follow-up issues instead of
    leaving TODOs. Open logic gaps block formal-driven promotion.
-6. After formal inputs are valid, run `make generator-generate`,
+6. After formal inputs are valid, run
+   `go run ./cmd/generator --config internal/generator/config/services.yaml --all`,
    `go run ./hack/update_validator_registries.go --write`,
    `make generated-coverage-gate`, and `make generated-runtime-gate`.
 7. For resources that still depend on manual runtime behavior, keep

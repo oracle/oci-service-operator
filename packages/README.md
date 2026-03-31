@@ -24,32 +24,29 @@ Package profiles:
 
 Current workflow:
 
-1. `make generator-generate GENERATOR_SERVICE=<service>` or
-   `make generator-generate GENERATOR_ALL=true` writes generated API packages,
-   sample manifests, sample kustomization, per-group package scaffolding, and
-   the configured controller, service-manager, and registration outputs from
+1. `go run ./cmd/generator --config internal/generator/config/services.yaml --service <service>`
+   or `go run ./cmd/generator --config internal/generator/config/services.yaml --all`
+   writes generated API packages, sample manifests, sample kustomization,
+   per-group package scaffolding, and the configured controller,
+   service-manager, and registration outputs from
    `internal/generator/config/services.yaml`.
-2. `make generator-refresh ...` runs the generator first, then refreshes
-   `zz_generated.deepcopy.go` and `config/crd/` artifacts with `controller-gen`.
+2. Run `make generator-refresh GENERATOR_SERVICE=<service>` when the selected
+   generator refresh also needs `zz_generated.deepcopy.go` and `config/crd/`
+   artifacts updated in the same step.
 3. `make package-generate GROUP=<group>` generates CRDs and optional controller
    RBAC into `packages/<group>/install/generated/`.
 4. `make package-install GROUP=<group>` renders a single install YAML into
    `dist/packages/<group>/install.yaml` for either package profile.
-
-Compatibility aliases:
-
-- `make api-generate ...` forwards to `make generator-generate ...`
-- `make api-refresh ...` forwards to `make generator-refresh ...`
 
 Runtime rollout defaults:
 
 - Services without a `generation` block default to controller, service-manager,
   and registration rollout `none`; webhook ownership stays with checked-in
   `*_webhook.go` files unless explicitly disabled.
-- The checked-in config now enables generated controller, service-manager, and
-  registration rollout for every service. Historical parity resources rely on
-  resource-level package-path and webhook carve-outs instead of service-level
-  runtime exceptions.
+- Services that need checked-in naming, observed-state, package-path, or
+  webhook carve-outs keep those mappings in `services.yaml` and can use
+  `--preserve-existing-spec-surface` when regenerating checked-in
+  spec/helper/sample/package artifacts.
 
 Package profile behavior:
 

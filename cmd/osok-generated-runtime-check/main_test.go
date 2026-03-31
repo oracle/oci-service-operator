@@ -9,6 +9,27 @@ import (
 	"github.com/oracle/oci-service-operator/internal/generator"
 )
 
+func TestResolveRunInputsPreserveExistingSpecSurface(t *testing.T) {
+	t.Parallel()
+
+	repoRoot, err := findRepoRoot()
+	if err != nil {
+		t.Fatalf("findRepoRoot() error = %v", err)
+	}
+
+	inputs, err := resolveRunInputs(options{
+		configPath:   defaultConfigPath,
+		all:          true,
+		preserveSpec: true,
+	})
+	if err != nil {
+		t.Fatalf("resolveRunInputs() error = %v", err)
+	}
+	if inputs.preserveRoot != repoRoot {
+		t.Fatalf("preserveRoot = %q, want %q", inputs.preserveRoot, repoRoot)
+	}
+}
+
 func TestCollectBuildPlanFindsGeneratedRuntimePackages(t *testing.T) {
 	t.Helper()
 

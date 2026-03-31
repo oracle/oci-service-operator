@@ -98,7 +98,7 @@ func main() {
 	flag.StringVar(&opts.baselinePath, "baseline", "", "Optional generated coverage baseline JSON to compare against.")
 	flag.StringVar(&opts.writeBaseline, "write-baseline", "", "Write the current generated coverage baseline to the given path.")
 	flag.BoolVar(&opts.failOnRegression, "fail-on-regression", false, "Exit with a non-zero status when the generated coverage report regresses compared to --baseline.")
-	flag.BoolVar(&opts.preserveSpec, "preserve-existing-spec-surface", false, "Preserve the current checked-in spec/helper surface for selected packages while regenerating status/read-model outputs in the snapshot.")
+	flag.BoolVar(&opts.preserveSpec, "preserve-existing-spec-surface", false, "Preserve the current checked-in API spec/helper surface plus any existing checked-in sample/package artifacts while regenerating status/read-model outputs in the snapshot.")
 	flag.Parse()
 
 	if err := run(context.Background(), opts); err != nil {
@@ -107,6 +107,7 @@ func main() {
 	}
 }
 
+//nolint:gocognit,gocyclo // The CLI keeps snapshot generation/report orchestration linear so each step returns specific context.
 func run(ctx context.Context, opts options) (err error) {
 	if err := validateOptions(opts); err != nil {
 		return err
@@ -896,14 +897,21 @@ func copyFile(src, dst string, mode fs.FileMode) (err error) {
 		return err
 	}
 	defer func() {
-		if closeErr := output.Close(); err == nil && closeErr != nil {
-			err = closeErr
+		if output != nil {
+			if closeErr := output.Close(); err == nil && closeErr != nil {
+				err = closeErr
+			}
 		}
 	}()
 
 	if _, err = io.Copy(output, input); err != nil {
 		return err
 	}
+	if err = output.Close(); err != nil {
+		return err
+	}
+	output = nil
+
 	return nil
 }
 

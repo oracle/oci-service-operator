@@ -32,7 +32,7 @@ func Main(programName string, args []string, stdout io.Writer, stderr io.Writer)
 		if errors.Is(err, flag.ErrHelp) {
 			return 0
 		}
-		fmt.Fprintf(stderr, "%s: %v\n", programName, err)
+		_, _ = fmt.Fprintf(stderr, "%s: %v\n", programName, err)
 		return 1
 	}
 
@@ -49,7 +49,7 @@ func run(ctx context.Context, programName string, args []string, stdout io.Write
 	flagSet.BoolVar(&opts.all, "all", false, "Generate all configured services.")
 	flagSet.StringVar(&opts.outputRoot, "output-root", ".", "Root directory where generated outputs are written.")
 	flagSet.BoolVar(&opts.overwrite, "overwrite", false, "Overwrite existing generated package files when the target directory already exists.")
-	flagSet.BoolVar(&opts.preserve, "preserve-existing-spec-surface", false, "Preserve the current checked-in spec/helper surface for existing API packages while regenerating status/read-model outputs.")
+	flagSet.BoolVar(&opts.preserve, "preserve-existing-spec-surface", false, "Preserve the current checked-in API spec/helper surface plus any existing checked-in sample/package artifacts while regenerating status/read-model and other outputs.")
 	if err := flagSet.Parse(args); err != nil {
 		return err
 	}
@@ -57,6 +57,7 @@ func run(ctx context.Context, programName string, args []string, stdout io.Write
 	return execute(ctx, opts, stdout)
 }
 
+//nolint:gocyclo // CLI execution keeps validation, generation, and reporting together for straightforward error flow.
 func execute(ctx context.Context, opts options, stdout io.Writer) error {
 	cfg, err := generator.LoadConfig(opts.configPath)
 	if err != nil {
@@ -87,10 +88,14 @@ func execute(ctx context.Context, opts options, stdout io.Writer) error {
 	}
 
 	for _, generated := range result.Generated {
-		fmt.Fprintf(stdout, "generated service=%s group=%s resources=%d output=%s\n", generated.Service, generated.Group, generated.ResourceCount, generated.OutputDir)
+		if _, err := fmt.Fprintf(stdout, "generated service=%s group=%s resources=%d output=%s\n", generated.Service, generated.Group, generated.ResourceCount, generated.OutputDir); err != nil {
+			return fmt.Errorf("write generated summary: %w", err)
+		}
 	}
 	for _, skipped := range result.Skipped {
-		fmt.Fprintf(stdout, "skipped service=%s group=%s reason=%s\n", skipped.Service, skipped.Group, skipped.Reason)
+		if _, err := fmt.Fprintf(stdout, "skipped service=%s group=%s reason=%s\n", skipped.Service, skipped.Group, skipped.Reason); err != nil {
+			return fmt.Errorf("write skipped summary: %w", err)
+		}
 	}
 
 	return nil

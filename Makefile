@@ -62,18 +62,12 @@ GENERATOR_SERVICE ?=
 GENERATOR_ALL ?=
 GENERATOR_OVERWRITE ?=
 GENERATOR_PRESERVE_EXISTING_SPEC_SURFACE ?=
-API_GENERATOR_CONFIG ?=
-API_GENERATOR_OUTPUT_ROOT ?=
-API_SERVICE ?=
-API_ALL ?=
-API_OVERWRITE ?=
-API_PRESERVE_EXISTING_SPEC_SURFACE ?=
-EFFECTIVE_GENERATOR_CONFIG = $(or $(strip $(GENERATOR_CONFIG)),$(strip $(API_GENERATOR_CONFIG)),internal/generator/config/services.yaml)
-EFFECTIVE_GENERATOR_OUTPUT_ROOT = $(or $(strip $(GENERATOR_OUTPUT_ROOT)),$(strip $(API_GENERATOR_OUTPUT_ROOT)),.)
-EFFECTIVE_GENERATOR_SERVICE = $(or $(strip $(GENERATOR_SERVICE)),$(strip $(API_SERVICE)))
-EFFECTIVE_GENERATOR_ALL = $(or $(strip $(GENERATOR_ALL)),$(strip $(API_ALL)))
-EFFECTIVE_GENERATOR_OVERWRITE = $(or $(strip $(GENERATOR_OVERWRITE)),$(strip $(API_OVERWRITE)))
-EFFECTIVE_GENERATOR_PRESERVE_EXISTING_SPEC_SURFACE = $(or $(strip $(GENERATOR_PRESERVE_EXISTING_SPEC_SURFACE)),$(strip $(API_PRESERVE_EXISTING_SPEC_SURFACE)))
+EFFECTIVE_GENERATOR_CONFIG = $(or $(strip $(GENERATOR_CONFIG)),internal/generator/config/services.yaml)
+EFFECTIVE_GENERATOR_OUTPUT_ROOT = $(or $(strip $(GENERATOR_OUTPUT_ROOT)),.)
+EFFECTIVE_GENERATOR_SERVICE = $(strip $(GENERATOR_SERVICE))
+EFFECTIVE_GENERATOR_ALL = $(strip $(GENERATOR_ALL))
+EFFECTIVE_GENERATOR_OVERWRITE = $(strip $(GENERATOR_OVERWRITE))
+EFFECTIVE_GENERATOR_PRESERVE_EXISTING_SPEC_SURFACE = $(strip $(GENERATOR_PRESERVE_EXISTING_SPEC_SURFACE))
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
@@ -117,7 +111,7 @@ DEEPCOPY_GEN_PATHS ?= "./api/...;./pkg/shared"
 generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
 	"$(CONTROLLER_GEN_RUNNER)" "$(CONTROLLER_GEN)" object:headerFile="hack/boilerplate.go.txt" paths=$(DEEPCOPY_GEN_PATHS)
 
-generator-generate: ## Run the OSOK generator. Use GENERATOR_SERVICE=<service> or GENERATOR_ALL=true. Compatibility aliases: API_SERVICE, API_ALL, and api-generate.
+generator-generate: ## Run the OSOK generator. Use GENERATOR_SERVICE=<service> or GENERATOR_ALL=true.
 	@set -e; \
 	is_true() { case "$$1" in 1|true|TRUE|yes|YES) return 0 ;; *) return 1 ;; esac; }; \
 	service="$(EFFECTIVE_GENERATOR_SERVICE)"; \
@@ -148,16 +142,10 @@ generator-generate: ## Run the OSOK generator. Use GENERATOR_SERVICE=<service> o
 	fi; \
 	go run $(GENERATOR_ENTRYPOINT) $$args
 
-api-generate: ## Compatibility alias for generator-generate.
-	@$(MAKE) generator-generate
-
-generator-refresh: ## Run the OSOK generator, then refresh deepcopy and manifest artifacts. Compatibility aliases: api-refresh.
+generator-refresh: ## Run the OSOK generator, then refresh deepcopy and manifest artifacts.
 	@$(MAKE) generator-generate
 	@$(MAKE) generate
 	@$(MAKE) manifests
-
-api-refresh: ## Compatibility alias for generator-refresh.
-	@$(MAKE) generator-refresh
 
 fmt: ## Run go fmt against code.
 	go fmt ./...
@@ -213,7 +201,7 @@ GENERATED_COVERAGE_SNAPSHOT_DIR ?=
 GENERATED_COVERAGE_KEEP_SNAPSHOT ?=
 GENERATED_COVERAGE_VALIDATOR_JSON ?=
 GENERATED_COVERAGE_BASELINE ?= internal/generator/config/generated_coverage_baseline.json
-GENERATED_COVERAGE_PRESERVE_EXISTING_SPEC_SURFACE ?=
+GENERATED_COVERAGE_PRESERVE_EXISTING_SPEC_SURFACE ?= true
 GENERATED_COVERAGE_SERVICE_ARG = $(if $(strip $(GENERATED_COVERAGE_SERVICE)),--service $(GENERATED_COVERAGE_SERVICE),--all)
 GENERATED_COVERAGE_SNAPSHOT_ARG = $(if $(strip $(GENERATED_COVERAGE_SNAPSHOT_DIR)),--snapshot-dir $(GENERATED_COVERAGE_SNAPSHOT_DIR),)
 GENERATED_COVERAGE_KEEP_ARG = $(if $(filter 1 true TRUE yes YES,$(GENERATED_COVERAGE_KEEP_SNAPSHOT)),--keep-snapshot,)
@@ -225,9 +213,11 @@ GENERATED_RUNTIME_REPORT ?= generated-runtime-report.json
 GENERATED_RUNTIME_SERVICE ?=
 GENERATED_RUNTIME_SNAPSHOT_DIR ?=
 GENERATED_RUNTIME_KEEP_SNAPSHOT ?=
+GENERATED_RUNTIME_PRESERVE_EXISTING_SPEC_SURFACE ?= true
 GENERATED_RUNTIME_SERVICE_ARG = $(if $(strip $(GENERATED_RUNTIME_SERVICE)),--service $(GENERATED_RUNTIME_SERVICE),--all)
 GENERATED_RUNTIME_SNAPSHOT_ARG = $(if $(strip $(GENERATED_RUNTIME_SNAPSHOT_DIR)),--snapshot-dir $(GENERATED_RUNTIME_SNAPSHOT_DIR),)
 GENERATED_RUNTIME_KEEP_ARG = $(if $(filter 1 true TRUE yes YES,$(GENERATED_RUNTIME_KEEP_SNAPSHOT)),--keep-snapshot,)
+GENERATED_RUNTIME_PRESERVE_EXISTING_SPEC_ARG = $(if $(filter 1 true TRUE yes YES,$(GENERATED_RUNTIME_PRESERVE_EXISTING_SPEC_SURFACE)),--preserve-existing-spec-surface,)
 
 generated-coverage-report: controller-gen ## Generate APIs in a snapshot tree, run validator coverage, and write a JSON summary.
 	"$(CONTROLLER_GEN_RUNNER)" go run ./cmd/osok-generated-coverage --config $(EFFECTIVE_GENERATOR_CONFIG) $(GENERATED_COVERAGE_SERVICE_ARG) --top $(GENERATED_COVERAGE_TOP) --controller-gen $(CONTROLLER_GEN) --report-out $(GENERATED_COVERAGE_REPORT) $(GENERATED_COVERAGE_SNAPSHOT_ARG) $(GENERATED_COVERAGE_KEEP_ARG) $(GENERATED_COVERAGE_VALIDATOR_JSON_ARG) $(GENERATED_COVERAGE_PRESERVE_EXISTING_SPEC_ARG)
@@ -243,11 +233,11 @@ generated-coverage-gate: controller-gen ## Fail when generated API coverage regr
 	@echo "Generated coverage gate passed; report at $(GENERATED_COVERAGE_REPORT)"
 
 generated-runtime-report: controller-gen ## Generate a runtime snapshot and compile generated controller/service-manager outputs.
-	"$(CONTROLLER_GEN_RUNNER)" go run ./cmd/osok-generated-runtime-check --config $(GENERATED_RUNTIME_CONFIG) $(GENERATED_RUNTIME_SERVICE_ARG) --controller-gen $(CONTROLLER_GEN) --report-out $(GENERATED_RUNTIME_REPORT) $(GENERATED_RUNTIME_SNAPSHOT_ARG) $(GENERATED_RUNTIME_KEEP_ARG)
+	"$(CONTROLLER_GEN_RUNNER)" go run ./cmd/osok-generated-runtime-check --config $(GENERATED_RUNTIME_CONFIG) $(GENERATED_RUNTIME_SERVICE_ARG) --controller-gen $(CONTROLLER_GEN) --report-out $(GENERATED_RUNTIME_REPORT) $(GENERATED_RUNTIME_SNAPSHOT_ARG) $(GENERATED_RUNTIME_KEEP_ARG) $(GENERATED_RUNTIME_PRESERVE_EXISTING_SPEC_ARG)
 	@echo "Wrote generated runtime report to $(GENERATED_RUNTIME_REPORT)"
 
 generated-runtime-gate: controller-gen ## Fail when generated controller/service-manager snapshot outputs do not compile.
-	"$(CONTROLLER_GEN_RUNNER)" go run ./cmd/osok-generated-runtime-check --config $(GENERATED_RUNTIME_CONFIG) --all --controller-gen $(CONTROLLER_GEN) --report-out $(GENERATED_RUNTIME_REPORT) $(GENERATED_RUNTIME_SNAPSHOT_ARG) $(GENERATED_RUNTIME_KEEP_ARG)
+	"$(CONTROLLER_GEN_RUNNER)" go run ./cmd/osok-generated-runtime-check --config $(GENERATED_RUNTIME_CONFIG) --all --controller-gen $(CONTROLLER_GEN) --report-out $(GENERATED_RUNTIME_REPORT) $(GENERATED_RUNTIME_SNAPSHOT_ARG) $(GENERATED_RUNTIME_KEEP_ARG) $(GENERATED_RUNTIME_PRESERVE_EXISTING_SPEC_ARG)
 	@echo "Generated runtime gate passed; report at $(GENERATED_RUNTIME_REPORT)"
 
 generator-validation: generated-coverage-gate generated-runtime-gate ## Run generator regression gates for API coverage and generated runtime outputs.
