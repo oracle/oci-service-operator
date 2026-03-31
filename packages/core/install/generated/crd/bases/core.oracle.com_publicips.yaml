@@ -127,6 +127,36 @@ spec:
                   AVAILABILITY_DOMAIN). The value is the availability domain of the assigned private IP.
                   Example: `Uocm:PHX-AD-1`
                 type: string
+              compartmentId:
+                description: |-
+                  The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the public IP. For an ephemeral public IP, this is
+                  the compartment of its assigned entity (which can be a private IP or a regional entity such
+                  as a NAT gateway). For a reserved public IP that is currently assigned,
+                  its compartment can be different from the assigned private IP's.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a
+                  namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              displayName:
+                description: |-
+                  A user-friendly name. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no
+                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
               id:
                 description: The public IP's Oracle ID (OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)).
                 type: string
@@ -137,6 +167,32 @@ spec:
                 type: string
               lifecycleState:
                 description: The public IP's current state.
+                type: string
+              lifetime:
+                description: |-
+                  Defines when the public IP is deleted and released back to Oracle's public IP pool.
+                  * `EPHEMERAL`: The lifetime is tied to the lifetime of its assigned entity. An ephemeral
+                  public IP must always be assigned to an entity. If the assigned entity is a private IP,
+                  the ephemeral public IP is automatically deleted when the private IP is deleted, when
+                  the VNIC is terminated, or when the instance is terminated. If the assigned entity is a
+                  NatGateway, the ephemeral public IP is automatically
+                  deleted when the NAT gateway is terminated.
+                  * `RESERVED`: You control the public IP's lifetime. You can delete a reserved public IP
+                  whenever you like. It does not need to be assigned to a private IP at all times.
+                  For more information and comparison of the two types,
+                  see Public IP Addresses (https://docs.cloud.oracle.com/iaas/Content/Network/Tasks/managingpublicIPs.htm).
+                type: string
+              privateIpId:
+                description: |-
+                  Deprecated. Use `assignedEntityId` instead.
+                  The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the private IP that the public IP is currently assigned to, or in the
+                  process of being assigned to.
+                  **Note:** This is `null` if the public IP is not assigned to a private IP, or is
+                  in the process of being assigned to one.
+                type: string
+              publicIpPoolId:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the pool object created in the current tenancy.
                 type: string
               scope:
                 description: |-

@@ -189,63 +189,41 @@ type ChannelSourceAnonymousTransactionsHandlingObservedState struct {
 
 // ChannelSourceObservedState defines nested fields for Channel.Source.
 type ChannelSourceObservedState struct {
-	// +kubebuilder:validation:Optional
-	JsonData string `json:"jsonData,omitempty"`
-	// +kubebuilder:validation:Optional
+	JsonData   string `json:"jsonData,omitempty"`
 	SourceType string `json:"sourceType,omitempty"`
 	// The network address of the MySQL instance.
-	// +kubebuilder:validation:Required
-	Hostname string `json:"hostname"`
+	Hostname string `json:"hostname,omitempty"`
+	// The port the source MySQL instance listens on.
+	Port int `json:"port,omitempty"`
 	// The name of the replication user on the source MySQL instance.
 	// The username has a maximum length of 96 characters. For more information,
 	// please see the MySQL documentation (https://dev.mysql.com/doc/refman/8.0/en/change-master-to.html)
-	// +kubebuilder:validation:Required
-	Username string `json:"username"`
-	// The password for the replication user. The password must be
-	// between 8 and 32 characters long, and must contain at least 1
-	// numeric character, 1 lowercase character, 1 uppercase character,
-	// and 1 special (nonalphanumeric) character.
-	// +kubebuilder:validation:Required
-	Password string `json:"password"`
-	// The port the source MySQL instance listens on.
-	// +kubebuilder:validation:Optional
-	Port int `json:"port,omitempty"`
-	// +kubebuilder:validation:Optional
-	SslCaCertificate ChannelSourceSslCaCertificateObservedState `json:"sslCaCertificate,omitempty"`
-	// +kubebuilder:validation:Optional
+	Username                      string                                                  `json:"username,omitempty"`
+	SslCaCertificate              ChannelSourceSslCaCertificateObservedState              `json:"sslCaCertificate,omitempty"`
 	AnonymousTransactionsHandling ChannelSourceAnonymousTransactionsHandlingObservedState `json:"anonymousTransactionsHandling,omitempty"`
 	// The SSL mode of the Channel.
-	// +kubebuilder:validation:Required
-	SslMode string `json:"sslMode"`
+	SslMode string `json:"sslMode,omitempty"`
 }
 
 // ChannelTargetObservedState defines nested fields for Channel.Target.
 type ChannelTargetObservedState struct {
-	// +kubebuilder:validation:Optional
-	JsonData string `json:"jsonData,omitempty"`
-	// +kubebuilder:validation:Optional
+	JsonData   string `json:"jsonData,omitempty"`
 	TargetType string `json:"targetType,omitempty"`
-	// The OCID of the target DB System.
-	// +kubebuilder:validation:Required
-	DbSystemId string `json:"dbSystemId"`
+	// The OCID of the source DB System.
+	DbSystemId string `json:"dbSystemId,omitempty"`
 	// The case-insensitive name that identifies the replication channel. Channel names
 	// must follow the rules defined for MySQL identifiers (https://dev.mysql.com/doc/refman/8.0/en/identifiers.html).
 	// The names of non-Deleted Channels must be unique for each DB System.
-	// +kubebuilder:validation:Optional
 	ChannelName string `json:"channelName,omitempty"`
 	// The username for the replication applier of the target MySQL DB System.
-	// +kubebuilder:validation:Optional
 	ApplierUsername string `json:"applierUsername,omitempty"`
-	// Replication filter rules to be applied at the DB System Channel target.
-	// +kubebuilder:validation:Optional
-	Filters []ChannelTargetFilter `json:"filters,omitempty"`
 	// Specifies the amount of time, in seconds, that the channel waits before
 	// applying a transaction received from the source.
-	// +kubebuilder:validation:Optional
 	DelayInSeconds int `json:"delayInSeconds,omitempty"`
+	// Replication filter rules to be applied at the DB System Channel target.
+	Filters []ChannelTargetFilter `json:"filters,omitempty"`
 	// Specifies how a replication channel handles the creation and alteration of tables
-	// that do not have a primary key. The default value is set to ALLOW.
-	// +kubebuilder:validation:Optional
+	// that do not have a primary key.
 	TablesWithoutPrimaryKeyHandling string `json:"tablesWithoutPrimaryKeyHandling,omitempty"`
 }
 

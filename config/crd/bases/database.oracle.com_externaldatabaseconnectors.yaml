@@ -175,8 +175,8 @@ spec:
                   of the compartment.
                 type: string
               connectionCredentials:
-                description: ExternalDatabaseConnectorConnectionCredentials defines
-                  nested fields for ExternalDatabaseConnector.ConnectionCredentials.
+                description: ExternalDatabaseConnectorConnectionCredentialsObservedState
+                  defines nested fields for ExternalDatabaseConnector.ConnectionCredentials.
                 properties:
                   credentialName:
                     description: |-
@@ -191,12 +191,6 @@ spec:
                     type: string
                   credentialType:
                     type: string
-                  jsonData:
-                    type: string
-                  password:
-                    description: The password that will be used to connect to the
-                      database.
-                    type: string
                   role:
                     description: The role of the user that will be connecting to the
                       database.
@@ -209,12 +203,6 @@ spec:
                     description: The username that will be used to connect to the
                       database.
                     type: string
-                required:
-                - credentialName
-                - password
-                - role
-                - sslSecretId
-                - username
                 type: object
               connectionStatus:
                 description: The status of connectivity to the external database.
@@ -280,8 +268,6 @@ spec:
                 description: |-
                   The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the
                   CreateExternalDatabaseConnectorDetails.
-                type: string
-              jsonData:
                 type: string
               lifecycleDetails:
                 description: Additional information about the current lifecycle state.

@@ -99,9 +99,27 @@ spec:
           status:
             description: BootVolumeBackupStatus defines the observed state of BootVolumeBackup.
             properties:
+              bootVolumeId:
+                description: The OCID of the boot volume.
+                type: string
               compartmentId:
                 description: The OCID of the compartment that contains the boot volume
                   backup.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a
+                  namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              displayName:
+                description: |-
+                  A user-friendly name. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
                 type: string
               expirationTime:
                 description: |-
@@ -111,12 +129,27 @@ spec:
                   it will be absent, signifying that there is no expiration time and the backup will
                   last forever until manually deleted.
                 type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no
+                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
               id:
                 description: The OCID of the boot volume backup.
                 type: string
               imageId:
                 description: The image OCID used to create the boot volume the backup
                   is taken from.
+                type: string
+              kmsKeyId:
+                description: |-
+                  The OCID of the Vault service master encryption assigned to the boot volume backup.
+                  For more information about the Vault service and encryption keys, see
+                  Overview of Vault service (https://docs.cloud.oracle.com/iaas/Content/KeyManagement/Concepts/keyoverview.htm) and
+                  Using Keys (https://docs.cloud.oracle.com/iaas/Content/KeyManagement/Tasks/usingkeys.htm).
                 type: string
               lifecycleState:
                 description: The current state of a boot volume backup.
@@ -191,6 +224,9 @@ spec:
               timeRequestReceived:
                 description: The date and time the request to create the boot volume
                   backup was received. Format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+                type: string
+              type:
+                description: The type of a volume backup.
                 type: string
               uniqueSizeInGBs:
                 description: |-

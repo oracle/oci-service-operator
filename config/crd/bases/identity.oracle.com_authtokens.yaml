@@ -133,11 +133,6 @@ spec:
                   Null if it never expires.
                   Example: `2016-08-25T21:10:29.600Z`
                 type: string
-              token:
-                description: |-
-                  The auth token. The value is available only in the response for `CreateAuthToken`, and not
-                  for `ListAuthTokens` or `UpdateAuthToken`.
-                type: string
               userId:
                 description: The OCID of the user the auth token belongs to.
                 type: string

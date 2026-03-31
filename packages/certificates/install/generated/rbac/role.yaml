@@ -1,0 +1,44 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - certificates.oracle.com
+  resources:
+  - cabundles
+  - certificateauthoritybundles
+  - certificateauthoritybundleversions
+  - certificatebundles
+  - certificatebundleversions
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - certificates.oracle.com
+  resources:
+  - cabundles/finalizers
+  - certificateauthoritybundles/finalizers
+  - certificateauthoritybundleversions/finalizers
+  - certificatebundles/finalizers
+  - certificatebundleversions/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - certificates.oracle.com
+  resources:
+  - cabundles/status
+  - certificateauthoritybundles/status
+  - certificateauthoritybundleversions/status
+  - certificatebundles/status
+  - certificatebundleversions/status
+  verbs:
+  - get
+  - patch
+  - update

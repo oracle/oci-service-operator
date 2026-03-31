@@ -55,6 +55,108 @@ spec:
           status:
             description: ZoneFromZoneFileStatus defines the observed state of ZoneFromZoneFile.
             properties:
+              compartmentId:
+                description: The OCID of the compartment containing the zone.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+
+                  **Example:** `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              externalDownstreams:
+                description: |-
+                  External secondary servers for the zone.
+                  This field is currently not supported when `zoneType` is `SECONDARY` or `scope` is `PRIVATE`.
+                items:
+                  description: ZoneFromZoneFileExternalDownstream defines nested fields
+                    for ZoneFromZoneFile.ExternalDownstream.
+                  properties:
+                    address:
+                      description: The server's IP address (IPv4 or IPv6).
+                      type: string
+                    port:
+                      description: |-
+                        The server's port. Port value must be a value of 53, otherwise omit
+                        the port value.
+                      type: integer
+                    tsigKeyId:
+                      description: |-
+                        The OCID of the TSIG key.
+                        A TSIG key is used to secure DNS messages (in this case, zone transfers) between two systems that both have the (shared) secret.
+                      type: string
+                  type: object
+                type: array
+              externalMasters:
+                description: |-
+                  External master servers for the zone. `externalMasters` becomes a
+                  required parameter when the `zoneType` value is `SECONDARY`.
+                items:
+                  description: ZoneFromZoneFileExternalMaster defines nested fields
+                    for ZoneFromZoneFile.ExternalMaster.
+                  properties:
+                    address:
+                      description: The server's IP address (IPv4 or IPv6).
+                      type: string
+                    port:
+                      description: |-
+                        The server's port. Port value must be a value of 53, otherwise omit
+                        the port value.
+                      type: integer
+                    tsigKeyId:
+                      description: The OCID of the TSIG key.
+                      type: string
+                  type: object
+                type: array
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+
+                  **Example:** `{"Department": "Finance"}`
+                type: object
+              id:
+                description: The OCID of the zone.
+                type: string
+              isProtected:
+                description: A Boolean flag indicating whether or not parts of the
+                  resource are unable to be explicitly managed.
+                type: boolean
+              lifecycleState:
+                description: The current state of the zone resource.
+                type: string
+              name:
+                description: The name of the zone.
+                type: string
+              nameservers:
+                description: The authoritative nameservers for the zone.
+                items:
+                  description: ZoneFromZoneFileNameserver defines nested fields for
+                    ZoneFromZoneFile.Nameserver.
+                  properties:
+                    hostname:
+                      description: The hostname of the nameserver.
+                      type: string
+                  type: object
+                type: array
+              scope:
+                description: The scope of the zone.
+                type: string
+              self:
+                description: The canonical absolute URL of the resource.
+                type: string
+              serial:
+                description: The current serial of the zone. As seen in the zone's
+                  SOA record.
+                format: int64
+                type: integer
               status:
                 properties:
                   conditions:
@@ -97,6 +199,51 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              timeCreated:
+                description: |-
+                  The date and time the resource was created in "YYYY-MM-ddThh:mm:ssZ" format
+                  with a Z offset, as defined by RFC 3339.
+                  **Example:** `2016-07-22T17:23:59:60Z`
+                type: string
+              version:
+                description: |-
+                  Version is the never-repeating, totally-orderable, version of the
+                  zone, from which the serial field of the zone's SOA record is
+                  derived.
+                type: string
+              viewId:
+                description: |-
+                  The OCID of the private view containing the zone. This value will
+                  be null for zones in the global DNS, which are publicly resolvable and
+                  not part of a private view.
+                type: string
+              zoneTransferServers:
+                description: The OCI nameservers that transfer the zone data with
+                  external nameservers.
+                items:
+                  description: ZoneFromZoneFileZoneTransferServer defines nested fields
+                    for ZoneFromZoneFile.ZoneTransferServer.
+                  properties:
+                    address:
+                      description: The server's IP address (IPv4 or IPv6).
+                      type: string
+                    isTransferDestination:
+                      description: A Boolean flag indicating whether or not the server
+                        is a zone data transfer destination.
+                      type: boolean
+                    isTransferSource:
+                      description: A Boolean flag indicating whether or not the server
+                        is a zone data transfer source.
+                      type: boolean
+                    port:
+                      description: The server's port.
+                      type: integer
+                  type: object
+                type: array
+              zoneType:
+                description: The type of the zone. Must be either `PRIMARY` or `SECONDARY`.
+                  `SECONDARY` is only supported for GLOBAL zones.
+                type: string
             required:
             - status
             type: object

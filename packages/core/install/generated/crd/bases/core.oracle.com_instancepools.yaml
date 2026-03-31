@@ -267,13 +267,206 @@ spec:
                 items:
                   type: string
                 type: array
+              compartmentId:
+                description: |-
+                  The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the instance
+                  pool.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a
+                  namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              displayName:
+                description: |-
+                  A user-friendly name. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no
+                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
               id:
                 description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the instance pool.
                 type: string
+              instanceConfigurationId:
+                description: |-
+                  The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the instance configuration associated
+                  with the instance pool.
+                type: string
+              instanceDisplayNameFormatter:
+                description: |-
+                  A user-friendly formatter for the instance pool's instances. Instance displaynames follow the format.
+                  The formatter does not retroactively change instance's displaynames, only instance displaynames in the future follow the format
+                type: string
+              instanceHostnameFormatter:
+                description: |-
+                  A user-friendly formatter for the instance pool's instances. Instance hostnames follow the format.
+                  The formatter does not retroactively change instance's hostnames, only instance hostnames in the future follow the format
+                type: string
               lifecycleState:
                 description: The current state of the instance pool.
                 type: string
+              loadBalancers:
+                description: The load balancers attached to the instance pool.
+                items:
+                  description: InstancePoolLoadBalancer defines nested fields for
+                    InstancePool.LoadBalancer.
+                  properties:
+                    backendSetName:
+                      description: The name of the backend set on the load balancer
+                        to add instances to.
+                      type: string
+                    loadBalancerId:
+                      description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                        of the load balancer to attach to the instance pool.
+                      type: string
+                    port:
+                      description: The port value to use when creating the backend
+                        set.
+                      type: integer
+                    vnicSelection:
+                      description: |-
+                        Indicates which VNIC on each instance in the pool should be used to associate with the load balancer.
+                        Possible values are "PrimaryVnic" or the displayName of one of the secondary VNICs on the instance configuration
+                        that is associated with the instance pool.
+                      type: string
+                  required:
+                  - backendSetName
+                  - loadBalancerId
+                  - port
+                  - vnicSelection
+                  type: object
+                type: array
+              placementConfigurations:
+                description: The placement configurations for the instance pool.
+                items:
+                  description: InstancePoolPlacementConfiguration defines nested fields
+                    for InstancePool.PlacementConfiguration.
+                  properties:
+                    availabilityDomain:
+                      description: |-
+                        The availability domain to place instances.
+                        Example: `Uocm:PHX-AD-1`
+                      type: string
+                    faultDomains:
+                      description: |-
+                        The fault domains to place instances.
+                        If you don't provide any values, the system makes a best effort to distribute
+                        instances across all fault domains based on capacity.
+                        To distribute the instances evenly across selected fault domains, provide a
+                        set of fault domains. For example, you might want instances to be evenly
+                        distributed if your applications require high availability.
+                        To get a list of fault domains, use the
+                        ListFaultDomains operation
+                        in the Identity and Access Management Service API.
+                        Example: `[FAULT-DOMAIN-1, FAULT-DOMAIN-2, FAULT-DOMAIN-3]`
+                      items:
+                        type: string
+                      type: array
+                    primarySubnetId:
+                      description: |-
+                        The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the primary subnet in which to place instances. This field is deprecated.
+                        Use `primaryVnicSubnets` instead to set VNIC data for instances in the pool.
+                      type: string
+                    primaryVnicSubnets:
+                      description: InstancePoolPlacementConfigurationPrimaryVnicSubnets
+                        defines nested fields for InstancePool.PlacementConfiguration.PrimaryVnicSubnets.
+                      properties:
+                        ipv6AddressIpv6SubnetCidrPairDetails:
+                          description: |-
+                            A list of IPv6 prefix ranges from which the VNIC should be assigned an IPv6 address.
+                            You can provide only the prefix ranges and OCI will select an available
+                            address from the range. You can optionally choose to leave the prefix range empty
+                            and instead provide the specific IPv6 address that should be used from within that range.
+                          items:
+                            description: InstancePoolPlacementConfigurationPrimaryVnicSubnetsIpv6AddressIpv6SubnetCidrPairDetail
+                              defines nested fields for InstancePool.PlacementConfiguration.PrimaryVnicSubnets.Ipv6AddressIpv6SubnetCidrPairDetail.
+                            properties:
+                              ipv6SubnetCidr:
+                                description: Optional. Used to disambiguate which
+                                  subnet prefix should be used to create an IPv6 allocation.
+                                type: string
+                            type: object
+                          type: array
+                        isAssignIpv6Ip:
+                          description: |-
+                            Whether to allocate an IPv6 address at instance and VNIC creation from an IPv6 enabled
+                            subnet. Default: False. When provided you may optionally provide an IPv6 prefix
+                            (`ipv6SubnetCidr`) of your choice to assign the IPv6 address from. If `ipv6SubnetCidr`
+                            is not provided then an IPv6 prefix is chosen
+                            for you.
+                          type: boolean
+                        subnetId:
+                          description: The subnet OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                            for the secondary VNIC.
+                          type: string
+                      required:
+                      - subnetId
+                      type: object
+                    secondaryVnicSubnets:
+                      description: The set of secondary VNIC data for instances in
+                        the pool.
+                      items:
+                        description: InstancePoolPlacementConfigurationSecondaryVnicSubnet
+                          defines nested fields for InstancePool.PlacementConfiguration.SecondaryVnicSubnet.
+                        properties:
+                          displayName:
+                            description: |-
+                              The display name of the VNIC. This is also used to match against the instance configuration defined
+                              secondary VNIC.
+                            type: string
+                          ipv6AddressIpv6SubnetCidrPairDetails:
+                            description: |-
+                              A list of IPv6 prefix ranges from which the VNIC should be assigned an IPv6 address.
+                              You can provide only the prefix ranges and OCI will select an available
+                              address from the range. You can optionally choose to leave the prefix range empty
+                              and instead provide the specific IPv6 address that should be used from within that range.
+                            items:
+                              description: InstancePoolPlacementConfigurationSecondaryVnicSubnetIpv6AddressIpv6SubnetCidrPairDetail
+                                defines nested fields for InstancePool.PlacementConfiguration.SecondaryVnicSubnet.Ipv6AddressIpv6SubnetCidrPairDetail.
+                              properties:
+                                ipv6SubnetCidr:
+                                  description: Optional. Used to disambiguate which
+                                    subnet prefix should be used to create an IPv6
+                                    allocation.
+                                  type: string
+                              type: object
+                            type: array
+                          isAssignIpv6Ip:
+                            description: |-
+                              Whether to allocate an IPv6 address at instance and VNIC creation from an IPv6 enabled
+                              subnet. Default: False. When provided you may optionally provide an IPv6 prefix
+                              (`ipv6SubnetCidr`) of your choice to assign the IPv6 address from. If `ipv6SubnetCidr`
+                              is not provided then an IPv6 prefix is chosen
+                              for you.
+                            type: boolean
+                          subnetId:
+                            description: The subnet OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                              for the secondary VNIC.
+                            type: string
+                        required:
+                        - subnetId
+                        type: object
+                      type: array
+                  required:
+                  - availabilityDomain
+                  type: object
+                type: array
+              size:
+                description: The number of instances that should be in the instance
+                  pool.
+                type: integer
               status:
                 properties:
                   conditions:

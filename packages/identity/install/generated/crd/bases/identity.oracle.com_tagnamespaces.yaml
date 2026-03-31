@@ -120,14 +120,68 @@ spec:
           status:
             description: TagNamespaceStatus defines the observed state of TagNamespace.
             properties:
+              compartmentId:
+                description: The OCID of the compartment that contains the tag namespace.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              description:
+                description: The description you assign to the tag namespace.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
               id:
                 description: The OCID of the tag namespace.
                 type: string
+              isRetired:
+                description: |-
+                  Whether the tag namespace is retired.
+                  See Retiring Key Definitions and Namespace Definitions (https://docs.cloud.oracle.com/Content/Tagging/Tasks/managingtagsandtagnamespaces.htm#retiringkeys).
+                type: boolean
               lifecycleState:
                 description: The tagnamespace's current state. After creating a tagnamespace,
                   make sure its `lifecycleState` is ACTIVE before using it. After
                   retiring a tagnamespace, make sure its `lifecycleState` is INACTIVE
                   before using it.
+                type: string
+              locks:
+                description: Locks associated with this resource.
+                items:
+                  description: TagNamespaceLock defines nested fields for TagNamespace.Lock.
+                  properties:
+                    message:
+                      description: |-
+                        A message added by the creator of the lock. This is typically used to give an
+                        indication of why the resource is locked.
+                      type: string
+                    relatedResourceId:
+                      description: The ID of the resource that is locking this resource.
+                        Indicates that deleting this resource will remove the lock.
+                      type: string
+                    type:
+                      description: Type of the lock.
+                      type: string
+                  required:
+                  - type
+                  type: object
+                type: array
+              name:
+                description: The name of the tag namespace. It must be unique across
+                  all tag namespaces in the tenancy and cannot be changed.
                 type: string
               status:
                 properties:

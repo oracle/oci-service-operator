@@ -547,7 +547,7 @@ func TestBuildPackageModelSynthesizesIdentityObservedStateAliases(t *testing.T) 
 	assertResourceStatusFields(t, findResource(t, pkg.Resources, "CostTrackingTag"), []string{"TagNamespaceId", "TagNamespaceName", "IsRetired", "Validator"})
 	assertResourceStatusFields(t, findResource(t, pkg.Resources, "IdentityProvider"), []string{"CompartmentId", "Name", "Description", "Metadata", "MetadataUrl", "ProductType"})
 	assertResourceStatusFields(t, findResource(t, pkg.Resources, "NetworkSource"), []string{"CompartmentId", "Name", "Description", "PublicSourceList", "Services", "VirtualSourceList"})
-	assertResourceStatusFields(t, findResource(t, pkg.Resources, "OrResetUIPassword"), []string{"Password", "UserId", "TimeCreated", "LifecycleState", "InactiveStatus"})
+	assertResourceStatusFields(t, findResource(t, pkg.Resources, "OrResetUIPassword"), []string{"UserId", "TimeCreated", "LifecycleState", "InactiveStatus"})
 	assertResourceStatusFields(t, findResource(t, pkg.Resources, "StandardTagNamespace"), []string{"Description", "StandardTagNamespaceName", "TagDefinitionTemplates"})
 	assertFieldTag(t, findResource(t, pkg.Resources, "StandardTagNamespace").StatusFields, "Status", `json:"sdkStatus,omitempty"`)
 	assertResourceStatusFields(t, findResource(t, pkg.Resources, "StandardTagTemplate"), []string{"Description", "TagDefinitionName", "Type", "IsCostTracking"})
@@ -602,7 +602,7 @@ func TestBuildPackageModelSynthesizesCoreObservedStateAliases(t *testing.T) {
 	assertResourceStatusFields(t, findResource(t, pkg.Resources, "IPSecConnectionTunnelSecurityAssociation"), []string{"CpeSubnet", "OracleSubnet", "TunnelSaStatus"})
 	assertResourceStatusFields(t, findResource(t, pkg.Resources, "InstanceDevice"), []string{"IsAvailable", "Name"})
 	assertResourceStatusFields(t, findResource(t, pkg.Resources, "VolumeBackupPolicyAssetAssignment"), []string{"AssetId", "Id", "PolicyId", "TimeCreated"})
-	assertResourceStatusFields(t, findResource(t, pkg.Resources, "WindowsInstanceInitialCredential"), []string{"Password", "Username"})
+	assertResourceStatusFields(t, findResource(t, pkg.Resources, "WindowsInstanceInitialCredential"), []string{"Username"})
 	assertResourceStatusFields(t, findResource(t, pkg.Resources, "FastConnectProviderVirtualCircuitBandwidthShape"), []string{"BandwidthInMbps", "Name"})
 	assertResourceStatusFields(t, findResource(t, pkg.Resources, "CrossconnectPortSpeedShape"), []string{"Name", "PortSpeedInGbps"})
 	assertResourceStatusFields(t, findResource(t, pkg.Resources, "AllDrgAttachment"), []string{"Id"})
@@ -1773,6 +1773,33 @@ func TestCheckedInConfigIncludesONSObservedStateAlias(t *testing.T) {
 	}
 }
 
+func TestCheckedInConfigExcludesSensitiveObservedStateFields(t *testing.T) {
+	cfg := loadCheckedInGeneratorConfig(t)
+
+	tests := []struct {
+		name   string
+		assert func(*testing.T, *PackageModel)
+	}{
+		{name: "certificates", assert: assertCheckedInCertificatesSensitiveStatusExclusions},
+		{name: "core", assert: assertCheckedInCoreSensitiveStatusExclusions},
+		{name: "database", assert: assertCheckedInDatabaseSensitiveStatusExclusions},
+		{name: "dns", assert: assertCheckedInDNSSensitiveStatusExclusions},
+		{name: "identity", assert: assertCheckedInIdentitySensitiveStatusExclusions},
+		{name: "keymanagement", assert: assertCheckedInKeyManagementSensitiveStatusExclusions},
+		{name: "mysql", assert: assertCheckedInMySQLSensitiveStatusExclusions},
+		{name: "secrets", assert: assertCheckedInSecretsSensitiveStatusExclusions},
+	}
+
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			service := *mustFindGeneratorService(t, cfg, test.name)
+			pkg := mustBuildPackageModel(t, cfg, service)
+			test.assert(t, pkg)
+		})
+	}
+}
+
 func TestMySQLPublishedKindIncludesOptionalDesiredStateFields(t *testing.T) {
 	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
 	cfg, err := LoadConfig(cfgPath)
@@ -2046,6 +2073,18 @@ func assertNoField(t *testing.T, fields []FieldModel, name string, context strin
 	}
 }
 
+func assertNoNestedStatusField(t *testing.T, resource ResourceModel, statusFieldName string, nestedFieldName string, context string) {
+	t.Helper()
+
+	statusField := findFieldModel(t, resource.StatusFields, statusFieldName)
+	helperTypeName := underlyingTypeName(statusField.Type)
+	if helperTypeName == "" {
+		t.Fatalf("%s %s type = %q, want helper type", resource.Kind, statusFieldName, statusField.Type)
+	}
+
+	assertNoField(t, findHelperType(t, resource.HelperTypes, helperTypeName).Fields, nestedFieldName, context)
+}
+
 func assertDiscoveredMySQLDbSystem(t *testing.T, resource ResourceModel) {
 	t.Helper()
 
@@ -2198,9 +2237,108 @@ func assertSecretsComplexSDKFields(t *testing.T, pkg *PackageModel) {
 	t.Helper()
 
 	bundle := findResource(t, pkg.Resources, "SecretBundle")
-	assertFieldType(t, bundle.StatusFields, "SecretBundleContent", "SecretBundleContent")
-	assertHelperFields(t, findHelperType(t, bundle.HelperTypes, "SecretBundleContent"), []string{"ContentType", "Content"})
-	assertResourceStatusFields(t, findResource(t, pkg.Resources, "SecretBundleByName"), []string{"SecretId", "VersionNumber", "SecretBundleContent", "Metadata"})
+	assertResourceStatusFields(t, bundle, []string{"SecretId", "VersionNumber", "Metadata"})
+	assertResourceStatusFields(t, findResource(t, pkg.Resources, "SecretBundleByName"), []string{"SecretId", "VersionNumber", "Metadata"})
+}
+
+func assertCheckedInCertificatesSensitiveStatusExclusions(t *testing.T, pkg *PackageModel) {
+	t.Helper()
+
+	bundle := findResource(t, pkg.Resources, "CertificateBundle")
+	assertNoField(t, bundle.StatusFields, "JsonData", "CertificateBundle status")
+	assertNoField(t, bundle.StatusFields, "PrivateKeyPem", "CertificateBundle status")
+	assertNoField(t, bundle.StatusFields, "PrivateKeyPemPassphrase", "CertificateBundle status")
+}
+
+func assertCheckedInCoreSensitiveStatusExclusions(t *testing.T, pkg *PackageModel) {
+	t.Helper()
+
+	crossConnectMapping := findResource(t, pkg.Resources, "CrossConnectMapping")
+	assertNoField(t, crossConnectMapping.StatusFields, "BgpMd5AuthKey", "CrossConnectMapping status")
+
+	ipSecConnectionDeviceConfig := findResource(t, pkg.Resources, "IPSecConnectionDeviceConfig")
+	assertResourceStatusFields(t, ipSecConnectionDeviceConfig, []string{"CompartmentId", "Id", "Tunnels"})
+	assertNoField(
+		t,
+		findHelperType(t, ipSecConnectionDeviceConfig.HelperTypes, "IPSecConnectionDeviceConfigTunnel").Fields,
+		"SharedSecret",
+		"IPSecConnectionDeviceConfigTunnel",
+	)
+
+	ipSecConnectionTunnelSharedSecret := findResource(t, pkg.Resources, "IPSecConnectionTunnelSharedSecret")
+	assertNoField(t, ipSecConnectionTunnelSharedSecret.StatusFields, "SharedSecret", "IPSecConnectionTunnelSharedSecret status")
+
+	virtualCircuit := findResource(t, pkg.Resources, "VirtualCircuit")
+	assertNoNestedStatusField(t, virtualCircuit, "CrossConnectMappings", "BgpMd5AuthKey", "VirtualCircuit status CrossConnectMappings")
+
+	volumeAttachment := findResource(t, pkg.Resources, "VolumeAttachment")
+	assertNoField(t, volumeAttachment.StatusFields, "JsonData", "VolumeAttachment status")
+	assertNoField(t, volumeAttachment.StatusFields, "ChapSecret", "VolumeAttachment status")
+
+	windowsInstanceInitialCredential := findResource(t, pkg.Resources, "WindowsInstanceInitialCredential")
+	assertNoField(t, windowsInstanceInitialCredential.StatusFields, "Password", "WindowsInstanceInitialCredential status")
+}
+
+func assertCheckedInDatabaseSensitiveStatusExclusions(t *testing.T, pkg *PackageModel) {
+	t.Helper()
+
+	externalBackupJob := findResource(t, pkg.Resources, "ExternalBackupJob")
+	assertNoField(t, externalBackupJob.StatusFields, "SwiftPassword", "ExternalBackupJob status")
+
+	externalDatabaseConnector := findResource(t, pkg.Resources, "ExternalDatabaseConnector")
+	assertNoField(t, externalDatabaseConnector.StatusFields, "JsonData", "ExternalDatabaseConnector status")
+	assertNoNestedStatusField(t, externalDatabaseConnector, "ConnectionCredentials", "JsonData", "ExternalDatabaseConnector status ConnectionCredentials")
+	assertNoNestedStatusField(t, externalDatabaseConnector, "ConnectionCredentials", "Password", "ExternalDatabaseConnector status ConnectionCredentials")
+}
+
+func assertCheckedInDNSSensitiveStatusExclusions(t *testing.T, pkg *PackageModel) {
+	t.Helper()
+
+	tsigKey := findResource(t, pkg.Resources, "TsigKey")
+	assertNoField(t, tsigKey.StatusFields, "Secret", "TsigKey status")
+}
+
+func assertCheckedInIdentitySensitiveStatusExclusions(t *testing.T, pkg *PackageModel) {
+	t.Helper()
+
+	authToken := findResource(t, pkg.Resources, "AuthToken")
+	assertNoField(t, authToken.StatusFields, "Token", "AuthToken status")
+
+	customerSecretKey := findResource(t, pkg.Resources, "CustomerSecretKey")
+	assertNoField(t, customerSecretKey.StatusFields, "Key", "CustomerSecretKey status")
+
+	orResetUIPassword := findResource(t, pkg.Resources, "OrResetUIPassword")
+	assertNoField(t, orResetUIPassword.StatusFields, "Password", "OrResetUIPassword status")
+
+	smtpCredential := findResource(t, pkg.Resources, "SmtpCredential")
+	assertNoField(t, smtpCredential.StatusFields, "Password", "SmtpCredential status")
+
+	swiftPassword := findResource(t, pkg.Resources, "SwiftPassword")
+	assertNoField(t, swiftPassword.StatusFields, "Password", "SwiftPassword status")
+}
+
+func assertCheckedInKeyManagementSensitiveStatusExclusions(t *testing.T, pkg *PackageModel) {
+	t.Helper()
+
+	preCoUserCredential := findResource(t, pkg.Resources, "PreCoUserCredential")
+	assertNoField(t, preCoUserCredential.StatusFields, "Password", "PreCoUserCredential status")
+}
+
+func assertCheckedInMySQLSensitiveStatusExclusions(t *testing.T, pkg *PackageModel) {
+	t.Helper()
+
+	channel := findResource(t, pkg.Resources, "Channel")
+	assertNoNestedStatusField(t, channel, "Source", "Password", "Channel status Source")
+}
+
+func assertCheckedInSecretsSensitiveStatusExclusions(t *testing.T, pkg *PackageModel) {
+	t.Helper()
+
+	secretBundle := findResource(t, pkg.Resources, "SecretBundle")
+	assertNoField(t, secretBundle.StatusFields, "SecretBundleContent", "SecretBundle status")
+
+	secretBundleByName := findResource(t, pkg.Resources, "SecretBundleByName")
+	assertNoField(t, secretBundleByName.StatusFields, "SecretBundleContent", "SecretBundleByName status")
 }
 
 func assertVaultComplexSDKFields(t *testing.T, pkg *PackageModel) {

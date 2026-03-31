@@ -66,6 +66,9 @@ spec:
             description: VirtualCircuitPublicPrefixStatus defines the observed state
               of VirtualCircuitPublicPrefix.
             properties:
+              cidrBlock:
+                description: Publix IP prefix (CIDR) that the customer specified.
+                type: string
               status:
                 properties:
                   conditions:

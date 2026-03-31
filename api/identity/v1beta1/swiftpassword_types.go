@@ -23,9 +23,6 @@ type SwiftPasswordSpec struct {
 // SwiftPasswordStatus defines the observed state of SwiftPassword.
 type SwiftPasswordStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
-	// The Swift password. The value is available only in the response for `CreateSwiftPassword`, and not
-	// for `ListSwiftPasswords` or `UpdateSwiftPassword`.
-	Password string `json:"password,omitempty"`
 	// The OCID of the Swift password.
 	Id string `json:"id,omitempty"`
 	// The OCID of the user the password belongs to.

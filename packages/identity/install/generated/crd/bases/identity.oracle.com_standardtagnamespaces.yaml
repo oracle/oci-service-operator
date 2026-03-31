@@ -57,6 +57,18 @@ spec:
             description: StandardTagNamespaceStatus defines the observed state of
               StandardTagNamespace.
             properties:
+              description:
+                description: The default description of the tag namespace that users
+                  can use to create the tag namespace
+                type: string
+              sdkStatus:
+                description: |-
+                  The status of the standard tag namespace
+                  This uses a distinct JSON name so it can coexist with the OSOK status envelope.
+                type: string
+              standardTagNamespaceName:
+                description: The reserved name of this standard tag namespace
+                type: string
               status:
                 properties:
                   conditions:
@@ -99,6 +111,40 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              tagDefinitionTemplates:
+                description: The template of the tag definition. This object includes
+                  necessary details to create the provided standard tag definition.
+                items:
+                  description: StandardTagNamespaceTagDefinitionTemplate defines nested
+                    fields for StandardTagNamespace.TagDefinitionTemplate.
+                  properties:
+                    description:
+                      description: The default description of the tag namespace that
+                        users can use to create the tag definition
+                      type: string
+                    enumMutability:
+                      description: The mutability of the possible values list for
+                        enum tags. This will default to IMMUTABLE for string value
+                        tags
+                      type: string
+                    isCostTracking:
+                      description: Is the tag a cost tracking tag. Default will be
+                        false as cost tracking tags have been deprecated
+                      type: boolean
+                    possibleValues:
+                      description: List of possible values. An optional parameter
+                        that will be present if the type of definition is enum.
+                      items:
+                        type: string
+                      type: array
+                    tagDefinitionName:
+                      description: The name of this standard tag definition
+                      type: string
+                    type:
+                      description: The type of tag definition. Enum or string.
+                      type: string
+                  type: object
+                type: array
             required:
             - status
             type: object

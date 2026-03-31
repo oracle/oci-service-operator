@@ -37,7 +37,6 @@ type CertificateBundleValidity struct {
 // CertificateBundleStatus defines the observed state of CertificateBundle.
 type CertificateBundleStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
-	JsonData   string            `json:"jsonData,omitempty"`
 	// The certificate in PEM format.
 	CertificatePem string `json:"certificatePem,omitempty"`
 	// The certificate chain (in PEM format) for the certificate bundle.
@@ -61,10 +60,6 @@ type CertificateBundleStatus struct {
 	// A list of rotation states for the certificate bundle.
 	Stages                []string `json:"stages,omitempty"`
 	CertificateBundleType string   `json:"certificateBundleType,omitempty"`
-	// The private key (in PEM format) for the certificate.
-	PrivateKeyPem string `json:"privateKeyPem,omitempty"`
-	// An optional passphrase for the private key.
-	PrivateKeyPemPassphrase string `json:"privateKeyPemPassphrase,omitempty"`
 }
 
 // +kubebuilder:object:root=true

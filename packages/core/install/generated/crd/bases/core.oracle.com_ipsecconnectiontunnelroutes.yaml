@@ -58,6 +58,24 @@ spec:
             description: IPSecConnectionTunnelRouteStatus defines the observed state
               of IPSecConnectionTunnelRoute.
             properties:
+              advertiser:
+                description: The source of the route advertisement.
+                type: string
+              age:
+                description: The age of the route.
+                format: int64
+                type: integer
+              asPath:
+                description: A list of ASNs in AS_Path.
+                items:
+                  type: integer
+                type: array
+              isBestPath:
+                description: Indicates this is the best route.
+                type: boolean
+              prefix:
+                description: The BGP network layer reachability information.
+                type: string
               status:
                 properties:
                   conditions:

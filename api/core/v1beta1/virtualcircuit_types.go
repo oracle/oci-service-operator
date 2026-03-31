@@ -189,6 +189,55 @@ type VirtualCircuitPublicPrefixFields struct {
 	CidrBlock string `json:"cidrBlock"`
 }
 
+// VirtualCircuitCrossConnectMappingObservedState defines nested fields for VirtualCircuit.CrossConnectMapping.
+type VirtualCircuitCrossConnectMappingObservedState struct {
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the cross-connect or cross-connect group for this mapping.
+	// Specified by the owner of the cross-connect or cross-connect group (the
+	// customer if the customer is colocated with Oracle, or the provider if the
+	// customer is connecting via provider).
+	CrossConnectOrCrossConnectGroupId string `json:"crossConnectOrCrossConnectGroupId,omitempty"`
+	// The BGP IPv4 address for the router on the other end of the BGP session from
+	// Oracle. Specified by the owner of that router. If the session goes from Oracle
+	// to a customer, this is the BGP IPv4 address of the customer's edge router. If the
+	// session goes from Oracle to a provider, this is the BGP IPv4 address of the
+	// provider's edge router. Must use a subnet mask from /28 to /31.
+	// There's one exception: for a public virtual circuit, Oracle specifies the BGP IPv4 addresses.
+	// Example: `10.0.0.18/31`
+	CustomerBgpPeeringIp string `json:"customerBgpPeeringIp,omitempty"`
+	// The IPv4 address for Oracle's end of the BGP session. Must use a subnet mask from /28 to /31.
+	// If the session goes from Oracle to a customer's edge router,
+	// the customer specifies this information. If the session goes from Oracle to
+	// a provider's edge router, the provider specifies this.
+	// There's one exception: for a public virtual circuit, Oracle specifies the BGP IPv4 addresses.
+	// Example: `10.0.0.19/31`
+	OracleBgpPeeringIp string `json:"oracleBgpPeeringIp,omitempty"`
+	// The BGP IPv6 address for the router on the other end of the BGP session from
+	// Oracle. Specified by the owner of that router. If the session goes from Oracle
+	// to a customer, this is the BGP IPv6 address of the customer's edge router. If the
+	// session goes from Oracle to a provider, this is the BGP IPv6 address of the
+	// provider's edge router. Only subnet masks from /64 up to /127 are allowed.
+	// There's one exception: for a public virtual circuit, Oracle specifies the BGP IPv6 addresses.
+	// IPv6 addressing is supported for all commercial and government regions. See
+	// IPv6 Addresses (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/ipv6.htm).
+	// Example: `2001:db8::1/64`
+	CustomerBgpPeeringIpv6 string `json:"customerBgpPeeringIpv6,omitempty"`
+	// The IPv6 address for Oracle's end of the BGP session. Only subnet masks from /64 up to /127 are allowed.
+	// If the session goes from Oracle to a customer's edge router,
+	// the customer specifies this information. If the session goes from Oracle to
+	// a provider's edge router, the provider specifies this.
+	// There's one exception: for a public virtual circuit, Oracle specifies the BGP IPv6 addresses.
+	// Note that IPv6 addressing is currently supported only in certain regions. See
+	// IPv6 Addresses (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/ipv6.htm).
+	// Example: `2001:db8::2/64`
+	OracleBgpPeeringIpv6 string `json:"oracleBgpPeeringIpv6,omitempty"`
+	// The number of the specific VLAN (on the cross-connect or cross-connect group)
+	// that is assigned to this virtual circuit. Specified by the owner of the cross-connect
+	// or cross-connect group (the customer if the customer is colocated with Oracle, or
+	// the provider if the customer is connecting via provider).
+	// Example: `200`
+	Vlan int `json:"vlan,omitempty"`
+}
+
 // VirtualCircuitStatus defines the observed state of VirtualCircuit.
 type VirtualCircuitStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
@@ -209,7 +258,7 @@ type VirtualCircuitStatus struct {
 	// An array of mappings, each containing properties for a
 	// cross-connect or cross-connect group that is associated with this
 	// virtual circuit.
-	CrossConnectMappings []VirtualCircuitCrossConnectMapping `json:"crossConnectMappings,omitempty"`
+	CrossConnectMappings []VirtualCircuitCrossConnectMappingObservedState `json:"crossConnectMappings,omitempty"`
 	// The routing policy sets how routing information about the Oracle cloud is shared over a public virtual circuit.
 	// Policies available are: `ORACLE_SERVICE_NETWORK`, `REGIONAL`, `MARKET_LEVEL`, and `GLOBAL`.
 	// See Route Filtering (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/routingonprem.htm#route_filtering) for details.

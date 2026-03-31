@@ -254,6 +254,12 @@ spec:
             description: IPSecConnectionTunnelStatus defines the observed state of
               IPSecConnectionTunnel.
             properties:
+              associatedVirtualCircuits:
+                description: The list of virtual circuit OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)s
+                  over which your network can reach this tunnel.
+                items:
+                  type: string
+                type: array
               bgpSessionInfo:
                 description: IPSecConnectionTunnelBgpSessionInfo defines nested fields
                   for IPSecConnectionTunnel.BgpSessionInfo.
@@ -330,6 +336,11 @@ spec:
                   The IP address of the CPE device's VPN headend.
                   Example: `203.0.113.22`
                 type: string
+              displayName:
+                description: |-
+                  A user-friendly name. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
+                type: string
               dpdMode:
                 description: |-
                   Dead peer detection (DPD) mode set on the Oracle side of the connection.
@@ -339,12 +350,43 @@ spec:
               dpdTimeoutInSec:
                 description: DPD timeout in seconds.
                 type: integer
+              encryptionDomainConfig:
+                description: IPSecConnectionTunnelEncryptionDomainConfig defines nested
+                  fields for IPSecConnectionTunnel.EncryptionDomainConfig.
+                properties:
+                  cpeTrafficSelector:
+                    description: Lists IPv4 or IPv6-enabled subnets in your on-premises
+                      network.
+                    items:
+                      type: string
+                    type: array
+                  oracleTrafficSelector:
+                    description: Lists IPv4 or IPv6-enabled subnets in your Oracle
+                      tenancy.
+                    items:
+                      type: string
+                    type: array
+                type: object
               id:
                 description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the tunnel.
                 type: string
+              ikeVersion:
+                description: Internet Key Exchange protocol version.
+                type: string
               lifecycleState:
                 description: The tunnel's lifecycle state.
+                type: string
+              natTranslationEnabled:
+                description: |-
+                  By default (the `AUTO` setting), IKE sends packets with a source and destination port set to 500,
+                  and when it detects that the port used to forward packets has changed (most likely because a NAT device
+                  is between the CPE device and the Oracle VPN headend) it will try to negotiate the use of NAT-T.
+                  The `ENABLED` option sets the IKE protocol to use port 4500 instead of 500 and forces encapsulating traffic with the ESP protocol inside UDP packets.
+                  The `DISABLED` option directs IKE to completely refuse to negotiate NAT-T
+                  even if it senses there may be a NAT device in use.
+
+                  .
                 type: string
               oracleCanInitiate:
                 description: Indicates whether Oracle can only respond to a request
@@ -445,6 +487,15 @@ spec:
                       Example: `2016-08-25T21:10:29.600Z`
                     type: string
                 type: object
+              routing:
+                description: The type of routing used for this tunnel (BGP dynamic
+                  routing, static routing, or policy-based routing).
+                type: string
+              sdkStatus:
+                description: |-
+                  The status of the tunnel based on IPSec protocol characteristics.
+                  This uses a distinct JSON name so it can coexist with the OSOK status envelope.
+                type: string
               status:
                 properties:
                   conditions:

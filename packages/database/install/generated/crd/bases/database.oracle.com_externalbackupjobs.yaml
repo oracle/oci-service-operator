@@ -169,11 +169,6 @@ spec:
                     format: date-time
                     type: string
                 type: object
-              swiftPassword:
-                description: |-
-                  The auth token to use for access to the Swift compartment bucket that will store the standalone backup.
-                  For information about auth tokens, see Working with Auth Tokens (https://docs.cloud.oracle.com/Content/Identity/Tasks/managingcredentials.htm#two).
-                type: string
               swiftPath:
                 description: The Swift path to use as a destination for the standalone
                   backup.
