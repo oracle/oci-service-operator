@@ -21,9 +21,9 @@ type ConnectHarnessReconciler struct {
 	Reconciler *core.BaseReconciler
 }
 
-// +kubebuilder:rbac:groups=streaming.oracle.com,resources=connectharnesss,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=streaming.oracle.com,resources=connectharnesss/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=streaming.oracle.com,resources=connectharnesss/finalizers,verbs=update
+// +kubebuilder:rbac:groups=streaming.oracle.com,resources=connectharnesses,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=streaming.oracle.com,resources=connectharnesses/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=streaming.oracle.com,resources=connectharnesses/finalizers,verbs=update
 
 // Reconcile is part of the main Kubernetes reconciliation loop.
 func (r *ConnectHarnessReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {

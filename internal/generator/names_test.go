@@ -22,6 +22,7 @@ func TestSingularizeAndPluralize(t *testing.T) {
 		{name: "simple s suffix", input: "Widgets", singular: "Widget", plural: "Widgets"},
 		{name: "ies suffix", input: "Policies", singular: "Policy", plural: "Policies"},
 		{name: "autonomous database plural", input: "AutonomousDatabases", singular: "AutonomousDatabase", plural: "AutonomousDatabases"},
+		{name: "ss suffix gains es", input: "ConnectHarnesses", singular: "ConnectHarness", plural: "ConnectHarnesses"},
 		{name: "status suffix is preserved", input: "AlarmsStatus", singular: "AlarmStatus", plural: "AlarmStatuses"},
 		{name: "statuses singularize to status", input: "AlarmStatuses", singular: "AlarmStatus", plural: "AlarmStatuses"},
 		{name: "stats stay plural", input: "Stats", singular: "Stats", plural: "Stats"},

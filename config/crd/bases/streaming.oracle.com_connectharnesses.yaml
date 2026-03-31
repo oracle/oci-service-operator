@@ -34,7 +34,7 @@ spec:
     name: v1beta1
     schema:
       openAPIV3Schema:
-        description: ConnectHarness is the Schema for the connectharnesss API.
+        description: ConnectHarness is the Schema for the connectharnesses API.
         properties:
           apiVersion:
             description: |-
