@@ -69,7 +69,7 @@ if ("Secret sync succeeds?") then (yes)
 else (no)
 :Block successful completion until Secret sync\nsucceeds;
 endif
-:Project manual status and finalizer policy\nnone;
+:Project required status and finalizer policy\nnone;
 :Requeue on provisioning, updating, terminating;
 }
 endif
@@ -90,7 +90,7 @@ service: streaming
 slug: stream
 kind: Stream
 archetype: generated-service-manager
-status/finalizer: manual / none
+status/finalizer: required / none
 requeue: provisioning, updating, terminating
 provider states: create CREATING; update
 UPDATING; delete DELETING

@@ -41,7 +41,7 @@ var newStreamServiceClient = func(manager *StreamServiceManager) StreamServiceCl
 		Semantics: &generatedruntime.Semantics{
 			FormalService:     "streaming",
 			FormalSlug:        "stream",
-			StatusProjection:  "manual",
+			StatusProjection:  "required",
 			SecretSideEffects: "ready-only",
 			FinalizerPolicy:   "none",
 			Lifecycle: generatedruntime.LifecycleSemantics{

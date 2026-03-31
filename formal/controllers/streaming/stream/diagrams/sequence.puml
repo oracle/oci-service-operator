@@ -87,7 +87,7 @@ alt Secret sync fails
 ServiceManager --> BaseReconciler: block success and retry
 end
 end
-ServiceManager --> BaseReconciler: status=manual, finalizer=none
+ServiceManager --> BaseReconciler: status=required, finalizer=none
 end
 BaseReconciler --> Controller: requeue on provisioning, updating,\nterminating
 note right of ServiceManager
@@ -109,7 +109,7 @@ service: streaming
 slug: stream
 kind: Stream
 archetype: generated-service-manager
-status/finalizer: manual / none
+status/finalizer: required / none
 requeue: provisioning, updating, terminating
 provider states: create CREATING; update
 UPDATING; delete DELETING

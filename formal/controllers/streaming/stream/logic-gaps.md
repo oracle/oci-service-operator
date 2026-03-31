@@ -16,6 +16,6 @@ gaps: []
 ## Repo-authored semantics
 
 - Update accepts `streamPoolId`, `freeformTags`, and `definedTags`. The generated runtime rejects force-new drift for `name`, `partitions`, and `retentionInHours` against the live OCI resource body before any update call.
-- Status projection remains manual. The `Stream` CR only records `OsokStatus`, while the generated runtime still stamps the tracked OCI identifier and lifecycle conditions.
+- Status projection is part of the repo-authored contract. The generated runtime merges the live OCI `Stream` response into the published status read-model fields while still stamping `status.status.ocid` and OSOK lifecycle conditions.
 - Secret side effects are explicit repo-authored behavior. A narrow companion in the generated `stream` package writes the `messagesEndpoint` secret only after ACTIVE and deletes that secret during best-effort delete completion.
 - Delete remains explicitly best-effort. The generated runtime issues `DeleteStream`, treats `DELETING` or `DELETED` as sufficient for finalizer removal, and uses delete-phase list lookup when no OCI identifier is already tracked.

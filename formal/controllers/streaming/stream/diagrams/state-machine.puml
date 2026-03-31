@@ -71,7 +71,7 @@ service: streaming
 slug: stream
 kind: Stream
 archetype: generated-service-manager
-status/finalizer: manual / none
+status/finalizer: required / none
 requeue: provisioning, updating, terminating
 provider states: create CREATING; update
 UPDATING; delete DELETING
