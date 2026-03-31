@@ -156,11 +156,17 @@ func (c ServiceClient[T]) CreateOrUpdate(ctx context.Context, resource T, _ ctrl
 	}
 
 	currentID := c.currentID(resource)
+	originalCurrentID := currentID
+	statusOnlyCurrentID := c.shouldResolveExistingBeforeCreate() && c.usesStatusOnlyCurrentID(resource, currentID)
 	existingResponse, err := c.resolveExistingBeforeCreate(ctx, resource)
 	if err != nil {
 		return servicemanager.OSOKResponse{IsSuccessful: false}, c.markFailure(resource, err)
 	}
 	resolvedExistingBeforeCreate := currentID == "" && existingResponse != nil
+	if statusOnlyCurrentID {
+		currentID = ""
+		resolvedExistingBeforeCreate = existingResponse != nil && responseID(existingResponse) != originalCurrentID
+	}
 	if currentID == "" && existingResponse != nil {
 		currentID = responseID(existingResponse)
 	}
@@ -541,6 +547,12 @@ func (c ServiceClient[T]) readResource(ctx context.Context, resource T, preferre
 	if readID == "" {
 		readID = c.currentID(resource)
 	}
+	values, err := lookupValues(resource)
+	if err != nil {
+		return nil, err
+	}
+	listValues := values
+	listID := readID
 
 	if c.config.Get != nil && c.canInvokeGet(resource, readID) {
 		response, err := c.invoke(ctx, c.config.Get, resource, readID)
@@ -550,13 +562,17 @@ func (c ServiceClient[T]) readResource(ctx context.Context, resource T, preferre
 		if !isNotFound(err) || c.config.List == nil {
 			return nil, err
 		}
+		if phase != readPhaseDelete && c.usesStatusOnlyCurrentID(resource, readID) {
+			listValues = valuesWithoutAliases(values, c.idFieldAliases())
+			listID = ""
+		}
 	}
 
 	if c.config.List == nil {
 		return nil, fmt.Errorf("%s generated runtime has no readable OCI operation", c.config.Kind)
 	}
 
-	response, err := c.invoke(ctx, c.config.List, resource, readID)
+	response, err := c.invokeWithValues(ctx, c.config.List, resource, listValues, listID)
 	if err != nil {
 		return nil, err
 	}
@@ -566,7 +582,7 @@ func (c ServiceClient[T]) readResource(ctx context.Context, resource T, preferre
 		return nil, fmt.Errorf("%s list response did not expose a body payload", c.config.Kind)
 	}
 
-	item, err := c.selectListItem(body, resource, readID, phase)
+	item, err := c.selectListItem(body, listValues, listID, phase)
 	if err != nil {
 		return nil, err
 	}
@@ -663,6 +679,14 @@ func (c ServiceClient[T]) canInvokeGet(resource T, preferredID string) bool {
 }
 
 func (c ServiceClient[T]) invoke(ctx context.Context, op *Operation, resource T, preferredID string) (any, error) {
+	values, err := lookupValues(resource)
+	if err != nil {
+		return nil, err
+	}
+	return c.invokeWithValues(ctx, op, resource, values, preferredID)
+}
+
+func (c ServiceClient[T]) invokeWithValues(ctx context.Context, op *Operation, resource T, values map[string]any, preferredID string) (any, error) {
 	if op == nil {
 		return nil, fmt.Errorf("%s generated runtime does not define this OCI operation", c.config.Kind)
 	}
@@ -674,7 +698,7 @@ func (c ServiceClient[T]) invoke(ctx context.Context, op *Operation, resource T,
 	if request == nil {
 		return nil, fmt.Errorf("%s generated runtime did not create an OCI request value", c.config.Kind)
 	}
-	if err := buildRequest(request, resource, preferredID, op.Fields, c.idFieldAliases()); err != nil {
+	if err := buildRequest(request, resource, values, preferredID, op.Fields, c.idFieldAliases()); err != nil {
 		return nil, fmt.Errorf("build %s OCI request: %w", c.config.Kind, err)
 	}
 
@@ -773,6 +797,30 @@ func (c ServiceClient[T]) currentID(resource T) string {
 	return firstNonEmpty(values, c.idFieldAliases()...)
 }
 
+func (c ServiceClient[T]) usesStatusOnlyCurrentID(resource T, currentID string) bool {
+	if currentID == "" {
+		return false
+	}
+	return currentID == c.statusID(resource) && c.specID(resource) == ""
+}
+
+func (c ServiceClient[T]) statusID(resource T) string {
+	status, err := osokStatus(resource)
+	if err == nil && status.Ocid != "" {
+		return string(status.Ocid)
+	}
+
+	statusValue, err := statusStruct(resource)
+	if err != nil {
+		return ""
+	}
+	return firstNonEmpty(jsonMap(statusValue.Interface()), c.idFieldAliases()...)
+}
+
+func (c ServiceClient[T]) specID(resource T) string {
+	return firstNonEmpty(jsonMap(specValue(resource)), c.idFieldAliases()...)
+}
+
 func (c ServiceClient[T]) idFieldAliases() []string {
 	aliases := []string{"id", "ocid"}
 	for _, name := range []string{c.config.Kind, c.config.SDKName} {
@@ -784,7 +832,7 @@ func (c ServiceClient[T]) idFieldAliases() []string {
 	return aliases
 }
 
-func buildRequest(request any, resource any, preferredID string, fields []RequestField, idAliases []string) error {
+func buildRequest(request any, resource any, values map[string]any, preferredID string, fields []RequestField, idAliases []string) error {
 	requestValue := reflect.ValueOf(request)
 	if !requestValue.IsValid() || requestValue.Kind() != reflect.Pointer || requestValue.IsNil() {
 		return fmt.Errorf("expected pointer OCI request, got %T", request)
@@ -793,11 +841,6 @@ func buildRequest(request any, resource any, preferredID string, fields []Reques
 	requestStruct := requestValue.Elem()
 	if requestStruct.Kind() != reflect.Struct {
 		return fmt.Errorf("expected pointer to OCI request struct, got %T", request)
-	}
-
-	values, err := lookupValues(resource)
-	if err != nil {
-		return err
 	}
 
 	if len(fields) > 0 {
@@ -1260,7 +1303,7 @@ func isNotFound(err error) bool {
 	return false
 }
 
-func (c ServiceClient[T]) selectListItem(body any, resource T, preferredID string, phase readPhase) (any, error) {
+func (c ServiceClient[T]) selectListItem(body any, criteria map[string]any, preferredID string, phase readPhase) (any, error) {
 	responseItemsField := ""
 	if c.config.Semantics != nil && c.config.Semantics.List != nil {
 		responseItemsField = c.config.Semantics.List.ResponseItemsField
@@ -1271,11 +1314,6 @@ func (c ServiceClient[T]) selectListItem(body any, resource T, preferredID strin
 	}
 	if len(items) == 0 {
 		return nil, errResourceNotFound
-	}
-
-	criteria, err := lookupValues(resource)
-	if err != nil {
-		return nil, err
 	}
 	if preferredID != "" {
 		criteria["id"] = preferredID
@@ -1525,6 +1563,26 @@ func sliceValues(value reflect.Value) []any {
 		items = append(items, value.Index(i).Interface())
 	}
 	return items
+}
+
+func valuesWithoutAliases(values map[string]any, aliases []string) map[string]any {
+	filtered := make(map[string]any, len(values))
+	for key, value := range values {
+		if matchesAnyAlias(key, aliases) {
+			continue
+		}
+		filtered[key] = value
+	}
+	return filtered
+}
+
+func matchesAnyAlias(key string, aliases []string) bool {
+	for _, alias := range aliases {
+		if strings.EqualFold(key, alias) || lowerCamel(key) == lowerCamel(alias) {
+			return true
+		}
+	}
+	return false
 }
 
 func assignField(field reflect.Value, raw any) error {

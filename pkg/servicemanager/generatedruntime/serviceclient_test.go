@@ -104,6 +104,7 @@ type fakeDeleteThingResponse struct{}
 type fakeListThingRequest struct {
 	CompartmentId string `contributesTo:"query" name:"compartmentId"`
 	DisplayName   string `contributesTo:"query" name:"displayName"`
+	Id            string `contributesTo:"query" name:"id"`
 	Name          string `contributesTo:"query" name:"name"`
 }
 
@@ -1379,6 +1380,222 @@ func TestServiceClientCreateOrUpdateCreatesWhenLiveGetMissesAfterListReuse(t *te
 	}
 	if !createCalled {
 		t.Fatal("Create() should be called when the live Get no longer finds the list match")
+	}
+	if createRequest.DisplayName != "created-name" {
+		t.Fatalf("create request displayName = %q, want created-name", createRequest.DisplayName)
+	}
+	if string(resource.Status.OsokStatus.Ocid) != "ocid1.thing.oc1..created" {
+		t.Fatalf("status.ocid = %q, want created OCID", resource.Status.OsokStatus.Ocid)
+	}
+	if resource.Status.Id != "ocid1.thing.oc1..created" {
+		t.Fatalf("status.id = %q, want created OCID", resource.Status.Id)
+	}
+}
+
+func TestServiceClientCreateOrUpdateRebindsWhenTrackedStatusIDIsStale(t *testing.T) {
+	t.Parallel()
+
+	createCalled := false
+	var listRequest fakeListThingRequest
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Semantics: &Semantics{
+			List: &ListSemantics{
+				ResponseItemsField: "Items",
+				MatchFields:        []string{"id", "name", "compartmentId"},
+			},
+			Lifecycle: LifecycleSemantics{
+				ProvisioningStates: []string{"CREATING"},
+				UpdatingStates:     []string{"UPDATING"},
+				ActiveStates:       []string{"ACTIVE"},
+			},
+			Delete: DeleteSemantics{
+				Policy:         "best-effort",
+				PendingStates:  []string{"DELETING"},
+				TerminalStates: []string{"DELETED"},
+			},
+		},
+		Create: &Operation{
+			NewRequest: func() any { return &fakeCreateThingRequest{} },
+			Call: func(_ context.Context, _ any) (any, error) {
+				createCalled = true
+				t.Fatal("Create() should not be called when list fallback rebinds a replacement resource")
+				return nil, nil
+			},
+		},
+		Get: &Operation{
+			NewRequest: func() any { return &fakeGetThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				if request.(*fakeGetThingRequest).ThingId == nil || *request.(*fakeGetThingRequest).ThingId != "ocid1.thing.oc1..stale" {
+					t.Fatalf("get request thingId = %v, want stale tracked OCID", request.(*fakeGetThingRequest).ThingId)
+				}
+				return nil, fakeServiceError{
+					code:       "NotAuthorizedOrNotFound",
+					message:    "thing not found",
+					statusCode: 404,
+					opcID:      "opc-test",
+				}
+			},
+			Fields: []RequestField{
+				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
+			},
+		},
+		List: &Operation{
+			NewRequest: func() any { return &fakeListThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				listRequest = *request.(*fakeListThingRequest)
+				return fakeListThingResponse{
+					Collection: fakeThingCollection{
+						Items: []fakeThingSummary{
+							{
+								Id:             "ocid1.thing.oc1..replacement",
+								Name:           "wanted",
+								CompartmentId:  "ocid1.compartment.oc1..match",
+								LifecycleState: "ACTIVE",
+							},
+						},
+					},
+				}, nil
+			},
+			Fields: []RequestField{
+				{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
+				{FieldName: "Id", RequestName: "id", Contribution: "query"},
+				{FieldName: "Name", RequestName: "name", Contribution: "query"},
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Spec: fakeSpec{
+			CompartmentId: "ocid1.compartment.oc1..match",
+			Name:          "wanted",
+		},
+		Status: fakeStatus{
+			OsokStatus:    shared.OSOKStatus{Ocid: "ocid1.thing.oc1..stale"},
+			Id:            "ocid1.thing.oc1..stale",
+			CompartmentId: "ocid1.compartment.oc1..match",
+		},
+	}
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful {
+		t.Fatal("CreateOrUpdate() should rebind when the tracked OCID is stale")
+	}
+	if createCalled {
+		t.Fatal("Create() should not be called when list fallback rebinds a replacement resource")
+	}
+	if listRequest.Id != "" {
+		t.Fatalf("list request id = %q, want empty after stale tracked ID fallback", listRequest.Id)
+	}
+	if string(resource.Status.OsokStatus.Ocid) != "ocid1.thing.oc1..replacement" {
+		t.Fatalf("status.ocid = %q, want replacement OCID", resource.Status.OsokStatus.Ocid)
+	}
+	if resource.Status.Id != "ocid1.thing.oc1..replacement" {
+		t.Fatalf("status.id = %q, want replacement OCID", resource.Status.Id)
+	}
+}
+
+func TestServiceClientCreateOrUpdateCreatesWhenTrackedStatusIDIsStaleAndNoReplacementExists(t *testing.T) {
+	t.Parallel()
+
+	var createRequest fakeCreateThingRequest
+	var listRequest fakeListThingRequest
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Semantics: &Semantics{
+			List: &ListSemantics{
+				ResponseItemsField: "Items",
+				MatchFields:        []string{"id", "name", "compartmentId"},
+			},
+			Lifecycle: LifecycleSemantics{
+				ProvisioningStates: []string{"CREATING"},
+				UpdatingStates:     []string{"UPDATING"},
+				ActiveStates:       []string{"ACTIVE"},
+			},
+			Delete: DeleteSemantics{
+				Policy:         "best-effort",
+				PendingStates:  []string{"DELETING"},
+				TerminalStates: []string{"DELETED"},
+			},
+		},
+		Create: &Operation{
+			NewRequest: func() any { return &fakeCreateThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				createRequest = *request.(*fakeCreateThingRequest)
+				return fakeCreateThingResponse{
+					Thing: fakeThing{
+						Id:             "ocid1.thing.oc1..created",
+						CompartmentId:  "ocid1.compartment.oc1..match",
+						DisplayName:    "created-name",
+						LifecycleState: "ACTIVE",
+					},
+				}, nil
+			},
+		},
+		Get: &Operation{
+			NewRequest: func() any { return &fakeGetThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				if request.(*fakeGetThingRequest).ThingId == nil || *request.(*fakeGetThingRequest).ThingId != "ocid1.thing.oc1..stale" {
+					t.Fatalf("get request thingId = %v, want stale tracked OCID", request.(*fakeGetThingRequest).ThingId)
+				}
+				return nil, fakeServiceError{
+					code:       "NotAuthorizedOrNotFound",
+					message:    "thing not found",
+					statusCode: 404,
+					opcID:      "opc-test",
+				}
+			},
+			Fields: []RequestField{
+				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
+			},
+		},
+		List: &Operation{
+			NewRequest: func() any { return &fakeListThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				listRequest = *request.(*fakeListThingRequest)
+				return fakeListThingResponse{
+					Collection: fakeThingCollection{
+						Items: nil,
+					},
+				}, nil
+			},
+			Fields: []RequestField{
+				{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
+				{FieldName: "Id", RequestName: "id", Contribution: "query"},
+				{FieldName: "Name", RequestName: "name", Contribution: "query"},
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Spec: fakeSpec{
+			CompartmentId: "ocid1.compartment.oc1..match",
+			DisplayName:   "created-name",
+			Name:          "wanted",
+		},
+		Status: fakeStatus{
+			OsokStatus:    shared.OSOKStatus{Ocid: "ocid1.thing.oc1..stale"},
+			Id:            "ocid1.thing.oc1..stale",
+			CompartmentId: "ocid1.compartment.oc1..match",
+		},
+	}
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful {
+		t.Fatal("CreateOrUpdate() should recreate when the tracked OCID is stale and no replacement exists")
+	}
+	if listRequest.Id != "" {
+		t.Fatalf("list request id = %q, want empty after stale tracked ID fallback", listRequest.Id)
 	}
 	if createRequest.DisplayName != "created-name" {
 		t.Fatalf("create request displayName = %q, want created-name", createRequest.DisplayName)
