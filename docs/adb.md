@@ -16,9 +16,11 @@ is a fully managed, preconfigured database environment. It delivers automated
 patching, upgrades, and tuning while remaining available to applications.
 
 The v2 rollout treats the generated Autonomous Database surfaces under
-`api/database/v1beta1` as the source of truth. The legacy handwritten
-compatibility flow, bind-only shortcut, and wallet-secret side effects are not
-the contract documented here.
+`api/database/v1beta1` as the source of truth. The published OSOK CR kind
+remains `AutonomousDatabases` for compatibility even though the underlying OCI
+resource family is `AutonomousDatabase`. The legacy handwritten compatibility
+flow, bind-only shortcut, and wallet-secret side effects are not the contract
+documented here.
 
 ## OCI Permission requirement
 
@@ -83,9 +85,9 @@ kubectl create secret generic <ADMIN_PASSWORD_SECRET_NAME> --from-literal=passwo
 
 ```yaml
 apiVersion: database.oracle.com/v1beta1
-kind: AutonomousDatabase
+kind: AutonomousDatabases
 metadata:
-  name: autonomousdatabase-sample
+  name: autonomousdatabases-sample
 spec:
   compartmentId: <COMPARTMENT_OCID>
   displayName: <DISPLAY_NAME>
@@ -102,7 +104,7 @@ spec:
   licenseModel: <BRING_YOUR_OWN_LICENSE/LICENSE_INCLUDED>
 ```
 
-Apply the resource with:
+Apply the `AutonomousDatabases` resource with:
 
 ```sh
 kubectl apply -f <CREATE_YAML>.yaml
@@ -124,7 +126,7 @@ resource. For example:
 
 ```yaml
 apiVersion: database.oracle.com/v1beta1
-kind: AutonomousDatabase
+kind: AutonomousDatabases
 metadata:
   name: <CR_OBJECT_NAME>
 spec:

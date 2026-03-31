@@ -176,6 +176,43 @@ func TestAllSkipsGeneratedGroupsThatDuplicateManualEntries(t *testing.T) {
 	}
 }
 
+func TestManualWebhooksIncludesAutonomousDatabases(t *testing.T) {
+	t.Parallel()
+
+	webhooks := ManualWebhooks()
+	if len(webhooks) == 0 {
+		t.Fatal("ManualWebhooks() returned no entries")
+	}
+
+	for _, webhook := range webhooks {
+		if webhook.Name != "AutonomousDatabases" {
+			continue
+		}
+		if webhook.SetupWithManager == nil {
+			t.Fatal("AutonomousDatabases webhook setup hook is nil")
+		}
+		return
+	}
+
+	t.Fatalf("ManualWebhooks() = %v, want AutonomousDatabases entry", webhooks)
+}
+
+func TestManualWebhooksReturnsCopy(t *testing.T) {
+	t.Parallel()
+
+	webhooks := ManualWebhooks()
+	if len(webhooks) == 0 {
+		t.Fatal("ManualWebhooks() returned no entries")
+	}
+
+	webhooks[0].Name = "mutated"
+
+	fresh := ManualWebhooks()
+	if fresh[0].Name != manualWebhookRegistrations[0].Name {
+		t.Fatalf("ManualWebhooks() exposed shared slice storage: got %q, want %q", fresh[0].Name, manualWebhookRegistrations[0].Name)
+	}
+}
+
 func restoreGeneratedGroupRegistrations(t *testing.T) {
 	t.Helper()
 
