@@ -7,7 +7,6 @@ package vcn
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"reflect"
@@ -408,15 +407,25 @@ func (c *vcnRuntimeClient) markTerminating(resource *corev1beta1.Vcn, current co
 }
 
 func (c *vcnRuntimeClient) projectStatus(resource *corev1beta1.Vcn, current coresdk.Vcn) error {
-	payload, err := json.Marshal(current)
-	if err != nil {
-		return fmt.Errorf("marshal OCI response body: %w", err)
-	}
-	if err := json.Unmarshal(payload, &resource.Status); err != nil {
-		return fmt.Errorf("project OCI response body into status: %w", err)
-	}
-	if current.Id != nil {
-		resource.Status.OsokStatus.Ocid = shared.OCID(*current.Id)
+	resource.Status = corev1beta1.VcnStatus{
+		OsokStatus:            resource.Status.OsokStatus,
+		CidrBlock:             stringValue(current.CidrBlock),
+		CidrBlocks:            append([]string(nil), current.CidrBlocks...),
+		CompartmentId:         stringValue(current.CompartmentId),
+		Id:                    stringValue(current.Id),
+		LifecycleState:        string(current.LifecycleState),
+		Byoipv6CidrBlocks:     append([]string(nil), current.Byoipv6CidrBlocks...),
+		Ipv6PrivateCidrBlocks: append([]string(nil), current.Ipv6PrivateCidrBlocks...),
+		DefaultDhcpOptionsId:  stringValue(current.DefaultDhcpOptionsId),
+		DefaultRouteTableId:   stringValue(current.DefaultRouteTableId),
+		DefaultSecurityListId: stringValue(current.DefaultSecurityListId),
+		DefinedTags:           convertOCIToStatusDefinedTags(current.DefinedTags),
+		DisplayName:           stringValue(current.DisplayName),
+		DnsLabel:              stringValue(current.DnsLabel),
+		FreeformTags:          cloneStringMap(current.FreeformTags),
+		Ipv6CidrBlocks:        append([]string(nil), current.Ipv6CidrBlocks...),
+		TimeCreated:           sdkTimeString(current.TimeCreated),
+		VcnDomainName:         stringValue(current.VcnDomainName),
 	}
 	return nil
 }
@@ -486,4 +495,50 @@ func stringPtrEqual(actual *string, expected string) bool {
 
 func metav1Time(t time.Time) metav1.Time {
 	return metav1.NewTime(t)
+}
+
+func stringValue(value *string) string {
+	if value == nil {
+		return ""
+	}
+	return *value
+}
+
+func sdkTimeString(value *common.SDKTime) string {
+	if value == nil {
+		return ""
+	}
+	return value.Time.Format(time.RFC3339Nano)
+}
+
+func cloneStringMap(input map[string]string) map[string]string {
+	if len(input) == 0 {
+		return nil
+	}
+	cloned := make(map[string]string, len(input))
+	for key, value := range input {
+		cloned[key] = value
+	}
+	return cloned
+}
+
+func convertOCIToStatusDefinedTags(input map[string]map[string]interface{}) map[string]shared.MapValue {
+	if len(input) == 0 {
+		return nil
+	}
+	converted := make(map[string]shared.MapValue, len(input))
+	for namespace, values := range input {
+		if len(values) == 0 {
+			continue
+		}
+		tagValues := make(shared.MapValue, len(values))
+		for key, value := range values {
+			tagValues[key] = fmt.Sprint(value)
+		}
+		converted[namespace] = tagValues
+	}
+	if len(converted) == 0 {
+		return nil
+	}
+	return converted
 }

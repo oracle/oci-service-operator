@@ -188,6 +188,45 @@ func TestCreateOrUpdate_ObserveByStatusOCID(t *testing.T) {
 	assert.Equal(t, "AVAILABLE", resource.Status.LifecycleState)
 }
 
+func TestCreateOrUpdate_ClearsStaleOptionalStatusFieldsOnProjection(t *testing.T) {
+	manager := newTestManager(&fakeVcnOCIClient{
+		getFn: func(_ context.Context, _ coresdk.GetVcnRequest) (coresdk.GetVcnResponse, error) {
+			current := makeSDKVcn("ocid1.vcn.oc1..existing", "test-vcn", coresdk.VcnLifecycleStateAvailable)
+			current.DisplayName = nil
+			current.DefinedTags = nil
+			current.FreeformTags = nil
+			current.VcnDomainName = nil
+			current.DefaultRouteTableId = nil
+			return coresdk.GetVcnResponse{
+				Vcn: current,
+			}, nil
+		},
+	})
+
+	resource := makeSpecVcn()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.vcn.oc1..existing")
+	resource.Spec.DisplayName = ""
+	resource.Status.DisplayName = "stale-name"
+	resource.Status.DnsLabel = "stale-dns"
+	resource.Status.FreeformTags = map[string]string{"env": "stale"}
+	resource.Status.DefinedTags = map[string]shared.MapValue{"Operations": {"CostCenter": "42"}}
+	resource.Status.Ipv6CidrBlocks = []string{"fd00::/56"}
+	resource.Status.VcnDomainName = "stale.oraclevcn.com"
+	resource.Status.DefaultRouteTableId = "ocid1.routetable.oc1..stale"
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.Equal(t, "", resource.Status.DisplayName)
+	assert.Equal(t, "", resource.Status.DnsLabel)
+	assert.Nil(t, resource.Status.FreeformTags)
+	assert.Nil(t, resource.Status.DefinedTags)
+	assert.Nil(t, resource.Status.Ipv6CidrBlocks)
+	assert.Equal(t, "", resource.Status.VcnDomainName)
+	assert.Equal(t, "", resource.Status.DefaultRouteTableId)
+}
+
 func TestCreateOrUpdate_MutableDriftTriggersUpdate(t *testing.T) {
 	var captured coresdk.UpdateVcnRequest
 	manager := newTestManager(&fakeVcnOCIClient{
