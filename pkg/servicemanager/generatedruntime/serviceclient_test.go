@@ -23,13 +23,15 @@ type fakeResource struct {
 }
 
 type fakeSpec struct {
-	Id               string `json:"Id,omitempty"`
-	CompartmentId    string `json:"compartmentId,omitempty"`
-	DisplayName      string `json:"displayName,omitempty"`
-	Name             string `json:"name,omitempty"`
-	Partitions       int    `json:"partitions,omitempty"`
-	RetentionInHours int    `json:"retentionInHours,omitempty"`
-	Enabled          bool   `json:"enabled,omitempty"`
+	Id               string                `json:"Id,omitempty"`
+	CompartmentId    string                `json:"compartmentId,omitempty"`
+	DisplayName      string                `json:"displayName,omitempty"`
+	Name             string                `json:"name,omitempty"`
+	AdminUsername    shared.UsernameSource `json:"adminUsername,omitempty"`
+	AdminPassword    shared.PasswordSource `json:"adminPassword,omitempty"`
+	Partitions       int                   `json:"partitions,omitempty"`
+	RetentionInHours int                   `json:"retentionInHours,omitempty"`
+	Enabled          bool                  `json:"enabled,omitempty"`
 }
 
 type fakeStatus struct {
@@ -72,6 +74,16 @@ type fakeCreateThingRequest struct {
 
 type fakeCreateThingResponse struct {
 	Thing fakeThing `presentIn:"body"`
+}
+
+type FakeCreateThingWithSecretDetails struct {
+	DisplayName   string `json:"displayName,omitempty"`
+	AdminUsername string `json:"adminUsername,omitempty"`
+	AdminPassword string `json:"adminPassword,omitempty"`
+}
+
+type fakeCreateThingWithSecretRequest struct {
+	FakeCreateThingWithSecretDetails `contributesTo:"body"`
 }
 
 type fakeGetThingRequest struct {
@@ -140,6 +152,34 @@ func (f fakeServiceError) GetOpcRequestID() string {
 	return f.opcID
 }
 
+type fakeCredentialClient struct {
+	secrets    map[string]map[string][]byte
+	getCalls   []string
+	namespaces []string
+}
+
+func (f *fakeCredentialClient) CreateSecret(context.Context, string, string, map[string]string, map[string][]byte) (bool, error) {
+	return true, nil
+}
+
+func (f *fakeCredentialClient) DeleteSecret(context.Context, string, string) (bool, error) {
+	return true, nil
+}
+
+func (f *fakeCredentialClient) GetSecret(_ context.Context, name, namespace string) (map[string][]byte, error) {
+	f.getCalls = append(f.getCalls, name)
+	f.namespaces = append(f.namespaces, namespace)
+	secret, ok := f.secrets[name]
+	if !ok {
+		return nil, nil
+	}
+	return secret, nil
+}
+
+func (f *fakeCredentialClient) UpdateSecret(context.Context, string, string, map[string]string, map[string][]byte) (bool, error) {
+	return true, nil
+}
+
 func TestServiceClientCreateOrUpdateCreatesAndProjectsStatus(t *testing.T) {
 	t.Parallel()
 
@@ -197,6 +237,97 @@ func TestServiceClientCreateOrUpdateCreatesAndProjectsStatus(t *testing.T) {
 	requireStringEqual(t, "status.lifecycleState", resource.Status.LifecycleState, "ACTIVE")
 	requireCreatedAt(t, resource)
 	requireTrailingCondition(t, resource, shared.Active)
+}
+
+func TestServiceClientCreateOrUpdateResolvesSecretBackedBodyFields(t *testing.T) {
+	t.Parallel()
+
+	var createRequest fakeCreateThingWithSecretRequest
+	credClient := &fakeCredentialClient{
+		secrets: map[string]map[string][]byte{
+			"admin-user": {
+				"username": []byte("dbadmin"),
+			},
+			"admin-password": {
+				"password": []byte("SuperSecret123"),
+			},
+		},
+	}
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:             "Thing",
+		SDKName:          "Thing",
+		CredentialClient: credClient,
+		Create: &Operation{
+			NewRequest: func() any { return &fakeCreateThingWithSecretRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				createRequest = *request.(*fakeCreateThingWithSecretRequest)
+				return fakeCreateThingResponse{
+					Thing: fakeThing{
+						Id:             "ocid1.thing.oc1..create",
+						DisplayName:    "created-name",
+						LifecycleState: "ACTIVE",
+					},
+				}, nil
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Namespace: "database-system",
+		Spec: fakeSpec{
+			DisplayName:   "created-name",
+			AdminUsername: shared.UsernameSource{Secret: shared.SecretSource{SecretName: "admin-user"}},
+			AdminPassword: shared.PasswordSource{Secret: shared.SecretSource{SecretName: "admin-password"}},
+		},
+	}
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	requireCreateOrUpdateSuccess(t, response, err)
+	requireStringEqual(t, "create request displayName", createRequest.DisplayName, "created-name")
+	requireStringEqual(t, "create request adminUsername", createRequest.AdminUsername, "dbadmin")
+	requireStringEqual(t, "create request adminPassword", createRequest.AdminPassword, "SuperSecret123")
+	requireStringEqual(t, "GetSecret() names", strings.Join(credClient.getCalls, ","), "admin-user,admin-password")
+	for _, namespace := range credClient.namespaces {
+		requireStringEqual(t, "GetSecret() namespace", namespace, "database-system")
+	}
+}
+
+func TestServiceClientCreateOrUpdateFailsWhenSecretKeyIsMissing(t *testing.T) {
+	t.Parallel()
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		CredentialClient: &fakeCredentialClient{
+			secrets: map[string]map[string][]byte{
+				"admin-password": {
+					"not-password": []byte("missing"),
+				},
+			},
+		},
+		Create: &Operation{
+			NewRequest: func() any { return &fakeCreateThingWithSecretRequest{} },
+			Call: func(_ context.Context, _ any) (any, error) {
+				return fakeCreateThingResponse{}, nil
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Namespace: "database-system",
+		Spec: fakeSpec{
+			AdminPassword: shared.PasswordSource{Secret: shared.SecretSource{SecretName: "admin-password"}},
+		},
+	}
+
+	_, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err == nil {
+		t.Fatal("CreateOrUpdate() unexpectedly succeeded")
+	}
+	if !strings.Contains(err.Error(), `password key in secret "admin-password" is not found`) {
+		t.Fatalf("CreateOrUpdate() error = %v, want missing password key failure", err)
+	}
 }
 
 func TestServiceClientCreateOrUpdateUpdatesExistingResource(t *testing.T) {

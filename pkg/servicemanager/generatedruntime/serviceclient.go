@@ -16,6 +16,7 @@ import (
 	"unicode"
 
 	"github.com/oracle/oci-go-sdk/v65/common"
+	"github.com/oracle/oci-service-operator/pkg/credhelper"
 	"github.com/oracle/oci-service-operator/pkg/errorutil"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
@@ -29,6 +30,11 @@ import (
 const defaultRequeueDuration = time.Minute
 
 var errResourceNotFound = errors.New("generated runtime resource not found")
+
+var (
+	passwordSourceType = reflect.TypeOf(shared.PasswordSource{})
+	usernameSourceType = reflect.TypeOf(shared.UsernameSource{})
+)
 
 type Operation struct {
 	NewRequest func() any
@@ -114,11 +120,12 @@ type Semantics struct {
 }
 
 type Config[T any] struct {
-	Kind      string
-	SDKName   string
-	Log       loggerutil.OSOKLogger
-	InitError error
-	Semantics *Semantics
+	Kind             string
+	SDKName          string
+	Log              loggerutil.OSOKLogger
+	CredentialClient credhelper.CredentialClient
+	InitError        error
+	Semantics        *Semantics
 
 	Create *Operation
 	Get    *Operation
@@ -159,11 +166,12 @@ func NewServiceClient[T any](cfg Config[T]) ServiceClient[T] {
 	return ServiceClient[T]{config: cfg}
 }
 
-func (c ServiceClient[T]) CreateOrUpdate(ctx context.Context, resource T, _ ctrl.Request) (servicemanager.OSOKResponse, error) {
+func (c ServiceClient[T]) CreateOrUpdate(ctx context.Context, resource T, req ctrl.Request) (servicemanager.OSOKResponse, error) {
 	if response, err, handled := c.validateCreateOrUpdateRequest(resource); handled {
 		return response, err
 	}
 
+	namespace := resourceNamespace(resource, req.Namespace)
 	state, err := c.prepareCreateOrUpdateState(ctx, resource)
 	if err != nil {
 		return c.failCreateOrUpdate(resource, err)
@@ -172,9 +180,9 @@ func (c ServiceClient[T]) CreateOrUpdate(ctx context.Context, resource T, _ ctrl
 		return c.failCreateOrUpdate(resource, err)
 	}
 	if state.currentID != "" {
-		return c.reconcileExistingResource(ctx, resource, state)
+		return c.reconcileExistingResource(ctx, resource, state, namespace)
 	}
-	return c.createOrReadResource(ctx, resource)
+	return c.createOrReadResource(ctx, resource, namespace)
 }
 
 func (c ServiceClient[T]) validateCreateOrUpdateRequest(resource T) (servicemanager.OSOKResponse, error, bool) {
@@ -266,19 +274,19 @@ func (c ServiceClient[T]) mergeLiveResponseIntoStatus(resource T, currentID stri
 	}
 }
 
-func (c ServiceClient[T]) reconcileExistingResource(ctx context.Context, resource T, state createOrUpdateState) (servicemanager.OSOKResponse, error) {
+func (c ServiceClient[T]) reconcileExistingResource(ctx context.Context, resource T, state createOrUpdateState, namespace string) (servicemanager.OSOKResponse, error) {
 	shouldUpdate, err := c.shouldInvokeUpdate(resource, state.liveResponse)
 	if err != nil {
 		return c.failCreateOrUpdate(resource, err)
 	}
 	if shouldUpdate {
-		return c.updateExistingResource(ctx, resource, state.currentID)
+		return c.updateExistingResource(ctx, resource, state.currentID, namespace)
 	}
 	return c.observeExistingResource(ctx, resource, state.currentID, state.liveResponse)
 }
 
-func (c ServiceClient[T]) updateExistingResource(ctx context.Context, resource T, currentID string) (servicemanager.OSOKResponse, error) {
-	response, err := c.invoke(ctx, c.config.Update, resource, currentID)
+func (c ServiceClient[T]) updateExistingResource(ctx context.Context, resource T, currentID string, namespace string) (servicemanager.OSOKResponse, error) {
+	response, err := c.invoke(ctx, c.config.Update, resource, currentID, c.requestBuildOptions(ctx, namespace))
 	if err != nil {
 		return c.failCreateOrUpdate(resource, err)
 	}
@@ -302,9 +310,9 @@ func (c ServiceClient[T]) observeExistingResource(ctx context.Context, resource 
 	return c.applySuccess(resource, response, shared.Active)
 }
 
-func (c ServiceClient[T]) createOrReadResource(ctx context.Context, resource T) (servicemanager.OSOKResponse, error) {
+func (c ServiceClient[T]) createOrReadResource(ctx context.Context, resource T, namespace string) (servicemanager.OSOKResponse, error) {
 	if c.config.Create != nil {
-		response, err := c.invoke(ctx, c.config.Create, resource, "")
+		response, err := c.invoke(ctx, c.config.Create, resource, "", c.requestBuildOptions(ctx, namespace))
 		if err != nil {
 			return c.failCreateOrUpdate(resource, err)
 		}
@@ -325,6 +333,14 @@ func (c ServiceClient[T]) createOrReadResource(ctx context.Context, resource T) 
 
 func (c ServiceClient[T]) failCreateOrUpdate(resource T, err error) (servicemanager.OSOKResponse, error) {
 	return servicemanager.OSOKResponse{IsSuccessful: false}, c.markFailure(resource, err)
+}
+
+func (c ServiceClient[T]) requestBuildOptions(ctx context.Context, namespace string) requestBuildOptions {
+	return requestBuildOptions{
+		Context:          ctx,
+		CredentialClient: c.config.CredentialClient,
+		Namespace:        namespace,
+	}
 }
 
 func (c ServiceClient[T]) Delete(ctx context.Context, resource T) (bool, error) {
@@ -359,7 +375,7 @@ func (c ServiceClient[T]) validateDeleteRequest(resource T) error {
 }
 
 func (c ServiceClient[T]) invokeDeleteOperation(ctx context.Context, resource T, currentID string) (bool, error) {
-	if _, err := c.invoke(ctx, c.config.Delete, resource, currentID); err != nil {
+	if _, err := c.invoke(ctx, c.config.Delete, resource, currentID, requestBuildOptions{}); err != nil {
 		if isNotFound(err) {
 			c.markDeleted(resource, "OCI resource no longer exists")
 			return true, nil
@@ -699,7 +715,7 @@ func (c ServiceClient[T]) readResourceForMutationValidation(ctx context.Context,
 		return nil, fmt.Errorf("%s generated runtime has no OCI Get operation for live mutation validation", c.config.Kind)
 	}
 
-	response, err := c.invoke(ctx, c.config.Get, resource, currentID)
+	response, err := c.invoke(ctx, c.config.Get, resource, currentID, requestBuildOptions{})
 	if err != nil {
 		if isNotFound(err) {
 			return nil, errResourceNotFound
@@ -733,7 +749,7 @@ func (c ServiceClient[T]) readResourceWithGet(ctx context.Context, resource T, s
 		return state, nil, false, nil
 	}
 
-	response, err := c.invoke(ctx, c.config.Get, resource, state.readID)
+	response, err := c.invoke(ctx, c.config.Get, resource, state.readID, requestBuildOptions{})
 	if err == nil {
 		return state, response, true, nil
 	}
@@ -757,7 +773,7 @@ func (c ServiceClient[T]) readResourceWithList(ctx context.Context, resource T, 
 		return nil, fmt.Errorf("%s generated runtime has no readable OCI operation", c.config.Kind)
 	}
 
-	response, err := c.invokeWithValues(ctx, c.config.List, resource, state.listValues, state.listID)
+	response, err := c.invokeWithValues(ctx, c.config.List, resource, state.listValues, state.listID, requestBuildOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -840,15 +856,15 @@ func (c ServiceClient[T]) canInvokeGet(resource T, preferredID string) bool {
 	return c.canInvokeHeuristicGet(values, preferredID)
 }
 
-func (c ServiceClient[T]) invoke(ctx context.Context, op *Operation, resource T, preferredID string) (any, error) {
+func (c ServiceClient[T]) invoke(ctx context.Context, op *Operation, resource T, preferredID string, options requestBuildOptions) (any, error) {
 	values, err := lookupValues(resource)
 	if err != nil {
 		return nil, err
 	}
-	return c.invokeWithValues(ctx, op, resource, values, preferredID)
+	return c.invokeWithValues(ctx, op, resource, values, preferredID, options)
 }
 
-func (c ServiceClient[T]) invokeWithValues(ctx context.Context, op *Operation, resource T, values map[string]any, preferredID string) (any, error) {
+func (c ServiceClient[T]) invokeWithValues(ctx context.Context, op *Operation, resource T, values map[string]any, preferredID string, options requestBuildOptions) (any, error) {
 	if op == nil {
 		return nil, fmt.Errorf("%s generated runtime does not define this OCI operation", c.config.Kind)
 	}
@@ -860,7 +876,7 @@ func (c ServiceClient[T]) invokeWithValues(ctx context.Context, op *Operation, r
 	if request == nil {
 		return nil, fmt.Errorf("%s generated runtime did not create an OCI request value", c.config.Kind)
 	}
-	if err := buildRequest(request, resource, values, preferredID, op.Fields, c.idFieldAliases()); err != nil {
+	if err := buildRequest(request, resource, values, preferredID, op.Fields, c.idFieldAliases(), options); err != nil {
 		return nil, fmt.Errorf("build %s OCI request: %w", c.config.Kind, err)
 	}
 
@@ -994,7 +1010,13 @@ func (c ServiceClient[T]) idFieldAliases() []string {
 	return aliases
 }
 
-func buildRequest(request any, resource any, values map[string]any, preferredID string, fields []RequestField, idAliases []string) error {
+type requestBuildOptions struct {
+	Context          context.Context
+	CredentialClient credhelper.CredentialClient
+	Namespace        string
+}
+
+func buildRequest(request any, resource any, values map[string]any, preferredID string, fields []RequestField, idAliases []string, options requestBuildOptions) error {
 	requestValue := reflect.ValueOf(request)
 	if !requestValue.IsValid() || requestValue.Kind() != reflect.Pointer || requestValue.IsNil() {
 		return fmt.Errorf("expected pointer OCI request, got %T", request)
@@ -1005,14 +1027,23 @@ func buildRequest(request any, resource any, values map[string]any, preferredID 
 		return fmt.Errorf("expected pointer to OCI request struct, got %T", request)
 	}
 
-	if len(fields) > 0 {
-		return buildExplicitRequest(requestStruct, resource, values, preferredID, fields)
+	var resolvedSpec any
+	if requestNeedsResolvedSpec(fields, requestStruct.Type()) {
+		var err error
+		resolvedSpec, err = resolvedSpecValue(resource, options)
+		if err != nil {
+			return err
+		}
 	}
 
-	return buildHeuristicRequest(requestStruct, requestStruct.Type(), resource, values, preferredID, idAliases)
+	if len(fields) > 0 {
+		return buildExplicitRequest(requestStruct, values, preferredID, fields, resolvedSpec)
+	}
+
+	return buildHeuristicRequest(requestStruct, requestStruct.Type(), values, preferredID, idAliases, resolvedSpec)
 }
 
-func buildExplicitRequest(requestStruct reflect.Value, resource any, values map[string]any, preferredID string, fields []RequestField) error {
+func buildExplicitRequest(requestStruct reflect.Value, values map[string]any, preferredID string, fields []RequestField, resolvedSpec any) error {
 	for _, field := range fields {
 		fieldValue := requestStruct.FieldByName(field.FieldName)
 		if !fieldValue.IsValid() || !fieldValue.CanSet() {
@@ -1023,7 +1054,7 @@ func buildExplicitRequest(requestStruct reflect.Value, resource any, values map[
 		case "header", "binary":
 			continue
 		case "body":
-			if err := assignField(fieldValue, specValue(resource)); err != nil {
+			if err := assignField(fieldValue, resolvedSpec); err != nil {
 				return fmt.Errorf("set body field %s: %w", field.FieldName, err)
 			}
 			continue
@@ -1044,13 +1075,13 @@ func buildExplicitRequest(requestStruct reflect.Value, resource any, values map[
 func buildHeuristicRequest(
 	requestStruct reflect.Value,
 	requestType reflect.Type,
-	resource any,
 	values map[string]any,
 	preferredID string,
 	idAliases []string,
+	resolvedSpec any,
 ) error {
 	for i := 0; i < requestStruct.NumField(); i++ {
-		if err := populateHeuristicRequestField(requestStruct.Field(i), requestType.Field(i), resource, values, preferredID, idAliases); err != nil {
+		if err := populateHeuristicRequestField(requestStruct.Field(i), requestType.Field(i), values, preferredID, idAliases, resolvedSpec); err != nil {
 			return err
 		}
 	}
@@ -1092,7 +1123,7 @@ func requestLookupKey(fieldType reflect.StructField) string {
 	return lookupKey
 }
 
-func populateHeuristicRequestField(fieldValue reflect.Value, fieldType reflect.StructField, resource any, values map[string]any, preferredID string, idAliases []string) error {
+func populateHeuristicRequestField(fieldValue reflect.Value, fieldType reflect.StructField, values map[string]any, preferredID string, idAliases []string, resolvedSpec any) error {
 	if !fieldValue.CanSet() || fieldType.Name == "RequestMetadata" {
 		return nil
 	}
@@ -1101,7 +1132,7 @@ func populateHeuristicRequestField(fieldValue reflect.Value, fieldType reflect.S
 	case "header", "binary":
 		return nil
 	case "body":
-		if err := assignField(fieldValue, specValue(resource)); err != nil {
+		if err := assignField(fieldValue, resolvedSpec); err != nil {
 			return fmt.Errorf("set body field %s: %w", fieldType.Name, err)
 		}
 		return nil
@@ -1240,12 +1271,275 @@ func specValue(resource any) any {
 	return fieldInterface(resourceValue, "Spec")
 }
 
+func requestNeedsResolvedSpec(fields []RequestField, requestType reflect.Type) bool {
+	if len(fields) > 0 {
+		for _, field := range fields {
+			if field.Contribution == "body" {
+				return true
+			}
+		}
+		return false
+	}
+
+	for i := 0; i < requestType.NumField(); i++ {
+		if requestType.Field(i).Tag.Get("contributesTo") == "body" {
+			return true
+		}
+	}
+	return false
+}
+
+func resolvedSpecValue(resource any, options requestBuildOptions) (any, error) {
+	raw := specValue(resource)
+	if raw == nil {
+		return nil, nil
+	}
+
+	payload, err := json.Marshal(raw)
+	if err != nil {
+		return nil, fmt.Errorf("marshal spec value: %w", err)
+	}
+	var decoded any
+	if err := json.Unmarshal(payload, &decoded); err != nil {
+		return nil, fmt.Errorf("decode spec value: %w", err)
+	}
+
+	resourceValue, err := resourceStruct(resource)
+	if err != nil {
+		return nil, err
+	}
+	specField, ok := fieldValue(resourceValue, "Spec")
+	if !ok {
+		return nil, fmt.Errorf("resource %T does not expose Spec", resource)
+	}
+
+	resolved, _, err := rewriteSecretSources(specField, decoded, options)
+	if err != nil {
+		return nil, err
+	}
+	return resolved, nil
+}
+
+func indirectValue(value reflect.Value) (reflect.Value, bool) {
+	for value.IsValid() && (value.Kind() == reflect.Pointer || value.Kind() == reflect.Interface) {
+		if value.IsNil() {
+			return reflect.Value{}, false
+		}
+		value = value.Elem()
+	}
+	return value, value.IsValid()
+}
+
+func rewriteSecretSources(value reflect.Value, decoded any, options requestBuildOptions) (any, bool, error) {
+	value, ok := indirectValue(value)
+	if !ok {
+		return nil, false, nil
+	}
+	if rewritten, include, handled, err := rewriteSharedSecretSource(value, options); handled {
+		return rewritten, include, err
+	}
+
+	switch value.Kind() {
+	case reflect.Struct:
+		return rewriteSecretStruct(value, decoded, options)
+	case reflect.Slice, reflect.Array:
+		return rewriteSecretSlice(value, decoded, options)
+	case reflect.Map:
+		return rewriteSecretMap(value, decoded, options)
+	default:
+		return decoded, true, nil
+	}
+}
+
+func rewriteSharedSecretSource(value reflect.Value, options requestBuildOptions) (any, bool, bool, error) {
+	switch value.Type() {
+	case passwordSourceType:
+		rewritten, include, err := resolveSecretSourceValue(options.Context, options.CredentialClient, options.Namespace, value.FieldByName("Secret"), "SecretName", "password")
+		return rewritten, include, true, err
+	case usernameSourceType:
+		rewritten, include, err := resolveSecretSourceValue(options.Context, options.CredentialClient, options.Namespace, value.FieldByName("Secret"), "SecretName", "username")
+		return rewritten, include, true, err
+	default:
+		return nil, false, false, nil
+	}
+}
+
+func rewriteSecretStruct(value reflect.Value, decoded any, options requestBuildOptions) (any, bool, error) {
+	decodedMap := decodedMapValue(decoded)
+	typ := value.Type()
+	for i := 0; i < value.NumField(); i++ {
+		fieldType := typ.Field(i)
+		if !fieldType.IsExported() {
+			continue
+		}
+		if fieldType.Anonymous && embeddedJSONField(fieldType) {
+			var err error
+			decodedMap, err = rewriteEmbeddedSecretField(value.Field(i), decodedMap, options)
+			if err != nil {
+				return nil, false, err
+			}
+			continue
+		}
+		if err := rewriteNamedSecretField(decodedMap, value.Field(i), fieldType, options); err != nil {
+			return nil, false, err
+		}
+	}
+	return decodedMap, true, nil
+}
+
+func decodedMapValue(decoded any) map[string]any {
+	decodedMap, ok := decoded.(map[string]any)
+	if !ok || decodedMap == nil {
+		return map[string]any{}
+	}
+	return decodedMap
+}
+
+func rewriteEmbeddedSecretField(fieldValue reflect.Value, decodedMap map[string]any, options requestBuildOptions) (map[string]any, error) {
+	rewritten, _, err := rewriteSecretSources(fieldValue, decodedMap, options)
+	if err != nil {
+		return nil, err
+	}
+	if nestedMap, ok := rewritten.(map[string]any); ok {
+		return nestedMap, nil
+	}
+	return decodedMap, nil
+}
+
+func rewriteNamedSecretField(decodedMap map[string]any, fieldValue reflect.Value, fieldType reflect.StructField, options requestBuildOptions) error {
+	jsonName, skip := fieldJSONTagName(fieldType)
+	if skip {
+		return nil
+	}
+	childDecoded, exists := decodedMap[jsonName]
+	rewritten, include, err := rewriteSecretSources(fieldValue, childDecoded, options)
+	if err != nil {
+		return err
+	}
+	if include {
+		decodedMap[jsonName] = rewritten
+		return nil
+	}
+	if exists {
+		delete(decodedMap, jsonName)
+	}
+	return nil
+}
+
+func rewriteSecretSlice(value reflect.Value, decoded any, options requestBuildOptions) (any, bool, error) {
+	decodedSlice, ok := decoded.([]any)
+	if !ok {
+		return decoded, true, nil
+	}
+	for i := 0; i < value.Len() && i < len(decodedSlice); i++ {
+		rewritten, include, err := rewriteSecretSources(value.Index(i), decodedSlice[i], options)
+		if err != nil {
+			return nil, false, err
+		}
+		if include {
+			decodedSlice[i] = rewritten
+		}
+	}
+	return decodedSlice, true, nil
+}
+
+func rewriteSecretMap(value reflect.Value, decoded any, options requestBuildOptions) (any, bool, error) {
+	if value.Type().Key().Kind() != reflect.String {
+		return decoded, true, nil
+	}
+	decodedMap, ok := decoded.(map[string]any)
+	if !ok {
+		return decoded, true, nil
+	}
+	iter := value.MapRange()
+	for iter.Next() {
+		key := iter.Key().String()
+		childDecoded, exists := decodedMap[key]
+		rewritten, include, err := rewriteSecretSources(iter.Value(), childDecoded, options)
+		if err != nil {
+			return nil, false, err
+		}
+		if include {
+			decodedMap[key] = rewritten
+			continue
+		}
+		if exists {
+			delete(decodedMap, key)
+		}
+	}
+	return decodedMap, true, nil
+}
+
+func resolveSecretSourceValue(
+	ctx context.Context,
+	credentialClient credhelper.CredentialClient,
+	namespace string,
+	secretField reflect.Value,
+	nameField string,
+	dataKey string,
+) (any, bool, error) {
+	if !secretField.IsValid() {
+		return nil, false, nil
+	}
+	secretNameField := secretField.FieldByName(nameField)
+	if !secretNameField.IsValid() || secretNameField.Kind() != reflect.String {
+		return nil, false, nil
+	}
+
+	secretName := strings.TrimSpace(secretNameField.String())
+	if secretName == "" {
+		return nil, false, nil
+	}
+	if credentialClient == nil {
+		return nil, false, fmt.Errorf("resolve %s secret %q: credential client is nil", dataKey, secretName)
+	}
+	if strings.TrimSpace(namespace) == "" {
+		return nil, false, fmt.Errorf("resolve %s secret %q: namespace is empty", dataKey, secretName)
+	}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
+	secretData, err := credentialClient.GetSecret(ctx, secretName, namespace)
+	if err != nil {
+		return nil, false, fmt.Errorf("get %s secret %q: %w", dataKey, secretName, err)
+	}
+	rawValue, ok := secretData[dataKey]
+	if !ok {
+		return nil, false, fmt.Errorf("%s key in secret %q is not found", dataKey, secretName)
+	}
+	return string(rawValue), true, nil
+}
+
+func fieldJSONTagName(field reflect.StructField) (string, bool) {
+	name := field.Tag.Get("json")
+	if name == "-" {
+		return "", true
+	}
+	if strings.TrimSpace(name) == "" {
+		return lowerCamel(field.Name), false
+	}
+	parts := strings.Split(name, ",")
+	if len(parts) == 0 || parts[0] == "" {
+		return lowerCamel(field.Name), false
+	}
+	return parts[0], false
+}
+
+func embeddedJSONField(field reflect.StructField) bool {
+	if !field.Anonymous {
+		return false
+	}
+	parts := strings.Split(field.Tag.Get("json"), ",")
+	return len(parts) == 0 || parts[0] == ""
+}
+
 func responseBody(response any) (any, bool) {
 	if response == nil {
 		return nil, false
 	}
 
-	value, ok := derefValue(reflect.ValueOf(response))
+	value, ok := indirectValue(reflect.ValueOf(response))
 	if !ok {
 		return nil, false
 	}
@@ -1257,16 +1551,6 @@ func responseBody(response any) (any, bool) {
 		return value.Interface(), true
 	}
 	return responseStructBody(value)
-}
-
-func derefValue(value reflect.Value) (reflect.Value, bool) {
-	for value.IsValid() && value.Kind() == reflect.Pointer {
-		if value.IsNil() {
-			return reflect.Value{}, false
-		}
-		value = value.Elem()
-	}
-	return value, value.IsValid()
 }
 
 func responseStructBody(value reflect.Value) (any, bool) {
@@ -1941,6 +2225,18 @@ func lookupMetadataString(value reflect.Value, fieldName string) string {
 	return field.String()
 }
 
+func resourceNamespace(resource any, fallback string) string {
+	resourceValue, err := resourceStruct(resource)
+	if err != nil {
+		return strings.TrimSpace(fallback)
+	}
+	namespace := lookupMetadataString(resourceValue, "Namespace")
+	if strings.TrimSpace(namespace) != "" {
+		return namespace
+	}
+	return strings.TrimSpace(fallback)
+}
+
 func fieldJSONName(field reflect.StructField) string {
 	tag := field.Tag.Get("json")
 	if tag == "" || tag == "-" {
@@ -2149,7 +2445,7 @@ func splitCamel(name string) []string {
 }
 
 func listBodyStruct(body any) (reflect.Value, error) {
-	value, ok := derefValue(reflect.ValueOf(body))
+	value, ok := indirectValue(reflect.ValueOf(body))
 	if !ok {
 		return reflect.Value{}, errResourceNotFound
 	}

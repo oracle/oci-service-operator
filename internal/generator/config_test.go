@@ -649,15 +649,14 @@ func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
 	})
 }
 
-func TestCheckedInConfigPromotesOnlyIdentityUserFormalSpec(t *testing.T) {
+func TestCheckedInConfigPromotesIdentityUserFormalSpec(t *testing.T) {
 	t.Parallel()
 
 	cfg := loadCheckedInConfig(t)
-	services := serviceConfigsByName(t, cfg, "identity", "database", "mysql")
+	services := serviceConfigsByName(t, cfg, "identity", "mysql")
 
 	assertServiceFormalSpec(t, services["identity"], "User", "user")
 	assertServiceFormalSpec(t, services["identity"], "Compartment", "")
-	assertServiceFormalSpec(t, services["database"], "AutonomousDatabases", "")
 	assertServiceFormalSpec(t, services["mysql"], "MySqlDbSystem", "")
 }
 
