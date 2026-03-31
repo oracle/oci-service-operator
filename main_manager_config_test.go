@@ -176,6 +176,69 @@ unexpectedField: true
 	}
 }
 
+func TestLoadManagerOptionsFromFileRejectsInvalidTypeMeta(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name           string
+		apiVersionLine string
+		kindLine       string
+		want           string
+	}{
+		{
+			name:     "missing apiVersion",
+			kindLine: "kind: " + expectedControllerManagerConfigKind,
+			want:     `controller manager config apiVersion = "", want "` + expectedControllerManagerConfigAPIVersion + `"`,
+		},
+		{
+			name:           "missing kind",
+			apiVersionLine: "apiVersion: " + expectedControllerManagerConfigAPIVersion,
+			want:           `controller manager config kind = "", want "` + expectedControllerManagerConfigKind + `"`,
+		},
+		{
+			name:           "wrong apiVersion",
+			apiVersionLine: "apiVersion: wrong.example/v1",
+			kindLine:       "kind: " + expectedControllerManagerConfigKind,
+			want:           `controller manager config apiVersion = "wrong.example/v1", want "` + expectedControllerManagerConfigAPIVersion + `"`,
+		},
+		{
+			name:           "wrong kind",
+			apiVersionLine: "apiVersion: " + expectedControllerManagerConfigAPIVersion,
+			kindLine:       "kind: WrongControllerManagerConfig",
+			want:           `controller manager config kind = "WrongControllerManagerConfig", want "` + expectedControllerManagerConfigKind + `"`,
+		},
+	}
+
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			lines := make([]string, 0, 4)
+			if test.apiVersionLine != "" {
+				lines = append(lines, test.apiVersionLine)
+			}
+			if test.kindLine != "" {
+				lines = append(lines, test.kindLine)
+			}
+			lines = append(lines,
+				"metrics:",
+				"  bindAddress: 127.0.0.1:48080",
+			)
+
+			configPath := writeTempManagerConfig(t, strings.Join(lines, "\n"))
+
+			_, err := loadManagerOptionsFromFile(configPath)
+			if err == nil {
+				t.Fatal("loadManagerOptionsFromFile() error = nil, want invalid type metadata failure")
+			}
+			if !strings.Contains(err.Error(), test.want) {
+				t.Fatalf("loadManagerOptionsFromFile() error = %q, want substring %q", err, test.want)
+			}
+		})
+	}
+}
+
 func writeTempManagerConfig(t *testing.T, content string) string {
 	t.Helper()
 

@@ -18,6 +18,11 @@ import (
 
 const defaultLeaderElectionID = "40558063.oci"
 
+const (
+	expectedControllerManagerConfigAPIVersion = "controller-runtime.sigs.k8s.io/v1alpha1"
+	expectedControllerManagerConfigKind       = "ControllerManagerConfig"
+)
+
 type startupFlags struct {
 	configFile           string
 	metricsAddr          string
@@ -131,7 +136,20 @@ func loadManagerOptionsFromFile(path string) (ctrl.Options, error) {
 	if err := yaml.UnmarshalStrict(content, &cfg); err != nil {
 		return ctrl.Options{}, err
 	}
+	if err := validateControllerManagerConfigTypeMeta(cfg); err != nil {
+		return ctrl.Options{}, err
+	}
 	return cfg.toOptions(), nil
+}
+
+func validateControllerManagerConfigTypeMeta(cfg controllerManagerConfigFile) error {
+	if cfg.APIVersion != expectedControllerManagerConfigAPIVersion {
+		return fmt.Errorf("controller manager config apiVersion = %q, want %q", cfg.APIVersion, expectedControllerManagerConfigAPIVersion)
+	}
+	if cfg.Kind != expectedControllerManagerConfigKind {
+		return fmt.Errorf("controller manager config kind = %q, want %q", cfg.Kind, expectedControllerManagerConfigKind)
+	}
+	return nil
 }
 
 func (cfg controllerManagerConfigFile) toOptions() ctrl.Options {
