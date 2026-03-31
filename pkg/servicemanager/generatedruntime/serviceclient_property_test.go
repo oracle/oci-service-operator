@@ -154,6 +154,14 @@ func (c deleteQuickCase) expectError() bool {
 	return c.policy() == "required" && c.InputBucket%4 == 3
 }
 
+type deleteQuickOutcome struct {
+	deleted    bool
+	err        error
+	inputState string
+	request    fakeDeleteThingRequest
+	resource   *fakeResource
+}
+
 func TestClassifyLifecycleSemanticsQuick(t *testing.T) {
 	t.Parallel()
 
@@ -201,116 +209,170 @@ func TestServiceClientDeleteWithFormalSemanticsQuick(t *testing.T) {
 
 	property := func(tc deleteQuickCase) bool {
 		t.Helper()
-
-		var deleteRequest fakeDeleteThingRequest
-		inputState := tc.inputState()
-
-		client := NewServiceClient[*fakeResource](Config[*fakeResource]{
-			Kind:    "Thing",
-			SDKName: "Thing",
-			Semantics: &Semantics{
-				Delete: DeleteSemantics{
-					Policy:         tc.policy(),
-					PendingStates:  []string{tc.PendingState},
-					TerminalStates: []string{tc.TerminalState},
-				},
-				DeleteFollowUp: FollowUpSemantics{
-					Strategy: "confirm-delete",
-				},
-			},
-			Delete: &Operation{
-				NewRequest: func() any { return &fakeDeleteThingRequest{} },
-				Call: func(_ context.Context, request any) (any, error) {
-					deleteRequest = *request.(*fakeDeleteThingRequest)
-					return fakeDeleteThingResponse{}, nil
-				},
-				Fields: []RequestField{
-					{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
-				},
-			},
-			Get: &Operation{
-				NewRequest: func() any { return &fakeGetThingRequest{} },
-				Call: func(_ context.Context, _ any) (any, error) {
-					return fakeGetThingResponse{
-						Thing: fakeThing{
-							Id:             "ocid1.thing.oc1..delete",
-							LifecycleState: inputState,
-						},
-					}, nil
-				},
-				Fields: []RequestField{
-					{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
-				},
-			},
-		})
-
-		resource := &fakeResource{
-			Status: fakeStatus{
-				OsokStatus: shared.OSOKStatus{Ocid: "ocid1.thing.oc1..delete"},
-			},
-		}
-
-		deleted, err := client.Delete(context.Background(), resource)
-		if deleteRequest.ThingId == nil || *deleteRequest.ThingId != "ocid1.thing.oc1..delete" {
-			t.Logf("delete request thingId = %v, want ocid1.thing.oc1..delete", deleteRequest.ThingId)
-			return false
-		}
-
-		if tc.expectError() {
-			if err == nil || !strings.Contains(err.Error(), "unexpected lifecycle state") {
-				t.Logf("Delete() error = %v, want unexpected lifecycle state failure for %q", err, inputState)
-				return false
-			}
-			if deleted {
-				t.Logf("Delete() unexpectedly reported deletion for error case %q", inputState)
-				return false
-			}
-			if resource.Status.OsokStatus.DeletedAt != nil {
-				t.Logf("Delete() set deletedAt for error case %q", inputState)
-				return false
-			}
-			if len(resource.Status.OsokStatus.Conditions) != 0 {
-				t.Logf("Delete() recorded conditions for error case %q: %#v", inputState, resource.Status.OsokStatus.Conditions)
-				return false
-			}
-			return true
-		}
-
-		if err != nil {
-			t.Logf("Delete() error = %v for policy=%s state=%q", err, tc.policy(), inputState)
-			return false
-		}
-		if deleted != tc.expectDeleted() {
-			t.Logf("Delete() deleted = %t, want %t for policy=%s state=%q", deleted, tc.expectDeleted(), tc.policy(), inputState)
-			return false
-		}
-		if resource.Status.OsokStatus.Reason != string(shared.Terminating) {
-			t.Logf("status.reason = %q, want %q", resource.Status.OsokStatus.Reason, shared.Terminating)
-			return false
-		}
-		if len(resource.Status.OsokStatus.Conditions) == 0 || resource.Status.OsokStatus.Conditions[len(resource.Status.OsokStatus.Conditions)-1].Type != shared.Terminating {
-			t.Logf("status conditions = %#v, want trailing Terminating condition", resource.Status.OsokStatus.Conditions)
-			return false
-		}
-
-		if tc.expectDeleted() {
-			if resource.Status.OsokStatus.DeletedAt == nil {
-				t.Logf("Delete() did not set deletedAt for policy=%s state=%q", tc.policy(), inputState)
-				return false
-			}
-			return true
-		}
-
-		if resource.Status.OsokStatus.DeletedAt != nil {
-			t.Logf("Delete() set deletedAt unexpectedly for policy=%s state=%q", tc.policy(), inputState)
-			return false
-		}
-		return true
+		return checkDeleteQuickCase(t, tc)
 	}
 
 	if err := quick.Check(property, &quick.Config{MaxCount: 256}); err != nil {
 		t.Fatalf("quick.Check() error = %v", err)
 	}
+}
+
+func checkDeleteQuickCase(t *testing.T, tc deleteQuickCase) bool {
+	t.Helper()
+
+	outcome := runDeleteQuickCase(tc)
+	if !checkDeleteQuickRequest(t, outcome.request) {
+		return false
+	}
+	return checkDeleteQuickOutcome(t, tc, outcome)
+}
+
+func runDeleteQuickCase(tc deleteQuickCase) deleteQuickOutcome {
+	inputState := tc.inputState()
+	var deleteRequest fakeDeleteThingRequest
+
+	resource := &fakeResource{
+		Status: fakeStatus{
+			OsokStatus: shared.OSOKStatus{Ocid: "ocid1.thing.oc1..delete"},
+		},
+	}
+
+	deleted, err := newDeleteQuickClient(tc, inputState, &deleteRequest).Delete(context.Background(), resource)
+	return deleteQuickOutcome{
+		deleted:    deleted,
+		err:        err,
+		inputState: inputState,
+		request:    deleteRequest,
+		resource:   resource,
+	}
+}
+
+func newDeleteQuickClient(tc deleteQuickCase, inputState string, deleteRequest *fakeDeleteThingRequest) ServiceClient[*fakeResource] {
+	return NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Semantics: &Semantics{
+			Delete: DeleteSemantics{
+				Policy:         tc.policy(),
+				PendingStates:  []string{tc.PendingState},
+				TerminalStates: []string{tc.TerminalState},
+			},
+			DeleteFollowUp: FollowUpSemantics{
+				Strategy: "confirm-delete",
+			},
+		},
+		Delete: &Operation{
+			NewRequest: func() any { return &fakeDeleteThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				*deleteRequest = *request.(*fakeDeleteThingRequest)
+				return fakeDeleteThingResponse{}, nil
+			},
+			Fields: []RequestField{
+				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
+			},
+		},
+		Get: &Operation{
+			NewRequest: func() any { return &fakeGetThingRequest{} },
+			Call: func(_ context.Context, _ any) (any, error) {
+				return fakeGetThingResponse{
+					Thing: fakeThing{
+						Id:             "ocid1.thing.oc1..delete",
+						LifecycleState: inputState,
+					},
+				}, nil
+			},
+			Fields: []RequestField{
+				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
+			},
+		},
+	})
+}
+
+func checkDeleteQuickRequest(t *testing.T, request fakeDeleteThingRequest) bool {
+	t.Helper()
+
+	if request.ThingId == nil || *request.ThingId != "ocid1.thing.oc1..delete" {
+		t.Logf("delete request thingId = %v, want ocid1.thing.oc1..delete", request.ThingId)
+		return false
+	}
+	return true
+}
+
+func checkDeleteQuickOutcome(t *testing.T, tc deleteQuickCase, outcome deleteQuickOutcome) bool {
+	t.Helper()
+
+	if tc.expectError() {
+		return checkDeleteQuickError(t, outcome)
+	}
+	return checkDeleteQuickSuccess(t, tc, outcome)
+}
+
+func checkDeleteQuickError(t *testing.T, outcome deleteQuickOutcome) bool {
+	t.Helper()
+
+	if outcome.err == nil || !strings.Contains(outcome.err.Error(), "unexpected lifecycle state") {
+		t.Logf("Delete() error = %v, want unexpected lifecycle state failure for %q", outcome.err, outcome.inputState)
+		return false
+	}
+	if outcome.deleted {
+		t.Logf("Delete() unexpectedly reported deletion for error case %q", outcome.inputState)
+		return false
+	}
+	if outcome.resource.Status.OsokStatus.DeletedAt != nil {
+		t.Logf("Delete() set deletedAt for error case %q", outcome.inputState)
+		return false
+	}
+	if len(outcome.resource.Status.OsokStatus.Conditions) != 0 {
+		t.Logf("Delete() recorded conditions for error case %q: %#v", outcome.inputState, outcome.resource.Status.OsokStatus.Conditions)
+		return false
+	}
+	return true
+}
+
+func checkDeleteQuickSuccess(t *testing.T, tc deleteQuickCase, outcome deleteQuickOutcome) bool {
+	t.Helper()
+
+	if outcome.err != nil {
+		t.Logf("Delete() error = %v for policy=%s state=%q", outcome.err, tc.policy(), outcome.inputState)
+		return false
+	}
+	if outcome.deleted != tc.expectDeleted() {
+		t.Logf("Delete() deleted = %t, want %t for policy=%s state=%q", outcome.deleted, tc.expectDeleted(), tc.policy(), outcome.inputState)
+		return false
+	}
+	if outcome.resource.Status.OsokStatus.Reason != string(shared.Terminating) {
+		t.Logf("status.reason = %q, want %q", outcome.resource.Status.OsokStatus.Reason, shared.Terminating)
+		return false
+	}
+	if !hasTrailingCondition(outcome.resource.Status.OsokStatus.Conditions, shared.Terminating) {
+		t.Logf("status conditions = %#v, want trailing Terminating condition", outcome.resource.Status.OsokStatus.Conditions)
+		return false
+	}
+	return checkDeleteQuickDeletedAt(t, tc, outcome)
+}
+
+func hasTrailingCondition(conditions []shared.OSOKCondition, want shared.OSOKConditionType) bool {
+	if len(conditions) == 0 {
+		return false
+	}
+	return conditions[len(conditions)-1].Type == want
+}
+
+func checkDeleteQuickDeletedAt(t *testing.T, tc deleteQuickCase, outcome deleteQuickOutcome) bool {
+	t.Helper()
+
+	if tc.expectDeleted() {
+		if outcome.resource.Status.OsokStatus.DeletedAt == nil {
+			t.Logf("Delete() did not set deletedAt for policy=%s state=%q", tc.policy(), outcome.inputState)
+			return false
+		}
+		return true
+	}
+	if outcome.resource.Status.OsokStatus.DeletedAt != nil {
+		t.Logf("Delete() set deletedAt unexpectedly for policy=%s state=%q", tc.policy(), outcome.inputState)
+		return false
+	}
+	return true
 }
 
 func quickStateToken(r *rand.Rand, prefix string) string {
