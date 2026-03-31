@@ -68,9 +68,6 @@ type ExternalBackupJobStatus struct {
 	Tag string `json:"tag,omitempty"`
 	// The Swift user name to use for transferring the standalone backup to the designated Swift compartment bucket.
 	UserName string `json:"userName,omitempty"`
-	// The auth token to use for access to the Swift compartment bucket that will store the standalone backup.
-	// For information about auth tokens, see Working with Auth Tokens (https://docs.cloud.oracle.com/Content/Identity/Tasks/managingcredentials.htm#two).
-	SwiftPassword string `json:"swiftPassword,omitempty"`
 }
 
 // +kubebuilder:object:root=true

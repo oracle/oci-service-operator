@@ -58,6 +58,16 @@ spec:
             description: FastConnectProviderVirtualCircuitBandwidthShapeStatus defines
               the observed state of FastConnectProviderVirtualCircuitBandwidthShape.
             properties:
+              bandwidthInMbps:
+                description: |-
+                  The bandwidth in Mbps.
+                  Example: `10000`
+                type: integer
+              name:
+                description: |-
+                  The name of the bandwidth shape.
+                  Example: `10 Gbps`
+                type: string
               status:
                 properties:
                   conditions:

@@ -53,6 +53,17 @@ type TagValidator struct {
 	Values []string `json:"values,omitempty"`
 }
 
+// TagValidatorObservedState defines nested fields for Tag.Validator.
+type TagValidatorObservedState struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
+	ValidatorType string `json:"validatorType,omitempty"`
+	// The list of allowed values for a definedTag value.
+	// +kubebuilder:validation:Optional
+	Values []string `json:"values,omitempty"`
+}
+
 // TagStatus defines the observed state of Tag.
 type TagStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
@@ -86,8 +97,8 @@ type TagStatus struct {
 	// The tag's current state. After creating a tag, make sure its `lifecycleState` is ACTIVE before using it. After retiring a tag, make sure its `lifecycleState` is INACTIVE before using it. If you delete a tag, you cannot delete another tag until the deleted tag's `lifecycleState` changes from DELETING to DELETED.
 	LifecycleState string `json:"lifecycleState,omitempty"`
 	// Indicates whether the tag is enabled for cost tracking.
-	IsCostTracking bool         `json:"isCostTracking,omitempty"`
-	Validator      TagValidator `json:"validator,omitempty"`
+	IsCostTracking bool                      `json:"isCostTracking,omitempty"`
+	Validator      TagValidatorObservedState `json:"validator,omitempty"`
 }
 
 // +kubebuilder:object:root=true

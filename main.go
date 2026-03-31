@@ -22,7 +22,10 @@ import (
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
+	"sigs.k8s.io/yaml"
 
 	"github.com/oracle/oci-service-operator/pkg/authhelper"
 	"github.com/oracle/oci-service-operator/pkg/config"
@@ -37,6 +40,8 @@ var (
 	scheme   = runtime.NewScheme()
 	setupLog = loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("setup")}
 )
+
+type managerFlags = startupFlags
 
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
@@ -70,7 +75,145 @@ func run() error {
 		return fmt.Errorf("unable to start manager: %w", err)
 	}
 
-	if startup.initOSOKResources {
+	if err := setupRegistrations(mgr, startup.initOSOKResources); err != nil {
+		return err
+	}
+
+	// +kubebuilder:scaffold:builder
+
+	if err := addManagerHealthChecks(mgr); err != nil {
+		return err
+	}
+
+	setupLog.InfoLog("starting manager")
+	return mgr.Start(ctrl.SetupSignalHandler())
+}
+
+func managerOptions(flags managerFlags) (ctrl.Options, error) {
+	return resolveManagerOptions(flags)
+}
+
+func loadManagerOptionsFromConfig(path string, options ctrl.Options) (ctrl.Options, error) {
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return options, err
+	}
+
+	cfg := controllerManagerConfigFile{}
+	if err := yaml.UnmarshalStrict(content, &cfg); err != nil {
+		return options, err
+	}
+	if err := validateControllerManagerConfigTypeMeta(cfg); err != nil {
+		return options, err
+	}
+	return applyManagerConfigOverlay(options, cfg), nil
+}
+
+func applyManagerConfigOverlay(options ctrl.Options, cfg controllerManagerConfigFile) ctrl.Options {
+	options = applyLeaderElectionConfigOverlay(options, cfg.LeaderElection)
+	options = applyGeneralManagerConfigOverlay(options, cfg)
+	options = applyHealthConfigOverlay(options, cfg.Health)
+	options = applyWebhookConfigOverlay(options, cfg.Webhook)
+	if cfg.Controller != nil {
+		options = applyControllerConfigOverlay(options, *cfg.Controller)
+	}
+	return options
+}
+
+func applyLeaderElectionConfigOverlay(options ctrl.Options, cfg *leaderElectionConfigFile) ctrl.Options {
+	if cfg == nil {
+		return options
+	}
+	if !options.LeaderElection && cfg.LeaderElect != nil {
+		options.LeaderElection = *cfg.LeaderElect
+	}
+	if options.LeaderElectionResourceLock == "" && cfg.ResourceLock != "" {
+		options.LeaderElectionResourceLock = cfg.ResourceLock
+	}
+	if options.LeaderElectionNamespace == "" && cfg.ResourceNamespace != "" {
+		options.LeaderElectionNamespace = cfg.ResourceNamespace
+	}
+	if options.LeaderElectionID == "" && cfg.ResourceName != "" {
+		options.LeaderElectionID = cfg.ResourceName
+	}
+	if options.LeaseDuration == nil && cfg.LeaseDuration != nil {
+		leaseDuration := cfg.LeaseDuration.Duration
+		options.LeaseDuration = &leaseDuration
+	}
+	if options.RenewDeadline == nil && cfg.RenewDeadline != nil {
+		renewDeadline := cfg.RenewDeadline.Duration
+		options.RenewDeadline = &renewDeadline
+	}
+	if options.RetryPeriod == nil && cfg.RetryPeriod != nil {
+		retryPeriod := cfg.RetryPeriod.Duration
+		options.RetryPeriod = &retryPeriod
+	}
+	return options
+}
+
+func applyGeneralManagerConfigOverlay(options ctrl.Options, cfg controllerManagerConfigFile) ctrl.Options {
+	if options.Cache.SyncPeriod == nil && cfg.SyncPeriod != nil {
+		syncPeriod := cfg.SyncPeriod.Duration
+		options.Cache.SyncPeriod = &syncPeriod
+	}
+	if len(options.Cache.DefaultNamespaces) == 0 && cfg.CacheNamespace != "" {
+		options.Cache.DefaultNamespaces = map[string]cache.Config{cfg.CacheNamespace: {}}
+	}
+	if options.GracefulShutdownTimeout == nil && cfg.GracefulShutdownTimeout != nil {
+		timeout := cfg.GracefulShutdownTimeout.Duration
+		options.GracefulShutdownTimeout = &timeout
+	}
+	if options.Metrics.BindAddress == "" && cfg.Metrics.BindAddress != "" {
+		options.Metrics.BindAddress = cfg.Metrics.BindAddress
+	}
+	return options
+}
+
+func applyHealthConfigOverlay(options ctrl.Options, cfg healthConfigFile) ctrl.Options {
+	if options.HealthProbeBindAddress == "" && cfg.HealthProbeBindAddress != "" {
+		options.HealthProbeBindAddress = cfg.HealthProbeBindAddress
+	}
+	if options.ReadinessEndpointName == "" && cfg.ReadinessEndpointName != "" {
+		options.ReadinessEndpointName = cfg.ReadinessEndpointName
+	}
+	if options.LivenessEndpointName == "" && cfg.LivenessEndpointName != "" {
+		options.LivenessEndpointName = cfg.LivenessEndpointName
+	}
+	return options
+}
+
+func applyWebhookConfigOverlay(options ctrl.Options, cfg webhookConfigFile) ctrl.Options {
+	if options.WebhookServer != nil {
+		return options
+	}
+
+	port := 0
+	if cfg.Port != nil {
+		port = *cfg.Port
+	}
+	options.WebhookServer = webhook.NewServer(webhook.Options{
+		Port:    port,
+		Host:    cfg.Host,
+		CertDir: cfg.CertDir,
+	})
+	return options
+}
+
+func applyControllerConfigOverlay(options ctrl.Options, cfg controllerConfigFile) ctrl.Options {
+	if options.Controller.CacheSyncTimeout == 0 && cfg.CacheSyncTimeout != nil {
+		options.Controller.CacheSyncTimeout = cfg.CacheSyncTimeout.Duration
+	}
+	if len(options.Controller.GroupKindConcurrency) == 0 && len(cfg.GroupKindConcurrency) > 0 {
+		options.Controller.GroupKindConcurrency = cfg.GroupKindConcurrency
+	}
+	if options.Controller.RecoverPanic == nil && cfg.RecoverPanic != nil {
+		options.Controller.RecoverPanic = cfg.RecoverPanic
+	}
+	return options
+}
+
+func setupRegistrations(mgr ctrl.Manager, initOSOKResources bool) error {
+	if initOSOKResources {
 		util.InitOSOK(mgr.GetConfig(), loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("setup").WithName("initOSOK")})
 	}
 
@@ -79,18 +222,13 @@ func run() error {
 		return err
 	}
 
-	if err := setupRuntimeRegistrations(mgr, runtimeDeps); err != nil {
-		return err
+	registrationContext := registrations.NewContext(mgr, runtimeDeps)
+	for _, registration := range registrations.All() {
+		if err := registration.SetupWithManager(registrationContext); err != nil {
+			return err
+		}
 	}
-
-	// +kubebuilder:scaffold:builder
-
-	if err := addManagerChecks(mgr); err != nil {
-		return err
-	}
-
-	setupLog.InfoLog("starting manager")
-	return mgr.Start(ctrl.SetupSignalHandler())
+	return nil
 }
 
 func buildRuntimeDeps(mgr ctrl.Manager) (servicemanager.RuntimeDeps, error) {
@@ -119,38 +257,14 @@ func buildRuntimeDeps(mgr ctrl.Manager) (servicemanager.RuntimeDeps, error) {
 	}, nil
 }
 
-func setupRuntimeRegistrations(mgr ctrl.Manager, runtimeDeps servicemanager.RuntimeDeps) error {
-	registrationContext := registrations.NewContext(mgr, runtimeDeps)
-	if err := setupControllerRegistrations(registrationContext); err != nil {
+type managerHealthChecker interface {
+	AddHealthzCheck(name string, check healthz.Checker) error
+	AddReadyzCheck(name string, check healthz.Checker) error
+}
+
+func addManagerHealthChecks(mgr managerHealthChecker) error {
+	if err := mgr.AddHealthzCheck("health", healthz.Ping); err != nil {
 		return err
 	}
-	return setupManualWebhooks(mgr)
-}
-
-func setupControllerRegistrations(registrationContext registrations.Context) error {
-	for _, registration := range registrations.All() {
-		if err := registration.SetupWithManager(registrationContext); err != nil {
-			return fmt.Errorf("unable to create controller registration for group %q: %w", registration.Group, err)
-		}
-	}
-	return nil
-}
-
-func setupManualWebhooks(mgr ctrl.Manager) error {
-	for _, webhook := range registrations.ManualWebhooks() {
-		if err := webhook.SetupWithManager(mgr); err != nil {
-			return fmt.Errorf("unable to create webhook %q: %w", webhook.Name, err)
-		}
-	}
-	return nil
-}
-
-func addManagerChecks(mgr ctrl.Manager) error {
-	if err := mgr.AddHealthzCheck("health", healthz.Ping); err != nil {
-		return fmt.Errorf("unable to set up health check: %w", err)
-	}
-	if err := mgr.AddReadyzCheck("check", healthz.Ping); err != nil {
-		return fmt.Errorf("unable to set up ready check: %w", err)
-	}
-	return nil
+	return mgr.AddReadyzCheck("check", healthz.Ping)
 }

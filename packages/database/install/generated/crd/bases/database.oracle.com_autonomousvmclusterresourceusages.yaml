@@ -1,0 +1,266 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: autonomousvmclusterresourceusages.database.oracle.com
+spec:
+  group: database.oracle.com
+  names:
+    kind: AutonomousVmClusterResourceUsage
+    listKind: AutonomousVmClusterResourceUsageList
+    plural: autonomousvmclusterresourceusages
+    singular: autonomousvmclusterresourceusage
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: status of the AutonomousVmClusterResourceUsage
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the AutonomousVmClusterResourceUsage
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: AutonomousVmClusterResourceUsage is the Schema for the autonomousvmclusterresourceusages
+          API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: AutonomousVmClusterResourceUsageSpec defines the desired
+              state of AutonomousVmClusterResourceUsage.
+            type: object
+          status:
+            description: AutonomousVmClusterResourceUsageStatus defines the observed
+              state of AutonomousVmClusterResourceUsage.
+            properties:
+              autonomousDataStorageSizeInTBs:
+                description: The data disk group size allocated for Autonomous Databases,
+                  in TBs.
+                type: number
+              autonomousVmResourceUsage:
+                description: List of autonomous vm cluster resource usages.
+                items:
+                  description: AutonomousVmClusterResourceUsageAutonomousVmResourceUsage
+                    defines nested fields for AutonomousVmClusterResourceUsage.AutonomousVmResourceUsage.
+                  properties:
+                    autonomousContainerDatabaseUsage:
+                      description: Associated Autonomous Container Database Usages.
+                      items:
+                        description: AutonomousVmClusterResourceUsageAutonomousVmResourceUsageAutonomousContainerDatabaseUsage
+                          defines nested fields for AutonomousVmClusterResourceUsage.AutonomousVmResourceUsage.AutonomousContainerDatabaseUsage.
+                        properties:
+                          availableCpus:
+                            description: The number of CPU cores available.
+                            type: number
+                          displayName:
+                            description: The user-friendly name for the Autonomous
+                              Container Database. The name does not need to be unique.
+                            type: string
+                          id:
+                            description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                              of the Autonomous Container Database.
+                            type: string
+                          provisionedCpus:
+                            description: CPUs/cores assigned to Autonomous Databases
+                              in the ACD instances.
+                            type: number
+                          reclaimableCpus:
+                            description: |-
+                              CPUs/cores that continue to be included in the count of OCPUs available to the
+                              Autonomous Container Database even after one of its Autonomous Database is terminated
+                              or scaled down. You can release them to the available OCPUs at its parent AVMC level by
+                              restarting the Autonomous Container Database.
+                            type: number
+                          reservedCpus:
+                            description: |-
+                              CPUs/cores reserved for scalability, resilliency and other overheads. This includes failover,
+                              autoscaling and idle instance overhead.
+                            type: number
+                          usedCpus:
+                            description: |-
+                              CPUs/cores assigned to the ACD instance. Sum of provisioned, reserved and reclaimable CPUs/ cores
+                              to the ACD instance.
+                            type: number
+                        type: object
+                      type: array
+                    availableCpus:
+                      description: The number of CPU cores available.
+                      type: number
+                    displayName:
+                      description: The user-friendly name for the Autonomous VM cluster.
+                        The name does not need to be unique.
+                      type: string
+                    id:
+                      description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                        of the Autonomous VM Cluster.
+                      type: string
+                    provisionedCpus:
+                      description: The number of CPUs provisioned in an Autonomous
+                        VM Cluster.
+                      type: number
+                    reclaimableCpus:
+                      description: |-
+                        CPU cores that continue to be included in the count of OCPUs available to the
+                        Autonomous Container Database even after one of its Autonomous Database is
+                        terminated or scaled down. You can release them to the available OCPUs at its
+                        parent AVMC level by restarting the Autonomous Container Database.
+                      type: number
+                    reservedCpus:
+                      description: The number of CPUs reserved in an Autonomous VM
+                        Cluster.
+                      type: number
+                    usedCpus:
+                      description: The number of CPU cores alloted to the Autonomous
+                        Container Databases in an Cloud Autonomous VM cluster.
+                      type: number
+                  type: object
+                type: array
+              availableAutonomousDataStorageSizeInTBs:
+                description: The data disk group size available for Autonomous Databases,
+                  in TBs.
+                type: number
+              availableCpus:
+                description: The number of CPU cores available.
+                type: number
+              dbNodeStorageSizeInGBs:
+                description: The local node storage allocated in GBs.
+                type: integer
+              displayName:
+                description: The user-friendly name for the Autonomous VM cluster.
+                  The name does not need to be unique.
+                type: string
+              exadataStorageInTBs:
+                description: Total exadata storage allocated for the Autonomous VM
+                  Cluster. DATA + RECOVERY + SPARSE + any overhead in TBs.
+                type: number
+              id:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the Autonomous VM cluster.
+                type: string
+              isLocalBackupEnabled:
+                description: If true, database backup on local Exadata storage is
+                  configured for the Autonomous VM cluster. If false, database backup
+                  on local Exadata storage is not available in the Autonomous VM cluster.
+                type: boolean
+              memoryPerOracleComputeUnitInGBs:
+                description: The amount of memory (in GBs) to be enabled per each
+                  CPU core.
+                type: integer
+              memorySizeInGBs:
+                description: The memory allocated in GBs.
+                type: integer
+              nonProvisionableAutonomousContainerDatabases:
+                description: The number of non-provisionable Autonomous Container
+                  Databases in an Autonomous VM Cluster.
+                type: integer
+              provisionableAutonomousContainerDatabases:
+                description: The number of provisionable Autonomous Container Databases
+                  in an Autonomous VM Cluster.
+                type: integer
+              provisionedAutonomousContainerDatabases:
+                description: The number of provisioned Autonomous Container Databases
+                  in an Autonomous VM Cluster.
+                type: integer
+              provisionedCpus:
+                description: The number of CPUs provisioned in an Autonomous VM Cluster.
+                type: number
+              reclaimableCpus:
+                description: |-
+                  CPU cores that continue to be included in the count of OCPUs available to the
+                  Autonomous Container Database even after one of its Autonomous Database is terminated or scaled down.
+                  You can release them to the available OCPUs at its parent AVMC level by restarting the Autonomous Container Database.
+                type: number
+              reservedCpus:
+                description: The number of CPUs reserved in an Autonomous VM Cluster.
+                type: number
+              status:
+                properties:
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              totalContainerDatabases:
+                description: The total number of Autonomous Container Databases that
+                  can be created.
+                type: integer
+              totalCpus:
+                description: The number of CPU cores enabled on the Autonomous VM
+                  cluster.
+                type: number
+              usedAutonomousDataStorageSizeInTBs:
+                description: The data disk group size used for Autonomous Databases,
+                  in TBs.
+                type: number
+              usedCpus:
+                description: The number of CPU cores alloted to the Autonomous Container
+                  Databases in an Autonomous VM cluster.
+                type: number
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

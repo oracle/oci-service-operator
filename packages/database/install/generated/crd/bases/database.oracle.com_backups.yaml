@@ -1,0 +1,197 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: backups.database.oracle.com
+spec:
+  group: database.oracle.com
+  names:
+    kind: Backup
+    listKind: BackupList
+    plural: backups
+    singular: backup
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the Backup
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the Backup
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Backup is the Schema for the backups API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: BackupSpec defines the desired state of Backup.
+            properties:
+              databaseId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the database.
+                type: string
+              displayName:
+                description: The user-friendly name for the backup. The name does
+                  not have to be unique.
+                type: string
+            required:
+            - databaseId
+            - displayName
+            type: object
+          status:
+            description: BackupStatus defines the observed state of Backup.
+            properties:
+              availabilityDomain:
+                description: The name of the availability domain where the database
+                  backup is stored.
+                type: string
+              compartmentId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the compartment.
+                type: string
+              databaseEdition:
+                description: The Oracle Database edition of the DB system from which
+                  the database backup was taken.
+                type: string
+              databaseId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the database.
+                type: string
+              databaseSizeInGBs:
+                description: The size of the database in gigabytes at the time the
+                  backup was taken.
+                type: number
+              displayName:
+                description: The user-friendly name for the backup. The name does
+                  not have to be unique.
+                type: string
+              id:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the backup.
+                type: string
+              keyStoreId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the key store of Oracle Vault.
+                type: string
+              keyStoreWalletName:
+                description: The wallet name for Oracle Key Vault.
+                type: string
+              kmsKeyId:
+                description: The OCID of the key container that is used as the master
+                  encryption key in database transparent data encryption (TDE) operations.
+                type: string
+              kmsKeyVersionId:
+                description: The OCID of the key container version that is used in
+                  database transparent data encryption (TDE) operations KMS Key can
+                  have multiple key versions. If none is specified, the current key
+                  version (latest) of the Key Id is used for the operation. Autonomous
+                  Database Serverless does not use key versions, hence is not applicable
+                  for Autonomous Database Serverless instances.
+                type: string
+              lifecycleDetails:
+                description: Additional information about the current lifecycle state.
+                type: string
+              lifecycleState:
+                description: The current state of the backup.
+                type: string
+              shape:
+                description: Shape of the backup's source database.
+                type: string
+              status:
+                properties:
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              timeEnded:
+                description: The date and time the backup was completed.
+                type: string
+              timeStarted:
+                description: The date and time the backup started.
+                type: string
+              type:
+                description: The type of backup.
+                type: string
+              vaultId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the Oracle Cloud Infrastructure vault (https://docs.cloud.oracle.com/Content/KeyManagement/Concepts/keyoverview.htm#concepts).
+                  This parameter and `secretId` are required for Customer Managed
+                  Keys.
+                type: string
+              version:
+                description: Version of the backup's source database
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

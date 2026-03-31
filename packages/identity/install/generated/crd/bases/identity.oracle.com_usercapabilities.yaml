@@ -79,8 +79,28 @@ spec:
           status:
             description: UserCapabilityStatus defines the observed state of UserCapability.
             properties:
+              canUseApiKeys:
+                description: Indicates if the user can use API keys.
+                type: boolean
+              canUseAuthTokens:
+                description: Indicates if the user can use SWIFT passwords / auth
+                  tokens.
+                type: boolean
+              canUseConsolePassword:
+                description: Indicates if the user can log in to the console.
+                type: boolean
+              canUseCustomerSecretKeys:
+                description: Indicates if the user can use SigV4 symmetric keys.
+                type: boolean
               canUseDbCredentials:
                 description: Indicates if the user can use DB passwords.
+                type: boolean
+              canUseOAuth2ClientCredentials:
+                description: Indicates if the user can use OAuth2 credentials and
+                  tokens.
+                type: boolean
+              canUseSmtpCredentials:
+                description: Indicates if the user can use SMTP passwords.
                 type: boolean
               status:
                 properties:

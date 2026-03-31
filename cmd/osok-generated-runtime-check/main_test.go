@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"slices"
@@ -9,7 +10,7 @@ import (
 	"github.com/oracle/oci-service-operator/internal/generator"
 )
 
-func TestResolveRunInputsPreserveExistingSpecSurface(t *testing.T) {
+func TestLoadRuntimeCheckRunInputsPreserveExistingSpecSurface(t *testing.T) {
 	t.Parallel()
 
 	repoRoot, err := findRepoRoot()
@@ -17,13 +18,13 @@ func TestResolveRunInputsPreserveExistingSpecSurface(t *testing.T) {
 		t.Fatalf("findRepoRoot() error = %v", err)
 	}
 
-	inputs, err := resolveRunInputs(options{
+	inputs, err := loadRuntimeCheckRunInputs(context.Background(), options{
 		configPath:   defaultConfigPath,
 		all:          true,
 		preserveSpec: true,
 	})
 	if err != nil {
-		t.Fatalf("resolveRunInputs() error = %v", err)
+		t.Fatalf("loadRuntimeCheckRunInputs() error = %v", err)
 	}
 	if inputs.preserveRoot != repoRoot {
 		t.Fatalf("preserveRoot = %q, want %q", inputs.preserveRoot, repoRoot)
@@ -34,13 +35,11 @@ func TestCollectBuildPlanFindsGeneratedRuntimePackages(t *testing.T) {
 	t.Helper()
 
 	root := t.TempDir()
-	mustMkdirAll(t, []string{
-		filepath.Join(root, "controllers", "functions"),
-		filepath.Join(root, "pkg", "servicemanager", "functions", "application"),
-		filepath.Join(root, "internal", "registrations"),
-	})
+	mustRuntimeCheckMkdirAll(t, filepath.Join(root, "controllers", "functions"))
+	mustRuntimeCheckMkdirAll(t, filepath.Join(root, "pkg", "servicemanager", "functions", "application"))
+	mustRuntimeCheckMkdirAll(t, filepath.Join(root, "internal", "registrations"))
 
-	writeTestFiles(t, map[string]string{
+	writeRuntimeCheckFiles(t, map[string]string{
 		filepath.Join(root, "controllers", "functions", "application_controller.go"):                              "package functions\n",
 		filepath.Join(root, "pkg", "servicemanager", "functions", "application", "application_servicemanager.go"): generatedServiceManagerSource("application"),
 		filepath.Join(root, "pkg", "servicemanager", "functions", "application", "application_serviceclient.go"):  generatedServiceManagerSource("application"),
@@ -67,13 +66,11 @@ func TestCollectBuildPlanFindsDatabaseGeneratedRuntimePackages(t *testing.T) {
 	t.Helper()
 
 	root := t.TempDir()
-	mustMkdirAll(t, []string{
-		filepath.Join(root, "controllers", "database"),
-		filepath.Join(root, "pkg", "servicemanager", "database", "autonomousdatabase"),
-		filepath.Join(root, "internal", "registrations"),
-	})
+	mustRuntimeCheckMkdirAll(t, filepath.Join(root, "controllers", "database"))
+	mustRuntimeCheckMkdirAll(t, filepath.Join(root, "pkg", "servicemanager", "database", "autonomousdatabase"))
+	mustRuntimeCheckMkdirAll(t, filepath.Join(root, "internal", "registrations"))
 
-	writeTestFiles(t, map[string]string{
+	writeRuntimeCheckFiles(t, map[string]string{
 		filepath.Join(root, "controllers", "database", "autonomousdatabase_controller.go"):                                     "package database\n",
 		filepath.Join(root, "pkg", "servicemanager", "database", "autonomousdatabase", "autonomousdatabase_servicemanager.go"): generatedServiceManagerSource("autonomousdatabase"),
 		filepath.Join(root, "pkg", "servicemanager", "database", "autonomousdatabase", "autonomousdatabase_serviceclient.go"):  generatedServiceManagerSource("autonomousdatabase"),
@@ -94,7 +91,7 @@ func TestCollectBuildPlanRejectsMissingRuntimePackages(t *testing.T) {
 	t.Helper()
 
 	root := t.TempDir()
-	mustMkdirAll(t, []string{filepath.Join(root, "internal", "registrations")})
+	mustRuntimeCheckMkdirAll(t, filepath.Join(root, "internal", "registrations"))
 
 	if _, err := collectBuildPlan(root, []string{"functions"}, []string{"functions"}, []string{"functions"}); err == nil {
 		t.Fatal("collectBuildPlan() error = nil, want missing package error")
@@ -105,17 +102,15 @@ func TestCollectBuildPlanRejectsLegacyOnlyServiceManagerPackages(t *testing.T) {
 	t.Helper()
 
 	root := t.TempDir()
-	mustMkdirAll(t, []string{
-		filepath.Join(root, "controllers", "database"),
-		filepath.Join(root, "pkg", "servicemanager", "database", "autonomousdatabase"),
-		filepath.Join(root, "internal", "registrations"),
-	})
+	mustRuntimeCheckMkdirAll(t, filepath.Join(root, "controllers", "database"))
+	mustRuntimeCheckMkdirAll(t, filepath.Join(root, "pkg", "servicemanager", "database", "autonomousdatabase"))
+	mustRuntimeCheckMkdirAll(t, filepath.Join(root, "internal", "registrations"))
 
-	writeTestFiles(t, map[string]string{
-		filepath.Join(root, "controllers", "database", "autonomousdatabase_controller.go"):                         "package database\n",
+	writeRuntimeCheckFiles(t, map[string]string{
+		filepath.Join(root, "controllers", "database", "autonomousdatabase_controller.go"):                          "package database\n",
 		filepath.Join(root, "pkg", "servicemanager", "database", "autonomousdatabase", "legacy_servicemanager.go"): "package autonomousdatabase\n",
 		filepath.Join(root, "pkg", "servicemanager", "database", "autonomousdatabase", "manual_helper.go"):         "package autonomousdatabase\n",
-		filepath.Join(root, "internal", "registrations", "database_generated.go"):                                  generatedRegistrationSource(),
+		filepath.Join(root, "internal", "registrations", "database_generated.go"):                                   generatedRegistrationSource(),
 	})
 
 	_, err := collectBuildPlan(root, []string{"database"}, []string{"database"}, []string{"database"})
@@ -131,13 +126,11 @@ func TestCollectBuildPlanRejectsMissingSelectedRegistrationOutputs(t *testing.T)
 	t.Helper()
 
 	root := t.TempDir()
-	mustMkdirAll(t, []string{
-		filepath.Join(root, "controllers", "functions"),
-		filepath.Join(root, "pkg", "servicemanager", "functions", "application"),
-		filepath.Join(root, "internal", "registrations"),
-	})
+	mustRuntimeCheckMkdirAll(t, filepath.Join(root, "controllers", "functions"))
+	mustRuntimeCheckMkdirAll(t, filepath.Join(root, "pkg", "servicemanager", "functions", "application"))
+	mustRuntimeCheckMkdirAll(t, filepath.Join(root, "internal", "registrations"))
 
-	writeTestFiles(t, map[string]string{
+	writeRuntimeCheckFiles(t, map[string]string{
 		filepath.Join(root, "controllers", "functions", "application_controller.go"):                              "package functions\n",
 		filepath.Join(root, "pkg", "servicemanager", "functions", "application", "application_servicemanager.go"): generatedServiceManagerSource("application"),
 		filepath.Join(root, "pkg", "servicemanager", "functions", "application", "application_serviceclient.go"):  generatedServiceManagerSource("application"),
@@ -159,7 +152,7 @@ func TestPopulateSnapshotCarriesFormalRootAndLeavesSelectedFilesWritable(t *test
 	repoRoot := t.TempDir()
 	snapshotRoot := t.TempDir()
 
-	mustMkdirAll(t, []string{
+	for _, dir := range []string{
 		filepath.Join(repoRoot, "api"),
 		filepath.Join(repoRoot, "controllers"),
 		filepath.Join(repoRoot, "hack"),
@@ -167,8 +160,10 @@ func TestPopulateSnapshotCarriesFormalRootAndLeavesSelectedFilesWritable(t *test
 		filepath.Join(repoRoot, "pkg", "servicemanager", "database"),
 		filepath.Join(repoRoot, "pkg", "servicemanager", "identity"),
 		filepath.Join(repoRoot, "internal", "registrations"),
-	})
-	writeTestFiles(t, map[string]string{
+	} {
+		mustRuntimeCheckMkdirAll(t, dir)
+	}
+	writeRuntimeCheckFiles(t, map[string]string{
 		filepath.Join(repoRoot, "go.mod"):                                             "module example.com/test\n",
 		filepath.Join(repoRoot, "go.sum"):                                             "",
 		filepath.Join(repoRoot, "internal", "registrations", "database_generated.go"): "package registrations\n",
@@ -179,11 +174,11 @@ func TestPopulateSnapshotCarriesFormalRootAndLeavesSelectedFilesWritable(t *test
 		t.Fatalf("populateSnapshot() error = %v", err)
 	}
 
-	assertSymlink(t, filepath.Join(snapshotRoot, "formal"))
-	assertNotExists(t, filepath.Join(snapshotRoot, "internal", "registrations", "database_generated.go"), "selected registration")
-	assertSymlink(t, filepath.Join(snapshotRoot, "internal", "registrations", "events_generated.go"))
-	assertNotExists(t, filepath.Join(snapshotRoot, "pkg", "servicemanager", "database"), "selected service-manager root")
-	assertSymlink(t, filepath.Join(snapshotRoot, "pkg", "servicemanager", "identity"))
+	assertRuntimeCheckSymlink(t, filepath.Join(snapshotRoot, "formal"))
+	assertRuntimeCheckNotExists(t, filepath.Join(snapshotRoot, "internal", "registrations", "database_generated.go"))
+	assertRuntimeCheckSymlink(t, filepath.Join(snapshotRoot, "internal", "registrations", "events_generated.go"))
+	assertRuntimeCheckNotExists(t, filepath.Join(snapshotRoot, "pkg", "servicemanager", "database"))
+	assertRuntimeCheckSymlink(t, filepath.Join(snapshotRoot, "pkg", "servicemanager", "identity"))
 }
 
 func TestPreserveCheckedInCompanionFilesLinksCheckedInCompatibilityCompanions(t *testing.T) {
@@ -193,76 +188,73 @@ func TestPreserveCheckedInCompanionFilesLinksCheckedInCompatibilityCompanions(t 
 	snapshotRoot := t.TempDir()
 
 	apiSourceDir := filepath.Join(repoRoot, "api", "database", "v1beta1")
-	mustMkdirAll(t, []string{apiSourceDir})
-	helperPath := filepath.Join(apiSourceDir, "autonomousdatabase_helpers.go")
+	mustRuntimeCheckMkdirAll(t, apiSourceDir)
+	apiCompanionPath := filepath.Join(apiSourceDir, "autonomousdatabase_helpers.go")
+	mustRuntimeCheckWriteFile(t, apiCompanionPath, "package v1beta1\n")
 	typesPath := filepath.Join(apiSourceDir, "autonomousdatabase_types.go")
-	writeTestFiles(t, map[string]string{
-		helperPath: "package v1beta1\n",
-		typesPath:  "package v1beta1\n",
-	})
+	mustRuntimeCheckWriteFile(t, typesPath, "package v1beta1\n")
 
 	serviceManagerSourceDir := filepath.Join(repoRoot, "pkg", "servicemanager", "database", "autonomousdatabase")
-	mustMkdirAll(t, []string{serviceManagerSourceDir})
+	mustRuntimeCheckMkdirAll(t, serviceManagerSourceDir)
 	adapterPath := filepath.Join(serviceManagerSourceDir, "autonomousdatabase_generated_client_adapter.go")
+	mustRuntimeCheckWriteFile(t, adapterPath, "package autonomousdatabase\n")
 	legacyServiceManagerPath := filepath.Join(serviceManagerSourceDir, "legacy_servicemanager.go")
+	mustRuntimeCheckWriteFile(t, legacyServiceManagerPath, "package autonomousdatabase\n")
 	generatedServiceClientPath := filepath.Join(serviceManagerSourceDir, "autonomousdatabase_serviceclient.go")
-	writeTestFiles(t, map[string]string{
-		adapterPath:                "package autonomousdatabase\n",
-		legacyServiceManagerPath:   "package autonomousdatabase\n",
-		generatedServiceClientPath: generatedServiceManagerSource("autonomousdatabase"),
-	})
+	mustRuntimeCheckWriteFile(t, generatedServiceClientPath, generatedServiceManagerSource("autonomousdatabase"))
 
 	snapshotServiceManagerDir := filepath.Join(snapshotRoot, "pkg", "servicemanager", "database", "autonomousdatabase")
-	mustMkdirAll(t, []string{snapshotServiceManagerDir})
+	mustRuntimeCheckMkdirAll(t, snapshotServiceManagerDir)
 	snapshotGeneratedServiceClientPath := filepath.Join(snapshotServiceManagerDir, "autonomousdatabase_serviceclient.go")
-	writeTestFiles(t, map[string]string{
-		snapshotGeneratedServiceClientPath: generatedServiceManagerSource("autonomousdatabase"),
-	})
+	mustRuntimeCheckWriteFile(t, snapshotGeneratedServiceClientPath, generatedServiceManagerSource("autonomousdatabase"))
 
-	services := []generator.ServiceConfig{
+	packages := []*generator.PackageModel{
 		{
-			Group: "database",
-			Generation: generator.GenerationConfig{
-				Resources: []generator.ResourceGenerationOverride{
-					{
-						Kind: "AutonomousDatabase",
-						ServiceManager: generator.ServiceManagerGenerationOverride{
-							PackagePath: "database/autonomousdatabase",
-						},
-					},
+			Service: generator.ServiceConfig{Group: "database"},
+			Version: "v1beta1",
+			ServiceManagers: []generator.ServiceManagerModel{
+				{
+					PackagePath:            "database/autonomousdatabase",
+					ServiceClientFileName:  "autonomousdatabase_serviceclient.go",
+					ServiceManagerFileName: "autonomousdatabase_servicemanager.go",
 				},
 			},
 		},
 	}
-	if err := preserveCheckedInCompanionFiles(repoRoot, snapshotRoot, "v1beta1", services); err != nil {
+	if err := preserveCheckedInCompanionFiles(repoRoot, snapshotRoot, packages); err != nil {
 		t.Fatalf("preserveCheckedInCompanionFiles() error = %v", err)
 	}
 
-	snapshotHelperPath := filepath.Join(snapshotRoot, "api", "database", "v1beta1", "autonomousdatabase_helpers.go")
-	snapshotAdapterPath := filepath.Join(snapshotServiceManagerDir, "autonomousdatabase_generated_client_adapter.go")
-	snapshotLegacyServiceManagerPath := filepath.Join(snapshotServiceManagerDir, "legacy_servicemanager.go")
-	assertSymlinkTarget(t, snapshotHelperPath, helperPath)
-	assertSymlink(t, snapshotAdapterPath)
-	assertSymlink(t, snapshotLegacyServiceManagerPath)
-	assertRegularFile(t, snapshotGeneratedServiceClientPath)
-	assertNotExists(t, filepath.Join(snapshotRoot, "api", "database", "v1beta1", "autonomousdatabase_types.go"), "generated api type file")
+	snapshotAPICompanionPath := filepath.Join(snapshotRoot, "api", "database", "v1beta1", "autonomousdatabase_helpers.go")
+	assertRuntimeCheckSymlink(t, snapshotAPICompanionPath)
+	assertRuntimeCheckReadlink(t, snapshotAPICompanionPath, apiCompanionPath)
+	assertRuntimeCheckSymlink(t, filepath.Join(snapshotServiceManagerDir, "autonomousdatabase_generated_client_adapter.go"))
+	assertRuntimeCheckSymlink(t, filepath.Join(snapshotServiceManagerDir, "legacy_servicemanager.go"))
+	assertRuntimeCheckRegularFile(t, snapshotGeneratedServiceClientPath)
+	assertRuntimeCheckNotExists(t, filepath.Join(snapshotRoot, "api", "database", "v1beta1", "autonomousdatabase_types.go"))
 }
 
-func mustMkdirAll(t *testing.T, dirs []string) {
+func writeRuntimeCheckFiles(t *testing.T, files map[string]string) {
 	t.Helper()
-	for _, dir := range dirs {
-		if err := os.MkdirAll(dir, 0o755); err != nil {
-			t.Fatalf("MkdirAll(%q) error = %v", dir, err)
-		}
+
+	for path, content := range files {
+		mustRuntimeCheckWriteFile(t, path, content)
 	}
 }
 
-func writeTestFiles(t *testing.T, files map[string]string) {
+func mustRuntimeCheckMkdirAll(t *testing.T, path string) {
 	t.Helper()
-	for path, content := range files {
-		if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
-			t.Fatalf("WriteFile(%q) error = %v", path, err)
-		}
+
+	if err := os.MkdirAll(path, 0o755); err != nil {
+		t.Fatalf("MkdirAll(%q) error = %v", path, err)
+	}
+}
+
+func mustRuntimeCheckWriteFile(t *testing.T, path string, content string) {
+	t.Helper()
+
+	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+		t.Fatalf("WriteFile(%q) error = %v", path, err)
 	}
 }
 
@@ -274,8 +266,9 @@ func generatedRegistrationSource() string {
 	return "package registrations\n\n" + generatedFileMarker + "\n"
 }
 
-func assertSymlink(t *testing.T, path string) {
+func assertRuntimeCheckSymlink(t *testing.T, path string) {
 	t.Helper()
+
 	info, err := os.Lstat(path)
 	if err != nil {
 		t.Fatalf("Lstat(%q) error = %v", path, err)
@@ -285,20 +278,21 @@ func assertSymlink(t *testing.T, path string) {
 	}
 }
 
-func assertSymlinkTarget(t *testing.T, path string, wantTarget string) {
+func assertRuntimeCheckReadlink(t *testing.T, path string, want string) {
 	t.Helper()
-	assertSymlink(t, path)
+
 	target, err := os.Readlink(path)
 	if err != nil {
 		t.Fatalf("Readlink(%q) error = %v", path, err)
 	}
-	if target != wantTarget {
-		t.Fatalf("Readlink(%q) = %q, want %q", path, target, wantTarget)
+	if target != want {
+		t.Fatalf("Readlink(%q) = %q, want %q", path, target, want)
 	}
 }
 
-func assertRegularFile(t *testing.T, path string) {
+func assertRuntimeCheckRegularFile(t *testing.T, path string) {
 	t.Helper()
+
 	info, err := os.Lstat(path)
 	if err != nil {
 		t.Fatalf("Lstat(%q) error = %v", path, err)
@@ -308,9 +302,10 @@ func assertRegularFile(t *testing.T, path string) {
 	}
 }
 
-func assertNotExists(t *testing.T, path string, label string) {
+func assertRuntimeCheckNotExists(t *testing.T, path string) {
 	t.Helper()
+
 	if _, err := os.Lstat(path); !os.IsNotExist(err) {
-		t.Fatalf("Lstat(%s) error = %v, want not exist", label, err)
+		t.Fatalf("Lstat(%q) error = %v, want not exist", path, err)
 	}
 }

@@ -35,9 +35,10 @@ var _ MySqlDbSystemServiceClient = defaultMySqlDbSystemServiceClient{}
 var newMySqlDbSystemServiceClient = func(manager *MySqlDbSystemServiceManager) MySqlDbSystemServiceClient {
 	sdkClient, err := mysqlsdk.NewDbSystemClientWithConfigurationProvider(manager.Provider)
 	config := generatedruntime.Config[*mysqlv1beta1.MySqlDbSystem]{
-		Kind:    "MySqlDbSystem",
-		SDKName: "DbSystem",
-		Log:     manager.Log,
+		Kind:             "MySqlDbSystem",
+		SDKName:          "DbSystem",
+		Log:              manager.Log,
+		CredentialClient: manager.CredentialClient,
 		Create: &generatedruntime.Operation{
 			NewRequest: func() any { return &mysqlsdk.CreateDbSystemRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {

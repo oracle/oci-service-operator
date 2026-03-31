@@ -19,8 +19,6 @@ type WindowsInstanceInitialCredentialSpec struct {
 // WindowsInstanceInitialCredentialStatus defines the observed state of WindowsInstanceInitialCredential.
 type WindowsInstanceInitialCredentialStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
-	// The password for the username.
-	Password string `json:"password,omitempty"`
 	// The username.
 	Username string `json:"username,omitempty"`
 }

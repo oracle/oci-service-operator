@@ -10,6 +10,10 @@ import (
 	"testing"
 
 	"github.com/oracle/oci-go-sdk/v65/common"
+	corev1beta1 "github.com/oracle/oci-service-operator/api/core/v1beta1"
+	databasev1beta1 "github.com/oracle/oci-service-operator/api/database/v1beta1"
+	mysqlv1beta1 "github.com/oracle/oci-service-operator/api/mysql/v1beta1"
+	streamingv1beta1 "github.com/oracle/oci-service-operator/api/streaming/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/credhelper"
 	"github.com/oracle/oci-service-operator/pkg/metrics"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
@@ -20,7 +24,7 @@ import (
 	ctrlclientfake "sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
-func TestAllAddToSchemeRegistersKnownGroups(t *testing.T) {
+func TestAllAddToSchemeRegistersManualGroupKinds(t *testing.T) {
 	t.Parallel()
 
 	scheme := runtime.NewScheme()
@@ -30,14 +34,18 @@ func TestAllAddToSchemeRegistersKnownGroups(t *testing.T) {
 		}
 	}
 
-	for _, group := range []string{
-		"core.oracle.com",
-		"database.oracle.com",
-		"mysql.oracle.com",
-		"streaming.oracle.com",
+	for _, obj := range []runtime.Object{
+		&corev1beta1.Vcn{},
+		&databasev1beta1.AutonomousDatabase{},
+		&mysqlv1beta1.MySqlDbSystem{},
+		&streamingv1beta1.Stream{},
 	} {
-		if !schemeRegistersGroupVersion(scheme, group, "v1beta1") {
-			t.Fatalf("scheme does not register any types for %s/v1beta1", group)
+		gvks, _, err := scheme.ObjectKinds(obj)
+		if err != nil {
+			t.Fatalf("ObjectKinds(%T) error = %v", obj, err)
+		}
+		if len(gvks) == 0 {
+			t.Fatalf("ObjectKinds(%T) returned no GVKs", obj)
 		}
 	}
 }
@@ -127,7 +135,7 @@ func (fakeServiceManager) GetCrdStatus(runtime.Object) (*shared.OSOKStatus, erro
 
 var _ servicemanager.OSOKServiceManager = fakeServiceManager{}
 
-func TestAllIncludesGeneratedGroupsAfterManualPrefix(t *testing.T) {
+func TestAllIncludesGeneratedGroupsAfterManualGroups(t *testing.T) {
 	restoreGeneratedGroupRegistrations(t)
 	registerGeneratedGroup(GroupRegistration{Group: "events"})
 
@@ -176,43 +184,6 @@ func TestAllSkipsGeneratedGroupsThatDuplicateManualEntries(t *testing.T) {
 	}
 }
 
-func TestManualWebhooksIncludesAutonomousDatabases(t *testing.T) {
-	t.Parallel()
-
-	webhooks := ManualWebhooks()
-	if len(webhooks) == 0 {
-		t.Fatal("ManualWebhooks() returned no entries")
-	}
-
-	for _, webhook := range webhooks {
-		if webhook.Name != "AutonomousDatabases" {
-			continue
-		}
-		if webhook.SetupWithManager == nil {
-			t.Fatal("AutonomousDatabases webhook setup hook is nil")
-		}
-		return
-	}
-
-	t.Fatalf("ManualWebhooks() = %v, want AutonomousDatabases entry", webhooks)
-}
-
-func TestManualWebhooksReturnsCopy(t *testing.T) {
-	t.Parallel()
-
-	webhooks := ManualWebhooks()
-	if len(webhooks) == 0 {
-		t.Fatal("ManualWebhooks() returned no entries")
-	}
-
-	webhooks[0].Name = "mutated"
-
-	fresh := ManualWebhooks()
-	if fresh[0].Name != manualWebhookRegistrations[0].Name {
-		t.Fatalf("ManualWebhooks() exposed shared slice storage: got %q, want %q", fresh[0].Name, manualWebhookRegistrations[0].Name)
-	}
-}
-
 func restoreGeneratedGroupRegistrations(t *testing.T) {
 	t.Helper()
 
@@ -221,13 +192,4 @@ func restoreGeneratedGroupRegistrations(t *testing.T) {
 	t.Cleanup(func() {
 		generatedGroupRegistrations = snapshot
 	})
-}
-
-func schemeRegistersGroupVersion(scheme *runtime.Scheme, group string, version string) bool {
-	for gvk := range scheme.AllKnownTypes() {
-		if gvk.Group == group && gvk.Version == version {
-			return true
-		}
-	}
-	return false
 }

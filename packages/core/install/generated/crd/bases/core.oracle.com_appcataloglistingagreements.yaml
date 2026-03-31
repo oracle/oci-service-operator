@@ -58,6 +58,22 @@ spec:
             description: AppCatalogListingAgreementStatus defines the observed state
               of AppCatalogListingAgreement.
             properties:
+              eulaLink:
+                description: EULA link
+                type: string
+              listingId:
+                description: The OCID of the listing associated with these agreements.
+                type: string
+              listingResourceVersion:
+                description: Listing resource version associated with these agreements.
+                type: string
+              oracleTermsOfUseLink:
+                description: Oracle TOU link
+                type: string
+              signature:
+                description: A generated signature for this agreement retrieval operation
+                  which should be used in the create subscription call.
+                type: string
               status:
                 properties:
                   conditions:
@@ -100,6 +116,11 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              timeRetrieved:
+                description: |-
+                  Date and time the agreements were retrieved, in RFC3339 (https://tools.ietf.org/html/rfc3339) format.
+                  Example: `2018-03-20T12:32:53.532Z`
+                type: string
             required:
             - status
             type: object

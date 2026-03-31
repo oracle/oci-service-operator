@@ -21,8 +21,6 @@ type PreCoUserCredentialStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
 	// The pre crypto officer username..
 	Username string `json:"username,omitempty"`
-	// The base 64 encoded pre crypto officer password.
-	Password string `json:"password,omitempty"`
 }
 
 // +kubebuilder:object:root=true

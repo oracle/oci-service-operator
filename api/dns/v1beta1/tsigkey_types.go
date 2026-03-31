@@ -55,8 +55,6 @@ type TsigKeyStatus struct {
 	Name string `json:"name,omitempty"`
 	// The OCID of the compartment containing the TSIG key.
 	CompartmentId string `json:"compartmentId,omitempty"`
-	// A base64 string encoding the binary shared secret.
-	Secret string `json:"secret,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
 	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
 	//

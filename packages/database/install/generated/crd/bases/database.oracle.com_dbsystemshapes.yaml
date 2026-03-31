@@ -1,0 +1,193 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: dbsystemshapes.database.oracle.com
+spec:
+  group: database.oracle.com
+  names:
+    kind: DbSystemShape
+    listKind: DbSystemShapeList
+    plural: dbsystemshapes
+    singular: dbsystemshape
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: status of the DbSystemShape
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the DbSystemShape
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: DbSystemShape is the Schema for the dbsystemshapes API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: DbSystemShapeSpec defines the desired state of DbSystemShape.
+            type: object
+          status:
+            description: DbSystemShapeStatus defines the observed state of DbSystemShape.
+            properties:
+              availableCoreCount:
+                description: The maximum number of CPU cores that can be enabled on
+                  the DB system for this shape.
+                type: integer
+              availableCoreCountPerNode:
+                description: The maximum number of CPU cores per database node that
+                  can be enabled for this shape. Only applicable to the flex Exadata
+                  shape, ExaCC Elastic shapes and VM Flex shapes.
+                type: integer
+              availableDataStorageInTBs:
+                description: The maximum DATA storage that can be enabled for this
+                  shape.
+                type: integer
+              availableDataStoragePerServerInTBs:
+                description: The maximum data storage available per storage server
+                  for this shape. Only applicable to ExaCC Elastic shapes.
+                type: number
+              availableDbNodePerNodeInGBs:
+                description: The maximum Db Node storage available per database node
+                  for this shape. Only applicable to ExaCC Elastic shapes.
+                type: integer
+              availableDbNodeStorageInGBs:
+                description: The maximum Db Node storage that can be enabled for this
+                  shape.
+                type: integer
+              availableMemoryInGBs:
+                description: The maximum memory that can be enabled for this shape.
+                type: integer
+              availableMemoryPerNodeInGBs:
+                description: The maximum memory available per database node for this
+                  shape. Only applicable to ExaCC Elastic shapes.
+                type: integer
+              coreCountIncrement:
+                description: The discrete number by which the CPU core count for this
+                  shape can be increased or decreased.
+                type: integer
+              maxStorageCount:
+                description: The maximum number of Exadata storage servers available
+                  for the Exadata infrastructure.
+                type: integer
+              maximumNodeCount:
+                description: The maximum number of compute servers available for this
+                  shape.
+                type: integer
+              minCoreCountPerNode:
+                description: The minimum number of CPU cores that can be enabled per
+                  node for this shape.
+                type: integer
+              minDataStorageInTBs:
+                description: The minimum data storage that need be allocated for this
+                  shape.
+                type: integer
+              minDbNodeStoragePerNodeInGBs:
+                description: The minimum Db Node storage that need be allocated per
+                  node for this shape.
+                type: integer
+              minMemoryPerNodeInGBs:
+                description: The minimum memory that need be allocated per node for
+                  this shape.
+                type: integer
+              minStorageCount:
+                description: The minimum number of Exadata storage servers available
+                  for the Exadata infrastructure.
+                type: integer
+              minimumCoreCount:
+                description: The minimum number of CPU cores that can be enabled on
+                  the DB system for this shape.
+                type: integer
+              minimumNodeCount:
+                description: The minimum number of compute servers available for this
+                  shape.
+                type: integer
+              name:
+                description: The name of the shape used for the DB system.
+                type: string
+              shape:
+                description: Deprecated. Use `name` instead of `shape`.
+                type: string
+              shapeFamily:
+                description: The family of the shape used for the DB system.
+                type: string
+              shapeType:
+                description: The shape type for the virtual machine DB system. Shape
+                  type is determined by CPU hardware. Valid values are `AMD` , `INTEL`,
+                  `INTEL_FLEX_X9` or `AMPERE_FLEX_A1`.
+                type: string
+              status:
+                properties:
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

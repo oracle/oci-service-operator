@@ -58,6 +58,10 @@ spec:
             description: VirtualCircuitAssociatedTunnelStatus defines the observed
               state of VirtualCircuitAssociatedTunnel.
             properties:
+              ipsecConnectionId:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of IPSec connection associated with the virtual circuit.
+                type: string
               status:
                 properties:
                   conditions:
@@ -100,6 +104,13 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              tunnelId:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the IPSec tunnel associated with the virtual circuit.
+                type: string
+              tunnelType:
+                description: The type of the tunnel associated with the virtual circuit.
+                type: string
             required:
             - status
             type: object

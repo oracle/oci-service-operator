@@ -86,6 +86,15 @@ spec:
                 description: The OCID of the compartment containing the steering policy
                   attachment.
                 type: string
+              displayName:
+                description: |-
+                  A user-friendly name for the steering policy attachment.
+                  Does not have to be unique and can be changed.
+                  Avoid entering confidential information.
+                type: string
+              domainName:
+                description: The attached domain within the attached zone.
+                type: string
               id:
                 description: The OCID of the resource.
                 type: string
@@ -145,10 +154,16 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              steeringPolicyId:
+                description: The OCID of the attached steering policy.
+                type: string
               timeCreated:
                 description: |-
                   The date and time the resource was created, expressed in RFC 3339 timestamp format.
                   **Example:** `2016-07-22T17:23:59:60Z`
+                type: string
+              zoneId:
+                description: The OCID of the attached zone.
                 type: string
             required:
             - status

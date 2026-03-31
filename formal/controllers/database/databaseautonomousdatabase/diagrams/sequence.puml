@@ -8,7 +8,7 @@ skinparam noteBackgroundColor #fff7d6
 skinparam noteBorderColor #b45309
 skinparam noteFontColor #334155
 skinparam roundcorner 16
-title Sequence - database/DatabaseAutonomousDatabase
+title Sequence - database/AutonomousDatabase
 hide footbox
 skinparam sequence {
   actorBorderColor #0f172a
@@ -31,30 +31,30 @@ shared/diagrams/shared-resolution-sequence.svg
 shared delete:
 shared/diagrams/shared-delete-sequence.svg
 end note
-Kubernetes -> Controller: enqueue DatabaseAutonomousDatabase\nreconcile
+Kubernetes -> Controller: enqueue AutonomousDatabase reconcile
 Controller -> BaseReconciler: Reconcile(request)
-BaseReconciler -> ServiceManager: reconcile desired\nDatabaseAutonomousDatabase
+BaseReconciler -> ServiceManager: reconcile desired AutonomousDatabase
 group Lookup and bind
 alt tracked or explicit OCI identity already exists
-ServiceManager -> OCI: GetDatabaseAutonomousDatabase
+ServiceManager -> OCI: GetAutonomousDatabase
 else tracked identity is missing
-ServiceManager -> OCI: ListDatabaseAutonomousDatabase(filters:\ncompartment_id, state)
+ServiceManager -> OCI: ListAutonomousDatabases(filters:\ncompartment_id, display_name)
 alt reusable OCI resource is not found
-ServiceManager -> OCI: CreateDatabaseAutonomousDatabase
-loop create pending PROVISIONING
-ServiceManager -> OCI: GetDatabaseAutonomousDatabase
+ServiceManager -> OCI: CreateAutonomousDatabase
+loop create pending PROVISIONING,\nSTARTING
+ServiceManager -> OCI: GetAutonomousDatabase
 end
 else reusable OCI resource already exists
-ServiceManager -> OCI: GetDatabaseAutonomousDatabase
+ServiceManager -> OCI: GetAutonomousDatabase
 end
 ServiceManager --> BaseReconciler: persist resolved OCI identity in status
 end
 alt delete requested
 group Delete
-ServiceManager -> OCI: DeleteDatabaseAutonomousDatabase
-ServiceManager -> OCI: confirm delete via\nGetDatabaseAutonomousDatabase or\nListDatabaseAutonomousDatabase
-loop delete pending DELETING
-ServiceManager -> OCI: GetDatabaseAutonomousDatabase or\nListDatabaseAutonomousDatabase
+ServiceManager -> OCI: DeleteAutonomousDatabase
+ServiceManager -> OCI: confirm delete via\nGetAutonomousDatabase or\nListAutonomousDatabases
+loop delete pending TERMINATING,\nUNAVAILABLE
+ServiceManager -> OCI: GetAutonomousDatabase or\nListAutonomousDatabases
 end
 alt cleanup or finalizer release is blocked
 ServiceManager --> BaseReconciler: retain delete state and retry
@@ -63,25 +63,37 @@ ServiceManager --> BaseReconciler: release finalizer after delete completion
 end
 end
 else OCI state is retryable
-ServiceManager --> BaseReconciler: requeue while OCI remains in\nPROVISIONING, UPDATING, DELETING
+ServiceManager --> BaseReconciler: requeue while OCI remains in\nPROVISIONING, STARTING,\nMAINTENANCE_IN_PROGRESS, RESTARTING\n(+6 more)
 else live state requires field-aware\ndrift evaluation
 group Drift handling
 note over ServiceManager,OCI
-Supported update surface: display_name
+Supported update surface:
+admin_password,
+are_primary_whitelisted_ips_used,
+auto_refresh_frequency_in_seconds,
+auto_refresh_point_lag_in_seconds (+107
+more)
 Reject before mutate: force-new fields
-compartment_id
-Lookup filters: compartment_id, state
+autonomous_container_database_id,
+autonomous_database_backup_id,
+autonomous_database_id, character_set
+(+12 more) and conflicts is_shrink_only
+-> shrink_adb_trigger
+Conflicts: is_shrink_only ->
+shrink_adb_trigger
+Lookup filters: compartment_id,
+display_name
 end note
 opt force-new or conflicting drift is detected
 ServiceManager --> BaseReconciler: reject before OCI mutation
 end
 opt supported mutable drift is detected
-ServiceManager -> OCI: Apply\nUpdateDatabaseAutonomousDatabase\nonly for mutable fields display_name
-loop update pending UPDATING
-ServiceManager -> OCI: GetDatabaseAutonomousDatabase
+ServiceManager -> OCI: Apply UpdateAutonomousDatabase only\nfor mutable fields admin_password,\nare_primary_whitelisted_ips_used,\nauto_refresh_frequency_in_seconds,\nauto_refresh_point_lag_in_seconds\n(+107 more)
+loop update pending\nMAINTENANCE_IN_PROGRESS,\nPROVISIONING, RESTARTING,\nSCALE_IN_PROGRESS (+5 more)
+ServiceManager -> OCI: GetAutonomousDatabase
 end
 end
-ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=template action=CREATED;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
+ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
 end
 ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
 end
@@ -103,23 +115,30 @@ delete sequences with imported waits and
 controller-local policy.
 service: database
 slug: databaseautonomousdatabase
-kind: DatabaseAutonomousDatabase
+kind: AutonomousDatabase
 archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
-provider states: create PROVISIONING; update
-UPDATING; delete DELETING
-supported drift: display_name
+provider states: create PROVISIONING, STARTING;
+update MAINTENANCE_IN_PROGRESS, PROVISIONING,
+RESTARTING, SCALE_IN_PROGRESS (+5 more); delete
+TERMINATING, UNAVAILABLE
+supported drift: admin_password,
+are_primary_whitelisted_ips_used,
+auto_refresh_frequency_in_seconds,
+auto_refresh_point_lag_in_seconds (+107 more)
 reject before mutate: force-new fields
-compartment_id
-list lookup:
-scaffold_database_databaseautonomousdatabase
-filters compartment_id, state
-conflicts: none
+autonomous_container_database_id,
+autonomous_database_backup_id,
+autonomous_database_id, character_set (+12 more)
+and conflicts is_shrink_only ->
+shrink_adb_trigger
+list lookup: oci_database_autonomous_databases
+filters compartment_id, display_name
+conflicts: is_shrink_only -> shrink_adb_trigger
 open gaps: none
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+Promoted generated-runtime metadata for
+database/AutonomousDatabase.
 end note
 @enduml
