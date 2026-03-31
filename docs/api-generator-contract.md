@@ -390,11 +390,9 @@ Expected regeneration and validation flow:
    FORMAL_PROVIDER_PATH=/path/to/terraform-provider-oci`.
 3. Run `go run ./cmd/generator ...` to emit API packages, sample manifests,
    sample kustomization, and package scaffolding for the selected services.
-   When refreshing services that must keep checked-in API spec/helper surfaces
-   or companion sample/package artifacts, pass
-   `--preserve-existing-spec-surface` so those checked-in files remain intact
-   while status/read-model outputs and the rest of the service regenerate from
-   normal config.
+   Generator-owned spec, helper, sample, and package artifacts now regenerate
+   directly from `services.yaml` and the current v2 contract; there is no
+   parity-preservation mode.
 4. When deepcopy output and CRD manifests also need refresh, run `make generate`
    and `make manifests` after the generator command. That flow also syncs the shared
    `config/crd/kustomization.yaml` resource list from `config/crd/bases/*.yaml`.
