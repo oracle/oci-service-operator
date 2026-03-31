@@ -166,7 +166,7 @@ func (c ServiceClient[T]) CreateOrUpdate(ctx context.Context, resource T, _ ctrl
 	}
 
 	liveResponse := existingResponse
-	if currentID != "" && c.requiresLiveMutationValidation() {
+	if currentID != "" && c.requiresLiveMutationAssessment() {
 		forceLiveGet := resolvedExistingBeforeCreate && c.config.Get != nil
 		if liveResponse == nil || forceLiveGet {
 			response, err := c.readResourceForMutationValidation(ctx, resource, currentID, forceLiveGet)
@@ -191,7 +191,11 @@ func (c ServiceClient[T]) CreateOrUpdate(ctx context.Context, resource T, _ ctrl
 		return servicemanager.OSOKResponse{IsSuccessful: false}, c.markFailure(resource, err)
 	}
 	if currentID != "" {
-		if c.config.Update != nil {
+		shouldUpdate, err := c.shouldInvokeUpdate(resource, liveResponse)
+		if err != nil {
+			return servicemanager.OSOKResponse{IsSuccessful: false}, c.markFailure(resource, err)
+		}
+		if shouldUpdate {
 			response, err := c.invoke(ctx, c.config.Update, resource, currentID)
 			if err != nil {
 				return servicemanager.OSOKResponse{IsSuccessful: false}, c.markFailure(resource, err)
@@ -204,7 +208,7 @@ func (c ServiceClient[T]) CreateOrUpdate(ctx context.Context, resource T, _ ctrl
 		}
 
 		response := liveResponse
-		if response == nil {
+		if response == nil && (c.config.Get != nil || c.config.List != nil) {
 			response, err = c.readResource(ctx, resource, currentID, readPhaseObserve)
 			if err != nil {
 				return servicemanager.OSOKResponse{IsSuccessful: false}, c.markFailure(resource, err)
@@ -441,10 +445,20 @@ func (c ServiceClient[T]) shouldResolveExistingBeforeCreate() bool {
 	return c.config.Create != nil && c.config.List != nil && c.config.Semantics != nil && c.config.Semantics.List != nil
 }
 
-func (c ServiceClient[T]) requiresLiveMutationValidation() bool {
+func (c ServiceClient[T]) requiresLiveMutationAssessment() bool {
 	return c.config.Semantics != nil &&
-		len(c.config.Semantics.Mutation.ForceNew) > 0 &&
+		(len(c.config.Semantics.Mutation.ForceNew) > 0 || len(c.config.Semantics.Mutation.Mutable) > 0) &&
 		(c.config.Get != nil || c.config.List != nil)
+}
+
+func (c ServiceClient[T]) shouldInvokeUpdate(resource T, currentResponse any) (bool, error) {
+	if c.config.Update == nil {
+		return false, nil
+	}
+	if c.config.Semantics == nil {
+		return true, nil
+	}
+	return c.hasMutableDrift(resource, currentResponse)
 }
 
 func (c ServiceClient[T]) validateMutationPolicy(resource T, existing bool, currentResponse any) error {
@@ -489,6 +503,37 @@ func (c ServiceClient[T]) validateMutationPolicy(resource T, existing bool, curr
 	}
 
 	return nil
+}
+
+func (c ServiceClient[T]) hasMutableDrift(resource T, currentResponse any) (bool, error) {
+	semantics := c.config.Semantics
+	if semantics == nil || len(semantics.Mutation.Mutable) == 0 {
+		return false, nil
+	}
+
+	resourceValue, err := resourceStruct(resource)
+	if err != nil {
+		return false, err
+	}
+
+	specValues := jsonMap(fieldInterface(resourceValue, "Spec"))
+	currentValues := jsonMap(fieldInterface(resourceValue, "Status"))
+	if body, ok := responseBody(currentResponse); ok && body != nil {
+		currentValues = jsonMap(body)
+	}
+
+	for _, field := range semantics.Mutation.Mutable {
+		specValue, specOK := lookupMeaningfulValue(specValues, field)
+		if !specOK {
+			continue
+		}
+		currentValue, currentOK := lookupMeaningfulValue(currentValues, field)
+		if !currentOK || !valuesEqual(specValue, currentValue) {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }
 
 func (c ServiceClient[T]) readResource(ctx context.Context, resource T, preferredID string, phase readPhase) (any, error) {

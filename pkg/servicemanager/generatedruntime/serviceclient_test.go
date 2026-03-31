@@ -293,6 +293,166 @@ func TestServiceClientCreateOrUpdateUpdatesExistingResource(t *testing.T) {
 	}
 }
 
+func TestServiceClientCreateOrUpdateSkipsUpdateWhenMutableStateMatches(t *testing.T) {
+	t.Parallel()
+
+	getCalled := false
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Semantics: &Semantics{
+			Lifecycle: LifecycleSemantics{
+				ActiveStates: []string{"ACTIVE"},
+			},
+			Mutation: MutationSemantics{
+				Mutable: []string{"displayName"},
+			},
+		},
+		Get: &Operation{
+			NewRequest: func() any { return &fakeGetThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				getCalled = true
+				if request.(*fakeGetThingRequest).ThingId == nil || *request.(*fakeGetThingRequest).ThingId != "ocid1.thing.oc1..existing" {
+					t.Fatalf("get request thingId = %v, want existing OCID", request.(*fakeGetThingRequest).ThingId)
+				}
+				return fakeGetThingResponse{
+					Thing: fakeThing{
+						Id:             "ocid1.thing.oc1..existing",
+						DisplayName:    "steady-name",
+						LifecycleState: "ACTIVE",
+					},
+				}, nil
+			},
+			Fields: []RequestField{
+				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
+			},
+		},
+		Update: &Operation{
+			NewRequest: func() any { return &fakeUpdateThingRequest{} },
+			Call: func(_ context.Context, _ any) (any, error) {
+				t.Fatal("Update() should not be called when mutable fields already match")
+				return nil, nil
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Spec: fakeSpec{
+			DisplayName: "steady-name",
+		},
+		Status: fakeStatus{
+			OsokStatus: shared.OSOKStatus{Ocid: "ocid1.thing.oc1..existing"},
+			Id:         "ocid1.thing.oc1..existing",
+		},
+	}
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful {
+		t.Fatal("CreateOrUpdate() should succeed when mutable fields already match")
+	}
+	if response.ShouldRequeue {
+		t.Fatal("CreateOrUpdate() should not requeue for ACTIVE lifecycle")
+	}
+	if !getCalled {
+		t.Fatal("Get() should be called to compare the current mutable state")
+	}
+	if resource.Status.DisplayName != "steady-name" {
+		t.Fatalf("status.displayName = %q, want steady-name", resource.Status.DisplayName)
+	}
+	if len(resource.Status.OsokStatus.Conditions) == 0 || resource.Status.OsokStatus.Conditions[len(resource.Status.OsokStatus.Conditions)-1].Type != shared.Active {
+		t.Fatalf("status conditions = %#v, want trailing Active condition", resource.Status.OsokStatus.Conditions)
+	}
+}
+
+func TestServiceClientCreateOrUpdateUpdatesWhenMutableStateDiffers(t *testing.T) {
+	t.Parallel()
+
+	getCalled := false
+	var updateRequest fakeUpdateThingRequest
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Semantics: &Semantics{
+			Lifecycle: LifecycleSemantics{
+				ActiveStates: []string{"ACTIVE"},
+			},
+			Mutation: MutationSemantics{
+				Mutable: []string{"displayName"},
+			},
+		},
+		Get: &Operation{
+			NewRequest: func() any { return &fakeGetThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				getCalled = true
+				if request.(*fakeGetThingRequest).ThingId == nil || *request.(*fakeGetThingRequest).ThingId != "ocid1.thing.oc1..existing" {
+					t.Fatalf("get request thingId = %v, want existing OCID", request.(*fakeGetThingRequest).ThingId)
+				}
+				return fakeGetThingResponse{
+					Thing: fakeThing{
+						Id:             "ocid1.thing.oc1..existing",
+						DisplayName:    "old-name",
+						LifecycleState: "ACTIVE",
+					},
+				}, nil
+			},
+			Fields: []RequestField{
+				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
+			},
+		},
+		Update: &Operation{
+			NewRequest: func() any { return &fakeUpdateThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				updateRequest = *request.(*fakeUpdateThingRequest)
+				return fakeUpdateThingResponse{
+					Thing: fakeThing{
+						Id:             "ocid1.thing.oc1..existing",
+						DisplayName:    "new-name",
+						LifecycleState: "ACTIVE",
+					},
+				}, nil
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Spec: fakeSpec{
+			DisplayName: "new-name",
+		},
+		Status: fakeStatus{
+			OsokStatus: shared.OSOKStatus{Ocid: "ocid1.thing.oc1..existing"},
+			Id:         "ocid1.thing.oc1..existing",
+		},
+	}
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful {
+		t.Fatal("CreateOrUpdate() should succeed when mutable drift requires update")
+	}
+	if response.ShouldRequeue {
+		t.Fatal("CreateOrUpdate() should not requeue for ACTIVE update result")
+	}
+	if !getCalled {
+		t.Fatal("Get() should be called before comparing mutable fields")
+	}
+	if updateRequest.ThingId == nil || *updateRequest.ThingId != "ocid1.thing.oc1..existing" {
+		t.Fatalf("update request thingId = %v, want existing OCID", updateRequest.ThingId)
+	}
+	if updateRequest.DisplayName != "new-name" {
+		t.Fatalf("update request displayName = %q, want new-name", updateRequest.DisplayName)
+	}
+	if resource.Status.DisplayName != "new-name" {
+		t.Fatalf("status.displayName = %q, want new-name", resource.Status.DisplayName)
+	}
+}
+
 func TestServiceClientCreateOrUpdateFallsBackToList(t *testing.T) {
 	t.Parallel()
 
@@ -814,6 +974,118 @@ func TestServiceClientCreateOrUpdateReusesExistingListMatchBeforeCreate(t *testi
 	}
 	if string(resource.Status.OsokStatus.Ocid) != "ocid1.thing.oc1..existing" {
 		t.Fatalf("status.ocid = %q, want reused OCID", resource.Status.OsokStatus.Ocid)
+	}
+}
+
+func TestServiceClientCreateOrUpdateSkipsUpdateAfterListReuseWhenMutableStateMatches(t *testing.T) {
+	t.Parallel()
+
+	createCalled := false
+	getCalled := false
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Semantics: &Semantics{
+			List: &ListSemantics{
+				ResponseItemsField: "Items",
+				MatchFields:        []string{"name", "compartmentId"},
+			},
+			Lifecycle: LifecycleSemantics{
+				ActiveStates: []string{"ACTIVE"},
+			},
+			Mutation: MutationSemantics{
+				Mutable: []string{"displayName"},
+			},
+		},
+		Create: &Operation{
+			NewRequest: func() any { return &fakeCreateThingRequest{} },
+			Call: func(_ context.Context, _ any) (any, error) {
+				createCalled = true
+				t.Fatal("Create() should not be called when list lookup finds a reusable resource")
+				return nil, nil
+			},
+		},
+		Get: &Operation{
+			NewRequest: func() any { return &fakeGetThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				getCalled = true
+				if request.(*fakeGetThingRequest).ThingId == nil || *request.(*fakeGetThingRequest).ThingId != "ocid1.thing.oc1..existing" {
+					t.Fatalf("get request thingId = %v, want reused OCID", request.(*fakeGetThingRequest).ThingId)
+				}
+				return fakeGetThingResponse{
+					Thing: fakeThing{
+						Id:             "ocid1.thing.oc1..existing",
+						Name:           "wanted",
+						CompartmentId:  "ocid1.compartment.oc1..match",
+						DisplayName:    "steady-name",
+						LifecycleState: "ACTIVE",
+					},
+				}, nil
+			},
+			Fields: []RequestField{
+				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
+			},
+		},
+		List: &Operation{
+			NewRequest: func() any { return &fakeListThingRequest{} },
+			Call: func(_ context.Context, _ any) (any, error) {
+				return fakeListThingResponse{
+					Collection: fakeThingCollection{
+						Items: []fakeThingSummary{
+							{
+								Id:             "ocid1.thing.oc1..existing",
+								Name:           "wanted",
+								CompartmentId:  "ocid1.compartment.oc1..match",
+								LifecycleState: "ACTIVE",
+							},
+						},
+					},
+				}, nil
+			},
+			Fields: []RequestField{
+				{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
+				{FieldName: "Name", RequestName: "name", Contribution: "query"},
+			},
+		},
+		Update: &Operation{
+			NewRequest: func() any { return &fakeUpdateThingRequest{} },
+			Call: func(_ context.Context, _ any) (any, error) {
+				t.Fatal("Update() should not be called when live mutable state already matches")
+				return nil, nil
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Spec: fakeSpec{
+			CompartmentId: "ocid1.compartment.oc1..match",
+			Name:          "wanted",
+			DisplayName:   "steady-name",
+		},
+	}
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful {
+		t.Fatal("CreateOrUpdate() should succeed when list reuse finds matching mutable state")
+	}
+	if response.ShouldRequeue {
+		t.Fatal("CreateOrUpdate() should not requeue for ACTIVE lifecycle")
+	}
+	if createCalled {
+		t.Fatal("Create() should not be called when list lookup finds a reusable resource")
+	}
+	if !getCalled {
+		t.Fatal("Get() should be called after list reuse to compare mutable fields")
+	}
+	if string(resource.Status.OsokStatus.Ocid) != "ocid1.thing.oc1..existing" {
+		t.Fatalf("status.ocid = %q, want reused OCID", resource.Status.OsokStatus.Ocid)
+	}
+	if resource.Status.DisplayName != "steady-name" {
+		t.Fatalf("status.displayName = %q, want steady-name", resource.Status.DisplayName)
 	}
 }
 
