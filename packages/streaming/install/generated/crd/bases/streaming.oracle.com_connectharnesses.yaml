@@ -4,14 +4,14 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.17.0
-  name: streams.streaming.oracle.com
+  name: connectharnesses.streaming.oracle.com
 spec:
   group: streaming.oracle.com
   names:
-    kind: Stream
-    listKind: StreamList
-    plural: streams
-    singular: stream
+    kind: ConnectHarness
+    listKind: ConnectHarnessList
+    plural: connectharnesses
+    singular: connectharness
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
@@ -19,11 +19,11 @@ spec:
       name: Name
       priority: 1
       type: string
-    - description: status of the Stream
+    - description: status of the ConnectHarness
       jsonPath: .status.status.conditions[-1].type
       name: Status
       type: string
-    - description: Ocid of the Stream
+    - description: Ocid of the ConnectHarness
       jsonPath: .status.status.ocid
       name: Ocid
       priority: 1
@@ -34,7 +34,7 @@ spec:
     name: v1beta1
     schema:
       openAPIV3Schema:
-        description: Stream is the Schema for the streams API.
+        description: ConnectHarness is the Schema for the connectharnesss API.
         properties:
           apiVersion:
             description: |-
@@ -54,48 +54,44 @@ spec:
           metadata:
             type: object
           spec:
-            description: StreamSpec defines the desired state of Stream
+            description: ConnectHarnessSpec defines the desired state of ConnectHarness.
             properties:
-              Id:
-                description: |-
-                  INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-                  Important: Run "make" to regenerate code after modifying this file
-                maxLength: 255
-                minLength: 1
-                type: string
               compartmentId:
-                maxLength: 255
-                minLength: 1
+                description: The OCID of the compartment that contains the connect
+                  harness.
                 type: string
               definedTags:
                 additionalProperties:
                   additionalProperties:
                     type: string
                   type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
                 type: object
               freeformTags:
                 additionalProperties:
                   type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair that is applied with no predefined name, type, or namespace. Exists for cross-compatibility only.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
                 type: object
               name:
+                description: |-
+                  The name of the connect harness. Avoid entering confidential information.
+                  Example: `JDBCConnector`
                 type: string
-              partitions:
-                minimum: 1
-                type: integer
-              retentionInHours:
-                maximum: 168
-                minimum: 24
-                type: integer
-              streamPoolId:
-                maxLength: 255
-                minLength: 1
-                type: string
+            required:
+            - compartmentId
+            - name
             type: object
           status:
-            description: StreamStatus defines the observed state of Stream.
+            description: ConnectHarnessStatus defines the observed state of ConnectHarness.
             properties:
               compartmentId:
-                description: The OCID of the stream.
+                description: The OCID of the compartment that contains the connect
+                  harness.
                 type: string
               definedTags:
                 additionalProperties:
@@ -115,32 +111,20 @@ spec:
                   Example: `{"Department": "Finance"}`
                 type: object
               id:
-                description: The OCID of the stream.
+                description: The OCID of the connect harness.
                 type: string
               lifecycleState:
-                description: The current state of the stream.
+                description: The current state of the connect harness.
                 type: string
               lifecycleStateDetails:
                 description: Any additional details about the current state of the
-                  stream.
-                type: string
-              messagesEndpoint:
-                description: |-
-                  The endpoint to use when creating the StreamClient to consume or publish messages in the stream.
-                  If the associated stream pool is private, the endpoint is also private and can only be accessed from inside the stream pool's associated subnet.
+                  connect harness.
                 type: string
               name:
                 description: |-
-                  The name of the stream. Avoid entering confidential information.
-                  Example: `TelemetryEvents`
+                  The name of the connect harness. Avoid entering confidential information.
+                  Example: `JDBCConnector`
                 type: string
-              partitions:
-                description: The number of partitions in the stream.
-                type: integer
-              retentionInHours:
-                description: The retention period of the stream, in hours. This property
-                  is read-only.
-                type: integer
               status:
                 properties:
                   conditions:
@@ -183,12 +167,9 @@ spec:
                     format: date-time
                     type: string
                 type: object
-              streamPoolId:
-                description: The OCID of the stream pool that contains the stream.
-                type: string
               timeCreated:
                 description: |-
-                  The date and time the stream was created, expressed in in RFC 3339 (https://tools.ietf.org/rfc/rfc3339) timestamp format.
+                  The date and time the connect harness was created, expressed in in RFC 3339 (https://tools.ietf.org/rfc/rfc3339) timestamp format.
                   Example: `2018-04-20T00:00:07.405Z`
                 type: string
             required:
