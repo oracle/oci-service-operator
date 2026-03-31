@@ -483,8 +483,13 @@ func (c ServiceClient[T]) validateMutationPolicy(resource T, existing bool, curr
 }
 
 func (c ServiceClient[T]) readResource(ctx context.Context, resource T, preferredID string, phase readPhase) (any, error) {
-	if c.config.Get != nil {
-		response, err := c.invoke(ctx, c.config.Get, resource, preferredID)
+	readID := preferredID
+	if readID == "" {
+		readID = c.currentID(resource)
+	}
+
+	if c.config.Get != nil && c.canInvokeGet(resource, readID) {
+		response, err := c.invoke(ctx, c.config.Get, resource, readID)
 		if err == nil {
 			return response, nil
 		}
@@ -497,7 +502,7 @@ func (c ServiceClient[T]) readResource(ctx context.Context, resource T, preferre
 		return nil, fmt.Errorf("%s generated runtime has no readable OCI operation", c.config.Kind)
 	}
 
-	response, err := c.invoke(ctx, c.config.List, resource, preferredID)
+	response, err := c.invoke(ctx, c.config.List, resource, readID)
 	if err != nil {
 		return nil, err
 	}
@@ -507,11 +512,82 @@ func (c ServiceClient[T]) readResource(ctx context.Context, resource T, preferre
 		return nil, fmt.Errorf("%s list response did not expose a body payload", c.config.Kind)
 	}
 
-	item, err := c.selectListItem(body, resource, preferredID, phase)
+	item, err := c.selectListItem(body, resource, readID, phase)
 	if err != nil {
 		return nil, err
 	}
 	return item, nil
+}
+
+func (c ServiceClient[T]) canInvokeGet(resource T, preferredID string) bool {
+	if c.config.Get == nil {
+		return false
+	}
+
+	values, err := lookupValues(resource)
+	if err != nil {
+		return true
+	}
+
+	if len(c.config.Get.Fields) > 0 {
+		for _, field := range c.config.Get.Fields {
+			if !requestFieldRequiresResourceID(field, c.idFieldAliases()) {
+				continue
+			}
+			if _, ok := explicitRequestValue(values, field, preferredID); !ok {
+				return false
+			}
+		}
+		return true
+	}
+
+	request := c.config.Get.NewRequest()
+	if request == nil {
+		return true
+	}
+
+	requestValue := reflect.ValueOf(request)
+	if !requestValue.IsValid() || requestValue.Kind() != reflect.Pointer || requestValue.IsNil() {
+		return true
+	}
+
+	requestStruct := requestValue.Elem()
+	if requestStruct.Kind() != reflect.Struct {
+		return true
+	}
+
+	requestType := requestStruct.Type()
+	for i := 0; i < requestStruct.NumField(); i++ {
+		fieldValue := requestStruct.Field(i)
+		fieldType := requestType.Field(i)
+		if !fieldValue.CanSet() || fieldType.Name == "RequestMetadata" {
+			continue
+		}
+
+		switch fieldType.Tag.Get("contributesTo") {
+		case "header", "binary", "body":
+			continue
+		}
+
+		lookupKey := fieldType.Tag.Get("name")
+		if lookupKey == "" {
+			lookupKey = fieldJSONName(fieldType)
+		}
+		if lookupKey == "" {
+			lookupKey = lowerCamel(fieldType.Name)
+		}
+		if !containsString(c.idFieldAliases(), lookupKey) {
+			continue
+		}
+		if preferredID != "" {
+			continue
+		}
+		if _, ok := lookupValueByPaths(values, lookupKey); !ok {
+			return false
+		}
+	}
+
+	return true
 }
 
 func (c ServiceClient[T]) invoke(ctx context.Context, op *Operation, resource T, preferredID string) (any, error) {
@@ -780,6 +856,18 @@ func explicitRequestValue(values map[string]any, field RequestField, preferredID
 	}
 
 	return nil, false
+}
+
+func requestFieldRequiresResourceID(field RequestField, idAliases []string) bool {
+	if field.PreferResourceID {
+		return true
+	}
+
+	lookupKey := strings.TrimSpace(field.RequestName)
+	if lookupKey == "" {
+		lookupKey = lowerCamel(field.FieldName)
+	}
+	return containsString(idAliases, lookupKey)
 }
 
 func lookupValues(resource any) (map[string]any, error) {

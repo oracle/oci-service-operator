@@ -811,6 +811,100 @@ func TestServiceClientCreateOrUpdateReusesExistingListMatchBeforeCreate(t *testi
 	}
 }
 
+func TestServiceClientCreateOrUpdateSkipsGetWithoutOcidBeforeListReuse(t *testing.T) {
+	t.Parallel()
+
+	createCalled := false
+	getCalled := false
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Semantics: &Semantics{
+			List: &ListSemantics{
+				ResponseItemsField: "Items",
+				MatchFields:        []string{"name", "compartmentId"},
+			},
+			Lifecycle: LifecycleSemantics{
+				ProvisioningStates: []string{"CREATING"},
+				UpdatingStates:     []string{"UPDATING"},
+				ActiveStates:       []string{"ACTIVE"},
+			},
+			Delete: DeleteSemantics{
+				Policy:         "best-effort",
+				PendingStates:  []string{"DELETING"},
+				TerminalStates: []string{"DELETED"},
+			},
+		},
+		Create: &Operation{
+			NewRequest: func() any { return &fakeCreateThingRequest{} },
+			Call: func(_ context.Context, _ any) (any, error) {
+				createCalled = true
+				t.Fatal("Create() should not be called when list lookup finds a reusable resource")
+				return nil, nil
+			},
+		},
+		Get: &Operation{
+			NewRequest: func() any { return &fakeGetThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				getCalled = true
+				if request.(*fakeGetThingRequest).ThingId == nil {
+					t.Fatal("Get() should not be called without a resource OCID")
+				}
+				return fakeGetThingResponse{}, nil
+			},
+			Fields: []RequestField{
+				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
+			},
+		},
+		List: &Operation{
+			NewRequest: func() any { return &fakeListThingRequest{} },
+			Call: func(_ context.Context, _ any) (any, error) {
+				return fakeListThingResponse{
+					Collection: fakeThingCollection{
+						Items: []fakeThingSummary{
+							{
+								Id:             "ocid1.thing.oc1..existing",
+								Name:           "wanted",
+								CompartmentId:  "ocid1.compartment.oc1..match",
+								LifecycleState: "ACTIVE",
+							},
+						},
+					},
+				}, nil
+			},
+			Fields: []RequestField{
+				{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
+				{FieldName: "Name", RequestName: "name", Contribution: "query"},
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Spec: fakeSpec{
+			CompartmentId: "ocid1.compartment.oc1..match",
+			Name:          "wanted",
+		},
+	}
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful {
+		t.Fatal("CreateOrUpdate() should succeed when list lookup reuses an existing resource")
+	}
+	if createCalled {
+		t.Fatal("Create() should not be called when list lookup finds a reusable resource")
+	}
+	if getCalled {
+		t.Fatal("Get() should be skipped when no resource OCID is recorded")
+	}
+	if string(resource.Status.OsokStatus.Ocid) != "ocid1.thing.oc1..existing" {
+		t.Fatalf("status.ocid = %q, want reused OCID", resource.Status.OsokStatus.Ocid)
+	}
+}
+
 func TestServiceClientCreateOrUpdateIgnoresDeleteCandidatesDuringPreCreateLookup(t *testing.T) {
 	t.Parallel()
 
@@ -951,6 +1045,7 @@ func TestServiceClientDeleteResolvesDeletePhaseListMatchWithoutOcid(t *testing.T
 	t.Parallel()
 
 	var deleteRequest fakeDeleteThingRequest
+	getCalled := false
 
 	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
 		Kind:    "Thing",
@@ -972,6 +1067,19 @@ func TestServiceClientDeleteResolvesDeletePhaseListMatchWithoutOcid(t *testing.T
 			},
 			DeleteFollowUp: FollowUpSemantics{
 				Strategy: "none",
+			},
+		},
+		Get: &Operation{
+			NewRequest: func() any { return &fakeGetThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				getCalled = true
+				if request.(*fakeGetThingRequest).ThingId == nil {
+					t.Fatal("Get() should not be called without a resource OCID")
+				}
+				return fakeGetThingResponse{}, nil
+			},
+			Fields: []RequestField{
+				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
 			},
 		},
 		List: &Operation{
@@ -1020,6 +1128,9 @@ func TestServiceClientDeleteResolvesDeletePhaseListMatchWithoutOcid(t *testing.T
 	}
 	if !deleted {
 		t.Fatal("Delete() should resolve delete-phase list matches without a recorded OCID")
+	}
+	if getCalled {
+		t.Fatal("Get() should be skipped when delete resolution has no recorded OCID")
 	}
 	if deleteRequest.ThingId == nil || *deleteRequest.ThingId != "ocid1.thing.oc1..deleting" {
 		t.Fatalf("delete request thingId = %v, want delete-phase OCID", deleteRequest.ThingId)
