@@ -174,7 +174,7 @@ func (c *Config) validateService(
 	if err := service.Generation.Validate(service.Service); err != nil {
 		return err
 	}
-	if err := validateObservedStateAliases(service); err != nil {
+	if err := validateObservedStateConfig(service); err != nil {
 		return err
 	}
 	if err := validateUniqueServiceKeys(service, servicesByName, groupsByName); err != nil {
@@ -214,6 +214,13 @@ func validatePackageExtraResources(service ServiceConfig) error {
 	return nil
 }
 
+func validateObservedStateConfig(service ServiceConfig) error {
+	if err := validateObservedStateAliases(service); err != nil {
+		return err
+	}
+	return validateObservedStateExcludedFieldPaths(service)
+}
+
 func validateObservedStateAliases(service ServiceConfig) error {
 	for rawName, aliases := range service.ObservedState.SDKAliases {
 		if strings.TrimSpace(rawName) == "" {
@@ -222,6 +229,25 @@ func validateObservedStateAliases(service ServiceConfig) error {
 		for _, alias := range aliases {
 			if strings.TrimSpace(alias) == "" {
 				return fmt.Errorf("service %q observedState sdkAliases[%q] contains a blank SDK alias", service.Service, rawName)
+			}
+		}
+	}
+	return nil
+}
+
+func validateObservedStateExcludedFieldPaths(service ServiceConfig) error {
+	for rawName, paths := range service.ObservedState.ExcludedFieldPaths {
+		if strings.TrimSpace(rawName) == "" {
+			return fmt.Errorf("service %q observedState excludedFieldPaths contains a blank resource name", service.Service)
+		}
+		for _, fieldPath := range paths {
+			if _, err := normalizeObservedStateFieldPath(fieldPath); err != nil {
+				return fmt.Errorf(
+					"service %q observedState excludedFieldPaths[%q] %w",
+					service.Service,
+					rawName,
+					err,
+				)
 			}
 		}
 	}
@@ -279,9 +305,13 @@ func validateGenerationSurfaceStrategies(serviceName string, g GenerationConfig)
 
 func validateResourceGenerationOverrides(serviceName string, resources []ResourceGenerationOverride) error {
 	resourceKinds := make(map[string]struct{}, len(resources))
+	sdkNames := make(map[string]string, len(resources))
 	for _, resource := range resources {
 		kind, err := validateResourceGenerationKind(serviceName, resource, resourceKinds)
 		if err != nil {
+			return err
+		}
+		if err := validateResourceGenerationSDKName(serviceName, kind, resource.SDKName, sdkNames); err != nil {
 			return err
 		}
 		if err := validateResourceGenerationStrategies(serviceName, kind, resource); err != nil {
@@ -307,6 +337,31 @@ func validateResourceGenerationOverrides(serviceName string, resources []Resourc
 			)
 		}
 	}
+	return nil
+}
+
+func validateResourceGenerationSDKName(
+	serviceName string,
+	kind string,
+	sdkName string,
+	sdkNames map[string]string,
+) error {
+	sdkName = strings.TrimSpace(sdkName)
+	if sdkName == "" {
+		return nil
+	}
+
+	if existingKind, exists := sdkNames[sdkName]; exists {
+		return fmt.Errorf(
+			"service %q generation.resources contains duplicate sdkName %q for kinds %q and %q",
+			serviceName,
+			sdkName,
+			existingKind,
+			kind,
+		)
+	}
+
+	sdkNames[sdkName] = kind
 	return nil
 }
 

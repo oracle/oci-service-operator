@@ -1938,6 +1938,12 @@ func assertGoParityFiles(t *testing.T, root string, outputRoot string, files []s
 	}
 }
 
+func assertGoParity(t *testing.T, wantPath string, gotPath string) {
+	t.Helper()
+
+	assertGeneratedGoMatches(t, wantPath, gotPath)
+}
+
 func assertExactFileMatches(t *testing.T, root string, outputRoot string, files []string) {
 	t.Helper()
 
@@ -2045,9 +2051,6 @@ func assertDiscoveredMySQLDbSystem(t *testing.T, resource ResourceModel) {
 
 	if resource.SDKName != "DbSystem" {
 		t.Fatalf("MySqlDbSystem SDK name = %q, want %q", resource.SDKName, "DbSystem")
-	}
-	if !resource.CompatibilityLocked {
-		t.Fatal("MySqlDbSystem compatibility override was not applied")
 	}
 	assertResourceSpecFields(t, resource, []string{"Port"})
 	assertNoField(t, resource.SpecFields, "Id", "MySqlDbSystem")
@@ -2284,236 +2287,6 @@ func sampleSDKDir(t *testing.T) string {
 	return filepath.Join(generatorTestDir(t), "testdata", "sdk", "sample")
 }
 
-func assertDiscoveredMySQLDbSystem(t *testing.T, dbSystem ResourceModel) {
-	t.Helper()
-
-	if dbSystem.SDKName != "DbSystem" {
-		t.Fatalf("MySqlDbSystem SDK name = %q, want %q", dbSystem.SDKName, "DbSystem")
-	}
-	assertResourceSpecFields(t, dbSystem, "Port")
-	assertResourceSpecFieldsAbsent(t, dbSystem, "Id")
-	if dbSystem.PrimaryDisplayField != "DisplayName" {
-		t.Fatalf("MySqlDbSystem primary display field = %q, want DisplayName", dbSystem.PrimaryDisplayField)
-	}
-}
-
-func assertDiscoveredWidget(t *testing.T, widget ResourceModel) {
-	t.Helper()
-
-	if len(widget.Operations) != 5 {
-		t.Fatalf("Widget operations = %v, want 5 CRUD operations", widget.Operations)
-	}
-	assertResourceSpecFields(t, widget, "Mode", "CreatedAt")
-	assertResourceSpecFieldsAbsent(t, widget, "LifecycleState", "TimeUpdated")
-	assertResourceStatusFields(t, widget, "LifecycleState", "TimeUpdated")
-
-	compartmentID := findFieldModel(t, widget.SpecFields, "CompartmentId")
-	assertFieldTag(t, "Widget CompartmentId", compartmentID, `json:"compartmentId"`)
-	assertFieldCommentsEqual(t, "Widget CompartmentId", compartmentID, []string{"The OCID of the widget compartment."})
-	assertFieldMarkers(t, "Widget CompartmentId", compartmentID, []string{"+kubebuilder:validation:Required"})
-
-	labels := findFieldModel(t, widget.SpecFields, "Labels")
-	assertFieldTag(t, "Widget Labels", labels, `json:"labels,omitempty"`)
-	assertFieldCommentsEqual(t, "Widget Labels", labels, []string{"Additional labels for the widget."})
-	assertFieldMarkers(t, "Widget Labels", labels, []string{"+kubebuilder:validation:Optional"})
-
-	serverState := findFieldModel(t, widget.SpecFields, "ServerState")
-	assertFieldTag(t, "Widget ServerState", serverState, `json:"serverState,omitempty"`)
-	assertFieldHasNoMarkers(t, "Widget ServerState", serverState)
-
-	lifecycleState := findFieldModel(t, widget.StatusFields, "LifecycleState")
-	assertFieldCommentsEqual(t, "Widget LifecycleState", lifecycleState, []string{"The lifecycle state of the widget."})
-	assertFieldHasNoMarkers(t, "Widget LifecycleState", lifecycleState)
-}
-
-func assertDiscoveredReport(t *testing.T, report ResourceModel) {
-	t.Helper()
-
-	if len(report.SpecFields) != 0 {
-		t.Fatalf("Report spec fields = %#v, want empty spec when no create or update payload exists", report.SpecFields)
-	}
-	assertResourceStatusFields(t, report, "Id", "LifecycleState", "DisplayName")
-}
-
-func assertWidgetFormalModel(t *testing.T, widget ResourceModel) {
-	t.Helper()
-
-	if widget.Formal == nil {
-		t.Fatal("Widget formal model was not attached")
-	}
-	if widget.Formal.Reference.Service != "mysql" {
-		t.Fatalf("Widget formal service = %q, want %q", widget.Formal.Reference.Service, "mysql")
-	}
-	if widget.Formal.Reference.Slug != "widget" {
-		t.Fatalf("Widget formal slug = %q, want %q", widget.Formal.Reference.Slug, "widget")
-	}
-	if widget.Formal.Binding.Import.ProviderResource != "widget_resource" {
-		t.Fatalf("Widget provider resource = %q, want %q", widget.Formal.Binding.Import.ProviderResource, "widget_resource")
-	}
-	if widget.Formal.Binding.Spec.Kind != "Widget" {
-		t.Fatalf("Widget formal kind = %q, want %q", widget.Formal.Binding.Spec.Kind, "Widget")
-	}
-	if widget.Formal.Diagrams.ActivitySourcePath != "controllers/mysql/widget/diagrams/activity.puml" {
-		t.Fatalf("Widget activity diagram path = %q, want %q", widget.Formal.Diagrams.ActivitySourcePath, "controllers/mysql/widget/diagrams/activity.puml")
-	}
-}
-
-func assertWidgetServiceManagerFormalModel(t *testing.T, serviceManager ServiceManagerModel) {
-	t.Helper()
-
-	if serviceManager.Formal == nil {
-		t.Fatal("Widget service manager formal model was not attached")
-	}
-	if serviceManager.Formal.Reference.Slug != "widget" {
-		t.Fatalf("Widget service manager formal slug = %q, want %q", serviceManager.Formal.Reference.Slug, "widget")
-	}
-}
-
-func assertWidgetRuntimeSemantics(t *testing.T, widget ResourceModel) {
-	t.Helper()
-
-	if widget.Runtime == nil || widget.Runtime.Semantics == nil {
-		t.Fatal("Widget runtime semantics were not attached")
-	}
-
-	semantics := widget.Runtime.Semantics
-	assertWidgetLifecycleSemantics(t, semantics)
-	assertWidgetListAndMutationSemantics(t, semantics)
-}
-
-func assertWidgetLifecycleSemantics(t *testing.T, semantics *RuntimeSemanticsModel) {
-	t.Helper()
-
-	if !slices.Equal(semantics.Lifecycle.ProvisioningStates, []string{"PROVISIONING"}) {
-		t.Fatalf("Widget provisioning states = %v, want [PROVISIONING]", semantics.Lifecycle.ProvisioningStates)
-	}
-	if !slices.Equal(semantics.Lifecycle.ActiveStates, []string{"ACTIVE"}) {
-		t.Fatalf("Widget active states = %v, want [ACTIVE]", semantics.Lifecycle.ActiveStates)
-	}
-	if semantics.Delete.Policy != "required" {
-		t.Fatalf("Widget delete policy = %q, want required", semantics.Delete.Policy)
-	}
-	if semantics.List == nil || semantics.List.ResponseItemsField != "Items" {
-		t.Fatalf("Widget list semantics = %#v, want responseItemsField Items", semantics.List)
-	}
-}
-
-func assertWidgetListAndMutationSemantics(t *testing.T, semantics *RuntimeSemanticsModel) {
-	t.Helper()
-
-	if !slices.Equal(semantics.List.MatchFields, []string{"compartmentId", "state"}) {
-		t.Fatalf("Widget list match fields = %v, want [compartmentId state]", semantics.List.MatchFields)
-	}
-	if !slices.Equal(semantics.Mutation.ForceNew, []string{"compartmentId"}) {
-		t.Fatalf("Widget forceNew = %v, want [compartmentId]", semantics.Mutation.ForceNew)
-	}
-	if semantics.CreateFollowUp.Strategy != followUpStrategyReadAfterWrite {
-		t.Fatalf("Widget create follow-up = %q, want %q", semantics.CreateFollowUp.Strategy, followUpStrategyReadAfterWrite)
-	}
-	if len(semantics.OpenGaps) != 0 {
-		t.Fatalf("Widget open gaps = %#v, want none", semantics.OpenGaps)
-	}
-}
-
-func assertWidgetServiceManagerSemantics(t *testing.T, serviceManager ServiceManagerModel) {
-	t.Helper()
-
-	if serviceManager.Semantics == nil {
-		t.Fatal("Widget service manager semantics were not attached")
-	}
-	if serviceManager.Semantics.FormalSlug != "widget" {
-		t.Fatalf("Widget service manager formal slug = %q, want widget", serviceManager.Semantics.FormalSlug)
-	}
-}
-
-func assertFunctionsSDKFields(t *testing.T, pkg *PackageModel) {
-	t.Helper()
-
-	application := findResource(t, pkg.Resources, "Application")
-	assertFieldType(t, "Application TraceConfig", findFieldModel(t, application.SpecFields, "TraceConfig"), "ApplicationTraceConfig")
-	assertFieldType(t, "Application ImagePolicyConfig", findFieldModel(t, application.SpecFields, "ImagePolicyConfig"), "ApplicationImagePolicyConfig")
-	assertFieldType(t, "Application DefinedTags", findFieldModel(t, application.SpecFields, "DefinedTags"), "map[string]shared.MapValue")
-	assertHelperTypeFields(t, findHelperType(t, application.HelperTypes, "ApplicationTraceConfig"), "DomainId")
-	assertHelperTypeFields(t, findHelperType(t, application.HelperTypes, "ApplicationImagePolicyConfig"), "IsPolicyEnabled")
-
-	function := findResource(t, pkg.Resources, "Function")
-	assertFieldType(t, "Function SourceDetails", findFieldModel(t, function.SpecFields, "SourceDetails"), "FunctionSourceDetails")
-	assertHelperTypeFields(t, findHelperType(t, function.HelperTypes, "FunctionSourceDetails"), "SourceType", "PbfListingId")
-	assertFieldType(t, "Function ProvisionedConcurrencyConfig", findFieldModel(t, function.SpecFields, "ProvisionedConcurrencyConfig"), "FunctionProvisionedConcurrencyConfig")
-	assertHelperTypeFields(t, findHelperType(t, function.HelperTypes, "FunctionProvisionedConcurrencyConfig"), "Strategy", "Count")
-}
-
-func assertCoreSDKFields(t *testing.T, pkg *PackageModel) {
-	t.Helper()
-
-	tunnel := findResource(t, pkg.Resources, "IPSecConnectionTunnel")
-	assertFieldType(t, "IPSecConnectionTunnel BgpSessionConfig", findFieldModel(t, tunnel.SpecFields, "BgpSessionConfig"), "IPSecConnectionTunnelBgpSessionConfig")
-	assertFieldType(t, "IPSecConnectionTunnel PhaseOneConfig", findFieldModel(t, tunnel.SpecFields, "PhaseOneConfig"), "IPSecConnectionTunnelPhaseOneConfig")
-	assertFieldType(t, "IPSecConnectionTunnel PhaseTwoConfig", findFieldModel(t, tunnel.SpecFields, "PhaseTwoConfig"), "IPSecConnectionTunnelPhaseTwoConfig")
-	assertHelperTypeFields(t, findHelperType(t, tunnel.HelperTypes, "IPSecConnectionTunnelBgpSessionConfig"), "CustomerBgpAsn")
-	assertHelperTypeFields(t, findHelperType(t, tunnel.HelperTypes, "IPSecConnectionTunnelPhaseOneConfig"), "DiffieHelmanGroup")
-}
-
-func assertCertificatesSDKFields(t *testing.T, pkg *PackageModel) {
-	t.Helper()
-
-	bundle := findResource(t, pkg.Resources, "CertificateBundle")
-	assertFieldType(t, "CertificateBundle Validity", findFieldModel(t, bundle.StatusFields, "Validity"), "CertificateBundleValidity")
-	assertFieldType(t, "CertificateBundle RevocationStatus", findFieldModel(t, bundle.StatusFields, "RevocationStatus"), "CertificateBundleRevocationStatus")
-	assertHelperTypeFields(t, findHelperType(t, bundle.HelperTypes, "CertificateBundleValidity"), "TimeOfValidityNotBefore")
-	assertHelperTypeFields(t, findHelperType(t, bundle.HelperTypes, "CertificateBundleRevocationStatus"), "RevocationReason")
-}
-
-func assertNoSQLSDKFields(t *testing.T, pkg *PackageModel) {
-	t.Helper()
-
-	row := findResource(t, pkg.Resources, "Row")
-	assertFieldType(t, "Row Value", findFieldModel(t, row.SpecFields, "Value"), "map[string]shared.JSONValue")
-}
-
-func assertSecretsSDKFields(t *testing.T, pkg *PackageModel) {
-	t.Helper()
-
-	bundle := findResource(t, pkg.Resources, "SecretBundle")
-	assertFieldType(t, "SecretBundle SecretBundleContent", findFieldModel(t, bundle.StatusFields, "SecretBundleContent"), "SecretBundleContent")
-	assertHelperTypeFields(t, findHelperType(t, bundle.HelperTypes, "SecretBundleContent"), "ContentType", "Content")
-	assertResourceStatusFields(t, findResource(t, pkg.Resources, "SecretBundleByName"), "SecretId", "VersionNumber", "SecretBundleContent", "Metadata")
-}
-
-func assertVaultSDKFields(t *testing.T, pkg *PackageModel) {
-	t.Helper()
-
-	secret := findResource(t, pkg.Resources, "Secret")
-	assertFieldType(t, "Secret Metadata", findFieldModel(t, secret.SpecFields, "Metadata"), "map[string]shared.JSONValue")
-}
-
-func assertArtifactsSDKFields(t *testing.T, pkg *PackageModel) {
-	t.Helper()
-
-	assertPackageResourceStatusFields(t, pkg, map[string][]string{
-		"ContainerConfiguration":  {"IsRepositoryCreatedOnFirstPush"},
-		"ContainerImage":          {"FreeformTags"},
-		"ContainerImageSignature": {"CompartmentId", "ImageId", "Message", "Signature", "SigningAlgorithm"},
-		"ContainerRepository":     {"CompartmentId", "DisplayName", "IsImmutable", "IsPublic", "FreeformTags", "DefinedTags"},
-		"GenericArtifact":         {"FreeformTags"},
-		"Repository":              {"DisplayName", "Description", "CompartmentId", "IsImmutable", "FreeformTags", "DefinedTags"},
-	})
-
-	containerImage := findResource(t, pkg.Resources, "ContainerImage")
-	assertFieldType(t, "ContainerImage DefinedTags", findFieldModel(t, containerImage.StatusFields, "DefinedTags"), "map[string]shared.MapValue")
-
-	containerRepository := findResource(t, pkg.Resources, "ContainerRepository")
-	assertFieldType(t, "ContainerRepository Readme", findFieldModel(t, containerRepository.StatusFields, "Readme"), "ContainerRepositoryReadme")
-}
-
-func assertNetworkLoadBalancerSDKFields(t *testing.T, pkg *PackageModel) {
-	t.Helper()
-
-	healthChecker := findResource(t, pkg.Resources, "HealthChecker")
-	assertFieldType(t, "HealthChecker RequestData", findFieldModel(t, healthChecker.SpecFields, "RequestData"), "string")
-	assertFieldType(t, "HealthChecker ResponseData", findFieldModel(t, healthChecker.SpecFields, "ResponseData"), "string")
-}
-
 func newTestGenerator(t *testing.T) *Generator {
 	t.Helper()
 
@@ -2649,6 +2422,79 @@ func structFieldNames(t *testing.T, source string, typeName string) []string {
 	_, file := parseTestGoFile(t, source)
 	structType := findStructType(t, file, source, typeName)
 	return structFieldNamesFromStruct(structType)
+}
+
+func parseTestGoFile(t *testing.T, source string) (*token.FileSet, *ast.File) {
+	t.Helper()
+
+	fileSet := token.NewFileSet()
+	file, err := parser.ParseFile(fileSet, "", source, parser.ParseComments)
+	if err != nil {
+		t.Fatalf("parse Go source error = %v\n%s", err, source)
+	}
+
+	return fileSet, file
+}
+
+func findStructType(t *testing.T, file *ast.File, source string, typeName string) *ast.StructType {
+	t.Helper()
+
+	for _, decl := range file.Decls {
+		genDecl, ok := decl.(*ast.GenDecl)
+		if !ok || genDecl.Tok != token.TYPE {
+			continue
+		}
+
+		for _, spec := range genDecl.Specs {
+			typeSpec, ok := spec.(*ast.TypeSpec)
+			if !ok || typeSpec.Name.Name != typeName {
+				continue
+			}
+
+			structType, ok := typeSpec.Type.(*ast.StructType)
+			if !ok {
+				t.Fatalf("%s in source is %T, want struct\n%s", typeName, typeSpec.Type, source)
+			}
+			return structType
+		}
+	}
+
+	t.Fatalf("struct type %q was not found in source:\n%s", typeName, source)
+	return nil
+}
+
+func structFieldNamesFromStruct(structType *ast.StructType) []string {
+	if structType.Fields == nil {
+		return nil
+	}
+
+	names := make([]string, 0, len(structType.Fields.List))
+	for _, field := range structType.Fields.List {
+		if len(field.Names) == 0 {
+			if name := embeddedFieldName(field.Type); name != "" {
+				names = append(names, name)
+			}
+			continue
+		}
+		for _, name := range field.Names {
+			names = append(names, name.Name)
+		}
+	}
+
+	return names
+}
+
+func embeddedFieldName(expr ast.Expr) string {
+	switch typed := expr.(type) {
+	case *ast.Ident:
+		return typed.Name
+	case *ast.SelectorExpr:
+		return typed.Sel.Name
+	case *ast.StarExpr:
+		return embeddedFieldName(typed.X)
+	default:
+		return ""
+	}
 }
 
 func findHelperType(t *testing.T, helperTypes []TypeModel, name string) TypeModel {

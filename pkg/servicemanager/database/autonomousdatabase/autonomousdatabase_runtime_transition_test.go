@@ -66,6 +66,11 @@ type quickAutonomousDatabaseListResponse struct {
 	Collection quickAutonomousDatabaseCollection `presentIn:"body"`
 }
 
+type quickAutonomousDatabaseDeleteCase struct {
+	deleted bool
+	states  []string
+}
+
 func TestAutonomousDatabaseRuntimeLifecycleClassificationQuick(t *testing.T) {
 	t.Parallel()
 
@@ -121,54 +126,10 @@ func TestAutonomousDatabaseDeleteConfirmationQuick(t *testing.T) {
 	t.Parallel()
 
 	cfg := quickAutonomousDatabaseRuntimeConfig(t)
-	cases := []struct {
-		deleted bool
-		states  []string
-	}{
-		{deleted: false, states: cfg.Semantics.Delete.PendingStates},
-		{deleted: true, states: cfg.Semantics.Delete.TerminalStates},
-	}
-
-	for _, testCase := range cases {
-		if len(testCase.states) == 0 {
-			t.Fatal("delete confirmation runtime states should not be empty")
-		}
-	}
+	cases := quickAutonomousDatabaseDeleteCases(t, cfg)
 
 	property := func(caseIndex uint8, stateIndex uint8, caseMask uint64) bool {
-		testCase := cases[int(caseIndex)%len(cases)]
-		lifecycleState := quickAutonomousDatabaseCaseMask(pickQuickState(testCase.states, stateIndex), caseMask)
-		client := newQuickAutonomousDatabaseDeleteClient(t, cfg, lifecycleState)
-		resource := &databasev1beta1.AutonomousDatabase{}
-		resource.Status.OsokStatus.Ocid = shared.OCID(quickAutonomousDatabaseOCID)
-
-		deleted, err := client.Delete(context.Background(), resource)
-		if err != nil {
-			t.Logf("Delete(%q) returned error: %v", lifecycleState, err)
-			return false
-		}
-		if deleted != testCase.deleted {
-			t.Logf("Delete(%q) deleted = %t, want %t", lifecycleState, deleted, testCase.deleted)
-			return false
-		}
-		if got := quickAutonomousDatabaseLastCondition(resource); got != shared.Terminating {
-			t.Logf("Delete(%q) condition = %s, want %s", lifecycleState, got, shared.Terminating)
-			return false
-		}
-		if testCase.deleted && resource.Status.OsokStatus.DeletedAt == nil {
-			t.Logf("Delete(%q) should set deletedAt", lifecycleState)
-			return false
-		}
-		if !testCase.deleted && resource.Status.OsokStatus.DeletedAt != nil {
-			t.Logf("Delete(%q) should not set deletedAt while OCI remains pending", lifecycleState)
-			return false
-		}
-		if got := resource.Status.LifecycleState; got != lifecycleState {
-			t.Logf("Delete(%q) lifecycleState = %q, want %q", lifecycleState, got, lifecycleState)
-			return false
-		}
-
-		return true
+		return quickAutonomousDatabaseDeleteConfirmationProperty(t, cfg, cases, caseIndex, stateIndex, caseMask)
 	}
 
 	if err := quick.Check(property, &quick.Config{MaxCount: 96}); err != nil {
@@ -182,59 +143,170 @@ func TestAutonomousDatabaseDeleteLookupByListQuick(t *testing.T) {
 	cfg := quickAutonomousDatabaseRuntimeConfig(t)
 
 	property := func(seed uint32, rawDisplayName string) bool {
-		compartmentID := fmt.Sprintf("ocid1.compartment.oc1..%08x", seed)
-		displayName := quickAutonomousDatabaseDisplayName(rawDisplayName)
-		var deletedID string
-		listCalls := 0
-
-		client := newQuickAutonomousDatabaseListDeleteClient(t, cfg, compartmentID, displayName, &deletedID, &listCalls)
-		resource := &databasev1beta1.AutonomousDatabase{
-			Spec: databasev1beta1.AutonomousDatabaseSpec{
-				CompartmentId: compartmentID,
-				DisplayName:   displayName,
-			},
-		}
-
-		deleted, err := client.Delete(context.Background(), resource)
-		if err != nil {
-			t.Logf("Delete(list lookup %q/%q) returned error: %v", compartmentID, displayName, err)
-			return false
-		}
-		if !deleted {
-			t.Logf("Delete(list lookup %q/%q) should complete once the follow-up list returns no items", compartmentID, displayName)
-			return false
-		}
-		if deletedID != quickAutonomousDatabaseOCID {
-			t.Logf("Delete(list lookup %q/%q) id = %q, want %q", compartmentID, displayName, deletedID, quickAutonomousDatabaseOCID)
-			return false
-		}
-		if listCalls != 2 {
-			t.Logf("Delete(list lookup %q/%q) list calls = %d, want 2", compartmentID, displayName, listCalls)
-			return false
-		}
-		if got := resource.Status.Id; got != quickAutonomousDatabaseOCID {
-			t.Logf("Delete(list lookup %q/%q) status.id = %q, want %q", compartmentID, displayName, got, quickAutonomousDatabaseOCID)
-			return false
-		}
-		if got := resource.Status.CompartmentId; got != compartmentID {
-			t.Logf("Delete(list lookup %q/%q) status.compartmentId = %q, want %q", compartmentID, displayName, got, compartmentID)
-			return false
-		}
-		if got := resource.Status.DisplayName; got != displayName {
-			t.Logf("Delete(list lookup %q/%q) status.displayName = %q, want %q", compartmentID, displayName, got, displayName)
-			return false
-		}
-		if resource.Status.OsokStatus.DeletedAt == nil {
-			t.Logf("Delete(list lookup %q/%q) should set deletedAt", compartmentID, displayName)
-			return false
-		}
-
-		return true
+		return quickAutonomousDatabaseDeleteLookupByListProperty(t, cfg, seed, rawDisplayName)
 	}
 
 	if err := quick.Check(property, &quick.Config{MaxCount: 64}); err != nil {
 		t.Fatal(err)
 	}
+}
+
+func quickAutonomousDatabaseDeleteCases(
+	t *testing.T,
+	cfg generatedruntime.Config[*databasev1beta1.AutonomousDatabase],
+) []quickAutonomousDatabaseDeleteCase {
+	t.Helper()
+
+	cases := []quickAutonomousDatabaseDeleteCase{
+		{deleted: false, states: cfg.Semantics.Delete.PendingStates},
+		{deleted: true, states: cfg.Semantics.Delete.TerminalStates},
+	}
+	for _, testCase := range cases {
+		if len(testCase.states) == 0 {
+			t.Fatal("delete confirmation runtime states should not be empty")
+		}
+	}
+
+	return cases
+}
+
+func quickAutonomousDatabaseDeleteConfirmationProperty(
+	t *testing.T,
+	cfg generatedruntime.Config[*databasev1beta1.AutonomousDatabase],
+	cases []quickAutonomousDatabaseDeleteCase,
+	caseIndex uint8,
+	stateIndex uint8,
+	caseMask uint64,
+) bool {
+	t.Helper()
+
+	testCase := cases[int(caseIndex)%len(cases)]
+	lifecycleState := quickAutonomousDatabaseCaseMask(pickQuickState(testCase.states, stateIndex), caseMask)
+	client := newQuickAutonomousDatabaseDeleteClient(t, cfg, lifecycleState)
+	resource := &databasev1beta1.AutonomousDatabase{}
+	resource.Status.OsokStatus.Ocid = shared.OCID(quickAutonomousDatabaseOCID)
+
+	deleted, err := client.Delete(context.Background(), resource)
+	if err != nil {
+		t.Logf("Delete(%q) returned error: %v", lifecycleState, err)
+		return false
+	}
+
+	return quickAutonomousDatabaseValidateDeleteConfirmation(t, resource, lifecycleState, deleted, testCase.deleted)
+}
+
+func quickAutonomousDatabaseValidateDeleteConfirmation(
+	t *testing.T,
+	resource *databasev1beta1.AutonomousDatabase,
+	lifecycleState string,
+	deleted bool,
+	wantDeleted bool,
+) bool {
+	t.Helper()
+
+	if deleted != wantDeleted {
+		t.Logf("Delete(%q) deleted = %t, want %t", lifecycleState, deleted, wantDeleted)
+		return false
+	}
+	if got := quickAutonomousDatabaseLastCondition(resource); got != shared.Terminating {
+		t.Logf("Delete(%q) condition = %s, want %s", lifecycleState, got, shared.Terminating)
+		return false
+	}
+	if wantDeleted && resource.Status.OsokStatus.DeletedAt == nil {
+		t.Logf("Delete(%q) should set deletedAt", lifecycleState)
+		return false
+	}
+	if !wantDeleted && resource.Status.OsokStatus.DeletedAt != nil {
+		t.Logf("Delete(%q) should not set deletedAt while OCI remains pending", lifecycleState)
+		return false
+	}
+	if got := resource.Status.LifecycleState; got != lifecycleState {
+		t.Logf("Delete(%q) lifecycleState = %q, want %q", lifecycleState, got, lifecycleState)
+		return false
+	}
+
+	return true
+}
+
+func quickAutonomousDatabaseDeleteLookupByListProperty(
+	t *testing.T,
+	cfg generatedruntime.Config[*databasev1beta1.AutonomousDatabase],
+	seed uint32,
+	rawDisplayName string,
+) bool {
+	t.Helper()
+
+	compartmentID := fmt.Sprintf("ocid1.compartment.oc1..%08x", seed)
+	displayName := quickAutonomousDatabaseDisplayName(rawDisplayName)
+	var deletedID string
+	listCalls := 0
+
+	client := newQuickAutonomousDatabaseListDeleteClient(t, cfg, compartmentID, displayName, &deletedID, &listCalls)
+	resource := &databasev1beta1.AutonomousDatabase{
+		Spec: databasev1beta1.AutonomousDatabaseSpec{
+			CompartmentId: compartmentID,
+			DisplayName:   displayName,
+		},
+	}
+
+	deleted, err := client.Delete(context.Background(), resource)
+	if err != nil {
+		t.Logf("Delete(list lookup %q/%q) returned error: %v", compartmentID, displayName, err)
+		return false
+	}
+
+	return quickAutonomousDatabaseValidateDeleteLookupByList(
+		t,
+		resource,
+		compartmentID,
+		displayName,
+		deleted,
+		deletedID,
+		listCalls,
+	)
+}
+
+func quickAutonomousDatabaseValidateDeleteLookupByList(
+	t *testing.T,
+	resource *databasev1beta1.AutonomousDatabase,
+	compartmentID string,
+	displayName string,
+	deleted bool,
+	deletedID string,
+	listCalls int,
+) bool {
+	t.Helper()
+
+	if !deleted {
+		t.Logf("Delete(list lookup %q/%q) should complete once the follow-up list returns no items", compartmentID, displayName)
+		return false
+	}
+	if deletedID != quickAutonomousDatabaseOCID {
+		t.Logf("Delete(list lookup %q/%q) id = %q, want %q", compartmentID, displayName, deletedID, quickAutonomousDatabaseOCID)
+		return false
+	}
+	if listCalls != 2 {
+		t.Logf("Delete(list lookup %q/%q) list calls = %d, want 2", compartmentID, displayName, listCalls)
+		return false
+	}
+	if got := resource.Status.Id; got != quickAutonomousDatabaseOCID {
+		t.Logf("Delete(list lookup %q/%q) status.id = %q, want %q", compartmentID, displayName, got, quickAutonomousDatabaseOCID)
+		return false
+	}
+	if got := resource.Status.CompartmentId; got != compartmentID {
+		t.Logf("Delete(list lookup %q/%q) status.compartmentId = %q, want %q", compartmentID, displayName, got, compartmentID)
+		return false
+	}
+	if got := resource.Status.DisplayName; got != displayName {
+		t.Logf("Delete(list lookup %q/%q) status.displayName = %q, want %q", compartmentID, displayName, got, displayName)
+		return false
+	}
+	if resource.Status.OsokStatus.DeletedAt == nil {
+		t.Logf("Delete(list lookup %q/%q) should set deletedAt", compartmentID, displayName)
+		return false
+	}
+
+	return true
 }
 
 func quickAutonomousDatabaseRuntimeConfig(t *testing.T) generatedruntime.Config[*databasev1beta1.AutonomousDatabase] {

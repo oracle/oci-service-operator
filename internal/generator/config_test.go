@@ -627,7 +627,6 @@ func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
 	assertRuntimeRolloutMetadataForMySQL(t, mysqlService)
 	assertRuntimeRolloutMetadataForStreaming(t, streamingService)
 
-	coreService := services["core"]
 	if coreService.PackageProfile != PackageProfileControllerBacked {
 		t.Fatalf("core packageProfile = %q, want %q", coreService.PackageProfile, PackageProfileControllerBacked)
 	}
@@ -764,27 +763,6 @@ func TestObservedStateStructCandidatesReplacesNormalizedAliasMatch(t *testing.T)
 	dhcpWant := []string{"DhcpOptions", "DhcpOptionSummary"}
 	if !slices.Equal(dhcpGot, dhcpWant) {
 		t.Fatalf("ObservedStateStructCandidates(DhcpOption) = %v, want %v", dhcpGot, dhcpWant)
-	}
-}
-
-func assertSelectServicesResult(t *testing.T, cfg *Config, serviceName string, all bool, wantCount int, wantErr string) {
-	t.Helper()
-
-	services, err := cfg.SelectServices(serviceName, all)
-	if wantErr != "" {
-		if err == nil {
-			t.Fatalf("SelectServices() error = nil, want %q", wantErr)
-		}
-		if !strings.Contains(err.Error(), wantErr) {
-			t.Fatalf("SelectServices() error = %v, want substring %q", err, wantErr)
-		}
-		return
-	}
-	if err != nil {
-		t.Fatalf("SelectServices() error = %v", err)
-	}
-	if len(services) != wantCount {
-		t.Fatalf("SelectServices() returned %d services, want %d", len(services), wantCount)
 	}
 }
 

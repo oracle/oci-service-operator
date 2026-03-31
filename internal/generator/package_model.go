@@ -69,9 +69,6 @@ func buildPackageOutputModel(service ServiceConfig, resources []ResourceModel) P
 			"../../../config/rbac/leader_election_role_binding.yaml",
 		)
 		output.Install.Resources = appendUniqueStrings(output.Install.Resources, service.Package.ExtraResources...)
-		if service.Parity != nil {
-			output.Install.Resources = appendUniqueStrings(output.Install.Resources, service.Parity.Package.ExtraResources...)
-		}
 	case PackageProfileCRDOnly:
 		output.Install.Resources = append(output.Install.Resources, "generated/crd")
 	default:
@@ -365,41 +362,6 @@ func appendUniqueStrings(existing []string, extras ...string) []string {
 		existing = append(existing, value)
 	}
 	return existing
-}
-
-func convertHelperTypes(overrides []TypeOverride) []TypeModel {
-	types := make([]TypeModel, 0, len(overrides))
-	for _, override := range overrides {
-		types = append(types, TypeModel{
-			Name:     override.Name,
-			Comments: override.Comments,
-			Fields:   convertFields(override.Fields),
-		})
-	}
-	return types
-}
-
-func convertFields(overrides []FieldOverride) []FieldModel {
-	fields := make([]FieldModel, 0, len(overrides))
-	for _, override := range overrides {
-		fields = append(fields, FieldModel{
-			Name:     override.Name,
-			Type:     override.Type,
-			Tag:      override.Tag,
-			Comments: override.Comments,
-			Markers:  override.Markers,
-			Embedded: strings.TrimSpace(override.Name) == "",
-		})
-	}
-	return fields
-}
-
-func convertPrintColumns(overrides []PrintColumnOverride) []PrintColumnModel {
-	printColumns := make([]PrintColumnModel, 0, len(overrides))
-	for _, override := range overrides {
-		printColumns = append(printColumns, PrintColumnModel(override))
-	}
-	return printColumns
 }
 
 func sampleFileName(group string, version string, fileStem string) string {
