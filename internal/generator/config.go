@@ -127,6 +127,21 @@ func LoadConfig(path string) (*Config, error) {
 //
 //nolint:gocognit,gocyclo // Validation intentionally walks the full config contract in one pass to return precise field context.
 func (c *Config) Validate() error {
+	if err := c.validateMetadata(); err != nil {
+		return err
+	}
+	servicesByName := make(map[string]struct{}, len(c.Services))
+	groupsByName := make(map[string]struct{}, len(c.Services))
+	for _, service := range c.Services {
+		if err := c.validateService(service, servicesByName, groupsByName); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (c *Config) validateMetadata() error {
 	if strings.TrimSpace(c.SchemaVersion) == "" {
 		return fmt.Errorf("schemaVersion is required")
 	}
@@ -139,66 +154,91 @@ func (c *Config) Validate() error {
 	if len(c.Services) == 0 {
 		return fmt.Errorf("at least one service is required")
 	}
+	return nil
+}
 
-	servicesByName := make(map[string]struct{}, len(c.Services))
-	groupsByName := make(map[string]struct{}, len(c.Services))
-	for _, service := range c.Services {
-		if strings.TrimSpace(service.Service) == "" {
-			return fmt.Errorf("service name is required")
-		}
-		if strings.TrimSpace(service.SDKPackage) == "" {
-			return fmt.Errorf("service %q is missing sdkPackage", service.Service)
-		}
-		if strings.TrimSpace(service.Group) == "" {
-			return fmt.Errorf("service %q is missing group", service.Service)
-		}
-		if strings.TrimSpace(service.PackageProfile) == "" {
-			return fmt.Errorf("service %q is missing packageProfile", service.Service)
-		}
-		if _, ok := c.PackageProfiles[service.PackageProfile]; !ok {
-			return fmt.Errorf("service %q references unknown packageProfile %q", service.Service, service.PackageProfile)
-		}
-		for _, extraResource := range service.Package.ExtraResources {
-			if strings.TrimSpace(extraResource) == "" {
-				return fmt.Errorf("service %q package.extraResources contains a blank path", service.Service)
-			}
-		}
-		if err := validateFormalSpec(fmt.Sprintf("service %q formalSpec", service.Service), service.FormalSpec); err != nil {
-			return err
-		}
-		if err := service.Generation.Validate(service.Service); err != nil {
-			return err
-		}
-		for rawName, aliases := range service.ObservedState.SDKAliases {
-			if strings.TrimSpace(rawName) == "" {
-				return fmt.Errorf("service %q observedState sdkAliases contains a blank resource name", service.Service)
-			}
-			for _, alias := range aliases {
-				if strings.TrimSpace(alias) == "" {
-					return fmt.Errorf("service %q observedState sdkAliases[%q] contains a blank SDK alias", service.Service, rawName)
-				}
-			}
-		}
-		for rawName, paths := range service.ObservedState.ExcludedFieldPaths {
-			if strings.TrimSpace(rawName) == "" {
-				return fmt.Errorf("service %q observedState excludedFieldPaths contains a blank resource name", service.Service)
-			}
-			for _, path := range paths {
-				if _, err := normalizeObservedStateFieldPath(path); err != nil {
-					return fmt.Errorf("service %q observedState excludedFieldPaths[%q] %w", service.Service, rawName, err)
-				}
-			}
-		}
-		if _, exists := servicesByName[service.Service]; exists {
-			return fmt.Errorf("duplicate service %q", service.Service)
-		}
-		if _, exists := groupsByName[service.Group]; exists {
-			return fmt.Errorf("duplicate group %q", service.Group)
-		}
-		servicesByName[service.Service] = struct{}{}
-		groupsByName[service.Group] = struct{}{}
+func (c *Config) validateService(
+	service ServiceConfig,
+	servicesByName map[string]struct{},
+	groupsByName map[string]struct{},
+) error {
+	if err := validateServiceIdentity(service, c.PackageProfiles); err != nil {
+		return err
+	}
+	if err := validatePackageExtraResources(service); err != nil {
+		return err
+	}
+	if err := validateFormalSpec(fmt.Sprintf("service %q formalSpec", service.Service), service.FormalSpec); err != nil {
+		return err
+	}
+	if err := service.Generation.Validate(service.Service); err != nil {
+		return err
+	}
+	if err := validateObservedStateAliases(service); err != nil {
+		return err
+	}
+	if err := validateUniqueServiceKeys(service, servicesByName, groupsByName); err != nil {
+		return err
 	}
 
+	servicesByName[service.Service] = struct{}{}
+	groupsByName[service.Group] = struct{}{}
+	return nil
+}
+
+func validateServiceIdentity(service ServiceConfig, packageProfiles map[string]PackageProfile) error {
+	if strings.TrimSpace(service.Service) == "" {
+		return fmt.Errorf("service name is required")
+	}
+	if strings.TrimSpace(service.SDKPackage) == "" {
+		return fmt.Errorf("service %q is missing sdkPackage", service.Service)
+	}
+	if strings.TrimSpace(service.Group) == "" {
+		return fmt.Errorf("service %q is missing group", service.Service)
+	}
+	if strings.TrimSpace(service.PackageProfile) == "" {
+		return fmt.Errorf("service %q is missing packageProfile", service.Service)
+	}
+	if _, ok := packageProfiles[service.PackageProfile]; !ok {
+		return fmt.Errorf("service %q references unknown packageProfile %q", service.Service, service.PackageProfile)
+	}
+	return nil
+}
+
+func validatePackageExtraResources(service ServiceConfig) error {
+	for _, extraResource := range service.Package.ExtraResources {
+		if strings.TrimSpace(extraResource) == "" {
+			return fmt.Errorf("service %q package.extraResources contains a blank path", service.Service)
+		}
+	}
+	return nil
+}
+
+func validateObservedStateAliases(service ServiceConfig) error {
+	for rawName, aliases := range service.ObservedState.SDKAliases {
+		if strings.TrimSpace(rawName) == "" {
+			return fmt.Errorf("service %q observedState sdkAliases contains a blank resource name", service.Service)
+		}
+		for _, alias := range aliases {
+			if strings.TrimSpace(alias) == "" {
+				return fmt.Errorf("service %q observedState sdkAliases[%q] contains a blank SDK alias", service.Service, rawName)
+			}
+		}
+	}
+	return nil
+}
+
+func validateUniqueServiceKeys(
+	service ServiceConfig,
+	servicesByName map[string]struct{},
+	groupsByName map[string]struct{},
+) error {
+	if _, exists := servicesByName[service.Service]; exists {
+		return fmt.Errorf("duplicate service %q", service.Service)
+	}
+	if _, exists := groupsByName[service.Group]; exists {
+		return fmt.Errorf("duplicate group %q", service.Group)
+	}
 	return nil
 }
 
@@ -206,6 +246,13 @@ func (c *Config) Validate() error {
 //
 //nolint:gocognit,gocyclo // Runtime rollout validation checks interdependent service and resource overrides together.
 func (g GenerationConfig) Validate(serviceName string) error {
+	if err := validateGenerationSurfaceStrategies(serviceName, g); err != nil {
+		return err
+	}
+	return validateResourceGenerationOverrides(serviceName, g.Resources)
+}
+
+func validateGenerationSurfaceStrategies(serviceName string, g GenerationConfig) error {
 	if err := validateGenerationStrategy(
 		fmt.Sprintf("service %q generation.controller.strategy", serviceName),
 		g.Controller.Strategy,
@@ -224,47 +271,20 @@ func (g GenerationConfig) Validate(serviceName string) error {
 	); err != nil {
 		return err
 	}
-	if err := validateWebhookStrategy(
+	return validateWebhookStrategy(
 		fmt.Sprintf("service %q generation.webhooks.strategy", serviceName),
 		g.Webhooks.Strategy,
-	); err != nil {
-		return err
-	}
+	)
+}
 
-	resourceKinds := make(map[string]struct{}, len(g.Resources))
-	resourceSDKNames := make(map[string]struct{}, len(g.Resources))
-	for _, resource := range g.Resources {
-		kind := strings.TrimSpace(resource.Kind)
-		if kind == "" {
-			return fmt.Errorf("service %q generation.resources kind is required", serviceName)
-		}
-		if _, exists := resourceKinds[kind]; exists {
-			return fmt.Errorf("service %q generation.resources contains duplicate kind %q", serviceName, kind)
-		}
-		resourceKinds[kind] = struct{}{}
-		if sdkName := strings.TrimSpace(resource.SDKName); sdkName != "" {
-			if _, exists := resourceSDKNames[sdkName]; exists {
-				return fmt.Errorf("service %q generation.resources contains duplicate sdkName %q", serviceName, sdkName)
-			}
-			resourceSDKNames[sdkName] = struct{}{}
-		}
-
-		if err := validateGenerationStrategy(
-			fmt.Sprintf("service %q generation.resources[%q].controller.strategy", serviceName, kind),
-			resource.Controller.Strategy,
-		); err != nil {
+func validateResourceGenerationOverrides(serviceName string, resources []ResourceGenerationOverride) error {
+	resourceKinds := make(map[string]struct{}, len(resources))
+	for _, resource := range resources {
+		kind, err := validateResourceGenerationKind(serviceName, resource, resourceKinds)
+		if err != nil {
 			return err
 		}
-		if err := validateGenerationStrategy(
-			fmt.Sprintf("service %q generation.resources[%q].serviceManager.strategy", serviceName, kind),
-			resource.ServiceManager.Strategy,
-		); err != nil {
-			return err
-		}
-		if err := validateWebhookStrategy(
-			fmt.Sprintf("service %q generation.resources[%q].webhooks.strategy", serviceName, kind),
-			resource.Webhooks.Strategy,
-		); err != nil {
+		if err := validateResourceGenerationStrategies(serviceName, kind, resource); err != nil {
 			return err
 		}
 		if err := validateFormalSpec(
@@ -273,31 +293,11 @@ func (g GenerationConfig) Validate(serviceName string) error {
 		); err != nil {
 			return err
 		}
-		if resource.Controller.MaxConcurrentReconciles < 0 {
-			return fmt.Errorf(
-				"service %q generation.resources[%q].controller.maxConcurrentReconciles must be >= 0",
-				serviceName,
-				kind,
-			)
+		if err := validateControllerGenerationOverride(serviceName, kind, resource.Controller); err != nil {
+			return err
 		}
-		for _, marker := range resource.Controller.ExtraRBACMarkers {
-			if strings.TrimSpace(marker) == "" {
-				return fmt.Errorf(
-					"service %q generation.resources[%q].controller.extraRBACMarkers contains a blank marker",
-					serviceName,
-					kind,
-				)
-			}
-		}
-		if packagePath := strings.TrimSpace(resource.ServiceManager.PackagePath); packagePath != "" {
-			cleaned := path.Clean(packagePath)
-			if strings.HasPrefix(packagePath, "/") || cleaned == "." || strings.HasPrefix(cleaned, "../") || cleaned != packagePath {
-				return fmt.Errorf(
-					"service %q generation.resources[%q].serviceManager.packagePath must be a clean relative path beneath pkg/servicemanager",
-					serviceName,
-					kind,
-				)
-			}
+		if err := validateServiceManagerGenerationOverride(serviceName, kind, resource.ServiceManager); err != nil {
+			return err
 		}
 		if !resource.hasOverrides() {
 			return fmt.Errorf(
@@ -307,7 +307,78 @@ func (g GenerationConfig) Validate(serviceName string) error {
 			)
 		}
 	}
+	return nil
+}
 
+func validateResourceGenerationKind(
+	serviceName string,
+	resource ResourceGenerationOverride,
+	resourceKinds map[string]struct{},
+) (string, error) {
+	kind := strings.TrimSpace(resource.Kind)
+	if kind == "" {
+		return "", fmt.Errorf("service %q generation.resources kind is required", serviceName)
+	}
+	if _, exists := resourceKinds[kind]; exists {
+		return "", fmt.Errorf("service %q generation.resources contains duplicate kind %q", serviceName, kind)
+	}
+	resourceKinds[kind] = struct{}{}
+	return kind, nil
+}
+
+func validateResourceGenerationStrategies(serviceName, kind string, resource ResourceGenerationOverride) error {
+	if err := validateGenerationStrategy(
+		fmt.Sprintf("service %q generation.resources[%q].controller.strategy", serviceName, kind),
+		resource.Controller.Strategy,
+	); err != nil {
+		return err
+	}
+	if err := validateGenerationStrategy(
+		fmt.Sprintf("service %q generation.resources[%q].serviceManager.strategy", serviceName, kind),
+		resource.ServiceManager.Strategy,
+	); err != nil {
+		return err
+	}
+	return validateWebhookStrategy(
+		fmt.Sprintf("service %q generation.resources[%q].webhooks.strategy", serviceName, kind),
+		resource.Webhooks.Strategy,
+	)
+}
+
+func validateControllerGenerationOverride(serviceName, kind string, controller ControllerGenerationOverride) error {
+	if controller.MaxConcurrentReconciles < 0 {
+		return fmt.Errorf(
+			"service %q generation.resources[%q].controller.maxConcurrentReconciles must be >= 0",
+			serviceName,
+			kind,
+		)
+	}
+	for _, marker := range controller.ExtraRBACMarkers {
+		if strings.TrimSpace(marker) == "" {
+			return fmt.Errorf(
+				"service %q generation.resources[%q].controller.extraRBACMarkers contains a blank marker",
+				serviceName,
+				kind,
+			)
+		}
+	}
+	return nil
+}
+
+func validateServiceManagerGenerationOverride(serviceName, kind string, serviceManager ServiceManagerGenerationOverride) error {
+	packagePath := strings.TrimSpace(serviceManager.PackagePath)
+	if packagePath == "" {
+		return nil
+	}
+
+	cleaned := path.Clean(packagePath)
+	if strings.HasPrefix(packagePath, "/") || cleaned == "." || strings.HasPrefix(cleaned, "../") || cleaned != packagePath {
+		return fmt.Errorf(
+			"service %q generation.resources[%q].serviceManager.packagePath must be a clean relative path beneath pkg/servicemanager",
+			serviceName,
+			kind,
+		)
+	}
 	return nil
 }
 

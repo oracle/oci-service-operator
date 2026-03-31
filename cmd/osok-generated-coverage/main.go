@@ -71,6 +71,17 @@ type snapshot struct {
 	auto     bool
 }
 
+type coverageRunInputs struct {
+	repoRoot                    string
+	configPath                  string
+	cfg                         *generator.Config
+	services                    []generator.ServiceConfig
+	packageModels               []*generator.PackageModel
+	controllerGenPath           string
+	selectedGroups              []string
+	selectedServiceManagerRoots []string
+}
+
 func main() {
 	opts := options{}
 	flag.StringVar(&opts.configPath, "config", "internal/generator/config/services.yaml", "Path to the OSOK generator config file.")
@@ -100,101 +111,188 @@ func run(ctx context.Context, opts options) (err error) {
 		return err
 	}
 
-	repoRoot, err := findRepoRoot()
+	inputs, err := loadCoverageRunInputs(ctx, opts)
 	if err != nil {
 		return err
+	}
+	snapshotDir, err := prepareSnapshot(
+		inputs.repoRoot,
+		inputs.selectedGroups,
+		inputs.selectedServiceManagerRoots,
+		opts.snapshotDir,
+		opts.keepSnapshot,
+	)
+	if err != nil {
+		return err
+	}
+	defer cleanupSnapshot(&err, snapshotDir)
+
+	output, err := generateCoverageOutput(ctx, opts, inputs, snapshotDir)
+	if err != nil {
+		return err
+	}
+	rendered, err := renderOutput(output)
+	if err != nil {
+		return err
+	}
+	if err := writeReport(rendered, opts.reportOut); err != nil {
+		return err
+	}
+	if strings.TrimSpace(opts.writeBaseline) != "" {
+		if err := metrics.WriteBaseline(opts.writeBaseline, output.Summary); err != nil {
+			return err
+		}
+	}
+	return checkCoverageRegression(opts, output.Summary)
+}
+
+func loadCoverageRunInputs(ctx context.Context, opts options) (coverageRunInputs, error) {
+	repoRoot, err := findRepoRoot()
+	if err != nil {
+		return coverageRunInputs{}, err
 	}
 
 	configPath := absFromRoot(repoRoot, opts.configPath)
 	cfg, err := generator.LoadConfig(configPath)
 	if err != nil {
-		return err
+		return coverageRunInputs{}, err
 	}
 	services, err := cfg.SelectServices(opts.service, opts.all)
 	if err != nil {
-		return err
+		return coverageRunInputs{}, err
 	}
 	if err := cfg.VerifyFormalInputs(); err != nil {
-		return err
+		return coverageRunInputs{}, err
 	}
 	packageModels, err := buildPackageModels(ctx, cfg, services)
 	if err != nil {
-		return err
+		return coverageRunInputs{}, err
 	}
 
-	controllerGenPath := opts.controllerGen
+	controllerGenPath, err := resolveControllerGenPath(repoRoot, opts.controllerGen)
+	if err != nil {
+		return coverageRunInputs{}, err
+	}
+
+	return coverageRunInputs{
+		repoRoot:                    repoRoot,
+		configPath:                  configPath,
+		cfg:                         cfg,
+		services:                    services,
+		packageModels:               packageModels,
+		controllerGenPath:           controllerGenPath,
+		selectedGroups:              serviceGroups(services),
+		selectedServiceManagerRoots: serviceManagerRoots(services),
+	}, nil
+}
+
+func resolveControllerGenPath(repoRoot string, controllerGenPath string) (string, error) {
 	if strings.TrimSpace(controllerGenPath) == "" {
 		controllerGenPath = filepath.Join(repoRoot, "bin", "controller-gen")
 	}
 	if _, statErr := os.Stat(controllerGenPath); statErr != nil {
-		return fmt.Errorf("controller-gen not found at %q; run `make controller-gen` or pass --controller-gen: %w", controllerGenPath, statErr)
+		return "", fmt.Errorf("controller-gen not found at %q; run `make controller-gen` or pass --controller-gen: %w", controllerGenPath, statErr)
 	}
+	return controllerGenPath, nil
+}
 
-	selectedGroups := serviceGroups(services)
-	selectedServiceManagerRoots := serviceManagerRoots(services)
-	snapshotDir, err := prepareSnapshot(repoRoot, selectedGroups, selectedServiceManagerRoots, opts.snapshotDir, opts.keepSnapshot)
+func cleanupSnapshot(runErr *error, snapshotDir snapshot) {
+	if *runErr == nil {
+		if !snapshotDir.retained {
+			_ = os.RemoveAll(snapshotDir.root)
+		}
+		return
+	}
+	if snapshotDir.auto && !snapshotDir.retained {
+		*runErr = fmt.Errorf("%w (snapshot kept at %s)", *runErr, snapshotDir.root)
+	}
+}
+
+func generateCoverageOutput(
+	ctx context.Context,
+	opts options,
+	inputs coverageRunInputs,
+	snapshotDir snapshot,
+) (outputReport, error) {
+	if err := generateCoverageSnapshot(ctx, opts, inputs, snapshotDir.root); err != nil {
+		return outputReport{}, err
+	}
+	envelope, err := runCoverageValidator(snapshotDir.root, inputs.controllerGenPath, inputs.selectedGroups, opts.validatorJSONOut)
 	if err != nil {
-		return err
+		return outputReport{}, err
 	}
-	defer func() {
-		if err == nil {
-			if !snapshotDir.retained {
-				_ = os.RemoveAll(snapshotDir.root)
-			}
-			return
-		}
-		if snapshotDir.auto && !snapshotDir.retained {
-			err = fmt.Errorf("%w (snapshot kept at %s)", err, snapshotDir.root)
-		}
-	}()
+	return buildCoverageOutput(opts, inputs, snapshotDir, envelope), nil
+}
 
-	pipeline := generator.New()
+func generateCoverageSnapshot(
+	ctx context.Context,
+	opts options,
+	inputs coverageRunInputs,
+	snapshotRoot string,
+) error {
 	preserveRoot := ""
 	if opts.preserveSpec {
-		preserveRoot = repoRoot
+		preserveRoot = inputs.repoRoot
 	}
-	if _, err = pipeline.Generate(ctx, cfg, services, generator.Options{
-		OutputRoot:                      snapshotDir.root,
+
+	pipeline := generator.New()
+	if _, err := pipeline.Generate(ctx, inputs.cfg, inputs.services, generator.Options{
+		OutputRoot:                      snapshotRoot,
 		Overwrite:                       true,
 		PreserveExistingSpecSurfaceRoot: preserveRoot,
 	}); err != nil {
 		return fmt.Errorf("generate selected services into snapshot: %w", err)
 	}
-	if err := preserveCheckedInCompanionFiles(repoRoot, snapshotDir.root, packageModels); err != nil {
+	if err := preserveCheckedInCompanionFiles(inputs.repoRoot, snapshotRoot, inputs.packageModels); err != nil {
 		return fmt.Errorf("preserve checked-in companion files in snapshot: %w", err)
 	}
+	return nil
+}
 
-	snapshotEnv := snapshotCommandEnv(snapshotDir.root)
-	if err = runCommand(snapshotDir.root, snapshotEnv, "go", "run", "./hack/update_validator_registries.go", "--write"); err != nil {
-		return fmt.Errorf("refresh validator registries in snapshot: %w", err)
+func runCoverageValidator(
+	snapshotRoot string,
+	controllerGenPath string,
+	selectedGroups []string,
+	validatorJSONOut string,
+) (validatorEnvelope, error) {
+	snapshotEnv := snapshotCommandEnv(snapshotRoot)
+	if err := runCommand(snapshotRoot, snapshotEnv, "go", "run", "./hack/update_validator_registries.go", "--write"); err != nil {
+		return validatorEnvelope{}, fmt.Errorf("refresh validator registries in snapshot: %w", err)
 	}
-	if err = runCommand(snapshotDir.root, snapshotEnv, controllerGenPath, "object:headerFile=hack/boilerplate.go.txt", "paths="+controllerGenPaths(selectedGroups)); err != nil {
-		return fmt.Errorf("generate deepcopy code in snapshot: %w", err)
+	if err := runCommand(snapshotRoot, snapshotEnv, controllerGenPath, "object:headerFile=hack/boilerplate.go.txt", "paths="+controllerGenPaths(selectedGroups)); err != nil {
+		return validatorEnvelope{}, fmt.Errorf("generate deepcopy code in snapshot: %w", err)
 	}
 
-	validatorJSON, err := runCommandOutput(snapshotDir.root, snapshotEnv, "go", "run", "./cmd/osok-schema-validator", "--provider-path", ".", "--format", "json")
+	validatorJSON, err := runCommandOutput(snapshotRoot, snapshotEnv, "go", "run", "./cmd/osok-schema-validator", "--provider-path", ".", "--format", "json")
 	if err != nil {
-		return fmt.Errorf("run validator in snapshot: %w", err)
+		return validatorEnvelope{}, fmt.Errorf("run validator in snapshot: %w", err)
 	}
-
-	if strings.TrimSpace(opts.validatorJSONOut) != "" {
-		if err = writeFile(opts.validatorJSONOut, validatorJSON); err != nil {
-			return err
+	if strings.TrimSpace(validatorJSONOut) != "" {
+		if err := writeFile(validatorJSONOut, validatorJSON); err != nil {
+			return validatorEnvelope{}, err
 		}
 	}
 
 	envelope := validatorEnvelope{}
-	if err = json.Unmarshal(validatorJSON, &envelope); err != nil {
-		return fmt.Errorf("decode validator JSON: %w", err)
+	if err := json.Unmarshal(validatorJSON, &envelope); err != nil {
+		return validatorEnvelope{}, fmt.Errorf("decode validator JSON: %w", err)
 	}
+	return envelope, nil
+}
 
+func buildCoverageOutput(
+	opts options,
+	inputs coverageRunInputs,
+	snapshotDir snapshot,
+	envelope validatorEnvelope,
+) outputReport {
 	output := outputReport{
 		Config: outputConfig{
-			ConfigPath:                  configPath,
+			ConfigPath:                  inputs.configPath,
 			Service:                     opts.service,
 			All:                         opts.all,
-			GeneratedServices:           serviceNames(services),
-			GeneratedGroups:             selectedGroups,
+			GeneratedServices:           serviceNames(inputs.services),
+			GeneratedGroups:             inputs.selectedGroups,
 			Top:                         opts.top,
 			PreserveExistingSpecSurface: opts.preserveSpec,
 		},
@@ -209,28 +307,20 @@ func run(ctx context.Context, opts options) (err error) {
 	if snapshotDir.retained {
 		output.Snapshot.Root = snapshotDir.root
 	}
+	return output
+}
 
-	rendered, err := renderOutput(output)
+func checkCoverageRegression(opts options, summary metrics.APISummary) error {
+	if !opts.failOnRegression {
+		return nil
+	}
+	baseline, err := metrics.LoadBaseline(opts.baselinePath)
 	if err != nil {
 		return err
 	}
-	if err := writeReport(rendered, opts.reportOut); err != nil {
-		return err
-	}
-	if strings.TrimSpace(opts.writeBaseline) != "" {
-		if err := metrics.WriteBaseline(opts.writeBaseline, output.Summary); err != nil {
-			return err
-		}
-	}
-	if opts.failOnRegression {
-		baseline, err := metrics.LoadBaseline(opts.baselinePath)
-		if err != nil {
-			return err
-		}
-		comparison := metrics.CompareSummary(output.Summary, baseline)
-		if comparison.HasFailures() {
-			return fmt.Errorf("%s", formatRegressionMessage(comparison, output.Summary, opts.reportOut, opts.validatorJSONOut, opts.baselinePath))
-		}
+	comparison := metrics.CompareSummary(summary, baseline)
+	if comparison.HasFailures() {
+		return fmt.Errorf("%s", formatRegressionMessage(comparison, summary, opts.reportOut, opts.validatorJSONOut, opts.baselinePath))
 	}
 	return nil
 }
@@ -627,37 +717,12 @@ func populateRegistrations(repoRoot, snapshotRoot string, selectedGroups []strin
 }
 
 func preserveCheckedInCompanionFiles(repoRoot, snapshotRoot string, packages []*generator.PackageModel) error {
-	generatedServiceManagerPaths := make(map[string]map[string]struct{})
 	for _, pkg := range packages {
-		version := pkg.Version
-		if err := preserveCompanionGoFiles(
-			filepath.Join(repoRoot, "api", pkg.Service.Group, version),
-			filepath.Join(snapshotRoot, "api", pkg.Service.Group, version),
-			isGeneratedAPIFile,
-		); err != nil {
-			return fmt.Errorf("preserve api companion files for %s/%s: %w", pkg.Service.Group, version, err)
-		}
-		if err := preserveCompanionGoFiles(
-			filepath.Join(repoRoot, "controllers", pkg.Service.Group),
-			filepath.Join(snapshotRoot, "controllers", pkg.Service.Group),
-			isGeneratedControllerFile,
-		); err != nil {
-			return fmt.Errorf("preserve controller companion files for %s: %w", pkg.Service.Group, err)
-		}
-		for _, serviceManager := range pkg.ServiceManagers {
-			root := strings.Split(filepath.ToSlash(serviceManager.PackagePath), "/")[0]
-			if strings.TrimSpace(root) == "" {
-				continue
-			}
-			if generatedServiceManagerPaths[root] == nil {
-				generatedServiceManagerPaths[root] = make(map[string]struct{})
-			}
-			serviceManagerDir := filepath.Join(snapshotRoot, "pkg", "servicemanager", filepath.FromSlash(serviceManager.PackagePath))
-			generatedServiceManagerPaths[root][filepath.Join(serviceManagerDir, serviceManager.ServiceClientFileName)] = struct{}{}
-			generatedServiceManagerPaths[root][filepath.Join(serviceManagerDir, serviceManager.ServiceManagerFileName)] = struct{}{}
+		if err := preservePackageCompanionFiles(repoRoot, snapshotRoot, pkg); err != nil {
+			return err
 		}
 	}
-	for root, generatedPaths := range generatedServiceManagerPaths {
+	for root, generatedPaths := range generatedServiceManagerPaths(packages, snapshotRoot) {
 		if err := preserveServiceManagerCompanionGoFiles(
 			filepath.Join(repoRoot, "pkg", "servicemanager", root),
 			filepath.Join(snapshotRoot, "pkg", "servicemanager", root),
@@ -669,40 +734,64 @@ func preserveCheckedInCompanionFiles(repoRoot, snapshotRoot string, packages []*
 	return nil
 }
 
-func preserveCompanionGoFiles(sourceRoot, destRoot string, isGenerated func(string) bool) error {
-	if _, err := os.Stat(sourceRoot); err != nil {
-		if os.IsNotExist(err) {
-			return nil
-		}
-		return err
+func preservePackageCompanionFiles(repoRoot, snapshotRoot string, pkg *generator.PackageModel) error {
+	version := pkg.Version
+	if err := preserveCompanionGoFiles(
+		filepath.Join(repoRoot, "api", pkg.Service.Group, version),
+		filepath.Join(snapshotRoot, "api", pkg.Service.Group, version),
+		isGeneratedAPIFile,
+	); err != nil {
+		return fmt.Errorf("preserve api companion files for %s/%s: %w", pkg.Service.Group, version, err)
 	}
+	if err := preserveCompanionGoFiles(
+		filepath.Join(repoRoot, "controllers", pkg.Service.Group),
+		filepath.Join(snapshotRoot, "controllers", pkg.Service.Group),
+		isGeneratedControllerFile,
+	); err != nil {
+		return fmt.Errorf("preserve controller companion files for %s: %w", pkg.Service.Group, err)
+	}
+	return nil
+}
 
-	return filepath.WalkDir(sourceRoot, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
+func generatedServiceManagerPaths(packages []*generator.PackageModel, snapshotRoot string) map[string]map[string]struct{} {
+	pathsByRoot := make(map[string]map[string]struct{})
+	for _, pkg := range packages {
+		for _, serviceManager := range pkg.ServiceManagers {
+			root := strings.Split(filepath.ToSlash(serviceManager.PackagePath), "/")[0]
+			if strings.TrimSpace(root) == "" {
+				continue
+			}
+			if pathsByRoot[root] == nil {
+				pathsByRoot[root] = make(map[string]struct{})
+			}
+			serviceManagerDir := filepath.Join(snapshotRoot, "pkg", "servicemanager", filepath.FromSlash(serviceManager.PackagePath))
+			pathsByRoot[root][filepath.Join(serviceManagerDir, serviceManager.ServiceClientFileName)] = struct{}{}
+			pathsByRoot[root][filepath.Join(serviceManagerDir, serviceManager.ServiceManagerFileName)] = struct{}{}
 		}
+	}
+	return pathsByRoot
+}
 
-		rel, err := filepath.Rel(sourceRoot, path)
-		if err != nil {
-			return err
-		}
-		destPath := filepath.Join(destRoot, rel)
-		if d.IsDir() {
-			return os.MkdirAll(destPath, 0o755)
-		}
-		if filepath.Ext(d.Name()) != ".go" || isGenerated(d.Name()) {
-			return nil
-		}
-		if _, err := os.Lstat(destPath); err == nil {
-			return nil
-		} else if !os.IsNotExist(err) {
-			return err
-		}
-		return symlink(path, destPath)
+func preserveCompanionGoFiles(sourceRoot, destRoot string, isGenerated func(string) bool) error {
+	return preserveCompanionGoFilesMatching(sourceRoot, destRoot, func(destPath string, entry fs.DirEntry) bool {
+		return filepath.Ext(entry.Name()) == ".go" && !isGenerated(entry.Name())
 	})
 }
 
 func preserveServiceManagerCompanionGoFiles(sourceRoot, destRoot string, generatedPaths map[string]struct{}) error {
+	return preserveCompanionGoFilesMatching(sourceRoot, destRoot, func(destPath string, entry fs.DirEntry) bool {
+		if filepath.Ext(entry.Name()) != ".go" {
+			return false
+		}
+		_, generated := generatedPaths[destPath]
+		return !generated
+	})
+}
+
+func preserveCompanionGoFilesMatching(
+	sourceRoot, destRoot string,
+	shouldLink func(destPath string, entry fs.DirEntry) bool,
+) error {
 	if _, err := os.Stat(sourceRoot); err != nil {
 		if os.IsNotExist(err) {
 			return nil
@@ -710,32 +799,39 @@ func preserveServiceManagerCompanionGoFiles(sourceRoot, destRoot string, generat
 		return err
 	}
 
-	return filepath.WalkDir(sourceRoot, func(path string, d fs.DirEntry, err error) error {
+	return filepath.WalkDir(sourceRoot, func(path string, entry fs.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			return walkErr
+		}
+		destPath, err := companionDestPath(sourceRoot, destRoot, path)
 		if err != nil {
 			return err
 		}
-
-		rel, err := filepath.Rel(sourceRoot, path)
-		if err != nil {
-			return err
-		}
-		destPath := filepath.Join(destRoot, rel)
-		if d.IsDir() {
+		if entry.IsDir() {
 			return os.MkdirAll(destPath, 0o755)
 		}
-		if filepath.Ext(d.Name()) != ".go" {
+		if !shouldLink(destPath, entry) {
 			return nil
 		}
-		if _, ok := generatedPaths[destPath]; ok {
-			return nil
-		}
-		if _, err := os.Lstat(destPath); err == nil {
-			return nil
-		} else if !os.IsNotExist(err) {
-			return err
-		}
-		return symlink(path, destPath)
+		return symlinkIfMissing(path, destPath)
 	})
+}
+
+func companionDestPath(sourceRoot, destRoot, path string) (string, error) {
+	rel, err := filepath.Rel(sourceRoot, path)
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(destRoot, rel), nil
+}
+
+func symlinkIfMissing(src, dst string) error {
+	if _, err := os.Lstat(dst); err == nil {
+		return nil
+	} else if !os.IsNotExist(err) {
+		return err
+	}
+	return symlink(src, dst)
 }
 
 func isGeneratedAPIFile(name string) bool {
@@ -840,21 +936,14 @@ func copyFile(src, dst string, mode fs.FileMode) (err error) {
 		return err
 	}
 	defer func() {
-		if output != nil {
-			if closeErr := output.Close(); err == nil && closeErr != nil {
-				err = closeErr
-			}
+		if closeErr := output.Close(); err == nil && closeErr != nil {
+			err = closeErr
 		}
 	}()
 
 	if _, err = io.Copy(output, input); err != nil {
 		return err
 	}
-	if err = output.Close(); err != nil {
-		return err
-	}
-	output = nil
-
 	return nil
 }
 
