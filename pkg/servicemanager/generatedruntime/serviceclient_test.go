@@ -13,6 +13,7 @@ import (
 	"testing"
 
 	"github.com/oracle/oci-service-operator/pkg/credhelper"
+	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
@@ -327,21 +328,39 @@ func TestServiceClientCreateOrUpdateResolvesSecretInputsAndStampsStatus(t *testi
 	}
 
 	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	assertSuccessfulSecretCreate(t, response, err)
+	assertSecretCreateRequestResolved(t, createRequest)
+	assertSecretStatusStamped(t, resource, credentialClient)
+}
+
+func assertSuccessfulSecretCreate(t *testing.T, response servicemanager.OSOKResponse, err error) {
+	t.Helper()
+
 	if err != nil {
 		t.Fatalf("CreateOrUpdate() error = %v", err)
 	}
 	if !response.IsSuccessful {
 		t.Fatal("CreateOrUpdate() should report success")
 	}
-	if createRequest.DisplayName != "desired-name" {
-		t.Fatalf("create request displayName = %q, want desired-name", createRequest.DisplayName)
+}
+
+func assertSecretCreateRequestResolved(t *testing.T, request fakeCreateSecretThingRequest) {
+	t.Helper()
+
+	if request.DisplayName != "desired-name" {
+		t.Fatalf("create request displayName = %q, want desired-name", request.DisplayName)
 	}
-	if createRequest.AdminUsername == nil || *createRequest.AdminUsername != "admin" {
-		t.Fatalf("create request adminUsername = %v, want admin", createRequest.AdminUsername)
+	if request.AdminUsername == nil || *request.AdminUsername != "admin" {
+		t.Fatalf("create request adminUsername = %v, want admin", request.AdminUsername)
 	}
-	if createRequest.AdminPassword == nil || *createRequest.AdminPassword != "S3cr3t!" {
-		t.Fatalf("create request adminPassword = %v, want resolved secret value", createRequest.AdminPassword)
+	if request.AdminPassword == nil || *request.AdminPassword != "S3cr3t!" {
+		t.Fatalf("create request adminPassword = %v, want resolved secret value", request.AdminPassword)
 	}
+}
+
+func assertSecretStatusStamped(t *testing.T, resource *fakeSecretResource, credentialClient *fakeCredentialClient) {
+	t.Helper()
+
 	if got := resource.Status.AdminUsername.Secret.SecretName; got != "admin-secret" {
 		t.Fatalf("status.adminUsername.secret.secretName = %q, want admin-secret", got)
 	}

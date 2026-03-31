@@ -502,7 +502,7 @@ func TestValidateRejectsInvalidGenerationConfig(t *testing.T) {
 			name: "duplicate sdk name override",
 			mutate: func(cfg *Config) {
 				cfg.Services[0].Generation.Resources = []ResourceGenerationOverride{
-					{Kind: "MySqlDbSystem", SDKName: "DbSystem", Controller: ControllerGenerationOverride{Strategy: GenerationStrategyManual}},
+					{Kind: "DbSystemAlias", SDKName: "DbSystem", Controller: ControllerGenerationOverride{Strategy: GenerationStrategyManual}},
 					{Kind: "Widget", SDKName: "DbSystem", ServiceManager: ServiceManagerGenerationOverride{PackagePath: "mysql/widget"}},
 				}
 			},
@@ -608,17 +608,7 @@ func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
 	services := serviceConfigsByName(t, cfg, "database", "mysql", "streaming", "core")
 
 	for _, name := range []string{"database", "mysql", "streaming"} {
-		assertServiceGenerationStrategies(t, services[name], generationStrategyExpectation{
-			controller:     GenerationStrategyGenerated,
-			serviceManager: GenerationStrategyGenerated,
-			registration:   GenerationStrategyGenerated,
-			webhook:        GenerationStrategyManual,
-		})
-	}
-
-	services := requireServices(t, cfg, "database", "mysql", "streaming", "core")
-	for _, serviceName := range []string{"database", "mysql", "streaming"} {
-		assertServiceGenerationStrategies(t, services[serviceName], generationStrategyExpectations{
+		assertServiceGenerationStrategies(t, services[name], generationStrategyExpectations{
 			controller:     GenerationStrategyGenerated,
 			serviceManager: GenerationStrategyGenerated,
 			registration:   GenerationStrategyGenerated,
@@ -637,8 +627,6 @@ func TestCheckedInConfigPromotesOnlyIdentityUserFormalSpec(t *testing.T) {
 
 	cfg := loadCheckedInConfig(t)
 	services := serviceConfigsByName(t, cfg, "identity", "database", "mysql", "streaming")
-
-	services := requireServices(t, cfg, "identity", "database", "mysql", "streaming")
 	assertFormalSpecFor(t, services["identity"], "User", "user")
 	assertFormalSpecFor(t, services["identity"], "Compartment", "")
 	assertFormalSpecFor(t, services["database"], "AutonomousDatabases", "")
@@ -998,74 +986,4 @@ func TestCheckedInConfigExcludesMySQLSourceURLFromObservedState(t *testing.T) {
 	if _, ok := excluded[wantKey]; !ok {
 		t.Fatalf("mysql DbSystem excluded observed-state paths = %v, want %q", excluded, wantKey)
 	}
-}
-
-func assertCheckedInDatabaseRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
-	t.Helper()
-
-	if len(service.Generation.Resources) != 1 {
-		t.Fatalf("database generation overrides = %d, want 1", len(service.Generation.Resources))
-	}
-
-	override := service.Generation.Resources[0]
-	if override.SDKName != "AutonomousDatabase" {
-		t.Fatalf("database sdkName = %q, want %q", override.SDKName, "AutonomousDatabase")
-	}
-	if !slices.Equal(
-		override.Controller.ExtraRBACMarkers,
-		[]string{
-			`groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete`,
-			`groups="",resources=events,verbs=get;list;watch;create;update;patch;delete`,
-		},
-	) {
-		t.Fatalf("database extra RBAC markers = %v", override.Controller.ExtraRBACMarkers)
-	}
-	if override.ServiceManager.PackagePath != "autonomousdatabases/adb" {
-		t.Fatalf("database packagePath = %q, want %q", override.ServiceManager.PackagePath, "autonomousdatabases/adb")
-	}
-	if got := generationStrategyOrDefault(override.Webhooks.Strategy, GenerationStrategyManual); got != GenerationStrategyManual {
-		t.Fatalf("database resource webhook strategy = %q, want %q", got, GenerationStrategyManual)
-	}
-}
-
-func assertCheckedInMySQLRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
-	t.Helper()
-
-	if len(service.Generation.Resources) != 1 {
-		t.Fatalf("mysql generation overrides = %d, want 1", len(service.Generation.Resources))
-	}
-
-	override := service.Generation.Resources[0]
-	if override.SDKName != "DbSystem" {
-		t.Fatalf("mysql sdkName = %q, want %q", override.SDKName, "DbSystem")
-	}
-	if override.Controller.MaxConcurrentReconciles != 3 {
-		t.Fatalf("mysql maxConcurrentReconciles = %d, want 3", override.Controller.MaxConcurrentReconciles)
-	}
-	if !slices.Equal(
-		override.Controller.ExtraRBACMarkers,
-		[]string{
-			`groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete`,
-			`groups="",resources=events,verbs=get;list;watch;create;update;patch;delete`,
-		},
-	) {
-		t.Fatalf("mysql extra RBAC markers = %v", override.Controller.ExtraRBACMarkers)
-	}
-	if override.ServiceManager.PackagePath != "mysql/dbsystem" {
-		t.Fatalf("mysql packagePath = %q, want %q", override.ServiceManager.PackagePath, "mysql/dbsystem")
-	}
-}
-
-func assertCheckedInStreamingRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
-	t.Helper()
-
-	if len(service.Generation.Resources) != 5 {
-		t.Fatalf("streaming generation overrides = %d, want 5", len(service.Generation.Resources))
-	}
-
-	overrides := resourceGenerationOverridesByKind(service.Generation.Resources)
-	if overrides["Stream"].ServiceManager.PackagePath != "streaming/stream" {
-		t.Fatalf("streaming packagePath = %q, want %q", overrides["Stream"].ServiceManager.PackagePath, "streaming/stream")
-	}
-	assertResourceGenerationDisabled(t, service, "Cursor", "Group", "GroupCursor", "Message")
 }

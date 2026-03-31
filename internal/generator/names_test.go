@@ -52,13 +52,6 @@ func TestSplitCamelAndLowerCamel(t *testing.T) {
 		lower  string
 	}{
 		{
-			name:          "suffix match for mysql",
-			rawName:       "DbSystem",
-			compatibility: CompatibilityConfig{ExistingKinds: []string{"LegacyDbSystem"}},
-			wantKind:      "LegacyDbSystem",
-			wantMatch:     true,
-		},
-		{
 			name:   "acronym boundary",
 			input:  "HTTPRequest",
 			tokens: []string{"http", "request"},

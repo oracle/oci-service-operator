@@ -215,6 +215,33 @@ type DbSystemSecureConnections struct {
 	CertificateId string `json:"certificateId,omitempty"`
 }
 
+// DbSystemBackupPolicyObservedState defines nested fields for DbSystem.BackupPolicy.
+type DbSystemBackupPolicyObservedState struct {
+	// Specifies if automatic backups are enabled.
+	// +kubebuilder:validation:Optional
+	IsEnabled bool `json:"isEnabled,omitempty"`
+	// The start of a 30-minute window of time in which daily, automated backups occur.
+	// This should be in the format of the "Time" portion of an RFC3339-formatted timestamp. Any second or sub-second time data will be truncated to zero.
+	// At some point in the window, the system may incur a brief service disruption as the backup is performed.
+	// +kubebuilder:validation:Optional
+	WindowStartTime string `json:"windowStartTime,omitempty"`
+	// Number of days to retain an automatic backup.
+	// +kubebuilder:validation:Optional
+	RetentionInDays int `json:"retentionInDays,omitempty"`
+	// Simple key-value pair applied without any predefined name, type or scope. Exists for cross-compatibility only.
+	// Tags defined here will be copied verbatim as tags on the Backup resource created by this BackupPolicy.
+	// Example: `{"bar-key": "value"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Usage of predefined tag keys. These predefined keys are scoped to namespaces.
+	// Tags defined here will be copied verbatim as tags on the Backup resource created by this BackupPolicy.
+	// Example: `{"foo-namespace": {"bar-key": "value"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// +kubebuilder:validation:Optional
+	PitrPolicy DbSystemBackupPolicyPitrPolicy `json:"pitrPolicy,omitempty"`
+}
+
 // DbSystemCurrentPlacement defines nested fields for DbSystem.CurrentPlacement.
 type DbSystemCurrentPlacement struct {
 	// The availability domain in which the DB System is placed.
@@ -241,6 +268,24 @@ type DbSystemHeatWaveCluster struct {
 	TimeUpdated string `json:"timeUpdated,omitempty"`
 	// Lakehouse enabled status for the HeatWave cluster.
 	IsLakehouseEnabled bool `json:"isLakehouseEnabled,omitempty"`
+}
+
+// DbSystemSourceObservedState defines nested fields for DbSystem.Source.
+type DbSystemSourceObservedState struct {
+	JsonData   string `json:"jsonData,omitempty"`
+	SourceType string `json:"sourceType,omitempty"`
+	// The OCID of the backup to be used as the source for the new DB System.
+	BackupId string `json:"backupId,omitempty"`
+	// The OCID of the DB System from which a backup shall be selected to be
+	// restored when creating the new DB System. Use this together with
+	// recovery point to perform a point in time recovery operation.
+	DbSystemId string `json:"dbSystemId,omitempty"`
+	// The date and time, as per RFC 3339, of the change up to which the
+	// new DB System shall be restored to, using a backup and logs from the
+	// original DB System. In case no point in time is specified, then this
+	// new DB System shall be restored up to the latest change recorded for
+	// the original DB System.
+	RecoveryPoint string `json:"recoveryPoint,omitempty"`
 }
 
 // DbSystemEndpoint defines nested fields for DbSystem.Endpoint.
@@ -429,9 +474,9 @@ type DbSystemStatus struct {
 	// and memory for VM shapes; CPU cores, memory and storage for non-VM
 	// (or bare metal) shapes. To get a list of shapes, use (the
 	// ListShapes operation.
-	ShapeName    string               `json:"shapeName,omitempty"`
-	BackupPolicy DbSystemBackupPolicy `json:"backupPolicy,omitempty"`
-	Source       DbSystemSource       `json:"source,omitempty"`
+	ShapeName    string                            `json:"shapeName,omitempty"`
+	BackupPolicy DbSystemBackupPolicyObservedState `json:"backupPolicy,omitempty"`
+	Source       DbSystemSourceObservedState       `json:"source,omitempty"`
 	// The OCID of the Configuration to be used for Instances in this DB System.
 	ConfigurationId string `json:"configurationId,omitempty"`
 	// The hostname for the primary endpoint of the DB System. Used for DNS.

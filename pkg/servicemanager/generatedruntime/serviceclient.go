@@ -1124,36 +1124,62 @@ func stampSecretSourceStatus(resource any) {
 
 //nolint:gocyclo // Status stamping recursively walks nested structs to preserve secret-reference mirrors.
 func copySecretSourceFields(source reflect.Value, destination reflect.Value) {
+	source, destination, ok := secretSourceStructPair(source, destination)
+	if !ok {
+		return
+	}
+	for i := 0; i < source.NumField(); i++ {
+		copySecretSourceField(source, destination, i)
+	}
+}
+
+func secretSourceStructPair(source reflect.Value, destination reflect.Value) (reflect.Value, reflect.Value, bool) {
 	source = indirectValue(source)
 	destination = indirectValue(destination)
 	if !source.IsValid() || !destination.IsValid() {
-		return
+		return reflect.Value{}, reflect.Value{}, false
 	}
 	if source.Kind() != reflect.Struct || destination.Kind() != reflect.Struct {
+		return reflect.Value{}, reflect.Value{}, false
+	}
+	return source, destination, true
+}
+
+func copySecretSourceField(source reflect.Value, destination reflect.Value, index int) {
+	fieldType := source.Type().Field(index)
+	if !fieldType.IsExported() {
 		return
 	}
 
-	for i := 0; i < source.NumField(); i++ {
-		fieldType := source.Type().Field(i)
-		if !fieldType.IsExported() {
-			continue
-		}
-
-		sourceField := source.Field(i)
-		destinationField := destination.FieldByName(fieldType.Name)
-		if !destinationField.IsValid() || !destinationField.CanSet() {
-			continue
-		}
-		if isSecretSourceType(sourceField.Type()) && destinationField.Type() == sourceField.Type() {
-			if secretSourceValueIsEmpty(sourceField) {
-				destinationField.Set(reflect.Zero(destinationField.Type()))
-			} else {
-				destinationField.Set(sourceField)
-			}
-			continue
-		}
-		copySecretSourceFields(sourceField, destinationField)
+	sourceField := source.Field(index)
+	destinationField, ok := settableFieldByName(destination, fieldType.Name)
+	if !ok {
+		return
 	}
+	if copySecretSourceLeaf(sourceField, destinationField) {
+		return
+	}
+	copySecretSourceFields(sourceField, destinationField)
+}
+
+func settableFieldByName(value reflect.Value, name string) (reflect.Value, bool) {
+	field := value.FieldByName(name)
+	if !field.IsValid() || !field.CanSet() {
+		return reflect.Value{}, false
+	}
+	return field, true
+}
+
+func copySecretSourceLeaf(source reflect.Value, destination reflect.Value) bool {
+	if !isSecretSourceType(source.Type()) || destination.Type() != source.Type() {
+		return false
+	}
+	if secretSourceValueIsEmpty(source) {
+		destination.Set(reflect.Zero(destination.Type()))
+		return true
+	}
+	destination.Set(source)
+	return true
 }
 
 func secretSourceValueIsEmpty(value reflect.Value) bool {

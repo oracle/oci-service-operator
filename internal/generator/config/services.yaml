@@ -376,7 +376,10 @@ services:
     phase: data-and-storage
     sampleOrder: 30
     packageProfile: controller-backed
-    parityFile: parity/mysql.yaml
+    observedState:
+      excludedFieldPaths:
+        DbSystem:
+          - Source.SourceUrl
     generation:
       controller:
         strategy: generated

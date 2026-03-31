@@ -575,8 +575,18 @@ func newExistingDbSystemWithSource(current, desired mysqlv1beta1.DbSystemSource)
 			OsokStatus: shared.OSOKStatus{
 				Ocid: "ocid1.mysqldbsystem.oc1..existing",
 			},
-			Source: current,
+			Source: observedDbSystemSource(current),
 		},
+	}
+}
+
+func observedDbSystemSource(source mysqlv1beta1.DbSystemSource) mysqlv1beta1.DbSystemSourceObservedState {
+	return mysqlv1beta1.DbSystemSourceObservedState{
+		JsonData:      source.JsonData,
+		SourceType:    source.SourceType,
+		BackupId:      source.BackupId,
+		DbSystemId:    source.DbSystemId,
+		RecoveryPoint: source.RecoveryPoint,
 	}
 }
 
