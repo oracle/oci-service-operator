@@ -182,7 +182,7 @@ func (r *Renderer) RenderServiceManagers(root string, pkg *PackageModel, overwri
 	return nil
 }
 
-func (r *Renderer) RenderSamples(root string, packages []*PackageModel) error {
+func (r *Renderer) RenderSamples(root string, cfg *Config, packages []*PackageModel) error {
 	type sampleEntry struct {
 		order    int
 		fileName string
@@ -233,7 +233,6 @@ func (r *Renderer) RenderSamples(root string, packages []*PackageModel) error {
 		return err
 	}
 
-	resourceNames := make([]string, 0, len(samples))
 	for _, sample := range samples {
 		content, err := renderSampleFile(sample.body, sample.groupDNS, sample.version, sample.kind, sample.metadata, sample.spec)
 		if err != nil {
@@ -242,7 +241,11 @@ func (r *Renderer) RenderSamples(root string, packages []*PackageModel) error {
 		if err := os.WriteFile(filepath.Join(samplesDir, sample.fileName), []byte(content), 0o644); err != nil {
 			return fmt.Errorf("write sample %s: %w", sample.fileName, err)
 		}
-		resourceNames = append(resourceNames, sample.fileName)
+	}
+
+	resourceNames, err := sampleKustomizationResources(samplesDir, cfg, packages)
+	if err != nil {
+		return err
 	}
 
 	kustomizationContent, err := renderSamplesKustomization(resourceNames)
@@ -254,6 +257,100 @@ func (r *Renderer) RenderSamples(root string, packages []*PackageModel) error {
 	}
 
 	return nil
+}
+
+type sampleInventoryPrefix struct {
+	prefix string
+	order  int
+}
+
+type sampleInventoryResource struct {
+	fileName string
+	order    int
+}
+
+func sampleKustomizationResources(samplesDir string, cfg *Config, packages []*PackageModel) ([]string, error) {
+	prefixes := sampleInventoryPrefixes(cfg, packages)
+	if len(prefixes) == 0 {
+		return nil, nil
+	}
+
+	entries, err := os.ReadDir(samplesDir)
+	if err != nil {
+		return nil, fmt.Errorf("read samples dir %q: %w", samplesDir, err)
+	}
+
+	resources := make([]sampleInventoryResource, 0, len(entries))
+	for _, entry := range entries {
+		if entry.IsDir() || entry.Name() == "kustomization.yaml" || filepath.Ext(entry.Name()) != ".yaml" {
+			continue
+		}
+
+		order, ok := sampleInventoryOrder(entry.Name(), prefixes)
+		if !ok {
+			continue
+		}
+
+		resources = append(resources, sampleInventoryResource{
+			fileName: entry.Name(),
+			order:    order,
+		})
+	}
+
+	sort.Slice(resources, func(i, j int) bool {
+		if resources[i].order == resources[j].order {
+			return resources[i].fileName < resources[j].fileName
+		}
+		return resources[i].order < resources[j].order
+	})
+
+	resourceNames := make([]string, 0, len(resources))
+	for _, resource := range resources {
+		resourceNames = append(resourceNames, resource.fileName)
+	}
+
+	return resourceNames, nil
+}
+
+func sampleInventoryPrefixes(cfg *Config, packages []*PackageModel) []sampleInventoryPrefix {
+	seen := make(map[string]struct{})
+	prefixes := make([]sampleInventoryPrefix, 0, len(packages))
+
+	appendPrefix := func(prefix string, order int) {
+		if strings.TrimSpace(prefix) == "" {
+			return
+		}
+		if _, ok := seen[prefix]; ok {
+			return
+		}
+		seen[prefix] = struct{}{}
+		prefixes = append(prefixes, sampleInventoryPrefix{
+			prefix: prefix,
+			order:  order,
+		})
+	}
+
+	if cfg != nil {
+		for _, service := range cfg.Services {
+			appendPrefix(sampleFilePrefix(service.Group, service.VersionOrDefault(cfg.DefaultVersion)), service.SampleOrder)
+		}
+	}
+
+	for _, pkg := range packages {
+		appendPrefix(sampleFilePrefix(pkg.Service.Group, pkg.Version), pkg.SampleOrder)
+	}
+
+	return prefixes
+}
+
+func sampleInventoryOrder(name string, prefixes []sampleInventoryPrefix) (int, bool) {
+	for _, prefix := range prefixes {
+		if strings.HasPrefix(name, prefix.prefix) {
+			return prefix.order, true
+		}
+	}
+
+	return 0, false
 }
 
 func renderGroupVersionFile(pkg *PackageModel) (string, error) {

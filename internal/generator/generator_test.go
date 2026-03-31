@@ -2189,6 +2189,59 @@ func TestGenerateOverwritesExistingSampleKustomizationEntries(t *testing.T) {
 	}
 }
 
+func TestGenerateIncrementalSampleKustomizationKeepsExistingGeneratedServices(t *testing.T) {
+	t.Parallel()
+
+	databaseService := testServiceConfig(PackageProfileCRDOnly)
+	databaseService.Service = "database"
+	databaseService.Group = "database"
+	databaseService.SampleOrder = 10
+
+	mysqlService := testServiceConfig(PackageProfileCRDOnly)
+	mysqlService.SampleOrder = 20
+
+	cfg := &Config{
+		Domain:         "oracle.com",
+		DefaultVersion: "v1beta1",
+		Services:       []ServiceConfig{databaseService, mysqlService},
+	}
+	pipeline := newTestGenerator(t)
+	outputRoot := t.TempDir()
+
+	if _, err := pipeline.Generate(context.Background(), cfg, []ServiceConfig{databaseService}, Options{
+		OutputRoot: outputRoot,
+	}); err != nil {
+		t.Fatalf("Generate(database) error = %v", err)
+	}
+
+	if _, err := pipeline.Generate(context.Background(), cfg, []ServiceConfig{mysqlService}, Options{
+		OutputRoot: outputRoot,
+	}); err != nil {
+		t.Fatalf("Generate(mysql) error = %v", err)
+	}
+
+	order, err := readSampleKustomizationOrder(filepath.Join(outputRoot, "config", "samples", "kustomization.yaml"))
+	if err != nil {
+		t.Fatalf("readSampleKustomizationOrder(kustomization.yaml) error = %v", err)
+	}
+
+	want := []string{
+		"database_v1beta1_dbsystem.yaml",
+		"database_v1beta1_oauthclientcredential.yaml",
+		"database_v1beta1_report.yaml",
+		"database_v1beta1_reportbyname.yaml",
+		"database_v1beta1_widget.yaml",
+		"mysql_v1beta1_dbsystem.yaml",
+		"mysql_v1beta1_oauthclientcredential.yaml",
+		"mysql_v1beta1_report.yaml",
+		"mysql_v1beta1_reportbyname.yaml",
+		"mysql_v1beta1_widget.yaml",
+	}
+	if !slices.Equal(order, want) {
+		t.Fatalf("sample kustomization resources = %#v, want %#v", order, want)
+	}
+}
+
 func sampleSDKDir(t *testing.T) string {
 	t.Helper()
 

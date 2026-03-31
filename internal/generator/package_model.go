@@ -330,7 +330,11 @@ func appendUniqueStrings(existing []string, extras ...string) []string {
 }
 
 func sampleFileName(group string, version string, fileStem string) string {
-	return fmt.Sprintf("%s_%s_%s.yaml", group, version, fileStem)
+	return sampleFilePrefix(group, version) + fileStem + ".yaml"
+}
+
+func sampleFilePrefix(group string, version string) string {
+	return fmt.Sprintf("%s_%s_", group, version)
 }
 
 func defaultStatusFields() []FieldModel {
