@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"sort"
 	"strings"
 	"time"
 
@@ -145,6 +146,10 @@ func (c *vcnRuntimeClient) Delete(ctx context.Context, resource *corev1beta1.Vcn
 }
 
 func (c *vcnRuntimeClient) create(ctx context.Context, resource *corev1beta1.Vcn) (servicemanager.OSOKResponse, error) {
+	if err := validateCreateInputs(resource.Spec); err != nil {
+		return c.fail(resource, err)
+	}
+
 	request := coresdk.CreateVcnRequest{
 		CreateVcnDetails: buildCreateVcnDetails(resource.Spec),
 	}
@@ -272,10 +277,10 @@ func validateCreateOnlyDrift(spec corev1beta1.VcnSpec, current coresdk.Vcn) erro
 	if spec.CidrBlock != "" && !stringPtrEqual(current.CidrBlock, spec.CidrBlock) {
 		unsupported = append(unsupported, "cidrBlock")
 	}
-	if len(spec.CidrBlocks) > 0 && !reflect.DeepEqual(current.CidrBlocks, spec.CidrBlocks) {
+	if len(spec.CidrBlocks) > 0 && !normalizedStringSlicesEqual(current.CidrBlocks, spec.CidrBlocks) {
 		unsupported = append(unsupported, "cidrBlocks")
 	}
-	if len(spec.Ipv6PrivateCidrBlocks) > 0 && !reflect.DeepEqual(current.Ipv6PrivateCidrBlocks, spec.Ipv6PrivateCidrBlocks) {
+	if len(spec.Ipv6PrivateCidrBlocks) > 0 && !normalizedStringSlicesEqual(current.Ipv6PrivateCidrBlocks, spec.Ipv6PrivateCidrBlocks) {
 		unsupported = append(unsupported, "ipv6PrivateCidrBlocks")
 	}
 	if spec.IsIpv6Enabled && len(current.Ipv6CidrBlocks) == 0 && len(current.Ipv6PrivateCidrBlocks) == 0 && len(current.Byoipv6CidrBlocks) == 0 {
@@ -284,7 +289,7 @@ func validateCreateOnlyDrift(spec corev1beta1.VcnSpec, current coresdk.Vcn) erro
 	if spec.IsOracleGuaAllocationEnabled && len(current.Ipv6CidrBlocks) == 0 {
 		unsupported = append(unsupported, "isOracleGuaAllocationEnabled")
 	}
-	if len(spec.Byoipv6CidrDetails) > 0 && !reflect.DeepEqual(current.Byoipv6CidrBlocks, desiredByoipv6Blocks(spec.Byoipv6CidrDetails)) {
+	if len(spec.Byoipv6CidrDetails) > 0 && !normalizedStringSlicesEqual(current.Byoipv6CidrBlocks, desiredByoipv6Blocks(spec.Byoipv6CidrDetails)) {
 		unsupported = append(unsupported, "byoipv6CidrDetails")
 	}
 
@@ -302,6 +307,30 @@ func desiredByoipv6Blocks(details []corev1beta1.VcnByoipv6CidrDetail) []string {
 		}
 	}
 	return blocks
+}
+
+func validateCreateInputs(spec corev1beta1.VcnSpec) error {
+	if strings.TrimSpace(spec.CidrBlock) != "" && len(normalizeStringSlice(spec.CidrBlocks)) > 0 {
+		return fmt.Errorf("Vcn create input cannot set both cidrBlock and cidrBlocks")
+	}
+	return nil
+}
+
+func normalizedStringSlicesEqual(left []string, right []string) bool {
+	return reflect.DeepEqual(normalizeStringSlice(left), normalizeStringSlice(right))
+}
+
+func normalizeStringSlice(values []string) []string {
+	normalized := make([]string, 0, len(values))
+	for _, value := range values {
+		trimmed := strings.TrimSpace(value)
+		if trimmed == "" {
+			continue
+		}
+		normalized = append(normalized, trimmed)
+	}
+	sort.Strings(normalized)
+	return normalized
 }
 
 func (c *vcnRuntimeClient) applyLifecycle(resource *corev1beta1.Vcn, current coresdk.Vcn) (servicemanager.OSOKResponse, error) {

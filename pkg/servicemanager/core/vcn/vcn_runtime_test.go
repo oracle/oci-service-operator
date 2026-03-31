@@ -133,6 +133,27 @@ func TestCreateOrUpdate_CreateSuccessAndStatusProjection(t *testing.T) {
 	assert.Equal(t, []string{"10.0.0.0/16"}, resource.Status.CidrBlocks)
 }
 
+func TestCreateOrUpdate_RejectsConflictingCreateCIDRInputs(t *testing.T) {
+	createCalls := 0
+	manager := newTestManager(&fakeVcnOCIClient{
+		createFn: func(_ context.Context, _ coresdk.CreateVcnRequest) (coresdk.CreateVcnResponse, error) {
+			createCalls++
+			return coresdk.CreateVcnResponse{}, nil
+		},
+	})
+
+	resource := makeSpecVcn()
+	resource.Spec.CidrBlock = "10.0.0.0/16"
+	resource.Spec.CidrBlocks = []string{"10.0.0.0/16"}
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.Error(t, err)
+	assert.False(t, resp.IsSuccessful)
+	assert.Contains(t, err.Error(), "both cidrBlock and cidrBlocks")
+	assert.Equal(t, 0, createCalls)
+}
+
 func TestCreateOrUpdate_ObserveByStatusOCID(t *testing.T) {
 	getCalls := 0
 	updateCalls := 0
@@ -253,6 +274,38 @@ func TestCreateOrUpdate_RejectsUnsupportedCreateOnlyDrift(t *testing.T) {
 	assert.Error(t, err)
 	assert.False(t, resp.IsSuccessful)
 	assert.Contains(t, err.Error(), "create-only field drift")
+	assert.Equal(t, 0, updateCalls)
+}
+
+func TestCreateOrUpdate_AllowsEquivalentReorderedCreateOnlyLists(t *testing.T) {
+	updateCalls := 0
+	manager := newTestManager(&fakeVcnOCIClient{
+		getFn: func(_ context.Context, _ coresdk.GetVcnRequest) (coresdk.GetVcnResponse, error) {
+			current := makeSDKVcn("ocid1.vcn.oc1..existing", "test-vcn", coresdk.VcnLifecycleStateAvailable)
+			current.CidrBlocks = []string{"10.1.0.0/16", "10.0.0.0/16"}
+			current.Ipv6PrivateCidrBlocks = []string{"fd00:2::/56", "fd00:1::/56"}
+			current.Byoipv6CidrBlocks = []string{"2001:db8:2::/56", "2001:db8:1::/56"}
+			return coresdk.GetVcnResponse{Vcn: current}, nil
+		},
+		updateFn: func(_ context.Context, _ coresdk.UpdateVcnRequest) (coresdk.UpdateVcnResponse, error) {
+			updateCalls++
+			return coresdk.UpdateVcnResponse{}, nil
+		},
+	})
+
+	resource := makeSpecVcn()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.vcn.oc1..existing")
+	resource.Spec.CidrBlocks = []string{"10.0.0.0/16", "10.1.0.0/16"}
+	resource.Spec.Ipv6PrivateCidrBlocks = []string{"fd00:1::/56", "fd00:2::/56"}
+	resource.Spec.Byoipv6CidrDetails = []corev1beta1.VcnByoipv6CidrDetail{
+		{Byoipv6RangeId: "ocid1.byoipv6.oc1..a", Ipv6CidrBlock: "2001:db8:1::/56"},
+		{Byoipv6RangeId: "ocid1.byoipv6.oc1..b", Ipv6CidrBlock: "2001:db8:2::/56"},
+	}
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
 	assert.Equal(t, 0, updateCalls)
 }
 
