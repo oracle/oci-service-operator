@@ -39,7 +39,7 @@ type StreamStatus struct {
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Streamname",type="string",JSONPath=".spec.name",priority=1
+// +kubebuilder:printcolumn:name="Name",type="string",JSONPath=".spec.name",priority=1
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.status.conditions[-1].type",description="status of the Stream",priority=0
 // +kubebuilder:printcolumn:name="Ocid",type="string",JSONPath=".status.status.ocid",description="Ocid of the Stream",priority=1
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0

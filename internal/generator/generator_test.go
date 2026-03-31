@@ -2198,6 +2198,34 @@ func TestCurrentServiceParityMatchesCheckedInArtifacts(t *testing.T) {
 	)
 }
 
+func TestCheckedInStreamingParityPreservesStreamNamePrinterColumn(t *testing.T) {
+	t.Parallel()
+
+	cfg := loadCheckedInConfig(t)
+	service := requireService(t, cfg, "streaming")
+
+	pkg, err := NewDiscoverer().BuildPackageModel(context.Background(), cfg, *service)
+	if err != nil {
+		t.Fatalf("BuildPackageModel() error = %v", err)
+	}
+
+	stream := findResource(t, pkg.Resources, "Stream")
+	if len(stream.PrintColumns) == 0 {
+		t.Fatal("Stream print columns = none, want Name column first")
+	}
+
+	nameColumn := stream.PrintColumns[0]
+	if nameColumn.Name != "Name" {
+		t.Fatalf("Stream first print column name = %q, want %q", nameColumn.Name, "Name")
+	}
+	if nameColumn.JSONPath != ".spec.name" {
+		t.Fatalf("Stream first print column JSONPath = %q, want %q", nameColumn.JSONPath, ".spec.name")
+	}
+	if nameColumn.Type != "string" {
+		t.Fatalf("Stream first print column type = %q, want %q", nameColumn.Type, "string")
+	}
+}
+
 func TestCheckedInPromotedCoreRuntimeArtifactsMatchGenerator(t *testing.T) {
 	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
 	cfg, err := LoadConfig(cfgPath)
