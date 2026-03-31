@@ -938,8 +938,8 @@ func TestCreateOrUpdate_BindExistingAdb_SecretReferenceUpdateWhenStatusMissing(t
 	resp, err := mgr.CreateOrUpdate(context.Background(), adb, ctrl.Request{})
 	assert.NoError(t, err)
 	assert.True(t, resp.IsSuccessful)
-	assert.Equal(t, common.String("ocid1.vaultsecret.oc1..desired"), capturedUpdate.UpdateAutonomousDatabaseDetails.SecretId)
-	assert.Equal(t, common.Int(4), capturedUpdate.UpdateAutonomousDatabaseDetails.SecretVersionNumber)
+	assert.Equal(t, common.String("ocid1.vaultsecret.oc1..desired"), capturedUpdate.SecretId)
+	assert.Equal(t, common.Int(4), capturedUpdate.SecretVersionNumber)
 	assert.Equal(t, "ocid1.vaultsecret.oc1..desired", adb.Status.LastAppliedSecretId)
 	assert.Equal(t, 4, adb.Status.LastAppliedSecretVersionNumber)
 }
@@ -1003,8 +1003,8 @@ func TestCreateOrUpdate_BindExistingAdb_SecretReferenceChangeTriggersUpdate(t *t
 	resp, err := mgr.CreateOrUpdate(context.Background(), adb, ctrl.Request{})
 	assert.NoError(t, err)
 	assert.True(t, resp.IsSuccessful)
-	assert.Equal(t, common.String("ocid1.vaultsecret.oc1..new"), capturedUpdate.UpdateAutonomousDatabaseDetails.SecretId)
-	assert.Equal(t, common.Int(2), capturedUpdate.UpdateAutonomousDatabaseDetails.SecretVersionNumber)
+	assert.Equal(t, common.String("ocid1.vaultsecret.oc1..new"), capturedUpdate.SecretId)
+	assert.Equal(t, common.Int(2), capturedUpdate.SecretVersionNumber)
 	assert.Equal(t, "ocid1.vaultsecret.oc1..new", adb.Status.LastAppliedSecretId)
 	assert.Equal(t, 2, adb.Status.LastAppliedSecretVersionNumber)
 }
@@ -1152,7 +1152,7 @@ func TestCreateOrUpdate_BindExistingAdb_DbNameChange(t *testing.T) {
 	resp, err := mgr.CreateOrUpdate(context.Background(), adb, ctrl.Request{})
 	assert.NoError(t, err)
 	assert.True(t, resp.IsSuccessful)
-	assert.Equal(t, common.String("newdb"), capturedUpdate.UpdateAutonomousDatabaseDetails.DbName)
+	assert.Equal(t, common.String("newdb"), capturedUpdate.DbName)
 }
 
 func TestCreateOrUpdate_CreateNewAdb_InvalidParameterError(t *testing.T) {
