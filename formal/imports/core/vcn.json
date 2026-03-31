@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "vcn",
+  "kind": "Vcn",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_core_vcn",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateVcn",
+        "requestType": "core.CreateVcnRequest",
+        "responseType": "core.CreateVcnResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetVcn",
+        "requestType": "core.GetVcnRequest",
+        "responseType": "core.GetVcnResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListVcn",
+        "requestType": "core.ListVcnRequest",
+        "responseType": "core.ListVcnResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateVcn",
+        "requestType": "core.UpdateVcnRequest",
+        "responseType": "core.UpdateVcnResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteVcn",
+        "requestType": "core.DeleteVcnRequest",
+        "responseType": "core.DeleteVcnResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "AVAILABLE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "AVAILABLE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "display_name",
+      "freeform_tags"
+    ],
+    "forceNew": [
+      "byoipv6_cidr_details",
+      "cidr_block",
+      "cidr_blocks",
+      "compartment_id",
+      "dns_label",
+      "ipv6_private_cidr_blocks",
+      "is_ipv6_enabled",
+      "is_oracle_gua_allocation_enabled"
+    ],
+    "conflictsWith": {
+      "cidr_block": [
+        "cidr_blocks"
+      ],
+      "cidr_blocks": [
+        "cidr_block"
+      ]
+    }
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "TERMINATING",
+      "TERMINATED"
+    ],
+    "target": [
+      "NOT_FOUND"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_core_vcns",
+    "collectionField": "vcn",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/vcn/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/vcn/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: UpdateVcnDetails only exposes defined_tags, display_name, and freeform_tags as in-place updates.",
+    "Repo-authored delete confirmation requires GetVcn to return not found; observed TERMINATED remains an accepted intermediate state."
+  ]
+}
