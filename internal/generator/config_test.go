@@ -887,6 +887,14 @@ func assertCheckedInStreamingRuntimeRolloutMetadata(t *testing.T, service *Servi
 	}
 
 	overrides := resourceGenerationOverridesByKind(service.Generation.Resources)
+	if !slices.Equal(
+		overrides["Stream"].Controller.ExtraRBACMarkers,
+		[]string{
+			`groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete`,
+		},
+	) {
+		t.Fatalf("streaming Stream extra RBAC markers = %v", overrides["Stream"].Controller.ExtraRBACMarkers)
+	}
 	if overrides["Stream"].ServiceManager.PackagePath != "streaming/stream" {
 		t.Fatalf("streaming packagePath = %q, want %q", overrides["Stream"].ServiceManager.PackagePath, "streaming/stream")
 	}

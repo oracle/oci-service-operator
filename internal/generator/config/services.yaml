@@ -561,6 +561,9 @@ services:
       resources:
         - kind: Stream
           formalSpec: stream
+          controller:
+            extraRBACMarkers:
+              - groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
           serviceManager:
             packagePath: streaming/stream
         - kind: Cursor
