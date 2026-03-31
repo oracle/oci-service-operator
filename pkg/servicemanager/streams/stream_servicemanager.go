@@ -61,6 +61,29 @@ func NewStreamServiceManager(provider common.ConfigurationProvider, credClient c
 	})
 }
 
+func getStreamOCID(stream *streamingv1beta1.Stream) shared.OCID {
+	if stream == nil {
+		return ""
+	}
+	if ocid := strings.TrimSpace(string(stream.Status.OsokStatus.Ocid)); ocid != "" {
+		return shared.OCID(ocid)
+	}
+	if id := strings.TrimSpace(stream.Status.Id); id != "" {
+		return shared.OCID(id)
+	}
+	return ""
+}
+
+func setStreamOCID(stream *streamingv1beta1.Stream, ocid shared.OCID) {
+	if stream == nil {
+		return
+	}
+	stream.Status.OsokStatus.Ocid = ocid
+	if ocid != "" {
+		stream.Status.Id = string(ocid)
+	}
+}
+
 func (c *StreamServiceManager) CreateOrUpdate(ctx context.Context, obj runtime.Object, req ctrl.Request) (servicemanager.OSOKResponse, error) {
 	streamObject, err := c.convert(obj)
 
@@ -72,7 +95,8 @@ func (c *StreamServiceManager) CreateOrUpdate(ctx context.Context, obj runtime.O
 
 	var streamInstance *streaming.Stream
 
-	if strings.TrimSpace(string(streamObject.Spec.StreamId)) == "" {
+	streamOCID := getStreamOCID(streamObject)
+	if strings.TrimSpace(string(streamOCID)) == "" {
 
 		if streamObject.Spec.Name == "" {
 			return servicemanager.OSOKResponse{IsSuccessful: false}, errors.New("Can't able to create the stream")
@@ -88,6 +112,7 @@ func (c *StreamServiceManager) CreateOrUpdate(ctx context.Context, obj runtime.O
 		}
 
 		if streamOcid != nil {
+			setStreamOCID(streamObject, *streamOcid)
 
 			streamInstance, err = c.GetStream(ctx, *streamOcid, nil)
 			if err != nil {
@@ -147,7 +172,7 @@ func (c *StreamServiceManager) CreateOrUpdate(ctx context.Context, obj runtime.O
 	} else {
 		// stream already exists update the configuration or modify the changes
 		// Bind CRD with an existing Stream.
-		streamInstance, err = c.GetStream(ctx, streamObject.Spec.StreamId, nil)
+		streamInstance, err = c.GetStream(ctx, streamOCID, nil)
 		if err != nil {
 			c.Log.ErrorLog(err, "Error while getting Stream")
 			c.Metrics.AddCRFaultMetrics(ctx, obj.GetObjectKind().GroupVersionKind().Kind,
@@ -168,7 +193,7 @@ func (c *StreamServiceManager) CreateOrUpdate(ctx context.Context, obj runtime.O
 		} else {
 			streamObject.Status.OsokStatus = util.UpdateOSOKStatusCondition(streamObject.Status.OsokStatus,
 				shared.Active, v1.ConditionTrue, "", "Stream Bound success", c.Log)
-			streamObject.Status.OsokStatus.Ocid = shared.OCID(*streamInstance.Id)
+			setStreamOCID(streamObject, shared.OCID(*streamInstance.Id))
 			now := metav1.NewTime(time.Now())
 			streamObject.Status.OsokStatus.CreatedAt = &now
 			c.Log.InfoLog(fmt.Sprintf("Stream %s is bounded successfully", *streamInstance.Name))
@@ -176,7 +201,7 @@ func (c *StreamServiceManager) CreateOrUpdate(ctx context.Context, obj runtime.O
 
 	}
 
-	streamObject.Status.OsokStatus.Ocid = shared.OCID(*streamInstance.Id)
+	setStreamOCID(streamObject, shared.OCID(*streamInstance.Id))
 	if streamObject.Status.OsokStatus.CreatedAt != nil {
 		now := metav1.NewTime(time.Now())
 		streamObject.Status.OsokStatus.CreatedAt = &now
@@ -215,7 +240,7 @@ func isValidUpdate(streamObject streamingv1beta1.Stream, streamInstance streamin
 	}
 
 	return streamObject.Spec.StreamPoolId != "" && string(streamObject.Spec.StreamPoolId) != *streamInstance.StreamPoolId ||
-		streamObject.Spec.FreeFormTags != nil && !reflect.DeepEqual(streamObject.Spec.FreeFormTags, streamInstance.FreeformTags) ||
+		streamObject.Spec.FreeformTags != nil && !reflect.DeepEqual(streamObject.Spec.FreeformTags, streamInstance.FreeformTags) ||
 		definedTagUpdated
 }
 
@@ -227,40 +252,41 @@ func (c *StreamServiceManager) Delete(ctx context.Context, obj runtime.Object) (
 		return true, nil
 	}
 
-	if strings.TrimSpace(string(streamObject.Spec.StreamId)) == "" {
+	streamOCID := getStreamOCID(streamObject)
+	if strings.TrimSpace(string(streamOCID)) == "" {
 		// if name and StreamID both are null or empty then delete is not possible
-		if streamObject.Status.OsokStatus.Ocid != "" {
-			c.Log.ErrorLog(err, "Deleted is not possible ocid not found")
+		if strings.TrimSpace(streamObject.Spec.Name) == "" {
+			c.Log.ErrorLog(err, "Delete is not possible: stream name and status OCID are both empty")
 			return true, nil
 		}
 
-		streamObject.Spec.StreamId = streamObject.Status.OsokStatus.Ocid
-		streamOcid, err := c.GetStreamOcid(ctx, *streamObject)
+		discoveredOCID, err := c.GetStreamOcid(ctx, *streamObject)
 		if err != nil {
 			c.Log.ErrorLog(err, "Error while getting the stream ocid")
 			return true, nil
 		}
 		//Error happened in while getting the StreamOcid
-		if streamOcid == nil && err == nil {
+		if discoveredOCID == nil && err == nil {
 			//check whether the given cluster is in failed state or not
-			streamOcid, err = c.GetStreamOCID(ctx, *streamObject, "DELETE")
+			discoveredOCID, err = c.GetStreamOCID(ctx, *streamObject, "DELETE")
 
-			if err == nil && streamOcid == nil {
+			if err == nil && discoveredOCID == nil {
 				return true, nil
 			}
 
-			if err != nil || streamOcid == nil {
+			if err != nil || discoveredOCID == nil {
 				c.Log.ErrorLog(err, "Error while getting the err")
 				return true, err
 			}
-			c.Log.InfoLog(fmt.Sprintf("Stream OCID is %s ", *streamOcid))
-			streamObject.Spec.StreamId = *streamOcid
+			c.Log.InfoLog(fmt.Sprintf("Stream OCID is %s ", *discoveredOCID))
+			streamOCID = *discoveredOCID
 		}
 
-		if streamOcid != nil {
-			c.Log.InfoLog(fmt.Sprintf("Stream OCID is %s ", *streamOcid))
-			streamObject.Spec.StreamId = *streamOcid
+		if discoveredOCID != nil {
+			c.Log.InfoLog(fmt.Sprintf("Stream OCID is %s ", *discoveredOCID))
+			streamOCID = *discoveredOCID
 		}
+		setStreamOCID(streamObject, streamOCID)
 	}
 	var streamInstance *streaming.Stream
 	_, err = c.DeleteStream(ctx, *streamObject)
@@ -269,7 +295,7 @@ func (c *StreamServiceManager) Delete(ctx context.Context, obj runtime.Object) (
 		return true, nil
 	}
 
-	streamInstance, err = c.GetStream(ctx, streamObject.Spec.StreamId, nil)
+	streamInstance, err = c.GetStream(ctx, streamOCID, nil)
 	if err != nil {
 		c.Log.ErrorLog(err, "Error while Getting the Stream")
 		c.Log.InfoLog(fmt.Sprintf("Error after calling the GetStream %s ", streamInstance.LifecycleState))

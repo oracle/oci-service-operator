@@ -175,8 +175,8 @@ spec:
                   of the compartment.
                 type: string
               connectionCredentials:
-                description: ExternalDatabaseConnectorConnectionCredentialsObservedState
-                  defines nested fields for ExternalDatabaseConnector.ConnectionCredentials.
+                description: ExternalDatabaseConnectorConnectionCredentials defines
+                  nested fields for ExternalDatabaseConnector.ConnectionCredentials.
                 properties:
                   credentialName:
                     description: |-

@@ -23,7 +23,6 @@ type options struct {
 	all        bool
 	outputRoot string
 	overwrite  bool
-	preserve   bool
 }
 
 // Main runs the user-facing generator CLI and returns a process exit code.
@@ -49,7 +48,6 @@ func run(ctx context.Context, programName string, args []string, stdout io.Write
 	flagSet.BoolVar(&opts.all, "all", false, "Generate all configured services.")
 	flagSet.StringVar(&opts.outputRoot, "output-root", ".", "Root directory where generated outputs are written.")
 	flagSet.BoolVar(&opts.overwrite, "overwrite", false, "Overwrite existing generated package files when the target directory already exists.")
-	flagSet.BoolVar(&opts.preserve, "preserve-existing-spec-surface", false, "Preserve the current checked-in API spec/helper surface plus any existing checked-in sample/package artifacts while regenerating status/read-model and other outputs.")
 	if err := flagSet.Parse(args); err != nil {
 		return err
 	}
@@ -73,15 +71,10 @@ func execute(ctx context.Context, opts options, stdout io.Writer) error {
 	}
 
 	pipeline := generator.New()
-	preserveRoot := ""
-	if opts.preserve {
-		preserveRoot = "."
-	}
 	result, err := pipeline.Generate(ctx, cfg, services, generator.Options{
-		OutputRoot:                      opts.outputRoot,
-		Overwrite:                       opts.overwrite,
-		SkipExisting:                    opts.all && !opts.overwrite,
-		PreserveExistingSpecSurfaceRoot: preserveRoot,
+		OutputRoot:   opts.outputRoot,
+		Overwrite:    opts.overwrite,
+		SkipExisting: opts.all && !opts.overwrite,
 	})
 	if err != nil {
 		return err

@@ -134,7 +134,42 @@ func resourceModels(index *ocisdk.Package, service ServiceConfig) ([]ResourceMod
 		if buildErr != nil {
 			return nil, buildErr
 		}
-		resources = append(resources, resource)
+		sort.Strings(operations)
+
+		runtimeModel, err := buildRuntimeModel(index, entry.rawName, operations, index.ResourceOperations(entry.rawName))
+		if err != nil {
+			return nil, fmt.Errorf("discover runtime metadata for %q: %w", entry.rawName, err)
+		}
+
+		kind := entry.rawName
+
+		fieldSet := synthesizeResourceFieldSet(index, service, kind, entry.rawName, desiredStateStructCandidates(entry.rawName, entry.requestBodyPayloads))
+		displayField := ""
+		switch {
+		case hasField(fieldSet.SpecFields, "DisplayName"):
+			displayField = "DisplayName"
+		case hasField(fieldSet.SpecFields, "Name"):
+			displayField = "Name"
+		}
+
+		resources = append(resources, ResourceModel{
+			SDKName:             entry.rawName,
+			Kind:                kind,
+			FileStem:            fileStem(kind),
+			KindPlural:          strings.ToLower(pluralize(kind)),
+			Operations:          operations,
+			Runtime:             runtimeModel,
+			SpecComments:        []string{fmt.Sprintf("%sSpec defines the desired state of %s.", kind, kind)},
+			HelperTypes:         fieldSet.HelperTypes,
+			SpecFields:          fieldSet.SpecFields,
+			StatusTypeName:      defaultStatusTypeName(kind),
+			StatusComments:      []string{fmt.Sprintf("%s defines the observed state of %s.", defaultStatusTypeName(kind), kind)},
+			StatusFields:        fieldSet.StatusFields,
+			PrintColumns:        defaultPrintColumns(kind, displayField),
+			ObjectComments:      []string{fmt.Sprintf("%s is the Schema for the %s API.", kind, strings.ToLower(pluralize(kind)))},
+			ListComments:        []string{fmt.Sprintf("%sList contains a list of %s.", kind, kind)},
+			PrimaryDisplayField: displayField,
+		})
 	}
 
 	sort.Slice(resources, func(i, j int) bool {

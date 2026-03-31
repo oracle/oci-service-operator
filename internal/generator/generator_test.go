@@ -35,14 +35,6 @@ func TestBuildPackageModelDiscoversResources(t *testing.T) {
 		SDKPackage:     "example.com/test/sdk",
 		Group:          "mysql",
 		PackageProfile: "controller-backed",
-		Generation: GenerationConfig{
-			Resources: []ResourceGenerationOverride{
-				{
-					Kind:    "MySqlDbSystem",
-					SDKName: "DbSystem",
-				},
-			},
-		},
 	}
 
 	discoverer := &Discoverer{
@@ -60,11 +52,110 @@ func TestBuildPackageModelDiscoversResources(t *testing.T) {
 		t.Fatalf("BuildPackageModel() group DNS name = %q, want %q", pkg.GroupDNSName, "mysql.oracle.com")
 	}
 
-	assertDiscoveredMySQLDbSystem(t, findResource(t, pkg.Resources, "MySqlDbSystem"))
-	assertDiscoveredWidget(t, findResource(t, pkg.Resources, "Widget"))
-	assertDiscoveredReport(t, findResource(t, pkg.Resources, "Report"))
-	assertResourceSpecFields(t, findResource(t, pkg.Resources, "ReportByName"), "DisplayName")
-	assertResourceSpecFields(t, findResource(t, pkg.Resources, "OAuthClientCredential"), "Name", "Description", "Scopes")
+	dbSystem := findResource(t, pkg.Resources, "DbSystem")
+	if dbSystem.SDKName != "DbSystem" {
+		t.Fatalf("DbSystem SDK name = %q, want %q", dbSystem.SDKName, "DbSystem")
+	}
+	if !hasField(dbSystem.SpecFields, "Port") {
+		t.Fatalf("DbSystem fields = %#v, want Port", dbSystem.SpecFields)
+	}
+	if hasField(dbSystem.SpecFields, "Id") {
+		t.Fatalf("DbSystem fields = %#v, want no implicit Id field", dbSystem.SpecFields)
+	}
+	if dbSystem.PrimaryDisplayField != "DisplayName" {
+		t.Fatalf("DbSystem primary display field = %q, want DisplayName", dbSystem.PrimaryDisplayField)
+	}
+
+	widget := findResource(t, pkg.Resources, "Widget")
+	if len(widget.Operations) != 5 {
+		t.Fatalf("Widget operations = %v, want 5 CRUD operations", widget.Operations)
+	}
+	if !hasField(widget.SpecFields, "Mode") {
+		t.Fatalf("Widget fields = %#v, want Mode alias field", widget.SpecFields)
+	}
+	if !hasField(widget.SpecFields, "CreatedAt") {
+		t.Fatalf("Widget fields = %#v, want CreatedAt selector field", widget.SpecFields)
+	}
+	if hasField(widget.SpecFields, "LifecycleState") {
+		t.Fatalf("Widget spec fields = %#v, want read-model fields moved out of spec", widget.SpecFields)
+	}
+	if hasField(widget.SpecFields, "TimeUpdated") {
+		t.Fatalf("Widget spec fields = %#v, want summary fields moved out of spec", widget.SpecFields)
+	}
+	if !hasField(widget.StatusFields, "LifecycleState") {
+		t.Fatalf("Widget status fields = %#v, want LifecycleState from the read model", widget.StatusFields)
+	}
+	if !hasField(widget.StatusFields, "TimeUpdated") {
+		t.Fatalf("Widget status fields = %#v, want TimeUpdated from the summary model", widget.StatusFields)
+	}
+
+	compartmentID := findFieldModel(t, widget.SpecFields, "CompartmentId")
+	if compartmentID.Tag != `json:"compartmentId"` {
+		t.Fatalf("Widget CompartmentId tag = %q, want required json tag", compartmentID.Tag)
+	}
+	if !slices.Equal(compartmentID.Comments, []string{"The OCID of the widget compartment."}) {
+		t.Fatalf("Widget CompartmentId comments = %#v, want SDK documentation", compartmentID.Comments)
+	}
+	if !slices.Equal(compartmentID.Markers, []string{"+kubebuilder:validation:Required"}) {
+		t.Fatalf("Widget CompartmentId markers = %#v, want required marker", compartmentID.Markers)
+	}
+
+	labels := findFieldModel(t, widget.SpecFields, "Labels")
+	if labels.Tag != `json:"labels,omitempty"` {
+		t.Fatalf("Widget Labels tag = %q, want optional json tag", labels.Tag)
+	}
+	if !slices.Equal(labels.Comments, []string{"Additional labels for the widget."}) {
+		t.Fatalf("Widget Labels comments = %#v, want SDK documentation", labels.Comments)
+	}
+	if !slices.Equal(labels.Markers, []string{"+kubebuilder:validation:Optional"}) {
+		t.Fatalf("Widget Labels markers = %#v, want optional marker", labels.Markers)
+	}
+
+	serverState := findFieldModel(t, widget.SpecFields, "ServerState")
+	if serverState.Tag != `json:"serverState,omitempty"` {
+		t.Fatalf("Widget ServerState tag = %q, want read-only field to keep omitempty", serverState.Tag)
+	}
+	if len(serverState.Markers) != 0 {
+		t.Fatalf("Widget ServerState markers = %#v, want read-only field to suppress requiredness markers", serverState.Markers)
+	}
+
+	lifecycleState := findFieldModel(t, widget.StatusFields, "LifecycleState")
+	if !slices.Equal(lifecycleState.Comments, []string{"The lifecycle state of the widget."}) {
+		t.Fatalf("Widget LifecycleState comments = %#v, want SDK documentation on status fields", lifecycleState.Comments)
+	}
+	if len(lifecycleState.Markers) != 0 {
+		t.Fatalf("Widget LifecycleState markers = %#v, want no requiredness markers on status fields", lifecycleState.Markers)
+	}
+
+	report := findResource(t, pkg.Resources, "Report")
+	if len(report.SpecFields) != 0 {
+		t.Fatalf("Report spec fields = %#v, want empty spec when no create or update payload exists", report.SpecFields)
+	}
+	if !hasField(report.StatusFields, "Id") {
+		t.Fatalf("Report status fields = %#v, want Id from the read model", report.StatusFields)
+	}
+	if !hasField(report.StatusFields, "LifecycleState") {
+		t.Fatalf("Report status fields = %#v, want LifecycleState from the read model", report.StatusFields)
+	}
+	if !hasField(report.StatusFields, "DisplayName") {
+		t.Fatalf("Report status fields = %#v, want DisplayName from the summary model", report.StatusFields)
+	}
+
+	reportByName := findResource(t, pkg.Resources, "ReportByName")
+	if !hasField(reportByName.SpecFields, "DisplayName") {
+		t.Fatalf("ReportByName spec fields = %#v, want DisplayName from the non-CRUD request payload", reportByName.SpecFields)
+	}
+
+	oauthClientCredential := findResource(t, pkg.Resources, "OAuthClientCredential")
+	if !hasField(oauthClientCredential.SpecFields, "Name") {
+		t.Fatalf("OAuthClientCredential spec fields = %#v, want Name from the aliased create payload", oauthClientCredential.SpecFields)
+	}
+	if !hasField(oauthClientCredential.SpecFields, "Description") {
+		t.Fatalf("OAuthClientCredential spec fields = %#v, want Description from the aliased create/update payloads", oauthClientCredential.SpecFields)
+	}
+	if !hasField(oauthClientCredential.SpecFields, "Scopes") {
+		t.Fatalf("OAuthClientCredential spec fields = %#v, want Scopes from the aliased create/update payloads", oauthClientCredential.SpecFields)
+	}
 }
 
 func TestBuildPackageModelAttachesFormalModelFromResourceOverride(t *testing.T) {
@@ -835,12 +926,17 @@ func TestGenerateRendersAndSkipsExisting(t *testing.T) {
 		`GroupVersion = schema.GroupVersion{Group: "mysql.oracle.com", Version: "v1beta1"}`,
 	})
 
-	resourcePath := filepath.Join(outputRoot, "api", "mysql", "v1beta1", "mysqldbsystem_types.go")
-	assertFileContains(t, resourcePath, []string{
-		"type MySqlDbSystemSpec struct",
-		"Port",
-		`json:"port,omitempty"`,
-	})
+	resourcePath := filepath.Join(outputRoot, "api", "mysql", "v1beta1", "dbsystem_types.go")
+	resourceContent, err := os.ReadFile(resourcePath)
+	if err != nil {
+		t.Fatalf("read %s: %v", resourcePath, err)
+	}
+	if !strings.Contains(string(resourceContent), "type DbSystemSpec struct") {
+		t.Fatalf("dbsystem_types.go did not render the expected kind: %s", string(resourceContent))
+	}
+	if !strings.Contains(string(resourceContent), "Port") || !strings.Contains(string(resourceContent), `json:"port,omitempty"`) {
+		t.Fatalf("dbsystem_types.go did not render the expected Port field: %s", string(resourceContent))
+	}
 
 	result, err = pipeline.Generate(context.Background(), cfg, []ServiceConfig{service}, Options{
 		OutputRoot:   outputRoot,
@@ -930,10 +1026,6 @@ func TestGenerateRendersPackageOutputsByProfile(t *testing.T) {
 				"- generated/rbac",
 				"- ../../../config/manager",
 			},
-			wantInstallNotContains: []string{
-				"mysqldbsystem_editor_role.yaml",
-				"mysqldbsystem_viewer_role.yaml",
-			},
 		},
 		{
 			name:    "crd-only",
@@ -984,16 +1076,16 @@ func TestGenerateRendersPackageOutputsByProfile(t *testing.T) {
 			assertContains(t, installContent, test.wantInstallContains)
 			assertNotContains(t, installContent, test.wantInstallNotContains)
 
-			sampleContent := readFile(t, filepath.Join(outputRoot, "config", "samples", "mysql_v1beta1_mysqldbsystem.yaml"))
+			sampleContent := readFile(t, filepath.Join(outputRoot, "config", "samples", "mysql_v1beta1_dbsystem.yaml"))
 			assertContains(t, sampleContent, []string{
 				"apiVersion: mysql.oracle.com/v1beta1",
-				"kind: MySqlDbSystem",
-				"name: mysqldbsystem-sample",
+				"kind: DbSystem",
+				"name: dbsystem-sample",
 			})
 
 			sampleKustomization := readFile(t, filepath.Join(outputRoot, "config", "samples", "kustomization.yaml"))
 			assertContains(t, sampleKustomization, []string{
-				"- mysql_v1beta1_mysqldbsystem.yaml",
+				"- mysql_v1beta1_dbsystem.yaml",
 				"# +kubebuilder:scaffold:manifestskustomizesamples",
 			})
 		})
@@ -1011,8 +1103,7 @@ func TestGenerateRendersControllerOutputs(t *testing.T) {
 	service.Generation.Controller.Strategy = GenerationStrategyGenerated
 	service.Generation.Resources = []ResourceGenerationOverride{
 		{
-			Kind:    "MySqlDbSystem",
-			SDKName: "DbSystem",
+			Kind: "DbSystem",
 			Controller: ControllerGenerationOverride{
 				MaxConcurrentReconciles: 3,
 				ExtraRBACMarkers: []string{
@@ -1031,19 +1122,19 @@ func TestGenerateRendersControllerOutputs(t *testing.T) {
 		t.Fatalf("Generate() error = %v", err)
 	}
 
-	content := readFile(t, filepath.Join(outputRoot, "controllers", "mysql", "mysqldbsystem_controller.go"))
+	content := readFile(t, filepath.Join(outputRoot, "controllers", "mysql", "dbsystem_controller.go"))
 	assertContains(t, content, []string{
 		"package mysql",
 		`mysqlv1beta1 "github.com/oracle/oci-service-operator/api/mysql/v1beta1"`,
-		"type MySqlDbSystemReconciler struct {",
-		"// +kubebuilder:rbac:groups=mysql.oracle.com,resources=mysqldbsystems,verbs=get;list;watch;create;update;patch;delete",
-		"// +kubebuilder:rbac:groups=mysql.oracle.com,resources=mysqldbsystems/status,verbs=get;update;patch",
-		"// +kubebuilder:rbac:groups=mysql.oracle.com,resources=mysqldbsystems/finalizers,verbs=update",
+		"type DbSystemReconciler struct {",
+		"// +kubebuilder:rbac:groups=mysql.oracle.com,resources=dbsystems,verbs=get;list;watch;create;update;patch;delete",
+		"// +kubebuilder:rbac:groups=mysql.oracle.com,resources=dbsystems/status,verbs=get;update;patch",
+		"// +kubebuilder:rbac:groups=mysql.oracle.com,resources=dbsystems/finalizers,verbs=update",
 		`// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch`,
 		`// +kubebuilder:rbac:groups="",resources=events,verbs=create;patch`,
 		"builder = builder.WithOptions(controller.Options{MaxConcurrentReconciles: 3})",
-		"mySqlDbSystem := &mysqlv1beta1.MySqlDbSystem{}",
-		"return r.Reconciler.Reconcile(ctx, req, mySqlDbSystem)",
+		"dbSystem := &mysqlv1beta1.DbSystem{}",
+		"return r.Reconciler.Reconcile(ctx, req, dbSystem)",
 	})
 }
 
@@ -1063,7 +1154,7 @@ func TestGenerateDoesNotOverwriteExistingControllerOutput(t *testing.T) {
 	if err := os.MkdirAll(controllerDir, 0o755); err != nil {
 		t.Fatalf("MkdirAll(%s) error = %v", controllerDir, err)
 	}
-	controllerPath := filepath.Join(controllerDir, "mysqldbsystem_controller.go")
+	controllerPath := filepath.Join(controllerDir, "dbsystem_controller.go")
 	if err := os.WriteFile(controllerPath, []byte("package mysql\n"), 0o644); err != nil {
 		t.Fatalf("WriteFile(%s) error = %v", controllerPath, err)
 	}
@@ -1104,14 +1195,14 @@ func TestGenerateRendersRegistrationOutputs(t *testing.T) {
 		"package registrations",
 		`mysqlv1beta1 "github.com/oracle/oci-service-operator/api/mysql/v1beta1"`,
 		`mysqlcontrollers "github.com/oracle/oci-service-operator/controllers/mysql"`,
-		`mysqlmysqldbsystemservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/mysql/mysqldbsystem"`,
+		`mysqldbsystemservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/mysql/dbsystem"`,
 		"registerGeneratedGroup(GroupRegistration{",
 		`Group:       "mysql",`,
 		"AddToScheme: mysqlv1beta1.AddToScheme,",
-		"(&mysqlcontrollers.MySqlDbSystemReconciler{",
+		"(&mysqlcontrollers.DbSystemReconciler{",
 		`ctx,`,
-		`"MySqlDbSystem",`,
-		"return mysqlmysqldbsystemservicemanager.NewMySqlDbSystemServiceManagerWithDeps(deps)",
+		`"DbSystem",`,
+		"return mysqldbsystemservicemanager.NewDbSystemServiceManagerWithDeps(deps)",
 	})
 }
 
@@ -1190,12 +1281,12 @@ func TestGenerateRejectsGeneratedRegistrationWithoutGeneratedRuntimeSurfaces(t *
 	if err == nil {
 		t.Fatal("Generate() unexpectedly succeeded")
 	}
-	if !strings.Contains(err.Error(), `registration strategy "generated" requires generated controller output for kind "MySqlDbSystem"`) {
+	if !strings.Contains(err.Error(), `registration strategy "generated" requires generated controller output for kind "DbSystem"`) {
 		t.Fatalf("Generate() error = %v", err)
 	}
 }
 
-func TestGenerateControllerBackedPackagesDoNotReferenceEditorViewerRolesByDefault(t *testing.T) {
+func TestGenerateControllerBackedPackagesDoNotReferenceEditorViewerRoles(t *testing.T) {
 	t.Parallel()
 
 	cfg := &Config{
@@ -1238,8 +1329,7 @@ func TestGeneratedControllerCompiles(t *testing.T) {
 	service.Generation.Controller.Strategy = GenerationStrategyManual
 	service.Generation.Resources = []ResourceGenerationOverride{
 		{
-			Kind:    "MySqlDbSystem",
-			SDKName: "DbSystem",
+			Kind: "DbSystem",
 			Controller: ControllerGenerationOverride{
 				Strategy:                GenerationStrategyGenerated,
 				MaxConcurrentReconciles: 3,
@@ -1297,26 +1387,26 @@ func TestGenerateRendersServiceManagerScaffolds(t *testing.T) {
 		t.Fatalf("Generate() error = %v", err)
 	}
 
-	serviceClientPath := filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "mysqldbsystem", "mysqldbsystem_serviceclient.go")
-	serviceManagerPath := filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "mysqldbsystem", "mysqldbsystem_servicemanager.go")
+	serviceClientPath := filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "dbsystem", "dbsystem_serviceclient.go")
+	serviceManagerPath := filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "dbsystem", "dbsystem_servicemanager.go")
 
 	serviceClientContent := readFile(t, serviceClientPath)
 	assertContains(t, serviceClientContent, []string{
-		"package mysqldbsystem",
-		"type MySqlDbSystemServiceClient interface {",
-		"var newMySqlDbSystemServiceClient = func(manager *MySqlDbSystemServiceManager) MySqlDbSystemServiceClient {",
-		`Kind:    "MySqlDbSystem"`,
+		"package dbsystem",
+		"type DbSystemServiceClient interface {",
+		"var newDbSystemServiceClient = func(manager *DbSystemServiceManager) DbSystemServiceClient {",
+		`Kind:    "DbSystem"`,
 		"github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime",
-		"generatedruntime.NewServiceClient[*mysqlv1beta1.MySqlDbSystem]",
+		"generatedruntime.NewServiceClient[*mysqlv1beta1.DbSystem]",
 		"mysqlsdk.NewSampleClientWithConfigurationProvider(manager.Provider)",
 	})
 
 	serviceManagerContent := readFile(t, serviceManagerPath)
 	assertContains(t, serviceManagerContent, []string{
-		"type MySqlDbSystemServiceManager struct {",
-		"func NewMySqlDbSystemServiceManagerWithDeps(deps servicemanager.RuntimeDeps) *MySqlDbSystemServiceManager {",
-		"func (c *MySqlDbSystemServiceManager) WithClient(client MySqlDbSystemServiceClient) *MySqlDbSystemServiceManager {",
-		"func (c *MySqlDbSystemServiceManager) GetCrdStatus(obj runtime.Object) (*shared.OSOKStatus, error) {",
+		"type DbSystemServiceManager struct {",
+		"func NewDbSystemServiceManagerWithDeps(deps servicemanager.RuntimeDeps) *DbSystemServiceManager {",
+		"func (c *DbSystemServiceManager) WithClient(client DbSystemServiceClient) *DbSystemServiceManager {",
+		"func (c *DbSystemServiceManager) GetCrdStatus(obj runtime.Object) (*shared.OSOKStatus, error) {",
 		"return &resource.Status.OsokStatus",
 	})
 }
@@ -1449,10 +1539,9 @@ func TestGenerateRendersServiceManagerScaffoldAtOverridePath(t *testing.T) {
 	service.Generation.ServiceManager.Strategy = GenerationStrategyGenerated
 	service.Generation.Resources = []ResourceGenerationOverride{
 		{
-			Kind:    "MySqlDbSystem",
-			SDKName: "DbSystem",
+			Kind: "DbSystem",
 			ServiceManager: ServiceManagerGenerationOverride{
-				PackagePath: "mysql/dbsystem",
+				PackagePath: "mysql/runtime/dbsystem",
 			},
 		},
 	}
@@ -1465,8 +1554,8 @@ func TestGenerateRendersServiceManagerScaffoldAtOverridePath(t *testing.T) {
 		t.Fatalf("Generate() error = %v", err)
 	}
 
-	serviceClientContent := readFile(t, filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "dbsystem", "mysqldbsystem_serviceclient.go"))
-	serviceManagerContent := readFile(t, filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "dbsystem", "mysqldbsystem_servicemanager.go"))
+	serviceClientContent := readFile(t, filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "runtime", "dbsystem", "dbsystem_serviceclient.go"))
+	serviceManagerContent := readFile(t, filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "runtime", "dbsystem", "dbsystem_servicemanager.go"))
 
 	assertContains(t, serviceClientContent, []string{"package dbsystem"})
 	assertContains(t, serviceManagerContent, []string{"package dbsystem"})
@@ -1496,7 +1585,7 @@ func TestGeneratedServiceManagerScaffoldCompiles(t *testing.T) {
 		t.Fatalf("Generate() error = %v", err)
 	}
 
-	relativePackagePath, err := filepath.Rel(moduleRoot, filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "mysqldbsystem"))
+	relativePackagePath, err := filepath.Rel(moduleRoot, filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "dbsystem"))
 	if err != nil {
 		t.Fatalf("Rel() error = %v", err)
 	}
@@ -1509,17 +1598,28 @@ func TestGeneratedServiceManagerScaffoldCompiles(t *testing.T) {
 	}
 }
 
-func TestCheckedInServicesMatchGenerator(t *testing.T) {
-	cfg := loadCheckedInConfig(t)
-	selectedServices := serviceConfigsByName(t, cfg, "database", "mysql", "streaming")
-	services := []ServiceConfig{*selectedServices["database"], *selectedServices["mysql"], *selectedServices["streaming"]}
+func TestCurrentServiceGeneratedArtifactsMatchCheckedInOutputs(t *testing.T) {
+	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
+	cfg, err := LoadConfig(cfgPath)
+	if err != nil {
+		t.Fatalf("LoadConfig(%q) error = %v", cfgPath, err)
+	}
+
+	var services []ServiceConfig
+	for _, service := range cfg.Services {
+		if slices.Contains([]string{"database", "mysql", "streaming"}, service.Service) {
+			services = append(services, service)
+		}
+	}
+	if len(services) != 3 {
+		t.Fatalf("selected %d generated runtime services, want 3", len(services))
+	}
 
 	outputRoot := t.TempDir()
 	seedSamplesKustomization(t, outputRoot)
 	pipeline := New()
 	result, err := pipeline.Generate(context.Background(), cfg, services, Options{
-		OutputRoot:                      outputRoot,
-		PreserveExistingSpecSurfaceRoot: repoRoot(t),
+		OutputRoot: outputRoot,
 	})
 	if err != nil {
 		t.Fatalf("Generate() error = %v", err)
@@ -1532,20 +1632,22 @@ func TestCheckedInServicesMatchGenerator(t *testing.T) {
 
 	apiFiles := []string{
 		"api/database/v1beta1/groupversion_info.go",
-		"api/database/v1beta1/autonomousdatabases_types.go",
+		"api/database/v1beta1/autonomousdatabase_types.go",
 		"api/database/v1beta1/autonomousdatabasebackup_types.go",
 		"api/mysql/v1beta1/groupversion_info.go",
-		"api/mysql/v1beta1/mysqldbsystem_types.go",
+		"api/mysql/v1beta1/dbsystem_types.go",
 		"api/mysql/v1beta1/backup_types.go",
 		"api/streaming/v1beta1/groupversion_info.go",
 		"api/streaming/v1beta1/stream_types.go",
 		"api/streaming/v1beta1/streampool_types.go",
 	}
-	assertGeneratedGoMatchesAll(t, repoRoot(t), outputRoot, apiFiles)
+	for _, relativePath := range apiFiles {
+		assertGoEquivalent(t, filepath.Join(repoRoot(t), relativePath), filepath.Join(outputRoot, relativePath))
+	}
 
 	exactFiles := []string{
-		"config/samples/database_v1beta1_autonomousdatabases.yaml",
-		"config/samples/mysql_v1beta1_mysqldbsystem.yaml",
+		"config/samples/database_v1beta1_autonomousdatabase.yaml",
+		"config/samples/mysql_v1beta1_dbsystem.yaml",
 		"config/samples/streaming_v1beta1_stream.yaml",
 		"packages/database/metadata.env",
 		"packages/database/install/kustomization.yaml",
@@ -1557,18 +1659,18 @@ func TestCheckedInServicesMatchGenerator(t *testing.T) {
 	assertExactFileMatchesAll(t, repoRoot(t), outputRoot, exactFiles)
 
 	runtimeFiles := []string{
-		"controllers/database/autonomousdatabases_controller.go",
+		"controllers/database/autonomousdatabase_controller.go",
 		"controllers/database/autonomousdatabasebackup_controller.go",
-		"controllers/mysql/mysqldbsystem_controller.go",
+		"controllers/mysql/dbsystem_controller.go",
 		"controllers/mysql/backup_controller.go",
 		"controllers/streaming/stream_controller.go",
 		"controllers/streaming/streampool_controller.go",
-		"pkg/servicemanager/autonomousdatabases/adb/autonomousdatabases_serviceclient.go",
-		"pkg/servicemanager/autonomousdatabases/adb/autonomousdatabases_servicemanager.go",
+		"pkg/servicemanager/database/autonomousdatabase/autonomousdatabase_serviceclient.go",
+		"pkg/servicemanager/database/autonomousdatabase/autonomousdatabase_servicemanager.go",
 		"pkg/servicemanager/database/autonomousdatabasebackup/autonomousdatabasebackup_serviceclient.go",
 		"pkg/servicemanager/database/autonomousdatabasebackup/autonomousdatabasebackup_servicemanager.go",
-		"pkg/servicemanager/mysql/dbsystem/mysqldbsystem_serviceclient.go",
-		"pkg/servicemanager/mysql/dbsystem/mysqldbsystem_servicemanager.go",
+		"pkg/servicemanager/mysql/dbsystem/dbsystem_serviceclient.go",
+		"pkg/servicemanager/mysql/dbsystem/dbsystem_servicemanager.go",
 		"pkg/servicemanager/mysql/backup/backup_serviceclient.go",
 		"pkg/servicemanager/mysql/backup/backup_servicemanager.go",
 		"pkg/servicemanager/streaming/stream/stream_serviceclient.go",
@@ -1579,7 +1681,9 @@ func TestCheckedInServicesMatchGenerator(t *testing.T) {
 		"internal/registrations/mysql_generated.go",
 		"internal/registrations/streaming_generated.go",
 	}
-	assertGeneratedGoMatchesAll(t, repoRoot(t), outputRoot, runtimeFiles)
+	for _, relativePath := range runtimeFiles {
+		assertGoEquivalent(t, filepath.Join(repoRoot(t), relativePath), filepath.Join(outputRoot, relativePath))
+	}
 
 	assertResourceOrderContainsSubset(
 		t,
@@ -1597,8 +1701,7 @@ func TestCheckedInPromotedCoreRuntimeArtifactsMatchGenerator(t *testing.T) {
 
 	pipeline := New()
 	result, err := pipeline.Generate(context.Background(), cfg, []ServiceConfig{*coreService}, Options{
-		OutputRoot:                      outputRoot,
-		PreserveExistingSpecSurfaceRoot: repoRoot(t),
+		OutputRoot: outputRoot,
 	})
 	if err != nil {
 		t.Fatalf("Generate() error = %v", err)
@@ -1613,7 +1716,9 @@ func TestCheckedInPromotedCoreRuntimeArtifactsMatchGenerator(t *testing.T) {
 		"pkg/servicemanager/core/vcn/vcn_servicemanager.go",
 		"internal/registrations/core_generated.go",
 	}
-	assertGeneratedGoMatchesAll(t, repoRoot(t), outputRoot, runtimeFiles)
+	for _, relativePath := range runtimeFiles {
+		assertGoEquivalent(t, filepath.Join(repoRoot(t), relativePath), filepath.Join(outputRoot, relativePath))
+	}
 
 	exactFiles := []string{
 		"packages/core/metadata.env",
@@ -1655,8 +1760,7 @@ func TestCheckedInIdentityUserRuntimeArtifactsMatchGenerator(t *testing.T) {
 
 	pipeline := New()
 	result, err := pipeline.Generate(context.Background(), cfg, []ServiceConfig{*identityService}, Options{
-		OutputRoot:                      outputRoot,
-		PreserveExistingSpecSurfaceRoot: repoRoot(t),
+		OutputRoot: outputRoot,
 	})
 	if err != nil {
 		t.Fatalf("Generate() error = %v", err)
@@ -1667,8 +1771,8 @@ func TestCheckedInIdentityUserRuntimeArtifactsMatchGenerator(t *testing.T) {
 
 	serviceClientPath := "pkg/servicemanager/identity/user/user_serviceclient.go"
 	serviceManagerPath := "pkg/servicemanager/identity/user/user_servicemanager.go"
-	assertGeneratedGoMatches(t, filepath.Join(repoRoot(t), serviceClientPath), filepath.Join(outputRoot, serviceClientPath))
-	assertGeneratedGoMatches(t, filepath.Join(repoRoot(t), serviceManagerPath), filepath.Join(outputRoot, serviceManagerPath))
+	assertGoEquivalent(t, filepath.Join(repoRoot(t), serviceClientPath), filepath.Join(outputRoot, serviceClientPath))
+	assertGoEquivalent(t, filepath.Join(repoRoot(t), serviceManagerPath), filepath.Join(outputRoot, serviceManagerPath))
 
 	content := readFile(t, filepath.Join(outputRoot, serviceClientPath))
 	assertContains(t, content, []string{
@@ -1823,7 +1927,7 @@ func TestCheckedInConfigIncludesONSObservedStateAlias(t *testing.T) {
 	}
 }
 
-func TestMySQLPublishedKindIncludesOptionalDesiredStateFields(t *testing.T) {
+func TestMySQLDbSystemIncludesOptionalDesiredStateFields(t *testing.T) {
 	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
 	cfg, err := LoadConfig(cfgPath)
 	if err != nil {
@@ -1849,24 +1953,20 @@ func TestMySQLPublishedKindIncludesOptionalDesiredStateFields(t *testing.T) {
 		t.Fatalf("Generate() error = %v", err)
 	}
 
-	content := readFile(t, filepath.Join(outputRoot, "api", "mysql", "v1beta1", "mysqldbsystem_types.go"))
+	content := readFile(t, filepath.Join(outputRoot, "api", "mysql", "v1beta1", "dbsystem_types.go"))
 	normalized := strings.Join(strings.Fields(content), " ")
 	assertContains(t, normalized, []string{
-		"type MySqlDbSystemDeletionPolicy struct {",
+		"type DbSystemDeletionPolicy struct {",
 		"AutomaticBackupRetention string `json:\"automaticBackupRetention,omitempty\"`",
 		"FinalBackup string `json:\"finalBackup,omitempty\"`",
 		"IsDeleteProtected bool `json:\"isDeleteProtected,omitempty\"`",
-		"type MySqlDbSystemSecureConnections struct {",
+		"type DbSystemSecureConnections struct {",
 		"CertificateGenerationType string `json:\"certificateGenerationType\"`",
 		"CertificateId string `json:\"certificateId,omitempty\"`",
-		"DeletionPolicy MySqlDbSystemDeletionPolicy `json:\"deletionPolicy,omitempty\"`",
+		"DeletionPolicy DbSystemDeletionPolicy `json:\"deletionPolicy,omitempty\"`",
 		"CrashRecovery string `json:\"crashRecovery,omitempty\"`",
 		"DatabaseManagement string `json:\"databaseManagement,omitempty\"`",
-		"SecureConnections MySqlDbSystemSecureConnections `json:\"secureConnections,omitempty\"`",
-		"type MySqlDbSystemSourceObservedState struct {",
-		"Source MySqlDbSystemSourceObservedState `json:\"source,omitempty\"`",
-		"BackupId string `json:\"backupId\"`",
-		"DbSystemId string `json:\"dbSystemId\"`",
+		"SecureConnections DbSystemSecureConnections `json:\"secureConnections,omitempty\"`",
 	})
 	if slices.Contains(structFieldNames(t, content, "MySqlDbSystemSourceObservedState"), "SourceUrl") {
 		t.Fatalf("MySqlDbSystemSourceObservedState unexpectedly contains SourceUrl:\n%s", content)
@@ -1904,9 +2004,9 @@ func TestGenerateMergesExistingSampleKustomizationEntries(t *testing.T) {
 	sampleKustomization := readFile(t, filepath.Join(samplesDir, "kustomization.yaml"))
 	assertContains(t, sampleKustomization, []string{
 		"- existing.yaml",
-		"- mysql_v1beta1_mysqldbsystem.yaml",
+		"- mysql_v1beta1_dbsystem.yaml",
 	})
-	if strings.Index(sampleKustomization, "- existing.yaml") > strings.Index(sampleKustomization, "- mysql_v1beta1_mysqldbsystem.yaml") {
+	if strings.Index(sampleKustomization, "- existing.yaml") > strings.Index(sampleKustomization, "- mysql_v1beta1_dbsystem.yaml") {
 		t.Fatalf("existing sample entry was not preserved ahead of the generated sample:\n%s", sampleKustomization)
 	}
 }
@@ -2166,14 +2266,6 @@ func testServiceConfig(profile string) ServiceConfig {
 		SDKPackage:     "github.com/oracle/oci-service-operator/internal/generator/testdata/sdk/sample",
 		Group:          "mysql",
 		PackageProfile: profile,
-		Generation: GenerationConfig{
-			Resources: []ResourceGenerationOverride{
-				{
-					Kind:    "MySqlDbSystem",
-					SDKName: "DbSystem",
-				},
-			},
-		},
 	}
 }
 
@@ -2220,13 +2312,13 @@ func assertResourceOrderContainsSubset(t *testing.T, fullPath string, subsetPath
 	}
 }
 
-func assertGeneratedGoMatches(t *testing.T, wantPath string, gotPath string) {
+func assertGoEquivalent(t *testing.T, wantPath string, gotPath string) {
 	t.Helper()
 
-	want := normalizeGeneratedGo(t, readFile(t, wantPath))
-	got := normalizeGeneratedGo(t, readFile(t, gotPath))
+	want := normalizeGoForComparison(t, readFile(t, wantPath))
+	got := normalizeGoForComparison(t, readFile(t, gotPath))
 	if want != got {
-		t.Fatalf("Go output mismatch for %s\nwant:\n%s\n\ngot:\n%s", wantPath, want, got)
+		t.Fatalf("Go mismatch for %s\nwant:\n%s\n\ngot:\n%s", wantPath, want, got)
 	}
 }
 
@@ -2326,12 +2418,16 @@ func repoRoot(t *testing.T) string {
 	return filepath.Clean(filepath.Join(generatorTestDir(t), "..", ".."))
 }
 
-func normalizeGeneratedGo(t *testing.T, source string) string {
+func normalizeGoForComparison(t *testing.T, source string) string {
 	t.Helper()
 
 	source = strings.ReplaceAll(source, "// Code generated by generator. DO NOT EDIT.\n\n", "")
 
-	fileSet, file := parseTestGoFile(t, source)
+	fileSet := token.NewFileSet()
+	file, err := parser.ParseFile(fileSet, "comparison.go", source, parser.SkipObjectResolution)
+	if err != nil {
+		t.Fatalf("ParseFile() error = %v\nsource:\n%s", err, source)
+	}
 
 	stripGoComments(file)
 

@@ -268,12 +268,11 @@ spec:
                 description: The state of the Channel.
                 type: string
               source:
-                description: ChannelSourceObservedState defines nested fields for
-                  Channel.Source.
+                description: ChannelSource defines nested fields for Channel.Source.
                 properties:
                   anonymousTransactionsHandling:
-                    description: ChannelSourceAnonymousTransactionsHandlingObservedState
-                      defines nested fields for Channel.Source.AnonymousTransactionsHandling.
+                    description: ChannelSourceAnonymousTransactionsHandling defines
+                      nested fields for Channel.Source.AnonymousTransactionsHandling.
                     properties:
                       jsonData:
                         type: string
@@ -318,8 +317,8 @@ spec:
                   sourceType:
                     type: string
                   sslCaCertificate:
-                    description: ChannelSourceSslCaCertificateObservedState defines
-                      nested fields for Channel.Source.SslCaCertificate.
+                    description: ChannelSourceSslCaCertificate defines nested fields
+                      for Channel.Source.SslCaCertificate.
                     properties:
                       certificateType:
                         type: string
@@ -390,8 +389,7 @@ spec:
                     type: string
                 type: object
               target:
-                description: ChannelTargetObservedState defines nested fields for
-                  Channel.Target.
+                description: ChannelTarget defines nested fields for Channel.Target.
                 properties:
                   applierUsername:
                     description: The username for the replication applier of the target

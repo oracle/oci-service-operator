@@ -89,7 +89,7 @@ var _ = BeforeSuite(func() {
 	})
 	Expect(err).NotTo(HaveOccurred())
 
-	err = (&AutonomousDatabases{}).SetupWebhookWithManager(mgr)
+	err = (&AutonomousDatabase{}).SetupWebhookWithManager(mgr)
 	Expect(err).NotTo(HaveOccurred())
 
 	// +kubebuilder:scaffold:webhook

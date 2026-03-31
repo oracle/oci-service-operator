@@ -131,16 +131,17 @@ kubectl apply -f <CREATE_SECRET>.yaml
 
 The MySQL DB System can be accessed from the Secret which will be persisted as part of the provision/bind operation of the CR.
 
-The OSOK MySqlDbSystem controller automatically provisions a MySQL DB System when you provide mandatory fields to the `spec`. The following is a sample CR yaml for MySqlDbSystem.
+The v2 generated runtime now uses the `DbSystem` kind directly. Use the current
+API group and spec surface instead of the retired `MySqlDbSystem` resource and
+its legacy secret-based bind workflow.
 
 - SUBNET_OCID - OCID of the subnet created in the pre-requisites step
 - CONFIGURATION_ID - [More info about Configurations](https://docs.oracle.com/en-us/iaas/mysql-database/doc/db-systems.html#GUID-E2A83218-9700-4A49-B55D-987867D81871) Get your [Configuration_id](https://console.us-ashburn-1.oraclecloud.com/mysqlaas/configurations) 
 
 
 ```yaml
-
 apiVersion: mysql.oracle.com/v1beta1
-kind: MySqlDbSystem
+kind: DbSystem
 metadata:
   name: <CR_OBJECT_NAME>
 spec:
@@ -148,15 +149,10 @@ spec:
   displayName: <DISPLAY_NAME>
   shapeName: <SHAPE>
   subnetId: <SUBNET_OCID>
-  configuration:
-    id: <CONFIGURATION_OCID>
-  availabilityDomain: <AVAILABILITY_DOMAIN>
-  adminUsername:
-    secret:
-      secretName: <ADMIN_SECRET>
-  adminPassword:
-    secret:
-      secretName: <ADMIN_SECRET>
+  configurationId: <CONFIGURATION_OCID>
+  availabilityDomain: <AVAIALABILITY_DOMAIN>
+  adminUsername: <ADMIN_USERNAME>
+  adminPassword: <ADMIN_PASSWORD>
   description: <DESCRIPTION>
   dataStorageSizeInGBs: <DB_SIZE>
   port: <PORT>
@@ -174,84 +170,39 @@ Run the following command to create a CR to the cluster:
 kubectl apply -f <CREATE_YAML>.yaml
 ```
 
-Once the CR is created, OSOK will Reconcile and creates a MySQL DB System. OSOK will ensure the MySQL DB System instance is Available.
+Once the CR is created, OSOK reconciles the `DbSystem` and records the OCI
+identifier in status.
 
-The MySqlDbSystem CR can list the MySQL DB Systems in the cluster: 
+The `DbSystem` CR can list the MySQL DB Systems in the cluster:
 ```sh
-$ kubectl get mysqldbsystems
+$ kubectl get dbsystems
 NAME                       STATUS         AGE
-mysqldbsystems-sample      Active         4d
+dbsystem-sample            Active         4d
 ```
 
-The MySqlDbSystem CR can list the MySQL DB Systems in the cluster with detailed information: 
+The `DbSystem` CR can list the MySQL DB Systems in the cluster with detailed information:
 ```sh
-$ kubectl get mysqldbsystems -o wide
+$ kubectl get dbsystems -o wide
 NAME                         DISPLAYNAME     STATUS         OCID                                   AGE
-mysqldbsystems-sample        BusyBoxDB       Active         ocid1.mysqldbsystem.oc1.iad.........   4d
+dbsystem-sample              BusyBoxDB       Active         ocid1.dbsystem.oc1.iad.........        4d
 ```
 
-The MysqlDbSystem CR can be described as below:
+The `DbSystem` CR can be described as below:
 ```sh
-$ kubectl describe mysqldbsystems <NAME_OF_CR_OBJECT>
+$ kubectl describe dbsystems <NAME_OF_CR_OBJECT>
 ```
 
-## Binding to an Existing MySQL DB System
+## Current v2 notes
 
-OSOK allows you to bind to an existing MySQL DB System. In this case, `Id` is the only required field in the CR `spec`.
+- The generated v2 contract no longer uses the legacy `MySqlDbSystem` kind.
+- The retired handwritten path's secret-based bind or endpoint-materialization
+  examples do not apply to the generated `DbSystem` resource.
+- Check `api/mysql/v1beta1/dbsystem_types.go` for the current spec surface when
+  authoring CRs.
 
-```yaml
-apiVersion: mysql.oracle.com/v1beta1
-kind: MySqlDbSystem
-metadata:
-  name: <CR_OBJECT_NAME>
-spec:
-  id: <MYSQLDBSYSTEM_OCID>
-```
+## Access Information
 
-Run the following command to create a CR that binds to an existing MySQL DB System:
-```sh
-kubectl apply -f <BIND_YAML>.yaml
-```
-
-## Updating a MySQL DB System
-
-You can also update a number of [parameters](https://docs.oracle.com/en-us/iaas/mysql-database/doc/managing-db-system.html#GUID-24D56090-C7E8-4A21-B450-BCBFAD231911) of the MySQL DB System.
-```yaml
-apiVersion: mysql.oracle.com/v1beta1
-kind: MySqlDbSystem
-metadata:
-  name: <CR_OBJECT_NAME>
-spec:
-  id: <MYSQLDBSYSTEM_OCID>
-  displayName: <UPDATE_DISPLAY_NAME>
-  description: <UPDATE_DESCRIPTION>
-  configuration:
-    id: <UPDATE_CONFIGURATION_ID>
-  freeformTags:
-    <KEY1>: <VALUE1>
-  definedTags:
-    <TAGNAMESPACE1>:
-      <KEY1>: <VALUE1>
-```
-
-Run the following command to create a CR that updates an existing MySQL DB System. 
-```sh
-kubectl apply -f <UPDATE_YAML>.yaml
-```
-
-## Access Information in Kubernetes Secrets
-
-The Access information of a OCI Service or Resource will be created as a Kubernetes secret to manage the MySQL DB System. The name of the secret can be provided in the CR yaml or by default the name of the CR will be used.
-
-You will get the access information as Kubernetes Secret to use the MySQL DB System. The following files/details will be made available to you:
-
-| Parameter           | Description                                                              | Type   |
-| ------------------  | ------------------------------------------------------------------------ | ------ |
-| `InternalFQDN`      | DNS endpoint                                                             | string |
-| `MySQLPort`         | Mysql port                                                               | string |
-| `MySQLXProtocolPort`| Mysql portx                                                              | string |
-| `PrivateIPAddress`  | DbSystem's PrivateIPAddress                                              | string |
-| `AvailabilityDomain`| AvailabilityDomain                                                       | string |
-| `FaultDomain`       | FaultDomain                                                              | string |
-| `Endpoints`         | Endpoints to connect to mysql db system                                  | json   |
+The generated v2 `DbSystem` runtime does not preserve the retired
+secret-materialization flow from the handwritten `MySqlDbSystem` path. Consume
+the current status surface on the CR directly.
  

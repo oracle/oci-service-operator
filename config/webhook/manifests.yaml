@@ -10,9 +10,9 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /mutate-database-oracle-com-v1beta1-autonomousdatabases
+      path: /mutate-database-oracle-com-v1beta1-autonomousdatabase
   failurePolicy: Ignore
-  name: mautonomousdatabases.kb.io
+  name: mautonomousdatabase.kb.io
   rules:
   - apiGroups:
     - database.oracle.com
@@ -36,9 +36,9 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-database-oracle-com-v1beta1-autonomousdatabases
+      path: /validate-database-oracle-com-v1beta1-autonomousdatabase
   failurePolicy: Fail
-  name: vautonomousdatabases.kb.io
+  name: vautonomousdatabase.kb.io
   rules:
   - apiGroups:
     - database.oracle.com

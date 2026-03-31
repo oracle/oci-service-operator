@@ -88,11 +88,14 @@ The Autonomous Database can be accessed using the details in the wallet which wi
 kubectl create secret generic <WALLET-PASSWORD-SECRET-NAME> --from-literal=walletPassword=<WALLET-PASSWORD>
 ```
 
-The OSOK `AutonomousDatabases` controller automatically provisions an Autonomous Database when you provide the mandatory fields in the `spec`. The following is a sample YAML for `AutonomousDatabases`.
+The v2 generated runtime now uses the `AutonomousDatabase` kind directly. Use
+the current API group and spec surface instead of the retired
+`AutonomousDatabases` resource and its legacy wallet or bind-by-`spec.id`
+workflow.
 
 ```yaml
 apiVersion: database.oracle.com/v1beta1
-kind: AutonomousDatabases
+kind: AutonomousDatabase
 metadata:
   name: <CR_OBJECT_NAME>
 spec:
@@ -100,131 +103,40 @@ spec:
   displayName: <DISPLAY_NAME>
   dbName: <DB_NAME>
   dbWorkload: <OLTP/DW>
-  isDedicated: <false/true>
-  dbVersion: <ORACLE_DB_VERSION>
-  dataStorageSizeInTBs: <SIZE_IN_TBs>
   cpuCoreCount: <COUNT>
-  adminPassword:
-    secret:
-      secretName: <ADMIN_PASSWORD_SECRET_NAME>
-  isAutoScalingEnabled: <true/false>
-  isFreeTier: <false/true>
-  licenseModel: <BRING_YOUR_OWN_LICENSE/LICENSE_INCLUDED>
-  wallet:
-    walletName: <WALLET_SECRET_NAME>
-    walletPassword:
-      secret:
-        secretName: <WALLET_PASSWORD_SECRET_NAME>
-  freeformTags:
-    <KEY1>: <VALUE1>
-  definedTags:
-    <TAGNAMESPACE1>:
-      <KEY1>: <VALUE1>
+  dataStorageSizeInTBs: <SIZE_IN_TBs>
 ```
 
 Run the following command to create a CR in the cluster:
+
 ```sh
 kubectl apply -f <CREATE_YAML>.yaml
 ```
 
-Once the CR is created, OSOK will reconcile and create an Autonomous Database. OSOK will ensure the Autonomous Database instance is available.
+Once the CR is created, OSOK reconciles the `AutonomousDatabase` and records
+the OCI identifier in status.
 
-The AutonomousDatabases CR can list the Autonomous Databases in the cluster as below: 
+List and inspect the resource with:
+
 ```sh
-$ kubectl get autonomousdatabases
-NAME                         DBWORKLOAD   STATUS         AGE
-autonomousdatabases-sample   OLTP         Active         4d
+kubectl get autonomousdatabases
+kubectl get autonomousdatabases -o wide
+kubectl describe autonomousdatabases <NAME_OF_CR_OBJECT>
 ```
 
-The AutonomousDatabases CR can list the Autonomous Databases in the cluster with detailed information as below: 
-```sh
-$ kubectl get autonomousdatabases -o wide
-NAME                         DISPLAYNAME   DBWORKLOAD   STATUS         OCID                                   AGE
-autonomousdatabases-sample   ADBTest       OLTP         Active         ocid1.autonomousdatabase.oc1........   4d
-```
+## Current v2 notes
 
-The AutonomousDatabases CR can be describe as below:
-```sh
-$ kubectl describe autonomousdatabases <NAME_OF_CR_OBJECT>
-```
+- The generated v2 contract no longer uses the legacy `AutonomousDatabases`
+  kind.
+- The retired handwritten ADB runtime's nested wallet/admin secret helper
+  fields and bind-by-`spec.id` examples do not apply to the generated v2
+  resource.
+- Check `api/database/v1beta1/autonomousdatabase_types.go` for the current
+  spec surface when authoring CRs.
 
-## Binding to an Existing Autonomous Database
+## Access Information
 
-The OSOK allows you to bind to an existing Autonomous Database instance. In this case, `Id` is the only required field in the CR `spec`. The wallet information can be provided to obtain the access information of the Autonomous Database instance.
-
-```yaml
-apiVersion: database.oracle.com/v1beta1
-kind: AutonomousDatabases
-metadata:
-  name: <CR_OBJECT_NAME>
-spec:
-  id: <AUTONOMOUS_DATABASE_OCID>
-  wallet:
-    walletName: <WALLET_SECRET_NAME>
-    walletPassword:
-      secret:
-        secretName: <WALLET_PASSWORD_SECRET_NAME>
-```
-
-Run the following command to create a CR that binds to an existing DB instance:
-```sh
-kubectl apply -f <BIND_YAML>.yaml
-```
-
-## Updating an Autonomous Database
-
-Customers can also update a number of [parameters](https://docs.oracle.com/en-us/iaas/api/#/en/database/20160918/datatypes/UpdateAutonomousDatabaseDetails) of the Autonomous Database instance.
-```yaml
-apiVersion: database.oracle.com/v1beta1
-kind: AutonomousDatabases
-metadata:
-  name: <CR_OBJECT_NAME>
-spec:
-  id: <AUTONOMOUS_DATABASE_OCID>
-  displayName: <DISPLAY_NAME>
-  dbName: <DB_NAME>
-  dbWorkload: <OLTP/DW>
-  isDedicated: <false/true>
-  dbVersion: <ORACLE_DB_VERSION>
-  dataStorageSizeInTBs: <SIZE_IN_TBs>
-  cpuCoreCount: <COUNT>
-  adminPassword:
-    secret:
-      secretName: <ADMIN_PASSWORD_SECRET_NAME>
-  isAutoScalingEnabled: <true/false>
-  isFreeTier: <false/true>
-  licenseModel: <BRING_YOUR_OWN_LICENSE/LICENSE_INCLUDED>
-  wallet:
-    walletName: <WALLET_SECRET_NAME>
-    walletPassword:
-      secret:
-        secretName: <WALLET_PASSWORD_SECRET_NAME>
-  freeformTags:
-    <KEY1>: <VALUE1>
-  definedTags:
-    <TAGNAMESPACE1>:
-      <KEY1>: <VALUE1>
-```
-
-Run the following command to create a CR that updates an existing Autonomous Database instance:
-```sh
-kubectl apply -f <UPDATE_YAML>.yaml
-```
-
-## Access Information in Kubernetes Secrets
-
-The Access information of a OCI Service or resource will be created as a Kubernetes secret to manage the Autonomous Database. The name of the secret can be provided in the CR yaml or by default the name of the CR will be used.
-
-Customer will get the access information as Kubernetes secret to use the Autonomous Database. The following files/details will be made available to the user:
-
-| Parameter          | Description                                                              | Type   |
-| ------------------ | ------------------------------------------------------------------------ | ------ |
-| `ewallet.p12`      | Oracle Wallet.                                                           | string |
-| `cwallet.sso`      | Oracle wallet with autologin.                                            | string |
-| `tnsnames.ora`     | Configuration file containing service name and other connection details. | string |
-| `sqlnet.ora`       |                                                                          | string |
-| `ojdbc.properties` |                                                                          | string |
-| `keystore.jks`     | Java Keystore.                                                           | string |
-| `truststore.jks`   | Java trustore.                                                           | string |
-| `user_name`        | Pre-provisioned DB ADMIN Username.                                       | string |
+The generated v2 `AutonomousDatabase` runtime does not preserve the retired
+wallet-secret side effects from the handwritten `AutonomousDatabases` path.
+Consume the current status surface on the CR directly.
  

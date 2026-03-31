@@ -27,8 +27,7 @@ Each service record defines:
 | `generation.serviceManager.strategy` | Service-wide service-manager rollout: `none`, `manual`, or `generated`. |
 | `generation.registration.strategy` | Group-level runtime registration rollout: `none`, `manual`, or `generated`. |
 | `generation.webhooks.strategy` | Webhook ownership seam: `manual` or `none`. |
-| `generation.resources[]` | Per-kind overrides keyed by the published OSOK kind. |
-| `generation.resources[].sdkName` | Optional discovered OCI SDK resource family name when the published OSOK kind must keep an existing checked-in name that differs from the raw SDK name. |
+| `generation.resources[]` | Per-kind overrides keyed by the current OSOK kind from the v2 contract. |
 | `generation.resources[].formalSpec` | Optional per-kind controller slug from `formal/controller_manifest.tsv` when only selected resources are formally promoted. |
 | `generation.resources[].controller.maxConcurrentReconciles` | Optional controller concurrency override for one kind. |
 | `generation.resources[].controller.extraRBACMarkers` | Optional additional kubebuilder RBAC marker payloads for one kind. |
@@ -41,11 +40,12 @@ Rules:
   explicitly says otherwise.
 - Omitted `generation` fields default to controller, service-manager, and
   registration rollout `none`, with webhooks defaulting to `manual`.
-- `generation.resources[].kind` uses the published OSOK kind.
-- `generation.resources[].sdkName` is only needed when the checked-in OSOK kind
-  differs from the discovered OCI SDK resource family name.
-- Service-specific rollout or naming behavior belongs in the mapping file, not
-  in hardcoded generator branches.
+- `generation.resources[].kind` uses the current OSOK kind from the v2
+  contract.
+- Service-specific rollout behavior belongs in the mapping file, not in
+  hardcoded generator branches.
+- Parity overlays and compatibility-kind remaps are no longer part of the
+  generator contract.
 
 ## Output Ownership
 
@@ -99,13 +99,8 @@ and service-manager generation is enabled.
 - The generator pipeline should normalize OCI SDK CRUD request families
   (`Create*`, `Get*`, `List*`, `Update*`, `Delete*`) into a shared resource
   stem and render that stem as the OSOK kind.
-- If the published OSOK kind must keep an existing checked-in name, record the
-  raw SDK family under `generation.resources[].sdkName` in
-  `internal/generator/config/services.yaml` rather than adding special-case Go
-  code.
-- The current checked-in renamed kind mappings are
-  `database/AutonomousDatabases <- AutonomousDatabase` and
-  `mysql/MySqlDbSystem <- DbSystem`.
+- Checked-in kinds now follow the current v2 contract directly; the generator
+  does not preserve legacy published GVKs through compatibility remaps.
 
 ### Controller outputs
 
@@ -168,16 +163,16 @@ and service-manager generation is enabled.
 - Group registration setup consumes `internal/registrations.Context`, which
   combines the controller-runtime manager/client/recorder seam with
   `servicemanager.RuntimeDeps`.
-- Existing manual `database`, `mysql`, and `streaming` groups can bridge into
-  this contract through handwritten files under `internal/registrations/`
-  without changing the shared manager bootstrap shape in `main.go`.
+- Groups with manual webhook or runtime seams can still bridge into this
+  contract through handwritten files under `internal/registrations/` without
+  changing the shared manager bootstrap shape in `main.go`.
 
 ### Webhook ownership
 
 - Webhook ownership defaults to `manual`.
 - Webhook code remains under `api/<group>/<version>/*_webhook.go`.
-- Resource overrides may pin individual kinds to `manual` so existing webhook
-  seams such as `AutonomousDatabases` stay explicit during migration.
+- Resource overrides may pin individual kinds to `manual` so handwritten
+  webhooks such as `AutonomousDatabase` stay explicit when needed.
 - Webhook generation is not part of this epic.
 
 ### Kubebuilder markers
@@ -241,9 +236,8 @@ posture rather than whether the runtime pieces are handwritten or generated.
 ### `controller-backed`
 
 Use this for groups that participate in the shared manager install. In the
-current repo that includes `database`, `mysql`, and `streaming`, all of which
-already declare generated controller, service-manager, and registration
-surfaces while keeping manual webhook seams where needed.
+current repo that is `database`, `mysql`, and `streaming`, all of which now
+declare generated controller, service-manager, and registration rollout.
 
 Generated package scaffolding must include:
 
@@ -269,10 +263,9 @@ Generated package scaffolding must include:
 ### Transition rules
 
 - New services start as `crd-only` and normally omit the `generation` block.
-- Services that need to keep existing checked-in API shapes or companion
-  artifacts stay `controller-backed` and use
-  `--preserve-existing-spec-surface` plus normal `generation.resources[]`
-  overrides instead of alternate migration-only config.
+- Existing controller-backed generated services remain `controller-backed`
+  without parity overlays or compatibility-kind preservation. The parity
+  removal is documented in `docs/api-generator-parity.md`.
 - A service moves from `crd-only` to `controller-backed` only when controller,
   service-manager, and registration rollout is explicitly enabled and the
   shared manager/package integration issue lands.
@@ -352,15 +345,13 @@ from scaffold coverage into generated runtime:
 
 7. Move a service from `crd-only` to `controller-backed` in `services.yaml`
    only after controller, service-manager, registration, validator, webhook,
-   and package prerequisites land. For existing controller-backed published
-   resources with preserved checked-in seams, keep
-   `_generated_client_adapter.go` shims, manual webhook files, and other
-   checked-in legacy seams explicit until the corresponding `logic-gaps.md`
-   stop conditions are closed.
+   and package prerequisites land. When a resource still depends on
+   handwritten runtime seams, keep those files explicit until the
+   corresponding `logic-gaps.md` stop conditions are closed.
 
 Scaffold coverage alone does not move a group into generated runtime or replace
-legacy adapters. Runtime ownership still follows `generation.*` rollout and
-explicit `formalSpec` references.
+remaining handwritten seams. Runtime ownership still follows `generation.*`
+rollout and explicit `formalSpec` references.
 
 Workflow integration for both package profiles uses the same targets:
 

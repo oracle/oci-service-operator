@@ -152,103 +152,6 @@ type ChannelTarget struct {
 	TablesWithoutPrimaryKeyHandling string `json:"tablesWithoutPrimaryKeyHandling,omitempty"`
 }
 
-// ChannelSourceSslCaCertificateObservedState defines nested fields for Channel.Source.SslCaCertificate.
-type ChannelSourceSslCaCertificateObservedState struct {
-	// +kubebuilder:validation:Optional
-	JsonData string `json:"jsonData,omitempty"`
-	// +kubebuilder:validation:Optional
-	CertificateType string `json:"certificateType,omitempty"`
-	// The string containing the CA certificate in PEM format.
-	// +kubebuilder:validation:Required
-	Contents string `json:"contents"`
-}
-
-// ChannelSourceAnonymousTransactionsHandlingObservedState defines nested fields for Channel.Source.AnonymousTransactionsHandling.
-type ChannelSourceAnonymousTransactionsHandlingObservedState struct {
-	// +kubebuilder:validation:Optional
-	JsonData string `json:"jsonData,omitempty"`
-	// +kubebuilder:validation:Optional
-	Policy string `json:"policy,omitempty"`
-	// Specifies one of the coordinates (file) at which the replica should begin
-	// reading the source's log. As this value specifies the point where replication
-	// starts from, it is only used once, when it starts. It is never used again,
-	// unless a new UpdateChannel operation modifies it.
-	// +kubebuilder:validation:Optional
-	LastConfiguredLogFilename string `json:"lastConfiguredLogFilename,omitempty"`
-	// Specifies one of the coordinates (offset) at which the replica should begin
-	// reading the source's log. As this value specifies the point where replication
-	// starts from, it is only used once, when it starts. It is never used again,
-	// unless a new UpdateChannel operation modifies it.
-	// +kubebuilder:validation:Optional
-	LastConfiguredLogOffset int64 `json:"lastConfiguredLogOffset,omitempty"`
-	// The UUID that is used as a prefix when generating transaction identifiers for anonymous transactions
-	// coming from the source. You can change the UUID later.
-	// +kubebuilder:validation:Optional
-	Uuid string `json:"uuid,omitempty"`
-}
-
-// ChannelSourceObservedState defines nested fields for Channel.Source.
-type ChannelSourceObservedState struct {
-	// +kubebuilder:validation:Optional
-	JsonData string `json:"jsonData,omitempty"`
-	// +kubebuilder:validation:Optional
-	SourceType string `json:"sourceType,omitempty"`
-	// The network address of the MySQL instance.
-	// +kubebuilder:validation:Required
-	Hostname string `json:"hostname"`
-	// The name of the replication user on the source MySQL instance.
-	// The username has a maximum length of 96 characters. For more information,
-	// please see the MySQL documentation (https://dev.mysql.com/doc/refman/8.0/en/change-master-to.html)
-	// +kubebuilder:validation:Required
-	Username string `json:"username"`
-	// The password for the replication user. The password must be
-	// between 8 and 32 characters long, and must contain at least 1
-	// numeric character, 1 lowercase character, 1 uppercase character,
-	// and 1 special (nonalphanumeric) character.
-	// +kubebuilder:validation:Required
-	Password string `json:"password"`
-	// The port the source MySQL instance listens on.
-	// +kubebuilder:validation:Optional
-	Port int `json:"port,omitempty"`
-	// +kubebuilder:validation:Optional
-	SslCaCertificate ChannelSourceSslCaCertificateObservedState `json:"sslCaCertificate,omitempty"`
-	// +kubebuilder:validation:Optional
-	AnonymousTransactionsHandling ChannelSourceAnonymousTransactionsHandlingObservedState `json:"anonymousTransactionsHandling,omitempty"`
-	// The SSL mode of the Channel.
-	// +kubebuilder:validation:Required
-	SslMode string `json:"sslMode"`
-}
-
-// ChannelTargetObservedState defines nested fields for Channel.Target.
-type ChannelTargetObservedState struct {
-	// +kubebuilder:validation:Optional
-	JsonData string `json:"jsonData,omitempty"`
-	// +kubebuilder:validation:Optional
-	TargetType string `json:"targetType,omitempty"`
-	// The OCID of the target DB System.
-	// +kubebuilder:validation:Required
-	DbSystemId string `json:"dbSystemId"`
-	// The case-insensitive name that identifies the replication channel. Channel names
-	// must follow the rules defined for MySQL identifiers (https://dev.mysql.com/doc/refman/8.0/en/identifiers.html).
-	// The names of non-Deleted Channels must be unique for each DB System.
-	// +kubebuilder:validation:Optional
-	ChannelName string `json:"channelName,omitempty"`
-	// The username for the replication applier of the target MySQL DB System.
-	// +kubebuilder:validation:Optional
-	ApplierUsername string `json:"applierUsername,omitempty"`
-	// Replication filter rules to be applied at the DB System Channel target.
-	// +kubebuilder:validation:Optional
-	Filters []ChannelTargetFilter `json:"filters,omitempty"`
-	// Specifies the amount of time, in seconds, that the channel waits before
-	// applying a transaction received from the source.
-	// +kubebuilder:validation:Optional
-	DelayInSeconds int `json:"delayInSeconds,omitempty"`
-	// Specifies how a replication channel handles the creation and alteration of tables
-	// that do not have a primary key. The default value is set to ALLOW.
-	// +kubebuilder:validation:Optional
-	TablesWithoutPrimaryKeyHandling string `json:"tablesWithoutPrimaryKeyHandling,omitempty"`
-}
-
 // ChannelStatus defines the observed state of Channel.
 type ChannelStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
@@ -259,9 +162,9 @@ type ChannelStatus struct {
 	// The user-friendly name for the Channel. It does not have to be unique.
 	DisplayName string `json:"displayName,omitempty"`
 	// Whether the Channel has been enabled by the user.
-	IsEnabled bool                       `json:"isEnabled,omitempty"`
-	Source    ChannelSourceObservedState `json:"source,omitempty"`
-	Target    ChannelTargetObservedState `json:"target,omitempty"`
+	IsEnabled bool          `json:"isEnabled,omitempty"`
+	Source    ChannelSource `json:"source,omitempty"`
+	Target    ChannelTarget `json:"target,omitempty"`
 	// The state of the Channel.
 	LifecycleState string `json:"lifecycleState,omitempty"`
 	// The date and time the Channel was created, as described by RFC 3339 (https://tools.ietf.org/rfc/rfc3339).

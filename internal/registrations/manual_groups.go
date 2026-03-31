@@ -14,9 +14,9 @@ var manualGroupRegistrations = []GroupRegistration{}
 
 var manualWebhookRegistrations = []WebhookRegistration{
 	{
-		Name: "AutonomousDatabases",
+		Name: "AutonomousDatabase",
 		SetupWithManager: func(mgr ctrl.Manager) error {
-			return (&databasev1beta1.AutonomousDatabases{}).SetupWebhookWithManager(mgr)
+			return (&databasev1beta1.AutonomousDatabase{}).SetupWebhookWithManager(mgr)
 		},
 	},
 }

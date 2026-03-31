@@ -14,7 +14,8 @@ import (
 
 func buildPackageModel(cfg *Config, service ServiceConfig, discovered []ResourceModel) (*PackageModel, error) {
 	version := service.VersionOrDefault(cfg.DefaultVersion)
-	resources := assignHelperTypeNames(discovered)
+	resources := discovered
+	resources = assignHelperTypeNames(resources)
 	resources = assignStatusTypeNames(resources)
 	resources = applyDefaultSamples(service, version, resources)
 	controllerOutput := buildControllerOutputModel(service, cfg.Domain, resources)

@@ -25,7 +25,7 @@ func moduleRoot(t *testing.T) string {
 	}
 }
 
-func TestAnalyzerFindsAutonomousDatabaseUsage(t *testing.T) {
+func TestAnalyzerFindsStreamUsage(t *testing.T) {
 	analyzer := provider.NewAnalyzer(moduleRoot(t))
 	analysis, err := analyzer.Analyze()
 	if err != nil {
@@ -33,12 +33,12 @@ func TestAnalyzerFindsAutonomousDatabaseUsage(t *testing.T) {
 	}
 	found := false
 	for _, usage := range analysis.Usages {
-		if usage.StructType == "database.CreateAutonomousDatabaseDetails" && usage.FieldName == "CompartmentId" {
+		if usage.StructType == "streaming.CreateStreamDetails" && usage.FieldName == "CompartmentId" {
 			found = true
 			break
 		}
 	}
 	if !found {
-		t.Fatalf("expected to find CreateAutonomousDatabaseDetails.CompartmentId usage")
+		t.Fatalf("expected to find CreateStreamDetails.CompartmentId usage")
 	}
 }

@@ -365,9 +365,9 @@ resources:
 - bases/mysql.oracle.com_backups.yaml
 - bases/mysql.oracle.com_channels.yaml
 - bases/mysql.oracle.com_configurations.yaml
+- bases/mysql.oracle.com_dbsystems.yaml
 - bases/mysql.oracle.com_heatwaveclustermemoryestimates.yaml
 - bases/mysql.oracle.com_heatwaveclusters.yaml
-- bases/mysql.oracle.com_mysqldbsystems.yaml
 - bases/mysql.oracle.com_replicas.yaml
 - bases/mysql.oracle.com_shapes.yaml
 - bases/mysql.oracle.com_versions.yaml

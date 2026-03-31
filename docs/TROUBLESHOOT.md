@@ -162,7 +162,7 @@ This happens mostly due to user authorization. Follow below steps for remediatio
 
 2. **Secret \"admin-password\" not found**
 ```bash
-ERROR	service-manager.AutonomousDatabases	Error while getting the admin password secret	{"error": "Secret \"admin-password\" not found"}
+ERROR	service-manager.AutonomousDatabase	Error while getting the admin password secret	{"error": "Secret \"admin-password\" not found"}
 ``` 
 Ensure that secret admin-password (name as specified in the yaml) is present in the current namespace of CR. Sample secret : 
 ```bash
@@ -171,7 +171,7 @@ kubectl create secret generic admin-password --from-literal=password=Sample@1234
 
 3. **Password key in admin/wallet password secret not found**
 ```bash
-ERROR	service-manager.AutonomousDatabases	password key in admin password secret is not found
+ERROR	service-manager.AutonomousDatabase	password key in admin password secret is not found
 ```
  Ensure that secret admin-password/wallet-password (name as specified in the yaml) is present in the current namespace of CR and has a field by key-name as password. Sample secret : 
  ```bash
@@ -183,7 +183,7 @@ kubectl create secret generic wallet-password --from-literal=walletpassword=Samp
 4. **Service error:InvalidParameter**
 ```
 Sample error msg : 
-ERROR	service-manager.AutonomousDatabases	Create AutonomousDatabase failed	{"error": "Service error:InvalidParameter. The Autonomous Database name cannot be longer than 14 characters
+ERROR	service-manager.AutonomousDatabase	Create AutonomousDatabase failed	{"error": "Service error:InvalidParameter. The Autonomous Database name cannot be longer than 14 characters
 ```
 Invalid parameter error happens when one of the parameter for the associated OCI resource is not valid or not as per the specification. Check the specifications for the parameter being reported as invalid from the documentation page of the associated resource and update the same in the yaml for the CR. Parameter specifications : 
 * AutonomousDB : https://docs.oracle.com/en-us/iaas/api/#/en/database/20160918/AutonomousDatabase/
@@ -192,4 +192,3 @@ Invalid parameter error happens when one of the parameter for the associated OCI
 
 5. **If the CR creation fails with any 5XX error :**
 * Contact respective service team from Oracle for support with details of the request (opc-id) and failure message
-

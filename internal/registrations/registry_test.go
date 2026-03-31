@@ -36,8 +36,8 @@ func TestAllAddToSchemeRegistersManualGroupKinds(t *testing.T) {
 
 	for _, obj := range []runtime.Object{
 		&corev1beta1.Vcn{},
-		&databasev1beta1.AutonomousDatabases{},
-		&mysqlv1beta1.MySqlDbSystem{},
+		&databasev1beta1.AutonomousDatabase{},
+		&mysqlv1beta1.DbSystem{},
 		&streamingv1beta1.Stream{},
 	} {
 		gvks, _, err := scheme.ObjectKinds(obj)
@@ -57,8 +57,8 @@ func TestAllExposesManualWebhooksSeparately(t *testing.T) {
 	if len(webhooks) != 1 {
 		t.Fatalf("len(ManualWebhooks()) = %d, want 1", len(webhooks))
 	}
-	if webhooks[0].Name != "AutonomousDatabases" {
-		t.Fatalf("ManualWebhooks()[0].Name = %q, want %q", webhooks[0].Name, "AutonomousDatabases")
+	if webhooks[0].Name != "AutonomousDatabase" {
+		t.Fatalf("ManualWebhooks()[0].Name = %q, want %q", webhooks[0].Name, "AutonomousDatabase")
 	}
 }
 
