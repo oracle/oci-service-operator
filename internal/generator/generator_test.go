@@ -1532,7 +1532,7 @@ func TestCheckedInServicesMatchGenerator(t *testing.T) {
 
 	apiFiles := []string{
 		"api/database/v1beta1/groupversion_info.go",
-		"api/database/v1beta1/autonomousdatabases_types.go",
+		"api/database/v1beta1/autonomousdatabase_types.go",
 		"api/database/v1beta1/autonomousdatabasebackup_types.go",
 		"api/mysql/v1beta1/groupversion_info.go",
 		"api/mysql/v1beta1/mysqldbsystem_types.go",
@@ -1544,7 +1544,7 @@ func TestCheckedInServicesMatchGenerator(t *testing.T) {
 	assertGeneratedGoMatchesAll(t, repoRoot(t), outputRoot, apiFiles)
 
 	exactFiles := []string{
-		"config/samples/database_v1beta1_autonomousdatabases.yaml",
+		"config/samples/database_v1beta1_autonomousdatabase.yaml",
 		"config/samples/mysql_v1beta1_mysqldbsystem.yaml",
 		"config/samples/streaming_v1beta1_stream.yaml",
 		"packages/database/metadata.env",
@@ -1557,14 +1557,14 @@ func TestCheckedInServicesMatchGenerator(t *testing.T) {
 	assertExactFileMatchesAll(t, repoRoot(t), outputRoot, exactFiles)
 
 	runtimeFiles := []string{
-		"controllers/database/autonomousdatabases_controller.go",
+		"controllers/database/autonomousdatabase_controller.go",
 		"controllers/database/autonomousdatabasebackup_controller.go",
 		"controllers/mysql/mysqldbsystem_controller.go",
 		"controllers/mysql/backup_controller.go",
 		"controllers/streaming/stream_controller.go",
 		"controllers/streaming/streampool_controller.go",
-		"pkg/servicemanager/autonomousdatabases/adb/autonomousdatabases_serviceclient.go",
-		"pkg/servicemanager/autonomousdatabases/adb/autonomousdatabases_servicemanager.go",
+		"pkg/servicemanager/database/autonomousdatabase/autonomousdatabase_serviceclient.go",
+		"pkg/servicemanager/database/autonomousdatabase/autonomousdatabase_servicemanager.go",
 		"pkg/servicemanager/database/autonomousdatabasebackup/autonomousdatabasebackup_serviceclient.go",
 		"pkg/servicemanager/database/autonomousdatabasebackup/autonomousdatabasebackup_servicemanager.go",
 		"pkg/servicemanager/mysql/dbsystem/mysqldbsystem_serviceclient.go",

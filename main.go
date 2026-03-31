@@ -71,7 +71,7 @@ func main() {
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
 	flag.BoolVar(&initOSOKResources, "init-osok-resources", false,
-		"Install OSOK prerequisites like CRDs and Webhooks at manager bootup")
+		"Install OSOK prerequisites like CRDs and supporting manifests at manager bootup")
 	opts := zap.Options{
 		Development: true,
 	}
@@ -143,13 +143,6 @@ func main() {
 			os.Exit(1)
 		}
 	}
-	for _, webhook := range registrations.ManualWebhooks() {
-		if err = webhook.SetupWithManager(mgr); err != nil {
-			setupLog.ErrorLog(err, "unable to create webhook", "webhook", webhook.Name)
-			os.Exit(1)
-		}
-	}
-
 	// +kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("health", healthz.Ping); err != nil {

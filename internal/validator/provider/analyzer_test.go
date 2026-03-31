@@ -33,12 +33,12 @@ func TestAnalyzerFindsAutonomousDatabaseUsage(t *testing.T) {
 	}
 	found := false
 	for _, usage := range analysis.Usages {
-		if usage.StructType == "database.CreateAutonomousDatabaseDetails" && usage.FieldName == "CompartmentId" {
+		if usage.StructType == "database.ListAutonomousDatabasesRequest" && usage.FieldName == "CompartmentId" {
 			found = true
 			break
 		}
 	}
 	if !found {
-		t.Fatalf("expected to find CreateAutonomousDatabaseDetails.CompartmentId usage")
+		t.Fatalf("expected to find ListAutonomousDatabasesRequest.CompartmentId usage")
 	}
 }

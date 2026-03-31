@@ -91,36 +91,6 @@ type ExternalDatabaseConnectorConnectionCredentials struct {
 	Role string `json:"role"`
 }
 
-// ExternalDatabaseConnectorConnectionCredentialsObservedState defines nested fields for ExternalDatabaseConnector.ConnectionCredentials.
-type ExternalDatabaseConnectorConnectionCredentialsObservedState struct {
-	// +kubebuilder:validation:Optional
-	JsonData string `json:"jsonData,omitempty"`
-	// +kubebuilder:validation:Optional
-	CredentialType string `json:"credentialType,omitempty"`
-	// The username that will be used to connect to the database.
-	// +kubebuilder:validation:Required
-	Username string `json:"username"`
-	// The password that will be used to connect to the database.
-	// +kubebuilder:validation:Required
-	Password string `json:"password"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Oracle Cloud Infrastructure secret (https://docs.cloud.oracle.com/Content/KeyManagement/Concepts/keyoverview.htm#concepts).
-	// +kubebuilder:validation:Required
-	SslSecretId string `json:"sslSecretId"`
-	// The name of the credential information that used to connect to the database. The name should be in "x.y" format, where
-	// the length of "x" has a maximum of 64 characters, and length of "y" has a maximum of 199 characters.
-	// The name strings can contain letters, numbers and the underscore character only. Other characters are not valid, except for
-	// the "." character that separates the "x" and "y" portions of the name.
-	// *IMPORTANT* - The name must be unique within the OCI region the credential is being created in. If you specify a name
-	// that duplicates the name of another credential within the same OCI region, you may overwrite or corrupt the credential that is already
-	// using the name.
-	// For example: inventorydb.abc112233445566778899
-	// +kubebuilder:validation:Required
-	CredentialName string `json:"credentialName"`
-	// The role of the user that will be connecting to the database.
-	// +kubebuilder:validation:Required
-	Role string `json:"role"`
-}
-
 // ExternalDatabaseConnectorStatus defines the observed state of ExternalDatabaseConnector.
 type ExternalDatabaseConnectorStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
@@ -152,10 +122,10 @@ type ExternalDatabaseConnectorStatus struct {
 	// The status of connectivity to the external database.
 	ConnectionStatus string `json:"connectionStatus,omitempty"`
 	// The date and time the connectionStatus of this external connector was last updated.
-	TimeConnectionStatusLastUpdated string                                                      `json:"timeConnectionStatusLastUpdated,omitempty"`
-	ConnectorType                   string                                                      `json:"connectorType,omitempty"`
-	ConnectionString                ExternalDatabaseConnectorConnectionString                   `json:"connectionString,omitempty"`
-	ConnectionCredentials           ExternalDatabaseConnectorConnectionCredentialsObservedState `json:"connectionCredentials,omitempty"`
+	TimeConnectionStatusLastUpdated string                                         `json:"timeConnectionStatusLastUpdated,omitempty"`
+	ConnectorType                   string                                         `json:"connectorType,omitempty"`
+	ConnectionString                ExternalDatabaseConnectorConnectionString      `json:"connectionString,omitempty"`
+	ConnectionCredentials           ExternalDatabaseConnectorConnectionCredentials `json:"connectionCredentials,omitempty"`
 	// The ID of the agent used for the
 	// CreateExternalDatabaseConnectorDetails.
 	ConnectorAgentId string `json:"connectorAgentId,omitempty"`

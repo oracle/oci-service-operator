@@ -34,7 +34,7 @@ func InitOSOK(config *rest.Config, log loggerutil.OSOKLogger) {
 		os.Exit(1)
 	}
 
-	log.InfoLog("Starting OSOK initialization. Will install CRDs and Webhooks needed for OSOK operator to run")
+	log.InfoLog("Starting OSOK initialization. Will install CRDs and supporting manifests needed for the OSOK operator to run")
 	// Prepare a RESTMapper to find GVR
 	dc, err := discovery.NewDiscoveryClientForConfig(config)
 	if err != nil {

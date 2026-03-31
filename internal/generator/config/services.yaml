@@ -153,18 +153,14 @@ services:
       registration:
         strategy: generated
       webhooks:
-        strategy: manual
+        strategy: none
       resources:
-        - kind: AutonomousDatabases
-          sdkName: AutonomousDatabase
+        - kind: AutonomousDatabase
+          formalSpec: databaseautonomousdatabase
           controller:
             extraRBACMarkers:
               - groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
               - groups="",resources=events,verbs=get;list;watch;create;update;patch;delete
-          serviceManager:
-            packagePath: autonomousdatabases/adb
-          webhooks:
-            strategy: manual
 
   - service: dns
     sdkPackage: github.com/oracle/oci-go-sdk/v65/dns

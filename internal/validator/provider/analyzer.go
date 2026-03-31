@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"go/ast"
+	"go/token"
 	"go/types"
 	"path"
 	"path/filepath"
@@ -63,6 +64,9 @@ func (analyzer *Analyzer) Analyze() (Analysis, error) {
 			ast.Inspect(fileNode, func(node ast.Node) bool {
 				switch typedNode := node.(type) {
 				case *ast.CompositeLit:
+					if operationTypeName := qualifiedTypeName(loadedPackage.TypesInfo.TypeOf(typedNode)); operationTypeName == "generatedruntime.Operation" {
+						usages = append(usages, generatedOperationUsages(loadedPackage.TypesInfo, loadedPackage.Fset, filePath, targets, typedNode)...)
+					}
 					structType := seedStructName(loadedPackage.TypesInfo.TypeOf(typedNode), targets)
 					if structType == "" {
 						return true
@@ -132,6 +136,17 @@ func (analyzer *Analyzer) Analyze() (Analysis, error) {
 }
 
 func seedStructName(typeRef types.Type, targets map[string]struct{}) string {
+	qualifiedName := qualifiedTypeName(typeRef)
+	if qualifiedName == "" {
+		return ""
+	}
+	if _, ok := targets[qualifiedName]; !ok {
+		return ""
+	}
+	return qualifiedName
+}
+
+func qualifiedTypeName(typeRef types.Type) string {
 	if typeRef == nil {
 		return ""
 	}
@@ -150,11 +165,110 @@ func seedStructName(typeRef types.Type, targets map[string]struct{}) string {
 	if object == nil || object.Pkg() == nil {
 		return ""
 	}
-	qualifiedName := path.Base(object.Pkg().Path()) + "." + object.Name()
-	if _, ok := targets[qualifiedName]; !ok {
-		return ""
+	return path.Base(object.Pkg().Path()) + "." + object.Name()
+}
+
+func generatedOperationUsages(
+	typesInfo *types.Info,
+	fileSet *token.FileSet,
+	filePath string,
+	targets map[string]struct{},
+	operation *ast.CompositeLit,
+) []FieldUsage {
+	requestType := generatedOperationRequestType(typesInfo, operation)
+	if requestType == "" {
+		return nil
 	}
-	return qualifiedName
+
+	var usages []FieldUsage
+	for _, element := range operation.Elts {
+		keyValue, ok := element.(*ast.KeyValueExpr)
+		if !ok {
+			continue
+		}
+		fieldIdentifier, ok := keyValue.Key.(*ast.Ident)
+		if !ok || fieldIdentifier.Name != "Fields" {
+			continue
+		}
+		fieldsLiteral, ok := keyValue.Value.(*ast.CompositeLit)
+		if !ok {
+			continue
+		}
+		for _, fieldElement := range fieldsLiteral.Elts {
+			fieldLiteral, ok := fieldElement.(*ast.CompositeLit)
+			if !ok {
+				continue
+			}
+			if qualifiedTypeName(typesInfo.TypeOf(fieldLiteral)) != "generatedruntime.RequestField" {
+				continue
+			}
+			fieldName, fieldPos := generatedRequestFieldName(fileSet, fieldLiteral)
+			if fieldName == "" {
+				continue
+			}
+			usages = append(usages, FieldUsage{
+				StructType: requestType,
+				FieldName:  fieldName,
+				File:       filePath,
+				Line:       fieldPos.Line,
+				Kind:       UsageKindGeneratedRequestField,
+			})
+		}
+	}
+
+	return usages
+}
+
+func generatedOperationRequestType(typesInfo *types.Info, operation *ast.CompositeLit) string {
+	for _, element := range operation.Elts {
+		keyValue, ok := element.(*ast.KeyValueExpr)
+		if !ok {
+			continue
+		}
+		fieldIdentifier, ok := keyValue.Key.(*ast.Ident)
+		if !ok || fieldIdentifier.Name != "NewRequest" {
+			continue
+		}
+		requestFactory, ok := keyValue.Value.(*ast.FuncLit)
+		if !ok {
+			continue
+		}
+		for _, statement := range requestFactory.Body.List {
+			returnStmt, ok := statement.(*ast.ReturnStmt)
+			if !ok {
+				continue
+			}
+			for _, result := range returnStmt.Results {
+				if requestType := qualifiedTypeName(typesInfo.TypeOf(result)); requestType != "" {
+					return requestType
+				}
+			}
+		}
+	}
+	return ""
+}
+
+func generatedRequestFieldName(fileSet *token.FileSet, requestField *ast.CompositeLit) (string, token.Position) {
+	for _, element := range requestField.Elts {
+		keyValue, ok := element.(*ast.KeyValueExpr)
+		if !ok {
+			continue
+		}
+		fieldIdentifier, ok := keyValue.Key.(*ast.Ident)
+		if !ok || fieldIdentifier.Name != "FieldName" {
+			continue
+		}
+		fieldValue, ok := keyValue.Value.(*ast.BasicLit)
+		if !ok || fieldValue.Kind != token.STRING {
+			return "", token.Position{}
+		}
+		fieldName := strings.Trim(fieldValue.Value, `"`)
+		if fieldName == "" {
+			return "", token.Position{}
+		}
+		return fieldName, fileSet.Position(fieldValue.Pos())
+	}
+	return "", token.Position{}
 }
 
 func filePathFor(loadedPackage *packages.Package, fileIndex int) string {

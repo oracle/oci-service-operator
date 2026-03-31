@@ -10,9 +10,9 @@ spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
     owned:
-    - description: AutonomousDatabases is the Schema for the autonomousdatabases API
-      displayName: Autonomous Databases
-      kind: AutonomousDatabases
+    - description: AutonomousDatabase is the Schema for the autonomousdatabases API
+      displayName: Autonomous Database
+      kind: AutonomousDatabase
       name: autonomousdatabases.database.oracle.com
       version: v1beta1
     - description: MySqlDbSystem is the Schema for the mysqldbsystems API

@@ -24,12 +24,6 @@ type GroupRegistration struct {
 	SetupWithManager func(Context) error
 }
 
-// WebhookRegistration keeps webhook setup explicit and separate from group runtime registration.
-type WebhookRegistration struct {
-	Name             string
-	SetupWithManager func(ctrl.Manager) error
-}
-
 // Context carries the manager and shared runtime deps needed to wire a group.
 type Context struct {
 	Manager            ctrl.Manager
@@ -91,11 +85,6 @@ func All() []GroupRegistration {
 		return generated[i].Group < generated[j].Group
 	})
 	return appendUniqueGroupRegistrations(registrations, generated...)
-}
-
-// ManualWebhooks returns explicit webhook hooks that stay outside generated runtime registration.
-func ManualWebhooks() []WebhookRegistration {
-	return append([]WebhookRegistration(nil), manualWebhookRegistrations...)
 }
 
 func appendUniqueGroupRegistrations(existing []GroupRegistration, extras ...GroupRegistration) []GroupRegistration {
