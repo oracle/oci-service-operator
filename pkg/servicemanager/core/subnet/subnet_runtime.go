@@ -282,22 +282,22 @@ func buildCreateSubnetDetails(spec corev1beta1.SubnetSpec) coresdk.CreateSubnetD
 func validateSubnetCreateOnlyDrift(spec corev1beta1.SubnetSpec, current coresdk.Subnet) error {
 	var unsupported []string
 
-	if spec.CompartmentId != "" && !stringPtrEqual(current.CompartmentId, spec.CompartmentId) {
+	if !stringCreateOnlyMatches(current.CompartmentId, spec.CompartmentId) {
 		unsupported = append(unsupported, "compartmentId")
 	}
-	if spec.VcnId != "" && !stringPtrEqual(current.VcnId, spec.VcnId) {
+	if !stringCreateOnlyMatches(current.VcnId, spec.VcnId) {
 		unsupported = append(unsupported, "vcnId")
 	}
-	if spec.AvailabilityDomain != "" && !stringPtrEqual(current.AvailabilityDomain, spec.AvailabilityDomain) {
+	if !stringCreateOnlyMatches(current.AvailabilityDomain, spec.AvailabilityDomain) {
 		unsupported = append(unsupported, "availabilityDomain")
 	}
-	if spec.DnsLabel != "" && !stringPtrEqual(current.DnsLabel, spec.DnsLabel) {
+	if !stringCreateOnlyMatches(current.DnsLabel, spec.DnsLabel) {
 		unsupported = append(unsupported, "dnsLabel")
 	}
-	if spec.ProhibitInternetIngress && !boolPtrEqual(current.ProhibitInternetIngress, spec.ProhibitInternetIngress) {
+	if !boolCreateOnlyMatches(current.ProhibitInternetIngress, spec.ProhibitInternetIngress) {
 		unsupported = append(unsupported, "prohibitInternetIngress")
 	}
-	if spec.ProhibitPublicIpOnVnic && !boolPtrEqual(current.ProhibitPublicIpOnVnic, spec.ProhibitPublicIpOnVnic) {
+	if !boolCreateOnlyMatches(current.ProhibitPublicIpOnVnic, spec.ProhibitPublicIpOnVnic) {
 		unsupported = append(unsupported, "prohibitPublicIpOnVnic")
 	}
 
@@ -487,11 +487,19 @@ func stringPtrEqual(actual *string, expected string) bool {
 	return *actual == expected
 }
 
+func stringCreateOnlyMatches(actual *string, expected string) bool {
+	return strings.TrimSpace(stringValue(actual)) == strings.TrimSpace(expected)
+}
+
 func boolPtrEqual(actual *bool, expected bool) bool {
 	if actual == nil {
 		return !expected
 	}
 	return *actual == expected
+}
+
+func boolCreateOnlyMatches(actual *bool, expected bool) bool {
+	return boolValue(actual) == expected
 }
 
 func metav1Time(t time.Time) metav1.Time {
