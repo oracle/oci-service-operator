@@ -18,9 +18,9 @@ patching, upgrades, and tuning while remaining available to applications.
 The v2 rollout treats the generated Autonomous Database surfaces under
 `api/database/v1beta1` as the source of truth. The published OSOK CR kind
 remains `AutonomousDatabases` for compatibility even though the underlying OCI
-resource family is `AutonomousDatabase`. The legacy handwritten compatibility
-flow, bind-only shortcut, and wallet-secret side effects are not the contract
-documented here.
+resource family is `AutonomousDatabase`. The current published spec still
+includes `spec.id` for binding to an existing Autonomous Database and
+`spec.wallet` for wallet-secret generation on the primary CR.
 
 ## OCI Permission requirement
 
@@ -51,6 +51,7 @@ truth for the full schema. Commonly used fields include:
 
 | Parameter | Description | Type | Mandatory |
 | --- | --- | --- | --- |
+| `spec.id` | Existing Autonomous Database OCID. Set this to bind the CR to a pre-existing database instead of provisioning a new one. | string | no |
 | `spec.compartmentId` | Compartment OCID for the Autonomous Database. | string | yes |
 | `spec.displayName` | Friendly name for the database. | string | no |
 | `spec.dbName` | Database name. | string | no |
@@ -59,6 +60,8 @@ truth for the full schema. Commonly used fields include:
 | `spec.dataStorageSizeInTBs` / `spec.dataStorageSizeInGBs` | Requested storage capacity. | number | no |
 | `spec.adminPassword.secret.secretName` | Kubernetes Secret that stores the admin password under the `password` key. | string | conditional |
 | `spec.secretId` | OCI Vault secret OCID to use instead of a Kubernetes Secret. | string | conditional |
+| `spec.wallet.walletName` | Kubernetes Secret name that should receive generated wallet files. Defaults to `<metadata.name>-wallet` when omitted. | string | no |
+| `spec.wallet.walletPassword.secret.secretName` | Kubernetes Secret that stores the wallet password under the `walletPassword` key. When set, the current runtime generates a wallet Secret during create or bind. | string | no |
 | `spec.kmsKeyId`, `spec.vaultId`, `spec.subnetId`, `spec.nsgIds` | OCI integration fields exposed directly by the generated schema. | mixed | no |
 | `spec.freeformTags`, `spec.definedTags` | OCI tagging support. | map | no |
 
@@ -83,6 +86,13 @@ material.
 kubectl create secret generic <ADMIN_PASSWORD_SECRET_NAME> --from-literal=password=<ADMIN_PASSWORD>
 ```
 
+If you keep the optional `spec.wallet` stanza shown below, create a wallet
+password Secret under the `walletPassword` key before applying the CR:
+
+```sh
+kubectl create secret generic <WALLET_PASSWORD_SECRET_NAME> --from-literal=walletPassword=<WALLET_PASSWORD>
+```
+
 ```yaml
 apiVersion: database.oracle.com/v1beta1
 kind: AutonomousDatabases
@@ -102,6 +112,11 @@ spec:
   isAutoScalingEnabled: <true/false>
   isFreeTier: <false/true>
   licenseModel: <BRING_YOUR_OWN_LICENSE/LICENSE_INCLUDED>
+  wallet:
+    walletName: <WALLET_SECRET_NAME>
+    walletPassword:
+      secret:
+        secretName: <WALLET_PASSWORD_SECRET_NAME>
 ```
 
 Apply the `AutonomousDatabases` resource with:
@@ -112,9 +127,17 @@ kubectl apply -f <CREATE_YAML>.yaml
 
 ## Binding and wallet access
 
-The old handwritten bind-and-wallet shortcut is not part of the generated v2
-contract. Use the primary Autonomous Database resource for lifecycle management
-and the dedicated wallet resources for follow-on access workflows:
+The published `AutonomousDatabases` CR still supports the compatibility bind
+flow through `spec.id`. Set it to the Autonomous Database OCID when you want
+OSOK to bind to an existing database instead of provisioning a new one.
+
+When `spec.wallet.walletPassword.secret.secretName` is set, the current runtime
+generates a wallet Secret as part of create or bind. The Secret name comes from
+`spec.wallet.walletName`; if that field is omitted, OSOK defaults it to
+`<metadata.name>-wallet`.
+
+Dedicated wallet resources remain available for standalone follow-on wallet
+workflows:
 
 - `config/samples/database_v1beta1_autonomousdatabasewallet.yaml`
 - `config/samples/database_v1beta1_autonomousdatabaseregionalwallet.yaml`
@@ -145,7 +168,13 @@ kubectl apply -f <UPDATE_YAML>.yaml
 
 ## Access information
 
-The generated v2 runtime does not materialize wallet files into a Kubernetes
-Secret as a side effect of create or bind. Use the dedicated wallet resources
-when wallet artifacts are required, and consume connection metadata from the CR
-status for the primary database resource.
+Use `status.connectionStrings` and `status.connectionUrls` on the primary CR
+for connection metadata.
+
+If `spec.wallet.walletPassword` is set, the current service manager also
+materializes wallet files into a Kubernetes Secret during create or bind. The
+target Secret name is `spec.wallet.walletName`, or `<metadata.name>-wallet`
+when `walletName` is omitted.
+
+Use the dedicated wallet resources when you need standalone or regional wallet
+workflows that are separate from the primary `AutonomousDatabases` lifecycle.
