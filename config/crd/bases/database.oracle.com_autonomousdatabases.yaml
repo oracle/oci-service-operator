@@ -518,12 +518,7 @@ spec:
                   type: string
                 type: array
             required:
-            - autonomousDatabaseBackupId
-            - autonomousDatabaseId
-            - cloneType
             - compartmentId
-            - remoteDisasterRecoveryType
-            - sourceId
             type: object
           status:
             description: AutonomousDatabaseStatus defines the observed state of AutonomousDatabase.

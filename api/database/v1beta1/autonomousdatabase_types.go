@@ -267,25 +267,25 @@ type AutonomousDatabaseSpec struct {
 	// +kubebuilder:validation:Optional
 	Source string `json:"source,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the source Autonomous Database that you will clone to create a new Autonomous Database.
-	// +kubebuilder:validation:Required
-	SourceId string `json:"sourceId"`
+	// +kubebuilder:validation:Optional
+	SourceId string `json:"sourceId,omitempty"`
 	// The Autonomous Database clone type.
-	// +kubebuilder:validation:Required
-	CloneType string `json:"cloneType"`
+	// +kubebuilder:validation:Optional
+	CloneType string `json:"cloneType,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the source Autonomous Database Backup that you will clone to create a new Autonomous Database.
-	// +kubebuilder:validation:Required
-	AutonomousDatabaseBackupId string `json:"autonomousDatabaseBackupId"`
+	// +kubebuilder:validation:Optional
+	AutonomousDatabaseBackupId string `json:"autonomousDatabaseBackupId,omitempty"`
 	// If true, 7 days worth of backups are replicated across regions for Cross-Region ADB or Backup-Based DR between Primary and Standby. If false, the backups taken on the Primary are not replicated to the Standby database.
 	// +kubebuilder:validation:Optional
 	IsReplicateAutomaticBackups bool `json:"isReplicateAutomaticBackups,omitempty"`
 	// Indicates the cross-region disaster recovery (DR) type of the standby Autonomous Database Serverless instance.
 	// Autonomous Data Guard (ADG) DR type provides business critical DR with a faster recovery time objective (RTO) during failover or switchover.
 	// Backup-based DR type provides lower cost DR with a slower RTO during failover or switchover.
-	// +kubebuilder:validation:Required
-	RemoteDisasterRecoveryType string `json:"remoteDisasterRecoveryType"`
+	// +kubebuilder:validation:Optional
+	RemoteDisasterRecoveryType string `json:"remoteDisasterRecoveryType,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the source Autonomous Database that you will clone to create a new Autonomous Database.
-	// +kubebuilder:validation:Required
-	AutonomousDatabaseId string `json:"autonomousDatabaseId"`
+	// +kubebuilder:validation:Optional
+	AutonomousDatabaseId string `json:"autonomousDatabaseId,omitempty"`
 	// The timestamp specified for the point-in-time clone of the source Autonomous Database. The timestamp must be in the past.
 	// +kubebuilder:validation:Optional
 	Timestamp string `json:"timestamp,omitempty"`

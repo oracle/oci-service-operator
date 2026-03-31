@@ -83,7 +83,7 @@ func (s *fieldSynthesizer) mergeStructFields(candidates []string, initial []Fiel
 	}
 
 	for _, candidate := range candidates {
-		fields, ok := s.candidateFields(candidate)
+		fields, ok := s.candidateFields(candidate, options)
 		if !ok {
 			continue
 		}
@@ -110,7 +110,7 @@ func (s *fieldSynthesizer) mergeStructFields(candidates []string, initial []Fiel
 	return merged, seenJSONNames
 }
 
-func (s *fieldSynthesizer) candidateFields(typeName string) ([]ocisdk.Field, bool) {
+func (s *fieldSynthesizer) candidateFields(typeName string, options fieldRenderingOptions) ([]ocisdk.Field, bool) {
 	for _, candidate := range s.typeCandidates(typeName) {
 		structDef, ok := s.index.Struct(candidate)
 		if ok {
@@ -121,7 +121,7 @@ func (s *fieldSynthesizer) candidateFields(typeName string) ([]ocisdk.Field, boo
 		if !ok {
 			continue
 		}
-		fields := mergeInterfaceFamilyFields(family)
+		fields := mergeInterfaceFamilyFields(family, options.scope == fieldScopeSpec)
 		if len(fields) == 0 {
 			continue
 		}
@@ -167,7 +167,7 @@ func (s *fieldSynthesizer) renderFieldType(field ocisdk.Field, options fieldRend
 		if !ok {
 			return "", false
 		}
-		fields := mergeInterfaceFamilyFields(family)
+		fields := mergeInterfaceFamilyFields(family, options.scope == fieldScopeSpec)
 		if len(fields) == 0 {
 			return "", false
 		}
@@ -436,7 +436,15 @@ func (s *fieldSynthesizer) typeCandidates(typeName string) []string {
 	return candidates
 }
 
-func mergeInterfaceFamilyFields(family ocisdk.InterfaceFamily) []ocisdk.Field {
+func mergeInterfaceFamilyFields(family ocisdk.InterfaceFamily, relaxImplementationMandatory bool) []ocisdk.Field {
+	if !relaxImplementationMandatory {
+		return mergeInterfaceFamilyFieldsStrict(family)
+	}
+
+	return mergeInterfaceFamilyFieldsSpec(family)
+}
+
+func mergeInterfaceFamilyFieldsStrict(family ocisdk.InterfaceFamily) []ocisdk.Field {
 	merged := make([]ocisdk.Field, 0, len(family.Base.Fields))
 	byJSONName := make(map[string]int, len(family.Base.Fields))
 
@@ -452,7 +460,7 @@ func mergeInterfaceFamilyFields(family ocisdk.InterfaceFamily) []ocisdk.Field {
 				merged = append(merged, field)
 				continue
 			}
-			merged[index] = mergeInterfaceField(merged[index], field)
+			merged[index] = mergeInterfaceFieldStrict(merged[index], field)
 		}
 	}
 
@@ -464,12 +472,77 @@ func mergeInterfaceFamilyFields(family ocisdk.InterfaceFamily) []ocisdk.Field {
 	return merged
 }
 
-func mergeInterfaceField(existing ocisdk.Field, candidate ocisdk.Field) ocisdk.Field {
+func mergeInterfaceFamilyFieldsSpec(family ocisdk.InterfaceFamily) []ocisdk.Field {
+	type mergedField struct {
+		field    ocisdk.Field
+		fromBase bool
+	}
+
+	merged := make([]mergedField, 0, len(family.Base.Fields))
+	byJSONName := make(map[string]int, len(family.Base.Fields))
+
+	appendFields := func(fields []ocisdk.Field, fromBase bool) {
+		for _, field := range fields {
+			jsonName := field.JSONName
+			if jsonName == "" {
+				jsonName = lowerCamel(field.Name)
+			}
+			index, exists := byJSONName[jsonName]
+			if !exists {
+				byJSONName[jsonName] = len(merged)
+				merged = append(merged, mergedField{
+					field:    field,
+					fromBase: fromBase,
+				})
+				continue
+			}
+			merged[index].field = mergeInterfaceField(merged[index].field, field)
+			merged[index].fromBase = merged[index].fromBase || fromBase
+		}
+	}
+
+	appendFields(family.Base.Fields, true)
+	for _, implementation := range family.Implementations {
+		appendFields(implementation.Fields, false)
+	}
+
+	resolved := make([]ocisdk.Field, 0, len(merged))
+	for _, entry := range merged {
+		if !entry.fromBase {
+			entry.field.Mandatory = false
+		}
+		resolved = append(resolved, entry.field)
+	}
+
+	return resolved
+}
+
+func mergeInterfaceFieldStrict(existing ocisdk.Field, candidate ocisdk.Field) ocisdk.Field {
 	if existing.Type != candidate.Type || existing.Kind != candidate.Kind || existing.RenderableType != candidate.RenderableType {
 		return existing
 	}
 
 	existing.Mandatory = existing.Mandatory || candidate.Mandatory
+	existing.Deprecated = existing.Deprecated || candidate.Deprecated
+	existing.ReadOnly = existing.ReadOnly || candidate.ReadOnly
+	if existing.JSONName == "" {
+		existing.JSONName = candidate.JSONName
+	}
+	if existing.Documentation == "" {
+		existing.Documentation = candidate.Documentation
+	}
+	if len(existing.NestedFields) == 0 {
+		existing.NestedFields = candidate.NestedFields
+	}
+
+	return existing
+}
+
+func mergeInterfaceField(existing ocisdk.Field, candidate ocisdk.Field) ocisdk.Field {
+	if existing.Type != candidate.Type || existing.Kind != candidate.Kind || existing.RenderableType != candidate.RenderableType {
+		return existing
+	}
+
 	existing.Deprecated = existing.Deprecated || candidate.Deprecated
 	existing.ReadOnly = existing.ReadOnly || candidate.ReadOnly
 	if existing.JSONName == "" {

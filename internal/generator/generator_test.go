@@ -1665,6 +1665,40 @@ func TestCheckedInDatabaseAutonomousDatabasePreservesSecretBackedAdminPassword(t
 	})
 }
 
+func TestGenerateDatabaseAutonomousDatabaseKeepsVariantSpecificSourceFieldsOptionalWithoutPreservedSurface(t *testing.T) {
+	cfg := loadCheckedInGeneratorConfig(t)
+	databaseService := mustFindGeneratorService(t, cfg, "database")
+
+	outputRoot := t.TempDir()
+	seedSampleKustomization(t, outputRoot)
+
+	pipeline := New()
+	result := mustGenerateRun(t, pipeline, cfg, []ServiceConfig{*databaseService}, Options{
+		OutputRoot: outputRoot,
+	})
+	if len(result.Generated) != 1 {
+		t.Fatalf("Generate() generated %d services, want 1", len(result.Generated))
+	}
+
+	apiContent := readFile(t, filepath.Join(outputRoot, "api", "database", "v1beta1", "autonomousdatabase_types.go"))
+	assertContains(t, apiContent, []string{
+		`CompartmentId string ` + "`json:\"compartmentId\"`",
+		`Source string ` + "`json:\"source,omitempty\"`",
+		`SourceId string ` + "`json:\"sourceId,omitempty\"`",
+		`CloneType string ` + "`json:\"cloneType,omitempty\"`",
+		`AutonomousDatabaseBackupId string ` + "`json:\"autonomousDatabaseBackupId,omitempty\"`",
+		`RemoteDisasterRecoveryType string ` + "`json:\"remoteDisasterRecoveryType,omitempty\"`",
+		`AutonomousDatabaseId string ` + "`json:\"autonomousDatabaseId,omitempty\"`",
+	})
+	assertNotContains(t, apiContent, []string{
+		`SourceId string ` + "`json:\"sourceId\"`",
+		`CloneType string ` + "`json:\"cloneType\"`",
+		`AutonomousDatabaseBackupId string ` + "`json:\"autonomousDatabaseBackupId\"`",
+		`RemoteDisasterRecoveryType string ` + "`json:\"remoteDisasterRecoveryType\"`",
+		`AutonomousDatabaseId string ` + "`json:\"autonomousDatabaseId\"`",
+	})
+}
+
 func TestCheckedInConfigIncludesNetworkLoadBalancerObservedStateAlias(t *testing.T) {
 	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
 	cfg, err := LoadConfig(cfgPath)
@@ -1872,8 +1906,8 @@ func TestMySQLPublishedKindIncludesOptionalDesiredStateFields(t *testing.T) {
 		"SecureConnections MySqlDbSystemSecureConnections `json:\"secureConnections,omitempty\"`",
 		"type MySqlDbSystemSourceObservedState struct {",
 		"Source MySqlDbSystemSourceObservedState `json:\"source,omitempty\"`",
-		"BackupId string `json:\"backupId\"`",
-		"DbSystemId string `json:\"dbSystemId\"`",
+		"BackupId string `json:\"backupId,omitempty\"`",
+		"DbSystemId string `json:\"dbSystemId,omitempty\"`",
 	})
 	if slices.Contains(structFieldNames(t, content, "MySqlDbSystemSourceObservedState"), "SourceUrl") {
 		t.Fatalf("MySqlDbSystemSourceObservedState unexpectedly contains SourceUrl:\n%s", content)
