@@ -27,11 +27,11 @@
     - [Delete](oss.md#delete-stream)
   - [Oracle MySQL Database Service](mysql.md#oracle-mysql-database-service)
     - [Introduction](mysql.md#introduction)
-    - [MySQL DbSystem Pre-requisites](mysql.md#pre-requisites-for-setting-up-mysql-dbsystems)
-    - [MySQL DbSystem Specification Parameters](mysql.md#mysql-dbsystem-specification-parameters)
-    - [MySQL DbSystem Status Parameters](mysql.md#mysql-dbsystem-status-parameters)
-    - [Provision](mysql.md#provisioning-a-mysql-dbsystem)
-    - [Update](mysql.md#updating-a-mysql-dbsystem)
+    - [MySQL DB System Pre-requisites](mysql.md#pre-requisites-for-setting-up-mysql-db-systems)
+    - [MySQL DB System Specification Parameters](mysql.md#mysql-db-system-specification-parameters)
+    - [MySQL DB System Status Parameters](mysql.md#mysql-db-system-status-parameters)
+    - [Provision](mysql.md#provisioning-a-mysql-db-system)
+    - [Update](mysql.md#updating-a-mysql-db-system)
     - [Kubernetes Secrets](mysql.md#kubernetes-secrets)
 
 ## Introduction

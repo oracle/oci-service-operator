@@ -1,11 +1,11 @@
 # Oracle MySQL Database Service
 
 - [Introduction](#introduction)
-- [MySQL DbSystem Pre-requisites](#pre-requisites-for-setting-up-mysql-dbsystems)
-- [MySQL DbSystem Specification Parameters](#mysql-dbsystem-specification-parameters)
-- [MySQL DbSystem Status Parameters](#mysql-dbsystem-status-parameters)
-- [Provision](#provisioning-a-mysql-dbsystem)
-- [Update](#updating-a-mysql-dbsystem)
+- [MySQL DB System Pre-requisites](#pre-requisites-for-setting-up-mysql-db-systems)
+- [MySQL DB System Specification Parameters](#mysql-db-system-specification-parameters)
+- [MySQL DB System Status Parameters](#mysql-db-system-status-parameters)
+- [Provision](#provisioning-a-mysql-db-system)
+- [Update](#updating-a-mysql-db-system)
 - [Kubernetes Secrets](#kubernetes-secrets)
 
 ## Introduction
@@ -54,7 +54,7 @@ Allow group <OSOK_GROUP> to use tag-namespaces in tenancy
 
 Without these policies, the service will not function correctly.
 
-## MySQL DbSystem Specification Parameters
+## MySQL DB System Specification Parameters
 
 The published CRD is `dbsystems.mysql.oracle.com`, and the top-level kind is
 `DbSystem`. The generated v2 surface does not preserve the old `spec.id` bind
@@ -97,7 +97,7 @@ the matching variant field:
 - `IMPORTURL`: `spec.source.sourceUrl`
 - `NONE`: no additional source field
 
-## MySQL DbSystem Status Parameters
+## MySQL DB System Status Parameters
 
 | Parameter | Description | Type |
 | --- | --- | --- |
