@@ -344,6 +344,110 @@ func TestDbSystemServiceManagerCreateOrUpdateTreatsEmptyAdminSecretObjectsAsOmit
 	}
 }
 
+func TestDbSystemServiceManagerCreateOrUpdateListBindingUsesReusableLifecycleStates(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name           string
+		lifecycleState mysqlsdk.DbSystemLifecycleStateEnum
+		wantCreate     bool
+		wantRequeue    bool
+		wantOcid       string
+	}{
+		{
+			name:           "active binds existing db system",
+			lifecycleState: mysqlsdk.DbSystemLifecycleStateActive,
+			wantCreate:     false,
+			wantRequeue:    false,
+			wantOcid:       "ocid1.mysqldbsystem.oc1..existing",
+		},
+		{
+			name:           "deleting match falls through to create",
+			lifecycleState: mysqlsdk.DbSystemLifecycleStateDeleting,
+			wantCreate:     true,
+			wantRequeue:    false,
+			wantOcid:       "ocid1.mysqldbsystem.oc1..created",
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			runDbSystemListBindingLifecycleCase(t, tt.lifecycleState, tt.wantCreate, tt.wantRequeue, tt.wantOcid)
+		})
+	}
+}
+
+func runDbSystemListBindingLifecycleCase(
+	t *testing.T,
+	lifecycleState mysqlsdk.DbSystemLifecycleStateEnum,
+	wantCreate, wantRequeue bool,
+	wantOcid string,
+) {
+	t.Helper()
+
+	manager, createCalled, listRequest := newDbSystemListBindingTestManager(lifecycleState)
+	resource := newDbSystemListBindingTestResource("wanted")
+
+	response, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	assertDbSystemListBindingLifecycleOutcome(
+		t,
+		lifecycleState,
+		wantCreate,
+		wantRequeue,
+		wantOcid,
+		resource,
+		response,
+		*createCalled,
+		*listRequest,
+	)
+}
+
+func assertDbSystemListBindingLifecycleOutcome(
+	t *testing.T,
+	lifecycleState mysqlsdk.DbSystemLifecycleStateEnum,
+	wantCreate, wantRequeue bool,
+	wantOcid string,
+	resource *mysqlv1beta1.DbSystem,
+	response servicemanager.OSOKResponse,
+	createCalled bool,
+	listRequest mysqlsdk.ListDbSystemsRequest,
+) {
+	t.Helper()
+
+	if !response.IsSuccessful {
+		t.Fatal("CreateOrUpdate() should report success")
+	}
+	if createCalled != wantCreate {
+		t.Fatalf("Create() called = %t, want %t for lifecycle %q", createCalled, wantCreate, lifecycleState)
+	}
+	if response.ShouldRequeue != wantRequeue {
+		t.Fatalf("response.ShouldRequeue = %t, want %t for lifecycle %q", response.ShouldRequeue, wantRequeue, lifecycleState)
+	}
+	assertDbSystemListBindingRequest(t, listRequest, resource)
+	if string(resource.Status.OsokStatus.Ocid) != wantOcid {
+		t.Fatalf("status.ocid = %q, want %q", resource.Status.OsokStatus.Ocid, wantOcid)
+	}
+}
+
+func assertDbSystemListBindingRequest(t *testing.T, listRequest mysqlsdk.ListDbSystemsRequest, resource *mysqlv1beta1.DbSystem) {
+	t.Helper()
+
+	if listRequest.CompartmentId == nil || *listRequest.CompartmentId != resource.Spec.CompartmentId {
+		t.Fatalf("list request compartmentId = %v, want %q", listRequest.CompartmentId, resource.Spec.CompartmentId)
+	}
+	if listRequest.DisplayName == nil || *listRequest.DisplayName != resource.Spec.DisplayName {
+		t.Fatalf("list request displayName = %v, want %q", listRequest.DisplayName, resource.Spec.DisplayName)
+	}
+	if listRequest.LifecycleState != "" {
+		t.Fatalf("list request lifecycleState = %q, want omitted empty lifecycle filter", listRequest.LifecycleState)
+	}
+}
+
 func TestDbSystemServiceManagerCreateOrUpdateRejectsSourceMutationsQuick(t *testing.T) {
 	t.Parallel()
 
@@ -439,6 +543,84 @@ func projectCreateDbSystemRequest(resource *mysqlv1beta1.DbSystem, credentialCli
 		return mysqlsdk.CreateDbSystemRequest{}, fmt.Errorf("CreateOrUpdate() should report success")
 	}
 	return captured, nil
+}
+
+func newDbSystemListBindingTestManager(lifecycleState mysqlsdk.DbSystemLifecycleStateEnum) (*DbSystemServiceManager, *bool, *mysqlsdk.ListDbSystemsRequest) {
+	createCalled := false
+	listRequest := mysqlsdk.ListDbSystemsRequest{}
+
+	manager := &DbSystemServiceManager{
+		client: defaultDbSystemServiceClient{
+			ServiceClient: generatedruntime.NewServiceClient[*mysqlv1beta1.DbSystem](generatedruntime.Config[*mysqlv1beta1.DbSystem]{
+				Kind:    "DbSystem",
+				SDKName: "DbSystem",
+				Semantics: &generatedruntime.Semantics{
+					List: &generatedruntime.ListSemantics{
+						ResponseItemsField: "Items",
+						MatchFields:        []string{"compartmentId", "configurationId", "databaseManagement", "dbSystemId", "displayName", "isHeatWaveClusterAttached", "isUpToDate", "state"},
+					},
+					Lifecycle: generatedruntime.LifecycleSemantics{
+						ProvisioningStates: []string{"CREATING", "UPDATING"},
+						UpdatingStates:     []string{"UPDATING"},
+						ActiveStates:       []string{"ACTIVE"},
+					},
+					Delete: generatedruntime.DeleteSemantics{
+						Policy:         "required",
+						PendingStates:  []string{"DELETING"},
+						TerminalStates: []string{"DELETED"},
+					},
+				},
+				Create: &generatedruntime.Operation{
+					NewRequest: func() any { return &mysqlsdk.CreateDbSystemRequest{} },
+					Call: func(_ context.Context, _ any) (any, error) {
+						createCalled = true
+						return mysqlsdk.CreateDbSystemResponse{
+							DbSystem: mysqlsdk.DbSystem{
+								Id:             common.String("ocid1.mysqldbsystem.oc1..created"),
+								DisplayName:    common.String("wanted"),
+								CompartmentId:  common.String("ocid1.compartment.oc1..example"),
+								LifecycleState: mysqlsdk.DbSystemLifecycleStateActive,
+							},
+						}, nil
+					},
+				},
+				List: &generatedruntime.Operation{
+					NewRequest: func() any { return &mysqlsdk.ListDbSystemsRequest{} },
+					Call: func(_ context.Context, request any) (any, error) {
+						listRequest = *request.(*mysqlsdk.ListDbSystemsRequest)
+						return mysqlsdk.ListDbSystemsResponse{
+							Items: []mysqlsdk.DbSystemSummary{
+								{
+									Id:             common.String("ocid1.mysqldbsystem.oc1..existing"),
+									DisplayName:    common.String("wanted"),
+									CompartmentId:  common.String("ocid1.compartment.oc1..example"),
+									LifecycleState: lifecycleState,
+								},
+							},
+						}, nil
+					},
+					Fields: []generatedruntime.RequestField{
+						{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
+						{FieldName: "DisplayName", RequestName: "displayName", Contribution: "query"},
+						{FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query"},
+					},
+				},
+			}),
+		},
+	}
+
+	return manager, &createCalled, &listRequest
+}
+
+func newDbSystemListBindingTestResource(displayName string) *mysqlv1beta1.DbSystem {
+	return &mysqlv1beta1.DbSystem{
+		Spec: mysqlv1beta1.DbSystemSpec{
+			CompartmentId: "ocid1.compartment.oc1..example",
+			ShapeName:     "MySQL.VM.Standard.E3.1.8GB",
+			SubnetId:      "ocid1.subnet.oc1..example",
+			DisplayName:   displayName,
+		},
+	}
 }
 
 func projectCreateDbSystemSource(source mysqlv1beta1.DbSystemSource) (mysqlsdk.CreateDbSystemSourceDetails, error) {

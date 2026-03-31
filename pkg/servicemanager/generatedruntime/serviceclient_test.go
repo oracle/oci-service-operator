@@ -745,6 +745,137 @@ func TestServiceClientCreateOrUpdateDoesNotBindFormalListWithoutIdentifyingCrite
 	}
 }
 
+func TestServiceClientCreateOrUpdateFormalListBindingRespectsReusableLifecycleStates(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name           string
+		lifecycleState string
+		wantCreate     bool
+		wantRequeue    bool
+		wantOcid       string
+	}{
+		{name: "active", lifecycleState: "ACTIVE", wantCreate: false, wantRequeue: false, wantOcid: "ocid1.thing.oc1..existing"},
+		{name: "creating", lifecycleState: "CREATING", wantCreate: false, wantRequeue: true, wantOcid: "ocid1.thing.oc1..existing"},
+		{name: "updating", lifecycleState: "UPDATING", wantCreate: false, wantRequeue: true, wantOcid: "ocid1.thing.oc1..existing"},
+		{name: "deleting", lifecycleState: "DELETING", wantCreate: true, wantRequeue: false, wantOcid: "ocid1.thing.oc1..created"},
+		{name: "deleted", lifecycleState: "DELETED", wantCreate: true, wantRequeue: false, wantOcid: "ocid1.thing.oc1..created"},
+		{name: "failed", lifecycleState: "FAILED", wantCreate: true, wantRequeue: false, wantOcid: "ocid1.thing.oc1..created"},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			runFormalListBindingLifecycleCase(t, tt.lifecycleState, tt.wantCreate, tt.wantRequeue, tt.wantOcid)
+		})
+	}
+}
+
+func runFormalListBindingLifecycleCase(t *testing.T, lifecycleState string, wantCreate, wantRequeue bool, wantOcid string) {
+	t.Helper()
+
+	client, createCalled, listRequest := newFormalListBindingLifecycleClient(t, lifecycleState)
+	resource := &fakeResource{
+		Spec: fakeSpec{
+			CompartmentId: "ocid1.compartment.oc1..match",
+			DisplayName:   "created-name",
+			Name:          "wanted",
+		},
+	}
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful {
+		t.Fatal("CreateOrUpdate() should report success")
+	}
+	if *createCalled != wantCreate {
+		t.Fatalf("Create() called = %t, want %t for lifecycle %q", *createCalled, wantCreate, lifecycleState)
+	}
+	if response.ShouldRequeue != wantRequeue {
+		t.Fatalf("response.ShouldRequeue = %t, want %t for lifecycle %q", response.ShouldRequeue, wantRequeue, lifecycleState)
+	}
+	if listRequest.CompartmentId != "ocid1.compartment.oc1..match" {
+		t.Fatalf("list request compartmentId = %q, want ocid1.compartment.oc1..match", listRequest.CompartmentId)
+	}
+	if listRequest.Name != "wanted" {
+		t.Fatalf("list request name = %q, want wanted", listRequest.Name)
+	}
+	if string(resource.Status.OsokStatus.Ocid) != wantOcid {
+		t.Fatalf("status.ocid = %q, want %q", resource.Status.OsokStatus.Ocid, wantOcid)
+	}
+}
+
+func newFormalListBindingLifecycleClient(t *testing.T, lifecycleState string) (ServiceClient[*fakeResource], *bool, *fakeListThingRequest) {
+	t.Helper()
+
+	createCalled := false
+	listRequest := fakeListThingRequest{}
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Semantics: &Semantics{
+			List: &ListSemantics{
+				ResponseItemsField: "Resources",
+				MatchFields:        []string{"name", "compartmentId"},
+			},
+			Lifecycle: LifecycleSemantics{
+				ProvisioningStates: []string{"CREATING"},
+				UpdatingStates:     []string{"UPDATING"},
+				ActiveStates:       []string{"ACTIVE"},
+			},
+			Delete: DeleteSemantics{
+				Policy:         "required",
+				TerminalStates: []string{"DELETED"},
+			},
+		},
+		Create: &Operation{
+			NewRequest: func() any { return &fakeCreateThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				createRequest := *request.(*fakeCreateThingRequest)
+				if createRequest.DisplayName != "created-name" {
+					t.Fatalf("create request displayName = %q, want created-name", createRequest.DisplayName)
+				}
+				createCalled = true
+				return fakeCreateThingResponse{
+					Thing: fakeThing{
+						Id:             "ocid1.thing.oc1..created",
+						DisplayName:    "created-name",
+						LifecycleState: "ACTIVE",
+					},
+				}, nil
+			},
+		},
+		List: &Operation{
+			NewRequest: func() any { return &fakeListThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				listRequest = *request.(*fakeListThingRequest)
+				return fakeNamedListThingResponse{
+					Collection: fakeNamedThingCollection{
+						Resources: []fakeThingSummary{
+							{
+								Id:             "ocid1.thing.oc1..existing",
+								Name:           "wanted",
+								CompartmentId:  "ocid1.compartment.oc1..match",
+								LifecycleState: lifecycleState,
+							},
+						},
+					},
+				}, nil
+			},
+			Fields: []RequestField{
+				{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
+				{FieldName: "Name", RequestName: "name", Contribution: "query"},
+			},
+		},
+	})
+
+	return client, &createCalled, &listRequest
+}
+
 func TestServiceClientCreateOrUpdateSkipsUpdateWhenNoSupportedDriftRemains(t *testing.T) {
 	t.Parallel()
 

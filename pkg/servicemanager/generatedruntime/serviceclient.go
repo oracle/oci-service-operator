@@ -188,7 +188,7 @@ func (c ServiceClient[T]) CreateOrUpdate(ctx context.Context, resource T, _ ctrl
 	}
 
 	if c.shouldBindBeforeCreate() {
-		response, err := c.readResource(ctx, resource, "")
+		response, err := c.bindBeforeCreate(ctx, resource)
 		switch {
 		case err == nil:
 			return c.applySuccess(resource, response, shared.Active)
@@ -498,6 +498,24 @@ func unsupportedUpdateDriftPaths(specValues map[string]any, statusValues map[str
 	return unsupported
 }
 
+func (c ServiceClient[T]) bindBeforeCreate(ctx context.Context, resource T) (any, error) {
+	response, err := c.invoke(ctx, c.config.List, resource, "")
+	if err != nil {
+		return nil, err
+	}
+
+	body, ok := responseBody(response)
+	if !ok {
+		return nil, fmt.Errorf("%s list response did not expose a body payload", c.config.Kind)
+	}
+
+	item, err := c.selectReusableListItem(body, resource)
+	if err != nil {
+		return nil, err
+	}
+	return item, nil
+}
+
 func (c ServiceClient[T]) readResource(ctx context.Context, resource T, preferredID string) (any, error) {
 	if c.config.Get != nil && !c.shouldUseFormalListLookup(preferredID) {
 		response, err := c.invoke(ctx, c.config.Get, resource, preferredID)
@@ -542,6 +560,26 @@ func (c ServiceClient[T]) shouldUseFormalListLookup(preferredID string) bool {
 		c.config.Semantics != nil &&
 		c.config.Semantics.List != nil &&
 		c.config.List != nil
+}
+
+func (c ServiceClient[T]) selectReusableListItem(body any, resource T) (any, error) {
+	responseItemsField := ""
+	if c.config.Semantics != nil && c.config.Semantics.List != nil {
+		responseItemsField = c.config.Semantics.List.ResponseItemsField
+	}
+	items, err := listItems(body, responseItemsField)
+	if err != nil {
+		return nil, err
+	}
+	if len(items) == 0 {
+		return nil, errResourceNotFound
+	}
+
+	criteria, err := lookupValues(resource)
+	if err != nil {
+		return nil, err
+	}
+	return c.selectFormalReusableListItem(items, criteria)
 }
 
 func (c ServiceClient[T]) invoke(ctx context.Context, op *Operation, resource T, preferredID string) (any, error) {
@@ -1558,6 +1596,15 @@ func (c ServiceClient[T]) selectListItem(body any, resource T, preferredID strin
 
 //nolint:gocognit,gocyclo // Formal list matching must evaluate preferred IDs, match fields, and ambiguity handling together.
 func (c ServiceClient[T]) selectFormalListItem(items []any, criteria map[string]any, preferredID string) (any, error) {
+	return c.selectFormalListItemWithFilter(items, criteria, preferredID, nil)
+}
+
+func (c ServiceClient[T]) selectFormalReusableListItem(items []any, criteria map[string]any) (any, error) {
+	return c.selectFormalListItemWithFilter(items, criteria, "", c.listItemReusableBeforeCreate)
+}
+
+//nolint:gocognit,gocyclo // Formal list matching must evaluate preferred IDs, match fields, lifecycle filters, and ambiguity handling together.
+func (c ServiceClient[T]) selectFormalListItemWithFilter(items []any, criteria map[string]any, preferredID string, accept func(map[string]any) bool) (any, error) {
 	matchFields := []string{}
 	if c.config.Semantics != nil && c.config.Semantics.List != nil {
 		matchFields = append(matchFields, c.config.Semantics.List.MatchFields...)
@@ -1594,7 +1641,7 @@ func (c ServiceClient[T]) selectFormalListItem(items []any, criteria map[string]
 			continue
 		}
 		comparedReusable = true
-		if matched {
+		if matched && (accept == nil || accept(values)) {
 			matches = append(matches, item)
 		}
 	}
@@ -1611,7 +1658,31 @@ func (c ServiceClient[T]) selectFormalListItem(items []any, criteria map[string]
 	}
 }
 
-//nolint:gocyclo // OCI list bodies expose item slices through several schema shapes.
+func (c ServiceClient[T]) listItemReusableBeforeCreate(values map[string]any) bool {
+	reusableStates := c.reusableLifecycleStates()
+	if len(reusableStates) == 0 {
+		return true
+	}
+
+	lifecycleState := strings.ToUpper(firstNonEmpty(values, "lifecycleState", "status", "state"))
+	if lifecycleState == "" {
+		return false
+	}
+	return containsString(reusableStates, lifecycleState)
+}
+
+func (c ServiceClient[T]) reusableLifecycleStates() []string {
+	if c.config.Semantics == nil {
+		return nil
+	}
+
+	states := appendUniqueStrings([]string{}, c.config.Semantics.Lifecycle.ActiveStates...)
+	states = appendUniqueStrings(states, c.config.Semantics.Lifecycle.ProvisioningStates...)
+	states = appendUniqueStrings(states, c.config.Semantics.Lifecycle.UpdatingStates...)
+	return states
+}
+
+//nolint:gocognit,gocyclo // OCI list bodies expose item slices through several schema shapes.
 func listItems(body any, responseItemsField string) ([]any, error) {
 	value := reflect.ValueOf(body)
 	for value.IsValid() && value.Kind() == reflect.Pointer {
@@ -1620,7 +1691,13 @@ func listItems(body any, responseItemsField string) ([]any, error) {
 		}
 		value = value.Elem()
 	}
-	if !value.IsValid() || value.Kind() != reflect.Struct {
+	if !value.IsValid() {
+		return nil, fmt.Errorf("OCI list body must be a struct or slice, got %T", body)
+	}
+	if value.Kind() == reflect.Slice {
+		return sliceValues(value), nil
+	}
+	if value.Kind() != reflect.Struct {
 		return nil, fmt.Errorf("OCI list body must be a struct, got %T", body)
 	}
 

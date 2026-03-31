@@ -16,8 +16,13 @@ gaps: []
 - The generated request path resolves `spec.adminUsername` and
   `spec.adminPassword` from same-namespace Kubernetes secrets before OCI
   create/update calls, then mirrors those secret references into status.
-- The current generated path creates whenever no OCI ID is tracked, then relies
-  on `GetDbSystem` or `ListDbSystems` only for read-after-write and delete
+- When no OCI ID is tracked, the current generated path calls
+  `ListDbSystems` before create and only reuses entries that match an
+  identifying reusable field such as `displayName` while OCI remains in
+  reusable lifecycle states (`ACTIVE`, `CREATING`, or `UPDATING`).
+- Deleting, deleted, failed, or non-identifying list matches still fall
+  through to `CreateDbSystem`, and the generated path continues to rely on
+  `GetDbSystem` or `ListDbSystems` for read-after-write and delete
   confirmation.
 - Imported provider facts cover `CreateDbSystem`, `GetDbSystem`,
   `ListDbSystems`, `UpdateDbSystem`, and `DeleteDbSystem`.
@@ -43,8 +48,9 @@ gaps: []
 - `DbSystem` records only non-empty last applied admin credential secret
   references in status so force-new checks compare references instead of
   plaintext values.
-- The shared generated runtime resolves reusable OCI resources through
-  `ListDbSystems` before create when no OCI ID is already tracked.
+- The shared generated runtime uses `ListDbSystems` before create only when no
+  OCI ID is already tracked, reuses only identifying matches in reusable
+  lifecycle states, and otherwise still calls `CreateDbSystem`.
 - The generated runtime rejects force-new and otherwise unsupported update drift,
   and only calls `UpdateDbSystem` when the imported mutable surface differs from
   observed state.
