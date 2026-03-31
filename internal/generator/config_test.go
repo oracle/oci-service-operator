@@ -252,6 +252,7 @@ services:
               - groups="",resources=secrets,verbs=get;list;watch
           serviceManager:
             packagePath: mysql/dbsystem
+            needsCredentialClient: true
   - service: core
     sdkPackage: github.com/oracle/oci-go-sdk/v65/core
     group: core
@@ -752,6 +753,9 @@ func assertMySQLGenerationOverride(t *testing.T, override ResourceGenerationOver
 	if override.ServiceManager.PackagePath != "mysql/dbsystem" {
 		t.Fatalf("mysql packagePath = %q, want %q", override.ServiceManager.PackagePath, "mysql/dbsystem")
 	}
+	if !override.ServiceManager.NeedsCredentialClient {
+		t.Fatal("mysql needsCredentialClient = false, want true")
+	}
 }
 
 func assertDatabaseRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
@@ -780,7 +784,7 @@ func assertMySQLRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
 	t.Helper()
 
 	assertResourceOverrideCount(t, service, 1)
-	assertMySQLGenerationOverride(t, service.Generation.Resources[0], nil)
+	assertMySQLGenerationOverride(t, service.Generation.Resources[0], []string{`groups="",resources=secrets,verbs=get;list;watch`})
 }
 
 func assertStreamingRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {

@@ -130,8 +130,8 @@ database_management, db_system_id (+4 more)
 conflicts: none
 open gaps: bind-versus-create, list-lookup,
 mutation-policy, waiter-work-request
-Generated runtime only; replace with
-controller-specific lifecycle notes before
-promotion.
+Generated runtime reads admin credential secret
+refs during OCI request projection and does not
+write follow-up Kubernetes secrets.
 end note
 @enduml

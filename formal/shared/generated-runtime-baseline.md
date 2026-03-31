@@ -86,10 +86,12 @@ the same reference points:
 - `nosql/Table`: no repo-authored secret reads or writes.
 - `psql/DbSystem`: no Kubernetes secret reads or writes; credential fields
   remain OCI payload inputs.
-- `mysql/DbSystem`: no repo-authored Kubernetes secret reads or writes; the v2
-  generated surface carries admin credentials as direct spec inputs and does
-  not materialize endpoint secrets.
-- Owner: no additional secret seam for these generated-runtime rows.
+- `mysql/DbSystem`: generated-runtime request projection reads
+  same-namespace Kubernetes secrets for `adminUsername` and `adminPassword`,
+  mirrors the secret references into status for force-new bookkeeping, and
+  does not materialize endpoint or access secrets.
+- Owner: no additional secret seam for `nosql/Table` or `psql/DbSystem`;
+  mysql keeps explicit read-only secret semantics in the generated-runtime row.
 
 ### Delete semantics
 

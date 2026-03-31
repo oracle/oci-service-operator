@@ -33,6 +33,7 @@ func (e ErrTargetExists) Error() string {
 	return fmt.Sprintf("target output %q already exists", e.Path)
 }
 
+//nolint:gocyclo // Package rendering fans out across multiple optional generated surfaces.
 func (r *Renderer) RenderPackage(root string, pkg *PackageModel, overwrite bool) (string, error) {
 	outputDir := targetOutputDir(root, pkg)
 	if _, err := os.Stat(outputDir); err == nil && !overwrite {
@@ -182,6 +183,7 @@ func (r *Renderer) RenderServiceManagers(root string, pkg *PackageModel, overwri
 	return nil
 }
 
+//nolint:gocognit,gocyclo // Sample rendering preserves ordering and kustomization updates across package groups.
 func (r *Renderer) RenderSamples(root string, packages []*PackageModel) error {
 	type sampleEntry struct {
 		order    int
@@ -898,9 +900,12 @@ var new{{ .Kind }}ServiceClient = func(manager *{{ .ManagerTypeName }}) {{ .Clie
 {{- end }}
 {{- end }}
 	config := generatedruntime.Config[*{{ .APIImportAlias }}.{{ .Kind }}]{
-		Kind:    "{{ .Kind }}",
-		SDKName: "{{ .SDKName }}",
-		Log:     manager.Log,
+		Kind:             "{{ .Kind }}",
+		SDKName:          "{{ .SDKName }}",
+		Log:              manager.Log,
+{{- if .NeedsCredentialClient }}
+		CredentialClient: manager.CredentialClient,
+{{- end }}
 {{- if .Semantics }}
 		Semantics: &generatedruntime.Semantics{
 			FormalService:     "{{ .Semantics.FormalService }}",

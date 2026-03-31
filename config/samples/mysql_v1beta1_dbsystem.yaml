@@ -7,4 +7,13 @@ apiVersion: mysql.oracle.com/v1beta1
 kind: DbSystem
 metadata:
   name: dbsystem-sample
-spec: {}
+spec:
+  compartmentId: ocid1.compartment.oc1..exampleuniqueID
+  shapeName: MySQL.VM.Standard.E3.1.8GB
+  subnetId: ocid1.subnet.oc1..exampleuniqueID
+  adminUsername:
+    secret:
+      secretName: admin-secret
+  adminPassword:
+    secret:
+      secretName: admin-secret

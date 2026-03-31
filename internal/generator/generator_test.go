@@ -665,6 +665,65 @@ func TestBuildPackageModelAvoidsHelperTypeCollisions(t *testing.T) {
 	}
 }
 
+func TestBuildPackageModelMergesParityFieldOverridesIntoDiscoveredResources(t *testing.T) {
+	t.Parallel()
+
+	cfg := &Config{
+		Domain:         "oracle.com",
+		DefaultVersion: "v1beta1",
+	}
+	service := ServiceConfig{
+		Service:        "mysql",
+		SDKPackage:     "example.com/test/sdk",
+		Group:          "mysql",
+		PackageProfile: PackageProfileCRDOnly,
+		Parity: &ParityConfig{
+			Resources: []ParityResource{
+				{
+					SourceResource:      "Widget",
+					Kind:                "Widget",
+					MergeWithDiscovered: true,
+					SpecFields:          []FieldOverride{{Name: "DisplayName", Type: "shared.UsernameSource", Tag: `json:"displayName,omitempty"`}},
+					StatusFields:        []FieldOverride{{Name: "AdminUsername", Type: "shared.UsernameSource", Tag: `json:"adminUsername,omitempty"`}},
+					Sample:              SampleOverride{MetadataName: "widget-sample"},
+				},
+			},
+		},
+	}
+
+	pkg, err := buildPackageModel(cfg, service, []ResourceModel{
+		{
+			SDKName:             "Widget",
+			Kind:                "Widget",
+			FileStem:            "widget",
+			KindPlural:          "widgets",
+			StatusTypeName:      defaultStatusTypeName("Widget"),
+			SpecComments:        []string{"WidgetSpec defines the desired state of Widget."},
+			StatusComments:      []string{"WidgetStatus defines the observed state of Widget."},
+			SpecFields:          []FieldModel{{Name: "DisplayName", Type: "string", Tag: `json:"displayName,omitempty"`}, {Name: "Enabled", Type: "bool", Tag: `json:"enabled,omitempty"`}},
+			StatusFields:        []FieldModel{{Name: "OsokStatus", Type: "shared.OSOKStatus", Tag: `json:"status"`}, {Name: "Id", Type: "string", Tag: `json:"id,omitempty"`}},
+			HelperTypes:         []TypeModel{{Name: "WidgetConfig", Comments: []string{"WidgetConfig defines nested fields for Widget.Config."}, Fields: []FieldModel{{Name: "Enabled", Type: "bool", Tag: `json:"enabled,omitempty"`}}}},
+			Sample:              SampleModel{Body: "apiVersion: mysql.oracle.com/v1beta1", FileName: "mysql_v1beta1_widget.yaml", MetadataName: "widget-default"},
+			CompatibilityLocked: false,
+		},
+	})
+	if err != nil {
+		t.Fatalf("buildPackageModel() error = %v", err)
+	}
+
+	resource := findResource(t, pkg.Resources, "Widget")
+	assertFieldType(t, "Widget DisplayName", findFieldModel(t, resource.SpecFields, "DisplayName"), "shared.UsernameSource")
+	assertResourceHasSpecFields(t, resource, "Enabled")
+	assertResourceHasStatusFields(t, resource, "Id", "AdminUsername")
+	findHelperType(t, resource.HelperTypes, "WidgetConfig")
+	if resource.Sample.MetadataName != "widget-sample" {
+		t.Fatalf("Widget sample metadata name = %q, want %q", resource.Sample.MetadataName, "widget-sample")
+	}
+	if !resource.CompatibilityLocked {
+		t.Fatal("Widget compatibility lock should be preserved after merging parity overrides")
+	}
+}
+
 func TestGenerateRendersAndSkipsExisting(t *testing.T) {
 	t.Parallel()
 
@@ -1112,6 +1171,14 @@ func TestGenerateRendersServiceManagerScaffolds(t *testing.T) {
 	}
 	service := testServiceConfig(PackageProfileControllerBacked)
 	service.Generation.ServiceManager.Strategy = GenerationStrategyGenerated
+	service.Generation.Resources = []ResourceGenerationOverride{
+		{
+			Kind: "DbSystem",
+			ServiceManager: ServiceManagerGenerationOverride{
+				NeedsCredentialClient: true,
+			},
+		},
+	}
 	pipeline := newTestGenerator(t)
 
 	outputRoot := t.TempDir()
@@ -1129,7 +1196,9 @@ func TestGenerateRendersServiceManagerScaffolds(t *testing.T) {
 		"package dbsystem",
 		"type DbSystemServiceClient interface {",
 		"var newDbSystemServiceClient = func(manager *DbSystemServiceManager) DbSystemServiceClient {",
-		`Kind:    "DbSystem"`,
+		`Kind:`,
+		`"DbSystem"`,
+		`CredentialClient: manager.CredentialClient`,
 		"github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime",
 		"generatedruntime.NewServiceClient[*mysqlv1beta1.DbSystem]",
 		"mysqlsdk.NewSampleClientWithConfigurationProvider(manager.Provider)",

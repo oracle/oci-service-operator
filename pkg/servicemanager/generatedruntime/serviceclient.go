@@ -16,6 +16,7 @@ import (
 	"unicode"
 
 	"github.com/oracle/oci-go-sdk/v65/common"
+	"github.com/oracle/oci-service-operator/pkg/credhelper"
 	"github.com/oracle/oci-service-operator/pkg/errorutil"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
@@ -114,11 +115,12 @@ type Semantics struct {
 }
 
 type Config[T any] struct {
-	Kind      string
-	SDKName   string
-	Log       loggerutil.OSOKLogger
-	InitError error
-	Semantics *Semantics
+	Kind             string
+	SDKName          string
+	Log              loggerutil.OSOKLogger
+	InitError        error
+	Semantics        *Semantics
+	CredentialClient credhelper.CredentialClient
 
 	Create *Operation
 	Get    *Operation
@@ -138,6 +140,7 @@ func NewServiceClient[T any](cfg Config[T]) ServiceClient[T] {
 	return ServiceClient[T]{config: cfg}
 }
 
+//nolint:gocognit,gocyclo // Reconcile orchestration branches across create, update, and read-only generated-runtime flows.
 func (c ServiceClient[T]) CreateOrUpdate(ctx context.Context, resource T, _ ctrl.Request) (servicemanager.OSOKResponse, error) {
 	if c.config.InitError != nil {
 		return servicemanager.OSOKResponse{IsSuccessful: false}, c.markFailure(resource, c.config.InitError)
@@ -190,6 +193,7 @@ func (c ServiceClient[T]) CreateOrUpdate(ctx context.Context, resource T, _ ctrl
 	return c.applySuccess(resource, response, shared.Active)
 }
 
+//nolint:gocyclo // Delete must coordinate semantic and legacy fallback paths in one entrypoint.
 func (c ServiceClient[T]) Delete(ctx context.Context, resource T) (bool, error) {
 	if c.config.InitError != nil {
 		return false, c.config.InitError
@@ -273,6 +277,7 @@ func (c ServiceClient[T]) requiresWriteFollowUp(phase string) bool {
 	}
 }
 
+//nolint:gocognit,gocyclo // Semantic delete handling encodes policy-specific confirmation behavior and lifecycle mapping.
 func (c ServiceClient[T]) deleteWithSemantics(ctx context.Context, resource T) (bool, error) {
 	semantics := c.config.Semantics
 	if semantics == nil {
@@ -366,6 +371,7 @@ func (c ServiceClient[T]) resolveDeleteID(ctx context.Context, resource T) (stri
 	return currentID, nil
 }
 
+//nolint:gocognit,gocyclo // Mutation validation combines conflicts and force-new comparisons over dotted JSON paths.
 func (c ServiceClient[T]) validateMutationPolicy(resource T, existing bool) error {
 	semantics := c.config.Semantics
 	if semantics == nil {
@@ -451,7 +457,7 @@ func (c ServiceClient[T]) invoke(ctx context.Context, op *Operation, resource T,
 	if request == nil {
 		return nil, fmt.Errorf("%s generated runtime did not create an OCI request value", c.config.Kind)
 	}
-	if err := buildRequest(request, resource, preferredID, op.Fields, c.idFieldAliases()); err != nil {
+	if err := buildRequest(ctx, request, resource, preferredID, op.Fields, c.idFieldAliases(), c.config.CredentialClient); err != nil {
 		return nil, fmt.Errorf("build %s OCI request: %w", c.config.Kind, err)
 	}
 
@@ -466,6 +472,7 @@ func (c ServiceClient[T]) applySuccess(resource T, response any, fallback shared
 	if err := mergeResponseIntoStatus(resource, response); err != nil {
 		return servicemanager.OSOKResponse{IsSuccessful: false}, err
 	}
+	stampSecretSourceStatus(resource)
 
 	status, err := osokStatus(resource)
 	if err != nil {
@@ -561,7 +568,15 @@ func (c ServiceClient[T]) idFieldAliases() []string {
 	return aliases
 }
 
-func buildRequest(request any, resource any, preferredID string, fields []RequestField, idAliases []string) error {
+func buildRequest(
+	ctx context.Context,
+	request any,
+	resource any,
+	preferredID string,
+	fields []RequestField,
+	idAliases []string,
+	credentialClient credhelper.CredentialClient,
+) error {
 	requestValue := reflect.ValueOf(request)
 	if !requestValue.IsValid() || requestValue.Kind() != reflect.Pointer || requestValue.IsNil() {
 		return fmt.Errorf("expected pointer OCI request, got %T", request)
@@ -578,13 +593,21 @@ func buildRequest(request any, resource any, preferredID string, fields []Reques
 	}
 
 	if len(fields) > 0 {
-		return buildExplicitRequest(requestStruct, resource, values, preferredID, fields)
+		return buildExplicitRequest(ctx, requestStruct, resource, values, preferredID, fields, credentialClient)
 	}
 
-	return buildHeuristicRequest(requestStruct, requestStruct.Type(), resource, values, preferredID, idAliases)
+	return buildHeuristicRequest(ctx, requestStruct, requestStruct.Type(), resource, values, preferredID, idAliases, credentialClient)
 }
 
-func buildExplicitRequest(requestStruct reflect.Value, resource any, values map[string]any, preferredID string, fields []RequestField) error {
+func buildExplicitRequest(
+	ctx context.Context,
+	requestStruct reflect.Value,
+	resource any,
+	values map[string]any,
+	preferredID string,
+	fields []RequestField,
+	credentialClient credhelper.CredentialClient,
+) error {
 	for _, field := range fields {
 		fieldValue := requestStruct.FieldByName(field.FieldName)
 		if !fieldValue.IsValid() || !fieldValue.CanSet() {
@@ -595,7 +618,7 @@ func buildExplicitRequest(requestStruct reflect.Value, resource any, values map[
 		case "header", "binary":
 			continue
 		case "body":
-			if err := assignField(fieldValue, specValue(resource)); err != nil {
+			if err := assignSpecField(ctx, fieldValue, resource, credentialClient); err != nil {
 				return fmt.Errorf("set body field %s: %w", field.FieldName, err)
 			}
 			continue
@@ -613,13 +636,16 @@ func buildExplicitRequest(requestStruct reflect.Value, resource any, values map[
 	return nil
 }
 
+//nolint:gocognit,gocyclo // Heuristic request projection must account for body, path, query, metadata, and ID alias cases.
 func buildHeuristicRequest(
+	ctx context.Context,
 	requestStruct reflect.Value,
 	requestType reflect.Type,
 	resource any,
 	values map[string]any,
 	preferredID string,
 	idAliases []string,
+	credentialClient credhelper.CredentialClient,
 ) error {
 	for i := 0; i < requestStruct.NumField(); i++ {
 		fieldValue := requestStruct.Field(i)
@@ -635,7 +661,7 @@ func buildHeuristicRequest(
 		case "header", "binary":
 			continue
 		case "body":
-			if err := assignField(fieldValue, specValue(resource)); err != nil {
+			if err := assignSpecField(ctx, fieldValue, resource, credentialClient); err != nil {
 				return fmt.Errorf("set body field %s: %w", fieldType.Name, err)
 			}
 			continue
@@ -674,6 +700,197 @@ func buildHeuristicRequest(
 	}
 
 	return nil
+}
+
+func assignSpecField(ctx context.Context, field reflect.Value, resource any, credentialClient credhelper.CredentialClient) error {
+	prepared, err := prepareSpecValue(ctx, specValue(resource), field.Type(), resource, credentialClient)
+	if err != nil {
+		return err
+	}
+	return assignField(field, prepared)
+}
+
+func prepareSpecValue(
+	ctx context.Context,
+	spec any,
+	targetType reflect.Type,
+	resource any,
+	credentialClient credhelper.CredentialClient,
+) (any, error) {
+	raw, err := normalizeJSONValue(spec)
+	if err != nil {
+		return nil, err
+	}
+
+	namespace := ""
+	values, lookupErr := lookupValues(resource)
+	if lookupErr == nil {
+		namespace = firstNonEmpty(values, "namespaceName", "namespace")
+	}
+
+	return prepareValueForTarget(ctx, raw, targetType, namespace, credentialClient, nil)
+}
+
+func normalizeJSONValue(raw any) (any, error) {
+	if raw == nil {
+		return nil, nil
+	}
+	payload, err := json.Marshal(raw)
+	if err != nil {
+		return nil, fmt.Errorf("marshal source value: %w", err)
+	}
+	var normalized any
+	if err := json.Unmarshal(payload, &normalized); err != nil {
+		return nil, fmt.Errorf("normalize source value: %w", err)
+	}
+	return normalized, nil
+}
+
+//nolint:gocognit,gocyclo // Recursive projection handles structs, collections, maps, and secret-backed scalar inputs.
+func prepareValueForTarget(
+	ctx context.Context,
+	raw any,
+	targetType reflect.Type,
+	namespace string,
+	credentialClient credhelper.CredentialClient,
+	path []string,
+) (any, error) {
+	if targetType == nil {
+		return raw, nil
+	}
+	for targetType.Kind() == reflect.Pointer {
+		targetType = targetType.Elem()
+	}
+
+	switch targetType.Kind() {
+	case reflect.Struct:
+		rawMap, ok := raw.(map[string]any)
+		if !ok {
+			return raw, nil
+		}
+		prepared := make(map[string]any, len(rawMap))
+		for key, value := range rawMap {
+			prepared[key] = value
+		}
+		for i := 0; i < targetType.NumField(); i++ {
+			fieldType := targetType.Field(i)
+			if !fieldType.IsExported() {
+				continue
+			}
+			fieldName := fieldJSONName(fieldType)
+			if fieldName == "" {
+				continue
+			}
+			childRaw, ok := rawMap[fieldName]
+			if !ok {
+				continue
+			}
+			childPrepared, err := prepareValueForTarget(ctx, childRaw, fieldType.Type, namespace, credentialClient, append(path, fieldName))
+			if err != nil {
+				return nil, err
+			}
+			prepared[fieldName] = childPrepared
+		}
+		return prepared, nil
+	case reflect.Slice, reflect.Array:
+		items, ok := raw.([]any)
+		if !ok {
+			return raw, nil
+		}
+		prepared := make([]any, len(items))
+		for index, item := range items {
+			next, err := prepareValueForTarget(ctx, item, targetType.Elem(), namespace, credentialClient, path)
+			if err != nil {
+				return nil, err
+			}
+			prepared[index] = next
+		}
+		return prepared, nil
+	case reflect.Map:
+		values, ok := raw.(map[string]any)
+		if !ok {
+			return raw, nil
+		}
+		prepared := make(map[string]any, len(values))
+		for key, value := range values {
+			next, err := prepareValueForTarget(ctx, value, targetType.Elem(), namespace, credentialClient, path)
+			if err != nil {
+				return nil, err
+			}
+			prepared[key] = next
+		}
+		return prepared, nil
+	case reflect.String:
+		if resolved, ok, err := maybeResolveSecretInput(ctx, raw, namespace, credentialClient, path); ok || err != nil {
+			return resolved, err
+		}
+	}
+
+	return raw, nil
+}
+
+func maybeResolveSecretInput(
+	ctx context.Context,
+	raw any,
+	namespace string,
+	credentialClient credhelper.CredentialClient,
+	path []string,
+) (string, bool, error) {
+	secretName, ok := extractSecretName(raw)
+	if !ok {
+		return "", false, nil
+	}
+	if secretName == "" {
+		return "", true, nil
+	}
+	if credentialClient == nil {
+		return "", false, fmt.Errorf("generated runtime requires a credential client to resolve %s", strings.Join(path, "."))
+	}
+
+	secretData, err := credentialClient.GetSecret(ctx, secretName, namespace)
+	if err != nil {
+		return "", false, err
+	}
+
+	key := secretDataKeyForPath(path)
+	value, ok := secretData[key]
+	if !ok {
+		return "", false, fmt.Errorf("secret %q is missing required key %q for %s", secretName, key, strings.Join(path, "."))
+	}
+	return string(value), true, nil
+}
+
+func extractSecretName(raw any) (string, bool) {
+	values, ok := raw.(map[string]any)
+	if !ok {
+		return "", false
+	}
+	secretValue, ok := values["secret"]
+	if !ok {
+		return "", false
+	}
+	secretMap, ok := secretValue.(map[string]any)
+	if !ok {
+		return "", false
+	}
+	name, _ := secretMap["secretName"].(string)
+	return name, true
+}
+
+func secretDataKeyForPath(path []string) string {
+	if len(path) == 0 {
+		return "password"
+	}
+
+	fieldName := strings.ToLower(path[len(path)-1])
+	switch fieldName {
+	case "walletpassword":
+		return "walletPassword"
+	}
+	if strings.HasSuffix(fieldName, "username") {
+		return "username"
+	}
+	return "password"
 }
 
 func explicitRequestValue(values map[string]any, field RequestField, preferredID string) (any, bool) {
@@ -766,6 +983,7 @@ func specValue(resource any) any {
 	return fieldInterface(resourceValue, "Spec")
 }
 
+//nolint:gocognit,gocyclo // OCI responses vary widely, so body extraction handles several structural fallbacks.
 func responseBody(response any) (any, bool) {
 	if response == nil {
 		return nil, false
@@ -836,6 +1054,71 @@ func mergeResponseIntoStatus(resource any, response any) error {
 		return fmt.Errorf("project OCI response body into status: %w", err)
 	}
 	return nil
+}
+
+func stampSecretSourceStatus(resource any) {
+	resourceValue, err := resourceStruct(resource)
+	if err != nil {
+		return
+	}
+
+	specField, ok := fieldValue(resourceValue, "Spec")
+	if !ok {
+		return
+	}
+	statusField, ok := fieldValue(resourceValue, "Status")
+	if !ok {
+		return
+	}
+
+	copySecretSourceFields(specField, statusField)
+}
+
+//nolint:gocyclo // Status stamping recursively walks nested structs to preserve secret-reference mirrors.
+func copySecretSourceFields(source reflect.Value, destination reflect.Value) {
+	source = indirectValue(source)
+	destination = indirectValue(destination)
+	if !source.IsValid() || !destination.IsValid() {
+		return
+	}
+	if source.Kind() != reflect.Struct || destination.Kind() != reflect.Struct {
+		return
+	}
+
+	for i := 0; i < source.NumField(); i++ {
+		fieldType := source.Type().Field(i)
+		if !fieldType.IsExported() {
+			continue
+		}
+
+		sourceField := source.Field(i)
+		destinationField := destination.FieldByName(fieldType.Name)
+		if !destinationField.IsValid() || !destinationField.CanSet() {
+			continue
+		}
+		if isSecretSourceType(sourceField.Type()) && destinationField.Type() == sourceField.Type() {
+			destinationField.Set(sourceField)
+			continue
+		}
+		copySecretSourceFields(sourceField, destinationField)
+	}
+}
+
+func indirectValue(value reflect.Value) reflect.Value {
+	for value.IsValid() && value.Kind() == reflect.Pointer {
+		if value.IsNil() {
+			return reflect.Value{}
+		}
+		value = value.Elem()
+	}
+	return value
+}
+
+func isSecretSourceType(typ reflect.Type) bool {
+	for typ.Kind() == reflect.Pointer {
+		typ = typ.Elem()
+	}
+	return typ == reflect.TypeOf(shared.UsernameSource{}) || typ == reflect.TypeOf(shared.PasswordSource{})
 }
 
 func responseID(response any) string {
@@ -943,6 +1226,7 @@ func defaultConditionMessage(condition shared.OSOKConditionType) string {
 	}
 }
 
+//nolint:gocyclo // Formal validation aggregates independent semantic compatibility checks into one report.
 func validateFormalSemantics(kind string, semantics *Semantics) error {
 	if semantics == nil {
 		return nil
@@ -1025,6 +1309,7 @@ func isNotFound(err error) bool {
 	return false
 }
 
+//nolint:gocyclo // List selection combines preferred-ID, formal semantics, and heuristic matching fallbacks.
 func (c ServiceClient[T]) selectListItem(body any, resource T, preferredID string) (any, error) {
 	responseItemsField := ""
 	if c.config.Semantics != nil && c.config.Semantics.List != nil {
@@ -1079,6 +1364,7 @@ func (c ServiceClient[T]) selectListItem(body any, resource T, preferredID strin
 	}
 }
 
+//nolint:gocognit,gocyclo // Formal list matching must evaluate preferred IDs, match fields, and ambiguity handling together.
 func (c ServiceClient[T]) selectFormalListItem(items []any, criteria map[string]any, preferredID string) (any, error) {
 	matchFields := []string{}
 	if c.config.Semantics != nil && c.config.Semantics.List != nil {
@@ -1129,6 +1415,7 @@ func (c ServiceClient[T]) selectFormalListItem(items []any, criteria map[string]
 	}
 }
 
+//nolint:gocyclo // OCI list bodies expose item slices through several schema shapes.
 func listItems(body any, responseItemsField string) ([]any, error) {
 	value := reflect.ValueOf(body)
 	for value.IsValid() && value.Kind() == reflect.Pointer {
@@ -1440,6 +1727,7 @@ func lowerCamel(name string) string {
 	return builder.String()
 }
 
+//nolint:gocyclo // Camel splitting preserves acronym boundaries and mixed token transitions.
 func splitCamel(name string) []string {
 	if strings.TrimSpace(name) == "" {
 		return nil

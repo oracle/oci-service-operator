@@ -72,8 +72,8 @@ alias or the legacy kind name.
 | `spec.faultDomain` | Preferred fault domain. | string | no |
 | `spec.configurationId` | OCID of the MySQL configuration to use. | string | no |
 | `spec.mysqlVersion` | Specific MySQL version identifier. | string | no |
-| `spec.adminUsername` | Administrative username. | string | no |
-| `spec.adminPassword` | Administrative password. | string | no |
+| `spec.adminUsername` | Administrative username secret reference. Set `spec.adminUsername.secret.secretName` to a Secret in the same namespace that contains a `username` key. | object | no |
+| `spec.adminPassword` | Administrative password secret reference. Set `spec.adminPassword.secret.secretName` to a Secret in the same namespace that contains a `password` key. | object | no |
 | `spec.dataStorageSizeInGBs` | Initial data volume size in GBs. | int | no |
 | `spec.hostnameLabel` | Hostname label for the primary endpoint. | string | no |
 | `spec.ipAddress` | Private IP address for the primary endpoint. | string | no |
@@ -111,15 +111,31 @@ the matching variant field:
 | `status.timeCreated` | OCI creation time. | string |
 | `status.timeUpdated` | OCI update time. | string |
 | `status.currentPlacement` | Observed availability and fault domain placement. | object |
+| `status.adminUsername.secret.secretName` | Last applied administrative username secret reference. | string |
+| `status.adminPassword.secret.secretName` | Last applied administrative password secret reference. | string |
 
 ## Provisioning a MySQL DB System
 
-The generated `DbSystem` surface uses direct spec fields for admin credentials.
-Provide the values in the CR itself or template them into the manifest through
-your own secret-management workflow.
+Provisioning a MySQL DB System requires a same-namespace Kubernetes Secret for
+the administrative credentials. The operator reads the `username` and
+`password` keys from that Secret when it builds the OCI create request; the
+credential values are not stored in the CR.
 
 - `SUBNET_OCID`: OCID of the subnet created in the pre-requisites step
 - `CONFIGURATION_OCID`: OCID of the MySQL configuration to attach
+
+Create the credentials Secret first:
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: admin-secret
+type: Opaque
+stringData:
+  username: admin
+  password: S3cr3t!
+```
 
 ```yaml
 apiVersion: mysql.oracle.com/v1beta1
@@ -133,8 +149,12 @@ spec:
   subnetId: <SUBNET_OCID>
   configurationId: <CONFIGURATION_OCID>
   availabilityDomain: <AVAILABILITY_DOMAIN>
-  adminUsername: <ADMIN_USERNAME>
-  adminPassword: <ADMIN_PASSWORD>
+  adminUsername:
+    secret:
+      secretName: admin-secret
+  adminPassword:
+    secret:
+      secretName: admin-secret
   description: <DESCRIPTION>
   dataStorageSizeInGBs: <DB_SIZE>
   port: <PORT>
@@ -162,7 +182,8 @@ kubectl describe dbsystems <NAME_OF_CR_OBJECT>
 
 ## Updating a MySQL DB System
 
-Update the same `DbSystem` object by modifying supported mutable fields.
+Update the same `DbSystem` object by modifying supported mutable fields. Keep
+the admin credential references in their secret-backed form.
 
 ```yaml
 apiVersion: mysql.oracle.com/v1beta1
@@ -176,8 +197,12 @@ spec:
   displayName: <UPDATED_DISPLAY_NAME>
   description: <UPDATED_DESCRIPTION>
   configurationId: <UPDATED_CONFIGURATION_OCID>
-  adminUsername: <ADMIN_USERNAME>
-  adminPassword: <ADMIN_PASSWORD>
+  adminUsername:
+    secret:
+      secretName: admin-secret
+  adminPassword:
+    secret:
+      secretName: admin-secret
   freeformTags:
     <KEY1>: <VALUE1>
   definedTags:
@@ -193,14 +218,15 @@ kubectl apply -f <UPDATE_YAML>.yaml
 
 ## Kubernetes Secrets
 
-The generated v2 mysql `DbSystem` path does not preserve the legacy
-secret-reference inputs or the endpoint/access secret side effect from the old
-handwritten runtime.
+The generated v2 mysql `DbSystem` surface preserves secret-backed admin
+credentials without restoring the old handwritten runtime path.
 
-- `spec.adminUsername` and `spec.adminPassword` are direct string fields in the
-  published API.
+- `spec.adminUsername.secret.secretName` must reference a Secret in the same
+  namespace with a `username` entry.
+- `spec.adminPassword.secret.secretName` must reference a Secret in the same
+  namespace with a `password` entry.
+- OSOK mirrors the referenced secret names into `status.adminUsername` and
+  `status.adminPassword` for drift tracking, but it does not write the secret
+  payload into the CR status.
 - OSOK does not create a follow-up Kubernetes Secret containing DB System
   connection details for this generated surface.
-
-If you want credential indirection or connection-secret materialization, manage
-that outside the operator or introduce a separate supported workflow.

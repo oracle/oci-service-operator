@@ -41,6 +41,126 @@ func buildPackageModel(cfg *Config, service ServiceConfig, discovered []Resource
 	}, nil
 }
 
+func buildParityResources(service ServiceConfig, version string, discovered []ResourceModel) ([]ResourceModel, error) {
+	discoveredBySource := make(map[string]ResourceModel, len(discovered))
+	for _, resource := range discovered {
+		discoveredBySource[resource.SDKName] = resource
+	}
+
+	overridesBySource := make(map[string]ParityResource, len(service.Parity.Resources))
+	for _, override := range service.Parity.Resources {
+		if _, ok := discoveredBySource[override.SourceResource]; !ok {
+			return nil, fmt.Errorf("parity resource %q for service %q was not found in SDK discovery", override.SourceResource, service.Service)
+		}
+		overridesBySource[override.SourceResource] = override
+	}
+
+	resources := make([]ResourceModel, 0, len(discovered))
+	for _, resource := range discovered {
+		override, ok := overridesBySource[resource.SDKName]
+		if ok {
+			resource = buildParityResourceModel(service, version, resource, override)
+		}
+		resources = append(resources, resource)
+	}
+
+	sort.Slice(resources, func(i, j int) bool {
+		return resources[i].Kind < resources[j].Kind
+	})
+
+	return resources, nil
+}
+
+func buildParityResourceModel(service ServiceConfig, version string, discoveredResource ResourceModel, override ParityResource) ResourceModel {
+	if override.MergeWithDiscovered {
+		return mergeParityResourceModel(service, version, discoveredResource, override)
+	}
+
+	fileStem := override.FileStem
+	if strings.TrimSpace(fileStem) == "" {
+		fileStem = strings.ToLower(override.Kind)
+	}
+
+	printColumns := convertPrintColumns(override.PrintColumns)
+	if len(printColumns) == 0 {
+		printColumns = discoveredResource.PrintColumns
+	}
+
+	statusFields := convertFields(override.StatusFields)
+	if len(statusFields) == 0 {
+		statusFields = defaultStatusFields()
+	}
+
+	return ResourceModel{
+		SDKName:         discoveredResource.SDKName,
+		Kind:            override.Kind,
+		FileStem:        fileStem,
+		KindPlural:      strings.ToLower(pluralize(override.Kind)),
+		Operations:      discoveredResource.Operations,
+		Runtime:         discoveredResource.Runtime,
+		LeadingComments: override.LeadingComments,
+		SpecComments:    override.SpecComments,
+		HelperTypes:     convertHelperTypes(override.HelperTypes),
+		SpecFields:      convertFields(override.SpecFields),
+		StatusTypeName:  defaultStatusTypeName(override.Kind),
+		StatusComments:  override.StatusComments,
+		StatusFields:    statusFields,
+		PrintColumns:    printColumns,
+		ObjectComments:  override.ObjectComments,
+		ListComments:    override.ListComments,
+		Sample: SampleModel{
+			Body:         override.Sample.Body,
+			FileName:     sampleFileName(service.Group, version, fileStem),
+			MetadataName: override.Sample.MetadataName,
+			Spec:         override.Sample.Spec,
+		},
+		PrimaryDisplayField: discoveredResource.PrimaryDisplayField,
+		CompatibilityLocked: true,
+	}
+}
+
+//nolint:gocyclo // Partial parity merges must handle each optional overlay surface explicitly.
+func mergeParityResourceModel(service ServiceConfig, version string, discoveredResource ResourceModel, override ParityResource) ResourceModel {
+	resource := discoveredResource
+	resource.Kind = override.Kind
+	if strings.TrimSpace(override.FileStem) != "" {
+		resource.FileStem = override.FileStem
+	}
+	if resource.Kind != discoveredResource.Kind || strings.TrimSpace(resource.KindPlural) == "" {
+		resource.KindPlural = strings.ToLower(pluralize(resource.Kind))
+	}
+	if len(override.LeadingComments) > 0 {
+		resource.LeadingComments = override.LeadingComments
+	}
+	if len(override.SpecComments) > 0 {
+		resource.SpecComments = override.SpecComments
+	}
+	if len(override.HelperTypes) > 0 {
+		resource.HelperTypes = mergeHelperTypeOverrides(resource.HelperTypes, override.HelperTypes)
+	}
+	if len(override.SpecFields) > 0 {
+		resource.SpecFields = mergeFieldOverrides(resource.SpecFields, override.SpecFields)
+	}
+	if len(override.StatusComments) > 0 {
+		resource.StatusComments = override.StatusComments
+	}
+	if len(override.StatusFields) > 0 {
+		resource.StatusFields = mergeFieldOverrides(resource.StatusFields, override.StatusFields)
+	}
+	if len(override.PrintColumns) > 0 {
+		resource.PrintColumns = convertPrintColumns(override.PrintColumns)
+	}
+	if len(override.ObjectComments) > 0 {
+		resource.ObjectComments = override.ObjectComments
+	}
+	if len(override.ListComments) > 0 {
+		resource.ListComments = override.ListComments
+	}
+	resource.Sample = mergeSampleOverride(service, version, resource.FileStem, resource.Sample, override.Sample)
+	resource.CompatibilityLocked = true
+	return resource
+}
+
 func buildPackageOutputModel(service ServiceConfig, resources []ResourceModel) PackageOutputModel {
 	output := PackageOutputModel{
 		Generate: true,
@@ -77,7 +197,7 @@ func buildPackageOutputModel(service ServiceConfig, resources []ResourceModel) P
 	return output
 }
 
-//nolint:gocognit,gocyclo // Registration generation validates interdependent controller and service-manager rollout per resource.
+//nolint:gocognit,gocyclo // Registration generation validates several coupled controller and service-manager cases.
 func buildRegistrationOutputModel(
 	service ServiceConfig,
 	version string,
@@ -255,6 +375,7 @@ func buildServiceManagerModels(service ServiceConfig, version string, resources 
 			SDKClientTypeName:        resource.Runtime.ClientType,
 			SDKClientConstructor:     resource.Runtime.ClientConstructor,
 			SDKClientConstructorKind: resource.Runtime.ClientConstructorKind,
+			NeedsCredentialClient:    service.ServiceManagerNeedsCredentialClientFor(resource.Kind),
 			CreateOperation:          resource.Runtime.Create,
 			GetOperation:             resource.Runtime.Get,
 			ListOperation:            resource.Runtime.List,
@@ -328,6 +449,143 @@ func appendUniqueStrings(existing []string, extras ...string) []string {
 	return existing
 }
 
+func convertHelperTypes(overrides []TypeOverride) []TypeModel {
+	types := make([]TypeModel, 0, len(overrides))
+	for _, override := range overrides {
+		types = append(types, TypeModel{
+			Name:     override.Name,
+			Comments: override.Comments,
+			Fields:   convertFields(override.Fields),
+		})
+	}
+	return types
+}
+
+func convertFields(overrides []FieldOverride) []FieldModel {
+	fields := make([]FieldModel, 0, len(overrides))
+	for _, override := range overrides {
+		fields = append(fields, FieldModel{
+			Name:     override.Name,
+			Type:     override.Type,
+			Tag:      override.Tag,
+			Comments: override.Comments,
+			Markers:  override.Markers,
+			Embedded: strings.TrimSpace(override.Name) == "",
+		})
+	}
+	return fields
+}
+
+func mergeHelperTypeOverrides(existing []TypeModel, overrides []TypeOverride) []TypeModel {
+	merged := append([]TypeModel(nil), existing...)
+	indexByName := make(map[string]int, len(existing))
+	for index, helperType := range existing {
+		indexByName[helperType.Name] = index
+	}
+
+	for _, override := range overrides {
+		converted := TypeModel{
+			Name:     override.Name,
+			Comments: override.Comments,
+			Fields:   convertFields(override.Fields),
+		}
+		if index, ok := indexByName[override.Name]; ok {
+			merged[index] = converted
+			continue
+		}
+		indexByName[override.Name] = len(merged)
+		merged = append(merged, converted)
+	}
+
+	return merged
+}
+
+func mergeFieldOverrides(existing []FieldModel, overrides []FieldOverride) []FieldModel {
+	merged := append([]FieldModel(nil), existing...)
+	indexByKey := make(map[string]int, len(existing))
+	for index, field := range existing {
+		indexByKey[fieldMergeKey(field.Name, field.Type, field.Tag)] = index
+	}
+
+	for _, override := range overrides {
+		converted := FieldModel{
+			Name:     override.Name,
+			Type:     override.Type,
+			Tag:      override.Tag,
+			Comments: override.Comments,
+			Markers:  override.Markers,
+			Embedded: strings.TrimSpace(override.Name) == "",
+		}
+		key := fieldMergeKey(override.Name, override.Type, override.Tag)
+		if index, ok := indexByKey[key]; ok {
+			merged[index] = converted
+			continue
+		}
+		indexByKey[key] = len(merged)
+		merged = append(merged, converted)
+	}
+
+	return merged
+}
+
+func fieldMergeKey(name string, typ string, tag string) string {
+	if strings.TrimSpace(name) != "" {
+		return "name:" + name
+	}
+	if jsonName := jsonTagName(tag); jsonName != "" {
+		return "json:" + jsonName
+	}
+	return "type:" + strings.TrimSpace(typ) + "|tag:" + strings.TrimSpace(tag)
+}
+
+func jsonTagName(tag string) string {
+	tag = strings.TrimSpace(tag)
+	tag = strings.Trim(tag, "`")
+	if tag == "" {
+		return ""
+	}
+	const prefix = `json:"`
+	start := strings.Index(tag, prefix)
+	if start == -1 {
+		return ""
+	}
+	tag = tag[start+len(prefix):]
+	end := strings.Index(tag, `"`)
+	if end == -1 {
+		return ""
+	}
+	tag = tag[:end]
+	if tag == "" {
+		return ""
+	}
+	return strings.Split(tag, ",")[0]
+}
+
+func convertPrintColumns(overrides []PrintColumnOverride) []PrintColumnModel {
+	printColumns := make([]PrintColumnModel, 0, len(overrides))
+	for _, override := range overrides {
+		printColumns = append(printColumns, PrintColumnModel(override))
+	}
+	return printColumns
+}
+
+func mergeSampleOverride(service ServiceConfig, version string, fileStem string, existing SampleModel, override SampleOverride) SampleModel {
+	sample := existing
+	if strings.TrimSpace(sample.FileName) == "" {
+		sample.FileName = sampleFileName(service.Group, version, fileStem)
+	}
+	if strings.TrimSpace(override.Body) != "" {
+		sample.Body = override.Body
+	}
+	if strings.TrimSpace(override.MetadataName) != "" {
+		sample.MetadataName = override.MetadataName
+	}
+	if strings.TrimSpace(override.Spec) != "" {
+		sample.Spec = override.Spec
+	}
+	return sample
+}
+
 func sampleFileName(group string, version string, fileStem string) string {
 	return fmt.Sprintf("%s_%s_%s.yaml", group, version, fileStem)
 }
@@ -342,7 +600,7 @@ func defaultStatusFields() []FieldModel {
 	}
 }
 
-//nolint:gocognit // Helper type renaming rewrites resource fields and helper graphs in a single pass over each resource.
+//nolint:gocognit // Helper renaming coordinates reserved names, rewrites, and comment carryover in one pass.
 func assignHelperTypeNames(resources []ResourceModel) []ResourceModel {
 	reservedNames := make(map[string]struct{}, len(resources))
 	for _, resource := range resources {

@@ -10,4 +10,4 @@ states:
   - updating
   - terminating
 notes:
-  - Generated runtime only; replace with controller-specific lifecycle notes before promotion.
+  - Generated runtime reads admin credential secret refs during OCI request projection and does not write follow-up Kubernetes secrets.

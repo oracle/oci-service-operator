@@ -102,6 +102,7 @@ type ServiceManagerModel struct {
 	SDKClientTypeName        string
 	SDKClientConstructor     string
 	SDKClientConstructorKind string
+	NeedsCredentialClient    bool
 	CreateOperation          *RuntimeOperationModel
 	GetOperation             *RuntimeOperationModel
 	ListOperation            *RuntimeOperationModel

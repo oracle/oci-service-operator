@@ -74,8 +74,9 @@ type ControllerGenerationOverride struct {
 
 // ServiceManagerGenerationOverride captures per-kind service-manager settings.
 type ServiceManagerGenerationOverride struct {
-	Strategy    string `yaml:"strategy,omitempty"`
-	PackagePath string `yaml:"packagePath,omitempty"`
+	Strategy              string `yaml:"strategy,omitempty"`
+	PackagePath           string `yaml:"packagePath,omitempty"`
+	NeedsCredentialClient bool   `yaml:"needsCredentialClient,omitempty"`
 }
 
 // ServiceConfig identifies one OCI SDK service and its OSOK output group.
@@ -119,7 +120,7 @@ func LoadConfig(path string) (*Config, error) {
 
 // Validate ensures the config is coherent before generation begins.
 //
-//nolint:gocognit,gocyclo // Validation intentionally walks the full config contract in one pass to return precise field context.
+//nolint:gocognit,gocyclo // Validation intentionally collects all config problems in one pass.
 func (c *Config) Validate() error {
 	if strings.TrimSpace(c.SchemaVersion) == "" {
 		return fmt.Errorf("schemaVersion is required")
@@ -193,7 +194,7 @@ func (c *Config) Validate() error {
 
 // Validate ensures runtime rollout metadata is coherent before generation begins.
 //
-//nolint:gocognit,gocyclo // Runtime rollout validation checks interdependent service and resource overrides together.
+//nolint:gocognit,gocyclo // Generation validation checks multiple rollout surfaces and overrides together.
 func (g GenerationConfig) Validate(serviceName string) error {
 	if err := validateGenerationStrategy(
 		fmt.Sprintf("service %q generation.controller.strategy", serviceName),
@@ -486,6 +487,15 @@ func (s ServiceConfig) ServiceManagerPackagePathFor(kind string, fileStem string
 		return override.ServiceManager.PackagePath
 	}
 	return path.Join(s.Group, fileStem)
+}
+
+// ServiceManagerNeedsCredentialClientFor reports whether the generated service client
+// should wire the runtime credential client for one resource.
+func (s ServiceConfig) ServiceManagerNeedsCredentialClientFor(kind string) bool {
+	if override, ok := s.resourceGenerationOverride(kind); ok {
+		return override.ServiceManager.NeedsCredentialClient
+	}
+	return false
 }
 
 // FormalSpecFor resolves the effective formal slug for one generated resource.
