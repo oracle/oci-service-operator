@@ -69,7 +69,6 @@ endif
 :Return success for the ACTIVE success state;
 :Project required status and finalizer policy\nretain-until-confirmed-delete;
 :Requeue on provisioning, updating, terminating;
-:Keep promotion blocked on bind-versus-create,\nlist-lookup, mutation-policy,\nwaiter-work-request;
 }
 endif
 stop
@@ -105,8 +104,7 @@ list lookup: oci_mysql_mysql_db_systems filters
 compartment_id, configuration_id,
 database_management, db_system_id (+4 more)
 conflicts: none
-open gaps: bind-versus-create, list-lookup,
-mutation-policy, waiter-work-request
+open gaps: none
 Generated runtime reads admin credential secret
 refs during OCI request projection and does not
 write follow-up Kubernetes secrets.

@@ -7,6 +7,8 @@ package dbsystem
 
 import (
 	"context"
+	cryptorand "crypto/rand"
+	"crypto/rsa"
 	"encoding/json"
 	"fmt"
 	"math/rand"
@@ -16,9 +18,11 @@ import (
 	"testing/quick"
 	"time"
 
+	"github.com/oracle/oci-go-sdk/v65/common"
 	mysqlsdk "github.com/oracle/oci-go-sdk/v65/mysql"
 	mysqlv1beta1 "github.com/oracle/oci-service-operator/api/mysql/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/credhelper"
+	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -32,6 +36,10 @@ type fakeDbSystemBody struct {
 
 type fakeCreateDbSystemResponse struct {
 	DbSystem fakeDbSystemBody `presentIn:"body"`
+}
+
+type testConfigurationProvider struct {
+	privateKey *rsa.PrivateKey
 }
 
 type fakeCredentialClient struct {
@@ -60,6 +68,34 @@ func (f *fakeCredentialClient) GetSecret(_ context.Context, name, namespace stri
 
 func (f *fakeCredentialClient) UpdateSecret(_ context.Context, _, _ string, _ map[string]string, _ map[string][]byte) (bool, error) {
 	return false, nil
+}
+
+func (p testConfigurationProvider) PrivateRSAKey() (*rsa.PrivateKey, error) {
+	return p.privateKey, nil
+}
+
+func (p testConfigurationProvider) KeyID() (string, error) {
+	return "ocid1.tenancy.oc1..example/ocid1.user.oc1..example/fingerprint", nil
+}
+
+func (p testConfigurationProvider) TenancyOCID() (string, error) {
+	return "ocid1.tenancy.oc1..example", nil
+}
+
+func (p testConfigurationProvider) UserOCID() (string, error) {
+	return "ocid1.user.oc1..example", nil
+}
+
+func (p testConfigurationProvider) KeyFingerprint() (string, error) {
+	return "fingerprint", nil
+}
+
+func (p testConfigurationProvider) Region() (string, error) {
+	return "us-phoenix-1", nil
+}
+
+func (p testConfigurationProvider) AuthType() (common.AuthConfig, error) {
+	return common.AuthConfig{}, nil
 }
 
 type createOrUpdateSourceVariantTestCase struct {
@@ -513,6 +549,29 @@ func TestDbSystemServiceManagerCreateOrUpdateRejectsWrongObjectType(t *testing.T
 	}
 	if !strings.Contains(err.Error(), "expected *mysqlv1beta1.DbSystem") {
 		t.Fatalf("CreateOrUpdate() error = %q, want DbSystem conversion failure", err.Error())
+	}
+}
+
+func TestNewDbSystemServiceManagerWithDepsDoesNotCarryOpenFormalGapInitError(t *testing.T) {
+	t.Parallel()
+
+	privateKey, err := rsa.GenerateKey(cryptorand.Reader, 1024)
+	if err != nil {
+		t.Fatalf("rsa.GenerateKey() error = %v", err)
+	}
+	manager := NewDbSystemServiceManagerWithDeps(servicemanager.RuntimeDeps{
+		Provider: testConfigurationProvider{privateKey: privateKey},
+	})
+
+	_, err = manager.client.CreateOrUpdate(context.Background(), nil, ctrl.Request{})
+	if err == nil {
+		t.Fatal("CreateOrUpdate() error = nil, want nil resource failure")
+	}
+	if strings.Contains(err.Error(), "open formal gap") {
+		t.Fatalf("CreateOrUpdate() error = %v, want constructor without formal-gap init failure", err)
+	}
+	if strings.Contains(err.Error(), "initialize DbSystem OCI client") {
+		t.Fatalf("CreateOrUpdate() error = %v, want client initialization to succeed before the invalid-resource failure", err)
 	}
 }
 

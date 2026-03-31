@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"sort"
 	"strings"
 	"time"
 	"unicode"
@@ -154,7 +155,11 @@ func (c ServiceClient[T]) CreateOrUpdate(ctx context.Context, resource T, _ ctrl
 		return servicemanager.OSOKResponse{IsSuccessful: false}, c.markFailure(resource, err)
 	}
 	if currentID != "" {
-		if c.config.Update != nil {
+		shouldUpdate, err := c.shouldUpdateExistingResource(resource)
+		if err != nil {
+			return servicemanager.OSOKResponse{IsSuccessful: false}, c.markFailure(resource, err)
+		}
+		if shouldUpdate {
 			response, err := c.invoke(ctx, c.config.Update, resource, currentID)
 			if err != nil {
 				return servicemanager.OSOKResponse{IsSuccessful: false}, c.markFailure(resource, err)
@@ -166,11 +171,30 @@ func (c ServiceClient[T]) CreateOrUpdate(ctx context.Context, resource T, _ ctrl
 			return c.applySuccess(resource, response, shared.Updating)
 		}
 
+		if c.config.Get == nil && c.config.List == nil {
+			c.markCondition(resource, shared.Active, defaultConditionMessage(shared.Active))
+			return servicemanager.OSOKResponse{
+				IsSuccessful:    true,
+				ShouldRequeue:   false,
+				RequeueDuration: defaultRequeueDuration,
+			}, nil
+		}
+
 		response, err := c.readResource(ctx, resource, currentID)
 		if err != nil {
 			return servicemanager.OSOKResponse{IsSuccessful: false}, c.markFailure(resource, err)
 		}
 		return c.applySuccess(resource, response, shared.Active)
+	}
+
+	if c.shouldBindBeforeCreate() {
+		response, err := c.readResource(ctx, resource, "")
+		switch {
+		case err == nil:
+			return c.applySuccess(resource, response, shared.Active)
+		case !errors.Is(err, errResourceNotFound):
+			return servicemanager.OSOKResponse{IsSuccessful: false}, c.markFailure(resource, err)
+		}
 	}
 
 	if c.config.Create != nil {
@@ -378,12 +402,10 @@ func (c ServiceClient[T]) validateMutationPolicy(resource T, existing bool) erro
 		return nil
 	}
 
-	resourceValue, err := resourceStruct(resource)
+	specValues, statusValues, err := c.mutationValues(resource)
 	if err != nil {
 		return err
 	}
-	specValues := jsonMap(fieldInterface(resourceValue, "Spec"))
-	statusValues := jsonMap(fieldInterface(resourceValue, "Status"))
 
 	for field, conflicts := range semantics.Mutation.ConflictsWith {
 		if _, ok := lookupMeaningfulValue(specValues, field); !ok {
@@ -409,12 +431,75 @@ func (c ServiceClient[T]) validateMutationPolicy(resource T, existing bool) erro
 			return fmt.Errorf("%s formal semantics require replacement when %s changes", c.config.Kind, field)
 		}
 	}
+	if c.config.Update == nil {
+		return nil
+	}
 
-	return nil
+	unsupportedPaths := unsupportedUpdateDriftPaths(specValues, statusValues, semantics.Mutation)
+	if len(unsupportedPaths) == 0 {
+		return nil
+	}
+	return fmt.Errorf("%s formal semantics reject unsupported update drift for %s", c.config.Kind, strings.Join(unsupportedPaths, ", "))
+}
+
+func (c ServiceClient[T]) mutationValues(resource T) (map[string]any, map[string]any, error) {
+	resourceValue, err := resourceStruct(resource)
+	if err != nil {
+		return nil, nil, err
+	}
+	return jsonMap(fieldInterface(resourceValue, "Spec")), jsonMap(fieldInterface(resourceValue, "Status")), nil
+}
+
+func (c ServiceClient[T]) shouldUpdateExistingResource(resource T) (bool, error) {
+	if c.config.Update == nil {
+		return false, nil
+	}
+	if c.config.Semantics == nil {
+		return true, nil
+	}
+	return c.hasMutableDrift(resource)
+}
+
+func (c ServiceClient[T]) hasMutableDrift(resource T) (bool, error) {
+	semantics := c.config.Semantics
+	if semantics == nil {
+		return false, nil
+	}
+
+	specValues, statusValues, err := c.mutationValues(resource)
+	if err != nil {
+		return false, err
+	}
+	for _, field := range semantics.Mutation.Mutable {
+		specValue, specOK := lookupValueByPath(specValues, field)
+		statusValue, statusOK := lookupValueByPath(statusValues, field)
+		if !specOK || !statusOK {
+			continue
+		}
+		if !valuesEqual(specValue, statusValue) {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+func unsupportedUpdateDriftPaths(specValues map[string]any, statusValues map[string]any, semantics MutationSemantics) []string {
+	diffPaths := comparableDiffPaths(specValues, statusValues, "")
+	unsupported := make([]string, 0, len(diffPaths))
+	for _, path := range diffPaths {
+		switch {
+		case pathCoveredByAny(path, semantics.Mutable):
+		case pathCoveredByAny(path, semantics.ForceNew):
+		default:
+			unsupported = appendUniqueStrings(unsupported, path)
+		}
+	}
+	sort.Strings(unsupported)
+	return unsupported
 }
 
 func (c ServiceClient[T]) readResource(ctx context.Context, resource T, preferredID string) (any, error) {
-	if c.config.Get != nil {
+	if c.config.Get != nil && !c.shouldUseFormalListLookup(preferredID) {
 		response, err := c.invoke(ctx, c.config.Get, resource, preferredID)
 		if err == nil {
 			return response, nil
@@ -443,6 +528,20 @@ func (c ServiceClient[T]) readResource(ctx context.Context, resource T, preferre
 		return nil, err
 	}
 	return item, nil
+}
+
+func (c ServiceClient[T]) shouldBindBeforeCreate() bool {
+	return c.config.Create != nil &&
+		c.config.List != nil &&
+		c.config.Semantics != nil &&
+		c.config.Semantics.List != nil
+}
+
+func (c ServiceClient[T]) shouldUseFormalListLookup(preferredID string) bool {
+	return preferredID == "" &&
+		c.config.Semantics != nil &&
+		c.config.Semantics.List != nil &&
+		c.config.List != nil
 }
 
 func (c ServiceClient[T]) invoke(ctx context.Context, op *Operation, resource T, preferredID string) (any, error) {
@@ -1753,6 +1852,74 @@ func valuesEqual(left any, right any) bool {
 		return reflect.DeepEqual(left, right)
 	}
 	return string(leftPayload) == string(rightPayload)
+}
+
+func comparableDiffPaths(specValues map[string]any, statusValues map[string]any, prefix string) []string {
+	if specValues == nil || statusValues == nil {
+		return nil
+	}
+
+	keys := meaningfulSortedKeys(specValues)
+	paths := make([]string, 0, len(keys))
+	for _, key := range keys {
+		paths = append(paths, comparableDiffPathsForKey(specValues, statusValues, prefix, key)...)
+	}
+
+	return paths
+}
+
+func meaningfulSortedKeys(values map[string]any) []string {
+	keys := make([]string, 0, len(values))
+	for key, value := range values {
+		if meaningfulValue(value) {
+			keys = append(keys, key)
+		}
+	}
+	sort.Strings(keys)
+	return keys
+}
+
+func comparableDiffPathsForKey(specValues map[string]any, statusValues map[string]any, prefix string, key string) []string {
+	specValue := specValues[key]
+	statusValue, ok := statusValues[key]
+	if !ok {
+		return nil
+	}
+
+	path := key
+	if prefix != "" {
+		path = prefix + "." + key
+	}
+
+	specMap, specIsMap := specValue.(map[string]any)
+	statusMap, statusIsMap := statusValue.(map[string]any)
+	if specIsMap && statusIsMap {
+		return comparableDiffPaths(specMap, statusMap, path)
+	}
+	if !valuesEqual(specValue, statusValue) {
+		return []string{path}
+	}
+	return nil
+}
+
+func pathCoveredByAny(path string, semanticPaths []string) bool {
+	for _, semanticPath := range semanticPaths {
+		if pathCoveredBy(path, semanticPath) {
+			return true
+		}
+	}
+	return false
+}
+
+func pathCoveredBy(path string, semanticPath string) bool {
+	path = strings.TrimSpace(path)
+	semanticPath = strings.TrimSpace(semanticPath)
+	if path == "" || semanticPath == "" {
+		return false
+	}
+	return path == semanticPath ||
+		strings.HasPrefix(path, semanticPath+".") ||
+		strings.HasPrefix(semanticPath, path+".")
 }
 
 func firstNonEmpty(values map[string]any, keys ...string) string {
