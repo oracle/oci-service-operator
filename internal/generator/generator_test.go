@@ -837,6 +837,76 @@ func TestBuildPackageModelAvoidsHelperTypeCollisions(t *testing.T) {
 	}
 }
 
+func TestBuildPackageModelAppliesResourceFieldAndSampleOverrides(t *testing.T) {
+	t.Parallel()
+
+	cfg := &Config{
+		Domain:         "oracle.com",
+		DefaultVersion: "v1beta1",
+	}
+	service := ServiceConfig{
+		Service:        "mysql",
+		SDKPackage:     "example.com/test/sdk",
+		Group:          "mysql",
+		PackageProfile: PackageProfileCRDOnly,
+		Generation: GenerationConfig{
+			Resources: []ResourceGenerationOverride{
+				{
+					Kind: "Widget",
+					SpecFields: []FieldOverride{
+						{Name: "DisplayName", Type: "shared.UsernameSource", Tag: `json:"displayName,omitempty"`},
+					},
+					StatusFields: []FieldOverride{
+						{Name: "AdminUsername", Type: "shared.UsernameSource", Tag: `json:"adminUsername,omitempty"`},
+					},
+					Sample: SampleOverride{MetadataName: "widget-sample"},
+				},
+			},
+		},
+	}
+
+	pkg, err := buildPackageModel(cfg, service, []ResourceModel{
+		{
+			SDKName:        "Widget",
+			Kind:           "Widget",
+			FileStem:       "widget",
+			KindPlural:     "widgets",
+			StatusTypeName: defaultStatusTypeName("Widget"),
+			SpecComments:   []string{"WidgetSpec defines the desired state of Widget."},
+			StatusComments: []string{"WidgetStatus defines the observed state of Widget."},
+			SpecFields: []FieldModel{
+				{
+					Name:     "DisplayName",
+					Type:     "string",
+					Tag:      `json:"displayName,omitempty"`,
+					Comments: []string{"Original display name comment."},
+					Markers:  []string{"+kubebuilder:validation:Optional"},
+				},
+				{Name: "Enabled", Type: "bool", Tag: `json:"enabled,omitempty"`},
+			},
+			StatusFields: []FieldModel{
+				{Name: "OsokStatus", Type: "shared.OSOKStatus", Tag: `json:"status"`},
+				{Name: "Id", Type: "string", Tag: `json:"id,omitempty"`},
+			},
+			Sample: SampleModel{MetadataName: "widget-default"},
+		},
+	})
+	if err != nil {
+		t.Fatalf("buildPackageModel() error = %v", err)
+	}
+
+	resource := findResource(t, pkg.Resources, "Widget")
+	displayName := findFieldModel(t, resource.SpecFields, "DisplayName")
+	assertFieldType(t, "Widget DisplayName", displayName, "shared.UsernameSource")
+	assertFieldCommentsEqual(t, "Widget DisplayName", displayName, []string{"Original display name comment."})
+	assertFieldMarkers(t, "Widget DisplayName", displayName, []string{"+kubebuilder:validation:Optional"})
+	assertResourceSpecFields(t, resource, "Enabled")
+	assertResourceStatusFields(t, resource, "Id", "AdminUsername")
+	if resource.Sample.MetadataName != "widget-sample" {
+		t.Fatalf("Widget sample metadata name = %q, want %q", resource.Sample.MetadataName, "widget-sample")
+	}
+}
+
 func TestGenerateRendersAndSkipsExisting(t *testing.T) {
 	t.Parallel()
 
@@ -1739,10 +1809,8 @@ func TestCheckedInPromotedRuntimeArtifactsMatchGenerator(t *testing.T) {
 			serviceClientPath: "pkg/servicemanager/database/autonomousdatabase/autonomousdatabase_serviceclient.go",
 			controllerPath:    "controllers/database/autonomousdatabase_controller.go",
 			controllerContains: []string{
+				`// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch`,
 				`// +kubebuilder:rbac:groups="",resources=events,verbs=get;list;watch;create;update;patch;delete`,
-			},
-			controllerExcludes: []string{
-				`// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete`,
 			},
 			serviceClientChecks: []string{
 				"Semantics: &generatedruntime.Semantics{",
@@ -1750,6 +1818,7 @@ func TestCheckedInPromotedRuntimeArtifactsMatchGenerator(t *testing.T) {
 				`FormalSlug:        "autonomousdatabase"`,
 				`SecretSideEffects: "none"`,
 				`StatusProjection:  "required"`,
+				`CredentialClient: manager.CredentialClient,`,
 			},
 		},
 		{
@@ -1759,10 +1828,8 @@ func TestCheckedInPromotedRuntimeArtifactsMatchGenerator(t *testing.T) {
 			serviceClientPath: "pkg/servicemanager/mysql/dbsystem/dbsystem_serviceclient.go",
 			controllerPath:    "controllers/mysql/dbsystem_controller.go",
 			controllerContains: []string{
+				`// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch`,
 				`// +kubebuilder:rbac:groups="",resources=events,verbs=get;list;watch;create;update;patch;delete`,
-			},
-			controllerExcludes: []string{
-				`// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete`,
 			},
 			serviceClientChecks: []string{
 				"Semantics: &generatedruntime.Semantics{",
@@ -1770,6 +1837,7 @@ func TestCheckedInPromotedRuntimeArtifactsMatchGenerator(t *testing.T) {
 				`FormalSlug:        "dbsystem"`,
 				`SecretSideEffects: "none"`,
 				`StatusProjection:  "required"`,
+				`CredentialClient: manager.CredentialClient,`,
 			},
 		},
 		{
@@ -1799,6 +1867,84 @@ func TestCheckedInPromotedRuntimeArtifactsMatchGenerator(t *testing.T) {
 			assertPromotedRuntimeArtifactsCase(t, cfg, service, test)
 		})
 	}
+}
+
+func TestCheckedInDatabaseAutonomousDatabaseUsesSecretBackedAdminPassword(t *testing.T) {
+	cfg := loadCheckedInConfig(t)
+	databaseService := serviceConfigsByName(t, cfg, "database")["database"]
+
+	outputRoot := t.TempDir()
+	seedSamplesKustomization(t, outputRoot)
+
+	pipeline := New()
+	result, err := pipeline.Generate(context.Background(), cfg, []ServiceConfig{*databaseService}, Options{
+		OutputRoot: outputRoot,
+	})
+	if err != nil {
+		t.Fatalf("Generate() error = %v", err)
+	}
+	if len(result.Generated) != 1 {
+		t.Fatalf("Generate() generated %d services, want 1", len(result.Generated))
+	}
+
+	apiContent := readFile(t, filepath.Join(outputRoot, "api", "database", "v1beta1", "autonomousdatabase_types.go"))
+	assertContains(t, apiContent, []string{
+		`AdminPassword shared.PasswordSource ` + "`json:\"adminPassword,omitempty\"`",
+		"// The administrative password sourced from a Kubernetes Secret in the same namespace.\n\t// The referenced Secret must contain a `password` key. Use `secretId` and `secretVersionNumber` instead to reference an OCI Vault secret.\n\t// +kubebuilder:validation:Optional\n\tAdminPassword shared.PasswordSource `json:\"adminPassword,omitempty\"`",
+	})
+	assertNotContains(t, apiContent, []string{
+		`AdminPassword string ` + "`json:\"adminPassword,omitempty\"`",
+	})
+
+	serviceClientContent := readFile(t, filepath.Join(outputRoot, "pkg", "servicemanager", "database", "autonomousdatabase", "autonomousdatabase_serviceclient.go"))
+	assertContains(t, serviceClientContent, []string{
+		`CredentialClient: manager.CredentialClient,`,
+	})
+}
+
+func TestCheckedInMySQLDbSystemUsesSecretBackedAdminCredentials(t *testing.T) {
+	cfg := loadCheckedInConfig(t)
+	mysqlService := serviceConfigsByName(t, cfg, "mysql")["mysql"]
+
+	outputRoot := t.TempDir()
+	seedSamplesKustomization(t, outputRoot)
+
+	pipeline := New()
+	result, err := pipeline.Generate(context.Background(), cfg, []ServiceConfig{*mysqlService}, Options{
+		OutputRoot: outputRoot,
+	})
+	if err != nil {
+		t.Fatalf("Generate() error = %v", err)
+	}
+	if len(result.Generated) != 1 {
+		t.Fatalf("Generate() generated %d services, want 1", len(result.Generated))
+	}
+
+	apiContent := readFile(t, filepath.Join(outputRoot, "api", "mysql", "v1beta1", "dbsystem_types.go"))
+	assertContains(t, apiContent, []string{
+		`AdminUsername shared.UsernameSource ` + "`json:\"adminUsername,omitempty\"`",
+		`AdminPassword shared.PasswordSource ` + "`json:\"adminPassword,omitempty\"`",
+		"// The username for the administrative user sourced from a Kubernetes Secret in the same namespace.\n\t// The referenced Secret must contain a `username` key.\n\t// +kubebuilder:validation:Optional\n\tAdminUsername shared.UsernameSource `json:\"adminUsername,omitempty\"`",
+		"// The password for the administrative user sourced from a Kubernetes Secret in the same namespace.\n\t// The referenced Secret must contain a `password` key.\n\t// +kubebuilder:validation:Optional\n\tAdminPassword shared.PasswordSource `json:\"adminPassword,omitempty\"`",
+		"// The last applied secret reference for the administrative username.\n\tAdminUsername shared.UsernameSource `json:\"adminUsername,omitempty\"`",
+		"// The last applied secret reference for the administrative password.\n\tAdminPassword shared.PasswordSource `json:\"adminPassword,omitempty\"`",
+	})
+	assertNotContains(t, apiContent, []string{
+		`AdminUsername string ` + "`json:\"adminUsername,omitempty\"`",
+		`AdminPassword string ` + "`json:\"adminPassword,omitempty\"`",
+	})
+
+	sampleContent := readFile(t, filepath.Join(outputRoot, "config", "samples", "mysql_v1beta1_dbsystem.yaml"))
+	assertContains(t, sampleContent, []string{
+		"adminUsername:",
+		"adminPassword:",
+		"secretName: admin-secret",
+	})
+
+	serviceClientContent := readFile(t, filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "dbsystem", "dbsystem_serviceclient.go"))
+	assertContains(t, serviceClientContent, []string{
+		`CredentialClient: manager.CredentialClient,`,
+	})
 }
 
 func TestCheckedInConfigIncludesNetworkLoadBalancerObservedStateAlias(t *testing.T) {

@@ -81,9 +81,17 @@ This checklist seeds `database/AutonomousDatabase`, `mysql/DbSystem`,
 
 - Shared rule: make repo-authored secret behavior explicit instead of implying
   it from provider facts.
-- `database/AutonomousDatabase`, `mysql/DbSystem`, `nosql/Table`, and
-  `psql/DbSystem` have no Kubernetes secret reads or writes in the current
-  generated-runtime path.
+- `database/AutonomousDatabase` reads a same-namespace Kubernetes Secret for
+  `spec.adminPassword` when the repo-authored contract uses Kubernetes-backed
+  credentials instead of OCI Vault `secretId`.
+- `mysql/DbSystem` reads same-namespace Kubernetes Secrets for
+  `spec.adminUsername` and `spec.adminPassword`, and mirrors the applied secret
+  references into status.
+- `nosql/Table` and `psql/DbSystem` have no Kubernetes secret reads or writes
+  in the current generated-runtime path.
+- The current formal `secret_side_effects` classification remains `none` for
+  reads-only credential inputs because the shared contract distinguishes Secret
+  mutations, not Secret lookups.
 
 ### Delete semantics
 

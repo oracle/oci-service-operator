@@ -17,6 +17,7 @@ func buildPackageModel(cfg *Config, service ServiceConfig, discovered []Resource
 	resources := discovered
 	resources = assignHelperTypeNames(resources)
 	resources = assignStatusTypeNames(resources)
+	resources = applyResourceGenerationOverrides(service, version, resources)
 	resources = applyDefaultSamples(service, version, resources)
 	controllerOutput := buildControllerOutputModel(service, cfg.Domain, resources)
 	serviceManagers, err := buildServiceManagerModels(service, version, resources)
@@ -253,6 +254,7 @@ func buildServiceManagerModels(service ServiceConfig, version string, resources 
 			Constructor:              fmt.Sprintf("New%sServiceManager", resource.Kind),
 			ClientInterfaceName:      fmt.Sprintf("%sServiceClient", resource.Kind),
 			DefaultClientTypeName:    fmt.Sprintf("default%sServiceClient", resource.Kind),
+			UsesCredentialClient:     resourceUsesCredentialClient(resource),
 			SDKClientTypeName:        resource.Runtime.ClientType,
 			SDKClientConstructor:     resource.Runtime.ClientConstructor,
 			SDKClientConstructorKind: resource.Runtime.ClientConstructorKind,
@@ -274,6 +276,60 @@ func buildServiceManagerModels(service ServiceConfig, version string, resources 
 	})
 
 	return serviceManagers, nil
+}
+
+func applyResourceGenerationOverrides(service ServiceConfig, version string, resources []ResourceModel) []ResourceModel {
+	updated := make([]ResourceModel, 0, len(resources))
+	for _, resource := range resources {
+		override, ok := service.resourceGenerationOverride(resource.Kind)
+		if ok {
+			resource.SpecFields = mergeFieldOverrides(resource.SpecFields, override.SpecFields)
+			resource.StatusFields = mergeFieldOverrides(resource.StatusFields, override.StatusFields)
+			resource.Sample = mergeSampleOverride(service, version, resource.FileStem, resource.Sample, override.Sample)
+		}
+		updated = append(updated, resource)
+	}
+	return updated
+}
+
+func resourceUsesCredentialClient(resource ResourceModel) bool {
+	helperIndex := make(map[string]TypeModel, len(resource.HelperTypes))
+	for _, helper := range resource.HelperTypes {
+		helperIndex[helper.Name] = helper
+	}
+
+	seenHelpers := make(map[string]struct{}, len(resource.HelperTypes))
+	for _, field := range resource.SpecFields {
+		if fieldTypeUsesCredentialClient(field.Type, helperIndex, seenHelpers) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func fieldTypeUsesCredentialClient(typeExpr string, helperIndex map[string]TypeModel, seenHelpers map[string]struct{}) bool {
+	switch underlyingTypeName(typeExpr) {
+	case "shared.PasswordSource", "shared.UsernameSource":
+		return true
+	}
+
+	helper, ok := helperIndex[underlyingTypeName(typeExpr)]
+	if !ok {
+		return false
+	}
+	if _, seen := seenHelpers[helper.Name]; seen {
+		return false
+	}
+
+	seenHelpers[helper.Name] = struct{}{}
+	for _, field := range helper.Fields {
+		if fieldTypeUsesCredentialClient(field.Type, helperIndex, seenHelpers) {
+			return true
+		}
+	}
+
+	return false
 }
 
 func defaultControllerRBACMarkers(groupDNSName string, kindPlural string) []string {
@@ -327,6 +383,99 @@ func appendUniqueStrings(existing []string, extras ...string) []string {
 		existing = append(existing, value)
 	}
 	return existing
+}
+
+func mergeFieldOverrides(existing []FieldModel, overrides []FieldOverride) []FieldModel {
+	if len(overrides) == 0 {
+		return append([]FieldModel(nil), existing...)
+	}
+
+	merged := append([]FieldModel(nil), existing...)
+	indexByKey := make(map[string]int, len(existing))
+	for index, field := range existing {
+		indexByKey[fieldMergeKey(field.Name, field.Type, field.Tag)] = index
+	}
+
+	for _, override := range overrides {
+		key := fieldMergeKey(override.Name, override.Type, override.Tag)
+		if index, ok := indexByKey[key]; ok {
+			converted := merged[index]
+			converted.Name = override.Name
+			converted.Type = override.Type
+			converted.Tag = override.Tag
+			converted.Embedded = strings.TrimSpace(override.Name) == ""
+			if len(override.Comments) > 0 {
+				converted.Comments = append([]string(nil), override.Comments...)
+			}
+			if len(override.Markers) > 0 {
+				converted.Markers = append([]string(nil), override.Markers...)
+			}
+			merged[index] = converted
+			continue
+		}
+		converted := FieldModel{
+			Name:     override.Name,
+			Type:     override.Type,
+			Tag:      override.Tag,
+			Comments: append([]string(nil), override.Comments...),
+			Markers:  append([]string(nil), override.Markers...),
+			Embedded: strings.TrimSpace(override.Name) == "",
+		}
+		indexByKey[key] = len(merged)
+		merged = append(merged, converted)
+	}
+
+	return merged
+}
+
+func fieldMergeKey(name string, typ string, tag string) string {
+	if strings.TrimSpace(name) != "" {
+		return "name:" + name
+	}
+	if jsonName := jsonTagName(tag); jsonName != "" {
+		return "json:" + jsonName
+	}
+	return "type:" + strings.TrimSpace(typ) + "|tag:" + strings.TrimSpace(tag)
+}
+
+func jsonTagName(tag string) string {
+	tag = strings.TrimSpace(tag)
+	tag = strings.Trim(tag, "`")
+	if tag == "" {
+		return ""
+	}
+	const prefix = `json:"`
+	start := strings.Index(tag, prefix)
+	if start == -1 {
+		return ""
+	}
+	tag = tag[start+len(prefix):]
+	end := strings.Index(tag, `"`)
+	if end == -1 {
+		return ""
+	}
+	tag = tag[:end]
+	if tag == "" {
+		return ""
+	}
+	return strings.Split(tag, ",")[0]
+}
+
+func mergeSampleOverride(service ServiceConfig, version string, fileStem string, existing SampleModel, override SampleOverride) SampleModel {
+	sample := existing
+	if strings.TrimSpace(sample.FileName) == "" {
+		sample.FileName = sampleFileName(service.Group, version, fileStem)
+	}
+	if strings.TrimSpace(override.Body) != "" {
+		sample.Body = override.Body
+	}
+	if strings.TrimSpace(override.MetadataName) != "" {
+		sample.MetadataName = override.MetadataName
+	}
+	if strings.TrimSpace(override.Spec) != "" {
+		sample.Spec = override.Spec
+	}
+	return sample
 }
 
 func sampleFileName(group string, version string, fileStem string) string {

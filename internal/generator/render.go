@@ -914,6 +914,9 @@ var new{{ .Kind }}ServiceClient = func(manager *{{ .ManagerTypeName }}) {{ .Clie
 		Kind:    "{{ .Kind }}",
 		SDKName: "{{ .SDKName }}",
 		Log:     manager.Log,
+{{- if .UsesCredentialClient }}
+		CredentialClient: manager.CredentialClient,
+{{- end }}
 {{- if .Semantics }}
 		Semantics: &generatedruntime.Semantics{
 			FormalService:     "{{ .Semantics.FormalService }}",

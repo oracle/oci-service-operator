@@ -45,8 +45,12 @@ gaps:
 
 ## Repo-authored semantics
 
-- `AutonomousDatabase` has no Kubernetes secret reads or writes in the current
-  generated path.
+- `AutonomousDatabase` reads same-namespace Kubernetes Secrets for
+  `spec.adminPassword.secret.secretName` when the repo-authored v2 contract
+  uses Kubernetes-backed admin credentials instead of OCI Vault `secretId`
+  input.
+- The generated runtime forwards the resolved password to OCI but does not
+  create, update, or delete Kubernetes Secret objects.
 - Delete should keep the finalizer until `GetAutonomousDatabase` or
   `ListAutonomousDatabases` confirms the database is gone.
 - The imported mutation surface is broad, so the seeded baseline keeps bind,

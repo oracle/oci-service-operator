@@ -85,15 +85,16 @@ summarized below:
 | `spec.ipAddress` | The IP address the DB System is configured to listen on. A private IP address of your choice to assign to the primary endpoint of the DB System. Must be an available IP address within the subnet's CIDR. If you don't specify a value, Oracle automatically assigns a private IP address from the subnet. This should be a "dotted-quad" style IPv4 address. | string | no |
 | `spec.freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see [Resource Tags](https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). `Example: {"Department": "Finance"}` | string | no |
 | `spec.definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see [Resource Tags](https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). | string | no |
-| `spec.adminUsername` | The username for the administrative user. | string | no |
-| `spec.adminPassword` | The administrative password. The password must meet the MySQL DB System password policy. | string | no |
+| `spec.adminUsername` | Same-namespace Kubernetes Secret reference for the administrative username. OSOK reads the `username` key from the referenced Secret. | object | no |
+| `spec.adminPassword` | Same-namespace Kubernetes Secret reference for the administrative password. OSOK reads the `password` key from the referenced Secret. | object | no |
 | `spec.backupPolicy` | Nested backup policy options for automatic backup behavior and PITR. | object | no |
 | `spec.maintenance` | Nested maintenance window configuration. | object | no |
 | `spec.secureConnections` | Nested TLS certificate configuration. | object | no |
 
-The generated v2 runtime reads `spec.adminUsername` and `spec.adminPassword`
-directly from the CR. It does not consume nested Kubernetes Secret references
-for DB System credentials.
+The generated v2 runtime resolves `spec.adminUsername.secret.secretName` and
+`spec.adminPassword.secret.secretName` from Secrets in the same namespace as
+the `DbSystem` CR. It sends the resolved `username` and `password` values to
+OCI and mirrors only the secret references back into status.
 
 
 
@@ -118,13 +119,22 @@ for DB System credentials.
 
 The v2 generated runtime now uses the `DbSystem` kind directly. Use the current
 API group and spec surface instead of the retired `MySqlDbSystem` resource and
-its retired secret-materialization and bind workflow.
+its retired bind workflow.
 
 - SUBNET_OCID - OCID of the subnet created in the pre-requisites step
 - CONFIGURATION_ID - [More info about Configurations](https://docs.oracle.com/en-us/iaas/mysql-database/doc/db-systems.html#GUID-E2A83218-9700-4A49-B55D-987867D81871) Get your [Configuration_id](https://console.us-ashburn-1.oraclecloud.com/mysqlaas/configurations) 
 
 
 ```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: admin-secret
+type: Opaque
+stringData:
+  username: <ADMIN_USERNAME>
+  password: <ADMIN_PASSWORD>
+---
 apiVersion: mysql.oracle.com/v1beta1
 kind: DbSystem
 metadata:
@@ -136,12 +146,19 @@ spec:
   subnetId: <SUBNET_OCID>
   configurationId: <CONFIGURATION_OCID>
   availabilityDomain: <AVAILABILITY_DOMAIN>
-  adminUsername: <ADMIN_USERNAME>
-  adminPassword: <ADMIN_PASSWORD>
+  adminUsername:
+    secret:
+      secretName: admin-secret
+  adminPassword:
+    secret:
+      secretName: admin-secret
   description: <DESCRIPTION>
   dataStorageSizeInGBs: <DB_SIZE>
   isHighlyAvailable: false
 ```
+
+Create the Secret in the same namespace as the `DbSystem` CR. OSOK reads the
+`username` and `password` keys from that Secret during reconcile.
 
 Run the following command to create a CR to the cluster:
 ```sh
@@ -150,6 +167,10 @@ kubectl apply -f <CREATE_YAML>.yaml
 
 Once the CR is created, OSOK reconciles the `DbSystem` and records the OCI
 identifier in status.
+
+`status.adminUsername.secret.secretName` and
+`status.adminPassword.secret.secretName` mirror the last applied secret
+references. Secret values are not copied into status.
 
 The `DbSystem` CR can list the MySQL DB Systems in the cluster:
 ```sh
@@ -173,9 +194,8 @@ $ kubectl describe dbsystems <NAME_OF_CR_OBJECT>
 ## Current v2 notes
 
 - The generated v2 contract no longer uses the legacy `MySqlDbSystem` kind.
-- The retired handwritten path's nested Kubernetes Secret fields, bind, and
-  endpoint-materialization examples do not apply to the generated `DbSystem`
-  resource.
+- The generated runtime reads same-namespace Kubernetes Secret references for
+  admin credentials but does not materialize endpoint or credential Secrets.
 - Check `api/mysql/v1beta1/dbsystem_types.go` for the current spec surface when
   authoring CRs.
 
@@ -190,4 +210,6 @@ the current status surface on the CR directly:
 - `status.port`
 - `status.portX`
 - `status.endpoints`
+- `status.adminUsername.secret.secretName`
+- `status.adminPassword.secret.secretName`
  

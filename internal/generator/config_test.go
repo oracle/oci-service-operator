@@ -252,6 +252,7 @@ services:
 	}
 }
 
+//nolint:gocyclo // This fixture-based config parser test intentionally checks multiple rollout surfaces in one YAML example.
 func TestLoadConfigIncludesGenerationRolloutAndOverrides(t *testing.T) {
 	t.Parallel()
 
@@ -286,6 +287,25 @@ services:
             maxConcurrentReconciles: 3
             extraRBACMarkers:
               - groups="",resources=secrets,verbs=get;list;watch
+              - groups="",resources=events,verbs=get;list;watch;create;update;patch;delete
+          specFields:
+            - name: AdminUsername
+              type: shared.UsernameSource
+              tag: 'json:"adminUsername,omitempty"'
+          statusFields:
+            - name: AdminPassword
+              type: shared.PasswordSource
+              tag: 'json:"adminPassword,omitempty"'
+          sample:
+            body: |-
+              apiVersion: mysql.oracle.com/v1beta1
+              kind: DbSystem
+              metadata:
+                name: dbsystem-sample
+              spec:
+                adminUsername:
+                  secret:
+                    secretName: admin-secret
           serviceManager:
             packagePath: mysql/dbsystem
   - service: core
@@ -323,11 +343,23 @@ services:
 	if override.Controller.MaxConcurrentReconciles != 3 {
 		t.Fatalf("mysql maxConcurrentReconciles = %d, want 3", override.Controller.MaxConcurrentReconciles)
 	}
-	if !slices.Equal(override.Controller.ExtraRBACMarkers, []string{`groups="",resources=secrets,verbs=get;list;watch`}) {
-		t.Fatalf("mysql extra RBAC markers = %v, want secrets marker", override.Controller.ExtraRBACMarkers)
+	if !slices.Equal(override.Controller.ExtraRBACMarkers, []string{
+		`groups="",resources=secrets,verbs=get;list;watch`,
+		`groups="",resources=events,verbs=get;list;watch;create;update;patch;delete`,
+	}) {
+		t.Fatalf("mysql extra RBAC markers = %v, want secret and event markers", override.Controller.ExtraRBACMarkers)
 	}
 	if override.ServiceManager.PackagePath != "mysql/dbsystem" {
 		t.Fatalf("mysql packagePath = %q, want %q", override.ServiceManager.PackagePath, "mysql/dbsystem")
+	}
+	if len(override.SpecFields) != 1 || override.SpecFields[0].Name != "AdminUsername" {
+		t.Fatalf("mysql specFields = %#v, want AdminUsername override", override.SpecFields)
+	}
+	if len(override.StatusFields) != 1 || override.StatusFields[0].Name != "AdminPassword" {
+		t.Fatalf("mysql statusFields = %#v, want AdminPassword override", override.StatusFields)
+	}
+	if !strings.Contains(override.Sample.Body, "secretName: admin-secret") {
+		t.Fatalf("mysql sample override = %q, want secret-backed body", override.Sample.Body)
 	}
 
 	coreService := cfg.Services[1]
@@ -855,10 +887,14 @@ func assertCheckedInDatabaseRuntimeRolloutMetadata(t *testing.T, service *Servic
 	if !slices.Equal(
 		override.Controller.ExtraRBACMarkers,
 		[]string{
+			`groups="",resources=secrets,verbs=get;list;watch`,
 			`groups="",resources=events,verbs=get;list;watch;create;update;patch;delete`,
 		},
 	) {
 		t.Fatalf("database extra RBAC markers = %v", override.Controller.ExtraRBACMarkers)
+	}
+	if len(override.SpecFields) != 1 || override.SpecFields[0].Name != "AdminPassword" || override.SpecFields[0].Type != "shared.PasswordSource" {
+		t.Fatalf("database specFields = %#v, want secret-backed adminPassword override", override.SpecFields)
 	}
 	if got := service.ServiceManagerPackagePathFor("AutonomousDatabase", "autonomousdatabase"); got != "database/autonomousdatabase" {
 		t.Fatalf("database packagePath = %q, want %q", got, "database/autonomousdatabase")
@@ -883,10 +919,20 @@ func assertCheckedInMySQLRuntimeRolloutMetadata(t *testing.T, service *ServiceCo
 	if !slices.Equal(
 		override.Controller.ExtraRBACMarkers,
 		[]string{
+			`groups="",resources=secrets,verbs=get;list;watch`,
 			`groups="",resources=events,verbs=get;list;watch;create;update;patch;delete`,
 		},
 	) {
 		t.Fatalf("mysql extra RBAC markers = %v", override.Controller.ExtraRBACMarkers)
+	}
+	if len(override.SpecFields) != 2 {
+		t.Fatalf("mysql specFields = %#v, want 2 secret-backed overrides", override.SpecFields)
+	}
+	if len(override.StatusFields) != 2 {
+		t.Fatalf("mysql statusFields = %#v, want 2 secret-backed overrides", override.StatusFields)
+	}
+	if !strings.Contains(override.Sample.Body, "adminPassword:") || !strings.Contains(override.Sample.Body, "secretName: admin-secret") {
+		t.Fatalf("mysql sample override = %q, want secret-backed sample body", override.Sample.Body)
 	}
 	if got := service.ServiceManagerPackagePathFor("DbSystem", "dbsystem"); got != "mysql/dbsystem" {
 		t.Fatalf("mysql packagePath = %q, want %q", got, "mysql/dbsystem")

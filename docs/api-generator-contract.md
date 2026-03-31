@@ -31,6 +31,9 @@ Each service record defines:
 | `generation.resources[].formalSpec` | Optional per-kind controller slug from `formal/controller_manifest.tsv` when only selected resources are formally promoted. |
 | `generation.resources[].controller.maxConcurrentReconciles` | Optional controller concurrency override for one kind. |
 | `generation.resources[].controller.extraRBACMarkers` | Optional additional kubebuilder RBAC marker payloads for one kind. |
+| `generation.resources[].specFields` | Optional per-kind spec field overrides keyed by generated Go field name. Overrides may replace field type, tag, comments, or markers when the repo-authored v2 contract intentionally differs from the imported SDK surface. |
+| `generation.resources[].statusFields` | Optional per-kind status field overrides keyed by generated Go field name. Overrides may replace or add repo-authored observed-state or status-mirror fields. |
+| `generation.resources[].sample` | Optional per-kind sample override. `body` replaces the rendered sample wholesale, while `metadataName` and `spec` refine the generated defaults. |
 | `generation.resources[].serviceManager.packagePath` | Optional existing package path relative to `pkg/servicemanager/` when a manual layout must be preserved. |
 
 Rules:
@@ -199,6 +202,20 @@ Additional validation, default, enum, or minimum/maximum markers should come
 from the OCI schema model when the generator can infer them. Any exception
 should be expressed as a structured override in generator inputs, not as a
 one-off file edit under `api/`.
+
+### Structured field and sample overrides
+
+- `generation.resources[].specFields` and `generation.resources[].statusFields`
+  match fields by generated Go name, with JSON tag fallback for anonymous or
+  embedded cases.
+- Field overrides may set `type`, `tag`, `comments`, and `markers`.
+- Omitted comments and markers inherit from the discovered field model; explicit
+  values should be supplied when the repo-authored v2 contract intentionally
+  diverges from the imported SDK field semantics, such as secret-backed
+  credential inputs.
+- `generation.resources[].sample.body` replaces the generated sample manifest
+  for one kind. `metadataName` and `spec` allow narrower sample customization
+  without forking the full body.
 
 ### Samples
 

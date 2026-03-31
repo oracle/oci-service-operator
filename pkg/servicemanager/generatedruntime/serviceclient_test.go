@@ -7,11 +7,13 @@ package generatedruntime
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"testing"
 
 	databasesdk "github.com/oracle/oci-go-sdk/v65/database"
 	databasev1beta1 "github.com/oracle/oci-service-operator/api/database/v1beta1"
+	"github.com/oracle/oci-service-operator/pkg/credhelper"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
@@ -36,6 +38,27 @@ type fakeStatus struct {
 	CompartmentId  string            `json:"compartmentId,omitempty"`
 	DisplayName    string            `json:"displayName,omitempty"`
 	LifecycleState string            `json:"lifecycleState,omitempty"`
+}
+
+type fakeSecretResource struct {
+	Name      string           `json:"-"`
+	Namespace string           `json:"-"`
+	Spec      fakeSecretSpec   `json:"spec,omitempty"`
+	Status    fakeSecretStatus `json:"status,omitempty"`
+}
+
+type fakeSecretSpec struct {
+	DisplayName   string                `json:"displayName,omitempty"`
+	AdminUsername shared.UsernameSource `json:"adminUsername,omitempty"`
+	AdminPassword shared.PasswordSource `json:"adminPassword,omitempty"`
+}
+
+type fakeSecretStatus struct {
+	OsokStatus     shared.OSOKStatus     `json:"status"`
+	Id             string                `json:"id,omitempty"`
+	LifecycleState string                `json:"lifecycleState,omitempty"`
+	AdminUsername  shared.UsernameSource `json:"adminUsername,omitempty"`
+	AdminPassword  shared.PasswordSource `json:"adminPassword,omitempty"`
 }
 
 type fakeThing struct {
@@ -90,6 +113,20 @@ type fakeUpdateThingResponse struct {
 	Thing fakeThing `presentIn:"body"`
 }
 
+type FakeCreateSecretThingDetails struct {
+	DisplayName   string `json:"displayName,omitempty"`
+	AdminUsername string `json:"adminUsername,omitempty"`
+	AdminPassword string `json:"adminPassword,omitempty"`
+}
+
+type fakeCreateSecretThingRequest struct {
+	FakeCreateSecretThingDetails `contributesTo:"body"`
+}
+
+type fakeCreateSecretThingResponse struct {
+	Thing fakeThing `presentIn:"body"`
+}
+
 type fakeDeleteThingRequest struct {
 	ThingId *string `contributesTo:"path" name:"thingId"`
 }
@@ -131,6 +168,34 @@ func (f fakeServiceError) GetMessage() string     { return f.message }
 func (f fakeServiceError) GetCode() string        { return f.code }
 func (f fakeServiceError) GetOpcRequestID() string {
 	return f.opcID
+}
+
+type fakeCredentialClient struct {
+	secrets   map[string]map[string][]byte
+	readNames []string
+}
+
+var _ credhelper.CredentialClient = (*fakeCredentialClient)(nil)
+
+func (f *fakeCredentialClient) CreateSecret(_ context.Context, _, _ string, _ map[string]string, _ map[string][]byte) (bool, error) {
+	return false, nil
+}
+
+func (f *fakeCredentialClient) DeleteSecret(_ context.Context, _, _ string) (bool, error) {
+	return false, nil
+}
+
+func (f *fakeCredentialClient) GetSecret(_ context.Context, name, namespace string) (map[string][]byte, error) {
+	f.readNames = append(f.readNames, namespace+"/"+name)
+	secret, ok := f.secrets[name]
+	if !ok {
+		return nil, fmt.Errorf("secret %s/%s not found", namespace, name)
+	}
+	return secret, nil
+}
+
+func (f *fakeCredentialClient) UpdateSecret(_ context.Context, _, _ string, _ map[string]string, _ map[string][]byte) (bool, error) {
+	return false, nil
 }
 
 //nolint:gocyclo // This scenario keeps request projection and status assertions together to verify the full create path.
@@ -219,6 +284,73 @@ func TestServiceClientCreateOrUpdateCreatesAndProjectsStatus(t *testing.T) {
 	}
 	if len(resource.Status.OsokStatus.Conditions) == 0 || resource.Status.OsokStatus.Conditions[len(resource.Status.OsokStatus.Conditions)-1].Type != shared.Active {
 		t.Fatalf("status conditions = %#v, want trailing Active condition", resource.Status.OsokStatus.Conditions)
+	}
+}
+
+func TestServiceClientCreateOrUpdateResolvesSecretInputsAndStampsStatus(t *testing.T) {
+	t.Parallel()
+
+	var createRequest fakeCreateSecretThingRequest
+	credentialClient := &fakeCredentialClient{
+		secrets: map[string]map[string][]byte{
+			"admin-secret": {
+				"username": []byte("admin"),
+				"password": []byte("S3cr3t!"),
+			},
+		},
+	}
+
+	client := NewServiceClient[*fakeSecretResource](Config[*fakeSecretResource]{
+		Kind:             "Thing",
+		SDKName:          "Thing",
+		CredentialClient: credentialClient,
+		Create: &Operation{
+			NewRequest: func() any { return &fakeCreateSecretThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				createRequest = *request.(*fakeCreateSecretThingRequest)
+				return fakeCreateSecretThingResponse{
+					Thing: fakeThing{
+						Id:             "ocid1.thing.oc1..create",
+						LifecycleState: "ACTIVE",
+					},
+				}, nil
+			},
+		},
+	})
+
+	resource := &fakeSecretResource{
+		Namespace: "default",
+		Spec: fakeSecretSpec{
+			DisplayName:   "desired-name",
+			AdminUsername: shared.UsernameSource{Secret: shared.SecretSource{SecretName: "admin-secret"}},
+			AdminPassword: shared.PasswordSource{Secret: shared.SecretSource{SecretName: "admin-secret"}},
+		},
+	}
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful {
+		t.Fatal("CreateOrUpdate() should report success")
+	}
+	if createRequest.DisplayName != "desired-name" {
+		t.Fatalf("create request displayName = %q, want desired-name", createRequest.DisplayName)
+	}
+	if createRequest.AdminUsername != "admin" {
+		t.Fatalf("create request adminUsername = %q, want admin", createRequest.AdminUsername)
+	}
+	if createRequest.AdminPassword != "S3cr3t!" {
+		t.Fatalf("create request adminPassword = %q, want resolved secret value", createRequest.AdminPassword)
+	}
+	if got := resource.Status.AdminUsername.Secret.SecretName; got != "admin-secret" {
+		t.Fatalf("status.adminUsername.secret.secretName = %q, want admin-secret", got)
+	}
+	if got := resource.Status.AdminPassword.Secret.SecretName; got != "admin-secret" {
+		t.Fatalf("status.adminPassword.secret.secretName = %q, want admin-secret", got)
+	}
+	if len(credentialClient.readNames) != 2 {
+		t.Fatalf("credential reads = %v, want username and password lookups", credentialClient.readNames)
 	}
 }
 
@@ -534,10 +666,12 @@ func TestBuildRequestPopulatesAutonomousDatabasePolymorphicCreateBody(t *testing
 			resource := &databasev1beta1.AutonomousDatabase{Spec: tc.spec}
 
 			err := buildRequest(
+				context.Background(),
 				request,
 				resource,
 				"",
 				[]RequestField{{FieldName: "CreateAutonomousDatabaseDetails", RequestName: "createAutonomousDatabaseDetails", Contribution: "body"}},
+				nil,
 				nil,
 			)
 			if err != nil {

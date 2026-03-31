@@ -43,8 +43,13 @@ gaps:
 
 ## Repo-authored semantics
 
-- `DbSystem` has no Kubernetes secret reads or writes in the current generated
-  path.
+- `DbSystem` reads same-namespace Kubernetes Secrets for
+  `spec.adminUsername.secret.secretName` and
+  `spec.adminPassword.secret.secretName` before create or update request
+  projection.
+- The generated runtime mirrors the applied secret references into
+  `status.adminUsername` and `status.adminPassword`, but it does not create,
+  update, or delete Kubernetes Secret objects.
 - Delete should keep the finalizer until `GetDbSystem` or `ListDbSystems`
   confirms the database system is gone.
 - The imported mutation surface is broader than the current generated contract,

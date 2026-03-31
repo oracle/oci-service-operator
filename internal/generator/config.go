@@ -62,6 +62,9 @@ type ResourceGenerationOverride struct {
 	Controller     ControllerGenerationOverride     `yaml:"controller,omitempty"`
 	ServiceManager ServiceManagerGenerationOverride `yaml:"serviceManager,omitempty"`
 	Webhooks       GenerationSurfaceConfig          `yaml:"webhooks,omitempty"`
+	SpecFields     []FieldOverride                  `yaml:"specFields,omitempty"`
+	StatusFields   []FieldOverride                  `yaml:"statusFields,omitempty"`
+	Sample         SampleOverride                   `yaml:"sample,omitempty"`
 }
 
 // ControllerGenerationOverride captures per-kind controller-specific settings.
@@ -75,6 +78,22 @@ type ControllerGenerationOverride struct {
 type ServiceManagerGenerationOverride struct {
 	Strategy    string `yaml:"strategy,omitempty"`
 	PackagePath string `yaml:"packagePath,omitempty"`
+}
+
+// FieldOverride captures one generated resource field override sourced from services.yaml.
+type FieldOverride struct {
+	Name     string   `yaml:"name,omitempty"`
+	Type     string   `yaml:"type,omitempty"`
+	Tag      string   `yaml:"tag,omitempty"`
+	Comments []string `yaml:"comments,omitempty"`
+	Markers  []string `yaml:"markers,omitempty"`
+}
+
+// SampleOverride captures a generated sample override sourced from services.yaml.
+type SampleOverride struct {
+	Body         string `yaml:"body,omitempty"`
+	MetadataName string `yaml:"metadataName,omitempty"`
+	Spec         string `yaml:"spec,omitempty"`
 }
 
 // ServiceConfig identifies one OCI SDK service and its OSOK output group.
@@ -254,6 +273,24 @@ func (g GenerationConfig) Validate(serviceName string) error {
 		); err != nil {
 			return err
 		}
+		if err := validateFieldOverrides(
+			fmt.Sprintf("service %q generation.resources[%q].specFields", serviceName, kind),
+			resource.SpecFields,
+		); err != nil {
+			return err
+		}
+		if err := validateFieldOverrides(
+			fmt.Sprintf("service %q generation.resources[%q].statusFields", serviceName, kind),
+			resource.StatusFields,
+		); err != nil {
+			return err
+		}
+		if err := validateSampleOverride(
+			fmt.Sprintf("service %q generation.resources[%q].sample", serviceName, kind),
+			resource.Sample,
+		); err != nil {
+			return err
+		}
 		if resource.Controller.MaxConcurrentReconciles < 0 {
 			return fmt.Errorf(
 				"service %q generation.resources[%q].controller.maxConcurrentReconciles must be >= 0",
@@ -323,11 +360,37 @@ func validateWebhookStrategy(field string, strategy string) error {
 	}
 }
 
+func validateFieldOverrides(field string, overrides []FieldOverride) error {
+	for index, override := range overrides {
+		overrideField := fmt.Sprintf("%s[%d]", field, index)
+		if strings.TrimSpace(override.Name) == "" {
+			return fmt.Errorf("%s.name is required", overrideField)
+		}
+		if strings.TrimSpace(override.Type) == "" {
+			return fmt.Errorf("%s.type is required", overrideField)
+		}
+		if strings.TrimSpace(override.Tag) == "" {
+			return fmt.Errorf("%s.tag is required", overrideField)
+		}
+	}
+	return nil
+}
+
+func validateSampleOverride(field string, sample SampleOverride) error {
+	if strings.TrimSpace(sample.Body) != "" && (strings.TrimSpace(sample.MetadataName) != "" || strings.TrimSpace(sample.Spec) != "") {
+		return fmt.Errorf("%s.body cannot be combined with metadataName or spec", field)
+	}
+	return nil
+}
+
 func (r ResourceGenerationOverride) hasOverrides() bool {
 	return strings.TrimSpace(r.FormalSpec) != "" ||
 		r.Controller.hasOverrides() ||
 		r.ServiceManager.hasOverrides() ||
-		strings.TrimSpace(r.Webhooks.Strategy) != ""
+		strings.TrimSpace(r.Webhooks.Strategy) != "" ||
+		len(r.SpecFields) > 0 ||
+		len(r.StatusFields) > 0 ||
+		r.Sample.hasOverride()
 }
 
 func (c ControllerGenerationOverride) hasOverrides() bool {
@@ -336,6 +399,10 @@ func (c ControllerGenerationOverride) hasOverrides() bool {
 
 func (s ServiceManagerGenerationOverride) hasOverrides() bool {
 	return strings.TrimSpace(s.Strategy) != "" || strings.TrimSpace(s.PackagePath) != ""
+}
+
+func (s SampleOverride) hasOverride() bool {
+	return strings.TrimSpace(s.Body) != "" || strings.TrimSpace(s.MetadataName) != "" || strings.TrimSpace(s.Spec) != ""
 }
 
 func validateFormalSpec(field string, value string) error {

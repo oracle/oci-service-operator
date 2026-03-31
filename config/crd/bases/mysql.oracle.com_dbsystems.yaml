@@ -58,14 +58,26 @@ spec:
             properties:
               adminPassword:
                 description: |-
-                  The password for the administrative user. The password must be
-                  between 8 and 32 characters long, and must contain at least 1
-                  numeric character, 1 lowercase character, 1 uppercase character, and
-                  1 special (nonalphanumeric) character.
-                type: string
+                  The password for the administrative user sourced from a Kubernetes Secret in the same namespace.
+                  The referenced Secret must contain a `password` key.
+                properties:
+                  secret:
+                    properties:
+                      secretName:
+                        type: string
+                    type: object
+                type: object
               adminUsername:
-                description: The username for the administrative user.
-                type: string
+                description: |-
+                  The username for the administrative user sourced from a Kubernetes Secret in the same namespace.
+                  The referenced Secret must contain a `username` key.
+                properties:
+                  secret:
+                    properties:
+                      secretName:
+                        type: string
+                    type: object
+                type: object
               availabilityDomain:
                 description: |-
                   The availability domain on which to deploy the Read/Write endpoint. This defines the preferred primary instance.
@@ -308,6 +320,26 @@ spec:
           status:
             description: DbSystemStatus defines the observed state of DbSystem.
             properties:
+              adminPassword:
+                description: The last applied secret reference for the administrative
+                  password.
+                properties:
+                  secret:
+                    properties:
+                      secretName:
+                        type: string
+                    type: object
+                type: object
+              adminUsername:
+                description: The last applied secret reference for the administrative
+                  username.
+                properties:
+                  secret:
+                    properties:
+                      secretName:
+                        type: string
+                    type: object
+                type: object
               availabilityDomain:
                 description: |-
                   The availability domain on which to deploy the Read/Write endpoint. This defines the preferred primary instance.

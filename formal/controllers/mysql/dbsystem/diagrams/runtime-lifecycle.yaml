@@ -11,3 +11,5 @@ states:
   - terminating
 notes:
   - Scaffold metadata only; replace with controller-specific runtime states before promotion.
+  - Create and update resolve admin credential inputs from same-namespace Kubernetes Secrets before request projection.
+  - Status mirrors secret references only; no Secret create, update, or delete side effects are modeled.

@@ -146,5 +146,11 @@ mutation-policy, waiter-work-request
 Scaffold metadata only; replace with
 controller-specific runtime states before
 promotion.
+Create and update resolve admin password input
+from a same-namespace Kubernetes Secret when
+`spec.adminPassword` is used.
+OCI Vault `secretId` remains the alternate
+credential input, and no Kubernetes Secret side
+effects are modeled.
 end note
 @enduml

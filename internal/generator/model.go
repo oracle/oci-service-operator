@@ -99,6 +99,7 @@ type ServiceManagerModel struct {
 	Constructor              string
 	ClientInterfaceName      string
 	DefaultClientTypeName    string
+	UsesCredentialClient     bool
 	SDKClientTypeName        string
 	SDKClientConstructor     string
 	SDKClientConstructorKind string

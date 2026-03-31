@@ -160,16 +160,19 @@ This happens mostly due to user authorization. Follow below steps for remediatio
 * If using User credentials, cross verify if the secret for user credentials (ocicredentials as per installation doc) is populated correctly.
 * Note that OSOK uses user credentials for authorization if the secret 'ocicredentials' is available during installation. Else it uses instance principal by default. Delete the secret 'ocicredentials' if user principals are not intended and restart the deployment to switch to Instance principals
 
-2. **AutonomousDatabase credentials are still authored as Kubernetes Secrets**
+2. **AutonomousDatabase credentials use plaintext fields or retired helper shapes**
 
-The generated v2 `AutonomousDatabase` runtime does not read names such as
-`admin-password` or `wallet-password` from Kubernetes Secrets in the CR
-namespace. If your manifest still follows the retired handwritten examples,
-update it to one of the supported v2 credential flows instead:
+The generated v2 `AutonomousDatabase` runtime accepts either a same-namespace
+Kubernetes Secret reference for `spec.adminPassword` or an OCI Vault reference
+through `spec.secretId`. If your manifest still uses plaintext
+`spec.adminPassword: <value>` or retired handwritten helper fields, update it
+to one of the supported v2 credential flows instead:
 
 ```yaml
 spec:
-  adminPassword: <ADMIN_PASSWORD>
+  adminPassword:
+    secret:
+      secretName: adb-admin-password
 ```
 
 or
@@ -180,16 +183,17 @@ spec:
   secretVersionNumber: <OPTIONAL_SECRET_VERSION>
 ```
 
-Do not expect OSOK to materialize admin credentials or wallets into Kubernetes
-Secrets for `AutonomousDatabase`. Use the current `docs/adb.md` guidance and
-the resource status surface instead.
+Create the referenced Secret in the same namespace as the CR and store the
+credential under the `password` key. Do not expect OSOK to materialize admin
+credentials or wallets into Kubernetes Secrets for `AutonomousDatabase`. Use
+the current `docs/adb.md` guidance and the resource status surface instead.
 
 3. **AutonomousDatabase credentials are configured with incompatible or invalid values**
 
 For the generated v2 `AutonomousDatabase` CR:
 
-* Set exactly one of `spec.adminPassword` or `spec.secretId`.
-* Ensure `spec.adminPassword` satisfies the Autonomous Database password policy.
+* Set exactly one of `spec.adminPassword.secret.secretName` or `spec.secretId`.
+* Ensure the referenced Kubernetes Secret exists in the same namespace as the CR and includes a `password` key whose value satisfies the Autonomous Database password policy.
 * Ensure `spec.secretId` points to a valid OCI Vault secret OCID; set `spec.secretVersionNumber` when a specific version is required.
 
 If both fields are set, or the chosen password/secret is invalid, OCI rejects

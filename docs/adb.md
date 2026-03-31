@@ -55,7 +55,7 @@ are summarized below:
 | `spec.licenseModel` | The Oracle license model that applies to the Oracle Autonomous Database. Bring your own license (BYOL) allows you to apply your current on-premises Oracle software licenses to equivalent, highly automated Oracle PaaS and IaaS services in the cloud. License Included allows you to subscribe to new Oracle Database software licenses and the Database service. Note that when provisioning an Autonomous Database on [dedicated Exadata infrastructure](https://docs.oracle.com/iaas/Content/Database/Concepts/adbddoverview.htm), this attribute must be null because the attribute is already set at the Autonomous Exadata Infrastructure level. When using [shared Exadata infrastructure](https://docs.oracle.com/iaas/Content/Database/Concepts/adboverview.htm#AEI), if a value is not specified, the system will supply the value of `BRING_YOUR_OWN_LICENSE`. <br>Allowed values are:<ul><li>LICENSE_INCLUDED</li><li>BRING_YOUR_OWN_LICENSE</li></ul>. | string | no       |
 | `spec.freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see [Resource Tags](https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). `Example: {"Department": "Finance"}` | string | no |
 | `spec.definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see [Resource Tags](https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). | string | no |
-| `spec.adminPassword` | The admin password to send directly in the CR. It must meet the Autonomous Database password policy. | string | conditionally required |
+| `spec.adminPassword` | Same-namespace Kubernetes Secret reference for the admin password. OSOK reads the `password` key from the referenced Secret. | object | conditionally required |
 | `spec.secretId` | The OCI Vault secret OCID to use instead of `spec.adminPassword`. | string | conditionally required |
 | `spec.secretVersionNumber` | The OCI Vault secret version to use with `spec.secretId`. | int | no |
 | `spec.subnetId` | The private subnet OCID for private endpoint databases. | string | no |
@@ -63,9 +63,10 @@ are summarized below:
 | `spec.privateEndpointLabel` | The private endpoint label for private access. | string | no |
 | `spec.privateEndpointIp` | The private endpoint IP for private access. | string | no |
 
-Provide either `spec.adminPassword` or `spec.secretId` when the service
-requires credentials. The generated v2 runtime does not read Kubernetes Secret
-references for password or wallet materialization.
+Provide either `spec.adminPassword.secret.secretName` or `spec.secretId` when
+the service requires credentials. The generated v2 runtime reads the referenced
+same-namespace Secret only to build the OCI request and does not materialize
+admin credentials or wallets into Kubernetes Secrets.
 
 ## Autonomous Database Status Parameters
 
@@ -91,10 +92,15 @@ the current API group and spec surface instead of the retired
 `AutonomousDatabases` resource and its retired wallet-download and bind helper
 workflow.
 
-Set credentials on the CR itself with `spec.adminPassword`, or reference an OCI
-Vault secret with `spec.secretId` and `spec.secretVersionNumber`.
-
 ```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: adb-admin-password
+type: Opaque
+stringData:
+  password: <ADMIN_PASSWORD>
+---
 apiVersion: database.oracle.com/v1beta1
 kind: AutonomousDatabase
 metadata:
@@ -107,8 +113,16 @@ spec:
   computeModel: ECPU
   computeCount: 2
   dataStorageSizeInTBs: <SIZE_IN_TBs>
-  adminPassword: <ADMIN_PASSWORD>
+  adminPassword:
+    secret:
+      secretName: adb-admin-password
 ```
+
+Create the Secret in the same namespace as the `AutonomousDatabase` CR. The
+referenced Secret must contain a `password` key.
+
+If you store the credential in OCI Vault instead, omit `spec.adminPassword`
+and set `spec.secretId` plus optional `spec.secretVersionNumber`.
 
 Run the following command to create a CR in the cluster:
 
@@ -131,9 +145,11 @@ kubectl describe autonomousdatabases <NAME_OF_CR_OBJECT>
 
 - The generated v2 contract no longer uses the legacy `AutonomousDatabases`
   kind.
-- The retired handwritten ADB runtime's nested Kubernetes Secret helper fields,
-  wallet download examples, and bind-by-id examples do not apply to the
-  generated v2 resource.
+- The generated runtime accepts either same-namespace Kubernetes Secret
+  references for `spec.adminPassword` or OCI Vault references through
+  `spec.secretId`.
+- The retired handwritten ADB wallet download and bind-by-id examples do not
+  apply to the generated v2 resource.
 - Check `api/database/v1beta1/autonomousdatabase_types.go` for the current
   spec surface when authoring CRs.
 
@@ -147,4 +163,7 @@ Consume the current status surface on the CR directly:
 - `status.connectionStrings`
 - `status.connectionUrls`
 - `status.privateEndpoint`
+
+OSOK does not create wallet or admin credential Kubernetes Secrets for
+`AutonomousDatabase`.
  
