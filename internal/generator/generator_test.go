@@ -1355,7 +1355,7 @@ func TestCurrentServiceParityMatchesCheckedInArtifacts(t *testing.T) {
 
 	apiFiles := []string{
 		"api/database/v1beta1/groupversion_info.go",
-		"api/database/v1beta1/autonomousdatabases_types.go",
+		"api/database/v1beta1/autonomousdatabase_types.go",
 		"api/database/v1beta1/autonomousdatabasebackup_types.go",
 		"api/streaming/v1beta1/groupversion_info.go",
 		"api/streaming/v1beta1/stream_types.go",
@@ -1364,7 +1364,7 @@ func TestCurrentServiceParityMatchesCheckedInArtifacts(t *testing.T) {
 	assertGoParityFiles(t, outputRoot, apiFiles)
 
 	exactFiles := []string{
-		"config/samples/database_v1beta1_autonomousdatabases.yaml",
+		"config/samples/database_v1beta1_autonomousdatabase.yaml",
 		"config/samples/streaming_v1beta1_stream.yaml",
 		"packages/database/metadata.env",
 		"packages/database/install/kustomization.yaml",
@@ -1374,12 +1374,12 @@ func TestCurrentServiceParityMatchesCheckedInArtifacts(t *testing.T) {
 	assertExactFileMatches(t, outputRoot, exactFiles)
 
 	runtimeFiles := []string{
-		"controllers/database/autonomousdatabases_controller.go",
+		"controllers/database/autonomousdatabase_controller.go",
 		"controllers/database/autonomousdatabasebackup_controller.go",
 		"controllers/streaming/stream_controller.go",
 		"controllers/streaming/streampool_controller.go",
-		"pkg/servicemanager/autonomousdatabases/adb/autonomousdatabases_serviceclient.go",
-		"pkg/servicemanager/autonomousdatabases/adb/autonomousdatabases_servicemanager.go",
+		"pkg/servicemanager/database/autonomousdatabase/autonomousdatabase_serviceclient.go",
+		"pkg/servicemanager/database/autonomousdatabase/autonomousdatabase_servicemanager.go",
 		"pkg/servicemanager/database/autonomousdatabasebackup/autonomousdatabasebackup_serviceclient.go",
 		"pkg/servicemanager/database/autonomousdatabasebackup/autonomousdatabasebackup_servicemanager.go",
 		"pkg/servicemanager/streaming/stream/stream_serviceclient.go",
