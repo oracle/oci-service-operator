@@ -33,6 +33,9 @@ const defaultRequeueDuration = time.Minute
 var errResourceNotFound = errors.New("generated runtime resource not found")
 
 var autonomousDatabaseBaseType = reflect.TypeOf((*databasesdk.CreateAutonomousDatabaseBase)(nil)).Elem()
+var omittedRequestFieldSentinel = omittedRequestField{}
+
+type omittedRequestField struct{}
 
 type Operation struct {
 	NewRequest func() any
@@ -799,6 +802,10 @@ func prepareValueForTarget(
 			if err != nil {
 				return nil, err
 			}
+			if isOmittedRequestField(childPrepared) {
+				delete(prepared, fieldName)
+				continue
+			}
 			prepared[fieldName] = childPrepared
 		}
 		return prepared, nil
@@ -845,32 +852,37 @@ func maybeResolveSecretInput(
 	namespace string,
 	credentialClient credhelper.CredentialClient,
 	path []string,
-) (string, bool, error) {
+) (any, bool, error) {
 	secretName, ok := extractSecretName(raw)
 	if !ok {
 		if isEmptySecretSourceValue(raw, path) {
-			return "", true, nil
+			return omittedRequestFieldSentinel, true, nil
 		}
-		return "", false, nil
+		return nil, false, nil
 	}
 	if secretName == "" {
-		return "", true, nil
+		return omittedRequestFieldSentinel, true, nil
 	}
 	if credentialClient == nil {
-		return "", false, fmt.Errorf("generated runtime requires a credential client to resolve %s", strings.Join(path, "."))
+		return nil, false, fmt.Errorf("generated runtime requires a credential client to resolve %s", strings.Join(path, "."))
 	}
 
 	secretData, err := credentialClient.GetSecret(ctx, secretName, namespace)
 	if err != nil {
-		return "", false, err
+		return nil, false, err
 	}
 
 	key := secretDataKeyForPath(path)
 	value, ok := secretData[key]
 	if !ok {
-		return "", false, fmt.Errorf("secret %q is missing required key %q for %s", secretName, key, strings.Join(path, "."))
+		return nil, false, fmt.Errorf("secret %q is missing required key %q for %s", secretName, key, strings.Join(path, "."))
 	}
 	return string(value), true, nil
+}
+
+func isOmittedRequestField(value any) bool {
+	_, ok := value.(omittedRequestField)
+	return ok
 }
 
 func extractSecretName(raw any) (string, bool) {
@@ -1539,6 +1551,9 @@ func assignField(field reflect.Value, raw any) error {
 
 func convertValue(raw any, targetType reflect.Type) (reflect.Value, error) {
 	if raw == nil {
+		return reflect.Zero(targetType), nil
+	}
+	if isOmittedRequestField(raw) {
 		return reflect.Zero(targetType), nil
 	}
 	payload, err := json.Marshal(raw)

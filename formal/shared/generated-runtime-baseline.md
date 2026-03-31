@@ -81,6 +81,9 @@ This checklist seeds `database/AutonomousDatabase`, `mysql/DbSystem`,
 
 - Shared rule: make repo-authored secret behavior explicit instead of implying
   it from provider facts.
+- Shared rule: when a secret-backed input is omitted or remains zero-valued,
+  the generated runtime must leave the matching OCI request field unset rather
+  than projecting an empty secret object or empty string.
 - `database/AutonomousDatabase` reads a same-namespace Kubernetes Secret for
   `spec.adminPassword` when the repo-authored contract uses Kubernetes-backed
   credentials instead of OCI Vault `secretId`.

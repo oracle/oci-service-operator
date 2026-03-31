@@ -1889,8 +1889,8 @@ func TestCheckedInDatabaseAutonomousDatabaseUsesSecretBackedAdminPassword(t *tes
 
 	apiContent := readFile(t, filepath.Join(outputRoot, "api", "database", "v1beta1", "autonomousdatabase_types.go"))
 	assertContains(t, apiContent, []string{
-		`AdminPassword shared.PasswordSource ` + "`json:\"adminPassword,omitempty\"`",
-		"// The administrative password sourced from a Kubernetes Secret in the same namespace.\n\t// The referenced Secret must contain a `password` key. Use `secretId` and `secretVersionNumber` instead to reference an OCI Vault secret.\n\t// +kubebuilder:validation:Optional\n\tAdminPassword shared.PasswordSource `json:\"adminPassword,omitempty\"`",
+		`AdminPassword shared.PasswordSource ` + "`json:\"adminPassword,omitempty,omitzero\"`",
+		"// The administrative password sourced from a Kubernetes Secret in the same namespace.\n\t// The referenced Secret must contain a `password` key. Use `secretId` and `secretVersionNumber` instead to reference an OCI Vault secret.\n\t// +kubebuilder:validation:Optional\n\tAdminPassword shared.PasswordSource `json:\"adminPassword,omitempty,omitzero\"`",
 	})
 	assertNotContains(t, apiContent, []string{
 		`AdminPassword string ` + "`json:\"adminPassword,omitempty\"`",
@@ -1922,12 +1922,12 @@ func TestCheckedInMySQLDbSystemUsesSecretBackedAdminCredentials(t *testing.T) {
 
 	apiContent := readFile(t, filepath.Join(outputRoot, "api", "mysql", "v1beta1", "dbsystem_types.go"))
 	assertContains(t, apiContent, []string{
-		`AdminUsername shared.UsernameSource ` + "`json:\"adminUsername,omitempty\"`",
-		`AdminPassword shared.PasswordSource ` + "`json:\"adminPassword,omitempty\"`",
-		"// The username for the administrative user sourced from a Kubernetes Secret in the same namespace.\n\t// The referenced Secret must contain a `username` key.\n\t// +kubebuilder:validation:Optional\n\tAdminUsername shared.UsernameSource `json:\"adminUsername,omitempty\"`",
-		"// The password for the administrative user sourced from a Kubernetes Secret in the same namespace.\n\t// The referenced Secret must contain a `password` key.\n\t// +kubebuilder:validation:Optional\n\tAdminPassword shared.PasswordSource `json:\"adminPassword,omitempty\"`",
-		"// The last applied secret reference for the administrative username.\n\tAdminUsername shared.UsernameSource `json:\"adminUsername,omitempty\"`",
-		"// The last applied secret reference for the administrative password.\n\tAdminPassword shared.PasswordSource `json:\"adminPassword,omitempty\"`",
+		`AdminUsername shared.UsernameSource ` + "`json:\"adminUsername,omitempty,omitzero\"`",
+		`AdminPassword shared.PasswordSource ` + "`json:\"adminPassword,omitempty,omitzero\"`",
+		"// The username for the administrative user sourced from a Kubernetes Secret in the same namespace.\n\t// The referenced Secret must contain a `username` key.\n\t// +kubebuilder:validation:Optional\n\tAdminUsername shared.UsernameSource `json:\"adminUsername,omitempty,omitzero\"`",
+		"// The password for the administrative user sourced from a Kubernetes Secret in the same namespace.\n\t// The referenced Secret must contain a `password` key.\n\t// +kubebuilder:validation:Optional\n\tAdminPassword shared.PasswordSource `json:\"adminPassword,omitempty,omitzero\"`",
+		"// The last applied secret reference for the administrative username.\n\tAdminUsername shared.UsernameSource `json:\"adminUsername,omitempty,omitzero\"`",
+		"// The last applied secret reference for the administrative password.\n\tAdminPassword shared.PasswordSource `json:\"adminPassword,omitempty,omitzero\"`",
 	})
 	assertNotContains(t, apiContent, []string{
 		`AdminUsername string ` + "`json:\"adminUsername,omitempty\"`",

@@ -74,7 +74,7 @@ type AutonomousDatabaseSpec struct {
 	// The administrative password sourced from a Kubernetes Secret in the same namespace.
 	// The referenced Secret must contain a `password` key. Use `secretId` and `secretVersionNumber` instead to reference an OCI Vault secret.
 	// +kubebuilder:validation:Optional
-	AdminPassword shared.PasswordSource `json:"adminPassword,omitempty"`
+	AdminPassword shared.PasswordSource `json:"adminPassword,omitempty,omitzero"`
 	// The user-friendly name for the Autonomous Database. The name does not have to be unique.
 	// +kubebuilder:validation:Optional
 	DisplayName string `json:"displayName,omitempty"`

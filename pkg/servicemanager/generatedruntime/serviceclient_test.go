@@ -7,12 +7,15 @@ package generatedruntime
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 	"testing"
 
 	databasesdk "github.com/oracle/oci-go-sdk/v65/database"
+	mysqlsdk "github.com/oracle/oci-go-sdk/v65/mysql"
 	databasev1beta1 "github.com/oracle/oci-service-operator/api/database/v1beta1"
+	mysqlv1beta1 "github.com/oracle/oci-service-operator/api/mysql/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/credhelper"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -121,6 +124,16 @@ type FakeCreateSecretThingDetails struct {
 
 type fakeCreateSecretThingRequest struct {
 	FakeCreateSecretThingDetails `contributesTo:"body"`
+}
+
+type FakeCreateOptionalSecretThingDetails struct {
+	DisplayName   *string `json:"displayName,omitempty"`
+	AdminUsername *string `json:"adminUsername,omitempty"`
+	AdminPassword *string `json:"adminPassword,omitempty"`
+}
+
+type fakeCreateOptionalSecretThingRequest struct {
+	FakeCreateOptionalSecretThingDetails `contributesTo:"body"`
 }
 
 type fakeCreateSecretThingResponse struct {
@@ -351,6 +364,80 @@ func TestServiceClientCreateOrUpdateResolvesSecretInputsAndStampsStatus(t *testi
 	}
 	if len(credentialClient.readNames) != 2 {
 		t.Fatalf("credential reads = %v, want username and password lookups", credentialClient.readNames)
+	}
+}
+
+func TestBuildRequestOmitsEmptySecretSourceInputs(t *testing.T) {
+	t.Parallel()
+
+	request := &fakeCreateOptionalSecretThingRequest{}
+	resource := &fakeSecretResource{
+		Spec: fakeSecretSpec{
+			DisplayName: "desired-name",
+		},
+	}
+
+	if err := buildRequest(context.Background(), request, resource, "", nil, nil, nil); err != nil {
+		t.Fatalf("buildRequest() error = %v", err)
+	}
+	if request.DisplayName == nil || *request.DisplayName != "desired-name" {
+		t.Fatalf("request.displayName = %v, want desired-name", request.DisplayName)
+	}
+	if request.AdminUsername != nil {
+		t.Fatalf("request.adminUsername = %v, want nil for omitted secret source", request.AdminUsername)
+	}
+	if request.AdminPassword != nil {
+		t.Fatalf("request.adminPassword = %v, want nil for omitted secret source", request.AdminPassword)
+	}
+}
+
+func TestGeneratedCredentialSourceFieldsOmitZeroJSON(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name     string
+		value    any
+		unwanted []string
+	}{
+		{
+			name: "autonomous database spec",
+			value: databasev1beta1.AutonomousDatabaseSpec{
+				CompartmentId: "ocid1.compartment.oc1..adb",
+				DisplayName:   "adb-sample",
+			},
+			unwanted: []string{`"adminPassword"`},
+		},
+		{
+			name: "mysql dbsystem spec",
+			value: mysqlv1beta1.DbSystemSpec{
+				CompartmentId: "ocid1.compartment.oc1..mysql",
+				ShapeName:     "MySQL.VM.Standard.E4.1.8GB",
+				SubnetId:      "ocid1.subnet.oc1..mysql",
+			},
+			unwanted: []string{`"adminUsername"`, `"adminPassword"`},
+		},
+		{
+			name:     "mysql dbsystem status",
+			value:    mysqlv1beta1.DbSystemStatus{},
+			unwanted: []string{`"adminUsername"`, `"adminPassword"`},
+		},
+	}
+
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			payload, err := json.Marshal(tc.value)
+			if err != nil {
+				t.Fatalf("json.Marshal() error = %v", err)
+			}
+			for _, token := range tc.unwanted {
+				if strings.Contains(string(payload), token) {
+					t.Fatalf("json.Marshal() = %s, unexpected token %s", payload, token)
+				}
+			}
+		})
 	}
 }
 
@@ -683,6 +770,59 @@ func TestBuildRequestPopulatesAutonomousDatabasePolymorphicCreateBody(t *testing
 
 			tc.assert(t, request.CreateAutonomousDatabaseDetails)
 		})
+	}
+}
+
+func TestBuildRequestOmitsUnsetGeneratedAdminCredentialSources(t *testing.T) {
+	t.Parallel()
+
+	mysqlRequest := &mysqlsdk.CreateDbSystemRequest{}
+	mysqlResource := &mysqlv1beta1.DbSystem{
+		Spec: mysqlv1beta1.DbSystemSpec{
+			CompartmentId: "ocid1.compartment.oc1..mysql",
+			ShapeName:     "MySQL.VM.Standard.E4.1.8GB",
+			SubnetId:      "ocid1.subnet.oc1..mysql",
+		},
+	}
+
+	if err := buildRequest(context.Background(), mysqlRequest, mysqlResource, "", nil, nil, nil); err != nil {
+		t.Fatalf("buildRequest(mysql) error = %v", err)
+	}
+	if mysqlRequest.AdminUsername != nil {
+		t.Fatalf("mysql adminUsername = %v, want nil when secret source is omitted", mysqlRequest.AdminUsername)
+	}
+	if mysqlRequest.AdminPassword != nil {
+		t.Fatalf("mysql adminPassword = %v, want nil when secret source is omitted", mysqlRequest.AdminPassword)
+	}
+
+	adbRequest := &databasesdk.CreateAutonomousDatabaseRequest{}
+	adbResource := &databasev1beta1.AutonomousDatabase{
+		Spec: databasev1beta1.AutonomousDatabaseSpec{
+			CompartmentId: "ocid1.compartment.oc1..adb",
+			DisplayName:   "adb-sample",
+		},
+	}
+
+	if err := buildRequest(
+		context.Background(),
+		adbRequest,
+		adbResource,
+		"",
+		[]RequestField{{FieldName: "CreateAutonomousDatabaseDetails", RequestName: "createAutonomousDatabaseDetails", Contribution: "body"}},
+		nil,
+		nil,
+	); err != nil {
+		t.Fatalf("buildRequest(adb) error = %v", err)
+	}
+	if adbRequest.CreateAutonomousDatabaseDetails == nil {
+		t.Fatal("buildRequest(adb) should populate CreateAutonomousDatabaseDetails")
+	}
+	adbDetails, ok := adbRequest.CreateAutonomousDatabaseDetails.(databasesdk.CreateAutonomousDatabaseDetails)
+	if !ok {
+		t.Fatalf("create body type = %T, want %T", adbRequest.CreateAutonomousDatabaseDetails, databasesdk.CreateAutonomousDatabaseDetails{})
+	}
+	if adbDetails.AdminPassword != nil {
+		t.Fatalf("autonomous database adminPassword = %v, want nil when secret source is omitted", adbDetails.AdminPassword)
 	}
 }
 

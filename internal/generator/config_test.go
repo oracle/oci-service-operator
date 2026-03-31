@@ -291,11 +291,11 @@ services:
           specFields:
             - name: AdminUsername
               type: shared.UsernameSource
-              tag: 'json:"adminUsername,omitempty"'
+              tag: 'json:"adminUsername,omitempty,omitzero"'
           statusFields:
             - name: AdminPassword
               type: shared.PasswordSource
-              tag: 'json:"adminPassword,omitempty"'
+              tag: 'json:"adminPassword,omitempty,omitzero"'
           sample:
             body: |-
               apiVersion: mysql.oracle.com/v1beta1
