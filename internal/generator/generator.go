@@ -49,19 +49,14 @@ func New() *Generator {
 
 // Generate renders the requested services into OSOK API packages.
 //
-//nolint:gocognit,gocyclo // Generation keeps render/preserve steps together so failures are attributed to the exact surface.
+//nolint:gocognit,gocyclo // Generation keeps per-service rendering and failure attribution in one flow.
 func (g *Generator) Generate(ctx context.Context, cfg *Config, services []ServiceConfig, options Options) (RunResult, error) {
 	result := RunResult{}
 	generatedPackages := make([]*PackageModel, 0, len(services))
-	preservedArtifacts := make(map[string]preservedPackageArtifacts, len(services))
 	for _, service := range services {
 		pkg, err := g.discoverer.BuildPackageModel(ctx, cfg, service)
 		if err != nil {
 			return result, fmt.Errorf("build package model for service %q: %w", service.Service, err)
-		}
-		preserved, err := loadPreservedPackageArtifacts(options.OutputRoot, pkg)
-		if err != nil {
-			return result, fmt.Errorf("load preserved artifacts for service %q: %w", service.Service, err)
 		}
 
 		outputDir, err := g.renderer.RenderPackage(options.OutputRoot, pkg, options.Overwrite)
@@ -91,9 +86,6 @@ func (g *Generator) Generate(ctx context.Context, cfg *Config, services []Servic
 		if err := g.renderer.RenderServiceManagers(options.OutputRoot, pkg, options.Overwrite); err != nil {
 			return result, fmt.Errorf("render service-manager outputs for service %q: %w", service.Service, err)
 		}
-		if err := preserved.applyPackageFiles(options.OutputRoot); err != nil {
-			return result, fmt.Errorf("preserve checked-in artifacts for service %q: %w", service.Service, err)
-		}
 
 		result.Generated = append(result.Generated, ServiceResult{
 			Service:       service.Service,
@@ -102,16 +94,10 @@ func (g *Generator) Generate(ctx context.Context, cfg *Config, services []Servic
 			ResourceCount: len(pkg.Resources),
 		})
 		generatedPackages = append(generatedPackages, pkg)
-		preservedArtifacts[pkg.Service.Group] = preserved
 	}
 
 	if err := g.renderer.RenderSamples(options.OutputRoot, generatedPackages); err != nil {
 		return result, fmt.Errorf("render sample outputs: %w", err)
-	}
-	for _, pkg := range generatedPackages {
-		if err := preservedArtifacts[pkg.Service.Group].applySampleFiles(options.OutputRoot); err != nil {
-			return result, fmt.Errorf("preserve checked-in sample artifacts for service %q: %w", pkg.Service.Service, err)
-		}
 	}
 
 	return result, nil

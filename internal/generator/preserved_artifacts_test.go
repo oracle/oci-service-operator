@@ -9,110 +9,53 @@ import (
 	"context"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 )
 
-func TestGeneratePreservesCheckedInPackageArtifactsInOutputRoot(t *testing.T) {
+func TestGenerateOverwritesExistingPackageAndSampleArtifactsInOutputRoot(t *testing.T) {
 	t.Parallel()
 
-	cfg := &Config{
-		Domain:         "oracle.com",
-		DefaultVersion: "v1beta1",
-	}
-	service := testServiceConfig(PackageProfileControllerBacked)
-	outputRoot := t.TempDir()
-	resourceDir := filepath.Join(outputRoot, "api", "mysql", "v1beta1")
-	if err := os.MkdirAll(resourceDir, 0o755); err != nil {
-		t.Fatalf("MkdirAll(%s) error = %v", resourceDir, err)
-	}
-	resourcePath := filepath.Join(resourceDir, "dbsystem_types.go")
-	if err := os.WriteFile(resourcePath, []byte(existingCheckedInDbSystemTypes), 0o644); err != nil {
-		t.Fatalf("WriteFile(%s) error = %v", resourcePath, err)
-	}
+	cfg := loadCheckedInConfig(t)
+	mysqlService := serviceConfigsByName(t, cfg, "mysql")["mysql"]
 
-	installDir := filepath.Join(outputRoot, "packages", "mysql", "install")
-	if err := os.MkdirAll(installDir, 0o755); err != nil {
-		t.Fatalf("MkdirAll(%s) error = %v", installDir, err)
+	outputRoot := t.TempDir()
+
+	installPath := filepath.Join(outputRoot, "packages", "mysql", "install", "kustomization.yaml")
+	if err := os.MkdirAll(filepath.Dir(installPath), 0o755); err != nil {
+		t.Fatalf("MkdirAll(%s) error = %v", filepath.Dir(installPath), err)
 	}
-	installPath := filepath.Join(installDir, "kustomization.yaml")
-	if err := os.WriteFile(installPath, []byte(existingCheckedInMySQLInstallKustomization), 0o644); err != nil {
+	if err := os.WriteFile(installPath, []byte(staleMySQLInstallKustomization), 0o644); err != nil {
 		t.Fatalf("WriteFile(%s) error = %v", installPath, err)
 	}
 
-	samplesDir := filepath.Join(outputRoot, "config", "samples")
-	if err := os.MkdirAll(samplesDir, 0o755); err != nil {
-		t.Fatalf("MkdirAll(%s) error = %v", samplesDir, err)
+	samplePath := filepath.Join(outputRoot, "config", "samples", "mysql_v1beta1_dbsystem.yaml")
+	if err := os.MkdirAll(filepath.Dir(samplePath), 0o755); err != nil {
+		t.Fatalf("MkdirAll(%s) error = %v", filepath.Dir(samplePath), err)
 	}
-	samplePath := filepath.Join(samplesDir, "mysql_v1beta1_dbsystem.yaml")
-	if err := os.WriteFile(samplePath, []byte(existingCheckedInDbSystemSample), 0o644); err != nil {
+	if err := os.WriteFile(samplePath, []byte(staleMySQLDbSystemSample), 0o644); err != nil {
 		t.Fatalf("WriteFile(%s) error = %v", samplePath, err)
 	}
 
-	pipeline := newTestGenerator(t)
-	if _, err := pipeline.Generate(context.Background(), cfg, []ServiceConfig{service}, Options{
+	pipeline := New()
+	if _, err := pipeline.Generate(context.Background(), cfg, []ServiceConfig{*mysqlService}, Options{
 		OutputRoot: outputRoot,
 		Overwrite:  true,
 	}); err != nil {
 		t.Fatalf("Generate() error = %v", err)
 	}
 
-	renderedResourcePath := filepath.Join(outputRoot, "api", "mysql", "v1beta1", "dbsystem_types.go")
-	content := readFile(t, renderedResourcePath)
-	if content == existingCheckedInDbSystemTypes {
-		t.Fatalf("Generate() copied %s verbatim instead of regenerating status/read-model output", renderedResourcePath)
+	if got := readFile(t, installPath); got == staleMySQLInstallKustomization {
+		t.Fatalf("Generate() preserved stale install kustomization:\n%s", got)
 	}
-	normalized := strings.Join(strings.Fields(content), " ")
-	assertContains(t, normalized, []string{
-		"type DbSystemStatus struct {",
-		"OsokStatus shared.OSOKStatus `json:\"status\"`",
-		"LifecycleState string `json:\"lifecycleState,omitempty\"`",
-		"Status DbSystemStatus `json:\"status,omitempty\"`",
-	})
-	assertNotContains(t, content, []string{
-		"Preserved custom checked-in DbSystem marker.",
-	})
-	if got := readFile(t, installPath); got != existingCheckedInMySQLInstallKustomization {
-		t.Fatalf("install kustomization was not preserved:\n%s", got)
+	if got := readFile(t, samplePath); got == staleMySQLDbSystemSample {
+		t.Fatalf("Generate() preserved stale sample manifest:\n%s", got)
 	}
-	if got := readFile(t, samplePath); got != existingCheckedInDbSystemSample {
-		t.Fatalf("sample file was not preserved:\n%s", got)
-	}
+
+	assertExactFileMatch(t, filepath.Join(repoRoot(t), "packages", "mysql", "install", "kustomization.yaml"), installPath)
+	assertExactFileMatch(t, filepath.Join(repoRoot(t), "config", "samples", "mysql_v1beta1_dbsystem.yaml"), samplePath)
 }
 
-const existingCheckedInDbSystemTypes = `package v1beta1
-
-import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-// DbSystemSpec defines the desired state of DbSystem.
-type DbSystemSpec struct {
-	Port int ` + "`json:\"port,omitempty\"`" + `
-}
-
-// DbSystemStatus defines the observed state of DbSystem.
-type DbSystemStatus struct {
-	LastSuccessfulSync string ` + "`json:\"lastSuccessfulSync,omitempty\"`" + `
-}
-
-// +kubebuilder:object:root=true
-// Preserved custom checked-in DbSystem marker.
-type DbSystem struct {
-	metav1.TypeMeta   ` + "`json:\",inline\"`" + `
-	metav1.ObjectMeta ` + "`json:\"metadata,omitempty\"`" + `
-
-	Spec   DbSystemSpec   ` + "`json:\"spec,omitempty\"`" + `
-	Status DbSystemStatus ` + "`json:\"status,omitempty\"`" + `
-}
-
-// +kubebuilder:object:root=true
-type DbSystemList struct {
-	metav1.TypeMeta ` + "`json:\",inline\"`" + `
-	metav1.ListMeta ` + "`json:\"metadata,omitempty\"`" + `
-	Items           []DbSystem ` + "`json:\"items\"`" + `
-}
-`
-
-const existingCheckedInMySQLInstallKustomization = `apiVersion: kustomize.config.k8s.io/v1beta1
+const staleMySQLInstallKustomization = `apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
@@ -120,10 +63,14 @@ resources:
 - preserved/editor-role.yaml
 `
 
-const existingCheckedInDbSystemSample = `apiVersion: mysql.oracle.com/v1beta1
+const staleMySQLDbSystemSample = `apiVersion: mysql.oracle.com/v1beta1
 kind: DbSystem
 metadata:
   name: preserved-dbsystem
 spec:
-  port: 3307
+  adminPassword:
+    valueFrom:
+      secretKeyRef:
+        name: old-secret
+        key: password
 `
