@@ -1,12 +1,11 @@
 {
   "version": 1,
   "decision": "advance",
-  "summary": "Removed the remaining compatibility-style generator contract for admin-osok#3 by replacing existingKinds with normal per-resource sdkName mappings, generalizing preserve-existing-spec-surface for checked-in artifacts, and updating the checked-in docs/tests to reject parity or compatibility inputs.",
+  "summary": "Removed the stale compatibility-exception wording from packages/README.md so the checked-in package contract matches the generator-owned services.yaml model.",
   "artifacts": [
-    "GOCACHE=$PWD/.cache/go-build go test ./internal/generator",
-    "GOCACHE=$PWD/.cache/go-build go test ./internal/generatorcmd",
-    "GOCACHE=$PWD/.cache/go-build go test ./cmd/osok-generated-coverage",
-    "GOCACHE=$PWD/.cache/go-build go test ./hack"
+    "packages/README.md",
+    "validation: rg -n 'compatibility-locked|existingKinds|parity-only|osok-api-generator|api-generate|api-refresh' packages/README.md docs/api-generator-contract.md internal/generator/config/services.yaml Makefile cmd internal/generator -S",
+    "validation: git diff --check -- packages/README.md"
   ],
-  "next_focus": "Proceed to review and verify that the checked-in generator contract no longer exposes parity or compatibility settings while preserving the documented checked-in artifact flow."
+  "next_focus": "Hand the branch back to review to confirm the package contract docs no longer describe compatibility exceptions."
 }

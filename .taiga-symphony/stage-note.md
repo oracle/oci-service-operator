@@ -1,15 +1,7 @@
-Implemented the remaining generator-contract cleanup for `admin-osok#3`.
+Updated `packages/README.md` to remove the last stale compatibility-style wording from the checked-in package contract.
 
-Changes:
-- Removed the checked-in `compatibility.existingKinds` contract from `internal/generator/config/services.yaml`, the generator config model, and the discovery pipeline.
-- Added a normal per-resource `generation.resources[].sdkName` mapping so renamed published kinds such as `database/AutonomousDatabases` and `mysql/MySqlDbSystem` stay in standard generator config without compatibility-only branches.
-- Generalized `--preserve-existing-spec-surface` to preserve any existing checked-in sample/package artifacts for selected services, and updated generator docs/help text/tests to reflect the new contract and to fail if parity or compatibility config returns.
+The README now describes `database`, `mysql`, and `streaming` as normal `controller-backed` services whose rollout metadata is declared directly in `internal/generator/config/services.yaml`, and it documents `--preserve-existing-spec-surface` as the generic checked-in artifact preservation flow for naming and observed-state overrides.
 
 Validation:
-- `GOCACHE=$PWD/.cache/go-build go test ./internal/generator`
-- `GOCACHE=$PWD/.cache/go-build go test ./internal/generatorcmd`
-- `GOCACHE=$PWD/.cache/go-build go test ./cmd/osok-generated-coverage`
-- `GOCACHE=$PWD/.cache/go-build go test ./hack`
-
-Outcome:
-- The checked-in generator contract now encodes `database`, `mysql`, and `streaming` as normal generator-owned services without parity/compatibility settings, while the preserve-existing-spec-surface workflow still protects the checked-in surfaces that must remain stable.
+- `rg -n 'compatibility-locked|existingKinds|parity-only|osok-api-generator|api-generate|api-refresh' packages/README.md docs/api-generator-contract.md internal/generator/config/services.yaml Makefile cmd internal/generator -S`
+- `git diff --check -- packages/README.md`

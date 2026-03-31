@@ -17,8 +17,8 @@ Package profiles:
 
 - `controller-backed`: used by groups that already participate in the shared
   manager install. `database`, `mysql`, and `streaming` already live here with
-  generated controller, service-manager, and registration outputs plus explicit
-  compatibility-locked published kinds where needed.
+  generated controller, service-manager, and registration outputs declared
+  directly in `internal/generator/config/services.yaml`.
 - `crd-only`: used by generator-first API groups that ship CRDs and samples
   before controller, service-manager, and registration rollout is enabled.
 
@@ -40,11 +40,10 @@ Runtime rollout defaults:
 
 - Services without a `generation` block default to controller, service-manager,
   and registration rollout `none`, while webhook ownership remains `manual`.
-- Services with compatibility-locked published kinds keep that published API
-  surface in `services.yaml` and use
-  `--preserve-existing-spec-surface` when regenerating the
-  checked-in spec/helper surface plus compatibility-locked sample/package
-  artifacts.
+- Services that need checked-in naming or observed-state overrides keep those
+  mappings in `services.yaml` and can use
+  `--preserve-existing-spec-surface` when regenerating checked-in
+  spec/helper/sample/package artifacts.
 
 Package profile behavior:
 
