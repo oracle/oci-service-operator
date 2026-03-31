@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "decision": "advance",
+  "summary": "Refactored generator discovery and helper-type synthesis paths to remove the remaining gocognit, gocyclo, and unused failures in the admin-osok#3 cleanup branch.",
+  "artifacts": [
+    "XDG_CACHE_HOME=$PWD/.cache HOME=$PWD/.tmp/home GOCACHE=$PWD/.cache/go-build GOLANGCI_LINT_CACHE=$PWD/.cache/golangci-lint make lint",
+    "XDG_CACHE_HOME=$PWD/.cache HOME=$PWD/.tmp/home GOCACHE=$PWD/.cache/go-build go test ./internal/generator",
+    "XDG_CACHE_HOME=$PWD/.cache HOME=$PWD/.tmp/home GOCACHE=$PWD/.cache/go-build go test ./internal/generatorcmd ./hack ./cmd/osok-generated-coverage"
+  ],
+  "next_focus": "Proceed to review with the lint-clean generator refactor and no remaining stage-local validation failures."
+}

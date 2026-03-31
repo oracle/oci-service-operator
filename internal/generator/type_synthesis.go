@@ -227,39 +227,48 @@ func (s *fieldSynthesizer) ensureHelperType(helperPath []string, fieldPath []str
 }
 
 func (s *fieldSynthesizer) uniqueScopedHelperTypeName(base string, fields []FieldModel, scope fieldScope) string {
-	for _, candidate := range scopedHelperTypeCandidates(base, scope) {
-		if index, ok := s.helperIndex[candidate]; ok {
-			if helperFieldShapesEqual(s.helperTypes[index].Fields, fields) {
-				return s.helperTypes[index].Name
-			}
-			continue
-		}
+	if candidate, ok := s.firstReusableOrAvailableHelperTypeName(scopedHelperTypeCandidates(base, scope), fields); ok {
 		return candidate
 	}
 
+	return s.nextIndexedHelperTypeName(indexedHelperTypePrefix(base, scope), fields)
+}
+
+func (s *fieldSynthesizer) firstReusableOrAvailableHelperTypeName(candidates []string, fields []FieldModel) (string, bool) {
+	for _, candidate := range candidates {
+		if resolved, ok := s.reusableOrAvailableHelperTypeName(candidate, fields); ok {
+			return resolved, true
+		}
+	}
+	return "", false
+}
+
+func (s *fieldSynthesizer) reusableOrAvailableHelperTypeName(candidate string, fields []FieldModel) (string, bool) {
+	index, ok := s.helperIndex[candidate]
+	if !ok {
+		return candidate, true
+	}
+	if helperFieldShapesEqual(s.helperTypes[index].Fields, fields) {
+		return s.helperTypes[index].Name, true
+	}
+	return "", false
+}
+
+func (s *fieldSynthesizer) nextIndexedHelperTypeName(prefix string, fields []FieldModel) string {
+	for i := 2; ; i++ {
+		candidate := fmt.Sprintf("%s%d", prefix, i)
+		if resolved, ok := s.reusableOrAvailableHelperTypeName(candidate, fields); ok {
+			return resolved
+		}
+	}
+}
+
+func indexedHelperTypePrefix(base string, scope fieldScope) string {
 	switch scope {
 	case fieldScopeStatus:
-		for i := 2; ; i++ {
-			candidate := fmt.Sprintf("%sObservedState%d", base, i)
-			if index, ok := s.helperIndex[candidate]; ok {
-				if helperFieldShapesEqual(s.helperTypes[index].Fields, fields) {
-					return s.helperTypes[index].Name
-				}
-				continue
-			}
-			return candidate
-		}
+		return base + "ObservedState"
 	default:
-		for i := 2; ; i++ {
-			candidate := fmt.Sprintf("%sFields%d", base, i)
-			if index, ok := s.helperIndex[candidate]; ok {
-				if helperFieldShapesEqual(s.helperTypes[index].Fields, fields) {
-					return s.helperTypes[index].Name
-				}
-				continue
-			}
-			return candidate
-		}
+		return base + "Fields"
 	}
 }
 
