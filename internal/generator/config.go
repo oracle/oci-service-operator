@@ -58,7 +58,6 @@ type GenerationSurfaceConfig struct {
 // ResourceGenerationOverride captures per-kind rollout and override metadata.
 type ResourceGenerationOverride struct {
 	Kind           string                           `yaml:"kind"`
-	SDKName        string                           `yaml:"sdkName,omitempty"`
 	FormalSpec     string                           `yaml:"formalSpec,omitempty"`
 	Controller     ControllerGenerationOverride     `yaml:"controller,omitempty"`
 	ServiceManager ServiceManagerGenerationOverride `yaml:"serviceManager,omitempty"`
@@ -221,7 +220,6 @@ func (g GenerationConfig) Validate(serviceName string) error {
 	}
 
 	resourceKinds := make(map[string]struct{}, len(g.Resources))
-	resourceSDKNames := make(map[string]struct{}, len(g.Resources))
 	for _, resource := range g.Resources {
 		kind := strings.TrimSpace(resource.Kind)
 		if kind == "" {
@@ -231,12 +229,6 @@ func (g GenerationConfig) Validate(serviceName string) error {
 			return fmt.Errorf("service %q generation.resources contains duplicate kind %q", serviceName, kind)
 		}
 		resourceKinds[kind] = struct{}{}
-		if sdkName := strings.TrimSpace(resource.SDKName); sdkName != "" {
-			if _, exists := resourceSDKNames[sdkName]; exists {
-				return fmt.Errorf("service %q generation.resources contains duplicate sdkName %q", serviceName, sdkName)
-			}
-			resourceSDKNames[sdkName] = struct{}{}
-		}
 
 		if err := validateGenerationStrategy(
 			fmt.Sprintf("service %q generation.resources[%q].controller.strategy", serviceName, kind),
@@ -332,8 +324,7 @@ func validateWebhookStrategy(field string, strategy string) error {
 }
 
 func (r ResourceGenerationOverride) hasOverrides() bool {
-	return strings.TrimSpace(r.SDKName) != "" ||
-		strings.TrimSpace(r.FormalSpec) != "" ||
+	return strings.TrimSpace(r.FormalSpec) != "" ||
 		r.Controller.hasOverrides() ||
 		r.ServiceManager.hasOverrides() ||
 		strings.TrimSpace(r.Webhooks.Strategy) != ""
@@ -527,35 +518,12 @@ func generationStrategyOrDefault(strategy string, defaultStrategy string) string
 	return strategy
 }
 
-// PublishedKind returns the rendered OSOK kind for one discovered OCI SDK resource family.
-func (s ServiceConfig) PublishedKind(rawName string) string {
-	if override, ok := s.resourceGenerationOverrideForSDKName(rawName); ok {
-		return override.Kind
-	}
-	return rawName
-}
-
 func (s ServiceConfig) resourceGenerationOverride(kind string) (ResourceGenerationOverride, bool) {
 	for _, override := range s.Generation.Resources {
 		if override.Kind == kind {
 			return override, true
 		}
 	}
-	return ResourceGenerationOverride{}, false
-}
-
-func (s ServiceConfig) resourceGenerationOverrideForSDKName(rawName string) (ResourceGenerationOverride, bool) {
-	rawName = strings.TrimSpace(rawName)
-	if rawName == "" {
-		return ResourceGenerationOverride{}, false
-	}
-
-	for _, override := range s.Generation.Resources {
-		if strings.TrimSpace(override.SDKName) == rawName {
-			return override, true
-		}
-	}
-
 	return ResourceGenerationOverride{}, false
 }
 

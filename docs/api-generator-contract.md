@@ -377,8 +377,7 @@ go run ./cmd/generator --config internal/generator/config/services.yaml --servic
 Expected regeneration and validation flow:
 
 1. Update `internal/generator/config/services.yaml` if service scope,
-   resource naming (`sdkName`/`kind`), runtime rollout, or `formalSpec`
-   bindings changed.
+   resource `kind`, runtime rollout, or `formalSpec` bindings changed.
 2. If formal scope changed, run `make formal-scaffold` to refresh scaffold rows
    and rendered diagram artifacts. Use
    `FORMAL_PROVIDER_PATH=/path/to/terraform-provider-oci` when provider-backed

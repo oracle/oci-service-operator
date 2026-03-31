@@ -45,6 +45,43 @@ services:
 	}
 }
 
+func TestLoadConfigRejectsLegacySDKNameOverrideField(t *testing.T) {
+	t.Parallel()
+
+	configPath := filepath.Join(t.TempDir(), "services.yaml")
+	content := `
+schemaVersion: v1alpha1
+domain: oracle.com
+defaultVersion: v1beta1
+generatorEntrypoint: ./cmd/generator
+packageProfiles:
+  controller-backed:
+    description: manual controllers
+services:
+  - service: mysql
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/mysql
+    group: mysql
+    packageProfile: controller-backed
+    generation:
+      resources:
+        - kind: DbSystem
+          sdkName: MySqlDbSystem
+          controller:
+            strategy: manual
+`
+	if err := os.WriteFile(configPath, []byte(content), 0o644); err != nil {
+		t.Fatalf("write temp config: %v", err)
+	}
+
+	_, err := LoadConfig(configPath)
+	if err == nil {
+		t.Fatal("LoadConfig() unexpectedly succeeded")
+	}
+	if !strings.Contains(err.Error(), "sdkName") {
+		t.Fatalf("LoadConfig() error = %v, want sdkName rejection", err)
+	}
+}
+
 func TestLoadConfigRejectsBlankObservedStateExcludedFieldPath(t *testing.T) {
 	t.Parallel()
 
@@ -283,9 +320,6 @@ services:
 	if override.Kind != "DbSystem" {
 		t.Fatalf("mysql override kind = %q, want %q", override.Kind, "DbSystem")
 	}
-	if override.SDKName != "" {
-		t.Fatalf("mysql override sdkName = %q, want empty", override.SDKName)
-	}
 	if override.Controller.MaxConcurrentReconciles != 3 {
 		t.Fatalf("mysql maxConcurrentReconciles = %d, want 3", override.Controller.MaxConcurrentReconciles)
 	}
@@ -513,16 +547,6 @@ func TestValidateRejectsInvalidGenerationConfig(t *testing.T) {
 				}
 			},
 			wantErr: `duplicate kind "DbSystem"`,
-		},
-		{
-			name: "duplicate sdk name override",
-			mutate: func(cfg *Config) {
-				cfg.Services[0].Generation.Resources = []ResourceGenerationOverride{
-					{Kind: "MySqlDbSystem", SDKName: "DbSystem", Controller: ControllerGenerationOverride{Strategy: GenerationStrategyManual}},
-					{Kind: "Widget", SDKName: "DbSystem", ServiceManager: ServiceManagerGenerationOverride{PackagePath: "mysql/widget"}},
-				}
-			},
-			wantErr: `duplicate sdkName "DbSystem"`,
 		},
 		{
 			name: "blank extra rbac marker",
@@ -961,9 +985,6 @@ func assertCheckedInDatabaseRuntimeRolloutMetadata(t *testing.T, service *Servic
 	}
 
 	override := service.Generation.Resources[0]
-	if override.SDKName != "AutonomousDatabase" {
-		t.Fatalf("database sdkName = %q, want %q", override.SDKName, "AutonomousDatabase")
-	}
 	if !slices.Equal(
 		override.Controller.ExtraRBACMarkers,
 		[]string{
@@ -989,9 +1010,6 @@ func assertCheckedInMySQLRuntimeRolloutMetadata(t *testing.T, service *ServiceCo
 	}
 
 	override := service.Generation.Resources[0]
-	if override.SDKName != "DbSystem" {
-		t.Fatalf("mysql sdkName = %q, want %q", override.SDKName, "DbSystem")
-	}
 	if override.Controller.MaxConcurrentReconciles != 3 {
 		t.Fatalf("mysql maxConcurrentReconciles = %d, want 3", override.Controller.MaxConcurrentReconciles)
 	}
