@@ -70,14 +70,6 @@ spec:
               certificatePem:
                 description: The certificate in PEM format.
                 type: string
-              jsonData:
-                type: string
-              privateKeyPem:
-                description: The private key (in PEM format) for the certificate.
-                type: string
-              privateKeyPemPassphrase:
-                description: An optional passphrase for the private key.
-                type: string
               revocationStatus:
                 description: CertificateBundleRevocationStatus defines nested fields
                   for CertificateBundle.RevocationStatus.

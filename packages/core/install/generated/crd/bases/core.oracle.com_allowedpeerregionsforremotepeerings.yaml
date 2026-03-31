@@ -58,6 +58,11 @@ spec:
             description: AllowedPeerRegionsForRemotePeeringStatus defines the observed
               state of AllowedPeerRegionsForRemotePeering.
             properties:
+              name:
+                description: |-
+                  The region's name.
+                  Example: `us-phoenix-1`
+                type: string
               status:
                 properties:
                   conditions:

@@ -122,6 +122,25 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "AutonomousDatabase",
+		SpecType:   reflect.TypeOf(databasev1beta1.AutonomousDatabaseSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.AutonomousDatabaseStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.CreateAutonomousDatabaseDetails",
+			},
+			{
+				SDKStruct: "database.UpdateAutonomousDatabaseDetails",
+			},
+			{
+				SDKStruct: "database.AutonomousDatabase",
+			},
+			{
+				SDKStruct: "database.AutonomousDatabaseSummary",
+			},
+		},
+	},
+	{
 		Name:       "AutonomousDatabaseBackup",
 		SpecType:   reflect.TypeOf(databasev1beta1.AutonomousDatabaseBackupSpec{}),
 		StatusType: reflect.TypeOf(databasev1beta1.AutonomousDatabaseBackupStatus{}),
@@ -207,19 +226,6 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "database.AutonomousDatabaseWallet",
-			},
-		},
-	},
-	{
-		Name:       "AutonomousDatabases",
-		SpecType:   reflect.TypeOf(databasev1beta1.AutonomousDatabasesSpec{}),
-		StatusType: reflect.TypeOf(databasev1beta1.AutonomousDatabasesStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "database.CreateAutonomousDatabaseDetails",
-			},
-			{
-				SDKStruct: "database.UpdateAutonomousDatabaseDetails",
 			},
 		},
 	},

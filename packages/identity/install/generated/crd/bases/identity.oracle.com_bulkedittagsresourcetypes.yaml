@@ -58,6 +58,28 @@ spec:
             description: BulkEditTagsResourceTypeStatus defines the observed state
               of BulkEditTagsResourceType.
             properties:
+              items:
+                description: The collection of resource types that support bulk editing
+                  of tags.
+                items:
+                  description: BulkEditTagsResourceTypeItem defines nested fields
+                    for BulkEditTagsResourceType.Item.
+                  properties:
+                    metadataKeys:
+                      description: |-
+                        The metadata keys required to identify the resource.
+                        For example, for a bucket, the value of `metadataKeys` will be "namespaceName", "bucketName".
+                        This information will match the API documentation.
+                        See UpdateBucket (https://docs.cloud.oracle.com/api/#/en/objectstorage/latest/Bucket/UpdateBucket) and
+                        DeleteBucket (https://docs.cloud.oracle.com/api/#/en/objectstorage/latest/Bucket/DeleteBucket).
+                      items:
+                        type: string
+                      type: array
+                    resourceType:
+                      description: The unique name of the resource type.
+                      type: string
+                  type: object
+                type: array
               metadataKeys:
                 description: |-
                   The metadata keys required to identify the resource.

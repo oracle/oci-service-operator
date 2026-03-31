@@ -58,6 +58,36 @@ spec:
             description: ComputeCapacityReservationInstanceStatus defines the observed
               state of ComputeCapacityReservationInstance.
             properties:
+              availabilityDomain:
+                description: The availability domain the instance is running in.
+                type: string
+              compartmentId:
+                description: The OCID of the compartment that contains the instance.
+                type: string
+              faultDomain:
+                description: The fault domain the instance is running in.
+                type: string
+              id:
+                description: The OCID of the instance.
+                type: string
+              shape:
+                description: |-
+                  The shape of the instance. The shape determines the number of CPUs, amount of memory,
+                  and other resources allocated to the instance.
+                  You can enumerate all available shapes by calling ListComputeCapacityReservationInstanceShapes.
+                type: string
+              shapeConfig:
+                description: ComputeCapacityReservationInstanceShapeConfig defines
+                  nested fields for ComputeCapacityReservationInstance.ShapeConfig.
+                properties:
+                  memoryInGBs:
+                    description: The total amount of memory available to the instance,
+                      in gigabytes.
+                    type: number
+                  ocpus:
+                    description: The total number of OCPUs available to the instance.
+                    type: number
+                type: object
               status:
                 properties:
                   conditions:

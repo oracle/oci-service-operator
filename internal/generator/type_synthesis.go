@@ -83,7 +83,7 @@ func (s *fieldSynthesizer) mergeStructFields(candidates []string, initial []Fiel
 	}
 
 	for _, candidate := range candidates {
-		fields, ok := s.candidateFields(candidate)
+		fields, ok := s.candidateFields(candidate, options)
 		if !ok {
 			continue
 		}
@@ -110,7 +110,7 @@ func (s *fieldSynthesizer) mergeStructFields(candidates []string, initial []Fiel
 	return merged, seenJSONNames
 }
 
-func (s *fieldSynthesizer) candidateFields(typeName string) ([]ocisdk.Field, bool) {
+func (s *fieldSynthesizer) candidateFields(typeName string, options fieldRenderingOptions) ([]ocisdk.Field, bool) {
 	for _, candidate := range s.typeCandidates(typeName) {
 		structDef, ok := s.index.Struct(candidate)
 		if ok {
@@ -121,7 +121,7 @@ func (s *fieldSynthesizer) candidateFields(typeName string) ([]ocisdk.Field, boo
 		if !ok {
 			continue
 		}
-		fields := mergeInterfaceFamilyFields(family)
+		fields := mergeInterfaceFamilyFields(family, options.scope == fieldScopeSpec)
 		if len(fields) == 0 {
 			continue
 		}
@@ -167,7 +167,7 @@ func (s *fieldSynthesizer) renderFieldType(field ocisdk.Field, options fieldRend
 		if !ok {
 			return "", false
 		}
-		fields := mergeInterfaceFamilyFields(family)
+		fields := mergeInterfaceFamilyFields(family, options.scope == fieldScopeSpec)
 		if len(fields) == 0 {
 			return "", false
 		}
@@ -436,91 +436,106 @@ func (s *fieldSynthesizer) typeCandidates(typeName string) []string {
 	return candidates
 }
 
-type interfaceFieldAggregate struct {
-	field                      ocisdk.Field
-	baseMandatory              bool
-	implementationPresence     int
-	implementationRequiredness int
-}
-
-func mergeInterfaceFamilyFields(family ocisdk.InterfaceFamily) []ocisdk.Field {
-	merged := make([]interfaceFieldAggregate, 0, len(family.Base.Fields))
-	byJSONName := make(map[string]int, len(family.Base.Fields))
-
-	merged = appendInterfaceFields(merged, byJSONName, family.Base.Fields, true)
-	for _, implementation := range family.Implementations {
-		merged = appendInterfaceFields(merged, byJSONName, implementation.Fields, false)
+func mergeInterfaceFamilyFields(family ocisdk.InterfaceFamily, relaxImplementationMandatory bool) []ocisdk.Field {
+	if !relaxImplementationMandatory {
+		return mergeInterfaceFamilyFieldsStrict(family)
 	}
 
-	return finalizeMergedInterfaceFields(merged, len(family.Implementations))
+	return mergeInterfaceFamilyFieldsSpec(family)
 }
 
-func appendInterfaceFields(
-	merged []interfaceFieldAggregate,
-	byJSONName map[string]int,
-	fields []ocisdk.Field,
-	fromBase bool,
-) []interfaceFieldAggregate {
-	for _, field := range fields {
-		index, next := ensureInterfaceFieldAggregate(merged, byJSONName, field, fromBase)
-		merged = next
-		if fromBase {
-			continue
-		}
+func mergeInterfaceFamilyFieldsStrict(family ocisdk.InterfaceFamily) []ocisdk.Field {
+	merged := make([]ocisdk.Field, 0, len(family.Base.Fields))
+	byJSONName := make(map[string]int, len(family.Base.Fields))
 
-		merged[index].implementationPresence++
-		if field.Mandatory {
-			merged[index].implementationRequiredness++
+	appendFields := func(fields []ocisdk.Field) {
+		for _, field := range fields {
+			jsonName := field.JSONName
+			if jsonName == "" {
+				jsonName = lowerCamel(field.Name)
+			}
+			index, exists := byJSONName[jsonName]
+			if !exists {
+				byJSONName[jsonName] = len(merged)
+				merged = append(merged, field)
+				continue
+			}
+			merged[index] = mergeInterfaceFieldStrict(merged[index], field)
 		}
+	}
+
+	appendFields(family.Base.Fields)
+	for _, implementation := range family.Implementations {
+		appendFields(implementation.Fields)
 	}
 
 	return merged
 }
 
-func ensureInterfaceFieldAggregate(
-	merged []interfaceFieldAggregate,
-	byJSONName map[string]int,
-	field ocisdk.Field,
-	fromBase bool,
-) (int, []interfaceFieldAggregate) {
-	jsonName := interfaceFieldJSONName(field)
-	if index, exists := byJSONName[jsonName]; exists {
-		merged[index].field = mergeInterfaceField(merged[index].field, field)
-		merged[index].baseMandatory = merged[index].baseMandatory || (fromBase && field.Mandatory)
-		return index, merged
+func mergeInterfaceFamilyFieldsSpec(family ocisdk.InterfaceFamily) []ocisdk.Field {
+	type mergedField struct {
+		field    ocisdk.Field
+		fromBase bool
 	}
 
-	byJSONName[jsonName] = len(merged)
-	merged = append(merged, interfaceFieldAggregate{
-		field:         field,
-		baseMandatory: fromBase && field.Mandatory,
-	})
+	merged := make([]mergedField, 0, len(family.Base.Fields))
+	byJSONName := make(map[string]int, len(family.Base.Fields))
 
-	return len(merged) - 1, merged
-}
-
-func interfaceFieldJSONName(field ocisdk.Field) string {
-	if field.JSONName != "" {
-		return field.JSONName
+	appendFields := func(fields []ocisdk.Field, fromBase bool) {
+		for _, field := range fields {
+			jsonName := field.JSONName
+			if jsonName == "" {
+				jsonName = lowerCamel(field.Name)
+			}
+			index, exists := byJSONName[jsonName]
+			if !exists {
+				byJSONName[jsonName] = len(merged)
+				merged = append(merged, mergedField{
+					field:    field,
+					fromBase: fromBase,
+				})
+				continue
+			}
+			merged[index].field = mergeInterfaceField(merged[index].field, field)
+			merged[index].fromBase = merged[index].fromBase || fromBase
+		}
 	}
 
-	return lowerCamel(field.Name)
-}
-
-func finalizeMergedInterfaceFields(aggregates []interfaceFieldAggregate, totalImplementations int) []ocisdk.Field {
-	fields := make([]ocisdk.Field, 0, len(aggregates))
-	for _, aggregate := range aggregates {
-		aggregate.field.Mandatory = aggregate.baseMandatory || isRequiredAcrossImplementations(aggregate, totalImplementations)
-		fields = append(fields, aggregate.field)
+	appendFields(family.Base.Fields, true)
+	for _, implementation := range family.Implementations {
+		appendFields(implementation.Fields, false)
 	}
 
-	return fields
+	resolved := make([]ocisdk.Field, 0, len(merged))
+	for _, entry := range merged {
+		if !entry.fromBase {
+			entry.field.Mandatory = false
+		}
+		resolved = append(resolved, entry.field)
+	}
+
+	return resolved
 }
 
-func isRequiredAcrossImplementations(aggregate interfaceFieldAggregate, totalImplementations int) bool {
-	return totalImplementations > 0 &&
-		aggregate.implementationPresence == totalImplementations &&
-		aggregate.implementationRequiredness == totalImplementations
+func mergeInterfaceFieldStrict(existing ocisdk.Field, candidate ocisdk.Field) ocisdk.Field {
+	if existing.Type != candidate.Type || existing.Kind != candidate.Kind || existing.RenderableType != candidate.RenderableType {
+		return existing
+	}
+
+	existing.Mandatory = existing.Mandatory || candidate.Mandatory
+	existing.Deprecated = existing.Deprecated || candidate.Deprecated
+	existing.ReadOnly = existing.ReadOnly || candidate.ReadOnly
+	if existing.JSONName == "" {
+		existing.JSONName = candidate.JSONName
+	}
+	if existing.Documentation == "" {
+		existing.Documentation = candidate.Documentation
+	}
+	if len(existing.NestedFields) == 0 {
+		existing.NestedFields = candidate.NestedFields
+	}
+
+	return existing
 }
 
 func mergeInterfaceField(existing ocisdk.Field, candidate ocisdk.Field) ocisdk.Field {
@@ -528,7 +543,6 @@ func mergeInterfaceField(existing ocisdk.Field, candidate ocisdk.Field) ocisdk.F
 		return existing
 	}
 
-	existing.Mandatory = existing.Mandatory || candidate.Mandatory
 	existing.Deprecated = existing.Deprecated || candidate.Deprecated
 	existing.ReadOnly = existing.ReadOnly || candidate.ReadOnly
 	if existing.JSONName == "" {

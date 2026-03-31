@@ -8,7 +8,7 @@ skinparam noteBackgroundColor #fff7d6
 skinparam noteBorderColor #b45309
 skinparam noteFontColor #334155
 skinparam roundcorner 16
-title State Machine - database/DatabaseAutonomousDatabase
+title State Machine - database/AutonomousDatabase
 skinparam state {
   backgroundColor #f8fafc
   borderColor #0f172a
@@ -30,17 +30,17 @@ state "ApplyUpdate" as apply_update
 state "DeletePending" as delete_pending
 state "Deleted" as deleted
 state "DeleteCleanupBlocked" as delete_cleanup_blocked
-[*] --> observe : CreateDatabaseAutonomousDatabase
+[*] --> observe : CreateAutonomousDatabase
 observe --> resolve_by_lookup : tracked identity missing
-resolve_by_lookup --> evaluate_ready : lookup or create reaches\nACTIVE
-resolve_by_lookup --> retryable : OCI state in PROVISIONING,\nUPDATING, DELETING
+resolve_by_lookup --> evaluate_ready : lookup or create reaches\nAVAILABLE, STANDBY
+resolve_by_lookup --> retryable : OCI state in PROVISIONING,\nSTARTING,\nMAINTENANCE_IN_PROGRESS,\nRESTARTING (+6 more)
 resolve_by_lookup --> failed : unresolved OCI error or non-success state
-observe --> evaluate_ready : OCI state in ACTIVE
-observe --> retryable : OCI state in PROVISIONING,\nUPDATING, DELETING
+observe --> evaluate_ready : OCI state in AVAILABLE,\nSTANDBY
+observe --> retryable : OCI state in PROVISIONING,\nSTARTING,\nMAINTENANCE_IN_PROGRESS,\nRESTARTING (+6 more)
 observe --> failed : unresolved OCI error or non-success state
 evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
 reject_unsupported_drift --> ready : wait for spec or live state change
-evaluate_ready --> apply_update : supported mutable drift for\ndisplay_name
+evaluate_ready --> apply_update : supported mutable drift for\nadmin_password,\nare_primary_whitelisted_ips_used,\nauto_refresh_frequency_in_seconds\n(+108 more)
 apply_update --> ready : update path completes
 evaluate_ready --> ready : no supported drift remains
 ready --> ready : no supported drift remains
@@ -64,29 +64,36 @@ controller phases with explicit finalizer and
 requeue policies.
 service: database
 slug: databaseautonomousdatabase
-kind: DatabaseAutonomousDatabase
+kind: AutonomousDatabase
 archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
-provider states: create PROVISIONING; update
-UPDATING; delete DELETING
-supported drift: display_name
+provider states: create PROVISIONING, STARTING;
+update MAINTENANCE_IN_PROGRESS, PROVISIONING,
+RESTARTING, SCALE_IN_PROGRESS (+5 more); delete
+TERMINATING, UNAVAILABLE
+supported drift: admin_password,
+are_primary_whitelisted_ips_used,
+auto_refresh_frequency_in_seconds,
+auto_refresh_point_lag_in_seconds (+107 more)
 reject before mutate: force-new fields
-compartment_id
-list lookup:
-scaffold_database_databaseautonomousdatabase
-filters compartment_id, state
-conflicts: none
+autonomous_container_database_id,
+autonomous_database_backup_id,
+autonomous_database_id, character_set (+12 more)
+and conflicts is_shrink_only ->
+shrink_adb_trigger
+list lookup: oci_database_autonomous_databases
+filters compartment_id, display_name
+conflicts: is_shrink_only -> shrink_adb_trigger
 open gaps: none
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+Promoted generated-runtime metadata for
+database/AutonomousDatabase.
 end note
 note right of delete_pending
 delete policy: required
-delete observe: GetDatabaseAutonomousDatabase or
-ListDatabaseAutonomousDatabase
-delete targets: DELETED
+delete observe: GetAutonomousDatabase or
+ListAutonomousDatabases
+delete targets: TERMINATED
 end note
 @enduml

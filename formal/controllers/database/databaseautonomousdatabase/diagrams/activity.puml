@@ -8,7 +8,7 @@ skinparam noteBackgroundColor #fff7d6
 skinparam noteBorderColor #b45309
 skinparam noteFontColor #334155
 skinparam roundcorner 16
-title Activity - database/DatabaseAutonomousDatabase
+title Activity - database/AutonomousDatabase
 skinparam activity {
   backgroundColor #f8fafc
   borderColor #0f172a
@@ -23,19 +23,19 @@ skinparam activity {
 start
 partition "Observe and Bind" {
 :Start from shared flow\nshared/diagrams/shared-reconcile-activity.svg;
-:Read desired DatabaseAutonomousDatabase spec,\ntracked status, and delete intent;
+:Read desired AutonomousDatabase spec, tracked\nstatus, and delete intent;
 if ("Tracked or explicit OCI identity present?") then (yes)
-:Get the current OCI resource via\nGetDatabaseAutonomousDatabase;
+:Get the current OCI resource via\nGetAutonomousDatabase;
 else (no)
-:Resolve an existing OCI resource through\nListDatabaseAutonomousDatabase using filters\ncompartment_id, state;
-:Create the OCI resource via\nCreateDatabaseAutonomousDatabase when no\nreusable match is found;
+:Resolve an existing OCI resource through\nListAutonomousDatabases using filters\ncompartment_id, display_name;
+:Create the OCI resource via\nCreateAutonomousDatabase when no reusable\nmatch is found;
 :Persist the resolved or created OCI identity\ninto status;
 endif
 }
 if ("Delete requested?") then (yes)
 partition "Delete" {
-:Delete path uses\nDeleteDatabaseAutonomousDatabase with required\nvia GetDatabaseAutonomousDatabase or\nListDatabaseAutonomousDatabase to DELETED\nconfirmation;
-:Confirm deletion via\nGetDatabaseAutonomousDatabase or\nListDatabaseAutonomousDatabase until OCI\nreaches DELETED;
+:Delete path uses DeleteAutonomousDatabase with\nrequired via GetAutonomousDatabase or\nListAutonomousDatabases to TERMINATED\nconfirmation;
+:Confirm deletion via GetAutonomousDatabase or\nListAutonomousDatabases until OCI reaches\nTERMINATED;
 if ("Delete cleanup and finalizer release succeed?") then (yes)
 :Remove the finalizer after delete completion;
 else (no)
@@ -46,27 +46,28 @@ stop
 else (no)
 partition "Lifecycle Classification" {
 if ("OCI state in retryable set?") then (yes)
-:Request requeue while OCI remains in\nPROVISIONING, UPDATING, DELETING;
+:Request requeue while OCI remains in\nPROVISIONING, STARTING,\nMAINTENANCE_IN_PROGRESS, RESTARTING (+6 more);
 stop
 endif
 if ("OCI state is outside success targets?") then (yes)
-:Return an unsuccessful reconcile result until\nOCI reaches ACTIVE;
+:Return an unsuccessful reconcile result until\nOCI reaches AVAILABLE, STANDBY;
 stop
 endif
 }
 partition "Ready and Drift Handling" {
 :Compare live OCI state against the imported\nfield surface;
 if ("Force-new or conflicting drift detected?") then (yes)
-:Reject drift before OCI mutation for force-new\nfields compartment_id;
+:Reject drift before OCI mutation for force-new\nfields autonomous_container_database_id,\nautonomous_database_backup_id,\nautonomous_database_id, character_set (+12\nmore) and conflicts is_shrink_only ->\nshrink_adb_trigger;
 stop
 endif
+:Enforce conflictsWith rules is_shrink_only ->\nshrink_adb_trigger before any OCI mutation;
 if ("Supported mutable drift detected?") then (yes)
-:Apply UpdateDatabaseAutonomousDatabase only\nfor mutable fields display_name;
+:Apply UpdateAutonomousDatabase only for\nmutable fields admin_password,\nare_primary_whitelisted_ips_used,\nauto_refresh_frequency_in_seconds,\nauto_refresh_point_lag_in_seconds (+107 more);
 else (no)
 :Skip the no-op mutation path;
 endif
-:Run provider helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=template action=CREATED;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
-:Return success for the ACTIVE success state;
+:Run provider helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
+:Return success for the AVAILABLE, STANDBY\nsuccess state;
 :Project required status and finalizer policy\nretain-until-confirmed-delete;
 :Requeue on provisioning, updating, terminating;
 }
@@ -86,23 +87,30 @@ controllers specialize the shared reconcile path
 with formal runtime ownership.
 service: database
 slug: databaseautonomousdatabase
-kind: DatabaseAutonomousDatabase
+kind: AutonomousDatabase
 archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
-provider states: create PROVISIONING; update
-UPDATING; delete DELETING
-supported drift: display_name
+provider states: create PROVISIONING, STARTING;
+update MAINTENANCE_IN_PROGRESS, PROVISIONING,
+RESTARTING, SCALE_IN_PROGRESS (+5 more); delete
+TERMINATING, UNAVAILABLE
+supported drift: admin_password,
+are_primary_whitelisted_ips_used,
+auto_refresh_frequency_in_seconds,
+auto_refresh_point_lag_in_seconds (+107 more)
 reject before mutate: force-new fields
-compartment_id
-list lookup:
-scaffold_database_databaseautonomousdatabase
-filters compartment_id, state
-conflicts: none
+autonomous_container_database_id,
+autonomous_database_backup_id,
+autonomous_database_id, character_set (+12 more)
+and conflicts is_shrink_only ->
+shrink_adb_trigger
+list lookup: oci_database_autonomous_databases
+filters compartment_id, display_name
+conflicts: is_shrink_only -> shrink_adb_trigger
 open gaps: none
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+Promoted generated-runtime metadata for
+database/AutonomousDatabase.
 end note
 @enduml

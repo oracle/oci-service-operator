@@ -52,6 +52,13 @@ spec:
             type: object
           spec:
             description: PublicIpByPrivateIpIdSpec defines the desired state of PublicIpByPrivateIpId.
+            properties:
+              privateIpId:
+                description: OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the private IP.
+                type: string
+            required:
+            - privateIpId
             type: object
           status:
             description: PublicIpByPrivateIpIdStatus defines the observed state of

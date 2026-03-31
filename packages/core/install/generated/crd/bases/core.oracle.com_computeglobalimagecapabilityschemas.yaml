@@ -61,6 +61,9 @@ spec:
               compartmentId:
                 description: The OCID of the compartment that contains the resource.
                 type: string
+              computeGlobalImageCapabilitySchemaId:
+                description: The OCID of the compute global image capability schema
+                type: string
               currentVersionName:
                 description: The name of the global capabilities version resource
                   that is considered the current version.
@@ -91,6 +94,9 @@ spec:
               id:
                 description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the compute global image capability schema
+                type: string
+              name:
+                description: The compute global image capability schema version name
                 type: string
               status:
                 properties:

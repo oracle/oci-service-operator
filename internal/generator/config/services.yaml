@@ -36,6 +36,12 @@ services:
     version: v1beta1
     phase: security-and-identity
     packageProfile: controller-backed
+    observedState:
+      excludedFieldPaths:
+        CertificateBundle:
+          - JsonData
+          - PrivateKeyPem
+          - PrivateKeyPemPassphrase
     generation:
       controller:
         strategy: generated
@@ -137,6 +143,20 @@ services:
           - VolumeBackupPolicyAssignment
         WindowsInstanceInitialCredential:
           - InstanceCredentials
+      excludedFieldPaths:
+        CrossConnectMapping:
+          - BgpMd5AuthKey
+        IPSecConnectionDeviceConfig:
+          - Tunnels.SharedSecret
+        IPSecConnectionTunnelSharedSecret:
+          - SharedSecret
+        VirtualCircuit:
+          - CrossConnectMappings.BgpMd5AuthKey
+        VolumeAttachment:
+          - JsonData
+          - ChapSecret
+        WindowsInstanceInitialCredential:
+          - Password
 
   - service: database
     sdkPackage: github.com/oracle/oci-go-sdk/v65/database
@@ -145,6 +165,18 @@ services:
     phase: data-and-storage
     sampleOrder: 10
     packageProfile: controller-backed
+    package:
+      extraResources:
+        - ../../../config/rbac/autonomousdatabases_editor_role.yaml
+        - ../../../config/rbac/autonomousdatabases_viewer_role.yaml
+    observedState:
+      excludedFieldPaths:
+        ExternalBackupJob:
+          - SwiftPassword
+        ExternalDatabaseConnector:
+          - JsonData
+          - ConnectionCredentials.JsonData
+          - ConnectionCredentials.Password
     generation:
       controller:
         strategy: generated
@@ -153,18 +185,14 @@ services:
       registration:
         strategy: generated
       webhooks:
-        strategy: manual
+        strategy: none
       resources:
-        - kind: AutonomousDatabases
-          sdkName: AutonomousDatabase
+        - kind: AutonomousDatabase
+          formalSpec: databaseautonomousdatabase
           controller:
             extraRBACMarkers:
               - groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
               - groups="",resources=events,verbs=get;list;watch;create;update;patch;delete
-          serviceManager:
-            packagePath: autonomousdatabases/adb
-          webhooks:
-            strategy: manual
 
   - service: dns
     sdkPackage: github.com/oracle/oci-go-sdk/v65/dns
@@ -182,6 +210,9 @@ services:
       webhooks:
         strategy: none
     observedState:
+      excludedFieldPaths:
+        TsigKey:
+          - Secret
       sdkAliases:
         DomainRecord:
           - Record
@@ -241,6 +272,17 @@ services:
         - kind: User
           formalSpec: user
     observedState:
+      excludedFieldPaths:
+        AuthToken:
+          - Token
+        CustomerSecretKey:
+          - Key
+        OrResetUIPassword:
+          - Password
+        SmtpCredential:
+          - Password
+        SwiftPassword:
+          - Password
       sdkAliases:
         BulkActionResourceType:
           - BulkActionResourceTypeCollection
@@ -270,6 +312,10 @@ services:
     version: v1beta1
     phase: security-and-identity
     packageProfile: controller-backed
+    observedState:
+      excludedFieldPaths:
+        PreCoUserCredential:
+          - Password
     generation:
       controller:
         strategy: generated
@@ -378,6 +424,8 @@ services:
     packageProfile: controller-backed
     observedState:
       excludedFieldPaths:
+        Channel:
+          - Source.Password
         DbSystem:
           - Source.SourceUrl
     generation:
@@ -538,6 +586,11 @@ services:
       webhooks:
         strategy: none
     observedState:
+      excludedFieldPaths:
+        SecretBundle:
+          - SecretBundleContent
+        SecretBundleByName:
+          - SecretBundleContent
       sdkAliases:
         SecretBundleByName:
           - SecretBundle

@@ -16,7 +16,7 @@ This tree is the repo-local source of truth for formal runtime inputs.
 - `controller_manifest.tsv` binds one controller row to exactly one import, spec, logic-gap file, and diagrams directory.
 
 The checked-in `template` row remains scaffold-only as a schema example. Seeded
-rows for `database/AutonomousDatabases`, `mysql/DbSystem`,
+rows for `database/AutonomousDatabase`, `mysql/DbSystem`,
 `streaming/Stream`, and `identity/User` exercise the first
 resource-specific formal corpus.
 
@@ -77,9 +77,9 @@ controller-backed promotion:
    `go run ./hack/update_validator_registries.go --write`,
    `make generated-coverage-gate`, and `make generated-runtime-gate`.
 7. For resources that still depend on manual runtime behavior, keep
-   `_generated_client_adapter.go` shims, manual webhook files, and other legacy
-   seams explicit until their stop conditions close; do not treat formal
-   scaffold coverage as permission to delete those files.
+   `_generated_client_adapter.go` shims and other legacy seams explicit until
+   their stop conditions close; do not treat formal scaffold coverage as
+   permission to delete those files.
 
 ## Coverage Staging
 

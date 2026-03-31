@@ -1,0 +1,68 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - dns.oracle.com
+  resources:
+  - domainrecords
+  - resolverendpoints
+  - resolvers
+  - rrsets
+  - steeringpolicies
+  - steeringpolicyattachments
+  - tsigkeies
+  - views
+  - zonecontents
+  - zonefromzonefiles
+  - zonerecords
+  - zones
+  - zonetransferservers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - dns.oracle.com
+  resources:
+  - domainrecords/finalizers
+  - resolverendpoints/finalizers
+  - resolvers/finalizers
+  - rrsets/finalizers
+  - steeringpolicies/finalizers
+  - steeringpolicyattachments/finalizers
+  - tsigkeies/finalizers
+  - views/finalizers
+  - zonecontents/finalizers
+  - zonefromzonefiles/finalizers
+  - zonerecords/finalizers
+  - zones/finalizers
+  - zonetransferservers/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - dns.oracle.com
+  resources:
+  - domainrecords/status
+  - resolverendpoints/status
+  - resolvers/status
+  - rrsets/status
+  - steeringpolicies/status
+  - steeringpolicyattachments/status
+  - tsigkeies/status
+  - views/status
+  - zonecontents/status
+  - zonefromzonefiles/status
+  - zonerecords/status
+  - zones/status
+  - zonetransferservers/status
+  verbs:
+  - get
+  - patch
+  - update

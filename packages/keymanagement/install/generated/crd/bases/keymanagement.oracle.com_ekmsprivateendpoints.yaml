@@ -105,6 +105,36 @@ spec:
           status:
             description: EkmsPrivateEndpointStatus defines the observed state of EkmsPrivateEndpoint.
             properties:
+              caBundle:
+                description: CABundle to validate TLS certificate of the external
+                  key manager system in PEM format
+                type: string
+              compartmentId:
+                description: Compartment Identifier.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of predefined tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              displayName:
+                description: EKMS Private Endpoint display name
+                type: string
+              externalKeyManagerIp:
+                description: Private IP of the external key manager system to connect
+                  to from the EKMS private endpoint
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type, or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
               id:
                 description: Unique identifier that is immutable
                 type: string
@@ -116,6 +146,9 @@ spec:
               lifecycleState:
                 description: The current state of the EKMS private endpoint resource.
                 type: string
+              port:
+                description: The port of the external key manager system
+                type: integer
               privateEndpointIp:
                 description: The IP address in the customer's VCN for the EKMS private
                   endpoint. This is taken from subnet
@@ -162,6 +195,9 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              subnetId:
+                description: Subnet Identifier
+                type: string
               timeCreated:
                 description: The time the EKMS private endpoint was created. An RFC3339
                   (https://tools.ietf.org/html/rfc3339) formatted datetime string.

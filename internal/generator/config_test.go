@@ -607,7 +607,13 @@ func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
 	cfg := loadCheckedInConfig(t)
 	services := serviceConfigsByName(t, cfg, "database", "mysql", "streaming", "core")
 
-	for _, name := range []string{"database", "mysql", "streaming"} {
+	assertServiceGenerationStrategies(t, services["database"], generationStrategyExpectations{
+		controller:     GenerationStrategyGenerated,
+		serviceManager: GenerationStrategyGenerated,
+		registration:   GenerationStrategyGenerated,
+		webhook:        GenerationStrategyNone,
+	})
+	for _, name := range []string{"mysql", "streaming"} {
 		assertServiceGenerationStrategies(t, services[name], generationStrategyExpectations{
 			controller:     GenerationStrategyGenerated,
 			serviceManager: GenerationStrategyGenerated,
@@ -622,14 +628,14 @@ func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
 	assertCoreRuntimeRolloutMetadata(t, services["core"])
 }
 
-func TestCheckedInConfigPromotesOnlyIdentityUserFormalSpec(t *testing.T) {
+func TestCheckedInConfigPromotesFormalSpecReferences(t *testing.T) {
 	t.Parallel()
 
 	cfg := loadCheckedInConfig(t)
 	services := serviceConfigsByName(t, cfg, "identity", "database", "mysql", "streaming")
 	assertFormalSpecFor(t, services["identity"], "User", "user")
 	assertFormalSpecFor(t, services["identity"], "Compartment", "")
-	assertFormalSpecFor(t, services["database"], "AutonomousDatabases", "")
+	assertFormalSpecFor(t, services["database"], "AutonomousDatabase", "databaseautonomousdatabase")
 	assertFormalSpecFor(t, services["mysql"], "DbSystem", "dbsystem")
 	assertFormalSpecFor(t, services["streaming"], "Stream", "")
 }
@@ -751,6 +757,9 @@ func assertDatabaseRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) 
 
 	assertResourceOverrideCount(t, service, 1)
 	override := service.Generation.Resources[0]
+	if override.Kind != "AutonomousDatabase" {
+		t.Fatalf("database override kind = %q, want %q", override.Kind, "AutonomousDatabase")
+	}
 	if !slices.Equal(
 		override.Controller.ExtraRBACMarkers,
 		[]string{
@@ -760,11 +769,23 @@ func assertDatabaseRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) 
 	) {
 		t.Fatalf("database extra RBAC markers = %v", override.Controller.ExtraRBACMarkers)
 	}
-	if override.ServiceManager.PackagePath != "autonomousdatabases/adb" {
-		t.Fatalf("database packagePath = %q, want %q", override.ServiceManager.PackagePath, "autonomousdatabases/adb")
+	if override.FormalSpec != "databaseautonomousdatabase" {
+		t.Fatalf("database formalSpec = %q, want %q", override.FormalSpec, "databaseautonomousdatabase")
 	}
-	if got := generationStrategyOrDefault(override.Webhooks.Strategy, GenerationStrategyManual); got != GenerationStrategyManual {
-		t.Fatalf("database resource webhook strategy = %q, want %q", got, GenerationStrategyManual)
+	if !slices.Equal(
+		service.Package.ExtraResources,
+		[]string{
+			"../../../config/rbac/autonomousdatabases_editor_role.yaml",
+			"../../../config/rbac/autonomousdatabases_viewer_role.yaml",
+		},
+	) {
+		t.Fatalf("database package extraResources = %v", service.Package.ExtraResources)
+	}
+	if override.ServiceManager.PackagePath != "" {
+		t.Fatalf("database packagePath = %q, want empty to use default package layout", override.ServiceManager.PackagePath)
+	}
+	if override.Webhooks.Strategy != "" {
+		t.Fatalf("database resource webhook strategy = %q, want empty", override.Webhooks.Strategy)
 	}
 }
 

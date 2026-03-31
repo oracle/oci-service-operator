@@ -1,0 +1,302 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: pluggabledatabases.database.oracle.com
+spec:
+  group: database.oracle.com
+  names:
+    kind: PluggableDatabase
+    listKind: PluggableDatabaseList
+    plural: pluggabledatabases
+    singular: pluggabledatabase
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: status of the PluggableDatabase
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the PluggableDatabase
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: PluggableDatabase is the Schema for the pluggabledatabases API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: PluggableDatabaseSpec defines the desired state of PluggableDatabase.
+            properties:
+              containerDatabaseAdminPassword:
+                description: The DB system administrator password of the Container
+                  Database.
+                type: string
+              containerDatabaseId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the CDB
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                type: object
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              pdbAdminPassword:
+                description: A strong password for PDB Admin. The password must be
+                  at least nine characters and contain at least two uppercase, two
+                  lowercase, two numbers, and two special characters. The special
+                  characters must be _, \#, or -.
+                type: string
+              pdbCreationTypeDetails:
+                description: PluggableDatabasePdbCreationTypeDetails defines nested
+                  fields for PluggableDatabase.PdbCreationTypeDetails.
+                properties:
+                  creationType:
+                    type: string
+                  dblinkUserPassword:
+                    description: The DB link user password.
+                    type: string
+                  dblinkUsername:
+                    description: The name of the DB link user.
+                    type: string
+                  jsonData:
+                    type: string
+                  refreshableCloneDetails:
+                    description: PluggableDatabasePdbCreationTypeDetailsRefreshableCloneDetails
+                      defines nested fields for PluggableDatabase.PdbCreationTypeDetails.RefreshableCloneDetails.
+                    properties:
+                      isRefreshableClone:
+                        description: Indicates whether Pluggable Database is a refreshable
+                          clone.
+                        type: boolean
+                    type: object
+                  sourceContainerDatabaseAdminPassword:
+                    description: The DB system administrator password of the source
+                      Container Database.
+                    type: string
+                  sourcePluggableDatabaseId:
+                    description: The OCID of the Source Pluggable Database.
+                    type: string
+                required:
+                - sourceContainerDatabaseAdminPassword
+                - sourcePluggableDatabaseId
+                type: object
+              pdbName:
+                description: The name for the pluggable database (PDB). The name is
+                  unique in the context of a Database. The name must begin with an
+                  alphabetic character and can contain a maximum of thirty alphanumeric
+                  characters. Special characters are not permitted. The pluggable
+                  database name should not be same as the container database name.
+                type: string
+              shouldCreatePdbBackup:
+                description: Indicates whether to take Pluggable Database Backup after
+                  the operation.
+                type: boolean
+              shouldPdbAdminAccountBeLocked:
+                description: |-
+                  The locked mode of the pluggable database admin account. If false, the user needs to provide the PDB Admin Password to connect to it.
+                  If true, the pluggable database will be locked and user cannot login to it.
+                type: boolean
+              tdeWalletPassword:
+                description: The existing TDE wallet password of the CDB.
+                type: string
+            required:
+            - containerDatabaseId
+            - pdbName
+            type: object
+          status:
+            description: PluggableDatabaseStatus defines the observed state of PluggableDatabase.
+            properties:
+              compartmentId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the compartment.
+                type: string
+              connectionStrings:
+                description: PluggableDatabaseConnectionStrings defines nested fields
+                  for PluggableDatabase.ConnectionStrings.
+                properties:
+                  allConnectionStrings:
+                    additionalProperties:
+                      type: string
+                    description: All connection strings to use to connect to the pluggable
+                      database.
+                    type: object
+                  pdbDefault:
+                    description: A host name-based PDB connection string.
+                    type: string
+                  pdbIpDefault:
+                    description: An IP-based PDB connection string.
+                    type: string
+                type: object
+              containerDatabaseId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the CDB.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                type: object
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              id:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the pluggable database.
+                type: string
+              isRestricted:
+                description: |-
+                  The restricted mode of the pluggable database. If a pluggable database is opened in restricted mode,
+                  the user needs both create a session and have restricted session privileges to connect to it.
+                type: boolean
+              lifecycleDetails:
+                description: Detailed message for the lifecycle state.
+                type: string
+              lifecycleState:
+                description: The current state of the pluggable database.
+                type: string
+              openMode:
+                description: |-
+                  **Deprecated.** Use PluggableDatabaseNodeLevelDetails for OpenMode details.
+                  The mode that pluggable database is in. Open mode can only be changed to READ_ONLY or MIGRATE directly from the backend (within the Oracle Database software).
+                type: string
+              pdbName:
+                description: The name for the pluggable database (PDB). The name is
+                  unique in the context of a Database. The name must begin with an
+                  alphabetic character and can contain a maximum of thirty alphanumeric
+                  characters. Special characters are not permitted. The pluggable
+                  database name should not be same as the container database name.
+                type: string
+              pdbNodeLevelDetails:
+                description: |-
+                  Pluggable Database Node Level Details.
+                  Example: [{"nodeName" : "node1", "openMode" : "READ_WRITE"}, {"nodeName" : "node2", "openMode" : "READ_ONLY"}]
+                items:
+                  description: PluggableDatabasePdbNodeLevelDetail defines nested
+                    fields for PluggableDatabase.PdbNodeLevelDetail.
+                  properties:
+                    nodeName:
+                      description: The Node name of the Database Instance.
+                      type: string
+                    openMode:
+                      description: The mode that pluggable database is in. Open mode
+                        can only be changed to READ_ONLY or MIGRATE directly from
+                        the backend (within the Oracle Database software).
+                      type: string
+                  type: object
+                type: array
+              pluggableDatabaseManagementConfig:
+                description: PluggableDatabaseManagementConfig defines nested fields
+                  for PluggableDatabase.PluggableDatabaseManagementConfig.
+                properties:
+                  managementStatus:
+                    description: The status of the Pluggable Database Management service.
+                    type: string
+                type: object
+              refreshableCloneConfig:
+                description: PluggableDatabaseRefreshableCloneConfig defines nested
+                  fields for PluggableDatabase.RefreshableCloneConfig.
+                properties:
+                  isRefreshableClone:
+                    description: Indicates whether the Pluggable Database is a refreshable
+                      clone.
+                    type: boolean
+                type: object
+              status:
+                properties:
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              timeCreated:
+                description: The date and time the pluggable database was created.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

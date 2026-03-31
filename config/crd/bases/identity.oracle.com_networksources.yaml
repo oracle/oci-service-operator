@@ -228,8 +228,8 @@ spec:
                   A list of allowed VCN OCID and IP range pairs.
                   Example:`"vcnId": "ocid1.vcn.oc1.iad.aaaaaaaaexampleuniqueID", "ipRanges": [ "129.213.39.0/24" ]`
                 items:
-                  description: NetworkSourceVirtualSourceList defines nested fields
-                    for NetworkSource.VirtualSourceList.
+                  description: NetworkSourceVirtualSourceListObservedState defines
+                    nested fields for NetworkSource.VirtualSourceList.
                   properties:
                     ipRanges:
                       items:

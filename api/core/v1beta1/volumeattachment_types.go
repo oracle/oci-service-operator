@@ -37,7 +37,6 @@ type VolumeAttachmentMultipathDevice struct {
 // VolumeAttachmentStatus defines the observed state of VolumeAttachment.
 type VolumeAttachmentStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
-	JsonData   string            `json:"jsonData,omitempty"`
 	// The device name.
 	Device string `json:"device,omitempty"`
 	// A user-friendly name. Does not have to be unique, and it's changeable.
@@ -87,10 +86,6 @@ type VolumeAttachmentStatus struct {
 	// The volume's iSCSI port, usually port 860 or 3260.
 	// Example: `3260`
 	Port int `json:"port,omitempty"`
-	// The Challenge-Handshake-Authentication-Protocol (CHAP) secret
-	// valid for the associated CHAP user name.
-	// (Also called the "CHAP password".)
-	ChapSecret string `json:"chapSecret,omitempty"`
 	// The volume's system-generated Challenge-Handshake-Authentication-Protocol
 	// (CHAP) user name. See RFC 1994 (https://tools.ietf.org/html/rfc1994) for more on CHAP.
 	// Example: `ocid1.volume.oc1.phx.<unique_ID>`
