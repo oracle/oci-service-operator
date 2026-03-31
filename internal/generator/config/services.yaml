@@ -381,6 +381,10 @@ services:
     compatibility:
       existingKinds:
         - MySqlDbSystem
+    observedState:
+      excludedFieldPaths:
+        DbSystem:
+          - Source.SourceUrl
     generation:
       controller:
         strategy: generated

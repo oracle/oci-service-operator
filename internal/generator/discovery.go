@@ -489,6 +489,7 @@ const (
 type fieldRenderingOptions struct {
 	scope                     fieldScope
 	escapeStatusJSONCollision bool
+	excludedFieldPaths        map[string]struct{}
 }
 
 func mergeStructFields(index *ocisdk.Package, candidates []string, initial []FieldModel, options fieldRenderingOptions) ([]FieldModel, map[string]struct{}) {

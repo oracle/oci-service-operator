@@ -2501,7 +2501,14 @@ func TestMySQLCompatibilityLockedKindIncludesOptionalDesiredStateFields(t *testi
 		"CrashRecovery string `json:\"crashRecovery,omitempty\"`",
 		"DatabaseManagement string `json:\"databaseManagement,omitempty\"`",
 		"SecureConnections MySqlDbSystemSecureConnections `json:\"secureConnections,omitempty\"`",
+		"type MySqlDbSystemSourceObservedState struct {",
+		"Source MySqlDbSystemSourceObservedState `json:\"source,omitempty\"`",
+		"BackupId string `json:\"backupId\"`",
+		"DbSystemId string `json:\"dbSystemId\"`",
 	})
+	if slices.Contains(structFieldNames(t, content, "MySqlDbSystemSourceObservedState"), "SourceUrl") {
+		t.Fatalf("MySqlDbSystemSourceObservedState unexpectedly contains SourceUrl:\n%s", content)
+	}
 }
 
 func TestGenerateMergesExistingSampleKustomizationEntries(t *testing.T) {
@@ -2670,6 +2677,43 @@ func findFieldModel(t *testing.T, fields []FieldModel, name string) FieldModel {
 
 	t.Fatalf("field %q was not found in %#v", name, fields)
 	return FieldModel{}
+}
+
+func structFieldNames(t *testing.T, source string, typeName string) []string {
+	t.Helper()
+
+	fileSet := token.NewFileSet()
+	file, err := parser.ParseFile(fileSet, "generated.go", source, parser.SkipObjectResolution)
+	if err != nil {
+		t.Fatalf("ParseFile() error = %v\nsource:\n%s", err, source)
+	}
+
+	for _, decl := range file.Decls {
+		genDecl, ok := decl.(*ast.GenDecl)
+		if !ok || genDecl.Tok != token.TYPE {
+			continue
+		}
+		for _, spec := range genDecl.Specs {
+			typeSpec, ok := spec.(*ast.TypeSpec)
+			if !ok || typeSpec.Name.Name != typeName {
+				continue
+			}
+			structType, ok := typeSpec.Type.(*ast.StructType)
+			if !ok || structType.Fields == nil {
+				t.Fatalf("type %q was not a struct in source:\n%s", typeName, source)
+			}
+			names := make([]string, 0, len(structType.Fields.List))
+			for _, field := range structType.Fields.List {
+				for _, name := range field.Names {
+					names = append(names, name.Name)
+				}
+			}
+			return names
+		}
+	}
+
+	t.Fatalf("type %q was not found in source:\n%s", typeName, source)
+	return nil
 }
 
 func findHelperType(t *testing.T, helperTypes []TypeModel, name string) TypeModel {

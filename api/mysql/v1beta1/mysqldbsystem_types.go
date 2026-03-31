@@ -140,36 +140,6 @@ type MySqlDbSystemBackupPolicy struct {
 	PitrPolicy MySqlDbSystemBackupPolicyPitrPolicy `json:"pitrPolicy,omitempty"`
 }
 
-// MySqlDbSystemSource defines nested fields for MySqlDbSystem.Source.
-type MySqlDbSystemSource struct {
-	// +kubebuilder:validation:Optional
-	JsonData string `json:"jsonData,omitempty"`
-	// +kubebuilder:validation:Optional
-	SourceType string `json:"sourceType,omitempty"`
-	// The OCID of the backup to be used as the source for the new DB System.
-	// +kubebuilder:validation:Required
-	BackupId string `json:"backupId"`
-	// The Pre-Authenticated Request (PAR) of a bucket/prefix or PAR of a @.manifest.json object from the Object Storage.
-	// Check Using Pre-Authenticated Requests (https://docs.oracle.com/en-us/iaas/Content/Object/Tasks/usingpreauthenticatedrequests.htm)
-	// for information related to PAR creation.
-	// Please create PAR with "Permit object reads" access type and "Enable Object Listing" permission when using a bucket/prefix PAR.
-	// Please create PAR with "Permit object reads" access type when using a @.manifest.json object PAR.
-	// +kubebuilder:validation:Required
-	SourceUrl string `json:"sourceUrl"`
-	// The OCID of the DB System from which a backup shall be selected to be
-	// restored when creating the new DB System. Use this together with
-	// recovery point to perform a point in time recovery operation.
-	// +kubebuilder:validation:Required
-	DbSystemId string `json:"dbSystemId"`
-	// The date and time, as per RFC 3339, of the change up to which the
-	// new DB System shall be restored to, using a backup and logs from the
-	// original DB System. In case no point in time is specified, then this
-	// new DB System shall be restored up to the latest change recorded for
-	// the original DB System.
-	// +kubebuilder:validation:Optional
-	RecoveryPoint string `json:"recoveryPoint,omitempty"`
-}
-
 // MySqlDbSystemMaintenance defines nested fields for MySqlDbSystem.Maintenance.
 type MySqlDbSystemMaintenance struct {
 	// The start of the 2 hour maintenance window.
@@ -232,6 +202,24 @@ type MySqlDbSystemHeatWaveCluster struct {
 	TimeUpdated string `json:"timeUpdated,omitempty"`
 	// Lakehouse enabled status for the HeatWave cluster.
 	IsLakehouseEnabled bool `json:"isLakehouseEnabled,omitempty"`
+}
+
+// MySqlDbSystemSourceObservedState defines nested fields for MySqlDbSystem.Source.
+type MySqlDbSystemSourceObservedState struct {
+	JsonData   string `json:"jsonData,omitempty"`
+	SourceType string `json:"sourceType,omitempty"`
+	// The OCID of the backup to be used as the source for the new DB System.
+	BackupId string `json:"backupId,omitempty"`
+	// The OCID of the DB System from which a backup shall be selected to be
+	// restored when creating the new DB System. Use this together with
+	// recovery point to perform a point in time recovery operation.
+	DbSystemId string `json:"dbSystemId,omitempty"`
+	// The date and time, as per RFC 3339, of the change up to which the
+	// new DB System shall be restored to, using a backup and logs from the
+	// original DB System. In case no point in time is specified, then this
+	// new DB System shall be restored up to the latest change recorded for
+	// the original DB System.
+	RecoveryPoint string `json:"recoveryPoint,omitempty"`
 }
 
 // MySqlDbSystemEndpoint defines nested fields for MySqlDbSystem.Endpoint.
@@ -420,9 +408,9 @@ type MySqlDbSystemStatus struct {
 	// and memory for VM shapes; CPU cores, memory and storage for non-VM
 	// (or bare metal) shapes. To get a list of shapes, use (the
 	// ListShapes operation.
-	ShapeName    string                    `json:"shapeName,omitempty"`
-	BackupPolicy MySqlDbSystemBackupPolicy `json:"backupPolicy,omitempty"`
-	Source       MySqlDbSystemSource       `json:"source,omitempty"`
+	ShapeName    string                           `json:"shapeName,omitempty"`
+	BackupPolicy MySqlDbSystemBackupPolicy        `json:"backupPolicy,omitempty"`
+	Source       MySqlDbSystemSourceObservedState `json:"source,omitempty"`
 	// The OCID of the Configuration to be used for Instances in this DB System.
 	ConfigurationId string `json:"configurationId,omitempty"`
 	// The hostname for the primary endpoint of the DB System. Used for DNS.

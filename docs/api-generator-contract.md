@@ -21,6 +21,8 @@ Each service record defines:
 | `phase` | Current rollout bucket used by the generator epic. |
 | `packageProfile` | Install posture for the group: `controller-backed` or `crd-only`. |
 | `formalSpec` | Optional controller slug from `formal/controller_manifest.tsv` when one formal row covers the service-level runtime contract. |
+| `observedState.sdkAliases` | Optional observed-state SDK struct aliases keyed by the discovered SDK resource family when status synthesis must read a differently named response model. |
+| `observedState.excludedFieldPaths` | Optional dot-separated observed-state field paths keyed by the discovered SDK resource family when sensitive or unsupported SDK fields must be omitted from generated status surfaces. |
 | `generation.controller.strategy` | Service-wide controller rollout: `none`, `manual`, or `generated`. |
 | `generation.serviceManager.strategy` | Service-wide service-manager rollout: `none`, `manual`, or `generated`. |
 | `generation.registration.strategy` | Group-level runtime registration rollout: `none`, `manual`, or `generated`. |

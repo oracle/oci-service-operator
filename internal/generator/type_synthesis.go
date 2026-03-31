@@ -28,7 +28,11 @@ func synthesizeResourceFieldSet(index *ocisdk.Package, service ServiceConfig, re
 	observedFields, _ := synthesizer.mergeStructFields(
 		service.ObservedStateStructCandidates(rawName),
 		nil,
-		fieldRenderingOptions{scope: fieldScopeStatus, escapeStatusJSONCollision: true},
+		fieldRenderingOptions{
+			scope:                     fieldScopeStatus,
+			escapeStatusJSONCollision: true,
+			excludedFieldPaths:        service.ObservedStateExcludedFieldPaths(rawName),
+		},
 	)
 	for _, field := range observedFields {
 		jsonName := tagJSONName(field.Tag)
@@ -84,7 +88,12 @@ func (s *fieldSynthesizer) mergeStructFields(candidates []string, initial []Fiel
 			continue
 		}
 		for _, field := range fields {
-			fieldModel, ok := s.buildGeneratedField(field, options, []string{helperPathComponent(field)})
+			fieldModel, ok := s.buildGeneratedField(
+				field,
+				options,
+				[]string{helperPathComponent(field)},
+				[]string{field.Name},
+			)
 			if !ok {
 				continue
 			}
@@ -121,8 +130,12 @@ func (s *fieldSynthesizer) candidateFields(typeName string) ([]ocisdk.Field, boo
 	return nil, false
 }
 
-func (s *fieldSynthesizer) buildGeneratedField(field ocisdk.Field, options fieldRenderingOptions, path []string) (FieldModel, bool) {
-	renderedType, ok := s.renderFieldType(field, options, path)
+func (s *fieldSynthesizer) buildGeneratedField(field ocisdk.Field, options fieldRenderingOptions, helperPath []string, fieldPath []string) (FieldModel, bool) {
+	if isObservedStateFieldExcluded(fieldPath, options) {
+		return FieldModel{}, false
+	}
+
+	renderedType, ok := s.renderFieldType(field, options, helperPath, fieldPath)
 	if !ok {
 		return FieldModel{}, false
 	}
@@ -137,14 +150,14 @@ func (s *fieldSynthesizer) buildGeneratedField(field ocisdk.Field, options field
 	return fieldModel, true
 }
 
-func (s *fieldSynthesizer) renderFieldType(field ocisdk.Field, options fieldRenderingOptions, path []string) (string, bool) {
+func (s *fieldSynthesizer) renderFieldType(field ocisdk.Field, options fieldRenderingOptions, helperPath []string, fieldPath []string) (string, bool) {
 	if sharedType, ok := sharedSchemaType(field); ok {
 		return sharedType, true
 	}
 
 	switch {
 	case field.Kind == ocisdk.FieldKindStruct && len(field.NestedFields) > 0:
-		helperTypeName, ok := s.ensureHelperType(path, field.NestedFields, options)
+		helperTypeName, ok := s.ensureHelperType(helperPath, fieldPath, field.NestedFields, options)
 		if !ok {
 			return "", false
 		}
@@ -158,7 +171,7 @@ func (s *fieldSynthesizer) renderFieldType(field ocisdk.Field, options fieldRend
 		if len(fields) == 0 {
 			return "", false
 		}
-		helperTypeName, ok := s.ensureHelperType(path, fields, options)
+		helperTypeName, ok := s.ensureHelperType(helperPath, fieldPath, fields, options)
 		if !ok {
 			return "", false
 		}
@@ -170,18 +183,20 @@ func (s *fieldSynthesizer) renderFieldType(field ocisdk.Field, options fieldRend
 	}
 }
 
-func (s *fieldSynthesizer) ensureHelperType(path []string, fields []ocisdk.Field, options fieldRenderingOptions) (string, bool) {
-	typeName := helperTypeName(s.resourceKind, path)
-	if index, ok := s.helperIndex[typeName]; ok {
-		return s.helperTypes[index].Name, len(s.helperTypes[index].Fields) > 0
-	}
+func (s *fieldSynthesizer) ensureHelperType(helperPath []string, fieldPath []string, fields []ocisdk.Field, options fieldRenderingOptions) (string, bool) {
+	typeName := helperTypeName(s.resourceKind, helperPath)
 
 	nestedOptions := options
 	nestedOptions.escapeStatusJSONCollision = false
 
 	helperFields := make([]FieldModel, 0, len(fields))
 	for _, field := range fields {
-		fieldModel, ok := s.buildGeneratedField(field, nestedOptions, append(append([]string(nil), path...), helperPathComponent(field)))
+		fieldModel, ok := s.buildGeneratedField(
+			field,
+			nestedOptions,
+			append(append([]string(nil), helperPath...), helperPathComponent(field)),
+			append(append([]string(nil), fieldPath...), field.Name),
+		)
 		if !ok {
 			continue
 		}
@@ -191,14 +206,98 @@ func (s *fieldSynthesizer) ensureHelperType(path []string, fields []ocisdk.Field
 		return "", false
 	}
 
+	if index, ok := s.helperIndex[typeName]; ok {
+		if helperFieldShapesEqual(s.helperTypes[index].Fields, helperFields) || len(options.excludedFieldPaths) == 0 {
+			return s.helperTypes[index].Name, true
+		}
+		typeName = s.uniqueScopedHelperTypeName(typeName, helperFields, options.scope)
+		if index, ok := s.helperIndex[typeName]; ok {
+			return s.helperTypes[index].Name, len(s.helperTypes[index].Fields) > 0
+		}
+	}
+
 	typeModel := TypeModel{
 		Name:     typeName,
-		Comments: []string{fmt.Sprintf("%s defines nested fields for %s.", typeName, helperPathLabel(s.resourceKind, path))},
+		Comments: []string{fmt.Sprintf("%s defines nested fields for %s.", typeName, helperPathLabel(s.resourceKind, helperPath))},
 		Fields:   helperFields,
 	}
 	s.helperIndex[typeName] = len(s.helperTypes)
 	s.helperTypes = append(s.helperTypes, typeModel)
 	return typeName, true
+}
+
+func (s *fieldSynthesizer) uniqueScopedHelperTypeName(base string, fields []FieldModel, scope fieldScope) string {
+	for _, candidate := range scopedHelperTypeCandidates(base, scope) {
+		if index, ok := s.helperIndex[candidate]; ok {
+			if helperFieldShapesEqual(s.helperTypes[index].Fields, fields) {
+				return s.helperTypes[index].Name
+			}
+			continue
+		}
+		return candidate
+	}
+
+	switch scope {
+	case fieldScopeStatus:
+		for i := 2; ; i++ {
+			candidate := fmt.Sprintf("%sObservedState%d", base, i)
+			if index, ok := s.helperIndex[candidate]; ok {
+				if helperFieldShapesEqual(s.helperTypes[index].Fields, fields) {
+					return s.helperTypes[index].Name
+				}
+				continue
+			}
+			return candidate
+		}
+	default:
+		for i := 2; ; i++ {
+			candidate := fmt.Sprintf("%sFields%d", base, i)
+			if index, ok := s.helperIndex[candidate]; ok {
+				if helperFieldShapesEqual(s.helperTypes[index].Fields, fields) {
+					return s.helperTypes[index].Name
+				}
+				continue
+			}
+			return candidate
+		}
+	}
+}
+
+func scopedHelperTypeCandidates(base string, scope fieldScope) []string {
+	switch scope {
+	case fieldScopeStatus:
+		return []string{base + "ObservedState", base + "Status"}
+	default:
+		return []string{base + "Fields", base + "Details"}
+	}
+}
+
+func helperFieldShapesEqual(a []FieldModel, b []FieldModel) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i].Name != b[i].Name || a[i].Type != b[i].Type || a[i].Embedded != b[i].Embedded {
+			return false
+		}
+		if tagJSONName(a[i].Tag) != tagJSONName(b[i].Tag) {
+			return false
+		}
+	}
+	return true
+}
+
+func isObservedStateFieldExcluded(fieldPath []string, options fieldRenderingOptions) bool {
+	if options.scope != fieldScopeStatus || len(options.excludedFieldPaths) == 0 {
+		return false
+	}
+
+	key, err := observedStateFieldPathKey(fieldPath)
+	if err != nil {
+		return false
+	}
+	_, excluded := options.excludedFieldPaths[key]
+	return excluded
 }
 
 func sharedSchemaType(field ocisdk.Field) (string, bool) {

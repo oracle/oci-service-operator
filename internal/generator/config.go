@@ -99,7 +99,8 @@ type CompatibilityConfig struct {
 
 // ObservedStateConfig tunes how read-model fields are synthesized into status types.
 type ObservedStateConfig struct {
-	SDKAliases map[string][]string `yaml:"sdkAliases,omitempty"`
+	SDKAliases         map[string][]string `yaml:"sdkAliases,omitempty"`
+	ExcludedFieldPaths map[string][]string `yaml:"excludedFieldPaths,omitempty"`
 }
 
 // LoadConfig reads and validates the generator config file.
@@ -169,6 +170,16 @@ func (c *Config) Validate() error {
 			for _, alias := range aliases {
 				if strings.TrimSpace(alias) == "" {
 					return fmt.Errorf("service %q observedState sdkAliases[%q] contains a blank SDK alias", service.Service, rawName)
+				}
+			}
+		}
+		for rawName, paths := range service.ObservedState.ExcludedFieldPaths {
+			if strings.TrimSpace(rawName) == "" {
+				return fmt.Errorf("service %q observedState excludedFieldPaths contains a blank resource name", service.Service)
+			}
+			for _, path := range paths {
+				if _, err := normalizeObservedStateFieldPath(path); err != nil {
+					return fmt.Errorf("service %q observedState excludedFieldPaths[%q] %w", service.Service, rawName, err)
 				}
 			}
 		}
@@ -549,4 +560,60 @@ func (s ServiceConfig) ObservedStateStructCandidates(rawName string) []string {
 	}
 
 	return candidates
+}
+
+// ObservedStateExcludedFieldPaths returns the configured observed-state field paths that must not be published in status.
+func (s ServiceConfig) ObservedStateExcludedFieldPaths(rawName string) map[string]struct{} {
+	rawName = strings.TrimSpace(rawName)
+	if rawName == "" {
+		return nil
+	}
+
+	configured := s.ObservedState.ExcludedFieldPaths[rawName]
+	if len(configured) == 0 {
+		return nil
+	}
+
+	paths := make(map[string]struct{}, len(configured))
+	for _, path := range configured {
+		normalized, err := normalizeObservedStateFieldPath(path)
+		if err != nil {
+			continue
+		}
+		paths[normalized] = struct{}{}
+	}
+	if len(paths) == 0 {
+		return nil
+	}
+	return paths
+}
+
+func normalizeObservedStateFieldPath(path string) (string, error) {
+	path = strings.TrimSpace(path)
+	if path == "" {
+		return "", fmt.Errorf("contains a blank field path")
+	}
+
+	parts := strings.Split(path, ".")
+	return observedStateFieldPathKey(parts)
+}
+
+func observedStateFieldPathKey(parts []string) (string, error) {
+	if len(parts) == 0 {
+		return "", fmt.Errorf("contains a blank field path")
+	}
+
+	keys := make([]string, 0, len(parts))
+	for _, part := range parts {
+		part = strings.TrimSpace(part)
+		if part == "" {
+			return "", fmt.Errorf("contains a blank path segment")
+		}
+		key := normalizedTypeKey(part)
+		if key == "" {
+			return "", fmt.Errorf("contains a blank path segment")
+		}
+		keys = append(keys, key)
+	}
+	return strings.Join(keys, "."), nil
 }

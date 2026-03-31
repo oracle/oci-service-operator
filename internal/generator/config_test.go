@@ -46,6 +46,41 @@ services:
 	}
 }
 
+func TestLoadConfigRejectsBlankObservedStateExcludedFieldPath(t *testing.T) {
+	t.Parallel()
+
+	configPath := filepath.Join(t.TempDir(), "services.yaml")
+	content := `
+schemaVersion: v1alpha1
+domain: oracle.com
+defaultVersion: v1beta1
+generatorEntrypoint: ./cmd/generator
+packageProfiles:
+  controller-backed:
+    description: manual controllers
+services:
+  - service: mysql
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/mysql
+    group: mysql
+    packageProfile: controller-backed
+    observedState:
+      excludedFieldPaths:
+        DbSystem:
+          - Source..SourceUrl
+`
+	if err := os.WriteFile(configPath, []byte(content), 0o644); err != nil {
+		t.Fatalf("write temp config: %v", err)
+	}
+
+	_, err := LoadConfig(configPath)
+	if err == nil {
+		t.Fatal("LoadConfig() unexpectedly succeeded")
+	}
+	if !strings.Contains(err.Error(), `observedState excludedFieldPaths["DbSystem"]`) {
+		t.Fatalf("LoadConfig() error = %v, want excludedFieldPaths failure", err)
+	}
+}
+
 func TestSelectServices(t *testing.T) {
 	t.Parallel()
 
@@ -911,5 +946,59 @@ func TestObservedStateStructCandidatesReplacesNormalizedAliasMatch(t *testing.T)
 	dhcpWant := []string{"DhcpOptions", "DhcpOptionSummary"}
 	if !slices.Equal(dhcpGot, dhcpWant) {
 		t.Fatalf("ObservedStateStructCandidates(DhcpOption) = %v, want %v", dhcpGot, dhcpWant)
+	}
+}
+
+func TestObservedStateExcludedFieldPaths(t *testing.T) {
+	t.Parallel()
+
+	service := ServiceConfig{
+		ObservedState: ObservedStateConfig{
+			ExcludedFieldPaths: map[string][]string{
+				"DbSystem": {"Source.SourceUrl", " source.sourceURL "},
+			},
+		},
+	}
+
+	got := service.ObservedStateExcludedFieldPaths("DbSystem")
+	wantKey, err := normalizeObservedStateFieldPath("Source.SourceUrl")
+	if err != nil {
+		t.Fatalf("normalizeObservedStateFieldPath() error = %v", err)
+	}
+	if len(got) != 1 {
+		t.Fatalf("ObservedStateExcludedFieldPaths() returned %d entries, want 1", len(got))
+	}
+	if _, ok := got[wantKey]; !ok {
+		t.Fatalf("ObservedStateExcludedFieldPaths() = %v, want %q", got, wantKey)
+	}
+}
+
+func TestCheckedInConfigExcludesMySQLSourceURLFromObservedState(t *testing.T) {
+	t.Parallel()
+
+	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
+	cfg, err := LoadConfig(cfgPath)
+	if err != nil {
+		t.Fatalf("LoadConfig(%q) error = %v", cfgPath, err)
+	}
+
+	var mysqlService *ServiceConfig
+	for i := range cfg.Services {
+		if cfg.Services[i].Service == "mysql" {
+			mysqlService = &cfg.Services[i]
+			break
+		}
+	}
+	if mysqlService == nil {
+		t.Fatal("mysql service was not found in services.yaml")
+	}
+
+	excluded := mysqlService.ObservedStateExcludedFieldPaths("DbSystem")
+	wantKey, err := normalizeObservedStateFieldPath("Source.SourceUrl")
+	if err != nil {
+		t.Fatalf("normalizeObservedStateFieldPath() error = %v", err)
+	}
+	if _, ok := excluded[wantKey]; !ok {
+		t.Fatalf("mysql DbSystem excluded observed-state paths = %v, want %q", excluded, wantKey)
 	}
 }
