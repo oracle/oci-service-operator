@@ -238,7 +238,7 @@ type RuntimeAuxiliaryOperationModel struct {
 	ResponseTypeName string
 }
 
-// RuntimeGapModel captures one open formal gap that blocks the generated path.
+// RuntimeGapModel captures one open formal gap recorded alongside the generated runtime.
 type RuntimeGapModel struct {
 	Category      string
 	StopCondition string

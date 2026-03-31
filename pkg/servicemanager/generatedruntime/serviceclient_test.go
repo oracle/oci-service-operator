@@ -597,21 +597,124 @@ func TestServiceClientRejectsConflictingMutationFields(t *testing.T) {
 	}
 }
 
-func TestServiceClientRejectsOpenFormalGapsAtInit(t *testing.T) {
+func TestServiceClientIgnoresMetadataOnlyFormalSemanticsAtInit(t *testing.T) {
+	t.Parallel()
+
+	var createRequest fakeCreateThingRequest
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Semantics: &Semantics{
+			Lifecycle: LifecycleSemantics{
+				ActiveStates: []string{"ACTIVE"},
+			},
+			Delete: DeleteSemantics{
+				Policy:         "required",
+				TerminalStates: []string{"DELETED"},
+			},
+			CreateFollowUp: FollowUpSemantics{
+				Strategy: "none",
+				Hooks:    []Hook{{Helper: "tfresource.WaitForWorkRequestWithErrorHandling"}},
+			},
+			AuxiliaryOperations: []AuxiliaryOperation{
+				{
+					Phase:            "update",
+					MethodName:       "ChangeThingCompartment",
+					RequestTypeName:  "example.ChangeThingCompartmentRequest",
+					ResponseTypeName: "example.ChangeThingCompartmentResponse",
+				},
+			},
+			Unsupported: []UnsupportedSemantic{
+				{Category: "legacy-adapter", StopCondition: "keep manual adapter until gaps close"},
+			},
+		},
+		Create: &Operation{
+			NewRequest: func() any { return &fakeCreateThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				createRequest = *request.(*fakeCreateThingRequest)
+				return fakeCreateThingResponse{
+					Thing: fakeThing{
+						Id:             "ocid1.thing.oc1..create",
+						DisplayName:    "created-name",
+						LifecycleState: "ACTIVE",
+					},
+				}, nil
+			},
+			Fields: []RequestField{
+				{FieldName: "FakeCreateThingDetails", Contribution: "body"},
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Spec: fakeSpec{
+			CompartmentId: "ocid1.compartment.oc1..example",
+			DisplayName:   "desired-name",
+			Enabled:       true,
+		},
+	}
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful {
+		t.Fatal("CreateOrUpdate() should report success")
+	}
+	if createRequest.DisplayName != "desired-name" {
+		t.Fatalf("create request displayName = %q, want desired-name", createRequest.DisplayName)
+	}
+	if string(resource.Status.OsokStatus.Ocid) != "ocid1.thing.oc1..create" {
+		t.Fatalf("status.ocid = %q, want created OCID", resource.Status.OsokStatus.Ocid)
+	}
+}
+
+func TestServiceClientRejectsMalformedFormalListSemanticsAtInit(t *testing.T) {
 	t.Parallel()
 
 	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
 		Kind:    "Thing",
 		SDKName: "Thing",
 		Semantics: &Semantics{
-			Unsupported: []UnsupportedSemantic{
-				{Category: "legacy-adapter", StopCondition: "keep manual adapter until gaps close"},
+			List: &ListSemantics{},
+		},
+		Create: &Operation{
+			NewRequest: func() any { return &fakeCreateThingRequest{} },
+			Call: func(_ context.Context, _ any) (any, error) {
+				t.Fatal("Create() should not be called when formal list semantics are malformed")
+				return nil, nil
 			},
 		},
 	})
 
-	if _, err := client.CreateOrUpdate(context.Background(), &fakeResource{}, ctrl.Request{}); err == nil || !strings.Contains(err.Error(), "open formal gap legacy-adapter") {
-		t.Fatalf("CreateOrUpdate() error = %v, want init failure for open formal gap", err)
+	if _, err := client.CreateOrUpdate(context.Background(), &fakeResource{}, ctrl.Request{}); err == nil || !strings.Contains(err.Error(), "list semantics require responseItemsField") {
+		t.Fatalf("CreateOrUpdate() error = %v, want init failure for malformed list semantics", err)
+	}
+}
+
+func TestServiceClientRejectsRequiredDeleteSemanticsWithoutTerminalStatesAtInit(t *testing.T) {
+	t.Parallel()
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Semantics: &Semantics{
+			Delete: DeleteSemantics{
+				Policy: "required",
+			},
+		},
+		Create: &Operation{
+			NewRequest: func() any { return &fakeCreateThingRequest{} },
+			Call: func(_ context.Context, _ any) (any, error) {
+				t.Fatal("Create() should not be called when required delete semantics are malformed")
+				return nil, nil
+			},
+		},
+	})
+
+	if _, err := client.CreateOrUpdate(context.Background(), &fakeResource{}, ctrl.Request{}); err == nil || !strings.Contains(err.Error(), "required delete semantics need terminal states") {
+		t.Fatalf("CreateOrUpdate() error = %v, want init failure for malformed delete semantics", err)
 	}
 }
 

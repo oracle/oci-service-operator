@@ -949,23 +949,6 @@ func validateFormalSemantics(kind string, semantics *Semantics) error {
 	}
 
 	var problems []string
-	for _, gap := range semantics.Unsupported {
-		problems = append(problems, fmt.Sprintf("open formal gap %s: %s", gap.Category, gap.StopCondition))
-	}
-	for _, operation := range semantics.AuxiliaryOperations {
-		problems = append(problems, fmt.Sprintf("unsupported %s auxiliary operation %s", operation.Phase, operation.MethodName))
-	}
-	for phase, followUp := range map[string]FollowUpSemantics{
-		"create": semantics.CreateFollowUp,
-		"update": semantics.UpdateFollowUp,
-		"delete": semantics.DeleteFollowUp,
-	} {
-		for _, hook := range followUp.Hooks {
-			if !supportedFormalHelper(hook.Helper) {
-				problems = append(problems, fmt.Sprintf("%s helper %q is not supported", phase, hook.Helper))
-			}
-		}
-	}
 	if semantics.List != nil && strings.TrimSpace(semantics.List.ResponseItemsField) == "" {
 		problems = append(problems, "list semantics require responseItemsField")
 	}
@@ -976,15 +959,6 @@ func validateFormalSemantics(kind string, semantics *Semantics) error {
 		return nil
 	}
 	return fmt.Errorf("%s formal semantics blocked: %s", kind, strings.Join(problems, "; "))
-}
-
-func supportedFormalHelper(helper string) bool {
-	switch strings.TrimSpace(helper) {
-	case "", "tfresource.CreateResource", "tfresource.UpdateResource", "tfresource.DeleteResource", "tfresource.WaitForUpdatedState":
-		return true
-	default:
-		return false
-	}
 }
 
 func normalizeOCIError(err error) error {
