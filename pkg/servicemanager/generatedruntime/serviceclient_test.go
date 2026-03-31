@@ -10,6 +10,8 @@ import (
 	"strings"
 	"testing"
 
+	databasesdk "github.com/oracle/oci-go-sdk/v65/database"
+	databasev1beta1 "github.com/oracle/oci-service-operator/api/database/v1beta1"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
@@ -464,6 +466,87 @@ func TestServiceClientCreateOrUpdateUsesExplicitRequestFieldsAndFormalLifecycle(
 	}
 	if resource.Status.LifecycleState != "AVAILABLE" {
 		t.Fatalf("status.lifecycleState = %q, want AVAILABLE", resource.Status.LifecycleState)
+	}
+}
+
+func TestBuildRequestPopulatesAutonomousDatabasePolymorphicCreateBody(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name   string
+		spec   databasev1beta1.AutonomousDatabaseSpec
+		assert func(*testing.T, databasesdk.CreateAutonomousDatabaseBase)
+	}{
+		{
+			name: "default create details",
+			spec: databasev1beta1.AutonomousDatabaseSpec{
+				CompartmentId: "ocid1.compartment.oc1..create",
+				DisplayName:   "adb-create",
+			},
+			assert: func(t *testing.T, body databasesdk.CreateAutonomousDatabaseBase) {
+				t.Helper()
+
+				details, ok := body.(databasesdk.CreateAutonomousDatabaseDetails)
+				if !ok {
+					t.Fatalf("create body type = %T, want %T", body, databasesdk.CreateAutonomousDatabaseDetails{})
+				}
+				if details.CompartmentId == nil || *details.CompartmentId != "ocid1.compartment.oc1..create" {
+					t.Fatalf("details.compartmentId = %v, want ocid1.compartment.oc1..create", details.CompartmentId)
+				}
+				if details.DisplayName == nil || *details.DisplayName != "adb-create" {
+					t.Fatalf("details.displayName = %v, want adb-create", details.DisplayName)
+				}
+			},
+		},
+		{
+			name: "clone details",
+			spec: databasev1beta1.AutonomousDatabaseSpec{
+				CompartmentId: "ocid1.compartment.oc1..clone",
+				DisplayName:   "adb-clone",
+				Source:        "DATABASE",
+				SourceId:      "ocid1.autonomousdatabase.oc1..source",
+			},
+			assert: func(t *testing.T, body databasesdk.CreateAutonomousDatabaseBase) {
+				t.Helper()
+
+				details, ok := body.(databasesdk.CreateAutonomousDatabaseCloneDetails)
+				if !ok {
+					t.Fatalf("create body type = %T, want %T", body, databasesdk.CreateAutonomousDatabaseCloneDetails{})
+				}
+				if details.SourceId == nil || *details.SourceId != "ocid1.autonomousdatabase.oc1..source" {
+					t.Fatalf("details.sourceId = %v, want ocid1.autonomousdatabase.oc1..source", details.SourceId)
+				}
+				if details.DisplayName == nil || *details.DisplayName != "adb-clone" {
+					t.Fatalf("details.displayName = %v, want adb-clone", details.DisplayName)
+				}
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			request := &databasesdk.CreateAutonomousDatabaseRequest{}
+			resource := &databasev1beta1.AutonomousDatabase{Spec: tc.spec}
+
+			err := buildRequest(
+				request,
+				resource,
+				"",
+				[]RequestField{{FieldName: "CreateAutonomousDatabaseDetails", RequestName: "createAutonomousDatabaseDetails", Contribution: "body"}},
+				nil,
+			)
+			if err != nil {
+				t.Fatalf("buildRequest() error = %v", err)
+			}
+			if request.CreateAutonomousDatabaseDetails == nil {
+				t.Fatal("buildRequest() should populate CreateAutonomousDatabaseDetails")
+			}
+
+			tc.assert(t, request.CreateAutonomousDatabaseDetails)
+		})
 	}
 }
 

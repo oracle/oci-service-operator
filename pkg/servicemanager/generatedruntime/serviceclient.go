@@ -16,6 +16,7 @@ import (
 	"unicode"
 
 	"github.com/oracle/oci-go-sdk/v65/common"
+	databasesdk "github.com/oracle/oci-go-sdk/v65/database"
 	"github.com/oracle/oci-service-operator/pkg/errorutil"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
@@ -29,6 +30,8 @@ import (
 const defaultRequeueDuration = time.Minute
 
 var errResourceNotFound = errors.New("generated runtime resource not found")
+
+var autonomousDatabaseBaseType = reflect.TypeOf((*databasesdk.CreateAutonomousDatabaseBase)(nil)).Elem()
 
 type Operation struct {
 	NewRequest func() any
@@ -1163,11 +1166,103 @@ func convertValue(raw any, targetType reflect.Type) (reflect.Value, error) {
 	if err != nil {
 		return reflect.Value{}, fmt.Errorf("marshal source value: %w", err)
 	}
+	if targetType.Kind() == reflect.Interface {
+		if converted, ok, err := convertPolymorphicInterfaceValue(payload, targetType); ok {
+			return converted, err
+		}
+	}
 	converted := reflect.New(targetType)
 	if err := json.Unmarshal(payload, converted.Interface()); err != nil {
 		return reflect.Value{}, fmt.Errorf("unmarshal into %s: %w", targetType, err)
 	}
 	return converted.Elem(), nil
+}
+
+func convertPolymorphicInterfaceValue(payload []byte, targetType reflect.Type) (reflect.Value, bool, error) {
+	switch targetType {
+	case autonomousDatabaseBaseType:
+		body, err := convertAutonomousDatabaseBase(payload)
+		if err != nil {
+			return reflect.Value{}, true, err
+		}
+		converted := reflect.New(targetType).Elem()
+		converted.Set(reflect.ValueOf(body))
+		return converted, true, nil
+	default:
+		return reflect.Value{}, false, nil
+	}
+}
+
+// OCI models CreateAutonomousDatabase with a polymorphic interface body. Resolve the CR spec into
+// the matching concrete SDK type so request serialization uses the provider model instead of map[string]any.
+func convertAutonomousDatabaseBase(payload []byte) (databasesdk.CreateAutonomousDatabaseBase, error) {
+	source, err := jsonFieldString(payload, "source")
+	if err != nil {
+		return nil, fmt.Errorf("decode autonomous database source: %w", err)
+	}
+
+	switch strings.ToUpper(strings.TrimSpace(source)) {
+	case "", "NONE":
+		var body databasesdk.CreateAutonomousDatabaseDetails
+		if err := json.Unmarshal(payload, &body); err != nil {
+			return nil, fmt.Errorf("unmarshal into %T: %w", body, err)
+		}
+		return body, nil
+	case "DATABASE":
+		var body databasesdk.CreateAutonomousDatabaseCloneDetails
+		if err := json.Unmarshal(payload, &body); err != nil {
+			return nil, fmt.Errorf("unmarshal into %T: %w", body, err)
+		}
+		return body, nil
+	case "CLONE_TO_REFRESHABLE":
+		var body databasesdk.CreateRefreshableAutonomousDatabaseCloneDetails
+		if err := json.Unmarshal(payload, &body); err != nil {
+			return nil, fmt.Errorf("unmarshal into %T: %w", body, err)
+		}
+		return body, nil
+	case "BACKUP_FROM_ID":
+		var body databasesdk.CreateAutonomousDatabaseFromBackupDetails
+		if err := json.Unmarshal(payload, &body); err != nil {
+			return nil, fmt.Errorf("unmarshal into %T: %w", body, err)
+		}
+		return body, nil
+	case "BACKUP_FROM_TIMESTAMP":
+		var body databasesdk.CreateAutonomousDatabaseFromBackupTimestampDetails
+		if err := json.Unmarshal(payload, &body); err != nil {
+			return nil, fmt.Errorf("unmarshal into %T: %w", body, err)
+		}
+		return body, nil
+	case "CROSS_REGION_DISASTER_RECOVERY":
+		var body databasesdk.CreateCrossRegionDisasterRecoveryDetails
+		if err := json.Unmarshal(payload, &body); err != nil {
+			return nil, fmt.Errorf("unmarshal into %T: %w", body, err)
+		}
+		return body, nil
+	case "CROSS_REGION_DATAGUARD":
+		var body databasesdk.CreateCrossRegionAutonomousDatabaseDataGuardDetails
+		if err := json.Unmarshal(payload, &body); err != nil {
+			return nil, fmt.Errorf("unmarshal into %T: %w", body, err)
+		}
+		return body, nil
+	default:
+		return nil, fmt.Errorf("unsupported CreateAutonomousDatabaseBase source %q", source)
+	}
+}
+
+func jsonFieldString(payload []byte, field string) (string, error) {
+	var values map[string]json.RawMessage
+	if err := json.Unmarshal(payload, &values); err != nil {
+		return "", err
+	}
+	raw, ok := values[field]
+	if !ok || string(raw) == "null" {
+		return "", nil
+	}
+	var value string
+	if err := json.Unmarshal(raw, &value); err != nil {
+		return "", err
+	}
+	return value, nil
 }
 
 func osokStatus(resource any) (*shared.OSOKStatus, error) {
