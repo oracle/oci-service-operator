@@ -2137,7 +2137,7 @@ func TestMySQLDbSystemIncludesOptionalDesiredStateFields(t *testing.T) {
 	})
 }
 
-func TestGenerateMergesExistingSampleKustomizationEntries(t *testing.T) {
+func TestGenerateOverwritesExistingSampleKustomizationEntries(t *testing.T) {
 	t.Parallel()
 
 	cfg := &Config{
@@ -2167,11 +2167,25 @@ func TestGenerateMergesExistingSampleKustomizationEntries(t *testing.T) {
 
 	sampleKustomization := readFile(t, filepath.Join(samplesDir, "kustomization.yaml"))
 	assertContains(t, sampleKustomization, []string{
-		"- existing.yaml",
 		"- mysql_v1beta1_dbsystem.yaml",
+		"# +kubebuilder:scaffold:manifestskustomizesamples",
 	})
-	if strings.Index(sampleKustomization, "- existing.yaml") > strings.Index(sampleKustomization, "- mysql_v1beta1_dbsystem.yaml") {
-		t.Fatalf("existing sample entry was not preserved ahead of the generated sample:\n%s", sampleKustomization)
+	assertNotContains(t, sampleKustomization, []string{
+		"- existing.yaml",
+	})
+
+	order, err := readSampleKustomizationOrder(filepath.Join(samplesDir, "kustomization.yaml"))
+	if err != nil {
+		t.Fatalf("readSampleKustomizationOrder(kustomization.yaml) error = %v", err)
+	}
+	if !slices.Equal(order, []string{
+		"mysql_v1beta1_dbsystem.yaml",
+		"mysql_v1beta1_oauthclientcredential.yaml",
+		"mysql_v1beta1_report.yaml",
+		"mysql_v1beta1_reportbyname.yaml",
+		"mysql_v1beta1_widget.yaml",
+	}) {
+		t.Fatalf("sample kustomization resources = %#v, want only generated entries", order)
 	}
 }
 

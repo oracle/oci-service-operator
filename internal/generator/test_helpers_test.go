@@ -251,6 +251,28 @@ func seedSamplesKustomization(t *testing.T, outputRoot string) {
 	}
 }
 
+func readSampleKustomizationOrder(path string) ([]string, error) {
+	content, err := os.ReadFile(path)
+	if os.IsNotExist(err) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	lines := strings.Split(string(content), "\n")
+	resources := make([]string, 0, len(lines))
+	for _, line := range lines {
+		trimmed := strings.TrimSpace(line)
+		if !strings.HasPrefix(trimmed, "- ") {
+			continue
+		}
+		resources = append(resources, strings.TrimSpace(strings.TrimPrefix(trimmed, "- ")))
+	}
+
+	return resources, nil
+}
+
 func assertGeneratedServiceCounts(t *testing.T, generated []ServiceResult, want map[string]int) {
 	t.Helper()
 

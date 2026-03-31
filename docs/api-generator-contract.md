@@ -72,7 +72,7 @@ remains opt-in and non-destructive.
 | `config/crd/bases/*.yaml` | `controller-gen` | Generated from API packages via `make manifests`. |
 | `config/crd/kustomization.yaml` | Workflow-managed sync | `make manifests` refreshes the shared CRD resource list from `config/crd/bases/*.yaml` while preserving the manual webhook and CA-injection patch sections used by the shared install path and bundle generation. |
 | `config/samples/<group>_<version>_<kind-lower>.yaml` | generator | One sample manifest per generated top-level kind. |
-| `config/samples/kustomization.yaml` sample entries | generator | The resource list is generator-owned; the existing kubebuilder scaffold marker stays intact. |
+| `config/samples/kustomization.yaml` sample entries | generator | The resource list is generator-owned and rewritten from the current generated sample set; the existing kubebuilder scaffold marker stays intact. |
 | `packages/<group>/metadata.env` | generator | Derived from group identity and package profile. |
 | `packages/<group>/install/kustomization.yaml` | generator | Generated static overlay for the group package profile. |
 | `packages/<group>/install/generated/**` | Package workflow | Refreshed by `make package-generate` or `make package-install`, not by hand and not directly by the generator. |
@@ -209,7 +209,8 @@ one-off file edit under `api/`.
 - Sample `kind`:
   generated OSOK kind for that resource
 - `config/samples/kustomization.yaml` must include every generated sample file
-  in deterministic service/kind order.
+  in deterministic service/kind order and must not preserve preexisting
+  entries that are not generated from the current config.
 
 ### Package metadata
 

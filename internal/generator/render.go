@@ -245,12 +245,7 @@ func (r *Renderer) RenderSamples(root string, packages []*PackageModel) error {
 		resourceNames = append(resourceNames, sample.fileName)
 	}
 
-	orderedResources, err := orderedSampleResources(samplesDir, resourceNames)
-	if err != nil {
-		return err
-	}
-
-	kustomizationContent, err := renderSamplesKustomization(orderedResources)
+	kustomizationContent, err := renderSamplesKustomization(resourceNames)
 	if err != nil {
 		return fmt.Errorf("render samples kustomization: %w", err)
 	}
@@ -405,87 +400,6 @@ func cleanupGeneratedSampleFiles(samplesDir string, packages []*PackageModel) er
 	}
 
 	return nil
-}
-
-func orderedSampleResources(samplesDir string, generatedOrder []string) ([]string, error) {
-	existingOrder, err := readSampleKustomizationOrder(filepath.Join(samplesDir, "kustomization.yaml"))
-	if err != nil {
-		return nil, err
-	}
-
-	currentFiles, err := listSampleFiles(samplesDir)
-	if err != nil {
-		return nil, err
-	}
-
-	remaining := make(map[string]struct{}, len(currentFiles))
-	for _, name := range currentFiles {
-		remaining[name] = struct{}{}
-	}
-
-	ordered := make([]string, 0, len(currentFiles))
-	for _, name := range existingOrder {
-		if _, ok := remaining[name]; !ok {
-			continue
-		}
-		ordered = append(ordered, name)
-		delete(remaining, name)
-	}
-
-	for _, name := range generatedOrder {
-		if _, ok := remaining[name]; !ok {
-			continue
-		}
-		ordered = append(ordered, name)
-		delete(remaining, name)
-	}
-
-	var leftovers []string
-	for name := range remaining {
-		leftovers = append(leftovers, name)
-	}
-	sort.Strings(leftovers)
-	ordered = append(ordered, leftovers...)
-
-	return ordered, nil
-}
-
-func readSampleKustomizationOrder(path string) ([]string, error) {
-	content, err := os.ReadFile(path)
-	if os.IsNotExist(err) {
-		return nil, nil
-	}
-	if err != nil {
-		return nil, fmt.Errorf("read sample kustomization %q: %w", path, err)
-	}
-
-	lines := strings.Split(string(content), "\n")
-	resources := make([]string, 0, len(lines))
-	for _, line := range lines {
-		trimmed := strings.TrimSpace(line)
-		if !strings.HasPrefix(trimmed, "- ") {
-			continue
-		}
-		resources = append(resources, strings.TrimSpace(strings.TrimPrefix(trimmed, "- ")))
-	}
-	return resources, nil
-}
-
-func listSampleFiles(samplesDir string) ([]string, error) {
-	entries, err := os.ReadDir(samplesDir)
-	if err != nil {
-		return nil, fmt.Errorf("read samples dir %q: %w", samplesDir, err)
-	}
-
-	files := make([]string, 0, len(entries))
-	for _, entry := range entries {
-		if entry.IsDir() || entry.Name() == "kustomization.yaml" || filepath.Ext(entry.Name()) != ".yaml" {
-			continue
-		}
-		files = append(files, entry.Name())
-	}
-	sort.Strings(files)
-	return files, nil
 }
 
 func matchesSamplePrefix(name string, prefixes []string) bool {
