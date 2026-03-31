@@ -338,7 +338,12 @@ func setupRegistrations(mgr ctrl.Manager, initOSOKResources bool) error {
 	return nil
 }
 
-func addManagerHealthChecks(mgr ctrl.Manager) error {
+type managerHealthChecker interface {
+	AddHealthzCheck(name string, check healthz.Checker) error
+	AddReadyzCheck(name string, check healthz.Checker) error
+}
+
+func addManagerHealthChecks(mgr managerHealthChecker) error {
 	if err := mgr.AddHealthzCheck("health", healthz.Ping); err != nil {
 		return err
 	}
