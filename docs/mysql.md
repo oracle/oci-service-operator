@@ -5,9 +5,8 @@
 - [MySQL DB System Specification Parameters](#mysql-dbsystem-specification-parameters)
 - [MySQL DB System Status Parameters](#mysql-dbsystem-status-parameters)
 - [Provision](#provisioning-a-mysql-dbsystem)
-- [Bind](#binding-to-an-existing-mysql-dbsystem)
-- [Update](#updating-a-mysql-dbsystem)
-- [Access Information in Kubernetes Secret](#access-information-in-kubernetes-secrets)
+- [Current v2 notes](#current-v2-notes)
+- [Access Information](#access-information)
 
 ## Introduction
 
@@ -63,20 +62,21 @@ Without these policies, the service will not function correctly.
 
 ## MySQL DB System Specification Parameters
 
-The complete specification of the `MySqlDbSystem` custom resource (CR) is detailed below:
+The generated v2 `DbSystem` CR is defined in
+`api/mysql/v1beta1/dbsystem_types.go`. Commonly used spec fields are
+summarized below:
 
 | Parameter                          | Description                                                         | Type   | Mandatory |
 | ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
-| `spec.id` | The Mysql DbSystem [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm). | string | no  |
-| `spec.displayName` | The user-friendly name for the Mysql DbSystem. The name does not have to be unique. | string | yes       |
+| `spec.displayName` | The user-friendly name for the DB System. | string | no |
 | `spec.compartmentId` | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment of the Mysql DbSystem. | string | yes       |
 | `spec.shapeName` | The name of the shape. The shape determines the resources allocated. CPU cores and memory for VM shapes; CPU cores, memory and storage for non-VM (or bare metal) shapes.  | string | yes       |
 | `spec.subnetId` | The OCID of the subnet the DB System is associated with.  | string | yes       |
-| `spec.dataStorageSizeInGBs`| Initial size of the data volume in GBs that will be created and attached. Keep in mind that this only specifies the size of the database data volume, the log volume for the database will be scaled appropriately with its shape. | int    | yes       |
-| `spec.isHighlyAvailable` | Specifies if the DB System is highly available.  | boolean | yes       |
-| `spec.availabilityDomain`| The availability domain on which to deploy the Read/Write endpoint. This defines the preferred primary instance. | string | yes        |
+| `spec.dataStorageSizeInGBs`| Initial size of the data volume in GBs that will be created and attached. Keep in mind that this only specifies the size of the database data volume, the log volume for the database will be scaled appropriately with its shape. | int    | no |
+| `spec.isHighlyAvailable` | Specifies if the DB System is highly available.  | boolean | no |
+| `spec.availabilityDomain`| The availability domain on which to deploy the Read/Write endpoint. This defines the preferred primary instance. | string | no |
 | `spec.faultDomain`| The fault domain on which to deploy the Read/Write endpoint. This defines the preferred primary instance. | string | no        |
-| `spec.configuration.id` | The OCID of the Configuration to be used for this DB System. [More info about Configurations](https://docs.oracle.com/en-us/iaas/mysql-database/doc/db-systems.html#GUID-E2A83218-9700-4A49-B55D-987867D81871)| string | yes |
+| `spec.configurationId` | The OCID of the Configuration to be used for this DB System. [More info about Configurations](https://docs.oracle.com/en-us/iaas/mysql-database/doc/db-systems.html#GUID-E2A83218-9700-4A49-B55D-987867D81871)| string | no |
 | `spec.description` | User-provided data about the DB System. | string | no |
 | `spec.hostnameLabel` | The hostname for the primary endpoint of the DB System. Used for DNS. | string | no |
 | `spec.mysqlVersion` | The specific MySQL version identifier. | string | no |
@@ -85,8 +85,15 @@ The complete specification of the `MySqlDbSystem` custom resource (CR) is detail
 | `spec.ipAddress` | The IP address the DB System is configured to listen on. A private IP address of your choice to assign to the primary endpoint of the DB System. Must be an available IP address within the subnet's CIDR. If you don't specify a value, Oracle automatically assigns a private IP address from the subnet. This should be a "dotted-quad" style IPv4 address. | string | no |
 | `spec.freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see [Resource Tags](https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). `Example: {"Department": "Finance"}` | string | no |
 | `spec.definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see [Resource Tags](https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). | string | no |
-| `spec.adminUsername.secret.secretName` | The username for the administrative user. | string | yes       |
-| `spec.adminPassword.secret.secretName` | The Kubernetes Secret Name that contains admin password for Mysql DbSystem. The password must be between 8 and 32 characters long, and must contain at least 1 numeric character, 1 lowercase character, 1 uppercase character, and 1 special (nonalphanumeric) character. | string | yes       |
+| `spec.adminUsername` | The username for the administrative user. | string | no |
+| `spec.adminPassword` | The administrative password. The password must meet the MySQL DB System password policy. | string | no |
+| `spec.backupPolicy` | Nested backup policy options for automatic backup behavior and PITR. | object | no |
+| `spec.maintenance` | Nested maintenance window configuration. | object | no |
+| `spec.secureConnections` | Nested TLS certificate configuration. | object | no |
+
+The generated v2 runtime reads `spec.adminUsername` and `spec.adminPassword`
+directly from the CR. It does not consume nested Kubernetes Secret references
+for DB System credentials.
 
 
 
@@ -109,31 +116,9 @@ The complete specification of the `MySqlDbSystem` custom resource (CR) is detail
 
 ## Provisioning a MySQL DB System
 
-Provisioning of a MySQL DB System requires the user to input the admin username and admin password as a Kubernetes secret. OSOK acquires the admin usernmame and admin password from the Kubernetes secret whose name is provided in the `spec`. 
-The Kubernetes secret should contain the admin username in `username` field. 
-The Kubernetes secret should contain the admin password in `password` field. 
-
-```yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: <ADMIN_SECRET_NAME>
-type: Opaque
-data:
-  username: <USERNAME_BASE64_ENCODED>
-  password: <PASSWORD_BASE64_ENCODED>
-```
-
-Run the following command to create a secret for the Mysql DbSystem:
-```sh
-kubectl apply -f <CREATE_SECRET>.yaml
-```
-
-The MySQL DB System can be accessed from the Secret which will be persisted as part of the provision/bind operation of the CR.
-
 The v2 generated runtime now uses the `DbSystem` kind directly. Use the current
 API group and spec surface instead of the retired `MySqlDbSystem` resource and
-its legacy secret-based bind workflow.
+its retired secret-materialization and bind workflow.
 
 - SUBNET_OCID - OCID of the subnet created in the pre-requisites step
 - CONFIGURATION_ID - [More info about Configurations](https://docs.oracle.com/en-us/iaas/mysql-database/doc/db-systems.html#GUID-E2A83218-9700-4A49-B55D-987867D81871) Get your [Configuration_id](https://console.us-ashburn-1.oraclecloud.com/mysqlaas/configurations) 
@@ -150,19 +135,12 @@ spec:
   shapeName: <SHAPE>
   subnetId: <SUBNET_OCID>
   configurationId: <CONFIGURATION_OCID>
-  availabilityDomain: <AVAIALABILITY_DOMAIN>
+  availabilityDomain: <AVAILABILITY_DOMAIN>
   adminUsername: <ADMIN_USERNAME>
   adminPassword: <ADMIN_PASSWORD>
   description: <DESCRIPTION>
   dataStorageSizeInGBs: <DB_SIZE>
-  port: <PORT>
-  portX: <PORTX>
-  freeformTags:
-    <KEY1>: <VALUE1>
-  definedTags:
-    <TAGNAMESPACE1>:
-      <KEY1>: <VALUE1>
-
+  isHighlyAvailable: false
 ```
 
 Run the following command to create a CR to the cluster:
@@ -195,8 +173,9 @@ $ kubectl describe dbsystems <NAME_OF_CR_OBJECT>
 ## Current v2 notes
 
 - The generated v2 contract no longer uses the legacy `MySqlDbSystem` kind.
-- The retired handwritten path's secret-based bind or endpoint-materialization
-  examples do not apply to the generated `DbSystem` resource.
+- The retired handwritten path's nested Kubernetes Secret fields, bind, and
+  endpoint-materialization examples do not apply to the generated `DbSystem`
+  resource.
 - Check `api/mysql/v1beta1/dbsystem_types.go` for the current spec surface when
   authoring CRs.
 
@@ -204,5 +183,11 @@ $ kubectl describe dbsystems <NAME_OF_CR_OBJECT>
 
 The generated v2 `DbSystem` runtime does not preserve the retired
 secret-materialization flow from the handwritten `MySqlDbSystem` path. Consume
-the current status surface on the CR directly.
+the current status surface on the CR directly:
+
+- `status.ipAddress`
+- `status.hostnameLabel`
+- `status.port`
+- `status.portX`
+- `status.endpoints`
  
