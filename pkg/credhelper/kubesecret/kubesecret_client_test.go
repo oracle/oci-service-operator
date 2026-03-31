@@ -53,6 +53,68 @@ func newTestKubeSecretClient(t *testing.T, objs ...ctrlclient.Object) *KubeSecre
 	)
 }
 
+const (
+	testSecretName      = "test-secret"
+	testSecretNamespace = "default"
+)
+
+func expectSecretData(t *testing.T, client *KubeSecretClient, want map[string][]byte) {
+	t.Helper()
+
+	retrieved, err := client.GetSecret(context.Background(), testSecretName, testSecretNamespace)
+	if err != nil {
+		t.Fatalf("get secret: %v", err)
+	}
+	if !reflect.DeepEqual(want, retrieved) {
+		t.Fatalf("unexpected secret data: got %v want %v", retrieved, want)
+	}
+}
+
+func mustCreateSecret(t *testing.T, client *KubeSecretClient, labels map[string]string, data map[string][]byte) {
+	t.Helper()
+
+	created, err := client.CreateSecret(context.Background(), testSecretName, testSecretNamespace, labels, data)
+	if err != nil {
+		t.Fatalf("create secret: %v", err)
+	}
+	if !created {
+		t.Fatal("expected secret to be created")
+	}
+}
+
+func mustUpdateSecret(t *testing.T, client *KubeSecretClient, labels map[string]string, data map[string][]byte) {
+	t.Helper()
+
+	updated, err := client.UpdateSecret(context.Background(), testSecretName, testSecretNamespace, labels, data)
+	if err != nil {
+		t.Fatalf("update secret: %v", err)
+	}
+	if !updated {
+		t.Fatal("expected secret to be updated")
+	}
+}
+
+func mustDeleteSecret(t *testing.T, client *KubeSecretClient) {
+	t.Helper()
+
+	deleted, err := client.DeleteSecret(context.Background(), testSecretName, testSecretNamespace)
+	if err != nil {
+		t.Fatalf("delete secret: %v", err)
+	}
+	if !deleted {
+		t.Fatal("expected secret to be deleted")
+	}
+}
+
+func expectSecretNotFound(t *testing.T, client *KubeSecretClient) {
+	t.Helper()
+
+	_, err := client.GetSecret(context.Background(), testSecretName, testSecretNamespace)
+	if !apierrors.IsNotFound(err) {
+		t.Fatalf("expected not found after delete, got %v", err)
+	}
+}
+
 type staleGetClient struct {
 	ctrlclient.Client
 	getCalls int
@@ -66,65 +128,24 @@ func (c *staleGetClient) Get(ctx context.Context, key ctrlclient.ObjectKey, obj 
 
 func TestCreateUpdateDeleteSecret(t *testing.T) {
 	client := newTestKubeSecretClient(t)
-	ctx := context.Background()
-
-	secretName := "test-secret"
-	secretNamespace := "default"
 	labels := map[string]string{"label_def": "default_label"}
 	data := map[string][]byte{
 		"secret": []byte("test"),
 		"data":   []byte("default"),
 	}
 
-	created, err := client.CreateSecret(ctx, secretName, secretNamespace, labels, data)
-	if err != nil {
-		t.Fatalf("create secret: %v", err)
-	}
-	if !created {
-		t.Fatalf("expected secret to be created")
-	}
-
-	retrieved, err := client.GetSecret(ctx, secretName, secretNamespace)
-	if err != nil {
-		t.Fatalf("get secret: %v", err)
-	}
-	if !reflect.DeepEqual(data, retrieved) {
-		t.Fatalf("unexpected secret data after create: got %v want %v", retrieved, data)
-	}
+	mustCreateSecret(t, client, labels, data)
+	expectSecretData(t, client, data)
 
 	updatedData := map[string][]byte{
 		"secret": []byte("updated_test"),
 		"data":   []byte("updated_default"),
 		"value":  []byte("updated value"),
 	}
-	updated, err := client.UpdateSecret(ctx, secretName, secretNamespace, labels, updatedData)
-	if err != nil {
-		t.Fatalf("update secret: %v", err)
-	}
-	if !updated {
-		t.Fatalf("expected secret to be updated")
-	}
-
-	retrieved, err = client.GetSecret(ctx, secretName, secretNamespace)
-	if err != nil {
-		t.Fatalf("get updated secret: %v", err)
-	}
-	if !reflect.DeepEqual(updatedData, retrieved) {
-		t.Fatalf("unexpected secret data after update: got %v want %v", retrieved, updatedData)
-	}
-
-	deleted, err := client.DeleteSecret(ctx, secretName, secretNamespace)
-	if err != nil {
-		t.Fatalf("delete secret: %v", err)
-	}
-	if !deleted {
-		t.Fatalf("expected secret to be deleted")
-	}
-
-	_, err = client.GetSecret(ctx, secretName, secretNamespace)
-	if !apierrors.IsNotFound(err) {
-		t.Fatalf("expected not found after delete, got %v", err)
-	}
+	mustUpdateSecret(t, client, labels, updatedData)
+	expectSecretData(t, client, updatedData)
+	mustDeleteSecret(t, client)
+	expectSecretNotFound(t, client)
 }
 
 func TestCreateSecretAlreadyExists(t *testing.T) {

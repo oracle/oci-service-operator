@@ -7,14 +7,11 @@ package kubesecret
 
 import (
 	"context"
-	"regexp"
-	"strings"
 
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/metrics"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/api/validation"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -131,34 +128,4 @@ func (c *KubeSecretClient) reader() client.Reader {
 		return c.Reader
 	}
 	return c.Client
-}
-
-/***
-This method is used to convert the given secret name into lowercase and validate it against the kubernetes secret naming conventions
-https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#dns-subdomain-names
-*/
-
-func (c *KubeSecretClient) isValidSecretName(ctx context.Context, secretName string) bool {
-	validationResults := validation.NameIsDNSSubdomain(secretName, false)
-	if validationResults != nil && len(validationResults) > 0 {
-		return false
-	}
-	return true
-}
-func (c *KubeSecretClient) getValidSecretName(ctx context.Context, secretName string) string {
-	secretName = strings.ToLower(secretName)
-
-	regex := regexp.MustCompile("[^a-z0-9-.]+")
-	secretName = regex.ReplaceAllString(secretName, "")
-
-	consecutiveCharRegex := regexp.MustCompile("[-.]{2,}")
-	secretName = consecutiveCharRegex.ReplaceAllString(secretName, ".")
-
-	/** ToDo
-	Add length validation and trim the length to 256 chars, if it is more
-	Check the beginning and end characters of the secret name as it should be an alphanumeric char
-	*/
-
-	c.Log.InfoLog("Updated secret name is ", "Secret Name", secretName)
-	return secretName
 }
