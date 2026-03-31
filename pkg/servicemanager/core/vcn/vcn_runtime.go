@@ -73,7 +73,9 @@ func (c *vcnRuntimeClient) CreateOrUpdate(ctx context.Context, resource *corev1b
 		return c.fail(resource, normalizeOCIError(err))
 	}
 
-	c.projectStatus(resource, current)
+	if err := c.projectStatus(resource, current); err != nil {
+		return c.fail(resource, err)
+	}
 
 	updateRequest, updateNeeded, err := c.buildUpdateRequest(resource, current)
 	if err != nil {
@@ -88,7 +90,9 @@ func (c *vcnRuntimeClient) CreateOrUpdate(ctx context.Context, resource *corev1b
 		current = response.Vcn
 	}
 
-	c.projectStatus(resource, current)
+	if err := c.projectStatus(resource, current); err != nil {
+		return c.fail(resource, err)
+	}
 	return c.applyLifecycle(resource, current)
 }
 
@@ -123,7 +127,9 @@ func (c *vcnRuntimeClient) Delete(ctx context.Context, resource *corev1beta1.Vcn
 		return false, normalizeOCIError(err)
 	}
 
-	c.projectStatus(resource, current)
+	if err := c.projectStatus(resource, current); err != nil {
+		return false, err
+	}
 	switch current.LifecycleState {
 	case coresdk.VcnLifecycleStateTerminated:
 		c.markDeleted(resource, "OCI resource reached TERMINATED before disappearing")
@@ -147,7 +153,9 @@ func (c *vcnRuntimeClient) create(ctx context.Context, resource *corev1beta1.Vcn
 		return c.fail(resource, normalizeOCIError(err))
 	}
 
-	c.projectStatus(resource, response.Vcn)
+	if err := c.projectStatus(resource, response.Vcn); err != nil {
+		return c.fail(resource, err)
+	}
 	return c.applyLifecycle(resource, response.Vcn)
 }
 
@@ -362,15 +370,18 @@ func (c *vcnRuntimeClient) markTerminating(resource *corev1beta1.Vcn, current co
 	resource.Status.OsokStatus = util.UpdateOSOKStatusCondition(resource.Status.OsokStatus, shared.Terminating, v1.ConditionTrue, "", status.Message, c.manager.Log)
 }
 
-func (c *vcnRuntimeClient) projectStatus(resource *corev1beta1.Vcn, current coresdk.Vcn) {
+func (c *vcnRuntimeClient) projectStatus(resource *corev1beta1.Vcn, current coresdk.Vcn) error {
 	payload, err := json.Marshal(current)
 	if err != nil {
-		return
+		return fmt.Errorf("marshal OCI response body: %w", err)
 	}
-	_ = json.Unmarshal(payload, &resource.Status)
+	if err := json.Unmarshal(payload, &resource.Status); err != nil {
+		return fmt.Errorf("project OCI response body into status: %w", err)
+	}
 	if current.Id != nil {
 		resource.Status.OsokStatus.Ocid = shared.OCID(*current.Id)
 	}
+	return nil
 }
 
 func lifecycleMessage(current coresdk.Vcn) string {
