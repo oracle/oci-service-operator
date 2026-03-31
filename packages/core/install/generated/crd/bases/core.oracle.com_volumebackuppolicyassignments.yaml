@@ -69,8 +69,15 @@ spec:
             description: VolumeBackupPolicyAssignmentStatus defines the observed state
               of VolumeBackupPolicyAssignment.
             properties:
+              assetId:
+                description: The OCID of the volume the policy has been assigned to.
+                type: string
               id:
                 description: The OCID of the volume backup policy assignment.
+                type: string
+              policyId:
+                description: The OCID of the volume backup policy that has been assigned
+                  to the volume.
                 type: string
               status:
                 properties:

@@ -91,6 +91,8 @@ spec:
                   bucketName:
                     description: The Object Storage bucket for the image.
                     type: string
+                  jsonData:
+                    type: string
                   namespaceName:
                     description: The Object Storage namespace for the image.
                     type: string
@@ -164,14 +166,51 @@ spec:
                   Example: `100`
                 format: int64
                 type: integer
+              compartmentId:
+                description: The OCID of the compartment containing the instance you
+                  want to use as the basis for the image.
+                type: string
               createImageAllowed:
                 description: |-
                   Whether instances launched with this image can be used to create new images.
                   For example, you cannot create an image of an Oracle Database instance.
                   Example: `true`
                 type: boolean
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a
+                  namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              displayName:
+                description: |-
+                  A user-friendly name for the image. It does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
+                  You cannot use a platform image name as a custom image name.
+                  Example: `My custom Oracle Linux image`
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no
+                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
               id:
                 description: The OCID of the image.
+                type: string
+              launchMode:
+                description: |-
+                  Specifies the configuration mode for launching virtual machine (VM) instances. The configuration modes are:
+                  * `NATIVE` - VM instances launch with iSCSI boot and VFIO devices. The default value for platform images.
+                  * `EMULATED` - VM instances launch with emulated devices, such as the E1000 network driver and emulated SCSI disk controller.
+                  * `PARAVIRTUALIZED` - VM instances launch with paravirtualized devices using VirtIO drivers.
+                  * `CUSTOM` - VM instances launch with custom configuration settings specified in the `LaunchOptions` parameter.
                 type: string
               launchOptions:
                 description: ImageLaunchOptions defines nested fields for Image.LaunchOptions.
@@ -228,6 +267,16 @@ spec:
                 type: string
               listingType:
                 description: The listing type of the image. The default value is "NONE".
+                type: string
+              operatingSystem:
+                description: |-
+                  The image's operating system.
+                  Example: `Oracle Linux`
+                type: string
+              operatingSystemVersion:
+                description: |-
+                  The image's operating system version.
+                  Example: `7.2`
                 type: string
               sizeInMBs:
                 description: |-

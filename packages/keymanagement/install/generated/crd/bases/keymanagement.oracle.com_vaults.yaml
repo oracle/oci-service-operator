@@ -130,11 +130,29 @@ spec:
           status:
             description: VaultStatus defines the observed state of Vault.
             properties:
+              compartmentId:
+                description: The OCID of the compartment that contains this vault.
+                type: string
               cryptoEndpoint:
                 description: |-
                   The service endpoint to perform cryptographic operations against. Cryptographic operations include
                   Encrypt (https://docs.cloud.oracle.com/api/#/en/key/latest/EncryptedData/Encrypt), Decrypt (https://docs.cloud.oracle.com/api/#/en/key/latest/DecryptedData/Decrypt),
                   and GenerateDataEncryptionKey (https://docs.cloud.oracle.com/api/#/en/key/latest/GeneratedKey/GenerateDataEncryptionKey) operations.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              displayName:
+                description: |-
+                  A user-friendly name for the vault. It does not have to be unique, and it is changeable.
+                  Avoid entering confidential information.
                 type: string
               externalKeyManagerMetadataSummary:
                 description: VaultExternalKeyManagerMetadataSummary defines nested
@@ -161,6 +179,14 @@ spec:
                   vendor:
                     description: Vendor of the external key manager.
                     type: string
+                type: object
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
                 type: object
               id:
                 description: The OCID of the vault.
@@ -243,6 +269,11 @@ spec:
                 description: |-
                   An optional property to indicate when to delete the vault, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
                   Example: `2018-04-03T21:10:29.600Z`
+                type: string
+              vaultType:
+                description: |-
+                  The type of vault. Each type of vault stores the key with different
+                  degrees of isolation and has different options and pricing.
                 type: string
               wrappingkeyId:
                 description: The OCID of the vault's wrapping key.

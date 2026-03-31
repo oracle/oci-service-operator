@@ -1,16 +1,16 @@
 {
   "aggregate": {
     "specs": 414,
-    "mappings": 919,
-    "trackedMappings": 919,
+    "mappings": 921,
+    "trackedMappings": 921,
     "untrackedMappings": 0,
-    "presentFields": 8222,
-    "missingFields": 2,
-    "mandatoryPresentFields": 2916,
-    "mandatoryMissingFields": 0,
-    "extraSpecFields": 594,
-    "overallCoveragePercent": 99.97568093385215,
-    "mandatoryCoveragePercent": 100
+    "presentFields": 8429,
+    "missingFields": 15,
+    "mandatoryPresentFields": 2923,
+    "mandatoryMissingFields": 3,
+    "extraSpecFields": 610,
+    "overallCoveragePercent": 99.82235907153007,
+    "mandatoryCoveragePercent": 99.89747095010253
   },
   "services": [
     {
@@ -75,26 +75,26 @@
       "mappings": 247,
       "trackedMappings": 247,
       "untrackedMappings": 0,
-      "presentFields": 1847,
-      "missingFields": 0,
-      "mandatoryPresentFields": 600,
-      "mandatoryMissingFields": 0,
+      "presentFields": 1844,
+      "missingFields": 3,
+      "mandatoryPresentFields": 599,
+      "mandatoryMissingFields": 1,
       "extraSpecFields": 157,
-      "overallCoveragePercent": 100,
-      "mandatoryCoveragePercent": 100
+      "overallCoveragePercent": 99.83757444504602,
+      "mandatoryCoveragePercent": 99.83333333333333
     },
     {
       "service": "database",
       "specs": 66,
-      "mappings": 161,
-      "trackedMappings": 161,
+      "mappings": 163,
+      "trackedMappings": 163,
       "untrackedMappings": 0,
-      "presentFields": 2481,
-      "missingFields": 0,
-      "mandatoryPresentFields": 569,
+      "presentFields": 2700,
+      "missingFields": 1,
+      "mandatoryPresentFields": 579,
       "mandatoryMissingFields": 0,
-      "extraSpecFields": 229,
-      "overallCoveragePercent": 100,
+      "extraSpecFields": 245,
+      "overallCoveragePercent": 99.96297667530544,
       "mandatoryCoveragePercent": 100
     },
     {
@@ -103,13 +103,13 @@
       "mappings": 32,
       "trackedMappings": 32,
       "untrackedMappings": 0,
-      "presentFields": 260,
-      "missingFields": 0,
-      "mandatoryPresentFields": 180,
-      "mandatoryMissingFields": 0,
+      "presentFields": 259,
+      "missingFields": 1,
+      "mandatoryPresentFields": 179,
+      "mandatoryMissingFields": 1,
       "extraSpecFields": 20,
-      "overallCoveragePercent": 100,
-      "mandatoryCoveragePercent": 100
+      "overallCoveragePercent": 99.61538461538461,
+      "mandatoryCoveragePercent": 99.44444444444444
     },
     {
       "service": "events",
@@ -145,12 +145,12 @@
       "mappings": 94,
       "trackedMappings": 94,
       "untrackedMappings": 0,
-      "presentFields": 578,
-      "missingFields": 0,
+      "presentFields": 573,
+      "missingFields": 5,
       "mandatoryPresentFields": 240,
       "mandatoryMissingFields": 0,
       "extraSpecFields": 32,
-      "overallCoveragePercent": 100,
+      "overallCoveragePercent": 99.13494809688581,
       "mandatoryCoveragePercent": 100
     },
     {
@@ -159,13 +159,13 @@
       "mappings": 25,
       "trackedMappings": 25,
       "untrackedMappings": 0,
-      "presentFields": 195,
-      "missingFields": 0,
-      "mandatoryPresentFields": 106,
-      "mandatoryMissingFields": 0,
+      "presentFields": 194,
+      "missingFields": 1,
+      "mandatoryPresentFields": 105,
+      "mandatoryMissingFields": 1,
       "extraSpecFields": 13,
-      "overallCoveragePercent": 100,
-      "mandatoryCoveragePercent": 100
+      "overallCoveragePercent": 99.48717948717949,
+      "mandatoryCoveragePercent": 99.05660377358491
     },
     {
       "service": "limits",
@@ -327,12 +327,12 @@
       "mappings": 5,
       "trackedMappings": 5,
       "untrackedMappings": 0,
-      "presentFields": 39,
-      "missingFields": 0,
+      "presentFields": 37,
+      "missingFields": 2,
       "mandatoryPresentFields": 10,
       "mandatoryMissingFields": 0,
       "extraSpecFields": 0,
-      "overallCoveragePercent": 100,
+      "overallCoveragePercent": 94.87179487179486,
       "mandatoryCoveragePercent": 100
     },
     {

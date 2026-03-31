@@ -10,6 +10,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
@@ -22,10 +23,12 @@ type fakeResource struct {
 }
 
 type fakeSpec struct {
-	CompartmentId string `json:"compartmentId,omitempty"`
-	DisplayName   string `json:"displayName,omitempty"`
-	Name          string `json:"name,omitempty"`
-	Enabled       bool   `json:"enabled,omitempty"`
+	CompartmentId string                `json:"compartmentId,omitempty"`
+	DisplayName   string                `json:"displayName,omitempty"`
+	Name          string                `json:"name,omitempty"`
+	AdminUsername shared.UsernameSource `json:"adminUsername,omitempty"`
+	AdminPassword shared.PasswordSource `json:"adminPassword,omitempty"`
+	Enabled       bool                  `json:"enabled,omitempty"`
 }
 
 type fakeStatus struct {
@@ -64,6 +67,16 @@ type fakeCreateThingRequest struct {
 
 type fakeCreateThingResponse struct {
 	Thing fakeThing `presentIn:"body"`
+}
+
+type FakeCreateThingWithSecretDetails struct {
+	DisplayName   string `json:"displayName,omitempty"`
+	AdminUsername string `json:"adminUsername,omitempty"`
+	AdminPassword string `json:"adminPassword,omitempty"`
+}
+
+type fakeCreateThingWithSecretRequest struct {
+	FakeCreateThingWithSecretDetails `contributesTo:"body"`
 }
 
 type fakeGetThingRequest struct {
@@ -131,6 +144,34 @@ func (f fakeServiceError) GetOpcRequestID() string {
 	return f.opcID
 }
 
+type fakeCredentialClient struct {
+	secrets    map[string]map[string][]byte
+	getCalls   []string
+	namespaces []string
+}
+
+func (f *fakeCredentialClient) CreateSecret(context.Context, string, string, map[string]string, map[string][]byte) (bool, error) {
+	return true, nil
+}
+
+func (f *fakeCredentialClient) DeleteSecret(context.Context, string, string) (bool, error) {
+	return true, nil
+}
+
+func (f *fakeCredentialClient) GetSecret(_ context.Context, name, namespace string) (map[string][]byte, error) {
+	f.getCalls = append(f.getCalls, name)
+	f.namespaces = append(f.namespaces, namespace)
+	secret, ok := f.secrets[name]
+	if !ok {
+		return nil, nil
+	}
+	return secret, nil
+}
+
+func (f *fakeCredentialClient) UpdateSecret(context.Context, string, string, map[string]string, map[string][]byte) (bool, error) {
+	return true, nil
+}
+
 func TestServiceClientCreateOrUpdateCreatesAndProjectsStatus(t *testing.T) {
 	t.Parallel()
 
@@ -178,6 +219,14 @@ func TestServiceClientCreateOrUpdateCreatesAndProjectsStatus(t *testing.T) {
 	}
 
 	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	assertSuccessfulCreateOrUpdate(t, response, err)
+	assertCreateThingRequest(t, createRequest, resource)
+	assertGetThingRequest(t, getRequest, "ocid1.thing.oc1..create")
+	assertCreatedThingStatus(t, resource)
+}
+
+func assertSuccessfulCreateOrUpdate(t *testing.T, response servicemanager.OSOKResponse, err error) {
+	t.Helper()
 	if err != nil {
 		t.Fatalf("CreateOrUpdate() error = %v", err)
 	}
@@ -187,6 +236,10 @@ func TestServiceClientCreateOrUpdateCreatesAndProjectsStatus(t *testing.T) {
 	if response.ShouldRequeue {
 		t.Fatal("CreateOrUpdate() should not requeue for ACTIVE lifecycle")
 	}
+}
+
+func assertCreateThingRequest(t *testing.T, createRequest fakeCreateThingRequest, resource *fakeResource) {
+	t.Helper()
 	if createRequest.CompartmentId != resource.Spec.CompartmentId {
 		t.Fatalf("create request compartmentId = %q, want %q", createRequest.CompartmentId, resource.Spec.CompartmentId)
 	}
@@ -196,9 +249,17 @@ func TestServiceClientCreateOrUpdateCreatesAndProjectsStatus(t *testing.T) {
 	if !createRequest.Enabled {
 		t.Fatal("create request enabled flag was not projected from spec")
 	}
-	if getRequest.ThingId == nil || *getRequest.ThingId != "ocid1.thing.oc1..create" {
+}
+
+func assertGetThingRequest(t *testing.T, getRequest fakeGetThingRequest, expectedID string) {
+	t.Helper()
+	if getRequest.ThingId == nil || *getRequest.ThingId != expectedID {
 		t.Fatalf("get request thingId = %v, want created OCID", getRequest.ThingId)
 	}
+}
+
+func assertCreatedThingStatus(t *testing.T, resource *fakeResource) {
+	t.Helper()
 	if string(resource.Status.OsokStatus.Ocid) != "ocid1.thing.oc1..create" {
 		t.Fatalf("status.ocid = %q, want created OCID", resource.Status.OsokStatus.Ocid)
 	}
@@ -216,6 +277,112 @@ func TestServiceClientCreateOrUpdateCreatesAndProjectsStatus(t *testing.T) {
 	}
 	if len(resource.Status.OsokStatus.Conditions) == 0 || resource.Status.OsokStatus.Conditions[len(resource.Status.OsokStatus.Conditions)-1].Type != shared.Active {
 		t.Fatalf("status conditions = %#v, want trailing Active condition", resource.Status.OsokStatus.Conditions)
+	}
+}
+
+func TestServiceClientCreateOrUpdateResolvesSecretBackedBodyFields(t *testing.T) {
+	t.Parallel()
+
+	var createRequest fakeCreateThingWithSecretRequest
+	credClient := &fakeCredentialClient{
+		secrets: map[string]map[string][]byte{
+			"admin-user": {
+				"username": []byte("dbadmin"),
+			},
+			"admin-password": {
+				"password": []byte("SuperSecret123"),
+			},
+		},
+	}
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:             "Thing",
+		SDKName:          "Thing",
+		CredentialClient: credClient,
+		Create: &Operation{
+			NewRequest: func() any { return &fakeCreateThingWithSecretRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				createRequest = *request.(*fakeCreateThingWithSecretRequest)
+				return fakeCreateThingResponse{
+					Thing: fakeThing{
+						Id:             "ocid1.thing.oc1..create",
+						DisplayName:    "created-name",
+						LifecycleState: "ACTIVE",
+					},
+				}, nil
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Namespace: "database-system",
+		Spec: fakeSpec{
+			DisplayName:   "created-name",
+			AdminUsername: shared.UsernameSource{Secret: shared.SecretSource{SecretName: "admin-user"}},
+			AdminPassword: shared.PasswordSource{Secret: shared.SecretSource{SecretName: "admin-password"}},
+		},
+	}
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful {
+		t.Fatal("CreateOrUpdate() should report success")
+	}
+	if createRequest.DisplayName != "created-name" {
+		t.Fatalf("create request displayName = %q, want %q", createRequest.DisplayName, "created-name")
+	}
+	if createRequest.AdminUsername != "dbadmin" {
+		t.Fatalf("create request adminUsername = %q, want dbadmin", createRequest.AdminUsername)
+	}
+	if createRequest.AdminPassword != "SuperSecret123" {
+		t.Fatalf("create request adminPassword = %q, want SuperSecret123", createRequest.AdminPassword)
+	}
+	if got := strings.Join(credClient.getCalls, ","); got != "admin-user,admin-password" {
+		t.Fatalf("GetSecret() names = %q, want %q", got, "admin-user,admin-password")
+	}
+	for _, namespace := range credClient.namespaces {
+		if namespace != "database-system" {
+			t.Fatalf("GetSecret() namespace = %q, want database-system", namespace)
+		}
+	}
+}
+
+func TestServiceClientCreateOrUpdateFailsWhenSecretKeyIsMissing(t *testing.T) {
+	t.Parallel()
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		CredentialClient: &fakeCredentialClient{
+			secrets: map[string]map[string][]byte{
+				"admin-password": {
+					"not-password": []byte("missing"),
+				},
+			},
+		},
+		Create: &Operation{
+			NewRequest: func() any { return &fakeCreateThingWithSecretRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				return fakeCreateThingResponse{}, nil
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Namespace: "database-system",
+		Spec: fakeSpec{
+			AdminPassword: shared.PasswordSource{Secret: shared.SecretSource{SecretName: "admin-password"}},
+		},
+	}
+
+	_, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err == nil {
+		t.Fatal("CreateOrUpdate() unexpectedly succeeded")
+	}
+	if !strings.Contains(err.Error(), `password key in secret "admin-password" is not found`) {
+		t.Fatalf("CreateOrUpdate() error = %v, want missing password key failure", err)
 	}
 }
 

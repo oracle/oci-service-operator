@@ -1,0 +1,459 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: vmclusternetworks.database.oracle.com
+spec:
+  group: database.oracle.com
+  names:
+    kind: VmClusterNetwork
+    listKind: VmClusterNetworkList
+    plural: vmclusternetworks
+    singular: vmclusternetwork
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the VmClusterNetwork
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the VmClusterNetwork
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: VmClusterNetwork is the Schema for the vmclusternetworks API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: VmClusterNetworkSpec defines the desired state of VmClusterNetwork.
+            properties:
+              compartmentId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the compartment.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                type: object
+              displayName:
+                description: The user-friendly name for the Exadata Cloud@Customer
+                  VM cluster network. The name does not need to be unique.
+                type: string
+              dns:
+                description: The list of DNS server IP addresses. Maximum of 3 allowed.
+                items:
+                  type: string
+                type: array
+              drScans:
+                description: The SCAN details for DR network
+                items:
+                  description: VmClusterNetworkDrScan defines nested fields for VmClusterNetwork.DrScan.
+                  properties:
+                    hostname:
+                      description: The Disaster recovery SCAN hostname.
+                      type: string
+                    ips:
+                      description: The list of Disaster recovery SCAN IP addresses.
+                        Three addresses should be provided.
+                      items:
+                        type: string
+                      type: array
+                    scanListenerPortTcp:
+                      description: The Disaster recovery SCAN TCPIP port. Default
+                        is 1521.
+                      type: integer
+                  required:
+                  - hostname
+                  - ips
+                  - scanListenerPortTcp
+                  type: object
+                type: array
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              ntp:
+                description: The list of NTP server IP addresses. Maximum of 3 allowed.
+                items:
+                  type: string
+                type: array
+              scans:
+                description: The SCAN details.
+                items:
+                  description: VmClusterNetworkScan defines nested fields for VmClusterNetwork.Scan.
+                  properties:
+                    hostname:
+                      description: The SCAN hostname.
+                      type: string
+                    ips:
+                      description: The list of SCAN IP addresses. Three addresses
+                        should be provided.
+                      items:
+                        type: string
+                      type: array
+                    port:
+                      description: |-
+                        **Deprecated.** This field is deprecated. You may use 'scanListenerPortTcp' to specify the port.
+                        The SCAN TCPIP port. Default is 1521.
+                      type: integer
+                    scanListenerPortTcp:
+                      description: The SCAN TCPIP port. Default is 1521.
+                      type: integer
+                    scanListenerPortTcpSsl:
+                      description: The SCAN TCPIP SSL port. Default is 2484.
+                      type: integer
+                  required:
+                  - hostname
+                  - ips
+                  type: object
+                type: array
+              vmNetworks:
+                description: Details of the client and backup networks.
+                items:
+                  description: VmClusterNetworkVmNetwork defines nested fields for
+                    VmClusterNetwork.VmNetwork.
+                  properties:
+                    domainName:
+                      description: The network domain name.
+                      type: string
+                    gateway:
+                      description: The network gateway.
+                      type: string
+                    netmask:
+                      description: The network netmask.
+                      type: string
+                    networkType:
+                      description: The network type.
+                      type: string
+                    nodes:
+                      description: The list of node details.
+                      items:
+                        description: VmClusterNetworkVmNetworkNode defines nested
+                          fields for VmClusterNetwork.VmNetwork.Node.
+                        properties:
+                          dbServerId:
+                            description: The Db server associated with the node.
+                            type: string
+                          hostname:
+                            description: The node host name.
+                            type: string
+                          ip:
+                            description: The node IP address.
+                            type: string
+                          lifecycleState:
+                            description: |-
+                              The current state of the VM cluster network nodes.
+                              CREATING - The resource is being created
+                              REQUIRES_VALIDATION - The resource is created and may not be usable until it is validated.
+                              VALIDATING - The resource is being validated and not available to use.
+                              VALIDATED - The resource is validated and is available for consumption by VM cluster.
+                              VALIDATION_FAILED - The resource validation has failed and might require user input to be corrected.
+                              UPDATING - The resource is being updated and not available to use.
+                              ALLOCATED - The resource is currently being used by VM cluster.
+                              TERMINATING - The resource is being deleted and not available to use.
+                              TERMINATED - The resource is deleted and unavailable.
+                              FAILED - The resource is in a failed state due to validation or other errors.
+                            type: string
+                          vip:
+                            description: The node virtual IP (VIP) address.
+                            type: string
+                          vipHostname:
+                            description: The node virtual IP (VIP) host name.
+                            type: string
+                        required:
+                        - hostname
+                        - ip
+                        type: object
+                      type: array
+                    vlanId:
+                      description: The network VLAN ID.
+                      type: string
+                  required:
+                  - networkType
+                  - nodes
+                  type: object
+                type: array
+            required:
+            - compartmentId
+            - displayName
+            type: object
+          status:
+            description: VmClusterNetworkStatus defines the observed state of VmClusterNetwork.
+            properties:
+              compartmentId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the compartment.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                type: object
+              displayName:
+                description: The user-friendly name for the VM cluster network. The
+                  name does not need to be unique.
+                type: string
+              dns:
+                description: The list of DNS server IP addresses. Maximum of 3 allowed.
+                items:
+                  type: string
+                type: array
+              drScans:
+                description: The SCAN details for DR network
+                items:
+                  description: VmClusterNetworkDrScan defines nested fields for VmClusterNetwork.DrScan.
+                  properties:
+                    hostname:
+                      description: The Disaster recovery SCAN hostname.
+                      type: string
+                    ips:
+                      description: The list of Disaster recovery SCAN IP addresses.
+                        Three addresses should be provided.
+                      items:
+                        type: string
+                      type: array
+                    scanListenerPortTcp:
+                      description: The Disaster recovery SCAN TCPIP port. Default
+                        is 1521.
+                      type: integer
+                  required:
+                  - hostname
+                  - ips
+                  - scanListenerPortTcp
+                  type: object
+                type: array
+              exadataInfrastructureId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the Exadata infrastructure.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              id:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the VM cluster network.
+                type: string
+              lifecycleDetails:
+                description: Additional information about the current lifecycle state.
+                type: string
+              lifecycleState:
+                description: |-
+                  The current state of the VM cluster network.
+                  CREATING - The resource is being created
+                  REQUIRES_VALIDATION - The resource is created and may not be usable until it is validated.
+                  VALIDATING - The resource is being validated and not available to use.
+                  VALIDATED - The resource is validated and is available for consumption by VM cluster.
+                  VALIDATION_FAILED - The resource validation has failed and might require user input to be corrected.
+                  UPDATING - The resource is being updated and not available to use.
+                  ALLOCATED - The resource is is currently being used by VM cluster.
+                  TERMINATING - The resource is being deleted and not available to use.
+                  TERMINATED - The resource is deleted and unavailable.
+                  FAILED - The resource is in a failed state due to validation or other errors.
+                  NEEDS_ATTENTION - The resource is in needs attention state as some of it's child nodes are not validated
+                                    and unusable by VM cluster.
+                type: string
+              ntp:
+                description: The list of NTP server IP addresses. Maximum of 3 allowed.
+                items:
+                  type: string
+                type: array
+              scans:
+                description: The SCAN details.
+                items:
+                  description: VmClusterNetworkScan defines nested fields for VmClusterNetwork.Scan.
+                  properties:
+                    hostname:
+                      description: The SCAN hostname.
+                      type: string
+                    ips:
+                      description: The list of SCAN IP addresses. Three addresses
+                        should be provided.
+                      items:
+                        type: string
+                      type: array
+                    port:
+                      description: |-
+                        **Deprecated.** This field is deprecated. You may use 'scanListenerPortTcp' to specify the port.
+                        The SCAN TCPIP port. Default is 1521.
+                      type: integer
+                    scanListenerPortTcp:
+                      description: The SCAN TCPIP port. Default is 1521.
+                      type: integer
+                    scanListenerPortTcpSsl:
+                      description: The SCAN TCPIP SSL port. Default is 2484.
+                      type: integer
+                  required:
+                  - hostname
+                  - ips
+                  type: object
+                type: array
+              status:
+                properties:
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              timeCreated:
+                description: The date and time when the VM cluster network was created.
+                type: string
+              vmClusterId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the associated VM Cluster.
+                type: string
+              vmNetworks:
+                description: Details of the client and backup networks.
+                items:
+                  description: VmClusterNetworkVmNetwork defines nested fields for
+                    VmClusterNetwork.VmNetwork.
+                  properties:
+                    domainName:
+                      description: The network domain name.
+                      type: string
+                    gateway:
+                      description: The network gateway.
+                      type: string
+                    netmask:
+                      description: The network netmask.
+                      type: string
+                    networkType:
+                      description: The network type.
+                      type: string
+                    nodes:
+                      description: The list of node details.
+                      items:
+                        description: VmClusterNetworkVmNetworkNode defines nested
+                          fields for VmClusterNetwork.VmNetwork.Node.
+                        properties:
+                          dbServerId:
+                            description: The Db server associated with the node.
+                            type: string
+                          hostname:
+                            description: The node host name.
+                            type: string
+                          ip:
+                            description: The node IP address.
+                            type: string
+                          lifecycleState:
+                            description: |-
+                              The current state of the VM cluster network nodes.
+                              CREATING - The resource is being created
+                              REQUIRES_VALIDATION - The resource is created and may not be usable until it is validated.
+                              VALIDATING - The resource is being validated and not available to use.
+                              VALIDATED - The resource is validated and is available for consumption by VM cluster.
+                              VALIDATION_FAILED - The resource validation has failed and might require user input to be corrected.
+                              UPDATING - The resource is being updated and not available to use.
+                              ALLOCATED - The resource is currently being used by VM cluster.
+                              TERMINATING - The resource is being deleted and not available to use.
+                              TERMINATED - The resource is deleted and unavailable.
+                              FAILED - The resource is in a failed state due to validation or other errors.
+                            type: string
+                          vip:
+                            description: The node virtual IP (VIP) address.
+                            type: string
+                          vipHostname:
+                            description: The node virtual IP (VIP) host name.
+                            type: string
+                        required:
+                        - hostname
+                        - ip
+                        type: object
+                      type: array
+                    vlanId:
+                      description: The network VLAN ID.
+                      type: string
+                  required:
+                  - networkType
+                  - nodes
+                  type: object
+                type: array
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

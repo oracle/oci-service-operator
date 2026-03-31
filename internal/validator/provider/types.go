@@ -4,6 +4,7 @@ type UsageKind string
 
 const (
 	UsageKindCompositeLiteral      UsageKind = "composite_literal"
+	UsageKindGeneratedRequestField UsageKind = "generated_request_field"
 	UsageKindPostLiteralAssignment UsageKind = "post_literal_assignment"
 )
 

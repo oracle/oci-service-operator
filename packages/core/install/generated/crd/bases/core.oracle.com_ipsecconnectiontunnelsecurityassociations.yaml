@@ -58,6 +58,14 @@ spec:
             description: IPSecConnectionTunnelSecurityAssociationStatus defines the
               observed state of IPSecConnectionTunnelSecurityAssociation.
             properties:
+              cpeSubnet:
+                description: The IP address and mask of the partner subnet used in
+                  policy based VPNs or static routes.
+                type: string
+              oracleSubnet:
+                description: The IP address and mask of the local subnet used in policy
+                  based VPNs or static routes.
+                type: string
               status:
                 properties:
                   conditions:
@@ -100,6 +108,17 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              time:
+                description: Time in the current state, in seconds.
+                type: string
+              tunnelSaErrorInfo:
+                description: Current state if the IPSec tunnel status is not `UP`,
+                  including phase one and phase two details and a possible reason
+                  the tunnel is not `UP`.
+                type: string
+              tunnelSaStatus:
+                description: The IPSec tunnel's phase one status.
+                type: string
             required:
             - status
             type: object

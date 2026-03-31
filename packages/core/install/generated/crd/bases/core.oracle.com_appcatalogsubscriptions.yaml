@@ -89,13 +89,22 @@ spec:
             description: AppCatalogSubscriptionStatus defines the observed state of
               AppCatalogSubscription.
             properties:
+              compartmentId:
+                description: The compartmentID of the subscription.
+                type: string
               displayName:
                 description: |-
                   A user-friendly name. Does not have to be unique, and it's changeable.
                   Avoid entering confidential information.
                 type: string
+              listingId:
+                description: The ocid of the listing resource.
+                type: string
               listingResourceId:
                 description: Listing resource id.
+                type: string
+              listingResourceVersion:
+                description: Listing resource version.
                 type: string
               publisherName:
                 description: Name of the publisher who published this listing.

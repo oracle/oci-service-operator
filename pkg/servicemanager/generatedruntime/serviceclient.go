@@ -16,6 +16,7 @@ import (
 	"unicode"
 
 	"github.com/oracle/oci-go-sdk/v65/common"
+	"github.com/oracle/oci-service-operator/pkg/credhelper"
 	"github.com/oracle/oci-service-operator/pkg/errorutil"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
@@ -29,6 +30,11 @@ import (
 const defaultRequeueDuration = time.Minute
 
 var errResourceNotFound = errors.New("generated runtime resource not found")
+
+var (
+	passwordSourceType = reflect.TypeOf(shared.PasswordSource{})
+	usernameSourceType = reflect.TypeOf(shared.UsernameSource{})
+)
 
 type Operation struct {
 	NewRequest func() any
@@ -114,11 +120,12 @@ type Semantics struct {
 }
 
 type Config[T any] struct {
-	Kind      string
-	SDKName   string
-	Log       loggerutil.OSOKLogger
-	InitError error
-	Semantics *Semantics
+	Kind             string
+	SDKName          string
+	Log              loggerutil.OSOKLogger
+	CredentialClient credhelper.CredentialClient
+	InitError        error
+	Semantics        *Semantics
 
 	Create *Operation
 	Get    *Operation
@@ -138,99 +145,146 @@ func NewServiceClient[T any](cfg Config[T]) ServiceClient[T] {
 	return ServiceClient[T]{config: cfg}
 }
 
-func (c ServiceClient[T]) CreateOrUpdate(ctx context.Context, resource T, _ ctrl.Request) (servicemanager.OSOKResponse, error) {
-	if c.config.InitError != nil {
-		return servicemanager.OSOKResponse{IsSuccessful: false}, c.markFailure(resource, c.config.InitError)
-	}
-	if _, err := resourceStruct(resource); err != nil {
-		return servicemanager.OSOKResponse{IsSuccessful: false}, err
-	}
+func failedResponse(err error) (servicemanager.OSOKResponse, error) {
+	return servicemanager.OSOKResponse{IsSuccessful: false}, err
+}
 
+func (c ServiceClient[T]) CreateOrUpdate(ctx context.Context, resource T, req ctrl.Request) (servicemanager.OSOKResponse, error) {
+	namespace := resourceNamespace(resource, req.Namespace)
+	if response, err := c.preflightCreateOrUpdate(resource); err != nil {
+		return response, err
+	}
 	currentID := c.currentID(resource)
 	if err := c.validateMutationPolicy(resource, currentID != ""); err != nil {
-		return servicemanager.OSOKResponse{IsSuccessful: false}, c.markFailure(resource, err)
+		return c.markedFailureResponse(resource, err)
 	}
 	if currentID != "" {
-		if c.config.Update != nil {
-			response, err := c.invoke(ctx, c.config.Update, resource, currentID)
-			if err != nil {
-				return servicemanager.OSOKResponse{IsSuccessful: false}, c.markFailure(resource, err)
-			}
-			response, err = c.followUpAfterWrite(ctx, resource, currentID, response, "update")
-			if err != nil {
-				return servicemanager.OSOKResponse{IsSuccessful: false}, c.markFailure(resource, err)
-			}
-			return c.applySuccess(resource, response, shared.Updating)
-		}
-
-		response, err := c.readResource(ctx, resource, currentID)
-		if err != nil {
-			return servicemanager.OSOKResponse{IsSuccessful: false}, c.markFailure(resource, err)
-		}
-		return c.applySuccess(resource, response, shared.Active)
+		return c.updateExistingResource(ctx, resource, currentID, namespace)
 	}
-
-	if c.config.Create != nil {
-		response, err := c.invoke(ctx, c.config.Create, resource, "")
-		if err != nil {
-			return servicemanager.OSOKResponse{IsSuccessful: false}, c.markFailure(resource, err)
-		}
-
-		followUp, err := c.followUpAfterWrite(ctx, resource, responseID(response), response, "create")
-		if err != nil {
-			return servicemanager.OSOKResponse{IsSuccessful: false}, c.markFailure(resource, err)
-		}
-		return c.applySuccess(resource, followUp, shared.Provisioning)
-	}
-
-	response, err := c.readResource(ctx, resource, "")
-	if err != nil {
-		return servicemanager.OSOKResponse{IsSuccessful: false}, c.markFailure(resource, err)
-	}
-	return c.applySuccess(resource, response, shared.Active)
+	return c.createNewResource(ctx, resource, namespace)
 }
 
 func (c ServiceClient[T]) Delete(ctx context.Context, resource T) (bool, error) {
-	if c.config.InitError != nil {
-		return false, c.config.InitError
-	}
-	if _, err := resourceStruct(resource); err != nil {
+	if err := c.preflightDelete(resource); err != nil {
 		return false, err
 	}
 	if c.config.Semantics != nil {
 		return c.deleteWithSemantics(ctx, resource)
 	}
+	return c.deleteWithoutSemantics(ctx, resource)
+}
+
+func (c ServiceClient[T]) preflightCreateOrUpdate(resource T) (servicemanager.OSOKResponse, error) {
+	if c.config.InitError != nil {
+		return c.markedFailureResponse(resource, c.config.InitError)
+	}
+	if _, err := resourceStruct(resource); err != nil {
+		return failedResponse(err)
+	}
+	return servicemanager.OSOKResponse{}, nil
+}
+
+func (c ServiceClient[T]) markedFailureResponse(resource T, err error) (servicemanager.OSOKResponse, error) {
+	return failedResponse(c.markFailure(resource, err))
+}
+
+func (c ServiceClient[T]) requestBuildOptions(ctx context.Context, namespace string) requestBuildOptions {
+	return requestBuildOptions{
+		Context:          ctx,
+		CredentialClient: c.config.CredentialClient,
+		Namespace:        namespace,
+	}
+}
+
+func (c ServiceClient[T]) updateExistingResource(ctx context.Context, resource T, currentID string, namespace string) (servicemanager.OSOKResponse, error) {
+	if c.config.Update == nil {
+		return c.readExistingResource(ctx, resource, currentID)
+	}
+	response, err := c.invoke(ctx, c.config.Update, resource, currentID, c.requestBuildOptions(ctx, namespace))
+	if err != nil {
+		return c.markedFailureResponse(resource, err)
+	}
+	response, err = c.followUpAfterWrite(ctx, resource, currentID, response, "update")
+	if err != nil {
+		return c.markedFailureResponse(resource, err)
+	}
+	return c.applySuccess(resource, response, shared.Updating)
+}
+
+func (c ServiceClient[T]) createNewResource(ctx context.Context, resource T, namespace string) (servicemanager.OSOKResponse, error) {
+	if c.config.Create == nil {
+		return c.readExistingResource(ctx, resource, "")
+	}
+	response, err := c.invoke(ctx, c.config.Create, resource, "", c.requestBuildOptions(ctx, namespace))
+	if err != nil {
+		return c.markedFailureResponse(resource, err)
+	}
+	followUp, err := c.followUpAfterWrite(ctx, resource, responseID(response), response, "create")
+	if err != nil {
+		return c.markedFailureResponse(resource, err)
+	}
+	return c.applySuccess(resource, followUp, shared.Provisioning)
+}
+
+func (c ServiceClient[T]) readExistingResource(ctx context.Context, resource T, currentID string) (servicemanager.OSOKResponse, error) {
+	response, err := c.readResource(ctx, resource, currentID)
+	if err != nil {
+		return c.markedFailureResponse(resource, err)
+	}
+	return c.applySuccess(resource, response, shared.Active)
+}
+
+func (c ServiceClient[T]) preflightDelete(resource T) error {
+	if c.config.InitError != nil {
+		return c.config.InitError
+	}
+	_, err := resourceStruct(resource)
+	return err
+}
+
+func (c ServiceClient[T]) deleteWithoutSemantics(ctx context.Context, resource T) (bool, error) {
 	if c.config.Delete == nil {
 		c.markDeleted(resource, "OCI delete is not supported for this generated resource")
 		return true, nil
 	}
-
-	currentID := c.currentID(resource)
-	if currentID == "" {
-		c.markDeleted(resource, "OCI resource identifier is not recorded")
+	currentID, deleted := c.deleteIDOrMarkMissing(resource)
+	if deleted {
 		return true, nil
 	}
+	if deleted, err := c.invokeDelete(ctx, resource, currentID); deleted || err != nil {
+		return deleted, err
+	}
+	return c.confirmDeleteProgress(ctx, resource, currentID)
+}
 
-	if _, err := c.invoke(ctx, c.config.Delete, resource, currentID); err != nil {
+func (c ServiceClient[T]) deleteIDOrMarkMissing(resource T) (string, bool) {
+	currentID := c.currentID(resource)
+	if currentID != "" {
+		return currentID, false
+	}
+	c.markDeleted(resource, "OCI resource identifier is not recorded")
+	return "", true
+}
+
+func (c ServiceClient[T]) invokeDelete(ctx context.Context, resource T, currentID string) (bool, error) {
+	if _, err := c.invoke(ctx, c.config.Delete, resource, currentID, requestBuildOptions{}); err != nil {
 		if isNotFound(err) {
 			c.markDeleted(resource, "OCI resource no longer exists")
 			return true, nil
 		}
 		return false, err
 	}
+	return false, nil
+}
 
-	if c.config.Get == nil && c.config.List == nil {
+func (c ServiceClient[T]) confirmDeleteProgress(ctx context.Context, resource T, currentID string) (bool, error) {
+	if !c.canReadResource() {
 		c.markDeleted(resource, "OCI delete request accepted")
 		return true, nil
 	}
-
-	response, err := c.readResource(ctx, resource, currentID)
-	if err != nil {
-		if isNotFound(err) || errors.Is(err, errResourceNotFound) {
-			c.markDeleted(resource, "OCI resource deleted")
-			return true, nil
-		}
-		return false, err
+	response, deleted, err := c.readDeleteConfirmation(ctx, resource, currentID)
+	if deleted || err != nil {
+		return deleted, err
 	}
 	_ = mergeResponseIntoStatus(resource, response)
 	c.markCondition(resource, shared.Terminating, "OCI resource delete is in progress")
@@ -274,74 +328,18 @@ func (c ServiceClient[T]) requiresWriteFollowUp(phase string) bool {
 }
 
 func (c ServiceClient[T]) deleteWithSemantics(ctx context.Context, resource T) (bool, error) {
-	semantics := c.config.Semantics
-	if semantics == nil {
-		return false, fmt.Errorf("%s formal semantics are not configured", c.config.Kind)
-	}
-	if c.config.Delete == nil || semantics.Delete.Policy == "not-supported" {
-		return false, fmt.Errorf("%s formal semantics mark delete confirmation as %q", c.config.Kind, semantics.Delete.Policy)
-	}
-
-	currentID, err := c.resolveDeleteID(ctx, resource)
+	semantics, err := c.formalDeleteSemantics()
 	if err != nil {
-		if errors.Is(err, errResourceNotFound) {
-			c.markDeleted(resource, "OCI resource no longer exists")
-			return true, nil
-		}
 		return false, err
 	}
-
-	if _, err := c.invoke(ctx, c.config.Delete, resource, currentID); err != nil {
-		if isNotFound(err) {
-			c.markDeleted(resource, "OCI resource no longer exists")
-			return true, nil
-		}
-		return false, err
+	currentID, deleted, err := c.resolveDeleteIDOrMarkMissing(ctx, resource)
+	if deleted || err != nil {
+		return deleted, err
 	}
-
-	if semantics.DeleteFollowUp.Strategy != "confirm-delete" {
-		c.markDeleted(resource, "OCI delete request accepted")
-		return true, nil
+	if deleted, err := c.invokeDelete(ctx, resource, currentID); deleted || err != nil {
+		return deleted, err
 	}
-	if c.config.Get == nil && c.config.List == nil {
-		return false, fmt.Errorf("%s formal delete confirmation requires a readable OCI operation", c.config.Kind)
-	}
-
-	response, err := c.readResource(ctx, resource, currentID)
-	if err != nil {
-		if isNotFound(err) || errors.Is(err, errResourceNotFound) {
-			c.markDeleted(resource, "OCI resource deleted")
-			return true, nil
-		}
-		return false, err
-	}
-	_ = mergeResponseIntoStatus(resource, response)
-
-	lifecycleState := strings.ToUpper(responseLifecycleState(response))
-	switch semantics.Delete.Policy {
-	case "best-effort":
-		if lifecycleState == "" ||
-			containsString(semantics.Delete.PendingStates, lifecycleState) ||
-			containsString(semantics.Delete.TerminalStates, lifecycleState) {
-			c.markDeleted(resource, "OCI delete request accepted")
-			return true, nil
-		}
-		c.markCondition(resource, shared.Terminating, "OCI resource delete is in progress")
-		return false, nil
-	case "required":
-		switch {
-		case containsString(semantics.Delete.TerminalStates, lifecycleState):
-			c.markDeleted(resource, "OCI resource deleted")
-			return true, nil
-		case lifecycleState == "" || containsString(semantics.Delete.PendingStates, lifecycleState):
-			c.markCondition(resource, shared.Terminating, "OCI resource delete is in progress")
-			return false, nil
-		default:
-			return false, fmt.Errorf("%s delete confirmation returned unexpected lifecycle state %q", c.config.Kind, lifecycleState)
-		}
-	default:
-		return false, fmt.Errorf("%s formal delete confirmation policy %q is not supported", c.config.Kind, semantics.Delete.Policy)
-	}
+	return c.confirmDeleteWithSemantics(ctx, resource, currentID, semantics)
 }
 
 func (c ServiceClient[T]) resolveDeleteID(ctx context.Context, resource T) (string, error) {
@@ -371,29 +369,141 @@ func (c ServiceClient[T]) validateMutationPolicy(resource T, existing bool) erro
 	if semantics == nil {
 		return nil
 	}
-
-	resourceValue, err := resourceStruct(resource)
+	specValues, statusValues, err := mutationPolicyValues(resource)
 	if err != nil {
 		return err
 	}
-	specValues := jsonMap(fieldInterface(resourceValue, "Spec"))
-	statusValues := jsonMap(fieldInterface(resourceValue, "Status"))
-
-	for field, conflicts := range semantics.Mutation.ConflictsWith {
-		if _, ok := lookupMeaningfulValue(specValues, field); !ok {
-			continue
-		}
-		for _, conflict := range conflicts {
-			if _, ok := lookupMeaningfulValue(specValues, conflict); ok {
-				return fmt.Errorf("%s formal semantics forbid setting %s with %s", c.config.Kind, field, conflict)
-			}
-		}
+	if err := c.validateMutationConflicts(specValues); err != nil {
+		return err
 	}
-
 	if !existing {
 		return nil
 	}
-	for _, field := range semantics.Mutation.ForceNew {
+	return c.validateForceNewFields(specValues, statusValues)
+}
+
+func (c ServiceClient[T]) formalDeleteSemantics() (*Semantics, error) {
+	semantics := c.config.Semantics
+	if semantics == nil {
+		return nil, fmt.Errorf("%s formal semantics are not configured", c.config.Kind)
+	}
+	if c.config.Delete == nil || semantics.Delete.Policy == "not-supported" {
+		return nil, fmt.Errorf("%s formal semantics mark delete confirmation as %q", c.config.Kind, semantics.Delete.Policy)
+	}
+	return semantics, nil
+}
+
+func (c ServiceClient[T]) resolveDeleteIDOrMarkMissing(ctx context.Context, resource T) (string, bool, error) {
+	currentID, err := c.resolveDeleteID(ctx, resource)
+	if err != nil {
+		if errors.Is(err, errResourceNotFound) {
+			c.markDeleted(resource, "OCI resource no longer exists")
+			return "", true, nil
+		}
+		return "", false, err
+	}
+	return currentID, false, nil
+}
+
+func (c ServiceClient[T]) confirmDeleteWithSemantics(ctx context.Context, resource T, currentID string, semantics *Semantics) (bool, error) {
+	if semantics.DeleteFollowUp.Strategy != "confirm-delete" {
+		c.markDeleted(resource, "OCI delete request accepted")
+		return true, nil
+	}
+	if !c.canReadResource() {
+		return false, fmt.Errorf("%s formal delete confirmation requires a readable OCI operation", c.config.Kind)
+	}
+	response, deleted, err := c.readDeleteConfirmation(ctx, resource, currentID)
+	if deleted || err != nil {
+		return deleted, err
+	}
+	_ = mergeResponseIntoStatus(resource, response)
+	return c.evaluateDeleteLifecycle(resource, semantics, responseLifecycleState(response))
+}
+
+func (c ServiceClient[T]) canReadResource() bool {
+	return c.config.Get != nil || c.config.List != nil
+}
+
+func (c ServiceClient[T]) readDeleteConfirmation(ctx context.Context, resource T, currentID string) (any, bool, error) {
+	response, err := c.readResource(ctx, resource, currentID)
+	if err != nil {
+		if isNotFound(err) || errors.Is(err, errResourceNotFound) {
+			c.markDeleted(resource, "OCI resource deleted")
+			return nil, true, nil
+		}
+		return nil, false, err
+	}
+	return response, false, nil
+}
+
+func (c ServiceClient[T]) evaluateDeleteLifecycle(resource T, semantics *Semantics, lifecycleState string) (bool, error) {
+	lifecycleState = strings.ToUpper(lifecycleState)
+	switch semantics.Delete.Policy {
+	case "best-effort":
+		return c.evaluateBestEffortDelete(resource, semantics, lifecycleState)
+	case "required":
+		return c.evaluateRequiredDelete(resource, semantics, lifecycleState)
+	default:
+		return false, fmt.Errorf("%s formal delete confirmation policy %q is not supported", c.config.Kind, semantics.Delete.Policy)
+	}
+}
+
+func (c ServiceClient[T]) evaluateBestEffortDelete(resource T, semantics *Semantics, lifecycleState string) (bool, error) {
+	if lifecycleState == "" ||
+		containsString(semantics.Delete.PendingStates, lifecycleState) ||
+		containsString(semantics.Delete.TerminalStates, lifecycleState) {
+		c.markDeleted(resource, "OCI delete request accepted")
+		return true, nil
+	}
+	c.markCondition(resource, shared.Terminating, "OCI resource delete is in progress")
+	return false, nil
+}
+
+func (c ServiceClient[T]) evaluateRequiredDelete(resource T, semantics *Semantics, lifecycleState string) (bool, error) {
+	switch {
+	case containsString(semantics.Delete.TerminalStates, lifecycleState):
+		c.markDeleted(resource, "OCI resource deleted")
+		return true, nil
+	case lifecycleState == "" || containsString(semantics.Delete.PendingStates, lifecycleState):
+		c.markCondition(resource, shared.Terminating, "OCI resource delete is in progress")
+		return false, nil
+	default:
+		return false, fmt.Errorf("%s delete confirmation returned unexpected lifecycle state %q", c.config.Kind, lifecycleState)
+	}
+}
+
+func mutationPolicyValues(resource any) (map[string]any, map[string]any, error) {
+	resourceValue, err := resourceStruct(resource)
+	if err != nil {
+		return nil, nil, err
+	}
+	return jsonMap(fieldInterface(resourceValue, "Spec")), jsonMap(fieldInterface(resourceValue, "Status")), nil
+}
+
+func (c ServiceClient[T]) validateMutationConflicts(specValues map[string]any) error {
+	for field, conflicts := range c.config.Semantics.Mutation.ConflictsWith {
+		if _, ok := lookupMeaningfulValue(specValues, field); !ok {
+			continue
+		}
+		if conflict := firstPresentConflict(specValues, conflicts); conflict != "" {
+			return fmt.Errorf("%s formal semantics forbid setting %s with %s", c.config.Kind, field, conflict)
+		}
+	}
+	return nil
+}
+
+func firstPresentConflict(specValues map[string]any, conflicts []string) string {
+	for _, conflict := range conflicts {
+		if _, ok := lookupMeaningfulValue(specValues, conflict); ok {
+			return conflict
+		}
+	}
+	return ""
+}
+
+func (c ServiceClient[T]) validateForceNewFields(specValues map[string]any, statusValues map[string]any) error {
+	for _, field := range c.config.Semantics.Mutation.ForceNew {
 		specValue, specOK := lookupValueByPath(specValues, field)
 		statusValue, statusOK := lookupValueByPath(statusValues, field)
 		if !specOK || !statusOK {
@@ -403,13 +513,12 @@ func (c ServiceClient[T]) validateMutationPolicy(resource T, existing bool) erro
 			return fmt.Errorf("%s formal semantics require replacement when %s changes", c.config.Kind, field)
 		}
 	}
-
 	return nil
 }
 
 func (c ServiceClient[T]) readResource(ctx context.Context, resource T, preferredID string) (any, error) {
 	if c.config.Get != nil {
-		response, err := c.invoke(ctx, c.config.Get, resource, preferredID)
+		response, err := c.invoke(ctx, c.config.Get, resource, preferredID, requestBuildOptions{})
 		if err == nil {
 			return response, nil
 		}
@@ -422,7 +531,7 @@ func (c ServiceClient[T]) readResource(ctx context.Context, resource T, preferre
 		return nil, fmt.Errorf("%s generated runtime has no readable OCI operation", c.config.Kind)
 	}
 
-	response, err := c.invoke(ctx, c.config.List, resource, preferredID)
+	response, err := c.invoke(ctx, c.config.List, resource, preferredID, requestBuildOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -439,7 +548,7 @@ func (c ServiceClient[T]) readResource(ctx context.Context, resource T, preferre
 	return item, nil
 }
 
-func (c ServiceClient[T]) invoke(ctx context.Context, op *Operation, resource T, preferredID string) (any, error) {
+func (c ServiceClient[T]) invoke(ctx context.Context, op *Operation, resource T, preferredID string, options requestBuildOptions) (any, error) {
 	if op == nil {
 		return nil, fmt.Errorf("%s generated runtime does not define this OCI operation", c.config.Kind)
 	}
@@ -451,7 +560,7 @@ func (c ServiceClient[T]) invoke(ctx context.Context, op *Operation, resource T,
 	if request == nil {
 		return nil, fmt.Errorf("%s generated runtime did not create an OCI request value", c.config.Kind)
 	}
-	if err := buildRequest(request, resource, preferredID, op.Fields, c.idFieldAliases()); err != nil {
+	if err := buildRequest(request, resource, preferredID, op.Fields, c.idFieldAliases(), options); err != nil {
 		return nil, fmt.Errorf("build %s OCI request: %w", c.config.Kind, err)
 	}
 
@@ -561,7 +670,13 @@ func (c ServiceClient[T]) idFieldAliases() []string {
 	return aliases
 }
 
-func buildRequest(request any, resource any, preferredID string, fields []RequestField, idAliases []string) error {
+type requestBuildOptions struct {
+	Context          context.Context
+	CredentialClient credhelper.CredentialClient
+	Namespace        string
+}
+
+func buildRequest(request any, resource any, preferredID string, fields []RequestField, idAliases []string, options requestBuildOptions) error {
 	requestValue := reflect.ValueOf(request)
 	if !requestValue.IsValid() || requestValue.Kind() != reflect.Pointer || requestValue.IsNil() {
 		return fmt.Errorf("expected pointer OCI request, got %T", request)
@@ -577,14 +692,22 @@ func buildRequest(request any, resource any, preferredID string, fields []Reques
 		return err
 	}
 
-	if len(fields) > 0 {
-		return buildExplicitRequest(requestStruct, resource, values, preferredID, fields)
+	var resolvedSpec any
+	if requestNeedsResolvedSpec(fields, requestStruct.Type()) {
+		resolvedSpec, err = resolvedSpecValue(resource, options)
+		if err != nil {
+			return err
+		}
 	}
 
-	return buildHeuristicRequest(requestStruct, requestStruct.Type(), resource, values, preferredID, idAliases)
+	if len(fields) > 0 {
+		return buildExplicitRequest(requestStruct, resource, values, preferredID, fields, resolvedSpec)
+	}
+
+	return buildHeuristicRequest(requestStruct, requestStruct.Type(), values, preferredID, idAliases, resolvedSpec)
 }
 
-func buildExplicitRequest(requestStruct reflect.Value, resource any, values map[string]any, preferredID string, fields []RequestField) error {
+func buildExplicitRequest(requestStruct reflect.Value, resource any, values map[string]any, preferredID string, fields []RequestField, resolvedSpec any) error {
 	for _, field := range fields {
 		fieldValue := requestStruct.FieldByName(field.FieldName)
 		if !fieldValue.IsValid() || !fieldValue.CanSet() {
@@ -595,7 +718,7 @@ func buildExplicitRequest(requestStruct reflect.Value, resource any, values map[
 		case "header", "binary":
 			continue
 		case "body":
-			if err := assignField(fieldValue, specValue(resource)); err != nil {
+			if err := assignField(fieldValue, resolvedSpec); err != nil {
 				return fmt.Errorf("set body field %s: %w", field.FieldName, err)
 			}
 			continue
@@ -616,64 +739,97 @@ func buildExplicitRequest(requestStruct reflect.Value, resource any, values map[
 func buildHeuristicRequest(
 	requestStruct reflect.Value,
 	requestType reflect.Type,
-	resource any,
 	values map[string]any,
 	preferredID string,
 	idAliases []string,
+	resolvedSpec any,
 ) error {
 	for i := 0; i < requestStruct.NumField(); i++ {
 		fieldValue := requestStruct.Field(i)
 		fieldType := requestType.Field(i)
-		if !fieldValue.CanSet() {
+		if !shouldPopulateHeuristicField(fieldValue, fieldType) {
 			continue
 		}
-		if fieldType.Name == "RequestMetadata" {
+		handled, err := assignHeuristicBodyField(fieldValue, fieldType, resolvedSpec)
+		if err != nil {
+			return err
+		}
+		if handled {
 			continue
 		}
-
-		switch fieldType.Tag.Get("contributesTo") {
-		case "header", "binary":
-			continue
-		case "body":
-			if err := assignField(fieldValue, specValue(resource)); err != nil {
-				return fmt.Errorf("set body field %s: %w", fieldType.Name, err)
-			}
-			continue
-		}
-
-		lookupKey := fieldType.Tag.Get("name")
-		if lookupKey == "" {
-			lookupKey = fieldJSONName(fieldType)
-		}
-		if lookupKey == "" {
-			lookupKey = lowerCamel(fieldType.Name)
-		}
-
-		rawValue, ok := values[lookupKey]
-		if !ok && preferredID != "" && containsString(idAliases, lookupKey) {
-			rawValue = preferredID
-			ok = true
-		}
-		if !ok && lookupKey == "name" {
-			if metadataName, exists := values["metadataName"]; exists {
-				rawValue, ok = metadataName, true
-			}
-		}
-		if !ok && lookupKey == "namespaceName" {
-			if namespaceName, exists := values["namespaceName"]; exists {
-				rawValue, ok = namespaceName, true
-			}
-		}
-		if !ok {
-			continue
-		}
-
-		if err := assignField(fieldValue, rawValue); err != nil {
-			return fmt.Errorf("set request field %s: %w", fieldType.Name, err)
+		if err := assignHeuristicRequestField(fieldValue, fieldType, values, preferredID, idAliases); err != nil {
+			return err
 		}
 	}
 
 	return nil
+}
+
+func shouldPopulateHeuristicField(fieldValue reflect.Value, fieldType reflect.StructField) bool {
+	if !fieldValue.CanSet() || fieldType.Name == "RequestMetadata" {
+		return false
+	}
+	contribution := fieldType.Tag.Get("contributesTo")
+	return contribution != "header" && contribution != "binary"
+}
+
+func assignHeuristicBodyField(fieldValue reflect.Value, fieldType reflect.StructField, resolvedSpec any) (bool, error) {
+	if fieldType.Tag.Get("contributesTo") != "body" {
+		return false, nil
+	}
+	if err := assignField(fieldValue, resolvedSpec); err != nil {
+		return false, fmt.Errorf("set body field %s: %w", fieldType.Name, err)
+	}
+	return true, nil
+}
+
+func assignHeuristicRequestField(
+	fieldValue reflect.Value,
+	fieldType reflect.StructField,
+	values map[string]any,
+	preferredID string,
+	idAliases []string,
+) error {
+	rawValue, ok := heuristicRequestValue(values, fieldType, preferredID, idAliases)
+	if !ok {
+		return nil
+	}
+	if err := assignField(fieldValue, rawValue); err != nil {
+		return fmt.Errorf("set request field %s: %w", fieldType.Name, err)
+	}
+	return nil
+}
+
+func heuristicRequestValue(values map[string]any, fieldType reflect.StructField, preferredID string, idAliases []string) (any, bool) {
+	lookupKey := heuristicLookupKey(fieldType)
+	if rawValue, ok := values[lookupKey]; ok {
+		return rawValue, true
+	}
+	return heuristicFallbackValue(values, lookupKey, preferredID, idAliases)
+}
+
+func heuristicLookupKey(fieldType reflect.StructField) string {
+	if lookupKey := fieldType.Tag.Get("name"); lookupKey != "" {
+		return lookupKey
+	}
+	if lookupKey := fieldJSONName(fieldType); lookupKey != "" {
+		return lookupKey
+	}
+	return lowerCamel(fieldType.Name)
+}
+
+func heuristicFallbackValue(values map[string]any, lookupKey string, preferredID string, idAliases []string) (any, bool) {
+	if preferredID != "" && containsString(idAliases, lookupKey) {
+		return preferredID, true
+	}
+	switch lookupKey {
+	case "name":
+		return lookupValueByPaths(values, "metadataName")
+	case "namespaceName":
+		return lookupValueByPaths(values, "namespaceName", "namespace")
+	default:
+		return nil, false
+	}
 }
 
 func explicitRequestValue(values map[string]any, field RequestField, preferredID string) (any, bool) {
@@ -766,28 +922,291 @@ func specValue(resource any) any {
 	return fieldInterface(resourceValue, "Spec")
 }
 
+func requestNeedsResolvedSpec(fields []RequestField, requestType reflect.Type) bool {
+	if len(fields) > 0 {
+		for _, field := range fields {
+			if field.Contribution == "body" {
+				return true
+			}
+		}
+		return false
+	}
+
+	for i := 0; i < requestType.NumField(); i++ {
+		if requestType.Field(i).Tag.Get("contributesTo") == "body" {
+			return true
+		}
+	}
+	return false
+}
+
+func resolvedSpecValue(resource any, options requestBuildOptions) (any, error) {
+	raw := specValue(resource)
+	if raw == nil {
+		return nil, nil
+	}
+
+	payload, err := json.Marshal(raw)
+	if err != nil {
+		return nil, fmt.Errorf("marshal spec value: %w", err)
+	}
+	var decoded any
+	if err := json.Unmarshal(payload, &decoded); err != nil {
+		return nil, fmt.Errorf("decode spec value: %w", err)
+	}
+
+	resourceValue, err := resourceStruct(resource)
+	if err != nil {
+		return nil, err
+	}
+	specField, ok := fieldValue(resourceValue, "Spec")
+	if !ok {
+		return nil, fmt.Errorf("resource %T does not expose Spec", resource)
+	}
+
+	resolved, _, err := rewriteSecretSources(specField, decoded, options)
+	if err != nil {
+		return nil, err
+	}
+	return resolved, nil
+}
+
+func indirectValue(value reflect.Value) (reflect.Value, bool) {
+	for value.IsValid() && (value.Kind() == reflect.Pointer || value.Kind() == reflect.Interface) {
+		if value.IsNil() {
+			return reflect.Value{}, false
+		}
+		value = value.Elem()
+	}
+	return value, value.IsValid()
+}
+
+func rewriteSecretSources(value reflect.Value, decoded any, options requestBuildOptions) (any, bool, error) {
+	value, ok := indirectValue(value)
+	if !ok {
+		return nil, false, nil
+	}
+	if rewritten, include, handled, err := rewriteSharedSecretSource(value, options); handled {
+		return rewritten, include, err
+	}
+	switch value.Kind() {
+	case reflect.Struct:
+		return rewriteSecretStruct(value, decoded, options)
+	case reflect.Slice, reflect.Array:
+		return rewriteSecretSlice(value, decoded, options)
+	case reflect.Map:
+		return rewriteSecretMap(value, decoded, options)
+	default:
+		return decoded, true, nil
+	}
+}
+
+func rewriteSharedSecretSource(value reflect.Value, options requestBuildOptions) (any, bool, bool, error) {
+	switch value.Type() {
+	case passwordSourceType:
+		rewritten, include, err := resolveSecretSourceValue(options.Context, options.CredentialClient, options.Namespace, value.FieldByName("Secret"), "SecretName", "password")
+		return rewritten, include, true, err
+	case usernameSourceType:
+		rewritten, include, err := resolveSecretSourceValue(options.Context, options.CredentialClient, options.Namespace, value.FieldByName("Secret"), "SecretName", "username")
+		return rewritten, include, true, err
+	default:
+		return nil, false, false, nil
+	}
+}
+
+func rewriteSecretStruct(value reflect.Value, decoded any, options requestBuildOptions) (any, bool, error) {
+	decodedMap := decodedMapValue(decoded)
+	typ := value.Type()
+	for i := 0; i < value.NumField(); i++ {
+		fieldType := typ.Field(i)
+		if !fieldType.IsExported() {
+			continue
+		}
+		if fieldType.Anonymous && embeddedJSONField(fieldType) {
+			var err error
+			decodedMap, err = rewriteEmbeddedSecretField(value.Field(i), decodedMap, options)
+			if err != nil {
+				return nil, false, err
+			}
+			continue
+		}
+		if err := rewriteNamedSecretField(decodedMap, value.Field(i), fieldType, options); err != nil {
+			return nil, false, err
+		}
+	}
+	return decodedMap, true, nil
+}
+
+func decodedMapValue(decoded any) map[string]any {
+	decodedMap, ok := decoded.(map[string]any)
+	if !ok || decodedMap == nil {
+		return map[string]any{}
+	}
+	return decodedMap
+}
+
+func rewriteEmbeddedSecretField(fieldValue reflect.Value, decodedMap map[string]any, options requestBuildOptions) (map[string]any, error) {
+	rewritten, _, err := rewriteSecretSources(fieldValue, decodedMap, options)
+	if err != nil {
+		return nil, err
+	}
+	if nestedMap, ok := rewritten.(map[string]any); ok {
+		return nestedMap, nil
+	}
+	return decodedMap, nil
+}
+
+func rewriteNamedSecretField(decodedMap map[string]any, fieldValue reflect.Value, fieldType reflect.StructField, options requestBuildOptions) error {
+	jsonName, skip := fieldJSONTagName(fieldType)
+	if skip {
+		return nil
+	}
+	childDecoded, exists := decodedMap[jsonName]
+	rewritten, include, err := rewriteSecretSources(fieldValue, childDecoded, options)
+	if err != nil {
+		return err
+	}
+	if include {
+		decodedMap[jsonName] = rewritten
+		return nil
+	}
+	if exists {
+		delete(decodedMap, jsonName)
+	}
+	return nil
+}
+
+func rewriteSecretSlice(value reflect.Value, decoded any, options requestBuildOptions) (any, bool, error) {
+	decodedSlice, ok := decoded.([]any)
+	if !ok {
+		return decoded, true, nil
+	}
+	for i := 0; i < value.Len() && i < len(decodedSlice); i++ {
+		rewritten, include, err := rewriteSecretSources(value.Index(i), decodedSlice[i], options)
+		if err != nil {
+			return nil, false, err
+		}
+		if include {
+			decodedSlice[i] = rewritten
+		}
+	}
+	return decodedSlice, true, nil
+}
+
+func rewriteSecretMap(value reflect.Value, decoded any, options requestBuildOptions) (any, bool, error) {
+	if value.Type().Key().Kind() != reflect.String {
+		return decoded, true, nil
+	}
+	decodedMap, ok := decoded.(map[string]any)
+	if !ok {
+		return decoded, true, nil
+	}
+	iter := value.MapRange()
+	for iter.Next() {
+		key := iter.Key().String()
+		childDecoded, exists := decodedMap[key]
+		rewritten, include, err := rewriteSecretSources(iter.Value(), childDecoded, options)
+		if err != nil {
+			return nil, false, err
+		}
+		if include {
+			decodedMap[key] = rewritten
+			continue
+		}
+		if exists {
+			delete(decodedMap, key)
+		}
+	}
+	return decodedMap, true, nil
+}
+
+func resolveSecretSourceValue(
+	ctx context.Context,
+	credentialClient credhelper.CredentialClient,
+	namespace string,
+	secretField reflect.Value,
+	nameField string,
+	dataKey string,
+) (any, bool, error) {
+	if !secretField.IsValid() {
+		return nil, false, nil
+	}
+	secretNameField := secretField.FieldByName(nameField)
+	if !secretNameField.IsValid() || secretNameField.Kind() != reflect.String {
+		return nil, false, nil
+	}
+
+	secretName := strings.TrimSpace(secretNameField.String())
+	if secretName == "" {
+		return nil, false, nil
+	}
+	if credentialClient == nil {
+		return nil, false, fmt.Errorf("resolve %s secret %q: credential client is nil", dataKey, secretName)
+	}
+	if strings.TrimSpace(namespace) == "" {
+		return nil, false, fmt.Errorf("resolve %s secret %q: namespace is empty", dataKey, secretName)
+	}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
+	secretData, err := credentialClient.GetSecret(ctx, secretName, namespace)
+	if err != nil {
+		return nil, false, fmt.Errorf("get %s secret %q: %w", dataKey, secretName, err)
+	}
+	rawValue, ok := secretData[dataKey]
+	if !ok {
+		return nil, false, fmt.Errorf("%s key in secret %q is not found", dataKey, secretName)
+	}
+	return string(rawValue), true, nil
+}
+
+func fieldJSONTagName(field reflect.StructField) (string, bool) {
+	name := field.Tag.Get("json")
+	if name == "-" {
+		return "", true
+	}
+	if strings.TrimSpace(name) == "" {
+		return lowerCamel(field.Name), false
+	}
+	parts := strings.Split(name, ",")
+	if len(parts) == 0 {
+		return lowerCamel(field.Name), false
+	}
+	if parts[0] == "" {
+		return lowerCamel(field.Name), false
+	}
+	return parts[0], false
+}
+
+func embeddedJSONField(field reflect.StructField) bool {
+	if !field.Anonymous {
+		return false
+	}
+	parts := strings.Split(field.Tag.Get("json"), ",")
+	return len(parts) == 0 || parts[0] == ""
+}
+
 func responseBody(response any) (any, bool) {
 	if response == nil {
 		return nil, false
 	}
-
-	value := reflect.ValueOf(response)
-	for value.IsValid() && value.Kind() == reflect.Pointer {
-		if value.IsNil() {
-			return nil, false
-		}
-		value = value.Elem()
+	value, ok := indirectValue(reflect.ValueOf(response))
+	if !ok {
+		return nil, false
 	}
-	if !value.IsValid() || value.Kind() != reflect.Struct {
+	if value.Kind() != reflect.Struct {
 		return response, true
 	}
-
-	typ := value.Type()
-	if !strings.HasSuffix(typ.Name(), "Response") {
+	if !strings.HasSuffix(value.Type().Name(), "Response") {
 		return value.Interface(), true
 	}
+	return responseStructBody(value)
+}
 
+func responseStructBody(value reflect.Value) (any, bool) {
 	var fallback reflect.Value
+	typ := value.Type()
 	for i := 0; i < value.NumField(); i++ {
 		fieldType := typ.Field(i)
 		if !fieldType.IsExported() {
@@ -795,26 +1214,33 @@ func responseBody(response any) (any, bool) {
 		}
 		fieldValue := value.Field(i)
 		if fieldType.Tag.Get("presentIn") == "body" {
-			if fieldValue.Kind() == reflect.Pointer {
-				if fieldValue.IsNil() {
-					return nil, false
-				}
-				return fieldValue.Interface(), true
-			}
-			return fieldValue.Interface(), true
+			return responseFieldValue(fieldValue)
 		}
-		if fieldType.Name == "RawResponse" || strings.HasPrefix(fieldType.Name, "Opc") || fieldType.Name == "Etag" {
+		if isResponseMetadataField(fieldType) {
 			continue
 		}
 		if !fallback.IsValid() {
 			fallback = fieldValue
 		}
 	}
-
-	if fallback.IsValid() {
-		return fallback.Interface(), true
+	if !fallback.IsValid() {
+		return nil, false
 	}
-	return nil, false
+	return fallback.Interface(), true
+}
+
+func responseFieldValue(fieldValue reflect.Value) (any, bool) {
+	if fieldValue.Kind() != reflect.Pointer {
+		return fieldValue.Interface(), true
+	}
+	if fieldValue.IsNil() {
+		return nil, false
+	}
+	return fieldValue.Interface(), true
+}
+
+func isResponseMetadataField(fieldType reflect.StructField) bool {
+	return fieldType.Name == "RawResponse" || strings.HasPrefix(fieldType.Name, "Opc") || fieldType.Name == "Etag"
 }
 
 func mergeResponseIntoStatus(resource any, response any) error {
@@ -947,35 +1373,62 @@ func validateFormalSemantics(kind string, semantics *Semantics) error {
 	if semantics == nil {
 		return nil
 	}
+	problems := formalSemanticsProblems(semantics)
+	if len(problems) == 0 {
+		return nil
+	}
+	return fmt.Errorf("%s formal semantics blocked: %s", kind, strings.Join(problems, "; "))
+}
 
-	var problems []string
-	for _, gap := range semantics.Unsupported {
-		problems = append(problems, fmt.Sprintf("open formal gap %s: %s", gap.Category, gap.StopCondition))
-	}
-	for _, operation := range semantics.AuxiliaryOperations {
-		problems = append(problems, fmt.Sprintf("unsupported %s auxiliary operation %s", operation.Phase, operation.MethodName))
-	}
-	for phase, followUp := range map[string]FollowUpSemantics{
-		"create": semantics.CreateFollowUp,
-		"update": semantics.UpdateFollowUp,
-		"delete": semantics.DeleteFollowUp,
-	} {
-		for _, hook := range followUp.Hooks {
-			if !supportedFormalHelper(hook.Helper) {
-				problems = append(problems, fmt.Sprintf("%s helper %q is not supported", phase, hook.Helper))
-			}
-		}
-	}
+func formalSemanticsProblems(semantics *Semantics) []string {
+	problems := unsupportedSemanticProblems(semantics.Unsupported)
+	problems = append(problems, auxiliaryOperationProblems(semantics.AuxiliaryOperations)...)
+	problems = append(problems, followUpHelperProblems(semantics)...)
 	if semantics.List != nil && strings.TrimSpace(semantics.List.ResponseItemsField) == "" {
 		problems = append(problems, "list semantics require responseItemsField")
 	}
 	if semantics.Delete.Policy == "required" && len(semantics.Delete.TerminalStates) == 0 {
 		problems = append(problems, "required delete semantics need terminal states")
 	}
-	if len(problems) == 0 {
-		return nil
+	return problems
+}
+
+func unsupportedSemanticProblems(unsupported []UnsupportedSemantic) []string {
+	problems := make([]string, 0, len(unsupported))
+	for _, gap := range unsupported {
+		problems = append(problems, fmt.Sprintf("open formal gap %s: %s", gap.Category, gap.StopCondition))
 	}
-	return fmt.Errorf("%s formal semantics blocked: %s", kind, strings.Join(problems, "; "))
+	return problems
+}
+
+func auxiliaryOperationProblems(operations []AuxiliaryOperation) []string {
+	problems := make([]string, 0, len(operations))
+	for _, operation := range operations {
+		problems = append(problems, fmt.Sprintf("unsupported %s auxiliary operation %s", operation.Phase, operation.MethodName))
+	}
+	return problems
+}
+
+func followUpHelperProblems(semantics *Semantics) []string {
+	var problems []string
+	for phase, followUp := range map[string]FollowUpSemantics{
+		"create": semantics.CreateFollowUp,
+		"update": semantics.UpdateFollowUp,
+		"delete": semantics.DeleteFollowUp,
+	} {
+		problems = append(problems, unsupportedFollowUpHelpers(phase, followUp)...)
+	}
+	return problems
+}
+
+func unsupportedFollowUpHelpers(phase string, followUp FollowUpSemantics) []string {
+	var problems []string
+	for _, hook := range followUp.Hooks {
+		if !supportedFormalHelper(hook.Helper) {
+			problems = append(problems, fmt.Sprintf("%s helper %q is not supported", phase, hook.Helper))
+		}
+	}
+	return problems
 }
 
 func supportedFormalHelper(helper string) bool {
@@ -1026,18 +1479,61 @@ func isNotFound(err error) bool {
 }
 
 func (c ServiceClient[T]) selectListItem(body any, resource T, preferredID string) (any, error) {
-	responseItemsField := ""
-	if c.config.Semantics != nil && c.config.Semantics.List != nil {
-		responseItemsField = c.config.Semantics.List.ResponseItemsField
+	items, err := c.listResponseItems(body)
+	if err != nil {
+		return nil, err
 	}
-	items, err := listItems(body, responseItemsField)
+	criteria, err := c.listCriteria(resource, preferredID)
+	if err != nil {
+		return nil, err
+	}
+	if c.hasFormalListSemantics() {
+		return c.selectFormalListItem(items, criteria, preferredID)
+	}
+	return c.selectDefaultListItem(items, criteria)
+}
+
+func (c ServiceClient[T]) selectFormalListItem(items []any, criteria map[string]any, preferredID string) (any, error) {
+	matches, comparedAny := c.formalListMatches(items, criteria, preferredID)
+	return c.resolveFormalListMatches(matches, comparedAny, preferredID)
+}
+
+func listItems(body any, responseItemsField string) ([]any, error) {
+	value, err := listBodyValue(body)
+	if err != nil {
+		return nil, err
+	}
+	if items, found, err := namedListItems(value, responseItemsField); found || err != nil {
+		return items, err
+	}
+	if items, ok := sliceFieldValues(value, "Items"); ok {
+		return items, nil
+	}
+	if items, ok := firstSliceFieldValues(value); ok {
+		return items, nil
+	}
+	return nil, fmt.Errorf("OCI list body does not expose an items slice")
+}
+
+func (c ServiceClient[T]) listResponseItemsField() string {
+	if c.config.Semantics == nil || c.config.Semantics.List == nil {
+		return ""
+	}
+	return c.config.Semantics.List.ResponseItemsField
+}
+
+func (c ServiceClient[T]) listResponseItems(body any) ([]any, error) {
+	items, err := listItems(body, c.listResponseItemsField())
 	if err != nil {
 		return nil, err
 	}
 	if len(items) == 0 {
 		return nil, errResourceNotFound
 	}
+	return items, nil
+}
 
+func (c ServiceClient[T]) listCriteria(resource T, preferredID string) (map[string]any, error) {
 	criteria, err := lookupValues(resource)
 	if err != nil {
 		return nil, err
@@ -1046,27 +1542,16 @@ func (c ServiceClient[T]) selectListItem(body any, resource T, preferredID strin
 		criteria["id"] = preferredID
 		criteria["ocid"] = preferredID
 	}
-	if c.config.Semantics != nil && c.config.Semantics.List != nil {
-		return c.selectFormalListItem(items, criteria, preferredID)
-	}
+	return criteria, nil
+}
 
-	targetID := firstNonEmpty(criteria, "ocid", "id")
-	targetName := firstNonEmpty(criteria, "name", "metadataName")
-	targetDisplayName := firstNonEmpty(criteria, "displayName")
+func (c ServiceClient[T]) hasFormalListSemantics() bool {
+	return c.config.Semantics != nil && c.config.Semantics.List != nil
+}
 
-	var matches []any
-	for _, item := range items {
-		values := jsonMap(item)
-		switch {
-		case targetID != "" && targetID == firstNonEmpty(values, "id", "ocid"):
-			matches = append(matches, item)
-		case targetDisplayName != "" && targetDisplayName == firstNonEmpty(values, "displayName"):
-			matches = append(matches, item)
-		case targetName != "" && targetName == firstNonEmpty(values, "name"):
-			matches = append(matches, item)
-		}
-	}
-
+func (c ServiceClient[T]) selectDefaultListItem(items []any, criteria map[string]any) (any, error) {
+	targetID, targetName, targetDisplayName := defaultListTargets(criteria)
+	matches := matchingDefaultListItems(items, targetID, targetName, targetDisplayName)
 	switch {
 	case len(matches) == 1:
 		return matches[0], nil
@@ -1079,36 +1564,47 @@ func (c ServiceClient[T]) selectListItem(body any, resource T, preferredID strin
 	}
 }
 
-func (c ServiceClient[T]) selectFormalListItem(items []any, criteria map[string]any, preferredID string) (any, error) {
-	matchFields := []string{}
-	if c.config.Semantics != nil && c.config.Semantics.List != nil {
-		matchFields = append(matchFields, c.config.Semantics.List.MatchFields...)
-	}
+func defaultListTargets(criteria map[string]any) (string, string, string) {
+	return firstNonEmpty(criteria, "ocid", "id"), firstNonEmpty(criteria, "name", "metadataName"), firstNonEmpty(criteria, "displayName")
+}
 
+func matchingDefaultListItems(items []any, targetID string, targetName string, targetDisplayName string) []any {
+	var matches []any
+	for _, item := range items {
+		if defaultListItemMatches(jsonMap(item), targetID, targetName, targetDisplayName) {
+			matches = append(matches, item)
+		}
+	}
+	return matches
+}
+
+func defaultListItemMatches(values map[string]any, targetID string, targetName string, targetDisplayName string) bool {
+	switch {
+	case targetID != "" && targetID == firstNonEmpty(values, "id", "ocid"):
+		return true
+	case targetDisplayName != "" && targetDisplayName == firstNonEmpty(values, "displayName"):
+		return true
+	case targetName != "" && targetName == firstNonEmpty(values, "name"):
+		return true
+	default:
+		return false
+	}
+}
+
+func (c ServiceClient[T]) formalListMatchFields() []string {
+	if c.config.Semantics == nil || c.config.Semantics.List == nil {
+		return nil
+	}
+	return append([]string(nil), c.config.Semantics.List.MatchFields...)
+}
+
+func (c ServiceClient[T]) formalListMatches(items []any, criteria map[string]any, preferredID string) ([]any, bool) {
+	matchFields := c.formalListMatchFields()
 	var matches []any
 	comparedAny := false
 	for _, item := range items {
-		values := jsonMap(item)
-		if preferredID != "" && preferredID == firstNonEmpty(values, "id", "ocid") {
-			matches = append(matches, item)
-			continue
-		}
-
-		comparedFields := 0
-		matched := true
-		for _, field := range matchFields {
-			expected, ok := lookupMeaningfulValue(criteria, field)
-			if !ok {
-				continue
-			}
-			comparedFields++
-			actual, ok := lookupMeaningfulValue(values, field)
-			if !ok || !valuesEqual(expected, actual) {
-				matched = false
-				break
-			}
-		}
-		if comparedFields == 0 {
+		matched, compared := formalListItemMatch(item, criteria, preferredID, matchFields)
+		if !compared {
 			continue
 		}
 		comparedAny = true
@@ -1116,7 +1612,33 @@ func (c ServiceClient[T]) selectFormalListItem(items []any, criteria map[string]
 			matches = append(matches, item)
 		}
 	}
+	return matches, comparedAny
+}
 
+func formalListItemMatch(item any, criteria map[string]any, preferredID string, matchFields []string) (bool, bool) {
+	values := jsonMap(item)
+	if preferredID != "" && preferredID == firstNonEmpty(values, "id", "ocid") {
+		return true, true
+	}
+	comparedFields := 0
+	for _, field := range matchFields {
+		expected, ok := lookupMeaningfulValue(criteria, field)
+		if !ok {
+			continue
+		}
+		comparedFields++
+		actual, ok := lookupMeaningfulValue(values, field)
+		if !ok || !valuesEqual(expected, actual) {
+			return false, comparedFields > 0
+		}
+	}
+	if comparedFields == 0 {
+		return false, false
+	}
+	return true, true
+}
+
+func (c ServiceClient[T]) resolveFormalListMatches(matches []any, comparedAny bool, preferredID string) (any, error) {
 	switch {
 	case len(matches) == 1:
 		return matches[0], nil
@@ -1129,39 +1651,46 @@ func (c ServiceClient[T]) selectFormalListItem(items []any, criteria map[string]
 	}
 }
 
-func listItems(body any, responseItemsField string) ([]any, error) {
-	value := reflect.ValueOf(body)
-	for value.IsValid() && value.Kind() == reflect.Pointer {
-		if value.IsNil() {
-			return nil, errResourceNotFound
-		}
-		value = value.Elem()
+func listBodyValue(body any) (reflect.Value, error) {
+	value, ok := indirectValue(reflect.ValueOf(body))
+	if !ok {
+		return reflect.Value{}, errResourceNotFound
 	}
-	if !value.IsValid() || value.Kind() != reflect.Struct {
-		return nil, fmt.Errorf("OCI list body must be a struct, got %T", body)
+	if value.Kind() != reflect.Struct {
+		return reflect.Value{}, fmt.Errorf("OCI list body must be a struct, got %T", body)
 	}
+	return value, nil
+}
 
-	if strings.TrimSpace(responseItemsField) != "" {
-		itemsField := value.FieldByName(responseItemsField)
-		if itemsField.IsValid() && itemsField.Kind() == reflect.Slice {
-			return sliceValues(itemsField), nil
-		}
-		return nil, fmt.Errorf("OCI list body does not expose %s", responseItemsField)
+func namedListItems(value reflect.Value, responseItemsField string) ([]any, bool, error) {
+	fieldName := strings.TrimSpace(responseItemsField)
+	if fieldName == "" {
+		return nil, false, nil
 	}
-
-	if itemsField := value.FieldByName("Items"); itemsField.IsValid() && itemsField.Kind() == reflect.Slice {
-		return sliceValues(itemsField), nil
+	items, ok := sliceFieldValues(value, fieldName)
+	if ok {
+		return items, true, nil
 	}
+	return nil, true, fmt.Errorf("OCI list body does not expose %s", responseItemsField)
+}
 
+func sliceFieldValues(value reflect.Value, fieldName string) ([]any, bool) {
+	itemsField := value.FieldByName(fieldName)
+	if !itemsField.IsValid() || itemsField.Kind() != reflect.Slice {
+		return nil, false
+	}
+	return sliceValues(itemsField), true
+}
+
+func firstSliceFieldValues(value reflect.Value) ([]any, bool) {
 	for i := 0; i < value.NumField(); i++ {
 		field := value.Field(i)
 		if field.Kind() != reflect.Slice {
 			continue
 		}
-		return sliceValues(field), nil
+		return sliceValues(field), true
 	}
-
-	return nil, fmt.Errorf("OCI list body does not expose an items slice")
+	return nil, false
 }
 
 func sliceValues(value reflect.Value) []any {
@@ -1263,6 +1792,18 @@ func lookupMetadataString(value reflect.Value, fieldName string) string {
 		return ""
 	}
 	return field.String()
+}
+
+func resourceNamespace(resource any, fallback string) string {
+	resourceValue, err := resourceStruct(resource)
+	if err != nil {
+		return strings.TrimSpace(fallback)
+	}
+	namespace := lookupMetadataString(resourceValue, "Namespace")
+	if strings.TrimSpace(namespace) != "" {
+		return namespace
+	}
+	return strings.TrimSpace(fallback)
 }
 
 func fieldJSONName(field reflect.StructField) string {
@@ -1449,18 +1990,25 @@ func splitCamel(name string) []string {
 	var current []rune
 	runes := []rune(name)
 	for index, r := range runes {
-		if index > 0 {
-			prev := runes[index-1]
-			nextIsLower := index+1 < len(runes) && unicode.IsLower(runes[index+1])
-			if unicode.IsUpper(r) && (unicode.IsLower(prev) || unicode.IsDigit(prev) || (unicode.IsUpper(prev) && nextIsLower)) {
-				tokens = append(tokens, strings.ToLower(string(current)))
-				current = current[:0]
-			}
+		if index > 0 && startsNewCamelToken(runes, index) {
+			tokens = append(tokens, strings.ToLower(string(current)))
+			current = current[:0]
 		}
 		current = append(current, r)
 	}
-	if len(current) > 0 {
-		tokens = append(tokens, strings.ToLower(string(current)))
+	return appendCurrentCamelToken(tokens, current)
+}
+
+func startsNewCamelToken(runes []rune, index int) bool {
+	prev := runes[index-1]
+	nextIsLower := index+1 < len(runes) && unicode.IsLower(runes[index+1])
+	return unicode.IsUpper(runes[index]) &&
+		(unicode.IsLower(prev) || unicode.IsDigit(prev) || (unicode.IsUpper(prev) && nextIsLower))
+}
+
+func appendCurrentCamelToken(tokens []string, current []rune) []string {
+	if len(current) == 0 {
+		return tokens
 	}
-	return tokens
+	return append(tokens, strings.ToLower(string(current)))
 }

@@ -8,6 +8,9 @@ gaps: []
 
 # Logic Gaps
 
-This scaffold row tracks the published DatabaseAutonomousDatabase API shape for database. Replace this
-placeholder with repo-authored semantics and explicit stop conditions before
-adding formalSpec or promoting runtime ownership.
+No open logic gaps remain for the generated `database/AutonomousDatabase`
+runtime path.
+
+The promoted row binds the published API kind to generator-owned lifecycle,
+delete confirmation, and list-lookup semantics without the legacy adapter or
+manual webhook seam.

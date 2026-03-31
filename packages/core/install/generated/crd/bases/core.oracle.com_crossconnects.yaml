@@ -169,12 +169,88 @@ spec:
           status:
             description: CrossConnectObservedState defines the observed state of CrossConnect.
             properties:
+              compartmentId:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment containing the cross-connect group.
+                type: string
+              crossConnectGroupId:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the cross-connect group this cross-connect belongs to (if any).
+                type: string
+              customerReferenceName:
+                description: |-
+                  A reference name or identifier for the physical fiber connection that this cross-connect
+                  uses.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a
+                  namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              displayName:
+                description: |-
+                  A user-friendly name. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no
+                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
               id:
                 description: The cross-connect's Oracle ID (OCID).
                 type: string
               lifecycleState:
                 description: The cross-connect's current state.
                 type: string
+              locationName:
+                description: The name of the FastConnect location where this cross-connect
+                  is installed.
+                type: string
+              macsecProperties:
+                description: CrossConnectMacsecProperties defines nested fields for
+                  CrossConnect.MacsecProperties.
+                properties:
+                  encryptionCipher:
+                    description: Type of encryption cipher suite to use for the MACsec
+                      connection.
+                    type: string
+                  isUnprotectedTrafficAllowed:
+                    description: Indicates whether unencrypted traffic is allowed
+                      if MACsec Key Agreement protocol (MKA) fails.
+                    type: boolean
+                  primaryKey:
+                    description: CrossConnectMacsecPropertiesPrimaryKey defines nested
+                      fields for CrossConnect.MacsecProperties.PrimaryKey.
+                    properties:
+                      connectivityAssociationKeySecretId:
+                        description: |-
+                          Secret OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) containing the Connectivity Association Key (CAK) of this MACsec key.
+                          NOTE: Only the latest secret version will be used.
+                        type: string
+                      connectivityAssociationNameSecretId:
+                        description: |-
+                          Secret OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) containing the Connectivity association Key Name (CKN) of this MACsec key.
+                          NOTE: Only the latest secret version will be used.
+                        type: string
+                    required:
+                    - connectivityAssociationKeySecretId
+                    - connectivityAssociationNameSecretId
+                    type: object
+                  state:
+                    description: Indicates whether or not MACsec is enabled.
+                    type: string
+                required:
+                - state
+                type: object
               ociLogicalDeviceName:
                 description: |-
                   The FastConnect device that terminates the logical connection.
@@ -185,6 +261,11 @@ spec:
                 type: string
               portName:
                 description: A string identifying the meet-me room port for this cross-connect.
+                type: string
+              portSpeedShapeName:
+                description: |-
+                  The port speed for this cross-connect.
+                  Example: `10 Gbps`
                 type: string
               status:
                 properties:

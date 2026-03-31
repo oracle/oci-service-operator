@@ -51,6 +51,10 @@ spec:
             type: object
           spec:
             description: KeyVersionSpec defines the desired state of KeyVersion.
+            properties:
+              externalKeyVersionId:
+                description: Key version ID associated with the external key.
+                type: string
             type: object
           status:
             description: KeyVersionStatus defines the observed state of KeyVersion.

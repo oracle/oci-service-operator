@@ -71,6 +71,8 @@ spec:
                 description: A Boolean flag indicating whether or not the resolver
                   endpoint is for listening.
                 type: boolean
+              jsonData:
+                type: string
               listeningAddress:
                 description: |-
                   An IP address to listen to queries on. For VNIC endpoints this IP address must be part of the
@@ -105,9 +107,42 @@ spec:
                   The OCID of the owning compartment. This will match the resolver that the resolver endpoint is under
                   and will be updated if the resolver's compartment is changed.
                 type: string
+              endpointType:
+                type: string
+              forwardingAddress:
+                description: |-
+                  An IP address from which forwarded queries may be sent. For VNIC endpoints, this IP address must be part
+                  of the subnet and will be assigned by the system if unspecified when isForwarding is true.
+                type: string
+              isForwarding:
+                description: A Boolean flag indicating whether or not the resolver
+                  endpoint is for forwarding.
+                type: boolean
+              isListening:
+                description: A Boolean flag indicating whether or not the resolver
+                  endpoint is for listening.
+                type: boolean
+              jsonData:
+                type: string
               lifecycleState:
                 description: The current state of the resource.
                 type: string
+              listeningAddress:
+                description: |-
+                  An IP address to listen to queries on. For VNIC endpoints this IP address must be part of the
+                  subnet and will be assigned by the system if unspecified when isListening is true.
+                type: string
+              name:
+                description: The name of the resolver endpoint. Must be unique, case-insensitive,
+                  within the resolver.
+                type: string
+              nsgIds:
+                description: |-
+                  An array of network security group OCIDs for the resolver endpoint. These must be part of the VCN that the
+                  resolver endpoint is a part of.
+                items:
+                  type: string
+                type: array
               self:
                 description: The canonical absolute URL of the resource.
                 type: string
@@ -153,6 +188,10 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              subnetId:
+                description: The OCID of a subnet. Must be part of the VCN that the
+                  resolver is attached to.
+                type: string
               timeCreated:
                 description: |-
                   The date and time the resource was created in "YYYY-MM-ddThh:mm:ssZ" format

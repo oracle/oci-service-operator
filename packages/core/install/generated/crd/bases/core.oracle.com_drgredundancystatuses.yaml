@@ -61,6 +61,11 @@ spec:
                 description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the DRG.
                 type: string
+              sdkStatus:
+                description: |-
+                  The redundancy status of the DRG.
+                  This uses a distinct JSON name so it can coexist with the OSOK status envelope.
+                type: string
               status:
                 properties:
                   conditions:

@@ -94,6 +94,39 @@ spec:
               compartmentId:
                 description: Compartment OCID.
                 type: string
+              networkPolicy:
+                description: AuthenticationPolicyNetworkPolicy defines nested fields
+                  for AuthenticationPolicy.NetworkPolicy.
+                properties:
+                  networkSourceIds:
+                    description: Network Source ids
+                    items:
+                      type: string
+                    type: array
+                type: object
+              passwordPolicy:
+                description: AuthenticationPolicyPasswordPolicy defines nested fields
+                  for AuthenticationPolicy.PasswordPolicy.
+                properties:
+                  isLowercaseCharactersRequired:
+                    description: At least one lower case character required.
+                    type: boolean
+                  isNumericCharactersRequired:
+                    description: At least one numeric character required.
+                    type: boolean
+                  isSpecialCharactersRequired:
+                    description: At least one special character required.
+                    type: boolean
+                  isUppercaseCharactersRequired:
+                    description: At least one uppercase character required.
+                    type: boolean
+                  isUsernameContainmentAllowed:
+                    description: User name is allowed to be part of the password.
+                    type: boolean
+                  minimumPasswordLength:
+                    description: Minimum password length required.
+                    type: integer
+                type: object
               status:
                 properties:
                   conditions:

@@ -56,6 +56,24 @@ spec:
           status:
             description: StandardTagTemplateStatus defines the observed state of StandardTagTemplate.
             properties:
+              description:
+                description: The default description of the tag namespace that users
+                  can use to create the tag definition
+                type: string
+              enumMutability:
+                description: The mutability of the possible values list for enum tags.
+                  This will default to IMMUTABLE for string value tags
+                type: string
+              isCostTracking:
+                description: Is the tag a cost tracking tag. Default will be false
+                  as cost tracking tags have been deprecated
+                type: boolean
+              possibleValues:
+                description: List of possible values. An optional parameter that will
+                  be present if the type of definition is enum.
+                items:
+                  type: string
+                type: array
               status:
                 properties:
                   conditions:
@@ -98,6 +116,12 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              tagDefinitionName:
+                description: The name of this standard tag definition
+                type: string
+              type:
+                description: The type of tag definition. Enum or string.
+                type: string
             required:
             - status
             type: object

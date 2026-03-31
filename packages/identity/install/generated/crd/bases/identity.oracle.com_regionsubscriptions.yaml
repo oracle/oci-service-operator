@@ -68,11 +68,22 @@ spec:
               isHomeRegion:
                 description: Indicates if the region is the home region or not.
                 type: boolean
+              regionKey:
+                description: |-
+                  The region's key. See Regions and Availability Domains (https://docs.cloud.oracle.com/Content/General/Concepts/regions.htm)
+                  for the full list of supported 3-letter region codes.
+                  Example: `PHX`
+                type: string
               regionName:
                 description: |-
                   The region's name. See Regions and Availability Domains (https://docs.cloud.oracle.com/Content/General/Concepts/regions.htm)
                   for the full list of supported region names.
                   Example: `us-phoenix-1`
+                type: string
+              sdkStatus:
+                description: |-
+                  The region subscription status.
+                  This uses a distinct JSON name so it can coexist with the OSOK status envelope.
                 type: string
               status:
                 properties:

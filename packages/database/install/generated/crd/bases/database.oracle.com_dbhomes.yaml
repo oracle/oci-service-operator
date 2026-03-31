@@ -1,0 +1,421 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: dbhomes.database.oracle.com
+spec:
+  group: database.oracle.com
+  names:
+    kind: DbHome
+    listKind: DbHomeList
+    plural: dbhomes
+    singular: dbhome
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the DbHome
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the DbHome
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: DbHome is the Schema for the dbhomes API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: DbHomeSpec defines the desired state of DbHome.
+            properties:
+              database:
+                description: DbHomeDatabase defines nested fields for DbHome.Database.
+                properties:
+                  adminPassword:
+                    description: A strong password for SYS, SYSTEM, and PDB Admin.
+                      The password must be at least nine characters and contain at
+                      least two uppercase, two lowercase, two numbers, and two special
+                      characters. The special characters must be _, \#, or -.
+                    type: string
+                  characterSet:
+                    description: |-
+                      The character set for the database.  The default is AL32UTF8. Allowed values are:
+                      AL32UTF8, AR8ADOS710, AR8ADOS720, AR8APTEC715, AR8ARABICMACS, AR8ASMO8X, AR8ISO8859P6, AR8MSWIN1256, AR8MUSSAD768, AR8NAFITHA711, AR8NAFITHA721, AR8SAKHR706, AR8SAKHR707, AZ8ISO8859P9E, BG8MSWIN, BG8PC437S, BLT8CP921, BLT8ISO8859P13, BLT8MSWIN1257, BLT8PC775, BN8BSCII, CDN8PC863, CEL8ISO8859P14, CL8ISO8859P5, CL8ISOIR111, CL8KOI8R, CL8KOI8U, CL8MACCYRILLICS, CL8MSWIN1251, EE8ISO8859P2, EE8MACCES, EE8MACCROATIANS, EE8MSWIN1250, EE8PC852, EL8DEC, EL8ISO8859P7, EL8MACGREEKS, EL8MSWIN1253, EL8PC437S, EL8PC851, EL8PC869, ET8MSWIN923, HU8ABMOD, HU8CWI2, IN8ISCII, IS8PC861, IW8ISO8859P8, IW8MACHEBREWS, IW8MSWIN1255, IW8PC1507, JA16EUC, JA16EUCTILDE, JA16SJIS, JA16SJISTILDE, JA16VMS, KO16KSC5601, KO16KSCCS, KO16MSWIN949, LA8ISO6937, LA8PASSPORT, LT8MSWIN921, LT8PC772, LT8PC774, LV8PC1117, LV8PC8LR, LV8RST104090, N8PC865, NE8ISO8859P10, NEE8ISO8859P4, RU8BESTA, RU8PC855, RU8PC866, SE8ISO8859P3, TH8MACTHAIS, TH8TISASCII, TR8DEC, TR8MACTURKISHS, TR8MSWIN1254, TR8PC857, US7ASCII, US8PC437, UTF8, VN8MSWIN1258, VN8VN3, WE8DEC, WE8DG, WE8ISO8859P1, WE8ISO8859P15, WE8ISO8859P9, WE8MACROMAN8S, WE8MSWIN1252, WE8NCR4970, WE8NEXTSTEP, WE8PC850, WE8PC858, WE8PC860, WE8ROMAN8, ZHS16CGB231280, ZHS16GBK, ZHT16BIG5, ZHT16CCDC, ZHT16DBT, ZHT16HKSCS, ZHT16MSWIN950, ZHT32EUC, ZHT32SOPS, ZHT32TRIS
+                    type: string
+                  databaseSoftwareImageId:
+                    description: The database software image OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                    type: string
+                  dbBackupConfig:
+                    description: DbHomeDatabaseDbBackupConfig defines nested fields
+                      for DbHome.Database.DbBackupConfig.
+                    properties:
+                      autoBackupEnabled:
+                        description: If set to true, configures automatic backups.
+                          If you previously used RMAN or dbcli to configure backups
+                          and then you switch to using the Console or the API for
+                          backups, a new backup configuration is created and associated
+                          with your database. This means that you can no longer rely
+                          on your previously configured unmanaged backups to work.
+                        type: boolean
+                      autoBackupWindow:
+                        description: |-
+                          Time window selected for initiating automatic backup for the database system. There are twelve available two-hour time windows. If no option is selected, a start time between 12:00 AM to 7:00 AM in the region of the database is automatically chosen. For example, if the user selects SLOT_TWO from the enum list, the automatic backup job will start in between 2:00 AM (inclusive) to 4:00 AM (exclusive).
+                          Example: `SLOT_TWO`
+                        type: string
+                      autoFullBackupDay:
+                        description: Day of the week the full backup should be applied
+                          on the database system. If no option is selected, the value
+                          is null and we will default to Sunday.
+                        type: string
+                      autoFullBackupWindow:
+                        description: |-
+                          Time window selected for initiating full backup for the database system. There are twelve available two-hour time windows. If no option is selected, the value is null and a start time between 12:00 AM to 7:00 AM in the region of the database is automatically chosen. For example, if the user selects SLOT_TWO from the enum list, the automatic backup job will start in between 2:00 AM (inclusive) to 4:00 AM (exclusive).
+                          Example: `SLOT_TWO`
+                        type: string
+                      backupDeletionPolicy:
+                        description: This defines when the backups will be deleted.
+                          - IMMEDIATE option keep the backup for predefined time i.e
+                          72 hours and then delete permanently... - RETAIN will keep
+                          the backups as per the policy defined for database backups.
+                        type: string
+                      backupDestinationDetails:
+                        description: Backup destination details.
+                        items:
+                          description: DbHomeDatabaseDbBackupConfigBackupDestinationDetail
+                            defines nested fields for DbHome.Database.DbBackupConfig.BackupDestinationDetail.
+                          properties:
+                            dbrsPolicyId:
+                              description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                                of the DBRS policy used for backup.
+                              type: string
+                            id:
+                              description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                                of the backup destination.
+                              type: string
+                            internetProxy:
+                              description: Proxy URL to connect to object store.
+                              type: string
+                            type:
+                              description: Type of the database backup destination.
+                              type: string
+                            vpcPassword:
+                              description: For a RECOVERY_APPLIANCE backup destination,
+                                the password for the VPC user that is used to access
+                                the Recovery Appliance.
+                              type: string
+                            vpcUser:
+                              description: For a RECOVERY_APPLIANCE backup destination,
+                                the Virtual Private Catalog (VPC) user that is used
+                                to access the Recovery Appliance.
+                              type: string
+                          required:
+                          - type
+                          type: object
+                        type: array
+                      recoveryWindowInDays:
+                        description: |-
+                          Number of days between the current and the earliest point of recoverability covered by automatic backups.
+                          This value applies to automatic backups only. After a new automatic backup has been created, Oracle removes old automatic backups that are created before the window.
+                          When the value is updated, it is applied to all existing automatic backups.
+                        type: integer
+                      runImmediateFullBackup:
+                        description: If set to true, configures automatic full backups
+                          in the local region (the region of the DB system) for the
+                          first backup run immediately.
+                        type: boolean
+                    type: object
+                  dbName:
+                    description: The database name. The name must begin with an alphabetic
+                      character and can contain a maximum of eight alphanumeric characters.
+                      Special characters are not permitted.
+                    type: string
+                  dbUniqueName:
+                    description: The `DB_UNIQUE_NAME` of the Oracle Database being
+                      backed up.
+                    type: string
+                  dbWorkload:
+                    description: |-
+                      **Deprecated.** The dbWorkload field has been deprecated for Exadata Database Service on Dedicated Infrastructure, Exadata Database Service on Cloud@Customer, and Base Database Service.
+                      Support for this attribute will end in November 2023. You may choose to update your custom scripts to exclude the dbWorkload attribute. After November 2023 if you pass a value to the dbWorkload attribute, it will be ignored.
+                      The database workload type.
+                    type: string
+                  definedTags:
+                    additionalProperties:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    description: |-
+                      Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                      For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                    type: object
+                  freeformTags:
+                    additionalProperties:
+                      type: string
+                    description: |-
+                      Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                      For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                      Example: `{"Department": "Finance"}`
+                    type: object
+                  kmsKeyId:
+                    description: The OCID of the key container that is used as the
+                      master encryption key in database transparent data encryption
+                      (TDE) operations.
+                    type: string
+                  kmsKeyVersionId:
+                    description: The OCID of the key container version that is used
+                      in database transparent data encryption (TDE) operations KMS
+                      Key can have multiple key versions. If none is specified, the
+                      current key version (latest) of the Key Id is used for the operation.
+                      Autonomous Database Serverless does not use key versions, hence
+                      is not applicable for Autonomous Database Serverless instances.
+                    type: string
+                  ncharacterSet:
+                    description: |-
+                      The national character set for the database.  The default is AL16UTF16. Allowed values are:
+                      AL16UTF16 or UTF8.
+                    type: string
+                  pdbName:
+                    description: The name of the pluggable database. The name must
+                      begin with an alphabetic character and can contain a maximum
+                      of thirty alphanumeric characters. Special characters are not
+                      permitted. Pluggable database should not be same as database
+                      name.
+                    type: string
+                  sidPrefix:
+                    description: Specifies a prefix for the `Oracle SID` of the database
+                      to be created.
+                    type: string
+                  tdeWalletPassword:
+                    description: The optional password to open the TDE wallet. The
+                      password must be at least nine characters and contain at least
+                      two uppercase, two lowercase, two numeric, and two special characters.
+                      The special characters must be _, \#, or -.
+                    type: string
+                  vaultId:
+                    description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                      of the Oracle Cloud Infrastructure vault (https://docs.cloud.oracle.com/Content/KeyManagement/Concepts/keyoverview.htm#concepts).
+                      This parameter and `secretId` are required for Customer Managed
+                      Keys.
+                    type: string
+                required:
+                - adminPassword
+                - dbName
+                type: object
+              databaseSoftwareImageId:
+                description: The database software image OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm).
+                type: string
+              dbSystemId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the DB system.
+                type: string
+              dbVersion:
+                description: |-
+                  A valid Oracle Database version. For a list of supported versions, use the ListDbVersions operation.
+                  This cannot be updated in parallel with any of the following: licenseModel, dbEdition, cpuCoreCount, computeCount, computeModel, adminPassword, whitelistedIps, isMTLSConnectionRequired, openMode, permissionLevel, dbWorkload, privateEndpointLabel, nsgIds, isRefreshable, dbName, scheduledOperations, dbToolsDetails, isLocalDataGuardEnabled, or isFreeTier.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                type: object
+              displayName:
+                description: The user-provided name of the Database Home.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              isDesupportedVersion:
+                description: If true, the customer acknowledges that the specified
+                  Oracle Database software is an older release that is not currently
+                  supported by OCI.
+                type: boolean
+              jsonData:
+                type: string
+              kmsKeyId:
+                description: The OCID of the key container that is used as the master
+                  encryption key in database transparent data encryption (TDE) operations.
+                type: string
+              kmsKeyVersionId:
+                description: The OCID of the key container version that is used in
+                  database transparent data encryption (TDE) operations KMS Key can
+                  have multiple key versions. If none is specified, the current key
+                  version (latest) of the Key Id is used for the operation. Autonomous
+                  Database Serverless does not use key versions, hence is not applicable
+                  for Autonomous Database Serverless instances.
+                type: string
+              oneOffPatches:
+                description: List of one-off patches for Database Homes.
+                items:
+                  type: string
+                type: array
+              source:
+                type: string
+              vmClusterId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the VM cluster.
+                type: string
+            required:
+            - database
+            - dbSystemId
+            - dbVersion
+            - vmClusterId
+            type: object
+          status:
+            description: DbHomeStatus defines the observed state of DbHome.
+            properties:
+              compartmentId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the compartment.
+                type: string
+              databaseSoftwareImageId:
+                description: The database software image OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                type: string
+              dbHomeLocation:
+                description: The location of the Oracle Database Home.
+                type: string
+              dbSystemId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the DB system.
+                type: string
+              dbVersion:
+                description: The Oracle Database version.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                type: object
+              displayName:
+                description: The user-provided name for the Database Home. The name
+                  does not need to be unique.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              id:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the Database Home.
+                type: string
+              kmsKeyId:
+                description: The OCID of the key container that is used as the master
+                  encryption key in database transparent data encryption (TDE) operations.
+                type: string
+              lastPatchHistoryEntryId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the last patch history. This value is updated as soon as a patch
+                  operation is started.
+                type: string
+              lifecycleDetails:
+                description: Additional information about the current lifecycle state.
+                type: string
+              lifecycleState:
+                description: The current state of the Database Home.
+                type: string
+              oneOffPatches:
+                description: List of one-off patches for Database Homes.
+                items:
+                  type: string
+                type: array
+              status:
+                properties:
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              timeCreated:
+                description: The date and time the Database Home was created.
+                type: string
+              vmClusterId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the VM cluster.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

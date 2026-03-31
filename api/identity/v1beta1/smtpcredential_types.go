@@ -25,8 +25,6 @@ type SmtpCredentialStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
 	// The SMTP user name.
 	Username string `json:"username,omitempty"`
-	// The SMTP password.
-	Password string `json:"password,omitempty"`
 	// The OCID of the SMTP credential.
 	Id string `json:"id,omitempty"`
 	// The OCID of the user the SMTP credential belongs to.

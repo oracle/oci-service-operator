@@ -5,7 +5,6 @@
 
 ## Append samples you want in your CSV to this file as resources ##
 resources:
-- database_v1beta1_autonomousdatabases.yaml
 - streaming_v1beta1_stream.yaml
 - mysql_v1beta1_mysqldbsystem.yaml
 - artifacts_v1beta1_containerconfiguration.yaml
@@ -444,4 +443,5 @@ resources:
 - mysql_v1beta1_workrequesterror.yaml
 - mysql_v1beta1_workrequestlog.yaml
 - database_v1beta1_database.yaml
+- database_v1beta1_autonomousdatabase.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

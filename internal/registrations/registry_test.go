@@ -36,7 +36,7 @@ func TestAllAddToSchemeRegistersManualGroupKinds(t *testing.T) {
 
 	for _, obj := range []runtime.Object{
 		&corev1beta1.Vcn{},
-		&databasev1beta1.AutonomousDatabases{},
+		&databasev1beta1.AutonomousDatabase{},
 		&mysqlv1beta1.MySqlDbSystem{},
 		&streamingv1beta1.Stream{},
 	} {
@@ -47,18 +47,6 @@ func TestAllAddToSchemeRegistersManualGroupKinds(t *testing.T) {
 		if len(gvks) == 0 {
 			t.Fatalf("ObjectKinds(%T) returned no GVKs", obj)
 		}
-	}
-}
-
-func TestAllExposesManualWebhooksSeparately(t *testing.T) {
-	t.Parallel()
-
-	webhooks := ManualWebhooks()
-	if len(webhooks) != 1 {
-		t.Fatalf("len(ManualWebhooks()) = %d, want 1", len(webhooks))
-	}
-	if webhooks[0].Name != "AutonomousDatabases" {
-		t.Fatalf("ManualWebhooks()[0].Name = %q, want %q", webhooks[0].Name, "AutonomousDatabases")
 	}
 }
 
