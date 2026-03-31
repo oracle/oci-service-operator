@@ -288,6 +288,7 @@ func buildServiceManagerModels(service ServiceConfig, version string, resources 
 			Constructor:              fmt.Sprintf("New%sServiceManager", resource.Kind),
 			ClientInterfaceName:      fmt.Sprintf("%sServiceClient", resource.Kind),
 			DefaultClientTypeName:    fmt.Sprintf("default%sServiceClient", resource.Kind),
+			UsesCredentialClient:     resourceUsesCredentialClient(resource),
 			SDKClientTypeName:        resource.Runtime.ClientType,
 			SDKClientConstructor:     resource.Runtime.ClientConstructor,
 			SDKClientConstructorKind: resource.Runtime.ClientConstructorKind,
@@ -309,6 +310,45 @@ func buildServiceManagerModels(service ServiceConfig, version string, resources 
 	})
 
 	return serviceManagers, nil
+}
+
+func resourceUsesCredentialClient(resource ResourceModel) bool {
+	helperIndex := make(map[string]TypeModel, len(resource.HelperTypes))
+	for _, helper := range resource.HelperTypes {
+		helperIndex[helper.Name] = helper
+	}
+
+	seenHelpers := make(map[string]struct{}, len(resource.HelperTypes))
+	for _, field := range resource.SpecFields {
+		if fieldTypeUsesCredentialClient(field.Type, helperIndex, seenHelpers) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func fieldTypeUsesCredentialClient(typeExpr string, helperIndex map[string]TypeModel, seenHelpers map[string]struct{}) bool {
+	switch underlyingTypeName(typeExpr) {
+	case "shared.PasswordSource", "shared.UsernameSource":
+		return true
+	}
+
+	helper, ok := helperIndex[underlyingTypeName(typeExpr)]
+	if !ok {
+		return false
+	}
+	if _, seen := seenHelpers[helper.Name]; seen {
+		return false
+	}
+
+	seenHelpers[helper.Name] = struct{}{}
+	for _, field := range helper.Fields {
+		if fieldTypeUsesCredentialClient(field.Type, helperIndex, seenHelpers) {
+			return true
+		}
+	}
+	return false
 }
 
 func defaultControllerRBACMarkers(groupDNSName string, kindPlural string) []string {

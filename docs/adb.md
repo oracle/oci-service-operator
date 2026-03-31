@@ -54,15 +54,15 @@ the full schema.
 | `spec.dbWorkload` | Workload type such as `OLTP`, `DW`, `AJD`, or `APEX`. | string | no |
 | `spec.cpuCoreCount` / `spec.computeCount` | Requested compute. Use the OCI-supported combination for the selected compute model. | number | no |
 | `spec.dataStorageSizeInTBs` / `spec.dataStorageSizeInGBs` | Requested storage capacity. | number | no |
-| `spec.adminPassword` | Direct admin password value for create or update flows. | string | conditional |
-| `spec.secretId` | OCI Vault secret OCID alternative to `spec.adminPassword`. | string | conditional |
+| `spec.adminPassword.secret.secretName` | Kubernetes Secret name that stores the admin password under the `password` key. | string | conditional |
+| `spec.secretId` | OCI Vault secret OCID alternative to `spec.adminPassword.secret.secretName`. | string | conditional |
 | `spec.kmsKeyId`, `spec.vaultId`, `spec.subnetId`, `spec.nsgIds` | OCI integration fields exposed directly by the generated schema. | mixed | no |
 | `spec.freeformTags`, `spec.definedTags` | OCI tagging support. | map | no |
 
-`spec.adminPassword` and `spec.secretId` replace the deleted
-Kubernetes-secret compatibility path. The v2 resource does not accept
-`spec.adminPassword.secret.secretName`, `spec.wallet`, or
-`spec.walletPassword`.
+The v2 resource continues to accept Secret-backed
+`spec.adminPassword.secret.secretName` for the admin credential and also
+supports `spec.secretId` for OCI Vault-backed password material. It no longer
+accepts `kind: AutonomousDatabases`, `spec.wallet`, or `spec.walletPassword`.
 
 ## Autonomous Database Status Parameters
 
@@ -81,8 +81,13 @@ The generator-owned `AutonomousDatabase` controller provisions an Autonomous
 Database directly from the v2 spec fields. The legacy webhook and compatibility
 runtime are gone, so manifests should use only the generated field names.
 
-The following example shows a typical create flow. Use `secretId` instead of
-`adminPassword` if you want OCI Vault to provide the password material.
+The following example shows a typical create flow. Store the admin password in
+a Kubernetes Secret under the `password` key before applying the CR, or use
+`secretId` instead if you want OCI Vault to provide the password material.
+
+```sh
+kubectl create secret generic <ADMIN_PASSWORD_SECRET_NAME> --from-literal=password=<ADMIN_PASSWORD>
+```
 
 ```yaml
 apiVersion: database.oracle.com/v1beta1
@@ -97,7 +102,9 @@ spec:
   dbVersion: <ORACLE_DB_VERSION>
   dataStorageSizeInTBs: <SIZE_IN_TBS>
   cpuCoreCount: <COUNT>
-  adminPassword: <ADMIN_PASSWORD>
+  adminPassword:
+    secret:
+      secretName: <ADMIN_PASSWORD_SECRET_NAME>
   isAutoScalingEnabled: <true/false>
   isFreeTier: <false/true>
   licenseModel: <BRING_YOUR_OWN_LICENSE/LICENSE_INCLUDED>

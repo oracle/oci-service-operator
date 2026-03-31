@@ -35,9 +35,10 @@ var _ AutonomousDatabaseServiceClient = defaultAutonomousDatabaseServiceClient{}
 var newAutonomousDatabaseServiceClient = func(manager *AutonomousDatabaseServiceManager) AutonomousDatabaseServiceClient {
 	sdkClient, err := databasesdk.NewDatabaseClientWithConfigurationProvider(manager.Provider)
 	config := generatedruntime.Config[*databasev1beta1.AutonomousDatabase]{
-		Kind:    "AutonomousDatabase",
-		SDKName: "AutonomousDatabase",
-		Log:     manager.Log,
+		Kind:             "AutonomousDatabase",
+		SDKName:          "AutonomousDatabase",
+		Log:              manager.Log,
+		CredentialClient: manager.CredentialClient,
 		Semantics: &generatedruntime.Semantics{
 			FormalService:     "database",
 			FormalSlug:        "databaseautonomousdatabase",

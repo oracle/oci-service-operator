@@ -1635,6 +1635,36 @@ func TestCheckedInIdentityUserRuntimeArtifactsMatchGenerator(t *testing.T) {
 	})
 }
 
+func TestCheckedInDatabaseAutonomousDatabasePreservesSecretBackedAdminPassword(t *testing.T) {
+	cfg := loadCheckedInGeneratorConfig(t)
+	databaseService := mustFindGeneratorService(t, cfg, "database")
+
+	outputRoot := t.TempDir()
+	seedSampleKustomization(t, outputRoot)
+
+	pipeline := New()
+	result := mustGenerateRun(t, pipeline, cfg, []ServiceConfig{*databaseService}, Options{
+		OutputRoot:                      outputRoot,
+		PreserveExistingSpecSurfaceRoot: repoRoot(t),
+	})
+	if len(result.Generated) != 1 {
+		t.Fatalf("Generate() generated %d services, want 1", len(result.Generated))
+	}
+
+	apiContent := readFile(t, filepath.Join(outputRoot, "api", "database", "v1beta1", "autonomousdatabase_types.go"))
+	assertContains(t, apiContent, []string{
+		`AdminPassword shared.PasswordSource ` + "`json:\"adminPassword,omitempty\"`",
+	})
+	assertNotContains(t, apiContent, []string{
+		`AdminPassword string ` + "`json:\"adminPassword,omitempty\"`",
+	})
+
+	serviceClientContent := readFile(t, filepath.Join(outputRoot, "pkg", "servicemanager", "database", "autonomousdatabase", "autonomousdatabase_serviceclient.go"))
+	assertContains(t, serviceClientContent, []string{
+		`CredentialClient: manager.CredentialClient,`,
+	})
+}
+
 func TestCheckedInConfigIncludesNetworkLoadBalancerObservedStateAlias(t *testing.T) {
 	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
 	cfg, err := LoadConfig(cfgPath)

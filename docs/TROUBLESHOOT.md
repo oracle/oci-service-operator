@@ -164,9 +164,9 @@ This happens mostly due to user authorization. Follow below steps for remediatio
 
 The generated v2 `AutonomousDatabase` CR no longer accepts the old
 `AutonomousDatabases` compatibility shape. Manifests that still use
-`kind: AutonomousDatabases`, `spec.adminPassword.secret.secretName`, or
-`spec.wallet` will be rejected before reconciliation. Migrate those manifests
-to the generated `AutonomousDatabase` fields and use the dedicated
+`kind: AutonomousDatabases`, `spec.wallet`, or `spec.walletPassword` will be
+rejected before reconciliation. Migrate those manifests to the generated
+`AutonomousDatabase` fields and use the dedicated
 `AutonomousDatabaseWallet` or `AutonomousDatabaseRegionalWallet` resources for
 wallet material.
 

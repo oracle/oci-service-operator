@@ -61,7 +61,13 @@ spec:
                 description: |-
                   **Important** The `adminPassword` or `secretId` must be specified for all Autonomous Databases except for refreshable clones. The password must be between 12 and 30 characters long, and must contain at least 1 uppercase, 1 lowercase, and 1 numeric character. It cannot contain the double quote symbol (") or the username "admin", regardless of casing.
                   This cannot be used in conjunction with with OCI vault secrets (secretId).
-                type: string
+                properties:
+                  secret:
+                    properties:
+                      secretName:
+                        type: string
+                    type: object
+                type: object
               arePrimaryWhitelistedIpsUsed:
                 description: |-
                   This field will be null if the Autonomous Database is not Data Guard enabled or Access Control is disabled.
