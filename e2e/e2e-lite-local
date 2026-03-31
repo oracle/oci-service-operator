@@ -1,0 +1,1179 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
+
+ACTION="up"
+SERVICE="${SERVICE:-}"
+CONTROLLER_IMG="${CONTROLLER_IMG:-}"
+SKIP_IMAGE_BUILD="${SKIP_IMAGE_BUILD:-false}"
+SKIP_IMAGE_LOAD="${SKIP_IMAGE_LOAD:-false}"
+SKIP_GENERATOR_REFRESH="${SKIP_GENERATOR_REFRESH:-false}"
+SKIP_PACKAGE_RENDER="${SKIP_PACKAGE_RENDER:-false}"
+REFRESH_OCI_SECRET="${REFRESH_OCI_SECRET:-false}"
+SAMPLE_DIR="${SAMPLE_DIR:-${REPO_ROOT}/config/samples}"
+SAMPLE_GLOB="${SAMPLE_GLOB:-}"
+TEST_NAMESPACE="${TEST_NAMESPACE:-default}"
+CONTROLLER_ROLLOUT_TIMEOUT="${CONTROLLER_ROLLOUT_TIMEOUT:-5m}"
+RESOURCE_TIMEOUT="${RESOURCE_TIMEOUT:-10m}"
+RESOURCE_POLL_INTERVAL="${RESOURCE_POLL_INTERVAL:-10s}"
+OCI_PROFILE="${OCI_PROFILE:-${OCI_CONFIG_PROFILE:-DEFAULT}}"
+BUILD_CONTEXT="${BUILD_CONTEXT:-${REPO_ROOT}}"
+
+CLUSTER_NAME="${CLUSTER_NAME:-osok-lite}"
+OCI_DIR="${OCI_DIR:-${HOME}/.oci}"
+ARTIFACT_DIR="${ARTIFACT_DIR:-${REPO_ROOT}/e2e/.e2e-lite-local-${CLUSTER_NAME}}"
+KUBECONFIG_PATH="${KUBECONFIG_PATH:-${ARTIFACT_DIR}/kubeconfig}"
+BIN_DIR="${BIN_DIR:-${REPO_ROOT}/bin}"
+KIND_VERSION="${KIND_VERSION:-v0.31.0}"
+KIND_NODE_IMAGE="${KIND_NODE_IMAGE:-mirror.gcr.io/kindest/node:v1.35.0}"
+OPERATOR_SDK_VERSION="${OPERATOR_SDK_VERSION:-v1.37.0}"
+OLM_VERSION="${OLM_VERSION:-v0.28.0}"
+KIND_WAIT="${KIND_WAIT:-5m}"
+OLM_TIMEOUT="${OLM_TIMEOUT:-10m}"
+RECREATE_CLUSTER="${RECREATE_CLUSTER:-false}"
+SKIP_OLM="${SKIP_OLM:-false}"
+KIND_NODE_NAMESERVERS="${KIND_NODE_NAMESERVERS:-1.1.1.1 8.8.8.8}"
+OLM_REGISTRY_PROBE_URL="${OLM_REGISTRY_PROBE_URL:-https://quay.io/v2/}"
+MOUNTED_REPO_PATH="${MOUNTED_REPO_PATH:-/workspace/oci-service-operator}"
+MOUNTED_OCI_PATH="${MOUNTED_OCI_PATH:-/var/oci-host}"
+KIND_CONFIG_PATH="${ARTIFACT_DIR}/kind-config.yaml"
+KUBECTL_BIN="${KUBECTL_BIN:-kubectl}"
+KIND_BIN="${BIN_DIR}/kind"
+OPERATOR_SDK_BIN="${BIN_DIR}/operator-sdk"
+MAKE_GOCACHE="${MAKE_GOCACHE:-${ARTIFACT_DIR}/.gocache}"
+MAKE_GOMODCACHE="${MAKE_GOMODCACHE:-${ARTIFACT_DIR}/.gomodcache}"
+MAKE_GOTMPDIR="${MAKE_GOTMPDIR:-${ARTIFACT_DIR}/.gotmp}"
+MAKE_GOPATH="${MAKE_GOPATH:-${ARTIFACT_DIR}/.gopath}"
+
+export KUBECONFIG="${KUBECONFIG_PATH}"
+export KIND_EXPERIMENTAL_PROVIDER=docker
+
+HOST_OS=""
+HOST_ARCH=""
+PACKAGE_NAMESPACE=""
+PACKAGE_NAME_PREFIX=""
+DEPLOYMENT_NAME=""
+OSOKCONFIG_SECRET_NAME=""
+INSTALL_MANIFEST_PATH=""
+RESULTS_FILE=""
+CONTROLLER_LOG_FILE=""
+SERVICE_INSTALL_APPLIED=false
+RESULT_PASS_COUNT=0
+RESULT_FAIL_COUNT=0
+
+log() {
+  printf '[e2e-lite-local] %s\n' "$*" >&2
+}
+
+warn() {
+  printf '[e2e-lite-local] WARN: %s\n' "$*" >&2
+}
+
+die() {
+  printf '[e2e-lite-local] ERROR: %s\n' "$*" >&2
+  exit 1
+}
+
+usage() {
+  cat <<EOF
+Usage:
+  $(basename "$0") [up|test|down|status|render|help] [options] [NAME=value ...]
+
+Default action:
+  up      Install tools, create a Docker-backed Kind cluster, and install OLM.
+          If --service is set, also build/load/install/test that package group.
+
+Other actions:
+  test    Require --service. Bootstrap the cluster if needed, then deploy and
+          validate the selected package group against local sample manifests.
+  down    Delete the Kind cluster and local artifacts for CLUSTER_NAME.
+  status  Show cluster, OLM, and optional service deployment status.
+  render  Render the Kind config only.
+  help    Show this message.
+
+Service test options:
+  --service GROUP          Package/service group to build, install, and test.
+  --controller-img IMG     Local controller image tag. Default: osok-<group>:dev
+  --sample-dir DIR         Sample manifest directory. Default: ${SAMPLE_DIR}
+  --sample-glob GLOB       Manifest glob inside --sample-dir. Default: <group>_*.yaml
+  --test-namespace NS      Namespace for sample applies when manifests omit it.
+                           Default: ${TEST_NAMESPACE}
+  --oci-profile PROFILE    OCI profile for auto-created ocicredentials. Default: ${OCI_PROFILE}
+  --rollout-timeout DUR    Deployment rollout timeout. Default: ${CONTROLLER_ROLLOUT_TIMEOUT}
+  --resource-timeout DUR   Resource validation timeout. Default: ${RESOURCE_TIMEOUT}
+  --poll-interval DUR      Resource poll interval. Default: ${RESOURCE_POLL_INTERVAL}
+  --refresh-oci-secret     Rebuild ocicredentials even if it already exists.
+  --skip-build             Skip docker build and reuse --controller-img.
+  --skip-load              Skip kind load docker-image.
+  --skip-generator-refresh Skip make generator-refresh.
+  --skip-package-render    Skip make package-install and reuse dist/packages/<group>/install.yaml.
+
+Common environment overrides:
+  CLUSTER_NAME=${CLUSTER_NAME}
+  OCI_DIR=${OCI_DIR}
+  KIND_VERSION=${KIND_VERSION}
+  KIND_NODE_IMAGE=${KIND_NODE_IMAGE}
+  KIND_NODE_NAMESERVERS=${KIND_NODE_NAMESERVERS}
+  OLM_REGISTRY_PROBE_URL=${OLM_REGISTRY_PROBE_URL}
+  OPERATOR_SDK_VERSION=${OPERATOR_SDK_VERSION}
+  OLM_VERSION=${OLM_VERSION}
+  RECREATE_CLUSTER=${RECREATE_CLUSTER}
+  SKIP_OLM=${SKIP_OLM}
+EOF
+}
+
+is_true() {
+  case "${1:-}" in
+    1|[Tt][Rr][Uu][Ee]|[Yy][Ee][Ss]|[Yy]|[Oo][Nn]) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+need_cmd() {
+  command -v "$1" >/dev/null 2>&1 || die "missing required command: $1"
+}
+
+parse_args() {
+  if [ $# -gt 0 ]; then
+    case "$1" in
+      up|test|down|status|render|help|-h|--help)
+        ACTION="$1"
+        shift
+        ;;
+    esac
+  fi
+
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --service)
+        [ $# -ge 2 ] || die "--service requires a value"
+        SERVICE="$2"
+        shift 2
+        ;;
+      --controller-img)
+        [ $# -ge 2 ] || die "--controller-img requires a value"
+        CONTROLLER_IMG="$2"
+        shift 2
+        ;;
+      --sample-dir)
+        [ $# -ge 2 ] || die "--sample-dir requires a value"
+        SAMPLE_DIR="$2"
+        shift 2
+        ;;
+      --sample-glob)
+        [ $# -ge 2 ] || die "--sample-glob requires a value"
+        SAMPLE_GLOB="$2"
+        shift 2
+        ;;
+      --test-namespace)
+        [ $# -ge 2 ] || die "--test-namespace requires a value"
+        TEST_NAMESPACE="$2"
+        shift 2
+        ;;
+      --oci-profile)
+        [ $# -ge 2 ] || die "--oci-profile requires a value"
+        OCI_PROFILE="$2"
+        shift 2
+        ;;
+      --rollout-timeout)
+        [ $# -ge 2 ] || die "--rollout-timeout requires a value"
+        CONTROLLER_ROLLOUT_TIMEOUT="$2"
+        shift 2
+        ;;
+      --resource-timeout)
+        [ $# -ge 2 ] || die "--resource-timeout requires a value"
+        RESOURCE_TIMEOUT="$2"
+        shift 2
+        ;;
+      --poll-interval)
+        [ $# -ge 2 ] || die "--poll-interval requires a value"
+        RESOURCE_POLL_INTERVAL="$2"
+        shift 2
+        ;;
+      --refresh-oci-secret)
+        REFRESH_OCI_SECRET=true
+        shift
+        ;;
+      --skip-build|--skip-image-build)
+        SKIP_IMAGE_BUILD=true
+        shift
+        ;;
+      --skip-load|--skip-image-load)
+        SKIP_IMAGE_LOAD=true
+        shift
+        ;;
+      --skip-generator-refresh)
+        SKIP_GENERATOR_REFRESH=true
+        shift
+        ;;
+      --skip-package-render)
+        SKIP_PACKAGE_RENDER=true
+        shift
+        ;;
+      help|-h|--help)
+        ACTION="help"
+        shift
+        ;;
+      *=*)
+        case "$1" in
+          [A-Za-z_][A-Za-z0-9_]*=*)
+            export "$1"
+            shift
+            ;;
+          *)
+            die "unknown assignment argument: $1"
+            ;;
+        esac
+        ;;
+      *)
+        die "unknown argument: $1"
+        ;;
+    esac
+  done
+
+  case "${SAMPLE_DIR}" in
+    /*) ;;
+    *)
+      SAMPLE_DIR="${REPO_ROOT}/${SAMPLE_DIR}"
+      ;;
+  esac
+
+  if [ -n "${SERVICE}" ] && [ -z "${CONTROLLER_IMG}" ]; then
+    CONTROLLER_IMG="osok-${SERVICE}:dev"
+  fi
+}
+
+detect_platform() {
+  case "$(uname -s)" in
+    Darwin) HOST_OS="darwin" ;;
+    Linux) HOST_OS="linux" ;;
+    *) die "unsupported host OS: $(uname -s)" ;;
+  esac
+
+  case "$(uname -m)" in
+    x86_64|amd64) HOST_ARCH="amd64" ;;
+    arm64|aarch64) HOST_ARCH="arm64" ;;
+    *) die "unsupported host architecture: $(uname -m)" ;;
+  esac
+}
+
+ensure_dirs() {
+  mkdir -p "${ARTIFACT_DIR}" "${BIN_DIR}"
+}
+
+ensure_shareable_paths() {
+  if [ "${HOST_OS}" != "darwin" ]; then
+    return
+  fi
+
+  case "${REPO_ROOT}" in
+    "${HOME}"/*) ;;
+    *) die "REPO_ROOT (${REPO_ROOT}) is outside \$HOME; the active Docker runtime must expose it before Kind extraMounts can use it" ;;
+  esac
+
+  case "${OCI_DIR}" in
+    "${HOME}"/*) ;;
+    *) die "OCI_DIR (${OCI_DIR}) is outside \$HOME; the active Docker runtime must expose it before Kind extraMounts can use it" ;;
+  esac
+}
+
+ensure_docker() {
+  need_cmd docker
+  docker info >/dev/null 2>&1 || die "docker is installed but not ready; start the Docker runtime from Rancher Desktop and retry"
+}
+
+install_kind() {
+  if [ -x "${KIND_BIN}" ]; then
+    return
+  fi
+
+  log "Installing kind ${KIND_VERSION} into ${KIND_BIN}"
+  curl -fsSL -o "${KIND_BIN}" "https://kind.sigs.k8s.io/dl/${KIND_VERSION}/kind-${HOST_OS}-${HOST_ARCH}"
+  chmod +x "${KIND_BIN}"
+}
+
+install_operator_sdk() {
+  if [ -x "${OPERATOR_SDK_BIN}" ]; then
+    return
+  fi
+
+  log "Installing operator-sdk ${OPERATOR_SDK_VERSION} into ${OPERATOR_SDK_BIN}"
+  curl -fsSL -o "${OPERATOR_SDK_BIN}" "https://github.com/operator-framework/operator-sdk/releases/download/${OPERATOR_SDK_VERSION}/operator-sdk_${HOST_OS}_${HOST_ARCH}"
+  chmod +x "${OPERATOR_SDK_BIN}"
+}
+
+ensure_prereqs() {
+  detect_platform
+  ensure_dirs
+  ensure_shareable_paths
+  need_cmd curl
+  need_cmd "${KUBECTL_BIN}"
+  install_kind
+  install_operator_sdk
+  ensure_docker
+}
+
+ensure_service_prereqs() {
+  need_cmd make
+  need_cmd go
+}
+
+cluster_exists() {
+  "${KIND_BIN}" get clusters 2>/dev/null | grep -Fxq "${CLUSTER_NAME}"
+}
+
+ensure_kind_node_image() {
+  if docker image inspect "${KIND_NODE_IMAGE}" >/dev/null 2>&1; then
+    return
+  fi
+
+  log "Pulling Kind node image ${KIND_NODE_IMAGE}"
+  docker pull "${KIND_NODE_IMAGE}" >/dev/null || die "failed to pull Kind node image ${KIND_NODE_IMAGE}; if your environment blocks the default mirror, set KIND_NODE_IMAGE to a reachable preloaded or mirrored image"
+}
+
+write_kind_config() {
+  [ -d "${OCI_DIR}" ] || die "OCI_DIR does not exist: ${OCI_DIR}"
+
+  cat > "${KIND_CONFIG_PATH}" <<EOF
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+- role: control-plane
+  extraMounts:
+  - hostPath: ${REPO_ROOT}
+    containerPath: ${MOUNTED_REPO_PATH}
+  - hostPath: ${OCI_DIR}
+    containerPath: ${MOUNTED_OCI_PATH}
+    readOnly: true
+EOF
+}
+
+export_kubeconfig() {
+  "${KIND_BIN}" export kubeconfig --name "${CLUSTER_NAME}" --kubeconfig "${KUBECONFIG_PATH}" >/dev/null
+}
+
+kind_nodes() {
+  "${KIND_BIN}" get nodes --name "${CLUSTER_NAME}"
+}
+
+configure_kind_node_dns() {
+  local nameserver
+  local node
+  local resolv_conf
+
+  resolv_conf="$(
+    for nameserver in ${KIND_NODE_NAMESERVERS}; do
+      [ -n "${nameserver}" ] || continue
+      printf 'nameserver %s\n' "${nameserver}"
+    done
+  )"
+  [ -n "${resolv_conf}" ] || die "KIND_NODE_NAMESERVERS did not produce any nameserver entries"
+  resolv_conf="${resolv_conf}"$'\n''options ndots:0'
+
+  echo "$(kind_nodes)" | while IFS= read -r node; do
+    [ -n "${node}" ] || continue
+    log "Configuring DNS for ${node}"
+    docker exec -i "${node}" sh -c "cat > /etc/resolv.conf" <<EOF
+${resolv_conf}
+EOF
+  done
+}
+
+probe_kind_node_url() {
+  local node="$1"
+  local url="$2"
+  local curl_family="${3:-}"
+  local curl_cmd
+
+  curl_cmd="curl -sSIL -o /dev/null -w '%{http_code}' --connect-timeout 5 --max-time 20"
+  if [ -n "${curl_family}" ]; then
+    curl_cmd="${curl_cmd} ${curl_family}"
+  fi
+
+  docker exec "${node}" sh -c "${curl_cmd} '${url}'" 2>/dev/null || true
+}
+
+preflight_olm_registry() {
+  if is_true "${SKIP_OLM}"; then
+    return
+  fi
+
+  local first_node
+  local http_code
+  local ipv4_http_code
+
+  first_node="$(kind_nodes | head -n 1)"
+  [ -n "${first_node}" ] || die "unable to determine Kind node name for OLM preflight"
+
+  http_code="$(probe_kind_node_url "${first_node}" "${OLM_REGISTRY_PROBE_URL}")"
+  case "${http_code}" in
+    200|401)
+      return
+      ;;
+  esac
+
+  ipv4_http_code="$(probe_kind_node_url "${first_node}" "${OLM_REGISTRY_PROBE_URL}" "-4")"
+  case "${ipv4_http_code}" in
+    200|401)
+      log "OLM registry probe succeeded with curl -4 from ${first_node}"
+      return
+      ;;
+  esac
+
+  die "OLM registry preflight failed from ${first_node}; expected ${OLM_REGISTRY_PROBE_URL} to return 200 or 401 after DNS setup, got ${http_code:-<no response>} (default) and ${ipv4_http_code:-<no response>} (curl -4). Check Kind-node egress to Quay or override OLM_REGISTRY_PROBE_URL if your environment uses a different reachable registry endpoint."
+}
+
+create_cluster() {
+  write_kind_config
+  ensure_kind_node_image
+
+  if cluster_exists && is_true "${RECREATE_CLUSTER}"; then
+    log "Deleting existing Kind cluster ${CLUSTER_NAME}"
+    "${KIND_BIN}" delete cluster --name "${CLUSTER_NAME}"
+  fi
+
+  if ! cluster_exists; then
+    log "Creating Kind cluster ${CLUSTER_NAME}"
+    "${KIND_BIN}" create cluster \
+      --name "${CLUSTER_NAME}" \
+      --config "${KIND_CONFIG_PATH}" \
+      --image "${KIND_NODE_IMAGE}" \
+      --wait "${KIND_WAIT}" \
+      --kubeconfig "${KUBECONFIG_PATH}"
+  else
+    log "Reusing existing Kind cluster ${CLUSTER_NAME}"
+  fi
+
+  export_kubeconfig
+  "${KUBECTL_BIN}" cluster-info >/dev/null
+  configure_kind_node_dns
+  preflight_olm_registry
+}
+
+install_olm() {
+  if is_true "${SKIP_OLM}"; then
+    log "Skipping OLM installation because SKIP_OLM=${SKIP_OLM}"
+    return
+  fi
+
+  if "${OPERATOR_SDK_BIN}" olm status >/dev/null 2>&1; then
+    log "OLM is already installed"
+    return
+  fi
+
+  log "Installing OLM"
+  if [ -n "${OLM_VERSION}" ]; then
+    "${OPERATOR_SDK_BIN}" olm install --timeout "${OLM_TIMEOUT}" --version "${OLM_VERSION}"
+  else
+    "${OPERATOR_SDK_BIN}" olm install --timeout "${OLM_TIMEOUT}"
+  fi
+
+  "${OPERATOR_SDK_BIN}" olm status >/dev/null
+}
+
+load_service_metadata() {
+  local metadata_file package_name
+
+  [ -n "${SERVICE}" ] || die "--service is required for this action"
+
+  metadata_file="${REPO_ROOT}/packages/${SERVICE}/metadata.env"
+  [ -f "${metadata_file}" ] || die "unknown package/service group: ${SERVICE}"
+
+  # shellcheck disable=SC1090
+  source "${metadata_file}"
+
+  : "${PACKAGE_NAMESPACE:?missing PACKAGE_NAMESPACE in ${metadata_file}}"
+  package_name="${PACKAGE_NAME:-oci-service-operator-${SERVICE}}"
+  PACKAGE_NAME_PREFIX="${PACKAGE_NAME_PREFIX:-${package_name}-}"
+  DEPLOYMENT_NAME="${PACKAGE_NAME_PREFIX}controller-manager"
+  OSOKCONFIG_SECRET_NAME="${PACKAGE_NAME_PREFIX}osokconfig"
+  INSTALL_MANIFEST_PATH="${REPO_ROOT}/dist/packages/${SERVICE}/install.yaml"
+  RESULTS_FILE="${ARTIFACT_DIR}/results/${SERVICE}.tsv"
+  CONTROLLER_LOG_FILE="${ARTIFACT_DIR}/logs/${SERVICE}-controller.log"
+}
+
+ensure_make_cache_dirs() {
+  mkdir -p "${MAKE_GOCACHE}" "${MAKE_GOMODCACHE}" "${MAKE_GOTMPDIR}" "${MAKE_GOPATH}"
+}
+
+run_make() {
+  ensure_make_cache_dirs
+  (
+    cd "${REPO_ROOT}"
+    GOCACHE="${MAKE_GOCACHE}" \
+    GOMODCACHE="${MAKE_GOMODCACHE}" \
+    GOTMPDIR="${MAKE_GOTMPDIR}" \
+    GOPATH="${MAKE_GOPATH}" \
+    make "$@"
+  )
+}
+
+build_local_controller_image() {
+  [ -n "${CONTROLLER_IMG}" ] || die "CONTROLLER_IMG is empty"
+  log "Building controller image ${CONTROLLER_IMG}"
+  docker build -t "${CONTROLLER_IMG}" "${BUILD_CONTEXT}"
+}
+
+load_local_controller_image() {
+  [ -n "${CONTROLLER_IMG}" ] || die "CONTROLLER_IMG is empty"
+  log "Loading controller image ${CONTROLLER_IMG} into Kind cluster ${CLUSTER_NAME}"
+  "${KIND_BIN}" load docker-image "${CONTROLLER_IMG}" --name "${CLUSTER_NAME}"
+}
+
+refresh_service_artifacts() {
+  local args
+
+  args=( generator-refresh "GENERATOR_SERVICE=${SERVICE}" )
+  if [ -n "${GENERATOR_OVERWRITE:-}" ]; then
+    args+=( "GENERATOR_OVERWRITE=${GENERATOR_OVERWRITE}" )
+  fi
+
+  log "Refreshing generated artifacts for service ${SERVICE}"
+  run_make "${args[@]}"
+}
+
+render_service_install_manifest() {
+  log "Rendering install manifest for service ${SERVICE}"
+  run_make package-install "GROUP=${SERVICE}" "CONTROLLER_IMG=${CONTROLLER_IMG}"
+}
+
+ensure_service_install_manifest() {
+  [ -f "${INSTALL_MANIFEST_PATH}" ] || die "install manifest not found: ${INSTALL_MANIFEST_PATH}"
+}
+
+ensure_namespace_exists() {
+  "${KUBECTL_BIN}" create namespace "${PACKAGE_NAMESPACE}" --dry-run=client -o yaml | "${KUBECTL_BIN}" apply -f - >/dev/null
+}
+
+secret_exists() {
+  local namespace="$1"
+  local name="$2"
+
+  "${KUBECTL_BIN}" -n "${namespace}" get secret "${name}" >/dev/null 2>&1
+}
+
+oci_config_value() {
+  local key="$1"
+
+  awk -v profile="${OCI_PROFILE}" -v key="${key}" '
+    function trim(s) {
+      sub(/^[[:space:]]+/, "", s)
+      sub(/[[:space:]]+$/, "", s)
+      return s
+    }
+    /^[[:space:]]*#/ { next }
+    /^[[:space:]]*\[/ {
+      section=$0
+      gsub(/^[[:space:]]*\[/, "", section)
+      gsub(/\][[:space:]]*$/, "", section)
+      section=trim(section)
+      current=(section == profile)
+      next
+    }
+    current && index($0, "=") > 0 {
+      line=$0
+      split(line, parts, "=")
+      current_key=trim(parts[1])
+      sub(/^[^=]*=/, "", line)
+      if (current_key == key) {
+        print trim(line)
+        exit
+      }
+    }
+  ' "${OCI_DIR}/config"
+}
+
+expand_config_path() {
+  local value="$1"
+  local config_dir
+
+  [ -n "${value}" ] || return 0
+
+  config_dir="$(cd -- "$(dirname -- "${OCI_DIR}/config")" && pwd)"
+
+  case "${value}" in
+    "~")
+      printf '%s\n' "${HOME}"
+      ;;
+    "~/"*)
+      printf '%s/%s\n' "${HOME}" "${value#~/}"
+      ;;
+    /*)
+      printf '%s\n' "${value}"
+      ;;
+    *)
+      printf '%s/%s\n' "${config_dir}" "${value}"
+      ;;
+  esac
+}
+
+write_security_token_config() {
+  local out_path="$1"
+  local tenancy="$2"
+  local region="$3"
+  local fingerprint="$4"
+  local user="$5"
+
+  mkdir -p "$(dirname -- "${out_path}")"
+
+  cat > "${out_path}" <<EOF
+[${OCI_PROFILE}]
+tenancy=${tenancy}
+region=${region}
+fingerprint=${fingerprint}
+key_file=/etc/oci/privatekey
+security_token_file=/etc/oci/security_token
+EOF
+
+  if [ -n "${user}" ]; then
+    printf 'user=%s\n' "${user}" >> "${out_path}"
+  fi
+}
+
+ensure_ocicredentials_secret() {
+  local tenancy
+  local user
+  local fingerprint
+  local region
+  local passphrase
+  local key_file
+  local security_token_file
+  local rendered_config
+  local cmd
+
+  ensure_namespace_exists
+
+  if secret_exists "${PACKAGE_NAMESPACE}" ocicredentials && ! is_true "${REFRESH_OCI_SECRET}"; then
+    log "Reusing existing ocicredentials secret in namespace ${PACKAGE_NAMESPACE}"
+    return
+  fi
+
+  [ -f "${OCI_DIR}/config" ] || die "OCI config file not found at ${OCI_DIR}/config"
+
+  tenancy="$(oci_config_value tenancy)"
+  user="$(oci_config_value user)"
+  fingerprint="$(oci_config_value fingerprint)"
+  region="$(oci_config_value region)"
+  passphrase="$(oci_config_value pass_phrase)"
+  key_file="$(expand_config_path "$(oci_config_value key_file)")"
+  security_token_file="$(expand_config_path "$(oci_config_value security_token_file)")"
+
+  [ -n "${tenancy}" ] || die "profile ${OCI_PROFILE} in ${OCI_DIR}/config does not define tenancy"
+  [ -n "${fingerprint}" ] || die "profile ${OCI_PROFILE} in ${OCI_DIR}/config does not define fingerprint"
+  [ -n "${region}" ] || die "profile ${OCI_PROFILE} in ${OCI_DIR}/config does not define region"
+  [ -n "${key_file}" ] || die "profile ${OCI_PROFILE} in ${OCI_DIR}/config does not define key_file"
+  [ -f "${key_file}" ] || die "OCI private key file does not exist: ${key_file}"
+
+  if [ -n "${security_token_file}" ]; then
+    [ -f "${security_token_file}" ] || die "OCI security token file does not exist: ${security_token_file}"
+    rendered_config="${ARTIFACT_DIR}/oci/${SERVICE}-${OCI_PROFILE}-config"
+    write_security_token_config "${rendered_config}" "${tenancy}" "${region}" "${fingerprint}" "${user}"
+
+    cmd=( "${KUBECTL_BIN}" -n "${PACKAGE_NAMESPACE}" create secret generic ocicredentials --dry-run=client -o yaml )
+    cmd+=( "--from-literal=auth_type=security_token" )
+    cmd+=( "--from-literal=config_file_path=/etc/oci/config" )
+    cmd+=( "--from-literal=config_file_profile=${OCI_PROFILE}" )
+    cmd+=( "--from-literal=passphrase=${passphrase}" )
+    cmd+=( "--from-file=config=${rendered_config}" )
+    cmd+=( "--from-file=privatekey=${key_file}" )
+    cmd+=( "--from-file=security_token=${security_token_file}" )
+    "${cmd[@]}" | "${KUBECTL_BIN}" apply -f - >/dev/null
+    log "Applied ocicredentials secret in namespace ${PACKAGE_NAMESPACE} using OCI profile ${OCI_PROFILE} (security token)"
+    return
+  fi
+
+  [ -n "${user}" ] || die "profile ${OCI_PROFILE} in ${OCI_DIR}/config does not define user"
+
+  cmd=( "${KUBECTL_BIN}" -n "${PACKAGE_NAMESPACE}" create secret generic ocicredentials --dry-run=client -o yaml )
+  cmd+=( "--from-literal=tenancy=${tenancy}" )
+  cmd+=( "--from-literal=user=${user}" )
+  cmd+=( "--from-literal=fingerprint=${fingerprint}" )
+  cmd+=( "--from-literal=region=${region}" )
+  cmd+=( "--from-literal=passphrase=${passphrase}" )
+  cmd+=( "--from-file=privatekey=${key_file}" )
+  "${cmd[@]}" | "${KUBECTL_BIN}" apply -f - >/dev/null
+  log "Applied ocicredentials secret in namespace ${PACKAGE_NAMESPACE} using OCI profile ${OCI_PROFILE} (user principal)"
+}
+
+apply_service_install_manifest() {
+  ensure_namespace_exists
+  log "Applying install manifest ${INSTALL_MANIFEST_PATH}"
+  "${KUBECTL_BIN}" apply -f "${INSTALL_MANIFEST_PATH}" >/dev/null
+  SERVICE_INSTALL_APPLIED=true
+}
+
+patch_kind_local_mismatches() {
+  local pki_mount_index
+  local pki_volume_index
+  local patch_ops
+
+  log "Patching deployment ${DEPLOYMENT_NAME} imagePullPolicy=IfNotPresent for Kind"
+  "${KUBECTL_BIN}" -n "${PACKAGE_NAMESPACE}" patch deployment "${DEPLOYMENT_NAME}" \
+    --type=json \
+    -p='[{"op":"replace","path":"/spec/template/spec/containers/0/imagePullPolicy","value":"IfNotPresent"}]' >/dev/null
+
+  log "Patching secret ${OSOKCONFIG_SECRET_NAME} useinstanceprincipal=false for local credentials"
+  "${KUBECTL_BIN}" -n "${PACKAGE_NAMESPACE}" patch secret "${OSOKCONFIG_SECRET_NAME}" \
+    --type=merge \
+    -p='{"stringData":{"useinstanceprincipal":"false"}}' >/dev/null
+
+  pki_mount_index="$("${KUBECTL_BIN}" -n "${PACKAGE_NAMESPACE}" get deployment "${DEPLOYMENT_NAME}" \
+    -o jsonpath='{range .spec.template.spec.containers[0].volumeMounts[*]}{@.mountPath}{"\n"}{end}' \
+    | awk '$0 == "/etc/pki" { print NR - 1; exit }')"
+  pki_volume_index="$("${KUBECTL_BIN}" -n "${PACKAGE_NAMESPACE}" get deployment "${DEPLOYMENT_NAME}" \
+    -o jsonpath='{range .spec.template.spec.volumes[*]}{@.name}{"\n"}{end}' \
+    | awk '$0 == "pki" { print NR - 1; exit }')"
+  if [ -n "${pki_mount_index}" ] || [ -n "${pki_volume_index}" ]; then
+    patch_ops="["
+    if [ -n "${pki_mount_index}" ]; then
+      patch_ops="${patch_ops}{\"op\":\"remove\",\"path\":\"/spec/template/spec/containers/0/volumeMounts/${pki_mount_index}\"}"
+    fi
+    if [ -n "${pki_volume_index}" ]; then
+      if [ "${patch_ops}" != "[" ]; then
+        patch_ops="${patch_ops},"
+      fi
+      patch_ops="${patch_ops}{\"op\":\"remove\",\"path\":\"/spec/template/spec/volumes/${pki_volume_index}\"}"
+    fi
+    patch_ops="${patch_ops}]"
+
+    log "Removing host /etc/pki override from deployment ${DEPLOYMENT_NAME} for local Kind trust"
+    "${KUBECTL_BIN}" -n "${PACKAGE_NAMESPACE}" patch deployment "${DEPLOYMENT_NAME}" \
+      --type=json \
+      -p="${patch_ops}" >/dev/null
+  fi
+
+  log "Restarting deployment ${DEPLOYMENT_NAME} so updated secrets are re-read"
+  "${KUBECTL_BIN}" -n "${PACKAGE_NAMESPACE}" rollout restart "deployment/${DEPLOYMENT_NAME}" >/dev/null
+}
+
+wait_for_controller_rollout() {
+  log "Waiting for deployment ${DEPLOYMENT_NAME} rollout"
+  "${KUBECTL_BIN}" -n "${PACKAGE_NAMESPACE}" rollout status "deployment/${DEPLOYMENT_NAME}" --timeout "${CONTROLLER_ROLLOUT_TIMEOUT}"
+}
+
+record_result() {
+  local status="$1"
+  local kind="$2"
+  local name="$3"
+  local mode="$4"
+  local detail="$5"
+
+  mkdir -p "$(dirname -- "${RESULTS_FILE}")"
+  printf '%s\t%s\t%s\t%s\t%s\n' "${status}" "${kind}" "${name}" "${mode}" "${detail}" >> "${RESULTS_FILE}"
+
+  if [ "${status}" = "PASS" ]; then
+    RESULT_PASS_COUNT=$((RESULT_PASS_COUNT + 1))
+  else
+    RESULT_FAIL_COUNT=$((RESULT_FAIL_COUNT + 1))
+  fi
+
+  log "${status} ${kind}/${name} (${mode}): ${detail}"
+}
+
+duration_to_seconds() {
+  case "${1}" in
+    *h) printf '%s\n' "$(( ${1%h} * 3600 ))" ;;
+    *m) printf '%s\n' "$(( ${1%m} * 60 ))" ;;
+    *s) printf '%s\n' "$(( ${1%s} ))" ;;
+    *[!0-9]*)
+      die "unsupported duration format: ${1} (use whole seconds, or suffix with s/m/h)"
+      ;;
+    *)
+      printf '%s\n' "${1}"
+      ;;
+  esac
+}
+
+manifest_root_value() {
+  local manifest="$1"
+  local key="$2"
+
+  awk -v key="${key}" '
+    $1 == key ":" {
+      sub(/^[^:]+:[[:space:]]*/, "", $0)
+      print
+      exit
+    }
+  ' "${manifest}"
+}
+
+manifest_metadata_value() {
+  local manifest="$1"
+  local key="$2"
+
+  awk -v key="${key}" '
+    /^[[:space:]]*metadata:[[:space:]]*$/ {
+      inmeta=1
+      next
+    }
+    inmeta && $1 == key ":" {
+      sub(/^[^:]+:[[:space:]]*/, "", $0)
+      print
+      exit
+    }
+    inmeta && /^[^[:space:]]/ {
+      inmeta=0
+    }
+  ' "${manifest}"
+}
+
+resource_has_controller() {
+  local kind="$1"
+  local controller_dir
+
+  controller_dir="${REPO_ROOT}/controllers/${SERVICE}"
+  [ -d "${controller_dir}" ] || return 1
+
+  grep -R -E -q "type[[:space:]]+${kind}Reconciler|For\\(&[[:alnum:]_]+\\.${kind}\\{\\}\\)" "${controller_dir}" 2>/dev/null
+}
+
+warn_on_sample_placeholders() {
+  local manifest="$1"
+
+  if grep -E -q '^[[:space:]]*[^#].*(XXXXXXXX|<[^>]+>|exampleuniqueID)' "${manifest}"; then
+    warn "manifest ${manifest} still appears to contain placeholder OCI values"
+  fi
+}
+
+wait_for_controller_backed_resource() {
+  local kind="$1"
+  local name="$2"
+  local namespace="$3"
+  local timeout_secs
+  local poll_secs
+  local started
+  local state
+  local condition lifecycle ocid id reason message endpoint_status detail
+
+  timeout_secs="$(duration_to_seconds "${RESOURCE_TIMEOUT}")"
+  poll_secs="$(duration_to_seconds "${RESOURCE_POLL_INTERVAL}")"
+  started="${SECONDS}"
+  condition=""
+  lifecycle=""
+  ocid=""
+  id=""
+  reason=""
+  message=""
+  endpoint_status=""
+
+  while [ $(( SECONDS - started )) -lt "${timeout_secs}" ]; do
+    if ! "${KUBECTL_BIN}" -n "${namespace}" get "${kind}" "${name}" >/dev/null 2>&1; then
+      sleep "${poll_secs}"
+      continue
+    fi
+
+    state="$("${KUBECTL_BIN}" -n "${namespace}" get "${kind}" "${name}" -o jsonpath='{.status.status.conditions[-1].type}{"\t"}{.status.lifecycleState}{"\t"}{.status.status.ocid}{"\t"}{.status.id}{"\t"}{.status.status.reason}{"\t"}{.status.status.message}' 2>/dev/null || true)"
+    IFS=$'\t' read -r condition lifecycle ocid id reason message <<EOF
+${state}
+EOF
+
+    if [ "${kind}" = "Stream" ]; then
+      if "${KUBECTL_BIN}" -n "${namespace}" get secret "${name}" -o jsonpath='{.data.endpoint}' >/dev/null 2>&1; then
+        endpoint_status=" endpointSecret=present"
+      else
+        endpoint_status=" endpointSecret=missing"
+      fi
+    fi
+
+    case "${condition}" in
+      Active)
+        detail="condition=${condition}"
+        if [ -n "${ocid}" ]; then
+          detail="${detail} ocid=${ocid}"
+        elif [ -n "${id}" ]; then
+          detail="${detail} id=${id}"
+        fi
+        record_result PASS "${kind}" "${name}" controller-backed "${detail}${endpoint_status}"
+        return 0
+        ;;
+      Failed)
+        detail="condition=${condition}"
+        if [ -n "${reason}" ]; then
+          detail="${detail} reason=${reason}"
+        fi
+        if [ -n "${message}" ]; then
+          detail="${detail} message=${message}"
+        fi
+        record_result FAIL "${kind}" "${name}" controller-backed "${detail}${endpoint_status}"
+        return 1
+        ;;
+    esac
+
+    case "${lifecycle}" in
+      ACTIVE|SUCCEEDED)
+        detail="lifecycleState=${lifecycle}"
+        if [ -n "${ocid}" ]; then
+          detail="${detail} ocid=${ocid}"
+        elif [ -n "${id}" ]; then
+          detail="${detail} id=${id}"
+        fi
+        record_result PASS "${kind}" "${name}" controller-backed "${detail}${endpoint_status}"
+        return 0
+        ;;
+      FAILED)
+        detail="lifecycleState=${lifecycle}"
+        if [ -n "${reason}" ]; then
+          detail="${detail} reason=${reason}"
+        fi
+        if [ -n "${message}" ]; then
+          detail="${detail} message=${message}"
+        fi
+        record_result FAIL "${kind}" "${name}" controller-backed "${detail}${endpoint_status}"
+        return 1
+        ;;
+    esac
+
+    sleep "${poll_secs}"
+  done
+
+  detail="timed out waiting for Active"
+  if [ -n "${condition}" ]; then
+    detail="${detail}; lastCondition=${condition}"
+  fi
+  if [ -n "${lifecycle}" ]; then
+    detail="${detail}; lifecycleState=${lifecycle}"
+  fi
+  if [ -n "${reason}" ]; then
+    detail="${detail}; reason=${reason}"
+  fi
+  if [ -n "${message}" ]; then
+    detail="${detail}; message=${message}"
+  fi
+  record_result FAIL "${kind}" "${name}" controller-backed "${detail}${endpoint_status}"
+  return 1
+}
+
+verify_admission_only_resource() {
+  local kind="$1"
+  local name="$2"
+  local namespace="$3"
+
+  if "${KUBECTL_BIN}" -n "${namespace}" get "${kind}" "${name}" >/dev/null 2>&1; then
+    record_result PASS "${kind}" "${name}" admitted-only "created in cluster; no controller detected for ${SERVICE}/${kind}"
+    return 0
+  fi
+
+  record_result FAIL "${kind}" "${name}" admitted-only "kubectl apply succeeded but the resource was not found"
+  return 1
+}
+
+discover_service_samples() {
+  local pattern
+
+  pattern="${SAMPLE_GLOB:-${SERVICE}_*.yaml}"
+  find "${SAMPLE_DIR}" -maxdepth 1 -type f -name "${pattern}" | LC_ALL=C sort
+}
+
+capture_controller_logs() {
+  if ! is_true "${SERVICE_INSTALL_APPLIED}"; then
+    return 0
+  fi
+
+  [ -n "${CONTROLLER_LOG_FILE}" ] || return 0
+  mkdir -p "$(dirname -- "${CONTROLLER_LOG_FILE}")"
+
+  if "${KUBECTL_BIN}" -n "${PACKAGE_NAMESPACE}" logs "deployment/${DEPLOYMENT_NAME}" --all-containers=true > "${CONTROLLER_LOG_FILE}" 2>/dev/null; then
+    log "Controller logs written to ${CONTROLLER_LOG_FILE}"
+  fi
+}
+
+run_service_samples() {
+  local sample_list
+  local manifest
+  local sample_count
+  local kind
+  local name
+  local namespace
+  local apply_output
+
+  sample_list="${ARTIFACT_DIR}/results/${SERVICE}.samples"
+  mkdir -p "$(dirname -- "${sample_list}")"
+  discover_service_samples > "${sample_list}"
+  [ -s "${sample_list}" ] || die "no sample manifests found for ${SERVICE} in ${SAMPLE_DIR}"
+
+  : > "${RESULTS_FILE}"
+  RESULT_PASS_COUNT=0
+  RESULT_FAIL_COUNT=0
+  sample_count=0
+
+  while IFS= read -r manifest; do
+    sample_count=$((sample_count + 1))
+    warn_on_sample_placeholders "${manifest}"
+
+    kind="$(manifest_root_value "${manifest}" kind)"
+    name="$(manifest_metadata_value "${manifest}" name)"
+    namespace="$(manifest_metadata_value "${manifest}" namespace)"
+    namespace="${namespace:-${TEST_NAMESPACE}}"
+
+    [ -n "${kind}" ] || die "unable to determine kind from sample manifest ${manifest}"
+    [ -n "${name}" ] || die "unable to determine metadata.name from sample manifest ${manifest}"
+
+    log "Applying sample ${manifest} as ${kind}/${name} in namespace ${namespace}"
+    if ! apply_output="$("${KUBECTL_BIN}" -n "${namespace}" apply -f "${manifest}" 2>&1)"; then
+      record_result FAIL "${kind}" "${name}" apply "${apply_output}"
+      continue
+    fi
+
+    if resource_has_controller "${kind}"; then
+      wait_for_controller_backed_resource "${kind}" "${name}" "${namespace}" || true
+    else
+      verify_admission_only_resource "${kind}" "${name}" "${namespace}" || true
+    fi
+  done < "${sample_list}"
+
+  log "Resource creation summary for ${SERVICE}: pass=${RESULT_PASS_COUNT} fail=${RESULT_FAIL_COUNT} total=${sample_count}"
+}
+
+run_service_suite() {
+  load_service_metadata
+  ensure_service_prereqs
+
+  if is_true "${SKIP_OLM}"; then
+    log "Service suite is using direct package-install flow with SKIP_OLM=${SKIP_OLM}"
+  else
+    warn "OLM is not required for direct package-install service tests; set SKIP_OLM=true to skip it"
+  fi
+
+  if ! is_true "${SKIP_IMAGE_BUILD}"; then
+    build_local_controller_image
+  else
+    log "Skipping docker build because SKIP_IMAGE_BUILD=${SKIP_IMAGE_BUILD}"
+  fi
+
+  if ! is_true "${SKIP_IMAGE_LOAD}"; then
+    load_local_controller_image
+  else
+    log "Skipping kind load because SKIP_IMAGE_LOAD=${SKIP_IMAGE_LOAD}"
+  fi
+
+  if ! is_true "${SKIP_GENERATOR_REFRESH}"; then
+    refresh_service_artifacts
+  else
+    log "Skipping generator refresh because SKIP_GENERATOR_REFRESH=${SKIP_GENERATOR_REFRESH}"
+  fi
+
+  if ! is_true "${SKIP_PACKAGE_RENDER}"; then
+    render_service_install_manifest
+  else
+    log "Skipping package render because SKIP_PACKAGE_RENDER=${SKIP_PACKAGE_RENDER}"
+  fi
+
+  ensure_service_install_manifest
+  ensure_ocicredentials_secret
+  apply_service_install_manifest
+  patch_kind_local_mismatches
+  wait_for_controller_rollout
+  run_service_samples
+  capture_controller_logs
+
+  if [ "${RESULT_FAIL_COUNT}" -ne 0 ]; then
+    die "service suite failed for ${SERVICE}; see ${RESULTS_FILE} and ${CONTROLLER_LOG_FILE}"
+  fi
+}
+
+show_status() {
+  if ! cluster_exists; then
+    log "Kind cluster ${CLUSTER_NAME} does not exist"
+    return
+  fi
+
+  export_kubeconfig
+
+  log "Kind nodes"
+  "${KIND_BIN}" get nodes --name "${CLUSTER_NAME}"
+
+  log "OLM namespaces"
+  "${KUBECTL_BIN}" get namespace olm operators 2>/dev/null || true
+
+  if [ -x "${OPERATOR_SDK_BIN}" ]; then
+    log "OLM status"
+    "${OPERATOR_SDK_BIN}" olm status 2>/dev/null || true
+  fi
+
+  if [ -n "${SERVICE}" ]; then
+    if [ -z "${PACKAGE_NAMESPACE}" ]; then
+      load_service_metadata
+    fi
+    log "Service deployment"
+    "${KUBECTL_BIN}" -n "${PACKAGE_NAMESPACE}" get deployment "${DEPLOYMENT_NAME}" 2>/dev/null || true
+  fi
+}
+
+teardown() {
+  if cluster_exists; then
+    log "Deleting Kind cluster ${CLUSTER_NAME}"
+    "${KIND_BIN}" delete cluster --name "${CLUSTER_NAME}"
+  else
+    log "Kind cluster ${CLUSTER_NAME} does not exist"
+  fi
+
+  if [ -d "${ARTIFACT_DIR}" ]; then
+    rm -rf "${ARTIFACT_DIR}"
+    log "Removed ${ARTIFACT_DIR}"
+  fi
+}
+
+render_only() {
+  detect_platform
+  ensure_dirs
+  write_kind_config
+
+  log "Kind config: ${KIND_CONFIG_PATH}"
+}
+
+up() {
+  ensure_prereqs
+  create_cluster
+  install_olm
+  if [ -n "${SERVICE}" ]; then
+    run_service_suite
+  fi
+  show_status
+}
+
+test_action() {
+  [ -n "${SERVICE}" ] || die "test requires --service <group>"
+  ensure_prereqs
+  create_cluster
+  install_olm
+  run_service_suite
+  show_status
+}
+
+on_exit() {
+  capture_controller_logs || true
+}
+
+trap on_exit EXIT
+
+parse_args "$@"
+
+case "${ACTION}" in
+  up)
+    up
+    ;;
+  test)
+    test_action
+    ;;
+  down)
+    ensure_prereqs
+    teardown
+    ;;
+  status)
+    ensure_prereqs
+    show_status
+    ;;
+  render)
+    render_only
+    ;;
+  help|-h|--help)
+    usage
+    ;;
+  *)
+    usage
+    exit 1
+    ;;
+esac
