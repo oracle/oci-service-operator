@@ -297,3 +297,40 @@ func TestDelete_ConfirmsDeletionOnObservedTerminated(t *testing.T) {
 	assert.True(t, done)
 	assert.NotNil(t, resource.Status.OsokStatus.DeletedAt)
 }
+
+func TestDelete_DoesNotConfirmDeletionOnAuthAmbiguity(t *testing.T) {
+	manager := newTestManager(&fakeVcnOCIClient{
+		deleteFn: func(_ context.Context, _ coresdk.DeleteVcnRequest) (coresdk.DeleteVcnResponse, error) {
+			return coresdk.DeleteVcnResponse{}, nil
+		},
+		getFn: func(_ context.Context, _ coresdk.GetVcnRequest) (coresdk.GetVcnResponse, error) {
+			return coresdk.GetVcnResponse{}, fakeServiceError{
+				statusCode: 404,
+				code:       "NotAuthorizedOrNotFound",
+				message:    "auth ambiguity",
+			}
+		},
+	})
+
+	resource := makeSpecVcn()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.vcn.oc1..delete")
+
+	done, err := manager.Delete(context.Background(), resource)
+
+	assert.Error(t, err)
+	assert.False(t, done)
+	assert.Nil(t, resource.Status.OsokStatus.DeletedAt)
+}
+
+func TestIsNotFoundOCI_RejectsAuthAmbiguity(t *testing.T) {
+	assert.False(t, isNotFoundOCI(fakeServiceError{
+		statusCode: 404,
+		code:       "NotAuthorizedOrNotFound",
+		message:    "auth ambiguity",
+	}))
+	assert.True(t, isNotFoundOCI(fakeServiceError{
+		statusCode: 404,
+		code:       "NotFound",
+		message:    "not found",
+	}))
+}

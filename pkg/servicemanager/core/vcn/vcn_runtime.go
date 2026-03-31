@@ -412,19 +412,17 @@ func normalizeOCIError(err error) error {
 func isNotFoundOCI(err error) bool {
 	var serviceErr common.ServiceError
 	if errors.As(err, &serviceErr) {
-		if serviceErr.GetHTTPStatusCode() == 404 {
-			return true
-		}
 		switch serviceErr.GetCode() {
-		case "NotFound", "NotAuthorizedOrNotFound":
+		case "NotFound":
 			return true
 		}
 	}
 
 	message := err.Error()
-	return strings.Contains(message, "http status code: 404") ||
-		strings.Contains(message, "NotFound") ||
-		strings.Contains(message, "NotAuthorizedOrNotFound")
+	if strings.Contains(message, "NotAuthorizedOrNotFound") {
+		return false
+	}
+	return strings.Contains(message, "NotFound")
 }
 
 func stringPtrEqual(actual *string, expected string) bool {
