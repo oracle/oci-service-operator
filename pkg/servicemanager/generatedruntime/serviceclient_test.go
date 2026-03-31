@@ -10,6 +10,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
@@ -186,45 +187,16 @@ func TestServiceClientCreateOrUpdateCreatesAndProjectsStatus(t *testing.T) {
 	}
 
 	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
-	if err != nil {
-		t.Fatalf("CreateOrUpdate() error = %v", err)
-	}
-	if !response.IsSuccessful {
-		t.Fatal("CreateOrUpdate() should report success")
-	}
-	if response.ShouldRequeue {
-		t.Fatal("CreateOrUpdate() should not requeue for ACTIVE lifecycle")
-	}
-	if createRequest.CompartmentId != resource.Spec.CompartmentId {
-		t.Fatalf("create request compartmentId = %q, want %q", createRequest.CompartmentId, resource.Spec.CompartmentId)
-	}
-	if createRequest.DisplayName != resource.Spec.DisplayName {
-		t.Fatalf("create request displayName = %q, want %q", createRequest.DisplayName, resource.Spec.DisplayName)
-	}
-	if !createRequest.Enabled {
-		t.Fatal("create request enabled flag was not projected from spec")
-	}
-	if getRequest.ThingId == nil || *getRequest.ThingId != "ocid1.thing.oc1..create" {
-		t.Fatalf("get request thingId = %v, want created OCID", getRequest.ThingId)
-	}
-	if string(resource.Status.OsokStatus.Ocid) != "ocid1.thing.oc1..create" {
-		t.Fatalf("status.ocid = %q, want created OCID", resource.Status.OsokStatus.Ocid)
-	}
-	if resource.Status.Id != "ocid1.thing.oc1..create" {
-		t.Fatalf("status.id = %q, want created OCID", resource.Status.Id)
-	}
-	if resource.Status.DisplayName != "created-name" {
-		t.Fatalf("status.displayName = %q, want created-name", resource.Status.DisplayName)
-	}
-	if resource.Status.LifecycleState != "ACTIVE" {
-		t.Fatalf("status.lifecycleState = %q, want ACTIVE", resource.Status.LifecycleState)
-	}
-	if resource.Status.OsokStatus.CreatedAt == nil {
-		t.Fatal("status.createdAt should be set after create")
-	}
-	if len(resource.Status.OsokStatus.Conditions) == 0 || resource.Status.OsokStatus.Conditions[len(resource.Status.OsokStatus.Conditions)-1].Type != shared.Active {
-		t.Fatalf("status conditions = %#v, want trailing Active condition", resource.Status.OsokStatus.Conditions)
-	}
+	requireCreateOrUpdateSuccess(t, response, err)
+	requireRequeueState(t, response, false, "CreateOrUpdate() should not requeue for ACTIVE lifecycle")
+	requireCreateThingRequestMatchesSpec(t, createRequest, resource.Spec)
+	requireThingIDRequest(t, "get", getRequest.ThingId, "ocid1.thing.oc1..create")
+	requireStatusOCID(t, resource, "ocid1.thing.oc1..create")
+	requireStringEqual(t, "status.id", resource.Status.Id, "ocid1.thing.oc1..create")
+	requireStringEqual(t, "status.displayName", resource.Status.DisplayName, "created-name")
+	requireStringEqual(t, "status.lifecycleState", resource.Status.LifecycleState, "ACTIVE")
+	requireCreatedAt(t, resource)
+	requireTrailingCondition(t, resource, shared.Active)
 }
 
 func TestServiceClientCreateOrUpdateUpdatesExistingResource(t *testing.T) {
@@ -431,27 +403,12 @@ func TestServiceClientCreateOrUpdateUpdatesWhenMutableStateDiffers(t *testing.T)
 	}
 
 	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
-	if err != nil {
-		t.Fatalf("CreateOrUpdate() error = %v", err)
-	}
-	if !response.IsSuccessful {
-		t.Fatal("CreateOrUpdate() should succeed when mutable drift requires update")
-	}
-	if response.ShouldRequeue {
-		t.Fatal("CreateOrUpdate() should not requeue for ACTIVE update result")
-	}
-	if !getCalled {
-		t.Fatal("Get() should be called before comparing mutable fields")
-	}
-	if updateRequest.ThingId == nil || *updateRequest.ThingId != "ocid1.thing.oc1..existing" {
-		t.Fatalf("update request thingId = %v, want existing OCID", updateRequest.ThingId)
-	}
-	if updateRequest.DisplayName != "new-name" {
-		t.Fatalf("update request displayName = %q, want new-name", updateRequest.DisplayName)
-	}
-	if resource.Status.DisplayName != "new-name" {
-		t.Fatalf("status.displayName = %q, want new-name", resource.Status.DisplayName)
-	}
+	requireCreateOrUpdateSuccess(t, response, err)
+	requireRequeueState(t, response, false, "CreateOrUpdate() should not requeue for ACTIVE update result")
+	requireTrue(t, getCalled, "Get() should be called before comparing mutable fields")
+	requireThingIDRequest(t, "update", updateRequest.ThingId, "ocid1.thing.oc1..existing")
+	requireStringEqual(t, "update request displayName", updateRequest.DisplayName, "new-name")
+	requireStringEqual(t, "status.displayName", resource.Status.DisplayName, "new-name")
 }
 
 func TestServiceClientCreateOrUpdateFallsBackToList(t *testing.T) {
@@ -1837,5 +1794,81 @@ func TestServiceClientDeleteResolvesDeletePhaseListMatchWithoutOcid(t *testing.T
 	}
 	if deleteRequest.ThingId == nil || *deleteRequest.ThingId != "ocid1.thing.oc1..deleting" {
 		t.Fatalf("delete request thingId = %v, want delete-phase OCID", deleteRequest.ThingId)
+	}
+}
+
+func requireCreateOrUpdateSuccess(t *testing.T, response servicemanager.OSOKResponse, err error) {
+	t.Helper()
+
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful {
+		t.Fatal("CreateOrUpdate() should report success")
+	}
+}
+
+func requireRequeueState(t *testing.T, response servicemanager.OSOKResponse, want bool, message string) {
+	t.Helper()
+
+	if response.ShouldRequeue != want {
+		t.Fatal(message)
+	}
+}
+
+func requireCreateThingRequestMatchesSpec(t *testing.T, request fakeCreateThingRequest, spec fakeSpec) {
+	t.Helper()
+
+	requireStringEqual(t, "create request compartmentId", request.CompartmentId, spec.CompartmentId)
+	requireStringEqual(t, "create request displayName", request.DisplayName, spec.DisplayName)
+	requireTrue(t, request.Enabled, "create request enabled flag was not projected from spec")
+}
+
+func requireThingIDRequest(t *testing.T, operation string, got *string, want string) {
+	t.Helper()
+
+	if got == nil || *got != want {
+		t.Fatalf("%s request thingId = %v, want %s", operation, got, want)
+	}
+}
+
+func requireStatusOCID(t *testing.T, resource *fakeResource, want string) {
+	t.Helper()
+
+	if got := string(resource.Status.OsokStatus.Ocid); got != want {
+		t.Fatalf("status.ocid = %q, want %q", got, want)
+	}
+}
+
+func requireCreatedAt(t *testing.T, resource *fakeResource) {
+	t.Helper()
+
+	if resource.Status.OsokStatus.CreatedAt == nil {
+		t.Fatal("status.createdAt should be set after create")
+	}
+}
+
+func requireTrailingCondition(t *testing.T, resource *fakeResource, want shared.OSOKConditionType) {
+	t.Helper()
+
+	conditions := resource.Status.OsokStatus.Conditions
+	if len(conditions) == 0 || conditions[len(conditions)-1].Type != want {
+		t.Fatalf("status conditions = %#v, want trailing %s condition", conditions, want)
+	}
+}
+
+func requireStringEqual(t *testing.T, fieldName string, got string, want string) {
+	t.Helper()
+
+	if got != want {
+		t.Fatalf("%s = %q, want %q", fieldName, got, want)
+	}
+}
+
+func requireTrue(t *testing.T, got bool, message string) {
+	t.Helper()
+
+	if !got {
+		t.Fatal(message)
 	}
 }
