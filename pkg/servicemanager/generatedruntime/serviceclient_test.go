@@ -26,18 +26,20 @@ type fakeResource struct {
 }
 
 type fakeSpec struct {
-	CompartmentId string `json:"compartmentId,omitempty"`
-	DisplayName   string `json:"displayName,omitempty"`
-	Name          string `json:"name,omitempty"`
-	Enabled       bool   `json:"enabled,omitempty"`
+	CompartmentId        string `json:"compartmentId,omitempty"`
+	DisplayName          string `json:"displayName,omitempty"`
+	Name                 string `json:"name,omitempty"`
+	Enabled              bool   `json:"enabled,omitempty"`
+	DataStorageSizeInGBs int    `json:"dataStorageSizeInGBs,omitempty"`
 }
 
 type fakeStatus struct {
-	OsokStatus     shared.OSOKStatus `json:"status"`
-	Id             string            `json:"id,omitempty"`
-	CompartmentId  string            `json:"compartmentId,omitempty"`
-	DisplayName    string            `json:"displayName,omitempty"`
-	LifecycleState string            `json:"lifecycleState,omitempty"`
+	OsokStatus           shared.OSOKStatus `json:"status"`
+	Id                   string            `json:"id,omitempty"`
+	CompartmentId        string            `json:"compartmentId,omitempty"`
+	DisplayName          string            `json:"displayName,omitempty"`
+	LifecycleState       string            `json:"lifecycleState,omitempty"`
+	DataStorageSizeInGBs int               `json:"dataStorageSizeInGBs,omitempty"`
 }
 
 type fakeSecretResource struct {
@@ -62,11 +64,12 @@ type fakeSecretStatus struct {
 }
 
 type fakeThing struct {
-	Id             string `json:"id,omitempty"`
-	CompartmentId  string `json:"compartmentId,omitempty"`
-	DisplayName    string `json:"displayName,omitempty"`
-	Name           string `json:"name,omitempty"`
-	LifecycleState string `json:"lifecycleState,omitempty"`
+	Id                   string `json:"id,omitempty"`
+	CompartmentId        string `json:"compartmentId,omitempty"`
+	DisplayName          string `json:"displayName,omitempty"`
+	Name                 string `json:"name,omitempty"`
+	LifecycleState       string `json:"lifecycleState,omitempty"`
+	DataStorageSizeInGBs int    `json:"dataStorageSizeInGBs,omitempty"`
 }
 
 type fakeThingSummary struct {
@@ -100,8 +103,9 @@ type fakeGetThingResponse struct {
 }
 
 type FakeUpdateThingDetails struct {
-	DisplayName string `json:"displayName,omitempty"`
-	Enabled     bool   `json:"enabled,omitempty"`
+	DisplayName          string `json:"displayName,omitempty"`
+	Enabled              bool   `json:"enabled,omitempty"`
+	DataStorageSizeInGBs int    `json:"dataStorageSizeInGBs,omitempty"`
 }
 
 type fakeUpdateThingRequest struct {
@@ -655,6 +659,92 @@ func TestServiceClientCreateOrUpdateCreatesAfterFormalListMiss(t *testing.T) {
 	}
 }
 
+func TestServiceClientCreateOrUpdateDoesNotBindFormalListWithoutIdentifyingCriteria(t *testing.T) {
+	t.Parallel()
+
+	createCalled := false
+	var createRequest fakeCreateThingRequest
+	var listRequest fakeListThingRequest
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Semantics: &Semantics{
+			List: &ListSemantics{
+				ResponseItemsField: "Resources",
+				MatchFields:        []string{"displayName", "compartmentId"},
+			},
+			Lifecycle: LifecycleSemantics{
+				ActiveStates: []string{"ACTIVE"},
+			},
+			Delete: DeleteSemantics{
+				Policy:         "required",
+				TerminalStates: []string{"DELETED"},
+			},
+		},
+		Create: &Operation{
+			NewRequest: func() any { return &fakeCreateThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				createCalled = true
+				createRequest = *request.(*fakeCreateThingRequest)
+				return fakeCreateThingResponse{
+					Thing: fakeThing{
+						Id:             "ocid1.thing.oc1..created",
+						DisplayName:    "created-name",
+						LifecycleState: "ACTIVE",
+					},
+				}, nil
+			},
+		},
+		List: &Operation{
+			NewRequest: func() any { return &fakeListThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				listRequest = *request.(*fakeListThingRequest)
+				return fakeNamedListThingResponse{
+					Collection: fakeNamedThingCollection{
+						Resources: []fakeThingSummary{
+							{Id: "ocid1.thing.oc1..existing", CompartmentId: "ocid1.compartment.oc1..match", DisplayName: "existing-name", LifecycleState: "ACTIVE"},
+						},
+					},
+				}, nil
+			},
+			Fields: []RequestField{
+				{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
+				{FieldName: "DisplayName", RequestName: "displayName", Contribution: "query"},
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Spec: fakeSpec{
+			CompartmentId: "ocid1.compartment.oc1..match",
+		},
+	}
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !createCalled {
+		t.Fatal("Create() should be called when formal list lookup lacks identifying criteria")
+	}
+	if !response.IsSuccessful {
+		t.Fatal("CreateOrUpdate() should report success")
+	}
+	if listRequest.CompartmentId != "ocid1.compartment.oc1..match" {
+		t.Fatalf("list request compartmentId = %q, want ocid1.compartment.oc1..match", listRequest.CompartmentId)
+	}
+	if listRequest.DisplayName != "" {
+		t.Fatalf("list request displayName = %q, want omitted displayName", listRequest.DisplayName)
+	}
+	if createRequest.DisplayName != "" {
+		t.Fatalf("create request displayName = %q, want omitted displayName", createRequest.DisplayName)
+	}
+	if string(resource.Status.OsokStatus.Ocid) != "ocid1.thing.oc1..created" {
+		t.Fatalf("status.ocid = %q, want created OCID", resource.Status.OsokStatus.Ocid)
+	}
+}
+
 func TestServiceClientCreateOrUpdateSkipsUpdateWhenNoSupportedDriftRemains(t *testing.T) {
 	t.Parallel()
 
@@ -728,6 +818,74 @@ func TestServiceClientCreateOrUpdateSkipsUpdateWhenNoSupportedDriftRemains(t *te
 	}
 	if getRequest.ThingId == nil || *getRequest.ThingId != "ocid1.thing.oc1..existing" {
 		t.Fatalf("get request thingId = %v, want existing OCID", getRequest.ThingId)
+	}
+}
+
+func TestServiceClientAllowsMutableDriftThroughInGBsAlias(t *testing.T) {
+	t.Parallel()
+
+	updateCalled := false
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Semantics: &Semantics{
+			Lifecycle: LifecycleSemantics{
+				ActiveStates: []string{"ACTIVE"},
+			},
+			Delete: DeleteSemantics{
+				Policy:         "required",
+				TerminalStates: []string{"DELETED"},
+			},
+			Mutation: MutationSemantics{
+				Mutable: []string{"dataStorageSizeInGb"},
+			},
+		},
+		Update: &Operation{
+			NewRequest: func() any { return &fakeUpdateThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				updateCalled = true
+				updateRequest := *request.(*fakeUpdateThingRequest)
+				if updateRequest.DataStorageSizeInGBs != 20 {
+					t.Fatalf("update request dataStorageSizeInGBs = %d, want 20", updateRequest.DataStorageSizeInGBs)
+				}
+				return fakeUpdateThingResponse{
+					Thing: fakeThing{
+						Id:                   "ocid1.thing.oc1..existing",
+						DataStorageSizeInGBs: 20,
+						LifecycleState:       "ACTIVE",
+					},
+				}, nil
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Spec: fakeSpec{
+			DataStorageSizeInGBs: 20,
+		},
+		Status: fakeStatus{
+			OsokStatus:           shared.OSOKStatus{Ocid: "ocid1.thing.oc1..existing"},
+			Id:                   "ocid1.thing.oc1..existing",
+			DataStorageSizeInGBs: 10,
+		},
+	}
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !updateCalled {
+		t.Fatal("Update() should be called when only the InGBs alias differs")
+	}
+	if !response.IsSuccessful {
+		t.Fatal("CreateOrUpdate() should report success")
+	}
+	if response.ShouldRequeue {
+		t.Fatal("CreateOrUpdate() should not requeue for ACTIVE lifecycle")
+	}
+	if resource.Status.DataStorageSizeInGBs != 20 {
+		t.Fatalf("status.dataStorageSizeInGBs = %d, want 20", resource.Status.DataStorageSizeInGBs)
 	}
 }
 

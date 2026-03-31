@@ -1551,8 +1551,6 @@ func (c ServiceClient[T]) selectListItem(body any, resource T, preferredID strin
 		return matches[0], nil
 	case len(matches) > 1:
 		return nil, fmt.Errorf("%s list response returned multiple matching resources", c.config.Kind)
-	case len(items) == 1:
-		return items[0], nil
 	default:
 		return nil, errResourceNotFound
 	}
@@ -1566,7 +1564,7 @@ func (c ServiceClient[T]) selectFormalListItem(items []any, criteria map[string]
 	}
 
 	var matches []any
-	comparedAny := false
+	comparedReusable := false
 	for _, item := range items {
 		values := jsonMap(item)
 		if preferredID != "" && preferredID == firstNonEmpty(values, "id", "ocid") {
@@ -1575,6 +1573,7 @@ func (c ServiceClient[T]) selectFormalListItem(items []any, criteria map[string]
 		}
 
 		comparedFields := 0
+		comparedReusableFields := 0
 		matched := true
 		for _, field := range matchFields {
 			expected, ok := lookupMeaningfulValue(criteria, field)
@@ -1582,16 +1581,19 @@ func (c ServiceClient[T]) selectFormalListItem(items []any, criteria map[string]
 				continue
 			}
 			comparedFields++
+			if isReusableListMatchField(field) {
+				comparedReusableFields++
+			}
 			actual, ok := lookupMeaningfulValue(values, field)
 			if !ok || !valuesEqual(expected, actual) {
 				matched = false
 				break
 			}
 		}
-		if comparedFields == 0 {
+		if comparedFields == 0 || comparedReusableFields == 0 {
 			continue
 		}
-		comparedAny = true
+		comparedReusable = true
 		if matched {
 			matches = append(matches, item)
 		}
@@ -1602,10 +1604,10 @@ func (c ServiceClient[T]) selectFormalListItem(items []any, criteria map[string]
 		return matches[0], nil
 	case len(matches) > 1:
 		return nil, fmt.Errorf("%s formal list semantics returned multiple matching resources", c.config.Kind)
-	case comparedAny || preferredID != "":
+	case comparedReusable || preferredID != "":
 		return nil, errResourceNotFound
 	default:
-		return nil, fmt.Errorf("%s formal list semantics did not yield any match criteria", c.config.Kind)
+		return nil, errResourceNotFound
 	}
 }
 
@@ -1814,7 +1816,7 @@ func lookupValueByPath(values map[string]any, path string) (any, bool) {
 		if !ok {
 			return nil, false
 		}
-		next, ok := mapValue[segment]
+		next, ok := lookupPathSegment(mapValue, segment)
 		if !ok {
 			return nil, false
 		}
@@ -1822,6 +1824,20 @@ func lookupValueByPath(values map[string]any, path string) (any, bool) {
 	}
 
 	return current, true
+}
+
+func lookupPathSegment(values map[string]any, segment string) (any, bool) {
+	if value, ok := values[segment]; ok {
+		return value, true
+	}
+
+	normalizedSegment := normalizePathSegment(segment)
+	for key, value := range values {
+		if normalizePathSegment(key) == normalizedSegment {
+			return value, true
+		}
+	}
+	return nil, false
 }
 
 func meaningfulValue(value any) bool {
@@ -1912,14 +1928,55 @@ func pathCoveredByAny(path string, semanticPaths []string) bool {
 }
 
 func pathCoveredBy(path string, semanticPath string) bool {
-	path = strings.TrimSpace(path)
-	semanticPath = strings.TrimSpace(semanticPath)
+	path = normalizePath(path)
+	semanticPath = normalizePath(semanticPath)
 	if path == "" || semanticPath == "" {
 		return false
 	}
 	return path == semanticPath ||
 		strings.HasPrefix(path, semanticPath+".") ||
 		strings.HasPrefix(semanticPath, path+".")
+}
+
+func isReusableListMatchField(path string) bool {
+	switch normalizePathSegment(lastPathSegment(path)) {
+	case "displayname", "id", "metadataname", "name", "ocid":
+		return true
+	default:
+		return false
+	}
+}
+
+func lastPathSegment(path string) string {
+	path = strings.TrimSpace(path)
+	if path == "" {
+		return ""
+	}
+	lastDot := strings.LastIndex(path, ".")
+	if lastDot == -1 {
+		return path
+	}
+	return path[lastDot+1:]
+}
+
+func normalizePath(path string) string {
+	if strings.TrimSpace(path) == "" {
+		return ""
+	}
+
+	segments := strings.Split(path, ".")
+	for index, segment := range segments {
+		segments[index] = normalizePathSegment(segment)
+	}
+	return strings.Join(segments, ".")
+}
+
+func normalizePathSegment(segment string) string {
+	segment = strings.ToLower(strings.TrimSpace(segment))
+	if strings.HasSuffix(segment, "gbs") {
+		return strings.TrimSuffix(segment, "gbs") + "gb"
+	}
+	return segment
 }
 
 func firstNonEmpty(values map[string]any, keys ...string) string {
