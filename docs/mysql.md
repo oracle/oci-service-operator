@@ -1,10 +1,10 @@
 # Oracle MySQL Database Service
 
 - [Introduction](#introduction)
-- [MySQL DB System Pre-requisites](#pre-requisites-for-setting-up-mysql-dbsystems)
-- [MySQL DB System Specification Parameters](#mysql-dbsystem-specification-parameters)
-- [MySQL DB System Status Parameters](#mysql-dbsystem-status-parameters)
-- [Provision](#provisioning-a-mysql-dbsystem)
+- [MySQL DB System Pre-requisites](#pre-requisites-for-setting-up-mysql-db-systems)
+- [MySQL DB System Specification Parameters](#mysql-db-system-specification-parameters)
+- [MySQL DB System Status Parameters](#mysql-db-system-status-parameters)
+- [Provision](#provisioning-a-mysql-db-system)
 - [Current v2 notes](#current-v2-notes)
 - [Access Information](#access-information)
 
