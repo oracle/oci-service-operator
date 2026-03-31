@@ -49,6 +49,8 @@ func New() *Generator {
 }
 
 // Generate renders the requested services into OSOK API packages.
+//
+//nolint:gocognit,gocyclo // Generation keeps render/preserve steps together so failures are attributed to the exact surface.
 func (g *Generator) Generate(ctx context.Context, cfg *Config, services []ServiceConfig, options Options) (RunResult, error) {
 	result := RunResult{}
 	generatedPackages := make([]*PackageModel, 0, len(services))

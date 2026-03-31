@@ -3,6 +3,7 @@
   Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
 */
 
+//nolint:gocognit,gocyclo // These config contract tests intentionally keep full checked-in rollout assertions in one file.
 package generator
 
 import (

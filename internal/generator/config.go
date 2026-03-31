@@ -122,6 +122,8 @@ func LoadConfig(path string) (*Config, error) {
 }
 
 // Validate ensures the config is coherent before generation begins.
+//
+//nolint:gocognit,gocyclo // Validation intentionally walks the full config contract in one pass to return precise field context.
 func (c *Config) Validate() error {
 	if strings.TrimSpace(c.SchemaVersion) == "" {
 		return fmt.Errorf("schemaVersion is required")
@@ -184,6 +186,8 @@ func (c *Config) Validate() error {
 }
 
 // Validate ensures runtime rollout metadata is coherent before generation begins.
+//
+//nolint:gocognit,gocyclo // Runtime rollout validation checks interdependent service and resource overrides together.
 func (g GenerationConfig) Validate(serviceName string) error {
 	if err := validateGenerationStrategy(
 		fmt.Sprintf("service %q generation.controller.strategy", serviceName),

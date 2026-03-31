@@ -77,6 +77,7 @@ func buildPackageOutputModel(service ServiceConfig, resources []ResourceModel) P
 	return output
 }
 
+//nolint:gocognit,gocyclo // Registration generation validates interdependent controller and service-manager rollout per resource.
 func buildRegistrationOutputModel(
 	service ServiceConfig,
 	version string,
@@ -341,6 +342,7 @@ func defaultStatusFields() []FieldModel {
 	}
 }
 
+//nolint:gocognit // Helper type renaming rewrites resource fields and helper graphs in a single pass over each resource.
 func assignHelperTypeNames(resources []ResourceModel) []ResourceModel {
 	reservedNames := make(map[string]struct{}, len(resources))
 	for _, resource := range resources {

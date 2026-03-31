@@ -3,6 +3,7 @@
   Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
 */
 
+//nolint:gocognit,gocyclo // These generator contract tests use large end-to-end fixtures to lock emitted surfaces.
 package generator
 
 import (
@@ -2590,14 +2591,6 @@ func assertExactFileMatch(t *testing.T, wantPath string, gotPath string) {
 	got := readFile(t, gotPath)
 	if want != got {
 		t.Fatalf("file mismatch for %s", wantPath)
-	}
-}
-
-func assertPathAbsent(t *testing.T, path string, message string) {
-	t.Helper()
-
-	if _, err := os.Stat(path); !os.IsNotExist(err) {
-		t.Fatalf("%s: %v", message, err)
 	}
 }
 

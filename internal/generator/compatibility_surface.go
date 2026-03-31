@@ -222,6 +222,7 @@ func collectReferencedHelperTypes(typeExpr string, helperIndex map[string]TypeMo
 	}
 }
 
+//nolint:gocognit,gocyclo // Existing API parsing keeps the compatibility surface extraction in one pass over the parsed file.
 func loadExistingSpecSurface(path string, kind string) (existingSpecSurface, bool, error) {
 	content, err := os.ReadFile(path)
 	if os.IsNotExist(err) {
@@ -354,6 +355,7 @@ func renderExistingExpr(fileSet *token.FileSet, expr ast.Expr) (string, error) {
 	return buffer.String(), nil
 }
 
+//nolint:gocognit // Comment normalization handles the supported Go comment forms in one place.
 func commentGroupLines(group *ast.CommentGroup) []string {
 	if group == nil {
 		return nil
@@ -364,9 +366,7 @@ func commentGroupLines(group *ast.CommentGroup) []string {
 		text := strings.TrimRight(comment.Text, " \t")
 		if strings.HasPrefix(text, "//") {
 			line := strings.TrimPrefix(text, "//")
-			if strings.HasPrefix(line, " ") {
-				line = strings.TrimPrefix(line, " ")
-			}
+			line = strings.TrimPrefix(line, " ")
 			lines = append(lines, line)
 			continue
 		}
@@ -377,9 +377,7 @@ func commentGroupLines(group *ast.CommentGroup) []string {
 			line = strings.TrimPrefix(line, " ")
 			if strings.HasPrefix(line, "*") {
 				line = strings.TrimPrefix(line, "*")
-				if strings.HasPrefix(line, " ") {
-					line = strings.TrimPrefix(line, " ")
-				}
+				line = strings.TrimPrefix(line, " ")
 			}
 			lines = append(lines, line)
 		}

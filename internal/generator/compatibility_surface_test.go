@@ -3,6 +3,7 @@
   Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
 */
 
+//nolint:gocognit,gocyclo // This compatibility test pins the preserve/regenerate flow end to end with full artifact assertions.
 package generator
 
 import (

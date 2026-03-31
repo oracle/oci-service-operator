@@ -94,6 +94,7 @@ func main() {
 	}
 }
 
+//nolint:gocognit,gocyclo // The CLI keeps snapshot generation/report orchestration linear so each step returns specific context.
 func run(ctx context.Context, opts options) (err error) {
 	if err := validateOptions(opts); err != nil {
 		return err
@@ -763,23 +764,38 @@ func copyTree(src, dst string) error {
 	})
 }
 
-func copyFile(src, dst string, mode fs.FileMode) error {
+func copyFile(src, dst string, mode fs.FileMode) (err error) {
 	input, err := os.Open(src)
 	if err != nil {
 		return err
 	}
-	defer input.Close()
+	defer func() {
+		if closeErr := input.Close(); err == nil && closeErr != nil {
+			err = closeErr
+		}
+	}()
 
 	output, err := os.OpenFile(dst, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, mode.Perm())
 	if err != nil {
 		return err
 	}
-	defer output.Close()
+	defer func() {
+		if output != nil {
+			if closeErr := output.Close(); err == nil && closeErr != nil {
+				err = closeErr
+			}
+		}
+	}()
 
-	if _, err := io.Copy(output, input); err != nil {
+	if _, err = io.Copy(output, input); err != nil {
 		return err
 	}
-	return output.Close()
+	if err = output.Close(); err != nil {
+		return err
+	}
+	output = nil
+
+	return nil
 }
 
 func snapshotCommandEnv(snapshotRoot string) []string {

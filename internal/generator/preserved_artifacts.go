@@ -22,6 +22,7 @@ type preservedPackageArtifacts struct {
 	sampleFiles  map[string]preservedFile
 }
 
+//nolint:gocognit,gocyclo // Preserved artifact loading keeps compatibility-locked sample/package decisions in one traversal.
 func loadPreservedPackageArtifacts(root string, pkg *PackageModel) (preservedPackageArtifacts, error) {
 	preserved := preservedPackageArtifacts{}
 	if strings.TrimSpace(root) == "" || pkg == nil {
