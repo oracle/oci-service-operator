@@ -160,22 +160,31 @@ func (c ServiceClient[T]) CreateOrUpdate(ctx context.Context, resource T, _ ctrl
 	if err != nil {
 		return servicemanager.OSOKResponse{IsSuccessful: false}, c.markFailure(resource, err)
 	}
+	resolvedExistingBeforeCreate := currentID == "" && existingResponse != nil
 	if currentID == "" && existingResponse != nil {
 		currentID = responseID(existingResponse)
-		_ = mergeResponseIntoStatus(resource, existingResponse)
 	}
 
 	liveResponse := existingResponse
-	if currentID != "" && liveResponse == nil && c.requiresLiveMutationValidation() {
-		response, err := c.readResource(ctx, resource, currentID, readPhaseUpdate)
-		if err != nil {
-			if !errors.Is(err, errResourceNotFound) {
-				return servicemanager.OSOKResponse{IsSuccessful: false}, c.markFailure(resource, err)
+	if currentID != "" && c.requiresLiveMutationValidation() {
+		forceLiveGet := resolvedExistingBeforeCreate && c.config.Get != nil
+		if liveResponse == nil || forceLiveGet {
+			response, err := c.readResourceForMutationValidation(ctx, resource, currentID, forceLiveGet)
+			if err != nil {
+				if !errors.Is(err, errResourceNotFound) {
+					return servicemanager.OSOKResponse{IsSuccessful: false}, c.markFailure(resource, err)
+				}
+				if forceLiveGet {
+					currentID = ""
+					liveResponse = nil
+				}
+			} else {
+				liveResponse = response
 			}
-		} else {
-			liveResponse = response
-			_ = mergeResponseIntoStatus(resource, response)
 		}
+	}
+	if currentID != "" && liveResponse != nil {
+		_ = mergeResponseIntoStatus(resource, liveResponse)
 	}
 
 	if err := c.validateMutationPolicy(resource, currentID != "", liveResponse); err != nil {
@@ -517,6 +526,24 @@ func (c ServiceClient[T]) readResource(ctx context.Context, resource T, preferre
 		return nil, err
 	}
 	return item, nil
+}
+
+func (c ServiceClient[T]) readResourceForMutationValidation(ctx context.Context, resource T, currentID string, forceLiveGet bool) (any, error) {
+	if !forceLiveGet {
+		return c.readResource(ctx, resource, currentID, readPhaseUpdate)
+	}
+	if c.config.Get == nil {
+		return nil, fmt.Errorf("%s generated runtime has no OCI Get operation for live mutation validation", c.config.Kind)
+	}
+
+	response, err := c.invoke(ctx, c.config.Get, resource, currentID)
+	if err != nil {
+		if isNotFound(err) {
+			return nil, errResourceNotFound
+		}
+		return nil, err
+	}
+	return response, nil
 }
 
 func (c ServiceClient[T]) canInvokeGet(resource T, preferredID string) bool {
