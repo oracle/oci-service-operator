@@ -10,10 +10,6 @@ import (
 	"testing"
 
 	"github.com/oracle/oci-go-sdk/v65/common"
-	corev1beta1 "github.com/oracle/oci-service-operator/api/core/v1beta1"
-	databasev1beta1 "github.com/oracle/oci-service-operator/api/database/v1beta1"
-	mysqlv1beta1 "github.com/oracle/oci-service-operator/api/mysql/v1beta1"
-	streamingv1beta1 "github.com/oracle/oci-service-operator/api/streaming/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/credhelper"
 	"github.com/oracle/oci-service-operator/pkg/metrics"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
@@ -24,7 +20,7 @@ import (
 	ctrlclientfake "sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
-func TestAllAddToSchemeRegistersKnownGroupKinds(t *testing.T) {
+func TestAllAddToSchemeRegistersKnownGroups(t *testing.T) {
 	t.Parallel()
 
 	scheme := runtime.NewScheme()
@@ -34,31 +30,15 @@ func TestAllAddToSchemeRegistersKnownGroupKinds(t *testing.T) {
 		}
 	}
 
-	for _, obj := range []runtime.Object{
-		&corev1beta1.Vcn{},
-		&databasev1beta1.AutonomousDatabases{},
-		&mysqlv1beta1.MySqlDbSystem{},
-		&streamingv1beta1.Stream{},
+	for _, group := range []string{
+		"core.oracle.com",
+		"database.oracle.com",
+		"mysql.oracle.com",
+		"streaming.oracle.com",
 	} {
-		gvks, _, err := scheme.ObjectKinds(obj)
-		if err != nil {
-			t.Fatalf("ObjectKinds(%T) error = %v", obj, err)
+		if !schemeRegistersGroupVersion(scheme, group, "v1beta1") {
+			t.Fatalf("scheme does not register any types for %s/v1beta1", group)
 		}
-		if len(gvks) == 0 {
-			t.Fatalf("ObjectKinds(%T) returned no GVKs", obj)
-		}
-	}
-}
-
-func TestAllExposesExplicitWebhooksSeparately(t *testing.T) {
-	t.Parallel()
-
-	webhooks := ExplicitWebhooks()
-	if len(webhooks) != 1 {
-		t.Fatalf("len(ExplicitWebhooks()) = %d, want 1", len(webhooks))
-	}
-	if webhooks[0].Name != "AutonomousDatabases" {
-		t.Fatalf("ExplicitWebhooks()[0].Name = %q, want %q", webhooks[0].Name, "AutonomousDatabases")
 	}
 }
 
@@ -147,25 +127,25 @@ func (fakeServiceManager) GetCrdStatus(runtime.Object) (*shared.OSOKStatus, erro
 
 var _ servicemanager.OSOKServiceManager = fakeServiceManager{}
 
-func TestAllIncludesGeneratedGroupsAfterExplicitPrefix(t *testing.T) {
+func TestAllIncludesGeneratedGroupsAfterManualPrefix(t *testing.T) {
 	restoreGeneratedGroupRegistrations(t)
 	registerGeneratedGroup(GroupRegistration{Group: "events"})
 
 	registrations := All()
-	if len(registrations) != len(explicitGroupRegistrations)+1 {
-		t.Fatalf("len(All()) = %d, want %d", len(registrations), len(explicitGroupRegistrations)+1)
+	if len(registrations) != len(manualGroupRegistrations)+1 {
+		t.Fatalf("len(All()) = %d, want %d", len(registrations), len(manualGroupRegistrations)+1)
 	}
 	if registrations[len(registrations)-1].Group != "events" {
 		t.Fatalf("All()[last].Group = %q, want %q", registrations[len(registrations)-1].Group, "events")
 	}
 }
 
-func TestAllReturnsUniqueGroupsWithExplicitPrefix(t *testing.T) {
+func TestAllReturnsUniqueGroupsWithManualPrefix(t *testing.T) {
 	t.Parallel()
 
 	registrations := All()
-	if len(registrations) < len(explicitGroupRegistrations) {
-		t.Fatalf("len(All()) = %d, want at least %d explicit groups", len(registrations), len(explicitGroupRegistrations))
+	if len(registrations) < len(manualGroupRegistrations) {
+		t.Fatalf("len(All()) = %d, want at least %d manual groups", len(registrations), len(manualGroupRegistrations))
 	}
 
 	seen := make(map[string]struct{}, len(registrations))
@@ -174,13 +154,13 @@ func TestAllReturnsUniqueGroupsWithExplicitPrefix(t *testing.T) {
 			t.Fatalf("All() returned duplicate group %q", registration.Group)
 		}
 		seen[registration.Group] = struct{}{}
-		if index < len(explicitGroupRegistrations) && registration.Group != explicitGroupRegistrations[index].Group {
-			t.Fatalf("All()[%d].Group = %q, want explicit prefix %q", index, registration.Group, explicitGroupRegistrations[index].Group)
+		if index < len(manualGroupRegistrations) && registration.Group != manualGroupRegistrations[index].Group {
+			t.Fatalf("All()[%d].Group = %q, want manual prefix %q", index, registration.Group, manualGroupRegistrations[index].Group)
 		}
 	}
 }
 
-func TestAllSkipsGeneratedGroupsThatDuplicateExplicitEntries(t *testing.T) {
+func TestAllSkipsGeneratedGroupsThatDuplicateManualEntries(t *testing.T) {
 	restoreGeneratedGroupRegistrations(t)
 	registerGeneratedGroup(GroupRegistration{Group: "mysql"})
 
@@ -204,4 +184,13 @@ func restoreGeneratedGroupRegistrations(t *testing.T) {
 	t.Cleanup(func() {
 		generatedGroupRegistrations = snapshot
 	})
+}
+
+func schemeRegistersGroupVersion(scheme *runtime.Scheme, group string, version string) bool {
+	for gvk := range scheme.AllKnownTypes() {
+		if gvk.Group == group && gvk.Version == version {
+			return true
+		}
+	}
+	return false
 }

@@ -20,7 +20,7 @@ func TestPopulateSnapshotKeepsSelectedOutputsWritable(t *testing.T) {
 		filepath.Join(repoRoot, "controllers"),
 		filepath.Join(repoRoot, "hack"),
 		filepath.Join(repoRoot, "formal"),
-		filepath.Join(repoRoot, "pkg", "servicemanager", "autonomousdatabases"),
+		filepath.Join(repoRoot, "pkg", "servicemanager", "database"),
 		filepath.Join(repoRoot, "pkg", "servicemanager", "identity"),
 		filepath.Join(repoRoot, "internal", "registrations"),
 		filepath.Join(repoRoot, "internal", "validator"),
@@ -35,14 +35,14 @@ func TestPopulateSnapshotKeepsSelectedOutputsWritable(t *testing.T) {
 		filepath.Join(repoRoot, "internal", "registrations", "events_generated.go"):   "package registrations\n",
 	})
 
-	if err := populateSnapshot(repoRoot, snapshotRoot, []string{"database"}, []string{"autonomousdatabases"}); err != nil {
+	if err := populateSnapshot(repoRoot, snapshotRoot, []string{"database"}, []string{"database"}); err != nil {
 		t.Fatalf("populateSnapshot() error = %v", err)
 	}
 
 	assertSymlink(t, filepath.Join(snapshotRoot, "formal"))
 	assertNotExists(t, filepath.Join(snapshotRoot, "internal", "registrations", "database_generated.go"), "selected registration")
 	assertSymlink(t, filepath.Join(snapshotRoot, "internal", "registrations", "events_generated.go"))
-	assertNotExists(t, filepath.Join(snapshotRoot, "pkg", "servicemanager", "autonomousdatabases"), "selected service-manager root")
+	assertNotExists(t, filepath.Join(snapshotRoot, "pkg", "servicemanager", "database"), "selected service-manager root")
 	assertSymlink(t, filepath.Join(snapshotRoot, "pkg", "servicemanager", "identity"))
 }
 
@@ -54,31 +54,29 @@ func TestPreserveCheckedInCompanionFilesLinksCheckedInCompatibilityCompanions(t 
 
 	apiSourceDir := filepath.Join(repoRoot, "api", "database", "v1beta1")
 	mustMkdirAll(t, []string{apiSourceDir})
-	webhookPath := filepath.Join(apiSourceDir, "autonomousdatabases_webhook.go")
-	typesPath := filepath.Join(apiSourceDir, "autonomousdatabases_types.go")
+	helperPath := filepath.Join(apiSourceDir, "autonomousdatabase_helpers.go")
+	typesPath := filepath.Join(apiSourceDir, "autonomousdatabase_types.go")
 	writeTestFiles(t, map[string]string{
-		webhookPath: "package v1beta1\n",
-		typesPath:   "package v1beta1\n",
+		helperPath: "package v1beta1\n",
+		typesPath:  "package v1beta1\n",
 	})
 
-	serviceManagerSourceDir := filepath.Join(repoRoot, "pkg", "servicemanager", "autonomousdatabases", "adb")
+	serviceManagerSourceDir := filepath.Join(repoRoot, "pkg", "servicemanager", "database", "autonomousdatabase")
 	mustMkdirAll(t, []string{serviceManagerSourceDir})
-	legacyServiceClientPath := filepath.Join(serviceManagerSourceDir, "adb_serviceclient.go")
-	legacyServiceManagerPath := filepath.Join(serviceManagerSourceDir, "adb_servicemanager.go")
-	adapterPath := filepath.Join(serviceManagerSourceDir, "autonomousdatabases_generated_client_adapter.go")
-	generatedServiceClientPath := filepath.Join(serviceManagerSourceDir, "autonomousdatabases_serviceclient.go")
+	adapterPath := filepath.Join(serviceManagerSourceDir, "autonomousdatabase_generated_client_adapter.go")
+	legacyServiceManagerPath := filepath.Join(serviceManagerSourceDir, "legacy_servicemanager.go")
+	generatedServiceClientPath := filepath.Join(serviceManagerSourceDir, "autonomousdatabase_serviceclient.go")
 	writeTestFiles(t, map[string]string{
-		legacyServiceClientPath:    "package adb\n",
-		legacyServiceManagerPath:   "package adb\n",
-		adapterPath:                "package adb\n",
-		generatedServiceClientPath: "package adb\n",
+		adapterPath:                "package autonomousdatabase\n",
+		legacyServiceManagerPath:   "package autonomousdatabase\n",
+		generatedServiceClientPath: "package autonomousdatabase\n",
 	})
 
-	snapshotServiceManagerDir := filepath.Join(snapshotRoot, "pkg", "servicemanager", "autonomousdatabases", "adb")
+	snapshotServiceManagerDir := filepath.Join(snapshotRoot, "pkg", "servicemanager", "database", "autonomousdatabase")
 	mustMkdirAll(t, []string{snapshotServiceManagerDir})
-	snapshotGeneratedServiceClientPath := filepath.Join(snapshotServiceManagerDir, "autonomousdatabases_serviceclient.go")
+	snapshotGeneratedServiceClientPath := filepath.Join(snapshotServiceManagerDir, "autonomousdatabase_serviceclient.go")
 	writeTestFiles(t, map[string]string{
-		snapshotGeneratedServiceClientPath: "package adb\n",
+		snapshotGeneratedServiceClientPath: "package autonomousdatabase\n",
 	})
 
 	services := []generator.ServiceConfig{
@@ -87,9 +85,9 @@ func TestPreserveCheckedInCompanionFilesLinksCheckedInCompatibilityCompanions(t 
 			Generation: generator.GenerationConfig{
 				Resources: []generator.ResourceGenerationOverride{
 					{
-						Kind: "AutonomousDatabases",
+						Kind: "AutonomousDatabase",
 						ServiceManager: generator.ServiceManagerGenerationOverride{
-							PackagePath: "autonomousdatabases/adb",
+							PackagePath: "database/autonomousdatabase",
 						},
 					},
 				},
@@ -100,15 +98,13 @@ func TestPreserveCheckedInCompanionFilesLinksCheckedInCompatibilityCompanions(t 
 		t.Fatalf("preserveCheckedInCompanionFiles() error = %v", err)
 	}
 
-	snapshotAdapterPath := filepath.Join(snapshotServiceManagerDir, "autonomousdatabases_generated_client_adapter.go")
-	snapshotLegacyServiceClientPath := filepath.Join(snapshotServiceManagerDir, "adb_serviceclient.go")
-	snapshotLegacyServiceManagerPath := filepath.Join(snapshotServiceManagerDir, "adb_servicemanager.go")
-	assertSymlink(t, filepath.Join(snapshotRoot, "api", "database", "v1beta1", "autonomousdatabases_webhook.go"))
+	snapshotAdapterPath := filepath.Join(snapshotServiceManagerDir, "autonomousdatabase_generated_client_adapter.go")
+	snapshotLegacyServiceManagerPath := filepath.Join(snapshotServiceManagerDir, "legacy_servicemanager.go")
+	assertSymlink(t, filepath.Join(snapshotRoot, "api", "database", "v1beta1", "autonomousdatabase_helpers.go"))
 	assertSymlink(t, snapshotAdapterPath)
-	assertSymlink(t, snapshotLegacyServiceClientPath)
 	assertSymlink(t, snapshotLegacyServiceManagerPath)
 	assertRegularFile(t, snapshotGeneratedServiceClientPath)
-	assertNotExists(t, filepath.Join(snapshotRoot, "api", "database", "v1beta1", "autonomousdatabases_types.go"), "generated api type file")
+	assertNotExists(t, filepath.Join(snapshotRoot, "api", "database", "v1beta1", "autonomousdatabase_types.go"), "generated api type file")
 }
 
 func mustMkdirAll(t *testing.T, dirs []string) {

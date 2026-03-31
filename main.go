@@ -124,7 +124,7 @@ func setupRuntimeRegistrations(mgr ctrl.Manager, runtimeDeps servicemanager.Runt
 	if err := setupControllerRegistrations(registrationContext); err != nil {
 		return err
 	}
-	return setupExplicitWebhooks(mgr)
+	return setupManualWebhooks(mgr)
 }
 
 func setupControllerRegistrations(registrationContext registrations.Context) error {
@@ -136,8 +136,8 @@ func setupControllerRegistrations(registrationContext registrations.Context) err
 	return nil
 }
 
-func setupExplicitWebhooks(mgr ctrl.Manager) error {
-	for _, webhook := range registrations.ExplicitWebhooks() {
+func setupManualWebhooks(mgr ctrl.Manager) error {
+	for _, webhook := range registrations.ManualWebhooks() {
 		if err := webhook.SetupWithManager(mgr); err != nil {
 			return fmt.Errorf("unable to create webhook %q: %w", webhook.Name, err)
 		}
