@@ -33,6 +33,7 @@ func (e ErrTargetExists) Error() string {
 	return fmt.Sprintf("target output %q already exists", e.Path)
 }
 
+//nolint:gocyclo // Package rendering keeps overwrite checks and per-resource writes in one flow for clearer error attribution.
 func (r *Renderer) RenderPackage(root string, pkg *PackageModel, overwrite bool) (string, error) {
 	outputDir := targetOutputDir(root, pkg)
 	if _, err := os.Stat(outputDir); err == nil && !overwrite {
@@ -182,6 +183,7 @@ func (r *Renderer) RenderServiceManagers(root string, pkg *PackageModel, overwri
 	return nil
 }
 
+//nolint:gocognit,gocyclo // Sample rendering intentionally combines file cleanup, emission, and inventory rebuild in one pass.
 func (r *Renderer) RenderSamples(root string, cfg *Config, packages []*PackageModel) error {
 	type sampleEntry struct {
 		order    int

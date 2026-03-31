@@ -133,6 +133,7 @@ func (f fakeServiceError) GetOpcRequestID() string {
 	return f.opcID
 }
 
+//nolint:gocyclo // This scenario keeps request projection and status assertions together to verify the full create path.
 func TestServiceClientCreateOrUpdateCreatesAndProjectsStatus(t *testing.T) {
 	t.Parallel()
 
@@ -469,6 +470,7 @@ func TestServiceClientCreateOrUpdateUsesExplicitRequestFieldsAndFormalLifecycle(
 	}
 }
 
+//nolint:gocognit,gocyclo // Table-driven coverage keeps the generated polymorphic create-body variants together.
 func TestBuildRequestPopulatesAutonomousDatabasePolymorphicCreateBody(t *testing.T) {
 	t.Parallel()
 

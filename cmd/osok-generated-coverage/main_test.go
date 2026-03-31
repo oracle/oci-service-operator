@@ -8,6 +8,7 @@ import (
 	"github.com/oracle/oci-service-operator/internal/generator"
 )
 
+//nolint:gocyclo // Snapshot-fixture setup is intentionally exhaustive so writable and linked outputs are asserted in one test.
 func TestPopulateSnapshotKeepsSelectedOutputsWritable(t *testing.T) {
 	t.Helper()
 
@@ -81,6 +82,7 @@ func TestPopulateSnapshotKeepsSelectedOutputsWritable(t *testing.T) {
 	}
 }
 
+//nolint:gocognit,gocyclo // This fixture covers the generator's manual-companion linking cases in one end-to-end snapshot scenario.
 func TestPreserveCheckedInCompanionFilesLinksManualCompanions(t *testing.T) {
 	t.Helper()
 

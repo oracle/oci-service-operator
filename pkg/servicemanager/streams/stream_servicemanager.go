@@ -84,6 +84,7 @@ func setStreamOCID(stream *streamingv1beta1.Stream, ocid shared.OCID) {
 	}
 }
 
+//nolint:gocognit,gocyclo // Legacy stream reconciliation keeps bind, create, update, and secret side-effects in one status flow.
 func (c *StreamServiceManager) CreateOrUpdate(ctx context.Context, obj runtime.Object, req ctrl.Request) (servicemanager.OSOKResponse, error) {
 	streamObject, err := c.convert(obj)
 
@@ -223,7 +224,7 @@ func (c *StreamServiceManager) CreateOrUpdate(ctx context.Context, obj runtime.O
 			req.Name, req.Namespace)
 		_, err := c.addToSecret(ctx, streamObject.Namespace, streamObject.Name, *streamInstance)
 		if err != nil {
-			c.Log.InfoLog(fmt.Sprintf("Secret creation got failed"))
+			c.Log.InfoLog("Secret creation got failed")
 			return servicemanager.OSOKResponse{IsSuccessful: false}, err
 		}
 	}
@@ -244,6 +245,7 @@ func isValidUpdate(streamObject streamingv1beta1.Stream, streamInstance streamin
 		definedTagUpdated
 }
 
+//nolint:gocognit,gocyclo // Legacy stream deletion keeps discovery, OCI delete, and secret cleanup coupled to existing status handling.
 func (c *StreamServiceManager) Delete(ctx context.Context, obj runtime.Object) (bool, error) {
 	streamObject, err := c.convert(obj)
 

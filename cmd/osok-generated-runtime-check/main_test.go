@@ -98,6 +98,7 @@ func TestCollectBuildPlanRejectsMissingRuntimePackages(t *testing.T) {
 	}
 }
 
+//nolint:gocognit,gocyclo // Snapshot setup keeps formal-root linking and writable-output assertions together in one integration-style test.
 func TestPopulateSnapshotCarriesFormalRootAndLeavesSelectedFilesWritable(t *testing.T) {
 	t.Helper()
 
@@ -168,6 +169,7 @@ func TestPopulateSnapshotCarriesFormalRootAndLeavesSelectedFilesWritable(t *test
 	}
 }
 
+//nolint:gocognit,gocyclo // This fixture covers the runtime-check snapshot's manual-companion linking cases in one end-to-end scenario.
 func TestPreserveCheckedInCompanionFilesLinksManualCompanions(t *testing.T) {
 	t.Helper()
 

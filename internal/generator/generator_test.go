@@ -52,110 +52,11 @@ func TestBuildPackageModelDiscoversResources(t *testing.T) {
 		t.Fatalf("BuildPackageModel() group DNS name = %q, want %q", pkg.GroupDNSName, "mysql.oracle.com")
 	}
 
-	dbSystem := findResource(t, pkg.Resources, "DbSystem")
-	if dbSystem.SDKName != "DbSystem" {
-		t.Fatalf("DbSystem SDK name = %q, want %q", dbSystem.SDKName, "DbSystem")
-	}
-	if !hasField(dbSystem.SpecFields, "Port") {
-		t.Fatalf("DbSystem fields = %#v, want Port", dbSystem.SpecFields)
-	}
-	if hasField(dbSystem.SpecFields, "Id") {
-		t.Fatalf("DbSystem fields = %#v, want no implicit Id field", dbSystem.SpecFields)
-	}
-	if dbSystem.PrimaryDisplayField != "DisplayName" {
-		t.Fatalf("DbSystem primary display field = %q, want DisplayName", dbSystem.PrimaryDisplayField)
-	}
-
-	widget := findResource(t, pkg.Resources, "Widget")
-	if len(widget.Operations) != 5 {
-		t.Fatalf("Widget operations = %v, want 5 CRUD operations", widget.Operations)
-	}
-	if !hasField(widget.SpecFields, "Mode") {
-		t.Fatalf("Widget fields = %#v, want Mode alias field", widget.SpecFields)
-	}
-	if !hasField(widget.SpecFields, "CreatedAt") {
-		t.Fatalf("Widget fields = %#v, want CreatedAt selector field", widget.SpecFields)
-	}
-	if hasField(widget.SpecFields, "LifecycleState") {
-		t.Fatalf("Widget spec fields = %#v, want read-model fields moved out of spec", widget.SpecFields)
-	}
-	if hasField(widget.SpecFields, "TimeUpdated") {
-		t.Fatalf("Widget spec fields = %#v, want summary fields moved out of spec", widget.SpecFields)
-	}
-	if !hasField(widget.StatusFields, "LifecycleState") {
-		t.Fatalf("Widget status fields = %#v, want LifecycleState from the read model", widget.StatusFields)
-	}
-	if !hasField(widget.StatusFields, "TimeUpdated") {
-		t.Fatalf("Widget status fields = %#v, want TimeUpdated from the summary model", widget.StatusFields)
-	}
-
-	compartmentID := findFieldModel(t, widget.SpecFields, "CompartmentId")
-	if compartmentID.Tag != `json:"compartmentId"` {
-		t.Fatalf("Widget CompartmentId tag = %q, want required json tag", compartmentID.Tag)
-	}
-	if !slices.Equal(compartmentID.Comments, []string{"The OCID of the widget compartment."}) {
-		t.Fatalf("Widget CompartmentId comments = %#v, want SDK documentation", compartmentID.Comments)
-	}
-	if !slices.Equal(compartmentID.Markers, []string{"+kubebuilder:validation:Required"}) {
-		t.Fatalf("Widget CompartmentId markers = %#v, want required marker", compartmentID.Markers)
-	}
-
-	labels := findFieldModel(t, widget.SpecFields, "Labels")
-	if labels.Tag != `json:"labels,omitempty"` {
-		t.Fatalf("Widget Labels tag = %q, want optional json tag", labels.Tag)
-	}
-	if !slices.Equal(labels.Comments, []string{"Additional labels for the widget."}) {
-		t.Fatalf("Widget Labels comments = %#v, want SDK documentation", labels.Comments)
-	}
-	if !slices.Equal(labels.Markers, []string{"+kubebuilder:validation:Optional"}) {
-		t.Fatalf("Widget Labels markers = %#v, want optional marker", labels.Markers)
-	}
-
-	serverState := findFieldModel(t, widget.SpecFields, "ServerState")
-	if serverState.Tag != `json:"serverState,omitempty"` {
-		t.Fatalf("Widget ServerState tag = %q, want read-only field to keep omitempty", serverState.Tag)
-	}
-	if len(serverState.Markers) != 0 {
-		t.Fatalf("Widget ServerState markers = %#v, want read-only field to suppress requiredness markers", serverState.Markers)
-	}
-
-	lifecycleState := findFieldModel(t, widget.StatusFields, "LifecycleState")
-	if !slices.Equal(lifecycleState.Comments, []string{"The lifecycle state of the widget."}) {
-		t.Fatalf("Widget LifecycleState comments = %#v, want SDK documentation on status fields", lifecycleState.Comments)
-	}
-	if len(lifecycleState.Markers) != 0 {
-		t.Fatalf("Widget LifecycleState markers = %#v, want no requiredness markers on status fields", lifecycleState.Markers)
-	}
-
-	report := findResource(t, pkg.Resources, "Report")
-	if len(report.SpecFields) != 0 {
-		t.Fatalf("Report spec fields = %#v, want empty spec when no create or update payload exists", report.SpecFields)
-	}
-	if !hasField(report.StatusFields, "Id") {
-		t.Fatalf("Report status fields = %#v, want Id from the read model", report.StatusFields)
-	}
-	if !hasField(report.StatusFields, "LifecycleState") {
-		t.Fatalf("Report status fields = %#v, want LifecycleState from the read model", report.StatusFields)
-	}
-	if !hasField(report.StatusFields, "DisplayName") {
-		t.Fatalf("Report status fields = %#v, want DisplayName from the summary model", report.StatusFields)
-	}
-
-	reportByName := findResource(t, pkg.Resources, "ReportByName")
-	if !hasField(reportByName.SpecFields, "DisplayName") {
-		t.Fatalf("ReportByName spec fields = %#v, want DisplayName from the non-CRUD request payload", reportByName.SpecFields)
-	}
-
-	oauthClientCredential := findResource(t, pkg.Resources, "OAuthClientCredential")
-	if !hasField(oauthClientCredential.SpecFields, "Name") {
-		t.Fatalf("OAuthClientCredential spec fields = %#v, want Name from the aliased create payload", oauthClientCredential.SpecFields)
-	}
-	if !hasField(oauthClientCredential.SpecFields, "Description") {
-		t.Fatalf("OAuthClientCredential spec fields = %#v, want Description from the aliased create/update payloads", oauthClientCredential.SpecFields)
-	}
-	if !hasField(oauthClientCredential.SpecFields, "Scopes") {
-		t.Fatalf("OAuthClientCredential spec fields = %#v, want Scopes from the aliased create/update payloads", oauthClientCredential.SpecFields)
-	}
+	assertDiscoveredMySQLDbSystem(t, findResource(t, pkg.Resources, "DbSystem"))
+	assertDiscoveredWidget(t, findResource(t, pkg.Resources, "Widget"))
+	assertDiscoveredReport(t, findResource(t, pkg.Resources, "Report"))
+	assertDiscoveredReportByName(t, findResource(t, pkg.Resources, "ReportByName"))
+	assertDiscoveredOAuthClientCredential(t, findResource(t, pkg.Resources, "OAuthClientCredential"))
 }
 
 func TestBuildPackageModelAttachesFormalModelFromResourceOverride(t *testing.T) {
@@ -1827,22 +1728,10 @@ func TestCheckedInIdentityUserRuntimeArtifactsMatchGenerator(t *testing.T) {
 }
 
 func TestCheckedInPromotedRuntimeArtifactsMatchGenerator(t *testing.T) {
-	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
-	cfg, err := LoadConfig(cfgPath)
-	if err != nil {
-		t.Fatalf("LoadConfig(%q) error = %v", cfgPath, err)
-	}
+	cfg := loadCheckedInConfig(t)
+	services := serviceConfigsByName(t, cfg, "database", "mysql", "streaming")
 
-	tests := []struct {
-		serviceName         string
-		kind                string
-		formalSlug          string
-		serviceClientPath   string
-		controllerPath      string
-		controllerContains  []string
-		controllerExcludes  []string
-		serviceClientChecks []string
-	}{
+	tests := []promotedRuntimeArtifactExpectation{
 		{
 			serviceName:       "database",
 			kind:              "AutonomousDatabase",
@@ -1903,55 +1792,11 @@ func TestCheckedInPromotedRuntimeArtifactsMatchGenerator(t *testing.T) {
 	}
 
 	for _, test := range tests {
+		test := test
 		t.Run(test.serviceName, func(t *testing.T) {
-			var service *ServiceConfig
-			for i := range cfg.Services {
-				if cfg.Services[i].Service == test.serviceName {
-					service = &cfg.Services[i]
-					break
-				}
-			}
-			if service == nil {
-				t.Fatalf("%s service was not found in services.yaml", test.serviceName)
-			}
-			if got := service.FormalSpecFor(test.kind); got != test.formalSlug {
-				t.Fatalf("%s %s formalSpec = %q, want %q", test.serviceName, test.kind, got, test.formalSlug)
-			}
-
-			outputRoot := t.TempDir()
-			samplesDir := filepath.Join(outputRoot, "config", "samples")
-			if err := os.MkdirAll(samplesDir, 0o755); err != nil {
-				t.Fatalf("mkdir %s: %v", samplesDir, err)
-			}
-			checkedInSampleKustomization := readFile(t, filepath.Join(repoRoot(t), "config", "samples", "kustomization.yaml"))
-			if err := os.WriteFile(filepath.Join(samplesDir, "kustomization.yaml"), []byte(checkedInSampleKustomization), 0o644); err != nil {
-				t.Fatalf("write seeded samples kustomization: %v", err)
-			}
-
-			pipeline := New()
-			result, err := pipeline.Generate(context.Background(), cfg, []ServiceConfig{*service}, Options{
-				OutputRoot: outputRoot,
-			})
-			if err != nil {
-				t.Fatalf("Generate() error = %v", err)
-			}
-			if len(result.Generated) != 1 {
-				t.Fatalf("Generate() generated %d services, want 1", len(result.Generated))
-			}
-
-			assertGoEquivalent(t, filepath.Join(repoRoot(t), test.serviceClientPath), filepath.Join(outputRoot, test.serviceClientPath))
-			assertGoEquivalent(t, filepath.Join(repoRoot(t), test.controllerPath), filepath.Join(outputRoot, test.controllerPath))
-
-			serviceClientContent := readFile(t, filepath.Join(outputRoot, test.serviceClientPath))
-			assertContains(t, serviceClientContent, test.serviceClientChecks)
-
-			controllerContent := readFile(t, filepath.Join(outputRoot, test.controllerPath))
-			assertContains(t, controllerContent, test.controllerContains)
-			for _, excluded := range test.controllerExcludes {
-				if strings.Contains(controllerContent, excluded) {
-					t.Fatalf("%s unexpectedly contains %q", test.controllerPath, excluded)
-				}
-			}
+			service := services[test.serviceName]
+			assertServiceFormalSpec(t, service, test.kind, test.formalSlug)
+			assertPromotedRuntimeArtifactsCase(t, cfg, service, test)
 		})
 	}
 }
@@ -2299,6 +2144,18 @@ func assertDiscoveredReport(t *testing.T, report ResourceModel) {
 	assertResourceStatusFields(t, report, "Id", "LifecycleState", "DisplayName")
 }
 
+func assertDiscoveredReportByName(t *testing.T, report ResourceModel) {
+	t.Helper()
+
+	assertResourceSpecFields(t, report, "DisplayName")
+}
+
+func assertDiscoveredOAuthClientCredential(t *testing.T, credential ResourceModel) {
+	t.Helper()
+
+	assertResourceSpecFields(t, credential, "Name", "Description", "Scopes")
+}
+
 func assertWidgetFormalModel(t *testing.T, widget ResourceModel) {
 	t.Helper()
 
@@ -2478,6 +2335,43 @@ func assertNetworkLoadBalancerSDKFields(t *testing.T, pkg *PackageModel) {
 	assertFieldType(t, "HealthChecker ResponseData", findFieldModel(t, healthChecker.SpecFields, "ResponseData"), "string")
 }
 
+type promotedRuntimeArtifactExpectation struct {
+	serviceName         string
+	kind                string
+	formalSlug          string
+	serviceClientPath   string
+	controllerPath      string
+	controllerContains  []string
+	controllerExcludes  []string
+	serviceClientChecks []string
+}
+
+func assertPromotedRuntimeArtifactsCase(t *testing.T, cfg *Config, service *ServiceConfig, want promotedRuntimeArtifactExpectation) {
+	t.Helper()
+
+	outputRoot := t.TempDir()
+	seedSamplesKustomization(t, outputRoot)
+
+	pipeline := New()
+	result, err := pipeline.Generate(context.Background(), cfg, []ServiceConfig{*service}, Options{
+		OutputRoot: outputRoot,
+	})
+	if err != nil {
+		t.Fatalf("Generate() error = %v", err)
+	}
+	if len(result.Generated) != 1 {
+		t.Fatalf("Generate() generated %d services, want 1", len(result.Generated))
+	}
+
+	assertGeneratedGoMatchesAll(t, repoRoot(t), outputRoot, []string{
+		want.serviceClientPath,
+		want.controllerPath,
+	})
+	assertFileContains(t, filepath.Join(outputRoot, want.serviceClientPath), want.serviceClientChecks)
+	assertFileContains(t, filepath.Join(outputRoot, want.controllerPath), want.controllerContains)
+	assertFileDoesNotContain(t, filepath.Join(outputRoot, want.controllerPath), want.controllerExcludes)
+}
+
 func newTestGenerator(t *testing.T) *Generator {
 	t.Helper()
 
@@ -2597,14 +2491,6 @@ func findFieldModel(t *testing.T, fields []FieldModel, name string) FieldModel {
 
 	t.Fatalf("field %q was not found in %#v", name, fields)
 	return FieldModel{}
-}
-
-func structFieldNames(t *testing.T, source string, typeName string) []string {
-	t.Helper()
-
-	_, file := parseTestGoFile(t, source)
-	structType := findStructType(t, file, source, typeName)
-	return structFieldNamesFromStruct(structType)
 }
 
 func findHelperType(t *testing.T, helperTypes []TypeModel, name string) TypeModel {
@@ -2884,70 +2770,6 @@ func stripGoComments(file *ast.File) {
 	for _, decl := range file.Decls {
 		stripDeclComments(decl)
 	}
-}
-
-func parseTestGoFile(t *testing.T, source string) (*token.FileSet, *ast.File) {
-	t.Helper()
-
-	fileSet := token.NewFileSet()
-	file, err := parser.ParseFile(fileSet, "generated.go", source, parser.SkipObjectResolution)
-	if err != nil {
-		t.Fatalf("ParseFile() error = %v\nsource:\n%s", err, source)
-	}
-
-	return fileSet, file
-}
-
-func findStructType(t *testing.T, file *ast.File, source string, typeName string) *ast.StructType {
-	t.Helper()
-
-	typeSpec := findTypeSpec(t, file, source, typeName)
-	structType, ok := typeSpec.Type.(*ast.StructType)
-	if !ok || structType.Fields == nil {
-		t.Fatalf("type %q was not a struct in source:\n%s", typeName, source)
-	}
-
-	return structType
-}
-
-func findTypeSpec(t *testing.T, file *ast.File, source string, typeName string) *ast.TypeSpec {
-	t.Helper()
-
-	for _, decl := range file.Decls {
-		if typeSpec := typeSpecNamed(decl, typeName); typeSpec != nil {
-			return typeSpec
-		}
-	}
-
-	t.Fatalf("type %q was not found in source:\n%s", typeName, source)
-	return nil
-}
-
-func typeSpecNamed(decl ast.Decl, typeName string) *ast.TypeSpec {
-	genDecl, ok := decl.(*ast.GenDecl)
-	if !ok || genDecl.Tok != token.TYPE {
-		return nil
-	}
-
-	for _, spec := range genDecl.Specs {
-		typeSpec, ok := spec.(*ast.TypeSpec)
-		if ok && typeSpec.Name.Name == typeName {
-			return typeSpec
-		}
-	}
-
-	return nil
-}
-
-func structFieldNamesFromStruct(structType *ast.StructType) []string {
-	names := make([]string, 0, len(structType.Fields.List))
-	for _, field := range structType.Fields.List {
-		for _, name := range field.Names {
-			names = append(names, name.Name)
-		}
-	}
-
-	return names
 }
 
 func stripDeclComments(decl ast.Decl) {

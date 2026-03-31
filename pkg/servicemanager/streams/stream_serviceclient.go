@@ -126,6 +126,7 @@ func (c *StreamServiceManager) GetStream(ctx context.Context, streamId shared.OC
 	return &response.Stream, nil
 }
 
+//nolint:gocognit,gocyclo // Legacy stream updates keep OCI validation and conditional field projection together.
 func (c *StreamServiceManager) UpdateStream(ctx context.Context, stream *streamingv1beta1.Stream) error {
 
 	streamClient := c.getOCIClient()

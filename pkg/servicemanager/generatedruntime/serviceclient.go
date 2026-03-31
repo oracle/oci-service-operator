@@ -141,6 +141,7 @@ func NewServiceClient[T any](cfg Config[T]) ServiceClient[T] {
 	return ServiceClient[T]{config: cfg}
 }
 
+//nolint:gocognit,gocyclo // Generated reconcile keeps create, update, read, and status projection together to preserve one control path.
 func (c ServiceClient[T]) CreateOrUpdate(ctx context.Context, resource T, _ ctrl.Request) (servicemanager.OSOKResponse, error) {
 	if c.config.InitError != nil {
 		return servicemanager.OSOKResponse{IsSuccessful: false}, c.markFailure(resource, c.config.InitError)
@@ -193,6 +194,7 @@ func (c ServiceClient[T]) CreateOrUpdate(ctx context.Context, resource T, _ ctrl
 	return c.applySuccess(resource, response, shared.Active)
 }
 
+//nolint:gocyclo // Delete confirmation keeps the no-semantics fallback flow aligned with the generated formal path.
 func (c ServiceClient[T]) Delete(ctx context.Context, resource T) (bool, error) {
 	if c.config.InitError != nil {
 		return false, c.config.InitError
@@ -276,6 +278,7 @@ func (c ServiceClient[T]) requiresWriteFollowUp(phase string) bool {
 	}
 }
 
+//nolint:gocognit,gocyclo // Formal delete semantics intentionally keep OCI delete and follow-up state handling in one routine.
 func (c ServiceClient[T]) deleteWithSemantics(ctx context.Context, resource T) (bool, error) {
 	semantics := c.config.Semantics
 	if semantics == nil {
@@ -369,6 +372,7 @@ func (c ServiceClient[T]) resolveDeleteID(ctx context.Context, resource T) (stri
 	return currentID, nil
 }
 
+//nolint:gocognit,gocyclo // Mutation-policy validation walks conflicting and force-new fields together against spec/status JSON maps.
 func (c ServiceClient[T]) validateMutationPolicy(resource T, existing bool) error {
 	semantics := c.config.Semantics
 	if semantics == nil {
@@ -616,6 +620,7 @@ func buildExplicitRequest(requestStruct reflect.Value, resource any, values map[
 	return nil
 }
 
+//nolint:gocognit,gocyclo // Heuristic request building resolves OCI tags, metadata aliases, and resource IDs in one pass over request fields.
 func buildHeuristicRequest(
 	requestStruct reflect.Value,
 	requestType reflect.Type,
@@ -769,6 +774,7 @@ func specValue(resource any) any {
 	return fieldInterface(resourceValue, "Spec")
 }
 
+//nolint:gocognit,gocyclo // OCI responses vary between wrapped body fields and direct payloads, so unwrapping stays centralized here.
 func responseBody(response any) (any, bool) {
 	if response == nil {
 		return nil, false
@@ -1049,6 +1055,7 @@ func isNotFound(err error) bool {
 	return false
 }
 
+//nolint:gocyclo // List selection preserves ID and display-name fallback precedence in one matching routine.
 func (c ServiceClient[T]) selectListItem(body any, resource T, preferredID string) (any, error) {
 	responseItemsField := ""
 	if c.config.Semantics != nil && c.config.Semantics.List != nil {
@@ -1103,6 +1110,7 @@ func (c ServiceClient[T]) selectListItem(body any, resource T, preferredID strin
 	}
 }
 
+//nolint:gocognit,gocyclo // Formal list matching compares preferred IDs and semantic match fields in a single pass over OCI items.
 func (c ServiceClient[T]) selectFormalListItem(items []any, criteria map[string]any, preferredID string) (any, error) {
 	matchFields := []string{}
 	if c.config.Semantics != nil && c.config.Semantics.List != nil {
@@ -1153,6 +1161,7 @@ func (c ServiceClient[T]) selectFormalListItem(items []any, criteria map[string]
 	}
 }
 
+//nolint:gocyclo // OCI list payloads expose items through inconsistent field names, so fallback discovery stays linear here.
 func listItems(body any, responseItemsField string) ([]any, error) {
 	value := reflect.ValueOf(body)
 	for value.IsValid() && value.Kind() == reflect.Pointer {
@@ -1242,6 +1251,8 @@ func convertPolymorphicInterfaceValue(payload []byte, targetType reflect.Type) (
 
 // OCI models CreateAutonomousDatabase with a polymorphic interface body. Resolve the CR spec into
 // the matching concrete SDK type so request serialization uses the provider model instead of map[string]any.
+//
+//nolint:gocognit,gocyclo // The source discriminator maps to several concrete SDK request bodies in one switch.
 func convertAutonomousDatabaseBase(payload []byte) (databasesdk.CreateAutonomousDatabaseBase, error) {
 	source, err := jsonFieldString(payload, "source")
 	if err != nil {
@@ -1556,6 +1567,7 @@ func lowerCamel(name string) string {
 	return builder.String()
 }
 
+//nolint:gocyclo // Camel-case splitting keeps acronym and digit boundary handling together for stable request-name inference.
 func splitCamel(name string) []string {
 	if strings.TrimSpace(name) == "" {
 		return nil

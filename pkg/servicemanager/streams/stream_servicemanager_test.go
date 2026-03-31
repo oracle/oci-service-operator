@@ -152,11 +152,11 @@ func TestCreateStream_UsesInjectedClientAndRetention(t *testing.T) {
 
 	_, err := mgr.CreateStream(context.Background(), stream)
 	assert.NoError(t, err)
-	assert.Equal(t, common.String("test-stream"), captured.CreateStreamDetails.Name)
-	assert.Equal(t, common.Int(1), captured.CreateStreamDetails.Partitions)
-	assert.Equal(t, common.Int(24), captured.CreateStreamDetails.RetentionInHours)
-	assert.Equal(t, common.String("ocid1.compartment.oc1..example"), captured.CreateStreamDetails.CompartmentId)
-	assert.Equal(t, common.String("ocid1.streampool.oc1..example"), captured.CreateStreamDetails.StreamPoolId)
+	assert.Equal(t, common.String("test-stream"), captured.Name)
+	assert.Equal(t, common.Int(1), captured.Partitions)
+	assert.Equal(t, common.Int(24), captured.RetentionInHours)
+	assert.Equal(t, common.String("ocid1.compartment.oc1..example"), captured.CompartmentId)
+	assert.Equal(t, common.String("ocid1.streampool.oc1..example"), captured.StreamPoolId)
 }
 
 func TestGetCredentialMapForTest(t *testing.T) {
