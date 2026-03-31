@@ -6,6 +6,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 func TestResolveManagerOptionsUsesDefaultFlagsWithoutConfigFile(t *testing.T) {
@@ -81,63 +83,11 @@ webhook:
 		t.Fatalf("resolveManagerOptions() error = %v", err)
 	}
 
-	if options.Scheme != scheme {
-		t.Fatal("resolveManagerOptions() did not reuse the global scheme")
-	}
-	if options.Metrics.BindAddress != "127.0.0.1:28080" {
-		t.Fatalf("options.Metrics.BindAddress = %q, want %q", options.Metrics.BindAddress, "127.0.0.1:28080")
-	}
-	if options.HealthProbeBindAddress != ":28081" {
-		t.Fatalf("options.HealthProbeBindAddress = %q, want %q", options.HealthProbeBindAddress, ":28081")
-	}
-	if options.ReadinessEndpointName != "readyz-custom" {
-		t.Fatalf("options.ReadinessEndpointName = %q, want %q", options.ReadinessEndpointName, "readyz-custom")
-	}
-	if options.LivenessEndpointName != "healthz-custom" {
-		t.Fatalf("options.LivenessEndpointName = %q, want %q", options.LivenessEndpointName, "healthz-custom")
-	}
-	if options.Cache.SyncPeriod == nil || *options.Cache.SyncPeriod != 45*time.Second {
-		t.Fatalf("options.Cache.SyncPeriod = %v, want %v", options.Cache.SyncPeriod, 45*time.Second)
-	}
-	if _, ok := options.Cache.DefaultNamespaces["operator-system"]; !ok {
-		t.Fatalf("options.Cache.DefaultNamespaces = %v, want operator-system entry", options.Cache.DefaultNamespaces)
-	}
-	if options.GracefulShutdownTimeout == nil || *options.GracefulShutdownTimeout != 30*time.Second {
-		t.Fatalf("options.GracefulShutdownTimeout = %v, want %v", options.GracefulShutdownTimeout, 30*time.Second)
-	}
-	if !options.LeaderElection {
-		t.Fatal("options.LeaderElection = false, want true")
-	}
-	if options.LeaderElectionResourceLock != "leases" {
-		t.Fatalf("options.LeaderElectionResourceLock = %q, want %q", options.LeaderElectionResourceLock, "leases")
-	}
-	if options.LeaderElectionNamespace != "operator-system" {
-		t.Fatalf("options.LeaderElectionNamespace = %q, want %q", options.LeaderElectionNamespace, "operator-system")
-	}
-	if options.LeaderElectionID != "custom-leader-election" {
-		t.Fatalf("options.LeaderElectionID = %q, want %q", options.LeaderElectionID, "custom-leader-election")
-	}
-	if options.LeaseDuration == nil || *options.LeaseDuration != time.Minute {
-		t.Fatalf("options.LeaseDuration = %v, want %v", options.LeaseDuration, time.Minute)
-	}
-	if options.RenewDeadline == nil || *options.RenewDeadline != 40*time.Second {
-		t.Fatalf("options.RenewDeadline = %v, want %v", options.RenewDeadline, 40*time.Second)
-	}
-	if options.RetryPeriod == nil || *options.RetryPeriod != 10*time.Second {
-		t.Fatalf("options.RetryPeriod = %v, want %v", options.RetryPeriod, 10*time.Second)
-	}
-	if options.Controller.CacheSyncTimeout != 2*time.Minute {
-		t.Fatalf("options.Controller.CacheSyncTimeout = %v, want %v", options.Controller.CacheSyncTimeout, 2*time.Minute)
-	}
-	if got := options.Controller.GroupKindConcurrency["core/Vcn"]; got != 4 {
-		t.Fatalf("options.Controller.GroupKindConcurrency[core/Vcn] = %d, want %d", got, 4)
-	}
-	if options.Controller.RecoverPanic == nil || !*options.Controller.RecoverPanic {
-		t.Fatalf("options.Controller.RecoverPanic = %v, want true", options.Controller.RecoverPanic)
-	}
-	if options.WebhookServer == nil {
-		t.Fatal("options.WebhookServer = nil, want initialized server")
-	}
+	assertManagerOptionsUseLoadedConfig(t, options)
+	assertManagerOptionsHealthAndCacheConfig(t, options)
+	assertManagerOptionsLeaderElectionConfig(t, options)
+	assertManagerOptionsControllerConfig(t, options)
+	assertManagerOptionsWebhookConfig(t, options)
 }
 
 func TestResolveManagerOptionsWrapsConfigLoadErrors(t *testing.T) {
@@ -247,4 +197,98 @@ func writeTempManagerConfig(t *testing.T, content string) string {
 		t.Fatalf("WriteFile(%q) error = %v", configPath, err)
 	}
 	return configPath
+}
+
+func assertManagerOptionsUseLoadedConfig(t *testing.T, options ctrl.Options) {
+	t.Helper()
+
+	if options.Scheme != scheme {
+		t.Fatal("resolveManagerOptions() did not reuse the global scheme")
+	}
+	if options.Metrics.BindAddress != "127.0.0.1:28080" {
+		t.Fatalf("options.Metrics.BindAddress = %q, want %q", options.Metrics.BindAddress, "127.0.0.1:28080")
+	}
+	if options.HealthProbeBindAddress != ":28081" {
+		t.Fatalf("options.HealthProbeBindAddress = %q, want %q", options.HealthProbeBindAddress, ":28081")
+	}
+	if options.ReadinessEndpointName != "readyz-custom" {
+		t.Fatalf("options.ReadinessEndpointName = %q, want %q", options.ReadinessEndpointName, "readyz-custom")
+	}
+	if options.LivenessEndpointName != "healthz-custom" {
+		t.Fatalf("options.LivenessEndpointName = %q, want %q", options.LivenessEndpointName, "healthz-custom")
+	}
+}
+
+func assertManagerOptionsHealthAndCacheConfig(t *testing.T, options ctrl.Options) {
+	t.Helper()
+
+	if options.Cache.SyncPeriod == nil || *options.Cache.SyncPeriod != 45*time.Second {
+		t.Fatalf("options.Cache.SyncPeriod = %v, want %v", options.Cache.SyncPeriod, 45*time.Second)
+	}
+	if _, ok := options.Cache.DefaultNamespaces["operator-system"]; !ok {
+		t.Fatalf("options.Cache.DefaultNamespaces = %v, want operator-system entry", options.Cache.DefaultNamespaces)
+	}
+	if options.GracefulShutdownTimeout == nil || *options.GracefulShutdownTimeout != 30*time.Second {
+		t.Fatalf("options.GracefulShutdownTimeout = %v, want %v", options.GracefulShutdownTimeout, 30*time.Second)
+	}
+}
+
+func assertManagerOptionsLeaderElectionConfig(t *testing.T, options ctrl.Options) {
+	t.Helper()
+
+	assertLeaderElectionIdentity(t, options)
+	assertLeaderElectionDurations(t, options)
+}
+
+func assertLeaderElectionIdentity(t *testing.T, options ctrl.Options) {
+	t.Helper()
+
+	if !options.LeaderElection {
+		t.Fatal("options.LeaderElection = false, want true")
+	}
+	if options.LeaderElectionResourceLock != "leases" {
+		t.Fatalf("options.LeaderElectionResourceLock = %q, want %q", options.LeaderElectionResourceLock, "leases")
+	}
+	if options.LeaderElectionNamespace != "operator-system" {
+		t.Fatalf("options.LeaderElectionNamespace = %q, want %q", options.LeaderElectionNamespace, "operator-system")
+	}
+	if options.LeaderElectionID != "custom-leader-election" {
+		t.Fatalf("options.LeaderElectionID = %q, want %q", options.LeaderElectionID, "custom-leader-election")
+	}
+}
+
+func assertLeaderElectionDurations(t *testing.T, options ctrl.Options) {
+	t.Helper()
+
+	if options.LeaseDuration == nil || *options.LeaseDuration != time.Minute {
+		t.Fatalf("options.LeaseDuration = %v, want %v", options.LeaseDuration, time.Minute)
+	}
+	if options.RenewDeadline == nil || *options.RenewDeadline != 40*time.Second {
+		t.Fatalf("options.RenewDeadline = %v, want %v", options.RenewDeadline, 40*time.Second)
+	}
+	if options.RetryPeriod == nil || *options.RetryPeriod != 10*time.Second {
+		t.Fatalf("options.RetryPeriod = %v, want %v", options.RetryPeriod, 10*time.Second)
+	}
+}
+
+func assertManagerOptionsControllerConfig(t *testing.T, options ctrl.Options) {
+	t.Helper()
+
+	if options.Controller.CacheSyncTimeout != 2*time.Minute {
+		t.Fatalf("options.Controller.CacheSyncTimeout = %v, want %v", options.Controller.CacheSyncTimeout, 2*time.Minute)
+	}
+	if got := options.Controller.GroupKindConcurrency["core/Vcn"]; got != 4 {
+		t.Fatalf("options.Controller.GroupKindConcurrency[core/Vcn] = %d, want %d", got, 4)
+	}
+	if options.Controller.RecoverPanic == nil || !*options.Controller.RecoverPanic {
+		t.Fatalf("options.Controller.RecoverPanic = %v, want true", options.Controller.RecoverPanic)
+	}
+}
+
+func assertManagerOptionsWebhookConfig(t *testing.T, options ctrl.Options) {
+	t.Helper()
+
+	if options.WebhookServer == nil {
+		t.Fatal("options.WebhookServer = nil, want initialized server")
+	}
 }
