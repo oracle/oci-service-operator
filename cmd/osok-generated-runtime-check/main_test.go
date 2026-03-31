@@ -107,10 +107,10 @@ func TestCollectBuildPlanRejectsLegacyOnlyServiceManagerPackages(t *testing.T) {
 	mustRuntimeCheckMkdirAll(t, filepath.Join(root, "internal", "registrations"))
 
 	writeRuntimeCheckFiles(t, map[string]string{
-		filepath.Join(root, "controllers", "database", "autonomousdatabase_controller.go"):                          "package database\n",
+		filepath.Join(root, "controllers", "database", "autonomousdatabase_controller.go"):                         "package database\n",
 		filepath.Join(root, "pkg", "servicemanager", "database", "autonomousdatabase", "legacy_servicemanager.go"): "package autonomousdatabase\n",
 		filepath.Join(root, "pkg", "servicemanager", "database", "autonomousdatabase", "manual_helper.go"):         "package autonomousdatabase\n",
-		filepath.Join(root, "internal", "registrations", "database_generated.go"):                                   generatedRegistrationSource(),
+		filepath.Join(root, "internal", "registrations", "database_generated.go"):                                  generatedRegistrationSource(),
 	})
 
 	_, err := collectBuildPlan(root, []string{"database"}, []string{"database"}, []string{"database"})

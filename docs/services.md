@@ -39,9 +39,9 @@ intentionally keep `controller.strategy: none` and
 `keymanagement/WrappingKey`, `streaming/Cursor`, `streaming/Group`,
 `streaming/GroupCursor`, and `streaming/Message`.
 
-The remaining explicit checked-in seams are limited to the companion adapters
-for the historical published resources `AutonomousDatabases`, `MySqlDbSystem`,
-and `Stream`, plus the explicit `database/AutonomousDatabases` webhook path.
+The remaining explicit checked-in legacy companion adapters are limited to the
+historical published resources `MySqlDbSystem` and `Stream`. The old
+`AutonomousDatabases` compatibility adapter and webhook path are removed.
 
 Use the generated examples under `config/samples/` as the starting point for CR
 manifests. For rollout details, see `docs/api-generator-contract.md`.
