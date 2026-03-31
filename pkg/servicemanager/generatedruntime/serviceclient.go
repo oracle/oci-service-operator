@@ -743,7 +743,55 @@ func normalizeJSONValue(raw any) (any, error) {
 	if err := json.Unmarshal(payload, &normalized); err != nil {
 		return nil, fmt.Errorf("normalize source value: %w", err)
 	}
-	return normalized, nil
+	return compactNormalizedJSONValue(normalized), nil
+}
+
+func compactNormalizedJSONValue(raw any) any {
+	switch value := raw.(type) {
+	case map[string]any:
+		compacted := make(map[string]any, len(value))
+		for key, child := range value {
+			next := compactNormalizedJSONValue(child)
+			if next == nil {
+				continue
+			}
+			compacted[key] = next
+		}
+		if isEmptySecretSourceMap(compacted) {
+			return nil
+		}
+		return compacted
+	case []any:
+		compacted := make([]any, len(value))
+		for i, child := range value {
+			compacted[i] = compactNormalizedJSONValue(child)
+		}
+		return compacted
+	default:
+		return raw
+	}
+}
+
+func isEmptySecretSourceMap(values map[string]any) bool {
+	if len(values) != 1 {
+		return false
+	}
+	secretValue, ok := values["secret"]
+	if !ok {
+		return false
+	}
+	if secretValue == nil {
+		return true
+	}
+	secretMap, ok := secretValue.(map[string]any)
+	if !ok {
+		return false
+	}
+	if len(secretMap) == 0 {
+		return true
+	}
+	secretName, ok := secretMap["secretName"].(string)
+	return ok && strings.TrimSpace(secretName) == ""
 }
 
 //nolint:gocognit,gocyclo // Recursive projection handles structs, collections, maps, and secret-backed scalar inputs.
@@ -1097,11 +1145,32 @@ func copySecretSourceFields(source reflect.Value, destination reflect.Value) {
 			continue
 		}
 		if isSecretSourceType(sourceField.Type()) && destinationField.Type() == sourceField.Type() {
-			destinationField.Set(sourceField)
+			if secretSourceValueIsEmpty(sourceField) {
+				destinationField.Set(reflect.Zero(destinationField.Type()))
+			} else {
+				destinationField.Set(sourceField)
+			}
 			continue
 		}
 		copySecretSourceFields(sourceField, destinationField)
 	}
+}
+
+func secretSourceValueIsEmpty(value reflect.Value) bool {
+	value = indirectValue(value)
+	if !value.IsValid() || value.Kind() != reflect.Struct {
+		return true
+	}
+	secretField := value.FieldByName("Secret")
+	secretField = indirectValue(secretField)
+	if !secretField.IsValid() || secretField.Kind() != reflect.Struct {
+		return true
+	}
+	nameField := secretField.FieldByName("SecretName")
+	if !nameField.IsValid() || nameField.Kind() != reflect.String {
+		return true
+	}
+	return strings.TrimSpace(nameField.String()) == ""
 }
 
 func indirectValue(value reflect.Value) reflect.Value {
@@ -1564,12 +1633,12 @@ func jsonMap(value any) map[string]any {
 	if value == nil {
 		return nil
 	}
-	payload, err := json.Marshal(value)
+	normalized, err := normalizeJSONValue(value)
 	if err != nil {
 		return nil
 	}
-	var decoded map[string]any
-	if err := json.Unmarshal(payload, &decoded); err != nil {
+	decoded, ok := normalized.(map[string]any)
+	if !ok {
 		return nil
 	}
 	return decoded

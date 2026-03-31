@@ -7,6 +7,7 @@ package generatedruntime
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 	"testing"
@@ -112,9 +113,9 @@ type fakeUpdateThingResponse struct {
 }
 
 type FakeCreateSecretThingDetails struct {
-	DisplayName   string `json:"displayName,omitempty"`
-	AdminUsername string `json:"adminUsername,omitempty"`
-	AdminPassword string `json:"adminPassword,omitempty"`
+	DisplayName   string  `json:"displayName,omitempty"`
+	AdminUsername *string `json:"adminUsername,omitempty"`
+	AdminPassword *string `json:"adminPassword,omitempty"`
 }
 
 type fakeCreateSecretThingRequest struct {
@@ -335,11 +336,11 @@ func TestServiceClientCreateOrUpdateResolvesSecretInputsAndStampsStatus(t *testi
 	if createRequest.DisplayName != "desired-name" {
 		t.Fatalf("create request displayName = %q, want desired-name", createRequest.DisplayName)
 	}
-	if createRequest.AdminUsername != "admin" {
-		t.Fatalf("create request adminUsername = %q, want admin", createRequest.AdminUsername)
+	if createRequest.AdminUsername == nil || *createRequest.AdminUsername != "admin" {
+		t.Fatalf("create request adminUsername = %v, want admin", createRequest.AdminUsername)
 	}
-	if createRequest.AdminPassword != "S3cr3t!" {
-		t.Fatalf("create request adminPassword = %q, want resolved secret value", createRequest.AdminPassword)
+	if createRequest.AdminPassword == nil || *createRequest.AdminPassword != "S3cr3t!" {
+		t.Fatalf("create request adminPassword = %v, want resolved secret value", createRequest.AdminPassword)
 	}
 	if got := resource.Status.AdminUsername.Secret.SecretName; got != "admin-secret" {
 		t.Fatalf("status.adminUsername.secret.secretName = %q, want admin-secret", got)
@@ -349,6 +350,62 @@ func TestServiceClientCreateOrUpdateResolvesSecretInputsAndStampsStatus(t *testi
 	}
 	if len(credentialClient.readNames) != 2 {
 		t.Fatalf("credential reads = %v, want username and password lookups", credentialClient.readNames)
+	}
+}
+
+func TestServiceClientCreateOrUpdateOmitsEmptySecretInputs(t *testing.T) {
+	t.Parallel()
+
+	var createRequest fakeCreateSecretThingRequest
+	credentialClient := &fakeCredentialClient{secrets: map[string]map[string][]byte{}}
+
+	client := NewServiceClient[*fakeSecretResource](Config[*fakeSecretResource]{
+		Kind:             "Thing",
+		SDKName:          "Thing",
+		CredentialClient: credentialClient,
+		Create: &Operation{
+			NewRequest: func() any { return &fakeCreateSecretThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				createRequest = *request.(*fakeCreateSecretThingRequest)
+				return fakeCreateSecretThingResponse{
+					Thing: fakeThing{
+						Id:             "ocid1.thing.oc1..create",
+						LifecycleState: "ACTIVE",
+					},
+				}, nil
+			},
+		},
+	})
+
+	resource := &fakeSecretResource{
+		Namespace: "default",
+		Spec: fakeSecretSpec{
+			DisplayName: "desired-name",
+		},
+	}
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful {
+		t.Fatal("CreateOrUpdate() should report success")
+	}
+	if createRequest.AdminUsername != nil {
+		t.Fatalf("create request adminUsername = %v, want omitted nil pointer", createRequest.AdminUsername)
+	}
+	if createRequest.AdminPassword != nil {
+		t.Fatalf("create request adminPassword = %v, want omitted nil pointer", createRequest.AdminPassword)
+	}
+	payload, err := json.Marshal(createRequest.FakeCreateSecretThingDetails)
+	if err != nil {
+		t.Fatalf("json.Marshal(create request) error = %v", err)
+	}
+	if strings.Contains(string(payload), "adminUsername") || strings.Contains(string(payload), "adminPassword") {
+		t.Fatalf("create request payload = %s, want admin secret fields omitted", string(payload))
+	}
+	if len(credentialClient.readNames) != 0 {
+		t.Fatalf("credential reads = %v, want no secret lookups", credentialClient.readNames)
 	}
 }
 

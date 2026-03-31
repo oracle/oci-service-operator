@@ -225,8 +225,10 @@ credentials without restoring the old handwritten runtime path.
   namespace with a `username` entry.
 - `spec.adminPassword.secret.secretName` must reference a Secret in the same
   namespace with a `password` entry.
-- OSOK mirrors the referenced secret names into `status.adminUsername` and
-  `status.adminPassword` for drift tracking, but it does not write the secret
-  payload into the CR status.
+- If either admin secret reference is omitted, OSOK omits that field from the
+  OCI request instead of sending an empty string.
+- OSOK mirrors only non-empty referenced secret names into
+  `status.adminUsername` and `status.adminPassword` for drift tracking, but it
+  does not write the secret payload into the CR status.
 - OSOK does not create a follow-up Kubernetes Secret containing DB System
   connection details for this generated surface.

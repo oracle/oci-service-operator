@@ -50,8 +50,11 @@ gaps:
 - `DbSystem` reads admin credential secret references from same-namespace
   Kubernetes secrets in the generated runtime path, but it does not create or
   update Kubernetes secrets as a side effect.
-- `DbSystem` records the last applied admin credential secret references in
-  status so force-new checks compare references instead of plaintext values.
+- `DbSystem` omits admin credential inputs entirely when the secret references
+  are unset or empty, instead of projecting empty-string OCI payload values.
+- `DbSystem` records only non-empty last applied admin credential secret
+  references in status so force-new checks compare references instead of
+  plaintext values.
 - Delete should keep the finalizer until `GetDbSystem` or `ListDbSystems`
   confirms the DB system is gone.
 - The generated runtime now follows OCI create, update, and delete requests

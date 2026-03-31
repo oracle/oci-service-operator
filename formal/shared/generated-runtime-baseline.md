@@ -88,7 +88,9 @@ the same reference points:
   remain OCI payload inputs.
 - `mysql/DbSystem`: generated-runtime request projection reads
   same-namespace Kubernetes secrets for `adminUsername` and `adminPassword`,
-  mirrors the secret references into status for force-new bookkeeping, and
+  omits those inputs entirely when the secret references are unset or empty,
+  mirrors only non-empty secret references into status for force-new
+  bookkeeping, and
   does not materialize endpoint or access secrets.
 - Owner: no additional secret seam for `nosql/Table` or `psql/DbSystem`;
   mysql keeps explicit read-only secret semantics in the generated-runtime row.

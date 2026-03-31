@@ -4,23 +4,23 @@ resources:
     mergeWithDiscovered: true
     specFields:
       - name: AdminUsername
-        type: shared.UsernameSource
+        type: '*shared.UsernameSource'
         tag: 'json:"adminUsername,omitempty"'
         comments:
           - The username for the administrative user sourced from a Kubernetes Secret.
       - name: AdminPassword
-        type: shared.PasswordSource
+        type: '*shared.PasswordSource'
         tag: 'json:"adminPassword,omitempty"'
         comments:
           - The password for the administrative user sourced from a Kubernetes Secret.
     statusFields:
       - name: AdminUsername
-        type: shared.UsernameSource
+        type: '*shared.UsernameSource'
         tag: 'json:"adminUsername,omitempty"'
         comments:
           - The last applied secret reference for the administrative username.
       - name: AdminPassword
-        type: shared.PasswordSource
+        type: '*shared.PasswordSource'
         tag: 'json:"adminPassword,omitempty"'
         comments:
           - The last applied secret reference for the administrative password.

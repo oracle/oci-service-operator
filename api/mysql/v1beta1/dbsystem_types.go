@@ -61,9 +61,9 @@ type DbSystemSpec struct {
 	// +kubebuilder:validation:Optional
 	MysqlVersion string `json:"mysqlVersion,omitempty"`
 	// The username for the administrative user sourced from a Kubernetes Secret.
-	AdminUsername shared.UsernameSource `json:"adminUsername,omitempty"`
+	AdminUsername *shared.UsernameSource `json:"adminUsername,omitempty"`
 	// The password for the administrative user sourced from a Kubernetes Secret.
-	AdminPassword shared.PasswordSource `json:"adminPassword,omitempty"`
+	AdminPassword *shared.PasswordSource `json:"adminPassword,omitempty"`
 	// Initial size of the data volume in GBs that will be created and attached.
 	// Keep in mind that this only specifies the size of the database data volume,
 	// the log volume for the database will be scaled appropriately with its shape.
@@ -468,9 +468,9 @@ type DbSystemStatus struct {
 	DatabaseManagement string                    `json:"databaseManagement,omitempty"`
 	SecureConnections  DbSystemSecureConnections `json:"secureConnections,omitempty"`
 	// The last applied secret reference for the administrative username.
-	AdminUsername shared.UsernameSource `json:"adminUsername,omitempty"`
+	AdminUsername *shared.UsernameSource `json:"adminUsername,omitempty"`
 	// The last applied secret reference for the administrative password.
-	AdminPassword shared.PasswordSource `json:"adminPassword,omitempty"`
+	AdminPassword *shared.PasswordSource `json:"adminPassword,omitempty"`
 }
 
 // +kubebuilder:object:root=true

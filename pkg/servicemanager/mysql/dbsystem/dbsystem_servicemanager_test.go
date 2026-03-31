@@ -7,6 +7,7 @@ package dbsystem
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"reflect"
@@ -34,7 +35,8 @@ type fakeCreateDbSystemResponse struct {
 }
 
 type fakeCredentialClient struct {
-	secrets map[string]map[string][]byte
+	secrets   map[string]map[string][]byte
+	readNames []string
 }
 
 var _ credhelper.CredentialClient = (*fakeCredentialClient)(nil)
@@ -48,6 +50,7 @@ func (f *fakeCredentialClient) DeleteSecret(_ context.Context, _, _ string) (boo
 }
 
 func (f *fakeCredentialClient) GetSecret(_ context.Context, name, namespace string) (map[string][]byte, error) {
+	f.readNames = append(f.readNames, name)
 	secret, ok := f.secrets[name]
 	if !ok {
 		return nil, fmt.Errorf("secret %s/%s not found", namespace, name)
@@ -204,19 +207,20 @@ func TestDbSystemServiceManagerCreateOrUpdateProjectsSourceVariantsQuick(t *test
 func TestDbSystemServiceManagerCreateOrUpdateResolvesAdminCredentialsFromSecrets(t *testing.T) {
 	t.Parallel()
 
-	request, err := projectCreateDbSystemRequest(
-		&mysqlv1beta1.DbSystem{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: "default",
-			},
-			Spec: mysqlv1beta1.DbSystemSpec{
-				CompartmentId: "ocid1.compartment.oc1..example",
-				ShapeName:     "MySQL.VM.Standard.E3.1.8GB",
-				SubnetId:      "ocid1.subnet.oc1..example",
-				AdminUsername: shared.UsernameSource{Secret: shared.SecretSource{SecretName: "admin-secret"}},
-				AdminPassword: shared.PasswordSource{Secret: shared.SecretSource{SecretName: "admin-secret"}},
-			},
+	resource := &mysqlv1beta1.DbSystem{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "default",
 		},
+		Spec: mysqlv1beta1.DbSystemSpec{
+			CompartmentId: "ocid1.compartment.oc1..example",
+			ShapeName:     "MySQL.VM.Standard.E3.1.8GB",
+			SubnetId:      "ocid1.subnet.oc1..example",
+			AdminUsername: usernameSecretSource("admin-secret"),
+			AdminPassword: passwordSecretSource("admin-secret"),
+		},
+	}
+	request, err := projectCreateDbSystemRequest(
+		resource,
 		&fakeCredentialClient{
 			secrets: map[string]map[string][]byte{
 				"admin-secret": {
@@ -234,6 +238,73 @@ func TestDbSystemServiceManagerCreateOrUpdateResolvesAdminCredentialsFromSecrets
 	}
 	if request.AdminPassword == nil || *request.AdminPassword != "S3cr3t!" {
 		t.Fatalf("CreateDbSystemDetails.AdminPassword = %v, want resolved password", request.AdminPassword)
+	}
+}
+
+func TestDbSystemSpecOmitsAdminSecretRefsWhenUnset(t *testing.T) {
+	t.Parallel()
+
+	spec := mysqlv1beta1.DbSystemSpec{
+		CompartmentId: "ocid1.compartment.oc1..example",
+		ShapeName:     "MySQL.VM.Standard.E3.1.8GB",
+		SubnetId:      "ocid1.subnet.oc1..example",
+	}
+
+	payload, err := json.Marshal(spec)
+	if err != nil {
+		t.Fatalf("json.Marshal(DbSystemSpec) error = %v", err)
+	}
+	if strings.Contains(string(payload), "adminUsername") || strings.Contains(string(payload), "adminPassword") {
+		t.Fatalf("json.Marshal(DbSystemSpec) = %s, want admin secret refs omitted", string(payload))
+	}
+
+	request, err := projectCreateDbSystemRequest(&mysqlv1beta1.DbSystem{Spec: spec}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if request.AdminUsername != nil {
+		t.Fatalf("CreateDbSystemDetails.AdminUsername = %v, want omitted nil pointer", request.AdminUsername)
+	}
+	if request.AdminPassword != nil {
+		t.Fatalf("CreateDbSystemDetails.AdminPassword = %v, want omitted nil pointer", request.AdminPassword)
+	}
+}
+
+func TestDbSystemServiceManagerCreateOrUpdateTreatsEmptyAdminSecretObjectsAsOmitted(t *testing.T) {
+	t.Parallel()
+
+	credentialClient := &fakeCredentialClient{secrets: map[string]map[string][]byte{}}
+	resource := &mysqlv1beta1.DbSystem{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "default",
+		},
+		Spec: mysqlv1beta1.DbSystemSpec{
+			CompartmentId: "ocid1.compartment.oc1..example",
+			ShapeName:     "MySQL.VM.Standard.E3.1.8GB",
+			SubnetId:      "ocid1.subnet.oc1..example",
+			AdminUsername: &shared.UsernameSource{},
+			AdminPassword: &shared.PasswordSource{},
+		},
+	}
+
+	request, err := projectCreateDbSystemRequest(resource, credentialClient)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if request.AdminUsername != nil {
+		t.Fatalf("CreateDbSystemDetails.AdminUsername = %v, want omitted nil pointer", request.AdminUsername)
+	}
+	if request.AdminPassword != nil {
+		t.Fatalf("CreateDbSystemDetails.AdminPassword = %v, want omitted nil pointer", request.AdminPassword)
+	}
+	if resource.Status.AdminUsername != nil {
+		t.Fatalf("status.adminUsername = %#v, want omitted nil pointer", resource.Status.AdminUsername)
+	}
+	if resource.Status.AdminPassword != nil {
+		t.Fatalf("status.adminPassword = %#v, want omitted nil pointer", resource.Status.AdminPassword)
+	}
+	if len(credentialClient.readNames) != 0 {
+		t.Fatalf("credential reads = %v, want no secret lookups", credentialClient.readNames)
 	}
 }
 
@@ -515,17 +586,25 @@ func newExistingDbSystemWithAdminSecrets(current, desired quickDbSystemAdminSecr
 			CompartmentId: "ocid1.compartment.oc1..example",
 			ShapeName:     "MySQL.VM.Standard.E3.1.8GB",
 			SubnetId:      "ocid1.subnet.oc1..example",
-			AdminUsername: shared.UsernameSource{Secret: shared.SecretSource{SecretName: desired.UsernameSecret}},
-			AdminPassword: shared.PasswordSource{Secret: shared.SecretSource{SecretName: desired.PasswordSecret}},
+			AdminUsername: usernameSecretSource(desired.UsernameSecret),
+			AdminPassword: passwordSecretSource(desired.PasswordSecret),
 		},
 		Status: mysqlv1beta1.DbSystemStatus{
 			OsokStatus: shared.OSOKStatus{
 				Ocid: "ocid1.mysqldbsystem.oc1..existing",
 			},
-			AdminUsername: shared.UsernameSource{Secret: shared.SecretSource{SecretName: current.UsernameSecret}},
-			AdminPassword: shared.PasswordSource{Secret: shared.SecretSource{SecretName: current.PasswordSecret}},
+			AdminUsername: usernameSecretSource(current.UsernameSecret),
+			AdminPassword: passwordSecretSource(current.PasswordSecret),
 		},
 	}
+}
+
+func usernameSecretSource(name string) *shared.UsernameSource {
+	return &shared.UsernameSource{Secret: shared.SecretSource{SecretName: name}}
+}
+
+func passwordSecretSource(name string) *shared.PasswordSource {
+	return &shared.PasswordSource{Secret: shared.SecretSource{SecretName: name}}
 }
 
 func randomOCID(rand *rand.Rand, resource string) string {

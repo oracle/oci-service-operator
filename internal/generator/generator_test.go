@@ -1767,13 +1767,18 @@ func TestMySQLDbSystemIncludesOptionalDesiredStateFields(t *testing.T) {
 		"type DbSystemSecureConnections struct {",
 		"CertificateGenerationType string `json:\"certificateGenerationType\"`",
 		"CertificateId string `json:\"certificateId,omitempty\"`",
+		"AdminUsername *shared.UsernameSource `json:\"adminUsername,omitempty\"`",
+		"AdminPassword *shared.PasswordSource `json:\"adminPassword,omitempty\"`",
 		"DeletionPolicy DbSystemDeletionPolicy `json:\"deletionPolicy,omitempty\"`",
 		"CrashRecovery string `json:\"crashRecovery,omitempty\"`",
 		"DatabaseManagement string `json:\"databaseManagement,omitempty\"`",
 		"SecureConnections DbSystemSecureConnections `json:\"secureConnections,omitempty\"`",
 	})
-	if slices.Contains(structFieldNames(t, content, "MySqlDbSystemSourceObservedState"), "SourceUrl") {
-		t.Fatalf("MySqlDbSystemSourceObservedState unexpectedly contains SourceUrl:\n%s", content)
+	if count := strings.Count(normalized, "AdminUsername *shared.UsernameSource `json:\"adminUsername,omitempty\"`"); count != 2 {
+		t.Fatalf("generated mysql DbSystem adminUsername pointer field count = %d, want spec and status entries", count)
+	}
+	if count := strings.Count(normalized, "AdminPassword *shared.PasswordSource `json:\"adminPassword,omitempty\"`"); count != 2 {
+		t.Fatalf("generated mysql DbSystem adminPassword pointer field count = %d, want spec and status entries", count)
 	}
 }
 
