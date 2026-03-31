@@ -162,6 +162,81 @@ func TestStreamEndpointSecretClientCreatesSecretAfterActiveReconcile(t *testing.
 	}
 }
 
+func TestStreamEndpointSecretClientRecoversFromCreateAlreadyExistsAfterStaleRead(t *testing.T) {
+	t.Parallel()
+
+	credClient := &fakeCredentialClient{}
+	getCalls := 0
+	credClient.getSecretFn = func(_ context.Context, name string, namespace string) (map[string][]byte, error) {
+		if name != "test-stream" || namespace != "default" {
+			t.Fatalf("GetSecret() target = %s/%s, want default/test-stream", namespace, name)
+		}
+		getCalls++
+		if getCalls == 1 {
+			return nil, apierrors.NewNotFound(v1.Resource("secret"), name)
+		}
+		return map[string][]byte{
+			"endpoint": []byte("https://streaming.example.com"),
+		}, nil
+	}
+	credClient.createSecretFn = func(_ context.Context, name string, namespace string, _ map[string]string, data map[string][]byte) (bool, error) {
+		if name != "test-stream" || namespace != "default" {
+			t.Fatalf("CreateSecret() target = %s/%s, want default/test-stream", namespace, name)
+		}
+		if got := string(data["endpoint"]); got != "https://streaming.example.com" {
+			t.Fatalf("secret endpoint = %q, want https://streaming.example.com", got)
+		}
+		return false, apierrors.NewAlreadyExists(v1.Resource("secret"), name)
+	}
+	credClient.updateSecretFn = func(context.Context, string, string, map[string]string, map[string][]byte) (bool, error) {
+		t.Fatal("UpdateSecret() should not be called when the already-created companion secret already matches")
+		return false, nil
+	}
+
+	client := streamEndpointSecretClient{
+		delegate: fakeStreamServiceClient{
+			createOrUpdateFn: func(_ context.Context, resource *streamingv1beta1.Stream, _ ctrl.Request) (servicemanager.OSOKResponse, error) {
+				resource.Status.OsokStatus.Ocid = "ocid1.stream.oc1..active"
+				resource.Status.OsokStatus.Reason = string(shared.Active)
+				resource.Status.OsokStatus.Conditions = []shared.OSOKCondition{
+					{Type: shared.Active, Status: v1.ConditionTrue},
+				}
+				return servicemanager.OSOKResponse{IsSuccessful: true}, nil
+			},
+		},
+		credentialClient: credClient,
+		loadStream: func(_ context.Context, streamID shared.OCID) (*streamingsdk.Stream, error) {
+			if streamID != "ocid1.stream.oc1..active" {
+				t.Fatalf("loadStream() streamID = %q, want active OCID", streamID)
+			}
+			return &streamingsdk.Stream{
+				MessagesEndpoint: common.String("https://streaming.example.com"),
+			}, nil
+		},
+	}
+
+	resource := &streamingv1beta1.Stream{}
+	resource.Name = "test-stream"
+	resource.Namespace = "default"
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful {
+		t.Fatal("CreateOrUpdate() should keep the successful reconcile result after recovering from a stale read/create race")
+	}
+	if getCalls != 2 {
+		t.Fatalf("GetSecret() calls = %d, want 2 to cover the stale read and follow-up read", getCalls)
+	}
+	if !credClient.createCalled {
+		t.Fatal("CreateSecret() should be attempted after the stale NotFound read")
+	}
+	if credClient.updateCalled {
+		t.Fatal("UpdateSecret() should not be called when the companion secret already matches after the create race")
+	}
+}
+
 func TestStreamEndpointSecretClientSkipsSecretUpdateWhenExistingDataMatches(t *testing.T) {
 	t.Parallel()
 
@@ -382,16 +457,18 @@ func TestStreamEndpointSecretDataRequiresMessagesEndpoint(t *testing.T) {
 }
 
 type streamEndpointSecretQuickCase struct {
-	InitialState uint8
-	EndpointID   uint32
-	ExtraKey     bool
+	InitialState   uint8
+	EndpointID     uint32
+	ExtraKey       bool
+	CachedNotFound bool
 }
 
 func (streamEndpointSecretQuickCase) Generate(r *rand.Rand, _ int) reflect.Value {
 	return reflect.ValueOf(streamEndpointSecretQuickCase{
-		InitialState: uint8(r.Intn(3)),
-		EndpointID:   r.Uint32(),
-		ExtraKey:     r.Intn(2) == 0,
+		InitialState:   uint8(r.Intn(3)),
+		EndpointID:     r.Uint32(),
+		ExtraKey:       r.Intn(2) == 0,
+		CachedNotFound: r.Intn(2) == 0,
 	})
 }
 
@@ -422,11 +499,16 @@ func evaluateStreamEndpointSecretQuickCase(tc streamEndpointSecretQuickCase) err
 
 	createCalls := 0
 	updateCalls := 0
+	getCalls := 0
 	credClient.getSecretFn = func(_ context.Context, name string, namespace string) (map[string][]byte, error) {
+		getCalls++
 		if name != secretName || namespace != secretNamespace {
 			return nil, fmt.Errorf("GetSecret() target=%s/%s, want %s/%s", namespace, name, secretNamespace, secretName)
 		}
 		if store == nil {
+			return nil, apierrors.NewNotFound(v1.Resource("secret"), name)
+		}
+		if tc.CachedNotFound && getCalls == 1 {
 			return nil, apierrors.NewNotFound(v1.Resource("secret"), name)
 		}
 		return cloneSecretData(store), nil
@@ -486,12 +568,20 @@ func evaluateStreamEndpointSecretQuickCase(tc streamEndpointSecretQuickCase) err
 			return fmt.Errorf("calls create=%d update=%d, want create=1 update=0 for %+v", createCalls, updateCalls, tc)
 		}
 	case 1:
-		if createCalls != 0 || updateCalls != 0 {
-			return fmt.Errorf("calls create=%d update=%d, want create=0 update=0 for %+v", createCalls, updateCalls, tc)
+		wantCreate := 0
+		if tc.CachedNotFound {
+			wantCreate = 1
+		}
+		if createCalls != wantCreate || updateCalls != 0 {
+			return fmt.Errorf("calls create=%d update=%d, want create=%d update=0 for %+v", createCalls, updateCalls, wantCreate, tc)
 		}
 	default:
-		if createCalls != 0 || updateCalls != 1 {
-			return fmt.Errorf("calls create=%d update=%d, want create=0 update=1 for %+v", createCalls, updateCalls, tc)
+		wantCreate := 0
+		if tc.CachedNotFound {
+			wantCreate = 1
+		}
+		if createCalls != wantCreate || updateCalls != 1 {
+			return fmt.Errorf("calls create=%d update=%d, want create=%d update=1 for %+v", createCalls, updateCalls, wantCreate, tc)
 		}
 	}
 

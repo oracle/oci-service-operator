@@ -124,11 +124,12 @@ func main() {
 
 	metricsClient := metrics.Init("osok", loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("metrics")})
 
-	credClient := &kubesecret.KubeSecretClient{
-		Client:  mgr.GetClient(),
-		Log:     loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("credential-helper").WithName("KubeSecretClient")},
-		Metrics: metricsClient,
-	}
+	credClient := kubesecret.NewWithReader(
+		mgr.GetClient(),
+		mgr.GetAPIReader(),
+		loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("credential-helper").WithName("KubeSecretClient")},
+		metricsClient,
+	)
 
 	registrationContext := registrations.NewContext(mgr, servicemanager.RuntimeDeps{
 		Provider:         provider,

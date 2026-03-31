@@ -7,6 +7,9 @@ package kubesecret
 
 import (
 	"context"
+	"regexp"
+	"strings"
+
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/metrics"
 	v1 "k8s.io/api/core/v1"
@@ -14,20 +17,27 @@ import (
 	"k8s.io/apimachinery/pkg/api/validation"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
-	"regexp"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"strings"
 )
 
 type KubeSecretClient struct {
 	Client  client.Client
+	Reader  client.Reader
 	Log     loggerutil.OSOKLogger
 	Metrics *metrics.Metrics
 }
 
-func New(client client.Client, logger loggerutil.OSOKLogger, metrics *metrics.Metrics) *KubeSecretClient {
+func New(kubeClient client.Client, logger loggerutil.OSOKLogger, metrics *metrics.Metrics) *KubeSecretClient {
+	return NewWithReader(kubeClient, kubeClient, logger, metrics)
+}
+
+func NewWithReader(kubeClient client.Client, reader client.Reader, logger loggerutil.OSOKLogger, metrics *metrics.Metrics) *KubeSecretClient {
+	if reader == nil {
+		reader = kubeClient
+	}
 	return &KubeSecretClient{
-		Client:  client,
+		Client:  kubeClient,
+		Reader:  reader,
 		Log:     logger,
 		Metrics: metrics,
 	}
@@ -44,25 +54,17 @@ func (c *KubeSecretClient) CreateSecret(ctx context.Context, secretName string, 
 		Data: data,
 	}
 
-	currentSecret := &v1.Secret{}
-	err := c.Client.Get(ctx, types.NamespacedName{Name: newSecret.Name, Namespace: newSecret.Namespace}, currentSecret)
-	if err == nil {
-		c.Log.InfoLog("Secret already exists with provided details, Not creating a new Secret",
-			"newSecret.Namespace", newSecret.Namespace, "newSecret.Name", newSecret.Name)
-		return false, errors.NewAlreadyExists(v1.Resource("secret"), secretName)
-	}
-
-	if errors.IsNotFound(err) {
-		c.Log.InfoLog("Secret does not exist, Creating a new Secret", "newSecret.Namespace", newSecret.Namespace, "newSecret.Name", newSecret.Name)
-		if err = c.Client.Create(ctx, newSecret); err != nil {
-			return false, err
+	c.Log.InfoLog("Creating Kubernetes Secret", "newSecret.Namespace", newSecret.Namespace, "newSecret.Name", newSecret.Name)
+	if err := c.Client.Create(ctx, newSecret); err != nil {
+		if errors.IsAlreadyExists(err) {
+			c.Log.InfoLog("Secret already exists with provided details, Not creating a new Secret",
+				"newSecret.Namespace", newSecret.Namespace, "newSecret.Name", newSecret.Name)
 		}
-		c.Metrics.AddSecretCountMetrics(ctx, "kubesecretclient", "New Secret got created", secretName, secretNamespace)
-		c.Log.InfoLog("Secret Created successfully", "Secret Name", newSecret.Name)
-		return true, nil
-	} else {
 		return false, err
 	}
+	c.Metrics.AddSecretCountMetrics(ctx, "kubesecretclient", "New Secret got created", secretName, secretNamespace)
+	c.Log.InfoLog("Secret Created successfully", "Secret Name", newSecret.Name)
+	return true, nil
 }
 
 func (c *KubeSecretClient) DeleteSecret(ctx context.Context, secretName string, secretNamespace string) (bool, error) {
@@ -72,7 +74,7 @@ func (c *KubeSecretClient) DeleteSecret(ctx context.Context, secretName string, 
 			Namespace: secretNamespace,
 		},
 	}
-	err := c.Client.Get(ctx, types.NamespacedName{Name: secretName, Namespace: secretNamespace}, existingSecret)
+	err := c.reader().Get(ctx, types.NamespacedName{Name: secretName, Namespace: secretNamespace}, existingSecret)
 	if err != nil {
 		c.Log.ErrorLog(err, "error getting Kubernetes secret", "Secret Name", secretName, "Secret Namespace", secretNamespace)
 		return false, err
@@ -90,7 +92,7 @@ func (c *KubeSecretClient) GetSecret(ctx context.Context, secretName string, sec
 	data := map[string][]byte{}
 
 	existingSecret := &v1.Secret{}
-	err := c.Client.Get(ctx, types.NamespacedName{Name: secretName, Namespace: secretNamespace}, existingSecret)
+	err := c.reader().Get(ctx, types.NamespacedName{Name: secretName, Namespace: secretNamespace}, existingSecret)
 	if err != nil {
 		c.Log.ErrorLog(err, "error getting Kubernetes secret", "Secret Name", secretName, "Secret Namespace", secretNamespace)
 		return data, err
@@ -106,7 +108,7 @@ func (c *KubeSecretClient) GetSecret(ctx context.Context, secretName string, sec
 func (c *KubeSecretClient) UpdateSecret(ctx context.Context, secretName string, secretNamespace string, labels map[string]string,
 	updatedData map[string][]byte) (bool, error) {
 	existingSecret := &v1.Secret{}
-	err := c.Client.Get(ctx, types.NamespacedName{Name: secretName, Namespace: secretNamespace}, existingSecret)
+	err := c.reader().Get(ctx, types.NamespacedName{Name: secretName, Namespace: secretNamespace}, existingSecret)
 	if err != nil {
 		c.Log.ErrorLog(err, "Failed to get kubernetes secret before update", "Secret Name", secretName, "Secret Namespace", secretNamespace)
 		return false, err
@@ -122,6 +124,13 @@ func (c *KubeSecretClient) UpdateSecret(ctx context.Context, secretName string, 
 	}
 	c.Log.InfoLog("Secret updated successfully", "Secret Name", secretName, "Secret Namespace", secretNamespace)
 	return true, nil
+}
+
+func (c *KubeSecretClient) reader() client.Reader {
+	if c.Reader != nil {
+		return c.Reader
+	}
+	return c.Client
 }
 
 /***

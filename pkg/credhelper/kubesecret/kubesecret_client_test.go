@@ -21,24 +21,47 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
-func newTestKubeSecretClient(t *testing.T, objs ...ctrlclient.Object) *KubeSecretClient {
+func newTestScheme(t *testing.T) *runtime.Scheme {
 	t.Helper()
 
 	scheme := runtime.NewScheme()
 	if err := corev1.AddToScheme(scheme); err != nil {
 		t.Fatalf("add corev1 scheme: %v", err)
 	}
+	return scheme
+}
+
+func newTestMetrics() *metrics.Metrics {
+	logger := loggerutil.OSOKLogger{Logger: logr.Discard()}
+	return &metrics.Metrics{
+		Name:        "oci",
+		ServiceName: "KubeSecretTest",
+		Logger:      logger,
+	}
+}
+
+func newTestKubeSecretClient(t *testing.T, objs ...ctrlclient.Object) *KubeSecretClient {
+	t.Helper()
+
+	scheme := newTestScheme(t)
 
 	logger := loggerutil.OSOKLogger{Logger: logr.Discard()}
 	return New(
 		fake.NewClientBuilder().WithScheme(scheme).WithObjects(objs...).Build(),
 		logger,
-		&metrics.Metrics{
-			Name:        "oci",
-			ServiceName: "KubeSecretTest",
-			Logger:      logger,
-		},
+		newTestMetrics(),
 	)
+}
+
+type staleGetClient struct {
+	ctrlclient.Client
+	getCalls int
+	getErr   error
+}
+
+func (c *staleGetClient) Get(ctx context.Context, key ctrlclient.ObjectKey, obj ctrlclient.Object, opts ...ctrlclient.GetOption) error {
+	c.getCalls++
+	return c.getErr
 }
 
 func TestCreateUpdateDeleteSecret(t *testing.T) {
@@ -126,5 +149,89 @@ func TestCreateSecretAlreadyExists(t *testing.T) {
 	}
 	if !apierrors.IsAlreadyExists(err) {
 		t.Fatalf("expected already exists error, got %v", err)
+	}
+}
+
+func TestGetSecretUsesConfiguredReader(t *testing.T) {
+	t.Parallel()
+
+	scheme := newTestScheme(t)
+	existingSecret := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "existing-secret",
+			Namespace: "default",
+		},
+		Data: map[string][]byte{"key": []byte("value")},
+	}
+	baseClient := fake.NewClientBuilder().WithScheme(scheme).WithObjects(existingSecret.DeepCopy()).Build()
+	cachedClient := &staleGetClient{
+		Client: baseClient,
+		getErr: apierrors.NewNotFound(corev1.Resource("secret"), existingSecret.Name),
+	}
+	client := NewWithReader(
+		cachedClient,
+		baseClient,
+		loggerutil.OSOKLogger{Logger: logr.Discard()},
+		newTestMetrics(),
+	)
+
+	data, err := client.GetSecret(context.Background(), existingSecret.Name, existingSecret.Namespace)
+	if err != nil {
+		t.Fatalf("get secret: %v", err)
+	}
+	if !reflect.DeepEqual(existingSecret.Data, data) {
+		t.Fatalf("unexpected secret data: got %v want %v", data, existingSecret.Data)
+	}
+	if cachedClient.getCalls != 0 {
+		t.Fatalf("expected reads to use the configured Reader, got %d cached Client.Get calls", cachedClient.getCalls)
+	}
+}
+
+func TestUpdateSecretUsesConfiguredReader(t *testing.T) {
+	t.Parallel()
+
+	scheme := newTestScheme(t)
+	existingSecret := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "existing-secret",
+			Namespace: "default",
+			Labels:    map[string]string{"existing": "label"},
+		},
+		Data: map[string][]byte{"key": []byte("value")},
+	}
+	baseClient := fake.NewClientBuilder().WithScheme(scheme).WithObjects(existingSecret.DeepCopy()).Build()
+	cachedClient := &staleGetClient{
+		Client: baseClient,
+		getErr: apierrors.NewNotFound(corev1.Resource("secret"), existingSecret.Name),
+	}
+	client := NewWithReader(
+		cachedClient,
+		baseClient,
+		loggerutil.OSOKLogger{Logger: logr.Discard()},
+		newTestMetrics(),
+	)
+
+	updatedLabels := map[string]string{"updated": "label"}
+	updatedData := map[string][]byte{"key": []byte("new-value")}
+	updated, err := client.UpdateSecret(context.Background(), existingSecret.Name, existingSecret.Namespace, updatedLabels, updatedData)
+	if err != nil {
+		t.Fatalf("update secret: %v", err)
+	}
+	if !updated {
+		t.Fatal("expected secret to be updated")
+	}
+	if cachedClient.getCalls != 0 {
+		t.Fatalf("expected update to use the configured Reader, got %d cached Client.Get calls", cachedClient.getCalls)
+	}
+
+	storedSecret := &corev1.Secret{}
+	if err := baseClient.Get(context.Background(), ctrlclient.ObjectKey{Name: existingSecret.Name, Namespace: existingSecret.Namespace}, storedSecret); err != nil {
+		t.Fatalf("load updated secret: %v", err)
+	}
+	if !reflect.DeepEqual(updatedData, storedSecret.Data) {
+		t.Fatalf("unexpected updated data: got %v want %v", storedSecret.Data, updatedData)
+	}
+	if !reflect.DeepEqual(updatedLabels, storedSecret.Labels) {
+		t.Fatalf("unexpected updated labels: got %v want %v", storedSecret.Labels, updatedLabels)
 	}
 }

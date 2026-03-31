@@ -126,17 +126,40 @@ func (c streamEndpointSecretClient) syncEndpointSecret(ctx context.Context, reso
 	currentData, err := c.credentialClient.GetSecret(ctx, resource.Name, resource.Namespace)
 	switch {
 	case err == nil:
-		if reflect.DeepEqual(currentData, data) {
-			return nil
-		}
-		_, err = c.credentialClient.UpdateSecret(ctx, resource.Name, resource.Namespace, nil, data)
-		return err
+		return c.syncExistingEndpointSecret(ctx, resource, currentData, data)
 	case apierrors.IsNotFound(err):
 		_, err = c.credentialClient.CreateSecret(ctx, resource.Name, resource.Namespace, nil, data)
-		return err
+		switch {
+		case err == nil:
+			return nil
+		case apierrors.IsAlreadyExists(err):
+			// Manager-backed clients can observe a stale NotFound on the cached read while the direct create
+			// already sees the Secret. Re-read and converge so repeat ACTIVE reconciles stay idempotent.
+			currentData, err = c.credentialClient.GetSecret(ctx, resource.Name, resource.Namespace)
+			if err != nil {
+				return err
+			}
+			return c.syncExistingEndpointSecret(ctx, resource, currentData, data)
+		default:
+			return err
+		}
 	default:
 		return err
 	}
+}
+
+func (c streamEndpointSecretClient) syncExistingEndpointSecret(
+	ctx context.Context,
+	resource *streamingv1beta1.Stream,
+	currentData map[string][]byte,
+	desiredData map[string][]byte,
+) error {
+	if reflect.DeepEqual(currentData, desiredData) {
+		return nil
+	}
+
+	_, err := c.credentialClient.UpdateSecret(ctx, resource.Name, resource.Namespace, nil, desiredData)
+	return err
 }
 
 func streamEndpointSecretData(stream streamingsdk.Stream) (map[string][]byte, error) {
