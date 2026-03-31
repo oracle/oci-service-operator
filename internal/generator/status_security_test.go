@@ -113,6 +113,53 @@ func assertNoSensitiveStatusOffenders(t *testing.T, offenders []string, target s
 	t.Fatalf("found %s offender(s):\n%s", target, strings.Join(offenders, "\n"))
 }
 
+func TestCollectSensitiveStatusPropertiesAllowsSecretNameReferenceWrappers(t *testing.T) {
+	schema := map[string]any{
+		"properties": map[string]any{
+			"adminPassword": map[string]any{
+				"properties": map[string]any{
+					"secret": map[string]any{
+						"properties": map[string]any{
+							"secretName": map[string]any{
+								"type": "string",
+							},
+						},
+						"type": "object",
+					},
+				},
+				"type": "object",
+			},
+		},
+	}
+
+	var offenders []string
+	collectSensitiveStatusProperties("test.yaml", []string{"status"}, schema, &offenders)
+	if len(offenders) != 0 {
+		t.Fatalf("collectSensitiveStatusProperties() offenders = %v, want none", offenders)
+	}
+}
+
+func TestCollectSensitiveStatusPropertiesRejectsSensitiveLeafProperties(t *testing.T) {
+	schema := map[string]any{
+		"properties": map[string]any{
+			"source": map[string]any{
+				"properties": map[string]any{
+					"password": map[string]any{
+						"type": "string",
+					},
+				},
+				"type": "object",
+			},
+		},
+	}
+
+	var offenders []string
+	collectSensitiveStatusProperties("test.yaml", []string{"status"}, schema, &offenders)
+	if len(offenders) != 1 || offenders[0] != "test.yaml:status.source.password" {
+		t.Fatalf("collectSensitiveStatusProperties() offenders = %v, want [test.yaml:status.source.password]", offenders)
+	}
+}
+
 func isGeneratedStatusType(name string) bool {
 	return strings.HasSuffix(name, "Status") || strings.HasSuffix(name, "ObservedState")
 }
@@ -214,12 +261,12 @@ func collectSensitiveStatusProperties(path string, prefix []string, schema map[s
 	properties, ok := nestedMap(schema, "properties")
 	if ok {
 		for name, rawChild := range properties {
-			if _, sensitive := sensitiveStatusPropertyNames[name]; sensitive {
+			child, childOK := rawChild.(map[string]any)
+			if _, sensitive := sensitiveStatusPropertyNames[name]; sensitive && !isSafeSecretReferenceProperty(name, child) {
 				*offenders = append(*offenders, fmt.Sprintf("%s:%s", path, strings.Join(append(prefix, name), ".")))
 			}
 
-			child, ok := rawChild.(map[string]any)
-			if !ok {
+			if !childOK {
 				continue
 			}
 			collectSensitiveStatusProperties(path, append(prefix, name), child, offenders)
@@ -233,6 +280,25 @@ func collectSensitiveStatusProperties(path string, prefix []string, schema map[s
 	if additionalProperties, ok := nestedMap(schema, "additionalProperties"); ok {
 		collectSensitiveStatusProperties(path, append(prefix, "{}"), additionalProperties, offenders)
 	}
+}
+
+func isSafeSecretReferenceProperty(name string, schema map[string]any) bool {
+	if name != "secret" || schema == nil {
+		return false
+	}
+
+	properties, ok := nestedMap(schema, "properties")
+	if !ok || len(properties) != 1 {
+		return false
+	}
+
+	secretNameSchema, ok := properties["secretName"].(map[string]any)
+	if !ok {
+		return false
+	}
+
+	typeName, _ := secretNameSchema["type"].(string)
+	return typeName == "" || typeName == "string"
 }
 
 func nestedMap(root map[string]any, path ...string) (map[string]any, bool) {

@@ -5,31 +5,41 @@
 
 package generator
 
-import (
-	"strings"
-	"testing"
-)
+import "testing"
 
-func assertSelectServicesResult(t *testing.T, cfg *Config, serviceName string, all bool, wantCount int, wantErr string) {
+func serviceConfigsByName(t *testing.T, cfg *Config, names ...string) map[string]*ServiceConfig {
 	t.Helper()
 
-	services, err := cfg.SelectServices(serviceName, all)
-	if wantErr != "" {
-		if err == nil {
-			t.Fatalf("SelectServices() error = nil, want %q", wantErr)
-		}
-		if !strings.Contains(err.Error(), wantErr) {
-			t.Fatalf("SelectServices() error = %v, want substring %q", err, wantErr)
-		}
-		return
+	wanted := make(map[string]struct{}, len(names))
+	for _, name := range names {
+		wanted[name] = struct{}{}
 	}
 
-	if err != nil {
-		t.Fatalf("SelectServices() error = %v", err)
+	found := make(map[string]*ServiceConfig, len(names))
+	for i := range cfg.Services {
+		service := &cfg.Services[i]
+		if _, ok := wanted[service.Service]; ok {
+			found[service.Service] = service
+		}
 	}
-	if len(services) != wantCount {
-		t.Fatalf("SelectServices() returned %d services, want %d", len(services), wantCount)
+
+	missing := missingServiceNames(found, names)
+	if len(missing) != 0 {
+		t.Fatalf("services %v were not found in services.yaml", missing)
 	}
+
+	return found
+}
+
+func missingServiceNames(found map[string]*ServiceConfig, names []string) []string {
+	missing := make([]string, 0, len(names))
+	for _, name := range names {
+		if _, ok := found[name]; !ok {
+			missing = append(missing, name)
+		}
+	}
+
+	return missing
 }
 
 func assertFieldNamesPresent(t *testing.T, label string, fields []FieldModel, want ...string) {

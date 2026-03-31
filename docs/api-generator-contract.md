@@ -46,7 +46,7 @@ Rules:
 - Service-specific compatibility or rollout behavior belongs in the mapping
   file, not in hardcoded generator branches.
 - The existing manual groups with locked compatibility kinds are:
-  `mysql/MySqlDbSystem` and `streaming/Stream`.
+  `database/AutonomousDatabase`, `mysql/DbSystem`, and `streaming/Stream`.
 
 ## Output Ownership
 
@@ -104,7 +104,7 @@ service-manager generation is enabled.
   compatibility override belongs in `internal/generator/config/services.yaml`
   rather than in special-case Go code.
 - Existing locked compatibility kinds are:
-  `MySqlDbSystem` and `Stream`.
+  `AutonomousDatabase`, `DbSystem`, and `Stream`.
 
 ### Controller outputs
 
@@ -165,9 +165,9 @@ service-manager generation is enabled.
 - Group registration setup consumes `internal/registrations.Context`, which
   combines the controller-runtime manager/client/recorder seam with
   `servicemanager.RuntimeDeps`.
-- Existing manual `database`, `mysql`, and `streaming` groups can bridge into
-  this contract through handwritten files under `internal/registrations/`
-  without changing the shared manager bootstrap shape in `main.go`.
+- Existing manual `database` and `streaming` groups can bridge into this
+  contract through handwritten files under `internal/registrations/` without
+  changing the shared manager bootstrap shape in `main.go`.
 
 ### Webhook ownership
 

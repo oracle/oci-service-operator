@@ -191,8 +191,8 @@ services:
           formalSpec: databaseautonomousdatabase
           controller:
             extraRBACMarkers:
-              - groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
-              - groups="",resources=events,verbs=get;list;watch;create;update;patch;delete
+              - groups="",resources=secrets,verbs=get;list;watch
+              - groups="",resources=events,verbs=create;patch
 
   - service: dns
     sdkPackage: github.com/oracle/oci-go-sdk/v65/dns
@@ -438,15 +438,15 @@ services:
       webhooks:
         strategy: manual
       resources:
-        - kind: MySqlDbSystem
-          sdkName: DbSystem
+        - kind: DbSystem
+          formalSpec: dbsystem
           controller:
             maxConcurrentReconciles: 3
             extraRBACMarkers:
-              - groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
-              - groups="",resources=events,verbs=get;list;watch;create;update;patch;delete
+              - groups="",resources=secrets,verbs=get;list;watch
           serviceManager:
             packagePath: mysql/dbsystem
+            needsCredentialClient: true
 
   - service: networkloadbalancer
     sdkPackage: github.com/oracle/oci-go-sdk/v65/networkloadbalancer

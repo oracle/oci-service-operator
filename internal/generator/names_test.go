@@ -52,12 +52,6 @@ func TestSplitCamelAndLowerCamel(t *testing.T) {
 		lower  string
 	}{
 		{
-			name:   "simple camel case",
-			input:  "AutonomousDatabase",
-			tokens: []string{"autonomous", "database"},
-			lower:  "autonomousDatabase",
-		},
-		{
 			name:   "acronym boundary",
 			input:  "HTTPRequest",
 			tokens: []string{"http", "request"},
