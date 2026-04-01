@@ -102,55 +102,82 @@ func validateManifestRows(formalRoot string, rows []manifestRow, sourceIndex map
 
 func validateOrphanedControllerArtifacts(formalRoot string, desired map[string]struct{}) []string {
 	controllersRoot := filepath.Join(formalRoot, "controllers")
-	if _, err := os.Stat(controllersRoot); err != nil {
-		if os.IsNotExist(err) {
-			return nil
-		}
-		return []string{fmt.Sprintf("controllers: %v", err)}
-	}
-
-	stale := map[string]struct{}{}
-	if err := filepath.WalkDir(controllersRoot, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if d.IsDir() {
-			if d.Name() == "diagrams" {
-				rel, err := filepath.Rel(formalRoot, filepath.Dir(path))
-				if err != nil {
-					return err
-				}
-				rel = filepath.Clean(rel)
-				if _, ok := desired[rel]; !ok {
-					stale[rel] = struct{}{}
-				}
-				return fs.SkipDir
-			}
-			return nil
-		}
-		if d.Name() != "spec.cfg" && d.Name() != "logic-gaps.md" {
-			return nil
-		}
-
-		rel, err := filepath.Rel(formalRoot, filepath.Dir(path))
-		if err != nil {
-			return err
-		}
-		rel = filepath.Clean(rel)
-		if _, ok := desired[rel]; !ok {
-			stale[rel] = struct{}{}
-		}
-		return nil
-	}); err != nil {
+	stale, err := staleControllerArtifactRoots(formalRoot, controllersRoot, desired)
+	if err != nil {
 		return []string{fmt.Sprintf("controllers: %v", err)}
 	}
 
 	problems := make([]string, 0, len(stale))
-	for rel := range stale {
+	for _, rel := range stale {
 		problems = append(problems, fmt.Sprintf("%s: stale controller artifacts are not referenced by controller_manifest.tsv", filepath.ToSlash(rel)))
 	}
-	sort.Strings(problems)
 	return problems
+}
+
+func staleControllerArtifactRoots(formalRoot string, controllersRoot string, desired map[string]struct{}) ([]string, error) {
+	if _, err := os.Stat(controllersRoot); err != nil {
+		if os.IsNotExist(err) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	stale := map[string]struct{}{}
+	if err := filepath.WalkDir(controllersRoot, func(path string, d fs.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			return walkErr
+		}
+
+		rel, ok, skipDir, err := controllerArtifactRoot(formalRoot, path, d)
+		if err != nil {
+			return err
+		}
+		if ok {
+			if _, desiredRoot := desired[rel]; !desiredRoot {
+				stale[rel] = struct{}{}
+			}
+		}
+		if skipDir {
+			return fs.SkipDir
+		}
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+
+	return sortedStringSet(stale), nil
+}
+
+func controllerArtifactRoot(formalRoot string, path string, d fs.DirEntry) (string, bool, bool, error) {
+	if d.IsDir() {
+		if d.Name() != "diagrams" {
+			return "", false, false, nil
+		}
+		rel, err := filepath.Rel(formalRoot, filepath.Dir(path))
+		if err != nil {
+			return "", false, false, err
+		}
+		return filepath.Clean(rel), true, true, nil
+	}
+
+	if d.Name() != "spec.cfg" && d.Name() != "logic-gaps.md" {
+		return "", false, false, nil
+	}
+
+	rel, err := filepath.Rel(formalRoot, filepath.Dir(path))
+	if err != nil {
+		return "", false, false, err
+	}
+	return filepath.Clean(rel), true, false, nil
+}
+
+func sortedStringSet(values map[string]struct{}) []string {
+	out := make([]string, 0, len(values))
+	for value := range values {
+		out = append(out, value)
+	}
+	sort.Strings(out)
+	return out
 }
 
 func validateOrphanedImportArtifacts(formalRoot string, desired map[string]struct{}) []string {

@@ -79,8 +79,52 @@ type scaffoldArtifacts struct {
 	Import  []byte
 }
 
+type generateInputs struct {
+	Root       string
+	ConfigPath string
+	Config     *generator.Config
+	Catalog    *formal.Catalog
+	Template   formal.ControllerBinding
+}
+
 // Generate expands the repo-local formal scaffold to cover every published API kind.
 func Generate(opts Options) (Report, error) {
+	report, err := initializeGenerateReport(opts)
+	if err != nil {
+		return report, err
+	}
+
+	inputs, err := loadGenerateInputs(report)
+	if err != nil {
+		return report, err
+	}
+	report.Root = inputs.Root
+	report.ConfigPath = inputs.ConfigPath
+
+	entries, discoveredKeys, err := loadGenerateInventory(inputs, strings.TrimSpace(opts.ProviderPath), &report)
+	if err != nil {
+		return report, err
+	}
+
+	rows, err := buildManifestRows(inputs.Root, inputs.Config, inputs.Catalog, entries, &report)
+	if err != nil {
+		return report, err
+	}
+	report.ManifestRows = len(rows)
+
+	if err := writeManifestAndPrune(inputs.Root, rows, &report); err != nil {
+		return report, err
+	}
+	if err := writeDiscoveredScaffolds(inputs.Root, rows, discoveredKeys, inputs.Template, &report); err != nil {
+		return report, err
+	}
+	if err := renderAndVerifyScaffold(inputs, strings.TrimSpace(opts.ProviderPath), &report); err != nil {
+		return report, err
+	}
+	return report, nil
+}
+
+func initializeGenerateReport(opts Options) (Report, error) {
 	report := Report{
 		Root:       filepath.Clean(strings.TrimSpace(opts.Root)),
 		ConfigPath: filepath.Clean(strings.TrimSpace(opts.ConfigPath)),
@@ -91,103 +135,88 @@ func Generate(opts Options) (Report, error) {
 	if report.ConfigPath == "" {
 		return report, fmt.Errorf("generator config path must not be empty")
 	}
+	return report, nil
+}
 
+func loadGenerateInputs(report Report) (generateInputs, error) {
 	root, err := filepath.Abs(report.Root)
 	if err != nil {
-		return report, fmt.Errorf("resolve formal root %q: %w", report.Root, err)
+		return generateInputs{}, fmt.Errorf("resolve formal root %q: %w", report.Root, err)
 	}
 	configPath, err := filepath.Abs(report.ConfigPath)
 	if err != nil {
-		return report, fmt.Errorf("resolve generator config %q: %w", report.ConfigPath, err)
+		return generateInputs{}, fmt.Errorf("resolve generator config %q: %w", report.ConfigPath, err)
 	}
-	report.Root = root
-	report.ConfigPath = configPath
-
 	if err := requireDirectory(root); err != nil {
-		return report, err
+		return generateInputs{}, err
 	}
 
 	cfg, err := generator.LoadConfig(configPath)
 	if err != nil {
-		return report, err
+		return generateInputs{}, err
 	}
-
 	catalog, err := formal.LoadCatalogUnchecked(root)
 	if err != nil {
-		return report, fmt.Errorf("load existing formal catalog %q: %w", root, err)
+		return generateInputs{}, fmt.Errorf("load existing formal catalog %q: %w", root, err)
 	}
-
 	templateBinding, ok := catalog.Lookup("template", "template")
 	if !ok {
-		return report, fmt.Errorf("formal template binding template/template was not found in %s", filepath.ToSlash(filepath.Join(root, "controller_manifest.tsv")))
+		return generateInputs{}, fmt.Errorf("formal template binding template/template was not found in %s", filepath.ToSlash(filepath.Join(root, "controller_manifest.tsv")))
 	}
 
-	repoRoot := filepath.Clean(filepath.Join(filepath.Dir(configPath), "..", "..", ".."))
-	entries, selectedServices, err := discoverPublishedKinds(repoRoot, cfg)
+	return generateInputs{
+		Root:       root,
+		ConfigPath: configPath,
+		Config:     cfg,
+		Catalog:    catalog,
+		Template:   templateBinding,
+	}, nil
+}
+
+func loadGenerateInventory(inputs generateInputs, providerPath string, report *Report) ([]inventoryEntry, map[string]inventoryEntry, error) {
+	repoRoot := filepath.Clean(filepath.Join(filepath.Dir(inputs.ConfigPath), "..", "..", ".."))
+	entries, selectedServices, err := discoverPublishedKinds(repoRoot, inputs.Config)
 	if err != nil {
-		return report, err
+		return nil, nil, err
 	}
 	report.ServicesScanned = len(selectedServices)
 	report.PublishedKinds = len(entries)
-	if strings.TrimSpace(opts.ProviderPath) != "" {
-		providerEntries, err := discoverProviderKinds(strings.TrimSpace(opts.ProviderPath))
+
+	if providerPath != "" {
+		providerEntries, err := discoverProviderKinds(providerPath)
 		if err != nil {
-			return report, err
+			return nil, nil, err
 		}
 		report.ProviderKinds = len(providerEntries)
 		entries, err = mergeInventoryEntries(entries, providerEntries)
 		if err != nil {
-			return report, err
+			return nil, nil, err
 		}
 	}
 
-	existingBindings := make(map[string]formal.ControllerBinding, len(catalog.Controllers))
-	rowByKey := make(map[string]formal.ManifestRow, len(entries)+1)
-	for _, binding := range catalog.Controllers {
-		key := rowKey(binding.Manifest.Service, binding.Manifest.Slug)
-		existingBindings[key] = binding
-		if shouldPreserveManifestRow(cfg, binding.Manifest) {
-			rowByKey[key] = binding.Manifest
-		}
+	return entries, indexInventoryEntries(entries), nil
+}
+
+func indexInventoryEntries(entries []inventoryEntry) map[string]inventoryEntry {
+	index := make(map[string]inventoryEntry, len(entries))
+	for _, entry := range entries {
+		index[rowKey(entry.Service, entry.Slug)] = entry
 	}
-	recreatedRows, err := addConfiguredFormalSpecRows(root, cfg, rowByKey)
+	return index
+}
+
+func buildManifestRows(formalRoot string, cfg *generator.Config, catalog *formal.Catalog, entries []inventoryEntry, report *Report) ([]formal.ManifestRow, error) {
+	existingBindings, rowByKey := seedManifestRows(cfg, catalog)
+	recreatedRows, err := addConfiguredFormalSpecRows(formalRoot, cfg, rowByKey)
 	if err != nil {
-		return report, err
+		return nil, err
 	}
 	report.NewRows += recreatedRows
 
-	discoveredKeys := make(map[string]inventoryEntry, len(entries))
 	for _, entry := range entries {
-		key := rowKey(entry.Service, entry.Slug)
-		discoveredKeys[key] = entry
-		if binding, ok := existingBindings[key]; ok {
-			if binding.Manifest.Kind != entry.Kind {
-				return report, fmt.Errorf(
-					"existing formal row %s/%s kind %q does not match published API kind %q",
-					entry.Service,
-					entry.Slug,
-					binding.Manifest.Kind,
-					entry.Kind,
-				)
-			}
-			report.ExistingRowsPreserved++
-			rowByKey[key] = binding.Manifest
-			continue
+		if err := mergeDiscoveredManifestRow(entry, existingBindings, rowByKey, report); err != nil {
+			return nil, err
 		}
-		if row, ok := rowByKey[key]; ok {
-			if row.Kind != entry.Kind {
-				return report, fmt.Errorf(
-					"existing formal row %s/%s kind %q does not match published API kind %q",
-					entry.Service,
-					entry.Slug,
-					row.Kind,
-					entry.Kind,
-				)
-			}
-			continue
-		}
-		rowByKey[key] = scaffoldManifestRow(entry)
-		report.NewRows++
 	}
 
 	rows := make([]formal.ManifestRow, 0, len(rowByKey))
@@ -195,57 +224,108 @@ func Generate(opts Options) (Report, error) {
 		rows = append(rows, row)
 	}
 	sortManifestRows(rows)
-	report.ManifestRows = len(rows)
+	return rows, nil
+}
 
+func seedManifestRows(cfg *generator.Config, catalog *formal.Catalog) (map[string]formal.ControllerBinding, map[string]formal.ManifestRow) {
+	existingBindings := make(map[string]formal.ControllerBinding, len(catalog.Controllers))
+	rowByKey := make(map[string]formal.ManifestRow, len(catalog.Controllers)+1)
+	for _, binding := range catalog.Controllers {
+		key := rowKey(binding.Manifest.Service, binding.Manifest.Slug)
+		existingBindings[key] = binding
+		if shouldPreserveManifestRow(cfg, binding.Manifest) {
+			rowByKey[key] = binding.Manifest
+		}
+	}
+	return existingBindings, rowByKey
+}
+
+func mergeDiscoveredManifestRow(entry inventoryEntry, existingBindings map[string]formal.ControllerBinding, rowByKey map[string]formal.ManifestRow, report *Report) error {
+	key := rowKey(entry.Service, entry.Slug)
+	if binding, ok := existingBindings[key]; ok {
+		if err := ensureManifestKindMatch(entry, binding.Manifest.Kind); err != nil {
+			return err
+		}
+		report.ExistingRowsPreserved++
+		rowByKey[key] = binding.Manifest
+		return nil
+	}
+	if row, ok := rowByKey[key]; ok {
+		return ensureManifestKindMatch(entry, row.Kind)
+	}
+
+	rowByKey[key] = scaffoldManifestRow(entry)
+	report.NewRows++
+	return nil
+}
+
+func ensureManifestKindMatch(entry inventoryEntry, kind string) error {
+	if kind == entry.Kind {
+		return nil
+	}
+	return fmt.Errorf(
+		"existing formal row %s/%s kind %q does not match published API kind %q",
+		entry.Service,
+		entry.Slug,
+		kind,
+		entry.Kind,
+	)
+}
+
+func writeManifestAndPrune(root string, rows []formal.ManifestRow, report *Report) error {
 	changed, err := writeFileIfChanged(filepath.Join(root, "controller_manifest.tsv"), renderManifest(rows))
 	if err != nil {
-		return report, err
+		return err
 	}
 	if changed {
 		report.FilesWritten++
 	}
+	return pruneStaleFormalArtifacts(root, rows)
+}
 
-	if err := pruneStaleFormalArtifacts(root, rows); err != nil {
-		return report, err
-	}
-
+func writeDiscoveredScaffolds(root string, rows []formal.ManifestRow, discoveredKeys map[string]inventoryEntry, template formal.ControllerBinding, report *Report) error {
 	for _, row := range rows {
-		key := rowKey(row.Service, row.Slug)
-		entry, ok := discoveredKeys[key]
-		if !ok {
-			continue
-		}
-		if row.Stage != "scaffold" {
-			continue
-		}
-
-		artifacts, err := scaffoldForRow(templateBinding, row, entry)
+		writes, err := writeDiscoveredScaffoldRow(root, row, discoveredKeys, template)
 		if err != nil {
-			return report, err
-		}
-		writes, err := writeScaffoldArtifacts(root, row, artifacts)
-		if err != nil {
-			return report, err
+			return err
 		}
 		report.FilesWritten += writes
 	}
+	return nil
+}
 
-	diagramReport, err := formal.RenderDiagrams(formal.RenderOptions{Root: root})
+func writeDiscoveredScaffoldRow(root string, row formal.ManifestRow, discoveredKeys map[string]inventoryEntry, template formal.ControllerBinding) (int, error) {
+	entry, ok := discoveredKeys[rowKey(row.Service, row.Slug)]
+	if !ok || row.Stage != "scaffold" {
+		return 0, nil
+	}
+
+	artifacts, err := scaffoldForRow(template, row, entry)
 	if err != nil {
-		return report, err
+		return 0, err
+	}
+	return writeScaffoldArtifacts(root, row, artifacts)
+}
+
+func renderAndVerifyScaffold(inputs generateInputs, providerPath string, report *Report) error {
+	diagramReport, err := formal.RenderDiagrams(formal.RenderOptions{Root: inputs.Root})
+	if err != nil {
+		return err
 	}
 	report.FilesWritten += diagramReport.FilesWritten
 
-	if _, err := formal.Verify(root); err != nil {
-		return report, err
+	if _, err := formal.Verify(inputs.Root); err != nil {
+		return err
 	}
-	if strings.TrimSpace(opts.ProviderPath) != "" {
-		if _, err := VerifyCoverage(opts); err != nil {
-			return report, err
-		}
+	if providerPath == "" {
+		return nil
 	}
-
-	return report, nil
+	_, err = VerifyCoverage(Options{
+		Root:         inputs.Root,
+		ConfigPath:   inputs.ConfigPath,
+		ProviderPath: providerPath,
+	})
+	return err
 }
 
 func discoverPublishedKinds(repoRoot string, cfg *generator.Config) ([]inventoryEntry, []generator.ServiceConfig, error) {
@@ -261,81 +341,123 @@ func discoverPublishedKinds(repoRoot string, cfg *generator.Config) ([]inventory
 	entries := make([]inventoryEntry, 0, len(services))
 	seen := map[string]string{}
 	for _, service := range services {
-		version := service.VersionOrDefault(cfg.DefaultVersion)
-		apiDir := filepath.Join(repoRoot, "api", service.Group, version)
-		dirEntries, err := os.ReadDir(apiDir)
+		serviceEntries, err := discoverServicePublishedKinds(repoRoot, cfg, service, seen)
 		if err != nil {
-			return nil, nil, fmt.Errorf("read published API directory %q for service %q: %w", apiDir, service.Service, err)
+			return nil, nil, err
 		}
+		entries = append(entries, serviceEntries...)
+	}
 
-		selectedKinds := selectedKindSet(service.SelectedKinds())
-		remainingSelectedKinds := selectedKindSet(service.SelectedKinds())
-		serviceKinds := 0
-		for _, dirEntry := range dirEntries {
-			if dirEntry.IsDir() {
-				continue
-			}
-			name := dirEntry.Name()
-			if !strings.HasSuffix(name, "_types.go") {
-				continue
-			}
+	sortInventoryEntries(entries)
+	return entries, services, nil
+}
 
-			kind, err := publishedKindFromFile(filepath.Join(apiDir, name))
-			if err != nil {
-				return nil, nil, err
-			}
-			if len(selectedKinds) > 0 {
-				if _, ok := selectedKinds[kind]; !ok {
-					continue
-				}
-				delete(remainingSelectedKinds, kind)
-			}
-			slug := strings.TrimSpace(service.FormalSpecFor(kind))
-			if slug == "" {
-				slug = strings.TrimSuffix(name, "_types.go")
-			}
-			key := rowKey(service.Service, slug)
-			if previous, ok := seen[key]; ok {
-				return nil, nil, fmt.Errorf("duplicate published API kind key %s from %q and %q", key, previous, filepath.Join(apiDir, name))
-			}
-			seen[key] = filepath.Join(apiDir, name)
-			entries = append(entries, inventoryEntry{
-				Service: service.Service,
-				Group:   service.Group,
-				Version: version,
-				Slug:    slug,
-				Kind:    kind,
-			})
-			serviceKinds++
+func discoverServicePublishedKinds(repoRoot string, cfg *generator.Config, service generator.ServiceConfig, seen map[string]string) ([]inventoryEntry, error) {
+	version := service.VersionOrDefault(cfg.DefaultVersion)
+	apiDir := filepath.Join(repoRoot, "api", service.Group, version)
+	dirEntries, err := os.ReadDir(apiDir)
+	if err != nil {
+		return nil, fmt.Errorf("read published API directory %q for service %q: %w", apiDir, service.Service, err)
+	}
+
+	selectedKinds := selectedKindSet(service.SelectedKinds())
+	remainingSelectedKinds := copyKindSet(selectedKinds)
+	entries := make([]inventoryEntry, 0, len(dirEntries))
+	for _, dirEntry := range dirEntries {
+		entry, ok, err := publishedInventoryEntry(apiDir, service, version, dirEntry, selectedKinds, remainingSelectedKinds, seen)
+		if err != nil {
+			return nil, err
 		}
-		if len(remainingSelectedKinds) > 0 {
-			missing := make([]string, 0, len(remainingSelectedKinds))
-			for kind := range remainingSelectedKinds {
-				missing = append(missing, kind)
-			}
-			sort.Strings(missing)
-			return nil, nil, fmt.Errorf(
-				"service %q selected kinds %s were not found under %q",
-				service.Service,
-				strings.Join(missing, ", "),
-				apiDir,
-			)
-		}
-		if serviceKinds == 0 {
-			return nil, nil, fmt.Errorf("service %q has no published API kinds under %q", service.Service, apiDir)
+		if ok {
+			entries = append(entries, entry)
 		}
 	}
 
-	sort.Slice(entries, func(i, j int) bool {
-		if entries[i].Service != entries[j].Service {
-			return entries[i].Service < entries[j].Service
-		}
-		if entries[i].Slug != entries[j].Slug {
-			return entries[i].Slug < entries[j].Slug
-		}
-		return entries[i].Kind < entries[j].Kind
-	})
-	return entries, services, nil
+	if err := validateSelectedKindsFound(service.Service, apiDir, remainingSelectedKinds); err != nil {
+		return nil, err
+	}
+	if len(entries) == 0 {
+		return nil, fmt.Errorf("service %q has no published API kinds under %q", service.Service, apiDir)
+	}
+	return entries, nil
+}
+
+func publishedInventoryEntry(apiDir string, service generator.ServiceConfig, version string, dirEntry os.DirEntry, selectedKinds map[string]struct{}, remainingSelectedKinds map[string]struct{}, seen map[string]string) (inventoryEntry, bool, error) {
+	if dirEntry.IsDir() || !strings.HasSuffix(dirEntry.Name(), "_types.go") {
+		return inventoryEntry{}, false, nil
+	}
+
+	path := filepath.Join(apiDir, dirEntry.Name())
+	kind, err := publishedKindFromFile(path)
+	if err != nil {
+		return inventoryEntry{}, false, err
+	}
+	if !selectedKindAllowed(kind, selectedKinds, remainingSelectedKinds) {
+		return inventoryEntry{}, false, nil
+	}
+
+	slug := strings.TrimSpace(service.FormalSpecFor(kind))
+	if slug == "" {
+		slug = strings.TrimSuffix(dirEntry.Name(), "_types.go")
+	}
+	key := rowKey(service.Service, slug)
+	if previous, ok := seen[key]; ok {
+		return inventoryEntry{}, false, fmt.Errorf("duplicate published API kind key %s from %q and %q", key, previous, path)
+	}
+	seen[key] = path
+
+	return inventoryEntry{
+		Service: service.Service,
+		Group:   service.Group,
+		Version: version,
+		Slug:    slug,
+		Kind:    kind,
+	}, true, nil
+}
+
+func selectedKindAllowed(kind string, selectedKinds map[string]struct{}, remainingSelectedKinds map[string]struct{}) bool {
+	if len(selectedKinds) == 0 {
+		return true
+	}
+	if _, ok := selectedKinds[kind]; !ok {
+		return false
+	}
+	delete(remainingSelectedKinds, kind)
+	return true
+}
+
+func validateSelectedKindsFound(serviceName string, apiDir string, remainingSelectedKinds map[string]struct{}) error {
+	if len(remainingSelectedKinds) == 0 {
+		return nil
+	}
+
+	missing := sortedKindSet(remainingSelectedKinds)
+	return fmt.Errorf(
+		"service %q selected kinds %s were not found under %q",
+		serviceName,
+		strings.Join(missing, ", "),
+		apiDir,
+	)
+}
+
+func copyKindSet(values map[string]struct{}) map[string]struct{} {
+	if len(values) == 0 {
+		return nil
+	}
+	out := make(map[string]struct{}, len(values))
+	for value := range values {
+		out[value] = struct{}{}
+	}
+	return out
+}
+
+func sortedKindSet(values map[string]struct{}) []string {
+	out := make([]string, 0, len(values))
+	for value := range values {
+		out = append(out, value)
+	}
+	sort.Strings(out)
+	return out
 }
 
 func shouldPreserveManifestRow(cfg *generator.Config, row formal.ManifestRow) bool {
@@ -362,30 +484,48 @@ func addConfiguredFormalSpecRows(formalRoot string, cfg *generator.Config, rowBy
 
 	added := 0
 	for _, service := range cfg.Services {
-		for _, resource := range service.Generation.Resources {
-			slug := strings.TrimSpace(resource.FormalSpec)
-			if slug == "" {
-				continue
-			}
-
-			key := rowKey(service.Service, slug)
-			if _, ok := rowByKey[key]; ok {
-				continue
-			}
-
-			row, ok, err := configuredFormalSpecManifestRow(formalRoot, service.Service, resource.Kind, slug)
-			if err != nil {
-				return 0, err
-			}
-			if !ok {
-				continue
-			}
-			rowByKey[key] = row
-			added++
+		serviceAdded, err := addConfiguredFormalSpecRowsForService(formalRoot, service, rowByKey)
+		if err != nil {
+			return 0, err
 		}
+		added += serviceAdded
 	}
 
 	return added, nil
+}
+
+func addConfiguredFormalSpecRowsForService(formalRoot string, service generator.ServiceConfig, rowByKey map[string]formal.ManifestRow) (int, error) {
+	added := 0
+	for _, resource := range service.Generation.Resources {
+		addedRow, err := addConfiguredFormalSpecRow(formalRoot, service, resource.Kind, strings.TrimSpace(resource.FormalSpec), rowByKey)
+		if err != nil {
+			return 0, err
+		}
+		if addedRow {
+			added++
+		}
+	}
+	return added, nil
+}
+
+func addConfiguredFormalSpecRow(formalRoot string, service generator.ServiceConfig, kind string, slug string, rowByKey map[string]formal.ManifestRow) (bool, error) {
+	if slug == "" {
+		return false, nil
+	}
+	key := rowKey(service.Service, slug)
+	if _, ok := rowByKey[key]; ok {
+		return false, nil
+	}
+
+	row, ok, err := configuredFormalSpecManifestRow(formalRoot, service.Service, kind, slug)
+	if err != nil {
+		return false, err
+	}
+	if !ok {
+		return false, nil
+	}
+	rowByKey[key] = row
+	return true, nil
 }
 
 func configuredFormalSpecManifestRow(formalRoot string, serviceName string, kind string, slug string) (formal.ManifestRow, bool, error) {
@@ -469,15 +609,7 @@ func discoverProviderKinds(providerPath string) ([]inventoryEntry, error) {
 			ProviderResource: entry.TerraformName,
 		})
 	}
-	sort.Slice(entries, func(i, j int) bool {
-		if entries[i].Service != entries[j].Service {
-			return entries[i].Service < entries[j].Service
-		}
-		if entries[i].Slug != entries[j].Slug {
-			return entries[i].Slug < entries[j].Slug
-		}
-		return entries[i].Kind < entries[j].Kind
-	})
+	sortInventoryEntries(entries)
 	return entries, nil
 }
 
@@ -502,15 +634,7 @@ func mergeInventoryEntries(primary, secondary []inventoryEntry) ([]inventoryEntr
 	for _, entry := range merged {
 		out = append(out, entry)
 	}
-	sort.Slice(out, func(i, j int) bool {
-		if out[i].Service != out[j].Service {
-			return out[i].Service < out[j].Service
-		}
-		if out[i].Slug != out[j].Slug {
-			return out[i].Slug < out[j].Slug
-		}
-		return out[i].Kind < out[j].Kind
-	})
+	sortInventoryEntries(out)
 	return out, nil
 }
 
@@ -521,31 +645,7 @@ func publishedKindFromFile(path string) (string, error) {
 		return "", fmt.Errorf("parse published API file %q: %w", path, err)
 	}
 
-	var kinds []string
-	for _, decl := range node.Decls {
-		genDecl, ok := decl.(*ast.GenDecl)
-		if !ok || genDecl.Tok != token.TYPE {
-			continue
-		}
-		for _, spec := range genDecl.Specs {
-			typeSpec, ok := spec.(*ast.TypeSpec)
-			if !ok {
-				continue
-			}
-			structType, ok := typeSpec.Type.(*ast.StructType)
-			if !ok {
-				continue
-			}
-			if !hasRootMarker(genDecl.Doc, typeSpec.Doc) {
-				continue
-			}
-			if isListContainerType(structType) {
-				continue
-			}
-			kinds = append(kinds, typeSpec.Name.Name)
-		}
-	}
-
+	kinds := publishedRootKinds(node)
 	switch len(kinds) {
 	case 1:
 		return kinds[0], nil
@@ -554,6 +654,54 @@ func publishedKindFromFile(path string) (string, error) {
 	default:
 		return "", fmt.Errorf("published API file %q defines multiple non-list kubebuilder root kinds: %s", path, strings.Join(kinds, ", "))
 	}
+}
+
+func publishedRootKinds(node *ast.File) []string {
+	var kinds []string
+	for _, decl := range node.Decls {
+		kinds = append(kinds, publishedRootKindsFromDecl(decl)...)
+	}
+	return kinds
+}
+
+func publishedRootKindsFromDecl(decl ast.Decl) []string {
+	genDecl, ok := decl.(*ast.GenDecl)
+	if !ok || genDecl.Tok != token.TYPE {
+		return nil
+	}
+
+	var kinds []string
+	for _, spec := range genDecl.Specs {
+		kind, ok := publishedRootKindFromSpec(genDecl.Doc, spec)
+		if ok {
+			kinds = append(kinds, kind)
+		}
+	}
+	return kinds
+}
+
+func publishedRootKindFromSpec(genDoc *ast.CommentGroup, spec ast.Spec) (string, bool) {
+	typeSpec, ok := spec.(*ast.TypeSpec)
+	if !ok {
+		return "", false
+	}
+	structType, ok := typeSpec.Type.(*ast.StructType)
+	if !ok || !hasRootMarker(genDoc, typeSpec.Doc) || isListContainerType(structType) {
+		return "", false
+	}
+	return typeSpec.Name.Name, true
+}
+
+func sortInventoryEntries(entries []inventoryEntry) {
+	sort.Slice(entries, func(i, j int) bool {
+		if entries[i].Service != entries[j].Service {
+			return entries[i].Service < entries[j].Service
+		}
+		if entries[i].Slug != entries[j].Slug {
+			return entries[i].Slug < entries[j].Slug
+		}
+		return entries[i].Kind < entries[j].Kind
+	})
 }
 
 func isListContainerType(structType *ast.StructType) bool {
@@ -795,49 +943,70 @@ func pruneStaleFormalArtifacts(root string, rows []formal.ManifestRow) error {
 }
 
 func pruneStaleControllerArtifacts(controllersRoot string, formalRoot string, desired map[string]struct{}) error {
-	if _, err := os.Stat(controllersRoot); err != nil {
-		if os.IsNotExist(err) {
-			return nil
-		}
-		return fmt.Errorf("stat formal controllers root %q: %w", filepath.ToSlash(controllersRoot), err)
-	}
-
-	staleRoots := map[string]struct{}{}
-	if err := filepath.WalkDir(controllersRoot, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if d.IsDir() {
-			if d.Name() == "diagrams" {
-				rel, err := filepath.Rel(formalRoot, filepath.Dir(path))
-				if err != nil {
-					return err
-				}
-				rel = filepath.Clean(rel)
-				if _, ok := desired[rel]; !ok {
-					staleRoots[rel] = struct{}{}
-				}
-				return fs.SkipDir
-			}
-			return nil
-		}
-		if d.Name() != "spec.cfg" && d.Name() != "logic-gaps.md" {
-			return nil
-		}
-
-		rel, err := filepath.Rel(formalRoot, filepath.Dir(path))
-		if err != nil {
-			return err
-		}
-		rel = filepath.Clean(rel)
-		if _, ok := desired[rel]; !ok {
-			staleRoots[rel] = struct{}{}
-		}
-		return nil
-	}); err != nil {
+	staleRoots, err := discoverStaleControllerRoots(controllersRoot, formalRoot, desired)
+	if err != nil {
 		return fmt.Errorf("scan formal controller artifacts: %w", err)
 	}
+	return removeStaleControllerRoots(staleRoots, formalRoot, controllersRoot)
+}
 
+func discoverStaleControllerRoots(controllersRoot string, formalRoot string, desired map[string]struct{}) ([]string, error) {
+	exists, err := dirExists(controllersRoot)
+	if err != nil {
+		return nil, fmt.Errorf("stat formal controllers root %q: %w", filepath.ToSlash(controllersRoot), err)
+	}
+	if !exists {
+		return nil, nil
+	}
+
+	staleRoots, err := collectStaleControllerRoots(controllersRoot, formalRoot, desired)
+	if err != nil {
+		return nil, err
+	}
+	return sortStaleControllerRoots(staleRoots), nil
+}
+
+func dirExists(path string) (bool, error) {
+	if _, err := os.Stat(path); err != nil {
+		if os.IsNotExist(err) {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
+}
+
+func collectStaleControllerRoots(controllersRoot string, formalRoot string, desired map[string]struct{}) (map[string]struct{}, error) {
+	staleRoots := map[string]struct{}{}
+	if err := filepath.WalkDir(controllersRoot, func(path string, d fs.DirEntry, walkErr error) error {
+		return markStaleControllerRoot(staleRoots, desired, formalRoot, path, d, walkErr)
+	}); err != nil {
+		return nil, err
+	}
+	return staleRoots, nil
+}
+
+func markStaleControllerRoot(staleRoots map[string]struct{}, desired map[string]struct{}, formalRoot string, path string, d fs.DirEntry, walkErr error) error {
+	if walkErr != nil {
+		return walkErr
+	}
+
+	rel, ok, skipDir, err := controllerArtifactRoot(formalRoot, path, d)
+	if err != nil {
+		return err
+	}
+	if ok {
+		if _, keep := desired[rel]; !keep {
+			staleRoots[rel] = struct{}{}
+		}
+	}
+	if skipDir {
+		return fs.SkipDir
+	}
+	return nil
+}
+
+func sortStaleControllerRoots(staleRoots map[string]struct{}) []string {
 	roots := make([]string, 0, len(staleRoots))
 	for rel := range staleRoots {
 		roots = append(roots, rel)
@@ -848,7 +1017,31 @@ func pruneStaleControllerArtifacts(controllersRoot string, formalRoot string, de
 		}
 		return roots[i] < roots[j]
 	})
+	return roots
+}
 
+func controllerArtifactRoot(formalRoot string, path string, d fs.DirEntry) (string, bool, bool, error) {
+	if d.IsDir() {
+		if d.Name() != "diagrams" {
+			return "", false, false, nil
+		}
+		rel, err := filepath.Rel(formalRoot, filepath.Dir(path))
+		if err != nil {
+			return "", false, false, err
+		}
+		return filepath.Clean(rel), true, true, nil
+	}
+	if d.Name() != "spec.cfg" && d.Name() != "logic-gaps.md" {
+		return "", false, false, nil
+	}
+	rel, err := filepath.Rel(formalRoot, filepath.Dir(path))
+	if err != nil {
+		return "", false, false, err
+	}
+	return filepath.Clean(rel), true, false, nil
+}
+
+func removeStaleControllerRoots(roots []string, formalRoot string, controllersRoot string) error {
 	for _, rel := range roots {
 		path := filepath.Join(formalRoot, rel)
 		if err := os.RemoveAll(path); err != nil {
@@ -863,17 +1056,25 @@ func pruneStaleControllerArtifacts(controllersRoot string, formalRoot string, de
 }
 
 func pruneStaleImportArtifacts(importsRoot string, formalRoot string, desired map[string]struct{}) error {
+	stale, err := discoverStaleImportPaths(importsRoot, formalRoot, desired)
+	if err != nil {
+		return fmt.Errorf("scan formal import artifacts: %w", err)
+	}
+	return removeStaleImportPaths(stale, formalRoot, importsRoot)
+}
+
+func discoverStaleImportPaths(importsRoot string, formalRoot string, desired map[string]struct{}) ([]string, error) {
 	if _, err := os.Stat(importsRoot); err != nil {
 		if os.IsNotExist(err) {
-			return nil
+			return nil, nil
 		}
-		return fmt.Errorf("stat formal imports root %q: %w", filepath.ToSlash(importsRoot), err)
+		return nil, fmt.Errorf("stat formal imports root %q: %w", filepath.ToSlash(importsRoot), err)
 	}
 
 	var stale []string
-	if err := filepath.WalkDir(importsRoot, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
+	if err := filepath.WalkDir(importsRoot, func(path string, d fs.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			return walkErr
 		}
 		if d.IsDir() || filepath.Ext(d.Name()) != ".json" {
 			return nil
@@ -889,10 +1090,13 @@ func pruneStaleImportArtifacts(importsRoot string, formalRoot string, desired ma
 		}
 		return nil
 	}); err != nil {
-		return fmt.Errorf("scan formal import artifacts: %w", err)
+		return nil, err
 	}
-
 	sort.Strings(stale)
+	return stale, nil
+}
+
+func removeStaleImportPaths(stale []string, formalRoot string, importsRoot string) error {
 	for _, rel := range stale {
 		path := filepath.Join(formalRoot, rel)
 		if err := os.Remove(path); err != nil && !os.IsNotExist(err) {
@@ -910,35 +1114,40 @@ func pruneEmptyParents(dir string, stop string) error {
 	stop = filepath.Clean(stop)
 	for {
 		dir = filepath.Clean(dir)
-		if dir == stop || dir == "." || dir == string(filepath.Separator) {
+		if isPruneStop(dir, stop) {
 			return nil
 		}
 
-		entries, err := os.ReadDir(dir)
+		advance, err := pruneEmptyDir(dir)
 		if err != nil {
-			if os.IsNotExist(err) {
-				parent := filepath.Dir(dir)
-				if parent == dir {
-					return nil
-				}
-				dir = parent
-				continue
-			}
-			return fmt.Errorf("read %q: %w", filepath.ToSlash(dir), err)
+			return err
 		}
-		if len(entries) != 0 {
+		if !advance {
 			return nil
 		}
-		if err := os.Remove(dir); err != nil && !os.IsNotExist(err) {
-			return fmt.Errorf("remove empty formal directory %q: %w", filepath.ToSlash(dir), err)
-		}
-
-		parent := filepath.Dir(dir)
-		if parent == dir {
-			return nil
-		}
-		dir = parent
+		dir = filepath.Dir(dir)
 	}
+}
+
+func isPruneStop(dir string, stop string) bool {
+	return dir == stop || dir == "." || dir == string(filepath.Separator)
+}
+
+func pruneEmptyDir(dir string) (bool, error) {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return true, nil
+		}
+		return false, fmt.Errorf("read %q: %w", filepath.ToSlash(dir), err)
+	}
+	if len(entries) != 0 {
+		return false, nil
+	}
+	if err := os.Remove(dir); err != nil && !os.IsNotExist(err) {
+		return false, fmt.Errorf("remove empty formal directory %q: %w", filepath.ToSlash(dir), err)
+	}
+	return true, nil
 }
 
 func writeFileIfChanged(path string, contents []byte) (bool, error) {

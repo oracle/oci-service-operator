@@ -60,6 +60,21 @@ func cleanupGeneratedOutputs(root string, services []ServiceConfig, packages []*
 }
 
 func buildCleanupInventory(root string, services []ServiceConfig, packages []*PackageModel, fullSync bool) (cleanupInventory, error) {
+	inventory := newCleanupInventory(services)
+	if fullSync {
+		if err := inventory.includeExistingGeneratedCleanupScope(root); err != nil {
+			return cleanupInventory{}, err
+		}
+	}
+
+	for _, pkg := range packages {
+		inventory.includePackageOutputs(root, pkg)
+	}
+
+	return inventory, nil
+}
+
+func newCleanupInventory(services []ServiceConfig) cleanupInventory {
 	inventory := cleanupInventory{
 		apiFiles:               map[string]struct{}{},
 		controllerFiles:        map[string]struct{}{},
@@ -75,43 +90,49 @@ func buildCleanupInventory(root string, services []ServiceConfig, packages []*Pa
 	for _, service := range services {
 		inventory.addCleanupGroup(service.Group)
 	}
+	return inventory
+}
 
-	if fullSync {
-		if err := inventory.includeExistingGeneratedCleanupScope(root); err != nil {
-			return cleanupInventory{}, err
+func (inventory *cleanupInventory) includePackageOutputs(root string, pkg *PackageModel) {
+	apiDir := filepath.Join(root, "api", pkg.Service.Group, pkg.Version)
+	inventory.apiFiles[filepath.Join(apiDir, "groupversion_info.go")] = struct{}{}
+	inventory.includeResourceOutputs(root, apiDir, pkg.Resources)
+	inventory.includeControllerOutputs(root, pkg)
+	inventory.includeRegistrationOutputs(root, pkg)
+	inventory.includeServiceManagerOutputs(root, pkg.ServiceManagers)
+	if pkg.PackageOutput.Generate {
+		inventory.packageGroups[pkg.Service.Group] = struct{}{}
+	}
+}
+
+func (inventory *cleanupInventory) includeResourceOutputs(root string, apiDir string, resources []ResourceModel) {
+	for _, resource := range resources {
+		inventory.apiFiles[filepath.Join(apiDir, resource.FileStem+"_types.go")] = struct{}{}
+		if strings.TrimSpace(resource.Sample.FileName) != "" {
+			inventory.sampleFiles[filepath.Join(root, "config", "samples", resource.Sample.FileName)] = struct{}{}
 		}
 	}
+}
 
-	for _, pkg := range packages {
-		apiDir := filepath.Join(root, "api", pkg.Service.Group, pkg.Version)
-		inventory.apiFiles[filepath.Join(apiDir, "groupversion_info.go")] = struct{}{}
-
-		for _, resource := range pkg.Resources {
-			inventory.apiFiles[filepath.Join(apiDir, resource.FileStem+"_types.go")] = struct{}{}
-			if strings.TrimSpace(resource.Sample.FileName) != "" {
-				inventory.sampleFiles[filepath.Join(root, "config", "samples", resource.Sample.FileName)] = struct{}{}
-			}
-		}
-		for _, controller := range pkg.Controller.Resources {
-			inventory.controllerFiles[filepath.Join(root, "controllers", pkg.Service.Group, controller.FileStem+"_controller.go")] = struct{}{}
-		}
-
-		if len(pkg.Registration.Resources) > 0 {
-			inventory.registrationFiles[filepath.Join(root, "internal", "registrations", pkg.Registration.Group+"_generated.go")] = struct{}{}
-		}
-
-		for _, serviceManager := range pkg.ServiceManagers {
-			outputDir := filepath.Join(root, "pkg", "servicemanager", filepath.FromSlash(serviceManager.PackagePath))
-			inventory.serviceManagerFiles[filepath.Join(outputDir, serviceManager.ServiceClientFileName)] = struct{}{}
-			inventory.serviceManagerFiles[filepath.Join(outputDir, serviceManager.ServiceManagerFileName)] = struct{}{}
-		}
-
-		if pkg.PackageOutput.Generate {
-			inventory.packageGroups[pkg.Service.Group] = struct{}{}
-		}
+func (inventory *cleanupInventory) includeControllerOutputs(root string, pkg *PackageModel) {
+	for _, controller := range pkg.Controller.Resources {
+		inventory.controllerFiles[filepath.Join(root, "controllers", pkg.Service.Group, controller.FileStem+"_controller.go")] = struct{}{}
 	}
+}
 
-	return inventory, nil
+func (inventory *cleanupInventory) includeRegistrationOutputs(root string, pkg *PackageModel) {
+	if len(pkg.Registration.Resources) == 0 {
+		return
+	}
+	inventory.registrationFiles[filepath.Join(root, "internal", "registrations", pkg.Registration.Group+"_generated.go")] = struct{}{}
+}
+
+func (inventory *cleanupInventory) includeServiceManagerOutputs(root string, serviceManagers []ServiceManagerModel) {
+	for _, serviceManager := range serviceManagers {
+		outputDir := filepath.Join(root, "pkg", "servicemanager", filepath.FromSlash(serviceManager.PackagePath))
+		inventory.serviceManagerFiles[filepath.Join(outputDir, serviceManager.ServiceClientFileName)] = struct{}{}
+		inventory.serviceManagerFiles[filepath.Join(outputDir, serviceManager.ServiceManagerFileName)] = struct{}{}
+	}
 }
 
 func cleanupAPIOutputs(root string, inventory cleanupInventory) error {
@@ -201,20 +222,29 @@ func cleanupSampleOutputs(root string, inventory cleanupInventory) error {
 		return err
 	}
 
+	prefixes := mapKeys(inventory.selectedSamplePrefixes)
 	for _, entry := range entries {
-		if entry.IsDir() || entry.Name() == "kustomization.yaml" || filepath.Ext(entry.Name()) != ".yaml" {
+		if !isGeneratedSampleEntry(entry) {
 			continue
 		}
-		path := filepath.Join(samplesDir, entry.Name())
-		if _, ok := inventory.sampleFiles[path]; ok {
-			continue
-		}
-		if !matchesSamplePrefix(entry.Name(), mapKeys(inventory.selectedSamplePrefixes)) {
-			continue
-		}
-		if err := os.Remove(path); err != nil && !os.IsNotExist(err) {
+		if err := cleanupSampleEntry(samplesDir, entry, inventory.sampleFiles, prefixes); err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+func isGeneratedSampleEntry(entry os.DirEntry) bool {
+	return !entry.IsDir() && entry.Name() != "kustomization.yaml" && filepath.Ext(entry.Name()) == ".yaml"
+}
+
+func cleanupSampleEntry(samplesDir string, entry os.DirEntry, desired map[string]struct{}, prefixes []string) error {
+	path := filepath.Join(samplesDir, entry.Name())
+	if _, ok := desired[path]; ok || !matchesSamplePrefix(entry.Name(), prefixes) {
+		return nil
+	}
+	if err := os.Remove(path); err != nil && !os.IsNotExist(err) {
+		return err
 	}
 	return nil
 }

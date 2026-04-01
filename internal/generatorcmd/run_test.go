@@ -58,10 +58,6 @@ func TestExecuteAllOverwriteRemovesStaleOldVersionSamples(t *testing.T) {
 
 	root := t.TempDir()
 	configPath := filepath.Join(root, "internal", "generator", "config", "services.yaml")
-	if err := os.MkdirAll(filepath.Dir(configPath), 0o755); err != nil {
-		t.Fatalf("MkdirAll(%q) error = %v", filepath.Dir(configPath), err)
-	}
-
 	content := `
 schemaVersion: v1alpha1
 domain: oracle.com
@@ -105,69 +101,39 @@ services:
       webhooks:
         strategy: none
 `
-	if err := os.WriteFile(configPath, []byte(content), 0o644); err != nil {
-		t.Fatalf("WriteFile(%q) error = %v", configPath, err)
-	}
+	writeGeneratorCmdTestFile(t, configPath, content)
 
 	outputRoot := t.TempDir()
 	samplesDir := filepath.Join(outputRoot, "config", "samples")
-	if err := os.MkdirAll(samplesDir, 0o755); err != nil {
-		t.Fatalf("MkdirAll(%q) error = %v", samplesDir, err)
-	}
-
 	staleMySQLOldVersionSample := filepath.Join(samplesDir, "mysql_v1alpha1_widget.yaml")
-	if err := os.WriteFile(staleMySQLOldVersionSample, []byte("apiVersion: mysql.oracle.com/v1alpha1\nkind: Widget\n"), 0o644); err != nil {
-		t.Fatalf("WriteFile(%q) error = %v", staleMySQLOldVersionSample, err)
-	}
-
 	staleIdentityOldVersionSample := filepath.Join(samplesDir, "identity_v1alpha1_widget.yaml")
-	if err := os.WriteFile(staleIdentityOldVersionSample, []byte("apiVersion: identity.oracle.com/v1alpha1\nkind: Widget\n"), 0o644); err != nil {
-		t.Fatalf("WriteFile(%q) error = %v", staleIdentityOldVersionSample, err)
-	}
-
 	kustomizationPath := filepath.Join(samplesDir, "kustomization.yaml")
-	kustomizationContent := "resources:\n- mysql_v1alpha1_widget.yaml\n- identity_v1alpha1_widget.yaml\n"
-	if err := os.WriteFile(kustomizationPath, []byte(kustomizationContent), 0o644); err != nil {
-		t.Fatalf("WriteFile(%q) error = %v", kustomizationPath, err)
-	}
+	writeGeneratorCmdTestFile(t, staleMySQLOldVersionSample, "apiVersion: mysql.oracle.com/v1alpha1\nkind: Widget\n")
+	writeGeneratorCmdTestFile(t, staleIdentityOldVersionSample, "apiVersion: identity.oracle.com/v1alpha1\nkind: Widget\n")
+	writeGeneratorCmdTestFile(t, kustomizationPath, "resources:\n- mysql_v1alpha1_widget.yaml\n- identity_v1alpha1_widget.yaml\n")
 
-	err := execute(context.Background(), options{
-		configPath: configPath,
-		all:        true,
-		outputRoot: outputRoot,
-		overwrite:  true,
-	}, io.Discard)
-	if err != nil {
-		t.Fatalf("execute() error = %v", err)
-	}
+	executeAllOverwrite(t, configPath, outputRoot)
 
-	if _, err := os.Stat(staleMySQLOldVersionSample); !os.IsNotExist(err) {
-		t.Fatalf("Stat(%q) error = %v, want not exist", staleMySQLOldVersionSample, err)
-	}
-	if _, err := os.Stat(staleIdentityOldVersionSample); !os.IsNotExist(err) {
-		t.Fatalf("Stat(%q) error = %v, want not exist", staleIdentityOldVersionSample, err)
-	}
-	if _, err := os.Stat(filepath.Join(samplesDir, "mysql_v1beta1_widget.yaml")); err != nil {
-		t.Fatalf("Stat(%q) error = %v", filepath.Join(samplesDir, "mysql_v1beta1_widget.yaml"), err)
-	}
-	if _, err := os.Stat(filepath.Join(samplesDir, "identity_v1beta1_widget.yaml")); !os.IsNotExist(err) {
-		t.Fatalf("Stat(%q) error = %v, want not exist", filepath.Join(samplesDir, "identity_v1beta1_widget.yaml"), err)
-	}
+	assertGeneratorCmdPathsMissing(t, []string{
+		staleMySQLOldVersionSample,
+		staleIdentityOldVersionSample,
+		filepath.Join(samplesDir, "identity_v1beta1_widget.yaml"),
+	})
+	assertGeneratorCmdPathsExist(t, []string{
+		filepath.Join(samplesDir, "mysql_v1beta1_widget.yaml"),
+	})
 
-	kustomization, err := os.ReadFile(kustomizationPath)
-	if err != nil {
-		t.Fatalf("ReadFile(%q) error = %v", kustomizationPath, err)
-	}
-	if !strings.Contains(string(kustomization), "- mysql_v1beta1_widget.yaml") {
-		t.Fatalf("kustomization %q missing generated mysql sample:\n%s", kustomizationPath, string(kustomization))
+	kustomization := readGeneratorCmdTestFile(t, kustomizationPath)
+	if !strings.Contains(kustomization, "- mysql_v1beta1_widget.yaml") {
+		t.Fatalf("kustomization %q missing generated mysql sample:\n%s", kustomizationPath, kustomization)
 	}
 	for _, staleEntry := range []string{
 		"- mysql_v1alpha1_widget.yaml",
 		"- identity_v1alpha1_widget.yaml",
 		"- identity_v1beta1_widget.yaml",
 	} {
-		if strings.Contains(string(kustomization), staleEntry) {
-			t.Fatalf("kustomization %q retained stale sample %q:\n%s", kustomizationPath, staleEntry, string(kustomization))
+		if strings.Contains(kustomization, staleEntry) {
+			t.Fatalf("kustomization %q retained stale sample %q:\n%s", kustomizationPath, staleEntry, kustomization)
 		}
 	}
 }
@@ -177,26 +143,13 @@ func TestExecuteAllOverwriteRemovesStaleOutputsForServicesRemovedFromConfig(t *t
 
 	root := t.TempDir()
 	configPath := filepath.Join(root, "internal", "generator", "config", "services.yaml")
-	if err := os.MkdirAll(filepath.Dir(configPath), 0o755); err != nil {
-		t.Fatalf("MkdirAll(%q) error = %v", filepath.Dir(configPath), err)
-	}
-
 	outputRoot := t.TempDir()
 	for _, content := range []string{testGeneratorConfigWithIdentity, testGeneratorConfigWithoutIdentity} {
-		if err := os.WriteFile(configPath, []byte(content), 0o644); err != nil {
-			t.Fatalf("WriteFile(%q) error = %v", configPath, err)
-		}
-		if err := execute(context.Background(), options{
-			configPath: configPath,
-			all:        true,
-			outputRoot: outputRoot,
-			overwrite:  true,
-		}, io.Discard); err != nil {
-			t.Fatalf("execute() error = %v", err)
-		}
+		writeGeneratorCmdTestFile(t, configPath, content)
+		executeAllOverwrite(t, configPath, outputRoot)
 	}
 
-	for _, relativePath := range []string{
+	assertGeneratorCmdRelativePathsMissing(t, outputRoot, []string{
 		"api/identity/v1beta1/widget_types.go",
 		"controllers/identity/widget_controller.go",
 		"pkg/servicemanager/identity/widget/widget_serviceclient.go",
@@ -205,27 +158,91 @@ func TestExecuteAllOverwriteRemovesStaleOutputsForServicesRemovedFromConfig(t *t
 		"packages/identity/metadata.env",
 		"packages/identity/install/kustomization.yaml",
 		"config/samples/identity_v1beta1_widget.yaml",
-	} {
-		if _, err := os.Stat(filepath.Join(outputRoot, relativePath)); !os.IsNotExist(err) {
-			t.Fatalf("Stat(%q) error = %v, want not exist", filepath.Join(outputRoot, relativePath), err)
-		}
-	}
-
-	if _, err := os.Stat(filepath.Join(outputRoot, "api", "mysql", "v1beta1", "widget_types.go")); err != nil {
-		t.Fatalf("Stat(%q) error = %v", filepath.Join(outputRoot, "api", "mysql", "v1beta1", "widget_types.go"), err)
-	}
-	if _, err := os.Stat(filepath.Join(outputRoot, "config", "samples", "mysql_v1beta1_widget.yaml")); err != nil {
-		t.Fatalf("Stat(%q) error = %v", filepath.Join(outputRoot, "config", "samples", "mysql_v1beta1_widget.yaml"), err)
-	}
+	})
+	assertGeneratorCmdRelativePathsExist(t, outputRoot, []string{
+		"api/mysql/v1beta1/widget_types.go",
+		"config/samples/mysql_v1beta1_widget.yaml",
+	})
 
 	kustomizationPath := filepath.Join(outputRoot, "config", "samples", "kustomization.yaml")
-	kustomization, err := os.ReadFile(kustomizationPath)
+	kustomization := readGeneratorCmdTestFile(t, kustomizationPath)
+	if strings.Contains(kustomization, "identity_v1beta1_widget.yaml") {
+		t.Fatalf("kustomization %q retained removed-service sample:\n%s", kustomizationPath, kustomization)
+	}
+}
+
+func executeAllOverwrite(t *testing.T, configPath string, outputRoot string) {
+	t.Helper()
+
+	if err := execute(context.Background(), options{
+		configPath: configPath,
+		all:        true,
+		outputRoot: outputRoot,
+		overwrite:  true,
+	}, io.Discard); err != nil {
+		t.Fatalf("execute() error = %v", err)
+	}
+}
+
+func writeGeneratorCmdTestFile(t *testing.T, path string, contents string) {
+	t.Helper()
+
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatalf("MkdirAll(%q) error = %v", filepath.Dir(path), err)
+	}
+	if err := os.WriteFile(path, []byte(contents), 0o644); err != nil {
+		t.Fatalf("WriteFile(%q) error = %v", path, err)
+	}
+}
+
+func readGeneratorCmdTestFile(t *testing.T, path string) string {
+	t.Helper()
+
+	content, err := os.ReadFile(path)
 	if err != nil {
-		t.Fatalf("ReadFile(%q) error = %v", kustomizationPath, err)
+		t.Fatalf("ReadFile(%q) error = %v", path, err)
 	}
-	if strings.Contains(string(kustomization), "identity_v1beta1_widget.yaml") {
-		t.Fatalf("kustomization %q retained removed-service sample:\n%s", kustomizationPath, string(kustomization))
+	return string(content)
+}
+
+func assertGeneratorCmdPathsExist(t *testing.T, paths []string) {
+	t.Helper()
+
+	for _, path := range paths {
+		if _, err := os.Stat(path); err != nil {
+			t.Fatalf("Stat(%q) error = %v", path, err)
+		}
 	}
+}
+
+func assertGeneratorCmdPathsMissing(t *testing.T, paths []string) {
+	t.Helper()
+
+	for _, path := range paths {
+		if _, err := os.Stat(path); !os.IsNotExist(err) {
+			t.Fatalf("Stat(%q) error = %v, want not exist", path, err)
+		}
+	}
+}
+
+func assertGeneratorCmdRelativePathsExist(t *testing.T, root string, relativePaths []string) {
+	t.Helper()
+
+	paths := make([]string, 0, len(relativePaths))
+	for _, relativePath := range relativePaths {
+		paths = append(paths, filepath.Join(root, relativePath))
+	}
+	assertGeneratorCmdPathsExist(t, paths)
+}
+
+func assertGeneratorCmdRelativePathsMissing(t *testing.T, root string, relativePaths []string) {
+	t.Helper()
+
+	paths := make([]string, 0, len(relativePaths))
+	for _, relativePath := range relativePaths {
+		paths = append(paths, filepath.Join(root, relativePath))
+	}
+	assertGeneratorCmdPathsMissing(t, paths)
 }
 
 const testGeneratorConfigWithIdentity = `

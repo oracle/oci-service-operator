@@ -94,44 +94,16 @@ func TestGenerateFullSyncCleansStaleGeneratorOwnedOutputsForInactiveServicesAndE
 	outputRoot := t.TempDir()
 	pipeline := newSelectionCleanupTestGenerator(t)
 
-	if _, err := pipeline.Generate(context.Background(), cfg, []ServiceConfig{cfg.Services[0], cfg.Services[1]}, Options{
-		OutputRoot: outputRoot,
-		Overwrite:  true,
-	}); err != nil {
-		t.Fatalf("seed Generate() error = %v", err)
-	}
+	seedSelectionCleanupOutputs(t, pipeline, cfg, outputRoot)
 
 	preservedDeepCopyFile := filepath.Join(outputRoot, "api", "mysql", "v1beta1", "zz_generated.deepcopy.go")
-	if err := os.MkdirAll(filepath.Dir(preservedDeepCopyFile), 0o755); err != nil {
-		t.Fatalf("MkdirAll(%q) error = %v", filepath.Dir(preservedDeepCopyFile), err)
-	}
-	if err := os.WriteFile(preservedDeepCopyFile, []byte("// preserved deepcopy output\n"), 0o644); err != nil {
-		t.Fatalf("WriteFile(%q) error = %v", preservedDeepCopyFile, err)
-	}
-
 	preservedPackageFile := filepath.Join(outputRoot, "packages", "mysql", "install", "generated", "crd", "bases", "mysql.oracle.com_report.yaml")
-	if err := os.MkdirAll(filepath.Dir(preservedPackageFile), 0o755); err != nil {
-		t.Fatalf("MkdirAll(%q) error = %v", filepath.Dir(preservedPackageFile), err)
-	}
-	if err := os.WriteFile(preservedPackageFile, []byte("preserved manifest output\n"), 0o644); err != nil {
-		t.Fatalf("WriteFile(%q) error = %v", preservedPackageFile, err)
-	}
-
 	staleMySQLOldVersionSample := filepath.Join(outputRoot, "config", "samples", "mysql_v1alpha1_widget.yaml")
-	if err := os.MkdirAll(filepath.Dir(staleMySQLOldVersionSample), 0o755); err != nil {
-		t.Fatalf("MkdirAll(%q) error = %v", filepath.Dir(staleMySQLOldVersionSample), err)
-	}
-	if err := os.WriteFile(staleMySQLOldVersionSample, []byte("apiVersion: mysql.oracle.com/v1alpha1\nkind: Widget\n"), 0o644); err != nil {
-		t.Fatalf("WriteFile(%q) error = %v", staleMySQLOldVersionSample, err)
-	}
-
 	staleIdentityOldVersionSample := filepath.Join(outputRoot, "config", "samples", "identity_v1alpha1_widget.yaml")
-	if err := os.MkdirAll(filepath.Dir(staleIdentityOldVersionSample), 0o755); err != nil {
-		t.Fatalf("MkdirAll(%q) error = %v", filepath.Dir(staleIdentityOldVersionSample), err)
-	}
-	if err := os.WriteFile(staleIdentityOldVersionSample, []byte("apiVersion: identity.oracle.com/v1alpha1\nkind: Widget\n"), 0o644); err != nil {
-		t.Fatalf("WriteFile(%q) error = %v", staleIdentityOldVersionSample, err)
-	}
+	writeSelectionCleanupFile(t, preservedDeepCopyFile, "// preserved deepcopy output\n")
+	writeSelectionCleanupFile(t, preservedPackageFile, "preserved manifest output\n")
+	writeSelectionCleanupFile(t, staleMySQLOldVersionSample, "apiVersion: mysql.oracle.com/v1alpha1\nkind: Widget\n")
+	writeSelectionCleanupFile(t, staleIdentityOldVersionSample, "apiVersion: identity.oracle.com/v1alpha1\nkind: Widget\n")
 
 	activeServices, err := cfg.SelectServices("", true)
 	if err != nil {
@@ -145,41 +117,41 @@ func TestGenerateFullSyncCleansStaleGeneratorOwnedOutputsForInactiveServicesAndE
 		t.Fatalf("Generate() full-sync error = %v", err)
 	}
 
-	assertPathNotExists(t, filepath.Join(outputRoot, "api", "mysql", "v1beta1", "report_types.go"))
-	assertPathNotExists(t, filepath.Join(outputRoot, "controllers", "mysql", "report_controller.go"))
-	assertPathNotExists(t, filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "report", "report_serviceclient.go"))
-	assertPathNotExists(t, filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "report", "report_servicemanager.go"))
-	assertPathNotExists(t, filepath.Join(outputRoot, "config", "samples", "mysql_v1beta1_report.yaml"))
-	assertPathNotExists(t, filepath.Join(outputRoot, "api", "identity", "v1beta1", "widget_types.go"))
-	assertPathNotExists(t, filepath.Join(outputRoot, "controllers", "identity", "widget_controller.go"))
-	assertPathNotExists(t, filepath.Join(outputRoot, "pkg", "servicemanager", "identity", "widget", "widget_serviceclient.go"))
-	assertPathNotExists(t, filepath.Join(outputRoot, "pkg", "servicemanager", "identity", "widget", "widget_servicemanager.go"))
-	assertPathNotExists(t, filepath.Join(outputRoot, "internal", "registrations", "identity_generated.go"))
-	assertPathNotExists(t, filepath.Join(outputRoot, "packages", "identity", "metadata.env"))
-	assertPathNotExists(t, filepath.Join(outputRoot, "packages", "identity", "install", "kustomization.yaml"))
-	assertPathNotExists(t, filepath.Join(outputRoot, "config", "samples", "identity_v1beta1_widget.yaml"))
-	assertPathNotExists(t, staleMySQLOldVersionSample)
-	assertPathNotExists(t, staleIdentityOldVersionSample)
+	assertPathsNotExist(t, []string{
+		filepath.Join(outputRoot, "api", "mysql", "v1beta1", "report_types.go"),
+		filepath.Join(outputRoot, "controllers", "mysql", "report_controller.go"),
+		filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "report", "report_serviceclient.go"),
+		filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "report", "report_servicemanager.go"),
+		filepath.Join(outputRoot, "config", "samples", "mysql_v1beta1_report.yaml"),
+		filepath.Join(outputRoot, "api", "identity", "v1beta1", "widget_types.go"),
+		filepath.Join(outputRoot, "controllers", "identity", "widget_controller.go"),
+		filepath.Join(outputRoot, "pkg", "servicemanager", "identity", "widget", "widget_serviceclient.go"),
+		filepath.Join(outputRoot, "pkg", "servicemanager", "identity", "widget", "widget_servicemanager.go"),
+		filepath.Join(outputRoot, "internal", "registrations", "identity_generated.go"),
+		filepath.Join(outputRoot, "packages", "identity", "metadata.env"),
+		filepath.Join(outputRoot, "packages", "identity", "install", "kustomization.yaml"),
+		filepath.Join(outputRoot, "config", "samples", "identity_v1beta1_widget.yaml"),
+		staleMySQLOldVersionSample,
+		staleIdentityOldVersionSample,
+	})
 
-	assertPathExists(t, filepath.Join(outputRoot, "api", "mysql", "v1beta1", "widget_types.go"))
-	assertPathExists(t, filepath.Join(outputRoot, "controllers", "mysql", "widget_controller.go"))
-	assertPathExists(t, filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "widget", "widget_serviceclient.go"))
-	assertPathExists(t, filepath.Join(outputRoot, "packages", "mysql", "metadata.env"))
-	assertPathExists(t, filepath.Join(outputRoot, "internal", "registrations", "mysql_generated.go"))
-	assertPathExists(t, filepath.Join(outputRoot, "config", "samples", "mysql_v1beta1_widget.yaml"))
-	assertPathExists(t, preservedDeepCopyFile)
-	assertPathExists(t, preservedPackageFile)
+	assertPathsExist(t, []string{
+		filepath.Join(outputRoot, "api", "mysql", "v1beta1", "widget_types.go"),
+		filepath.Join(outputRoot, "controllers", "mysql", "widget_controller.go"),
+		filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "widget", "widget_serviceclient.go"),
+		filepath.Join(outputRoot, "packages", "mysql", "metadata.env"),
+		filepath.Join(outputRoot, "internal", "registrations", "mysql_generated.go"),
+		filepath.Join(outputRoot, "config", "samples", "mysql_v1beta1_widget.yaml"),
+		preservedDeepCopyFile,
+		preservedPackageFile,
+	})
 	assertFileDoesNotContain(t, filepath.Join(outputRoot, "internal", "registrations", "mysql_generated.go"), []string{"ReportReconciler"})
 	assertFileDoesNotContain(t, filepath.Join(outputRoot, "config", "samples", "kustomization.yaml"), []string{
 		"mysql_v1alpha1_widget.yaml",
 		"identity_v1alpha1_widget.yaml",
 	})
-	if got := readFile(t, preservedDeepCopyFile); got != "// preserved deepcopy output\n" {
-		t.Fatalf("deepcopy companion content = %q, want preserved content", got)
-	}
-	if got := readFile(t, preservedPackageFile); got != "preserved manifest output\n" {
-		t.Fatalf("package install/generated content = %q, want preserved content", got)
-	}
+	assertSelectionCleanupFileContent(t, preservedDeepCopyFile, "// preserved deepcopy output\n")
+	assertSelectionCleanupFileContent(t, preservedPackageFile, "preserved manifest output\n")
 }
 
 func TestGenerateFullSyncCleansStaleGeneratorOwnedOutputsForServicesRemovedFromConfig(t *testing.T) {
@@ -344,6 +316,52 @@ func newSelectionCleanupTestGenerator(t *testing.T) *Generator {
 			},
 		},
 		renderer: NewRenderer(),
+	}
+}
+
+func seedSelectionCleanupOutputs(t *testing.T, pipeline *Generator, cfg *Config, outputRoot string) {
+	t.Helper()
+
+	if _, err := pipeline.Generate(context.Background(), cfg, []ServiceConfig{cfg.Services[0], cfg.Services[1]}, Options{
+		OutputRoot: outputRoot,
+		Overwrite:  true,
+	}); err != nil {
+		t.Fatalf("seed Generate() error = %v", err)
+	}
+}
+
+func writeSelectionCleanupFile(t *testing.T, path string, contents string) {
+	t.Helper()
+
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatalf("MkdirAll(%q) error = %v", filepath.Dir(path), err)
+	}
+	if err := os.WriteFile(path, []byte(contents), 0o644); err != nil {
+		t.Fatalf("WriteFile(%q) error = %v", path, err)
+	}
+}
+
+func assertPathsExist(t *testing.T, paths []string) {
+	t.Helper()
+
+	for _, path := range paths {
+		assertPathExists(t, path)
+	}
+}
+
+func assertPathsNotExist(t *testing.T, paths []string) {
+	t.Helper()
+
+	for _, path := range paths {
+		assertPathNotExists(t, path)
+	}
+}
+
+func assertSelectionCleanupFileContent(t *testing.T, path string, want string) {
+	t.Helper()
+
+	if got := readFile(t, path); got != want {
+		t.Fatalf("%s content = %q, want %q", path, got, want)
 	}
 }
 
