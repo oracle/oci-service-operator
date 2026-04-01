@@ -178,7 +178,13 @@ func (r *Renderer) RenderServiceManagers(root string, pkg *PackageModel, overwri
 func (r *Renderer) RenderSamples(root string, packages []*PackageModel) error {
 	samples := collectSamples(packages)
 	if len(samples) == 0 {
-		return nil
+		samplesDir := filepath.Join(root, "config", "samples")
+		if _, err := os.Stat(samplesDir); os.IsNotExist(err) {
+			return nil
+		} else if err != nil {
+			return fmt.Errorf("stat samples dir %q: %w", samplesDir, err)
+		}
+		return writeSamplesKustomizationFile(samplesDir, nil)
 	}
 	sortSamples(samples)
 	samplesDir, err := ensureSamplesDir(root)

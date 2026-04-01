@@ -182,6 +182,68 @@ func TestGenerateFullSyncCleansStaleGeneratorOwnedOutputsForInactiveServicesAndE
 	}
 }
 
+func TestGenerateFullSyncPrunesSampleKustomizationWhenActiveSurfaceIsEmpty(t *testing.T) {
+	t.Parallel()
+
+	cfg := selectionCleanupTestConfig()
+	cfg.Services[0].Selection = selectionExplicit(false, "Widget")
+
+	outputRoot := t.TempDir()
+	pipeline := newSelectionCleanupTestGenerator(t)
+
+	samplesDir := filepath.Join(outputRoot, "config", "samples")
+	if err := os.MkdirAll(samplesDir, 0o755); err != nil {
+		t.Fatalf("MkdirAll(%q) error = %v", samplesDir, err)
+	}
+	if err := os.WriteFile(filepath.Join(samplesDir, "existing.yaml"), []byte("apiVersion: v1\nkind: ConfigMap\nmetadata:\n  name: existing\n"), 0o644); err != nil {
+		t.Fatalf("WriteFile(existing.yaml) error = %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(samplesDir, "kustomization.yaml"), []byte("resources:\n- existing.yaml\n"), 0o644); err != nil {
+		t.Fatalf("WriteFile(kustomization.yaml) error = %v", err)
+	}
+
+	seedServices, err := cfg.SelectServices("mysql", false)
+	if err != nil {
+		t.Fatalf("SelectServices(--service mysql) error = %v", err)
+	}
+	if _, err := pipeline.Generate(context.Background(), cfg, seedServices, Options{
+		OutputRoot: outputRoot,
+		Overwrite:  true,
+	}); err != nil {
+		t.Fatalf("seed Generate() error = %v", err)
+	}
+
+	assertPathExists(t, filepath.Join(outputRoot, "config", "samples", "mysql_v1beta1_widget.yaml"))
+	assertFileContains(t, filepath.Join(outputRoot, "config", "samples", "kustomization.yaml"), []string{
+		"- existing.yaml",
+		"- mysql_v1beta1_widget.yaml",
+	})
+
+	activeServices, err := cfg.SelectServices("", true)
+	if err != nil {
+		t.Fatalf("SelectServices(--all) error = %v", err)
+	}
+	if len(activeServices) != 0 {
+		t.Fatalf("SelectServices(--all) returned %d services, want 0", len(activeServices))
+	}
+	if _, err := pipeline.Generate(context.Background(), cfg, activeServices, Options{
+		OutputRoot: outputRoot,
+		Overwrite:  true,
+		FullSync:   true,
+	}); err != nil {
+		t.Fatalf("Generate() full-sync error = %v", err)
+	}
+
+	assertPathExists(t, filepath.Join(outputRoot, "config", "samples", "existing.yaml"))
+	assertPathNotExists(t, filepath.Join(outputRoot, "config", "samples", "mysql_v1beta1_widget.yaml"))
+	assertFileContains(t, filepath.Join(outputRoot, "config", "samples", "kustomization.yaml"), []string{
+		"- existing.yaml",
+	})
+	assertFileDoesNotContain(t, filepath.Join(outputRoot, "config", "samples", "kustomization.yaml"), []string{
+		"mysql_v1beta1_widget.yaml",
+	})
+}
+
 func selectionCleanupTestConfig() *Config {
 	return &Config{
 		SchemaVersion:  "v1alpha1",
