@@ -113,11 +113,6 @@ spec:
                   sourceUri:
                     description: The Object Storage URL for the image.
                     type: string
-                required:
-                - bucketName
-                - namespaceName
-                - objectName
-                - sourceUri
                 type: object
               instanceId:
                 description: The OCID of the instance you want to use as the basis

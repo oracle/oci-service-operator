@@ -21,9 +21,9 @@ type PublicIpByIpAddressReconciler struct {
 	Reconciler *core.BaseReconciler
 }
 
-// +kubebuilder:rbac:groups=core.oracle.com,resources=publicipbyipaddresss,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=core.oracle.com,resources=publicipbyipaddresss/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=core.oracle.com,resources=publicipbyipaddresss/finalizers,verbs=update
+// +kubebuilder:rbac:groups=core.oracle.com,resources=publicipbyipaddresses,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=core.oracle.com,resources=publicipbyipaddresses/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=core.oracle.com,resources=publicipbyipaddresses/finalizers,verbs=update
 
 // Reconcile is part of the main Kubernetes reconciliation loop.
 func (r *PublicIpByIpAddressReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {

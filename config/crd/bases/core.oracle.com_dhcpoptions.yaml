@@ -134,9 +134,6 @@ spec:
                       type: string
                     type:
                       type: string
-                  required:
-                  - searchDomainNames
-                  - serverType
                   type: object
                 type: array
               vcnId:
@@ -191,8 +188,7 @@ spec:
               options:
                 description: The collection of individual DHCP options.
                 items:
-                  description: DhcpOptionOptionObservedState defines nested fields
-                    for DhcpOption.Option.
+                  description: DhcpOptionOption defines nested fields for DhcpOption.Option.
                   properties:
                     customDnsServers:
                       description: |-
@@ -237,9 +233,6 @@ spec:
                       type: string
                     type:
                       type: string
-                  required:
-                  - searchDomainNames
-                  - serverType
                   type: object
                 type: array
               status:

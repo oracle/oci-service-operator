@@ -209,9 +209,8 @@ func cleanupRuntimeCheckSnapshot(runErr *error, snapshotDir snapshot) {
 func generateRuntimeCheckSnapshot(ctx context.Context, inputs runtimeCheckRunInputs, snapshotRoot string) error {
 	pipeline := generator.New()
 	if _, err := pipeline.Generate(ctx, inputs.cfg, inputs.services, generator.Options{
-		OutputRoot:                      snapshotRoot,
-		Overwrite:                       true,
-		PreserveExistingSpecSurfaceRoot: inputs.repoRoot,
+		OutputRoot: snapshotRoot,
+		Overwrite:  true,
 	}); err != nil {
 		return fmt.Errorf("generate selected services into runtime snapshot: %w", err)
 	}

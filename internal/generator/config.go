@@ -63,11 +63,13 @@ type GenerationSurfaceConfig struct {
 // ResourceGenerationOverride captures per-kind rollout and override metadata.
 type ResourceGenerationOverride struct {
 	Kind           string                           `yaml:"kind"`
-	SDKName        string                           `yaml:"sdkName,omitempty"`
 	FormalSpec     string                           `yaml:"formalSpec,omitempty"`
 	Controller     ControllerGenerationOverride     `yaml:"controller,omitempty"`
 	ServiceManager ServiceManagerGenerationOverride `yaml:"serviceManager,omitempty"`
 	Webhooks       GenerationSurfaceConfig          `yaml:"webhooks,omitempty"`
+	SpecFields     []FieldOverride                  `yaml:"specFields,omitempty"`
+	StatusFields   []FieldOverride                  `yaml:"statusFields,omitempty"`
+	Sample         SampleOverride                   `yaml:"sample,omitempty"`
 }
 
 // ControllerGenerationOverride captures per-kind controller-specific settings.
@@ -82,6 +84,22 @@ type ServiceManagerGenerationOverride struct {
 	Strategy              string `yaml:"strategy,omitempty"`
 	PackagePath           string `yaml:"packagePath,omitempty"`
 	NeedsCredentialClient bool   `yaml:"needsCredentialClient,omitempty"`
+}
+
+// FieldOverride captures one generated resource field override sourced from services.yaml.
+type FieldOverride struct {
+	Name     string   `yaml:"name,omitempty"`
+	Type     string   `yaml:"type,omitempty"`
+	Tag      string   `yaml:"tag,omitempty"`
+	Comments []string `yaml:"comments,omitempty"`
+	Markers  []string `yaml:"markers,omitempty"`
+}
+
+// SampleOverride captures a generated sample override sourced from services.yaml.
+type SampleOverride struct {
+	Body         string `yaml:"body,omitempty"`
+	MetadataName string `yaml:"metadataName,omitempty"`
+	Spec         string `yaml:"spec,omitempty"`
 }
 
 // ServiceConfig identifies one OCI SDK service and its OSOK output group.
@@ -304,15 +322,12 @@ func validateGenerationSurfaceStrategies(serviceName string, g GenerationConfig)
 	)
 }
 
+//nolint:gocognit,gocyclo // Validation walks all supported resource override surfaces and returns the first precise error.
 func validateResourceGenerationOverrides(serviceName string, resources []ResourceGenerationOverride) error {
 	resourceKinds := make(map[string]struct{}, len(resources))
-	sdkNames := make(map[string]string, len(resources))
 	for _, resource := range resources {
 		kind, err := validateResourceGenerationKind(serviceName, resource, resourceKinds)
 		if err != nil {
-			return err
-		}
-		if err := validateResourceGenerationSDKName(serviceName, kind, resource.SDKName, sdkNames); err != nil {
 			return err
 		}
 		if err := validateResourceGenerationStrategies(serviceName, kind, resource); err != nil {
@@ -321,6 +336,24 @@ func validateResourceGenerationOverrides(serviceName string, resources []Resourc
 		if err := validateFormalSpec(
 			fmt.Sprintf("service %q generation.resources[%q].formalSpec", serviceName, kind),
 			resource.FormalSpec,
+		); err != nil {
+			return err
+		}
+		if err := validateFieldOverrides(
+			fmt.Sprintf("service %q generation.resources[%q].specFields", serviceName, kind),
+			resource.SpecFields,
+		); err != nil {
+			return err
+		}
+		if err := validateFieldOverrides(
+			fmt.Sprintf("service %q generation.resources[%q].statusFields", serviceName, kind),
+			resource.StatusFields,
+		); err != nil {
+			return err
+		}
+		if err := validateSampleOverride(
+			fmt.Sprintf("service %q generation.resources[%q].sample", serviceName, kind),
+			resource.Sample,
 		); err != nil {
 			return err
 		}
@@ -338,31 +371,6 @@ func validateResourceGenerationOverrides(serviceName string, resources []Resourc
 			)
 		}
 	}
-	return nil
-}
-
-func validateResourceGenerationSDKName(
-	serviceName string,
-	kind string,
-	sdkName string,
-	sdkNames map[string]string,
-) error {
-	sdkName = strings.TrimSpace(sdkName)
-	if sdkName == "" {
-		return nil
-	}
-
-	if existingKind, exists := sdkNames[sdkName]; exists {
-		return fmt.Errorf(
-			"service %q generation.resources contains duplicate sdkName %q for kinds %q and %q",
-			serviceName,
-			sdkName,
-			existingKind,
-			kind,
-		)
-	}
-
-	sdkNames[sdkName] = kind
 	return nil
 }
 
@@ -469,12 +477,37 @@ func validateWebhookStrategy(field string, strategy string) error {
 	}
 }
 
+func validateFieldOverrides(field string, overrides []FieldOverride) error {
+	for index, override := range overrides {
+		overrideField := fmt.Sprintf("%s[%d]", field, index)
+		if strings.TrimSpace(override.Name) == "" {
+			return fmt.Errorf("%s.name is required", overrideField)
+		}
+		if strings.TrimSpace(override.Type) == "" {
+			return fmt.Errorf("%s.type is required", overrideField)
+		}
+		if strings.TrimSpace(override.Tag) == "" {
+			return fmt.Errorf("%s.tag is required", overrideField)
+		}
+	}
+	return nil
+}
+
+func validateSampleOverride(field string, sample SampleOverride) error {
+	if strings.TrimSpace(sample.Body) != "" && (strings.TrimSpace(sample.MetadataName) != "" || strings.TrimSpace(sample.Spec) != "") {
+		return fmt.Errorf("%s.body cannot be combined with metadataName or spec", field)
+	}
+	return nil
+}
+
 func (r ResourceGenerationOverride) hasOverrides() bool {
-	return strings.TrimSpace(r.SDKName) != "" ||
-		strings.TrimSpace(r.FormalSpec) != "" ||
+	return strings.TrimSpace(r.FormalSpec) != "" ||
 		r.Controller.hasOverrides() ||
 		r.ServiceManager.hasOverrides() ||
-		strings.TrimSpace(r.Webhooks.Strategy) != ""
+		strings.TrimSpace(r.Webhooks.Strategy) != "" ||
+		len(r.SpecFields) > 0 ||
+		len(r.StatusFields) > 0 ||
+		r.Sample.hasOverride()
 }
 
 func (c ControllerGenerationOverride) hasOverrides() bool {
@@ -482,7 +515,11 @@ func (c ControllerGenerationOverride) hasOverrides() bool {
 }
 
 func (s ServiceManagerGenerationOverride) hasOverrides() bool {
-	return strings.TrimSpace(s.Strategy) != "" || strings.TrimSpace(s.PackagePath) != ""
+	return strings.TrimSpace(s.Strategy) != "" || strings.TrimSpace(s.PackagePath) != "" || s.NeedsCredentialClient
+}
+
+func (s SampleOverride) hasOverride() bool {
+	return strings.TrimSpace(s.Body) != "" || strings.TrimSpace(s.MetadataName) != "" || strings.TrimSpace(s.Spec) != ""
 }
 
 func validateFormalSpec(field string, value string) error {
@@ -674,35 +711,12 @@ func generationStrategyOrDefault(strategy string, defaultStrategy string) string
 	return strategy
 }
 
-// PublishedKind returns the rendered OSOK kind for one discovered OCI SDK resource family.
-func (s ServiceConfig) PublishedKind(rawName string) string {
-	if override, ok := s.resourceGenerationOverrideForSDKName(rawName); ok {
-		return override.Kind
-	}
-	return rawName
-}
-
 func (s ServiceConfig) resourceGenerationOverride(kind string) (ResourceGenerationOverride, bool) {
 	for _, override := range s.Generation.Resources {
 		if override.Kind == kind {
 			return override, true
 		}
 	}
-	return ResourceGenerationOverride{}, false
-}
-
-func (s ServiceConfig) resourceGenerationOverrideForSDKName(rawName string) (ResourceGenerationOverride, bool) {
-	rawName = strings.TrimSpace(rawName)
-	if rawName == "" {
-		return ResourceGenerationOverride{}, false
-	}
-
-	for _, override := range s.Generation.Resources {
-		if strings.TrimSpace(override.SDKName) == rawName {
-			return override, true
-		}
-	}
-
 	return ResourceGenerationOverride{}, false
 }
 

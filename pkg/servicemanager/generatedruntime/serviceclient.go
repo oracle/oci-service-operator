@@ -17,6 +17,7 @@ import (
 	"unicode"
 
 	"github.com/oracle/oci-go-sdk/v65/common"
+	databasesdk "github.com/oracle/oci-go-sdk/v65/database"
 	"github.com/oracle/oci-service-operator/pkg/credhelper"
 	"github.com/oracle/oci-service-operator/pkg/errorutil"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
@@ -33,8 +34,9 @@ const defaultRequeueDuration = time.Minute
 var errResourceNotFound = errors.New("generated runtime resource not found")
 
 var (
-	passwordSourceType = reflect.TypeOf(shared.PasswordSource{})
-	usernameSourceType = reflect.TypeOf(shared.UsernameSource{})
+	passwordSourceType         = reflect.TypeOf(shared.PasswordSource{})
+	usernameSourceType         = reflect.TypeOf(shared.UsernameSource{})
+	autonomousDatabaseBaseType = reflect.TypeOf((*databasesdk.CreateAutonomousDatabaseBase)(nil)).Elem()
 )
 
 type Operation struct {
@@ -2371,11 +2373,94 @@ func convertValue(raw any, targetType reflect.Type) (reflect.Value, error) {
 	if err != nil {
 		return reflect.Value{}, fmt.Errorf("marshal source value: %w", err)
 	}
+	if targetType.Kind() == reflect.Interface {
+		if converted, ok, err := convertPolymorphicInterfaceValue(payload, targetType); ok {
+			return converted, err
+		}
+	}
 	converted := reflect.New(targetType)
 	if err := json.Unmarshal(payload, converted.Interface()); err != nil {
 		return reflect.Value{}, fmt.Errorf("unmarshal into %s: %w", targetType, err)
 	}
 	return converted.Elem(), nil
+}
+
+func convertPolymorphicInterfaceValue(payload []byte, targetType reflect.Type) (reflect.Value, bool, error) {
+	switch targetType {
+	case autonomousDatabaseBaseType:
+		body, err := convertAutonomousDatabaseBase(payload)
+		if err != nil {
+			return reflect.Value{}, true, err
+		}
+		converted := reflect.New(targetType).Elem()
+		converted.Set(reflect.ValueOf(body))
+		return converted, true, nil
+	default:
+		return reflect.Value{}, false, nil
+	}
+}
+
+// OCI models CreateAutonomousDatabase with a polymorphic interface body. Resolve the CR spec into
+// the matching concrete SDK type so request serialization uses the provider model instead of map[string]any.
+//
+//nolint:gocognit,gocyclo // The source discriminator maps to several concrete SDK request bodies in one switch.
+func convertAutonomousDatabaseBase(payload []byte) (databasesdk.CreateAutonomousDatabaseBase, error) {
+	source, err := jsonFieldString(payload, "source")
+	if err != nil {
+		return nil, fmt.Errorf("decode autonomous database source: %w", err)
+	}
+
+	concreteType, err := autonomousDatabaseBaseConcreteType(source)
+	if err != nil {
+		return nil, err
+	}
+
+	converted := reflect.New(concreteType)
+	if err := json.Unmarshal(payload, converted.Interface()); err != nil {
+		return nil, fmt.Errorf("unmarshal into %s: %w", concreteType, err)
+	}
+	body, ok := converted.Elem().Interface().(databasesdk.CreateAutonomousDatabaseBase)
+	if !ok {
+		return nil, fmt.Errorf("resolved CreateAutonomousDatabaseBase type %s does not implement the polymorphic interface", concreteType)
+	}
+	return body, nil
+}
+
+func autonomousDatabaseBaseConcreteType(source string) (reflect.Type, error) {
+	switch strings.ToUpper(strings.TrimSpace(source)) {
+	case "", "NONE":
+		return reflect.TypeOf(databasesdk.CreateAutonomousDatabaseDetails{}), nil
+	case "DATABASE":
+		return reflect.TypeOf(databasesdk.CreateAutonomousDatabaseCloneDetails{}), nil
+	case "CLONE_TO_REFRESHABLE":
+		return reflect.TypeOf(databasesdk.CreateRefreshableAutonomousDatabaseCloneDetails{}), nil
+	case "BACKUP_FROM_ID":
+		return reflect.TypeOf(databasesdk.CreateAutonomousDatabaseFromBackupDetails{}), nil
+	case "BACKUP_FROM_TIMESTAMP":
+		return reflect.TypeOf(databasesdk.CreateAutonomousDatabaseFromBackupTimestampDetails{}), nil
+	case "CROSS_REGION_DISASTER_RECOVERY":
+		return reflect.TypeOf(databasesdk.CreateCrossRegionDisasterRecoveryDetails{}), nil
+	case "CROSS_REGION_DATAGUARD":
+		return reflect.TypeOf(databasesdk.CreateCrossRegionAutonomousDatabaseDataGuardDetails{}), nil
+	default:
+		return nil, fmt.Errorf("unsupported CreateAutonomousDatabaseBase source %q", source)
+	}
+}
+
+func jsonFieldString(payload []byte, field string) (string, error) {
+	var values map[string]json.RawMessage
+	if err := json.Unmarshal(payload, &values); err != nil {
+		return "", err
+	}
+	raw, ok := values[field]
+	if !ok || string(raw) == "null" {
+		return "", nil
+	}
+	var value string
+	if err := json.Unmarshal(raw, &value); err != nil {
+		return "", err
+	}
+	return value, nil
 }
 
 func osokStatus(resource any) (*shared.OSOKStatus, error) {

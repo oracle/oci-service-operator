@@ -57,8 +57,9 @@ spec:
             description: DbSystemSpec defines the desired state of DbSystem.
             properties:
               adminPassword:
-                description: The password for the administrative user sourced from
-                  a Kubernetes Secret.
+                description: |-
+                  The password for the administrative user sourced from a Kubernetes Secret in the same namespace.
+                  The referenced Secret must contain a `password` key.
                 properties:
                   secret:
                     properties:
@@ -67,8 +68,9 @@ spec:
                     type: object
                 type: object
               adminUsername:
-                description: The username for the administrative user sourced from
-                  a Kubernetes Secret.
+                description: |-
+                  The username for the administrative user sourced from a Kubernetes Secret in the same namespace.
+                  The referenced Secret must contain a `username` key.
                 properties:
                   secret:
                     properties:
@@ -343,8 +345,7 @@ spec:
                   For a standalone DB System, this defines the availability domain in which the DB System is placed.
                 type: string
               backupPolicy:
-                description: DbSystemBackupPolicyObservedState defines nested fields
-                  for DbSystem.BackupPolicy.
+                description: DbSystemBackupPolicy defines nested fields for DbSystem.BackupPolicy.
                 properties:
                   definedTags:
                     additionalProperties:

@@ -212,7 +212,7 @@ spec:
                   To use the reservation for the desired shape, specify the shape, count, and
                   optionally the fault domain where you want this configuration.
                 items:
-                  description: ComputeCapacityReservationInstanceReservationConfigObservedState
+                  description: ComputeCapacityReservationInstanceReservationConfig
                     defines nested fields for ComputeCapacityReservation.InstanceReservationConfig.
                   properties:
                     clusterConfig:

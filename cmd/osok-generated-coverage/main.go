@@ -32,7 +32,6 @@ type options struct {
 	baselinePath     string
 	writeBaseline    string
 	failOnRegression bool
-	preserveSpec     bool
 }
 
 type validatorEnvelope struct {
@@ -47,13 +46,12 @@ type outputReport struct {
 }
 
 type outputConfig struct {
-	ConfigPath                  string   `json:"configPath"`
-	Service                     string   `json:"service,omitempty"`
-	All                         bool     `json:"all"`
-	GeneratedServices           []string `json:"generatedServices"`
-	GeneratedGroups             []string `json:"generatedGroups"`
-	Top                         int      `json:"top"`
-	PreserveExistingSpecSurface bool     `json:"preserveExistingSpecSurface,omitempty"`
+	ConfigPath        string   `json:"configPath"`
+	Service           string   `json:"service,omitempty"`
+	All               bool     `json:"all"`
+	GeneratedServices []string `json:"generatedServices"`
+	GeneratedGroups   []string `json:"generatedGroups"`
+	Top               int      `json:"top"`
 }
 
 type outputSnapshot struct {
@@ -96,7 +94,6 @@ func main() {
 	flag.StringVar(&opts.baselinePath, "baseline", "", "Optional generated coverage baseline JSON to compare against.")
 	flag.StringVar(&opts.writeBaseline, "write-baseline", "", "Write the current generated coverage baseline to the given path.")
 	flag.BoolVar(&opts.failOnRegression, "fail-on-regression", false, "Exit with a non-zero status when the generated coverage report regresses compared to --baseline.")
-	flag.BoolVar(&opts.preserveSpec, "preserve-existing-spec-surface", false, "Preserve the current checked-in API spec/helper surface plus any existing checked-in sample/package artifacts while regenerating status/read-model outputs in the snapshot.")
 	flag.Parse()
 
 	if err := run(context.Background(), opts); err != nil {
@@ -230,16 +227,10 @@ func generateCoverageSnapshot(
 	inputs coverageRunInputs,
 	snapshotRoot string,
 ) error {
-	preserveRoot := ""
-	if opts.preserveSpec {
-		preserveRoot = inputs.repoRoot
-	}
-
 	pipeline := generator.New()
 	if _, err := pipeline.Generate(ctx, inputs.cfg, inputs.services, generator.Options{
-		OutputRoot:                      snapshotRoot,
-		Overwrite:                       true,
-		PreserveExistingSpecSurfaceRoot: preserveRoot,
+		OutputRoot: snapshotRoot,
+		Overwrite:  true,
 	}); err != nil {
 		return fmt.Errorf("generate selected services into snapshot: %w", err)
 	}
@@ -288,13 +279,12 @@ func buildCoverageOutput(
 ) outputReport {
 	output := outputReport{
 		Config: outputConfig{
-			ConfigPath:                  inputs.configPath,
-			Service:                     opts.service,
-			All:                         opts.all,
-			GeneratedServices:           serviceNames(inputs.services),
-			GeneratedGroups:             inputs.selectedGroups,
-			Top:                         opts.top,
-			PreserveExistingSpecSurface: opts.preserveSpec,
+			ConfigPath:        inputs.configPath,
+			Service:           opts.service,
+			All:               opts.all,
+			GeneratedServices: serviceNames(inputs.services),
+			GeneratedGroups:   inputs.selectedGroups,
+			Top:               opts.top,
 		},
 		Snapshot: outputSnapshot{
 			Retained: snapshotDir.retained,

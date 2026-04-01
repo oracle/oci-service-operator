@@ -48,6 +48,8 @@ func pluralize(name string) string {
 		return name
 	case strings.HasSuffix(name, "y") && len(name) > 1:
 		return strings.TrimSuffix(name, "y") + "ies"
+	case strings.HasSuffix(name, "ss"):
+		return name + "es"
 	case strings.HasSuffix(name, "x"),
 		strings.HasSuffix(name, "z"),
 		strings.HasSuffix(name, "ch"),

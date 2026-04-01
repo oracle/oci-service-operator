@@ -128,14 +128,14 @@ type DbSystemCredentialsPasswordDetails struct {
 	// +kubebuilder:validation:Optional
 	PasswordType string `json:"passwordType,omitempty"`
 	// The database system password.
-	// +kubebuilder:validation:Required
-	Password string `json:"password"`
+	// +kubebuilder:validation:Optional
+	Password string `json:"password,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the secret where the password is stored.
-	// +kubebuilder:validation:Required
-	SecretId string `json:"secretId"`
+	// +kubebuilder:validation:Optional
+	SecretId string `json:"secretId,omitempty"`
 	// The secret version of the stored password.
-	// +kubebuilder:validation:Required
-	SecretVersion string `json:"secretVersion"`
+	// +kubebuilder:validation:Optional
+	SecretVersion string `json:"secretVersion,omitempty"`
 }
 
 // DbSystemCredentials defines nested fields for DbSystem.Credentials.
@@ -157,15 +157,15 @@ type DbSystemManagementPolicyBackupPolicy struct {
 	// +kubebuilder:validation:Optional
 	Kind string `json:"kind,omitempty"`
 	// Hour of the day when the backup starts.
-	// +kubebuilder:validation:Required
-	BackupStart string `json:"backupStart"`
+	// +kubebuilder:validation:Optional
+	BackupStart string `json:"backupStart,omitempty"`
 	// The day of the week that the backup starts.
-	// +kubebuilder:validation:Required
-	DaysOfTheWeek []string `json:"daysOfTheWeek"`
+	// +kubebuilder:validation:Optional
+	DaysOfTheWeek []string `json:"daysOfTheWeek,omitempty"`
 	// Day of the month when the backup should start.
 	// To ensure that the backup runs monthly, the latest day of the month that you can use to schedule a backup is the the 28th day.
-	// +kubebuilder:validation:Required
-	DaysOfTheMonth []int `json:"daysOfTheMonth"`
+	// +kubebuilder:validation:Optional
+	DaysOfTheMonth []int `json:"daysOfTheMonth,omitempty"`
 }
 
 // DbSystemManagementPolicy defines nested fields for DbSystem.ManagementPolicy.
@@ -184,8 +184,8 @@ type DbSystemSource struct {
 	// +kubebuilder:validation:Optional
 	SourceType string `json:"sourceType,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the database system backup.
-	// +kubebuilder:validation:Required
-	BackupId string `json:"backupId"`
+	// +kubebuilder:validation:Optional
+	BackupId string `json:"backupId,omitempty"`
 	// Deprecated. Don't use.
 	// +kubebuilder:validation:Optional
 	IsHavingRestoreConfigOverrides bool `json:"isHavingRestoreConfigOverrides,omitempty"`
@@ -200,72 +200,6 @@ type DbSystemDbConfigurationParams struct {
 	// Some configuration changes require a restart of database instances to be applied.
 	// +kubebuilder:validation:Optional
 	ApplyConfig string `json:"applyConfig,omitempty"`
-}
-
-// DbSystemStorageDetailsObservedState defines nested fields for DbSystem.StorageDetails.
-type DbSystemStorageDetailsObservedState struct {
-	// +kubebuilder:validation:Optional
-	JsonData string `json:"jsonData,omitempty"`
-	// Specifies the availability domain of AD-local storage.
-	// If `isRegionallyDurable` is set to true, `availabilityDomain` should not be specified.
-	// If `isRegionallyDurable` is set to false, `availabilityDomain` must be specified.
-	// +kubebuilder:validation:Optional
-	AvailabilityDomain string `json:"availabilityDomain,omitempty"`
-	// Specifies if the block volume used for the database system is regional or AD-local.
-	// If not specified, it will be set to false.
-	// If `isRegionallyDurable` is set to true, `availabilityDomain` should not be specified.
-	// If `isRegionallyDurable` is set to false, `availabilityDomain` must be specified.
-	// +kubebuilder:validation:Required
-	IsRegionallyDurable bool `json:"isRegionallyDurable"`
-	// +kubebuilder:validation:Optional
-	SystemType string `json:"systemType,omitempty"`
-	// Guaranteed input/output storage requests per second (IOPS) available to the database system.
-	// +kubebuilder:validation:Optional
-	Iops int64 `json:"iops,omitempty"`
-}
-
-// DbSystemManagementPolicyBackupPolicyObservedState defines nested fields for DbSystem.ManagementPolicy.BackupPolicy.
-type DbSystemManagementPolicyBackupPolicyObservedState struct {
-	// +kubebuilder:validation:Optional
-	JsonData string `json:"jsonData,omitempty"`
-	// How many days the data should be stored after the database system deletion.
-	// +kubebuilder:validation:Optional
-	RetentionDays int `json:"retentionDays,omitempty"`
-	// +kubebuilder:validation:Optional
-	Kind string `json:"kind,omitempty"`
-	// Hour of the day when the backup starts.
-	// +kubebuilder:validation:Required
-	BackupStart string `json:"backupStart"`
-	// The day of the week that the backup starts.
-	// +kubebuilder:validation:Required
-	DaysOfTheWeek []string `json:"daysOfTheWeek"`
-	// Day of the month when the backup should start.
-	// To ensure that the backup runs monthly, the latest day of the month that you can use to schedule a backup is the the 28th day.
-	// +kubebuilder:validation:Required
-	DaysOfTheMonth []int `json:"daysOfTheMonth"`
-}
-
-// DbSystemManagementPolicyObservedState defines nested fields for DbSystem.ManagementPolicy.
-type DbSystemManagementPolicyObservedState struct {
-	// The start of the maintenance window.
-	// +kubebuilder:validation:Optional
-	MaintenanceWindowStart string `json:"maintenanceWindowStart,omitempty"`
-	// +kubebuilder:validation:Optional
-	BackupPolicy DbSystemManagementPolicyBackupPolicyObservedState `json:"backupPolicy,omitempty"`
-}
-
-// DbSystemSourceObservedState defines nested fields for DbSystem.Source.
-type DbSystemSourceObservedState struct {
-	// +kubebuilder:validation:Optional
-	JsonData string `json:"jsonData,omitempty"`
-	// +kubebuilder:validation:Optional
-	SourceType string `json:"sourceType,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the database system backup.
-	// +kubebuilder:validation:Required
-	BackupId string `json:"backupId"`
-	// Deprecated. Don't use.
-	// +kubebuilder:validation:Optional
-	IsHavingRestoreConfigOverrides bool `json:"isHavingRestoreConfigOverrides,omitempty"`
 }
 
 // DbSystemInstance defines nested fields for DbSystem.Instance.
@@ -317,10 +251,10 @@ type DbSystemStatus struct {
 	// The total number of OCPUs available to each database instance node.
 	InstanceOcpuCount int `json:"instanceOcpuCount,omitempty"`
 	// The total amount of memory available to each database instance node, in gigabytes.
-	InstanceMemorySizeInGBs int                                   `json:"instanceMemorySizeInGBs,omitempty"`
-	StorageDetails          DbSystemStorageDetailsObservedState   `json:"storageDetails,omitempty"`
-	NetworkDetails          DbSystemNetworkDetails                `json:"networkDetails,omitempty"`
-	ManagementPolicy        DbSystemManagementPolicyObservedState `json:"managementPolicy,omitempty"`
+	InstanceMemorySizeInGBs int                      `json:"instanceMemorySizeInGBs,omitempty"`
+	StorageDetails          DbSystemStorageDetails   `json:"storageDetails,omitempty"`
+	NetworkDetails          DbSystemNetworkDetails   `json:"networkDetails,omitempty"`
+	ManagementPolicy        DbSystemManagementPolicy `json:"managementPolicy,omitempty"`
 	// A description of the database system.
 	Description string `json:"description,omitempty"`
 	// The date and time that the database system was updated, expressed in
@@ -345,8 +279,8 @@ type DbSystemStatus struct {
 	// Count of instances, or nodes, in the database system.
 	InstanceCount int `json:"instanceCount,omitempty"`
 	// The list of instances, or nodes, in the database system.
-	Instances []DbSystemInstance          `json:"instances,omitempty"`
-	Source    DbSystemSourceObservedState `json:"source,omitempty"`
+	Instances []DbSystemInstance `json:"instances,omitempty"`
+	Source    DbSystemSource     `json:"source,omitempty"`
 }
 
 // +kubebuilder:object:root=true

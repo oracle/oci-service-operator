@@ -154,8 +154,8 @@ spec:
                   JSON string.
                 type: string
               deliveryPolicy:
-                description: SubscriptionDeliveryPolicyObservedState defines nested
-                  fields for Subscription.DeliveryPolicy.
+                description: SubscriptionDeliveryPolicy defines nested fields for
+                  Subscription.DeliveryPolicy.
                 properties:
                   backoffRetryPolicy:
                     description: SubscriptionDeliveryPolicyBackoffRetryPolicy defines

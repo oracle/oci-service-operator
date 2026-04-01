@@ -203,7 +203,7 @@ func buildResourceModel(index *ocisdk.Package, service ServiceConfig, entry reso
 		return ResourceModel{}, fmt.Errorf("discover runtime metadata for %q: %w", entry.rawName, err)
 	}
 
-	kind := service.PublishedKind(entry.rawName)
+	kind := entry.rawName
 	fieldSet := synthesizeResourceFieldSet(index, service, kind, entry.rawName, desiredStateStructCandidates(entry.rawName, entry.requestBodyPayloads))
 	displayField := primaryDisplayField(fieldSet.SpecFields)
 	kindPlural := strings.ToLower(pluralize(kind))

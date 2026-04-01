@@ -293,9 +293,7 @@ spec:
                 type: string
             required:
             - database
-            - dbSystemId
             - dbVersion
-            - vmClusterId
             type: object
           status:
             description: DbHomeStatus defines the observed state of DbHome.

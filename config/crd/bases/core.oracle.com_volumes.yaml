@@ -72,8 +72,6 @@ spec:
                         temporarily based on performance monitoring.
                       format: int64
                       type: integer
-                  required:
-                  - maxVpusPerGB
                   type: object
                 type: array
               availabilityDomain:
@@ -164,8 +162,6 @@ spec:
                     type: string
                   type:
                     type: string
-                required:
-                - id
                 type: object
               volumeBackupId:
                 description: |-
@@ -200,8 +196,7 @@ spec:
               autotunePolicies:
                 description: The list of autotune policies enabled for this volume.
                 items:
-                  description: VolumeAutotunePolicyObservedState defines nested fields
-                    for Volume.AutotunePolicy.
+                  description: VolumeAutotunePolicy defines nested fields for Volume.AutotunePolicy.
                   properties:
                     autotuneType:
                       type: string
@@ -213,8 +208,6 @@ spec:
                         temporarily based on performance monitoring.
                       format: int64
                       type: integer
-                  required:
-                  - maxVpusPerGB
                   type: object
                 type: array
               availabilityDomain:
@@ -298,8 +291,7 @@ spec:
                 format: int64
                 type: integer
               sourceDetails:
-                description: VolumeSourceDetailsObservedState defines nested fields
-                  for Volume.SourceDetails.
+                description: VolumeSourceDetails defines nested fields for Volume.SourceDetails.
                 properties:
                   id:
                     description: The OCID of the block volume replica.
@@ -308,8 +300,6 @@ spec:
                     type: string
                   type:
                     type: string
-                required:
-                - id
                 type: object
               status:
                 properties:

@@ -12,20 +12,34 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// StreamSpec defines the desired state of Stream
+// StreamSpec defines the desired state of Stream.
 type StreamSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-	StreamId      shared.OCID `json:"Id,omitempty"`
-	CompartmentId shared.OCID `json:"compartmentId,omitempty"`
-	Name          string      `json:"name,omitempty"`
-	// +kubebuilder:validation:Minimum=1
-	Partitions int `json:"partitions,omitempty"`
-	// +kubebuilder:validation:Maximum=168
-	// +kubebuilder:validation:Minimum=24
-	RetentionInHours    int         `json:"retentionInHours,omitempty"`
-	StreamPoolId        shared.OCID `json:"streamPoolId,omitempty"`
-	shared.TagResources `json:",inline"`
+	// The name of the stream. Avoid entering confidential information.
+	// Example: `TelemetryEvents`
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+	// The number of partitions in the stream.
+	// +kubebuilder:validation:Required
+	Partitions int `json:"partitions"`
+	// The OCID of the compartment that contains the stream.
+	// +kubebuilder:validation:Optional
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The OCID of the stream pool that contains the stream.
+	// +kubebuilder:validation:Optional
+	StreamPoolId string `json:"streamPoolId,omitempty"`
+	// The retention period of the stream, in hours. Accepted values are between 24 and 168 (7 days).
+	// If not specified, the stream will have a retention period of 24 hours.
+	// +kubebuilder:validation:Optional
+	RetentionInHours int `json:"retentionInHours,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair that is applied with no predefined name, type, or namespace. Exists for cross-compatibility only.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	// +kubebuilder:validation:Optional
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	// +kubebuilder:validation:Optional
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 }
 
 // StreamStatus defines the observed state of Stream.
