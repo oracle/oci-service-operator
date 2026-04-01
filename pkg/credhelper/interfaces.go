@@ -5,9 +5,14 @@
 
 package credhelper
 
-import "context"
+import (
+	"context"
+
+	"k8s.io/apimachinery/pkg/types"
+)
 
 type SecretRecord struct {
+	UID    types.UID
 	Labels map[string]string
 	Data   map[string][]byte
 }
@@ -26,4 +31,11 @@ type CredentialClient interface {
 
 type SecretRecordReader interface {
 	GetSecretRecord(ctx context.Context, secretName string, secretNamespace string) (SecretRecord, error)
+}
+
+type GuardedSecretMutator interface {
+	DeleteSecretIfCurrent(ctx context.Context, secretName string, secretNamespace string, current SecretRecord) (bool, error)
+
+	UpdateSecretIfCurrent(ctx context.Context, secretName string, secretNamespace string, current SecretRecord, labels map[string]string,
+		data map[string][]byte) (bool, error)
 }

@@ -22,20 +22,24 @@ import (
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	v1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 type fakeCredentialClient struct {
-	createSecretFn      func(context.Context, string, string, map[string]string, map[string][]byte) (bool, error)
-	deleteSecretFn      func(context.Context, string, string) (bool, error)
-	getSecretFn         func(context.Context, string, string) (map[string][]byte, error)
-	getSecretRecordFn   func(context.Context, string, string) (credhelper.SecretRecord, error)
-	updateSecretFn      func(context.Context, string, string, map[string]string, map[string][]byte) (bool, error)
-	defaultSecretLabels map[string]string
-	createCalled        bool
-	deleteCalled        bool
-	getCalled           bool
-	updateCalled        bool
+	createSecretFn          func(context.Context, string, string, map[string]string, map[string][]byte) (bool, error)
+	deleteSecretFn          func(context.Context, string, string) (bool, error)
+	deleteSecretIfCurrentFn func(context.Context, string, string, credhelper.SecretRecord) (bool, error)
+	getSecretFn             func(context.Context, string, string) (map[string][]byte, error)
+	getSecretRecordFn       func(context.Context, string, string) (credhelper.SecretRecord, error)
+	updateSecretFn          func(context.Context, string, string, map[string]string, map[string][]byte) (bool, error)
+	updateSecretIfCurrentFn func(context.Context, string, string, credhelper.SecretRecord, map[string]string, map[string][]byte) (bool, error)
+	defaultSecretLabels     map[string]string
+	defaultSecretUID        string
+	createCalled            bool
+	deleteCalled            bool
+	getCalled               bool
+	updateCalled            bool
 }
 
 func (f *fakeCredentialClient) CreateSecret(
@@ -60,6 +64,22 @@ func (f *fakeCredentialClient) DeleteSecret(ctx context.Context, name string, na
 	return true, nil
 }
 
+func (f *fakeCredentialClient) DeleteSecretIfCurrent(
+	ctx context.Context,
+	name string,
+	namespace string,
+	current credhelper.SecretRecord,
+) (bool, error) {
+	f.deleteCalled = true
+	if f.deleteSecretIfCurrentFn != nil {
+		return f.deleteSecretIfCurrentFn(ctx, name, namespace, current)
+	}
+	if f.deleteSecretFn != nil {
+		return f.deleteSecretFn(ctx, name, namespace)
+	}
+	return true, nil
+}
+
 func (f *fakeCredentialClient) GetSecret(ctx context.Context, name string, namespace string) (map[string][]byte, error) {
 	f.getCalled = true
 	if f.getSecretFn != nil {
@@ -78,6 +98,7 @@ func (f *fakeCredentialClient) GetSecretRecord(ctx context.Context, name string,
 		return credhelper.SecretRecord{}, err
 	}
 	return credhelper.SecretRecord{
+		UID:    secretRecordUID(f.defaultSecretUID),
 		Labels: cloneSecretLabels(f.defaultSecretLabels),
 		Data:   cloneSecretData(data),
 	}, nil
@@ -91,6 +112,24 @@ func (f *fakeCredentialClient) UpdateSecret(
 	data map[string][]byte,
 ) (bool, error) {
 	f.updateCalled = true
+	if f.updateSecretFn != nil {
+		return f.updateSecretFn(ctx, name, namespace, labels, data)
+	}
+	return true, nil
+}
+
+func (f *fakeCredentialClient) UpdateSecretIfCurrent(
+	ctx context.Context,
+	name string,
+	namespace string,
+	current credhelper.SecretRecord,
+	labels map[string]string,
+	data map[string][]byte,
+) (bool, error) {
+	f.updateCalled = true
+	if f.updateSecretIfCurrentFn != nil {
+		return f.updateSecretIfCurrentFn(ctx, name, namespace, current, labels, data)
+	}
 	if f.updateSecretFn != nil {
 		return f.updateSecretFn(ctx, name, namespace, labels, data)
 	}
@@ -129,6 +168,7 @@ const (
 	quickStreamResourceUID = "stream-uid-quick"
 	testStreamEndpoint     = "https://streaming.example.com"
 	staleStreamEndpoint    = "https://old-streaming.example.com"
+	testEndpointSecretUID  = "endpoint-secret-uid"
 )
 
 const (
@@ -237,10 +277,11 @@ func staticStreamLoader(t *testing.T, wantID shared.OCID, endpoint string) func(
 func newActiveStreamEndpointSecretClient(t *testing.T, credClient *fakeCredentialClient, endpoint string) streamEndpointSecretClient {
 	t.Helper()
 	return streamEndpointSecretClient{
-		delegate:           activeStreamServiceClient(activeStreamOCID),
-		credentialClient:   credClient,
-		secretRecordReader: credClient,
-		loadStream:         staticStreamLoader(t, activeStreamOCID, endpoint),
+		delegate:             activeStreamServiceClient(activeStreamOCID),
+		credentialClient:     credClient,
+		secretRecordReader:   credClient,
+		guardedSecretMutator: credClient,
+		loadStream:           staticStreamLoader(t, activeStreamOCID, endpoint),
 	}
 }
 
@@ -255,6 +296,13 @@ func validateQuickSecretTarget(action string, name string, namespace string) err
 		return fmt.Errorf("%s() target=%s/%s, want %s/%s", action, namespace, name, testStreamNamespace, testStreamName)
 	}
 	return nil
+}
+
+func secretRecordUID(uid string) types.UID {
+	if strings.TrimSpace(uid) == "" {
+		return types.UID(testEndpointSecretUID)
+	}
+	return types.UID(uid)
 }
 
 func TestStreamEndpointSecretClientCreatesSecretAfterActiveReconcile(t *testing.T) {
@@ -354,6 +402,7 @@ func TestStreamEndpointSecretClientAdoptsLegacyUnlabeledSecretWhenDataMatches(t 
 	credClient := &fakeCredentialClient{}
 	var updatedLabels map[string]string
 	var updatedData map[string][]byte
+	var guardedRecord credhelper.SecretRecord
 	credClient.getSecretFn = func(_ context.Context, name string, namespace string) (map[string][]byte, error) {
 		requireSecretTarget(t, "GetSecret", name, namespace)
 		return map[string][]byte{
@@ -364,8 +413,13 @@ func TestStreamEndpointSecretClientAdoptsLegacyUnlabeledSecretWhenDataMatches(t 
 		t.Fatal("CreateSecret() should not be called when a legacy same-name Secret already exists")
 		return false, nil
 	}
-	credClient.updateSecretFn = func(_ context.Context, name string, namespace string, labels map[string]string, data map[string][]byte) (bool, error) {
+	credClient.updateSecretFn = func(context.Context, string, string, map[string]string, map[string][]byte) (bool, error) {
+		t.Fatal("UpdateSecret() should not be called when guarded adoption is available")
+		return false, nil
+	}
+	credClient.updateSecretIfCurrentFn = func(_ context.Context, name string, namespace string, current credhelper.SecretRecord, labels map[string]string, data map[string][]byte) (bool, error) {
 		requireSecretTarget(t, "UpdateSecret", name, namespace)
+		guardedRecord = current
 		updatedLabels = cloneSecretLabels(labels)
 		updatedData = cloneSecretData(data)
 		return true, nil
@@ -377,6 +431,9 @@ func TestStreamEndpointSecretClientAdoptsLegacyUnlabeledSecretWhenDataMatches(t 
 	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
 	requireCreateOrUpdateSuccess(t, response, err, "adopting a legacy unlabeled secret")
 	assertCredentialCalls(t, credClient, secretCallExpectation{get: true, update: true})
+	if guardedRecord.UID != testEndpointSecretUID {
+		t.Fatalf("guarded update secret UID = %q, want %q", guardedRecord.UID, testEndpointSecretUID)
+	}
 	requireOwnedSecretLabels(t, updatedLabels, testStreamUID)
 	requireEndpointSecretData(t, updatedData, testStreamEndpoint, "adopted secret")
 }
@@ -388,6 +445,7 @@ func TestStreamEndpointSecretClientUpdatesExistingSecretWhenEndpointChanges(t *t
 		defaultSecretLabels: ownedEndpointSecretLabels(testStreamUID),
 	}
 	var updatedData map[string][]byte
+	var guardedRecord credhelper.SecretRecord
 	credClient.getSecretFn = func(_ context.Context, name string, namespace string) (map[string][]byte, error) {
 		requireSecretTarget(t, "GetSecret", name, namespace)
 		return map[string][]byte{
@@ -398,10 +456,15 @@ func TestStreamEndpointSecretClientUpdatesExistingSecretWhenEndpointChanges(t *t
 		t.Fatal("CreateSecret() should not be called when the companion secret already exists")
 		return false, nil
 	}
-	credClient.updateSecretFn = func(_ context.Context, name string, namespace string, _ map[string]string, data map[string][]byte) (bool, error) {
+	credClient.updateSecretFn = func(context.Context, string, string, map[string]string, map[string][]byte) (bool, error) {
+		t.Fatal("UpdateSecret() should not be called when guarded mutation is available")
+		return false, nil
+	}
+	credClient.updateSecretIfCurrentFn = func(_ context.Context, name string, namespace string, current credhelper.SecretRecord, _ map[string]string, data map[string][]byte) (bool, error) {
 		if name != "test-stream" || namespace != "default" {
 			t.Fatalf("UpdateSecret() target = %s/%s, want default/test-stream", namespace, name)
 		}
+		guardedRecord = current
 		updatedData = data
 		return true, nil
 	}
@@ -412,6 +475,9 @@ func TestStreamEndpointSecretClientUpdatesExistingSecretWhenEndpointChanges(t *t
 	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
 	requireCreateOrUpdateSuccess(t, response, err, "secret update")
 	assertCredentialCalls(t, credClient, secretCallExpectation{get: true, update: true})
+	if guardedRecord.UID != testEndpointSecretUID {
+		t.Fatalf("guarded update secret UID = %q, want %q", guardedRecord.UID, testEndpointSecretUID)
+	}
 	requireEndpointSecretData(t, updatedData, testStreamEndpoint, "updated secret")
 }
 
@@ -462,8 +528,9 @@ func TestStreamEndpointSecretClientSkipsSecretUntilActive(t *testing.T) {
 				return servicemanager.OSOKResponse{IsSuccessful: true, ShouldRequeue: true}, nil
 			},
 		},
-		credentialClient:   credClient,
-		secretRecordReader: credClient,
+		credentialClient:     credClient,
+		secretRecordReader:   credClient,
+		guardedSecretMutator: credClient,
 		loadStream: func(_ context.Context, _ shared.OCID) (*streamingsdk.Stream, error) {
 			t.Fatal("loadStream() should not be called before the stream reaches ACTIVE")
 			return nil, nil
@@ -488,16 +555,23 @@ func TestStreamEndpointSecretClientDeletesSecretAfterDelete(t *testing.T) {
 	t.Parallel()
 
 	credClient := &fakeCredentialClient{}
+	var guardedRecord credhelper.SecretRecord
 	credClient.getSecretRecordFn = func(_ context.Context, name string, namespace string) (credhelper.SecretRecord, error) {
 		requireSecretTarget(t, "GetSecret", name, namespace)
 		return credhelper.SecretRecord{
+			UID:    testEndpointSecretUID,
 			Labels: ownedEndpointSecretLabels(testStreamUID),
 		}, nil
 	}
-	credClient.deleteSecretFn = func(_ context.Context, name string, namespace string) (bool, error) {
+	credClient.deleteSecretFn = func(context.Context, string, string) (bool, error) {
+		t.Fatal("DeleteSecret() should not be called when guarded deletion is available")
+		return false, nil
+	}
+	credClient.deleteSecretIfCurrentFn = func(_ context.Context, name string, namespace string, current credhelper.SecretRecord) (bool, error) {
 		if name != "test-stream" || namespace != "default" {
 			t.Fatalf("DeleteSecret() target = %s/%s, want default/test-stream", namespace, name)
 		}
+		guardedRecord = current
 		return true, nil
 	}
 
@@ -507,8 +581,9 @@ func TestStreamEndpointSecretClientDeletesSecretAfterDelete(t *testing.T) {
 				return true, nil
 			},
 		},
-		credentialClient:   credClient,
-		secretRecordReader: credClient,
+		credentialClient:     credClient,
+		secretRecordReader:   credClient,
+		guardedSecretMutator: credClient,
 	}
 
 	resource := newTestStreamResource()
@@ -516,6 +591,9 @@ func TestStreamEndpointSecretClientDeletesSecretAfterDelete(t *testing.T) {
 	deleted, err := client.Delete(context.Background(), resource)
 	requireDeleteSuccess(t, deleted, err, "secret cleanup")
 	assertCredentialCalls(t, credClient, secretCallExpectation{get: true, delete: true})
+	if guardedRecord.UID != testEndpointSecretUID {
+		t.Fatalf("guarded delete secret UID = %q, want %q", guardedRecord.UID, testEndpointSecretUID)
+	}
 }
 
 func TestStreamEndpointSecretClientDeleteIgnoresMissingSecret(t *testing.T) {
@@ -533,8 +611,9 @@ func TestStreamEndpointSecretClientDeleteIgnoresMissingSecret(t *testing.T) {
 				return true, nil
 			},
 		},
-		credentialClient:   credClient,
-		secretRecordReader: credClient,
+		credentialClient:     credClient,
+		secretRecordReader:   credClient,
+		guardedSecretMutator: credClient,
 	}
 
 	resource := newTestStreamResource()
@@ -563,8 +642,9 @@ func TestStreamEndpointSecretClientDeleteSkipsLegacyUnlabeledSecret(t *testing.T
 				return true, nil
 			},
 		},
-		credentialClient:   credClient,
-		secretRecordReader: credClient,
+		credentialClient:     credClient,
+		secretRecordReader:   credClient,
+		guardedSecretMutator: credClient,
 	}
 
 	resource := newTestStreamResource()
@@ -595,8 +675,9 @@ func TestStreamEndpointSecretClientDeleteSkipsUnownedSecret(t *testing.T) {
 				return true, nil
 			},
 		},
-		credentialClient:   credClient,
-		secretRecordReader: credClient,
+		credentialClient:     credClient,
+		secretRecordReader:   credClient,
+		guardedSecretMutator: credClient,
 	}
 
 	resource := newTestStreamResource()
@@ -706,9 +787,10 @@ func newStreamEndpointSecretQuickHarness(tc streamEndpointSecretQuickCase) *stre
 		updateSecretFn:    h.updateSecret,
 	}
 	h.client = streamEndpointSecretClient{
-		credentialClient:   credClient,
-		secretRecordReader: credClient,
-		loadStream:         h.loadStream,
+		credentialClient:     credClient,
+		secretRecordReader:   credClient,
+		guardedSecretMutator: credClient,
+		loadStream:           h.loadStream,
 	}
 	return h
 }
@@ -725,6 +807,7 @@ func (h *streamEndpointSecretQuickHarness) getSecretRecord(_ context.Context, na
 		return credhelper.SecretRecord{}, apierrors.NewNotFound(v1.Resource("secret"), name)
 	}
 	return credhelper.SecretRecord{
+		UID:    testEndpointSecretUID,
 		Labels: cloneSecretLabels(h.storeLabels),
 		Data:   cloneSecretData(h.store),
 	}, nil
@@ -909,8 +992,9 @@ func newStreamEndpointSecretDeleteQuickHarness(tc streamEndpointSecretDeleteQuic
 		delegate: fakeStreamServiceClient{
 			deleteFn: h.deleteResource,
 		},
-		credentialClient:   credClient,
-		secretRecordReader: credClient,
+		credentialClient:     credClient,
+		secretRecordReader:   credClient,
+		guardedSecretMutator: credClient,
 	}
 	return h
 }
@@ -924,6 +1008,7 @@ func (h *streamEndpointSecretDeleteQuickHarness) getSecretRecord(_ context.Conte
 		return credhelper.SecretRecord{}, apierrors.NewNotFound(v1.Resource("secret"), name)
 	}
 	return credhelper.SecretRecord{
+		UID:    testEndpointSecretUID,
 		Labels: cloneSecretLabels(h.secretLabels),
 	}, nil
 }

@@ -216,6 +216,7 @@ func TestGetSecretRecordUsesConfiguredReader(t *testing.T) {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "existing-secret",
 			Namespace: "default",
+			UID:       "secret-uid",
 			Labels:    map[string]string{"managed-by": "osok"},
 		},
 		Data: map[string][]byte{"key": []byte("value")},
@@ -241,6 +242,9 @@ func TestGetSecretRecordUsesConfiguredReader(t *testing.T) {
 	}
 	if !reflect.DeepEqual(existingSecret.Labels, record.Labels) {
 		t.Fatalf("unexpected secret labels: got %v want %v", record.Labels, existingSecret.Labels)
+	}
+	if record.UID != existingSecret.UID {
+		t.Fatalf("unexpected secret UID: got %q want %q", record.UID, existingSecret.UID)
 	}
 	if cachedClient.getCalls != 0 {
 		t.Fatalf("expected reads to use the configured Reader, got %d cached Client.Get calls", cachedClient.getCalls)
@@ -293,5 +297,134 @@ func TestUpdateSecretUsesConfiguredReader(t *testing.T) {
 	}
 	if !reflect.DeepEqual(updatedLabels, storedSecret.Labels) {
 		t.Fatalf("unexpected updated labels: got %v want %v", storedSecret.Labels, updatedLabels)
+	}
+}
+
+func TestUpdateSecretIfCurrentRejectsReplacedSecret(t *testing.T) {
+	t.Parallel()
+
+	scheme := newTestScheme(t)
+	originalSecret := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "existing-secret",
+			Namespace: "default",
+			UID:       "secret-uid-1",
+			Labels:    map[string]string{"managed-by": "osok"},
+		},
+		Data: map[string][]byte{"key": []byte("value")},
+	}
+	replacementSecret := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      originalSecret.Name,
+			Namespace: originalSecret.Namespace,
+			UID:       "secret-uid-2",
+			Labels:    map[string]string{"managed-by": "other"},
+		},
+		Data: map[string][]byte{"key": []byte("replacement")},
+	}
+	baseClient := fake.NewClientBuilder().WithScheme(scheme).WithObjects(originalSecret.DeepCopy()).Build()
+	client := NewWithReader(
+		baseClient,
+		baseClient,
+		loggerutil.OSOKLogger{Logger: logr.Discard()},
+		newTestMetrics(),
+	)
+
+	current, err := client.GetSecretRecord(context.Background(), originalSecret.Name, originalSecret.Namespace)
+	if err != nil {
+		t.Fatalf("get secret record: %v", err)
+	}
+	if err := baseClient.Delete(context.Background(), originalSecret.DeepCopy()); err != nil {
+		t.Fatalf("delete original secret: %v", err)
+	}
+	if err := baseClient.Create(context.Background(), replacementSecret.DeepCopy()); err != nil {
+		t.Fatalf("create replacement secret: %v", err)
+	}
+
+	updated, err := client.UpdateSecretIfCurrent(
+		context.Background(),
+		originalSecret.Name,
+		originalSecret.Namespace,
+		current,
+		map[string]string{"managed-by": "osok"},
+		map[string][]byte{"key": []byte("updated")},
+	)
+	if updated {
+		t.Fatal("expected guarded update to reject a replaced Secret")
+	}
+	if !apierrors.IsConflict(err) {
+		t.Fatalf("expected conflict after Secret replacement, got %v", err)
+	}
+
+	storedSecret := &corev1.Secret{}
+	if err := baseClient.Get(context.Background(), ctrlclient.ObjectKey{Name: originalSecret.Name, Namespace: originalSecret.Namespace}, storedSecret); err != nil {
+		t.Fatalf("load replacement secret: %v", err)
+	}
+	if storedSecret.UID != replacementSecret.UID {
+		t.Fatalf("replacement secret UID = %q, want %q", storedSecret.UID, replacementSecret.UID)
+	}
+	if !reflect.DeepEqual(storedSecret.Data, replacementSecret.Data) {
+		t.Fatalf("replacement secret data mutated: got %v want %v", storedSecret.Data, replacementSecret.Data)
+	}
+	if !reflect.DeepEqual(storedSecret.Labels, replacementSecret.Labels) {
+		t.Fatalf("replacement secret labels mutated: got %v want %v", storedSecret.Labels, replacementSecret.Labels)
+	}
+}
+
+func TestDeleteSecretIfCurrentRejectsReplacedSecret(t *testing.T) {
+	t.Parallel()
+
+	scheme := newTestScheme(t)
+	originalSecret := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "existing-secret",
+			Namespace: "default",
+			UID:       "secret-uid-1",
+			Labels:    map[string]string{"managed-by": "osok"},
+		},
+		Data: map[string][]byte{"key": []byte("value")},
+	}
+	replacementSecret := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      originalSecret.Name,
+			Namespace: originalSecret.Namespace,
+			UID:       "secret-uid-2",
+			Labels:    map[string]string{"managed-by": "other"},
+		},
+		Data: map[string][]byte{"key": []byte("replacement")},
+	}
+	baseClient := fake.NewClientBuilder().WithScheme(scheme).WithObjects(originalSecret.DeepCopy()).Build()
+	client := NewWithReader(
+		baseClient,
+		baseClient,
+		loggerutil.OSOKLogger{Logger: logr.Discard()},
+		newTestMetrics(),
+	)
+
+	current, err := client.GetSecretRecord(context.Background(), originalSecret.Name, originalSecret.Namespace)
+	if err != nil {
+		t.Fatalf("get secret record: %v", err)
+	}
+	if err := baseClient.Delete(context.Background(), originalSecret.DeepCopy()); err != nil {
+		t.Fatalf("delete original secret: %v", err)
+	}
+	if err := baseClient.Create(context.Background(), replacementSecret.DeepCopy()); err != nil {
+		t.Fatalf("create replacement secret: %v", err)
+	}
+
+	deleted, err := client.DeleteSecretIfCurrent(context.Background(), originalSecret.Name, originalSecret.Namespace, current)
+	if deleted {
+		t.Fatal("expected guarded delete to reject a replaced Secret")
+	}
+	if !apierrors.IsConflict(err) {
+		t.Fatalf("expected conflict after Secret replacement, got %v", err)
+	}
+
+	storedSecret := &corev1.Secret{}
+	if err := baseClient.Get(context.Background(), ctrlclient.ObjectKey{Name: originalSecret.Name, Namespace: originalSecret.Namespace}, storedSecret); err != nil {
+		t.Fatalf("load replacement secret: %v", err)
+	}
+	if storedSecret.UID != replacementSecret.UID {
+		t.Fatalf("replacement secret UID = %q, want %q", storedSecret.UID, replacementSecret.UID)
 	}
 }

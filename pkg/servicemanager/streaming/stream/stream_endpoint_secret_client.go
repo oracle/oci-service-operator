@@ -35,10 +35,11 @@ type streamEndpointSecretRecordReader interface {
 }
 
 type streamEndpointSecretClient struct {
-	delegate           StreamServiceClient
-	credentialClient   credhelper.CredentialClient
-	secretRecordReader streamEndpointSecretRecordReader
-	loadStream         func(context.Context, shared.OCID) (*streamingsdk.Stream, error)
+	delegate             StreamServiceClient
+	credentialClient     credhelper.CredentialClient
+	secretRecordReader   streamEndpointSecretRecordReader
+	guardedSecretMutator credhelper.GuardedSecretMutator
+	loadStream           func(context.Context, shared.OCID) (*streamingsdk.Stream, error)
 }
 
 var _ StreamServiceClient = streamEndpointSecretClient{}
@@ -64,6 +65,9 @@ func newStreamEndpointSecretClient(manager *StreamServiceManager, delegate Strea
 	}
 	if recordReader, ok := manager.CredentialClient.(streamEndpointSecretRecordReader); ok {
 		client.secretRecordReader = recordReader
+	}
+	if guardedMutator, ok := manager.CredentialClient.(credhelper.GuardedSecretMutator); ok {
+		client.guardedSecretMutator = guardedMutator
 	}
 	return client
 }
@@ -120,6 +124,9 @@ func (c streamEndpointSecretClient) syncEndpointSecret(ctx context.Context, reso
 	}
 	if c.secretRecordReader == nil {
 		return fmt.Errorf("stream endpoint secret ownership checks require secret metadata reads")
+	}
+	if c.guardedSecretMutator == nil {
+		return fmt.Errorf("stream endpoint secret ownership checks require guarded secret mutations")
 	}
 
 	streamID := resource.Status.OsokStatus.Ocid
@@ -189,7 +196,7 @@ func (c streamEndpointSecretClient) syncExistingEndpointSecret(
 			return nil
 		}
 
-		_, err = c.credentialClient.UpdateSecret(ctx, resource.Name, resource.Namespace, nil, desiredData)
+		_, err = c.guardedSecretMutator.UpdateSecretIfCurrent(ctx, resource.Name, resource.Namespace, currentRecord, nil, desiredData)
 		return err
 	}
 
@@ -206,7 +213,7 @@ func (c streamEndpointSecretClient) syncExistingEndpointSecret(
 		)
 	}
 
-	_, err = c.credentialClient.UpdateSecret(ctx, resource.Name, resource.Namespace, adoptionLabels, desiredData)
+	_, err = c.guardedSecretMutator.UpdateSecretIfCurrent(ctx, resource.Name, resource.Namespace, currentRecord, adoptionLabels, desiredData)
 	return err
 }
 
@@ -227,6 +234,9 @@ func (c streamEndpointSecretClient) deleteEndpointSecret(ctx context.Context, re
 	if c.secretRecordReader == nil {
 		return nil
 	}
+	if c.guardedSecretMutator == nil {
+		return fmt.Errorf("stream endpoint secret ownership checks require guarded secret mutations")
+	}
 
 	record, err := c.secretRecordReader.GetSecretRecord(ctx, resource.Name, resource.Namespace)
 	switch {
@@ -244,7 +254,7 @@ func (c streamEndpointSecretClient) deleteEndpointSecret(ctx context.Context, re
 		return nil
 	}
 
-	_, err = c.credentialClient.DeleteSecret(ctx, resource.Name, resource.Namespace)
+	_, err = c.guardedSecretMutator.DeleteSecretIfCurrent(ctx, resource.Name, resource.Namespace, record)
 	if apierrors.IsNotFound(err) {
 		return nil
 	}

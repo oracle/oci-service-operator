@@ -7,6 +7,8 @@ package kubesecret
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/oracle/oci-service-operator/pkg/credhelper"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
@@ -26,6 +28,7 @@ type KubeSecretClient struct {
 }
 
 var _ credhelper.SecretRecordReader = (*KubeSecretClient)(nil)
+var _ credhelper.GuardedSecretMutator = (*KubeSecretClient)(nil)
 
 func New(kubeClient client.Client, logger loggerutil.OSOKLogger, metrics *metrics.Metrics) *KubeSecretClient {
 	return NewWithReader(kubeClient, kubeClient, logger, metrics)
@@ -73,12 +76,35 @@ func (c *KubeSecretClient) DeleteSecret(ctx context.Context, secretName string, 
 		c.Log.ErrorLog(err, "error getting Kubernetes secret", "Secret Name", secretName, "Secret Namespace", secretNamespace)
 		return false, err
 	}
-	err = c.Client.Delete(ctx, existingSecret)
+	err = c.deleteSecretObject(ctx, existingSecret)
 	if err != nil {
 		c.Log.ErrorLog(err, "error deleting Kubernetes secret", "Secret Name", secretName, "Secret Namespace", secretNamespace)
 		return false, err
 	}
 	c.Log.InfoLog("Secret deleted successfully", "Secret Name", secretName, "Secret Namespace", secretNamespace)
+	return true, nil
+}
+
+func (c *KubeSecretClient) DeleteSecretIfCurrent(
+	ctx context.Context,
+	secretName string,
+	secretNamespace string,
+	current credhelper.SecretRecord,
+) (bool, error) {
+	existingSecret, err := c.getSecretObject(ctx, secretName, secretNamespace)
+	if err != nil {
+		c.Log.ErrorLog(err, "error getting Kubernetes secret before guarded delete", "Secret Name", secretName, "Secret Namespace", secretNamespace)
+		return false, err
+	}
+	if err := validateSecretIdentity(secretName, secretNamespace, current, existingSecret); err != nil {
+		c.Log.ErrorLog(err, "guarded delete rejected because the Kubernetes secret changed", "Secret Name", secretName, "Secret Namespace", secretNamespace)
+		return false, err
+	}
+	if err := c.deleteSecretObject(ctx, existingSecret); err != nil {
+		c.Log.ErrorLog(err, "error deleting Kubernetes secret", "Secret Name", secretName, "Secret Namespace", secretNamespace)
+		return false, err
+	}
+	c.Log.InfoLog("Secret deleted successfully after guarded identity check", "Secret Name", secretName, "Secret Namespace", secretNamespace)
 	return true, nil
 }
 
@@ -99,6 +125,7 @@ func (c *KubeSecretClient) GetSecretRecord(ctx context.Context, secretName strin
 
 	c.Log.InfoLog("Secret retrieved successfully", "Secret Name", existingSecret.Name, "Secret Namespace", existingSecret.Namespace)
 	return credhelper.SecretRecord{
+		UID:    existingSecret.UID,
 		Labels: cloneLabels(existingSecret.Labels),
 		Data:   cloneSecretData(existingSecret.Data),
 	}, nil
@@ -111,17 +138,59 @@ func (c *KubeSecretClient) UpdateSecret(ctx context.Context, secretName string, 
 		c.Log.ErrorLog(err, "Failed to get kubernetes secret before update", "Secret Name", secretName, "Secret Namespace", secretNamespace)
 		return false, err
 	}
-	if labels != nil {
-		existingSecret.Labels = labels
-	}
-	existingSecret.Data = updatedData
-	err = c.Client.Update(ctx, existingSecret)
+	err = c.updateSecretObject(ctx, existingSecret, secretName, secretNamespace, labels, updatedData)
 	if err != nil {
 		c.Log.ErrorLog(err, "Failed to update kubernetes secret", "Secret Name", secretName, "Secret Namespace", secretNamespace)
 		return false, err
 	}
 	c.Log.InfoLog("Secret updated successfully", "Secret Name", secretName, "Secret Namespace", secretNamespace)
 	return true, nil
+}
+
+func (c *KubeSecretClient) UpdateSecretIfCurrent(
+	ctx context.Context,
+	secretName string,
+	secretNamespace string,
+	current credhelper.SecretRecord,
+	labels map[string]string,
+	updatedData map[string][]byte,
+) (bool, error) {
+	existingSecret, err := c.getSecretObject(ctx, secretName, secretNamespace)
+	if err != nil {
+		c.Log.ErrorLog(err, "Failed to get kubernetes secret before guarded update", "Secret Name", secretName, "Secret Namespace", secretNamespace)
+		return false, err
+	}
+	if err := validateSecretIdentity(secretName, secretNamespace, current, existingSecret); err != nil {
+		c.Log.ErrorLog(err, "guarded update rejected because the Kubernetes secret changed", "Secret Name", secretName, "Secret Namespace", secretNamespace)
+		return false, err
+	}
+	err = c.updateSecretObject(ctx, existingSecret, secretName, secretNamespace, labels, updatedData)
+	if err != nil {
+		c.Log.ErrorLog(err, "Failed to update kubernetes secret", "Secret Name", secretName, "Secret Namespace", secretNamespace)
+		return false, err
+	}
+	c.Log.InfoLog("Secret updated successfully after guarded identity check", "Secret Name", secretName, "Secret Namespace", secretNamespace)
+	return true, nil
+}
+
+func (c *KubeSecretClient) updateSecretObject(
+	ctx context.Context,
+	existingSecret *v1.Secret,
+	secretName string,
+	secretNamespace string,
+	labels map[string]string,
+	updatedData map[string][]byte,
+) error {
+	if labels != nil {
+		existingSecret.Labels = labels
+	}
+	existingSecret.Data = updatedData
+	return c.Client.Update(ctx, existingSecret)
+}
+
+func (c *KubeSecretClient) deleteSecretObject(ctx context.Context, existingSecret *v1.Secret) error {
+	uid := existingSecret.UID
+	return c.Client.Delete(ctx, existingSecret, client.Preconditions{UID: &uid})
 }
 
 func (c *KubeSecretClient) reader() client.Reader {
@@ -164,4 +233,28 @@ func cloneSecretData(data map[string][]byte) map[string][]byte {
 		cloned[key] = append([]byte(nil), value...)
 	}
 	return cloned
+}
+
+func validateSecretIdentity(
+	secretName string,
+	secretNamespace string,
+	current credhelper.SecretRecord,
+	existingSecret *v1.Secret,
+) error {
+	expectedUID := strings.TrimSpace(string(current.UID))
+	if expectedUID == "" {
+		return fmt.Errorf("guarded secret mutation requires the previously read Secret UID for %s/%s", secretNamespace, secretName)
+	}
+	if existingSecret == nil {
+		return fmt.Errorf("guarded secret mutation requires the current Kubernetes Secret for %s/%s", secretNamespace, secretName)
+	}
+	actualUID := strings.TrimSpace(string(existingSecret.UID))
+	if actualUID != expectedUID {
+		return errors.NewConflict(
+			v1.Resource("secret"),
+			secretName,
+			fmt.Errorf("secret %s/%s changed UID from %q to %q", secretNamespace, secretName, expectedUID, actualUID),
+		)
+	}
+	return nil
 }
