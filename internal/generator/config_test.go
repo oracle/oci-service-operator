@@ -750,10 +750,28 @@ func TestCheckedInStreamingRuntimeRolloutIncludesSecretRBAC(t *testing.T) {
 	if !slices.Equal(
 		overrides["Stream"].Controller.ExtraRBACMarkers,
 		[]string{
-			`groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete`,
+			`groups="",resources=secrets,verbs=get;create;update;delete`,
 		},
 	) {
 		t.Fatalf("streaming Stream extra RBAC markers = %v", overrides["Stream"].Controller.ExtraRBACMarkers)
+	}
+}
+
+func TestCheckedInStreamingPackageInstallRoleNarrowsSecretVerbs(t *testing.T) {
+	t.Parallel()
+
+	rolePath := filepath.Join(repoRoot(t), "packages", "streaming", "install", "generated", "rbac", "role.yaml")
+	content, err := os.ReadFile(rolePath)
+	if err != nil {
+		t.Fatalf("ReadFile(%q) error = %v", rolePath, err)
+	}
+
+	rendered := string(content)
+	if !strings.Contains(rendered, "  - secrets\n  verbs:\n  - create\n  - delete\n  - get\n  - update\n") {
+		t.Fatalf("streaming package install role is missing the narrowed secret verbs:\n%s", rendered)
+	}
+	if strings.Contains(rendered, "  - secrets\n  verbs:\n  - create\n  - delete\n  - get\n  - list\n  - patch\n  - update\n  - watch\n") {
+		t.Fatalf("streaming package install role still grants broad secret verbs:\n%s", rendered)
 	}
 }
 
@@ -911,6 +929,14 @@ func assertCheckedInStreamingRuntimeRolloutMetadata(t *testing.T, service *Servi
 	}
 
 	overrides := resourceGenerationOverridesByKind(service.Generation.Resources)
+	if !slices.Equal(
+		overrides["Stream"].Controller.ExtraRBACMarkers,
+		[]string{
+			`groups="",resources=secrets,verbs=get;create;update;delete`,
+		},
+	) {
+		t.Fatalf("streaming extra RBAC markers = %v", overrides["Stream"].Controller.ExtraRBACMarkers)
+	}
 	if overrides["Stream"].ServiceManager.PackagePath != "streaming/stream" {
 		t.Fatalf("streaming packagePath = %q, want %q", overrides["Stream"].ServiceManager.PackagePath, "streaming/stream")
 	}
