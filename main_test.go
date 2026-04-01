@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"os"
 	"path/filepath"
@@ -9,8 +10,14 @@ import (
 	"testing"
 	"time"
 
+	corev1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
+	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 )
@@ -169,6 +176,44 @@ func TestAddManagerHealthChecksReturnsReadyError(t *testing.T) {
 	}
 	if len(mgr.healthChecks) != 1 {
 		t.Fatalf("healthChecks = %d, want %d", len(mgr.healthChecks), 1)
+	}
+}
+
+func TestNewCredentialClientUsesAPIReaderForSecretReads(t *testing.T) {
+	t.Parallel()
+
+	testScheme := runtime.NewScheme()
+	if err := corev1.AddToScheme(testScheme); err != nil {
+		t.Fatalf("add corev1 scheme: %v", err)
+	}
+
+	existingSecret := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "existing-secret",
+			Namespace: "default",
+		},
+		Data: map[string][]byte{"key": []byte("value")},
+	}
+	apiReader := fake.NewClientBuilder().WithScheme(testScheme).WithObjects(existingSecret.DeepCopy()).Build()
+	cachedClient := &staleSecretGetClient{
+		Client: apiReader,
+		getErr: apierrors.NewNotFound(corev1.Resource("secret"), existingSecret.Name),
+	}
+
+	credClient := newCredentialClient(&fakeCredentialClientManager{
+		client:    cachedClient,
+		apiReader: apiReader,
+	}, nil)
+
+	data, err := credClient.GetSecret(context.Background(), existingSecret.Name, existingSecret.Namespace)
+	if err != nil {
+		t.Fatalf("GetSecret() error = %v", err)
+	}
+	if !reflect.DeepEqual(data, existingSecret.Data) {
+		t.Fatalf("GetSecret() data = %v, want %v", data, existingSecret.Data)
+	}
+	if cachedClient.getCalls != 0 {
+		t.Fatalf("expected reads to bypass the cached client, got %d Client.Get calls", cachedClient.getCalls)
 	}
 }
 
@@ -419,6 +464,30 @@ func webhookOptionsFromServer(t *testing.T, server webhook.Server) webhook.Optio
 type recordedHealthCheck struct {
 	name string
 	fn   healthz.Checker
+}
+
+type staleSecretGetClient struct {
+	ctrlclient.Client
+	getCalls int
+	getErr   error
+}
+
+func (c *staleSecretGetClient) Get(ctx context.Context, key ctrlclient.ObjectKey, obj ctrlclient.Object, opts ...ctrlclient.GetOption) error {
+	c.getCalls++
+	return c.getErr
+}
+
+type fakeCredentialClientManager struct {
+	client    ctrlclient.Client
+	apiReader ctrlclient.Reader
+}
+
+func (f *fakeCredentialClientManager) GetClient() ctrlclient.Client {
+	return f.client
+}
+
+func (f *fakeCredentialClientManager) GetAPIReader() ctrlclient.Reader {
+	return f.apiReader
 }
 
 type fakeHealthCheckManager struct {

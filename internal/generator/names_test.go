@@ -25,6 +25,7 @@ func TestSingularizeAndPluralize(t *testing.T) {
 		{name: "status suffix is preserved", input: "AlarmsStatus", singular: "AlarmStatus", plural: "AlarmStatuses"},
 		{name: "statuses singularize to status", input: "AlarmStatuses", singular: "AlarmStatus", plural: "AlarmStatuses"},
 		{name: "stats stay plural", input: "Stats", singular: "Stats", plural: "Stats"},
+		{name: "ss suffix uses es pluralization", input: "ConnectHarnesses", singular: "ConnectHarness", plural: "ConnectHarnesses"},
 	}
 
 	for _, test := range tests {

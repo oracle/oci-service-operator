@@ -53,7 +53,8 @@ func pluralize(name string) string {
 	case strings.HasSuffix(name, "x"),
 		strings.HasSuffix(name, "z"),
 		strings.HasSuffix(name, "ch"),
-		strings.HasSuffix(name, "sh"):
+		strings.HasSuffix(name, "sh"),
+		strings.HasSuffix(name, "ss"):
 		return name + "es"
 	default:
 		return name + "s"

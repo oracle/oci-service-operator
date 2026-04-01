@@ -23,6 +23,7 @@ import (
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
+	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	"sigs.k8s.io/yaml"
@@ -222,6 +223,20 @@ func applyControllerConfigOverlay(options ctrl.Options, cfg controllerConfigFile
 	return options
 }
 
+type credentialClientManager interface {
+	GetClient() ctrlclient.Client
+	GetAPIReader() ctrlclient.Reader
+}
+
+func newCredentialClient(mgr credentialClientManager, metricsClient *metrics.Metrics) *kubesecret.KubeSecretClient {
+	return kubesecret.NewWithReader(
+		mgr.GetClient(),
+		mgr.GetAPIReader(),
+		loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("credential-helper").WithName("KubeSecretClient")},
+		metricsClient,
+	)
+}
+
 func setupRegistrations(mgr ctrl.Manager, initOSOKResources bool) error {
 	if initOSOKResources {
 		util.InitOSOK(mgr.GetConfig(), loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("setup").WithName("initOSOK")})
@@ -253,11 +268,7 @@ func buildRuntimeDeps(mgr ctrl.Manager) (servicemanager.RuntimeDeps, error) {
 	}
 
 	metricsClient := metrics.Init("osok", loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("metrics")})
-	credClient := &kubesecret.KubeSecretClient{
-		Client:  mgr.GetClient(),
-		Log:     loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("credential-helper").WithName("KubeSecretClient")},
-		Metrics: metricsClient,
-	}
+	credClient := newCredentialClient(mgr, metricsClient)
 
 	return servicemanager.RuntimeDeps{
 		Provider:         provider,

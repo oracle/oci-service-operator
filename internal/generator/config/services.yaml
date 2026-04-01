@@ -669,7 +669,7 @@ services:
           formalSpec: stream
           controller:
             extraRBACMarkers:
-              - groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
+              - groups="",resources=secrets,verbs=get;create;update;delete
           serviceManager:
             packagePath: streaming/stream
         - kind: Cursor

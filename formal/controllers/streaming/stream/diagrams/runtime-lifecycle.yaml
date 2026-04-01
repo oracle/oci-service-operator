@@ -3,7 +3,7 @@ surface: repo-authored-semantics
 service: streaming
 slug: stream
 kind: Stream
-archetype: legacy-adapter
+archetype: generated-service-manager
 states:
   - provisioning
   - active
@@ -11,6 +11,6 @@ states:
   - terminating
   - failed
 notes:
-  - Create or bind selection depends on name-based list lookup with optional pool and compartment filters.
-  - Endpoint secret materialization happens only after ACTIVE.
-  - Delete is best-effort today; DELETING is treated as sufficient for cleanup and finalizer removal.
+  - The generated runtime reuses existing streams before create by listing on name plus the optional pool and compartment filters, while delete-phase lookup can still resolve terminating or failed matches when no OCI identifier is recorded.
+  - A narrow package-local companion writes or updates the ready-only endpoint secret after ACTIVE when the same-name Secret already carries the current Stream UID ownership label, or when a legacy unlabeled Secret already matches the desired ready-only payload so reconcile can stamp the current UID label before future updates. Guarded update or delete revalidates the full Secret snapshot before mutating, and best-effort delete cleanup skips missing or unowned Secrets.
+  - Delete remains best-effort; DELETING or DELETED is sufficient for finalizer removal.

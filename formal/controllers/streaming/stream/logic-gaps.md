@@ -3,46 +3,19 @@ schemaVersion: 1
 surface: repo-authored-semantics
 service: streaming
 slug: stream
-gaps:
-  - category: bind-versus-create
-    status: open
-    stopCondition: "Formal semantics can branch between create, bind-by-id, and bind-by-name flows without routing through the legacy streams package."
-  - category: list-lookup
-    status: open
-    stopCondition: "Formal semantics encode the current name plus optional pool or compartment filters and the lifecycle-sensitive matching used for create, update, and delete."
-  - category: endpoint-materialization
-    status: open
-    stopCondition: "Formal semantics model the ACTIVE-only secret write that publishes the message endpoint and its delete-time cleanup."
-  - category: status-projection
-    status: open
-    stopCondition: "Formal semantics either describe the handwritten OsokStatus projection or preserve it as an explicit legacy-only contract."
-  - category: mutation-policy
-    status: open
-    stopCondition: "Formal semantics distinguish mutable fields from rejected changes, including the current partition and retention mismatch failures."
-  - category: delete-confirmation
-    status: open
-    stopCondition: "Formal semantics capture or replace the current best-effort delete behavior that treats DELETING as sufficient for finalizer removal."
-  - category: legacy-adapter
-    status: open
-    stopCondition: "stream_generated_client_adapter.go is removable because the formal runtime covers the current streams.StreamServiceManager behavior."
+gaps: []
 ---
 
 # Logic Gaps
 
 ## Current runtime path
 
-- The generated `StreamServiceManager` is overridden by `stream_generated_client_adapter.go`, so all runtime behavior still delegates into `pkg/servicemanager/streams`.
-- When `spec.id` is empty, the legacy manager lists streams by name plus optional pool or compartment filters to decide whether to create or bind.
+- `Stream` now uses the generated `StreamServiceManager` and generated runtime client directly; there is no checked-in legacy adapter override.
+- The generated runtime reuses an existing stream before create by listing on `name` plus the optional `streamPoolId` and `compartmentId` filters, then applies the formal lifecycle buckets to ignore delete-only matches during create or update while still resolving delete-time cleanup candidates.
 
 ## Repo-authored semantics
 
-- Delete uses two different list-resolution paths: create or update ignores failed and deleted streams, while delete explicitly searches for failed, deleting, or deleted entries by name when no OCID is recorded.
-- Update accepts tag changes and `streamPoolId`, but it rejects partition and retention mismatches as hard errors.
-- Status projection is manual. The controller only records `OsokStatus`.
-- When the stream reaches ACTIVE, the controller writes a secret that contains the `messagesEndpoint`; delete also attempts to remove that secret.
-- Delete is only best-effort today. The legacy manager issues `DeleteStream`, checks once for `DELETING` or `DELETED`, and still returns success immediately.
-
-## Why this stays on the legacy adapter
-
-- The lifecycle-sensitive list matching and update rejection rules are not expressible in the current generic runtime contract.
-- Secret materialization and best-effort delete confirmation need explicit formal semantics before the generated path can replace the legacy package.
+- Update accepts `streamPoolId`, `freeformTags`, and `definedTags`. The generated runtime rejects force-new drift for `name`, `partitions`, and `retentionInHours` against the live OCI resource body before any update call.
+- Status projection is part of the repo-authored contract. The generated runtime merges the live OCI `Stream` response into the published status read-model fields while still stamping `status.status.ocid` and OSOK lifecycle conditions.
+- Secret side effects are explicit repo-authored behavior. A narrow companion in the generated `stream` package writes or updates the `messagesEndpoint` secret only after ACTIVE when the same-name Secret already carries the current Stream UID ownership label, or when a legacy unlabeled Secret already matches the desired ready-only payload so reconcile can stamp the current UID label before future updates. Guarded update and delete revalidate the full Secret snapshot before mutating so same-UID in-place label or data drift retries instead of being overwritten. Delete-time cleanup still skips missing or unowned Secrets during best-effort completion.
+- Delete remains explicitly best-effort. The generated runtime issues `DeleteStream`, treats `DELETING` or `DELETED` as sufficient for finalizer removal, and uses delete-phase list lookup when no OCI identifier is already tracked.

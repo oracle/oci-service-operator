@@ -40,9 +40,9 @@ gaps:
   delete decisions.
 - Follow `identity/User` for required status projection, required delete
   confirmation, and `retain-until-confirmed-delete`.
-- Use `streaming/Stream` only as the legacy reference for pre-create lookup and
-  lifecycle-sensitive matching. Do not inherit its secret or best-effort delete
-  behavior.
+- Use `streaming/Stream` as the generated-runtime reference for pre-create
+  lookup and lifecycle-sensitive matching. Do not inherit its secret or
+  best-effort delete behavior.
 
 ## Repo-authored semantics
 

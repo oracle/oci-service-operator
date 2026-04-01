@@ -1735,6 +1735,34 @@ func TestCheckedInPromotedCoreRuntimeArtifactsMatchGenerator(t *testing.T) {
 	assertExactFileMatchesAll(t, repoRoot(t), outputRoot, exactFiles)
 }
 
+func TestCheckedInStreamingPreservesStreamNamePrinterColumn(t *testing.T) {
+	t.Parallel()
+
+	cfg := loadCheckedInConfig(t)
+	streamingService := serviceConfigsByName(t, cfg, "streaming")["streaming"]
+
+	pkg, err := NewDiscoverer().BuildPackageModel(context.Background(), cfg, *streamingService)
+	if err != nil {
+		t.Fatalf("BuildPackageModel() error = %v", err)
+	}
+
+	stream := findResource(t, pkg.Resources, "Stream")
+	if len(stream.PrintColumns) == 0 {
+		t.Fatal("Stream print columns = none, want Name column first")
+	}
+
+	nameColumn := stream.PrintColumns[0]
+	if nameColumn.Name != "Name" {
+		t.Fatalf("Stream first print column name = %q, want %q", nameColumn.Name, "Name")
+	}
+	if nameColumn.JSONPath != ".spec.name" {
+		t.Fatalf("Stream first print column JSONPath = %q, want %q", nameColumn.JSONPath, ".spec.name")
+	}
+	if nameColumn.Type != "string" {
+		t.Fatalf("Stream first print column type = %q, want %q", nameColumn.Type, "string")
+	}
+}
+
 func TestCheckedInIdentityUserRuntimeArtifactsMatchGenerator(t *testing.T) {
 	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
 	cfg, err := LoadConfig(cfgPath)
@@ -1846,14 +1874,14 @@ func TestCheckedInPromotedRuntimeArtifactsMatchGenerator(t *testing.T) {
 			serviceClientPath: "pkg/servicemanager/streaming/stream/stream_serviceclient.go",
 			controllerPath:    "controllers/streaming/stream_controller.go",
 			controllerContains: []string{
-				`// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete`,
+				`// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;create;update;delete`,
 			},
 			serviceClientChecks: []string{
 				"Semantics: &generatedruntime.Semantics{",
 				`FormalService:     "streaming"`,
 				`FormalSlug:        "stream"`,
 				`SecretSideEffects: "ready-only"`,
-				`StatusProjection:  "manual"`,
+				`StatusProjection:  "required"`,
 			},
 		},
 	}

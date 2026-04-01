@@ -55,6 +55,10 @@ Package profile behavior:
 - `crd-only` overlays render only generated CRDs until a staged config opts the
   service into runtime rollout.
 
+Runtime seam ownership stays explicit in checked-in files rather than being
+implied by the package profile. `database` and `mysql` still retain parity
+adapters, while `streaming/Stream` only retains the endpoint-secret companion.
+
 Package profile transitions:
 
 - New services can start as `crd-only` in a staged or alternate config.
