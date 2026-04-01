@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "internetgateway",
+  "kind": "InternetGateway",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_core_internet_gateway",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateInternetGateway",
+        "requestType": "core.CreateInternetGatewayRequest",
+        "responseType": "core.CreateInternetGatewayResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetInternetGateway",
+        "requestType": "core.GetInternetGatewayRequest",
+        "responseType": "core.GetInternetGatewayResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListInternetGateways",
+        "requestType": "core.ListInternetGatewaysRequest",
+        "responseType": "core.ListInternetGatewaysResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateInternetGateway",
+        "requestType": "core.UpdateInternetGatewayRequest",
+        "responseType": "core.UpdateInternetGatewayResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteInternetGateway",
+        "requestType": "core.DeleteInternetGatewayRequest",
+        "responseType": "core.DeleteInternetGatewayResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "AVAILABLE"
+      ]
+    },
+    "update": {
+      "pending": [],
+      "target": [
+        "AVAILABLE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "is_enabled",
+      "route_table_id"
+    ],
+    "forceNew": [
+      "compartment_id",
+      "vcn_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "TERMINATING",
+      "TERMINATED"
+    ],
+    "target": [
+      "NOT_FOUND"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_core_internet_gateways",
+    "collectionField": "internet_gateway",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "vcn_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/internetgateway/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/internetgateway/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: InternetGateway lifecycle exposes PROVISIONING, AVAILABLE, TERMINATING, and TERMINATED; there is no distinct UPDATING state in this branch.",
+    "Pinned OCI SDK contract: UpdateInternetGatewayDetails exposes defined_tags, display_name, freeform_tags, is_enabled, and route_table_id as in-place update fields; the handwritten runtime rejects create-only drift for compartment_id and vcn_id.",
+    "Repo-authored delete confirmation requires GetInternetGateway to return not found; observed TERMINATING and TERMINATED remain intermediate finalizer-holding states.",
+    "The handwritten runtime observes by tracked OCI identity rather than list-based bind semantics. The listLookup block is retained only as provider-facts reference metadata."
+  ]
+}
