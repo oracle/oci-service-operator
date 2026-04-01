@@ -813,6 +813,15 @@ func validateImport(row manifestRow, doc importFile, sourceIndex map[string]sour
 			bindingCount++
 			if strings.TrimSpace(binding.Operation) == "" || strings.TrimSpace(binding.RequestType) == "" || strings.TrimSpace(binding.ResponseType) == "" {
 				problems = append(problems, fmt.Sprintf("%s: %s bindings require non-empty operation, requestType, and responseType", filepath.ToSlash(row.ImportPath), operation))
+				continue
+			}
+			expectedRequestType := qualifiedOperationType(binding.RequestType, binding.Operation, "Request")
+			if binding.RequestType != expectedRequestType {
+				problems = append(problems, fmt.Sprintf("%s: %s binding requestType=%q, want %q", filepath.ToSlash(row.ImportPath), binding.Operation, binding.RequestType, expectedRequestType))
+			}
+			expectedResponseType := qualifiedOperationType(binding.ResponseType, binding.Operation, "Response")
+			if binding.ResponseType != expectedResponseType {
+				problems = append(problems, fmt.Sprintf("%s: %s binding responseType=%q, want %q", filepath.ToSlash(row.ImportPath), binding.Operation, binding.ResponseType, expectedResponseType))
 			}
 		}
 	}
@@ -857,6 +866,14 @@ func validateImport(row manifestRow, doc importFile, sourceIndex map[string]sour
 	}
 
 	return problems
+}
+
+func qualifiedOperationType(boundType, operation, suffix string) string {
+	prefix := ""
+	if idx := strings.LastIndex(boundType, "."); idx >= 0 {
+		prefix = boundType[:idx+1]
+	}
+	return prefix + operation + suffix
 }
 
 func validateDiagramDir(root, path string, row manifestRow, binding *ControllerBinding, strategy diagramStrategy) (int, []plantUMLPair, []string) {

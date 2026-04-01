@@ -300,6 +300,22 @@ func TestVerifyRejectsImportSurfaceMismatch(t *testing.T) {
 	}
 }
 
+func TestVerifyRejectsOperationBindingTypeMismatch(t *testing.T) {
+	root := writeScaffold(t)
+	mismatched := strings.NewReplacer(
+		`"requestType": "UpdateTemplateRequest"`,
+		`"requestType": "DeleteTemplateRequest"`,
+		`"responseType": "UpdateTemplateResponse"`,
+		`"responseType": "DeleteTemplateResponse"`,
+	).Replace(testImport)
+	writeFile(t, filepath.Join(root, "imports", "template", "template.json"), mismatched)
+
+	_, err := Verify(root)
+	if err == nil || !strings.Contains(err.Error(), `UpdateTemplate binding requestType="DeleteTemplateRequest", want "UpdateTemplateRequest"`) || !strings.Contains(err.Error(), `UpdateTemplate binding responseType="DeleteTemplateResponse", want "UpdateTemplateResponse"`) {
+		t.Fatalf("Verify(%q) error = %v, want operation binding type mismatch failure", root, err)
+	}
+}
+
 func TestVerifyRejectsMissingRenderedDiagramArtifacts(t *testing.T) {
 	root := writeScaffold(t)
 	if err := os.Remove(filepath.Join(root, "controllers", "template", "diagrams", "sequence.svg")); err != nil {
