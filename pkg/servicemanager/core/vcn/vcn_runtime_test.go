@@ -257,6 +257,44 @@ func TestCreateOrUpdate_MutableDriftTriggersUpdate(t *testing.T) {
 	assert.Equal(t, "new-name", resource.Status.DisplayName)
 }
 
+func TestCreateOrUpdate_DoesNotUpdateDuringRetryableLiveStates(t *testing.T) {
+	tests := []struct {
+		name  string
+		state coresdk.VcnLifecycleStateEnum
+	}{
+		{name: "provisioning", state: coresdk.VcnLifecycleStateProvisioning},
+		{name: "updating", state: coresdk.VcnLifecycleStateUpdating},
+		{name: "terminating", state: coresdk.VcnLifecycleStateTerminating},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			updateCalls := 0
+			manager := newTestManager(&fakeVcnOCIClient{
+				getFn: func(_ context.Context, _ coresdk.GetVcnRequest) (coresdk.GetVcnResponse, error) {
+					current := makeSDKVcn("ocid1.vcn.oc1..existing", "old-name", tt.state)
+					return coresdk.GetVcnResponse{Vcn: current}, nil
+				},
+				updateFn: func(_ context.Context, _ coresdk.UpdateVcnRequest) (coresdk.UpdateVcnResponse, error) {
+					updateCalls++
+					return coresdk.UpdateVcnResponse{}, nil
+				},
+			})
+
+			resource := makeSpecVcn()
+			resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.vcn.oc1..existing")
+			resource.Spec.DisplayName = "new-name"
+
+			resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+			assert.NoError(t, err)
+			assert.True(t, resp.IsSuccessful)
+			assert.True(t, resp.ShouldRequeue)
+			assert.Equal(t, 0, updateCalls)
+		})
+	}
+}
+
 func TestCreateOrUpdate_RetryableStates(t *testing.T) {
 	tests := []struct {
 		name   string
@@ -455,6 +493,40 @@ func TestCreateOrUpdate_DoesNotRecreateOnAuthAmbiguity(t *testing.T) {
 	assert.False(t, resp.IsSuccessful)
 	assert.Equal(t, 0, createCalls)
 	assert.Equal(t, "ocid1.vcn.oc1..existing", string(resource.Status.OsokStatus.Ocid))
+}
+
+func TestCreateOrUpdate_RecreatesTrackedTerminatedVcn(t *testing.T) {
+	createCalls := 0
+	updateCalls := 0
+	manager := newTestManager(&fakeVcnOCIClient{
+		getFn: func(_ context.Context, _ coresdk.GetVcnRequest) (coresdk.GetVcnResponse, error) {
+			return coresdk.GetVcnResponse{
+				Vcn: makeSDKVcn("ocid1.vcn.oc1..terminated", "old-name", coresdk.VcnLifecycleStateTerminated),
+			}, nil
+		},
+		createFn: func(_ context.Context, _ coresdk.CreateVcnRequest) (coresdk.CreateVcnResponse, error) {
+			createCalls++
+			return coresdk.CreateVcnResponse{
+				Vcn: makeSDKVcn("ocid1.vcn.oc1..recreated", "test-vcn", coresdk.VcnLifecycleStateAvailable),
+			}, nil
+		},
+		updateFn: func(_ context.Context, _ coresdk.UpdateVcnRequest) (coresdk.UpdateVcnResponse, error) {
+			updateCalls++
+			return coresdk.UpdateVcnResponse{}, nil
+		},
+	})
+
+	resource := makeSpecVcn()
+	resource.Status.Id = "ocid1.vcn.oc1..terminated"
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.vcn.oc1..terminated")
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.Equal(t, 1, createCalls)
+	assert.Equal(t, 0, updateCalls)
+	assert.Equal(t, shared.OCID("ocid1.vcn.oc1..recreated"), resource.Status.OsokStatus.Ocid)
 }
 
 func TestDelete_ConfirmsDeletionOnNotFound(t *testing.T) {

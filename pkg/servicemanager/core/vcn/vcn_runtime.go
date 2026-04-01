@@ -78,6 +78,14 @@ func (c *vcnRuntimeClient) CreateOrUpdate(ctx context.Context, resource *corev1b
 		return c.fail(resource, err)
 	}
 
+	switch current.LifecycleState {
+	case coresdk.VcnLifecycleStateTerminated:
+		c.clearTrackedIdentity(resource)
+		return c.create(ctx, resource)
+	case coresdk.VcnLifecycleStateProvisioning, coresdk.VcnLifecycleStateUpdating, coresdk.VcnLifecycleStateTerminating:
+		return c.applyLifecycle(resource, current)
+	}
+
 	updateRequest, updateNeeded, err := c.buildUpdateRequest(resource, current)
 	if err != nil {
 		return c.fail(resource, err)
