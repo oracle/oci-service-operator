@@ -550,7 +550,7 @@ func TestDelete_ConfirmsDeletionOnNotFound(t *testing.T) {
 	assert.NotNil(t, resource.Status.OsokStatus.DeletedAt)
 }
 
-func TestDelete_ConfirmsDeletionOnObservedTerminated(t *testing.T) {
+func TestDelete_KeepsFinalizerWhileObservedTerminated(t *testing.T) {
 	manager := newTestManager(&fakeVcnOCIClient{
 		deleteFn: func(_ context.Context, _ coresdk.DeleteVcnRequest) (coresdk.DeleteVcnResponse, error) {
 			return coresdk.DeleteVcnResponse{}, nil
@@ -568,8 +568,9 @@ func TestDelete_ConfirmsDeletionOnObservedTerminated(t *testing.T) {
 	done, err := manager.Delete(context.Background(), resource)
 
 	assert.NoError(t, err)
-	assert.True(t, done)
-	assert.NotNil(t, resource.Status.OsokStatus.DeletedAt)
+	assert.False(t, done)
+	assert.Nil(t, resource.Status.OsokStatus.DeletedAt)
+	assert.Equal(t, string(shared.Terminating), resource.Status.OsokStatus.Reason)
 }
 
 func TestDelete_DoesNotConfirmDeletionOnAuthAmbiguity(t *testing.T) {
@@ -621,5 +622,10 @@ func TestIsNotFoundOCI_RejectsAuthAmbiguity(t *testing.T) {
 		statusCode: 404,
 		code:       "UnexpectedCode",
 		message:    "resource not authorized",
+	}))
+	assert.False(t, isNotFoundOCI(fakeServiceError{
+		statusCode: 404,
+		code:       "UnexpectedCode",
+		message:    "resource terminated",
 	}))
 }

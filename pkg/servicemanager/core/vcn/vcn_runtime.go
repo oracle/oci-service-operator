@@ -140,10 +140,7 @@ func (c *vcnRuntimeClient) Delete(ctx context.Context, resource *corev1beta1.Vcn
 		return false, err
 	}
 	switch current.LifecycleState {
-	case coresdk.VcnLifecycleStateTerminated:
-		c.markDeleted(resource, "OCI resource reached TERMINATED before disappearing")
-		return true, nil
-	case coresdk.VcnLifecycleStateTerminating:
+	case coresdk.VcnLifecycleStateTerminated, coresdk.VcnLifecycleStateTerminating:
 		c.markTerminating(resource, current)
 		return false, nil
 	default:
