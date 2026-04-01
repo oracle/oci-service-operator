@@ -4,10 +4,10 @@
 - [OCI Permission requirement](#oci-permission-requirement)
 - [Autonomous Database Specification Parameters](#autonomous-database-specification-parameters)
 - [Autonomous Database Status Parameters](#autonomous-database-status-parameters)
-- [Provision](#provisioning-an-adb)
-- [Bind](#binding-to-an-existing-adb)
-- [Update](#updating-an-adb)
-- [Access Information in Kubernetes Secret](#access-information-in-kubernetes-secrets)
+- [Provisioning an Autonomous Database](#provisioning-an-autonomous-database)
+- [Binding to an Existing Autonomous Database](#binding-to-an-existing-autonomous-database)
+- [Updating an Autonomous Database](#updating-an-autonomous-database)
+- [Access Information in Kubernetes Secrets](#access-information-in-kubernetes-secrets)
 
 ## Introduction
 

@@ -15,10 +15,10 @@ spec:
       kind: AutonomousDatabase
       name: autonomousdatabases.database.oracle.com
       version: v1beta1
-    - description: MySqlDbSystem is the Schema for the mysqldbsystems API
-      displayName: My Sql Db System
-      kind: MySqlDbSystem
-      name: mysqldbsystems.mysql.oracle.com
+    - description: DbSystem is the Schema for the dbsystems API
+      displayName: Db System
+      kind: DbSystem
+      name: dbsystems.mysql.oracle.com
       version: v1beta1
     - description: Stream is the Schema for the streams API
       displayName: Stream

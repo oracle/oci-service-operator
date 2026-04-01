@@ -1,0 +1,185 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: heatwaveclusters.mysql.oracle.com
+spec:
+  group: mysql.oracle.com
+  names:
+    kind: HeatWaveCluster
+    listKind: HeatWaveClusterList
+    plural: heatwaveclusters
+    singular: heatwavecluster
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: status of the HeatWaveCluster
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the HeatWaveCluster
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: HeatWaveCluster is the Schema for the heatwaveclusters API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: HeatWaveClusterSpec defines the desired state of HeatWaveCluster.
+            properties:
+              clusterSize:
+                description: |-
+                  A change to the number of nodes in the HeatWave cluster will result
+                  in the entire cluster being torn down and re-created with the new
+                  cluster of nodes. This may result in a significant downtime for the
+                  analytics capability while the HeatWave cluster is
+                  re-provisioned.
+                type: integer
+              isLakehouseEnabled:
+                description: Enable/disable Lakehouse for the HeatWave cluster.
+                type: boolean
+              shapeName:
+                description: |-
+                  A change to the shape of the nodes in the HeatWave cluster will
+                  result in the entire cluster being torn down and re-created with
+                  Compute instances of the new Shape. This may result in significant
+                  downtime for the analytics capability while the HeatWave cluster is
+                  re-provisioned.
+                type: string
+            type: object
+          status:
+            description: HeatWaveClusterStatus defines the observed state of HeatWaveCluster.
+            properties:
+              clusterNodes:
+                description: A HeatWave node is a compute host that is part of a HeatWave
+                  cluster.
+                items:
+                  description: HeatWaveClusterClusterNode defines nested fields for
+                    HeatWaveCluster.ClusterNode.
+                  properties:
+                    lifecycleState:
+                      description: The current state of the MySQL HeatWave node.
+                      type: string
+                    nodeId:
+                      description: The ID of the node within MySQL HeatWave cluster.
+                      type: string
+                    timeCreated:
+                      description: |-
+                        The date and time the MySQL HeatWave node was created,
+                        as described by RFC 3339 (https://tools.ietf.org/rfc/rfc3339).
+                      type: string
+                    timeUpdated:
+                      description: |-
+                        The date and time the MySQL HeatWave node was updated,
+                        as described by RFC 3339 (https://tools.ietf.org/rfc/rfc3339).
+                      type: string
+                  type: object
+                type: array
+              clusterSize:
+                description: |-
+                  The number of analytics-processing compute instances, of the
+                  specified shape, in the HeatWave cluster.
+                type: integer
+              dbSystemId:
+                description: The OCID of the parent DB System this HeatWave cluster
+                  is attached to.
+                type: string
+              isLakehouseEnabled:
+                description: Lakehouse enabled status for the HeatWave cluster.
+                type: boolean
+              lifecycleDetails:
+                description: Additional information about the current lifecycleState.
+                type: string
+              lifecycleState:
+                description: The current state of the HeatWave cluster.
+                type: string
+              shapeName:
+                description: |-
+                  The shape determines resources to allocate to the HeatWave
+                  nodes - CPU cores, memory.
+                type: string
+              status:
+                properties:
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              timeCreated:
+                description: |-
+                  The date and time the HeatWave cluster was created,
+                  as described by RFC 3339 (https://tools.ietf.org/rfc/rfc3339).
+                type: string
+              timeUpdated:
+                description: |-
+                  The time the HeatWave cluster was last updated,
+                  as described by RFC 3339 (https://tools.ietf.org/rfc/rfc3339).
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

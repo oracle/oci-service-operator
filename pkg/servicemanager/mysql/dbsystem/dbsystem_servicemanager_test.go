@@ -3,780 +3,877 @@
   Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
 */
 
-package dbsystem_test
+package dbsystem
 
 import (
 	"context"
-	"errors"
+	cryptorand "crypto/rand"
+	"crypto/rsa"
+	"encoding/json"
+	"fmt"
+	"math/rand"
+	"reflect"
 	"strings"
 	"testing"
+	"testing/quick"
 	"time"
 
 	"github.com/oracle/oci-go-sdk/v65/common"
-	"github.com/oracle/oci-go-sdk/v65/mysql"
+	mysqlsdk "github.com/oracle/oci-go-sdk/v65/mysql"
 	mysqlv1beta1 "github.com/oracle/oci-service-operator/api/mysql/v1beta1"
-	streamingv1beta1 "github.com/oracle/oci-service-operator/api/streaming/v1beta1"
-	"github.com/oracle/oci-service-operator/pkg/loggerutil"
-	. "github.com/oracle/oci-service-operator/pkg/servicemanager/mysql/dbsystem"
+	"github.com/oracle/oci-service-operator/pkg/credhelper"
+	"github.com/oracle/oci-service-operator/pkg/servicemanager"
+	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
-	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
+type fakeDbSystemBody struct {
+	Id             string `json:"id,omitempty"`
+	LifecycleState string `json:"lifecycleState,omitempty"`
+}
+
+type fakeCreateDbSystemResponse struct {
+	DbSystem fakeDbSystemBody `presentIn:"body"`
+}
+
+type testConfigurationProvider struct {
+	privateKey *rsa.PrivateKey
+}
+
 type fakeCredentialClient struct {
-	createSecretFn func(ctx context.Context, name, ns string, labels map[string]string, data map[string][]byte) (bool, error)
-	deleteSecretFn func(ctx context.Context, name, ns string) (bool, error)
-	getSecretFn    func(ctx context.Context, name, ns string) (map[string][]byte, error)
-	updateSecretFn func(ctx context.Context, name, ns string, labels map[string]string, data map[string][]byte) (bool, error)
-	createCalled   bool
-	deleteCalled   bool
+	secrets   map[string]map[string][]byte
+	readNames []string
 }
 
-func (f *fakeCredentialClient) CreateSecret(ctx context.Context, name, ns string, labels map[string]string, data map[string][]byte) (bool, error) {
-	f.createCalled = true
-	if f.createSecretFn != nil {
-		return f.createSecretFn(ctx, name, ns, labels, data)
+var _ credhelper.CredentialClient = (*fakeCredentialClient)(nil)
+
+func (f *fakeCredentialClient) CreateSecret(_ context.Context, _, _ string, _ map[string]string, _ map[string][]byte) (bool, error) {
+	return false, nil
+}
+
+func (f *fakeCredentialClient) DeleteSecret(_ context.Context, _, _ string) (bool, error) {
+	return false, nil
+}
+
+func (f *fakeCredentialClient) GetSecret(_ context.Context, name, namespace string) (map[string][]byte, error) {
+	f.readNames = append(f.readNames, name)
+	secret, ok := f.secrets[name]
+	if !ok {
+		return nil, fmt.Errorf("secret %s/%s not found", namespace, name)
 	}
-	return true, nil
+	return secret, nil
 }
 
-func (f *fakeCredentialClient) DeleteSecret(ctx context.Context, name, ns string) (bool, error) {
-	f.deleteCalled = true
-	if f.deleteSecretFn != nil {
-		return f.deleteSecretFn(ctx, name, ns)
+func (f *fakeCredentialClient) UpdateSecret(_ context.Context, _, _ string, _ map[string]string, _ map[string][]byte) (bool, error) {
+	return false, nil
+}
+
+func (p testConfigurationProvider) PrivateRSAKey() (*rsa.PrivateKey, error) {
+	return p.privateKey, nil
+}
+
+func (p testConfigurationProvider) KeyID() (string, error) {
+	return "ocid1.tenancy.oc1..example/ocid1.user.oc1..example/fingerprint", nil
+}
+
+func (p testConfigurationProvider) TenancyOCID() (string, error) {
+	return "ocid1.tenancy.oc1..example", nil
+}
+
+func (p testConfigurationProvider) UserOCID() (string, error) {
+	return "ocid1.user.oc1..example", nil
+}
+
+func (p testConfigurationProvider) KeyFingerprint() (string, error) {
+	return "fingerprint", nil
+}
+
+func (p testConfigurationProvider) Region() (string, error) {
+	return "us-phoenix-1", nil
+}
+
+func (p testConfigurationProvider) AuthType() (common.AuthConfig, error) {
+	return common.AuthConfig{}, nil
+}
+
+type createOrUpdateSourceVariantTestCase struct {
+	name   string
+	source mysqlv1beta1.DbSystemSource
+	assert func(*testing.T, mysqlsdk.CreateDbSystemSourceDetails)
+}
+
+type quickDbSystemSourceCase struct {
+	Source mysqlv1beta1.DbSystemSource
+}
+
+type quickDbSystemAdminSecretCase struct {
+	UsernameSecret string
+	PasswordSecret string
+}
+
+func (quickDbSystemSourceCase) Generate(rand *rand.Rand, _ int) reflect.Value {
+	var source mysqlv1beta1.DbSystemSource
+
+	switch rand.Intn(4) {
+	case 0:
+		source = mysqlv1beta1.DbSystemSource{
+			SourceType: "BACKUP",
+			BackupId:   randomOCID(rand, "mysqlbackup"),
+		}
+	case 1:
+		source = mysqlv1beta1.DbSystemSource{
+			SourceType:    "PITR",
+			DbSystemId:    randomOCID(rand, "mysqldbsystem"),
+			RecoveryPoint: randomRecoveryPoint(rand),
+		}
+	case 2:
+		source = mysqlv1beta1.DbSystemSource{
+			SourceType: "IMPORTURL",
+			SourceUrl:  randomImportURL(rand),
+		}
+	default:
+		source = mysqlv1beta1.DbSystemSource{
+			SourceType: "NONE",
+		}
 	}
-	return true, nil
+
+	return reflect.ValueOf(quickDbSystemSourceCase{Source: source})
 }
 
-func (f *fakeCredentialClient) GetSecret(ctx context.Context, name, ns string) (map[string][]byte, error) {
-	if f.getSecretFn != nil {
-		return f.getSecretFn(ctx, name, ns)
-	}
-	return nil, nil
-}
-
-func (f *fakeCredentialClient) UpdateSecret(ctx context.Context, name, ns string, labels map[string]string, data map[string][]byte) (bool, error) {
-	if f.updateSecretFn != nil {
-		return f.updateSecretFn(ctx, name, ns, labels, data)
-	}
-	return true, nil
-}
-
-type mockOciDbSystemClient struct {
-	createFn func(context.Context, mysql.CreateDbSystemRequest) (mysql.CreateDbSystemResponse, error)
-	getFn    func(context.Context, mysql.GetDbSystemRequest) (mysql.GetDbSystemResponse, error)
-	listFn   func(context.Context, mysql.ListDbSystemsRequest) (mysql.ListDbSystemsResponse, error)
-	updateFn func(context.Context, mysql.UpdateDbSystemRequest) (mysql.UpdateDbSystemResponse, error)
-}
-
-func (m *mockOciDbSystemClient) CreateDbSystem(ctx context.Context, req mysql.CreateDbSystemRequest) (mysql.CreateDbSystemResponse, error) {
-	if m.createFn != nil {
-		return m.createFn(ctx, req)
-	}
-	return mysql.CreateDbSystemResponse{}, nil
-}
-
-func (m *mockOciDbSystemClient) GetDbSystem(ctx context.Context, req mysql.GetDbSystemRequest) (mysql.GetDbSystemResponse, error) {
-	if m.getFn != nil {
-		return m.getFn(ctx, req)
-	}
-	return mysql.GetDbSystemResponse{}, nil
-}
-
-func (m *mockOciDbSystemClient) ListDbSystems(ctx context.Context, req mysql.ListDbSystemsRequest) (mysql.ListDbSystemsResponse, error) {
-	if m.listFn != nil {
-		return m.listFn(ctx, req)
-	}
-	return mysql.ListDbSystemsResponse{}, nil
-}
-
-func (m *mockOciDbSystemClient) UpdateDbSystem(ctx context.Context, req mysql.UpdateDbSystemRequest) (mysql.UpdateDbSystemResponse, error) {
-	if m.updateFn != nil {
-		return m.updateFn(ctx, req)
-	}
-	return mysql.UpdateDbSystemResponse{}, nil
-}
-
-func newTestManager(credClient *fakeCredentialClient) *DbSystemServiceManager {
-	log := loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("test")}
-	return NewDbSystemServiceManager(common.NewRawConfigurationProvider("", "", "", "", "", nil), credClient, nil, log)
-}
-
-func makeActiveDbSystem(id, displayName string) mysql.DbSystem {
-	port := 3306
-	portX := 33060
-	desc := "test description"
-	hostname := "mysql.example.com"
-	ip := "10.0.0.1"
-	az := "AD-1"
-	fd := "FAULT-DOMAIN-1"
-	cfgID := "ocid1.mysqlconfiguration.oc1..xxx"
-	return mysql.DbSystem{
-		Id:                 common.String(id),
-		DisplayName:        common.String(displayName),
-		Description:        &desc,
-		LifecycleState:     mysql.DbSystemLifecycleStateActive,
-		Port:               &port,
-		PortX:              &portX,
-		HostnameLabel:      &hostname,
-		IpAddress:          &ip,
-		AvailabilityDomain: &az,
-		FaultDomain:        &fd,
-		ConfigurationId:    &cfgID,
-		CompartmentId:      common.String("ocid1.compartment.oc1..xxx"),
-	}
-}
-
-func TestCreateDbSystem_OmitsOptionalFieldsWhenEmpty(t *testing.T) {
-	mgr := newTestManager(&fakeCredentialClient{})
-	var captured mysql.CreateDbSystemRequest
-
-	ExportSetClientForTest(mgr, &mockOciDbSystemClient{
-		createFn: func(_ context.Context, req mysql.CreateDbSystemRequest) (mysql.CreateDbSystemResponse, error) {
-			captured = req
-			return mysql.CreateDbSystemResponse{}, nil
-		},
+func (quickDbSystemAdminSecretCase) Generate(rand *rand.Rand, _ int) reflect.Value {
+	return reflect.ValueOf(quickDbSystemAdminSecretCase{
+		UsernameSecret: randomSecretName(rand, "admin-user"),
+		PasswordSecret: randomSecretName(rand, "admin-password"),
 	})
-
-	dbSystem := mysqlv1beta1.MySqlDbSystem{
-		Spec: mysqlv1beta1.MySqlDbSystemSpec{
-			CompartmentId:        "ocid1.compartment.oc1..example",
-			ShapeName:            "MySQL.VM.Standard.E4.1.8GB",
-			AvailabilityDomain:   "AD-1",
-			FaultDomain:          "FAULT-DOMAIN-1",
-			DataStorageSizeInGBs: 50,
-			SubnetId:             "ocid1.subnet.oc1..example",
-			DisplayName:          "test-dbsystem",
-		},
-	}
-
-	_, err := mgr.CreateDbSystem(context.Background(), dbSystem, "admin", "password")
-	assert.NoError(t, err)
-	assert.Nil(t, captured.CreateDbSystemDetails.Description)
-	assert.Nil(t, captured.CreateDbSystemDetails.Port)
-	assert.Nil(t, captured.CreateDbSystemDetails.PortX)
-	assert.Nil(t, captured.CreateDbSystemDetails.ConfigurationId)
 }
 
-func TestCreateOrUpdate_LifecycleProvisioningWaitsForActive(t *testing.T) {
-	credClient := &fakeCredentialClient{
-		getSecretFn: func(_ context.Context, name, _ string) (map[string][]byte, error) {
-			if name == "admin-user" {
-				return map[string][]byte{"username": []byte("admin")}, nil
-			}
-			return map[string][]byte{"password": []byte("password")}, nil
+func (c quickDbSystemSourceCase) matches(projected mysqlsdk.CreateDbSystemSourceDetails) error {
+	switch c.Source.SourceType {
+	case "BACKUP":
+		return matchBackupSourceDetails(projected, c.Source.BackupId)
+	case "PITR":
+		return matchPITRSourceDetails(projected, c.Source.DbSystemId, c.Source.RecoveryPoint)
+	case "IMPORTURL":
+		return matchImportURLSourceDetails(projected, c.Source.SourceUrl)
+	case "NONE":
+		return matchNoneSourceDetails(projected)
+	default:
+		return fmt.Errorf("unexpected sourceType %q", c.Source.SourceType)
+	}
+}
+
+func (c quickDbSystemSourceCase) equal(other quickDbSystemSourceCase) bool {
+	return reflect.DeepEqual(c.Source, other.Source)
+}
+
+func (c quickDbSystemAdminSecretCase) equal(other quickDbSystemAdminSecretCase) bool {
+	return c.UsernameSecret == other.UsernameSecret && c.PasswordSecret == other.PasswordSecret
+}
+
+func TestDbSystemServiceManagerCreateOrUpdateProjectsSourceVariants(t *testing.T) {
+	t.Parallel()
+
+	tests := []createOrUpdateSourceVariantTestCase{
+		{
+			name: "backup",
+			source: mysqlv1beta1.DbSystemSource{
+				SourceType: "BACKUP",
+				BackupId:   "ocid1.mysqlbackup.oc1..backup",
+			},
+			assert: assertBackupSourceDetails,
+		},
+		{
+			name: "pitr",
+			source: mysqlv1beta1.DbSystemSource{
+				SourceType:    "PITR",
+				DbSystemId:    "ocid1.mysqldbsystem.oc1..source",
+				RecoveryPoint: "2026-03-01T02:03:04Z",
+			},
+			assert: assertPITRSourceDetails,
+		},
+		{
+			name: "import-url",
+			source: mysqlv1beta1.DbSystemSource{
+				SourceType: "IMPORTURL",
+				SourceUrl:  "https://objectstorage.example.com/n/tenant/b/bucket/o/import.manifest.json",
+			},
+			assert: assertImportURLSourceDetails,
+		},
+		{
+			name: "none",
+			source: mysqlv1beta1.DbSystemSource{
+				SourceType: "NONE",
+			},
+			assert: assertNoneSourceDetails,
 		},
 	}
-	mgr := newTestManager(credClient)
 
-	const dbSystemID = "ocid1.mysqldbsystem.oc1..example"
-	ExportSetClientForTest(mgr, &mockOciDbSystemClient{
-		createFn: func(_ context.Context, _ mysql.CreateDbSystemRequest) (mysql.CreateDbSystemResponse, error) {
-			return mysql.CreateDbSystemResponse{
-				DbSystem: mysql.DbSystem{Id: common.String(dbSystemID)},
-			}, nil
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			tt.assert(t, captureCreateDbSystemSource(t, tt.source))
+		})
+	}
+}
+
+func TestDbSystemServiceManagerCreateOrUpdateProjectsSourceVariantsQuick(t *testing.T) {
+	t.Parallel()
+
+	err := quick.Check(func(sourceCase quickDbSystemSourceCase) bool {
+		projected, projectErr := projectCreateDbSystemSource(sourceCase.Source)
+		if projectErr != nil {
+			t.Logf("project %q source %#v: %v", sourceCase.Source.SourceType, sourceCase.Source, projectErr)
+			return false
+		}
+		if matchErr := sourceCase.matches(projected); matchErr != nil {
+			t.Logf("match %q source %#v: %v", sourceCase.Source.SourceType, sourceCase.Source, matchErr)
+			return false
+		}
+		return true
+	}, &quick.Config{MaxCount: 64})
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestDbSystemServiceManagerCreateOrUpdateResolvesAdminCredentialsFromSecrets(t *testing.T) {
+	t.Parallel()
+
+	resource := &mysqlv1beta1.DbSystem{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "default",
 		},
-		getFn: func(_ context.Context, _ mysql.GetDbSystemRequest) (mysql.GetDbSystemResponse, error) {
-			return mysql.GetDbSystemResponse{
-				DbSystem: mysql.DbSystem{
-					Id:             common.String(dbSystemID),
-					DisplayName:    common.String("test-dbsystem"),
-					LifecycleState: mysql.DbSystemLifecycleStateCreating,
+		Spec: mysqlv1beta1.DbSystemSpec{
+			CompartmentId: "ocid1.compartment.oc1..example",
+			ShapeName:     "MySQL.VM.Standard.E3.1.8GB",
+			SubnetId:      "ocid1.subnet.oc1..example",
+			AdminUsername: usernameSecretSource("admin-secret"),
+			AdminPassword: passwordSecretSource("admin-secret"),
+		},
+	}
+	request, err := projectCreateDbSystemRequest(
+		resource,
+		&fakeCredentialClient{
+			secrets: map[string]map[string][]byte{
+				"admin-secret": {
+					"username": []byte("admin"),
+					"password": []byte("S3cr3t!"),
 				},
-			}, nil
+			},
 		},
-	})
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if request.AdminUsername == nil || *request.AdminUsername != "admin" {
+		t.Fatalf("CreateDbSystemDetails.AdminUsername = %v, want resolved username", request.AdminUsername)
+	}
+	if request.AdminPassword == nil || *request.AdminPassword != "S3cr3t!" {
+		t.Fatalf("CreateDbSystemDetails.AdminPassword = %v, want resolved password", request.AdminPassword)
+	}
+}
 
-	dbSystem := &mysqlv1beta1.MySqlDbSystem{}
-	dbSystem.Name = "test-dbsystem"
-	dbSystem.Namespace = "default"
-	dbSystem.Spec = mysqlv1beta1.MySqlDbSystemSpec{
-		CompartmentId:        "ocid1.compartment.oc1..example",
-		ShapeName:            "MySQL.VM.Standard.E4.1.8GB",
-		AvailabilityDomain:   "AD-1",
-		FaultDomain:          "FAULT-DOMAIN-1",
-		DataStorageSizeInGBs: 50,
-		SubnetId:             "ocid1.subnet.oc1..example",
-		DisplayName:          "test-dbsystem",
-		AdminUsername:        shared.UsernameSource{Secret: shared.SecretSource{SecretName: "admin-user"}},
-		AdminPassword:        shared.PasswordSource{Secret: shared.SecretSource{SecretName: "admin-password"}},
+func TestDbSystemSpecOmitsAdminSecretRefsWhenUnset(t *testing.T) {
+	t.Parallel()
+
+	spec := mysqlv1beta1.DbSystemSpec{
+		CompartmentId: "ocid1.compartment.oc1..example",
+		ShapeName:     "MySQL.VM.Standard.E3.1.8GB",
+		SubnetId:      "ocid1.subnet.oc1..example",
 	}
 
-	resp, err := mgr.CreateOrUpdate(context.Background(), dbSystem, ctrl.Request{})
-	assert.Error(t, err)
-	assert.False(t, resp.IsSuccessful)
-	assert.True(t, strings.Contains(err.Error(), "waiting for ACTIVE"))
-	assert.False(t, credClient.createCalled, "secret creation should wait until ACTIVE")
-}
-
-func TestGetCrdStatus_Happy(t *testing.T) {
-	mgr := newTestManager(&fakeCredentialClient{})
-
-	dbSystem := &mysqlv1beta1.MySqlDbSystem{}
-	dbSystem.Status.OsokStatus.Ocid = "ocid1.mysqldbsystem.oc1..xxx"
-
-	status, err := mgr.GetCrdStatus(dbSystem)
-	assert.NoError(t, err)
-	assert.Equal(t, "ocid1.mysqldbsystem.oc1..xxx", string(status.Ocid))
-}
-
-func TestGetCrdStatus_WrongType(t *testing.T) {
-	mgr := newTestManager(&fakeCredentialClient{})
-
-	stream := &streamingv1beta1.Stream{}
-	_, err := mgr.GetCrdStatus(stream)
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to convert the type assertion for MySqlDbSystem")
-}
-
-func TestDelete_NoOcid(t *testing.T) {
-	mgr := newTestManager(&fakeCredentialClient{})
-
-	dbSystem := &mysqlv1beta1.MySqlDbSystem{}
-	done, err := mgr.Delete(context.Background(), dbSystem)
-	assert.NoError(t, err)
-	assert.True(t, done)
-}
-
-func TestCreateOrUpdate_BadType(t *testing.T) {
-	mgr := newTestManager(&fakeCredentialClient{})
-
-	stream := &streamingv1beta1.Stream{}
-	resp, err := mgr.CreateOrUpdate(context.Background(), stream, ctrl.Request{})
-	assert.Error(t, err)
-	assert.False(t, resp.IsSuccessful)
-}
-
-func TestGetCredentialMapForDbSystem(t *testing.T) {
-	credMap, err := GetCredentialMapForTest(makeActiveDbSystem("ocid1.mysqldbsystem.oc1..xxx", "test-dbsystem"))
-
-	assert.NoError(t, err)
-	assert.Equal(t, "10.0.0.1", string(credMap["PrivateIPAddress"]))
-	assert.Equal(t, "mysql.example.com", string(credMap["InternalFQDN"]))
-	assert.Equal(t, "AD-1", string(credMap["AvailabilityDomain"]))
-	assert.Equal(t, "FAULT-DOMAIN-1", string(credMap["FaultDomain"]))
-	assert.Equal(t, "3306", string(credMap["MySQLPort"]))
-	assert.Equal(t, "33060", string(credMap["MySQLXProtocolPort"]))
-	assert.Contains(t, credMap, "Endpoints")
-}
-
-func TestGetCredentialMapForDbSystem_NilHostname(t *testing.T) {
-	port := 3306
-	portX := 33060
-	ip := "10.0.0.2"
-	az := "AD-2"
-	fd := "FAULT-DOMAIN-2"
-	dbSystem := mysql.DbSystem{
-		Id:                 common.String("ocid1.mysqldbsystem.oc1..yyy"),
-		IpAddress:          &ip,
-		AvailabilityDomain: &az,
-		FaultDomain:        &fd,
-		Port:               &port,
-		PortX:              &portX,
+	payload, err := json.Marshal(spec)
+	if err != nil {
+		t.Fatalf("json.Marshal(DbSystemSpec) error = %v", err)
+	}
+	if strings.Contains(string(payload), "adminUsername") || strings.Contains(string(payload), "adminPassword") {
+		t.Fatalf("json.Marshal(DbSystemSpec) = %s, want admin secret refs omitted", string(payload))
 	}
 
-	credMap, err := GetCredentialMapForTest(dbSystem)
-	assert.NoError(t, err)
-	assert.Equal(t, "", string(credMap["InternalFQDN"]))
+	request, err := projectCreateDbSystemRequest(&mysqlv1beta1.DbSystem{Spec: spec}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if request.AdminUsername != nil {
+		t.Fatalf("CreateDbSystemDetails.AdminUsername = %v, want omitted nil pointer", request.AdminUsername)
+	}
+	if request.AdminPassword != nil {
+		t.Fatalf("CreateDbSystemDetails.AdminPassword = %v, want omitted nil pointer", request.AdminPassword)
+	}
 }
 
-func TestDeleteFromSecret(t *testing.T) {
-	deleteCalled := false
-	credClient := &fakeCredentialClient{
-		deleteSecretFn: func(_ context.Context, _, _ string) (bool, error) {
-			deleteCalled = true
-			return true, nil
+func TestDbSystemServiceManagerCreateOrUpdateTreatsEmptyAdminSecretObjectsAsOmitted(t *testing.T) {
+	t.Parallel()
+
+	credentialClient := &fakeCredentialClient{secrets: map[string]map[string][]byte{}}
+	resource := &mysqlv1beta1.DbSystem{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "default",
+		},
+		Spec: mysqlv1beta1.DbSystemSpec{
+			CompartmentId: "ocid1.compartment.oc1..example",
+			ShapeName:     "MySQL.VM.Standard.E3.1.8GB",
+			SubnetId:      "ocid1.subnet.oc1..example",
+			AdminUsername: &shared.UsernameSource{},
+			AdminPassword: &shared.PasswordSource{},
 		},
 	}
-	mgr := newTestManager(credClient)
 
-	ok, err := ExportDeleteFromSecretForTest(mgr, context.Background(), "default", "my-dbsystem")
-	assert.NoError(t, err)
-	assert.True(t, ok)
-	assert.True(t, deleteCalled)
-}
-
-func TestDbSystemRetryPolicy_Creating(t *testing.T) {
-	mgr := newTestManager(&fakeCredentialClient{})
-	shouldRetry := ExportGetDbSystemRetryPredicate(mgr)
-
-	resp := common.OCIOperationResponse{
-		Response: mysql.GetDbSystemResponse{DbSystem: mysql.DbSystem{LifecycleState: "CREATING"}},
+	request, err := projectCreateDbSystemRequest(resource, credentialClient)
+	if err != nil {
+		t.Fatal(err)
 	}
-	assert.True(t, shouldRetry(resp))
-}
-
-func TestDbSystemRetryPolicy_Active(t *testing.T) {
-	mgr := newTestManager(&fakeCredentialClient{})
-	shouldRetry := ExportGetDbSystemRetryPredicate(mgr)
-
-	resp := common.OCIOperationResponse{
-		Response: mysql.GetDbSystemResponse{DbSystem: mysql.DbSystem{LifecycleState: "ACTIVE"}},
+	if request.AdminUsername != nil {
+		t.Fatalf("CreateDbSystemDetails.AdminUsername = %v, want omitted nil pointer", request.AdminUsername)
 	}
-	assert.False(t, shouldRetry(resp))
+	if request.AdminPassword != nil {
+		t.Fatalf("CreateDbSystemDetails.AdminPassword = %v, want omitted nil pointer", request.AdminPassword)
+	}
+	if resource.Status.AdminUsername != nil {
+		t.Fatalf("status.adminUsername = %#v, want omitted nil pointer", resource.Status.AdminUsername)
+	}
+	if resource.Status.AdminPassword != nil {
+		t.Fatalf("status.adminPassword = %#v, want omitted nil pointer", resource.Status.AdminPassword)
+	}
+	if len(credentialClient.readNames) != 0 {
+		t.Fatalf("credential reads = %v, want no secret lookups", credentialClient.readNames)
+	}
 }
 
-func TestDbSystemRetryPolicy_NonResponse(t *testing.T) {
-	mgr := newTestManager(&fakeCredentialClient{})
-	shouldRetry := ExportGetDbSystemRetryPredicate(mgr)
+func TestDbSystemServiceManagerCreateOrUpdateListBindingUsesReusableLifecycleStates(t *testing.T) {
+	t.Parallel()
 
-	assert.True(t, shouldRetry(common.OCIOperationResponse{}))
+	tests := []struct {
+		name           string
+		lifecycleState mysqlsdk.DbSystemLifecycleStateEnum
+		wantCreate     bool
+		wantRequeue    bool
+		wantOcid       string
+	}{
+		{
+			name:           "active binds existing db system",
+			lifecycleState: mysqlsdk.DbSystemLifecycleStateActive,
+			wantCreate:     false,
+			wantRequeue:    false,
+			wantOcid:       "ocid1.mysqldbsystem.oc1..existing",
+		},
+		{
+			name:           "deleting match falls through to create",
+			lifecycleState: mysqlsdk.DbSystemLifecycleStateDeleting,
+			wantCreate:     true,
+			wantRequeue:    false,
+			wantOcid:       "ocid1.mysqldbsystem.oc1..created",
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			runDbSystemListBindingLifecycleCase(t, tt.lifecycleState, tt.wantCreate, tt.wantRequeue, tt.wantOcid)
+		})
+	}
 }
 
-func TestDbSystemRetryNextDuration(t *testing.T) {
-	mgr := newTestManager(&fakeCredentialClient{})
-	nextDuration := ExportGetDbSystemNextDuration(mgr)
+func runDbSystemListBindingLifecycleCase(
+	t *testing.T,
+	lifecycleState mysqlsdk.DbSystemLifecycleStateEnum,
+	wantCreate, wantRequeue bool,
+	wantOcid string,
+) {
+	t.Helper()
 
-	assert.Equal(t, 1*time.Minute, nextDuration(common.OCIOperationResponse{AttemptNumber: 1}))
+	manager, createCalled, listRequest := newDbSystemListBindingTestManager(lifecycleState)
+	resource := newDbSystemListBindingTestResource("wanted")
+
+	response, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	assertDbSystemListBindingLifecycleOutcome(
+		t,
+		lifecycleState,
+		wantCreate,
+		wantRequeue,
+		wantOcid,
+		resource,
+		response,
+		*createCalled,
+		*listRequest,
+	)
 }
 
-func TestCreateOrUpdate_BindExistingDbSystem_NothingToUpdate(t *testing.T) {
-	mgr := newTestManager(&fakeCredentialClient{
-		createSecretFn: func(_ context.Context, _, _ string, _ map[string]string, _ map[string][]byte) (bool, error) {
-			return true, nil
-		},
-	})
+func assertDbSystemListBindingLifecycleOutcome(
+	t *testing.T,
+	lifecycleState mysqlsdk.DbSystemLifecycleStateEnum,
+	wantCreate, wantRequeue bool,
+	wantOcid string,
+	resource *mysqlv1beta1.DbSystem,
+	response servicemanager.OSOKResponse,
+	createCalled bool,
+	listRequest mysqlsdk.ListDbSystemsRequest,
+) {
+	t.Helper()
 
-	dbSystemID := "ocid1.mysqldbsystem.oc1..xxx"
-	ExportSetClientForTest(mgr, &mockOciDbSystemClient{
-		getFn: func(_ context.Context, _ mysql.GetDbSystemRequest) (mysql.GetDbSystemResponse, error) {
-			return mysql.GetDbSystemResponse{
-				DbSystem: makeActiveDbSystem(dbSystemID, "test-dbsystem"),
-			}, nil
-		},
-	})
-
-	dbSystem := &mysqlv1beta1.MySqlDbSystem{}
-	dbSystem.Name = "test-dbsystem"
-	dbSystem.Namespace = "default"
-	dbSystem.Spec.MySqlDbSystemId = shared.OCID(dbSystemID)
-	dbSystem.Spec.DisplayName = "test-dbsystem"
-
-	resp, err := mgr.CreateOrUpdate(context.Background(), dbSystem, ctrl.Request{})
-	assert.NoError(t, err)
-	assert.True(t, resp.IsSuccessful)
-	assert.Equal(t, shared.OCID(dbSystemID), dbSystem.Status.OsokStatus.Ocid)
+	if !response.IsSuccessful {
+		t.Fatal("CreateOrUpdate() should report success")
+	}
+	if createCalled != wantCreate {
+		t.Fatalf("Create() called = %t, want %t for lifecycle %q", createCalled, wantCreate, lifecycleState)
+	}
+	if response.ShouldRequeue != wantRequeue {
+		t.Fatalf("response.ShouldRequeue = %t, want %t for lifecycle %q", response.ShouldRequeue, wantRequeue, lifecycleState)
+	}
+	assertDbSystemListBindingRequest(t, listRequest, resource)
+	if string(resource.Status.OsokStatus.Ocid) != wantOcid {
+		t.Fatalf("status.ocid = %q, want %q", resource.Status.OsokStatus.Ocid, wantOcid)
+	}
 }
 
-func TestCreateOrUpdate_BindExistingDbSystem_UpdateNeeded(t *testing.T) {
-	mgr := newTestManager(&fakeCredentialClient{
-		createSecretFn: func(_ context.Context, _, _ string, _ map[string]string, _ map[string][]byte) (bool, error) {
-			return true, nil
-		},
-	})
+func assertDbSystemListBindingRequest(t *testing.T, listRequest mysqlsdk.ListDbSystemsRequest, resource *mysqlv1beta1.DbSystem) {
+	t.Helper()
 
-	dbSystemID := "ocid1.mysqldbsystem.oc1..yyy"
-	updateCalled := false
-	ExportSetClientForTest(mgr, &mockOciDbSystemClient{
-		getFn: func(_ context.Context, _ mysql.GetDbSystemRequest) (mysql.GetDbSystemResponse, error) {
-			return mysql.GetDbSystemResponse{
-				DbSystem: makeActiveDbSystem(dbSystemID, "old-name"),
-			}, nil
-		},
-		updateFn: func(_ context.Context, _ mysql.UpdateDbSystemRequest) (mysql.UpdateDbSystemResponse, error) {
-			updateCalled = true
-			return mysql.UpdateDbSystemResponse{}, nil
-		},
-	})
-
-	dbSystem := &mysqlv1beta1.MySqlDbSystem{}
-	dbSystem.Name = "test-dbsystem"
-	dbSystem.Namespace = "default"
-	dbSystem.Spec.MySqlDbSystemId = shared.OCID(dbSystemID)
-	dbSystem.Spec.DisplayName = "new-name"
-
-	resp, err := mgr.CreateOrUpdate(context.Background(), dbSystem, ctrl.Request{})
-	assert.NoError(t, err)
-	assert.True(t, resp.IsSuccessful)
-	assert.True(t, updateCalled)
+	if listRequest.CompartmentId == nil || *listRequest.CompartmentId != resource.Spec.CompartmentId {
+		t.Fatalf("list request compartmentId = %v, want %q", listRequest.CompartmentId, resource.Spec.CompartmentId)
+	}
+	if listRequest.DisplayName == nil || *listRequest.DisplayName != resource.Spec.DisplayName {
+		t.Fatalf("list request displayName = %v, want %q", listRequest.DisplayName, resource.Spec.DisplayName)
+	}
+	if listRequest.LifecycleState != "" {
+		t.Fatalf("list request lifecycleState = %q, want omitted empty lifecycle filter", listRequest.LifecycleState)
+	}
 }
 
-func TestCreateOrUpdate_OciGetError(t *testing.T) {
-	mgr := newTestManager(&fakeCredentialClient{})
+func TestDbSystemServiceManagerCreateOrUpdateRejectsSourceMutationsQuick(t *testing.T) {
+	t.Parallel()
 
-	ExportSetClientForTest(mgr, &mockOciDbSystemClient{
-		getFn: func(_ context.Context, _ mysql.GetDbSystemRequest) (mysql.GetDbSystemResponse, error) {
-			return mysql.GetDbSystemResponse{}, errors.New("OCI API error")
-		},
-	})
+	manager := newDbSystemSourceMutationManager()
 
-	dbSystem := &mysqlv1beta1.MySqlDbSystem{}
-	dbSystem.Spec.MySqlDbSystemId = "ocid1.mysqldbsystem.oc1..xxx"
+	err := quick.Check(func(current, desired quickDbSystemSourceCase) bool {
+		if current.equal(desired) {
+			return true
+		}
 
-	resp, err := mgr.CreateOrUpdate(context.Background(), dbSystem, ctrl.Request{})
-	assert.Error(t, err)
-	assert.False(t, resp.IsSuccessful)
+		resource := newExistingDbSystemWithSource(current.Source, desired.Source)
+		_, createOrUpdateErr := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+		if createOrUpdateErr == nil {
+			t.Logf("CreateOrUpdate() error = nil for current=%#v desired=%#v", current.Source, desired.Source)
+			return false
+		}
+		if !strings.Contains(createOrUpdateErr.Error(), "require replacement when source changes") {
+			t.Logf("CreateOrUpdate() error = %v for current=%#v desired=%#v", createOrUpdateErr, current.Source, desired.Source)
+			return false
+		}
+		return true
+	}, &quick.Config{MaxCount: 64})
+	if err != nil {
+		t.Fatal(err)
+	}
 }
 
-func TestCreateOrUpdate_FindExisting(t *testing.T) {
-	mgr := newTestManager(&fakeCredentialClient{
-		createSecretFn: func(_ context.Context, _, _ string, _ map[string]string, _ map[string][]byte) (bool, error) {
-			return true, nil
-		},
-	})
+func TestDbSystemServiceManagerCreateOrUpdateRejectsAdminSecretMutationsQuick(t *testing.T) {
+	t.Parallel()
 
-	dbSystemID := "ocid1.mysqldbsystem.oc1..found"
-	ExportSetClientForTest(mgr, &mockOciDbSystemClient{
-		listFn: func(_ context.Context, _ mysql.ListDbSystemsRequest) (mysql.ListDbSystemsResponse, error) {
-			return mysql.ListDbSystemsResponse{
-				Items: []mysql.DbSystemSummary{
-					{
-						Id:             common.String(dbSystemID),
-						LifecycleState: mysql.DbSystemLifecycleStateActive,
+	manager := newDbSystemAdminSecretMutationManager()
+
+	err := quick.Check(func(current, desired quickDbSystemAdminSecretCase) bool {
+		if current.equal(desired) {
+			return true
+		}
+
+		resource := newExistingDbSystemWithAdminSecrets(current, desired)
+		_, createOrUpdateErr := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+		if createOrUpdateErr == nil {
+			t.Logf("CreateOrUpdate() error = nil for current=%#v desired=%#v", current, desired)
+			return false
+		}
+		if !strings.Contains(createOrUpdateErr.Error(), "require replacement when admin") {
+			t.Logf("CreateOrUpdate() error = %v for current=%#v desired=%#v", createOrUpdateErr, current, desired)
+			return false
+		}
+		return true
+	}, &quick.Config{MaxCount: 64})
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func captureCreateDbSystemSource(t *testing.T, source mysqlv1beta1.DbSystemSource) mysqlsdk.CreateDbSystemSourceDetails {
+	t.Helper()
+
+	projected, err := projectCreateDbSystemSource(source)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return projected
+}
+
+func projectCreateDbSystemRequest(resource *mysqlv1beta1.DbSystem, credentialClient credhelper.CredentialClient) (mysqlsdk.CreateDbSystemRequest, error) {
+	var captured mysqlsdk.CreateDbSystemRequest
+	manager := &DbSystemServiceManager{
+		CredentialClient: credentialClient,
+		client: generatedruntime.NewServiceClient[*mysqlv1beta1.DbSystem](generatedruntime.Config[*mysqlv1beta1.DbSystem]{
+			Kind:             "DbSystem",
+			SDKName:          "DbSystem",
+			CredentialClient: credentialClient,
+			Create: &generatedruntime.Operation{
+				NewRequest: func() any { return &mysqlsdk.CreateDbSystemRequest{} },
+				Call: func(_ context.Context, request any) (any, error) {
+					captured = *request.(*mysqlsdk.CreateDbSystemRequest)
+					return fakeCreateDbSystemResponse{
+						DbSystem: fakeDbSystemBody{
+							Id:             "ocid1.mysqldbsystem.oc1..created",
+							LifecycleState: "ACTIVE",
+						},
+					}, nil
+				},
+			},
+		}),
+	}
+
+	response, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		return mysqlsdk.CreateDbSystemRequest{}, fmt.Errorf("CreateOrUpdate() error = %w", err)
+	}
+	if !response.IsSuccessful {
+		return mysqlsdk.CreateDbSystemRequest{}, fmt.Errorf("CreateOrUpdate() should report success")
+	}
+	return captured, nil
+}
+
+func newDbSystemListBindingTestManager(lifecycleState mysqlsdk.DbSystemLifecycleStateEnum) (*DbSystemServiceManager, *bool, *mysqlsdk.ListDbSystemsRequest) {
+	createCalled := false
+	listRequest := mysqlsdk.ListDbSystemsRequest{}
+
+	manager := &DbSystemServiceManager{
+		client: defaultDbSystemServiceClient{
+			ServiceClient: generatedruntime.NewServiceClient[*mysqlv1beta1.DbSystem](generatedruntime.Config[*mysqlv1beta1.DbSystem]{
+				Kind:    "DbSystem",
+				SDKName: "DbSystem",
+				Semantics: &generatedruntime.Semantics{
+					List: &generatedruntime.ListSemantics{
+						ResponseItemsField: "Items",
+						MatchFields:        []string{"compartmentId", "configurationId", "databaseManagement", "dbSystemId", "displayName", "isHeatWaveClusterAttached", "isUpToDate", "state"},
+					},
+					Lifecycle: generatedruntime.LifecycleSemantics{
+						ProvisioningStates: []string{"CREATING", "UPDATING"},
+						UpdatingStates:     []string{"UPDATING"},
+						ActiveStates:       []string{"ACTIVE"},
+					},
+					Delete: generatedruntime.DeleteSemantics{
+						Policy:         "required",
+						PendingStates:  []string{"DELETING"},
+						TerminalStates: []string{"DELETED"},
 					},
 				},
-			}, nil
-		},
-		getFn: func(_ context.Context, _ mysql.GetDbSystemRequest) (mysql.GetDbSystemResponse, error) {
-			return mysql.GetDbSystemResponse{
-				DbSystem: makeActiveDbSystem(dbSystemID, "my-dbsystem"),
-			}, nil
-		},
-	})
-
-	dbSystem := &mysqlv1beta1.MySqlDbSystem{}
-	dbSystem.Name = "my-dbsystem"
-	dbSystem.Namespace = "default"
-	dbSystem.Spec.DisplayName = "my-dbsystem"
-	dbSystem.Spec.CompartmentId = "ocid1.compartment.oc1..xxx"
-
-	resp, err := mgr.CreateOrUpdate(context.Background(), dbSystem, ctrl.Request{})
-	assert.NoError(t, err)
-	assert.True(t, resp.IsSuccessful)
-	assert.Equal(t, shared.OCID(dbSystemID), dbSystem.Status.OsokStatus.Ocid)
-}
-
-func TestCreateOrUpdate_ListError(t *testing.T) {
-	mgr := newTestManager(&fakeCredentialClient{})
-
-	ExportSetClientForTest(mgr, &mockOciDbSystemClient{
-		listFn: func(_ context.Context, _ mysql.ListDbSystemsRequest) (mysql.ListDbSystemsResponse, error) {
-			return mysql.ListDbSystemsResponse{}, errors.New("list API error")
-		},
-	})
-
-	dbSystem := &mysqlv1beta1.MySqlDbSystem{}
-	dbSystem.Spec.DisplayName = "my-dbsystem"
-	dbSystem.Spec.CompartmentId = "ocid1.compartment.oc1..xxx"
-
-	resp, err := mgr.CreateOrUpdate(context.Background(), dbSystem, ctrl.Request{})
-	assert.Error(t, err)
-	assert.False(t, resp.IsSuccessful)
-}
-
-func TestCreateOrUpdate_CreateNew(t *testing.T) {
-	newDbSystemID := "ocid1.mysqldbsystem.oc1..new"
-	credClient := &fakeCredentialClient{
-		getSecretFn: func(_ context.Context, name, _ string) (map[string][]byte, error) {
-			if name == "admin-username-secret" {
-				return map[string][]byte{"username": []byte("admin")}, nil
-			}
-			return map[string][]byte{"password": []byte("secret123")}, nil
-		},
-		createSecretFn: func(_ context.Context, _, _ string, _ map[string]string, _ map[string][]byte) (bool, error) {
-			return true, nil
+				Create: &generatedruntime.Operation{
+					NewRequest: func() any { return &mysqlsdk.CreateDbSystemRequest{} },
+					Call: func(_ context.Context, _ any) (any, error) {
+						createCalled = true
+						return mysqlsdk.CreateDbSystemResponse{
+							DbSystem: mysqlsdk.DbSystem{
+								Id:             common.String("ocid1.mysqldbsystem.oc1..created"),
+								DisplayName:    common.String("wanted"),
+								CompartmentId:  common.String("ocid1.compartment.oc1..example"),
+								LifecycleState: mysqlsdk.DbSystemLifecycleStateActive,
+							},
+						}, nil
+					},
+				},
+				List: &generatedruntime.Operation{
+					NewRequest: func() any { return &mysqlsdk.ListDbSystemsRequest{} },
+					Call: func(_ context.Context, request any) (any, error) {
+						listRequest = *request.(*mysqlsdk.ListDbSystemsRequest)
+						return mysqlsdk.ListDbSystemsResponse{
+							Items: []mysqlsdk.DbSystemSummary{
+								{
+									Id:             common.String("ocid1.mysqldbsystem.oc1..existing"),
+									DisplayName:    common.String("wanted"),
+									CompartmentId:  common.String("ocid1.compartment.oc1..example"),
+									LifecycleState: lifecycleState,
+								},
+							},
+						}, nil
+					},
+					Fields: []generatedruntime.RequestField{
+						{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
+						{FieldName: "DisplayName", RequestName: "displayName", Contribution: "query"},
+						{FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query"},
+					},
+				},
+			}),
 		},
 	}
-	mgr := newTestManager(credClient)
 
-	createCalled := false
-	ExportSetClientForTest(mgr, &mockOciDbSystemClient{
-		listFn: func(_ context.Context, _ mysql.ListDbSystemsRequest) (mysql.ListDbSystemsResponse, error) {
-			return mysql.ListDbSystemsResponse{}, nil
-		},
-		createFn: func(_ context.Context, _ mysql.CreateDbSystemRequest) (mysql.CreateDbSystemResponse, error) {
-			createCalled = true
-			return mysql.CreateDbSystemResponse{
-				DbSystem: mysql.DbSystem{Id: common.String(newDbSystemID)},
-			}, nil
-		},
-		getFn: func(_ context.Context, _ mysql.GetDbSystemRequest) (mysql.GetDbSystemResponse, error) {
-			return mysql.GetDbSystemResponse{
-				DbSystem: makeActiveDbSystem(newDbSystemID, "new-dbsystem"),
-			}, nil
-		},
-	})
-
-	dbSystem := &mysqlv1beta1.MySqlDbSystem{}
-	dbSystem.Name = "new-dbsystem"
-	dbSystem.Namespace = "default"
-	dbSystem.Spec.DisplayName = "new-dbsystem"
-	dbSystem.Spec.CompartmentId = "ocid1.compartment.oc1..xxx"
-	dbSystem.Spec.AdminUsername.Secret.SecretName = "admin-username-secret"
-	dbSystem.Spec.AdminPassword.Secret.SecretName = "admin-password-secret"
-
-	resp, err := mgr.CreateOrUpdate(context.Background(), dbSystem, ctrl.Request{NamespacedName: types.NamespacedName{Namespace: "default"}})
-	assert.NoError(t, err)
-	assert.True(t, resp.IsSuccessful)
-	assert.True(t, createCalled)
-	assert.Equal(t, shared.OCID(newDbSystemID), dbSystem.Status.OsokStatus.Ocid)
+	return manager, &createCalled, &listRequest
 }
 
-func TestCreateOrUpdate_CreateNew_MissingUsernameKey(t *testing.T) {
-	credClient := &fakeCredentialClient{
-		getSecretFn: func(_ context.Context, _, _ string) (map[string][]byte, error) {
-			return map[string][]byte{"wrongkey": []byte("value")}, nil
+func newDbSystemListBindingTestResource(displayName string) *mysqlv1beta1.DbSystem {
+	return &mysqlv1beta1.DbSystem{
+		Spec: mysqlv1beta1.DbSystemSpec{
+			CompartmentId: "ocid1.compartment.oc1..example",
+			ShapeName:     "MySQL.VM.Standard.E3.1.8GB",
+			SubnetId:      "ocid1.subnet.oc1..example",
+			DisplayName:   displayName,
 		},
 	}
-	mgr := newTestManager(credClient)
-
-	ExportSetClientForTest(mgr, &mockOciDbSystemClient{
-		listFn: func(_ context.Context, _ mysql.ListDbSystemsRequest) (mysql.ListDbSystemsResponse, error) {
-			return mysql.ListDbSystemsResponse{}, nil
-		},
-	})
-
-	dbSystem := &mysqlv1beta1.MySqlDbSystem{}
-	dbSystem.Spec.DisplayName = "my-dbsystem"
-	dbSystem.Spec.CompartmentId = "ocid1.compartment.oc1..xxx"
-	dbSystem.Spec.AdminUsername.Secret.SecretName = "admin-username-secret"
-	dbSystem.Spec.AdminPassword.Secret.SecretName = "admin-password-secret"
-
-	resp, err := mgr.CreateOrUpdate(context.Background(), dbSystem, ctrl.Request{})
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "username key")
-	assert.False(t, resp.IsSuccessful)
 }
 
-func TestCreateOrUpdate_CreateNew_GetSecretError(t *testing.T) {
-	credClient := &fakeCredentialClient{
-		getSecretFn: func(_ context.Context, _, _ string) (map[string][]byte, error) {
-			return nil, errors.New("secret not found")
+func projectCreateDbSystemSource(source mysqlv1beta1.DbSystemSource) (mysqlsdk.CreateDbSystemSourceDetails, error) {
+	request, err := projectCreateDbSystemRequest(&mysqlv1beta1.DbSystem{
+		Spec: mysqlv1beta1.DbSystemSpec{
+			CompartmentId: "ocid1.compartment.oc1..example",
+			ShapeName:     "MySQL.VM.Standard.E3.1.8GB",
+			SubnetId:      "ocid1.subnet.oc1..example",
+			Source:        source,
 		},
+	}, nil)
+	if err != nil {
+		return nil, err
 	}
-	mgr := newTestManager(credClient)
-
-	ExportSetClientForTest(mgr, &mockOciDbSystemClient{
-		listFn: func(_ context.Context, _ mysql.ListDbSystemsRequest) (mysql.ListDbSystemsResponse, error) {
-			return mysql.ListDbSystemsResponse{}, nil
-		},
-	})
-
-	dbSystem := &mysqlv1beta1.MySqlDbSystem{}
-	dbSystem.Spec.DisplayName = "my-dbsystem"
-	dbSystem.Spec.CompartmentId = "ocid1.compartment.oc1..xxx"
-	dbSystem.Spec.AdminUsername.Secret.SecretName = "admin-username-secret"
-	dbSystem.Spec.AdminPassword.Secret.SecretName = "admin-password-secret"
-
-	resp, err := mgr.CreateOrUpdate(context.Background(), dbSystem, ctrl.Request{})
-	assert.Error(t, err)
-	assert.False(t, resp.IsSuccessful)
-}
-
-func TestCreateOrUpdate_LifecycleFailed(t *testing.T) {
-	dbSystemID := "ocid1.mysqldbsystem.oc1..failed"
-	failedDBSystem := makeActiveDbSystem(dbSystemID, "failed-dbsystem")
-	failedDBSystem.LifecycleState = mysql.DbSystemLifecycleStateFailed
-
-	mgr := newTestManager(&fakeCredentialClient{})
-	ExportSetClientForTest(mgr, &mockOciDbSystemClient{
-		getFn: func(_ context.Context, _ mysql.GetDbSystemRequest) (mysql.GetDbSystemResponse, error) {
-			return mysql.GetDbSystemResponse{DbSystem: failedDBSystem}, nil
-		},
-	})
-
-	dbSystem := &mysqlv1beta1.MySqlDbSystem{}
-	dbSystem.Name = "failed-dbsystem"
-	dbSystem.Namespace = "default"
-	dbSystem.Spec.MySqlDbSystemId = shared.OCID(dbSystemID)
-
-	resp, err := mgr.CreateOrUpdate(context.Background(), dbSystem, ctrl.Request{})
-	assert.NoError(t, err)
-	assert.True(t, resp.IsSuccessful)
-	assert.Equal(t, shared.OCID(dbSystemID), dbSystem.Status.OsokStatus.Ocid)
-}
-
-func TestDeleteMySqlDbSystem(t *testing.T) {
-	mgr := newTestManager(&fakeCredentialClient{})
-
-	ocid, err := mgr.DeleteMySqlDbSystem()
-	assert.NoError(t, err)
-	assert.Equal(t, "", ocid)
-}
-
-func TestCreateOrUpdate_CreateNew_WithOptionalFields(t *testing.T) {
-	newDbSystemID := "ocid1.mysqldbsystem.oc1..opts"
-	credClient := &fakeCredentialClient{
-		getSecretFn: func(_ context.Context, name, _ string) (map[string][]byte, error) {
-			if name == "admin-username-secret" {
-				return map[string][]byte{"username": []byte("admin")}, nil
-			}
-			return map[string][]byte{"password": []byte("secret123")}, nil
-		},
-		createSecretFn: func(_ context.Context, _, _ string, _ map[string]string, _ map[string][]byte) (bool, error) {
-			return true, nil
-		},
-	}
-	mgr := newTestManager(credClient)
-
-	var capturedReq mysql.CreateDbSystemRequest
-	ExportSetClientForTest(mgr, &mockOciDbSystemClient{
-		listFn: func(_ context.Context, _ mysql.ListDbSystemsRequest) (mysql.ListDbSystemsResponse, error) {
-			return mysql.ListDbSystemsResponse{}, nil
-		},
-		createFn: func(_ context.Context, req mysql.CreateDbSystemRequest) (mysql.CreateDbSystemResponse, error) {
-			capturedReq = req
-			return mysql.CreateDbSystemResponse{
-				DbSystem: mysql.DbSystem{Id: common.String(newDbSystemID)},
-			}, nil
-		},
-		getFn: func(_ context.Context, _ mysql.GetDbSystemRequest) (mysql.GetDbSystemResponse, error) {
-			return mysql.GetDbSystemResponse{
-				DbSystem: makeActiveDbSystem(newDbSystemID, "opts-dbsystem"),
-			}, nil
-		},
-	})
-
-	dbSystem := &mysqlv1beta1.MySqlDbSystem{}
-	dbSystem.Name = "opts-dbsystem"
-	dbSystem.Namespace = "default"
-	dbSystem.Spec.DisplayName = "opts-dbsystem"
-	dbSystem.Spec.CompartmentId = "ocid1.compartment.oc1..xxx"
-	dbSystem.Spec.AdminUsername.Secret.SecretName = "admin-username-secret"
-	dbSystem.Spec.AdminPassword.Secret.SecretName = "admin-password-secret"
-	dbSystem.Spec.Description = "test description"
-	dbSystem.Spec.Port = 3307
-	dbSystem.Spec.PortX = 33070
-	dbSystem.Spec.ConfigurationId.Id = "ocid1.mysqlconfiguration.oc1..cfg"
-	dbSystem.Spec.IpAddress = "10.0.0.5"
-	dbSystem.Spec.HostnameLabel = "mysql-host"
-	dbSystem.Spec.MysqlVersion = "8.0"
-
-	resp, err := mgr.CreateOrUpdate(context.Background(), dbSystem, ctrl.Request{NamespacedName: types.NamespacedName{Namespace: "default"}})
-	assert.NoError(t, err)
-	assert.True(t, resp.IsSuccessful)
-
-	d := capturedReq.CreateDbSystemDetails
-	assert.Equal(t, common.String("test description"), d.Description)
-	assert.Equal(t, common.Int(3307), d.Port)
-	assert.Equal(t, common.Int(33070), d.PortX)
-	assert.Equal(t, common.String("ocid1.mysqlconfiguration.oc1..cfg"), d.ConfigurationId)
-	assert.Equal(t, common.String("10.0.0.5"), d.IpAddress)
-	assert.Equal(t, common.String("mysql-host"), d.HostnameLabel)
-	assert.Equal(t, common.String("8.0"), d.MysqlVersion)
-}
-
-func TestCreateOrUpdate_BindExisting_DescriptionAndConfigIDChange(t *testing.T) {
-	dbSystemID := "ocid1.mysqldbsystem.oc1..descfg"
-	var capturedUpdate mysql.UpdateDbSystemRequest
-
-	mgr := newTestManager(&fakeCredentialClient{
-		createSecretFn: func(_ context.Context, _, _ string, _ map[string]string, _ map[string][]byte) (bool, error) {
-			return true, nil
-		},
-	})
-	ExportSetClientForTest(mgr, &mockOciDbSystemClient{
-		getFn: func(_ context.Context, _ mysql.GetDbSystemRequest) (mysql.GetDbSystemResponse, error) {
-			return mysql.GetDbSystemResponse{
-				DbSystem: makeActiveDbSystem(dbSystemID, "test-dbsystem"),
-			}, nil
-		},
-		updateFn: func(_ context.Context, req mysql.UpdateDbSystemRequest) (mysql.UpdateDbSystemResponse, error) {
-			capturedUpdate = req
-			return mysql.UpdateDbSystemResponse{}, nil
-		},
-	})
-
-	dbSystem := &mysqlv1beta1.MySqlDbSystem{}
-	dbSystem.Name = "test-dbsystem"
-	dbSystem.Namespace = "default"
-	dbSystem.Spec.MySqlDbSystemId = shared.OCID(dbSystemID)
-	dbSystem.Spec.DisplayName = "test-dbsystem"
-	dbSystem.Spec.Description = "new description"
-	dbSystem.Spec.ConfigurationId.Id = "ocid1.mysqlconfiguration.oc1..new"
-
-	resp, err := mgr.CreateOrUpdate(context.Background(), dbSystem, ctrl.Request{})
-	assert.NoError(t, err)
-	assert.True(t, resp.IsSuccessful)
-	assert.Equal(t, common.String("new description"), capturedUpdate.UpdateDbSystemDetails.Description)
-	assert.Equal(t, common.String("ocid1.mysqlconfiguration.oc1..new"), capturedUpdate.UpdateDbSystemDetails.ConfigurationId)
-}
-
-func TestCreateOrUpdate_BindExisting_DefinedTagsChange(t *testing.T) {
-	dbSystemID := "ocid1.mysqldbsystem.oc1..deftag"
-	updateCalled := false
-
-	mgr := newTestManager(&fakeCredentialClient{
-		createSecretFn: func(_ context.Context, _, _ string, _ map[string]string, _ map[string][]byte) (bool, error) {
-			return true, nil
-		},
-	})
-	ExportSetClientForTest(mgr, &mockOciDbSystemClient{
-		getFn: func(_ context.Context, _ mysql.GetDbSystemRequest) (mysql.GetDbSystemResponse, error) {
-			return mysql.GetDbSystemResponse{
-				DbSystem: makeActiveDbSystem(dbSystemID, "test-dbsystem"),
-			}, nil
-		},
-		updateFn: func(_ context.Context, _ mysql.UpdateDbSystemRequest) (mysql.UpdateDbSystemResponse, error) {
-			updateCalled = true
-			return mysql.UpdateDbSystemResponse{}, nil
-		},
-	})
-
-	dbSystem := &mysqlv1beta1.MySqlDbSystem{}
-	dbSystem.Name = "test-dbsystem"
-	dbSystem.Namespace = "default"
-	dbSystem.Spec.MySqlDbSystemId = shared.OCID(dbSystemID)
-	dbSystem.Spec.DisplayName = "test-dbsystem"
-	dbSystem.Spec.DefinedTags = map[string]shared.MapValue{
-		"ns1": {"key1": "val1"},
+	if request.Source == nil {
+		return nil, fmt.Errorf("CreateDbSystemDetails.Source should be projected into the OCI request")
 	}
 
-	resp, err := mgr.CreateOrUpdate(context.Background(), dbSystem, ctrl.Request{})
-	assert.NoError(t, err)
-	assert.True(t, resp.IsSuccessful)
-	assert.True(t, updateCalled)
+	return request.Source, nil
 }
 
-func TestCreateOrUpdate_LifecycleProvisioning(t *testing.T) {
-	dbSystemID := "ocid1.mysqldbsystem.oc1..prov"
-	creatingDBSystem := makeActiveDbSystem(dbSystemID, "prov-dbsystem")
-	creatingDBSystem.LifecycleState = mysql.DbSystemLifecycleStateCreating
+func assertBackupSourceDetails(t *testing.T, source mysqlsdk.CreateDbSystemSourceDetails) {
+	t.Helper()
 
-	mgr := newTestManager(&fakeCredentialClient{})
-	ExportSetClientForTest(mgr, &mockOciDbSystemClient{
-		getFn: func(_ context.Context, _ mysql.GetDbSystemRequest) (mysql.GetDbSystemResponse, error) {
-			return mysql.GetDbSystemResponse{DbSystem: creatingDBSystem}, nil
-		},
-	})
-
-	dbSystem := &mysqlv1beta1.MySqlDbSystem{}
-	dbSystem.Name = "prov-dbsystem"
-	dbSystem.Namespace = "default"
-	dbSystem.Spec.MySqlDbSystemId = shared.OCID(dbSystemID)
-
-	resp, err := mgr.CreateOrUpdate(context.Background(), dbSystem, ctrl.Request{})
-	assert.Error(t, err)
-	assert.False(t, resp.IsSuccessful)
+	if err := matchBackupSourceDetails(source, "ocid1.mysqlbackup.oc1..backup"); err != nil {
+		t.Fatal(err)
+	}
 }
 
-func TestCreateOrUpdate_BindExisting_CreatedAtNonNil(t *testing.T) {
-	dbSystemID := "ocid1.mysqldbsystem.oc1..creat"
+func assertPITRSourceDetails(t *testing.T, source mysqlsdk.CreateDbSystemSourceDetails) {
+	t.Helper()
 
-	mgr := newTestManager(&fakeCredentialClient{
-		createSecretFn: func(_ context.Context, _, _ string, _ map[string]string, _ map[string][]byte) (bool, error) {
-			return true, nil
-		},
+	if err := matchPITRSourceDetails(source, "ocid1.mysqldbsystem.oc1..source", "2026-03-01T02:03:04Z"); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func assertImportURLSourceDetails(t *testing.T, source mysqlsdk.CreateDbSystemSourceDetails) {
+	t.Helper()
+
+	if err := matchImportURLSourceDetails(source, "https://objectstorage.example.com/n/tenant/b/bucket/o/import.manifest.json"); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func assertNoneSourceDetails(t *testing.T, source mysqlsdk.CreateDbSystemSourceDetails) {
+	t.Helper()
+
+	if err := matchNoneSourceDetails(source); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func matchBackupSourceDetails(source mysqlsdk.CreateDbSystemSourceDetails, wantBackupID string) error {
+	backup, ok := source.(mysqlsdk.CreateDbSystemSourceFromBackupDetails)
+	if !ok {
+		return fmt.Errorf("CreateDbSystemDetails.Source type = %T, want %T", source, mysqlsdk.CreateDbSystemSourceFromBackupDetails{})
+	}
+	if backup.BackupId == nil || *backup.BackupId != wantBackupID {
+		return fmt.Errorf("BackupId = %v, want %q", backup.BackupId, wantBackupID)
+	}
+	return nil
+}
+
+func matchPITRSourceDetails(source mysqlsdk.CreateDbSystemSourceDetails, wantDbSystemID, wantRecoveryPoint string) error {
+	pitr, ok := source.(mysqlsdk.CreateDbSystemSourceFromPitrDetails)
+	if !ok {
+		return fmt.Errorf("CreateDbSystemDetails.Source type = %T, want %T", source, mysqlsdk.CreateDbSystemSourceFromPitrDetails{})
+	}
+	if pitr.DbSystemId == nil || *pitr.DbSystemId != wantDbSystemID {
+		return fmt.Errorf("DbSystemId = %v, want %q", pitr.DbSystemId, wantDbSystemID)
+	}
+	if pitr.RecoveryPoint == nil || pitr.RecoveryPoint.Format(time.RFC3339) != wantRecoveryPoint {
+		return fmt.Errorf("RecoveryPoint = %v, want %q", pitr.RecoveryPoint, wantRecoveryPoint)
+	}
+	return nil
+}
+
+func matchImportURLSourceDetails(source mysqlsdk.CreateDbSystemSourceDetails, wantSourceURL string) error {
+	importURL, ok := source.(mysqlsdk.CreateDbSystemSourceImportFromUrlDetails)
+	if !ok {
+		return fmt.Errorf("CreateDbSystemDetails.Source type = %T, want %T", source, mysqlsdk.CreateDbSystemSourceImportFromUrlDetails{})
+	}
+	if importURL.SourceUrl == nil || *importURL.SourceUrl != wantSourceURL {
+		return fmt.Errorf("SourceUrl = %v, want %q", importURL.SourceUrl, wantSourceURL)
+	}
+	return nil
+}
+
+func matchNoneSourceDetails(source mysqlsdk.CreateDbSystemSourceDetails) error {
+	if _, ok := source.(mysqlsdk.CreateDbSystemSourceFromNoneDetails); !ok {
+		return fmt.Errorf("CreateDbSystemDetails.Source type = %T, want %T", source, mysqlsdk.CreateDbSystemSourceFromNoneDetails{})
+	}
+	return nil
+}
+
+func TestDbSystemServiceManagerCreateOrUpdateRejectsWrongObjectType(t *testing.T) {
+	t.Parallel()
+
+	manager := &DbSystemServiceManager{}
+
+	response, err := manager.CreateOrUpdate(context.Background(), &mysqlv1beta1.Backup{}, ctrl.Request{})
+	if err == nil {
+		t.Fatal("CreateOrUpdate() error = nil, want conversion failure")
+	}
+	if response.IsSuccessful {
+		t.Fatal("CreateOrUpdate() should report failure for the wrong resource type")
+	}
+	if !strings.Contains(err.Error(), "expected *mysqlv1beta1.DbSystem") {
+		t.Fatalf("CreateOrUpdate() error = %q, want DbSystem conversion failure", err.Error())
+	}
+}
+
+func TestNewDbSystemServiceManagerWithDepsDoesNotCarryOpenFormalGapInitError(t *testing.T) {
+	t.Parallel()
+
+	privateKey, err := rsa.GenerateKey(cryptorand.Reader, 1024)
+	if err != nil {
+		t.Fatalf("rsa.GenerateKey() error = %v", err)
+	}
+	manager := NewDbSystemServiceManagerWithDeps(servicemanager.RuntimeDeps{
+		Provider: testConfigurationProvider{privateKey: privateKey},
 	})
-	ExportSetClientForTest(mgr, &mockOciDbSystemClient{
-		getFn: func(_ context.Context, _ mysql.GetDbSystemRequest) (mysql.GetDbSystemResponse, error) {
-			return mysql.GetDbSystemResponse{
-				DbSystem: makeActiveDbSystem(dbSystemID, "test-dbsystem"),
-			}, nil
+
+	_, err = manager.client.CreateOrUpdate(context.Background(), nil, ctrl.Request{})
+	if err == nil {
+		t.Fatal("CreateOrUpdate() error = nil, want nil resource failure")
+	}
+	if strings.Contains(err.Error(), "open formal gap") {
+		t.Fatalf("CreateOrUpdate() error = %v, want constructor without formal-gap init failure", err)
+	}
+	if strings.Contains(err.Error(), "initialize DbSystem OCI client") {
+		t.Fatalf("CreateOrUpdate() error = %v, want client initialization to succeed before the invalid-resource failure", err)
+	}
+}
+
+func newDbSystemSourceMutationManager() *DbSystemServiceManager {
+	return &DbSystemServiceManager{
+		client: generatedruntime.NewServiceClient[*mysqlv1beta1.DbSystem](generatedruntime.Config[*mysqlv1beta1.DbSystem]{
+			Kind:    "DbSystem",
+			SDKName: "DbSystem",
+			Semantics: &generatedruntime.Semantics{
+				Mutation: generatedruntime.MutationSemantics{
+					ForceNew: []string{
+						"source",
+						"source.backupId",
+						"source.dbSystemId",
+						"source.recoveryPoint",
+						"source.sourceType",
+						"source.sourceUrl",
+					},
+				},
+			},
+			Update: &generatedruntime.Operation{
+				NewRequest: func() any { return &mysqlsdk.UpdateDbSystemRequest{} },
+				Call: func(_ context.Context, _ any) (any, error) {
+					return nil, fmt.Errorf("Update() should not be called when source changes")
+				},
+			},
+		}),
+	}
+}
+
+func newDbSystemAdminSecretMutationManager() *DbSystemServiceManager {
+	return &DbSystemServiceManager{
+		client: generatedruntime.NewServiceClient[*mysqlv1beta1.DbSystem](generatedruntime.Config[*mysqlv1beta1.DbSystem]{
+			Kind:    "DbSystem",
+			SDKName: "DbSystem",
+			Semantics: &generatedruntime.Semantics{
+				Mutation: generatedruntime.MutationSemantics{
+					ForceNew: []string{"adminPassword", "adminUsername"},
+				},
+			},
+			Update: &generatedruntime.Operation{
+				NewRequest: func() any { return &mysqlsdk.UpdateDbSystemRequest{} },
+				Call: func(_ context.Context, _ any) (any, error) {
+					return nil, fmt.Errorf("Update() should not be called when admin secret references change")
+				},
+			},
+		}),
+	}
+}
+
+func newExistingDbSystemWithSource(current, desired mysqlv1beta1.DbSystemSource) *mysqlv1beta1.DbSystem {
+	return &mysqlv1beta1.DbSystem{
+		Spec: mysqlv1beta1.DbSystemSpec{
+			CompartmentId: "ocid1.compartment.oc1..example",
+			ShapeName:     "MySQL.VM.Standard.E3.1.8GB",
+			SubnetId:      "ocid1.subnet.oc1..example",
+			Source:        desired,
 		},
-	})
+		Status: mysqlv1beta1.DbSystemStatus{
+			OsokStatus: shared.OSOKStatus{
+				Ocid: "ocid1.mysqldbsystem.oc1..existing",
+			},
+			Source: observedDbSystemSource(current),
+		},
+	}
+}
 
-	dbSystem := &mysqlv1beta1.MySqlDbSystem{}
-	dbSystem.Name = "test-dbsystem"
-	dbSystem.Namespace = "default"
-	dbSystem.Spec.MySqlDbSystemId = shared.OCID(dbSystemID)
-	dbSystem.Spec.DisplayName = "test-dbsystem"
-	ts := metav1.NewTime(time.Now())
-	dbSystem.Status.OsokStatus.CreatedAt = &ts
+func observedDbSystemSource(source mysqlv1beta1.DbSystemSource) mysqlv1beta1.DbSystemSourceObservedState {
+	return mysqlv1beta1.DbSystemSourceObservedState{
+		JsonData:      source.JsonData,
+		SourceType:    source.SourceType,
+		BackupId:      source.BackupId,
+		DbSystemId:    source.DbSystemId,
+		RecoveryPoint: source.RecoveryPoint,
+	}
+}
 
-	resp, err := mgr.CreateOrUpdate(context.Background(), dbSystem, ctrl.Request{})
-	assert.NoError(t, err)
-	assert.True(t, resp.IsSuccessful)
+func newExistingDbSystemWithAdminSecrets(current, desired quickDbSystemAdminSecretCase) *mysqlv1beta1.DbSystem {
+	return &mysqlv1beta1.DbSystem{
+		Spec: mysqlv1beta1.DbSystemSpec{
+			CompartmentId: "ocid1.compartment.oc1..example",
+			ShapeName:     "MySQL.VM.Standard.E3.1.8GB",
+			SubnetId:      "ocid1.subnet.oc1..example",
+			AdminUsername: usernameSecretSource(desired.UsernameSecret),
+			AdminPassword: passwordSecretSource(desired.PasswordSecret),
+		},
+		Status: mysqlv1beta1.DbSystemStatus{
+			OsokStatus: shared.OSOKStatus{
+				Ocid: "ocid1.mysqldbsystem.oc1..existing",
+			},
+			AdminUsername: usernameSecretSource(current.UsernameSecret),
+			AdminPassword: passwordSecretSource(current.PasswordSecret),
+		},
+	}
+}
+
+func usernameSecretSource(name string) *shared.UsernameSource {
+	return &shared.UsernameSource{Secret: shared.SecretSource{SecretName: name}}
+}
+
+func passwordSecretSource(name string) *shared.PasswordSource {
+	return &shared.PasswordSource{Secret: shared.SecretSource{SecretName: name}}
+}
+
+func randomOCID(rand *rand.Rand, resource string) string {
+	return fmt.Sprintf("ocid1.%s.oc1..%08x%08x", resource, rand.Uint32(), rand.Uint32())
+}
+
+func randomImportURL(rand *rand.Rand) string {
+	return fmt.Sprintf(
+		"https://objectstorage.example.com/n/tenant/b/bucket/o/%08x/%08x.manifest.json",
+		rand.Uint32(),
+		rand.Uint32(),
+	)
+}
+
+func randomRecoveryPoint(rand *rand.Rand) string {
+	return time.Unix(1_700_000_000+int64(rand.Int31n(31_536_000)), 0).UTC().Format(time.RFC3339)
+}
+
+func randomSecretName(rand *rand.Rand, prefix string) string {
+	return fmt.Sprintf("%s-%08x%08x", prefix, rand.Uint32(), rand.Uint32())
 }

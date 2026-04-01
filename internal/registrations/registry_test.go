@@ -37,7 +37,7 @@ func TestAllAddToSchemeRegistersManualGroupKinds(t *testing.T) {
 	for _, obj := range []runtime.Object{
 		&corev1beta1.Vcn{},
 		&databasev1beta1.AutonomousDatabase{},
-		&mysqlv1beta1.MySqlDbSystem{},
+		&mysqlv1beta1.DbSystem{},
 		&streamingv1beta1.Stream{},
 	} {
 		gvks, _, err := scheme.ObjectKinds(obj)

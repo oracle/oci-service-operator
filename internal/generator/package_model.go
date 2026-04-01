@@ -78,7 +78,7 @@ func buildPackageOutputModel(service ServiceConfig, resources []ResourceModel) P
 	return output
 }
 
-//nolint:gocognit,gocyclo // Registration generation validates interdependent controller and service-manager rollout per resource.
+//nolint:gocognit,gocyclo // Registration generation validates several coupled controller and service-manager cases.
 func buildRegistrationOutputModel(
 	service ServiceConfig,
 	version string,
@@ -292,6 +292,7 @@ func buildServiceManagerModels(service ServiceConfig, version string, resources 
 			SDKClientTypeName:        resource.Runtime.ClientType,
 			SDKClientConstructor:     resource.Runtime.ClientConstructor,
 			SDKClientConstructorKind: resource.Runtime.ClientConstructorKind,
+			NeedsCredentialClient:    service.ServiceManagerNeedsCredentialClientFor(resource.Kind),
 			CreateOperation:          resource.Runtime.Create,
 			GetOperation:             resource.Runtime.Get,
 			ListOperation:            resource.Runtime.List,
@@ -418,7 +419,7 @@ func defaultStatusFields() []FieldModel {
 	}
 }
 
-//nolint:gocognit // Helper type renaming rewrites resource fields and helper graphs in a single pass over each resource.
+//nolint:gocognit // Helper renaming coordinates reserved names, rewrites, and comment carryover in one pass.
 func assignHelperTypeNames(resources []ResourceModel) []ResourceModel {
 	reservedNames := reservedResourceNames(resources)
 	usedHelperNames := make(map[string]struct{}, len(resources))

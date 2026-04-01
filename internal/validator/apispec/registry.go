@@ -1255,6 +1255,25 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "DbSystem",
+		SpecType:   reflect.TypeOf(mysqlv1beta1.DbSystemSpec{}),
+		StatusType: reflect.TypeOf(mysqlv1beta1.DbSystemStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "mysql.CreateDbSystemDetails",
+			},
+			{
+				SDKStruct: "mysql.UpdateDbSystemDetails",
+			},
+			{
+				SDKStruct: "mysql.DbSystem",
+			},
+			{
+				SDKStruct: "mysql.DbSystemSummary",
+			},
+		},
+	},
+	{
 		Name:       "MySqlBackup",
 		SpecType:   reflect.TypeOf(mysqlv1beta1.BackupSpec{}),
 		StatusType: reflect.TypeOf(mysqlv1beta1.BackupStatus{}),
@@ -1308,19 +1327,6 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "mysql.ConfigurationSummary",
-			},
-		},
-	},
-	{
-		Name:       "MySqlDbSystem",
-		SpecType:   reflect.TypeOf(mysqlv1beta1.MySqlDbSystemSpec{}),
-		StatusType: reflect.TypeOf(mysqlv1beta1.MySqlDbSystemStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "mysql.CreateDbSystemDetails",
-			},
-			{
-				SDKStruct: "mysql.UpdateDbSystemDetails",
 			},
 		},
 	},

@@ -8,14 +8,16 @@ rules:
   - ""
   resources:
   - events
-  - secrets
   verbs:
   - create
-  - delete
+  - patch
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
   - get
   - list
-  - patch
-  - update
   - watch
 - apiGroups:
   - artifacts.oracle.com
@@ -1412,9 +1414,9 @@ rules:
   - backups
   - channels
   - configurations
+  - dbsystems
   - heatwaveclustermemoryestimates
   - heatwaveclusters
-  - mysqldbsystems
   - replicas
   - shapes
   - versions
@@ -1435,9 +1437,9 @@ rules:
   - backups/finalizers
   - channels/finalizers
   - configurations/finalizers
+  - dbsystems/finalizers
   - heatwaveclustermemoryestimates/finalizers
   - heatwaveclusters/finalizers
-  - mysqldbsystems/finalizers
   - replicas/finalizers
   - shapes/finalizers
   - versions/finalizers
@@ -1452,9 +1454,9 @@ rules:
   - backups/status
   - channels/status
   - configurations/status
+  - dbsystems/status
   - heatwaveclustermemoryestimates/status
   - heatwaveclusters/status
-  - mysqldbsystems/status
   - replicas/status
   - shapes/status
   - versions/status

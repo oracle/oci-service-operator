@@ -152,11 +152,11 @@ func TestCreateStream_UsesInjectedClientAndRetention(t *testing.T) {
 
 	_, err := mgr.CreateStream(context.Background(), stream)
 	assert.NoError(t, err)
-	assert.Equal(t, common.String("test-stream"), captured.CreateStreamDetails.Name)
-	assert.Equal(t, common.Int(1), captured.CreateStreamDetails.Partitions)
-	assert.Equal(t, common.Int(24), captured.CreateStreamDetails.RetentionInHours)
-	assert.Equal(t, common.String("ocid1.compartment.oc1..example"), captured.CreateStreamDetails.CompartmentId)
-	assert.Equal(t, common.String("ocid1.streampool.oc1..example"), captured.CreateStreamDetails.StreamPoolId)
+	assert.Equal(t, common.String("test-stream"), captured.Name)
+	assert.Equal(t, common.Int(1), captured.Partitions)
+	assert.Equal(t, common.Int(24), captured.RetentionInHours)
+	assert.Equal(t, common.String("ocid1.compartment.oc1..example"), captured.CompartmentId)
+	assert.Equal(t, common.String("ocid1.streampool.oc1..example"), captured.StreamPoolId)
 }
 
 func TestGetCredentialMapForTest(t *testing.T) {
@@ -183,7 +183,7 @@ func TestGetCrdStatus_HappyPath(t *testing.T) {
 func TestGetCrdStatus_WrongType(t *testing.T) {
 	mgr := makeTestManager(&fakeCredentialClient{}, nil)
 
-	dbSystem := &mysqlv1beta1.MySqlDbSystem{}
+	dbSystem := &mysqlv1beta1.DbSystem{}
 	_, err := mgr.GetCrdStatus(dbSystem)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "failed to convert the type assertion for Stream")
@@ -205,7 +205,7 @@ func TestDelete_NoOcid(t *testing.T) {
 func TestDelete_WrongType(t *testing.T) {
 	mgr := makeTestManager(&fakeCredentialClient{}, nil)
 
-	dbSystem := &mysqlv1beta1.MySqlDbSystem{}
+	dbSystem := &mysqlv1beta1.DbSystem{}
 	done, err := mgr.Delete(context.Background(), dbSystem)
 	assert.NoError(t, err)
 	assert.True(t, done)
@@ -234,7 +234,7 @@ func TestDelete_DeleteStreamFails(t *testing.T) {
 func TestCreateOrUpdate_BadType(t *testing.T) {
 	mgr := makeTestManager(&fakeCredentialClient{}, nil)
 
-	dbSystem := &mysqlv1beta1.MySqlDbSystem{}
+	dbSystem := &mysqlv1beta1.DbSystem{}
 	resp, err := mgr.CreateOrUpdate(context.Background(), dbSystem, ctrl.Request{})
 	assert.Error(t, err)
 	assert.False(t, resp.IsSuccessful)

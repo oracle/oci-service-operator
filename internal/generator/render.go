@@ -44,6 +44,7 @@ type sampleEntry struct {
 	spec     string
 }
 
+//nolint:gocyclo // Package rendering fans out across multiple optional generated surfaces.
 func (r *Renderer) RenderPackage(root string, pkg *PackageModel, overwrite bool) (string, error) {
 	outputDir, err := preparePackageOutputDir(root, pkg, overwrite)
 	if err != nil {
@@ -173,6 +174,7 @@ func (r *Renderer) RenderServiceManagers(root string, pkg *PackageModel, overwri
 	return nil
 }
 
+//nolint:gocognit,gocyclo // Sample rendering preserves ordering and kustomization updates across package groups.
 func (r *Renderer) RenderSamples(root string, packages []*PackageModel) error {
 	samples := collectSamples(packages)
 	if len(samples) == 0 {
@@ -940,7 +942,7 @@ var new{{ .Kind }}ServiceClient = func(manager *{{ .ManagerTypeName }}) {{ .Clie
 		Kind:             "{{ .Kind }}",
 		SDKName:          "{{ .SDKName }}",
 		Log:              manager.Log,
-{{- if .UsesCredentialClient }}
+{{- if or .UsesCredentialClient .NeedsCredentialClient }}
 		CredentialClient: manager.CredentialClient,
 {{- end }}
 {{- if .Semantics }}
