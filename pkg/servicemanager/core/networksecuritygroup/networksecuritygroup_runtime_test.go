@@ -385,6 +385,30 @@ func TestDelete_ConfirmsDeletionOnNotFound(t *testing.T) {
 	assert.NotNil(t, resource.Status.OsokStatus.DeletedAt)
 }
 
+func TestDelete_AlreadyMissingOCIResourceIsTreatedAsDeleted(t *testing.T) {
+	manager := newNetworkSecurityGroupTestManager(&fakeNetworkSecurityGroupOCIClient{
+		deleteFn: func(_ context.Context, req coresdk.DeleteNetworkSecurityGroupRequest) (coresdk.DeleteNetworkSecurityGroupResponse, error) {
+			assert.Equal(t, "ocid1.networksecuritygroup.oc1..delete", *req.NetworkSecurityGroupId)
+			return coresdk.DeleteNetworkSecurityGroupResponse{}, fakeNetworkSecurityGroupServiceError{
+				statusCode: 404,
+				code:       "NotFound",
+				message:    "not found",
+			}
+		},
+	})
+
+	resource := makeSpecNetworkSecurityGroup()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.networksecuritygroup.oc1..delete")
+
+	deleted, err := manager.Delete(context.Background(), resource)
+
+	assert.NoError(t, err)
+	assert.True(t, deleted)
+	assert.Equal(t, string(shared.Terminating), resource.Status.OsokStatus.Reason)
+	assert.Equal(t, "OCI resource no longer exists", resource.Status.OsokStatus.Message)
+	assert.NotNil(t, resource.Status.OsokStatus.DeletedAt)
+}
+
 func TestDelete_KeepsFinalizerWhileObservedTerminating(t *testing.T) {
 	manager := newNetworkSecurityGroupTestManager(&fakeNetworkSecurityGroupOCIClient{
 		deleteFn: func(_ context.Context, _ coresdk.DeleteNetworkSecurityGroupRequest) (coresdk.DeleteNetworkSecurityGroupResponse, error) {
