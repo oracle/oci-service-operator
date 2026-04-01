@@ -128,12 +128,14 @@ make schema-validator \
 
 For generator work, use the generated-output coverage workflow instead of
 rewriting the checked-in tree by hand. This command creates a snapshot workspace,
-renders selected services into that snapshot, refreshes the validator registries
-inside the snapshot, regenerates deepcopy code for the generated API groups, and
-then runs `osok-schema-validator` from that snapshot so the report reflects the
-generated API types rather than the checked-in ones. This workflow is focused on
-API and validator coverage only; generated controller and service-manager
-compilation is covered by the runtime gate below.
+renders selected services into that snapshot, restores the checked-in
+non-generated API, controller, and service-manager companion Go files for the
+selected services, refreshes the validator registries inside the snapshot,
+regenerates deepcopy code for the generated API groups, and then runs
+`osok-schema-validator` from that snapshot so the report reflects the generated
+API types plus the checked-in handwritten runtime seams. This workflow is
+focused on API and validator coverage only; generated controller and
+service-manager compilation is covered by the runtime gate below.
 
 ```bash
 # Full generated-output baseline report
@@ -154,19 +156,18 @@ Common variables and flags:
 
 | Variable / Flag | Default | Purpose |
 | --- | --- | --- |
+| `--config` | `internal/generator/config/services.yaml` | Generator config used for the snapshot coverage run. The Makefile passes the repo's effective generator config. |
 | `GENERATED_COVERAGE_SERVICE` / `--service` | empty | Run the snapshot report for one configured service. |
 | `--all` | false | Report all configured services. |
-| `GENERATED_COVERAGE_REPORT` | `generated-coverage-report.json` | File that receives the summary JSON from the Makefile target. |
+| `GENERATED_COVERAGE_REPORT` / `--report-out` | `generated-coverage-report.json` for the Makefile target | Write the generated coverage summary JSON. |
 | `GENERATED_COVERAGE_TOP` / `--top` | `10` | Number of top offenders to keep per category. Use `0` for all. |
 | `GENERATED_COVERAGE_SNAPSHOT_DIR` / `--snapshot-dir` | empty | Keep the generated snapshot at a specific path instead of using an auto-cleaned temp dir. |
 | `GENERATED_COVERAGE_KEEP_SNAPSHOT` / `--keep-snapshot` | empty / false | Keep an automatically created temp snapshot after a successful run. |
 | `GENERATED_COVERAGE_VALIDATOR_JSON` / `--validator-json-out` | empty | Optional path for the full raw validator JSON from the snapshot run. |
 | `GENERATED_COVERAGE_BASELINE` / `--baseline` | `internal/generator/config/generated_coverage_baseline.json` | Baseline file used by the regression gate. |
-| `GENERATED_COVERAGE_PRESERVE_EXISTING_SPEC_SURFACE` | `true` for the Makefile targets | Keep the checked-in ADB/MySQL/Stream spec/helper/sample/package surfaces while the rest of the snapshot regenerates from `services.yaml`. |
-| `--report-out` | empty | Write the generated coverage summary to a file instead of stdout. |
 | `--write-baseline` | empty | Refresh the baseline file intentionally from the current generated snapshot report. |
 | `--fail-on-regression` | false | Exit non-zero if coverage scope or metrics regress compared to `--baseline`. |
-| `--preserve-existing-spec-surface` | false | Enable the same preserved-spec mode for direct CLI runs when you want `go run` output to match the checked-in Make targets and baseline. |
+| `--controller-gen` | `<repo>/bin/controller-gen` | `controller-gen` binary used to regenerate deepcopy code inside the snapshot. |
 
 The summary JSON includes:
 
@@ -195,12 +196,13 @@ jq '.summary.scopeBreakdown' after.json
 jq '.summary.topOffenders.missingFields[:5]' after.json
 ```
 
-Raw `go run` invocations leave `--preserve-existing-spec-surface` off by
-default. Add the flag when you want a direct CLI run to reproduce the checked-in
-gate and baseline behavior:
+Direct `go run` invocations use the same snapshot behavior as the Make targets.
+If you need to inspect the retained snapshot from a direct CLI run, keep it
+explicitly and read the path back from the JSON report:
 
 ```bash
-go run ./cmd/osok-generated-coverage --all --preserve-existing-spec-surface > preserved.json
+go run ./cmd/osok-generated-coverage --all --keep-snapshot > report.json
+jq -r '.snapshot.root' report.json
 ```
 
 ## Generated Coverage Gate
@@ -226,15 +228,12 @@ make generated-coverage-gate \
 `generated-coverage-gate` and `generated-coverage-baseline` always operate on
 the full configured service set. Use `make generated-coverage-report
 GENERATED_COVERAGE_SERVICE=<service>` for targeted local inspection, but keep
-the checked-in baseline scoped to `--all`. For direct CLI repros of those
-checked-in targets, add `--preserve-existing-spec-surface`.
+the checked-in baseline scoped to `--all`.
 
-For the current checked-in config, the coverage targets default
-`GENERATED_COVERAGE_PRESERVE_EXISTING_SPEC_SURFACE=true` so the historical
-published ADB/MySQL/Stream resources keep their checked-in spec/helper/sample
-surfaces while the rest of the snapshot regenerates from `services.yaml`.
-Set that variable to `false` only when you intentionally want to inspect the
-fully regenerated spec surface instead of the preserved checked-in one.
+The snapshot workflow always restores the checked-in non-generated API,
+controller, and service-manager companion Go files for the selected services
+before the validator runs, so the gate measures the same mixed generated and
+handwritten contract as the checked-in tree.
 
 The gate checks two classes of failure:
 
@@ -262,16 +261,15 @@ the baseline diff documents the new expected floor for future regressions.
 Use the runtime gate when generator work changes controller, service-manager, or
 registration templates. By default it uses
 `internal/generator/config/services.yaml`, creates an isolated snapshot repo,
-generates runtime-enabled outputs there, regenerates deepcopy code for the
-selected API groups, verifies that each selected
-`internal/registrations/<group>_generated.go` output exists, and then
-compile-checks the generated controller, service-manager, and registration
+generates runtime-enabled outputs there, restores the checked-in non-generated
+API, controller, and service-manager companion Go files for the selected
+services, regenerates deepcopy code for the selected API groups, verifies that
+each selected `internal/registrations/<group>_generated.go` output exists, and
+then compile-checks the generated controller, service-manager, and registration
 packages.
 
 When future rollout work needs a pre-promotion snapshot, override
 `GENERATED_RUNTIME_CONFIG` or `--config` with an alternate config explicitly.
-The Make targets enable preserved-spec mode by default; direct `go run`
-invocations only do so when you add `--preserve-existing-spec-surface`.
 
 ```bash
 # Write a runtime validation summary JSON
@@ -285,16 +283,13 @@ make generated-runtime-gate \
   GENERATED_RUNTIME_SNAPSHOT_DIR=/tmp/osok-generated-runtime \
   GENERATED_RUNTIME_REPORT=/tmp/generated-runtime-report.json
 
-# Disable preserved-spec mode when intentionally inspecting a fully regenerated
-# API surface for the selected services
-make generated-runtime-gate \
-  GENERATED_RUNTIME_PRESERVE_EXISTING_SPEC_SURFACE=false
-
-# Direct CLI usage with the same preserved-spec behavior as the Make gate
-go run ./cmd/osok-generated-runtime-check --all --preserve-existing-spec-surface
-
-# Direct CLI usage for the fully regenerated API surface
+# Direct CLI usage for all configured services
 go run ./cmd/osok-generated-runtime-check --all
+
+# Direct CLI usage for one service with a retained snapshot
+go run ./cmd/osok-generated-runtime-check \
+  --service mysql \
+  --snapshot-dir /tmp/osok-generated-runtime-mysql
 ```
 
 Common variables and flags:
@@ -304,12 +299,9 @@ Common variables and flags:
 | `GENERATED_RUNTIME_CONFIG` / `--config` | `internal/generator/config/services.yaml` | Generator config used for the runtime snapshot. Override for alternate rollout configs. |
 | `GENERATED_RUNTIME_SERVICE` / `--service` | empty | Run the runtime check for one configured service. |
 | `--all` | false | Validate all services in the selected runtime config. |
-| `GENERATED_RUNTIME_REPORT` | `generated-runtime-report.json` | JSON summary file written by the Makefile target. |
-| `--report-out` | empty | Optional path to write the generated runtime summary during a direct CLI run. |
+| `GENERATED_RUNTIME_REPORT` / `--report-out` | `generated-runtime-report.json` for the Makefile target | Write the generated runtime summary JSON. |
 | `GENERATED_RUNTIME_SNAPSHOT_DIR` / `--snapshot-dir` | empty | Keep the runtime snapshot at a specific path instead of using an auto-cleaned temp dir. |
 | `GENERATED_RUNTIME_KEEP_SNAPSHOT` / `--keep-snapshot` | empty / false | Keep an automatically created temp snapshot after a successful run. |
-| `GENERATED_RUNTIME_PRESERVE_EXISTING_SPEC_SURFACE` | `true` for the Makefile targets | Preserve the current checked-in API spec/helper/sample/package surfaces while generating the runtime snapshot for services that still keep published checked-in seams. |
-| `--preserve-existing-spec-surface` | false | Enable the same preserved-spec mode for direct CLI runs. Omit it when you intentionally want a fully regenerated API surface. |
 | `--controller-gen` | `<repo>/bin/controller-gen` | `controller-gen` binary used to regenerate deepcopy code inside the snapshot. |
 
 The runtime summary JSON includes:
@@ -319,11 +311,10 @@ The runtime summary JSON includes:
 - `build.registrationPackages` — the shared registration package compiled after the selected `<group>_generated.go` outputs are present in the snapshot.
 - `snapshot.root` — present only when the snapshot is retained.
 
-For the current checked-in config, the runtime targets default
-`GENERATED_RUNTIME_PRESERVE_EXISTING_SPEC_SURFACE=true` so the snapshot keeps
-the published ADB/MySQL/Stream spec surfaces while compile-checking the
-generated controller, service-manager, and registration outputs around those
-preserved seams.
+The runtime snapshot always restores the checked-in non-generated API,
+controller, and service-manager companion Go files for the selected services
+before compiling the generated packages, so the gate checks the current mixed
+runtime seams rather than a fully isolated generated tree.
 
 `generated-runtime-gate` does not use a baseline file. The build either
 compiles or it fails, which makes it a straightforward regression tripwire for
