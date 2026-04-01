@@ -78,6 +78,11 @@ func (c *subnetRuntimeClient) CreateOrUpdate(ctx context.Context, resource *core
 		return c.fail(resource, err)
 	}
 
+	switch current.LifecycleState {
+	case coresdk.SubnetLifecycleStateProvisioning, coresdk.SubnetLifecycleStateUpdating, coresdk.SubnetLifecycleStateTerminating:
+		return c.applyLifecycle(resource, current)
+	}
+
 	updateRequest, updateNeeded, err := c.buildUpdateRequest(resource, current)
 	if err != nil {
 		return c.fail(resource, err)

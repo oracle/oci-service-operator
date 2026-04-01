@@ -331,6 +331,46 @@ func TestCreateOrUpdate_RetryableStates(t *testing.T) {
 	}
 }
 
+func TestCreateOrUpdate_DoesNotUpdateWhileLifecycleIsRetryable(t *testing.T) {
+	tests := []struct {
+		name  string
+		state coresdk.SubnetLifecycleStateEnum
+	}{
+		{name: "provisioning", state: coresdk.SubnetLifecycleStateProvisioning},
+		{name: "updating", state: coresdk.SubnetLifecycleStateUpdating},
+		{name: "terminating", state: coresdk.SubnetLifecycleStateTerminating},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			updateCalls := 0
+			manager := newTestManager(&fakeSubnetOCIClient{
+				getFn: func(_ context.Context, _ coresdk.GetSubnetRequest) (coresdk.GetSubnetResponse, error) {
+					current := makeSDKSubnet("ocid1.subnet.oc1..existing", "old-name", tt.state)
+					current.RouteTableId = common.String("ocid1.routetable.oc1..old")
+					return coresdk.GetSubnetResponse{Subnet: current}, nil
+				},
+				updateFn: func(_ context.Context, _ coresdk.UpdateSubnetRequest) (coresdk.UpdateSubnetResponse, error) {
+					updateCalls++
+					return coresdk.UpdateSubnetResponse{}, nil
+				},
+			})
+
+			resource := makeSpecSubnet()
+			resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.subnet.oc1..existing")
+			resource.Spec.DisplayName = "new-name"
+
+			resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+			assert.NoError(t, err)
+			assert.True(t, resp.IsSuccessful)
+			assert.True(t, resp.ShouldRequeue)
+			assert.Equal(t, 0, updateCalls)
+			assert.Equal(t, string(tt.state), resource.Status.LifecycleState)
+		})
+	}
+}
+
 func TestCreateOrUpdate_RecreatesOnExplicitNotFound(t *testing.T) {
 	getCalls := 0
 	createCalls := 0
