@@ -5,7 +5,7 @@
   "slug": "networksecuritygroup",
   "kind": "NetworkSecurityGroup",
   "sourceRef": "terraform-provider-oci",
-  "providerResource": "scaffold_core_networksecuritygroup",
+  "providerResource": "oci_core_network_security_group",
   "operations": {
     "create": [
       {
@@ -23,9 +23,9 @@
     ],
     "list": [
       {
-        "operation": "ListNetworkSecurityGroup",
-        "requestType": "core.ListNetworkSecurityGroupRequest",
-        "responseType": "core.ListNetworkSecurityGroupResponse"
+        "operation": "ListNetworkSecurityGroups",
+        "requestType": "core.ListNetworkSecurityGroupsRequest",
+        "responseType": "core.ListNetworkSecurityGroupsResponse"
       }
     ],
     "update": [
@@ -105,11 +105,13 @@
     ]
   },
   "listLookup": {
-    "datasource": "scaffold_core_networksecuritygroup",
-    "collectionField": "networksecuritygroup",
+    "datasource": "oci_core_network_security_groups",
+    "collectionField": "network_security_group",
     "responseItemsField": "Items",
     "filterFields": [
       "compartment_id",
+      "display_name",
+      "vcn_id",
       "state"
     ]
   },
@@ -119,8 +121,7 @@
     "repoAuthoredLogicGapsPath": "controllers/core/networksecuritygroup/logic-gaps.md",
     "excludedSemantics": [
       "bind-versus-create",
-      "secret-output",
-      "delete-confirmation"
+      "secret-output"
     ]
   },
   "notes": [
