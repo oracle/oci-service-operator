@@ -9,6 +9,44 @@ import (
 	"github.com/oracle/oci-service-operator/internal/generator"
 )
 
+func TestNormalizeCoverageOptionsDefaultsBlankSelectionToAll(t *testing.T) {
+	t.Helper()
+
+	got, err := normalizeCoverageOptions(options{})
+	if err != nil {
+		t.Fatalf("normalizeCoverageOptions() error = %v", err)
+	}
+	if got.service != "" {
+		t.Fatalf("normalizeCoverageOptions() service = %q, want empty", got.service)
+	}
+	if !got.all {
+		t.Fatal("normalizeCoverageOptions() all = false, want true")
+	}
+}
+
+func TestNormalizeCoverageOptionsPreservesExplicitServiceTarget(t *testing.T) {
+	t.Helper()
+
+	got, err := normalizeCoverageOptions(options{service: " mysql "})
+	if err != nil {
+		t.Fatalf("normalizeCoverageOptions() error = %v", err)
+	}
+	if got.service != "mysql" {
+		t.Fatalf("normalizeCoverageOptions() service = %q, want %q", got.service, "mysql")
+	}
+	if got.all {
+		t.Fatal("normalizeCoverageOptions() all = true, want false")
+	}
+}
+
+func TestNormalizeCoverageOptionsRejectsConflictingSelection(t *testing.T) {
+	t.Helper()
+
+	if _, err := normalizeCoverageOptions(options{service: "mysql", all: true}); err == nil {
+		t.Fatal("normalizeCoverageOptions() error = nil, want conflict failure")
+	}
+}
+
 func TestPopulateSnapshotKeepsSelectedOutputsWritable(t *testing.T) {
 	t.Helper()
 

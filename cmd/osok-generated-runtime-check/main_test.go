@@ -9,6 +9,44 @@ import (
 	"github.com/oracle/oci-service-operator/internal/generator"
 )
 
+func TestNormalizeRuntimeCheckOptionsDefaultsBlankSelectionToAll(t *testing.T) {
+	t.Helper()
+
+	got, err := normalizeRuntimeCheckOptions(options{})
+	if err != nil {
+		t.Fatalf("normalizeRuntimeCheckOptions() error = %v", err)
+	}
+	if got.service != "" {
+		t.Fatalf("normalizeRuntimeCheckOptions() service = %q, want empty", got.service)
+	}
+	if !got.all {
+		t.Fatal("normalizeRuntimeCheckOptions() all = false, want true")
+	}
+}
+
+func TestNormalizeRuntimeCheckOptionsPreservesExplicitServiceTarget(t *testing.T) {
+	t.Helper()
+
+	got, err := normalizeRuntimeCheckOptions(options{service: " mysql "})
+	if err != nil {
+		t.Fatalf("normalizeRuntimeCheckOptions() error = %v", err)
+	}
+	if got.service != "mysql" {
+		t.Fatalf("normalizeRuntimeCheckOptions() service = %q, want %q", got.service, "mysql")
+	}
+	if got.all {
+		t.Fatal("normalizeRuntimeCheckOptions() all = true, want false")
+	}
+}
+
+func TestNormalizeRuntimeCheckOptionsRejectsConflictingSelection(t *testing.T) {
+	t.Helper()
+
+	if _, err := normalizeRuntimeCheckOptions(options{service: "mysql", all: true}); err == nil {
+		t.Fatal("normalizeRuntimeCheckOptions() error = nil, want conflict failure")
+	}
+}
+
 func TestCollectBuildPlanFindsGeneratedRuntimePackages(t *testing.T) {
 	t.Helper()
 

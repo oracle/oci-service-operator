@@ -49,6 +49,21 @@ func TestValidatorRegistriesAreInSync(t *testing.T) {
 	}
 }
 
+func TestNormalizeConfiguredServiceSelectionDefaultsBlankRunToAll(t *testing.T) {
+	t.Parallel()
+
+	serviceName, all, err := normalizeConfiguredServiceSelection("", false)
+	if err != nil {
+		t.Fatalf("normalizeConfiguredServiceSelection() error = %v", err)
+	}
+	if serviceName != "" {
+		t.Fatalf("normalizeConfiguredServiceSelection() service = %q, want empty", serviceName)
+	}
+	if !all {
+		t.Fatal("normalizeConfiguredServiceSelection() all = false, want true")
+	}
+}
+
 func TestDeriveSDKTypes(t *testing.T) {
 	t.Parallel()
 

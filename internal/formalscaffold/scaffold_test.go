@@ -8,6 +8,7 @@ package formalscaffold
 import (
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -648,7 +649,78 @@ func TestPublishedKindFromFileAllowsKindsThatEndWithList(t *testing.T) {
 	}
 }
 
-func TestGenerateMergesProviderInventoryIntoFormalCatalog(t *testing.T) {
+func TestFilterProviderInventoryEntriesAppliesPublishedSelection(t *testing.T) {
+	t.Parallel()
+
+	got := filterProviderInventoryEntries(
+		[]inventoryEntry{
+			{
+				Service: "database",
+				Group:   "database",
+				Slug:    "databaseautonomousdatabase",
+				Kind:    "AutonomousDatabase",
+			},
+			{
+				Service: "identity",
+				Group:   "identity",
+				Slug:    "user",
+				Kind:    "User",
+			},
+		},
+		[]inventoryEntry{
+			{
+				Service:          "database",
+				Group:            "database",
+				Slug:             "autonomousdatabase",
+				Kind:             "AutonomousDatabase",
+				ProviderResource: "oci_database_autonomous_database",
+			},
+			{
+				Service:          "database",
+				Group:            "database",
+				Slug:             "backup",
+				Kind:             "Backup",
+				ProviderResource: "oci_database_backup",
+			},
+			{
+				Service:          "identity",
+				Group:            "identity",
+				Slug:             "user",
+				Kind:             "User",
+				ProviderResource: "oci_identity_user",
+			},
+			{
+				Service:          "widget",
+				Group:            "widget",
+				Slug:             "widget",
+				Kind:             "Widget",
+				ProviderResource: "oci_widget_widget",
+			},
+		},
+	)
+
+	want := []inventoryEntry{
+		{
+			Service:          "database",
+			Group:            "database",
+			Slug:             "databaseautonomousdatabase",
+			Kind:             "AutonomousDatabase",
+			ProviderResource: "oci_database_autonomous_database",
+		},
+		{
+			Service:          "identity",
+			Group:            "identity",
+			Slug:             "user",
+			Kind:             "User",
+			ProviderResource: "oci_identity_user",
+		},
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("filterProviderInventoryEntries() = %#v, want %#v", got, want)
+	}
+}
+
+func TestGenerateIgnoresProviderInventoryOutsidePublishedActiveSurface(t *testing.T) {
 	requirePlantUML(t)
 	repoRoot := writeTestRepo(t)
 	providerRoot := writeScaffoldProviderFixture(t)
@@ -661,23 +733,20 @@ func TestGenerateMergesProviderInventoryIntoFormalCatalog(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Generate() error = %v", err)
 	}
-	if report.ProviderKinds != 1 {
-		t.Fatalf("report.ProviderKinds = %d, want 1", report.ProviderKinds)
+	if report.ProviderKinds != 0 {
+		t.Fatalf("report.ProviderKinds = %d, want 0", report.ProviderKinds)
 	}
 
 	catalog, err := formal.LoadCatalog(filepath.Join(repoRoot, "formal"))
 	if err != nil {
 		t.Fatalf("formal.LoadCatalog() error = %v", err)
 	}
-	widget, ok := catalog.Lookup("widget", "widget")
-	if !ok {
-		t.Fatal("catalog.Lookup(widget, widget) unexpectedly missed")
-	}
-	if widget.Import.ProviderResource != "oci_widget_widget" {
-		t.Fatalf("widget providerResource = %q, want %q", widget.Import.ProviderResource, "oci_widget_widget")
+	if _, ok := catalog.Lookup("widget", "widget"); ok {
+		t.Fatal("catalog.Lookup(widget, widget) unexpectedly found filtered provider-only row")
 	}
 	assertSharedDiagramStrategyArtifacts(t, filepath.Join(repoRoot, "formal", "shared", "diagrams"))
-	assertRenderedDiagramFamily(t, filepath.Join(repoRoot, "formal", "controllers", "widget", "widget", "diagrams"))
+	assertGeneratedCatalogRowAdded(t, catalog)
+	assertRenderedDiagramFamily(t, filepath.Join(repoRoot, "formal", "controllers", "identity", "networksource", "diagrams"))
 }
 
 func TestGeneratePrunesRowsOutsideDefaultActiveSurface(t *testing.T) {
@@ -791,7 +860,7 @@ func TestGeneratePreservesConfiguredFormalSpecRowsOutsideDefaultActiveSurface(t 
 	}
 }
 
-func TestVerifyCoverageRejectsMissingProviderRows(t *testing.T) {
+func TestVerifyCoverageIgnoresProviderInventoryOutsidePublishedActiveSurface(t *testing.T) {
 	requirePlantUML(t)
 	repoRoot := writeTestRepo(t)
 	providerRoot := writeScaffoldProviderFixture(t)
@@ -802,13 +871,16 @@ func TestVerifyCoverageRejectsMissingProviderRows(t *testing.T) {
 		t.Fatalf("Generate() preflight error = %v", err)
 	}
 
-	_, err := VerifyCoverage(Options{
+	report, err := VerifyCoverage(Options{
 		Root:         filepath.Join(repoRoot, "formal"),
 		ConfigPath:   filepath.Join(repoRoot, "internal", "generator", "config", "services.yaml"),
 		ProviderPath: providerRoot,
 	})
-	if err == nil || !strings.Contains(err.Error(), "missing formal scaffold row for widget/widget (Widget)") {
-		t.Fatalf("VerifyCoverage() error = %v, want missing widget/widget failure", err)
+	if err != nil {
+		t.Fatalf("VerifyCoverage() error = %v", err)
+	}
+	if report.ProviderKinds != 0 {
+		t.Fatalf("report.ProviderKinds = %d, want 0", report.ProviderKinds)
 	}
 }
 

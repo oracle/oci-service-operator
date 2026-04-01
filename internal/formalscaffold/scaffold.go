@@ -183,7 +183,7 @@ func loadGenerateInventory(inputs generateInputs, providerPath string, report *R
 	report.PublishedKinds = len(entries)
 
 	if providerPath != "" {
-		providerEntries, err := discoverProviderKinds(providerPath)
+		providerEntries, err := discoverProviderKinds(providerPath, entries)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -593,7 +593,11 @@ func selectedKindSet(kinds []string) map[string]struct{} {
 	return selected
 }
 
-func discoverProviderKinds(providerPath string) ([]inventoryEntry, error) {
+func discoverProviderKinds(providerPath string, publishedEntries []inventoryEntry) ([]inventoryEntry, error) {
+	if len(publishedEntries) == 0 {
+		return nil, nil
+	}
+
 	providerEntries, err := formal.DiscoverProviderInventory(providerPath)
 	if err != nil {
 		return nil, err
@@ -609,8 +613,45 @@ func discoverProviderKinds(providerPath string) ([]inventoryEntry, error) {
 			ProviderResource: entry.TerraformName,
 		})
 	}
+	entries = filterProviderInventoryEntries(publishedEntries, entries)
 	sortInventoryEntries(entries)
 	return entries, nil
+}
+
+func filterProviderInventoryEntries(publishedEntries []inventoryEntry, providerEntries []inventoryEntry) []inventoryEntry {
+	if len(publishedEntries) == 0 || len(providerEntries) == 0 {
+		return nil
+	}
+
+	type publishedTarget struct {
+		group string
+		slug  string
+	}
+
+	publishedByKind := make(map[string]publishedTarget, len(publishedEntries))
+	for _, entry := range publishedEntries {
+		publishedByKind[providerInventoryKey(entry.Service, entry.Kind)] = publishedTarget{
+			group: entry.Group,
+			slug:  entry.Slug,
+		}
+	}
+
+	filtered := make([]inventoryEntry, 0, len(providerEntries))
+	for _, entry := range providerEntries {
+		publishedTarget, ok := publishedByKind[providerInventoryKey(entry.Service, entry.Kind)]
+		if !ok {
+			continue
+		}
+
+		entry.Group = publishedTarget.group
+		entry.Slug = publishedTarget.slug
+		filtered = append(filtered, entry)
+	}
+	return filtered
+}
+
+func providerInventoryKey(service string, kind string) string {
+	return service + "\x00" + kind
 }
 
 func mergeInventoryEntries(primary, secondary []inventoryEntry) ([]inventoryEntry, error) {

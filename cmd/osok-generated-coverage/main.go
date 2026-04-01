@@ -86,7 +86,7 @@ func main() {
 	opts := options{}
 	flag.StringVar(&opts.configPath, "config", "internal/generator/config/services.yaml", "Path to the OSOK generator config file.")
 	flag.StringVar(&opts.service, "service", "", "Generate and report a single service from config, even if it is inactive by default.")
-	flag.BoolVar(&opts.all, "all", false, "Generate and report all enabled services in the default active surface.")
+	flag.BoolVar(&opts.all, "all", false, "Explicitly generate and report the enabled default-active service surface.")
 	flag.IntVar(&opts.top, "top", 10, "Number of top offenders to include per category. Use 0 for all.")
 	flag.StringVar(&opts.snapshotDir, "snapshot-dir", "", "Optional path to keep the generated snapshot workspace.")
 	flag.BoolVar(&opts.keepSnapshot, "keep-snapshot", false, "Keep the generated snapshot workspace when using an automatic temp directory.")
@@ -106,6 +106,10 @@ func main() {
 
 //nolint:gocognit,gocyclo // The CLI keeps snapshot generation/report orchestration linear so each step returns specific context.
 func run(ctx context.Context, opts options) (err error) {
+	opts, err = normalizeCoverageOptions(opts)
+	if err != nil {
+		return err
+	}
 	if err := validateOptions(opts); err != nil {
 		return err
 	}
@@ -216,7 +220,7 @@ func generateCoverageOutput(
 	if err := generateCoverageSnapshot(ctx, opts, inputs, snapshotDir.root); err != nil {
 		return outputReport{}, err
 	}
-	envelope, err := runCoverageValidator(snapshotDir.root, inputs.controllerGenPath, opts.service, opts.all, inputs.selectedGroups, opts.validatorJSONOut)
+	envelope, err := runCoverageValidator(snapshotDir.root, inputs.controllerGenPath, opts.service, inputs.selectedGroups, opts.validatorJSONOut)
 	if err != nil {
 		return outputReport{}, err
 	}
@@ -246,7 +250,6 @@ func runCoverageValidator(
 	snapshotRoot string,
 	controllerGenPath string,
 	serviceName string,
-	all bool,
 	selectedGroups []string,
 	validatorJSONOut string,
 ) (validatorEnvelope, error) {
@@ -254,8 +257,6 @@ func runCoverageValidator(
 	args := []string{"run", "./hack/update_validator_registries.go", "--write"}
 	if strings.TrimSpace(serviceName) != "" {
 		args = append(args, "--service", serviceName)
-	} else if all {
-		args = append(args, "--all")
 	} else {
 		args = append(args, "--all")
 	}
@@ -335,9 +336,30 @@ func validateOptions(opts options) error {
 		return fmt.Errorf("--write-baseline cannot be combined with --baseline or --fail-on-regression")
 	}
 	if (strings.TrimSpace(opts.writeBaseline) != "" || opts.failOnRegression) && strings.TrimSpace(opts.service) != "" {
-		return fmt.Errorf("--write-baseline and --fail-on-regression only support default-active-surface runs; remove --service and use --all")
+		return fmt.Errorf("--write-baseline and --fail-on-regression only support default-active-surface runs; remove --service and target the default active surface")
 	}
 	return nil
+}
+
+func normalizeCoverageOptions(opts options) (options, error) {
+	serviceName, all, err := normalizeCoverageSelection(opts.service, opts.all)
+	if err != nil {
+		return opts, err
+	}
+	opts.service = serviceName
+	opts.all = all
+	return opts, nil
+}
+
+func normalizeCoverageSelection(serviceName string, all bool) (string, bool, error) {
+	serviceName = strings.TrimSpace(serviceName)
+	if serviceName != "" && all {
+		return "", false, fmt.Errorf("use either --all or --service, not both")
+	}
+	if serviceName == "" && !all {
+		return "", true, nil
+	}
+	return serviceName, all, nil
 }
 
 func renderOutput(output outputReport) ([]byte, error) {

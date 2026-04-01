@@ -77,7 +77,7 @@ func main() {
 	opts := options{}
 	flag.StringVar(&opts.configPath, "config", defaultConfigPath, "Path to the generator config file used for the runtime snapshot.")
 	flag.StringVar(&opts.service, "service", "", "Generate and validate a single service from config, even if it is inactive by default.")
-	flag.BoolVar(&opts.all, "all", false, "Generate and validate all enabled services in the default active surface.")
+	flag.BoolVar(&opts.all, "all", false, "Explicitly generate and validate the enabled default-active service surface.")
 	flag.StringVar(&opts.snapshotDir, "snapshot-dir", "", "Optional path to keep the generated runtime snapshot workspace.")
 	flag.BoolVar(&opts.keepSnapshot, "keep-snapshot", false, "Keep the generated runtime snapshot workspace when using an automatic temp directory.")
 	flag.StringVar(&opts.controllerGen, "controller-gen", "", "Path to the controller-gen binary. Defaults to <repo>/bin/controller-gen.")
@@ -91,6 +91,10 @@ func main() {
 }
 
 func run(ctx context.Context, opts options) (err error) {
+	opts, err = normalizeRuntimeCheckOptions(opts)
+	if err != nil {
+		return err
+	}
 	inputs, err := loadRuntimeCheckRunInputs(ctx, opts)
 	if err != nil {
 		return err
@@ -261,6 +265,27 @@ func writeReport(rendered []byte, path string) error {
 		return err
 	}
 	return os.WriteFile(path, rendered, 0o644)
+}
+
+func normalizeRuntimeCheckOptions(opts options) (options, error) {
+	serviceName, all, err := normalizeRuntimeCheckSelection(opts.service, opts.all)
+	if err != nil {
+		return opts, err
+	}
+	opts.service = serviceName
+	opts.all = all
+	return opts, nil
+}
+
+func normalizeRuntimeCheckSelection(serviceName string, all bool) (string, bool, error) {
+	serviceName = strings.TrimSpace(serviceName)
+	if serviceName != "" && all {
+		return "", false, fmt.Errorf("use either --all or --service, not both")
+	}
+	if serviceName == "" && !all {
+		return "", true, nil
+	}
+	return serviceName, all, nil
 }
 
 func findRepoRoot() (string, error) {

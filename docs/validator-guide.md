@@ -148,7 +148,7 @@ make generated-coverage-report \
   GENERATED_COVERAGE_SNAPSHOT_DIR=/tmp/osok-functions-snapshot
 
 # Direct CLI usage (stdout is JSON)
-go run ./cmd/osok-generated-coverage --all > before.json
+go run ./cmd/osok-generated-coverage > before.json
 go run ./cmd/osok-generated-coverage --service functions > after.json
 ```
 
@@ -158,7 +158,7 @@ Common variables and flags:
 | --- | --- | --- |
 | `--config` | `internal/generator/config/services.yaml` | Generator config used for the snapshot coverage run. The Makefile passes the repo's effective generator config. |
 | `GENERATED_COVERAGE_SERVICE` / `--service` | empty | Run the snapshot report for one service from config, even if it is inactive by default. |
-| `--all` | false | Report the enabled default-active service surface from the selected config. |
+| `--all` | false | Explicitly report the enabled default-active service surface from the selected config. Blank runs target the same surface automatically. |
 | `GENERATED_COVERAGE_REPORT` / `--report-out` | `generated-coverage-report.json` for the Makefile target | Write the generated coverage summary JSON. |
 | `GENERATED_COVERAGE_TOP` / `--top` | `10` | Number of top offenders to keep per category. Use `0` for all. |
 | `GENERATED_COVERAGE_SNAPSHOT_DIR` / `--snapshot-dir` | empty | Keep the generated snapshot at a specific path instead of using an auto-cleaned temp dir. |
@@ -186,9 +186,9 @@ The summary JSON includes:
 Typical before/after comparison flow:
 
 ```bash
-go run ./cmd/osok-generated-coverage --all > before.json
+go run ./cmd/osok-generated-coverage > before.json
 # make generator changes
-go run ./cmd/osok-generated-coverage --all > after.json
+go run ./cmd/osok-generated-coverage > after.json
 
 jq '.summary.aggregate' before.json
 jq '.summary.aggregate' after.json
@@ -201,7 +201,7 @@ If you need to inspect the retained snapshot from a direct CLI run, keep it
 explicitly and read the path back from the JSON report:
 
 ```bash
-go run ./cmd/osok-generated-coverage --all --keep-snapshot > report.json
+go run ./cmd/osok-generated-coverage --keep-snapshot > report.json
 jq -r '.snapshot.root' report.json
 ```
 
@@ -228,7 +228,7 @@ make generated-coverage-gate \
 `generated-coverage-gate` and `generated-coverage-baseline` always operate on
 the enabled default-active service surface from the selected config. Use `make generated-coverage-report
 GENERATED_COVERAGE_SERVICE=<service>` for targeted local inspection, but keep
-the checked-in baseline scoped to `--all`.
+the checked-in baseline scoped to the default active surface (`--all` or a blank direct CLI run).
 
 The snapshot workflow always restores the checked-in non-generated API,
 controller, and service-manager companion Go files for the selected services
@@ -284,7 +284,7 @@ make generated-runtime-gate \
   GENERATED_RUNTIME_REPORT=/tmp/generated-runtime-report.json
 
 # Direct CLI usage for the enabled active surface
-go run ./cmd/osok-generated-runtime-check --all
+go run ./cmd/osok-generated-runtime-check
 
 # Direct CLI usage for one service with a retained snapshot
 go run ./cmd/osok-generated-runtime-check \
@@ -298,7 +298,7 @@ Common variables and flags:
 | --- | --- | --- |
 | `GENERATED_RUNTIME_CONFIG` / `--config` | `internal/generator/config/services.yaml` | Generator config used for the runtime snapshot. Override for alternate rollout configs. |
 | `GENERATED_RUNTIME_SERVICE` / `--service` | empty | Run the runtime check for one service from config, even if it is inactive by default. |
-| `--all` | false | Validate the enabled default-active service surface from the selected runtime config. |
+| `--all` | false | Explicitly validate the enabled default-active service surface from the selected runtime config. Blank runs target the same surface automatically. |
 | `GENERATED_RUNTIME_REPORT` / `--report-out` | `generated-runtime-report.json` for the Makefile target | Write the generated runtime summary JSON. |
 | `GENERATED_RUNTIME_SNAPSHOT_DIR` / `--snapshot-dir` | empty | Keep the runtime snapshot at a specific path instead of using an auto-cleaned temp dir. |
 | `GENERATED_RUNTIME_KEEP_SNAPSHOT` / `--keep-snapshot` | empty / false | Keep an automatically created temp snapshot after a successful run. |
@@ -333,10 +333,11 @@ go run ./hack/update_validator_registries.go --write
 ```
 
 `internal/generator/config/services.yaml` is the source-of-truth inventory for
-this workflow. The generator scans the configured API groups/versions from that
-file, preserves existing explicit SDK mappings, and keeps specs with no inferred
-SDK payloads in the API registry so coverage reports can mark them as
-`untracked` instead of silently omitting them.
+this workflow. Blank runs refresh the default active surface from that config,
+while `--service <name>` keeps explicit targeting available for inactive or
+backlog services. The generator preserves existing explicit SDK mappings and
+keeps specs with no inferred SDK payloads in the API registry so coverage
+reports can mark them as `untracked` instead of silently omitting them.
 
 This script updates:
 

@@ -62,7 +62,7 @@ var (
 func main() {
 	write := flag.Bool("write", false, "write changes to registry files")
 	serviceName := flag.String("service", "", "refresh validator registries for a single configured service")
-	all := flag.Bool("all", false, "refresh validator registries for the default active generator surface")
+	all := flag.Bool("all", false, "explicitly refresh validator registries for the default active generator surface")
 	flag.Parse()
 
 	root, err := findRepoRoot()
