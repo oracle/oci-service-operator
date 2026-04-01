@@ -56,8 +56,10 @@ Package profile behavior:
   service into runtime rollout.
 
 Runtime seam ownership stays explicit in checked-in files rather than being
-implied by the package profile. `database` and `mysql` still retain parity
-adapters, while `streaming/Stream` only retains the endpoint-secret companion.
+implied by the package profile. The checked-in `database` and `mysql` runtime
+surfaces are generator-owned, while `streaming/Stream` keeps the only
+repo-authored companion through the endpoint-secret client layered onto the
+generated service-manager path.
 
 Package profile transitions:
 
