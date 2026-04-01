@@ -90,10 +90,7 @@ func (c *routeTableRuntimeClient) CreateOrUpdate(ctx context.Context, resource *
 	}
 
 	switch current.LifecycleState {
-	case coresdk.RouteTableLifecycleStateTerminated:
-		c.clearTrackedIdentity(resource)
-		return c.create(ctx, resource)
-	case coresdk.RouteTableLifecycleStateProvisioning, routeTableLifecycleStateUpdate, coresdk.RouteTableLifecycleStateTerminating:
+	case coresdk.RouteTableLifecycleStateProvisioning, routeTableLifecycleStateUpdate, coresdk.RouteTableLifecycleStateTerminating, coresdk.RouteTableLifecycleStateTerminated:
 		return c.applyLifecycle(resource, current)
 	}
 
