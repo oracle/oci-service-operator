@@ -20,6 +20,13 @@ type quickServiceSelectionCase struct {
 	kind  string
 }
 
+type quickSampleCleanupCase struct {
+	root       string
+	samplesDir string
+	inventory  cleanupInventory
+	want       []string
+}
+
 func TestSelectServicesQuickAppliesDefaultSurfaceAndExplicitOverride(t *testing.T) {
 	t.Parallel()
 
@@ -73,61 +80,27 @@ func TestCleanupSampleOutputsQuickKeepsOnlyDesiredGeneratedFiles(t *testing.T) {
 	}
 
 	property := func(existingGeneratedMask uint8, existingManualMask uint8, desiredMask uint8) bool {
-		root := t.TempDir()
-		samplesDir := filepath.Join(root, "config", "samples")
-		if err := os.MkdirAll(samplesDir, 0o755); err != nil {
-			return false
-		}
-
-		inventory := newCleanupInventory(nil)
-		for _, group := range []string{"alpha", "beta", "gamma"} {
-			inventory.addSamplePrefix(sampleGroupPrefix(group))
-		}
-
-		existingGenerated := quickFilesFromMask(generated, existingGeneratedMask)
-		existingManual := quickFilesFromMask(manual, existingManualMask)
-		desiredGenerated := quickFilesFromMask(generated, desiredMask)
-
-		for _, name := range existingGenerated {
-			if err := writeQuickCleanupFile(filepath.Join(samplesDir, name)); err != nil {
-				return false
-			}
-		}
-		for _, name := range existingManual {
-			if err := writeQuickCleanupFile(filepath.Join(samplesDir, name)); err != nil {
-				return false
-			}
-		}
-		for _, name := range desiredGenerated {
-			inventory.sampleFiles[filepath.Join(samplesDir, name)] = struct{}{}
-		}
-
-		if err := cleanupSampleOutputs(root, inventory); err != nil {
-			return false
-		}
-
-		got, err := quickDirFiles(samplesDir)
+		sampleCase, err := quickSampleCleanupCaseForMasks(
+			t.TempDir(),
+			generated,
+			manual,
+			existingGeneratedMask,
+			existingManualMask,
+			desiredMask,
+		)
 		if err != nil {
 			return false
 		}
 
-		wantSet := make(map[string]struct{}, len(existingManual)+len(existingGenerated))
-		for _, name := range existingManual {
-			wantSet[name] = struct{}{}
-		}
-		for _, name := range existingGenerated {
-			if inventoryPath := filepath.Join(samplesDir, name); quickCleanupContainsPath(inventory.sampleFiles, inventoryPath) {
-				wantSet[name] = struct{}{}
-			}
+		if err := cleanupSampleOutputs(sampleCase.root, sampleCase.inventory); err != nil {
+			return false
 		}
 
-		want := make([]string, 0, len(wantSet))
-		for name := range wantSet {
-			want = append(want, name)
+		got, err := quickDirFiles(sampleCase.samplesDir)
+		if err != nil {
+			return false
 		}
-		sort.Strings(want)
-
-		return slices.Equal(got, want)
+		return slices.Equal(got, sampleCase.want)
 	}
 
 	if err := quick.Check(property, &quick.Config{MaxCount: 96}); err != nil {
@@ -210,9 +183,80 @@ func quickMaskBit(mask uint8, index int) bool {
 	return mask&(1<<index) != 0
 }
 
-func quickCleanupContainsPath(paths map[string]struct{}, path string) bool {
-	_, ok := paths[path]
-	return ok
+func quickSampleCleanupCaseForMasks(
+	root string,
+	generated []string,
+	manual []string,
+	existingGeneratedMask uint8,
+	existingManualMask uint8,
+	desiredMask uint8,
+) (quickSampleCleanupCase, error) {
+	samplesDir := filepath.Join(root, "config", "samples")
+	if err := os.MkdirAll(samplesDir, 0o755); err != nil {
+		return quickSampleCleanupCase{}, err
+	}
+
+	inventory := quickSampleCleanupInventory()
+	existingGenerated := quickFilesFromMask(generated, existingGeneratedMask)
+	existingManual := quickFilesFromMask(manual, existingManualMask)
+	desiredGenerated := quickFilesFromMask(generated, desiredMask)
+
+	if err := quickSeedCleanupFiles(samplesDir, existingGenerated); err != nil {
+		return quickSampleCleanupCase{}, err
+	}
+	if err := quickSeedCleanupFiles(samplesDir, existingManual); err != nil {
+		return quickSampleCleanupCase{}, err
+	}
+	quickRegisterDesiredSampleFiles(samplesDir, &inventory, desiredGenerated)
+
+	return quickSampleCleanupCase{
+		root:       root,
+		samplesDir: samplesDir,
+		inventory:  inventory,
+		want:       quickExpectedSampleFiles(samplesDir, existingGenerated, existingManual, inventory.sampleFiles),
+	}, nil
+}
+
+func quickSampleCleanupInventory() cleanupInventory {
+	inventory := newCleanupInventory(nil)
+	for _, group := range []string{"alpha", "beta", "gamma"} {
+		inventory.addSamplePrefix(sampleGroupPrefix(group))
+	}
+	return inventory
+}
+
+func quickSeedCleanupFiles(samplesDir string, names []string) error {
+	for _, name := range names {
+		if err := writeQuickCleanupFile(filepath.Join(samplesDir, name)); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func quickRegisterDesiredSampleFiles(samplesDir string, inventory *cleanupInventory, names []string) {
+	for _, name := range names {
+		inventory.sampleFiles[filepath.Join(samplesDir, name)] = struct{}{}
+	}
+}
+
+func quickExpectedSampleFiles(samplesDir string, existingGenerated []string, existingManual []string, desired map[string]struct{}) []string {
+	wantSet := make(map[string]struct{}, len(existingManual)+len(existingGenerated))
+	for _, name := range existingManual {
+		wantSet[name] = struct{}{}
+	}
+	for _, name := range existingGenerated {
+		if _, ok := desired[filepath.Join(samplesDir, name)]; ok {
+			wantSet[name] = struct{}{}
+		}
+	}
+
+	want := make([]string, 0, len(wantSet))
+	for name := range wantSet {
+		want = append(want, name)
+	}
+	sort.Strings(want)
+	return want
 }
 
 func writeQuickCleanupFile(path string) error {
