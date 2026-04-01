@@ -8,6 +8,7 @@ package kubesecret
 import (
 	"context"
 
+	"github.com/oracle/oci-service-operator/pkg/credhelper"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/metrics"
 	v1 "k8s.io/api/core/v1"
@@ -23,6 +24,8 @@ type KubeSecretClient struct {
 	Log     loggerutil.OSOKLogger
 	Metrics *metrics.Metrics
 }
+
+var _ credhelper.SecretRecordReader = (*KubeSecretClient)(nil)
 
 func New(kubeClient client.Client, logger loggerutil.OSOKLogger, metrics *metrics.Metrics) *KubeSecretClient {
 	return NewWithReader(kubeClient, kubeClient, logger, metrics)
@@ -65,13 +68,7 @@ func (c *KubeSecretClient) CreateSecret(ctx context.Context, secretName string, 
 }
 
 func (c *KubeSecretClient) DeleteSecret(ctx context.Context, secretName string, secretNamespace string) (bool, error) {
-	existingSecret := &v1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      secretName,
-			Namespace: secretNamespace,
-		},
-	}
-	err := c.reader().Get(ctx, types.NamespacedName{Name: secretName, Namespace: secretNamespace}, existingSecret)
+	existingSecret, err := c.getSecretObject(ctx, secretName, secretNamespace)
 	if err != nil {
 		c.Log.ErrorLog(err, "error getting Kubernetes secret", "Secret Name", secretName, "Secret Namespace", secretNamespace)
 		return false, err
@@ -86,26 +83,30 @@ func (c *KubeSecretClient) DeleteSecret(ctx context.Context, secretName string, 
 }
 
 func (c *KubeSecretClient) GetSecret(ctx context.Context, secretName string, secretNamespace string) (map[string][]byte, error) {
-	data := map[string][]byte{}
+	record, err := c.GetSecretRecord(ctx, secretName, secretNamespace)
+	if err != nil {
+		return map[string][]byte{}, err
+	}
+	return record.Data, nil
+}
 
-	existingSecret := &v1.Secret{}
-	err := c.reader().Get(ctx, types.NamespacedName{Name: secretName, Namespace: secretNamespace}, existingSecret)
+func (c *KubeSecretClient) GetSecretRecord(ctx context.Context, secretName string, secretNamespace string) (credhelper.SecretRecord, error) {
+	existingSecret, err := c.getSecretObject(ctx, secretName, secretNamespace)
 	if err != nil {
 		c.Log.ErrorLog(err, "error getting Kubernetes secret", "Secret Name", secretName, "Secret Namespace", secretNamespace)
-		return data, err
+		return credhelper.SecretRecord{}, err
 	}
 
 	c.Log.InfoLog("Secret retrieved successfully", "Secret Name", existingSecret.Name, "Secret Namespace", existingSecret.Namespace)
-	for k, v := range existingSecret.Data {
-		data[k] = v
-	}
-	return data, nil
+	return credhelper.SecretRecord{
+		Labels: cloneLabels(existingSecret.Labels),
+		Data:   cloneSecretData(existingSecret.Data),
+	}, nil
 }
 
 func (c *KubeSecretClient) UpdateSecret(ctx context.Context, secretName string, secretNamespace string, labels map[string]string,
 	updatedData map[string][]byte) (bool, error) {
-	existingSecret := &v1.Secret{}
-	err := c.reader().Get(ctx, types.NamespacedName{Name: secretName, Namespace: secretNamespace}, existingSecret)
+	existingSecret, err := c.getSecretObject(ctx, secretName, secretNamespace)
 	if err != nil {
 		c.Log.ErrorLog(err, "Failed to get kubernetes secret before update", "Secret Name", secretName, "Secret Namespace", secretNamespace)
 		return false, err
@@ -128,4 +129,39 @@ func (c *KubeSecretClient) reader() client.Reader {
 		return c.Reader
 	}
 	return c.Client
+}
+
+func (c *KubeSecretClient) getSecretObject(ctx context.Context, secretName string, secretNamespace string) (*v1.Secret, error) {
+	existingSecret := &v1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      secretName,
+			Namespace: secretNamespace,
+		},
+	}
+	if err := c.reader().Get(ctx, types.NamespacedName{Name: secretName, Namespace: secretNamespace}, existingSecret); err != nil {
+		return nil, err
+	}
+	return existingSecret, nil
+}
+
+func cloneLabels(labels map[string]string) map[string]string {
+	if labels == nil {
+		return nil
+	}
+	cloned := make(map[string]string, len(labels))
+	for key, value := range labels {
+		cloned[key] = value
+	}
+	return cloned
+}
+
+func cloneSecretData(data map[string][]byte) map[string][]byte {
+	if data == nil {
+		return nil
+	}
+	cloned := make(map[string][]byte, len(data))
+	for key, value := range data {
+		cloned[key] = append([]byte(nil), value...)
+	}
+	return cloned
 }

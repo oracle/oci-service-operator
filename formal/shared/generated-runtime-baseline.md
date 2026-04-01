@@ -8,8 +8,8 @@ This checklist seeds `nosql/Table`, `psql/DbSystem`, and
   delete confirmation.
 - `formal/controllers/streaming/stream` is the generated-runtime reference for
   bind-versus-create, lifecycle-sensitive list lookup, and delete-side lookup
-  branching, while its ready-only secret companion and best-effort delete
-  semantics stay stream-specific.
+  branching, while its UID-owned ready-only secret companion and best-effort
+  delete semantics stay stream-specific.
 - `mysql/MySqlDbSystem` stays in the legacy-adapter batch in this issue; it
   uses the same category names as the shared checklist but does not inherit the
   generated-runtime answers yet.

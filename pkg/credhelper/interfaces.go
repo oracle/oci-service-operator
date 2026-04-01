@@ -7,6 +7,11 @@ package credhelper
 
 import "context"
 
+type SecretRecord struct {
+	Labels map[string]string
+	Data   map[string][]byte
+}
+
 type CredentialClient interface {
 	CreateSecret(ctx context.Context, secretName string, secretNamespace string, labels map[string]string,
 		data map[string][]byte) (bool, error)
@@ -17,4 +22,8 @@ type CredentialClient interface {
 
 	UpdateSecret(ctx context.Context, secretName string, secretNamespace string, labels map[string]string,
 		data map[string][]byte) (bool, error)
+}
+
+type SecretRecordReader interface {
+	GetSecretRecord(ctx context.Context, secretName string, secretNamespace string) (SecretRecord, error)
 }

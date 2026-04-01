@@ -17,6 +17,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/common"
 	streamingsdk "github.com/oracle/oci-go-sdk/v65/streaming"
 	streamingv1beta1 "github.com/oracle/oci-service-operator/api/streaming/v1beta1"
+	"github.com/oracle/oci-service-operator/pkg/credhelper"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	v1 "k8s.io/api/core/v1"
@@ -25,14 +26,16 @@ import (
 )
 
 type fakeCredentialClient struct {
-	createSecretFn func(context.Context, string, string, map[string]string, map[string][]byte) (bool, error)
-	deleteSecretFn func(context.Context, string, string) (bool, error)
-	getSecretFn    func(context.Context, string, string) (map[string][]byte, error)
-	updateSecretFn func(context.Context, string, string, map[string]string, map[string][]byte) (bool, error)
-	createCalled   bool
-	deleteCalled   bool
-	getCalled      bool
-	updateCalled   bool
+	createSecretFn      func(context.Context, string, string, map[string]string, map[string][]byte) (bool, error)
+	deleteSecretFn      func(context.Context, string, string) (bool, error)
+	getSecretFn         func(context.Context, string, string) (map[string][]byte, error)
+	getSecretRecordFn   func(context.Context, string, string) (credhelper.SecretRecord, error)
+	updateSecretFn      func(context.Context, string, string, map[string]string, map[string][]byte) (bool, error)
+	defaultSecretLabels map[string]string
+	createCalled        bool
+	deleteCalled        bool
+	getCalled           bool
+	updateCalled        bool
 }
 
 func (f *fakeCredentialClient) CreateSecret(
@@ -63,6 +66,21 @@ func (f *fakeCredentialClient) GetSecret(ctx context.Context, name string, names
 		return f.getSecretFn(ctx, name, namespace)
 	}
 	return nil, apierrors.NewNotFound(v1.Resource("secret"), name)
+}
+
+func (f *fakeCredentialClient) GetSecretRecord(ctx context.Context, name string, namespace string) (credhelper.SecretRecord, error) {
+	f.getCalled = true
+	if f.getSecretRecordFn != nil {
+		return f.getSecretRecordFn(ctx, name, namespace)
+	}
+	data, err := f.GetSecret(ctx, name, namespace)
+	if err != nil {
+		return credhelper.SecretRecord{}, err
+	}
+	return credhelper.SecretRecord{
+		Labels: cloneSecretLabels(f.defaultSecretLabels),
+		Data:   cloneSecretData(data),
+	}, nil
 }
 
 func (f *fakeCredentialClient) UpdateSecret(
@@ -103,12 +121,14 @@ func (f fakeStreamServiceClient) Delete(ctx context.Context, resource *streaming
 }
 
 const (
-	testStreamName      = "test-stream"
-	testStreamNamespace = "default"
-	activeStreamOCID    = shared.OCID("ocid1.stream.oc1..active")
-	quickStreamOCID     = shared.OCID("ocid1.stream.oc1..quick")
-	testStreamEndpoint  = "https://streaming.example.com"
-	staleStreamEndpoint = "https://old-streaming.example.com"
+	testStreamName         = "test-stream"
+	testStreamNamespace    = "default"
+	testStreamUID          = "stream-uid"
+	activeStreamOCID       = shared.OCID("ocid1.stream.oc1..active")
+	quickStreamOCID        = shared.OCID("ocid1.stream.oc1..quick")
+	quickStreamResourceUID = "stream-uid-quick"
+	testStreamEndpoint     = "https://streaming.example.com"
+	staleStreamEndpoint    = "https://old-streaming.example.com"
 )
 
 type secretCallExpectation struct {
@@ -122,6 +142,7 @@ func newTestStreamResource() *streamingv1beta1.Stream {
 	resource := &streamingv1beta1.Stream{}
 	resource.Name = testStreamName
 	resource.Namespace = testStreamNamespace
+	resource.UID = testStreamUID
 	return resource
 }
 
@@ -149,6 +170,13 @@ func requireEndpointSecretData(t *testing.T, data map[string][]byte, wantEndpoin
 	t.Helper()
 	if got := string(data["endpoint"]); got != wantEndpoint {
 		t.Fatalf("%s endpoint = %q, want %s", label, got, wantEndpoint)
+	}
+}
+
+func requireOwnedSecretLabels(t *testing.T, labels map[string]string, wantUID string) {
+	t.Helper()
+	if got := labels[streamEndpointSecretOwnerUIDLabel]; got != wantUID {
+		t.Fatalf("secret owner label = %q, want %q", got, wantUID)
 	}
 }
 
@@ -203,9 +231,16 @@ func staticStreamLoader(t *testing.T, wantID shared.OCID, endpoint string) func(
 func newActiveStreamEndpointSecretClient(t *testing.T, credClient *fakeCredentialClient, endpoint string) streamEndpointSecretClient {
 	t.Helper()
 	return streamEndpointSecretClient{
-		delegate:         activeStreamServiceClient(activeStreamOCID),
-		credentialClient: credClient,
-		loadStream:       staticStreamLoader(t, activeStreamOCID, endpoint),
+		delegate:           activeStreamServiceClient(activeStreamOCID),
+		credentialClient:   credClient,
+		secretRecordReader: credClient,
+		loadStream:         staticStreamLoader(t, activeStreamOCID, endpoint),
+	}
+}
+
+func ownedEndpointSecretLabels(uid string) map[string]string {
+	return map[string]string{
+		streamEndpointSecretOwnerUIDLabel: uid,
 	}
 }
 
@@ -220,9 +255,11 @@ func TestStreamEndpointSecretClientCreatesSecretAfterActiveReconcile(t *testing.
 	t.Parallel()
 
 	credClient := &fakeCredentialClient{}
+	var createdLabels map[string]string
 	var createdData map[string][]byte
-	credClient.createSecretFn = func(_ context.Context, name string, namespace string, _ map[string]string, data map[string][]byte) (bool, error) {
+	credClient.createSecretFn = func(_ context.Context, name string, namespace string, labels map[string]string, data map[string][]byte) (bool, error) {
 		requireSecretTarget(t, "CreateSecret", name, namespace)
+		createdLabels = cloneSecretLabels(labels)
 		createdData = data
 		return true, nil
 	}
@@ -233,13 +270,16 @@ func TestStreamEndpointSecretClientCreatesSecretAfterActiveReconcile(t *testing.
 	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
 	requireCreateOrUpdateSuccess(t, response, err, "secret sync")
 	assertCredentialCalls(t, credClient, secretCallExpectation{get: true, create: true})
+	requireOwnedSecretLabels(t, createdLabels, testStreamUID)
 	requireEndpointSecretData(t, createdData, testStreamEndpoint, "secret")
 }
 
 func TestStreamEndpointSecretClientRecoversFromCreateAlreadyExistsAfterStaleRead(t *testing.T) {
 	t.Parallel()
 
-	credClient := &fakeCredentialClient{}
+	credClient := &fakeCredentialClient{
+		defaultSecretLabels: ownedEndpointSecretLabels(testStreamUID),
+	}
 	getCalls := 0
 	credClient.getSecretFn = func(_ context.Context, name string, namespace string) (map[string][]byte, error) {
 		requireSecretTarget(t, "GetSecret", name, namespace)
@@ -251,8 +291,9 @@ func TestStreamEndpointSecretClientRecoversFromCreateAlreadyExistsAfterStaleRead
 			"endpoint": []byte(testStreamEndpoint),
 		}, nil
 	}
-	credClient.createSecretFn = func(_ context.Context, name string, namespace string, _ map[string]string, data map[string][]byte) (bool, error) {
+	credClient.createSecretFn = func(_ context.Context, name string, namespace string, labels map[string]string, data map[string][]byte) (bool, error) {
 		requireSecretTarget(t, "CreateSecret", name, namespace)
+		requireOwnedSecretLabels(t, labels, testStreamUID)
 		requireEndpointSecretData(t, data, testStreamEndpoint, "secret")
 		return false, apierrors.NewAlreadyExists(v1.Resource("secret"), name)
 	}
@@ -275,7 +316,9 @@ func TestStreamEndpointSecretClientRecoversFromCreateAlreadyExistsAfterStaleRead
 func TestStreamEndpointSecretClientSkipsSecretUpdateWhenExistingDataMatches(t *testing.T) {
 	t.Parallel()
 
-	credClient := &fakeCredentialClient{}
+	credClient := &fakeCredentialClient{
+		defaultSecretLabels: ownedEndpointSecretLabels(testStreamUID),
+	}
 	credClient.getSecretFn = func(_ context.Context, name string, namespace string) (map[string][]byte, error) {
 		requireSecretTarget(t, "GetSecret", name, namespace)
 		return map[string][]byte{
@@ -302,7 +345,9 @@ func TestStreamEndpointSecretClientSkipsSecretUpdateWhenExistingDataMatches(t *t
 func TestStreamEndpointSecretClientUpdatesExistingSecretWhenEndpointChanges(t *testing.T) {
 	t.Parallel()
 
-	credClient := &fakeCredentialClient{}
+	credClient := &fakeCredentialClient{
+		defaultSecretLabels: ownedEndpointSecretLabels(testStreamUID),
+	}
 	var updatedData map[string][]byte
 	credClient.getSecretFn = func(_ context.Context, name string, namespace string) (map[string][]byte, error) {
 		requireSecretTarget(t, "GetSecret", name, namespace)
@@ -331,6 +376,38 @@ func TestStreamEndpointSecretClientUpdatesExistingSecretWhenEndpointChanges(t *t
 	requireEndpointSecretData(t, updatedData, testStreamEndpoint, "updated secret")
 }
 
+func TestStreamEndpointSecretClientRejectsUnownedExistingSecret(t *testing.T) {
+	t.Parallel()
+
+	credClient := &fakeCredentialClient{}
+	credClient.getSecretFn = func(_ context.Context, name string, namespace string) (map[string][]byte, error) {
+		requireSecretTarget(t, "GetSecret", name, namespace)
+		return map[string][]byte{
+			"endpoint": []byte(staleStreamEndpoint),
+		}, nil
+	}
+	credClient.createSecretFn = func(context.Context, string, string, map[string]string, map[string][]byte) (bool, error) {
+		t.Fatal("CreateSecret() should not be called when an unowned same-name Secret already exists")
+		return false, nil
+	}
+	credClient.updateSecretFn = func(context.Context, string, string, map[string]string, map[string][]byte) (bool, error) {
+		t.Fatal("UpdateSecret() should not be called when the same-name Secret is not owned")
+		return false, nil
+	}
+
+	client := newActiveStreamEndpointSecretClient(t, credClient, testStreamEndpoint)
+	resource := newTestStreamResource()
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err == nil || !strings.Contains(err.Error(), "not owned") {
+		t.Fatalf("CreateOrUpdate() error = %v, want ownership failure", err)
+	}
+	if response.IsSuccessful {
+		t.Fatalf("CreateOrUpdate() response = %#v, want unsuccessful reconcile on ownership conflict", response)
+	}
+	assertCredentialCalls(t, credClient, secretCallExpectation{get: true})
+}
+
 func TestStreamEndpointSecretClientSkipsSecretUntilActive(t *testing.T) {
 	t.Parallel()
 
@@ -346,7 +423,8 @@ func TestStreamEndpointSecretClientSkipsSecretUntilActive(t *testing.T) {
 				return servicemanager.OSOKResponse{IsSuccessful: true, ShouldRequeue: true}, nil
 			},
 		},
-		credentialClient: credClient,
+		credentialClient:   credClient,
+		secretRecordReader: credClient,
 		loadStream: func(_ context.Context, _ shared.OCID) (*streamingsdk.Stream, error) {
 			t.Fatal("loadStream() should not be called before the stream reaches ACTIVE")
 			return nil, nil
@@ -371,6 +449,12 @@ func TestStreamEndpointSecretClientDeletesSecretAfterDelete(t *testing.T) {
 	t.Parallel()
 
 	credClient := &fakeCredentialClient{}
+	credClient.getSecretRecordFn = func(_ context.Context, name string, namespace string) (credhelper.SecretRecord, error) {
+		requireSecretTarget(t, "GetSecret", name, namespace)
+		return credhelper.SecretRecord{
+			Labels: ownedEndpointSecretLabels(testStreamUID),
+		}, nil
+	}
 	credClient.deleteSecretFn = func(_ context.Context, name string, namespace string) (bool, error) {
 		if name != "test-stream" || namespace != "default" {
 			t.Fatalf("DeleteSecret() target = %s/%s, want default/test-stream", namespace, name)
@@ -384,25 +468,24 @@ func TestStreamEndpointSecretClientDeletesSecretAfterDelete(t *testing.T) {
 				return true, nil
 			},
 		},
-		credentialClient: credClient,
+		credentialClient:   credClient,
+		secretRecordReader: credClient,
 	}
 
 	resource := newTestStreamResource()
 
 	deleted, err := client.Delete(context.Background(), resource)
 	requireDeleteSuccess(t, deleted, err, "secret cleanup")
-	assertCredentialCalls(t, credClient, secretCallExpectation{delete: true})
+	assertCredentialCalls(t, credClient, secretCallExpectation{get: true, delete: true})
 }
 
 func TestStreamEndpointSecretClientDeleteIgnoresMissingSecret(t *testing.T) {
 	t.Parallel()
 
 	credClient := &fakeCredentialClient{}
-	credClient.deleteSecretFn = func(_ context.Context, name string, namespace string) (bool, error) {
-		if name != "test-stream" || namespace != "default" {
-			t.Fatalf("DeleteSecret() target = %s/%s, want default/test-stream", namespace, name)
-		}
-		return false, apierrors.NewNotFound(v1.Resource("secret"), name)
+	credClient.getSecretRecordFn = func(_ context.Context, name string, namespace string) (credhelper.SecretRecord, error) {
+		requireSecretTarget(t, "GetSecret", name, namespace)
+		return credhelper.SecretRecord{}, apierrors.NewNotFound(v1.Resource("secret"), name)
 	}
 
 	client := streamEndpointSecretClient{
@@ -411,14 +494,47 @@ func TestStreamEndpointSecretClientDeleteIgnoresMissingSecret(t *testing.T) {
 				return true, nil
 			},
 		},
-		credentialClient: credClient,
+		credentialClient:   credClient,
+		secretRecordReader: credClient,
 	}
 
 	resource := newTestStreamResource()
 
 	deleted, err := client.Delete(context.Background(), resource)
 	requireDeleteSuccess(t, deleted, err, "a missing companion secret")
-	assertCredentialCalls(t, credClient, secretCallExpectation{delete: true})
+	assertCredentialCalls(t, credClient, secretCallExpectation{get: true})
+}
+
+func TestStreamEndpointSecretClientDeleteSkipsUnownedSecret(t *testing.T) {
+	t.Parallel()
+
+	credClient := &fakeCredentialClient{}
+	credClient.getSecretRecordFn = func(_ context.Context, name string, namespace string) (credhelper.SecretRecord, error) {
+		requireSecretTarget(t, "GetSecret", name, namespace)
+		return credhelper.SecretRecord{
+			Labels: ownedEndpointSecretLabels("other-stream-uid"),
+		}, nil
+	}
+	credClient.deleteSecretFn = func(context.Context, string, string) (bool, error) {
+		t.Fatal("DeleteSecret() should not be called for an unowned same-name Secret")
+		return false, nil
+	}
+
+	client := streamEndpointSecretClient{
+		delegate: fakeStreamServiceClient{
+			deleteFn: func(_ context.Context, _ *streamingv1beta1.Stream) (bool, error) {
+				return true, nil
+			},
+		},
+		credentialClient:   credClient,
+		secretRecordReader: credClient,
+	}
+
+	resource := newTestStreamResource()
+
+	deleted, err := client.Delete(context.Background(), resource)
+	requireDeleteSuccess(t, deleted, err, "skipping an unowned same-name secret")
+	assertCredentialCalls(t, credClient, secretCallExpectation{get: true})
 }
 
 func TestStreamEndpointSecretDataRequiresMessagesEndpoint(t *testing.T) {
@@ -431,6 +547,7 @@ func TestStreamEndpointSecretDataRequiresMessagesEndpoint(t *testing.T) {
 
 type streamEndpointSecretQuickCase struct {
 	InitialState   uint8
+	Owned          bool
 	EndpointID     uint32
 	ExtraKey       bool
 	CachedNotFound bool
@@ -439,6 +556,7 @@ type streamEndpointSecretQuickCase struct {
 func (streamEndpointSecretQuickCase) Generate(r *rand.Rand, _ int) reflect.Value {
 	return reflect.ValueOf(streamEndpointSecretQuickCase{
 		InitialState:   uint8(r.Intn(3)),
+		Owned:          r.Intn(2) == 0,
 		EndpointID:     r.Uint32(),
 		ExtraKey:       r.Intn(2) == 0,
 		CachedNotFound: r.Intn(2) == 0,
@@ -447,12 +565,14 @@ func (streamEndpointSecretQuickCase) Generate(r *rand.Rand, _ int) reflect.Value
 
 type streamEndpointSecretDeleteQuickCase struct {
 	InitialPresent bool
+	Owned          bool
 	DeleteRace     bool
 }
 
 func (streamEndpointSecretDeleteQuickCase) Generate(r *rand.Rand, _ int) reflect.Value {
 	return reflect.ValueOf(streamEndpointSecretDeleteQuickCase{
 		InitialPresent: r.Intn(2) == 0,
+		Owned:          r.Intn(2) == 0,
 		DeleteRace:     r.Intn(2) == 0,
 	})
 }
@@ -494,6 +614,7 @@ type streamEndpointSecretQuickHarness struct {
 	resource        *streamingv1beta1.Stream
 	desiredEndpoint string
 	store           map[string][]byte
+	storeLabels     map[string]string
 	createCalls     int
 	updateCalls     int
 	getCalls        int
@@ -506,36 +627,41 @@ func newStreamEndpointSecretQuickHarness(tc streamEndpointSecretQuickCase) *stre
 		resource:        newTestStreamResource(),
 		desiredEndpoint: fmt.Sprintf("https://streaming-%d.example.com", tc.EndpointID),
 	}
+	h.resource.UID = quickStreamResourceUID
 	h.resource.Status.OsokStatus.Ocid = quickStreamOCID
-	h.store = initialQuickSecretStore(tc, h.desiredEndpoint)
+	h.store, h.storeLabels = initialQuickSecretState(tc, h.desiredEndpoint, quickStreamResourceUID)
 
 	credClient := &fakeCredentialClient{
-		getSecretFn:    h.getSecret,
-		createSecretFn: h.createSecret,
-		updateSecretFn: h.updateSecret,
+		getSecretRecordFn: h.getSecretRecord,
+		createSecretFn:    h.createSecret,
+		updateSecretFn:    h.updateSecret,
 	}
 	h.client = streamEndpointSecretClient{
-		credentialClient: credClient,
-		loadStream:       h.loadStream,
+		credentialClient:   credClient,
+		secretRecordReader: credClient,
+		loadStream:         h.loadStream,
 	}
 	return h
 }
 
-func (h *streamEndpointSecretQuickHarness) getSecret(_ context.Context, name string, namespace string) (map[string][]byte, error) {
+func (h *streamEndpointSecretQuickHarness) getSecretRecord(_ context.Context, name string, namespace string) (credhelper.SecretRecord, error) {
 	h.getCalls++
 	if err := validateQuickSecretTarget("GetSecret", name, namespace); err != nil {
-		return nil, err
+		return credhelper.SecretRecord{}, err
 	}
 	if h.store == nil {
-		return nil, apierrors.NewNotFound(v1.Resource("secret"), name)
+		return credhelper.SecretRecord{}, apierrors.NewNotFound(v1.Resource("secret"), name)
 	}
 	if h.tc.CachedNotFound && h.getCalls == 1 {
-		return nil, apierrors.NewNotFound(v1.Resource("secret"), name)
+		return credhelper.SecretRecord{}, apierrors.NewNotFound(v1.Resource("secret"), name)
 	}
-	return cloneSecretData(h.store), nil
+	return credhelper.SecretRecord{
+		Labels: cloneSecretLabels(h.storeLabels),
+		Data:   cloneSecretData(h.store),
+	}, nil
 }
 
-func (h *streamEndpointSecretQuickHarness) createSecret(_ context.Context, name string, namespace string, _ map[string]string, data map[string][]byte) (bool, error) {
+func (h *streamEndpointSecretQuickHarness) createSecret(_ context.Context, name string, namespace string, labels map[string]string, data map[string][]byte) (bool, error) {
 	h.createCalls++
 	if err := validateQuickSecretTarget("CreateSecret", name, namespace); err != nil {
 		return false, err
@@ -544,10 +670,11 @@ func (h *streamEndpointSecretQuickHarness) createSecret(_ context.Context, name 
 		return false, apierrors.NewAlreadyExists(v1.Resource("secret"), name)
 	}
 	h.store = cloneSecretData(data)
+	h.storeLabels = cloneSecretLabels(labels)
 	return true, nil
 }
 
-func (h *streamEndpointSecretQuickHarness) updateSecret(_ context.Context, name string, namespace string, _ map[string]string, data map[string][]byte) (bool, error) {
+func (h *streamEndpointSecretQuickHarness) updateSecret(_ context.Context, name string, namespace string, labels map[string]string, data map[string][]byte) (bool, error) {
 	h.updateCalls++
 	if err := validateQuickSecretTarget("UpdateSecret", name, namespace); err != nil {
 		return false, err
@@ -556,6 +683,9 @@ func (h *streamEndpointSecretQuickHarness) updateSecret(_ context.Context, name 
 		return false, apierrors.NewNotFound(v1.Resource("secret"), name)
 	}
 	h.store = cloneSecretData(data)
+	if labels != nil {
+		h.storeLabels = cloneSecretLabels(labels)
+	}
 	return true, nil
 }
 
@@ -569,6 +699,9 @@ func (h *streamEndpointSecretQuickHarness) loadStream(_ context.Context, streamI
 }
 
 func (h *streamEndpointSecretQuickHarness) run() error {
+	if expectsQuickSyncOwnershipConflict(h.tc) {
+		return h.runConflictCase()
+	}
 	if err := h.syncOnce("first"); err != nil {
 		return err
 	}
@@ -595,6 +728,10 @@ func (h *streamEndpointSecretQuickHarness) assertStoredSecret() error {
 	if !reflect.DeepEqual(h.store, wantData) {
 		return fmt.Errorf("final secret data=%v, want %v for %+v", h.store, wantData, h.tc)
 	}
+	wantLabels := ownedEndpointSecretLabels(string(h.resource.UID))
+	if !reflect.DeepEqual(h.storeLabels, wantLabels) {
+		return fmt.Errorf("final secret labels=%v, want %v for %+v", h.storeLabels, wantLabels, h.tc)
+	}
 	return nil
 }
 
@@ -606,16 +743,60 @@ func (h *streamEndpointSecretQuickHarness) assertCallCounts() error {
 	return nil
 }
 
+func (h *streamEndpointSecretQuickHarness) runConflictCase() error {
+	for attempt := 1; attempt <= 2; attempt++ {
+		if err := h.expectOwnershipConflict(attempt); err != nil {
+			return err
+		}
+	}
+	wantStore, wantLabels := initialQuickSecretState(h.tc, h.desiredEndpoint, quickStreamResourceUID)
+	if !reflect.DeepEqual(h.store, wantStore) || !reflect.DeepEqual(h.storeLabels, wantLabels) {
+		return fmt.Errorf("unowned secret changed data=%v labels=%v, want data=%v labels=%v for %+v", h.store, h.storeLabels, wantStore, wantLabels, h.tc)
+	}
+	wantCreate := 0
+	if h.tc.CachedNotFound {
+		wantCreate = 1
+	}
+	if h.createCalls != wantCreate || h.updateCalls != 0 {
+		return fmt.Errorf("conflict calls create=%d update=%d, want create=%d update=0 for %+v", h.createCalls, h.updateCalls, wantCreate, h.tc)
+	}
+	return nil
+}
+
+func (h *streamEndpointSecretQuickHarness) expectOwnershipConflict(attempt int) error {
+	err := h.client.syncEndpointSecret(context.Background(), h.resource)
+	if err == nil || !strings.Contains(err.Error(), "not owned") {
+		return fmt.Errorf("sync attempt %d: err=%v, want ownership failure for %+v", attempt, err, h.tc)
+	}
+	return nil
+}
+
+func expectsQuickSyncOwnershipConflict(tc streamEndpointSecretQuickCase) bool {
+	return tc.InitialState%3 != 0 && !tc.Owned
+}
+
 func expectedQuickSyncCallCounts(tc streamEndpointSecretQuickCase) (int, int) {
 	switch tc.InitialState % 3 {
 	case 0:
 		return 1, 0
 	case 1:
+		if !tc.Owned {
+			if tc.CachedNotFound {
+				return 1, 0
+			}
+			return 0, 0
+		}
 		if tc.CachedNotFound {
 			return 1, 0
 		}
 		return 0, 0
 	default:
+		if !tc.Owned {
+			if tc.CachedNotFound {
+				return 1, 0
+			}
+			return 0, 0
+		}
 		if tc.CachedNotFound {
 			return 1, 1
 		}
@@ -627,6 +808,8 @@ type streamEndpointSecretDeleteQuickHarness struct {
 	tc            streamEndpointSecretDeleteQuickCase
 	resource      *streamingv1beta1.Stream
 	secretPresent bool
+	secretLabels  map[string]string
+	getCalls      int
 	deleteCalls   int
 	client        streamEndpointSecretClient
 }
@@ -637,16 +820,39 @@ func newStreamEndpointSecretDeleteQuickHarness(tc streamEndpointSecretDeleteQuic
 		resource:      newTestStreamResource(),
 		secretPresent: tc.InitialPresent,
 	}
+	h.resource.UID = quickStreamResourceUID
+	if tc.InitialPresent {
+		if tc.Owned {
+			h.secretLabels = ownedEndpointSecretLabels(quickStreamResourceUID)
+		} else {
+			h.secretLabels = ownedEndpointSecretLabels("other-stream-uid")
+		}
+	}
 	credClient := &fakeCredentialClient{
-		deleteSecretFn: h.deleteSecret,
+		getSecretRecordFn: h.getSecretRecord,
+		deleteSecretFn:    h.deleteSecret,
 	}
 	h.client = streamEndpointSecretClient{
 		delegate: fakeStreamServiceClient{
 			deleteFn: h.deleteResource,
 		},
-		credentialClient: credClient,
+		credentialClient:   credClient,
+		secretRecordReader: credClient,
 	}
 	return h
+}
+
+func (h *streamEndpointSecretDeleteQuickHarness) getSecretRecord(_ context.Context, name string, namespace string) (credhelper.SecretRecord, error) {
+	h.getCalls++
+	if err := validateQuickSecretTarget("GetSecret", name, namespace); err != nil {
+		return credhelper.SecretRecord{}, err
+	}
+	if !h.secretPresent {
+		return credhelper.SecretRecord{}, apierrors.NewNotFound(v1.Resource("secret"), name)
+	}
+	return credhelper.SecretRecord{
+		Labels: cloneSecretLabels(h.secretLabels),
+	}, nil
 }
 
 func (h *streamEndpointSecretDeleteQuickHarness) deleteSecret(_ context.Context, name string, namespace string) (bool, error) {
@@ -658,6 +864,7 @@ func (h *streamEndpointSecretDeleteQuickHarness) deleteSecret(_ context.Context,
 		return false, apierrors.NewNotFound(v1.Resource("secret"), name)
 	}
 	h.secretPresent = false
+	h.secretLabels = nil
 	if h.tc.DeleteRace && h.deleteCalls == 1 {
 		return false, apierrors.NewNotFound(v1.Resource("secret"), name)
 	}
@@ -677,13 +884,34 @@ func (h *streamEndpointSecretDeleteQuickHarness) run() error {
 			return err
 		}
 	}
-	if h.secretPresent {
-		return fmt.Errorf("secret still present after repeated delete completion for %+v", h.tc)
+	if err := h.assertFinalState(); err != nil {
+		return err
 	}
-	if h.deleteCalls != 2 {
-		return fmt.Errorf("DeleteSecret() calls=%d, want 2 repeated best-effort attempts for %+v", h.deleteCalls, h.tc)
+	if h.getCalls != 2 {
+		return fmt.Errorf("GetSecret() calls=%d, want 2 repeated ownership checks for %+v", h.getCalls, h.tc)
+	}
+	wantDeleteCalls := expectedQuickDeleteCalls(h.tc)
+	if h.deleteCalls != wantDeleteCalls {
+		return fmt.Errorf("DeleteSecret() calls=%d, want %d for %+v", h.deleteCalls, wantDeleteCalls, h.tc)
 	}
 	return nil
+}
+
+func (h *streamEndpointSecretDeleteQuickHarness) assertFinalState() error {
+	if h.tc.InitialPresent && h.tc.Owned && h.secretPresent {
+		return fmt.Errorf("owned secret still present after repeated delete completion for %+v", h.tc)
+	}
+	if h.tc.InitialPresent && !h.tc.Owned && !h.secretPresent {
+		return fmt.Errorf("unowned secret was deleted for %+v", h.tc)
+	}
+	return nil
+}
+
+func expectedQuickDeleteCalls(tc streamEndpointSecretDeleteQuickCase) int {
+	if tc.InitialPresent && tc.Owned {
+		return 1
+	}
+	return 0
 }
 
 func (h *streamEndpointSecretDeleteQuickHarness) deleteOnce(attempt int) error {
@@ -697,14 +925,22 @@ func (h *streamEndpointSecretDeleteQuickHarness) deleteOnce(attempt int) error {
 	return nil
 }
 
-func initialQuickSecretStore(tc streamEndpointSecretQuickCase, desiredEndpoint string) map[string][]byte {
+func initialQuickSecretState(
+	tc streamEndpointSecretQuickCase,
+	desiredEndpoint string,
+	ownerUID string,
+) (map[string][]byte, map[string]string) {
+	var labels map[string]string
+	if tc.Owned {
+		labels = ownedEndpointSecretLabels(ownerUID)
+	}
 	switch tc.InitialState % 3 {
 	case 0:
-		return nil
+		return nil, nil
 	case 1:
 		return map[string][]byte{
 			"endpoint": []byte(desiredEndpoint),
-		}
+		}, labels
 	default:
 		store := map[string][]byte{
 			"endpoint": []byte("https://stale-streaming.example.com"),
@@ -712,8 +948,19 @@ func initialQuickSecretStore(tc streamEndpointSecretQuickCase, desiredEndpoint s
 		if tc.ExtraKey {
 			store["stale"] = []byte("value")
 		}
-		return store
+		return store, labels
 	}
+}
+
+func cloneSecretLabels(labels map[string]string) map[string]string {
+	if labels == nil {
+		return nil
+	}
+	cloned := make(map[string]string, len(labels))
+	for key, value := range labels {
+		cloned[key] = value
+	}
+	return cloned
 }
 
 func cloneSecretData(data map[string][]byte) map[string][]byte {

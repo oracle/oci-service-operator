@@ -21,6 +21,8 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
+const streamEndpointSecretOwnerUIDLabel = "streaming.oracle.com/stream-uid"
+
 func init() {
 	generatedFactory := newStreamServiceClient
 	newStreamServiceClient = func(manager *StreamServiceManager) StreamServiceClient {
@@ -28,16 +30,21 @@ func init() {
 	}
 }
 
+type streamEndpointSecretRecordReader interface {
+	GetSecretRecord(context.Context, string, string) (credhelper.SecretRecord, error)
+}
+
 type streamEndpointSecretClient struct {
-	delegate         StreamServiceClient
-	credentialClient credhelper.CredentialClient
-	loadStream       func(context.Context, shared.OCID) (*streamingsdk.Stream, error)
+	delegate           StreamServiceClient
+	credentialClient   credhelper.CredentialClient
+	secretRecordReader streamEndpointSecretRecordReader
+	loadStream         func(context.Context, shared.OCID) (*streamingsdk.Stream, error)
 }
 
 var _ StreamServiceClient = streamEndpointSecretClient{}
 
 func newStreamEndpointSecretClient(manager *StreamServiceManager, delegate StreamServiceClient) StreamServiceClient {
-	return streamEndpointSecretClient{
+	client := streamEndpointSecretClient{
 		delegate:         delegate,
 		credentialClient: manager.CredentialClient,
 		loadStream: func(ctx context.Context, streamID shared.OCID) (*streamingsdk.Stream, error) {
@@ -55,6 +62,10 @@ func newStreamEndpointSecretClient(manager *StreamServiceManager, delegate Strea
 			return &response.Stream, nil
 		},
 	}
+	if recordReader, ok := manager.CredentialClient.(streamEndpointSecretRecordReader); ok {
+		client.secretRecordReader = recordReader
+	}
+	return client
 }
 
 func (c streamEndpointSecretClient) CreateOrUpdate(
@@ -107,10 +118,17 @@ func (c streamEndpointSecretClient) syncEndpointSecret(ctx context.Context, reso
 	if c.credentialClient == nil {
 		return fmt.Errorf("stream endpoint secret credential client is not configured")
 	}
+	if c.secretRecordReader == nil {
+		return fmt.Errorf("stream endpoint secret ownership checks require secret metadata reads")
+	}
 
 	streamID := resource.Status.OsokStatus.Ocid
 	if strings.TrimSpace(string(streamID)) == "" {
 		return fmt.Errorf("stream endpoint secret sync requires a tracked stream OCID")
+	}
+	ownerLabels, err := streamEndpointSecretLabels(resource)
+	if err != nil {
+		return err
 	}
 
 	stream, err := c.loadStream(ctx, streamID)
@@ -123,26 +141,34 @@ func (c streamEndpointSecretClient) syncEndpointSecret(ctx context.Context, reso
 		return err
 	}
 
-	currentData, err := c.credentialClient.GetSecret(ctx, resource.Name, resource.Namespace)
+	currentRecord, err := c.secretRecordReader.GetSecretRecord(ctx, resource.Name, resource.Namespace)
+	if err == nil {
+		return c.syncExistingEndpointSecret(ctx, resource, currentRecord, data)
+	}
+	if !apierrors.IsNotFound(err) {
+		return err
+	}
+	return c.createEndpointSecret(ctx, resource, ownerLabels, data)
+}
+
+func (c streamEndpointSecretClient) createEndpointSecret(
+	ctx context.Context,
+	resource *streamingv1beta1.Stream,
+	ownerLabels map[string]string,
+	data map[string][]byte,
+) error {
+	_, err := c.credentialClient.CreateSecret(ctx, resource.Name, resource.Namespace, ownerLabels, data)
 	switch {
 	case err == nil:
-		return c.syncExistingEndpointSecret(ctx, resource, currentData, data)
-	case apierrors.IsNotFound(err):
-		_, err = c.credentialClient.CreateSecret(ctx, resource.Name, resource.Namespace, nil, data)
-		switch {
-		case err == nil:
-			return nil
-		case apierrors.IsAlreadyExists(err):
-			// Manager-backed clients can observe a stale NotFound on the cached read while the direct create
-			// already sees the Secret. Re-read and converge so repeat ACTIVE reconciles stay idempotent.
-			currentData, err = c.credentialClient.GetSecret(ctx, resource.Name, resource.Namespace)
-			if err != nil {
-				return err
-			}
-			return c.syncExistingEndpointSecret(ctx, resource, currentData, data)
-		default:
-			return err
+		return nil
+	case apierrors.IsAlreadyExists(err):
+		// Manager-backed clients can observe a stale NotFound on the cached read while the direct create
+		// already sees the Secret. Re-read and converge so repeat ACTIVE reconciles stay idempotent.
+		currentRecord, rereadErr := c.secretRecordReader.GetSecretRecord(ctx, resource.Name, resource.Namespace)
+		if rereadErr != nil {
+			return rereadErr
 		}
+		return c.syncExistingEndpointSecret(ctx, resource, currentRecord, data)
 	default:
 		return err
 	}
@@ -151,14 +177,26 @@ func (c streamEndpointSecretClient) syncEndpointSecret(ctx context.Context, reso
 func (c streamEndpointSecretClient) syncExistingEndpointSecret(
 	ctx context.Context,
 	resource *streamingv1beta1.Stream,
-	currentData map[string][]byte,
+	currentRecord credhelper.SecretRecord,
 	desiredData map[string][]byte,
 ) error {
-	if reflect.DeepEqual(currentData, desiredData) {
+	owned, err := streamOwnsEndpointSecret(resource, currentRecord.Labels)
+	if err != nil {
+		return err
+	}
+	if !owned {
+		return fmt.Errorf(
+			"stream endpoint secret %s/%s is not owned by Stream UID %q",
+			resource.Namespace,
+			resource.Name,
+			resource.UID,
+		)
+	}
+	if reflect.DeepEqual(currentRecord.Data, desiredData) {
 		return nil
 	}
 
-	_, err := c.credentialClient.UpdateSecret(ctx, resource.Name, resource.Namespace, nil, desiredData)
+	_, err = c.credentialClient.UpdateSecret(ctx, resource.Name, resource.Namespace, nil, desiredData)
 	return err
 }
 
@@ -176,10 +214,58 @@ func (c streamEndpointSecretClient) deleteEndpointSecret(ctx context.Context, re
 	if c.credentialClient == nil {
 		return fmt.Errorf("stream endpoint secret credential client is not configured")
 	}
+	if c.secretRecordReader == nil {
+		return nil
+	}
 
-	_, err := c.credentialClient.DeleteSecret(ctx, resource.Name, resource.Namespace)
+	record, err := c.secretRecordReader.GetSecretRecord(ctx, resource.Name, resource.Namespace)
+	switch {
+	case apierrors.IsNotFound(err):
+		return nil
+	case err != nil:
+		return err
+	}
+
+	owned, err := streamOwnsEndpointSecret(resource, record.Labels)
+	if err != nil {
+		return err
+	}
+	if !owned {
+		return nil
+	}
+
+	_, err = c.credentialClient.DeleteSecret(ctx, resource.Name, resource.Namespace)
 	if apierrors.IsNotFound(err) {
 		return nil
 	}
 	return err
+}
+
+func streamEndpointSecretLabels(resource *streamingv1beta1.Stream) (map[string]string, error) {
+	ownerUID, err := streamEndpointSecretOwnerUID(resource)
+	if err != nil {
+		return nil, err
+	}
+	return map[string]string{
+		streamEndpointSecretOwnerUIDLabel: ownerUID,
+	}, nil
+}
+
+func streamOwnsEndpointSecret(resource *streamingv1beta1.Stream, labels map[string]string) (bool, error) {
+	ownerUID, err := streamEndpointSecretOwnerUID(resource)
+	if err != nil {
+		return false, err
+	}
+	return labels[streamEndpointSecretOwnerUIDLabel] == ownerUID, nil
+}
+
+func streamEndpointSecretOwnerUID(resource *streamingv1beta1.Stream) (string, error) {
+	if resource == nil {
+		return "", fmt.Errorf("stream endpoint secret ownership requires a Stream resource")
+	}
+	ownerUID := strings.TrimSpace(string(resource.UID))
+	if ownerUID == "" {
+		return "", fmt.Errorf("stream endpoint secret ownership requires a Stream UID")
+	}
+	return ownerUID, nil
 }

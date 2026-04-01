@@ -208,6 +208,45 @@ func TestGetSecretUsesConfiguredReader(t *testing.T) {
 	}
 }
 
+func TestGetSecretRecordUsesConfiguredReader(t *testing.T) {
+	t.Parallel()
+
+	scheme := newTestScheme(t)
+	existingSecret := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "existing-secret",
+			Namespace: "default",
+			Labels:    map[string]string{"managed-by": "osok"},
+		},
+		Data: map[string][]byte{"key": []byte("value")},
+	}
+	baseClient := fake.NewClientBuilder().WithScheme(scheme).WithObjects(existingSecret.DeepCopy()).Build()
+	cachedClient := &staleGetClient{
+		Client: baseClient,
+		getErr: apierrors.NewNotFound(corev1.Resource("secret"), existingSecret.Name),
+	}
+	client := NewWithReader(
+		cachedClient,
+		baseClient,
+		loggerutil.OSOKLogger{Logger: logr.Discard()},
+		newTestMetrics(),
+	)
+
+	record, err := client.GetSecretRecord(context.Background(), existingSecret.Name, existingSecret.Namespace)
+	if err != nil {
+		t.Fatalf("get secret record: %v", err)
+	}
+	if !reflect.DeepEqual(existingSecret.Data, record.Data) {
+		t.Fatalf("unexpected secret data: got %v want %v", record.Data, existingSecret.Data)
+	}
+	if !reflect.DeepEqual(existingSecret.Labels, record.Labels) {
+		t.Fatalf("unexpected secret labels: got %v want %v", record.Labels, existingSecret.Labels)
+	}
+	if cachedClient.getCalls != 0 {
+		t.Fatalf("expected reads to use the configured Reader, got %d cached Client.Get calls", cachedClient.getCalls)
+	}
+}
+
 func TestUpdateSecretUsesConfiguredReader(t *testing.T) {
 	t.Parallel()
 

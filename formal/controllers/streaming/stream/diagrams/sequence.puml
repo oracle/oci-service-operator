@@ -127,9 +127,12 @@ optional pool and compartment filters, while
 delete-phase lookup can still resolve
 terminating or failed matches when no OCI
 identifier is recorded.
-A narrow package-local companion writes the
-ready-only endpoint secret after ACTIVE and
-removes it during best-effort delete completion.
+A narrow package-local companion writes or
+updates the ready-only endpoint secret after
+ACTIVE only when the same-name Secret carries
+the current Stream UID ownership label, and
+best-effort delete cleanup skips missing or
+unowned Secrets.
 Delete remains best-effort; DELETING or DELETED
 is sufficient for finalizer removal.
 end note
