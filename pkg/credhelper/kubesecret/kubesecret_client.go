@@ -6,6 +6,7 @@
 package kubesecret
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"strings"
@@ -190,7 +191,11 @@ func (c *KubeSecretClient) updateSecretObject(
 
 func (c *KubeSecretClient) deleteSecretObject(ctx context.Context, existingSecret *v1.Secret) error {
 	uid := existingSecret.UID
-	return c.Client.Delete(ctx, existingSecret, client.Preconditions{UID: &uid})
+	preconditions := client.Preconditions{UID: &uid}
+	if resourceVersion := strings.TrimSpace(existingSecret.ResourceVersion); resourceVersion != "" {
+		preconditions.ResourceVersion = &resourceVersion
+	}
+	return c.Client.Delete(ctx, existingSecret, preconditions)
 }
 
 func (c *KubeSecretClient) reader() client.Reader {
@@ -256,5 +261,43 @@ func validateSecretIdentity(
 			fmt.Errorf("secret %s/%s changed UID from %q to %q", secretNamespace, secretName, expectedUID, actualUID),
 		)
 	}
+	if !secretLabelsEqual(current.Labels, existingSecret.Labels) {
+		return errors.NewConflict(
+			v1.Resource("secret"),
+			secretName,
+			fmt.Errorf("secret %s/%s labels changed since the guarded read", secretNamespace, secretName),
+		)
+	}
+	if !secretDataEqual(current.Data, existingSecret.Data) {
+		return errors.NewConflict(
+			v1.Resource("secret"),
+			secretName,
+			fmt.Errorf("secret %s/%s data changed since the guarded read", secretNamespace, secretName),
+		)
+	}
 	return nil
+}
+
+func secretLabelsEqual(left map[string]string, right map[string]string) bool {
+	if len(left) != len(right) {
+		return false
+	}
+	for key, value := range left {
+		if right[key] != value {
+			return false
+		}
+	}
+	return true
+}
+
+func secretDataEqual(left map[string][]byte, right map[string][]byte) bool {
+	if len(left) != len(right) {
+		return false
+	}
+	for key, value := range left {
+		if !bytes.Equal(value, right[key]) {
+			return false
+		}
+	}
+	return true
 }

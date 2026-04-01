@@ -134,8 +134,10 @@ the current Stream UID ownership label, or when
 a legacy unlabeled Secret already matches the
 desired ready-only payload so reconcile can
 stamp the current UID label before future
-updates. Best-effort delete cleanup skips
-missing or unowned Secrets.
+updates. Guarded update or delete revalidates
+the full Secret snapshot before mutating, and
+best-effort delete cleanup skips missing or
+unowned Secrets.
 Delete remains best-effort; DELETING or DELETED
 is sufficient for finalizer removal.
 end note

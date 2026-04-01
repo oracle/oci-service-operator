@@ -9,8 +9,9 @@ the same reference points:
 - `formal/controllers/streaming/stream` is the generated-runtime reference for
   bind-versus-create, lifecycle-sensitive list lookup, and delete-side lookup
   branching, while its ready-only secret companion still uses Stream UID
-  ownership with one-time adoption of matching legacy unlabeled secrets and
-  keeps best-effort delete semantics stream-specific.
+  ownership with one-time adoption of matching legacy unlabeled secrets,
+  guarded full-snapshot revalidation before update or delete, and keeps
+  best-effort delete semantics stream-specific.
 - `mysql/DbSystem` now follows the generated-runtime path and uses the same
   category names as the shared checklist.
 

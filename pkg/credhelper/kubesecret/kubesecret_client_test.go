@@ -126,6 +126,36 @@ func (c *staleGetClient) Get(ctx context.Context, key ctrlclient.ObjectKey, obj 
 	return c.getErr
 }
 
+type capturingDeleteClient struct {
+	ctrlclient.Client
+	deleteCalls         int
+	deletePreconditions *metav1.Preconditions
+}
+
+func (c *capturingDeleteClient) Delete(ctx context.Context, obj ctrlclient.Object, opts ...ctrlclient.DeleteOption) error {
+	c.deleteCalls++
+	deleteOptions := (&ctrlclient.DeleteOptions{}).ApplyOptions(opts)
+	if deleteOptions.Preconditions != nil {
+		copied := deleteOptions.Preconditions.DeepCopy()
+		c.deletePreconditions = copied
+	}
+	return nil
+}
+
+func requireDeletePreconditions(t *testing.T, got *metav1.Preconditions, want *corev1.Secret) {
+	t.Helper()
+
+	if got == nil {
+		t.Fatal("expected delete preconditions to be set")
+	}
+	if got.UID == nil || *got.UID != want.UID {
+		t.Fatalf("delete UID precondition = %v, want %q", got.UID, want.UID)
+	}
+	if got.ResourceVersion == nil || *got.ResourceVersion != want.ResourceVersion {
+		t.Fatalf("delete resourceVersion precondition = %v, want %q", got.ResourceVersion, want.ResourceVersion)
+	}
+}
+
 func TestCreateUpdateDeleteSecret(t *testing.T) {
 	client := newTestKubeSecretClient(t)
 	labels := map[string]string{"label_def": "default_label"}
@@ -427,4 +457,174 @@ func TestDeleteSecretIfCurrentRejectsReplacedSecret(t *testing.T) {
 	if storedSecret.UID != replacementSecret.UID {
 		t.Fatalf("replacement secret UID = %q, want %q", storedSecret.UID, replacementSecret.UID)
 	}
+}
+
+func TestUpdateSecretIfCurrentRejectsSameUIDStateChange(t *testing.T) {
+	t.Parallel()
+
+	scheme := newTestScheme(t)
+	originalSecret := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "existing-secret",
+			Namespace: "default",
+			UID:       "secret-uid-1",
+			Labels:    map[string]string{"managed-by": "osok"},
+		},
+		Data: map[string][]byte{"key": []byte("value")},
+	}
+	baseClient := fake.NewClientBuilder().WithScheme(scheme).WithObjects(originalSecret.DeepCopy()).Build()
+	client := NewWithReader(
+		baseClient,
+		baseClient,
+		loggerutil.OSOKLogger{Logger: logr.Discard()},
+		newTestMetrics(),
+	)
+
+	current, err := client.GetSecretRecord(context.Background(), originalSecret.Name, originalSecret.Namespace)
+	if err != nil {
+		t.Fatalf("get secret record: %v", err)
+	}
+
+	mutatedSecret := &corev1.Secret{}
+	if err := baseClient.Get(context.Background(), ctrlclient.ObjectKey{Name: originalSecret.Name, Namespace: originalSecret.Namespace}, mutatedSecret); err != nil {
+		t.Fatalf("load secret to mutate: %v", err)
+	}
+	mutatedSecret.Labels = map[string]string{"managed-by": "other"}
+	mutatedSecret.Data = map[string][]byte{"key": []byte("rotated")}
+	if err := baseClient.Update(context.Background(), mutatedSecret); err != nil {
+		t.Fatalf("mutate secret in place: %v", err)
+	}
+
+	updated, err := client.UpdateSecretIfCurrent(
+		context.Background(),
+		originalSecret.Name,
+		originalSecret.Namespace,
+		current,
+		map[string]string{"managed-by": "osok"},
+		map[string][]byte{"key": []byte("updated")},
+	)
+	if updated {
+		t.Fatal("expected guarded update to reject same-UID state changes")
+	}
+	if !apierrors.IsConflict(err) {
+		t.Fatalf("expected conflict after same-UID state change, got %v", err)
+	}
+
+	storedSecret := &corev1.Secret{}
+	if err := baseClient.Get(context.Background(), ctrlclient.ObjectKey{Name: originalSecret.Name, Namespace: originalSecret.Namespace}, storedSecret); err != nil {
+		t.Fatalf("load mutated secret: %v", err)
+	}
+	if storedSecret.UID != originalSecret.UID {
+		t.Fatalf("mutated secret UID = %q, want %q", storedSecret.UID, originalSecret.UID)
+	}
+	if !reflect.DeepEqual(storedSecret.Data, mutatedSecret.Data) {
+		t.Fatalf("mutated secret data overwritten: got %v want %v", storedSecret.Data, mutatedSecret.Data)
+	}
+	if !reflect.DeepEqual(storedSecret.Labels, mutatedSecret.Labels) {
+		t.Fatalf("mutated secret labels overwritten: got %v want %v", storedSecret.Labels, mutatedSecret.Labels)
+	}
+}
+
+func TestDeleteSecretIfCurrentRejectsSameUIDStateChange(t *testing.T) {
+	t.Parallel()
+
+	scheme := newTestScheme(t)
+	originalSecret := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "existing-secret",
+			Namespace: "default",
+			UID:       "secret-uid-1",
+			Labels:    map[string]string{"managed-by": "osok"},
+		},
+		Data: map[string][]byte{"key": []byte("value")},
+	}
+	baseClient := fake.NewClientBuilder().WithScheme(scheme).WithObjects(originalSecret.DeepCopy()).Build()
+	client := NewWithReader(
+		baseClient,
+		baseClient,
+		loggerutil.OSOKLogger{Logger: logr.Discard()},
+		newTestMetrics(),
+	)
+
+	current, err := client.GetSecretRecord(context.Background(), originalSecret.Name, originalSecret.Namespace)
+	if err != nil {
+		t.Fatalf("get secret record: %v", err)
+	}
+
+	mutatedSecret := &corev1.Secret{}
+	if err := baseClient.Get(context.Background(), ctrlclient.ObjectKey{Name: originalSecret.Name, Namespace: originalSecret.Namespace}, mutatedSecret); err != nil {
+		t.Fatalf("load secret to mutate: %v", err)
+	}
+	mutatedSecret.Labels = map[string]string{"managed-by": "other"}
+	mutatedSecret.Data = map[string][]byte{"key": []byte("rotated")}
+	if err := baseClient.Update(context.Background(), mutatedSecret); err != nil {
+		t.Fatalf("mutate secret in place: %v", err)
+	}
+
+	deleted, err := client.DeleteSecretIfCurrent(context.Background(), originalSecret.Name, originalSecret.Namespace, current)
+	if deleted {
+		t.Fatal("expected guarded delete to reject same-UID state changes")
+	}
+	if !apierrors.IsConflict(err) {
+		t.Fatalf("expected conflict after same-UID state change, got %v", err)
+	}
+
+	storedSecret := &corev1.Secret{}
+	if err := baseClient.Get(context.Background(), ctrlclient.ObjectKey{Name: originalSecret.Name, Namespace: originalSecret.Namespace}, storedSecret); err != nil {
+		t.Fatalf("load mutated secret: %v", err)
+	}
+	if storedSecret.UID != originalSecret.UID {
+		t.Fatalf("mutated secret UID = %q, want %q", storedSecret.UID, originalSecret.UID)
+	}
+	if !reflect.DeepEqual(storedSecret.Data, mutatedSecret.Data) {
+		t.Fatalf("mutated secret data deleted or overwritten: got %v want %v", storedSecret.Data, mutatedSecret.Data)
+	}
+	if !reflect.DeepEqual(storedSecret.Labels, mutatedSecret.Labels) {
+		t.Fatalf("mutated secret labels deleted or overwritten: got %v want %v", storedSecret.Labels, mutatedSecret.Labels)
+	}
+}
+
+func TestDeleteSecretIfCurrentUsesResourceVersionPrecondition(t *testing.T) {
+	t.Parallel()
+
+	scheme := newTestScheme(t)
+	existingSecret := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "existing-secret",
+			Namespace: "default",
+			UID:       "secret-uid-1",
+			Labels:    map[string]string{"managed-by": "osok"},
+		},
+		Data: map[string][]byte{"key": []byte("value")},
+	}
+	baseClient := fake.NewClientBuilder().WithScheme(scheme).WithObjects(existingSecret.DeepCopy()).Build()
+	deleteClient := &capturingDeleteClient{Client: baseClient}
+	client := NewWithReader(
+		deleteClient,
+		baseClient,
+		loggerutil.OSOKLogger{Logger: logr.Discard()},
+		newTestMetrics(),
+	)
+
+	current, err := client.GetSecretRecord(context.Background(), existingSecret.Name, existingSecret.Namespace)
+	if err != nil {
+		t.Fatalf("get secret record: %v", err)
+	}
+
+	refreshedSecret := &corev1.Secret{}
+	if err := baseClient.Get(context.Background(), ctrlclient.ObjectKey{Name: existingSecret.Name, Namespace: existingSecret.Namespace}, refreshedSecret); err != nil {
+		t.Fatalf("load refreshed secret: %v", err)
+	}
+
+	deleted, err := client.DeleteSecretIfCurrent(context.Background(), existingSecret.Name, existingSecret.Namespace, current)
+	if err != nil {
+		t.Fatalf("guarded delete: %v", err)
+	}
+	if !deleted {
+		t.Fatal("expected guarded delete to report success")
+	}
+	if deleteClient.deleteCalls != 1 {
+		t.Fatalf("Delete() calls = %d, want 1", deleteClient.deleteCalls)
+	}
+	requireDeletePreconditions(t, deleteClient.deletePreconditions, refreshedSecret)
 }
