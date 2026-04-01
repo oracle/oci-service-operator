@@ -15,12 +15,13 @@
 
 `database.oracle.com/v1beta1` now uses the generated v2
 `AutonomousDatabase` surface. The legacy handwritten
-`AutonomousDatabases` compatibility resource, its custom runtime behavior, and
-its manual webhook seam are removed.
+`AutonomousDatabases` compatibility resource and its custom runtime behavior
+are removed. The published `AutonomousDatabase` kind still carries the
+checked-in webhook registration for the current `v1beta1` API path.
 
 ## OCI Permission requirement
 
-**For Instance Principle** 
+**For Instance Principle**
 The OCI Service Operator dynamic group should have the `manage` permission for the `autonomous-database` resource type.
 
 **Sample Policy:**
@@ -29,7 +30,7 @@ The OCI Service Operator dynamic group should have the `manage` permission for t
 Allow dynamic-group <OSOK_DYNAMIC_GROUP> to manage autonomous-database in compartment <COMPARTMENT_NAME>
 ```
 
-**For User Principle** 
+**For User Principle**
 The OCI Service Operator user should have the `manage` permission for the `autonomous-database` resource type.
 
 **Sample Policy:**
@@ -78,8 +79,10 @@ accepts `kind: AutonomousDatabases`, `spec.wallet`, or `spec.walletPassword`.
 ## Provisioning an Autonomous Database
 
 The generator-owned `AutonomousDatabase` controller provisions an Autonomous
-Database directly from the v2 spec fields. The legacy webhook and compatibility
-runtime are gone, so manifests should use only the generated field names.
+Database directly from the v2 spec fields. The old
+`AutonomousDatabases` compatibility runtime is gone, and the remaining
+`AutonomousDatabase` webhook registration still targets this generated CR, so
+manifests should use only the generated field names.
 
 The following example shows a typical create flow. Store the admin password in
 a Kubernetes Secret under the `password` key before applying the CR, or use

@@ -54,39 +54,6 @@ notes:
   - Scaffold metadata only.
 `
 
-const testActivityPUML = `@startuml
-title Activity - template/Template
-start
-:Load desired Template state;
-stop
-@enduml
-`
-
-const testSequencePUML = `@startuml
-title Sequence - template/Template
-actor Kubernetes
-participant Controller
-Kubernetes -> Controller: reconcile
-@enduml
-`
-
-const testStateMachinePUML = `@startuml
-title State Machine - template/Template
-[*] --> provisioning
-provisioning --> active
-active --> [*]
-@enduml
-`
-
-const testActivitySVG = `<svg xmlns="http://www.w3.org/2000/svg"><text>activity</text></svg>
-`
-
-const testSequenceSVG = `<svg xmlns="http://www.w3.org/2000/svg"><text>sequence</text></svg>
-`
-
-const testStateMachineSVG = `<svg xmlns="http://www.w3.org/2000/svg"><text>state-machine</text></svg>
-`
-
 const testImport = `{
   "schemaVersion": 1,
   "surface": "provider-facts",
@@ -297,6 +264,22 @@ func TestVerifyRejectsImportSurfaceMismatch(t *testing.T) {
 	_, err := Verify(root)
 	if err == nil || !strings.Contains(err.Error(), `surface="repo-authored-semantics" is not allowed`) {
 		t.Fatalf("Verify(%q) error = %v, want import surface failure", root, err)
+	}
+}
+
+func TestVerifyRejectsOperationBindingTypeMismatch(t *testing.T) {
+	root := writeScaffold(t)
+	mismatched := strings.NewReplacer(
+		`"requestType": "UpdateTemplateRequest"`,
+		`"requestType": "DeleteTemplateRequest"`,
+		`"responseType": "UpdateTemplateResponse"`,
+		`"responseType": "DeleteTemplateResponse"`,
+	).Replace(testImport)
+	writeFile(t, filepath.Join(root, "imports", "template", "template.json"), mismatched)
+
+	_, err := Verify(root)
+	if err == nil || !strings.Contains(err.Error(), `UpdateTemplate binding requestType="DeleteTemplateRequest", want "UpdateTemplateRequest"`) || !strings.Contains(err.Error(), `UpdateTemplate binding responseType="DeleteTemplateResponse", want "UpdateTemplateResponse"`) {
+		t.Fatalf("Verify(%q) error = %v, want operation binding type mismatch failure", root, err)
 	}
 }
 
