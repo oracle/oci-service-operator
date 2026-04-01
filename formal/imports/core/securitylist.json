@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "securitylist",
+  "kind": "SecurityList",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_core_security_list",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateSecurityList",
+        "requestType": "core.CreateSecurityListRequest",
+        "responseType": "core.CreateSecurityListResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetSecurityList",
+        "requestType": "core.GetSecurityListRequest",
+        "responseType": "core.GetSecurityListResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListSecurityLists",
+        "requestType": "core.ListSecurityListsRequest",
+        "responseType": "core.ListSecurityListsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateSecurityList",
+        "requestType": "core.UpdateSecurityListRequest",
+        "responseType": "core.UpdateSecurityListResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteSecurityList",
+        "requestType": "core.DeleteSecurityListRequest",
+        "responseType": "core.DeleteSecurityListResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "AVAILABLE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "AVAILABLE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "display_name",
+      "egress_security_rules",
+      "freeform_tags",
+      "ingress_security_rules"
+    ],
+    "forceNew": [
+      "compartment_id",
+      "vcn_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "TERMINATING",
+      "TERMINATED"
+    ],
+    "target": [
+      "NOT_FOUND"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_core_security_lists",
+    "collectionField": "security_list",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "vcn_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/securitylist/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/securitylist/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: UpdateSecurityListDetails exposes defined_tags, display_name, egress_security_rules, freeform_tags, and ingress_security_rules as in-place updates; the handwritten runtime rejects create-only drift for compartment_id and vcn_id.",
+    "Vendored SDK lifecycle success is AVAILABLE; the handwritten runtime requeues PROVISIONING, defensive literal UPDATING, TERMINATING, and TERMINATED states.",
+    "The handwritten runtime observes by tracked status.osokStatus.ocid and only recreates after confirmed OCI not-found clears the tracked identity.",
+    "Delete confirmation is absence-based rather than a terminal SDK DELETED state, so observed TERMINATING and TERMINATED keep the finalizer in place until GetSecurityList returns not found."
+  ]
+}
