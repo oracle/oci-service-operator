@@ -112,11 +112,6 @@ spec:
                     items:
                       type: string
                     type: array
-                required:
-                - volumeGroupBackupId
-                - volumeGroupId
-                - volumeGroupReplicaId
-                - volumeIds
                 type: object
               volumeGroupReplicas:
                 description: |-
@@ -203,8 +198,7 @@ spec:
                 format: int64
                 type: integer
               sourceDetails:
-                description: VolumeGroupSourceDetailsObservedState defines nested
-                  fields for VolumeGroup.SourceDetails.
+                description: VolumeGroupSourceDetails defines nested fields for VolumeGroup.SourceDetails.
                 properties:
                   jsonData:
                     type: string
@@ -224,11 +218,6 @@ spec:
                     items:
                       type: string
                     type: array
-                required:
-                - volumeGroupBackupId
-                - volumeGroupId
-                - volumeGroupReplicaId
-                - volumeIds
                 type: object
               status:
                 properties:

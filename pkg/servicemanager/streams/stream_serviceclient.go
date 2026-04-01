@@ -97,9 +97,10 @@ func (c *StreamServiceManager) GetStreamOcid(ctx context.Context, stream streami
 func (c *StreamServiceManager) DeleteStream(ctx context.Context, stream streamingv1beta1.Stream) (streaming.DeleteStreamResponse, error) {
 	streamClient := c.getOCIClient()
 	c.Log.InfoLog("Deleting Stream ", "name", stream.Spec.Name)
+	streamOCID := getStreamOCID(&stream)
 
 	deleteStreamRequest := streaming.DeleteStreamRequest{
-		StreamId: common.String(string(stream.Spec.StreamId)),
+		StreamId: common.String(string(streamOCID)),
 	}
 
 	return streamClient.DeleteStream(ctx, deleteStreamRequest)
@@ -125,11 +126,16 @@ func (c *StreamServiceManager) GetStream(ctx context.Context, streamId shared.OC
 	return &response.Stream, nil
 }
 
+//nolint:gocognit,gocyclo // Legacy stream updates keep OCI validation and conditional field projection together.
 func (c *StreamServiceManager) UpdateStream(ctx context.Context, stream *streamingv1beta1.Stream) error {
 
 	streamClient := c.getOCIClient()
+	streamOCID := getStreamOCID(stream)
+	if strings.TrimSpace(string(streamOCID)) == "" {
+		return errors.New("Stream OCID not found")
+	}
 
-	existingStream, err := c.GetStream(ctx, stream.Spec.StreamId, nil)
+	existingStream, err := c.GetStream(ctx, streamOCID, nil)
 	if err != nil {
 		return err
 	}
@@ -150,8 +156,8 @@ func (c *StreamServiceManager) UpdateStream(ctx context.Context, stream *streami
 		updateNeeded = true
 	}
 
-	if stream.Spec.FreeFormTags != nil && !reflect.DeepEqual(existingStream.FreeformTags, stream.Spec.FreeFormTags) {
-		updateStreamDetails.FreeformTags = stream.Spec.FreeFormTags
+	if stream.Spec.FreeformTags != nil && !reflect.DeepEqual(existingStream.FreeformTags, stream.Spec.FreeformTags) {
+		updateStreamDetails.FreeformTags = stream.Spec.FreeformTags
 		updateNeeded = true
 	}
 
@@ -164,7 +170,7 @@ func (c *StreamServiceManager) UpdateStream(ctx context.Context, stream *streami
 
 	if updateNeeded {
 		updateAutonomousDatabaseRequest := streaming.UpdateStreamRequest{
-			StreamId:            common.String(string(stream.Spec.StreamId)),
+			StreamId:            common.String(string(streamOCID)),
 			UpdateStreamDetails: updateStreamDetails,
 		}
 

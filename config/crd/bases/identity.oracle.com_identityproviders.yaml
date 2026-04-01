@@ -117,8 +117,6 @@ spec:
             required:
             - compartmentId
             - description
-            - metadata
-            - metadataUrl
             - name
             - productType
             type: object

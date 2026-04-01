@@ -2,20 +2,20 @@
 
 - [Introduction](#introduction)
 - [Create Policies](#create-policies)
-- [Streams Service Specification Parameters](#streams-service-specification-parameters)
-- [Streams Service Status Parameters](#streams-service-status-parameters)
-- [Create a Stream](#create-a-stream)
-- [Bind](#binding-to-an-existing-stream)
-- [Update](#updating-stream)
-- [Delete](#delete-stream)
+- [Stream Specification Parameters](#stream-specification-parameters)
+- [Stream Status Parameters](#stream-status-parameters)
+- [Provisioning a Stream](#provisioning-a-stream)
+- [Current v2 notes](#current-v2-notes)
+- [Access Information](#access-information)
+- [Delete a Stream](#delete-a-stream)
 
 ## Introduction
 
-The [Oracle Streaming service](https://docs.oracle.com/en-us/iaas/Content/Streaming/Concepts/streamingoverview.htm) provides a fully managed, scalable, and durable solution for ingesting and consuming high-volume data streams in real-time. The Oracle Streaming Service is offered via the OCI Service Operator for Kubernetes (OSOK), making it easy for applications to provision and integrate seamlessly.
+The [Oracle Streaming service](https://docs.oracle.com/en-us/iaas/Content/Streaming/Concepts/streamingoverview.htm) provides a fully managed, scalable, and durable solution for ingesting and consuming high-volume data streams in real-time. Oracle Streaming is offered via the OCI Service Operator for Kubernetes (OSOK), making it easy for applications to provision and integrate seamlessly.
 
 ## Create Policies
 
-**For Instance Principle** 
+**For Instance Principal**
 The OCI Service Operator dynamic group should have the `manage` permission for the `stream-family` and `streampools` resource types.
 
 **Sample Policy:**
@@ -25,8 +25,8 @@ Allow dynamic-group <OSOK_DYNAMIC_GROUP> to manage stream-family in compartment 
 Allow dynamic-group <OSOK_DYNAMIC_GROUP> to manage streampools in compartment <COMPARTMENT_NAME>
 ```
 
-**For User Principle** 
-The OCI Service Operator user should have the `manage` permission for resource type `stream-family` and `streampools`.
+**For User Principal**
+The OCI Service Operator user should have the `manage` permission for the `stream-family` and `streampools` resource types.
 
 **Sample Policy:**
 
@@ -35,137 +35,106 @@ Allow group <SERVICE_BROKER_GROUP> to manage stream-family in compartment <COMPA
 Allow group <SERVICE_BROKER_GROUP> to manage streampools in compartment <COMPARTMENT_NAME>
 ```
 
-## Streams Service Specification Parameters
+## Stream Specification Parameters
 
-The Complete Specification of the `Streams` Custom Resource (CR) is as detailed below:
+The generated v2 `Stream` CR is defined in `api/streaming/v1beta1/stream_types.go`.
+Commonly used spec fields are summarized below:
 
-| Parameter                          | Description                                                         | Type   | Mandatory |
-| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
-| `spec.Id `           | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the stream                                        | string | No       |
-| `spec.name`          | The name of the stream. Avoid entering confidential information.                    | string | Yes       |
-| `spec.compartmentId` | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment that contains the stream. | string | Yes       |
-| `spec.partitions`   | The number of partitions in the stream.                        | number | Yes       |
-| `spec.retentionInHours` | The retention period of the stream, in hours. Accepted values are between 24 and 168 (7 days). If not specified, the stream will have a retention period of 24 hours. | number | No       |
-| `spec.streamPoolId`  | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the stream pool that contains the stream.  | string | Yes |
-| `spec.freeFormTags`  | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see [Resource Tags](https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). `Example: {"Department": "Finance"}` | object | No        |
-| `spec.definedTags`   | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see [Resource Tags](https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). `Example: {"Operations": {"CostCenter": "42"}}` | object | No        |
+| Parameter | Description | Type | Mandatory |
+| --- | --- | --- | --- |
+| `spec.name` | The name of the stream. Avoid entering confidential information. | string | yes |
+| `spec.partitions` | The number of partitions in the stream. | integer | yes |
+| `spec.compartmentId` | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment that contains the stream. Use this instead of `spec.streamPoolId` when you are not targeting a stream pool. | string | no |
+| `spec.streamPoolId` | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the stream pool that contains the stream. Use this instead of `spec.compartmentId` when creating the stream in a pool. | string | no |
+| `spec.retentionInHours` | The retention period of the stream, in hours. Accepted values are between 24 and 168 (7 days). If omitted, OCI defaults the retention period to 24 hours. | integer | no |
+| `spec.freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. `Example: {"Department": "Finance"}` | object | no |
+| `spec.definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. `Example: {"Operations": {"CostCenter": "42"}}` | object | no |
 
-## Streams Service Status Parameters
+Do not set both `spec.compartmentId` and `spec.streamPoolId` on the same `Stream`.
 
-| Parameter                                         | Description                                                         | Type   | Mandatory |
-| --------------------------------------------------| ------------------------------------------------------------------- | ------ | --------- |
-| `status.osokstatus.conditions.type`               | Lifecycle state of the Streams Service. The following values are valid: <ul><li>**Provisioning** - indicates a Stream is provisioning. </li><li>**Active** - indicates a Stream is Active. </li><li>**Failed** - indicates a Stream failed provisioning. </li><li>**Terminating** - indicates a Stream is Deleting. </li></ul>|  string  |  no  |
-| `status.osokstatus.conditions.status`             | Status of the Stream Custom Resource during the condition update. |  string  |  no  |
-| `status.osokstatus.conditions.lastTransitionTime` | Last time the Stream CR was Updated. |  string  |  no  | 
-| `status.osokstatus.conditions.message`            | Message of the status condition of the CR. | string | no | 
-| `status.osokstatus.conditions.reason`             | Resource if any of status condition of the CR. | string | no |
-| `status.osokstatus.ocid`                          | The Stream [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm). |  string  | yes |
-| `status.osokstatus.message`                       | Overall status message of the CR.  |  string  | no  |
-| `status.osokstatus.reason`                        | Overall status reason of the CR.   | string | no |
-| `status.osokstatus.createdAt`                     | Created time of the Streams Service.            | string | no |  
-| `status.osokstatus.updatedAt`                     | Updated time of the Streams Service.            | string | no |
-| `status.osokstatus.requestedAt`                   | Requested time of the CR.          | string | no |
-| `status.osokstatus.deletedAt`                     | Deleted time of the CR.            | string | no | 
+## Stream Status Parameters
 
-## Create a Stream
+The `Stream` CR exposes both OSOK control-plane status and mirrored OCI stream fields:
 
-The OSOK Stream controller provisions a stream when customer provides mandatory fields to the `spec`. The Message endpoint of the stream created will be created as a secret.
+| Parameter | Description | Type | Mandatory |
+| --- | --- | --- | --- |
+| `status.status.conditions[].type` | Lifecycle condition recorded by OSOK. Common values include `Provisioning`, `Active`, `Failed`, and `Terminating`. | string | no |
+| `status.status.conditions[].status` | Kubernetes condition status for the last condition update. | string | no |
+| `status.status.conditions[].lastTransitionTime` | Last transition timestamp for the condition entry. | string | no |
+| `status.status.conditions[].message` | Human-readable status detail for the last condition entry. | string | no |
+| `status.status.conditions[].reason` | Machine-readable reason for the last condition entry. | string | no |
+| `status.status.ocid` | OCI identifier recorded by OSOK for the stream. | string | yes |
+| `status.status.message` | Overall status message for the CR. | string | no |
+| `status.status.reason` | Overall status reason for the CR. | string | no |
+| `status.status.createdAt` | Timestamp when OSOK first recorded the resource. | string | no |
+| `status.status.updatedAt` | Timestamp for the last OSOK status update. | string | no |
+| `status.status.requestedAt` | Timestamp when the reconcile request was recorded. | string | no |
+| `status.status.deletedAt` | Timestamp when deletion was recorded. | string | no |
+| `status.id` | OCI OCID mirrored on the `Stream` status. | string | no |
+| `status.lifecycleState` | Current OCI lifecycle state for the stream. | string | no |
+| `status.messagesEndpoint` | The endpoint applications use to publish to or consume from the stream. | string | no |
+| `status.streamPoolId` | OCI stream pool OCID associated with the stream, when applicable. | string | no |
+| `status.timeCreated` | OCI creation timestamp for the stream. | string | no |
 
-Following is a sample CR yaml for Stream.
+## Provisioning a Stream
+
+The current v2 API uses `streaming.oracle.com/v1beta1` and the `Stream` kind directly.
 
 ```yaml
-apiVersion: oci.oracle.com/v1beta1
+apiVersion: streaming.oracle.com/v1beta1
 kind: Stream
 metadata:
   name: <CR_OBJECT_NAME>
 spec:
-  compartmentId: <COMPARTMENT_OCID>
   name: <STREAM_NAME>
   partitions: <PARTITION_COUNT>
   retentionInHours: <RETENTION_HOURS>
-# Either compartmentId or streamPoolId should be provided.  
   streamPoolId: <STREAM_POOL_OCID>
   freeformTags:
+    <KEY1>: <VALUE1>
+  definedTags:
+    <TAG_NAMESPACE1>:
       <KEY1>: <VALUE1>
-    definedTags:
-      <TAGNAMESPACE1>:
-        <KEY1>: <VALUE1>
 ```
 
-Run the following command to create a CR to the cluster:
+Use `spec.compartmentId` instead of `spec.streamPoolId` when you want OCI to place the stream directly in a compartment rather than in a stream pool.
+
+Run the following command to create the CR in the cluster:
+
 ```sh
 kubectl apply -f <CREATE_YAML>.yaml
 ```
 
-Once the CR is created, OSOK will reconcile and create a stream. OSOK will ensure the stream instance is available.
+Once the CR is created, OSOK reconciles the `Stream`, records the OCI identifier in status, and publishes the stream endpoint when the stream becomes active.
 
-The Stream CR can list the streams in the cluster: 
-```sh
-$ kubectl get streams
-NAME                         STATUS         AGE
-stream-sample             Active         4d
-```
-
-The Stream CR can list the streams in the cluster with detailed information: 
-```sh
-$ kubectl get streams -o wide
-NAME                         DISPLAYNAME   STATUS         OCID                                   AGE
-streams-sample             StreamTest    Active         ocid1.streams.oc1........   4d
-```
-
-The Stream CR can be described:
-```sh
-$ kubectl describe stream <NAME_OF_CR_OBJECT>
-```
-
-## Binding to an Existing Stream
-
-OSOK allows you to bind to an existing stream instance. In this case, `Id` is the only required field in the CR `spec`. The message endpoint of the stream will be created as a secret.
-
-```yaml
-apiVersion: oci.oracle.com/v1beta1
-kind: Stream
-metadata:
-  name: <CR_OBJECT_NAME>
-spec:
-  Id: <STREAM_OCID>
-```
-
-Run the following command to create a CR that binds to an existing stream instance:
+List and inspect the resource with:
 
 ```sh
-kubectl apply -f <BIND_YAML>.yaml
+kubectl get streams
+kubectl get streams -o wide
+kubectl describe stream <NAME_OF_CR_OBJECT>
 ```
 
-## Updating Stream
+## Current v2 notes
 
-You can update `streamPoolId`, `freeFormTags`, and `definedTags` of the stream instance.
+- The current Stream API group is `streaming.oracle.com/v1beta1`.
+- The generated v2 `Stream` contract does not expose the retired bind-by-id field from the legacy API.
+- Do not author new manifests with the retired pre-v2 Stream API group.
+- Manage the stream through the existing `Stream` CR rather than through a separate bind-by-id manifest.
+- Check `api/streaming/v1beta1/stream_types.go` for the current spec surface when authoring manifests.
 
-```yaml
-apiVersion: oci.oracle.com/v1beta1
-kind: Stream
-metadata:
-  name: <CR_OBJECT_NAME>
-spec:
-  Id: <STREAM_OCID>   
-  streamPoolId: <STREAM_POOL_OCID>
-  freeformTags:
-      <KEY1>: <VALUE1>
-    definedTags:
-      <TAGNAMESPACE1>:
-        <KEY1>: <VALUE1>
-```
+## Access Information
 
-Run the following command to create a CR that updates an existing stream instance:
+When a `Stream` becomes active, OSOK creates a same-namespace Kubernetes Secret named after the `Stream` CR. The Secret contains one data key:
+
+- `endpoint`
+
+The same endpoint is also mirrored on the CR at `status.messagesEndpoint`.
+
+## Delete a Stream
+
+Delete the `Stream` CR to delete the OCI stream and clean up the endpoint Secret:
 
 ```sh
-kubectl apply -f <UPDATE_YAML>.yaml
-```
-
-## Delete Stream
-
-You can delete the stream instance when they delete the CR.
-
-```sh
-$ kubectl delete stream <CR_OBJECT_NAME>
+kubectl delete stream <CR_OBJECT_NAME>
 ```

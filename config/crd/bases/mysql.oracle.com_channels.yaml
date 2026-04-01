@@ -148,8 +148,6 @@ spec:
                         type: string
                       jsonData:
                         type: string
-                    required:
-                    - contents
                     type: object
                   sslMode:
                     description: The SSL mode of the Channel.
@@ -160,11 +158,6 @@ spec:
                       The username has a maximum length of 96 characters. For more information,
                       please see the MySQL documentation (https://dev.mysql.com/doc/refman/8.0/en/change-master-to.html)
                     type: string
-                required:
-                - hostname
-                - password
-                - sslMode
-                - username
                 type: object
               target:
                 description: ChannelTarget defines nested fields for Channel.Target.
@@ -219,8 +212,6 @@ spec:
                     type: string
                   targetType:
                     type: string
-                required:
-                - dbSystemId
                 type: object
             required:
             - source
@@ -272,8 +263,8 @@ spec:
                   Channel.Source.
                 properties:
                   anonymousTransactionsHandling:
-                    description: ChannelSourceAnonymousTransactionsHandlingObservedState
-                      defines nested fields for Channel.Source.AnonymousTransactionsHandling.
+                    description: ChannelSourceAnonymousTransactionsHandling defines
+                      nested fields for Channel.Source.AnonymousTransactionsHandling.
                     properties:
                       jsonData:
                         type: string
@@ -311,8 +302,8 @@ spec:
                   sourceType:
                     type: string
                   sslCaCertificate:
-                    description: ChannelSourceSslCaCertificateObservedState defines
-                      nested fields for Channel.Source.SslCaCertificate.
+                    description: ChannelSourceSslCaCertificate defines nested fields
+                      for Channel.Source.SslCaCertificate.
                     properties:
                       certificateType:
                         type: string
@@ -322,8 +313,6 @@ spec:
                         type: string
                       jsonData:
                         type: string
-                    required:
-                    - contents
                     type: object
                   sslMode:
                     description: The SSL mode of the Channel.

@@ -58,34 +58,12 @@ type ResolverRule struct {
 	// +kubebuilder:validation:Optional
 	Action string `json:"action,omitempty"`
 	// IP addresses to which queries should be forwarded. Currently limited to a single address.
-	// +kubebuilder:validation:Required
-	DestinationAddresses []string `json:"destinationAddresses"`
+	// +kubebuilder:validation:Optional
+	DestinationAddresses []string `json:"destinationAddresses,omitempty"`
 	// Case-insensitive name of an endpoint, that is a sub-resource of the resolver, to use as the forwarding
 	// interface. The endpoint must have isForwarding set to true.
-	// +kubebuilder:validation:Required
-	SourceEndpointName string `json:"sourceEndpointName"`
-}
-
-// ResolverRuleObservedState defines nested fields for Resolver.Rule.
-type ResolverRuleObservedState struct {
 	// +kubebuilder:validation:Optional
-	JsonData string `json:"jsonData,omitempty"`
-	// A list of CIDR blocks. The query must come from a client within one of the blocks in order for the rule action
-	// to apply.
-	// +kubebuilder:validation:Optional
-	ClientAddressConditions []string `json:"clientAddressConditions,omitempty"`
-	// A list of domain names. The query must be covered by one of the domains in order for the rule action to apply.
-	// +kubebuilder:validation:Optional
-	QnameCoverConditions []string `json:"qnameCoverConditions,omitempty"`
-	// +kubebuilder:validation:Optional
-	Action string `json:"action,omitempty"`
-	// IP addresses to which queries should be forwarded. Currently limited to a single address.
-	// +kubebuilder:validation:Required
-	DestinationAddresses []string `json:"destinationAddresses"`
-	// Case-insensitive name of an endpoint, that is a sub-resource of the resolver, to use as the forwarding
-	// interface. The endpoint must have isForwarding set to true.
-	// +kubebuilder:validation:Required
-	SourceEndpointName string `json:"sourceEndpointName"`
+	SourceEndpointName string `json:"sourceEndpointName,omitempty"`
 }
 
 // ResolverEndpointFields defines nested fields for Resolver.Endpoint.
@@ -165,7 +143,7 @@ type ResolverStatus struct {
 	// The OCID of the default view.
 	DefaultViewId string `json:"defaultViewId,omitempty"`
 	// Rules for the resolver. Rules are evaluated in order.
-	Rules []ResolverRuleObservedState `json:"rules,omitempty"`
+	Rules []ResolverRule `json:"rules,omitempty"`
 }
 
 // +kubebuilder:object:root=true

@@ -85,10 +85,6 @@ spec:
                       secretVersion:
                         description: The secret version of the stored password.
                         type: string
-                    required:
-                    - password
-                    - secretId
-                    - secretVersion
                     type: object
                   username:
                     description: The database system administrator username.
@@ -203,10 +199,6 @@ spec:
                         description: How many days the data should be stored after
                           the database system deletion.
                         type: integer
-                    required:
-                    - backupStart
-                    - daysOfTheMonth
-                    - daysOfTheWeek
                     type: object
                   maintenanceWindowStart:
                     description: The start of the maintenance window.
@@ -252,8 +244,6 @@ spec:
                     type: string
                   sourceType:
                     type: string
-                required:
-                - backupId
                 type: object
               storageDetails:
                 description: DbSystemStorageDetails defines nested fields for DbSystem.StorageDetails.
@@ -400,12 +390,11 @@ spec:
                 description: The current state of the database system.
                 type: string
               managementPolicy:
-                description: DbSystemManagementPolicyObservedState defines nested
-                  fields for DbSystem.ManagementPolicy.
+                description: DbSystemManagementPolicy defines nested fields for DbSystem.ManagementPolicy.
                 properties:
                   backupPolicy:
-                    description: DbSystemManagementPolicyBackupPolicyObservedState
-                      defines nested fields for DbSystem.ManagementPolicy.BackupPolicy.
+                    description: DbSystemManagementPolicyBackupPolicy defines nested
+                      fields for DbSystem.ManagementPolicy.BackupPolicy.
                     properties:
                       backupStart:
                         description: Hour of the day when the backup starts.
@@ -430,10 +419,6 @@ spec:
                         description: How many days the data should be stored after
                           the database system deletion.
                         type: integer
-                    required:
-                    - backupStart
-                    - daysOfTheMonth
-                    - daysOfTheWeek
                     type: object
                   maintenanceWindowStart:
                     description: The start of the maintenance window.
@@ -466,8 +451,7 @@ spec:
                   Example: `VM.Standard.E4.Flex`
                 type: string
               source:
-                description: DbSystemSourceObservedState defines nested fields for
-                  DbSystem.Source.
+                description: DbSystemSource defines nested fields for DbSystem.Source.
                 properties:
                   backupId:
                     description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
@@ -480,8 +464,6 @@ spec:
                     type: string
                   sourceType:
                     type: string
-                required:
-                - backupId
                 type: object
               status:
                 properties:
@@ -526,8 +508,7 @@ spec:
                     type: string
                 type: object
               storageDetails:
-                description: DbSystemStorageDetailsObservedState defines nested fields
-                  for DbSystem.StorageDetails.
+                description: DbSystemStorageDetails defines nested fields for DbSystem.StorageDetails.
                 properties:
                   availabilityDomain:
                     description: |-

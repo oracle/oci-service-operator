@@ -729,8 +729,8 @@ type LoadBalancerRuleSetsItemCondition struct {
 	// You can use this condition in conjunction with `SourceVcnIpAddressCondition`.
 	// **NOTE:** If you define this condition for a rule without a `SourceVcnIpAddressCondition`, this condition
 	// matches all incoming traffic in the specified VCN.
-	// +kubebuilder:validation:Required
-	AttributeValue string `json:"attributeValue"`
+	// +kubebuilder:validation:Optional
+	AttributeValue string `json:"attributeValue,omitempty"`
 	// A string that specifies how to compare the PathMatchCondition object's `attributeValue` string to the
 	// incoming URI.
 	// *  **EXACT_MATCH** - The incoming URI path must exactly and completely match the `attributeValue` string.
@@ -740,8 +740,8 @@ type LoadBalancerRuleSetsItemCondition struct {
 	//    `attributeValue` string.
 	// *  **SUFFIX_MATCH** - The ending portion of the incoming URI path must exactly match the `attributeValue`
 	//    string.
-	// +kubebuilder:validation:Required
-	Operator string `json:"operator"`
+	// +kubebuilder:validation:Optional
+	Operator string `json:"operator,omitempty"`
 }
 
 // LoadBalancerRuleSetsItemRedirectUri defines nested fields for LoadBalancer.RuleSets.Item.RedirectUri.
@@ -832,16 +832,16 @@ type LoadBalancerRuleSetsItem struct {
 	Action string `json:"action,omitempty"`
 	// A header name that conforms to RFC 7230.
 	// Example: `example_header_name`
-	// +kubebuilder:validation:Required
-	Header string `json:"header"`
+	// +kubebuilder:validation:Optional
+	Header string `json:"header,omitempty"`
 	// A header value that conforms to RFC 7230. With the following exceptions:
 	// *  value cannot contain `$`
 	// *  value cannot contain patterns like `{variable_name}`. They are reserved for future extensions. Currently, such values are invalid.
 	// Example: `example_value`
-	// +kubebuilder:validation:Required
-	Value string `json:"value"`
-	// +kubebuilder:validation:Required
-	Conditions []LoadBalancerRuleSetsItemCondition `json:"conditions"`
+	// +kubebuilder:validation:Optional
+	Value string `json:"value,omitempty"`
+	// +kubebuilder:validation:Optional
+	Conditions []LoadBalancerRuleSetsItemCondition `json:"conditions,omitempty"`
 	// The HTTP status code to return when the incoming request is redirected.
 	// The status line returned with the code is mapped from the standard HTTP specification. Valid response
 	// codes for redirection are:
@@ -879,8 +879,8 @@ type LoadBalancerRuleSetsItem struct {
 	// The list of HTTP methods is extensible. If you need to configure custom HTTP methods, contact
 	// My Oracle Support (http://support.oracle.com/) to remove the restriction for your tenancy.
 	// Example: ["GET", "PUT", "POST", "PROPFIND"]
-	// +kubebuilder:validation:Required
-	AllowedMethods []string `json:"allowedMethods"`
+	// +kubebuilder:validation:Optional
+	AllowedMethods []string `json:"allowedMethods,omitempty"`
 	// The HTTP status code to return when the requested HTTP method is not in the list of allowed methods.
 	// The associated status line returned with the code is mapped from the standard HTTP specification. The
 	// default value is `405 (Method Not Allowed)`.
@@ -909,170 +909,6 @@ type LoadBalancerRuleSets struct {
 	// An array of rules that compose the rule set.
 	// +kubebuilder:validation:Required
 	Items []LoadBalancerRuleSetsItem `json:"items"`
-}
-
-// LoadBalancerListenersObservedState defines nested fields for LoadBalancer.Listeners.
-type LoadBalancerListenersObservedState struct {
-	// The name of the associated backend set.
-	// Example: `example_backend_set`
-	// +kubebuilder:validation:Required
-	DefaultBackendSetName string `json:"defaultBackendSetName"`
-	// The communication port for the listener.
-	// Example: `80`
-	// +kubebuilder:validation:Required
-	Port int `json:"port"`
-	// The protocol on which the listener accepts connection requests.
-	// To get a list of valid protocols, use the ListProtocols
-	// operation.
-	// Example: `HTTP`
-	// +kubebuilder:validation:Required
-	Protocol string `json:"protocol"`
-	// An array of hostname resource names.
-	// +kubebuilder:validation:Optional
-	HostnameNames []string `json:"hostnameNames,omitempty"`
-	// Deprecated. Please use `routingPolicies` instead.
-	// The name of the set of path-based routing rules, PathRouteSet,
-	// applied to this listener's traffic.
-	// Example: `example_path_route_set`
-	// +kubebuilder:validation:Optional
-	PathRouteSetName string `json:"pathRouteSetName,omitempty"`
-	// +kubebuilder:validation:Optional
-	SslConfiguration LoadBalancerListenersSslConfiguration `json:"sslConfiguration,omitempty"`
-	// +kubebuilder:validation:Optional
-	ConnectionConfiguration LoadBalancerListenersConnectionConfiguration `json:"connectionConfiguration,omitempty"`
-	// The name of the routing policy applied to this listener's traffic.
-	// Example: `example_routing_policy`
-	// +kubebuilder:validation:Optional
-	RoutingPolicyName string `json:"routingPolicyName,omitempty"`
-	// The names of the RuleSet to apply to the listener.
-	//  Example: ["example_rule_set"]
-	// +kubebuilder:validation:Optional
-	RuleSetNames []string `json:"ruleSetNames,omitempty"`
-}
-
-// LoadBalancerBackendSetsObservedState defines nested fields for LoadBalancer.BackendSets.
-type LoadBalancerBackendSetsObservedState struct {
-	// The load balancer policy for the backend set. To get a list of available policies, use the
-	// ListPolicies operation.
-	// Example: `LEAST_CONNECTIONS`
-	// +kubebuilder:validation:Required
-	Policy string `json:"policy"`
-	// +kubebuilder:validation:Required
-	HealthChecker LoadBalancerBackendSetsHealthChecker `json:"healthChecker"`
-	// +kubebuilder:validation:Optional
-	Backends []LoadBalancerBackendSetsBackend `json:"backends,omitempty"`
-	// +kubebuilder:validation:Optional
-	SslConfiguration LoadBalancerBackendSetsSslConfiguration `json:"sslConfiguration,omitempty"`
-	// +kubebuilder:validation:Optional
-	SessionPersistenceConfiguration LoadBalancerBackendSetsSessionPersistenceConfiguration `json:"sessionPersistenceConfiguration,omitempty"`
-	// +kubebuilder:validation:Optional
-	LbCookieSessionPersistenceConfiguration LoadBalancerBackendSetsLbCookieSessionPersistenceConfiguration `json:"lbCookieSessionPersistenceConfiguration,omitempty"`
-}
-
-// LoadBalancerRuleSetsItemConditionObservedState defines nested fields for LoadBalancer.RuleSets.Item.Condition.
-type LoadBalancerRuleSetsItemConditionObservedState struct {
-	// +kubebuilder:validation:Optional
-	JsonData string `json:"jsonData,omitempty"`
-	// +kubebuilder:validation:Optional
-	AttributeName string `json:"attributeName,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the originating VCN that an incoming packet
-	// must match.
-	// You can use this condition in conjunction with `SourceVcnIpAddressCondition`.
-	// **NOTE:** If you define this condition for a rule without a `SourceVcnIpAddressCondition`, this condition
-	// matches all incoming traffic in the specified VCN.
-	// +kubebuilder:validation:Required
-	AttributeValue string `json:"attributeValue"`
-	// A string that specifies how to compare the PathMatchCondition object's `attributeValue` string to the
-	// incoming URI.
-	// *  **EXACT_MATCH** - The incoming URI path must exactly and completely match the `attributeValue` string.
-	// *  **FORCE_LONGEST_PREFIX_MATCH** - The system looks for the `attributeValue` string with the best,
-	//    longest match of the beginning portion of the incoming URI path.
-	// *  **PREFIX_MATCH** - The beginning portion of the incoming URI path must exactly match the
-	//    `attributeValue` string.
-	// *  **SUFFIX_MATCH** - The ending portion of the incoming URI path must exactly match the `attributeValue`
-	//    string.
-	// +kubebuilder:validation:Required
-	Operator string `json:"operator"`
-}
-
-// LoadBalancerRuleSetsItemObservedState defines nested fields for LoadBalancer.RuleSets.Item.
-type LoadBalancerRuleSetsItemObservedState struct {
-	// +kubebuilder:validation:Optional
-	JsonData string `json:"jsonData,omitempty"`
-	// +kubebuilder:validation:Optional
-	Action string `json:"action,omitempty"`
-	// A header name that conforms to RFC 7230.
-	// Example: `example_header_name`
-	// +kubebuilder:validation:Required
-	Header string `json:"header"`
-	// A header value that conforms to RFC 7230. With the following exceptions:
-	// *  value cannot contain `$`
-	// *  value cannot contain patterns like `{variable_name}`. They are reserved for future extensions. Currently, such values are invalid.
-	// Example: `example_value`
-	// +kubebuilder:validation:Required
-	Value string `json:"value"`
-	// +kubebuilder:validation:Required
-	Conditions []LoadBalancerRuleSetsItemConditionObservedState `json:"conditions"`
-	// The HTTP status code to return when the incoming request is redirected.
-	// The status line returned with the code is mapped from the standard HTTP specification. Valid response
-	// codes for redirection are:
-	// *  301
-	// *  302
-	// *  303
-	// *  307
-	// *  308
-	// The default value is `302` (Found).
-	// Example: `301`
-	// +kubebuilder:validation:Optional
-	ResponseCode int `json:"responseCode,omitempty"`
-	// +kubebuilder:validation:Optional
-	RedirectUri LoadBalancerRuleSetsItemRedirectUri `json:"redirectUri,omitempty"`
-	// A string to prepend to the header value. The resulting header value must conform to RFC 7230.
-	// With the following exceptions:
-	// *  value cannot contain `$`
-	// *  value cannot contain patterns like `{variable_name}`. They are reserved for future extensions. Currently, such values are invalid.
-	// Example: `example_prefix_value`
-	// +kubebuilder:validation:Optional
-	Prefix string `json:"prefix,omitempty"`
-	// A string to append to the header value. The resulting header value must conform to RFC 7230.
-	// With the following exceptions:
-	// *  value cannot contain `$`
-	// *  value cannot contain patterns like `{variable_name}`. They are reserved for future extensions. Currently, such values are invalid.
-	// Example: `example_suffix_value`
-	// +kubebuilder:validation:Optional
-	Suffix string `json:"suffix,omitempty"`
-	// The list of HTTP methods allowed for this listener.
-	// By default, you can specify only the standard HTTP methods defined in the
-	// HTTP Method Registry (http://www.iana.org/assignments/http-methods/http-methods.xhtml). You can also
-	// see a list of supported standard HTTP methods in the Load Balancing service documentation at
-	// Managing Rule Sets (https://docs.cloud.oracle.com/Content/Balance/Tasks/managingrulesets.htm).
-	// Your backend application must be able to handle the methods specified in this list.
-	// The list of HTTP methods is extensible. If you need to configure custom HTTP methods, contact
-	// My Oracle Support (http://support.oracle.com/) to remove the restriction for your tenancy.
-	// Example: ["GET", "PUT", "POST", "PROPFIND"]
-	// +kubebuilder:validation:Required
-	AllowedMethods []string `json:"allowedMethods"`
-	// The HTTP status code to return when the requested HTTP method is not in the list of allowed methods.
-	// The associated status line returned with the code is mapped from the standard HTTP specification. The
-	// default value is `405 (Method Not Allowed)`.
-	// Example: 403
-	// +kubebuilder:validation:Optional
-	StatusCode int `json:"statusCode,omitempty"`
-	// A brief description of the access control rule. Avoid entering confidential information.
-	// example: `192.168.0.0/16 and 2001:db8::/32 are trusted clients. Whitelist them.`
-	// +kubebuilder:validation:Optional
-	Description string `json:"description,omitempty"`
-	// Indicates whether or not invalid characters in client header fields will be allowed.
-	// Valid names are composed of English letters, digits, hyphens and underscores.
-	// If "true", invalid characters are allowed in the HTTP header.
-	// If "false", invalid characters are not allowed in the HTTP header
-	// +kubebuilder:validation:Optional
-	AreInvalidCharactersAllowed bool `json:"areInvalidCharactersAllowed,omitempty"`
-	// The maximum size of each buffer used for reading http client request header.
-	// This value indicates the maximum size allowed for each buffer.
-	// The allowed values for buffer size are 8, 16, 32 and 64.
-	// +kubebuilder:validation:Optional
-	HttpLargeHeaderSizeInKB int `json:"httpLargeHeaderSizeInKB,omitempty"`
 }
 
 // LoadBalancerIpAddressReservedIp defines nested fields for LoadBalancer.IpAddress.ReservedIp.
@@ -1163,13 +999,13 @@ type LoadBalancerStatus struct {
 	// *  The network security rules of other resources can reference the NSGs associated with the load balancer
 	//    to ensure access.
 	// Example: ["ocid1.nsg.oc1.phx.unique_ID"]
-	NetworkSecurityGroupIds []string                                        `json:"networkSecurityGroupIds,omitempty"`
-	Listeners               map[string]LoadBalancerListenersObservedState   `json:"listeners,omitempty"`
-	Hostnames               map[string]LoadBalancerHostnames                `json:"hostnames,omitempty"`
-	SslCipherSuites         map[string]LoadBalancerSslCipherSuites          `json:"sslCipherSuites,omitempty"`
-	Certificates            map[string]LoadBalancerCertificates             `json:"certificates,omitempty"`
-	BackendSets             map[string]LoadBalancerBackendSetsObservedState `json:"backendSets,omitempty"`
-	PathRouteSets           map[string]LoadBalancerPathRouteSets            `json:"pathRouteSets,omitempty"`
+	NetworkSecurityGroupIds []string                               `json:"networkSecurityGroupIds,omitempty"`
+	Listeners               map[string]LoadBalancerListeners       `json:"listeners,omitempty"`
+	Hostnames               map[string]LoadBalancerHostnames       `json:"hostnames,omitempty"`
+	SslCipherSuites         map[string]LoadBalancerSslCipherSuites `json:"sslCipherSuites,omitempty"`
+	Certificates            map[string]LoadBalancerCertificates    `json:"certificates,omitempty"`
+	BackendSets             map[string]LoadBalancerBackendSets     `json:"backendSets,omitempty"`
+	PathRouteSets           map[string]LoadBalancerPathRouteSets   `json:"pathRouteSets,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
 	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`

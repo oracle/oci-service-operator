@@ -5,8 +5,22 @@ metadata:
   name: manager-role
 rules:
 - apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
   - streaming.oracle.com
   resources:
+  - connectharnesses
+  - streampools
   - streams
   verbs:
   - create
@@ -19,12 +33,16 @@ rules:
 - apiGroups:
   - streaming.oracle.com
   resources:
+  - connectharnesses/finalizers
+  - streampools/finalizers
   - streams/finalizers
   verbs:
   - update
 - apiGroups:
   - streaming.oracle.com
   resources:
+  - connectharnesses/status
+  - streampools/status
   - streams/status
   verbs:
   - get

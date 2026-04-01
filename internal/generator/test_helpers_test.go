@@ -5,7 +5,25 @@
 
 package generator
 
-import "testing"
+import (
+	"os"
+	"path/filepath"
+	"slices"
+	"strings"
+	"testing"
+)
+
+func loadCheckedInConfig(t *testing.T) *Config {
+	t.Helper()
+
+	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
+	cfg, err := LoadConfig(cfgPath)
+	if err != nil {
+		t.Fatalf("LoadConfig(%q) error = %v", cfgPath, err)
+	}
+
+	return cfg
+}
 
 func serviceConfigsByName(t *testing.T, cfg *Config, names ...string) map[string]*ServiceConfig {
 	t.Helper()
@@ -52,9 +70,142 @@ func assertFieldNamesPresent(t *testing.T, label string, fields []FieldModel, wa
 	}
 }
 
+func assertFieldNamesAbsent(t *testing.T, label string, fields []FieldModel, unwanted ...string) {
+	t.Helper()
+
+	for _, name := range unwanted {
+		if hasField(fields, name) {
+			t.Fatalf("%s = %#v, want no %s", label, fields, name)
+		}
+	}
+}
+
+func assertResourceSpecFields(t *testing.T, resource ResourceModel, want ...string) {
+	t.Helper()
+	assertFieldNamesPresent(t, resource.Kind+" spec fields", resource.SpecFields, want...)
+}
+
+func assertResourceSpecFieldsAbsent(t *testing.T, resource ResourceModel, unwanted ...string) {
+	t.Helper()
+	assertFieldNamesAbsent(t, resource.Kind+" spec fields", resource.SpecFields, unwanted...)
+}
+
+func assertResourceStatusFields(t *testing.T, resource ResourceModel, want ...string) {
+	t.Helper()
+	assertFieldNamesPresent(t, resource.Kind+" status fields", resource.StatusFields, want...)
+}
+
 func assertHelperTypeFields(t *testing.T, helperType TypeModel, want ...string) {
 	t.Helper()
 	assertFieldNamesPresent(t, helperType.Name+" fields", helperType.Fields, want...)
+}
+
+func assertPackageResourceStatusFields(t *testing.T, pkg *PackageModel, want map[string][]string) {
+	t.Helper()
+
+	for kind, fieldNames := range want {
+		assertResourceStatusFields(t, findResource(t, pkg.Resources, kind), fieldNames...)
+	}
+}
+
+func assertServiceFormalSpec(t *testing.T, service *ServiceConfig, kind string, want string) {
+	t.Helper()
+
+	if got := service.FormalSpecFor(kind); got != want {
+		t.Fatalf("%s %s formalSpec = %q, want %q", service.Service, kind, got, want)
+	}
+}
+
+func assertFieldType(t *testing.T, label string, field FieldModel, want string) {
+	t.Helper()
+
+	if field.Type != want {
+		t.Fatalf("%s type = %q, want %q", label, field.Type, want)
+	}
+}
+
+func assertFieldTag(t *testing.T, label string, field FieldModel, want string) {
+	t.Helper()
+
+	if field.Tag != want {
+		t.Fatalf("%s tag = %q, want %q", label, field.Tag, want)
+	}
+}
+
+func assertFieldCommentsEqual(t *testing.T, label string, field FieldModel, want []string) {
+	t.Helper()
+
+	if !slices.Equal(field.Comments, want) {
+		t.Fatalf("%s comments = %#v, want %#v", label, field.Comments, want)
+	}
+}
+
+func assertFieldCommentsContain(t *testing.T, label string, field FieldModel, want string) {
+	t.Helper()
+
+	if !strings.Contains(strings.Join(field.Comments, "\n"), want) {
+		t.Fatalf("%s comments = %#v, want substring %q", label, field.Comments, want)
+	}
+}
+
+func assertFieldMarkers(t *testing.T, label string, field FieldModel, want []string) {
+	t.Helper()
+
+	if !slices.Equal(field.Markers, want) {
+		t.Fatalf("%s markers = %#v, want %#v", label, field.Markers, want)
+	}
+}
+
+func assertFieldHasNoMarkers(t *testing.T, label string, field FieldModel) {
+	t.Helper()
+
+	if len(field.Markers) != 0 {
+		t.Fatalf("%s markers = %#v, want none", label, field.Markers)
+	}
+}
+
+func seedSamplesKustomization(t *testing.T, outputRoot string) {
+	t.Helper()
+
+	samplesDir := filepath.Join(outputRoot, "config", "samples")
+	if err := os.MkdirAll(samplesDir, 0o755); err != nil {
+		t.Fatalf("mkdir %s: %v", samplesDir, err)
+	}
+
+	checkedInSampleKustomization := readFile(t, filepath.Join(repoRoot(t), "config", "samples", "kustomization.yaml"))
+	if err := os.WriteFile(filepath.Join(samplesDir, "kustomization.yaml"), []byte(checkedInSampleKustomization), 0o644); err != nil {
+		t.Fatalf("write seeded samples kustomization: %v", err)
+	}
+}
+
+func assertGeneratedServiceCounts(t *testing.T, generated []ServiceResult, want map[string]int) {
+	t.Helper()
+
+	if len(generated) != len(want) {
+		t.Fatalf("generated %d services, want %d", len(generated), len(want))
+	}
+
+	for _, service := range generated {
+		if service.ResourceCount != want[service.Service] {
+			t.Fatalf("service %s generated %d resources, want %d", service.Service, service.ResourceCount, want[service.Service])
+		}
+	}
+}
+
+func assertGeneratedGoMatchesAll(t *testing.T, wantRoot string, gotRoot string, relativePaths []string) {
+	t.Helper()
+
+	for _, relativePath := range relativePaths {
+		assertGoEquivalent(t, filepath.Join(wantRoot, relativePath), filepath.Join(gotRoot, relativePath))
+	}
+}
+
+func assertExactFileMatchesAll(t *testing.T, wantRoot string, gotRoot string, relativePaths []string) {
+	t.Helper()
+
+	for _, relativePath := range relativePaths {
+		assertExactFileMatch(t, filepath.Join(wantRoot, relativePath), filepath.Join(gotRoot, relativePath))
+	}
 }
 
 func assertFileContains(t *testing.T, path string, want []string) {

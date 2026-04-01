@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
 	"testing"
@@ -166,5 +167,25 @@ func assertCoverageNotExists(t *testing.T, path string) {
 
 	if _, err := os.Lstat(path); !os.IsNotExist(err) {
 		t.Fatalf("Lstat(%q) error = %v, want not exist", path, err)
+	}
+}
+
+func TestRenderOutputOmitsRetiredPreserveExistingSpecSurfaceField(t *testing.T) {
+	t.Helper()
+
+	rendered, err := renderOutput(outputReport{
+		Config: outputConfig{
+			ConfigPath:        "internal/generator/config/services.yaml",
+			All:               true,
+			GeneratedServices: []string{"mysql"},
+			GeneratedGroups:   []string{"mysql"},
+			Top:               10,
+		},
+	})
+	if err != nil {
+		t.Fatalf("renderOutput() error = %v", err)
+	}
+	if bytes.Contains(rendered, []byte("preserveExistingSpecSurface")) {
+		t.Fatalf("renderOutput() unexpectedly rendered retired preserveExistingSpecSurface field:\n%s", rendered)
 	}
 }

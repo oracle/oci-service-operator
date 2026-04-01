@@ -112,7 +112,6 @@ spec:
                       type: array
                   required:
                   - source
-                  - values
                   type: object
                 description: The map of each capability name to its ImageCapabilitySchemaDescriptor.
                 type: object
@@ -169,8 +168,8 @@ spec:
                 type: string
               schemaData:
                 additionalProperties:
-                  description: ComputeImageCapabilitySchemaSchemaDataObservedState
-                    defines nested fields for ComputeImageCapabilitySchema.SchemaData.
+                  description: ComputeImageCapabilitySchemaSchemaData defines nested
+                    fields for ComputeImageCapabilitySchema.SchemaData.
                   properties:
                     defaultValue:
                       description: the default value
@@ -188,7 +187,6 @@ spec:
                       type: array
                   required:
                   - source
-                  - values
                   type: object
                 description: The map of each capability name to its ImageCapabilityDescriptor.
                 type: object

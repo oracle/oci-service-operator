@@ -35,8 +35,8 @@ type RoutingPolicyRuleAction struct {
 	Name string `json:"name,omitempty"`
 	// Name of the backend set the listener will forward the traffic to.
 	// Example: `backendSetForImages`
-	// +kubebuilder:validation:Required
-	BackendSetName string `json:"backendSetName"`
+	// +kubebuilder:validation:Optional
+	BackendSetName string `json:"backendSetName,omitempty"`
 }
 
 // RoutingPolicyRule defines nested fields for RoutingPolicy.Rule.
@@ -50,18 +50,6 @@ type RoutingPolicyRule struct {
 	// A list of actions to be applied when conditions of the routing rule are met.
 	// +kubebuilder:validation:Required
 	Actions []RoutingPolicyRuleAction `json:"actions"`
-}
-
-// RoutingPolicyRuleActionObservedState defines nested fields for RoutingPolicy.Rule.Action.
-type RoutingPolicyRuleActionObservedState struct {
-	// +kubebuilder:validation:Optional
-	JsonData string `json:"jsonData,omitempty"`
-	// +kubebuilder:validation:Optional
-	Name string `json:"name,omitempty"`
-	// Name of the backend set the listener will forward the traffic to.
-	// Example: `backendSetForImages`
-	// +kubebuilder:validation:Required
-	BackendSetName string `json:"backendSetName"`
 }
 
 // RoutingPolicyStatus defines the observed state of RoutingPolicy.

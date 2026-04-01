@@ -48,11 +48,11 @@ type IdentityProviderSpec struct {
 	Protocol string `json:"protocol,omitempty"`
 	// The URL for retrieving the identity provider's metadata,
 	// which contains information required for federating.
-	// +kubebuilder:validation:Required
-	MetadataUrl string `json:"metadataUrl"`
+	// +kubebuilder:validation:Optional
+	MetadataUrl string `json:"metadataUrl,omitempty"`
 	// The XML that contains the information required for federating.
-	// +kubebuilder:validation:Required
-	Metadata string `json:"metadata"`
+	// +kubebuilder:validation:Optional
+	Metadata string `json:"metadata,omitempty"`
 	// Extra name value pairs associated with this identity provider.
 	// Example: `{"clientId": "app_sf3kdjf3"}`
 	// +kubebuilder:validation:Optional

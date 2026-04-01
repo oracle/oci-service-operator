@@ -40,10 +40,10 @@ Runtime rollout defaults:
 
 - Services without a `generation` block default to controller, service-manager,
   and registration rollout `none`, while webhook ownership remains `manual`.
-- Services that need checked-in naming or observed-state overrides keep those
-  mappings in `services.yaml` and can use
-  `--preserve-existing-spec-surface` when regenerating checked-in
-  spec/helper/sample/package artifacts.
+- Services that need observed-state overrides or staged rollout metadata keep
+  those mappings in `services.yaml`; generator-owned
+  spec/helper/sample/package artifacts always regenerate from the current v2
+  contract.
 
 Package profile behavior:
 

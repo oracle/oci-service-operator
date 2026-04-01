@@ -160,12 +160,14 @@ This happens mostly due to user authorization. Follow below steps for remediatio
 * If using User credentials, cross verify if the secret for user credentials (ocicredentials as per installation doc) is populated correctly.
 * Note that OSOK uses user credentials for authorization if the secret 'ocicredentials' is available during installation. Else it uses instance principal by default. Delete the secret 'ocicredentials' if user principals are not intended and restart the deployment to switch to Instance principals
 
-2. **Legacy Autonomous Database fields rejected by schema validation**
+2. **Legacy or unsupported Autonomous Database credential fields rejected by schema validation**
 
 The generated v2 `AutonomousDatabase` CR no longer accepts the old
 `AutonomousDatabases` compatibility shape. Manifests that still use
-`kind: AutonomousDatabases`, `spec.wallet`, or `spec.walletPassword` will be
-rejected before reconciliation. Migrate those manifests to the generated
+`kind: AutonomousDatabases`, `spec.wallet`, `spec.walletPassword`, or a
+plaintext `spec.adminPassword` value will be rejected before reconciliation.
+Use either `spec.adminPassword.secret.secretName` or `spec.secretId` instead,
+but not both in the same manifest. Migrate those manifests to the generated
 `AutonomousDatabase` fields and use the dedicated
 `AutonomousDatabaseWallet` or `AutonomousDatabaseRegionalWallet` resources for
 wallet material.

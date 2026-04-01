@@ -74,12 +74,6 @@ type SubscriptionDeliveryPolicy struct {
 	BackoffRetryPolicy SubscriptionDeliveryPolicyBackoffRetryPolicy `json:"backoffRetryPolicy,omitempty"`
 }
 
-// SubscriptionDeliveryPolicyObservedState defines nested fields for Subscription.DeliveryPolicy.
-type SubscriptionDeliveryPolicyObservedState struct {
-	// +kubebuilder:validation:Optional
-	BackoffRetryPolicy SubscriptionDeliveryPolicyBackoffRetryPolicy `json:"backoffRetryPolicy,omitempty"`
-}
-
 // SubscriptionStatus defines the observed state of Subscription.
 type SubscriptionStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
@@ -117,8 +111,8 @@ type SubscriptionStatus struct {
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
-	DefinedTags    map[string]shared.MapValue              `json:"definedTags,omitempty"`
-	DeliveryPolicy SubscriptionDeliveryPolicyObservedState `json:"deliveryPolicy,omitempty"`
+	DefinedTags    map[string]shared.MapValue `json:"definedTags,omitempty"`
+	DeliveryPolicy SubscriptionDeliveryPolicy `json:"deliveryPolicy,omitempty"`
 }
 
 // +kubebuilder:object:root=true

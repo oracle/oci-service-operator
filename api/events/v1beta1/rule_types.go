@@ -77,8 +77,8 @@ type RuleActionsAction struct {
 	// +kubebuilder:validation:Optional
 	ActionType string `json:"actionType,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the stream to which messages are delivered.
-	// +kubebuilder:validation:Required
-	StreamId string `json:"streamId"`
+	// +kubebuilder:validation:Optional
+	StreamId string `json:"streamId,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of a Function hosted by Oracle Functions Service.
 	// +kubebuilder:validation:Optional
 	FunctionId string `json:"functionId,omitempty"`
@@ -92,31 +92,6 @@ type RuleActions struct {
 	// A list of one or more ActionDetails objects.
 	// +kubebuilder:validation:Required
 	Actions []RuleActionsAction `json:"actions"`
-}
-
-// RuleActionsActionObservedState defines nested fields for Rule.Actions.Action.
-type RuleActionsActionObservedState struct {
-	// +kubebuilder:validation:Optional
-	JsonData string `json:"jsonData,omitempty"`
-	// A string that describes the details of the action. It does not have to be unique, and you can change it. Avoid entering
-	// confidential information.
-	// +kubebuilder:validation:Optional
-	Description string `json:"description,omitempty"`
-	// Whether or not this action is currently enabled.
-	// Example: `true`
-	// +kubebuilder:validation:Required
-	IsEnabled bool `json:"isEnabled"`
-	// +kubebuilder:validation:Optional
-	ActionType string `json:"actionType,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the stream to which messages are delivered.
-	// +kubebuilder:validation:Required
-	StreamId string `json:"streamId"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of a Function hosted by Oracle Functions Service.
-	// +kubebuilder:validation:Optional
-	FunctionId string `json:"functionId,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the topic to which messages are delivered.
-	// +kubebuilder:validation:Optional
-	TopicId string `json:"topicId,omitempty"`
 }
 
 // RuleStatus defines the observed state of Rule.

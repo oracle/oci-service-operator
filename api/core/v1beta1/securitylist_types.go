@@ -271,127 +271,6 @@ type SecurityListIngressSecurityRule struct {
 	Description string `json:"description,omitempty"`
 }
 
-// SecurityListEgressSecurityRuleTcpOptionsObservedState defines nested fields for SecurityList.EgressSecurityRule.TcpOptions.
-type SecurityListEgressSecurityRuleTcpOptionsObservedState struct {
-	// +kubebuilder:validation:Optional
-	DestinationPortRange SecurityListEgressSecurityRuleTcpOptionsDestinationPortRange `json:"destinationPortRange,omitempty"`
-	// +kubebuilder:validation:Optional
-	SourcePortRange SecurityListEgressSecurityRuleTcpOptionsSourcePortRange `json:"sourcePortRange,omitempty"`
-}
-
-// SecurityListEgressSecurityRuleUdpOptionsObservedState defines nested fields for SecurityList.EgressSecurityRule.UdpOptions.
-type SecurityListEgressSecurityRuleUdpOptionsObservedState struct {
-	// +kubebuilder:validation:Optional
-	DestinationPortRange SecurityListEgressSecurityRuleUdpOptionsDestinationPortRange `json:"destinationPortRange,omitempty"`
-	// +kubebuilder:validation:Optional
-	SourcePortRange SecurityListEgressSecurityRuleUdpOptionsSourcePortRange `json:"sourcePortRange,omitempty"`
-}
-
-// SecurityListEgressSecurityRuleObservedState defines nested fields for SecurityList.EgressSecurityRule.
-type SecurityListEgressSecurityRuleObservedState struct {
-	// Conceptually, this is the range of IP addresses that a packet originating from the instance
-	// can go to.
-	// Allowed values:
-	//   * IP address range in CIDR notation. For example: `192.168.1.0/24` or `2001:0db8:0123:45::/56`
-	//     Note that IPv6 addressing is currently supported only in certain regions. See
-	//     IPv6 Addresses (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/ipv6.htm).
-	//   * The `cidrBlock` value for a Service, if you're
-	//     setting up a security list rule for traffic destined for a particular `Service` through
-	//     a service gateway. For example: `oci-phx-objectstorage`.
-	// +kubebuilder:validation:Required
-	Destination string `json:"destination"`
-	// The transport protocol. Specify either `all` or an IPv4 protocol number as
-	// defined in
-	// Protocol Numbers (http://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml).
-	// Options are supported only for ICMP ("1"), TCP ("6"), UDP ("17"), and ICMPv6 ("58").
-	// +kubebuilder:validation:Required
-	Protocol string `json:"protocol"`
-	// Type of destination for the rule. The default is `CIDR_BLOCK`.
-	// Allowed values:
-	//   * `CIDR_BLOCK`: If the rule's `destination` is an IP address range in CIDR notation.
-	//   * `SERVICE_CIDR_BLOCK`: If the rule's `destination` is the `cidrBlock` value for a
-	//     Service (the rule is for traffic destined for a
-	//     particular `Service` through a service gateway).
-	// +kubebuilder:validation:Optional
-	DestinationType string `json:"destinationType,omitempty"`
-	// +kubebuilder:validation:Optional
-	IcmpOptions SecurityListEgressSecurityRuleIcmpOptions `json:"icmpOptions,omitempty"`
-	// A stateless rule allows traffic in one direction. Remember to add a corresponding
-	// stateless rule in the other direction if you need to support bidirectional traffic. For
-	// example, if egress traffic allows TCP destination port 80, there should be an ingress
-	// rule to allow TCP source port 80. Defaults to false, which means the rule is stateful
-	// and a corresponding rule is not necessary for bidirectional traffic.
-	// +kubebuilder:validation:Optional
-	IsStateless bool `json:"isStateless,omitempty"`
-	// +kubebuilder:validation:Optional
-	TcpOptions SecurityListEgressSecurityRuleTcpOptionsObservedState `json:"tcpOptions,omitempty"`
-	// +kubebuilder:validation:Optional
-	UdpOptions SecurityListEgressSecurityRuleUdpOptionsObservedState `json:"udpOptions,omitempty"`
-	// An optional description of your choice for the rule.
-	// +kubebuilder:validation:Optional
-	Description string `json:"description,omitempty"`
-}
-
-// SecurityListIngressSecurityRuleTcpOptionsObservedState defines nested fields for SecurityList.IngressSecurityRule.TcpOptions.
-type SecurityListIngressSecurityRuleTcpOptionsObservedState struct {
-	// +kubebuilder:validation:Optional
-	DestinationPortRange SecurityListIngressSecurityRuleTcpOptionsDestinationPortRange `json:"destinationPortRange,omitempty"`
-	// +kubebuilder:validation:Optional
-	SourcePortRange SecurityListIngressSecurityRuleTcpOptionsSourcePortRange `json:"sourcePortRange,omitempty"`
-}
-
-// SecurityListIngressSecurityRuleUdpOptionsObservedState defines nested fields for SecurityList.IngressSecurityRule.UdpOptions.
-type SecurityListIngressSecurityRuleUdpOptionsObservedState struct {
-	// +kubebuilder:validation:Optional
-	DestinationPortRange SecurityListIngressSecurityRuleUdpOptionsDestinationPortRange `json:"destinationPortRange,omitempty"`
-	// +kubebuilder:validation:Optional
-	SourcePortRange SecurityListIngressSecurityRuleUdpOptionsSourcePortRange `json:"sourcePortRange,omitempty"`
-}
-
-// SecurityListIngressSecurityRuleObservedState defines nested fields for SecurityList.IngressSecurityRule.
-type SecurityListIngressSecurityRuleObservedState struct {
-	// The transport protocol. Specify either `all` or an IPv4 protocol number as
-	// defined in
-	// Protocol Numbers (http://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml).
-	// Options are supported only for ICMP ("1"), TCP ("6"), UDP ("17"), and ICMPv6 ("58").
-	// +kubebuilder:validation:Required
-	Protocol string `json:"protocol"`
-	// Conceptually, this is the range of IP addresses that a packet coming into the instance
-	// can come from.
-	// Allowed values:
-	//   * IP address range in CIDR notation. For example: `192.168.1.0/24` or `2001:0db8:0123:45::/56`.
-	//     IPv6 addressing is supported for all commercial and government regions. See
-	//     IPv6 Addresses (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/ipv6.htm).
-	//   * The `cidrBlock` value for a Service, if you're
-	//     setting up a security list rule for traffic coming from a particular `Service` through
-	//     a service gateway. For example: `oci-phx-objectstorage`.
-	// +kubebuilder:validation:Required
-	Source string `json:"source"`
-	// +kubebuilder:validation:Optional
-	IcmpOptions SecurityListIngressSecurityRuleIcmpOptions `json:"icmpOptions,omitempty"`
-	// A stateless rule allows traffic in one direction. Remember to add a corresponding
-	// stateless rule in the other direction if you need to support bidirectional traffic. For
-	// example, if ingress traffic allows TCP destination port 80, there should be an egress
-	// rule to allow TCP source port 80. Defaults to false, which means the rule is stateful
-	// and a corresponding rule is not necessary for bidirectional traffic.
-	// +kubebuilder:validation:Optional
-	IsStateless bool `json:"isStateless,omitempty"`
-	// Type of source for the rule. The default is `CIDR_BLOCK`.
-	//   * `CIDR_BLOCK`: If the rule's `source` is an IP address range in CIDR notation.
-	//   * `SERVICE_CIDR_BLOCK`: If the rule's `source` is the `cidrBlock` value for a
-	//     Service (the rule is for traffic coming from a
-	//     particular `Service` through a service gateway).
-	// +kubebuilder:validation:Optional
-	SourceType string `json:"sourceType,omitempty"`
-	// +kubebuilder:validation:Optional
-	TcpOptions SecurityListIngressSecurityRuleTcpOptionsObservedState `json:"tcpOptions,omitempty"`
-	// +kubebuilder:validation:Optional
-	UdpOptions SecurityListIngressSecurityRuleUdpOptionsObservedState `json:"udpOptions,omitempty"`
-	// An optional description of your choice for the rule.
-	// +kubebuilder:validation:Optional
-	Description string `json:"description,omitempty"`
-}
-
 // SecurityListStatus defines the observed state of SecurityList.
 type SecurityListStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
@@ -401,11 +280,11 @@ type SecurityListStatus struct {
 	// Avoid entering confidential information.
 	DisplayName string `json:"displayName,omitempty"`
 	// Rules for allowing egress IP packets.
-	EgressSecurityRules []SecurityListEgressSecurityRuleObservedState `json:"egressSecurityRules,omitempty"`
+	EgressSecurityRules []SecurityListEgressSecurityRule `json:"egressSecurityRules,omitempty"`
 	// The security list's Oracle Cloud ID (OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)).
 	Id string `json:"id,omitempty"`
 	// Rules for allowing ingress IP packets.
-	IngressSecurityRules []SecurityListIngressSecurityRuleObservedState `json:"ingressSecurityRules,omitempty"`
+	IngressSecurityRules []SecurityListIngressSecurityRule `json:"ingressSecurityRules,omitempty"`
 	// The security list's current state.
 	LifecycleState string `json:"lifecycleState,omitempty"`
 	// The date and time the security list was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).

@@ -35,12 +35,12 @@ type DrgRouteDistributionStatementMatchCriteria struct {
 	// +kubebuilder:validation:Optional
 	MatchType string `json:"matchType,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the DRG attachment.
-	// +kubebuilder:validation:Required
-	DrgAttachmentId string `json:"drgAttachmentId"`
+	// +kubebuilder:validation:Optional
+	DrgAttachmentId string `json:"drgAttachmentId,omitempty"`
 	// The type of the network resource to be included in this match. A match for a network type implies that all
 	// DRG attachments of that type insert routes into the table.
-	// +kubebuilder:validation:Required
-	AttachmentType string `json:"attachmentType"`
+	// +kubebuilder:validation:Optional
+	AttachmentType string `json:"attachmentType,omitempty"`
 }
 
 // DrgRouteDistributionStatementStatementMatchCriteria defines nested fields for DrgRouteDistributionStatement.Statement.MatchCriteria.
@@ -50,12 +50,12 @@ type DrgRouteDistributionStatementStatementMatchCriteria struct {
 	// +kubebuilder:validation:Optional
 	MatchType string `json:"matchType,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the DRG attachment.
-	// +kubebuilder:validation:Required
-	DrgAttachmentId string `json:"drgAttachmentId"`
+	// +kubebuilder:validation:Optional
+	DrgAttachmentId string `json:"drgAttachmentId,omitempty"`
 	// The type of the network resource to be included in this match. A match for a network type implies that all
 	// DRG attachments of that type insert routes into the table.
-	// +kubebuilder:validation:Required
-	AttachmentType string `json:"attachmentType"`
+	// +kubebuilder:validation:Optional
+	AttachmentType string `json:"attachmentType,omitempty"`
 }
 
 // DrgRouteDistributionStatementStatement defines nested fields for DrgRouteDistributionStatement.Statement.
@@ -71,27 +71,12 @@ type DrgRouteDistributionStatementStatement struct {
 	Priority int `json:"priority,omitempty"`
 }
 
-// DrgRouteDistributionStatementMatchCriteriaObservedState defines nested fields for DrgRouteDistributionStatement.MatchCriteria.
-type DrgRouteDistributionStatementMatchCriteriaObservedState struct {
-	// +kubebuilder:validation:Optional
-	JsonData string `json:"jsonData,omitempty"`
-	// +kubebuilder:validation:Optional
-	MatchType string `json:"matchType,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the DRG attachment.
-	// +kubebuilder:validation:Required
-	DrgAttachmentId string `json:"drgAttachmentId"`
-	// The type of the network resource to be included in this match. A match for a network type implies that all
-	// DRG attachments of that type insert routes into the table.
-	// +kubebuilder:validation:Required
-	AttachmentType string `json:"attachmentType"`
-}
-
 // DrgRouteDistributionStatementStatus defines the observed state of DrgRouteDistributionStatement.
 type DrgRouteDistributionStatementStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
 	// The action is applied only if all of the match criteria is met.
 	// If there are no match criteria in a statement, any input is considered a match and the action is applied.
-	MatchCriteria []DrgRouteDistributionStatementMatchCriteriaObservedState `json:"matchCriteria,omitempty"`
+	MatchCriteria []DrgRouteDistributionStatementMatchCriteria `json:"matchCriteria,omitempty"`
 	// `ACCEPT` indicates the route should be imported or exported as-is.
 	Action string `json:"action,omitempty"`
 	// This field specifies the priority of each statement in a route distribution.

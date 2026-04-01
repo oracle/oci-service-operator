@@ -70,17 +70,17 @@ type ImageSourceDetails struct {
 	// +kubebuilder:validation:Optional
 	SourceType string `json:"sourceType,omitempty"`
 	// The Object Storage bucket for the image.
-	// +kubebuilder:validation:Required
-	BucketName string `json:"bucketName"`
+	// +kubebuilder:validation:Optional
+	BucketName string `json:"bucketName,omitempty"`
 	// The Object Storage namespace for the image.
-	// +kubebuilder:validation:Required
-	NamespaceName string `json:"namespaceName"`
+	// +kubebuilder:validation:Optional
+	NamespaceName string `json:"namespaceName,omitempty"`
 	// The Object Storage name for the image.
-	// +kubebuilder:validation:Required
-	ObjectName string `json:"objectName"`
+	// +kubebuilder:validation:Optional
+	ObjectName string `json:"objectName,omitempty"`
 	// The Object Storage URL for the image.
-	// +kubebuilder:validation:Required
-	SourceUri string `json:"sourceUri"`
+	// +kubebuilder:validation:Optional
+	SourceUri string `json:"sourceUri,omitempty"`
 }
 
 // ImageLaunchOptions defines nested fields for Image.LaunchOptions.

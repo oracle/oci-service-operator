@@ -211,7 +211,7 @@ spec:
                   Example: `2016-08-25T21:10:29.600Z`
                 type: string
               validator:
-                description: TagValidatorObservedState defines nested fields for Tag.Validator.
+                description: TagValidator defines nested fields for Tag.Validator.
                 properties:
                   jsonData:
                     type: string

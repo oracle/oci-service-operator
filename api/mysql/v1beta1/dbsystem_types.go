@@ -60,10 +60,14 @@ type DbSystemSpec struct {
 	// The specific MySQL version identifier.
 	// +kubebuilder:validation:Optional
 	MysqlVersion string `json:"mysqlVersion,omitempty"`
-	// The username for the administrative user sourced from a Kubernetes Secret.
-	AdminUsername *shared.UsernameSource `json:"adminUsername,omitempty"`
-	// The password for the administrative user sourced from a Kubernetes Secret.
-	AdminPassword *shared.PasswordSource `json:"adminPassword,omitempty"`
+	// The username for the administrative user sourced from a Kubernetes Secret in the same namespace.
+	// The referenced Secret must contain a `username` key.
+	// +kubebuilder:validation:Optional
+	AdminUsername shared.UsernameSource `json:"adminUsername,omitempty,omitzero"`
+	// The password for the administrative user sourced from a Kubernetes Secret in the same namespace.
+	// The referenced Secret must contain a `password` key.
+	// +kubebuilder:validation:Optional
+	AdminPassword shared.PasswordSource `json:"adminPassword,omitempty,omitzero"`
 	// Initial size of the data volume in GBs that will be created and attached.
 	// Keep in mind that this only specifies the size of the database data volume,
 	// the log volume for the database will be scaled appropriately with its shape.
@@ -213,33 +217,6 @@ type DbSystemSecureConnections struct {
 	// The OCID of the certificate to use.
 	// +kubebuilder:validation:Optional
 	CertificateId string `json:"certificateId,omitempty"`
-}
-
-// DbSystemBackupPolicyObservedState defines nested fields for DbSystem.BackupPolicy.
-type DbSystemBackupPolicyObservedState struct {
-	// Specifies if automatic backups are enabled.
-	// +kubebuilder:validation:Optional
-	IsEnabled bool `json:"isEnabled,omitempty"`
-	// The start of a 30-minute window of time in which daily, automated backups occur.
-	// This should be in the format of the "Time" portion of an RFC3339-formatted timestamp. Any second or sub-second time data will be truncated to zero.
-	// At some point in the window, the system may incur a brief service disruption as the backup is performed.
-	// +kubebuilder:validation:Optional
-	WindowStartTime string `json:"windowStartTime,omitempty"`
-	// Number of days to retain an automatic backup.
-	// +kubebuilder:validation:Optional
-	RetentionInDays int `json:"retentionInDays,omitempty"`
-	// Simple key-value pair applied without any predefined name, type or scope. Exists for cross-compatibility only.
-	// Tags defined here will be copied verbatim as tags on the Backup resource created by this BackupPolicy.
-	// Example: `{"bar-key": "value"}`
-	// +kubebuilder:validation:Optional
-	FreeformTags map[string]string `json:"freeformTags,omitempty"`
-	// Usage of predefined tag keys. These predefined keys are scoped to namespaces.
-	// Tags defined here will be copied verbatim as tags on the Backup resource created by this BackupPolicy.
-	// Example: `{"foo-namespace": {"bar-key": "value"}}`
-	// +kubebuilder:validation:Optional
-	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
-	// +kubebuilder:validation:Optional
-	PitrPolicy DbSystemBackupPolicyPitrPolicy `json:"pitrPolicy,omitempty"`
 }
 
 // DbSystemCurrentPlacement defines nested fields for DbSystem.CurrentPlacement.
@@ -474,9 +451,9 @@ type DbSystemStatus struct {
 	// and memory for VM shapes; CPU cores, memory and storage for non-VM
 	// (or bare metal) shapes. To get a list of shapes, use (the
 	// ListShapes operation.
-	ShapeName    string                            `json:"shapeName,omitempty"`
-	BackupPolicy DbSystemBackupPolicyObservedState `json:"backupPolicy,omitempty"`
-	Source       DbSystemSourceObservedState       `json:"source,omitempty"`
+	ShapeName    string                      `json:"shapeName,omitempty"`
+	BackupPolicy DbSystemBackupPolicy        `json:"backupPolicy,omitempty"`
+	Source       DbSystemSourceObservedState `json:"source,omitempty"`
 	// The OCID of the Configuration to be used for Instances in this DB System.
 	ConfigurationId string `json:"configurationId,omitempty"`
 	// The hostname for the primary endpoint of the DB System. Used for DNS.
@@ -513,9 +490,9 @@ type DbSystemStatus struct {
 	DatabaseManagement string                    `json:"databaseManagement,omitempty"`
 	SecureConnections  DbSystemSecureConnections `json:"secureConnections,omitempty"`
 	// The last applied secret reference for the administrative username.
-	AdminUsername *shared.UsernameSource `json:"adminUsername,omitempty"`
+	AdminUsername shared.UsernameSource `json:"adminUsername,omitempty,omitzero"`
 	// The last applied secret reference for the administrative password.
-	AdminPassword *shared.PasswordSource `json:"adminPassword,omitempty"`
+	AdminPassword shared.PasswordSource `json:"adminPassword,omitempty,omitzero"`
 }
 
 // +kubebuilder:object:root=true

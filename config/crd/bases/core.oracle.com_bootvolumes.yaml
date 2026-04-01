@@ -73,8 +73,6 @@ spec:
                         temporarily based on performance monitoring.
                       format: int64
                       type: integer
-                  required:
-                  - maxVpusPerGB
                   type: object
                 type: array
               availabilityDomain:
@@ -158,8 +156,6 @@ spec:
                     type: string
                   type:
                     type: string
-                required:
-                - id
                 type: object
               vpusPerGB:
                 description: |-
@@ -188,8 +184,8 @@ spec:
               autotunePolicies:
                 description: The list of autotune policies enabled for this volume.
                 items:
-                  description: BootVolumeAutotunePolicyObservedState defines nested
-                    fields for BootVolume.AutotunePolicy.
+                  description: BootVolumeAutotunePolicy defines nested fields for
+                    BootVolume.AutotunePolicy.
                   properties:
                     autotuneType:
                       type: string
@@ -201,8 +197,6 @@ spec:
                         temporarily based on performance monitoring.
                       format: int64
                       type: integer
-                  required:
-                  - maxVpusPerGB
                   type: object
                 type: array
               availabilityDomain:
@@ -289,8 +283,7 @@ spec:
                 format: int64
                 type: integer
               sourceDetails:
-                description: BootVolumeSourceDetailsObservedState defines nested fields
-                  for BootVolume.SourceDetails.
+                description: BootVolumeSourceDetails defines nested fields for BootVolume.SourceDetails.
                 properties:
                   id:
                     description: The OCID of the boot volume backup.
@@ -299,8 +292,6 @@ spec:
                     type: string
                   type:
                     type: string
-                required:
-                - id
                 type: object
               status:
                 properties:

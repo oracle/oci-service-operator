@@ -87,8 +87,6 @@ spec:
                             type: string
                           name:
                             type: string
-                        required:
-                        - backendSetName
                         type: object
                       type: array
                     condition:
@@ -143,8 +141,6 @@ spec:
                             type: string
                           name:
                             type: string
-                        required:
-                        - backendSetName
                         type: object
                       type: array
                     condition:

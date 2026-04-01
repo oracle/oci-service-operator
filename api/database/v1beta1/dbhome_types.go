@@ -52,11 +52,11 @@ type DbHomeSpec struct {
 	// +kubebuilder:validation:Optional
 	Source string `json:"source,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the DB system.
-	// +kubebuilder:validation:Required
-	DbSystemId string `json:"dbSystemId"`
+	// +kubebuilder:validation:Optional
+	DbSystemId string `json:"dbSystemId,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VM cluster.
-	// +kubebuilder:validation:Required
-	VmClusterId string `json:"vmClusterId"`
+	// +kubebuilder:validation:Optional
+	VmClusterId string `json:"vmClusterId,omitempty"`
 }
 
 // DbHomeDatabaseDbBackupConfigBackupDestinationDetail defines nested fields for DbHome.Database.DbBackupConfig.BackupDestinationDetail.
@@ -169,6 +169,19 @@ type DbHomeDatabase struct {
 	// Specifies a prefix for the `Oracle SID` of the database to be created.
 	// +kubebuilder:validation:Optional
 	SidPrefix string `json:"sidPrefix,omitempty"`
+}
+
+// DbHomeDbVersion defines nested fields for DbHome.DbVersion.
+type DbHomeDbVersion struct {
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the patch.
+	// +kubebuilder:validation:Optional
+	PatchId string `json:"patchId,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the database software image.
+	// +kubebuilder:validation:Optional
+	DatabaseSoftwareImageId string `json:"databaseSoftwareImageId,omitempty"`
+	// The action to perform on the patch.
+	// +kubebuilder:validation:Optional
+	Action string `json:"action,omitempty"`
 }
 
 // DbHomeStatus defines the observed state of DbHome.

@@ -113,9 +113,6 @@ spec:
                   sourcePluggableDatabaseId:
                     description: The OCID of the Source Pluggable Database.
                     type: string
-                required:
-                - sourceContainerDatabaseAdminPassword
-                - sourcePluggableDatabaseId
                 type: object
               pdbName:
                 description: The name for the pluggable database (PDB). The name is

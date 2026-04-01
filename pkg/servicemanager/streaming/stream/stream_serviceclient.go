@@ -38,35 +38,85 @@ var newStreamServiceClient = func(manager *StreamServiceManager) StreamServiceCl
 		Kind:    "Stream",
 		SDKName: "Stream",
 		Log:     manager.Log,
+		Semantics: &generatedruntime.Semantics{
+			FormalService:     "streaming",
+			FormalSlug:        "stream",
+			StatusProjection:  "manual",
+			SecretSideEffects: "ready-only",
+			FinalizerPolicy:   "none",
+			Lifecycle: generatedruntime.LifecycleSemantics{
+				ProvisioningStates: []string{"CREATING"},
+				UpdatingStates:     []string{"UPDATING"},
+				ActiveStates:       []string{"ACTIVE"},
+			},
+			Delete: generatedruntime.DeleteSemantics{
+				Policy:         "best-effort",
+				PendingStates:  []string{"DELETING"},
+				TerminalStates: []string{"DELETED"},
+			},
+			List: &generatedruntime.ListSemantics{
+				ResponseItemsField: "Items",
+				MatchFields:        []string{"compartmentId", "id", "name", "state", "streamPoolId"},
+			},
+			Mutation: generatedruntime.MutationSemantics{
+				Mutable:       []string{"compartmentId", "definedTags", "freeformTags", "streamPoolId"},
+				ForceNew:      []string{"name", "partitions", "retentionInHours"},
+				ConflictsWith: map[string][]string{"compartmentId": []string{"streamPoolId"}, "streamPoolId": []string{"compartmentId"}},
+			},
+			Hooks: generatedruntime.HookSet{
+				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+				Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForUpdatedState", EntityType: "", Action: ""}},
+				Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+			},
+			CreateFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "read-after-write",
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			},
+			UpdateFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "read-after-write",
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForUpdatedState", EntityType: "", Action: ""}},
+			},
+			DeleteFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "confirm-delete",
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+			},
+			AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{{Phase: "update", MethodName: "ChangeStreamCompartment", RequestTypeName: "streaming.ChangeStreamCompartmentRequest", ResponseTypeName: "streaming.ChangeStreamCompartmentResponse"}},
+			Unsupported:         []generatedruntime.UnsupportedSemantic{{Category: "bind-versus-create", StopCondition: "Formal semantics can branch between create, bind-by-id, and bind-by-name flows without routing through the legacy streams package."}, {Category: "delete-confirmation", StopCondition: "Formal semantics capture or replace the current best-effort delete behavior that treats DELETING as sufficient for finalizer removal."}, {Category: "endpoint-materialization", StopCondition: "Formal semantics model the ACTIVE-only secret write that publishes the message endpoint and its delete-time cleanup."}, {Category: "legacy-adapter", StopCondition: "stream_generated_client_adapter.go is removable because the formal runtime covers the current streams.StreamServiceManager behavior."}, {Category: "list-lookup", StopCondition: "Formal semantics encode the current name plus optional pool or compartment filters and the lifecycle-sensitive matching used for create, update, and delete."}, {Category: "mutation-policy", StopCondition: "Formal semantics distinguish mutable fields from rejected changes, including the current partition and retention mismatch failures."}, {Category: "status-projection", StopCondition: "Formal semantics either describe the handwritten OsokStatus projection or preserve it as an explicit legacy-only contract."}},
+		},
 		Create: &generatedruntime.Operation{
 			NewRequest: func() any { return &streamingsdk.CreateStreamRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.CreateStream(ctx, *request.(*streamingsdk.CreateStreamRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "CreateStreamDetails", RequestName: "CreateStreamDetails", Contribution: "body", PreferResourceID: false}},
 		},
 		Get: &generatedruntime.Operation{
 			NewRequest: func() any { return &streamingsdk.GetStreamRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.GetStream(ctx, *request.(*streamingsdk.GetStreamRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "StreamId", RequestName: "streamId", Contribution: "path", PreferResourceID: true}},
 		},
 		List: &generatedruntime.Operation{
 			NewRequest: func() any { return &streamingsdk.ListStreamsRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.ListStreams(ctx, *request.(*streamingsdk.ListStreamsRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "StreamPoolId", RequestName: "streamPoolId", Contribution: "query", PreferResourceID: false}, {FieldName: "Id", RequestName: "id", Contribution: "query", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}},
 		},
 		Update: &generatedruntime.Operation{
 			NewRequest: func() any { return &streamingsdk.UpdateStreamRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.UpdateStream(ctx, *request.(*streamingsdk.UpdateStreamRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "StreamId", RequestName: "streamId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateStreamDetails", RequestName: "UpdateStreamDetails", Contribution: "body", PreferResourceID: false}},
 		},
 		Delete: &generatedruntime.Operation{
 			NewRequest: func() any { return &streamingsdk.DeleteStreamRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.DeleteStream(ctx, *request.(*streamingsdk.DeleteStreamRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "StreamId", RequestName: "streamId", Contribution: "path", PreferResourceID: true}},
 		},
 	}
 	if err != nil {

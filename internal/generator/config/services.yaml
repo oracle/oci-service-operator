@@ -193,6 +193,15 @@ services:
             extraRBACMarkers:
               - groups="",resources=secrets,verbs=get;list;watch
               - groups="",resources=events,verbs=create;patch
+          specFields:
+            - name: AdminPassword
+              type: shared.PasswordSource
+              tag: 'json:"adminPassword,omitempty,omitzero"'
+              comments:
+                - The administrative password sourced from a Kubernetes Secret in the same namespace.
+                - The referenced Secret must contain a `password` key. Use `secretId` and `secretVersionNumber` instead to reference an OCI Vault secret.
+              markers:
+                - +kubebuilder:validation:Optional
 
   - service: dns
     sdkPackage: github.com/oracle/oci-go-sdk/v65/dns
@@ -444,6 +453,50 @@ services:
             maxConcurrentReconciles: 3
             extraRBACMarkers:
               - groups="",resources=secrets,verbs=get;list;watch
+          specFields:
+            - name: AdminUsername
+              type: shared.UsernameSource
+              tag: 'json:"adminUsername,omitempty,omitzero"'
+              comments:
+                - The username for the administrative user sourced from a Kubernetes Secret in the same namespace.
+                - The referenced Secret must contain a `username` key.
+              markers:
+                - +kubebuilder:validation:Optional
+            - name: AdminPassword
+              type: shared.PasswordSource
+              tag: 'json:"adminPassword,omitempty,omitzero"'
+              comments:
+                - The password for the administrative user sourced from a Kubernetes Secret in the same namespace.
+                - The referenced Secret must contain a `password` key.
+              markers:
+                - +kubebuilder:validation:Optional
+          statusFields:
+            - name: AdminUsername
+              type: shared.UsernameSource
+              tag: 'json:"adminUsername,omitempty,omitzero"'
+              comments:
+                - The last applied secret reference for the administrative username.
+            - name: AdminPassword
+              type: shared.PasswordSource
+              tag: 'json:"adminPassword,omitempty,omitzero"'
+              comments:
+                - The last applied secret reference for the administrative password.
+          sample:
+            body: |-
+              apiVersion: mysql.oracle.com/v1beta1
+              kind: DbSystem
+              metadata:
+                name: dbsystem-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                shapeName: MySQL.VM.Standard.E3.1.8GB
+                subnetId: ocid1.subnet.oc1..exampleuniqueID
+                adminUsername:
+                  secret:
+                    secretName: admin-secret
+                adminPassword:
+                  secret:
+                    secretName: admin-secret
           serviceManager:
             packagePath: mysql/dbsystem
             needsCredentialClient: true
@@ -613,6 +666,10 @@ services:
         strategy: manual
       resources:
         - kind: Stream
+          formalSpec: stream
+          controller:
+            extraRBACMarkers:
+              - groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
           serviceManager:
             packagePath: streaming/stream
         - kind: Cursor

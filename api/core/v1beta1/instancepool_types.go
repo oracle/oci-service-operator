@@ -163,35 +163,6 @@ type InstancePoolLoadBalancer struct {
 	VnicSelection string `json:"vnicSelection"`
 }
 
-// InstancePoolPlacementConfigurationObservedState defines nested fields for InstancePool.PlacementConfiguration.
-type InstancePoolPlacementConfigurationObservedState struct {
-	// The availability domain to place instances.
-	// Example: `Uocm:PHX-AD-1`
-	// +kubebuilder:validation:Required
-	AvailabilityDomain string `json:"availabilityDomain"`
-	// The fault domains to place instances.
-	// If you don't provide any values, the system makes a best effort to distribute
-	// instances across all fault domains based on capacity.
-	// To distribute the instances evenly across selected fault domains, provide a
-	// set of fault domains. For example, you might want instances to be evenly
-	// distributed if your applications require high availability.
-	// To get a list of fault domains, use the
-	// ListFaultDomains operation
-	// in the Identity and Access Management Service API.
-	// Example: `[FAULT-DOMAIN-1, FAULT-DOMAIN-2, FAULT-DOMAIN-3]`
-	// +kubebuilder:validation:Optional
-	FaultDomains []string `json:"faultDomains,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the primary subnet in which to place instances. This field is deprecated.
-	// Use `primaryVnicSubnets` instead to set VNIC data for instances in the pool.
-	// +kubebuilder:validation:Optional
-	PrimarySubnetId string `json:"primarySubnetId,omitempty"`
-	// +kubebuilder:validation:Optional
-	PrimaryVnicSubnets InstancePoolPlacementConfigurationPrimaryVnicSubnets `json:"primaryVnicSubnets,omitempty"`
-	// The set of secondary VNIC data for instances in the pool.
-	// +kubebuilder:validation:Optional
-	SecondaryVnicSubnets []InstancePoolPlacementConfigurationSecondaryVnicSubnet `json:"secondaryVnicSubnets,omitempty"`
-}
-
 // InstancePoolStatus defines the observed state of InstancePool.
 type InstancePoolStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
@@ -206,7 +177,7 @@ type InstancePoolStatus struct {
 	// The current state of the instance pool.
 	LifecycleState string `json:"lifecycleState,omitempty"`
 	// The placement configurations for the instance pool.
-	PlacementConfigurations []InstancePoolPlacementConfigurationObservedState `json:"placementConfigurations,omitempty"`
+	PlacementConfigurations []InstancePoolPlacementConfiguration `json:"placementConfigurations,omitempty"`
 	// The number of instances that should be in the instance pool.
 	Size int `json:"size,omitempty"`
 	// The date and time the instance pool was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).

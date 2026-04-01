@@ -324,14 +324,14 @@ spec:
             properties:
               backendSets:
                 additionalProperties:
-                  description: NetworkLoadBalancerBackendSetsObservedState defines
-                    nested fields for NetworkLoadBalancer.BackendSets.
+                  description: NetworkLoadBalancerBackendSets defines nested fields
+                    for NetworkLoadBalancer.BackendSets.
                   properties:
                     backends:
                       description: An array of backends.
                       items:
-                        description: NetworkLoadBalancerBackendSetsBackendObservedState
-                          defines nested fields for NetworkLoadBalancer.BackendSets.Backend.
+                        description: NetworkLoadBalancerBackendSetsBackend defines
+                          nested fields for NetworkLoadBalancer.BackendSets.Backend.
                         properties:
                           ipAddress:
                             description: |-

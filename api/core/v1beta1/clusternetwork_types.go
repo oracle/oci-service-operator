@@ -155,24 +155,97 @@ type ClusterNetworkClusterConfiguration struct {
 	NetworkBlockIds []string `json:"networkBlockIds,omitempty"`
 }
 
-// ClusterNetworkPlacementConfigurationObservedState defines nested fields for ClusterNetwork.PlacementConfiguration.
-type ClusterNetworkPlacementConfigurationObservedState struct {
+// ClusterNetworkInstancePoolPlacementConfigurationPrimaryVnicSubnetsIpv6AddressIpv6SubnetCidrPairDetail defines nested fields for ClusterNetwork.InstancePool.PlacementConfiguration.PrimaryVnicSubnets.Ipv6AddressIpv6SubnetCidrPairDetail.
+type ClusterNetworkInstancePoolPlacementConfigurationPrimaryVnicSubnetsIpv6AddressIpv6SubnetCidrPairDetail struct {
+	// Optional. Used to disambiguate which subnet prefix should be used to create an IPv6 allocation.
+	Ipv6SubnetCidr string `json:"ipv6SubnetCidr,omitempty"`
+}
+
+// ClusterNetworkInstancePoolPlacementConfigurationPrimaryVnicSubnets defines nested fields for ClusterNetwork.InstancePool.PlacementConfiguration.PrimaryVnicSubnets.
+type ClusterNetworkInstancePoolPlacementConfigurationPrimaryVnicSubnets struct {
+	// The subnet OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) for the secondary VNIC.
+	SubnetId string `json:"subnetId,omitempty"`
+	// Whether to allocate an IPv6 address at instance and VNIC creation from an IPv6 enabled
+	// subnet. Default: False. When provided you may optionally provide an IPv6 prefix
+	// (`ipv6SubnetCidr`) of your choice to assign the IPv6 address from. If `ipv6SubnetCidr`
+	// is not provided then an IPv6 prefix is chosen
+	// for you.
+	IsAssignIpv6Ip bool `json:"isAssignIpv6Ip,omitempty"`
+	// A list of IPv6 prefix ranges from which the VNIC should be assigned an IPv6 address.
+	// You can provide only the prefix ranges and OCI will select an available
+	// address from the range. You can optionally choose to leave the prefix range empty
+	// and instead provide the specific IPv6 address that should be used from within that range.
+	Ipv6AddressIpv6SubnetCidrPairDetails []ClusterNetworkInstancePoolPlacementConfigurationPrimaryVnicSubnetsIpv6AddressIpv6SubnetCidrPairDetail `json:"ipv6AddressIpv6SubnetCidrPairDetails,omitempty"`
+}
+
+// ClusterNetworkInstancePoolPlacementConfigurationSecondaryVnicSubnetIpv6AddressIpv6SubnetCidrPairDetail defines nested fields for ClusterNetwork.InstancePool.PlacementConfiguration.SecondaryVnicSubnet.Ipv6AddressIpv6SubnetCidrPairDetail.
+type ClusterNetworkInstancePoolPlacementConfigurationSecondaryVnicSubnetIpv6AddressIpv6SubnetCidrPairDetail struct {
+	// Optional. Used to disambiguate which subnet prefix should be used to create an IPv6 allocation.
+	Ipv6SubnetCidr string `json:"ipv6SubnetCidr,omitempty"`
+}
+
+// ClusterNetworkInstancePoolPlacementConfigurationSecondaryVnicSubnet defines nested fields for ClusterNetwork.InstancePool.PlacementConfiguration.SecondaryVnicSubnet.
+type ClusterNetworkInstancePoolPlacementConfigurationSecondaryVnicSubnet struct {
+	// The subnet OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) for the secondary VNIC.
+	SubnetId string `json:"subnetId,omitempty"`
+	// Whether to allocate an IPv6 address at instance and VNIC creation from an IPv6 enabled
+	// subnet. Default: False. When provided you may optionally provide an IPv6 prefix
+	// (`ipv6SubnetCidr`) of your choice to assign the IPv6 address from. If `ipv6SubnetCidr`
+	// is not provided then an IPv6 prefix is chosen
+	// for you.
+	IsAssignIpv6Ip bool `json:"isAssignIpv6Ip,omitempty"`
+	// A list of IPv6 prefix ranges from which the VNIC should be assigned an IPv6 address.
+	// You can provide only the prefix ranges and OCI will select an available
+	// address from the range. You can optionally choose to leave the prefix range empty
+	// and instead provide the specific IPv6 address that should be used from within that range.
+	Ipv6AddressIpv6SubnetCidrPairDetails []ClusterNetworkInstancePoolPlacementConfigurationSecondaryVnicSubnetIpv6AddressIpv6SubnetCidrPairDetail `json:"ipv6AddressIpv6SubnetCidrPairDetails,omitempty"`
+	// The display name of the VNIC. This is also used to match against the instance configuration defined
+	// secondary VNIC.
+	DisplayName string `json:"displayName,omitempty"`
+}
+
+// ClusterNetworkInstancePoolPlacementConfiguration defines nested fields for ClusterNetwork.InstancePool.PlacementConfiguration.
+type ClusterNetworkInstancePoolPlacementConfiguration struct {
 	// The availability domain to place instances.
 	// Example: `Uocm:PHX-AD-1`
-	// +kubebuilder:validation:Required
-	AvailabilityDomain string `json:"availabilityDomain"`
-	// The placement constraint when reserving hosts.
-	// +kubebuilder:validation:Optional
-	PlacementConstraint string `json:"placementConstraint,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the primary subnet to place instances. This field is deprecated.
+	AvailabilityDomain string `json:"availabilityDomain,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the primary subnet in which to place instances. This field is deprecated.
 	// Use `primaryVnicSubnets` instead to set VNIC data for instances in the pool.
-	// +kubebuilder:validation:Optional
 	PrimarySubnetId string `json:"primarySubnetId,omitempty"`
-	// +kubebuilder:validation:Optional
-	PrimaryVnicSubnets ClusterNetworkPlacementConfigurationPrimaryVnicSubnets `json:"primaryVnicSubnets,omitempty"`
+	// The fault domains to place instances.
+	// If you don't provide any values, the system makes a best effort to distribute
+	// instances across all fault domains based on capacity.
+	// To distribute the instances evenly across selected fault domains, provide a
+	// set of fault domains. For example, you might want instances to be evenly
+	// distributed if your applications require high availability.
+	// To get a list of fault domains, use the
+	// ListFaultDomains operation
+	// in the Identity and Access Management Service API.
+	// Example: `[FAULT-DOMAIN-1, FAULT-DOMAIN-2, FAULT-DOMAIN-3]`
+	FaultDomains       []string                                                           `json:"faultDomains,omitempty"`
+	PrimaryVnicSubnets ClusterNetworkInstancePoolPlacementConfigurationPrimaryVnicSubnets `json:"primaryVnicSubnets,omitempty"`
 	// The set of secondary VNIC data for instances in the pool.
-	// +kubebuilder:validation:Optional
-	SecondaryVnicSubnets []ClusterNetworkPlacementConfigurationSecondaryVnicSubnet `json:"secondaryVnicSubnets,omitempty"`
+	SecondaryVnicSubnets []ClusterNetworkInstancePoolPlacementConfigurationSecondaryVnicSubnet `json:"secondaryVnicSubnets,omitempty"`
+}
+
+// ClusterNetworkInstancePoolLoadBalancer defines nested fields for ClusterNetwork.InstancePool.LoadBalancer.
+type ClusterNetworkInstancePoolLoadBalancer struct {
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the load balancer attachment.
+	Id string `json:"id,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the instance pool of the load balancer attachment.
+	InstancePoolId string `json:"instancePoolId,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the load balancer attached to the instance pool.
+	LoadBalancerId string `json:"loadBalancerId,omitempty"`
+	// The name of the backend set on the load balancer.
+	BackendSetName string `json:"backendSetName,omitempty"`
+	// The port value used for the backends.
+	Port int `json:"port,omitempty"`
+	// Indicates which VNIC on each instance in the instance pool should be used to associate with the load balancer.
+	// Possible values are "PrimaryVnic" or the displayName of one of the secondary VNICs on the instance configuration
+	// that is associated with the instance pool.
+	VnicSelection string `json:"vnicSelection,omitempty"`
+	// The status of the interaction between the instance pool and the load balancer.
+	LifecycleState string `json:"lifecycleState,omitempty"`
 }
 
 // ClusterNetworkStatus defines the observed state of ClusterNetwork.
@@ -207,8 +280,8 @@ type ClusterNetworkStatus struct {
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// The instance pools in the cluster network.
 	// Each cluster network can have one instance pool.
-	InstancePools          []ClusterNetworkInstancePool                      `json:"instancePools,omitempty"`
-	PlacementConfiguration ClusterNetworkPlacementConfigurationObservedState `json:"placementConfiguration,omitempty"`
+	InstancePools          []ClusterNetworkInstancePool         `json:"instancePools,omitempty"`
+	PlacementConfiguration ClusterNetworkPlacementConfiguration `json:"placementConfiguration,omitempty"`
 }
 
 // +kubebuilder:object:root=true

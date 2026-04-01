@@ -189,12 +189,11 @@ func TestGetCrdStatus_WrongType(t *testing.T) {
 	assert.Contains(t, err.Error(), "failed to convert the type assertion for Stream")
 }
 
-func TestDelete_NoOcid(t *testing.T) {
+func TestDelete_MissingIdentifiers(t *testing.T) {
 	credClient := &fakeCredentialClient{}
 	mgr := makeTestManager(credClient, nil)
 
 	stream := &streamingv1beta1.Stream{}
-	stream.Status.OsokStatus.Ocid = "ocid1.stream.oc1..xxx"
 
 	done, err := mgr.Delete(context.Background(), stream)
 	assert.NoError(t, err)
@@ -223,7 +222,7 @@ func TestDelete_DeleteStreamFails(t *testing.T) {
 	stream := &streamingv1beta1.Stream{}
 	stream.Name = "test-stream"
 	stream.Namespace = "default"
-	stream.Spec.StreamId = "ocid1.stream.oc1..xxx"
+	stream.Status.OsokStatus.Ocid = "ocid1.stream.oc1..xxx"
 
 	done, err := mgr.Delete(context.Background(), stream)
 	assert.NoError(t, err)
@@ -347,7 +346,7 @@ func TestDelete_StreamDeleted(t *testing.T) {
 	stream := &streamingv1beta1.Stream{}
 	stream.Name = "test-stream"
 	stream.Namespace = "default"
-	stream.Spec.StreamId = shared.OCID(streamID)
+	stream.Status.OsokStatus.Ocid = shared.OCID(streamID)
 
 	done, err := mgr.Delete(context.Background(), stream)
 	assert.NoError(t, err)
@@ -355,7 +354,7 @@ func TestDelete_StreamDeleted(t *testing.T) {
 	assert.True(t, credClient.deleteCalled)
 }
 
-func TestCreateOrUpdate_BindExistingByID(t *testing.T) {
+func TestCreateOrUpdate_BindExistingByStatusOcid(t *testing.T) {
 	credClient := &fakeCredentialClient{}
 	streamID := "ocid1.stream.oc1..xxx"
 	activeStream := makeActiveStream(streamID, "test-stream")
@@ -370,7 +369,7 @@ func TestCreateOrUpdate_BindExistingByID(t *testing.T) {
 	stream := &streamingv1beta1.Stream{}
 	stream.Name = "test-stream"
 	stream.Namespace = "default"
-	stream.Spec.StreamId = shared.OCID(streamID)
+	stream.Status.OsokStatus.Ocid = shared.OCID(streamID)
 
 	resp, err := mgr.CreateOrUpdate(context.Background(), stream, ctrl.Request{})
 	assert.NoError(t, err)
@@ -392,7 +391,7 @@ func TestCreateOrUpdate_GetStreamFails(t *testing.T) {
 	stream := &streamingv1beta1.Stream{}
 	stream.Name = "test-stream"
 	stream.Namespace = "default"
-	stream.Spec.StreamId = shared.OCID(streamID)
+	stream.Status.OsokStatus.Ocid = shared.OCID(streamID)
 
 	resp, err := mgr.CreateOrUpdate(context.Background(), stream, ctrl.Request{})
 	assert.Error(t, err)
@@ -594,7 +593,7 @@ func TestDelete_FailedStreamFound(t *testing.T) {
 	assert.True(t, done)
 }
 
-func TestCreateOrUpdate_UpdateViaFreeFormTags(t *testing.T) {
+func TestCreateOrUpdate_UpdateViaFreeformTags(t *testing.T) {
 	credClient := &fakeCredentialClient{}
 	streamID := "ocid1.stream.oc1..upd"
 	existingStream := makeActiveStream(streamID, "my-stream")
@@ -615,10 +614,10 @@ func TestCreateOrUpdate_UpdateViaFreeFormTags(t *testing.T) {
 	stream := &streamingv1beta1.Stream{}
 	stream.Name = "my-stream"
 	stream.Namespace = "default"
-	stream.Spec.StreamId = shared.OCID(streamID)
+	stream.Status.OsokStatus.Ocid = shared.OCID(streamID)
 	stream.Spec.Partitions = 1
 	stream.Spec.RetentionInHours = 24
-	stream.Spec.FreeFormTags = map[string]string{"env": "prod"}
+	stream.Spec.FreeformTags = map[string]string{"env": "prod"}
 
 	resp, err := mgr.CreateOrUpdate(context.Background(), stream, ctrl.Request{})
 	assert.NoError(t, err)
@@ -646,7 +645,7 @@ func TestCreateOrUpdate_UpdateViaDefinedTags(t *testing.T) {
 	stream := &streamingv1beta1.Stream{}
 	stream.Name = "tag-stream"
 	stream.Namespace = "default"
-	stream.Spec.StreamId = shared.OCID(streamID)
+	stream.Status.OsokStatus.Ocid = shared.OCID(streamID)
 	stream.Spec.Partitions = 1
 	stream.Spec.RetentionInHours = 24
 	stream.Spec.DefinedTags = map[string]shared.MapValue{
@@ -671,7 +670,7 @@ func TestUpdateStream_PartitionsMismatch(t *testing.T) {
 	mgr := makeTestManager(&fakeCredentialClient{}, mockClient)
 
 	stream := &streamingv1beta1.Stream{}
-	stream.Spec.StreamId = shared.OCID(streamID)
+	stream.Status.OsokStatus.Ocid = shared.OCID(streamID)
 	stream.Spec.Partitions = 3
 
 	err := mgr.UpdateStream(context.Background(), stream)
@@ -691,7 +690,7 @@ func TestUpdateStream_RetentionMismatch(t *testing.T) {
 	mgr := makeTestManager(&fakeCredentialClient{}, mockClient)
 
 	stream := &streamingv1beta1.Stream{}
-	stream.Spec.StreamId = shared.OCID(streamID)
+	stream.Status.OsokStatus.Ocid = shared.OCID(streamID)
 	stream.Spec.Partitions = 1
 	stream.Spec.RetentionInHours = 12
 
@@ -744,7 +743,7 @@ func TestCreateOrUpdate_FailedLifecycle(t *testing.T) {
 	stream := &streamingv1beta1.Stream{}
 	stream.Name = "failed-stream"
 	stream.Namespace = "default"
-	stream.Spec.StreamId = shared.OCID(streamID)
+	stream.Status.OsokStatus.Ocid = shared.OCID(streamID)
 
 	resp, err := mgr.CreateOrUpdate(context.Background(), stream, ctrl.Request{})
 	assert.NoError(t, err)

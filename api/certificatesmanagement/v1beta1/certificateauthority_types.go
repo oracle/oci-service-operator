@@ -122,16 +122,16 @@ type CertificateAuthorityConfig struct {
 	VersionName string `json:"versionName,omitempty"`
 	// +kubebuilder:validation:Optional
 	ConfigType string `json:"configType,omitempty"`
-	// +kubebuilder:validation:Required
-	Subject CertificateAuthorityConfigSubject `json:"subject"`
+	// +kubebuilder:validation:Optional
+	Subject CertificateAuthorityConfigSubject `json:"subject,omitempty"`
 	// +kubebuilder:validation:Optional
 	Validity CertificateAuthorityConfigValidity `json:"validity,omitempty"`
 	// The algorithm used to sign public key certificates that the CA issues.
 	// +kubebuilder:validation:Optional
 	SigningAlgorithm string `json:"signingAlgorithm,omitempty"`
 	// The OCID of the private CA.
-	// +kubebuilder:validation:Required
-	IssuerCertificateAuthorityId string `json:"issuerCertificateAuthorityId"`
+	// +kubebuilder:validation:Optional
+	IssuerCertificateAuthorityId string `json:"issuerCertificateAuthorityId,omitempty"`
 }
 
 // CertificateAuthorityRule defines nested fields for CertificateAuthority.CertificateAuthorityRule.
@@ -165,31 +165,6 @@ type CertificateAuthorityCertificateRevocationListDetailsObjectStorageConfig str
 
 // CertificateAuthorityCertificateRevocationListDetails defines nested fields for CertificateAuthority.CertificateRevocationListDetails.
 type CertificateAuthorityCertificateRevocationListDetails struct {
-	// +kubebuilder:validation:Required
-	ObjectStorageConfig CertificateAuthorityCertificateRevocationListDetailsObjectStorageConfig `json:"objectStorageConfig"`
-	// Optional CRL access points, expressed using a format where the version number of the issuing CA is inserted wherever you include a pair of curly braces. This versioning scheme helps avoid collisions when new CA versions are created. For example, myCrlFileIssuedFromCAVersion{}.crl becomes myCrlFileIssuedFromCAVersion2.crl for CA version 2.
-	// +kubebuilder:validation:Optional
-	CustomFormattedUrls []string `json:"customFormattedUrls,omitempty"`
-}
-
-// CertificateAuthorityRuleObservedState defines nested fields for CertificateAuthority.CertificateAuthorityRule.
-type CertificateAuthorityRuleObservedState struct {
-	// +kubebuilder:validation:Optional
-	JsonData string `json:"jsonData,omitempty"`
-	// +kubebuilder:validation:Optional
-	RuleType string `json:"ruleType,omitempty"`
-	// A property indicating the maximum validity duration, in days, of leaf certificates issued by this CA.
-	// Expressed in ISO 8601 (https://en.wikipedia.org/wiki/ISO_8601#Time_intervals) format.
-	// +kubebuilder:validation:Optional
-	LeafCertificateMaxValidityDuration string `json:"leafCertificateMaxValidityDuration,omitempty"`
-	// A property indicating the maximum validity duration, in days, of subordinate CA's issued by this CA.
-	// Expressed in ISO 8601 (https://en.wikipedia.org/wiki/ISO_8601#Time_intervals) format.
-	// +kubebuilder:validation:Optional
-	CertificateAuthorityMaxValidityDuration string `json:"certificateAuthorityMaxValidityDuration,omitempty"`
-}
-
-// CertificateAuthorityCertificateRevocationListDetailsObservedState defines nested fields for CertificateAuthority.CertificateRevocationListDetails.
-type CertificateAuthorityCertificateRevocationListDetailsObservedState struct {
 	// +kubebuilder:validation:Required
 	ObjectStorageConfig CertificateAuthorityCertificateRevocationListDetailsObjectStorageConfig `json:"objectStorageConfig"`
 	// Optional CRL access points, expressed using a format where the version number of the issuing CA is inserted wherever you include a pair of curly braces. This versioning scheme helps avoid collisions when new CA versions are created. For example, myCrlFileIssuedFromCAVersion{}.crl becomes myCrlFileIssuedFromCAVersion2.crl for CA version 2.
@@ -351,10 +326,10 @@ type CertificateAuthorityStatus struct {
 	// Additional information about the current CA lifecycle state.
 	LifecycleDetails string `json:"lifecycleDetails,omitempty"`
 	// An optional list of rules that control how the CA is used and managed.
-	CertificateAuthorityRules        []CertificateAuthorityRuleObservedState                           `json:"certificateAuthorityRules,omitempty"`
-	CurrentVersion                   CertificateAuthorityCurrentVersion                                `json:"currentVersion,omitempty"`
-	CertificateRevocationListDetails CertificateAuthorityCertificateRevocationListDetailsObservedState `json:"certificateRevocationListDetails,omitempty"`
-	Subject                          CertificateAuthoritySubject                                       `json:"subject,omitempty"`
+	CertificateAuthorityRules        []CertificateAuthorityRule                           `json:"certificateAuthorityRules,omitempty"`
+	CurrentVersion                   CertificateAuthorityCurrentVersion                   `json:"currentVersion,omitempty"`
+	CertificateRevocationListDetails CertificateAuthorityCertificateRevocationListDetails `json:"certificateRevocationListDetails,omitempty"`
+	Subject                          CertificateAuthoritySubject                          `json:"subject,omitempty"`
 	// The algorithm used to sign public key certificates that the CA issues.
 	SigningAlgorithm string `json:"signingAlgorithm,omitempty"`
 	// Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.

@@ -92,7 +92,6 @@ spec:
                           type: string
                       required:
                       - isEnabled
-                      - streamId
                       type: object
                     type: array
                 required:
@@ -201,7 +200,6 @@ spec:
                           type: string
                       required:
                       - isEnabled
-                      - streamId
                       type: object
                     type: array
                 required:

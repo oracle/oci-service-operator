@@ -62,19 +62,8 @@ type AlarmSuppressionTarget struct {
 	// +kubebuilder:validation:Optional
 	TargetType string `json:"targetType,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the alarm that is the target of the alarm suppression.
-	// +kubebuilder:validation:Required
-	AlarmId string `json:"alarmId"`
-}
-
-// AlarmSuppressionTargetObservedState defines nested fields for AlarmSuppression.AlarmSuppressionTarget.
-type AlarmSuppressionTargetObservedState struct {
 	// +kubebuilder:validation:Optional
-	JsonData string `json:"jsonData,omitempty"`
-	// +kubebuilder:validation:Optional
-	TargetType string `json:"targetType,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the alarm that is the target of the alarm suppression.
-	// +kubebuilder:validation:Required
-	AlarmId string `json:"alarmId"`
+	AlarmId string `json:"alarmId,omitempty"`
 }
 
 // AlarmSuppressionStatus defines the observed state of AlarmSuppression.
@@ -83,8 +72,8 @@ type AlarmSuppressionStatus struct {
 	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the alarm suppression.
 	Id string `json:"id,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the alarm suppression.
-	CompartmentId          string                              `json:"compartmentId,omitempty"`
-	AlarmSuppressionTarget AlarmSuppressionTargetObservedState `json:"alarmSuppressionTarget,omitempty"`
+	CompartmentId          string                 `json:"compartmentId,omitempty"`
+	AlarmSuppressionTarget AlarmSuppressionTarget `json:"alarmSuppressionTarget,omitempty"`
 	// A user-friendly name for the alarm suppression. It does not have to be unique, and it's changeable. Avoid entering confidential information.
 	DisplayName string `json:"displayName,omitempty"`
 	// Configured dimension filter for suppressing alarm state entries that include the set of specified dimension key-value pairs.

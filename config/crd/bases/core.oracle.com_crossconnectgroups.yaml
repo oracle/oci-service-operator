@@ -169,8 +169,8 @@ spec:
                 description: The cross-connect group's current state.
                 type: string
               macsecProperties:
-                description: CrossConnectGroupMacsecPropertiesObservedState defines
-                  nested fields for CrossConnectGroup.MacsecProperties.
+                description: CrossConnectGroupMacsecProperties defines nested fields
+                  for CrossConnectGroup.MacsecProperties.
                 properties:
                   encryptionCipher:
                     description: Type of encryption cipher suite to use for the MACsec
