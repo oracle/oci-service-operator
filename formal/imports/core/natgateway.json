@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "natgateway",
+  "kind": "NatGateway",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_core_nat_gateway",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateNatGateway",
+        "requestType": "core.CreateNatGatewayRequest",
+        "responseType": "core.CreateNatGatewayResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetNatGateway",
+        "requestType": "core.GetNatGatewayRequest",
+        "responseType": "core.GetNatGatewayResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListNatGateway",
+        "requestType": "core.ListNatGatewayRequest",
+        "responseType": "core.ListNatGatewayResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateNatGateway",
+        "requestType": "core.UpdateNatGatewayRequest",
+        "responseType": "core.UpdateNatGatewayResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteNatGateway",
+        "requestType": "core.DeleteNatGatewayRequest",
+        "responseType": "core.DeleteNatGatewayResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "AVAILABLE"
+      ]
+    },
+    "update": {
+      "pending": [],
+      "target": [
+        "AVAILABLE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "block_traffic",
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "route_table_id"
+    ],
+    "forceNew": [
+      "compartment_id",
+      "public_ip_id",
+      "vcn_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "TERMINATING",
+      "TERMINATED"
+    ],
+    "target": [
+      "NOT_FOUND"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_core_nat_gateways",
+    "collectionField": "nat_gateway",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "vcn_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/natgateway/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/natgateway/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: NatGateway lifecycle exposes PROVISIONING, AVAILABLE, TERMINATING, and TERMINATED; there is no distinct UPDATING, DELETING, or DELETED state in this branch.",
+    "Pinned OCI SDK contract: UpdateNatGatewayDetails exposes block_traffic, defined_tags, display_name, freeform_tags, and route_table_id as in-place update fields; the handwritten runtime rejects create-only drift for compartment_id, public_ip_id, and vcn_id.",
+    "Repo-authored delete confirmation requires GetNatGateway to return not found; observed TERMINATING and TERMINATED remain intermediate finalizer-holding states.",
+    "The handwritten runtime observes by tracked OCI identity rather than list-based bind semantics. The listLookup block is retained only as provider-facts reference metadata."
+  ]
+}
