@@ -661,12 +661,8 @@ func buildTargets(root string, services []configuredService, apiSpecs map[string
 	return out, nil
 }
 
-func buildSDKTargets(targets []specTarget, existing []sdkTarget, services []configuredService) []sdkTarget {
+func buildSDKTargets(targets []specTarget, _ []sdkTarget, _ []configuredService) []sdkTarget {
 	set := make(map[string]sdkTarget)
-	allowedServices := make(map[string]struct{}, len(services))
-	for _, service := range services {
-		allowedServices[service.Service] = struct{}{}
-	}
 	for _, t := range targets {
 		for _, mapping := range t.SDKMappings {
 			parts := strings.Split(mapping.SDKStruct, ".")
@@ -675,15 +671,6 @@ func buildSDKTargets(targets []specTarget, existing []sdkTarget, services []conf
 			}
 			k := mapping.SDKStruct
 			set[k] = sdkTarget{Group: parts[0], Type: parts[1]}
-		}
-	}
-	for _, e := range existing {
-		if _, ok := allowedServices[e.Group]; !ok {
-			continue
-		}
-		k := e.Group + "." + e.Type
-		if _, ok := set[k]; !ok {
-			set[k] = e
 		}
 	}
 	out := make([]sdkTarget, 0, len(set))

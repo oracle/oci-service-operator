@@ -189,7 +189,7 @@ func loadRuntimeCheckRunInputs(ctx context.Context, opts options) (runtimeCheckR
 		controllerGenPath:           controllerGenPath,
 		selectedGroups:              serviceGroups(services),
 		selectedRegistrationGroups:  registrationGroups(services),
-		selectedServiceManagerRoots: serviceManagerRoots(services),
+		selectedServiceManagerRoots: serviceManagerRoots(packageModels),
 	}, nil
 }
 
@@ -661,16 +661,11 @@ func isGeneratedServiceManagerFile(path, name string) bool {
 	return hasGeneratedMarker(path)
 }
 
-func serviceManagerRoots(services []generator.ServiceConfig) []string {
-	seen := make(map[string]struct{}, len(services))
-	for _, service := range services {
-		seen[service.Group] = struct{}{}
-		for _, override := range service.Generation.Resources {
-			packagePath := strings.TrimSpace(override.ServiceManager.PackagePath)
-			if packagePath == "" {
-				continue
-			}
-			root := strings.Split(filepath.ToSlash(packagePath), "/")[0]
+func serviceManagerRoots(packages []*generator.PackageModel) []string {
+	seen := make(map[string]struct{}, len(packages))
+	for _, pkg := range packages {
+		for _, serviceManager := range pkg.ServiceManagers {
+			root := strings.Split(filepath.ToSlash(serviceManager.PackagePath), "/")[0]
 			if strings.TrimSpace(root) == "" {
 				continue
 			}
@@ -768,14 +763,17 @@ func runtimeCheckGeneratedServiceManagerPaths(packages []*generator.PackageModel
 }
 
 func preserveCompanionGoFiles(sourceRoot, destRoot string, isGenerated func(string) bool) error {
-	return preserveRuntimeCheckCompanionGoFiles(sourceRoot, destRoot, func(destPath string, entry fs.DirEntry) bool {
+	return preserveRuntimeCheckCompanionGoFiles(sourceRoot, destRoot, func(_, _ string, entry fs.DirEntry) bool {
 		return filepath.Ext(entry.Name()) == ".go" && !isGenerated(entry.Name())
 	})
 }
 
 func preserveServiceManagerCompanionGoFiles(sourceRoot, destRoot string, generatedPaths map[string]struct{}) error {
-	return preserveRuntimeCheckCompanionGoFiles(sourceRoot, destRoot, func(destPath string, entry fs.DirEntry) bool {
+	return preserveRuntimeCheckCompanionGoFiles(sourceRoot, destRoot, func(sourcePath, destPath string, entry fs.DirEntry) bool {
 		if filepath.Ext(entry.Name()) != ".go" {
+			return false
+		}
+		if hasGeneratedMarker(sourcePath) {
 			return false
 		}
 		_, generated := generatedPaths[destPath]
@@ -785,7 +783,7 @@ func preserveServiceManagerCompanionGoFiles(sourceRoot, destRoot string, generat
 
 func preserveRuntimeCheckCompanionGoFiles(
 	sourceRoot, destRoot string,
-	shouldLink func(destPath string, entry fs.DirEntry) bool,
+	shouldLink func(sourcePath, destPath string, entry fs.DirEntry) bool,
 ) error {
 	if _, err := os.Stat(sourceRoot); err != nil {
 		if os.IsNotExist(err) {
@@ -805,7 +803,7 @@ func preserveRuntimeCheckCompanionGoFiles(
 		if entry.IsDir() {
 			return os.MkdirAll(destPath, 0o755)
 		}
-		if !shouldLink(destPath, entry) {
+		if !shouldLink(path, destPath, entry) {
 			return nil
 		}
 		return runtimeCheckSymlinkIfMissing(path, destPath)
