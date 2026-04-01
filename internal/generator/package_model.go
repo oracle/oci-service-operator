@@ -517,8 +517,12 @@ func sampleFileName(group string, version string, fileStem string) string {
 	return sampleFilePrefix(group, version) + fileStem + ".yaml"
 }
 
+func sampleGroupPrefix(group string) string {
+	return fmt.Sprintf("%s_", group)
+}
+
 func sampleFilePrefix(group string, version string) string {
-	return fmt.Sprintf("%s_%s_", group, version)
+	return sampleGroupPrefix(group) + version + "_"
 }
 
 func defaultStatusFields() []FieldModel {

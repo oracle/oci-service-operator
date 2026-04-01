@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 	"testing"
 )
 
@@ -26,7 +27,7 @@ func TestValidatorRegistriesAreInSync(t *testing.T) {
 		t.Fatalf("parseExistingSDKTargets(%q) error = %v", sdkPath, err)
 	}
 
-	apiOut, sdkOut, err := generateRegistryOutputs(root, existingAPI, existingSDK)
+	apiOut, sdkOut, err := generateRegistryOutputs(root, "", false, existingAPI, existingSDK)
 	if err != nil {
 		t.Fatalf("generateRegistryOutputs() error = %v", err)
 	}
@@ -165,6 +166,88 @@ func TestBuildSDKMappingsFunctionsPbfListingExcludesVersionSummary(t *testing.T)
 	}
 
 	assertExactMappings(t, got, want)
+}
+
+func TestFilterConfiguredAPISpecsAppliesSelectedKinds(t *testing.T) {
+	t.Parallel()
+
+	got, err := filterConfiguredAPISpecs(
+		configuredService{
+			Service:       "database",
+			Group:         "database",
+			Version:       "v1beta1",
+			SelectedKinds: []string{"Widget"},
+		},
+		[]apiTypeInfo{
+			{Spec: "Widget", Status: "WidgetStatus"},
+			{Spec: "Report", Status: "ReportStatus"},
+		},
+	)
+	if err != nil {
+		t.Fatalf("filterConfiguredAPISpecs() error = %v", err)
+	}
+	if len(got) != 1 || got[0].Spec != "Widget" {
+		t.Fatalf("filterConfiguredAPISpecs() = %#v, want Widget only", got)
+	}
+}
+
+func TestFilterConfiguredAPISpecsRejectsMissingSelectedKinds(t *testing.T) {
+	t.Parallel()
+
+	_, err := filterConfiguredAPISpecs(
+		configuredService{
+			Service:       "database",
+			Group:         "database",
+			Version:       "v1beta1",
+			SelectedKinds: []string{"Widget"},
+		},
+		[]apiTypeInfo{
+			{Spec: "Report", Status: "ReportStatus"},
+		},
+	)
+	if err == nil || !strings.Contains(err.Error(), "selected kinds Widget were not found") {
+		t.Fatalf("filterConfiguredAPISpecs() error = %v, want missing selected kind failure", err)
+	}
+}
+
+func TestBuildSDKTargetsPrunesExistingEntriesOutsideSelectedKinds(t *testing.T) {
+	t.Parallel()
+
+	got := buildSDKTargets(
+		[]specTarget{
+			{
+				Service: "database",
+				Group:   "database",
+				Spec:    "AutonomousDatabase",
+				SDKMappings: []sdkMapping{
+					{SDKStruct: "database.CreateAutonomousDatabaseDetails"},
+					{SDKStruct: "database.AutonomousDatabase"},
+				},
+			},
+		},
+		[]sdkTarget{
+			{Group: "database", Type: "CreateAutonomousDatabaseDetails"},
+			{Group: "database", Type: "AutonomousDatabase"},
+			{Group: "database", Type: "CreateDbSystemDetails"},
+			{Group: "database", Type: "DbSystem"},
+		},
+		[]configuredService{
+			{
+				Service:       "database",
+				Group:         "database",
+				Version:       "v1beta1",
+				SelectedKinds: []string{"AutonomousDatabase"},
+			},
+		},
+	)
+
+	want := []sdkTarget{
+		{Group: "database", Type: "CreateAutonomousDatabaseDetails"},
+		{Group: "database", Type: "AutonomousDatabase"},
+	}
+	if !slices.Equal(got, want) {
+		t.Fatalf("buildSDKTargets() = %#v, want %#v", got, want)
+	}
 }
 
 func TestBuildSDKMappingsObjectStorageOverrides(t *testing.T) {

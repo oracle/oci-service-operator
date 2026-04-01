@@ -101,9 +101,23 @@ func TestBuildReportMarksReviewedUntrackedTargetsAsIntentional(t *testing.T) {
 
 func TestBuildReportTracksResponseBodyTargets(t *testing.T) {
 	originalTargets := targets
+	originalResponseBodyCoverageTargets := responseBodyCoverageTargets
 	t.Cleanup(func() {
 		targets = originalTargets
+		responseBodyCoverageTargets = originalResponseBodyCoverageTargets
 	})
+	responseBodyCoverageTargets = map[string]responseBodyCoverage{
+		"NotificationUnsubscription": {
+			SDKStruct: "ons.GetUnsubscriptionResponse",
+			FieldName: "Value",
+			Encoding:  "plain-text",
+		},
+		"DNSZoneContent": {
+			SDKStruct: "dns.GetZoneContentResponse",
+			FieldName: "Content",
+			Encoding:  "binary",
+		},
+	}
 
 	tests := []struct {
 		name      string
@@ -127,46 +141,58 @@ func TestBuildReportTracksResponseBodyTargets(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			targets = []Target{
-				{
-					Name:        tt.target,
-					SpecType:    reflect.TypeOf(struct{}{}),
-					StatusType:  reflect.TypeOf(struct{}{}),
-					SDKMappings: nil,
-				},
-			}
-
-			report, err := BuildReport(nil, allowlist.Allowlist{})
-			if err != nil {
-				t.Fatalf("BuildReport() error = %v", err)
-			}
-			if len(report.Structs) != 1 {
-				t.Fatalf("BuildReport() report count = %d, want 1", len(report.Structs))
-			}
-
-			got := report.Structs[0]
-			if got.TrackingStatus != TrackingStatusTracked {
-				t.Fatalf("report.Structs[0].TrackingStatus = %q, want %q", got.TrackingStatus, TrackingStatusTracked)
-			}
-			if got.APISurface != apiSurfaceResponseBody {
-				t.Fatalf("report.Structs[0].APISurface = %q, want %q", got.APISurface, apiSurfaceResponseBody)
-			}
-			if got.SDKStruct != tt.sdkStruct {
-				t.Fatalf("report.Structs[0].SDKStruct = %q, want %q", got.SDKStruct, tt.sdkStruct)
-			}
-			if len(got.PresentFields) != 1 || got.PresentFields[0].FieldName != tt.fieldName {
-				t.Fatalf("report.Structs[0].PresentFields = %#v, want %q present", got.PresentFields, tt.fieldName)
-			}
-			if len(got.MissingFields) != 0 {
-				t.Fatalf("report.Structs[0].MissingFields = %#v, want none", got.MissingFields)
-			}
-			if len(got.ExtraSpecFields) != 0 {
-				t.Fatalf("report.Structs[0].ExtraSpecFields = %#v, want none", got.ExtraSpecFields)
-			}
-			if HasActionable(report) {
-				t.Fatal("HasActionable() = true, want false for response-body-covered target")
-			}
+			assertResponseBodyTargetCoverage(t, tt.target, tt.sdkStruct, tt.fieldName)
 		})
+	}
+}
+
+func assertResponseBodyTargetCoverage(t *testing.T, targetName string, sdkStruct string, fieldName string) {
+	t.Helper()
+
+	targets = []Target{
+		{
+			Name:        targetName,
+			SpecType:    reflect.TypeOf(struct{}{}),
+			StatusType:  reflect.TypeOf(struct{}{}),
+			SDKMappings: nil,
+		},
+	}
+
+	report, err := BuildReport(nil, allowlist.Allowlist{})
+	if err != nil {
+		t.Fatalf("BuildReport() error = %v", err)
+	}
+	assertTrackedResponseBodyReport(t, report, sdkStruct, fieldName)
+}
+
+func assertTrackedResponseBodyReport(t *testing.T, report Report, sdkStruct string, fieldName string) {
+	t.Helper()
+
+	if len(report.Structs) != 1 {
+		t.Fatalf("BuildReport() report count = %d, want 1", len(report.Structs))
+	}
+
+	got := report.Structs[0]
+	if got.TrackingStatus != TrackingStatusTracked {
+		t.Fatalf("report.Structs[0].TrackingStatus = %q, want %q", got.TrackingStatus, TrackingStatusTracked)
+	}
+	if got.APISurface != apiSurfaceResponseBody {
+		t.Fatalf("report.Structs[0].APISurface = %q, want %q", got.APISurface, apiSurfaceResponseBody)
+	}
+	if got.SDKStruct != sdkStruct {
+		t.Fatalf("report.Structs[0].SDKStruct = %q, want %q", got.SDKStruct, sdkStruct)
+	}
+	if len(got.PresentFields) != 1 || got.PresentFields[0].FieldName != fieldName {
+		t.Fatalf("report.Structs[0].PresentFields = %#v, want %q present", got.PresentFields, fieldName)
+	}
+	if len(got.MissingFields) != 0 {
+		t.Fatalf("report.Structs[0].MissingFields = %#v, want none", got.MissingFields)
+	}
+	if len(got.ExtraSpecFields) != 0 {
+		t.Fatalf("report.Structs[0].ExtraSpecFields = %#v, want none", got.ExtraSpecFields)
+	}
+	if HasActionable(report) {
+		t.Fatal("HasActionable() = true, want false for response-body-covered target")
 	}
 }
 
@@ -426,7 +452,25 @@ func TestBuildReportRoutesDesiredAndObservedSDKStructsToDifferentSurfaces(t *tes
 func TestEmptyRegistryTargetsHaveSpecialHandling(t *testing.T) {
 	t.Parallel()
 
-	var got []string
+	got := emptyRegistryTargetsWithoutHandling()
+	if len(got) != 0 {
+		t.Fatalf("empty registry targets without reviewed handling: %v", got)
+	}
+
+	emptyTargets := emptyRegistryTargetSet()
+	extra := unmatchedEmptyRegistryReferences(reviewedUntrackedReasons, emptyTargets)
+	if len(extra) != 0 {
+		t.Fatalf("reviewed untracked reasons without matching empty registry targets: %v", extra)
+	}
+
+	extra = unmatchedResponseBodyCoverageTargets(emptyTargets)
+	if len(extra) != 0 {
+		t.Fatalf("response-body coverage entries without matching empty registry targets: %v", extra)
+	}
+}
+
+func emptyRegistryTargetsWithoutHandling() []string {
+	var names []string
 	for _, target := range Targets() {
 		if len(target.SDKMappings) != 0 {
 			continue
@@ -434,47 +478,40 @@ func TestEmptyRegistryTargetsHaveSpecialHandling(t *testing.T) {
 		reason := reviewedUntrackedReason(target.Name)
 		_, hasResponseBodyCoverage := responseBodyCoverageForTarget(target.Name)
 		if !isIntentionalUntrackedReason(reason) && !hasResponseBodyCoverage {
-			got = append(got, target.Name)
+			names = append(names, target.Name)
 		}
 	}
+	return names
+}
 
-	if len(got) != 0 {
-		t.Fatalf("empty registry targets without reviewed handling: %v", got)
+func emptyRegistryTargetSet() map[string]struct{} {
+	targetsByName := make(map[string]struct{})
+	for _, target := range Targets() {
+		if len(target.SDKMappings) == 0 {
+			targetsByName[target.Name] = struct{}{}
+		}
 	}
+	return targetsByName
+}
 
+func unmatchedEmptyRegistryReferences(reasons map[string]string, emptyTargets map[string]struct{}) []string {
 	var extra []string
-	for targetName := range reviewedUntrackedReasons {
-		matched := false
-		for _, target := range Targets() {
-			if target.Name == targetName && len(target.SDKMappings) == 0 {
-				matched = true
-				break
-			}
-		}
-		if !matched {
+	for targetName := range reasons {
+		if _, matched := emptyTargets[targetName]; !matched {
 			extra = append(extra, targetName)
 		}
 	}
 	slices.Sort(extra)
-	if len(extra) != 0 {
-		t.Fatalf("reviewed untracked reasons without matching empty registry targets: %v", extra)
-	}
+	return extra
+}
 
-	extra = extra[:0]
+func unmatchedResponseBodyCoverageTargets(emptyTargets map[string]struct{}) []string {
+	var extra []string
 	for targetName := range responseBodyCoverageTargets {
-		matched := false
-		for _, target := range Targets() {
-			if target.Name == targetName && len(target.SDKMappings) == 0 {
-				matched = true
-				break
-			}
-		}
-		if !matched {
+		if _, matched := emptyTargets[targetName]; !matched {
 			extra = append(extra, targetName)
 		}
 	}
 	slices.Sort(extra)
-	if len(extra) != 0 {
-		t.Fatalf("response-body coverage entries without matching empty registry targets: %v", extra)
-	}
+	return extra
 }

@@ -212,6 +212,47 @@ func TestPreserveCheckedInCompanionFilesLinksCheckedInCompatibilityCompanions(t 
 	assertRuntimeCheckNotExists(t, filepath.Join(snapshotRoot, "api", "database", "v1beta1", "autonomousdatabase_types.go"))
 }
 
+func TestPreserveCheckedInCompanionFilesSkipsExcludedGeneratedServiceManagerPackages(t *testing.T) {
+	t.Helper()
+
+	repoRoot := t.TempDir()
+	snapshotRoot := t.TempDir()
+
+	selectedSourceDir := filepath.Join(repoRoot, "pkg", "servicemanager", "database", "autonomousdatabase")
+	mustRuntimeCheckMkdirAll(t, selectedSourceDir)
+	selectedCompanionPath := filepath.Join(selectedSourceDir, "legacy_servicemanager.go")
+	mustRuntimeCheckWriteFile(t, selectedCompanionPath, "package autonomousdatabase\n")
+
+	excludedSourceDir := filepath.Join(repoRoot, "pkg", "servicemanager", "database", "dbsystem")
+	mustRuntimeCheckMkdirAll(t, excludedSourceDir)
+	mustRuntimeCheckWriteFile(t, filepath.Join(excludedSourceDir, "dbsystem_serviceclient.go"), generatedServiceManagerSource("dbsystem"))
+	mustRuntimeCheckWriteFile(t, filepath.Join(excludedSourceDir, "dbsystem_servicemanager.go"), generatedServiceManagerSource("dbsystem"))
+
+	snapshotSelectedDir := filepath.Join(snapshotRoot, "pkg", "servicemanager", "database", "autonomousdatabase")
+	mustRuntimeCheckMkdirAll(t, snapshotSelectedDir)
+	mustRuntimeCheckWriteFile(t, filepath.Join(snapshotSelectedDir, "autonomousdatabase_serviceclient.go"), generatedServiceManagerSource("autonomousdatabase"))
+
+	packages := []*generator.PackageModel{
+		{
+			Service: generator.ServiceConfig{Group: "database"},
+			ServiceManagers: []generator.ServiceManagerModel{
+				{
+					PackagePath:            "database/autonomousdatabase",
+					ServiceClientFileName:  "autonomousdatabase_serviceclient.go",
+					ServiceManagerFileName: "autonomousdatabase_servicemanager.go",
+				},
+			},
+		},
+	}
+	if err := preserveCheckedInCompanionFiles(repoRoot, snapshotRoot, packages); err != nil {
+		t.Fatalf("preserveCheckedInCompanionFiles() error = %v", err)
+	}
+
+	assertRuntimeCheckSymlink(t, filepath.Join(snapshotSelectedDir, "legacy_servicemanager.go"))
+	assertRuntimeCheckNotExists(t, filepath.Join(snapshotRoot, "pkg", "servicemanager", "database", "dbsystem", "dbsystem_serviceclient.go"))
+	assertRuntimeCheckNotExists(t, filepath.Join(snapshotRoot, "pkg", "servicemanager", "database", "dbsystem", "dbsystem_servicemanager.go"))
+}
+
 func writeRuntimeCheckFiles(t *testing.T, files map[string]string) {
 	t.Helper()
 

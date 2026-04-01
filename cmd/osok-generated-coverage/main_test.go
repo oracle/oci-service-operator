@@ -102,6 +102,47 @@ func TestPreserveCheckedInCompanionFilesLinksManualCompanions(t *testing.T) {
 	assertCoverageNotExists(t, filepath.Join(snapshotRoot, "api", "database", "v1beta1", "autonomousdatabase_types.go"))
 }
 
+func TestPreserveCheckedInCompanionFilesSkipsExcludedGeneratedServiceManagerPackages(t *testing.T) {
+	t.Helper()
+
+	repoRoot := t.TempDir()
+	snapshotRoot := t.TempDir()
+
+	selectedSourceDir := filepath.Join(repoRoot, "pkg", "servicemanager", "database", "autonomousdatabase")
+	mustCoverageMkdirAll(t, selectedSourceDir)
+	selectedCompanionPath := filepath.Join(selectedSourceDir, "legacy_servicemanager.go")
+	mustCoverageWriteFile(t, selectedCompanionPath, "package autonomousdatabase\n")
+
+	excludedSourceDir := filepath.Join(repoRoot, "pkg", "servicemanager", "database", "dbsystem")
+	mustCoverageMkdirAll(t, excludedSourceDir)
+	mustCoverageWriteFile(t, filepath.Join(excludedSourceDir, "dbsystem_serviceclient.go"), "package dbsystem\n\n"+generatedFileMarker+"\n")
+	mustCoverageWriteFile(t, filepath.Join(excludedSourceDir, "dbsystem_servicemanager.go"), "package dbsystem\n\n"+generatedFileMarker+"\n")
+
+	snapshotSelectedDir := filepath.Join(snapshotRoot, "pkg", "servicemanager", "database", "autonomousdatabase")
+	mustCoverageMkdirAll(t, snapshotSelectedDir)
+	mustCoverageWriteFile(t, filepath.Join(snapshotSelectedDir, "autonomousdatabase_serviceclient.go"), "package autonomousdatabase\n\n"+generatedFileMarker+"\n")
+
+	packages := []*generator.PackageModel{
+		{
+			Service: generator.ServiceConfig{Group: "database"},
+			ServiceManagers: []generator.ServiceManagerModel{
+				{
+					PackagePath:            "database/autonomousdatabase",
+					ServiceClientFileName:  "autonomousdatabase_serviceclient.go",
+					ServiceManagerFileName: "autonomousdatabase_servicemanager.go",
+				},
+			},
+		},
+	}
+	if err := preserveCheckedInCompanionFiles(repoRoot, snapshotRoot, packages); err != nil {
+		t.Fatalf("preserveCheckedInCompanionFiles() error = %v", err)
+	}
+
+	assertCoverageSymlink(t, filepath.Join(snapshotSelectedDir, "legacy_servicemanager.go"))
+	assertCoverageNotExists(t, filepath.Join(snapshotRoot, "pkg", "servicemanager", "database", "dbsystem", "dbsystem_serviceclient.go"))
+	assertCoverageNotExists(t, filepath.Join(snapshotRoot, "pkg", "servicemanager", "database", "dbsystem", "dbsystem_servicemanager.go"))
+}
+
 func writeCoverageTestFiles(t *testing.T, files map[string]string) {
 	t.Helper()
 

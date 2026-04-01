@@ -317,6 +317,39 @@ func TestVerifyRejectsMissingSharedDiagramArtifacts(t *testing.T) {
 	}
 }
 
+func TestVerifyRejectsStaleManifestOwnedArtifacts(t *testing.T) {
+	root := writeScaffold(t)
+	writeFile(t, filepath.Join(root, "controllers", "identity", "user", "spec.cfg"), strings.NewReplacer(
+		"service = template", "service = identity",
+		"slug = template", "slug = user",
+		"kind = Template", "kind = User",
+		"import = imports/template/template.json", "import = imports/identity/user.json",
+	).Replace(testSpec))
+	writeFile(t, filepath.Join(root, "controllers", "identity", "user", "logic-gaps.md"), strings.NewReplacer(
+		"service: template", "service: identity",
+		"slug: template", "slug: user",
+	).Replace(testLogicGaps))
+	writeFile(t, filepath.Join(root, "controllers", "identity", "user", "diagrams", "runtime-lifecycle.yaml"), strings.NewReplacer(
+		"service: template", "service: identity",
+		"slug: template", "slug: user",
+		"kind: Template", "kind: User",
+	).Replace(testDiagram))
+	writeFile(t, filepath.Join(root, "imports", "identity", "user.json"), strings.NewReplacer(
+		`"service": "template"`, `"service": "identity"`,
+		`"slug": "template"`, `"slug": "user"`,
+		`"kind": "Template"`, `"kind": "User"`,
+		`"repoAuthoredSpecPath": "controllers/template/spec.cfg"`, `"repoAuthoredSpecPath": "controllers/identity/user/spec.cfg"`,
+		`"repoAuthoredLogicGapsPath": "controllers/template/logic-gaps.md"`, `"repoAuthoredLogicGapsPath": "controllers/identity/user/logic-gaps.md"`,
+	).Replace(testImport))
+
+	_, err := Verify(root)
+	if err == nil ||
+		!strings.Contains(err.Error(), "controllers/identity/user: stale controller artifacts are not referenced by controller_manifest.tsv") ||
+		!strings.Contains(err.Error(), "imports/identity/user.json: stale import artifact is not referenced by controller_manifest.tsv") {
+		t.Fatalf("Verify(%q) error = %v, want stale manifest-owned artifact failure", root, err)
+	}
+}
+
 func TestRenderDiagramsIncludesProviderDrivenDetail(t *testing.T) {
 	root := writeScaffold(t)
 

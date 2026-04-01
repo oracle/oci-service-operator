@@ -13,7 +13,7 @@ This tree is the repo-local source of truth for formal runtime inputs.
 - `shared/diagrams/` holds the shared reconcile, resolution, delete, controller-state,
   and legend `.puml` and `.svg` artifacts rendered from `controller_diagrams/*.yaml`.
 - `sources.lock` records the pinned provider source boundary that `formal-import` refreshes.
-- `controller_manifest.tsv` binds one controller row to exactly one import, spec, logic-gap file, and diagrams directory.
+- `controller_manifest.tsv` binds one controller row to exactly one import, spec, logic-gap file, and diagrams directory. That manifest is authoritative for generator-owned formal catalog artifacts; orphan controller directories or import JSON files are drift and fail `make formal-verify`.
 
 The checked-in `template` row remains scaffold-only as a schema example. Seeded
 rows for `database/AutonomousDatabase`, `mysql/DbSystem`,
@@ -58,7 +58,9 @@ controller-backed promotion:
    `formal/controllers/<service>/<slug>/spec.cfg`,
    `formal/controllers/<service>/<slug>/logic-gaps.md`,
    `formal/controllers/<service>/<slug>/diagrams/`, and
-   `formal/imports/<service>/<slug>.json`.
+   `formal/imports/<service>/<slug>.json`. When the published active surface
+   shrinks, this scaffold refresh also prunes generator-owned stale controller
+   and import artifacts that are no longer referenced by the manifest.
 3. Run `make formal-import FORMAL_IMPORT_PROVIDER_PATH=/path/to/terraform-provider-oci`.
    The provider path is a pinned external input; the repo does not assume a
    sibling checkout.
@@ -68,7 +70,8 @@ controller-backed promotion:
    `formal-verify` now checks generated `.puml` sources plus the embedded
    PlantUML metadata inside rendered SVGs, so any import/spec/logic change that
    affects diagrams must be followed by `make formal-diagrams` or
-   `make formal-scaffold`.
+   `make formal-scaffold`. It also rejects orphan controller directories and
+   import JSON files that are not referenced by `formal/controller_manifest.tsv`.
 5. Keep every unsupported behavior in `logic-gaps.md` front matter with an
    explicit `stopCondition`, and file linked `bd` follow-up issues instead of
    leaving TODOs. Open logic gaps block formal-driven promotion.

@@ -29,7 +29,7 @@ services:
     phase: security-and-identity
     packageProfile: controller-backed
     selection:
-      enabled: false
+      enabled: true
       mode: all
 `
 
@@ -227,6 +227,8 @@ const testTemplateImport = `{
   }
 }
 `
+
+const testTemplateManifestRow = "template\ttemplate\tTemplate\tscaffold\trepo-authored-semantics\timports/template/template.json\tcontrollers/template/spec.cfg\tcontrollers/template/logic-gaps.md\tcontrollers/template/diagrams\n"
 
 const testSeededManifestRow = "identity\tuser\tUser\tseeded\trepo-authored-semantics\timports/identity/user.json\tcontrollers/identity/user/spec.cfg\tcontrollers/identity/user/logic-gaps.md\tcontrollers/identity/user/diagrams\n"
 
@@ -449,6 +451,42 @@ type DbSystemDbInstanceList struct {
 }
 `
 
+const testAutonomousDatabaseAPI = `package v1beta1
+
+import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+// +kubebuilder:object:root=true
+type AutonomousDatabase struct {
+	metav1.TypeMeta   ` + "`json:\",inline\"`" + `
+	metav1.ObjectMeta ` + "`json:\"metadata,omitempty\"`" + `
+}
+
+// +kubebuilder:object:root=true
+type AutonomousDatabaseList struct {
+	metav1.TypeMeta ` + "`json:\",inline\"`" + `
+	metav1.ListMeta ` + "`json:\"metadata,omitempty\"`" + `
+	Items []AutonomousDatabase ` + "`json:\"items\"`" + `
+}
+`
+
+const testBackupAPI = `package v1beta1
+
+import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+// +kubebuilder:object:root=true
+type Backup struct {
+	metav1.TypeMeta   ` + "`json:\",inline\"`" + `
+	metav1.ObjectMeta ` + "`json:\"metadata,omitempty\"`" + `
+}
+
+// +kubebuilder:object:root=true
+type BackupList struct {
+	metav1.TypeMeta ` + "`json:\",inline\"`" + `
+	metav1.ListMeta ` + "`json:\"metadata,omitempty\"`" + `
+	Items []Backup ` + "`json:\"items\"`" + `
+}
+`
+
 const testSecurityListAPI = `package v1beta1
 
 import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -522,6 +560,67 @@ func TestGenerateUsesFileStemAsFormalSlug(t *testing.T) {
 	}
 }
 
+func TestGenerateUsesConfiguredFormalSpecSlug(t *testing.T) {
+	requirePlantUML(t)
+	repoRoot := t.TempDir()
+	writeScaffoldBase(t, repoRoot)
+	writeTestFile(t, filepath.Join(repoRoot, "internal", "generator", "config", "services.yaml"), `schemaVersion: v1
+domain: oracle.com
+defaultVersion: v1beta1
+generatorEntrypoint: ./cmd/generator
+packageProfiles:
+  controller-backed:
+    description: Shared manager install
+services:
+  - service: database
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/database
+    group: database
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - AutonomousDatabase
+    generation:
+      resources:
+        - kind: AutonomousDatabase
+          formalSpec: databaseautonomousdatabase
+`)
+	writeTestFile(t, filepath.Join(repoRoot, "api", "database", "v1beta1", "autonomousdatabase_types.go"), testAutonomousDatabaseAPI)
+	writeTestFile(t, filepath.Join(repoRoot, "api", "database", "v1beta1", "backup_types.go"), testBackupAPI)
+
+	report, err := Generate(Options{
+		Root:       filepath.Join(repoRoot, "formal"),
+		ConfigPath: filepath.Join(repoRoot, "internal", "generator", "config", "services.yaml"),
+	})
+	if err != nil {
+		t.Fatalf("Generate() error = %v", err)
+	}
+	if report.NewRows != 1 {
+		t.Fatalf("report.NewRows = %d, want 1", report.NewRows)
+	}
+
+	catalog, err := formal.LoadCatalog(filepath.Join(repoRoot, "formal"))
+	if err != nil {
+		t.Fatalf("formal.LoadCatalog() error = %v", err)
+	}
+	if _, ok := catalog.Lookup("database", "autonomousdatabase"); ok {
+		t.Fatal("catalog.Lookup(database, autonomousdatabase) unexpectedly found file-stem row")
+	}
+	if _, ok := catalog.Lookup("database", "backup"); ok {
+		t.Fatal("catalog.Lookup(database, backup) unexpectedly found excluded kind row")
+	}
+	binding, ok := catalog.Lookup("database", "databaseautonomousdatabase")
+	if !ok {
+		t.Fatal("catalog.Lookup(database, databaseautonomousdatabase) unexpectedly missed")
+	}
+	if binding.Manifest.Kind != "AutonomousDatabase" {
+		t.Fatalf("binding kind = %q, want %q", binding.Manifest.Kind, "AutonomousDatabase")
+	}
+}
+
 func TestPublishedKindFromFileRejectsFilesWithoutRootKinds(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "bad_types.go")
@@ -581,6 +680,117 @@ func TestGenerateMergesProviderInventoryIntoFormalCatalog(t *testing.T) {
 	assertRenderedDiagramFamily(t, filepath.Join(repoRoot, "formal", "controllers", "widget", "widget", "diagrams"))
 }
 
+func TestGeneratePrunesRowsOutsideDefaultActiveSurface(t *testing.T) {
+	requirePlantUML(t)
+	repoRoot := writeTestRepo(t)
+	writeTestFile(
+		t,
+		filepath.Join(repoRoot, "internal", "generator", "config", "services.yaml"),
+		strings.Replace(testGeneratorConfig, "enabled: true", "enabled: false", 1),
+	)
+
+	report, err := Generate(Options{
+		Root:       filepath.Join(repoRoot, "formal"),
+		ConfigPath: filepath.Join(repoRoot, "internal", "generator", "config", "services.yaml"),
+	})
+	if err != nil {
+		t.Fatalf("Generate() error = %v", err)
+	}
+	if report.ServicesScanned != 0 {
+		t.Fatalf("report.ServicesScanned = %d, want 0", report.ServicesScanned)
+	}
+	if report.PublishedKinds != 0 {
+		t.Fatalf("report.PublishedKinds = %d, want 0", report.PublishedKinds)
+	}
+	if report.ManifestRows != 1 {
+		t.Fatalf("report.ManifestRows = %d, want 1", report.ManifestRows)
+	}
+
+	catalog, err := formal.LoadCatalog(filepath.Join(repoRoot, "formal"))
+	if err != nil {
+		t.Fatalf("formal.LoadCatalog() error = %v", err)
+	}
+	if _, ok := catalog.Lookup("identity", "user"); ok {
+		t.Fatal("catalog.Lookup(identity, user) unexpectedly found pruned row")
+	}
+	assertPathNotExists(t, filepath.Join(repoRoot, "formal", "controllers", "identity", "user"))
+	assertPathNotExists(t, filepath.Join(repoRoot, "formal", "imports", "identity", "user.json"))
+}
+
+func TestGeneratePrunesOrphanedArtifactsWhenManifestAlreadyMatchesActiveSurface(t *testing.T) {
+	requirePlantUML(t)
+	repoRoot := writeTestRepo(t)
+	writeTestFile(
+		t,
+		filepath.Join(repoRoot, "internal", "generator", "config", "services.yaml"),
+		strings.Replace(testGeneratorConfig, "enabled: true", "enabled: false", 1),
+	)
+	writeTestFile(
+		t,
+		filepath.Join(repoRoot, "formal", "controller_manifest.tsv"),
+		manifestHeader+testTemplateManifestRow,
+	)
+
+	report, err := Generate(Options{
+		Root:       filepath.Join(repoRoot, "formal"),
+		ConfigPath: filepath.Join(repoRoot, "internal", "generator", "config", "services.yaml"),
+	})
+	if err != nil {
+		t.Fatalf("Generate() error = %v", err)
+	}
+	if report.ManifestRows != 1 {
+		t.Fatalf("report.ManifestRows = %d, want 1", report.ManifestRows)
+	}
+
+	assertPathNotExists(t, filepath.Join(repoRoot, "formal", "controllers", "identity", "user"))
+	assertPathNotExists(t, filepath.Join(repoRoot, "formal", "imports", "identity", "user.json"))
+}
+
+func TestGeneratePreservesConfiguredFormalSpecRowsOutsideDefaultActiveSurface(t *testing.T) {
+	requirePlantUML(t)
+	repoRoot := writeTestRepo(t)
+	config := strings.Replace(
+		testGeneratorConfig,
+		"selection:\n      enabled: true\n      mode: all\n",
+		"selection:\n      enabled: false\n      mode: all\n    generation:\n      resources:\n        - kind: User\n          formalSpec: user\n",
+		1,
+	)
+	writeTestFile(t, filepath.Join(repoRoot, "internal", "generator", "config", "services.yaml"), config)
+	writeTestFile(
+		t,
+		filepath.Join(repoRoot, "formal", "controller_manifest.tsv"),
+		manifestHeader+"template\ttemplate\tTemplate\tscaffold\trepo-authored-semantics\timports/template/template.json\tcontrollers/template/spec.cfg\tcontrollers/template/logic-gaps.md\tcontrollers/template/diagrams\n",
+	)
+
+	report, err := Generate(Options{
+		Root:       filepath.Join(repoRoot, "formal"),
+		ConfigPath: filepath.Join(repoRoot, "internal", "generator", "config", "services.yaml"),
+	})
+	if err != nil {
+		t.Fatalf("Generate() error = %v", err)
+	}
+	if report.ServicesScanned != 0 {
+		t.Fatalf("report.ServicesScanned = %d, want 0", report.ServicesScanned)
+	}
+	if report.PublishedKinds != 0 {
+		t.Fatalf("report.PublishedKinds = %d, want 0", report.PublishedKinds)
+	}
+	if report.NewRows != 1 {
+		t.Fatalf("report.NewRows = %d, want 1", report.NewRows)
+	}
+	if report.ManifestRows != 2 {
+		t.Fatalf("report.ManifestRows = %d, want 2", report.ManifestRows)
+	}
+
+	catalog, err := formal.LoadCatalog(filepath.Join(repoRoot, "formal"))
+	if err != nil {
+		t.Fatalf("formal.LoadCatalog() error = %v", err)
+	}
+	if _, ok := catalog.Lookup("identity", "user"); !ok {
+		t.Fatal("catalog.Lookup(identity, user) unexpectedly missed preserved formal-spec row")
+	}
+}
+
 func TestVerifyCoverageRejectsMissingProviderRows(t *testing.T) {
 	requirePlantUML(t)
 	repoRoot := writeTestRepo(t)
@@ -616,6 +826,15 @@ func assertScaffoldReport(t *testing.T, report Report, servicesScanned, publishe
 	}
 	if report.ManifestRows != manifestRows {
 		t.Fatalf("report.ManifestRows = %d, want %d", report.ManifestRows, manifestRows)
+	}
+}
+
+func assertPathNotExists(t *testing.T, path string) {
+	t.Helper()
+	if _, err := os.Stat(path); err == nil {
+		t.Fatalf("expected %q to be removed", path)
+	} else if !os.IsNotExist(err) {
+		t.Fatalf("Stat(%q) error = %v", path, err)
 	}
 }
 
@@ -663,7 +882,7 @@ func writeTestRepo(t *testing.T) string {
 	writeTestFile(t, filepath.Join(repoRoot, "internal", "generator", "config", "services.yaml"), testGeneratorConfig)
 	writeTestFile(t, filepath.Join(repoRoot, "api", "identity", "v1beta1", "user_types.go"), testUserAPI)
 	writeTestFile(t, filepath.Join(repoRoot, "api", "identity", "v1beta1", "networksource_types.go"), testNetworkSourceAPI)
-	writeTestFile(t, filepath.Join(repoRoot, "formal", "controller_manifest.tsv"), manifestHeader+"template\ttemplate\tTemplate\tscaffold\trepo-authored-semantics\timports/template/template.json\tcontrollers/template/spec.cfg\tcontrollers/template/logic-gaps.md\tcontrollers/template/diagrams\n"+testSeededManifestRow)
+	writeTestFile(t, filepath.Join(repoRoot, "formal", "controller_manifest.tsv"), manifestHeader+testTemplateManifestRow+testSeededManifestRow)
 	writeTestFile(t, filepath.Join(repoRoot, "formal", "controllers", "identity", "user", "spec.cfg"), testSeededSpec)
 	writeTestFile(t, filepath.Join(repoRoot, "formal", "controllers", "identity", "user", "logic-gaps.md"), testSeededLogic)
 	writeTestFile(t, filepath.Join(repoRoot, "formal", "controllers", "identity", "user", "diagrams", "runtime-lifecycle.yaml"), testSeededDiagram)
@@ -674,7 +893,7 @@ func writeTestRepo(t *testing.T) string {
 func writeScaffoldBase(t *testing.T, repoRoot string) {
 	t.Helper()
 
-	writeTestFile(t, filepath.Join(repoRoot, "formal", "controller_manifest.tsv"), manifestHeader+"template\ttemplate\tTemplate\tscaffold\trepo-authored-semantics\timports/template/template.json\tcontrollers/template/spec.cfg\tcontrollers/template/logic-gaps.md\tcontrollers/template/diagrams\n")
+	writeTestFile(t, filepath.Join(repoRoot, "formal", "controller_manifest.tsv"), manifestHeader+testTemplateManifestRow)
 	writeTestFile(t, filepath.Join(repoRoot, "formal", "sources.lock"), testSourcesLock)
 	writeTestFile(t, filepath.Join(repoRoot, "formal", "shared", "BaseReconcilerContract.tla"), testBaseReconcilerContract)
 	writeTestFile(t, filepath.Join(repoRoot, "formal", "shared", "ControllerLifecycleSpec.tla"), testControllerLifecycleContract)

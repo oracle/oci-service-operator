@@ -47,9 +47,10 @@ type sdkTarget struct {
 }
 
 type configuredService struct {
-	Service string
-	Group   string
-	Version string
+	Service       string
+	Group         string
+	Version       string
+	SelectedKinds []string
 }
 
 var (
@@ -60,6 +61,8 @@ var (
 
 func main() {
 	write := flag.Bool("write", false, "write changes to registry files")
+	serviceName := flag.String("service", "", "refresh validator registries for a single configured service")
+	all := flag.Bool("all", false, "refresh validator registries for the default active generator surface")
 	flag.Parse()
 
 	root, err := findRepoRoot()
@@ -79,7 +82,7 @@ func main() {
 		die(err)
 	}
 
-	apiOut, sdkOut, err := generateRegistryOutputs(root, existingAPI, existingSDK)
+	apiOut, sdkOut, err := generateRegistryOutputs(root, *serviceName, *all, existingAPI, existingSDK)
 	if err != nil {
 		die(err)
 	}
@@ -102,8 +105,8 @@ func main() {
 	fmt.Printf("Updated %s\n", rel(root, sdkPath))
 }
 
-func generateRegistryOutputs(root string, existingAPI map[string]specTarget, existingSDK []sdkTarget) ([]byte, []byte, error) {
-	services, err := loadConfiguredServices(root)
+func generateRegistryOutputs(root string, serviceName string, all bool, existingAPI map[string]specTarget, existingSDK []sdkTarget) ([]byte, []byte, error) {
+	services, err := loadConfiguredServices(root, serviceName, all)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -170,88 +173,145 @@ func parseExistingAPITargets(path string) (map[string]specTarget, error) {
 
 	m := make(map[string]specTarget)
 	for _, declaration := range parsed.Decls {
-		genDecl, ok := declaration.(*ast.GenDecl)
-		if !ok || genDecl.Tok != token.VAR {
-			continue
-		}
-
-		for _, spec := range genDecl.Specs {
-			valueSpec, ok := spec.(*ast.ValueSpec)
-			if !ok || len(valueSpec.Names) != 1 || valueSpec.Names[0].Name != "targets" || len(valueSpec.Values) != 1 {
-				continue
-			}
-
-			composite, ok := valueSpec.Values[0].(*ast.CompositeLit)
-			if !ok {
-				continue
-			}
-
-			for _, element := range composite.Elts {
-				targetLit, ok := element.(*ast.CompositeLit)
-				if !ok {
-					continue
-				}
-
-				target, err := parseExistingAPITarget(targetLit)
-				if err != nil {
-					return nil, err
-				}
-				key := target.Group + "." + target.Spec
-				m[key] = target
-			}
+		if err := collectExistingAPITargets(m, declaration); err != nil {
+			return nil, err
 		}
 	}
 	return m, nil
 }
 
-func parseExistingAPITarget(targetLit *ast.CompositeLit) (specTarget, error) {
-	target := specTarget{}
-	for _, element := range targetLit.Elts {
-		keyValue, ok := element.(*ast.KeyValueExpr)
+func collectExistingAPITargets(targets map[string]specTarget, declaration ast.Decl) error {
+	genDecl, ok := declaration.(*ast.GenDecl)
+	if !ok || genDecl.Tok != token.VAR {
+		return nil
+	}
+
+	for _, spec := range genDecl.Specs {
+		composite, ok := targetsComposite(spec)
 		if !ok {
 			continue
 		}
-		key, ok := keyValue.Key.(*ast.Ident)
+		if err := appendExistingAPITargets(targets, composite); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func targetsComposite(spec ast.Spec) (*ast.CompositeLit, bool) {
+	valueSpec, ok := spec.(*ast.ValueSpec)
+	if !ok || len(valueSpec.Names) != 1 || valueSpec.Names[0].Name != "targets" || len(valueSpec.Values) != 1 {
+		return nil, false
+	}
+
+	composite, ok := valueSpec.Values[0].(*ast.CompositeLit)
+	return composite, ok
+}
+
+func appendExistingAPITargets(targets map[string]specTarget, composite *ast.CompositeLit) error {
+	for _, element := range composite.Elts {
+		targetLit, ok := element.(*ast.CompositeLit)
 		if !ok {
 			continue
 		}
 
-		switch key.Name {
-		case "Name":
-			value, err := stringLiteralValue(keyValue.Value)
-			if err != nil {
-				return specTarget{}, err
-			}
-			target.Name = value
-		case "SpecType":
-			group, typeName, err := parseReflectTypeSelector(keyValue.Value)
-			if err != nil {
-				return specTarget{}, err
-			}
-			target.Group = group
-			target.Spec = strings.TrimSuffix(typeName, "Spec")
-		case "StatusType":
-			_, typeName, err := parseReflectTypeSelector(keyValue.Value)
-			if err != nil {
-				return specTarget{}, err
-			}
-			target.Status = typeName
-		case "SDKStructs":
-			mappings, err := parseLegacySDKStructs(keyValue.Value)
-			if err != nil {
-				return specTarget{}, err
-			}
-			target.SDKMappings = mappings
-		case "SDKMappings":
-			mappings, err := parseSDKMappings(keyValue.Value)
-			if err != nil {
-				return specTarget{}, err
-			}
-			target.SDKMappings = mappings
+		target, err := parseExistingAPITarget(targetLit)
+		if err != nil {
+			return err
+		}
+		key := target.Group + "." + target.Spec
+		targets[key] = target
+	}
+	return nil
+}
+
+func parseExistingAPITarget(targetLit *ast.CompositeLit) (specTarget, error) {
+	target := specTarget{}
+	for _, element := range targetLit.Elts {
+		field, value, ok := keyValueField(element)
+		if !ok {
+			continue
+		}
+		if err := applyExistingAPITargetField(&target, field, value); err != nil {
+			return specTarget{}, err
 		}
 	}
 
 	return target, nil
+}
+
+func keyValueField(element ast.Expr) (string, ast.Expr, bool) {
+	keyValue, ok := element.(*ast.KeyValueExpr)
+	if !ok {
+		return "", nil, false
+	}
+	key, ok := keyValue.Key.(*ast.Ident)
+	if !ok {
+		return "", nil, false
+	}
+	return key.Name, keyValue.Value, true
+}
+
+func applyExistingAPITargetField(target *specTarget, field string, value ast.Expr) error {
+	switch field {
+	case "Name":
+		return applyExistingAPITargetName(target, value)
+	case "SpecType":
+		return applyExistingAPITargetSpecType(target, value)
+	case "StatusType":
+		return applyExistingAPITargetStatusType(target, value)
+	case "SDKStructs":
+		return applyExistingAPITargetLegacySDKMappings(target, value)
+	case "SDKMappings":
+		return applyExistingAPITargetSDKMappings(target, value)
+	}
+	return nil
+}
+
+func applyExistingAPITargetName(target *specTarget, value ast.Expr) error {
+	name, err := stringLiteralValue(value)
+	if err != nil {
+		return err
+	}
+	target.Name = name
+	return nil
+}
+
+func applyExistingAPITargetSpecType(target *specTarget, value ast.Expr) error {
+	group, typeName, err := parseReflectTypeSelector(value)
+	if err != nil {
+		return err
+	}
+	target.Group = group
+	target.Spec = strings.TrimSuffix(typeName, "Spec")
+	return nil
+}
+
+func applyExistingAPITargetStatusType(target *specTarget, value ast.Expr) error {
+	_, typeName, err := parseReflectTypeSelector(value)
+	if err != nil {
+		return err
+	}
+	target.Status = typeName
+	return nil
+}
+
+func applyExistingAPITargetLegacySDKMappings(target *specTarget, value ast.Expr) error {
+	mappings, err := parseLegacySDKStructs(value)
+	if err != nil {
+		return err
+	}
+	target.SDKMappings = mappings
+	return nil
+}
+
+func applyExistingAPITargetSDKMappings(target *specTarget, value ast.Expr) error {
+	mappings, err := parseSDKMappings(value)
+	if err != nil {
+		return err
+	}
+	target.SDKMappings = mappings
+	return nil
 }
 
 func parseReflectTypeSelector(expr ast.Expr) (string, string, error) {
@@ -309,47 +369,57 @@ func parseSDKMappings(expr ast.Expr) ([]sdkMapping, error) {
 			return nil, fmt.Errorf("unexpected SDKMapping element %T", element)
 		}
 
-		mapping := sdkMapping{}
-		for _, field := range mappingLit.Elts {
-			keyValue, ok := field.(*ast.KeyValueExpr)
-			if !ok {
-				continue
-			}
-			key, ok := keyValue.Key.(*ast.Ident)
-			if !ok {
-				continue
-			}
-
-			switch key.Name {
-			case "SDKStruct":
-				value, err := stringLiteralValue(keyValue.Value)
-				if err != nil {
-					return nil, err
-				}
-				mapping.SDKStruct = value
-			case "APISurface":
-				value, err := stringLiteralValue(keyValue.Value)
-				if err != nil {
-					return nil, err
-				}
-				mapping.APISurface = value
-			case "Exclude":
-				value, err := boolLiteralValue(keyValue.Value)
-				if err != nil {
-					return nil, err
-				}
-				mapping.Exclude = value
-			case "Reason":
-				value, err := stringLiteralValue(keyValue.Value)
-				if err != nil {
-					return nil, err
-				}
-				mapping.Reason = value
-			}
+		mapping, err := parseSDKMapping(mappingLit)
+		if err != nil {
+			return nil, err
 		}
 		mappings = append(mappings, mapping)
 	}
 	return mappings, nil
+}
+
+func parseSDKMapping(mappingLit *ast.CompositeLit) (sdkMapping, error) {
+	mapping := sdkMapping{}
+	for _, field := range mappingLit.Elts {
+		name, value, ok := keyValueField(field)
+		if !ok {
+			continue
+		}
+		if err := applySDKMappingField(&mapping, name, value); err != nil {
+			return sdkMapping{}, err
+		}
+	}
+	return mapping, nil
+}
+
+func applySDKMappingField(mapping *sdkMapping, field string, value ast.Expr) error {
+	switch field {
+	case "SDKStruct":
+		sdkStruct, err := stringLiteralValue(value)
+		if err != nil {
+			return err
+		}
+		mapping.SDKStruct = sdkStruct
+	case "APISurface":
+		apiSurface, err := stringLiteralValue(value)
+		if err != nil {
+			return err
+		}
+		mapping.APISurface = apiSurface
+	case "Exclude":
+		exclude, err := boolLiteralValue(value)
+		if err != nil {
+			return err
+		}
+		mapping.Exclude = exclude
+	case "Reason":
+		reason, err := stringLiteralValue(value)
+		if err != nil {
+			return err
+		}
+		mapping.Reason = reason
+	}
+	return nil
 }
 
 func stringLiteralValue(expr ast.Expr) (string, error) {
@@ -387,23 +457,32 @@ func parseExistingSDKTargets(path string) ([]sdkTarget, error) {
 	return out, nil
 }
 
-func loadConfiguredServices(root string) ([]configuredService, error) {
+func loadConfiguredServices(root string, serviceName string, all bool) ([]configuredService, error) {
 	configPath := filepath.Join(root, "internal", "generator", "config", "services.yaml")
 	cfg, err := generator.LoadConfig(configPath)
 	if err != nil {
 		return nil, err
 	}
+	serviceName, all, err = normalizeConfiguredServiceSelection(serviceName, all)
+	if err != nil {
+		return nil, err
+	}
+	selectedServices, err := cfg.SelectServices(serviceName, all)
+	if err != nil {
+		return nil, err
+	}
 
-	services := make([]configuredService, 0, len(cfg.Services))
-	for _, service := range cfg.Services {
+	services := make([]configuredService, 0, len(selectedServices))
+	for _, service := range selectedServices {
 		sdkPackageBase := path.Base(strings.TrimSpace(service.SDKPackage))
 		if sdkPackageBase != service.Service {
 			return nil, fmt.Errorf("service %q sdkPackage %q does not match SDK package basename %q", service.Service, service.SDKPackage, sdkPackageBase)
 		}
 		services = append(services, configuredService{
-			Service: service.Service,
-			Group:   service.Group,
-			Version: service.VersionOrDefault(cfg.DefaultVersion),
+			Service:       service.Service,
+			Group:         service.Group,
+			Version:       service.VersionOrDefault(cfg.DefaultVersion),
+			SelectedKinds: service.SelectedKinds(),
 		})
 	}
 
@@ -418,6 +497,17 @@ func loadConfiguredServices(root string) ([]configuredService, error) {
 	return services, nil
 }
 
+func normalizeConfiguredServiceSelection(serviceName string, all bool) (string, bool, error) {
+	serviceName = strings.TrimSpace(serviceName)
+	if serviceName != "" && all {
+		return "", false, fmt.Errorf("use either --all or --service, not both")
+	}
+	if serviceName == "" && !all {
+		return "", true, nil
+	}
+	return serviceName, all, nil
+}
+
 func scanConfiguredAPISpecs(root string, services []configuredService) (map[string][]apiTypeInfo, error) {
 	out := make(map[string][]apiTypeInfo)
 	for _, service := range services {
@@ -425,13 +515,54 @@ func scanConfiguredAPISpecs(root string, services []configuredService) (map[stri
 		if err != nil {
 			return nil, fmt.Errorf("scan API specs for group %q: %w", service.Group, err)
 		}
+		specs, err = filterConfiguredAPISpecs(service, specs)
+		if err != nil {
+			return nil, err
+		}
 		if len(specs) == 0 {
-			return nil, fmt.Errorf("configured API group %q has no spec types under api/%s/%s", service.Group, service.Group, service.Version)
+			return nil, fmt.Errorf("configured API group %q has no selected spec types under api/%s/%s", service.Group, service.Group, service.Version)
 		}
 		out[service.Group] = specs
 	}
 
 	return out, nil
+}
+
+func filterConfiguredAPISpecs(service configuredService, specs []apiTypeInfo) ([]apiTypeInfo, error) {
+	if len(service.SelectedKinds) == 0 {
+		return specs, nil
+	}
+
+	selected := make(map[string]struct{}, len(service.SelectedKinds))
+	for _, kind := range service.SelectedKinds {
+		selected[kind] = struct{}{}
+	}
+
+	filtered := make([]apiTypeInfo, 0, len(specs))
+	for _, spec := range specs {
+		if _, ok := selected[spec.Spec]; !ok {
+			continue
+		}
+		filtered = append(filtered, spec)
+		delete(selected, spec.Spec)
+	}
+
+	if len(selected) == 0 {
+		return filtered, nil
+	}
+
+	missing := make([]string, 0, len(selected))
+	for kind := range selected {
+		missing = append(missing, kind)
+	}
+	sort.Strings(missing)
+	return nil, fmt.Errorf(
+		"configured service %q selected kinds %s were not found under api/%s/%s",
+		service.Service,
+		strings.Join(missing, ", "),
+		service.Group,
+		service.Version,
+	)
 }
 
 func scanAPISpecDir(dir string) ([]apiTypeInfo, error) {
@@ -443,52 +574,80 @@ func scanAPISpecDir(dir string) ([]apiTypeInfo, error) {
 		return nil, err
 	}
 
-	err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if d.IsDir() || !strings.HasSuffix(path, "_types.go") {
-			return nil
-		}
-		fileSet := token.NewFileSet()
-		parsed, err := parser.ParseFile(fileSet, path, nil, parser.SkipObjectResolution)
-		if err != nil {
-			return err
-		}
-		for _, declaration := range parsed.Decls {
-			genDecl, ok := declaration.(*ast.GenDecl)
-			if !ok || genDecl.Tok != token.TYPE {
-				continue
-			}
-			for _, spec := range genDecl.Specs {
-				typeSpec, ok := spec.(*ast.TypeSpec)
-				if !ok {
-					continue
-				}
-				structType, ok := typeSpec.Type.(*ast.StructType)
-				if !ok {
-					continue
-				}
-				specType, statusType := resourceSurfaceTypes(structType)
-				if specType == "" || !strings.HasSuffix(specType, "Spec") {
-					continue
-				}
-				specName := strings.TrimSuffix(specType, "Spec")
-				specs[specName] = apiTypeInfo{
-					Spec:   specName,
-					Status: statusType,
-				}
-			}
-		}
-		return nil
+	err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, walkErr error) error {
+		return collectAPISpecsFromEntry(path, d, walkErr, specs)
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	if len(specs) == 0 {
-		return nil, nil
+	return sortedAPITypeInfo(specs), nil
+}
+
+func collectAPISpecsFromEntry(path string, d fs.DirEntry, walkErr error, specs map[string]apiTypeInfo) error {
+	if walkErr != nil {
+		return walkErr
 	}
+	if d.IsDir() || !strings.HasSuffix(path, "_types.go") {
+		return nil
+	}
+	return collectAPISpecsFromFile(path, specs)
+}
+
+func collectAPISpecsFromFile(path string, specs map[string]apiTypeInfo) error {
+	fileSet := token.NewFileSet()
+	parsed, err := parser.ParseFile(fileSet, path, nil, parser.SkipObjectResolution)
+	if err != nil {
+		return err
+	}
+
+	for _, declaration := range parsed.Decls {
+		collectAPISpecsFromDecl(specs, declaration)
+	}
+	return nil
+}
+
+func collectAPISpecsFromDecl(specs map[string]apiTypeInfo, declaration ast.Decl) {
+	genDecl, ok := declaration.(*ast.GenDecl)
+	if !ok || genDecl.Tok != token.TYPE {
+		return
+	}
+
+	for _, spec := range genDecl.Specs {
+		apiType, ok := apiTypeInfoFromSpec(spec)
+		if !ok {
+			continue
+		}
+		specs[apiType.Spec] = apiType
+	}
+}
+
+func apiTypeInfoFromSpec(spec ast.Spec) (apiTypeInfo, bool) {
+	typeSpec, ok := spec.(*ast.TypeSpec)
+	if !ok {
+		return apiTypeInfo{}, false
+	}
+	structType, ok := typeSpec.Type.(*ast.StructType)
+	if !ok {
+		return apiTypeInfo{}, false
+	}
+	specType, statusType := resourceSurfaceTypes(structType)
+	if specType == "" || !strings.HasSuffix(specType, "Spec") {
+		return apiTypeInfo{}, false
+	}
+
+	specName := strings.TrimSuffix(specType, "Spec")
+	return apiTypeInfo{
+		Spec:   specName,
+		Status: statusType,
+	}, true
+}
+
+func sortedAPITypeInfo(specs map[string]apiTypeInfo) []apiTypeInfo {
+	if len(specs) == 0 {
+		return nil
+	}
+
 	names := make([]string, 0, len(specs))
 	for name := range specs {
 		names = append(names, name)
@@ -499,7 +658,7 @@ func scanAPISpecDir(dir string) ([]apiTypeInfo, error) {
 	for _, name := range names {
 		out = append(out, specs[name])
 	}
-	return out, nil
+	return out
 }
 
 func resourceSurfaceTypes(structType *ast.StructType) (string, string) {
@@ -536,73 +695,102 @@ func exprTypeName(expr ast.Expr) string {
 func buildTargets(root string, services []configuredService, apiSpecs map[string][]apiTypeInfo, existing map[string]specTarget) ([]specTarget, error) {
 	out := make([]specTarget, 0)
 	for _, service := range services {
-		specs := apiSpecs[service.Group]
-		sdkDir := filepath.Join(root, "vendor", "github.com", "oracle", "oci-go-sdk", "v65", service.Service)
-		stat, err := os.Stat(sdkDir)
-		if err != nil || !stat.IsDir() {
-			return nil, fmt.Errorf("configured service %q SDK package dir %q not found", service.Service, sdkDir)
+		serviceTargets, err := buildServiceTargets(root, service, apiSpecs[service.Group], existing)
+		if err != nil {
+			return nil, err
 		}
-
-		sdkStructs := scanSDKStructNames(sdkDir)
-		for _, specInfo := range specs {
-			key := service.Group + "." + specInfo.Spec
-			existingTarget, hasExisting := existing[key]
-			targetName := makeTargetName(service.Group, specInfo.Spec)
-			candidates := deriveSDKTypes(service.Service, specInfo.Spec, targetName, sdkStructs)
-			if hasExisting {
-				for _, mapping := range existingTarget.SDKMappings {
-					parts := strings.Split(mapping.SDKStruct, ".")
-					if len(parts) == 2 && parts[0] == service.Service {
-						candidates = append(candidates, parts[1])
-					}
-				}
-			}
-			candidates = uniqueByOrder(candidates)
-			sort.SliceStable(candidates, func(i, j int) bool {
-				ai, aj := sdkTypeOrder(candidates[i]), sdkTypeOrder(candidates[j])
-				if ai != aj {
-					return ai < aj
-				}
-				return candidates[i] < candidates[j]
-			})
-
-			name := targetName
-			if hasExisting && strings.TrimSpace(existingTarget.Name) != "" {
-				name = existingTarget.Name
-			}
-			statusType := resolveStatusType(specInfo, hasExisting, existingTarget)
-			mappings := buildSDKMappings(service.Service, specInfo.Spec, candidates, hasExisting, existingTarget)
-			out = append(out, specTarget{
-				Service:     service.Service,
-				Group:       service.Group,
-				Spec:        specInfo.Spec,
-				Status:      statusType,
-				Name:        name,
-				SDKMappings: mappings,
-			})
-		}
+		out = append(out, serviceTargets...)
 	}
 
-	sort.SliceStable(out, func(i, j int) bool {
-		gi, gj := groupOrder(out[i].Group), groupOrder(out[j].Group)
-		if gi != gj {
-			return gi < gj
-		}
-		if out[i].Group != out[j].Group {
-			return out[i].Group < out[j].Group
-		}
-		return out[i].Name < out[j].Name
-	})
-
+	sortSpecTargets(out)
 	return out, nil
 }
 
-func buildSDKTargets(targets []specTarget, existing []sdkTarget, services []configuredService) []sdkTarget {
-	set := make(map[string]sdkTarget)
-	allowedServices := make(map[string]struct{}, len(services))
-	for _, service := range services {
-		allowedServices[service.Service] = struct{}{}
+func buildServiceTargets(root string, service configuredService, specs []apiTypeInfo, existing map[string]specTarget) ([]specTarget, error) {
+	sdkStructs, err := sdkStructNamesForService(root, service)
+	if err != nil {
+		return nil, err
 	}
+
+	targets := make([]specTarget, 0, len(specs))
+	for _, specInfo := range specs {
+		targets = append(targets, buildServiceTarget(service, specInfo, sdkStructs, existing))
+	}
+	return targets, nil
+}
+
+func sdkStructNamesForService(root string, service configuredService) (map[string]bool, error) {
+	sdkDir := filepath.Join(root, "vendor", "github.com", "oracle", "oci-go-sdk", "v65", service.Service)
+	stat, err := os.Stat(sdkDir)
+	if err != nil || !stat.IsDir() {
+		return nil, fmt.Errorf("configured service %q SDK package dir %q not found", service.Service, sdkDir)
+	}
+	return scanSDKStructNames(sdkDir), nil
+}
+
+func buildServiceTarget(service configuredService, specInfo apiTypeInfo, sdkStructs map[string]bool, existing map[string]specTarget) specTarget {
+	key := service.Group + "." + specInfo.Spec
+	existingTarget := existing[key]
+	targetName := makeTargetName(service.Group, specInfo.Spec)
+	name := targetName
+	if strings.TrimSpace(existingTarget.Name) != "" {
+		name = existingTarget.Name
+	}
+
+	return specTarget{
+		Service:     service.Service,
+		Group:       service.Group,
+		Spec:        specInfo.Spec,
+		Status:      resolveStatusType(specInfo, false, existingTarget),
+		Name:        name,
+		SDKMappings: buildSDKMappings(service.Service, specInfo.Spec, sdkCandidatesForTarget(service, specInfo.Spec, targetName, sdkStructs, existingTarget), false, existingTarget),
+	}
+}
+
+func sdkCandidatesForTarget(service configuredService, spec string, targetName string, sdkStructs map[string]bool, existing specTarget) []string {
+	candidates := deriveSDKTypes(service.Service, spec, targetName, sdkStructs)
+	candidates = appendExistingSDKCandidates(service.Service, candidates, existing.SDKMappings)
+	candidates = uniqueByOrder(candidates)
+	sortSDKTypeNames(candidates)
+	return candidates
+}
+
+func appendExistingSDKCandidates(service string, candidates []string, mappings []sdkMapping) []string {
+	for _, mapping := range mappings {
+		typeName, ok := unqualifiedSDKType(mapping.SDKStruct, service)
+		if !ok {
+			continue
+		}
+		candidates = append(candidates, typeName)
+	}
+	return candidates
+}
+
+func sortSDKTypeNames(names []string) {
+	sort.SliceStable(names, func(i, j int) bool {
+		ai, aj := sdkTypeOrder(names[i]), sdkTypeOrder(names[j])
+		if ai != aj {
+			return ai < aj
+		}
+		return names[i] < names[j]
+	})
+}
+
+func sortSpecTargets(targets []specTarget) {
+	sort.SliceStable(targets, func(i, j int) bool {
+		gi, gj := groupOrder(targets[i].Group), groupOrder(targets[j].Group)
+		if gi != gj {
+			return gi < gj
+		}
+		if targets[i].Group != targets[j].Group {
+			return targets[i].Group < targets[j].Group
+		}
+		return targets[i].Name < targets[j].Name
+	})
+}
+
+func buildSDKTargets(targets []specTarget, _ []sdkTarget, _ []configuredService) []sdkTarget {
+	set := make(map[string]sdkTarget)
 	for _, t := range targets {
 		for _, mapping := range t.SDKMappings {
 			parts := strings.Split(mapping.SDKStruct, ".")
@@ -611,15 +799,6 @@ func buildSDKTargets(targets []specTarget, existing []sdkTarget, services []conf
 			}
 			k := mapping.SDKStruct
 			set[k] = sdkTarget{Group: parts[0], Type: parts[1]}
-		}
-	}
-	for _, e := range existing {
-		if _, ok := allowedServices[e.Group]; !ok {
-			continue
-		}
-		k := e.Group + "." + e.Type
-		if _, ok := set[k]; !ok {
-			set[k] = e
 		}
 	}
 	out := make([]sdkTarget, 0, len(set))
@@ -643,69 +822,86 @@ func buildSDKTargets(targets []specTarget, existing []sdkTarget, services []conf
 	return out
 }
 
-func buildSDKMappings(service, spec string, candidates []string, hasExisting bool, existing specTarget) []sdkMapping {
+func buildSDKMappings(service, spec string, candidates []string, _ bool, existing specTarget) []sdkMapping {
 	override := explicitAPITargetOverrides[service+"."+spec]
+	existingByType := existingSDKMappingsByType(service, existing.SDKMappings)
+	order := sdkMappingOrder(service, candidates, existing.SDKMappings, override)
 
-	existingByType := make(map[string]sdkMapping, len(existing.SDKMappings))
-	for _, mapping := range existing.SDKMappings {
+	mappings := make([]sdkMapping, 0, len(order))
+	for _, typeName := range order {
+		mapping := defaultSDKMapping(service, typeName, existingByType)
+		mappings = append(mappings, applySDKMappingOverride(mapping, override, typeName))
+	}
+	return mappings
+}
+
+func existingSDKMappingsByType(service string, mappings []sdkMapping) map[string]sdkMapping {
+	existingByType := make(map[string]sdkMapping, len(mappings))
+	for _, mapping := range mappings {
 		typeName, ok := unqualifiedSDKType(mapping.SDKStruct, service)
 		if !ok {
 			continue
 		}
 		existingByType[typeName] = mapping
 	}
+	return existingByType
+}
 
+func sdkMappingOrder(service string, candidates []string, existing []sdkMapping, override apiTargetOverride) []string {
 	overrideTypes := make([]string, 0, len(override.MappingOverrides))
 	for typeName := range override.MappingOverrides {
 		overrideTypes = append(overrideTypes, typeName)
 	}
 	sort.Strings(overrideTypes)
 
-	order := make([]string, 0, len(override.SDKTypes)+len(candidates)+len(existingByType)+len(overrideTypes))
+	order := make([]string, 0, len(override.SDKTypes)+len(candidates)+len(existing)+len(overrideTypes))
 	order = append(order, override.SDKTypes...)
 	order = append(order, overrideTypes...)
 	order = append(order, candidates...)
-	if hasExisting {
-		for _, mapping := range existing.SDKMappings {
-			typeName, ok := unqualifiedSDKType(mapping.SDKStruct, service)
-			if !ok {
-				continue
-			}
-			order = append(order, typeName)
-		}
-	}
+	order = append(order, existingSDKTypeNames(service, existing)...)
 	order = uniqueByOrder(order)
-	sort.SliceStable(order, func(i, j int) bool {
-		ai, aj := sdkTypeOrder(order[i]), sdkTypeOrder(order[j])
-		if ai != aj {
-			return ai < aj
-		}
-		return order[i] < order[j]
-	})
+	sortSDKTypeNames(order)
+	return order
+}
 
-	mappings := make([]sdkMapping, 0, len(order))
-	for _, typeName := range order {
-		mapping := sdkMapping{SDKStruct: service + "." + typeName}
-		if existingMapping, ok := existingByType[typeName]; ok {
-			mapping = existingMapping
+func existingSDKTypeNames(service string, mappings []sdkMapping) []string {
+	out := make([]string, 0, len(mappings))
+	for _, mapping := range mappings {
+		typeName, ok := unqualifiedSDKType(mapping.SDKStruct, service)
+		if !ok {
+			continue
 		}
-		if override.UseStatus && strings.TrimSpace(mapping.APISurface) == "" {
-			mapping.APISurface = "status"
-		}
-		if overrideMapping, ok := override.MappingOverrides[typeName]; ok {
-			if strings.TrimSpace(overrideMapping.APISurface) != "" {
-				mapping.APISurface = overrideMapping.APISurface
-			}
-			if overrideMapping.Exclude {
-				mapping.Exclude = true
-			}
-			if strings.TrimSpace(overrideMapping.Reason) != "" {
-				mapping.Reason = overrideMapping.Reason
-			}
-		}
-		mappings = append(mappings, mapping)
+		out = append(out, typeName)
 	}
-	return mappings
+	return out
+}
+
+func defaultSDKMapping(service string, typeName string, existingByType map[string]sdkMapping) sdkMapping {
+	if existingMapping, ok := existingByType[typeName]; ok {
+		return existingMapping
+	}
+	return sdkMapping{SDKStruct: service + "." + typeName}
+}
+
+func applySDKMappingOverride(mapping sdkMapping, override apiTargetOverride, typeName string) sdkMapping {
+	if override.UseStatus && strings.TrimSpace(mapping.APISurface) == "" {
+		mapping.APISurface = "status"
+	}
+
+	overrideMapping, ok := override.MappingOverrides[typeName]
+	if !ok {
+		return mapping
+	}
+	if strings.TrimSpace(overrideMapping.APISurface) != "" {
+		mapping.APISurface = overrideMapping.APISurface
+	}
+	if overrideMapping.Exclude {
+		mapping.Exclude = true
+	}
+	if strings.TrimSpace(overrideMapping.Reason) != "" {
+		mapping.Reason = overrideMapping.Reason
+	}
+	return mapping
 }
 
 func unqualifiedSDKType(sdkStruct, service string) (string, bool) {
@@ -1707,14 +1903,11 @@ func addIf(out *[]string, set map[string]bool, name string) {
 	}
 }
 
-func resolveStatusType(specInfo apiTypeInfo, hasExisting bool, existing specTarget) string {
+func resolveStatusType(specInfo apiTypeInfo, _ bool, existing specTarget) string {
 	if strings.TrimSpace(specInfo.Status) != "" {
 		return specInfo.Status
 	}
-	if hasExisting {
-		return existing.Status
-	}
-	return ""
+	return existing.Status
 }
 
 func specVariants(spec string) []string {
@@ -1781,6 +1974,16 @@ func sdkTypeOrder(t string) int {
 }
 
 func renderAPIRegistry(targets []specTarget) ([]byte, error) {
+	apiGroups := apiRegistryGroups(targets)
+	var b strings.Builder
+	renderAPIRegistryPreamble(&b, apiGroups)
+	renderAPITargets(&b, targets)
+	renderAPIRegistryClone(&b)
+
+	return format.Source([]byte(b.String()))
+}
+
+func apiRegistryGroups(targets []specTarget) []string {
 	groups := make(map[string]bool)
 	for _, t := range targets {
 		groups[t.Group] = true
@@ -1796,44 +1999,60 @@ func renderAPIRegistry(targets []specTarget) ([]byte, error) {
 		}
 		return apiGroups[i] < apiGroups[j]
 	})
+	return apiGroups
+}
 
-	var b strings.Builder
+func renderAPIRegistryPreamble(b *strings.Builder, apiGroups []string) {
 	b.WriteString("package apispec\n\n")
 	b.WriteString("import (\n")
 	b.WriteString("\t\"reflect\"\n\n")
 	for _, g := range apiGroups {
-		fmt.Fprintf(&b, "\t%sv1beta1 \"github.com/oracle/oci-service-operator/api/%s/v1beta1\"\n", g, g)
+		fmt.Fprintf(b, "\t%sv1beta1 \"github.com/oracle/oci-service-operator/api/%s/v1beta1\"\n", g, g)
 	}
 	b.WriteString(")\n\n")
 	b.WriteString("type SDKMapping struct {\n\tSDKStruct  string\n\tAPISurface string\n\tExclude    bool\n\tReason     string\n}\n\n")
 	b.WriteString("type Target struct {\n\tName        string\n\tSpecType    reflect.Type\n\tStatusType  reflect.Type\n\tSDKMappings []SDKMapping\n}\n\n")
 	b.WriteString("var targets = []Target{\n")
-	for _, t := range targets {
-		b.WriteString("\t{\n")
-		fmt.Fprintf(&b, "\t\tName:     %q,\n", t.Name)
-		fmt.Fprintf(&b, "\t\tSpecType: reflect.TypeOf(%sv1beta1.%sSpec{}),\n", t.Group, t.Spec)
-		if strings.TrimSpace(t.Status) != "" {
-			fmt.Fprintf(&b, "\t\tStatusType: reflect.TypeOf(%sv1beta1.%s{}),\n", t.Group, t.Status)
-		}
-		b.WriteString("\t\tSDKMappings: []SDKMapping{\n")
-		for _, mapping := range t.SDKMappings {
-			b.WriteString("\t\t\t{\n")
-			fmt.Fprintf(&b, "\t\t\t\tSDKStruct: %q,\n", mapping.SDKStruct)
-			if strings.TrimSpace(mapping.APISurface) != "" {
-				fmt.Fprintf(&b, "\t\t\t\tAPISurface: %q,\n", mapping.APISurface)
-			}
-			if mapping.Exclude {
-				b.WriteString("\t\t\t\tExclude: true,\n")
-			}
-			if strings.TrimSpace(mapping.Reason) != "" {
-				fmt.Fprintf(&b, "\t\t\t\tReason: %q,\n", mapping.Reason)
-			}
-			b.WriteString("\t\t\t},\n")
-		}
-		b.WriteString("\t\t},\n")
-		b.WriteString("\t},\n")
+}
+
+func renderAPITargets(b *strings.Builder, targets []specTarget) {
+	for _, target := range targets {
+		renderAPITarget(b, target)
 	}
 	b.WriteString("}\n\n")
+}
+
+func renderAPITarget(b *strings.Builder, target specTarget) {
+	b.WriteString("\t{\n")
+	fmt.Fprintf(b, "\t\tName:     %q,\n", target.Name)
+	fmt.Fprintf(b, "\t\tSpecType: reflect.TypeOf(%sv1beta1.%sSpec{}),\n", target.Group, target.Spec)
+	if strings.TrimSpace(target.Status) != "" {
+		fmt.Fprintf(b, "\t\tStatusType: reflect.TypeOf(%sv1beta1.%s{}),\n", target.Group, target.Status)
+	}
+	b.WriteString("\t\tSDKMappings: []SDKMapping{\n")
+	for _, mapping := range target.SDKMappings {
+		renderAPISDKMapping(b, mapping)
+	}
+	b.WriteString("\t\t},\n")
+	b.WriteString("\t},\n")
+}
+
+func renderAPISDKMapping(b *strings.Builder, mapping sdkMapping) {
+	b.WriteString("\t\t\t{\n")
+	fmt.Fprintf(b, "\t\t\t\tSDKStruct: %q,\n", mapping.SDKStruct)
+	if strings.TrimSpace(mapping.APISurface) != "" {
+		fmt.Fprintf(b, "\t\t\t\tAPISurface: %q,\n", mapping.APISurface)
+	}
+	if mapping.Exclude {
+		b.WriteString("\t\t\t\tExclude: true,\n")
+	}
+	if strings.TrimSpace(mapping.Reason) != "" {
+		fmt.Fprintf(b, "\t\t\t\tReason: %q,\n", mapping.Reason)
+	}
+	b.WriteString("\t\t\t},\n")
+}
+
+func renderAPIRegistryClone(b *strings.Builder) {
 	b.WriteString("func Targets() []Target {\n")
 	b.WriteString("\tresult := make([]Target, len(targets))\n")
 	b.WriteString("\tfor i := range targets {\n")
@@ -1844,11 +2063,20 @@ func renderAPIRegistry(targets []specTarget) ([]byte, error) {
 	b.WriteString("\t}\n")
 	b.WriteString("\treturn result\n")
 	b.WriteString("}\n")
+}
+
+func renderSDKRegistry(targets []sdkTarget) ([]byte, error) {
+	sdkGroups := sdkRegistryGroups(targets)
+	byGroup := sdkTargetsByGroup(targets)
+	var b strings.Builder
+	renderSDKRegistryPreamble(&b, sdkGroups)
+	renderSDKSeedTargets(&b, sdkGroups, byGroup)
+	renderSDKRegistryHelpers(&b)
 
 	return format.Source([]byte(b.String()))
 }
 
-func renderSDKRegistry(targets []sdkTarget) ([]byte, error) {
+func sdkRegistryGroups(targets []sdkTarget) []string {
 	groups := make(map[string]bool)
 	for _, t := range targets {
 		groups[t.Group] = true
@@ -1866,46 +2094,50 @@ func renderSDKRegistry(targets []sdkTarget) ([]byte, error) {
 		}
 		return sdkGroups[i] < sdkGroups[j]
 	})
+	return sdkGroups
+}
 
+func sdkTargetsByGroup(targets []sdkTarget) map[string][]string {
 	byGroup := make(map[string][]string)
 	for _, t := range targets {
 		byGroup[t.Group] = append(byGroup[t.Group], t.Type)
 	}
 	for g := range byGroup {
 		byGroup[g] = uniqueSorted(byGroup[g])
-		sort.SliceStable(byGroup[g], func(i, j int) bool {
-			ai, aj := sdkTypeOrder(byGroup[g][i]), sdkTypeOrder(byGroup[g][j])
-			if ai != aj {
-				return ai < aj
-			}
-			return byGroup[g][i] < byGroup[g][j]
-		})
+		sortSDKTypeNames(byGroup[g])
 	}
+	return byGroup
+}
 
-	var b strings.Builder
+func renderSDKRegistryPreamble(b *strings.Builder, sdkGroups []string) {
 	b.WriteString("package sdk\n\n")
 	b.WriteString("import (\n")
 	b.WriteString("\t\"path\"\n")
 	b.WriteString("\t\"reflect\"\n\n")
 	for _, g := range sdkGroups {
-		fmt.Fprintf(&b, "\t\"github.com/oracle/oci-go-sdk/v65/%s\"\n", g)
+		fmt.Fprintf(b, "\t\"github.com/oracle/oci-go-sdk/v65/%s\"\n", g)
 	}
 	b.WriteString(")\n\n")
 	b.WriteString("const (\n\tmodulePath    = \"github.com/oracle/oci-go-sdk/v65\"\n\tmoduleVersion = \"v65.61.1\"\n)\n\n")
 	b.WriteString("var seedTargets = []Target{\n")
-	for _, g := range sdkGroups {
-		types := byGroup[g]
+}
+
+func renderSDKSeedTargets(b *strings.Builder, sdkGroups []string, byGroup map[string][]string) {
+	for _, group := range sdkGroups {
+		types := byGroup[group]
 		if len(types) == 0 {
 			continue
 		}
-		fmt.Fprintf(&b, "\t// %s\n", serviceComment(g))
-		for _, t := range types {
-			fmt.Fprintf(&b, "\tnewTarget(%q, %q, reflect.TypeOf(%s.%s{})),\n", g, t, g, t)
+		fmt.Fprintf(b, "\t// %s\n", serviceComment(group))
+		for _, typeName := range types {
+			fmt.Fprintf(b, "\tnewTarget(%q, %q, reflect.TypeOf(%s.%s{})),\n", group, typeName, group, typeName)
 		}
 		b.WriteString("\n")
 	}
 	b.WriteString("}\n\n")
+}
 
+func renderSDKRegistryHelpers(b *strings.Builder) {
 	b.WriteString("var interfaceImplementations = map[string][]reflect.Type{\n")
 	b.WriteString("\tqualifiedTypeName(reflect.TypeOf((*mysql.CreateDbSystemSourceDetails)(nil)).Elem()): {\n")
 	b.WriteString("\t\treflect.TypeOf(mysql.CreateDbSystemSourceFromBackupDetails{}),\n")
@@ -1950,8 +2182,6 @@ func renderSDKRegistry(targets []sdkTarget) ([]byte, error) {
 	b.WriteString("func qualifiedTypeName(typeRef reflect.Type) string {\n")
 	b.WriteString("\treturn path.Base(typeRef.PkgPath()) + \".\" + typeRef.Name()\n")
 	b.WriteString("}\n")
-
-	return format.Source([]byte(b.String()))
 }
 
 func reportDiff(path string, next []byte) {

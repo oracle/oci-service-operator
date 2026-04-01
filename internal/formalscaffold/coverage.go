@@ -31,52 +31,15 @@ func (r CoverageReport) String() string {
 }
 
 func VerifyCoverage(opts Options) (CoverageReport, error) {
-	report := CoverageReport{}
-	if strings.TrimSpace(opts.ProviderPath) == "" {
-		return report, fmt.Errorf("provider source path must not be empty")
-	}
-	if strings.TrimSpace(opts.Root) == "" {
-		return report, fmt.Errorf("formal root must not be empty")
-	}
-	if strings.TrimSpace(opts.ConfigPath) == "" {
-		return report, fmt.Errorf("generator config path must not be empty")
-	}
-
-	formalRoot, err := filepath.Abs(strings.TrimSpace(opts.Root))
+	report, formalRoot, configPath, err := initializeCoverageReport(opts)
 	if err != nil {
-		return report, err
-	}
-	configPath, err := filepath.Abs(strings.TrimSpace(opts.ConfigPath))
-	if err != nil {
-		return report, err
-	}
-	report.Root = formalRoot
-	report.ConfigPath = configPath
-
-	if err := requireDirectory(formalRoot); err != nil {
 		return report, err
 	}
 
-	cfg, err := generator.LoadConfig(configPath)
+	expectedEntries, err := expectedCoverageEntries(formalRoot, configPath, strings.TrimSpace(opts.ProviderPath), &report)
 	if err != nil {
 		return report, err
 	}
-	repoRoot := filepath.Clean(filepath.Join(filepath.Dir(configPath), "..", "..", ".."))
-
-	publishedEntries, err := discoverPublishedKinds(repoRoot, cfg)
-	if err != nil {
-		return report, err
-	}
-	providerEntries, err := discoverProviderKinds(strings.TrimSpace(opts.ProviderPath))
-	if err != nil {
-		return report, err
-	}
-	expectedEntries, err := mergeInventoryEntries(publishedEntries, providerEntries)
-	if err != nil {
-		return report, err
-	}
-	report.ExpectedRows = len(expectedEntries)
-	report.ProviderKinds = len(providerEntries)
 
 	catalog, err := formal.LoadCatalog(formalRoot)
 	if err != nil {
@@ -84,17 +47,86 @@ func VerifyCoverage(opts Options) (CoverageReport, error) {
 	}
 	report.ManifestRows = len(catalog.Controllers)
 
-	manifestKinds := map[string]string{}
+	missingRows, problems := compareCoverageEntries(expectedEntries, manifestKindIndex(catalog))
+	report.MissingRows = missingRows
+	if len(problems) > 0 {
+		sort.Strings(problems)
+		return report, fmt.Errorf("formal scaffold coverage failed:\n- %s", strings.Join(problems, "\n- "))
+	}
+	return report, nil
+}
+
+func initializeCoverageReport(opts Options) (CoverageReport, string, string, error) {
+	report := CoverageReport{}
+	if strings.TrimSpace(opts.ProviderPath) == "" {
+		return report, "", "", fmt.Errorf("provider source path must not be empty")
+	}
+	if strings.TrimSpace(opts.Root) == "" {
+		return report, "", "", fmt.Errorf("formal root must not be empty")
+	}
+	if strings.TrimSpace(opts.ConfigPath) == "" {
+		return report, "", "", fmt.Errorf("generator config path must not be empty")
+	}
+
+	formalRoot, err := filepath.Abs(strings.TrimSpace(opts.Root))
+	if err != nil {
+		return report, "", "", err
+	}
+	configPath, err := filepath.Abs(strings.TrimSpace(opts.ConfigPath))
+	if err != nil {
+		return report, "", "", err
+	}
+	report.Root = formalRoot
+	report.ConfigPath = configPath
+
+	if err := requireDirectory(formalRoot); err != nil {
+		return report, "", "", err
+	}
+	return report, formalRoot, configPath, nil
+}
+
+func expectedCoverageEntries(formalRoot string, configPath string, providerPath string, report *CoverageReport) ([]inventoryEntry, error) {
+	cfg, err := generator.LoadConfig(configPath)
+	if err != nil {
+		return nil, err
+	}
+	repoRoot := filepath.Clean(filepath.Join(filepath.Dir(configPath), "..", "..", ".."))
+
+	publishedEntries, _, err := discoverPublishedKinds(repoRoot, cfg)
+	if err != nil {
+		return nil, err
+	}
+	providerEntries, err := discoverProviderKinds(providerPath)
+	if err != nil {
+		return nil, err
+	}
+	expectedEntries, err := mergeInventoryEntries(publishedEntries, providerEntries)
+	if err != nil {
+		return nil, err
+	}
+
+	report.Root = formalRoot
+	report.ExpectedRows = len(expectedEntries)
+	report.ProviderKinds = len(providerEntries)
+	return expectedEntries, nil
+}
+
+func manifestKindIndex(catalog *formal.Catalog) map[string]string {
+	manifestKinds := make(map[string]string, len(catalog.Controllers))
 	for _, binding := range catalog.Controllers {
 		manifestKinds[rowKey(binding.Manifest.Service, binding.Manifest.Slug)] = binding.Manifest.Kind
 	}
+	return manifestKinds
+}
 
+func compareCoverageEntries(expectedEntries []inventoryEntry, manifestKinds map[string]string) (int, []string) {
+	missingRows := 0
 	var problems []string
 	for _, entry := range expectedEntries {
 		key := rowKey(entry.Service, entry.Slug)
 		kind, ok := manifestKinds[key]
 		if !ok {
-			report.MissingRows++
+			missingRows++
 			problems = append(problems, fmt.Sprintf("missing formal scaffold row for %s/%s (%s)", entry.Service, entry.Slug, entry.Kind))
 			continue
 		}
@@ -102,10 +134,5 @@ func VerifyCoverage(opts Options) (CoverageReport, error) {
 			problems = append(problems, fmt.Sprintf("formal scaffold row %s/%s has kind %q, want %q", entry.Service, entry.Slug, kind, entry.Kind))
 		}
 	}
-
-	if len(problems) > 0 {
-		sort.Strings(problems)
-		return report, fmt.Errorf("formal scaffold coverage failed:\n- %s", strings.Join(problems, "\n- "))
-	}
-	return report, nil
+	return missingRows, problems
 }

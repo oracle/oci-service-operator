@@ -178,7 +178,13 @@ func (r *Renderer) RenderServiceManagers(root string, pkg *PackageModel, overwri
 func (r *Renderer) RenderSamples(root string, packages []*PackageModel) error {
 	samples := collectSamples(packages)
 	if len(samples) == 0 {
-		return nil
+		samplesDir := filepath.Join(root, "config", "samples")
+		if _, err := os.Stat(samplesDir); os.IsNotExist(err) {
+			return nil
+		} else if err != nil {
+			return fmt.Errorf("stat samples dir %q: %w", samplesDir, err)
+		}
+		return writeSamplesKustomizationFile(samplesDir, nil)
 	}
 	sortSamples(samples)
 	samplesDir, err := ensureSamplesDir(root)
@@ -423,7 +429,7 @@ func renderSamplesKustomization(resources []string) (string, error) {
 func cleanupGeneratedSampleFiles(samplesDir string, packages []*PackageModel) error {
 	prefixes := make([]string, 0, len(packages))
 	for _, pkg := range packages {
-		prefixes = append(prefixes, fmt.Sprintf("%s_%s_", pkg.Service.Group, pkg.Version))
+		prefixes = append(prefixes, sampleGroupPrefix(pkg.Service.Group))
 	}
 
 	entries, err := os.ReadDir(samplesDir)
