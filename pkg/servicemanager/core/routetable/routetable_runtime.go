@@ -399,7 +399,7 @@ func (c *routeTableRuntimeClient) applyLifecycle(resource *corev1beta1.RouteTabl
 		status.Reason = string(shared.Updating)
 		resource.Status.OsokStatus = util.UpdateOSOKStatusCondition(resource.Status.OsokStatus, shared.Updating, v1.ConditionTrue, "", message, c.manager.Log)
 		return servicemanager.OSOKResponse{IsSuccessful: true, ShouldRequeue: true, RequeueDuration: routeTableRequeueDuration}, nil
-	case coresdk.RouteTableLifecycleStateTerminating:
+	case coresdk.RouteTableLifecycleStateTerminating, coresdk.RouteTableLifecycleStateTerminated:
 		status.Reason = string(shared.Terminating)
 		resource.Status.OsokStatus = util.UpdateOSOKStatusCondition(resource.Status.OsokStatus, shared.Terminating, v1.ConditionTrue, "", message, c.manager.Log)
 		return servicemanager.OSOKResponse{IsSuccessful: true, ShouldRequeue: true, RequeueDuration: routeTableRequeueDuration}, nil

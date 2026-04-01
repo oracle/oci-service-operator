@@ -195,6 +195,77 @@ func TestCreateOrUpdate_ObserveByStatusOCID_NoOpWhenStateMatches(t *testing.T) {
 	assert.Equal(t, "AVAILABLE", resource.Status.LifecycleState)
 }
 
+func TestCreateOrUpdate_DoesNotRecreateWhenObservedTerminated(t *testing.T) {
+	createCalls := 0
+	updateCalls := 0
+	manager := newRouteTableTestManager(&fakeRouteTableOCIClient{
+		getFn: func(_ context.Context, req coresdk.GetRouteTableRequest) (coresdk.GetRouteTableResponse, error) {
+			assert.Equal(t, "ocid1.routetable.oc1..terminated", *req.RtId)
+			return coresdk.GetRouteTableResponse{
+				RouteTable: makeSDKRouteTable("ocid1.routetable.oc1..terminated", "test-route-table", coresdk.RouteTableLifecycleStateTerminated),
+			}, nil
+		},
+		createFn: func(_ context.Context, _ coresdk.CreateRouteTableRequest) (coresdk.CreateRouteTableResponse, error) {
+			createCalls++
+			return coresdk.CreateRouteTableResponse{}, nil
+		},
+		updateFn: func(_ context.Context, _ coresdk.UpdateRouteTableRequest) (coresdk.UpdateRouteTableResponse, error) {
+			updateCalls++
+			return coresdk.UpdateRouteTableResponse{}, nil
+		},
+	})
+
+	resource := makeSpecRouteTable()
+	resource.Status.Id = "ocid1.routetable.oc1..terminated"
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.routetable.oc1..terminated")
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.True(t, resp.ShouldRequeue)
+	assert.Equal(t, 0, createCalls)
+	assert.Equal(t, 0, updateCalls)
+	assert.Equal(t, shared.OCID("ocid1.routetable.oc1..terminated"), resource.Status.OsokStatus.Ocid)
+	assert.Equal(t, string(shared.Terminating), resource.Status.OsokStatus.Reason)
+	assert.Equal(t, "TERMINATED", resource.Status.LifecycleState)
+}
+
+func TestCreateOrUpdate_RecreatesOnNotFound(t *testing.T) {
+	getCalls := 0
+	createCalls := 0
+	manager := newRouteTableTestManager(&fakeRouteTableOCIClient{
+		getFn: func(_ context.Context, _ coresdk.GetRouteTableRequest) (coresdk.GetRouteTableResponse, error) {
+			getCalls++
+			return coresdk.GetRouteTableResponse{}, fakeRouteTableServiceError{
+				statusCode: 404,
+				code:       "NotFound",
+				message:    "not found",
+			}
+		},
+		createFn: func(_ context.Context, req coresdk.CreateRouteTableRequest) (coresdk.CreateRouteTableResponse, error) {
+			createCalls++
+			assert.Equal(t, common.String("ocid1.compartment.oc1..example"), req.CompartmentId)
+			return coresdk.CreateRouteTableResponse{
+				RouteTable: makeSDKRouteTable("ocid1.routetable.oc1..recreated", "test-route-table", coresdk.RouteTableLifecycleStateAvailable),
+			}, nil
+		},
+	})
+
+	resource := makeSpecRouteTable()
+	resource.Status.Id = "ocid1.routetable.oc1..existing"
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.routetable.oc1..existing")
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.Equal(t, 1, getCalls)
+	assert.Equal(t, 1, createCalls)
+	assert.Equal(t, shared.OCID("ocid1.routetable.oc1..recreated"), resource.Status.OsokStatus.Ocid)
+	assert.Equal(t, "ocid1.routetable.oc1..recreated", resource.Status.Id)
+}
+
 func TestCreateOrUpdate_MutableDriftTriggersUpdate(t *testing.T) {
 	var captured coresdk.UpdateRouteTableRequest
 	manager := newRouteTableTestManager(&fakeRouteTableOCIClient{
@@ -354,6 +425,29 @@ func TestDelete_KeepsFinalizerWhileResourceStillExists(t *testing.T) {
 		getFn: func(_ context.Context, _ coresdk.GetRouteTableRequest) (coresdk.GetRouteTableResponse, error) {
 			return coresdk.GetRouteTableResponse{
 				RouteTable: makeSDKRouteTable("ocid1.routetable.oc1..delete", "test-route-table", coresdk.RouteTableLifecycleStateTerminating),
+			}, nil
+		},
+	})
+
+	resource := makeSpecRouteTable()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.routetable.oc1..delete")
+
+	done, err := manager.Delete(context.Background(), resource)
+
+	assert.NoError(t, err)
+	assert.False(t, done)
+	assert.Nil(t, resource.Status.OsokStatus.DeletedAt)
+	assert.Equal(t, string(shared.Terminating), resource.Status.OsokStatus.Reason)
+}
+
+func TestDelete_KeepsFinalizerWhileObservedTerminated(t *testing.T) {
+	manager := newRouteTableTestManager(&fakeRouteTableOCIClient{
+		deleteFn: func(_ context.Context, _ coresdk.DeleteRouteTableRequest) (coresdk.DeleteRouteTableResponse, error) {
+			return coresdk.DeleteRouteTableResponse{}, nil
+		},
+		getFn: func(_ context.Context, _ coresdk.GetRouteTableRequest) (coresdk.GetRouteTableResponse, error) {
+			return coresdk.GetRouteTableResponse{
+				RouteTable: makeSDKRouteTable("ocid1.routetable.oc1..delete", "test-route-table", coresdk.RouteTableLifecycleStateTerminated),
 			}, nil
 		},
 	})
