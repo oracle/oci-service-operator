@@ -63,11 +63,11 @@ type PluggableDatabasePdbCreationTypeDetails struct {
 	// +kubebuilder:validation:Optional
 	CreationType string `json:"creationType,omitempty"`
 	// The OCID of the Source Pluggable Database.
-	// +kubebuilder:validation:Required
-	SourcePluggableDatabaseId string `json:"sourcePluggableDatabaseId"`
+	// +kubebuilder:validation:Optional
+	SourcePluggableDatabaseId string `json:"sourcePluggableDatabaseId,omitempty"`
 	// The DB system administrator password of the source Container Database.
-	// +kubebuilder:validation:Required
-	SourceContainerDatabaseAdminPassword string `json:"sourceContainerDatabaseAdminPassword"`
+	// +kubebuilder:validation:Optional
+	SourceContainerDatabaseAdminPassword string `json:"sourceContainerDatabaseAdminPassword,omitempty"`
 	// The name of the DB link user.
 	// +kubebuilder:validation:Optional
 	DblinkUsername string `json:"dblinkUsername,omitempty"`

@@ -40,11 +40,11 @@ type BackupDestinationSpec struct {
 	// +kubebuilder:validation:Optional
 	MountTypeDetails BackupDestinationMountTypeDetails `json:"mountTypeDetails,omitempty"`
 	// The connection string for connecting to the Recovery Appliance.
-	// +kubebuilder:validation:Required
-	ConnectionString string `json:"connectionString"`
+	// +kubebuilder:validation:Optional
+	ConnectionString string `json:"connectionString,omitempty"`
 	// The Virtual Private Catalog (VPC) users that are used to access the Recovery Appliance.
-	// +kubebuilder:validation:Required
-	VpcUsers []string `json:"vpcUsers"`
+	// +kubebuilder:validation:Optional
+	VpcUsers []string `json:"vpcUsers,omitempty"`
 	// NFS Mount type for backup destination.
 	// +kubebuilder:validation:Optional
 	NfsMountType string `json:"nfsMountType,omitempty"`
@@ -63,14 +63,14 @@ type BackupDestinationMountTypeDetails struct {
 	// +kubebuilder:validation:Optional
 	MountType string `json:"mountType,omitempty"`
 	// The local directory path on each VM cluster node where the NFS server location is mounted. The local directory path and the NFS server location must each be the same across all of the VM cluster nodes. Ensure that the NFS mount is maintained continuously on all of the VM cluster nodes.
-	// +kubebuilder:validation:Required
-	LocalMountPointPath string `json:"localMountPointPath"`
+	// +kubebuilder:validation:Optional
+	LocalMountPointPath string `json:"localMountPointPath,omitempty"`
 	// IP addresses for NFS Auto mount.
-	// +kubebuilder:validation:Required
-	NfsServer []string `json:"nfsServer"`
+	// +kubebuilder:validation:Optional
+	NfsServer []string `json:"nfsServer,omitempty"`
 	// Specifies the directory on which to mount the file system
-	// +kubebuilder:validation:Required
-	NfsServerExport string `json:"nfsServerExport"`
+	// +kubebuilder:validation:Optional
+	NfsServerExport string `json:"nfsServerExport,omitempty"`
 }
 
 // BackupDestinationAssociatedDatabase defines nested fields for BackupDestination.AssociatedDatabase.

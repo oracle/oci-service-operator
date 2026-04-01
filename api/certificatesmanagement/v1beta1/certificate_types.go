@@ -130,21 +130,21 @@ type CertificateConfig struct {
 	// +kubebuilder:validation:Optional
 	ConfigType string `json:"configType,omitempty"`
 	// The OCID of the private CA.
-	// +kubebuilder:validation:Required
-	IssuerCertificateAuthorityId string `json:"issuerCertificateAuthorityId"`
+	// +kubebuilder:validation:Optional
+	IssuerCertificateAuthorityId string `json:"issuerCertificateAuthorityId,omitempty"`
 	// The certificate signing request (in PEM format).
-	// +kubebuilder:validation:Required
-	CsrPem string `json:"csrPem"`
+	// +kubebuilder:validation:Optional
+	CsrPem string `json:"csrPem,omitempty"`
 	// +kubebuilder:validation:Optional
 	Validity CertificateConfigValidity `json:"validity,omitempty"`
-	// +kubebuilder:validation:Required
-	Subject CertificateConfigSubject `json:"subject"`
+	// +kubebuilder:validation:Optional
+	Subject CertificateConfigSubject `json:"subject,omitempty"`
 	// A list of subject alternative names.
 	// +kubebuilder:validation:Optional
 	SubjectAlternativeNames []CertificateConfigSubjectAlternativeName `json:"subjectAlternativeNames,omitempty"`
 	// The name of the profile used to create the certificate, which depends on the type of certificate you need.
-	// +kubebuilder:validation:Required
-	CertificateProfileType string `json:"certificateProfileType"`
+	// +kubebuilder:validation:Optional
+	CertificateProfileType string `json:"certificateProfileType,omitempty"`
 	// The algorithm to use to create key pairs.
 	// +kubebuilder:validation:Optional
 	KeyAlgorithm string `json:"keyAlgorithm,omitempty"`
@@ -152,14 +152,14 @@ type CertificateConfig struct {
 	// +kubebuilder:validation:Optional
 	SignatureAlgorithm string `json:"signatureAlgorithm,omitempty"`
 	// The certificate chain (in PEM format) for the imported certificate.
-	// +kubebuilder:validation:Required
-	CertChainPem string `json:"certChainPem"`
+	// +kubebuilder:validation:Optional
+	CertChainPem string `json:"certChainPem,omitempty"`
 	// The private key (in PEM format) for the imported certificate.
-	// +kubebuilder:validation:Required
-	PrivateKeyPem string `json:"privateKeyPem"`
+	// +kubebuilder:validation:Optional
+	PrivateKeyPem string `json:"privateKeyPem,omitempty"`
 	// The certificate (in PEM format) for the imported certificate.
-	// +kubebuilder:validation:Required
-	CertificatePem string `json:"certificatePem"`
+	// +kubebuilder:validation:Optional
+	CertificatePem string `json:"certificatePem,omitempty"`
 	// An optional passphrase for the private key.
 	// +kubebuilder:validation:Optional
 	PrivateKeyPemPassphrase string `json:"privateKeyPemPassphrase,omitempty"`
@@ -173,28 +173,12 @@ type CertificateRule struct {
 	RuleType string `json:"ruleType,omitempty"`
 	// A property specifying how often, in days, a certificate should be renewed.
 	// Expressed in ISO 8601 (https://en.wikipedia.org/wiki/ISO_8601#Time_intervals) format.
-	// +kubebuilder:validation:Required
-	RenewalInterval string `json:"renewalInterval"`
+	// +kubebuilder:validation:Optional
+	RenewalInterval string `json:"renewalInterval,omitempty"`
 	// A property specifying the period of time, in days, before the certificate's targeted renewal that the process should occur.
 	// Expressed in ISO 8601 (https://en.wikipedia.org/wiki/ISO_8601#Time_intervals) format.
-	// +kubebuilder:validation:Required
-	AdvanceRenewalPeriod string `json:"advanceRenewalPeriod"`
-}
-
-// CertificateRuleObservedState defines nested fields for Certificate.CertificateRule.
-type CertificateRuleObservedState struct {
 	// +kubebuilder:validation:Optional
-	JsonData string `json:"jsonData,omitempty"`
-	// +kubebuilder:validation:Optional
-	RuleType string `json:"ruleType,omitempty"`
-	// A property specifying how often, in days, a certificate should be renewed.
-	// Expressed in ISO 8601 (https://en.wikipedia.org/wiki/ISO_8601#Time_intervals) format.
-	// +kubebuilder:validation:Required
-	RenewalInterval string `json:"renewalInterval"`
-	// A property specifying the period of time, in days, before the certificate's targeted renewal that the process should occur.
-	// Expressed in ISO 8601 (https://en.wikipedia.org/wiki/ISO_8601#Time_intervals) format.
-	// +kubebuilder:validation:Required
-	AdvanceRenewalPeriod string `json:"advanceRenewalPeriod"`
+	AdvanceRenewalPeriod string `json:"advanceRenewalPeriod,omitempty"`
 }
 
 // CertificateCurrentVersionSubjectAlternativeName defines nested fields for Certificate.CurrentVersion.SubjectAlternativeName.
@@ -381,7 +365,7 @@ type CertificateStatus struct {
 	// A brief description of the certificate. Avoid entering confidential information.
 	Description string `json:"description,omitempty"`
 	// A list of rules that control how the certificate is used and managed.
-	CertificateRules []CertificateRuleObservedState `json:"certificateRules,omitempty"`
+	CertificateRules []CertificateRule `json:"certificateRules,omitempty"`
 	// An optional property indicating when to delete the certificate version, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
 	// Example: `2019-04-03T21:10:29.600Z`
 	TimeOfDeletion string `json:"timeOfDeletion,omitempty"`

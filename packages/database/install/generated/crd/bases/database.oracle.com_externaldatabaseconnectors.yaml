@@ -93,12 +93,6 @@ spec:
                     description: The username that will be used to connect to the
                       database.
                     type: string
-                required:
-                - credentialName
-                - password
-                - role
-                - sslSecretId
-                - username
                 type: object
               connectionString:
                 description: ExternalDatabaseConnectorConnectionString defines nested
@@ -160,9 +154,6 @@ spec:
               jsonData:
                 type: string
             required:
-            - connectionCredentials
-            - connectionString
-            - connectorAgentId
             - displayName
             - externalDatabaseId
             type: object

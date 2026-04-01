@@ -261,8 +261,7 @@ spec:
                 description: Available CNIs and network options for existing and new
                   node pools of the cluster
                 items:
-                  description: ClusterPodNetworkOptionObservedState defines nested
-                    fields for Cluster.ClusterPodNetworkOption.
+                  description: ClusterPodNetworkOption defines nested fields for Cluster.ClusterPodNetworkOption.
                   properties:
                     cniType:
                       type: string

@@ -48,14 +48,14 @@ type LogConfigurationSource struct {
 	// +kubebuilder:validation:Optional
 	SourceType string `json:"sourceType,omitempty"`
 	// Service generating log.
-	// +kubebuilder:validation:Required
-	Service string `json:"service"`
+	// +kubebuilder:validation:Optional
+	Service string `json:"service,omitempty"`
 	// The unique identifier of the resource emitting the log.
-	// +kubebuilder:validation:Required
-	Resource string `json:"resource"`
+	// +kubebuilder:validation:Optional
+	Resource string `json:"resource,omitempty"`
 	// Log object category.
-	// +kubebuilder:validation:Required
-	Category string `json:"category"`
+	// +kubebuilder:validation:Optional
+	Category string `json:"category,omitempty"`
 	// Log category parameters are stored here.
 	// +kubebuilder:validation:Optional
 	Parameters map[string]string `json:"parameters,omitempty"`
@@ -72,37 +72,6 @@ type LogConfigurationArchiving struct {
 type LogConfiguration struct {
 	// +kubebuilder:validation:Required
 	Source LogConfigurationSource `json:"source"`
-	// The OCID of the compartment that the resource belongs to.
-	// +kubebuilder:validation:Optional
-	CompartmentId string `json:"compartmentId,omitempty"`
-	// +kubebuilder:validation:Optional
-	Archiving LogConfigurationArchiving `json:"archiving,omitempty"`
-}
-
-// LogConfigurationSourceObservedState defines nested fields for Log.Configuration.Source.
-type LogConfigurationSourceObservedState struct {
-	// +kubebuilder:validation:Optional
-	JsonData string `json:"jsonData,omitempty"`
-	// +kubebuilder:validation:Optional
-	SourceType string `json:"sourceType,omitempty"`
-	// Service generating log.
-	// +kubebuilder:validation:Required
-	Service string `json:"service"`
-	// The unique identifier of the resource emitting the log.
-	// +kubebuilder:validation:Required
-	Resource string `json:"resource"`
-	// Log object category.
-	// +kubebuilder:validation:Required
-	Category string `json:"category"`
-	// Log category parameters are stored here.
-	// +kubebuilder:validation:Optional
-	Parameters map[string]string `json:"parameters,omitempty"`
-}
-
-// LogConfigurationObservedState defines nested fields for Log.Configuration.
-type LogConfigurationObservedState struct {
-	// +kubebuilder:validation:Required
-	Source LogConfigurationSourceObservedState `json:"source"`
 	// The OCID of the compartment that the resource belongs to.
 	// +kubebuilder:validation:Optional
 	CompartmentId string `json:"compartmentId,omitempty"`
@@ -135,8 +104,8 @@ type LogStatus struct {
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no
 	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
-	FreeformTags  map[string]string             `json:"freeformTags,omitempty"`
-	Configuration LogConfigurationObservedState `json:"configuration,omitempty"`
+	FreeformTags  map[string]string `json:"freeformTags,omitempty"`
+	Configuration LogConfiguration  `json:"configuration,omitempty"`
 	// Time the resource was created.
 	TimeCreated string `json:"timeCreated,omitempty"`
 	// Time the resource was last modified.

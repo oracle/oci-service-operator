@@ -16,8 +16,12 @@ rules:
   resources:
   - secrets
   verbs:
+  - create
+  - delete
   - get
   - list
+  - patch
+  - update
   - watch
 - apiGroups:
   - artifacts.oracle.com
@@ -308,7 +312,7 @@ rules:
   - networksecuritygroupsecurityrules
   - networksecuritygroupvnics
   - privateips
-  - publicipbyipaddresss
+  - publicipbyipaddresses
   - publicipbyprivateipids
   - publicippools
   - publicips
@@ -442,7 +446,7 @@ rules:
   - networksecuritygroupsecurityrules/finalizers
   - networksecuritygroupvnics/finalizers
   - privateips/finalizers
-  - publicipbyipaddresss/finalizers
+  - publicipbyipaddresses/finalizers
   - publicipbyprivateipids/finalizers
   - publicippools/finalizers
   - publicips/finalizers
@@ -570,7 +574,7 @@ rules:
   - networksecuritygroupsecurityrules/status
   - networksecuritygroupvnics/status
   - privateips/status
-  - publicipbyipaddresss/status
+  - publicipbyipaddresses/status
   - publicipbyprivateipids/status
   - publicippools/status
   - publicips/status
@@ -1820,7 +1824,7 @@ rules:
 - apiGroups:
   - streaming.oracle.com
   resources:
-  - connectharnesss
+  - connectharnesses
   - streampools
   - streams
   verbs:
@@ -1834,7 +1838,7 @@ rules:
 - apiGroups:
   - streaming.oracle.com
   resources:
-  - connectharnesss/finalizers
+  - connectharnesses/finalizers
   - streampools/finalizers
   - streams/finalizers
   verbs:
@@ -1842,7 +1846,7 @@ rules:
 - apiGroups:
   - streaming.oracle.com
   resources:
-  - connectharnesss/status
+  - connectharnesses/status
   - streampools/status
   - streams/status
   verbs:

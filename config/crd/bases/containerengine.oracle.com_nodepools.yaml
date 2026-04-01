@@ -162,8 +162,6 @@ spec:
                         items:
                           type: string
                         type: array
-                    required:
-                    - podSubnetIds
                     type: object
                   nsgIds:
                     description: The OCIDs of the Network Security Group(s) to associate
@@ -314,8 +312,6 @@ spec:
                     type: string
                   sourceType:
                     type: string
-                required:
-                - imageId
                 type: object
               quantityPerSubnet:
                 description: |-
@@ -454,8 +450,6 @@ spec:
                         items:
                           type: string
                         type: array
-                    required:
-                    - podSubnetIds
                     type: object
                   nsgIds:
                     description: The OCIDs of the Network Security Group(s) to associate
@@ -622,8 +616,6 @@ spec:
                     type: string
                   sourceType:
                     type: string
-                required:
-                - imageId
                 type: object
               nodes:
                 description: The nodes in the node pool.

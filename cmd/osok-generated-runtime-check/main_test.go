@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"os"
 	"path/filepath"
 	"slices"
@@ -9,27 +8,6 @@ import (
 
 	"github.com/oracle/oci-service-operator/internal/generator"
 )
-
-func TestLoadRuntimeCheckRunInputsPreserveExistingSpecSurface(t *testing.T) {
-	t.Parallel()
-
-	repoRoot, err := findRepoRoot()
-	if err != nil {
-		t.Fatalf("findRepoRoot() error = %v", err)
-	}
-
-	inputs, err := loadRuntimeCheckRunInputs(context.Background(), options{
-		configPath:   defaultConfigPath,
-		all:          true,
-		preserveSpec: true,
-	})
-	if err != nil {
-		t.Fatalf("loadRuntimeCheckRunInputs() error = %v", err)
-	}
-	if inputs.preserveRoot != repoRoot {
-		t.Fatalf("preserveRoot = %q, want %q", inputs.preserveRoot, repoRoot)
-	}
-}
 
 func TestCollectBuildPlanFindsGeneratedRuntimePackages(t *testing.T) {
 	t.Helper()

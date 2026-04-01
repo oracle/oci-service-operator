@@ -194,14 +194,6 @@ spec:
                     description: A name for the certificate. When the value is not
                       null, a name is unique across versions of a given certificate.
                     type: string
-                required:
-                - certChainPem
-                - certificatePem
-                - certificateProfileType
-                - csrPem
-                - issuerCertificateAuthorityId
-                - privateKeyPem
-                - subject
                 type: object
               certificateRules:
                 description: An optional list of rules that control how the certificate
@@ -223,9 +215,6 @@ spec:
                       type: string
                     ruleType:
                       type: string
-                  required:
-                  - advanceRenewalPeriod
-                  - renewalInterval
                   type: object
                 type: array
               compartmentId:
@@ -317,8 +306,7 @@ spec:
                 description: A list of rules that control how the certificate is used
                   and managed.
                 items:
-                  description: CertificateRuleObservedState defines nested fields
-                    for Certificate.CertificateRule.
+                  description: CertificateRule defines nested fields for Certificate.CertificateRule.
                   properties:
                     advanceRenewalPeriod:
                       description: |-
@@ -334,9 +322,6 @@ spec:
                       type: string
                     ruleType:
                       type: string
-                  required:
-                  - advanceRenewalPeriod
-                  - renewalInterval
                   type: object
                 type: array
               compartmentId:

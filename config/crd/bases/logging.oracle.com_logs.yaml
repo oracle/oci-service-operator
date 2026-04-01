@@ -96,10 +96,6 @@ spec:
                         type: string
                       sourceType:
                         type: string
-                    required:
-                    - category
-                    - resource
-                    - service
                     type: object
                 required:
                 - source
@@ -150,8 +146,7 @@ spec:
                   to.
                 type: string
               configuration:
-                description: LogConfigurationObservedState defines nested fields for
-                  Log.Configuration.
+                description: LogConfiguration defines nested fields for Log.Configuration.
                 properties:
                   archiving:
                     description: LogConfigurationArchiving defines nested fields for
@@ -168,8 +163,8 @@ spec:
                       to.
                     type: string
                   source:
-                    description: LogConfigurationSourceObservedState defines nested
-                      fields for Log.Configuration.Source.
+                    description: LogConfigurationSource defines nested fields for
+                      Log.Configuration.Source.
                     properties:
                       category:
                         description: Log object category.
@@ -190,10 +185,6 @@ spec:
                         type: string
                       sourceType:
                         type: string
-                    required:
-                    - category
-                    - resource
-                    - service
                     type: object
                 required:
                 - source

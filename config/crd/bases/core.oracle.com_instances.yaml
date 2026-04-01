@@ -646,8 +646,7 @@ spec:
                 description: Custom metadata that you provide.
                 type: object
               platformConfig:
-                description: InstancePlatformConfigObservedState defines nested fields
-                  for Instance.PlatformConfig.
+                description: InstancePlatformConfig defines nested fields for Instance.PlatformConfig.
                 properties:
                   isSymmetricMultiThreadingEnabled:
                     description: |-

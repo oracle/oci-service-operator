@@ -318,8 +318,8 @@ func TestDbSystemServiceManagerCreateOrUpdateTreatsEmptyAdminSecretObjectsAsOmit
 			CompartmentId: "ocid1.compartment.oc1..example",
 			ShapeName:     "MySQL.VM.Standard.E3.1.8GB",
 			SubnetId:      "ocid1.subnet.oc1..example",
-			AdminUsername: &shared.UsernameSource{},
-			AdminPassword: &shared.PasswordSource{},
+			AdminUsername: shared.UsernameSource{},
+			AdminPassword: shared.PasswordSource{},
 		},
 	}
 
@@ -333,11 +333,11 @@ func TestDbSystemServiceManagerCreateOrUpdateTreatsEmptyAdminSecretObjectsAsOmit
 	if request.AdminPassword != nil {
 		t.Fatalf("CreateDbSystemDetails.AdminPassword = %v, want omitted nil pointer", request.AdminPassword)
 	}
-	if resource.Status.AdminUsername != nil {
-		t.Fatalf("status.adminUsername = %#v, want omitted nil pointer", resource.Status.AdminUsername)
+	if resource.Status.AdminUsername != (shared.UsernameSource{}) {
+		t.Fatalf("status.adminUsername = %#v, want zero value", resource.Status.AdminUsername)
 	}
-	if resource.Status.AdminPassword != nil {
-		t.Fatalf("status.adminPassword = %#v, want omitted nil pointer", resource.Status.AdminPassword)
+	if resource.Status.AdminPassword != (shared.PasswordSource{}) {
+		t.Fatalf("status.adminPassword = %#v, want zero value", resource.Status.AdminPassword)
 	}
 	if len(credentialClient.readNames) != 0 {
 		t.Fatalf("credential reads = %v, want no secret lookups", credentialClient.readNames)
@@ -850,12 +850,12 @@ func newExistingDbSystemWithAdminSecrets(current, desired quickDbSystemAdminSecr
 	}
 }
 
-func usernameSecretSource(name string) *shared.UsernameSource {
-	return &shared.UsernameSource{Secret: shared.SecretSource{SecretName: name}}
+func usernameSecretSource(name string) shared.UsernameSource {
+	return shared.UsernameSource{Secret: shared.SecretSource{SecretName: name}}
 }
 
-func passwordSecretSource(name string) *shared.PasswordSource {
-	return &shared.PasswordSource{Secret: shared.SecretSource{SecretName: name}}
+func passwordSecretSource(name string) shared.PasswordSource {
+	return shared.PasswordSource{Secret: shared.SecretSource{SecretName: name}}
 }
 
 func randomOCID(rand *rand.Rand, resource string) string {

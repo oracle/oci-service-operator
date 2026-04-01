@@ -15,6 +15,10 @@ import (
 	"testing"
 	"testing/quick"
 
+	databasesdk "github.com/oracle/oci-go-sdk/v65/database"
+	mysqlsdk "github.com/oracle/oci-go-sdk/v65/mysql"
+	databasev1beta1 "github.com/oracle/oci-service-operator/api/database/v1beta1"
+	mysqlv1beta1 "github.com/oracle/oci-service-operator/api/mysql/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/credhelper"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
@@ -512,6 +516,193 @@ func TestServiceClientCreateOrUpdateOmitsEmptySecretInputs(t *testing.T) {
 	}
 	if len(credentialClient.readNames) != 0 {
 		t.Fatalf("credential reads = %v, want no secret lookups", credentialClient.readNames)
+	}
+}
+
+func TestGeneratedCredentialSourceFieldsOmitZeroJSON(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name     string
+		value    any
+		unwanted []string
+	}{
+		{
+			name: "autonomous database spec",
+			value: databasev1beta1.AutonomousDatabaseSpec{
+				CompartmentId: "ocid1.compartment.oc1..adb",
+				DisplayName:   "adb-sample",
+			},
+			unwanted: []string{`"adminPassword"`},
+		},
+		{
+			name: "mysql dbsystem spec",
+			value: mysqlv1beta1.DbSystemSpec{
+				CompartmentId: "ocid1.compartment.oc1..mysql",
+				ShapeName:     "MySQL.VM.Standard.E4.1.8GB",
+				SubnetId:      "ocid1.subnet.oc1..mysql",
+			},
+			unwanted: []string{`"adminUsername"`, `"adminPassword"`},
+		},
+		{
+			name:     "mysql dbsystem status",
+			value:    mysqlv1beta1.DbSystemStatus{},
+			unwanted: []string{`"adminUsername"`, `"adminPassword"`},
+		},
+	}
+
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			payload, err := json.Marshal(tc.value)
+			if err != nil {
+				t.Fatalf("json.Marshal() error = %v", err)
+			}
+			for _, token := range tc.unwanted {
+				if strings.Contains(string(payload), token) {
+					t.Fatalf("json.Marshal() = %s, unexpected token %s", payload, token)
+				}
+			}
+		})
+	}
+}
+
+//nolint:gocognit,gocyclo // Table-driven coverage keeps the generated polymorphic create-body variants together.
+func TestBuildRequestPopulatesAutonomousDatabasePolymorphicCreateBody(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name   string
+		spec   databasev1beta1.AutonomousDatabaseSpec
+		assert func(*testing.T, databasesdk.CreateAutonomousDatabaseBase)
+	}{
+		{
+			name: "default create details",
+			spec: databasev1beta1.AutonomousDatabaseSpec{
+				CompartmentId: "ocid1.compartment.oc1..create",
+				DisplayName:   "adb-create",
+			},
+			assert: func(t *testing.T, body databasesdk.CreateAutonomousDatabaseBase) {
+				t.Helper()
+
+				details, ok := body.(databasesdk.CreateAutonomousDatabaseDetails)
+				if !ok {
+					t.Fatalf("create body type = %T, want %T", body, databasesdk.CreateAutonomousDatabaseDetails{})
+				}
+				if details.CompartmentId == nil || *details.CompartmentId != "ocid1.compartment.oc1..create" {
+					t.Fatalf("details.compartmentId = %v, want ocid1.compartment.oc1..create", details.CompartmentId)
+				}
+				if details.DisplayName == nil || *details.DisplayName != "adb-create" {
+					t.Fatalf("details.displayName = %v, want adb-create", details.DisplayName)
+				}
+			},
+		},
+		{
+			name: "clone details",
+			spec: databasev1beta1.AutonomousDatabaseSpec{
+				CompartmentId: "ocid1.compartment.oc1..clone",
+				DisplayName:   "adb-clone",
+				Source:        "DATABASE",
+				SourceId:      "ocid1.autonomousdatabase.oc1..source",
+			},
+			assert: func(t *testing.T, body databasesdk.CreateAutonomousDatabaseBase) {
+				t.Helper()
+
+				details, ok := body.(databasesdk.CreateAutonomousDatabaseCloneDetails)
+				if !ok {
+					t.Fatalf("create body type = %T, want %T", body, databasesdk.CreateAutonomousDatabaseCloneDetails{})
+				}
+				if details.SourceId == nil || *details.SourceId != "ocid1.autonomousdatabase.oc1..source" {
+					t.Fatalf("details.sourceId = %v, want ocid1.autonomousdatabase.oc1..source", details.SourceId)
+				}
+				if details.DisplayName == nil || *details.DisplayName != "adb-clone" {
+					t.Fatalf("details.displayName = %v, want adb-clone", details.DisplayName)
+				}
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			request := &databasesdk.CreateAutonomousDatabaseRequest{}
+			resource := &databasev1beta1.AutonomousDatabase{Spec: tc.spec}
+
+			err := buildRequest(
+				context.Background(),
+				request,
+				resource,
+				"",
+				[]RequestField{{FieldName: "CreateAutonomousDatabaseDetails", RequestName: "createAutonomousDatabaseDetails", Contribution: "body"}},
+				nil,
+				nil,
+			)
+			if err != nil {
+				t.Fatalf("buildRequest() error = %v", err)
+			}
+			if request.CreateAutonomousDatabaseDetails == nil {
+				t.Fatal("buildRequest() should populate CreateAutonomousDatabaseDetails")
+			}
+
+			tc.assert(t, request.CreateAutonomousDatabaseDetails)
+		})
+	}
+}
+
+func TestBuildRequestOmitsUnsetGeneratedAdminCredentialSources(t *testing.T) {
+	t.Parallel()
+
+	mysqlRequest := &mysqlsdk.CreateDbSystemRequest{}
+	mysqlResource := &mysqlv1beta1.DbSystem{
+		Spec: mysqlv1beta1.DbSystemSpec{
+			CompartmentId: "ocid1.compartment.oc1..mysql",
+			ShapeName:     "MySQL.VM.Standard.E4.1.8GB",
+			SubnetId:      "ocid1.subnet.oc1..mysql",
+		},
+	}
+
+	if err := buildRequest(context.Background(), mysqlRequest, mysqlResource, "", nil, nil, nil); err != nil {
+		t.Fatalf("buildRequest(mysql) error = %v", err)
+	}
+	if mysqlRequest.AdminUsername != nil {
+		t.Fatalf("mysql adminUsername = %v, want nil when secret source is omitted", mysqlRequest.AdminUsername)
+	}
+	if mysqlRequest.AdminPassword != nil {
+		t.Fatalf("mysql adminPassword = %v, want nil when secret source is omitted", mysqlRequest.AdminPassword)
+	}
+
+	adbRequest := &databasesdk.CreateAutonomousDatabaseRequest{}
+	adbResource := &databasev1beta1.AutonomousDatabase{
+		Spec: databasev1beta1.AutonomousDatabaseSpec{
+			CompartmentId: "ocid1.compartment.oc1..adb",
+			DisplayName:   "adb-sample",
+		},
+	}
+
+	if err := buildRequest(
+		context.Background(),
+		adbRequest,
+		adbResource,
+		"",
+		[]RequestField{{FieldName: "CreateAutonomousDatabaseDetails", RequestName: "createAutonomousDatabaseDetails", Contribution: "body"}},
+		nil,
+		nil,
+	); err != nil {
+		t.Fatalf("buildRequest(adb) error = %v", err)
+	}
+	if adbRequest.CreateAutonomousDatabaseDetails == nil {
+		t.Fatal("buildRequest(adb) should populate CreateAutonomousDatabaseDetails")
+	}
+	adbDetails, ok := adbRequest.CreateAutonomousDatabaseDetails.(databasesdk.CreateAutonomousDatabaseDetails)
+	if !ok {
+		t.Fatalf("create body type = %T, want %T", adbRequest.CreateAutonomousDatabaseDetails, databasesdk.CreateAutonomousDatabaseDetails{})
+	}
+	if adbDetails.AdminPassword != nil {
+		t.Fatalf("autonomous database adminPassword = %v, want nil when secret source is omitted", adbDetails.AdminPassword)
 	}
 }
 

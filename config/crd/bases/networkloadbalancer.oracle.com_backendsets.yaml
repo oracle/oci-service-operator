@@ -203,8 +203,7 @@ spec:
               backends:
                 description: Array of backends.
                 items:
-                  description: BackendSetBackendObservedState defines nested fields
-                    for BackendSet.Backend.
+                  description: BackendSetBackend defines nested fields for BackendSet.Backend.
                   properties:
                     ipAddress:
                       description: |-

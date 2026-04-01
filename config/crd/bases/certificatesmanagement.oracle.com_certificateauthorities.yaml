@@ -154,9 +154,6 @@ spec:
                     description: The name of the CA version. When the value is not
                       null, a name is unique across versions of a given CA.
                     type: string
-                required:
-                - issuerCertificateAuthorityId
-                - subject
                 type: object
               certificateAuthorityRules:
                 description: A list of rules that control how the CA is used and managed.
@@ -272,8 +269,8 @@ spec:
                 description: An optional list of rules that control how the CA is
                   used and managed.
                 items:
-                  description: CertificateAuthorityRuleObservedState defines nested
-                    fields for CertificateAuthority.CertificateAuthorityRule.
+                  description: CertificateAuthorityRule defines nested fields for
+                    CertificateAuthority.CertificateAuthorityRule.
                   properties:
                     certificateAuthorityMaxValidityDuration:
                       description: |-
@@ -292,7 +289,7 @@ spec:
                   type: object
                 type: array
               certificateRevocationListDetails:
-                description: CertificateAuthorityCertificateRevocationListDetailsObservedState
+                description: CertificateAuthorityCertificateRevocationListDetails
                   defines nested fields for CertificateAuthority.CertificateRevocationListDetails.
                 properties:
                   customFormattedUrls:

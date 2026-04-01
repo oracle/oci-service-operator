@@ -71,10 +71,10 @@ type AutonomousDatabaseSpec struct {
 	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Oracle Cloud Infrastructure vault (https://docs.cloud.oracle.com/Content/KeyManagement/Concepts/keyoverview.htm#concepts). This parameter and `secretId` are required for Customer Managed Keys.
 	// +kubebuilder:validation:Optional
 	VaultId string `json:"vaultId,omitempty"`
-	// **Important** The `adminPassword` or `secretId` must be specified for all Autonomous Databases except for refreshable clones. The password must be between 12 and 30 characters long, and must contain at least 1 uppercase, 1 lowercase, and 1 numeric character. It cannot contain the double quote symbol (") or the username "admin", regardless of casing.
-	// This cannot be used in conjunction with with OCI vault secrets (secretId).
+	// The administrative password sourced from a Kubernetes Secret in the same namespace.
+	// The referenced Secret must contain a `password` key. Use `secretId` and `secretVersionNumber` instead to reference an OCI Vault secret.
 	// +kubebuilder:validation:Optional
-	AdminPassword shared.PasswordSource `json:"adminPassword,omitempty"`
+	AdminPassword shared.PasswordSource `json:"adminPassword,omitempty,omitzero"`
 	// The user-friendly name for the Autonomous Database. The name does not have to be unique.
 	// +kubebuilder:validation:Optional
 	DisplayName string `json:"displayName,omitempty"`
@@ -360,18 +360,6 @@ type AutonomousDatabaseLongTermBackupSchedule struct {
 	// Indicates if the long-term backup schedule should be deleted. The default value is `FALSE`.
 	// +kubebuilder:validation:Optional
 	IsDisabled bool `json:"isDisabled,omitempty"`
-}
-
-// AutonomousDatabaseScheduledOperationObservedState defines nested fields for AutonomousDatabase.ScheduledOperation.
-type AutonomousDatabaseScheduledOperationObservedState struct {
-	// +kubebuilder:validation:Required
-	DayOfWeek AutonomousDatabaseScheduledOperationDayOfWeek `json:"dayOfWeek"`
-	// auto start time. value must be of ISO-8601 format "HH:mm"
-	// +kubebuilder:validation:Optional
-	ScheduledStartTime string `json:"scheduledStartTime,omitempty"`
-	// auto stop time. value must be of ISO-8601 format "HH:mm"
-	// +kubebuilder:validation:Optional
-	ScheduledStopTime string `json:"scheduledStopTime,omitempty"`
 }
 
 // AutonomousDatabaseBackupConfig defines nested fields for AutonomousDatabase.BackupConfig.
@@ -776,7 +764,7 @@ type AutonomousDatabaseStatus struct {
 	AutonomousMaintenanceScheduleType string `json:"autonomousMaintenanceScheduleType,omitempty"`
 	// The list of scheduled operations. Consists of values such as dayOfWeek, scheduledStartTime, scheduledStopTime.
 	// This cannot be updated in parallel with any of the following: licenseModel, dbEdition, cpuCoreCount, computeCount, computeModel, whitelistedIps, isMTLSConnectionRequired, openMode, permissionLevel, dbWorkload, privateEndpointLabel, nsgIds, dbVersion, isRefreshable, dbName, dbToolsDetails, isLocalDataGuardEnabled, or isFreeTier.
-	ScheduledOperations []AutonomousDatabaseScheduledOperationObservedState `json:"scheduledOperations,omitempty"`
+	ScheduledOperations []AutonomousDatabaseScheduledOperation `json:"scheduledOperations,omitempty"`
 	// Indicates if auto scaling is enabled for the Autonomous Database storage. The default value is `FALSE`.
 	IsAutoScalingForStorageEnabled bool `json:"isAutoScalingForStorageEnabled,omitempty"`
 	// The amount of storage currently allocated for the database tables and billed for, rounded up. When auto-scaling is not enabled, this value is equal to the `dataStorageSizeInTBs` value. You can compare this value to the `actualUsedDataStorageSizeInTBs` value to determine if a manual shrink operation is appropriate for your allocated storage.

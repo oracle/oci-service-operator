@@ -6,11 +6,5 @@
 apiVersion: streaming.oracle.com/v1beta1
 kind: Stream
 metadata:
-  name: sample-stream
-spec:
-  # compartmentId: ocid1.compartment.oc1..aaaaaaaaXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-  name: SampleStream
-  streamPoolId: ocid1.streampool.oc1.iad.XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-  partitions: 1
-  retentionInHours: 24
-  # Id: ocid1.stream.oc1.<region_code>.XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+  name: stream-sample
+spec: {}

@@ -97,7 +97,6 @@ spec:
             - isForwarding
             - isListening
             - name
-            - subnetId
             type: object
           status:
             description: ResolverEndpointStatus defines the observed state of ResolverEndpoint.

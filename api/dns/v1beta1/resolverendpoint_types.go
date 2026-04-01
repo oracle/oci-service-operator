@@ -36,8 +36,8 @@ type ResolverEndpointSpec struct {
 	// +kubebuilder:validation:Optional
 	EndpointType string `json:"endpointType,omitempty"`
 	// The OCID of a subnet. Must be part of the VCN that the resolver is attached to.
-	// +kubebuilder:validation:Required
-	SubnetId string `json:"subnetId"`
+	// +kubebuilder:validation:Optional
+	SubnetId string `json:"subnetId,omitempty"`
 	// An array of network security group OCIDs for the resolver endpoint. These must be part of the VCN that the
 	// resolver endpoint is a part of.
 	// +kubebuilder:validation:Optional

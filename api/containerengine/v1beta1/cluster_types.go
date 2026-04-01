@@ -172,34 +172,6 @@ type ClusterPodNetworkOption struct {
 	CniType string `json:"cniType,omitempty"`
 }
 
-// ClusterOptionsObservedState defines nested fields for Cluster.Options.
-type ClusterOptionsObservedState struct {
-	// The OCIDs of the subnets used for Kubernetes services load balancers.
-	// +kubebuilder:validation:Optional
-	ServiceLbSubnetIds []string `json:"serviceLbSubnetIds,omitempty"`
-	// Network configuration for Kubernetes.
-	// +kubebuilder:validation:Optional
-	KubernetesNetworkConfig ClusterOptionsKubernetesNetworkConfig `json:"kubernetesNetworkConfig,omitempty"`
-	// Configurable cluster add-ons
-	// +kubebuilder:validation:Optional
-	AddOns ClusterOptionsAddOns `json:"addOns,omitempty"`
-	// Configurable cluster admission controllers
-	// +kubebuilder:validation:Optional
-	AdmissionControllerOptions ClusterOptionsAdmissionControllerOptions `json:"admissionControllerOptions,omitempty"`
-	// +kubebuilder:validation:Optional
-	PersistentVolumeConfig ClusterOptionsPersistentVolumeConfig `json:"persistentVolumeConfig,omitempty"`
-	// +kubebuilder:validation:Optional
-	ServiceLbConfig ClusterOptionsServiceLbConfig `json:"serviceLbConfig,omitempty"`
-}
-
-// ClusterPodNetworkOptionObservedState defines nested fields for Cluster.ClusterPodNetworkOption.
-type ClusterPodNetworkOptionObservedState struct {
-	// +kubebuilder:validation:Optional
-	JsonData string `json:"jsonData,omitempty"`
-	// +kubebuilder:validation:Optional
-	CniType string `json:"cniType,omitempty"`
-}
-
 // ClusterMetadata defines nested fields for Cluster.Metadata.
 type ClusterMetadata struct {
 	// The time the cluster was created.
@@ -266,7 +238,7 @@ type ClusterStatus struct {
 	// Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
 	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`
 	// Optional attributes for the cluster.
-	Options ClusterOptionsObservedState `json:"options,omitempty"`
+	Options ClusterOptions `json:"options,omitempty"`
 	// Metadata about the cluster.
 	Metadata ClusterMetadata `json:"metadata,omitempty"`
 	// The state of the cluster masters.
@@ -280,7 +252,7 @@ type ClusterStatus struct {
 	// The image verification policy for signature validation.
 	ImagePolicyConfig ClusterImagePolicyConfig `json:"imagePolicyConfig,omitempty"`
 	// Available CNIs and network options for existing and new node pools of the cluster
-	ClusterPodNetworkOptions []ClusterPodNetworkOptionObservedState `json:"clusterPodNetworkOptions,omitempty"`
+	ClusterPodNetworkOptions []ClusterPodNetworkOption `json:"clusterPodNetworkOptions,omitempty"`
 	// Type of cluster
 	Type string `json:"type,omitempty"`
 }

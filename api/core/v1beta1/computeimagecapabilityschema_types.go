@@ -51,24 +51,8 @@ type ComputeImageCapabilitySchemaSchemaData struct {
 	// +kubebuilder:validation:Optional
 	DescriptorType string `json:"descriptorType,omitempty"`
 	// the list of values for the enum
-	// +kubebuilder:validation:Required
-	Values []string `json:"values"`
-	// the default value
 	// +kubebuilder:validation:Optional
-	DefaultValue string `json:"defaultValue,omitempty"`
-}
-
-// ComputeImageCapabilitySchemaSchemaDataObservedState defines nested fields for ComputeImageCapabilitySchema.SchemaData.
-type ComputeImageCapabilitySchemaSchemaDataObservedState struct {
-	// +kubebuilder:validation:Optional
-	JsonData string `json:"jsonData,omitempty"`
-	// +kubebuilder:validation:Required
-	Source string `json:"source"`
-	// +kubebuilder:validation:Optional
-	DescriptorType string `json:"descriptorType,omitempty"`
-	// the list of values for the enum
-	// +kubebuilder:validation:Required
-	Values []string `json:"values"`
+	Values []string `json:"values,omitempty"`
 	// the default value
 	// +kubebuilder:validation:Optional
 	DefaultValue string `json:"defaultValue,omitempty"`
@@ -89,7 +73,7 @@ type ComputeImageCapabilitySchemaStatus struct {
 	// Avoid entering confidential information.
 	DisplayName string `json:"displayName,omitempty"`
 	// The map of each capability name to its ImageCapabilityDescriptor.
-	SchemaData map[string]ComputeImageCapabilitySchemaSchemaDataObservedState `json:"schemaData,omitempty"`
+	SchemaData map[string]ComputeImageCapabilitySchemaSchemaData `json:"schemaData,omitempty"`
 	// The date and time the compute image capability schema was created, in the format defined by
 	// RFC3339 (https://tools.ietf.org/html/rfc3339).
 	// Example: `2016-08-25T21:10:29.600Z`

@@ -420,7 +420,6 @@ spec:
                 type: string
             required:
             - adminPassword
-            - database
             - dbName
             type: object
           status:
