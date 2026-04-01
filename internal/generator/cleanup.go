@@ -26,8 +26,8 @@ type cleanupInventory struct {
 	serviceManagerRoots    map[string]struct{}
 }
 
-func cleanupGeneratedOutputs(root string, services []ServiceConfig, packages []*PackageModel) error {
-	inventory := buildCleanupInventory(root, services, packages)
+func cleanupGeneratedOutputs(root string, cfg *Config, services []ServiceConfig, packages []*PackageModel) error {
+	inventory := buildCleanupInventory(root, cfg, services, packages)
 
 	if err := cleanupAPIOutputs(root, inventory); err != nil {
 		return fmt.Errorf("cleanup api outputs: %w", err)
@@ -51,7 +51,7 @@ func cleanupGeneratedOutputs(root string, services []ServiceConfig, packages []*
 	return nil
 }
 
-func buildCleanupInventory(root string, services []ServiceConfig, packages []*PackageModel) cleanupInventory {
+func buildCleanupInventory(root string, cfg *Config, services []ServiceConfig, packages []*PackageModel) cleanupInventory {
 	inventory := cleanupInventory{
 		apiFiles:               map[string]struct{}{},
 		controllerFiles:        map[string]struct{}{},
@@ -66,6 +66,8 @@ func buildCleanupInventory(root string, services []ServiceConfig, packages []*Pa
 
 	for _, service := range services {
 		inventory.selectedGroups[service.Group] = struct{}{}
+		prefix := sampleFilePrefix(service.Group, service.VersionOrDefault(defaultVersion(cfg)))
+		inventory.selectedSamplePrefixes[prefix] = struct{}{}
 	}
 
 	for _, pkg := range packages {
@@ -78,10 +80,6 @@ func buildCleanupInventory(root string, services []ServiceConfig, packages []*Pa
 				inventory.sampleFiles[filepath.Join(root, "config", "samples", resource.Sample.FileName)] = struct{}{}
 			}
 		}
-
-		prefix := sampleFilePrefix(pkg.Service.Group, pkg.Version)
-		inventory.selectedSamplePrefixes[prefix] = struct{}{}
-
 		for _, controller := range pkg.Controller.Resources {
 			inventory.controllerFiles[filepath.Join(root, "controllers", pkg.Service.Group, controller.FileStem+"_controller.go")] = struct{}{}
 		}
@@ -102,6 +100,13 @@ func buildCleanupInventory(root string, services []ServiceConfig, packages []*Pa
 	}
 
 	return inventory
+}
+
+func defaultVersion(cfg *Config) string {
+	if cfg == nil {
+		return ""
+	}
+	return cfg.DefaultVersion
 }
 
 func cleanupAPIOutputs(root string, inventory cleanupInventory) error {

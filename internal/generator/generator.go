@@ -16,6 +16,7 @@ type Options struct {
 	OutputRoot   string
 	Overwrite    bool
 	SkipExisting bool
+	FullSync     bool
 }
 
 // ServiceResult describes the outcome for one generated or skipped service.
@@ -62,7 +63,11 @@ func (g *Generator) Generate(ctx context.Context, cfg *Config, services []Servic
 	}
 
 	if options.Overwrite {
-		if err := cleanupGeneratedOutputs(options.OutputRoot, services, builtPackages); err != nil {
+		cleanupServices := services
+		if options.FullSync && cfg != nil {
+			cleanupServices = cfg.Services
+		}
+		if err := cleanupGeneratedOutputs(options.OutputRoot, cfg, cleanupServices, builtPackages); err != nil {
 			return result, err
 		}
 	}

@@ -124,6 +124,7 @@ func TestGenerateFullSyncCleansStaleGeneratorOwnedOutputsForInactiveServicesAndE
 	if _, err := pipeline.Generate(context.Background(), cfg, activeServices, Options{
 		OutputRoot: outputRoot,
 		Overwrite:  true,
+		FullSync:   true,
 	}); err != nil {
 		t.Fatalf("Generate() full-sync error = %v", err)
 	}
@@ -133,17 +134,21 @@ func TestGenerateFullSyncCleansStaleGeneratorOwnedOutputsForInactiveServicesAndE
 	assertPathNotExists(t, filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "report", "report_serviceclient.go"))
 	assertPathNotExists(t, filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "report", "report_servicemanager.go"))
 	assertPathNotExists(t, filepath.Join(outputRoot, "config", "samples", "mysql_v1beta1_report.yaml"))
+	assertPathNotExists(t, filepath.Join(outputRoot, "api", "identity", "v1beta1", "widget_types.go"))
+	assertPathNotExists(t, filepath.Join(outputRoot, "controllers", "identity", "widget_controller.go"))
+	assertPathNotExists(t, filepath.Join(outputRoot, "pkg", "servicemanager", "identity", "widget", "widget_serviceclient.go"))
+	assertPathNotExists(t, filepath.Join(outputRoot, "pkg", "servicemanager", "identity", "widget", "widget_servicemanager.go"))
+	assertPathNotExists(t, filepath.Join(outputRoot, "internal", "registrations", "identity_generated.go"))
+	assertPathNotExists(t, filepath.Join(outputRoot, "packages", "identity", "metadata.env"))
+	assertPathNotExists(t, filepath.Join(outputRoot, "packages", "identity", "install", "kustomization.yaml"))
+	assertPathNotExists(t, filepath.Join(outputRoot, "config", "samples", "identity_v1beta1_widget.yaml"))
 
 	assertPathExists(t, filepath.Join(outputRoot, "api", "mysql", "v1beta1", "widget_types.go"))
-	assertPathExists(t, filepath.Join(outputRoot, "api", "identity", "v1beta1", "widget_types.go"))
 	assertPathExists(t, filepath.Join(outputRoot, "controllers", "mysql", "widget_controller.go"))
-	assertPathExists(t, filepath.Join(outputRoot, "controllers", "identity", "widget_controller.go"))
 	assertPathExists(t, filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "widget", "widget_serviceclient.go"))
-	assertPathExists(t, filepath.Join(outputRoot, "pkg", "servicemanager", "identity", "widget", "widget_serviceclient.go"))
 	assertPathExists(t, filepath.Join(outputRoot, "packages", "mysql", "metadata.env"))
-	assertPathExists(t, filepath.Join(outputRoot, "internal", "registrations", "identity_generated.go"))
+	assertPathExists(t, filepath.Join(outputRoot, "internal", "registrations", "mysql_generated.go"))
 	assertPathExists(t, filepath.Join(outputRoot, "config", "samples", "mysql_v1beta1_widget.yaml"))
-	assertPathExists(t, filepath.Join(outputRoot, "config", "samples", "identity_v1beta1_widget.yaml"))
 	assertPathExists(t, preservedDeepCopyFile)
 	assertPathExists(t, preservedPackageFile)
 	assertFileDoesNotContain(t, filepath.Join(outputRoot, "internal", "registrations", "mysql_generated.go"), []string{"ReportReconciler"})

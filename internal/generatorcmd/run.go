@@ -75,6 +75,7 @@ func execute(ctx context.Context, opts options, stdout io.Writer) error {
 		OutputRoot:   opts.outputRoot,
 		Overwrite:    opts.overwrite,
 		SkipExisting: opts.all && !opts.overwrite,
+		FullSync:     opts.all,
 	})
 	if err != nil {
 		return err
