@@ -216,6 +216,8 @@ func cleanupPackageGroup(groupDir string, packagesRoot string, desired bool) err
 		return err
 	}
 
+	// cmd/generator owns the package metadata and install kustomization files.
+	// install/generated is refreshed by downstream manifest targets.
 	for _, path := range []string{
 		filepath.Join(groupDir, "metadata.env"),
 		filepath.Join(groupDir, "install", "kustomization.yaml"),
@@ -223,10 +225,6 @@ func cleanupPackageGroup(groupDir string, packagesRoot string, desired bool) err
 		if err := os.Remove(path); err != nil && !os.IsNotExist(err) {
 			return err
 		}
-	}
-
-	if err := os.RemoveAll(filepath.Join(groupDir, "install", "generated")); err != nil {
-		return err
 	}
 
 	if desired {
@@ -328,8 +326,8 @@ func selectedServiceManagerRoots(services []ServiceConfig) map[string]struct{} {
 }
 
 func isOwnedAPIFile(name string) bool {
+	// Deepcopy companions are produced by controller-gen, not cmd/generator.
 	return name == "groupversion_info.go" ||
-		name == "zz_generated.deepcopy.go" ||
 		strings.HasSuffix(name, "_types.go")
 }
 

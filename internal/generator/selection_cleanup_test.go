@@ -87,7 +87,7 @@ func TestGenerateExplicitServiceOverrideIncludesDisabledServiceSurface(t *testin
 	}
 }
 
-func TestGenerateFullSyncCleansStaleOutputsForInactiveServicesAndExcludedKinds(t *testing.T) {
+func TestGenerateFullSyncCleansStaleGeneratorOwnedOutputsForInactiveServicesAndExcludedKinds(t *testing.T) {
 	t.Parallel()
 
 	cfg := selectionCleanupTestConfig()
@@ -101,12 +101,20 @@ func TestGenerateFullSyncCleansStaleOutputsForInactiveServicesAndExcludedKinds(t
 		t.Fatalf("seed Generate() error = %v", err)
 	}
 
-	stalePackageFile := filepath.Join(outputRoot, "packages", "mysql", "install", "generated", "crd", "bases", "mysql.oracle.com_report.yaml")
-	if err := os.MkdirAll(filepath.Dir(stalePackageFile), 0o755); err != nil {
-		t.Fatalf("MkdirAll(%q) error = %v", filepath.Dir(stalePackageFile), err)
+	preservedDeepCopyFile := filepath.Join(outputRoot, "api", "mysql", "v1beta1", "zz_generated.deepcopy.go")
+	if err := os.MkdirAll(filepath.Dir(preservedDeepCopyFile), 0o755); err != nil {
+		t.Fatalf("MkdirAll(%q) error = %v", filepath.Dir(preservedDeepCopyFile), err)
 	}
-	if err := os.WriteFile(stalePackageFile, []byte("stale package output\n"), 0o644); err != nil {
-		t.Fatalf("WriteFile(%q) error = %v", stalePackageFile, err)
+	if err := os.WriteFile(preservedDeepCopyFile, []byte("// preserved deepcopy output\n"), 0o644); err != nil {
+		t.Fatalf("WriteFile(%q) error = %v", preservedDeepCopyFile, err)
+	}
+
+	preservedPackageFile := filepath.Join(outputRoot, "packages", "mysql", "install", "generated", "crd", "bases", "mysql.oracle.com_report.yaml")
+	if err := os.MkdirAll(filepath.Dir(preservedPackageFile), 0o755); err != nil {
+		t.Fatalf("MkdirAll(%q) error = %v", filepath.Dir(preservedPackageFile), err)
+	}
+	if err := os.WriteFile(preservedPackageFile, []byte("preserved manifest output\n"), 0o644); err != nil {
+		t.Fatalf("WriteFile(%q) error = %v", preservedPackageFile, err)
 	}
 
 	activeServices, err := cfg.SelectServices("", true)
@@ -123,7 +131,7 @@ func TestGenerateFullSyncCleansStaleOutputsForInactiveServicesAndExcludedKinds(t
 	assertPathNotExists(t, filepath.Join(outputRoot, "api", "mysql", "v1beta1", "report_types.go"))
 	assertPathNotExists(t, filepath.Join(outputRoot, "controllers", "mysql", "report_controller.go"))
 	assertPathNotExists(t, filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "report", "report_serviceclient.go"))
-	assertPathNotExists(t, stalePackageFile)
+	assertPathNotExists(t, filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "report", "report_servicemanager.go"))
 	assertPathNotExists(t, filepath.Join(outputRoot, "config", "samples", "mysql_v1beta1_report.yaml"))
 
 	assertPathExists(t, filepath.Join(outputRoot, "api", "mysql", "v1beta1", "widget_types.go"))
@@ -136,7 +144,15 @@ func TestGenerateFullSyncCleansStaleOutputsForInactiveServicesAndExcludedKinds(t
 	assertPathExists(t, filepath.Join(outputRoot, "internal", "registrations", "identity_generated.go"))
 	assertPathExists(t, filepath.Join(outputRoot, "config", "samples", "mysql_v1beta1_widget.yaml"))
 	assertPathExists(t, filepath.Join(outputRoot, "config", "samples", "identity_v1beta1_widget.yaml"))
+	assertPathExists(t, preservedDeepCopyFile)
+	assertPathExists(t, preservedPackageFile)
 	assertFileDoesNotContain(t, filepath.Join(outputRoot, "internal", "registrations", "mysql_generated.go"), []string{"ReportReconciler"})
+	if got := readFile(t, preservedDeepCopyFile); got != "// preserved deepcopy output\n" {
+		t.Fatalf("deepcopy companion content = %q, want preserved content", got)
+	}
+	if got := readFile(t, preservedPackageFile); got != "preserved manifest output\n" {
+		t.Fatalf("package install/generated content = %q, want preserved content", got)
+	}
 }
 
 func selectionCleanupTestConfig() *Config {
