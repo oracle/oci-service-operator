@@ -76,6 +76,11 @@ services:
     sdkPackage: example.com/test/sdk
     group: mysql
     packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Widget
     generation:
       resources:
         - kind: Widget
@@ -129,6 +134,11 @@ services:
     sdkPackage: example.com/test/sdk
     group: mysql
     packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Widget
     generation:
       resources:
         - kind: Widget

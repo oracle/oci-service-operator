@@ -31,6 +31,9 @@ services:
     sdkPackage: example.com/identity
     group: identity
     packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
     formalSpec: user
 `
 	if err := os.WriteFile(configPath, []byte(content), 0o644); err != nil {

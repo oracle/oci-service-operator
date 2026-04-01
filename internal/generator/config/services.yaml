@@ -1,4 +1,8 @@
 # Source-of-truth service map for the OSOK generator contract.
+# Service selection metadata declares the default active generation surface.
+# - selection.enabled=false keeps a service inactive by default.
+# - selection.mode=all enables all discovered kinds for that service.
+# - selection.mode=explicit limits default activity to selection.includeKinds.
 # Services without a `generation` block default to:
 # - controller/serviceManager/registration: none
 # - webhooks: manual
@@ -20,6 +24,9 @@ services:
     version: v1beta1
     phase: data-and-storage
     packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
     generation:
       controller:
         strategy: generated
@@ -36,6 +43,9 @@ services:
     version: v1beta1
     phase: security-and-identity
     packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
     observedState:
       excludedFieldPaths:
         CertificateBundle:
@@ -58,6 +68,9 @@ services:
     version: v1beta1
     phase: security-and-identity
     packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
     generation:
       controller:
         strategy: generated
@@ -74,6 +87,9 @@ services:
     version: v1beta1
     phase: networking-and-infrastructure
     packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: all
     generation:
       controller:
         strategy: generated
@@ -94,6 +110,9 @@ services:
     version: v1beta1
     phase: networking-and-infrastructure
     packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
     generation:
       controller:
         strategy: generated
@@ -165,6 +184,11 @@ services:
     phase: data-and-storage
     sampleOrder: 10
     packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - AutonomousDatabase
     package:
       extraResources:
         - ../../../config/rbac/autonomousdatabases_editor_role.yaml
@@ -209,6 +233,9 @@ services:
     version: v1beta1
     phase: networking-and-infrastructure
     packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
     generation:
       controller:
         strategy: generated
@@ -236,6 +263,9 @@ services:
     version: v1beta1
     phase: eventing-messaging-and-observability
     packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
     generation:
       controller:
         strategy: generated
@@ -252,6 +282,9 @@ services:
     version: v1beta1
     phase: eventing-messaging-and-observability
     packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
     generation:
       controller:
         strategy: generated
@@ -268,6 +301,9 @@ services:
     version: v1beta1
     phase: security-and-identity
     packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
     generation:
       controller:
         strategy: generated
@@ -321,6 +357,9 @@ services:
     version: v1beta1
     phase: security-and-identity
     packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
     observedState:
       excludedFieldPaths:
         PreCoUserCredential:
@@ -362,6 +401,9 @@ services:
     version: v1beta1
     phase: eventing-messaging-and-observability
     packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
     generation:
       controller:
         strategy: generated
@@ -378,6 +420,9 @@ services:
     version: v1beta1
     phase: networking-and-infrastructure
     packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
     generation:
       controller:
         strategy: generated
@@ -394,6 +439,9 @@ services:
     version: v1beta1
     phase: eventing-messaging-and-observability
     packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
     generation:
       controller:
         strategy: generated
@@ -410,6 +458,9 @@ services:
     version: v1beta1
     phase: eventing-messaging-and-observability
     packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
     generation:
       controller:
         strategy: generated
@@ -431,6 +482,9 @@ services:
     phase: data-and-storage
     sampleOrder: 30
     packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: all
     observedState:
       excludedFieldPaths:
         Channel:
@@ -507,6 +561,9 @@ services:
     version: v1beta1
     phase: networking-and-infrastructure
     packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
     generation:
       controller:
         strategy: generated
@@ -527,6 +584,9 @@ services:
     version: v1beta1
     phase: data-and-storage
     packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: all
     generation:
       controller:
         strategy: generated
@@ -547,6 +607,9 @@ services:
     version: v1beta1
     phase: data-and-storage
     packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
     generation:
       controller:
         strategy: generated
@@ -567,6 +630,9 @@ services:
     version: v1beta1
     phase: eventing-messaging-and-observability
     packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
     generation:
       controller:
         strategy: generated
@@ -587,6 +653,9 @@ services:
     version: v1beta1
     phase: data-and-storage
     packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: all
     generation:
       controller:
         strategy: generated
@@ -609,6 +678,9 @@ services:
     version: v1beta1
     phase: eventing-messaging-and-observability
     packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
     generation:
       controller:
         strategy: generated
@@ -629,6 +701,9 @@ services:
     version: v1beta1
     phase: security-and-identity
     packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
     generation:
       controller:
         strategy: generated
@@ -655,6 +730,11 @@ services:
     phase: eventing-messaging-and-observability
     sampleOrder: 20
     packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Stream
     generation:
       controller:
         strategy: generated
@@ -699,6 +779,9 @@ services:
     version: v1beta1
     phase: security-and-identity
     packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
     generation:
       controller:
         strategy: generated
@@ -715,6 +798,9 @@ services:
     version: v1beta1
     phase: networking-and-infrastructure
     packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
     generation:
       controller:
         strategy: generated

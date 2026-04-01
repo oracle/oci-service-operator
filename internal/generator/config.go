@@ -34,6 +34,9 @@ const (
 	GenerationStrategyNone      = "none"
 	GenerationStrategyManual    = "manual"
 	GenerationStrategyGenerated = "generated"
+
+	SelectionModeAll      = "all"
+	SelectionModeExplicit = "explicit"
 )
 
 // PackageProfile describes how generated service outputs integrate with packaging.
@@ -44,6 +47,13 @@ type PackageProfile struct {
 // PackageConfig describes service-scoped package overlay details.
 type PackageConfig struct {
 	ExtraResources []string `yaml:"extraResources,omitempty"`
+}
+
+// SelectionConfig declares whether a service participates in the default active surface.
+type SelectionConfig struct {
+	Enabled      *bool    `yaml:"enabled"`
+	Mode         string   `yaml:"mode"`
+	IncludeKinds []string `yaml:"includeKinds,omitempty"`
 }
 
 // GenerationConfig defines controller/service-manager/runtime rollout for a service.
@@ -112,6 +122,7 @@ type ServiceConfig struct {
 	SampleOrder    int                 `yaml:"sampleOrder,omitempty"`
 	PackageProfile string              `yaml:"packageProfile"`
 	Package        PackageConfig       `yaml:"package,omitempty"`
+	Selection      SelectionConfig     `yaml:"selection"`
 	FormalSpec     string              `yaml:"formalSpec,omitempty"`
 	ObservedState  ObservedStateConfig `yaml:"observedState,omitempty"`
 	Generation     GenerationConfig    `yaml:"generation,omitempty"`
@@ -185,6 +196,9 @@ func (c *Config) validateService(
 		return err
 	}
 	if err := validatePackageExtraResources(service); err != nil {
+		return err
+	}
+	if err := service.Selection.Validate(service.Service); err != nil {
 		return err
 	}
 	if err := validateFormalSpec(fmt.Sprintf("service %q formalSpec", service.Service), service.FormalSpec); err != nil {
@@ -284,6 +298,55 @@ func validateUniqueServiceKeys(
 	if _, exists := groupsByName[service.Group]; exists {
 		return fmt.Errorf("duplicate group %q", service.Group)
 	}
+	return nil
+}
+
+// Validate ensures service selection metadata is coherent before generation begins.
+func (s SelectionConfig) Validate(serviceName string) error {
+	if s.Enabled == nil {
+		return fmt.Errorf("service %q selection.enabled is required", serviceName)
+	}
+
+	mode := strings.TrimSpace(s.Mode)
+	switch mode {
+	case SelectionModeAll:
+		if len(s.IncludeKinds) > 0 {
+			return fmt.Errorf(
+				"service %q selection.includeKinds must be empty when selection.mode is %q",
+				serviceName,
+				SelectionModeAll,
+			)
+		}
+	case SelectionModeExplicit:
+		if len(s.IncludeKinds) == 0 {
+			return fmt.Errorf(
+				"service %q selection.includeKinds must list at least one kind when selection.mode is %q",
+				serviceName,
+				SelectionModeExplicit,
+			)
+		}
+
+		seen := make(map[string]struct{}, len(s.IncludeKinds))
+		for index, rawKind := range s.IncludeKinds {
+			kind := strings.TrimSpace(rawKind)
+			if kind == "" {
+				return fmt.Errorf("service %q selection.includeKinds[%d] must not be blank", serviceName, index)
+			}
+			if _, exists := seen[kind]; exists {
+				return fmt.Errorf("service %q selection.includeKinds contains duplicate kind %q", serviceName, kind)
+			}
+			seen[kind] = struct{}{}
+		}
+	default:
+		return fmt.Errorf(
+			"service %q selection.mode %q must be one of %q or %q",
+			serviceName,
+			s.Mode,
+			SelectionModeAll,
+			SelectionModeExplicit,
+		)
+	}
+
 	return nil
 }
 
@@ -608,6 +671,53 @@ func (s ServiceConfig) VersionOrDefault(defaultVersion string) string {
 // GroupDNSName returns the Kubernetes API group DNS name for the service.
 func (s ServiceConfig) GroupDNSName(domain string) string {
 	return fmt.Sprintf("%s.%s", s.Group, domain)
+}
+
+// IsDefaultActive reports whether the service is part of the default active surface.
+func (s ServiceConfig) IsDefaultActive() bool {
+	return s.Selection.Enabled != nil && *s.Selection.Enabled
+}
+
+// DefaultSelectionMode returns the validated default selection mode for the service.
+func (s ServiceConfig) DefaultSelectionMode() string {
+	return strings.TrimSpace(s.Selection.Mode)
+}
+
+// DefaultIncludeKinds returns the validated explicit default kind subset for the service.
+func (s ServiceConfig) DefaultIncludeKinds() []string {
+	if len(s.Selection.IncludeKinds) == 0 {
+		return nil
+	}
+
+	kinds := make([]string, 0, len(s.Selection.IncludeKinds))
+	for _, rawKind := range s.Selection.IncludeKinds {
+		kind := strings.TrimSpace(rawKind)
+		if kind == "" {
+			continue
+		}
+		kinds = append(kinds, kind)
+	}
+
+	if len(kinds) == 0 {
+		return nil
+	}
+	return kinds
+}
+
+// DefaultActiveServices returns the services marked active in the default generator surface.
+func (c *Config) DefaultActiveServices() []ServiceConfig {
+	if c == nil {
+		return nil
+	}
+
+	selected := make([]ServiceConfig, 0, len(c.Services))
+	for _, service := range c.Services {
+		if service.IsDefaultActive() {
+			selected = append(selected, service)
+		}
+	}
+
+	return selected
 }
 
 // IsControllerBacked reports whether the service expects shared-manager controller assets.

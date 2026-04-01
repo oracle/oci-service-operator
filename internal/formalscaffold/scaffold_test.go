@@ -28,6 +28,9 @@ services:
     version: v1beta1
     phase: security-and-identity
     packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
 `
 
 const testSourcesLock = `{

@@ -39,6 +39,20 @@ intentionally keep `controller.strategy: none` and
 `keymanagement/WrappingKey`, `streaming/Cursor`, `streaming/Group`,
 `streaming/GroupCursor`, and `streaming/Message`.
 
+The default active generator surface is also declared in
+`internal/generator/config/services.yaml` through each service's `selection`
+block. The current first-wave default-active surface is:
+
+- whole-service: `containerengine`
+- whole-service: `mysql`
+- whole-service: `nosql`
+- whole-service: `psql`
+- explicit kind: `database/AutonomousDatabase`
+- explicit kind: `streaming/Stream`
+
+All other configured services remain inactive by default until future rollout
+stories promote them, but they stay available for explicit generator runs.
+
 The only remaining checked-in legacy companion adapter is `streaming/Stream`.
 `database/AutonomousDatabase` no longer keeps the old compatibility adapter,
 but the published `v1beta1` kind still carries its checked-in webhook
