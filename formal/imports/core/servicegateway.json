@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "servicegateway",
+  "kind": "ServiceGateway",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_core_service_gateway",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateServiceGateway",
+        "requestType": "core.CreateServiceGatewayRequest",
+        "responseType": "core.CreateServiceGatewayResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetServiceGateway",
+        "requestType": "core.GetServiceGatewayRequest",
+        "responseType": "core.GetServiceGatewayResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListServiceGateways",
+        "requestType": "core.ListServiceGatewaysRequest",
+        "responseType": "core.ListServiceGatewaysResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateServiceGateway",
+        "requestType": "core.UpdateServiceGatewayRequest",
+        "responseType": "core.UpdateServiceGatewayResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteServiceGateway",
+        "requestType": "core.DeleteServiceGatewayRequest",
+        "responseType": "core.DeleteServiceGatewayResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "AVAILABLE"
+      ]
+    },
+    "update": {
+      "pending": [],
+      "target": [
+        "AVAILABLE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "block_traffic",
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "route_table_id",
+      "services"
+    ],
+    "forceNew": [
+      "compartment_id",
+      "vcn_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "TERMINATING",
+      "TERMINATED"
+    ],
+    "target": [
+      "NOT_FOUND"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_core_service_gateways",
+    "collectionField": "service_gateway",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "vcn_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/servicegateway/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/servicegateway/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: ServiceGateway lifecycle exposes PROVISIONING, AVAILABLE, TERMINATING, and TERMINATED; there is no distinct UPDATING, DELETING, or DELETED state in this branch.",
+    "Pinned OCI SDK contract: UpdateServiceGatewayDetails exposes block_traffic, defined_tags, display_name, freeform_tags, route_table_id, and services as in-place update fields; the handwritten runtime rejects create-only drift for compartment_id and vcn_id.",
+    "Pinned OCI SDK contract: CreateServiceGatewayDetails does not expose block_traffic, so the handwritten runtime only manages blockTraffic after creation via UpdateServiceGateway.",
+    "Repo-authored delete confirmation requires GetServiceGateway to return not found; observed TERMINATING and TERMINATED remain intermediate finalizer-holding states.",
+    "The handwritten runtime observes by tracked OCI identity rather than list-based bind semantics. Services are normalized by serviceId so ordering and response-only fields do not trigger spurious updates."
+  ]
+}
