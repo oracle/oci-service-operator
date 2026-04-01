@@ -293,14 +293,7 @@ type importBoundary struct {
 
 func Verify(root string) (Report, error) {
 	report := Report{Root: filepath.Clean(root)}
-	var problems []string
-
-	root = strings.TrimSpace(root)
-	if root == "" {
-		return report, &ValidationError{Problems: []string{"formal root must not be empty"}}
-	}
-
-	formalRoot, err := filepath.Abs(root)
+	formalRoot, err := normalizeFormalRoot(root)
 	if err != nil {
 		return report, err
 	}
@@ -310,45 +303,24 @@ func Verify(root string) (Report, error) {
 		return report, err
 	}
 
-	for _, requiredDir := range []string{"shared", sharedDiagramDir, controllerDiagramTemplateDir, "controllers", "imports"} {
-		if err := requireDirectory(filepath.Join(formalRoot, requiredDir)); err != nil {
-			problems = append(problems, err.Error())
-		}
-	}
-
+	problems := validateFormalDirectories(formalRoot)
 	report.SharedContracts, problems = validateSharedContracts(formalRoot, problems)
-	strategy, sharedDiagrams, sharedPairs, strategyProblems := validateDiagramStrategy(formalRoot)
+	strategy, sharedDiagrams, renderedPairs, strategyProblems := validateDiagramStrategy(formalRoot)
 	report.SharedDiagrams = sharedDiagrams
 	problems = append(problems, strategyProblems...)
 
-	sourceLock, sourceIndex, err := loadSourceLock(filepath.Join(formalRoot, "sources.lock"))
-	if err != nil {
-		problems = append(problems, err.Error())
-	} else {
-		report.Sources = len(sourceLock.Sources)
-	}
+	sourceCount, sourceIndex, sourceProblems := loadVerifiedSourceIndex(formalRoot)
+	report.Sources = sourceCount
+	problems = append(problems, sourceProblems...)
 
-	rows, err := loadManifest(filepath.Join(formalRoot, "controller_manifest.tsv"))
-	if err != nil {
-		problems = append(problems, err.Error())
-	} else {
-		report.Controllers = len(rows)
-	}
+	rows, controllerCount, manifestProblems := loadVerifiedManifest(formalRoot)
+	report.Controllers = controllerCount
+	problems = append(problems, manifestProblems...)
 
-	renderedPairs := append([]plantUMLPair(nil), sharedPairs...)
-	seenRows := map[string]int{}
-	for _, row := range rows {
-		rowKey := strings.Join([]string{row.Service, row.Slug, row.Kind}, "/")
-		if previous, ok := seenRows[rowKey]; ok {
-			problems = append(problems, fmt.Sprintf("controller_manifest.tsv line %d duplicates controller row from line %d for %s", row.Line, previous, rowKey))
-			continue
-		}
-		seenRows[rowKey] = row.Line
-		diagramCount, rowPairs, rowProblems := validateManifestRow(formalRoot, row, sourceIndex, strategy)
-		report.DiagramFiles += diagramCount
-		renderedPairs = append(renderedPairs, rowPairs...)
-		problems = append(problems, rowProblems...)
-	}
+	diagramCount, rowPairs, rowProblems := validateManifestRows(formalRoot, rows, sourceIndex, strategy)
+	report.DiagramFiles = diagramCount
+	renderedPairs = append(renderedPairs, rowPairs...)
+	problems = append(problems, rowProblems...)
 	problems = append(problems, validateRenderedPlantUMLArtifacts(formalRoot, renderedPairs)...)
 
 	if len(problems) > 0 {
@@ -385,47 +357,25 @@ func loadSourceLock(path string) (sourceLockFile, map[string]sourceLockEntry, er
 	if err != nil {
 		return sourceLockFile{}, nil, fmt.Errorf("sources.lock: %w", err)
 	}
-	if lockFile.SchemaVersion != currentSchemaVersion {
-		return sourceLockFile{}, nil, fmt.Errorf("sources.lock: schemaVersion=%d, want %d", lockFile.SchemaVersion, currentSchemaVersion)
-	}
-	if len(lockFile.Sources) == 0 {
-		return sourceLockFile{}, nil, fmt.Errorf("sources.lock: expected at least one provider source entry")
+	if err := validateSourceLockSchema(lockFile); err != nil {
+		return sourceLockFile{}, nil, err
 	}
 
-	index := make(map[string]sourceLockEntry, len(lockFile.Sources))
-	for i, source := range lockFile.Sources {
-		label := fmt.Sprintf("sources.lock source %d", i+1)
-		if strings.TrimSpace(source.Name) == "" {
-			return sourceLockFile{}, nil, fmt.Errorf("%s: name must not be empty", label)
-		}
-		if !allowedProviderSurfaces.has(source.Surface) {
-			return sourceLockFile{}, nil, fmt.Errorf("%s: surface=%q is not allowed", label, source.Surface)
-		}
-		if !allowedSourceStatuses.has(source.Status) {
-			return sourceLockFile{}, nil, fmt.Errorf("%s: status=%q is not allowed", label, source.Status)
-		}
-		if source.Status == "pinned" {
-			if strings.TrimSpace(source.Path) == "" || strings.TrimSpace(source.Revision) == "" {
-				return sourceLockFile{}, nil, fmt.Errorf("%s: pinned sources require non-empty path and revision", label)
-			}
-		}
-		if _, exists := index[source.Name]; exists {
-			return sourceLockFile{}, nil, fmt.Errorf("sources.lock: duplicate source name %q", source.Name)
-		}
-		index[source.Name] = source
+	index, err := buildSourceLockIndex(lockFile)
+	if err != nil {
+		return sourceLockFile{}, nil, err
 	}
 
 	return lockFile, index, nil
 }
 
 func loadManifest(path string) ([]manifestRow, error) {
-	file, err := os.Open(path)
+	contents, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
 
-	reader := csv.NewReader(file)
+	reader := csv.NewReader(bytes.NewReader(contents))
 	reader.Comma = '\t'
 	reader.FieldsPerRecord = -1
 
@@ -467,104 +417,19 @@ func loadManifest(path string) ([]manifestRow, error) {
 }
 
 func validateManifestRow(root string, row manifestRow, sourceIndex map[string]sourceLockEntry, strategy diagramStrategy) (int, []plantUMLPair, []string) {
-	var problems []string
-	var renderedPairs []plantUMLPair
-	rowLabel := fmt.Sprintf("controller_manifest.tsv line %d", row.Line)
+	problems := validateManifestRowMetadata(row)
+	paths, pathProblems := resolveManifestRowPaths(root, row)
+	problems = append(problems, pathProblems...)
 
-	if row.Service == "" {
-		problems = append(problems, fmt.Sprintf("%s: service must not be empty", rowLabel))
-	}
-	if row.Slug == "" {
-		problems = append(problems, fmt.Sprintf("%s: slug must not be empty", rowLabel))
-	}
-	if row.Kind == "" {
-		problems = append(problems, fmt.Sprintf("%s: kind must not be empty", rowLabel))
-	}
-	if !allowedStages.has(row.Stage) {
-		problems = append(problems, fmt.Sprintf("%s: stage=%q is not allowed", rowLabel, row.Stage))
-	}
-	if !allowedRepoSurfaces.has(row.Surface) {
-		problems = append(problems, fmt.Sprintf("%s: surface=%q is not allowed", rowLabel, row.Surface))
+	artifacts, artifactProblems := loadManifestRowArtifacts(root, row, paths, sourceIndex)
+	problems = append(problems, artifactProblems...)
+
+	if paths.DiagramDir == "" {
+		return 0, nil, problems
 	}
 
-	specPath, err := resolveWithinRoot(root, row.SpecPath)
-	if err != nil {
-		problems = append(problems, fmt.Sprintf("%s: %v", rowLabel, err))
-	}
-	logicPath, err := resolveWithinRoot(root, row.LogicPath)
-	if err != nil {
-		problems = append(problems, fmt.Sprintf("%s: %v", rowLabel, err))
-	}
-	importPath, err := resolveWithinRoot(root, row.ImportPath)
-	if err != nil {
-		problems = append(problems, fmt.Sprintf("%s: %v", rowLabel, err))
-	}
-	diagramDir, err := resolveWithinRoot(root, row.DiagramDir)
-	if err != nil {
-		problems = append(problems, fmt.Sprintf("%s: %v", rowLabel, err))
-	}
-
-	var (
-		specValues map[string]string
-		specModel  SpecModel
-		logicGaps  logicGapsFrontMatter
-		importDoc  importFile
-		hasSpec    bool
-		hasLogic   bool
-		hasImport  bool
-	)
-
-	if specPath != "" {
-		specValues, err = loadSpec(specPath)
-		if err != nil {
-			problems = append(problems, fmt.Sprintf("%s: spec %s: %v", rowLabel, filepath.ToSlash(row.SpecPath), err))
-		} else {
-			problems = append(problems, validateSpec(root, row, specValues)...)
-			specModel, err = parseSpecModel(row.SpecPath, specValues)
-			if err != nil {
-				problems = append(problems, err.Error())
-			} else {
-				hasSpec = true
-			}
-		}
-	}
-
-	if logicPath != "" {
-		logicGaps, err = loadLogicGaps(logicPath)
-		if err != nil {
-			problems = append(problems, fmt.Sprintf("%s: logic gaps %s: %v", rowLabel, filepath.ToSlash(row.LogicPath), err))
-		} else {
-			problems = append(problems, validateLogicGaps(row, logicGaps)...)
-			hasLogic = true
-		}
-	}
-
-	if importPath != "" {
-		importDoc, err = loadImport(importPath)
-		if err != nil {
-			problems = append(problems, fmt.Sprintf("%s: import %s: %v", rowLabel, filepath.ToSlash(row.ImportPath), err))
-		} else {
-			problems = append(problems, validateImport(row, importDoc, sourceIndex)...)
-			hasImport = true
-		}
-	}
-
-	diagramCount := 0
-	if diagramDir != "" {
-		var diagramProblems []string
-		var binding *ControllerBinding
-		if hasSpec && hasLogic && hasImport {
-			binding = &ControllerBinding{
-				Manifest:  row,
-				Spec:      specModel,
-				LogicGaps: append([]LogicGap(nil), logicGaps.Gaps...),
-				Import:    importDoc,
-			}
-		}
-		diagramCount, renderedPairs, diagramProblems = validateDiagramDir(root, diagramDir, row, binding, strategy)
-		problems = append(problems, diagramProblems...)
-	}
-
+	diagramCount, renderedPairs, diagramProblems := validateDiagramDir(root, paths.DiagramDir, row, artifacts.binding(row), strategy)
+	problems = append(problems, diagramProblems...)
 	return diagramCount, renderedPairs, problems
 }
 
@@ -604,91 +469,16 @@ func loadSpec(path string) (map[string]string, error) {
 }
 
 func validateSpec(root string, row manifestRow, values map[string]string) []string {
-	var problems []string
-	requiredKeys := []string{
-		"schema_version",
-		"surface",
-		"service",
-		"slug",
-		"kind",
-		"stage",
-		"import",
-		"shared_contracts",
-		"status_projection",
-		"success_condition",
-		"requeue_conditions",
-		"delete_confirmation",
-		"finalizer_policy",
-		"secret_side_effects",
-	}
-	for _, key := range requiredKeys {
-		if strings.TrimSpace(values[key]) == "" {
-			problems = append(problems, fmt.Sprintf("%s: missing required key %q", filepath.ToSlash(row.SpecPath), key))
-		}
-	}
+	specPath := filepath.ToSlash(row.SpecPath)
+	problems := validateSpecRequiredKeys(specPath, values)
 	if len(problems) > 0 {
 		return problems
 	}
 
-	if values["schema_version"] != fmt.Sprintf("%d", currentSchemaVersion) {
-		problems = append(problems, fmt.Sprintf("%s: schema_version=%q, want %d", filepath.ToSlash(row.SpecPath), values["schema_version"], currentSchemaVersion))
-	}
-	if !allowedRepoSurfaces.has(values["surface"]) {
-		problems = append(problems, fmt.Sprintf("%s: surface=%q is not allowed", filepath.ToSlash(row.SpecPath), values["surface"]))
-	}
-	if values["service"] != row.Service {
-		problems = append(problems, fmt.Sprintf("%s: service=%q does not match manifest service %q", filepath.ToSlash(row.SpecPath), values["service"], row.Service))
-	}
-	if values["slug"] != row.Slug {
-		problems = append(problems, fmt.Sprintf("%s: slug=%q does not match manifest slug %q", filepath.ToSlash(row.SpecPath), values["slug"], row.Slug))
-	}
-	if values["kind"] != row.Kind {
-		problems = append(problems, fmt.Sprintf("%s: kind=%q does not match manifest kind %q", filepath.ToSlash(row.SpecPath), values["kind"], row.Kind))
-	}
-	if values["stage"] != row.Stage {
-		problems = append(problems, fmt.Sprintf("%s: stage=%q does not match manifest stage %q", filepath.ToSlash(row.SpecPath), values["stage"], row.Stage))
-	}
-	if values["import"] != row.ImportPath {
-		problems = append(problems, fmt.Sprintf("%s: import=%q does not match manifest import %q", filepath.ToSlash(row.SpecPath), values["import"], row.ImportPath))
-	}
-	if !allowedStatusProjection.has(values["status_projection"]) {
-		problems = append(problems, fmt.Sprintf("%s: status_projection=%q is not allowed", filepath.ToSlash(row.SpecPath), values["status_projection"]))
-	}
-	if !allowedSuccessConditions.has(values["success_condition"]) {
-		problems = append(problems, fmt.Sprintf("%s: success_condition=%q is not allowed", filepath.ToSlash(row.SpecPath), values["success_condition"]))
-	}
-	if !allowedDeleteConfirmation.has(values["delete_confirmation"]) {
-		problems = append(problems, fmt.Sprintf("%s: delete_confirmation=%q is not allowed", filepath.ToSlash(row.SpecPath), values["delete_confirmation"]))
-	}
-	if !allowedFinalizerPolicies.has(values["finalizer_policy"]) {
-		problems = append(problems, fmt.Sprintf("%s: finalizer_policy=%q is not allowed", filepath.ToSlash(row.SpecPath), values["finalizer_policy"]))
-	}
-	if !allowedSecretSideEffects.has(values["secret_side_effects"]) {
-		problems = append(problems, fmt.Sprintf("%s: secret_side_effects=%q is not allowed", filepath.ToSlash(row.SpecPath), values["secret_side_effects"]))
-	}
-
-	requeueConditions := splitList(values["requeue_conditions"])
-	if len(requeueConditions) == 0 {
-		problems = append(problems, fmt.Sprintf("%s: requeue_conditions must contain at least one retryable condition", filepath.ToSlash(row.SpecPath)))
-	}
-	for _, condition := range requeueConditions {
-		if !allowedRequeueConditions.has(condition) {
-			problems = append(problems, fmt.Sprintf("%s: requeue condition %q is not allowed", filepath.ToSlash(row.SpecPath), condition))
-		}
-	}
-
-	sharedContracts := splitList(values["shared_contracts"])
-	for _, required := range requiredSharedContracts {
-		if !containsString(sharedContracts, required.Path) {
-			problems = append(problems, fmt.Sprintf("%s: shared_contracts must include %q", filepath.ToSlash(row.SpecPath), required.Path))
-		}
-	}
-	for _, contract := range sharedContracts {
-		if _, err := resolveWithinRoot(root, contract); err != nil {
-			problems = append(problems, fmt.Sprintf("%s: shared contract %q: %v", filepath.ToSlash(row.SpecPath), contract, err))
-		}
-	}
-
+	problems = append(problems, validateSpecScalarFields(specPath, row, values)...)
+	problems = append(problems, validateSpecAllowedValues(specPath, values)...)
+	problems = append(problems, validateSpecRequeueConditions(specPath, values)...)
+	problems = append(problems, validateSpecSharedContracts(root, specPath, values)...)
 	return problems
 }
 
@@ -757,114 +547,16 @@ func loadImport(path string) (importFile, error) {
 }
 
 func validateImport(row manifestRow, doc importFile, sourceIndex map[string]sourceLockEntry) []string {
+	importPath := filepath.ToSlash(row.ImportPath)
 	var problems []string
 
-	if doc.SchemaVersion != currentSchemaVersion {
-		problems = append(problems, fmt.Sprintf("%s: schemaVersion=%d, want %d", filepath.ToSlash(row.ImportPath), doc.SchemaVersion, currentSchemaVersion))
-	}
-	if !allowedProviderSurfaces.has(doc.Surface) {
-		problems = append(problems, fmt.Sprintf("%s: surface=%q is not allowed", filepath.ToSlash(row.ImportPath), doc.Surface))
-	}
-	if doc.Service != row.Service {
-		problems = append(problems, fmt.Sprintf("%s: service=%q does not match manifest service %q", filepath.ToSlash(row.ImportPath), doc.Service, row.Service))
-	}
-	if doc.Slug != row.Slug {
-		problems = append(problems, fmt.Sprintf("%s: slug=%q does not match manifest slug %q", filepath.ToSlash(row.ImportPath), doc.Slug, row.Slug))
-	}
-	if doc.Kind != row.Kind {
-		problems = append(problems, fmt.Sprintf("%s: kind=%q does not match manifest kind %q", filepath.ToSlash(row.ImportPath), doc.Kind, row.Kind))
-	}
-	if strings.TrimSpace(doc.ProviderResource) == "" {
-		problems = append(problems, fmt.Sprintf("%s: providerResource must not be empty", filepath.ToSlash(row.ImportPath)))
-	}
-	if strings.TrimSpace(doc.SourceRef) == "" {
-		problems = append(problems, fmt.Sprintf("%s: sourceRef must not be empty", filepath.ToSlash(row.ImportPath)))
-	}
-	source, ok := sourceIndex[doc.SourceRef]
-	if !ok {
-		problems = append(problems, fmt.Sprintf("%s: sourceRef=%q is not present in sources.lock", filepath.ToSlash(row.ImportPath), doc.SourceRef))
-	} else if source.Surface != doc.Surface {
-		problems = append(problems, fmt.Sprintf("%s: sourceRef=%q has surface %q in sources.lock, want %q", filepath.ToSlash(row.ImportPath), doc.SourceRef, source.Surface, doc.Surface))
-	}
-
-	if !doc.Boundary.ProviderFactsOnly {
-		problems = append(problems, fmt.Sprintf("%s: boundary.providerFactsOnly must be true", filepath.ToSlash(row.ImportPath)))
-	}
-	if doc.Boundary.RepoAuthoredSpecPath != row.SpecPath {
-		problems = append(problems, fmt.Sprintf("%s: boundary.repoAuthoredSpecPath=%q does not match manifest spec %q", filepath.ToSlash(row.ImportPath), doc.Boundary.RepoAuthoredSpecPath, row.SpecPath))
-	}
-	if doc.Boundary.RepoAuthoredLogicGapsPath != row.LogicPath {
-		problems = append(problems, fmt.Sprintf("%s: boundary.repoAuthoredLogicGapsPath=%q does not match manifest logic_gaps %q", filepath.ToSlash(row.ImportPath), doc.Boundary.RepoAuthoredLogicGapsPath, row.LogicPath))
-	}
-	if len(doc.Boundary.ExcludedSemantics) == 0 {
-		problems = append(problems, fmt.Sprintf("%s: boundary.excludedSemantics must document at least one repo-authored behavior", filepath.ToSlash(row.ImportPath)))
-	}
-
-	bindings := map[string][]operationBinding{
-		"create": doc.Operations.Create,
-		"get":    doc.Operations.Get,
-		"list":   doc.Operations.List,
-		"update": doc.Operations.Update,
-		"delete": doc.Operations.Delete,
-	}
-	bindingCount := 0
-	for operation, operationBindings := range bindings {
-		for _, binding := range operationBindings {
-			bindingCount++
-			if strings.TrimSpace(binding.Operation) == "" || strings.TrimSpace(binding.RequestType) == "" || strings.TrimSpace(binding.ResponseType) == "" {
-				problems = append(problems, fmt.Sprintf("%s: %s bindings require non-empty operation, requestType, and responseType", filepath.ToSlash(row.ImportPath), operation))
-				continue
-			}
-			expectedRequestType := qualifiedOperationType(binding.RequestType, binding.Operation, "Request")
-			if binding.RequestType != expectedRequestType {
-				problems = append(problems, fmt.Sprintf("%s: %s binding requestType=%q, want %q", filepath.ToSlash(row.ImportPath), binding.Operation, binding.RequestType, expectedRequestType))
-			}
-			expectedResponseType := qualifiedOperationType(binding.ResponseType, binding.Operation, "Response")
-			if binding.ResponseType != expectedResponseType {
-				problems = append(problems, fmt.Sprintf("%s: %s binding responseType=%q, want %q", filepath.ToSlash(row.ImportPath), binding.Operation, binding.ResponseType, expectedResponseType))
-			}
-		}
-	}
-	if bindingCount == 0 {
-		problems = append(problems, fmt.Sprintf("%s: expected at least one OCI operation binding", filepath.ToSlash(row.ImportPath)))
-	}
-	if len(doc.Lifecycle.Create.Target) == 0 {
-		problems = append(problems, fmt.Sprintf("%s: lifecycle.create.target must contain at least one state", filepath.ToSlash(row.ImportPath)))
-	}
-	if len(doc.Operations.List) > 0 {
-		if doc.ListLookup == nil {
-			problems = append(problems, fmt.Sprintf("%s: listLookup must be present when list bindings exist", filepath.ToSlash(row.ImportPath)))
-		} else {
-			if strings.TrimSpace(doc.ListLookup.Datasource) == "" {
-				problems = append(problems, fmt.Sprintf("%s: listLookup.datasource must not be empty", filepath.ToSlash(row.ImportPath)))
-			}
-			if strings.TrimSpace(doc.ListLookup.CollectionField) == "" {
-				problems = append(problems, fmt.Sprintf("%s: listLookup.collectionField must not be empty", filepath.ToSlash(row.ImportPath)))
-			}
-			if strings.TrimSpace(doc.ListLookup.ResponseItemsField) == "" {
-				problems = append(problems, fmt.Sprintf("%s: listLookup.responseItemsField must not be empty", filepath.ToSlash(row.ImportPath)))
-			}
-		}
-	}
-	if len(doc.DeleteConfirmation.Target) == 0 {
-		problems = append(problems, fmt.Sprintf("%s: deleteConfirmation.target must contain at least one state", filepath.ToSlash(row.ImportPath)))
-	}
-
-	for _, hookList := range [][]hook{
-		doc.Hooks.Create,
-		doc.Hooks.Update,
-		doc.Hooks.Delete,
-	} {
-		for _, nextHook := range hookList {
-			if strings.TrimSpace(nextHook.Helper) == "" {
-				problems = append(problems, fmt.Sprintf("%s: hook helper must not be empty", filepath.ToSlash(row.ImportPath)))
-			}
-		}
-	}
-	if doc.Mutation.ConflictsWith == nil {
-		problems = append(problems, fmt.Sprintf("%s: mutation.conflictsWith must be present", filepath.ToSlash(row.ImportPath)))
-	}
-
+	problems = append(problems, validateImportMetadata(importPath, row, doc, sourceIndex)...)
+	problems = append(problems, validateImportBoundary(importPath, row, doc.Boundary)...)
+	problems = append(problems, validateImportBindings(importPath, doc.Operations)...)
+	problems = append(problems, validateImportLifecycle(importPath, doc)...)
+	problems = append(problems, validateImportListLookup(importPath, doc.Operations.List, doc.ListLookup)...)
+	problems = append(problems, validateImportHooks(importPath, doc.Hooks)...)
+	problems = append(problems, validateImportMutation(importPath, doc.Mutation)...)
 	return problems
 }
 
@@ -877,200 +569,37 @@ func qualifiedOperationType(boundType, operation, suffix string) string {
 }
 
 func validateDiagramDir(root, path string, row manifestRow, binding *ControllerBinding, strategy diagramStrategy) (int, []plantUMLPair, []string) {
-	var problems []string
-
-	info, err := os.Stat(path)
-	if err != nil {
-		return 0, nil, []string{fmt.Sprintf("%s: %v", filepath.ToSlash(row.DiagramDir), err)}
-	}
-	if !info.IsDir() {
-		return 0, nil, []string{fmt.Sprintf("%s is not a directory", filepath.ToSlash(row.DiagramDir))}
+	present, problems := loadDiagramEntries(path, row.DiagramDir)
+	if len(problems) > 0 {
+		return 0, nil, problems
 	}
 
-	entries, err := os.ReadDir(path)
-	if err != nil {
-		return 0, nil, []string{fmt.Sprintf("%s: %v", filepath.ToSlash(row.DiagramDir), err)}
+	count, runtimeDiagram, artifactProblems := validateRequiredDiagramArtifacts(path, row, present, binding)
+	problems = append(problems, artifactProblems...)
+	if !shouldValidateRenderedControllerArtifacts(binding, runtimeDiagram, strategy) {
+		return count, nil, problems
 	}
 
-	present := map[string]os.DirEntry{}
-	for _, entry := range entries {
-		if entry.IsDir() {
-			continue
-		}
-		present[entry.Name()] = entry
-	}
-
-	count := 0
-	var renderedPairs []plantUMLPair
-	var runtimeDiagram diagramSpec
-	for _, name := range requiredDiagramFiles {
-		entry, ok := present[name]
-		if !ok {
-			problems = append(problems, fmt.Sprintf("%s: missing required diagram artifact %q", filepath.ToSlash(row.DiagramDir), name))
-			continue
-		}
-		if entry.IsDir() {
-			problems = append(problems, fmt.Sprintf("%s: %q must be a file", filepath.ToSlash(row.DiagramDir), name))
-			continue
-		}
-
-		count++
-		fullPath := filepath.Join(path, name)
-		switch {
-		case name == runtimeLifecycleDiagramName:
-			diagram, err := loadDiagram(fullPath)
-			if err != nil {
-				problems = append(problems, fmt.Sprintf("%s: %v", filepath.ToSlash(filepath.Join(row.DiagramDir, name)), err))
-				continue
-			}
-			runtimeDiagram = diagram
-			problems = append(problems, validateDiagram(row, filepath.Join(row.DiagramDir, name), diagram, binding)...)
-		case strings.HasSuffix(name, ".puml"):
-			problems = append(problems, validatePlantUML(filepath.Join(row.DiagramDir, name), fullPath)...)
-		case strings.HasSuffix(name, ".svg"):
-			problems = append(problems, validateSVG(filepath.Join(row.DiagramDir, name), fullPath)...)
-		}
-	}
-
-	if binding != nil && runtimeDiagram.SchemaVersion != 0 && strategy.Activity.SchemaVersion != 0 {
-		artifacts, err := renderDiagramArtifacts(root, *binding, strategy)
-		if err != nil {
-			problems = append(problems, err.Error())
-		} else {
-			for _, expected := range artifacts.plantUMLArtifacts() {
-				displayPath := filepath.ToSlash(expected.SourcePath)
-				fullExpectedPath := filepath.Join(root, filepath.FromSlash(expected.SourcePath))
-				actual, err := os.ReadFile(fullExpectedPath)
-				if err != nil {
-					problems = append(problems, fmt.Sprintf("%s: %v", displayPath, err))
-					continue
-				}
-				if !bytes.Equal(actual, expected.SourceData) {
-					problems = append(problems, fmt.Sprintf("%s: stale PlantUML source; run `make formal-diagrams`", displayPath))
-				}
-				if _, ok := present[filepath.Base(filepath.FromSlash(expected.SourcePath))]; ok {
-					if _, ok := present[filepath.Base(filepath.FromSlash(expected.RenderedPath))]; ok {
-						renderedPairs = append(renderedPairs, plantUMLPair{
-							SourcePath:   expected.SourcePath,
-							RenderedPath: expected.RenderedPath,
-						})
-					}
-				}
-			}
-		}
-	}
-
+	renderedPairs, renderProblems := validateRenderedControllerArtifacts(root, present, binding, strategy)
+	problems = append(problems, renderProblems...)
 	return count, renderedPairs, problems
 }
 
 func validateDiagramStrategy(root string) (diagramStrategy, int, []plantUMLPair, []string) {
-	var problems []string
-
 	strategy, err := loadDiagramStrategy(root)
 	if err != nil {
 		return diagramStrategy{}, 0, nil, []string{err.Error()}
 	}
 
-	count := 0
-	var renderedPairs []plantUMLPair
-	for _, required := range requiredControllerDiagramTemplateFiles {
-		fullPath := filepath.Join(root, controllerDiagramTemplateDir, required)
-		info, err := os.Stat(fullPath)
-		if err != nil {
-			problems = append(problems, fmt.Sprintf("%s: %v", filepath.ToSlash(filepath.Join(controllerDiagramTemplateDir, required)), err))
-			continue
-		}
-		if info.IsDir() {
-			problems = append(problems, fmt.Sprintf("%s: must be a file", filepath.ToSlash(filepath.Join(controllerDiagramTemplateDir, required))))
-		}
-	}
-
-	for _, expected := range strategy.renderSharedDiagramArtifacts() {
-		sourcePath := filepath.Join(root, filepath.FromSlash(expected.SourcePath))
-		info, err := os.Stat(sourcePath)
-		if err != nil {
-			problems = append(problems, fmt.Sprintf("%s: %v", filepath.ToSlash(expected.SourcePath), err))
-			continue
-		}
-		if info.IsDir() {
-			problems = append(problems, fmt.Sprintf("%s: must be a file", filepath.ToSlash(expected.SourcePath)))
-			continue
-		}
-		renderedPath := filepath.Join(root, filepath.FromSlash(expected.RenderedPath))
-		renderedInfo, err := os.Stat(renderedPath)
-		if err != nil {
-			problems = append(problems, fmt.Sprintf("%s: %v", filepath.ToSlash(expected.RenderedPath), err))
-			continue
-		}
-		if renderedInfo.IsDir() {
-			problems = append(problems, fmt.Sprintf("%s: must be a file", filepath.ToSlash(expected.RenderedPath)))
-			continue
-		}
-		count++
-		actual, err := os.ReadFile(sourcePath)
-		if err != nil {
-			problems = append(problems, fmt.Sprintf("%s: %v", filepath.ToSlash(expected.SourcePath), err))
-			continue
-		}
-		if !bytes.Equal(actual, expected.SourceData) {
-			problems = append(problems, fmt.Sprintf("%s: stale PlantUML source; run `make formal-diagrams`", filepath.ToSlash(expected.SourcePath)))
-		}
-		problems = append(problems, validatePlantUML(expected.SourcePath, sourcePath)...)
-		problems = append(problems, validateSVG(expected.RenderedPath, renderedPath)...)
-		renderedPairs = append(renderedPairs, plantUMLPair{
-			SourcePath:   expected.SourcePath,
-			RenderedPath: expected.RenderedPath,
-		})
-	}
-
+	problems := validateDiagramTemplateFiles(root)
+	count, renderedPairs, sharedProblems := validateSharedDiagramArtifacts(root, strategy)
+	problems = append(problems, sharedProblems...)
 	return strategy, count, renderedPairs, problems
 }
 
 func validateDiagram(row manifestRow, path string, diagram diagramSpec, binding *ControllerBinding) []string {
-	var problems []string
-
-	if diagram.SchemaVersion != currentSchemaVersion {
-		problems = append(problems, fmt.Sprintf("%s: schemaVersion=%d, want %d", filepath.ToSlash(path), diagram.SchemaVersion, currentSchemaVersion))
-	}
-	if !allowedRepoSurfaces.has(diagram.Surface) {
-		problems = append(problems, fmt.Sprintf("%s: surface=%q is not allowed", filepath.ToSlash(path), diagram.Surface))
-	}
-	if diagram.Service != row.Service {
-		problems = append(problems, fmt.Sprintf("%s: service=%q does not match manifest service %q", filepath.ToSlash(path), diagram.Service, row.Service))
-	}
-	if diagram.Slug != row.Slug {
-		problems = append(problems, fmt.Sprintf("%s: slug=%q does not match manifest slug %q", filepath.ToSlash(path), diagram.Slug, row.Slug))
-	}
-	if diagram.Kind != row.Kind {
-		problems = append(problems, fmt.Sprintf("%s: kind=%q does not match manifest kind %q", filepath.ToSlash(path), diagram.Kind, row.Kind))
-	}
-	if !allowedDiagramArchetypes.has(diagram.Archetype) {
-		problems = append(problems, fmt.Sprintf("%s: archetype=%q is not allowed", filepath.ToSlash(path), diagram.Archetype))
-	}
-	if len(diagram.States) == 0 {
-		problems = append(problems, fmt.Sprintf("%s: states must contain at least one lifecycle state", filepath.ToSlash(path)))
-	}
-	if binding != nil {
-		expectedArchetype := "generated-service-manager"
-		if hasUnresolvedGap(binding.LogicGaps, "legacy-adapter") {
-			expectedArchetype = "legacy-adapter"
-		}
-		if diagram.Archetype != expectedArchetype {
-			problems = append(problems, fmt.Sprintf("%s: archetype=%q does not match formal runtime contract %q", filepath.ToSlash(path), diagram.Archetype, expectedArchetype))
-		}
-		if !containsIgnoreCase(diagram.States, binding.Spec.SuccessCondition) {
-			problems = append(problems, fmt.Sprintf("%s: states must include success_condition %q", filepath.ToSlash(path), binding.Spec.SuccessCondition))
-		}
-		for _, condition := range binding.Spec.RequeueConditions {
-			if !containsIgnoreCase(diagram.States, condition) {
-				problems = append(problems, fmt.Sprintf("%s: states must include requeue condition %q", filepath.ToSlash(path), condition))
-			}
-		}
-		if binding.Spec.DeleteConfirmation == "not-supported" && containsIgnoreCase(diagram.States, "terminating") {
-			problems = append(problems, fmt.Sprintf("%s: states must not include terminating when delete_confirmation is not-supported", filepath.ToSlash(path)))
-		}
-	}
-
+	problems := validateDiagramMetadata(row, path, diagram)
+	problems = append(problems, validateDiagramBinding(path, diagram, binding)...)
 	return problems
 }
 

@@ -54,39 +54,6 @@ notes:
   - Scaffold metadata only.
 `
 
-const testActivityPUML = `@startuml
-title Activity - template/Template
-start
-:Load desired Template state;
-stop
-@enduml
-`
-
-const testSequencePUML = `@startuml
-title Sequence - template/Template
-actor Kubernetes
-participant Controller
-Kubernetes -> Controller: reconcile
-@enduml
-`
-
-const testStateMachinePUML = `@startuml
-title State Machine - template/Template
-[*] --> provisioning
-provisioning --> active
-active --> [*]
-@enduml
-`
-
-const testActivitySVG = `<svg xmlns="http://www.w3.org/2000/svg"><text>activity</text></svg>
-`
-
-const testSequenceSVG = `<svg xmlns="http://www.w3.org/2000/svg"><text>sequence</text></svg>
-`
-
-const testStateMachineSVG = `<svg xmlns="http://www.w3.org/2000/svg"><text>state-machine</text></svg>
-`
-
 const testImport = `{
   "schemaVersion": 1,
   "surface": "provider-facts",
