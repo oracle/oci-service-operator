@@ -47,17 +47,30 @@ func pluralize(name string) string {
 	case strings.HasSuffix(name, "s") && !strings.HasSuffix(name, "ss"):
 		return name
 	case strings.HasSuffix(name, "y") && len(name) > 1:
+		if isVowel(name[len(name)-2]) {
+			return name + "s"
+		}
 		return strings.TrimSuffix(name, "y") + "ies"
 	case strings.HasSuffix(name, "ss"):
 		return name + "es"
 	case strings.HasSuffix(name, "x"),
 		strings.HasSuffix(name, "z"),
+		strings.HasSuffix(name, "ss"),
 		strings.HasSuffix(name, "ch"),
 		strings.HasSuffix(name, "sh"),
 		strings.HasSuffix(name, "ss"):
 		return name + "es"
 	default:
 		return name + "s"
+	}
+}
+
+func isVowel(b byte) bool {
+	switch b {
+	case 'a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U':
+		return true
+	default:
+		return false
 	}
 }
 
