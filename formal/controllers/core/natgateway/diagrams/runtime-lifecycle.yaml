@@ -1,0 +1,17 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: core
+slug: natgateway
+kind: NatGateway
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - terminating
+  - terminated
+  - deleted
+notes:
+  - Ready state maps to OCI AVAILABLE.
+  - Requeue continues while OCI reports PROVISIONING, TERMINATING, or TERMINATED.
+  - Delete completes only after GetNatGateway returns not found; TERMINATING and TERMINATED are accepted observed pre-delete states.
+  - In-place updates are limited to blockTraffic, displayName, definedTags, freeformTags, and routeTableId.
