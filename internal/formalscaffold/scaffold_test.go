@@ -228,6 +228,8 @@ const testTemplateImport = `{
 }
 `
 
+const testTemplateManifestRow = "template\ttemplate\tTemplate\tscaffold\trepo-authored-semantics\timports/template/template.json\tcontrollers/template/spec.cfg\tcontrollers/template/logic-gaps.md\tcontrollers/template/diagrams\n"
+
 const testSeededManifestRow = "identity\tuser\tUser\tseeded\trepo-authored-semantics\timports/identity/user.json\tcontrollers/identity/user/spec.cfg\tcontrollers/identity/user/logic-gaps.md\tcontrollers/identity/user/diagrams\n"
 
 const testSeededSpec = `# formal controller binding schema v1
@@ -711,6 +713,37 @@ func TestGeneratePrunesRowsOutsideDefaultActiveSurface(t *testing.T) {
 	if _, ok := catalog.Lookup("identity", "user"); ok {
 		t.Fatal("catalog.Lookup(identity, user) unexpectedly found pruned row")
 	}
+	assertPathNotExists(t, filepath.Join(repoRoot, "formal", "controllers", "identity", "user"))
+	assertPathNotExists(t, filepath.Join(repoRoot, "formal", "imports", "identity", "user.json"))
+}
+
+func TestGeneratePrunesOrphanedArtifactsWhenManifestAlreadyMatchesActiveSurface(t *testing.T) {
+	requirePlantUML(t)
+	repoRoot := writeTestRepo(t)
+	writeTestFile(
+		t,
+		filepath.Join(repoRoot, "internal", "generator", "config", "services.yaml"),
+		strings.Replace(testGeneratorConfig, "enabled: true", "enabled: false", 1),
+	)
+	writeTestFile(
+		t,
+		filepath.Join(repoRoot, "formal", "controller_manifest.tsv"),
+		manifestHeader+testTemplateManifestRow,
+	)
+
+	report, err := Generate(Options{
+		Root:       filepath.Join(repoRoot, "formal"),
+		ConfigPath: filepath.Join(repoRoot, "internal", "generator", "config", "services.yaml"),
+	})
+	if err != nil {
+		t.Fatalf("Generate() error = %v", err)
+	}
+	if report.ManifestRows != 1 {
+		t.Fatalf("report.ManifestRows = %d, want 1", report.ManifestRows)
+	}
+
+	assertPathNotExists(t, filepath.Join(repoRoot, "formal", "controllers", "identity", "user"))
+	assertPathNotExists(t, filepath.Join(repoRoot, "formal", "imports", "identity", "user.json"))
 }
 
 func TestGeneratePreservesConfiguredFormalSpecRowsOutsideDefaultActiveSurface(t *testing.T) {
@@ -796,6 +829,15 @@ func assertScaffoldReport(t *testing.T, report Report, servicesScanned, publishe
 	}
 }
 
+func assertPathNotExists(t *testing.T, path string) {
+	t.Helper()
+	if _, err := os.Stat(path); err == nil {
+		t.Fatalf("expected %q to be removed", path)
+	} else if !os.IsNotExist(err) {
+		t.Fatalf("Stat(%q) error = %v", path, err)
+	}
+}
+
 func assertSeededCatalogRowPreserved(t *testing.T, catalog *formal.Catalog) {
 	t.Helper()
 
@@ -840,7 +882,7 @@ func writeTestRepo(t *testing.T) string {
 	writeTestFile(t, filepath.Join(repoRoot, "internal", "generator", "config", "services.yaml"), testGeneratorConfig)
 	writeTestFile(t, filepath.Join(repoRoot, "api", "identity", "v1beta1", "user_types.go"), testUserAPI)
 	writeTestFile(t, filepath.Join(repoRoot, "api", "identity", "v1beta1", "networksource_types.go"), testNetworkSourceAPI)
-	writeTestFile(t, filepath.Join(repoRoot, "formal", "controller_manifest.tsv"), manifestHeader+"template\ttemplate\tTemplate\tscaffold\trepo-authored-semantics\timports/template/template.json\tcontrollers/template/spec.cfg\tcontrollers/template/logic-gaps.md\tcontrollers/template/diagrams\n"+testSeededManifestRow)
+	writeTestFile(t, filepath.Join(repoRoot, "formal", "controller_manifest.tsv"), manifestHeader+testTemplateManifestRow+testSeededManifestRow)
 	writeTestFile(t, filepath.Join(repoRoot, "formal", "controllers", "identity", "user", "spec.cfg"), testSeededSpec)
 	writeTestFile(t, filepath.Join(repoRoot, "formal", "controllers", "identity", "user", "logic-gaps.md"), testSeededLogic)
 	writeTestFile(t, filepath.Join(repoRoot, "formal", "controllers", "identity", "user", "diagrams", "runtime-lifecycle.yaml"), testSeededDiagram)
@@ -851,7 +893,7 @@ func writeTestRepo(t *testing.T) string {
 func writeScaffoldBase(t *testing.T, repoRoot string) {
 	t.Helper()
 
-	writeTestFile(t, filepath.Join(repoRoot, "formal", "controller_manifest.tsv"), manifestHeader+"template\ttemplate\tTemplate\tscaffold\trepo-authored-semantics\timports/template/template.json\tcontrollers/template/spec.cfg\tcontrollers/template/logic-gaps.md\tcontrollers/template/diagrams\n")
+	writeTestFile(t, filepath.Join(repoRoot, "formal", "controller_manifest.tsv"), manifestHeader+testTemplateManifestRow)
 	writeTestFile(t, filepath.Join(repoRoot, "formal", "sources.lock"), testSourcesLock)
 	writeTestFile(t, filepath.Join(repoRoot, "formal", "shared", "BaseReconcilerContract.tla"), testBaseReconcilerContract)
 	writeTestFile(t, filepath.Join(repoRoot, "formal", "shared", "ControllerLifecycleSpec.tla"), testControllerLifecycleContract)

@@ -3,8 +3,10 @@ package formal
 import (
 	"bytes"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 )
 
@@ -63,6 +65,19 @@ func loadVerifiedManifest(formalRoot string) ([]manifestRow, int, []string) {
 	return rows, len(rows), nil
 }
 
+func validateManifestOwnedArtifacts(formalRoot string, rows []manifestRow) []string {
+	desiredControllerRoots := make(map[string]struct{}, len(rows))
+	desiredImportPaths := make(map[string]struct{}, len(rows))
+	for _, row := range rows {
+		desiredControllerRoots[filepath.Clean(filepath.Dir(filepath.FromSlash(row.SpecPath)))] = struct{}{}
+		desiredImportPaths[filepath.Clean(filepath.FromSlash(row.ImportPath))] = struct{}{}
+	}
+
+	problems := validateOrphanedControllerArtifacts(formalRoot, desiredControllerRoots)
+	problems = append(problems, validateOrphanedImportArtifacts(formalRoot, desiredImportPaths)...)
+	return problems
+}
+
 func validateManifestRows(formalRoot string, rows []manifestRow, sourceIndex map[string]sourceLockEntry, strategy diagramStrategy) (int, []plantUMLPair, []string) {
 	var problems []string
 	renderedPairs := make([]plantUMLPair, 0, len(rows))
@@ -83,6 +98,98 @@ func validateManifestRows(formalRoot string, rows []manifestRow, sourceIndex map
 	}
 
 	return diagramCount, renderedPairs, problems
+}
+
+func validateOrphanedControllerArtifacts(formalRoot string, desired map[string]struct{}) []string {
+	controllersRoot := filepath.Join(formalRoot, "controllers")
+	if _, err := os.Stat(controllersRoot); err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return []string{fmt.Sprintf("controllers: %v", err)}
+	}
+
+	stale := map[string]struct{}{}
+	if err := filepath.WalkDir(controllersRoot, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			if d.Name() == "diagrams" {
+				rel, err := filepath.Rel(formalRoot, filepath.Dir(path))
+				if err != nil {
+					return err
+				}
+				rel = filepath.Clean(rel)
+				if _, ok := desired[rel]; !ok {
+					stale[rel] = struct{}{}
+				}
+				return fs.SkipDir
+			}
+			return nil
+		}
+		if d.Name() != "spec.cfg" && d.Name() != "logic-gaps.md" {
+			return nil
+		}
+
+		rel, err := filepath.Rel(formalRoot, filepath.Dir(path))
+		if err != nil {
+			return err
+		}
+		rel = filepath.Clean(rel)
+		if _, ok := desired[rel]; !ok {
+			stale[rel] = struct{}{}
+		}
+		return nil
+	}); err != nil {
+		return []string{fmt.Sprintf("controllers: %v", err)}
+	}
+
+	problems := make([]string, 0, len(stale))
+	for rel := range stale {
+		problems = append(problems, fmt.Sprintf("%s: stale controller artifacts are not referenced by controller_manifest.tsv", filepath.ToSlash(rel)))
+	}
+	sort.Strings(problems)
+	return problems
+}
+
+func validateOrphanedImportArtifacts(formalRoot string, desired map[string]struct{}) []string {
+	importsRoot := filepath.Join(formalRoot, "imports")
+	if _, err := os.Stat(importsRoot); err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return []string{fmt.Sprintf("imports: %v", err)}
+	}
+
+	var stale []string
+	if err := filepath.WalkDir(importsRoot, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() || filepath.Ext(d.Name()) != ".json" {
+			return nil
+		}
+
+		rel, err := filepath.Rel(formalRoot, path)
+		if err != nil {
+			return err
+		}
+		rel = filepath.Clean(rel)
+		if _, ok := desired[rel]; !ok {
+			stale = append(stale, rel)
+		}
+		return nil
+	}); err != nil {
+		return []string{fmt.Sprintf("imports: %v", err)}
+	}
+
+	sort.Strings(stale)
+	problems := make([]string, 0, len(stale))
+	for _, rel := range stale {
+		problems = append(problems, fmt.Sprintf("%s: stale import artifact is not referenced by controller_manifest.tsv", filepath.ToSlash(rel)))
+	}
+	return problems
 }
 
 func validateSourceLockSchema(lockFile sourceLockFile) error {

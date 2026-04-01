@@ -12,6 +12,7 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"io/fs"
 	"os"
 	"path"
 	"path/filepath"
@@ -202,6 +203,10 @@ func Generate(opts Options) (Report, error) {
 	}
 	if changed {
 		report.FilesWritten++
+	}
+
+	if err := pruneStaleFormalArtifacts(root, rows); err != nil {
+		return report, err
 	}
 
 	for _, row := range rows {
@@ -770,6 +775,170 @@ func writeScaffoldArtifacts(root string, row formal.ManifestRow, artifacts scaff
 		}
 	}
 	return writes, nil
+}
+
+func pruneStaleFormalArtifacts(root string, rows []formal.ManifestRow) error {
+	desiredControllerRoots := make(map[string]struct{}, len(rows))
+	desiredImportPaths := make(map[string]struct{}, len(rows))
+	for _, row := range rows {
+		desiredControllerRoots[filepath.Clean(filepath.Dir(filepath.FromSlash(row.SpecPath)))] = struct{}{}
+		desiredImportPaths[filepath.Clean(filepath.FromSlash(row.ImportPath))] = struct{}{}
+	}
+
+	if err := pruneStaleControllerArtifacts(filepath.Join(root, "controllers"), root, desiredControllerRoots); err != nil {
+		return err
+	}
+	if err := pruneStaleImportArtifacts(filepath.Join(root, "imports"), root, desiredImportPaths); err != nil {
+		return err
+	}
+	return nil
+}
+
+func pruneStaleControllerArtifacts(controllersRoot string, formalRoot string, desired map[string]struct{}) error {
+	if _, err := os.Stat(controllersRoot); err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return fmt.Errorf("stat formal controllers root %q: %w", filepath.ToSlash(controllersRoot), err)
+	}
+
+	staleRoots := map[string]struct{}{}
+	if err := filepath.WalkDir(controllersRoot, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			if d.Name() == "diagrams" {
+				rel, err := filepath.Rel(formalRoot, filepath.Dir(path))
+				if err != nil {
+					return err
+				}
+				rel = filepath.Clean(rel)
+				if _, ok := desired[rel]; !ok {
+					staleRoots[rel] = struct{}{}
+				}
+				return fs.SkipDir
+			}
+			return nil
+		}
+		if d.Name() != "spec.cfg" && d.Name() != "logic-gaps.md" {
+			return nil
+		}
+
+		rel, err := filepath.Rel(formalRoot, filepath.Dir(path))
+		if err != nil {
+			return err
+		}
+		rel = filepath.Clean(rel)
+		if _, ok := desired[rel]; !ok {
+			staleRoots[rel] = struct{}{}
+		}
+		return nil
+	}); err != nil {
+		return fmt.Errorf("scan formal controller artifacts: %w", err)
+	}
+
+	roots := make([]string, 0, len(staleRoots))
+	for rel := range staleRoots {
+		roots = append(roots, rel)
+	}
+	sort.Slice(roots, func(i, j int) bool {
+		if len(roots[i]) != len(roots[j]) {
+			return len(roots[i]) > len(roots[j])
+		}
+		return roots[i] < roots[j]
+	})
+
+	for _, rel := range roots {
+		path := filepath.Join(formalRoot, rel)
+		if err := os.RemoveAll(path); err != nil {
+			return fmt.Errorf("remove stale formal controller artifacts %q: %w", filepath.ToSlash(rel), err)
+		}
+		if err := pruneEmptyParents(filepath.Dir(path), controllersRoot); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func pruneStaleImportArtifacts(importsRoot string, formalRoot string, desired map[string]struct{}) error {
+	if _, err := os.Stat(importsRoot); err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return fmt.Errorf("stat formal imports root %q: %w", filepath.ToSlash(importsRoot), err)
+	}
+
+	var stale []string
+	if err := filepath.WalkDir(importsRoot, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() || filepath.Ext(d.Name()) != ".json" {
+			return nil
+		}
+
+		rel, err := filepath.Rel(formalRoot, path)
+		if err != nil {
+			return err
+		}
+		rel = filepath.Clean(rel)
+		if _, ok := desired[rel]; !ok {
+			stale = append(stale, rel)
+		}
+		return nil
+	}); err != nil {
+		return fmt.Errorf("scan formal import artifacts: %w", err)
+	}
+
+	sort.Strings(stale)
+	for _, rel := range stale {
+		path := filepath.Join(formalRoot, rel)
+		if err := os.Remove(path); err != nil && !os.IsNotExist(err) {
+			return fmt.Errorf("remove stale formal import artifact %q: %w", filepath.ToSlash(rel), err)
+		}
+		if err := pruneEmptyParents(filepath.Dir(path), importsRoot); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func pruneEmptyParents(dir string, stop string) error {
+	stop = filepath.Clean(stop)
+	for {
+		dir = filepath.Clean(dir)
+		if dir == stop || dir == "." || dir == string(filepath.Separator) {
+			return nil
+		}
+
+		entries, err := os.ReadDir(dir)
+		if err != nil {
+			if os.IsNotExist(err) {
+				parent := filepath.Dir(dir)
+				if parent == dir {
+					return nil
+				}
+				dir = parent
+				continue
+			}
+			return fmt.Errorf("read %q: %w", filepath.ToSlash(dir), err)
+		}
+		if len(entries) != 0 {
+			return nil
+		}
+		if err := os.Remove(dir); err != nil && !os.IsNotExist(err) {
+			return fmt.Errorf("remove empty formal directory %q: %w", filepath.ToSlash(dir), err)
+		}
+
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			return nil
+		}
+		dir = parent
+	}
 }
 
 func writeFileIfChanged(path string, contents []byte) (bool, error) {

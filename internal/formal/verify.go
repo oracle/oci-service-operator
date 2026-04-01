@@ -316,6 +316,9 @@ func Verify(root string) (Report, error) {
 	rows, controllerCount, manifestProblems := loadVerifiedManifest(formalRoot)
 	report.Controllers = controllerCount
 	problems = append(problems, manifestProblems...)
+	if len(manifestProblems) == 0 {
+		problems = append(problems, validateManifestOwnedArtifacts(formalRoot, rows)...)
+	}
 
 	diagramCount, rowPairs, rowProblems := validateManifestRows(formalRoot, rows, sourceIndex, strategy)
 	report.DiagramFiles = diagramCount
