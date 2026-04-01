@@ -23,9 +23,9 @@
     ],
     "list": [
       {
-        "operation": "ListNatGateway",
-        "requestType": "core.ListNatGatewayRequest",
-        "responseType": "core.ListNatGatewayResponse"
+        "operation": "ListNatGateways",
+        "requestType": "core.ListNatGatewaysRequest",
+        "responseType": "core.ListNatGatewaysResponse"
       }
     ],
     "update": [
