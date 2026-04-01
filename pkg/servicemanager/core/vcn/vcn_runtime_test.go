@@ -573,6 +573,29 @@ func TestDelete_KeepsFinalizerWhileObservedTerminated(t *testing.T) {
 	assert.Equal(t, string(shared.Terminating), resource.Status.OsokStatus.Reason)
 }
 
+func TestDelete_KeepsFinalizerWhileObservedTerminating(t *testing.T) {
+	manager := newTestManager(&fakeVcnOCIClient{
+		deleteFn: func(_ context.Context, _ coresdk.DeleteVcnRequest) (coresdk.DeleteVcnResponse, error) {
+			return coresdk.DeleteVcnResponse{}, nil
+		},
+		getFn: func(_ context.Context, _ coresdk.GetVcnRequest) (coresdk.GetVcnResponse, error) {
+			return coresdk.GetVcnResponse{
+				Vcn: makeSDKVcn("ocid1.vcn.oc1..delete", "test-vcn", coresdk.VcnLifecycleStateTerminating),
+			}, nil
+		},
+	})
+
+	resource := makeSpecVcn()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.vcn.oc1..delete")
+
+	done, err := manager.Delete(context.Background(), resource)
+
+	assert.NoError(t, err)
+	assert.False(t, done)
+	assert.Nil(t, resource.Status.OsokStatus.DeletedAt)
+	assert.Equal(t, string(shared.Terminating), resource.Status.OsokStatus.Reason)
+}
+
 func TestDelete_DoesNotConfirmDeletionOnAuthAmbiguity(t *testing.T) {
 	manager := newTestManager(&fakeVcnOCIClient{
 		deleteFn: func(_ context.Context, _ coresdk.DeleteVcnRequest) (coresdk.DeleteVcnResponse, error) {
