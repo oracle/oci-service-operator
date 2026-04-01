@@ -520,6 +520,29 @@ func TestDelete_AlreadyMissingOCIResourceIsTreatedAsDeleted(t *testing.T) {
 	assert.NotNil(t, resource.Status.OsokStatus.DeletedAt)
 }
 
+func TestDelete_KeepsFinalizerWhileObservedTerminating(t *testing.T) {
+	manager := newSecurityListTestManager(&fakeSecurityListOCIClient{
+		deleteFn: func(_ context.Context, _ coresdk.DeleteSecurityListRequest) (coresdk.DeleteSecurityListResponse, error) {
+			return coresdk.DeleteSecurityListResponse{}, nil
+		},
+		getFn: func(_ context.Context, _ coresdk.GetSecurityListRequest) (coresdk.GetSecurityListResponse, error) {
+			return coresdk.GetSecurityListResponse{
+				SecurityList: makeSDKSecurityList("ocid1.securitylist.oc1..delete", "test-security-list", coresdk.SecurityListLifecycleStateTerminating),
+			}, nil
+		},
+	})
+
+	resource := makeSpecSecurityList()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.securitylist.oc1..delete")
+
+	deleted, err := manager.Delete(context.Background(), resource)
+
+	assert.NoError(t, err)
+	assert.False(t, deleted)
+	assert.Equal(t, "TERMINATING", resource.Status.LifecycleState)
+	assert.Equal(t, string(shared.Terminating), resource.Status.OsokStatus.Reason)
+}
+
 func TestConvertSpecRules_OmitEmptyNestedOptionalObjects(t *testing.T) {
 	egress := convertSpecEgressRulesToOCI([]corev1beta1.SecurityListEgressSecurityRule{{
 		Destination: "0.0.0.0/0",
