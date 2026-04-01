@@ -28,6 +28,9 @@ services:
     version: v1beta1
     phase: security-and-identity
     packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
 `
 
 const testSourcesLock = `{
@@ -475,53 +478,16 @@ func TestGenerateAddsScaffoldsForPublishedKindsAndPreservesSeededRows(t *testing
 	if err != nil {
 		t.Fatalf("Generate() error = %v", err)
 	}
-	if report.ServicesScanned != 1 {
-		t.Fatalf("report.ServicesScanned = %d, want 1", report.ServicesScanned)
-	}
-	if report.PublishedKinds != 2 {
-		t.Fatalf("report.PublishedKinds = %d, want 2", report.PublishedKinds)
-	}
-	if report.NewRows != 1 {
-		t.Fatalf("report.NewRows = %d, want 1", report.NewRows)
-	}
-	if report.ManifestRows != 3 {
-		t.Fatalf("report.ManifestRows = %d, want 3", report.ManifestRows)
-	}
+	assertScaffoldReport(t, report, 1, 2, 1, 3)
 
 	catalog, err := formal.LoadCatalog(filepath.Join(repoRoot, "formal"))
 	if err != nil {
 		t.Fatalf("formal.LoadCatalog() error = %v", err)
 	}
-
-	user, ok := catalog.Lookup("identity", "user")
-	if !ok {
-		t.Fatal("catalog.Lookup(identity, user) unexpectedly missed")
-	}
-	if user.Spec.Stage != "seeded" {
-		t.Fatalf("user stage = %q, want %q", user.Spec.Stage, "seeded")
-	}
-	if got := strings.Join(user.Import.Notes, ","); !strings.Contains(got, "seeded identity user") {
-		t.Fatalf("user import notes = %q, want seeded note preserved", got)
-	}
+	assertSeededCatalogRowPreserved(t, catalog)
 	assertSharedDiagramStrategyArtifacts(t, filepath.Join(repoRoot, "formal", "shared", "diagrams"))
 	assertRenderedDiagramFamily(t, filepath.Join(repoRoot, "formal", "controllers", "identity", "user", "diagrams"))
-
-	networkSource, ok := catalog.Lookup("identity", "networksource")
-	if !ok {
-		t.Fatal("catalog.Lookup(identity, networksource) unexpectedly missed")
-	}
-	if networkSource.Spec.Stage != "scaffold" {
-		t.Fatalf("networksource stage = %q, want %q", networkSource.Spec.Stage, "scaffold")
-	}
-	if networkSource.Manifest.Kind != "NetworkSource" {
-		t.Fatalf("networksource kind = %q, want %q", networkSource.Manifest.Kind, "NetworkSource")
-	}
-	if networkSource.Import.ProviderResource != "scaffold_identity_networksource" {
-		t.Fatalf("networksource providerResource = %q, want %q", networkSource.Import.ProviderResource, "scaffold_identity_networksource")
-	}
-	if networkSource.Import.Boundary.RepoAuthoredSpecPath != "controllers/identity/networksource/spec.cfg" {
-		t.Fatalf("networksource repoAuthoredSpecPath = %q", networkSource.Import.Boundary.RepoAuthoredSpecPath)
-	}
+	assertGeneratedCatalogRowAdded(t, catalog)
 	assertRenderedDiagramFamily(t, filepath.Join(repoRoot, "formal", "controllers", "identity", "networksource", "diagrams"))
 }
 
@@ -633,6 +599,59 @@ func TestVerifyCoverageRejectsMissingProviderRows(t *testing.T) {
 	})
 	if err == nil || !strings.Contains(err.Error(), "missing formal scaffold row for widget/widget (Widget)") {
 		t.Fatalf("VerifyCoverage() error = %v, want missing widget/widget failure", err)
+	}
+}
+
+func assertScaffoldReport(t *testing.T, report Report, servicesScanned, publishedKinds, newRows, manifestRows int) {
+	t.Helper()
+
+	if report.ServicesScanned != servicesScanned {
+		t.Fatalf("report.ServicesScanned = %d, want %d", report.ServicesScanned, servicesScanned)
+	}
+	if report.PublishedKinds != publishedKinds {
+		t.Fatalf("report.PublishedKinds = %d, want %d", report.PublishedKinds, publishedKinds)
+	}
+	if report.NewRows != newRows {
+		t.Fatalf("report.NewRows = %d, want %d", report.NewRows, newRows)
+	}
+	if report.ManifestRows != manifestRows {
+		t.Fatalf("report.ManifestRows = %d, want %d", report.ManifestRows, manifestRows)
+	}
+}
+
+func assertSeededCatalogRowPreserved(t *testing.T, catalog *formal.Catalog) {
+	t.Helper()
+
+	user, ok := catalog.Lookup("identity", "user")
+	if !ok {
+		t.Fatal("catalog.Lookup(identity, user) unexpectedly missed")
+	}
+	if user.Spec.Stage != "seeded" {
+		t.Fatalf("user stage = %q, want %q", user.Spec.Stage, "seeded")
+	}
+	if got := strings.Join(user.Import.Notes, ","); !strings.Contains(got, "seeded identity user") {
+		t.Fatalf("user import notes = %q, want seeded note preserved", got)
+	}
+}
+
+func assertGeneratedCatalogRowAdded(t *testing.T, catalog *formal.Catalog) {
+	t.Helper()
+
+	networkSource, ok := catalog.Lookup("identity", "networksource")
+	if !ok {
+		t.Fatal("catalog.Lookup(identity, networksource) unexpectedly missed")
+	}
+	if networkSource.Spec.Stage != "scaffold" {
+		t.Fatalf("networksource stage = %q, want %q", networkSource.Spec.Stage, "scaffold")
+	}
+	if networkSource.Manifest.Kind != "NetworkSource" {
+		t.Fatalf("networksource kind = %q, want %q", networkSource.Manifest.Kind, "NetworkSource")
+	}
+	if networkSource.Import.ProviderResource != "scaffold_identity_networksource" {
+		t.Fatalf("networksource providerResource = %q, want %q", networkSource.Import.ProviderResource, "scaffold_identity_networksource")
+	}
+	if networkSource.Import.Boundary.RepoAuthoredSpecPath != "controllers/identity/networksource/spec.cfg" {
+		t.Fatalf("networksource repoAuthoredSpecPath = %q", networkSource.Import.Boundary.RepoAuthoredSpecPath)
 	}
 }
 

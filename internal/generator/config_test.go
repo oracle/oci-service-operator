@@ -30,6 +30,9 @@ services:
     sdkPackage: github.com/oracle/oci-go-sdk/v65/mysql
     group: mysql
     packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
     unknownField: nope
 `
 	if err := os.WriteFile(configPath, []byte(content), 0o644); err != nil {
@@ -62,6 +65,9 @@ services:
     sdkPackage: github.com/oracle/oci-go-sdk/v65/mysql
     group: mysql
     packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
     observedState:
       excludedFieldPaths:
         DbSystem:
@@ -91,8 +97,20 @@ func TestSelectServices(t *testing.T) {
 			"controller-backed": {Description: "manual controllers"},
 		},
 		Services: []ServiceConfig{
-			{Service: "database", SDKPackage: "example/database", Group: "database", PackageProfile: "controller-backed"},
-			{Service: "mysql", SDKPackage: "example/mysql", Group: "mysql", PackageProfile: "controller-backed"},
+			{
+				Service:        "database",
+				SDKPackage:     "example/database",
+				Group:          "database",
+				PackageProfile: "controller-backed",
+				Selection:      selectionAll(false),
+			},
+			{
+				Service:        "mysql",
+				SDKPackage:     "example/mysql",
+				Group:          "mysql",
+				PackageProfile: "controller-backed",
+				Selection:      selectionAll(true),
+			},
 		},
 	}
 
@@ -140,6 +158,55 @@ func TestSelectServices(t *testing.T) {
 	}
 }
 
+func TestLoadConfigIncludesSelectionMetadata(t *testing.T) {
+	t.Parallel()
+
+	configPath := filepath.Join(t.TempDir(), "services.yaml")
+	content := `
+schemaVersion: v1alpha1
+domain: oracle.com
+defaultVersion: v1beta1
+generatorEntrypoint: ./cmd/generator
+packageProfiles:
+  controller-backed:
+    description: runtime-integrated groups
+services:
+  - service: containerengine
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/containerengine
+    group: containerengine
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: all
+  - service: database
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/database
+    group: database
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - AutonomousDatabase
+`
+	if err := os.WriteFile(configPath, []byte(content), 0o644); err != nil {
+		t.Fatalf("write temp config: %v", err)
+	}
+
+	cfg, err := LoadConfig(configPath)
+	if err != nil {
+		t.Fatalf("LoadConfig() error = %v", err)
+	}
+
+	services := requireServices(t, cfg, "containerengine", "database")
+	assertServiceSelection(t, services["containerengine"], true, SelectionModeAll, nil)
+	assertServiceSelection(t, services["database"], true, SelectionModeExplicit, []string{"AutonomousDatabase"})
+
+	activeServices := serviceNames(cfg.DefaultActiveServices())
+	if !slices.Equal(activeServices, []string{"containerengine", "database"}) {
+		t.Fatalf("DefaultActiveServices() = %v, want containerengine,database", activeServices)
+	}
+}
+
 func TestLoadConfigIncludesObservedStateAliases(t *testing.T) {
 	t.Parallel()
 
@@ -157,6 +224,9 @@ services:
     sdkPackage: github.com/oracle/oci-go-sdk/v65/containerengine
     group: containerengine
     packageProfile: crd-only
+    selection:
+      enabled: false
+      mode: all
     observedState:
       sdkAliases:
         WorkRequestLog:
@@ -165,6 +235,9 @@ services:
     sdkPackage: github.com/oracle/oci-go-sdk/v65/psql
     group: psql
     packageProfile: crd-only
+    selection:
+      enabled: false
+      mode: all
     observedState:
       sdkAliases:
         PrimaryDbInstance:
@@ -175,6 +248,9 @@ services:
     sdkPackage: github.com/oracle/oci-go-sdk/v65/identity
     group: identity
     packageProfile: crd-only
+    selection:
+      enabled: false
+      mode: all
     observedState:
       sdkAliases:
         CostTrackingTag:
@@ -236,6 +312,11 @@ services:
     sdkPackage: github.com/oracle/oci-go-sdk/v65/mysql
     group: mysql
     packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - DbSystem
     generation:
       controller:
         strategy: manual
@@ -276,6 +357,9 @@ services:
     sdkPackage: github.com/oracle/oci-go-sdk/v65/core
     group: core
     packageProfile: crd-only
+    selection:
+      enabled: false
+      mode: all
 `
 	if err := os.WriteFile(configPath, []byte(content), 0o644); err != nil {
 		t.Fatalf("write temp config: %v", err)
@@ -348,6 +432,9 @@ services:
     sdkPackage: github.com/oracle/oci-go-sdk/v65/mysql
     group: mysql
     packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: all
     formalSpec: dbsystem
     generation:
       resources:
@@ -491,6 +578,7 @@ func TestValidateAllowsResourceFormalSpecWithoutRuntimeOverride(t *testing.T) {
 				SDKPackage:     "example/mysql",
 				Group:          "mysql",
 				PackageProfile: "controller-backed",
+				Selection:      selectionAll(true),
 				Generation: GenerationConfig{
 					Resources: []ResourceGenerationOverride{
 						{
@@ -505,6 +593,109 @@ func TestValidateAllowsResourceFormalSpecWithoutRuntimeOverride(t *testing.T) {
 
 	if err := cfg.Validate(); err != nil {
 		t.Fatalf("Validate() error = %v", err)
+	}
+}
+
+func TestValidateRejectsInvalidSelectionConfig(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name    string
+		mutate  func(*Config)
+		wantErr string
+	}{
+		{
+			name: "missing selection block",
+			mutate: func(cfg *Config) {
+				cfg.Services[0].Selection = SelectionConfig{}
+			},
+			wantErr: "selection.enabled is required",
+		},
+		{
+			name: "missing selection mode",
+			mutate: func(cfg *Config) {
+				cfg.Services[0].Selection.Mode = ""
+			},
+			wantErr: `selection.mode ""`,
+		},
+		{
+			name: "invalid selection mode",
+			mutate: func(cfg *Config) {
+				cfg.Services[0].Selection.Mode = "subset"
+			},
+			wantErr: `selection.mode "subset"`,
+		},
+		{
+			name: "all mode includes kinds",
+			mutate: func(cfg *Config) {
+				cfg.Services[0].Selection = selectionExplicit(true, "DbSystem")
+				cfg.Services[0].Selection.Mode = SelectionModeAll
+			},
+			wantErr: `selection.includeKinds must be empty when selection.mode is "all"`,
+		},
+		{
+			name: "explicit mode without kinds",
+			mutate: func(cfg *Config) {
+				cfg.Services[0].Selection = SelectionConfig{
+					Enabled: boolPtr(true),
+					Mode:    SelectionModeExplicit,
+				}
+			},
+			wantErr: `selection.includeKinds must list at least one kind when selection.mode is "explicit"`,
+		},
+		{
+			name: "explicit mode blank kind",
+			mutate: func(cfg *Config) {
+				cfg.Services[0].Selection = SelectionConfig{
+					Enabled:      boolPtr(true),
+					Mode:         SelectionModeExplicit,
+					IncludeKinds: []string{"DbSystem", " "},
+				}
+			},
+			wantErr: "selection.includeKinds[1] must not be blank",
+		},
+		{
+			name: "explicit mode duplicate kind",
+			mutate: func(cfg *Config) {
+				cfg.Services[0].Selection = selectionExplicit(true, "DbSystem", "DbSystem")
+			},
+			wantErr: `selection.includeKinds contains duplicate kind "DbSystem"`,
+		},
+	}
+
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			cfg := &Config{
+				SchemaVersion:  "v1alpha1",
+				Domain:         "oracle.com",
+				DefaultVersion: "v1beta1",
+				PackageProfiles: map[string]PackageProfile{
+					"controller-backed": {Description: "runtime-integrated groups"},
+				},
+				Services: []ServiceConfig{
+					{
+						Service:        "mysql",
+						SDKPackage:     "example/mysql",
+						Group:          "mysql",
+						PackageProfile: "controller-backed",
+						Selection:      selectionAll(true),
+					},
+				},
+			}
+
+			test.mutate(cfg)
+
+			err := cfg.Validate()
+			if err == nil {
+				t.Fatal("Validate() unexpectedly succeeded")
+			}
+			if !strings.Contains(err.Error(), test.wantErr) {
+				t.Fatalf("Validate() error = %v, want substring %q", err, test.wantErr)
+			}
+		})
 	}
 }
 
@@ -616,6 +807,7 @@ func TestValidateRejectsInvalidGenerationConfig(t *testing.T) {
 						SDKPackage:     "example/mysql",
 						Group:          "mysql",
 						PackageProfile: "controller-backed",
+						Selection:      selectionAll(true),
 					},
 				},
 			}
@@ -631,6 +823,28 @@ func TestValidateRejectsInvalidGenerationConfig(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
+	t.Parallel()
+
+	cfg := loadCheckedInConfig(t)
+
+	activeServices := serviceNames(cfg.DefaultActiveServices())
+	wantActiveServices := []string{"containerengine", "database", "mysql", "nosql", "psql", "streaming"}
+	if !slices.Equal(activeServices, wantActiveServices) {
+		t.Fatalf("DefaultActiveServices() = %v, want %v", activeServices, wantActiveServices)
+	}
+
+	services := requireServices(t, cfg, "containerengine", "database", "mysql", "nosql", "psql", "streaming", "core", "identity")
+	assertServiceSelection(t, services["containerengine"], true, SelectionModeAll, nil)
+	assertServiceSelection(t, services["database"], true, SelectionModeExplicit, []string{"AutonomousDatabase"})
+	assertServiceSelection(t, services["mysql"], true, SelectionModeAll, nil)
+	assertServiceSelection(t, services["nosql"], true, SelectionModeAll, nil)
+	assertServiceSelection(t, services["psql"], true, SelectionModeAll, nil)
+	assertServiceSelection(t, services["streaming"], true, SelectionModeExplicit, []string{"Stream"})
+	assertServiceSelection(t, services["core"], false, SelectionModeAll, nil)
+	assertServiceSelection(t, services["identity"], false, SelectionModeAll, nil)
 }
 
 func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
@@ -713,6 +927,47 @@ func assertSelectServicesResult(t *testing.T, cfg *Config, serviceName string, a
 	if len(services) != wantCount {
 		t.Fatalf("SelectServices() returned %d services, want %d", len(services), wantCount)
 	}
+}
+
+func assertServiceSelection(t *testing.T, service *ServiceConfig, wantEnabled bool, wantMode string, wantKinds []string) {
+	t.Helper()
+
+	if got := service.IsDefaultActive(); got != wantEnabled {
+		t.Fatalf("%s default active = %t, want %t", service.Service, got, wantEnabled)
+	}
+	if got := service.DefaultSelectionMode(); got != wantMode {
+		t.Fatalf("%s selection mode = %q, want %q", service.Service, got, wantMode)
+	}
+	if got := service.DefaultIncludeKinds(); !slices.Equal(got, wantKinds) {
+		t.Fatalf("%s includeKinds = %v, want %v", service.Service, got, wantKinds)
+	}
+}
+
+func selectionAll(enabled bool) SelectionConfig {
+	return SelectionConfig{
+		Enabled: boolPtr(enabled),
+		Mode:    SelectionModeAll,
+	}
+}
+
+func selectionExplicit(enabled bool, includeKinds ...string) SelectionConfig {
+	return SelectionConfig{
+		Enabled:      boolPtr(enabled),
+		Mode:         SelectionModeExplicit,
+		IncludeKinds: includeKinds,
+	}
+}
+
+func boolPtr(value bool) *bool {
+	return &value
+}
+
+func serviceNames(services []ServiceConfig) []string {
+	names := make([]string, 0, len(services))
+	for _, service := range services {
+		names = append(names, service.Service)
+	}
+	return names
 }
 
 func requireServices(t *testing.T, cfg *Config, names ...string) map[string]*ServiceConfig {

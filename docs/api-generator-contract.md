@@ -22,6 +22,9 @@ Each service record defines:
 | `sampleOrder` | Optional deterministic ordering hint for generated sample entries. |
 | `packageProfile` | Install posture for the group: `controller-backed` or `crd-only`. |
 | `package.extraResources` | Optional extra package overlay resources to include in the generated install kustomization. |
+| `selection.enabled` | Whether the service participates in the default active generator surface. |
+| `selection.mode` | Default selection contract for the service: `all` or `explicit`. |
+| `selection.includeKinds` | Optional non-empty kind list used only when `selection.mode=explicit`. |
 | `formalSpec` | Optional controller slug from `formal/controller_manifest.tsv` when one formal row covers the service-level runtime contract. |
 | `observedState.sdkAliases` | Optional observed-state SDK struct aliases keyed by the discovered SDK resource family when status synthesis must read a differently named response model. |
 | `observedState.excludedFieldPaths` | Optional dot-separated observed-state field paths keyed by the discovered SDK resource family when sensitive or unsupported SDK fields must be omitted from generated status surfaces. |
@@ -47,6 +50,12 @@ Rules:
 - Service-to-group mapping is 1:1.
 - `group` stays equal to the OCI SDK package basename unless the mapping file
   explicitly says otherwise.
+- `selection.enabled=false` keeps the service out of the default active
+  surface, but the service remains addressable through explicit generator
+  selectors such as `--service`.
+- `selection.mode=all` requires an empty `selection.includeKinds`.
+- `selection.mode=explicit` requires a non-empty `selection.includeKinds` list
+  of current OSOK kinds.
 - Omitted `generation` fields default to controller, service-manager, and
   registration rollout `none`, with webhooks defaulting to `manual`.
 - `generation.resources[].kind` uses the current OSOK kind from the v2
