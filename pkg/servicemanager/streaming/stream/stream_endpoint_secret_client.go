@@ -184,7 +184,20 @@ func (c streamEndpointSecretClient) syncExistingEndpointSecret(
 	if err != nil {
 		return err
 	}
-	if !owned {
+	if owned {
+		if reflect.DeepEqual(currentRecord.Data, desiredData) {
+			return nil
+		}
+
+		_, err = c.credentialClient.UpdateSecret(ctx, resource.Name, resource.Namespace, nil, desiredData)
+		return err
+	}
+
+	adoptionLabels, adoptable, err := streamLegacyEndpointSecretAdoptionLabels(resource, currentRecord, desiredData)
+	if err != nil {
+		return err
+	}
+	if !adoptable {
 		return fmt.Errorf(
 			"stream endpoint secret %s/%s is not owned by Stream UID %q",
 			resource.Namespace,
@@ -192,11 +205,8 @@ func (c streamEndpointSecretClient) syncExistingEndpointSecret(
 			resource.UID,
 		)
 	}
-	if reflect.DeepEqual(currentRecord.Data, desiredData) {
-		return nil
-	}
 
-	_, err = c.credentialClient.UpdateSecret(ctx, resource.Name, resource.Namespace, nil, desiredData)
+	_, err = c.credentialClient.UpdateSecret(ctx, resource.Name, resource.Namespace, adoptionLabels, desiredData)
 	return err
 }
 
@@ -257,6 +267,43 @@ func streamOwnsEndpointSecret(resource *streamingv1beta1.Stream, labels map[stri
 		return false, err
 	}
 	return labels[streamEndpointSecretOwnerUIDLabel] == ownerUID, nil
+}
+
+func streamLegacyEndpointSecretAdoptionLabels(
+	resource *streamingv1beta1.Stream,
+	currentRecord credhelper.SecretRecord,
+	desiredData map[string][]byte,
+) (map[string]string, bool, error) {
+	if strings.TrimSpace(currentRecord.Labels[streamEndpointSecretOwnerUIDLabel]) != "" {
+		return nil, false, nil
+	}
+	if !reflect.DeepEqual(currentRecord.Data, desiredData) {
+		return nil, false, nil
+	}
+
+	ownerLabels, err := streamEndpointSecretLabels(resource)
+	if err != nil {
+		return nil, false, err
+	}
+	return mergeEndpointSecretLabels(currentRecord.Labels, ownerLabels), true, nil
+}
+
+func mergeEndpointSecretLabels(existing map[string]string, updates map[string]string) map[string]string {
+	if len(existing) == 0 {
+		return mergeLabelMaps(nil, updates)
+	}
+	return mergeLabelMaps(existing, updates)
+}
+
+func mergeLabelMaps(base map[string]string, updates map[string]string) map[string]string {
+	merged := make(map[string]string, len(base)+len(updates))
+	for key, value := range base {
+		merged[key] = value
+	}
+	for key, value := range updates {
+		merged[key] = value
+	}
+	return merged
 }
 
 func streamEndpointSecretOwnerUID(resource *streamingv1beta1.Stream) (string, error) {

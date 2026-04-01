@@ -131,6 +131,12 @@ const (
 	staleStreamEndpoint    = "https://old-streaming.example.com"
 )
 
+const (
+	quickSecretUnlabeled uint8 = iota
+	quickSecretOwned
+	quickSecretForeignOwned
+)
+
 type secretCallExpectation struct {
 	get    bool
 	create bool
@@ -342,6 +348,39 @@ func TestStreamEndpointSecretClientSkipsSecretUpdateWhenExistingDataMatches(t *t
 	assertCredentialCalls(t, credClient, secretCallExpectation{get: true})
 }
 
+func TestStreamEndpointSecretClientAdoptsLegacyUnlabeledSecretWhenDataMatches(t *testing.T) {
+	t.Parallel()
+
+	credClient := &fakeCredentialClient{}
+	var updatedLabels map[string]string
+	var updatedData map[string][]byte
+	credClient.getSecretFn = func(_ context.Context, name string, namespace string) (map[string][]byte, error) {
+		requireSecretTarget(t, "GetSecret", name, namespace)
+		return map[string][]byte{
+			"endpoint": []byte(testStreamEndpoint),
+		}, nil
+	}
+	credClient.createSecretFn = func(context.Context, string, string, map[string]string, map[string][]byte) (bool, error) {
+		t.Fatal("CreateSecret() should not be called when a legacy same-name Secret already exists")
+		return false, nil
+	}
+	credClient.updateSecretFn = func(_ context.Context, name string, namespace string, labels map[string]string, data map[string][]byte) (bool, error) {
+		requireSecretTarget(t, "UpdateSecret", name, namespace)
+		updatedLabels = cloneSecretLabels(labels)
+		updatedData = cloneSecretData(data)
+		return true, nil
+	}
+
+	client := newActiveStreamEndpointSecretClient(t, credClient, testStreamEndpoint)
+	resource := newTestStreamResource()
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	requireCreateOrUpdateSuccess(t, response, err, "adopting a legacy unlabeled secret")
+	assertCredentialCalls(t, credClient, secretCallExpectation{get: true, update: true})
+	requireOwnedSecretLabels(t, updatedLabels, testStreamUID)
+	requireEndpointSecretData(t, updatedData, testStreamEndpoint, "adopted secret")
+}
+
 func TestStreamEndpointSecretClientUpdatesExistingSecretWhenEndpointChanges(t *testing.T) {
 	t.Parallel()
 
@@ -505,6 +544,36 @@ func TestStreamEndpointSecretClientDeleteIgnoresMissingSecret(t *testing.T) {
 	assertCredentialCalls(t, credClient, secretCallExpectation{get: true})
 }
 
+func TestStreamEndpointSecretClientDeleteSkipsLegacyUnlabeledSecret(t *testing.T) {
+	t.Parallel()
+
+	credClient := &fakeCredentialClient{}
+	credClient.getSecretRecordFn = func(_ context.Context, name string, namespace string) (credhelper.SecretRecord, error) {
+		requireSecretTarget(t, "GetSecret", name, namespace)
+		return credhelper.SecretRecord{}, nil
+	}
+	credClient.deleteSecretFn = func(context.Context, string, string) (bool, error) {
+		t.Fatal("DeleteSecret() should not be called for a legacy unlabeled same-name Secret before adoption")
+		return false, nil
+	}
+
+	client := streamEndpointSecretClient{
+		delegate: fakeStreamServiceClient{
+			deleteFn: func(_ context.Context, _ *streamingv1beta1.Stream) (bool, error) {
+				return true, nil
+			},
+		},
+		credentialClient:   credClient,
+		secretRecordReader: credClient,
+	}
+
+	resource := newTestStreamResource()
+
+	deleted, err := client.Delete(context.Background(), resource)
+	requireDeleteSuccess(t, deleted, err, "skipping a legacy unlabeled same-name secret")
+	assertCredentialCalls(t, credClient, secretCallExpectation{get: true})
+}
+
 func TestStreamEndpointSecretClientDeleteSkipsUnownedSecret(t *testing.T) {
 	t.Parallel()
 
@@ -547,7 +616,7 @@ func TestStreamEndpointSecretDataRequiresMessagesEndpoint(t *testing.T) {
 
 type streamEndpointSecretQuickCase struct {
 	InitialState   uint8
-	Owned          bool
+	LabelState     uint8
 	EndpointID     uint32
 	ExtraKey       bool
 	CachedNotFound bool
@@ -556,7 +625,7 @@ type streamEndpointSecretQuickCase struct {
 func (streamEndpointSecretQuickCase) Generate(r *rand.Rand, _ int) reflect.Value {
 	return reflect.ValueOf(streamEndpointSecretQuickCase{
 		InitialState:   uint8(r.Intn(3)),
-		Owned:          r.Intn(2) == 0,
+		LabelState:     uint8(r.Intn(3)),
 		EndpointID:     r.Uint32(),
 		ExtraKey:       r.Intn(2) == 0,
 		CachedNotFound: r.Intn(2) == 0,
@@ -772,35 +841,39 @@ func (h *streamEndpointSecretQuickHarness) expectOwnershipConflict(attempt int) 
 }
 
 func expectsQuickSyncOwnershipConflict(tc streamEndpointSecretQuickCase) bool {
-	return tc.InitialState%3 != 0 && !tc.Owned
+	switch tc.InitialState % 3 {
+	case 0:
+		return false
+	case 1:
+		return tc.LabelState%3 == quickSecretForeignOwned
+	default:
+		return tc.LabelState%3 != quickSecretOwned
+	}
 }
 
 func expectedQuickSyncCallCounts(tc streamEndpointSecretQuickCase) (int, int) {
-	switch tc.InitialState % 3 {
-	case 0:
+	if tc.InitialState%3 == 0 {
 		return 1, 0
-	case 1:
-		if !tc.Owned {
-			if tc.CachedNotFound {
-				return 1, 0
-			}
-			return 0, 0
+	}
+
+	createCalls := 0
+	if tc.CachedNotFound {
+		createCalls = 1
+	}
+
+	switch tc.LabelState % 3 {
+	case quickSecretOwned:
+		if tc.InitialState%3 == 2 {
+			return createCalls, 1
 		}
-		if tc.CachedNotFound {
-			return 1, 0
+		return createCalls, 0
+	case quickSecretUnlabeled:
+		if tc.InitialState%3 == 1 {
+			return createCalls, 1
 		}
-		return 0, 0
+		return createCalls, 0
 	default:
-		if !tc.Owned {
-			if tc.CachedNotFound {
-				return 1, 0
-			}
-			return 0, 0
-		}
-		if tc.CachedNotFound {
-			return 1, 1
-		}
-		return 0, 1
+		return createCalls, 0
 	}
 }
 
@@ -931,8 +1004,11 @@ func initialQuickSecretState(
 	ownerUID string,
 ) (map[string][]byte, map[string]string) {
 	var labels map[string]string
-	if tc.Owned {
+	switch tc.LabelState % 3 {
+	case quickSecretOwned:
 		labels = ownedEndpointSecretLabels(ownerUID)
+	case quickSecretForeignOwned:
+		labels = ownedEndpointSecretLabels("other-stream-uid")
 	}
 	switch tc.InitialState % 3 {
 	case 0:

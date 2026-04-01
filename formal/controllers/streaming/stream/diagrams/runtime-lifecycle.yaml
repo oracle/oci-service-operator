@@ -12,5 +12,5 @@ states:
   - failed
 notes:
   - The generated runtime reuses existing streams before create by listing on name plus the optional pool and compartment filters, while delete-phase lookup can still resolve terminating or failed matches when no OCI identifier is recorded.
-  - A narrow package-local companion writes or updates the ready-only endpoint secret after ACTIVE only when the same-name Secret carries the current Stream UID ownership label, and best-effort delete cleanup skips missing or unowned Secrets.
+  - A narrow package-local companion writes or updates the ready-only endpoint secret after ACTIVE when the same-name Secret already carries the current Stream UID ownership label, or when a legacy unlabeled Secret already matches the desired ready-only payload so reconcile can stamp the current UID label before future updates. Best-effort delete cleanup skips missing or unowned Secrets.
   - Delete remains best-effort; DELETING or DELETED is sufficient for finalizer removal.
