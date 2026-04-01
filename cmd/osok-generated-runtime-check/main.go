@@ -107,7 +107,7 @@ func run(ctx context.Context, opts options) (err error) {
 	}
 	defer cleanupRuntimeCheckSnapshot(&err, snapshotDir)
 
-	if err := generateRuntimeCheckSnapshot(ctx, inputs, snapshotDir.root); err != nil {
+	if err := generateRuntimeCheckSnapshot(ctx, inputs, opts, snapshotDir.root); err != nil {
 		return err
 	}
 
@@ -168,7 +168,7 @@ func loadRuntimeCheckRunInputs(ctx context.Context, opts options) (runtimeCheckR
 	if err != nil {
 		return runtimeCheckRunInputs{}, err
 	}
-	if err := cfg.VerifyFormalInputs(); err != nil {
+	if err := cfg.VerifyFormalInputsForServices(services); err != nil {
 		return runtimeCheckRunInputs{}, err
 	}
 	packageModels, err := buildPackageModels(ctx, cfg, services)
@@ -215,7 +215,7 @@ func cleanupRuntimeCheckSnapshot(runErr *error, snapshotDir snapshot) {
 	}
 }
 
-func generateRuntimeCheckSnapshot(ctx context.Context, inputs runtimeCheckRunInputs, snapshotRoot string) error {
+func generateRuntimeCheckSnapshot(ctx context.Context, inputs runtimeCheckRunInputs, opts options, snapshotRoot string) error {
 	pipeline := generator.New()
 	if _, err := pipeline.Generate(ctx, inputs.cfg, inputs.services, generator.Options{
 		OutputRoot: snapshotRoot,

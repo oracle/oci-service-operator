@@ -66,7 +66,7 @@ func execute(ctx context.Context, opts options, stdout io.Writer) error {
 	if err != nil {
 		return err
 	}
-	if err := cfg.VerifyFormalInputs(); err != nil {
+	if err := cfg.VerifyFormalInputsForServices(services); err != nil {
 		return err
 	}
 

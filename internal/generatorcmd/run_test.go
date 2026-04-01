@@ -32,7 +32,7 @@ services:
     group: identity
     packageProfile: controller-backed
     selection:
-      enabled: false
+      enabled: true
       mode: all
     formalSpec: user
 `

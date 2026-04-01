@@ -127,6 +127,10 @@ func resourceModels(index *ocisdk.Package, service ServiceConfig) ([]ResourceMod
 	if err != nil {
 		return nil, err
 	}
+	candidates, err = selectResourceCandidates(service, candidates)
+	if err != nil {
+		return nil, err
+	}
 
 	resources := make([]ResourceModel, 0, len(candidates))
 	for _, entry := range candidates {
@@ -142,6 +146,35 @@ func resourceModels(index *ocisdk.Package, service ServiceConfig) ([]ResourceMod
 	})
 
 	return resources, nil
+}
+
+func selectResourceCandidates(service ServiceConfig, candidates []resourceCandidate) ([]resourceCandidate, error) {
+	if !service.HasSelectedKinds() {
+		return candidates, nil
+	}
+
+	discovered := make(map[string]struct{}, len(candidates))
+	selected := make([]resourceCandidate, 0, len(candidates))
+	for _, candidate := range candidates {
+		discovered[candidate.rawName] = struct{}{}
+		if service.includesSelectedKind(candidate.rawName) {
+			selected = append(selected, candidate)
+		}
+	}
+
+	var missing []string
+	for _, kind := range service.SelectedKinds() {
+		if _, ok := discovered[kind]; ok {
+			continue
+		}
+		missing = append(missing, kind)
+	}
+	if len(missing) > 0 {
+		sort.Strings(missing)
+		return nil, fmt.Errorf("service %q selected kinds %s were not discovered in the SDK package", service.Service, strings.Join(missing, ", "))
+	}
+
+	return selected, nil
 }
 
 func discoverResourceCandidates(index *ocisdk.Package) ([]resourceCandidate, error) {

@@ -47,9 +47,10 @@ type sdkTarget struct {
 }
 
 type configuredService struct {
-	Service string
-	Group   string
-	Version string
+	Service       string
+	Group         string
+	Version       string
+	SelectedKinds []string
 }
 
 var (
@@ -60,6 +61,8 @@ var (
 
 func main() {
 	write := flag.Bool("write", false, "write changes to registry files")
+	serviceName := flag.String("service", "", "refresh validator registries for a single configured service")
+	all := flag.Bool("all", false, "refresh validator registries for the default active generator surface")
 	flag.Parse()
 
 	root, err := findRepoRoot()
@@ -79,7 +82,7 @@ func main() {
 		die(err)
 	}
 
-	apiOut, sdkOut, err := generateRegistryOutputs(root, existingAPI, existingSDK)
+	apiOut, sdkOut, err := generateRegistryOutputs(root, *serviceName, *all, existingAPI, existingSDK)
 	if err != nil {
 		die(err)
 	}
@@ -102,8 +105,8 @@ func main() {
 	fmt.Printf("Updated %s\n", rel(root, sdkPath))
 }
 
-func generateRegistryOutputs(root string, existingAPI map[string]specTarget, existingSDK []sdkTarget) ([]byte, []byte, error) {
-	services, err := loadConfiguredServices(root)
+func generateRegistryOutputs(root string, serviceName string, all bool, existingAPI map[string]specTarget, existingSDK []sdkTarget) ([]byte, []byte, error) {
+	services, err := loadConfiguredServices(root, serviceName, all)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -387,23 +390,32 @@ func parseExistingSDKTargets(path string) ([]sdkTarget, error) {
 	return out, nil
 }
 
-func loadConfiguredServices(root string) ([]configuredService, error) {
+func loadConfiguredServices(root string, serviceName string, all bool) ([]configuredService, error) {
 	configPath := filepath.Join(root, "internal", "generator", "config", "services.yaml")
 	cfg, err := generator.LoadConfig(configPath)
 	if err != nil {
 		return nil, err
 	}
+	serviceName, all, err = normalizeConfiguredServiceSelection(serviceName, all)
+	if err != nil {
+		return nil, err
+	}
+	selectedServices, err := cfg.SelectServices(serviceName, all)
+	if err != nil {
+		return nil, err
+	}
 
-	services := make([]configuredService, 0, len(cfg.Services))
-	for _, service := range cfg.Services {
+	services := make([]configuredService, 0, len(selectedServices))
+	for _, service := range selectedServices {
 		sdkPackageBase := path.Base(strings.TrimSpace(service.SDKPackage))
 		if sdkPackageBase != service.Service {
 			return nil, fmt.Errorf("service %q sdkPackage %q does not match SDK package basename %q", service.Service, service.SDKPackage, sdkPackageBase)
 		}
 		services = append(services, configuredService{
-			Service: service.Service,
-			Group:   service.Group,
-			Version: service.VersionOrDefault(cfg.DefaultVersion),
+			Service:       service.Service,
+			Group:         service.Group,
+			Version:       service.VersionOrDefault(cfg.DefaultVersion),
+			SelectedKinds: service.SelectedKinds(),
 		})
 	}
 
@@ -418,6 +430,17 @@ func loadConfiguredServices(root string) ([]configuredService, error) {
 	return services, nil
 }
 
+func normalizeConfiguredServiceSelection(serviceName string, all bool) (string, bool, error) {
+	serviceName = strings.TrimSpace(serviceName)
+	if serviceName != "" && all {
+		return "", false, fmt.Errorf("use either --all or --service, not both")
+	}
+	if serviceName == "" && !all {
+		return "", true, nil
+	}
+	return serviceName, all, nil
+}
+
 func scanConfiguredAPISpecs(root string, services []configuredService) (map[string][]apiTypeInfo, error) {
 	out := make(map[string][]apiTypeInfo)
 	for _, service := range services {
@@ -425,13 +448,54 @@ func scanConfiguredAPISpecs(root string, services []configuredService) (map[stri
 		if err != nil {
 			return nil, fmt.Errorf("scan API specs for group %q: %w", service.Group, err)
 		}
+		specs, err = filterConfiguredAPISpecs(service, specs)
+		if err != nil {
+			return nil, err
+		}
 		if len(specs) == 0 {
-			return nil, fmt.Errorf("configured API group %q has no spec types under api/%s/%s", service.Group, service.Group, service.Version)
+			return nil, fmt.Errorf("configured API group %q has no selected spec types under api/%s/%s", service.Group, service.Group, service.Version)
 		}
 		out[service.Group] = specs
 	}
 
 	return out, nil
+}
+
+func filterConfiguredAPISpecs(service configuredService, specs []apiTypeInfo) ([]apiTypeInfo, error) {
+	if len(service.SelectedKinds) == 0 {
+		return specs, nil
+	}
+
+	selected := make(map[string]struct{}, len(service.SelectedKinds))
+	for _, kind := range service.SelectedKinds {
+		selected[kind] = struct{}{}
+	}
+
+	filtered := make([]apiTypeInfo, 0, len(specs))
+	for _, spec := range specs {
+		if _, ok := selected[spec.Spec]; !ok {
+			continue
+		}
+		filtered = append(filtered, spec)
+		delete(selected, spec.Spec)
+	}
+
+	if len(selected) == 0 {
+		return filtered, nil
+	}
+
+	missing := make([]string, 0, len(selected))
+	for kind := range selected {
+		missing = append(missing, kind)
+	}
+	sort.Strings(missing)
+	return nil, fmt.Errorf(
+		"configured service %q selected kinds %s were not found under api/%s/%s",
+		service.Service,
+		strings.Join(missing, ", "),
+		service.Group,
+		service.Version,
+	)
 }
 
 func scanAPISpecDir(dir string) ([]apiTypeInfo, error) {

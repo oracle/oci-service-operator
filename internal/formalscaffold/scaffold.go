@@ -122,11 +122,11 @@ func Generate(opts Options) (Report, error) {
 	}
 
 	repoRoot := filepath.Clean(filepath.Join(filepath.Dir(configPath), "..", "..", ".."))
-	entries, err := discoverPublishedKinds(repoRoot, cfg)
+	entries, selectedServices, err := discoverPublishedKinds(repoRoot, cfg)
 	if err != nil {
 		return report, err
 	}
-	report.ServicesScanned = len(cfg.Services)
+	report.ServicesScanned = len(selectedServices)
 	report.PublishedKinds = len(entries)
 	if strings.TrimSpace(opts.ProviderPath) != "" {
 		providerEntries, err := discoverProviderKinds(strings.TrimSpace(opts.ProviderPath))
@@ -141,12 +141,19 @@ func Generate(opts Options) (Report, error) {
 	}
 
 	existingBindings := make(map[string]formal.ControllerBinding, len(catalog.Controllers))
-	rowByKey := make(map[string]formal.ManifestRow, len(catalog.Controllers)+len(entries))
+	rowByKey := make(map[string]formal.ManifestRow, len(entries)+1)
 	for _, binding := range catalog.Controllers {
 		key := rowKey(binding.Manifest.Service, binding.Manifest.Slug)
 		existingBindings[key] = binding
-		rowByKey[key] = binding.Manifest
+		if shouldPreserveManifestRow(cfg, binding.Manifest) {
+			rowByKey[key] = binding.Manifest
+		}
 	}
+	recreatedRows, err := addConfiguredFormalSpecRows(root, cfg, rowByKey)
+	if err != nil {
+		return report, err
+	}
+	report.NewRows += recreatedRows
 
 	discoveredKeys := make(map[string]inventoryEntry, len(entries))
 	for _, entry := range entries {
@@ -164,6 +171,18 @@ func Generate(opts Options) (Report, error) {
 			}
 			report.ExistingRowsPreserved++
 			rowByKey[key] = binding.Manifest
+			continue
+		}
+		if row, ok := rowByKey[key]; ok {
+			if row.Kind != entry.Kind {
+				return report, fmt.Errorf(
+					"existing formal row %s/%s kind %q does not match published API kind %q",
+					entry.Service,
+					entry.Slug,
+					row.Kind,
+					entry.Kind,
+				)
+			}
 			continue
 		}
 		rowByKey[key] = scaffoldManifestRow(entry)
@@ -224,21 +243,28 @@ func Generate(opts Options) (Report, error) {
 	return report, nil
 }
 
-func discoverPublishedKinds(repoRoot string, cfg *generator.Config) ([]inventoryEntry, error) {
+func discoverPublishedKinds(repoRoot string, cfg *generator.Config) ([]inventoryEntry, []generator.ServiceConfig, error) {
 	if cfg == nil {
-		return nil, fmt.Errorf("generator config is required")
+		return nil, nil, fmt.Errorf("generator config is required")
 	}
 
-	entries := make([]inventoryEntry, 0, len(cfg.Services))
+	services, err := cfg.SelectServices("", true)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	entries := make([]inventoryEntry, 0, len(services))
 	seen := map[string]string{}
-	for _, service := range cfg.Services {
+	for _, service := range services {
 		version := service.VersionOrDefault(cfg.DefaultVersion)
 		apiDir := filepath.Join(repoRoot, "api", service.Group, version)
 		dirEntries, err := os.ReadDir(apiDir)
 		if err != nil {
-			return nil, fmt.Errorf("read published API directory %q for service %q: %w", apiDir, service.Service, err)
+			return nil, nil, fmt.Errorf("read published API directory %q for service %q: %w", apiDir, service.Service, err)
 		}
 
+		selectedKinds := selectedKindSet(service.SelectedKinds())
+		remainingSelectedKinds := selectedKindSet(service.SelectedKinds())
 		serviceKinds := 0
 		for _, dirEntry := range dirEntries {
 			if dirEntry.IsDir() {
@@ -249,14 +275,23 @@ func discoverPublishedKinds(repoRoot string, cfg *generator.Config) ([]inventory
 				continue
 			}
 
-			slug := strings.TrimSuffix(name, "_types.go")
 			kind, err := publishedKindFromFile(filepath.Join(apiDir, name))
 			if err != nil {
-				return nil, err
+				return nil, nil, err
+			}
+			if len(selectedKinds) > 0 {
+				if _, ok := selectedKinds[kind]; !ok {
+					continue
+				}
+				delete(remainingSelectedKinds, kind)
+			}
+			slug := strings.TrimSpace(service.FormalSpecFor(kind))
+			if slug == "" {
+				slug = strings.TrimSuffix(name, "_types.go")
 			}
 			key := rowKey(service.Service, slug)
 			if previous, ok := seen[key]; ok {
-				return nil, fmt.Errorf("duplicate published API kind key %s from %q and %q", key, previous, filepath.Join(apiDir, name))
+				return nil, nil, fmt.Errorf("duplicate published API kind key %s from %q and %q", key, previous, filepath.Join(apiDir, name))
 			}
 			seen[key] = filepath.Join(apiDir, name)
 			entries = append(entries, inventoryEntry{
@@ -268,8 +303,21 @@ func discoverPublishedKinds(repoRoot string, cfg *generator.Config) ([]inventory
 			})
 			serviceKinds++
 		}
+		if len(remainingSelectedKinds) > 0 {
+			missing := make([]string, 0, len(remainingSelectedKinds))
+			for kind := range remainingSelectedKinds {
+				missing = append(missing, kind)
+			}
+			sort.Strings(missing)
+			return nil, nil, fmt.Errorf(
+				"service %q selected kinds %s were not found under %q",
+				service.Service,
+				strings.Join(missing, ", "),
+				apiDir,
+			)
+		}
 		if serviceKinds == 0 {
-			return nil, fmt.Errorf("service %q has no published API kinds under %q", service.Service, apiDir)
+			return nil, nil, fmt.Errorf("service %q has no published API kinds under %q", service.Service, apiDir)
 		}
 	}
 
@@ -282,7 +330,122 @@ func discoverPublishedKinds(repoRoot string, cfg *generator.Config) ([]inventory
 		}
 		return entries[i].Kind < entries[j].Kind
 	})
-	return entries, nil
+	return entries, services, nil
+}
+
+func shouldPreserveManifestRow(cfg *generator.Config, row formal.ManifestRow) bool {
+	if row.Service == "template" && row.Slug == "template" {
+		return true
+	}
+	if cfg == nil {
+		return false
+	}
+
+	for _, service := range cfg.Services {
+		if service.Service != row.Service {
+			continue
+		}
+		return strings.TrimSpace(service.FormalSpecFor(row.Kind)) == row.Slug
+	}
+	return false
+}
+
+func addConfiguredFormalSpecRows(formalRoot string, cfg *generator.Config, rowByKey map[string]formal.ManifestRow) (int, error) {
+	if cfg == nil {
+		return 0, nil
+	}
+
+	added := 0
+	for _, service := range cfg.Services {
+		for _, resource := range service.Generation.Resources {
+			slug := strings.TrimSpace(resource.FormalSpec)
+			if slug == "" {
+				continue
+			}
+
+			key := rowKey(service.Service, slug)
+			if _, ok := rowByKey[key]; ok {
+				continue
+			}
+
+			row, ok, err := configuredFormalSpecManifestRow(formalRoot, service.Service, resource.Kind, slug)
+			if err != nil {
+				return 0, err
+			}
+			if !ok {
+				continue
+			}
+			rowByKey[key] = row
+			added++
+		}
+	}
+
+	return added, nil
+}
+
+func configuredFormalSpecManifestRow(formalRoot string, serviceName string, kind string, slug string) (formal.ManifestRow, bool, error) {
+	specPath := path.Join("controllers", serviceName, slug, "spec.cfg")
+	stage, surface, ok, err := manifestMetadataFromSpecFile(filepath.Join(formalRoot, filepath.FromSlash(specPath)))
+	if err != nil {
+		return formal.ManifestRow{}, false, err
+	}
+	if !ok {
+		return formal.ManifestRow{}, false, nil
+	}
+	return formal.ManifestRow{
+		Service:    serviceName,
+		Slug:       slug,
+		Kind:       kind,
+		Stage:      stage,
+		Surface:    surface,
+		ImportPath: path.Join("imports", serviceName, slug+".json"),
+		SpecPath:   specPath,
+		LogicPath:  path.Join("controllers", serviceName, slug, "logic-gaps.md"),
+		DiagramDir: path.Join("controllers", serviceName, slug, "diagrams"),
+	}, true, nil
+}
+
+func manifestMetadataFromSpecFile(path string) (string, string, bool, error) {
+	content, err := os.ReadFile(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return "", "", false, nil
+		}
+		return "", "", false, fmt.Errorf("read formal spec %q: %w", filepath.ToSlash(path), err)
+	}
+
+	stage := ""
+	surface := "repo-authored-semantics"
+	for _, line := range strings.Split(string(content), "\n") {
+		key, value, ok := strings.Cut(line, "=")
+		if !ok {
+			continue
+		}
+		switch strings.TrimSpace(key) {
+		case "stage":
+			stage = strings.TrimSpace(value)
+		case "surface":
+			if trimmed := strings.TrimSpace(value); trimmed != "" {
+				surface = trimmed
+			}
+		}
+	}
+
+	if stage == "" {
+		return "", "", false, fmt.Errorf("formal spec %q is missing stage metadata", filepath.ToSlash(path))
+	}
+	return stage, surface, true, nil
+}
+
+func selectedKindSet(kinds []string) map[string]struct{} {
+	if len(kinds) == 0 {
+		return nil
+	}
+	selected := make(map[string]struct{}, len(kinds))
+	for _, kind := range kinds {
+		selected[kind] = struct{}{}
+	}
+	return selected
 }
 
 func discoverProviderKinds(providerPath string) ([]inventoryEntry, error) {

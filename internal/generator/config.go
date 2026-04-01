@@ -126,6 +126,7 @@ type ServiceConfig struct {
 	FormalSpec     string              `yaml:"formalSpec,omitempty"`
 	ObservedState  ObservedStateConfig `yaml:"observedState,omitempty"`
 	Generation     GenerationConfig    `yaml:"generation,omitempty"`
+	selectedKinds  []string            `yaml:"-"`
 }
 
 // ObservedStateConfig tunes how read-model fields are synthesized into status types.
@@ -601,6 +602,10 @@ func validateFormalSpec(field string, value string) error {
 }
 
 // SelectServices resolves the requested services from the config.
+// `--all` returns only the default-active services and applies any explicit
+// default kind subset before package-model construction. `--service` returns
+// the named service without applying default-active filtering so backlog and
+// disabled services remain addressable explicitly.
 func (c *Config) SelectServices(serviceName string, all bool) ([]ServiceConfig, error) {
 	if all && strings.TrimSpace(serviceName) != "" {
 		return nil, fmt.Errorf("use either --all or --service, not both")
@@ -609,14 +614,17 @@ func (c *Config) SelectServices(serviceName string, all bool) ([]ServiceConfig, 
 		return nil, fmt.Errorf("either --all or --service must be set")
 	}
 	if all {
-		selected := make([]ServiceConfig, len(c.Services))
-		copy(selected, c.Services)
+		defaultActive := c.DefaultActiveServices()
+		selected := make([]ServiceConfig, 0, len(defaultActive))
+		for _, service := range defaultActive {
+			selected = append(selected, service.defaultSelectedSurface())
+		}
 		return selected, nil
 	}
 
 	for _, service := range c.Services {
 		if service.Service == serviceName {
-			return []ServiceConfig{service}, nil
+			return []ServiceConfig{service.withSelectedKinds(nil)}, nil
 		}
 	}
 
@@ -649,7 +657,22 @@ func (c *Config) VerifyFormalInputs() error {
 	if !c.HasFormalSpecs() {
 		return nil
 	}
+	return c.verifyFormalRoot()
+}
 
+// VerifyFormalInputsForServices validates the repo-local formal catalog only
+// when the selected service surface references formal specs.
+func (c *Config) VerifyFormalInputsForServices(services []ServiceConfig) error {
+	for _, service := range services {
+		if !service.HasSelectedFormalSpecs() {
+			continue
+		}
+		return c.verifyFormalRoot()
+	}
+	return nil
+}
+
+func (c *Config) verifyFormalRoot() error {
 	formalRoot := c.FormalRoot()
 	if strings.TrimSpace(formalRoot) == "" {
 		return fmt.Errorf("formal root is unknown for configs with formalSpec references")
@@ -704,6 +727,22 @@ func (s ServiceConfig) DefaultIncludeKinds() []string {
 	return kinds
 }
 
+// SelectedKinds returns the effective kind subset applied to this service for
+// the current generator run. A nil slice means the full discovered service
+// surface is in scope.
+func (s ServiceConfig) SelectedKinds() []string {
+	if len(s.selectedKinds) == 0 {
+		return nil
+	}
+	return append([]string(nil), s.selectedKinds...)
+}
+
+// HasSelectedKinds reports whether the current generator run narrowed this
+// service to an explicit kind subset.
+func (s ServiceConfig) HasSelectedKinds() bool {
+	return len(s.selectedKinds) > 0
+}
+
 // DefaultActiveServices returns the services marked active in the default generator surface.
 func (c *Config) DefaultActiveServices() []ServiceConfig {
 	if c == nil {
@@ -718,6 +757,35 @@ func (c *Config) DefaultActiveServices() []ServiceConfig {
 	}
 
 	return selected
+}
+
+func (s ServiceConfig) defaultSelectedSurface() ServiceConfig {
+	if s.DefaultSelectionMode() != SelectionModeExplicit {
+		return s.withSelectedKinds(nil)
+	}
+	return s.withSelectedKinds(s.DefaultIncludeKinds())
+}
+
+func (s ServiceConfig) withSelectedKinds(kinds []string) ServiceConfig {
+	selected := s
+	if len(kinds) == 0 {
+		selected.selectedKinds = nil
+		return selected
+	}
+	selected.selectedKinds = append([]string(nil), kinds...)
+	return selected
+}
+
+func (s ServiceConfig) includesSelectedKind(kind string) bool {
+	if len(s.selectedKinds) == 0 {
+		return true
+	}
+	for _, selectedKind := range s.selectedKinds {
+		if selectedKind == kind {
+			return true
+		}
+	}
+	return false
 }
 
 // IsControllerBacked reports whether the service expects shared-manager controller assets.
@@ -796,6 +864,23 @@ func (s ServiceConfig) HasFormalSpecs() bool {
 		return true
 	}
 	for _, resource := range s.Generation.Resources {
+		if strings.TrimSpace(resource.FormalSpec) != "" {
+			return true
+		}
+	}
+	return false
+}
+
+// HasSelectedFormalSpecs reports whether the effective service surface for the
+// current run references any formal specs.
+func (s ServiceConfig) HasSelectedFormalSpecs() bool {
+	if strings.TrimSpace(s.FormalSpec) != "" {
+		return true
+	}
+	for _, resource := range s.Generation.Resources {
+		if !s.includesSelectedKind(resource.Kind) {
+			continue
+		}
 		if strings.TrimSpace(resource.FormalSpec) != "" {
 			return true
 		}

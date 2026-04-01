@@ -102,7 +102,7 @@ func TestSelectServices(t *testing.T) {
 				SDKPackage:     "example/database",
 				Group:          "database",
 				PackageProfile: "controller-backed",
-				Selection:      selectionAll(false),
+				Selection:      selectionExplicit(true, "AutonomousDatabase"),
 			},
 			{
 				Service:        "mysql",
@@ -110,6 +110,13 @@ func TestSelectServices(t *testing.T) {
 				Group:          "mysql",
 				PackageProfile: "controller-backed",
 				Selection:      selectionAll(true),
+			},
+			{
+				Service:        "identity",
+				SDKPackage:     "example/identity",
+				Group:          "identity",
+				PackageProfile: "controller-backed",
+				Selection:      selectionAll(false),
 			},
 		},
 	}
@@ -129,6 +136,11 @@ func TestSelectServices(t *testing.T) {
 		{
 			name:        "single service",
 			serviceName: "mysql",
+			wantCount:   1,
+		},
+		{
+			name:        "disabled service explicit",
+			serviceName: "identity",
 			wantCount:   1,
 		},
 		{
@@ -156,6 +168,79 @@ func TestSelectServices(t *testing.T) {
 			assertSelectServicesResult(t, cfg, test.serviceName, test.all, test.wantCount, test.wantErr)
 		})
 	}
+}
+
+func TestSelectServicesAllAppliesDefaultKindSubsets(t *testing.T) {
+	t.Parallel()
+
+	cfg := &Config{
+		SchemaVersion:  "v1alpha1",
+		Domain:         "oracle.com",
+		DefaultVersion: "v1beta1",
+		PackageProfiles: map[string]PackageProfile{
+			"controller-backed": {Description: "runtime-integrated groups"},
+		},
+		Services: []ServiceConfig{
+			{
+				Service:        "database",
+				SDKPackage:     "example/database",
+				Group:          "database",
+				PackageProfile: "controller-backed",
+				Selection:      selectionExplicit(true, "AutonomousDatabase"),
+			},
+			{
+				Service:        "mysql",
+				SDKPackage:     "example/mysql",
+				Group:          "mysql",
+				PackageProfile: "controller-backed",
+				Selection:      selectionAll(true),
+			},
+			{
+				Service:        "identity",
+				SDKPackage:     "example/identity",
+				Group:          "identity",
+				PackageProfile: "controller-backed",
+				Selection:      selectionAll(false),
+			},
+		},
+	}
+
+	services := assertSelectServicesResult(t, cfg, "", true, 2, "")
+	selected := make(map[string]ServiceConfig, len(services))
+	for _, service := range services {
+		selected[service.Service] = service
+	}
+
+	assertSelectedKinds(t, selected["database"], []string{"AutonomousDatabase"})
+	assertSelectedKinds(t, selected["mysql"], nil)
+	if _, ok := selected["identity"]; ok {
+		t.Fatal("SelectServices(--all) unexpectedly included disabled identity service")
+	}
+}
+
+func TestSelectServicesExplicitServiceClearsDefaultKindSubset(t *testing.T) {
+	t.Parallel()
+
+	cfg := &Config{
+		SchemaVersion:  "v1alpha1",
+		Domain:         "oracle.com",
+		DefaultVersion: "v1beta1",
+		PackageProfiles: map[string]PackageProfile{
+			"controller-backed": {Description: "runtime-integrated groups"},
+		},
+		Services: []ServiceConfig{
+			{
+				Service:        "database",
+				SDKPackage:     "example/database",
+				Group:          "database",
+				PackageProfile: "controller-backed",
+				Selection:      selectionExplicit(true, "AutonomousDatabase"),
+			},
+		},
+	}
+
+	services := assertSelectServicesResult(t, cfg, "database", false, 1, "")
+	assertSelectedKinds(t, services[0], nil)
 }
 
 func TestLoadConfigIncludesSelectionMetadata(t *testing.T) {
@@ -908,7 +993,7 @@ type generationStrategyExpectations struct {
 	webhook        string
 }
 
-func assertSelectServicesResult(t *testing.T, cfg *Config, serviceName string, all bool, wantCount int, wantErr string) {
+func assertSelectServicesResult(t *testing.T, cfg *Config, serviceName string, all bool, wantCount int, wantErr string) []ServiceConfig {
 	t.Helper()
 
 	services, err := cfg.SelectServices(serviceName, all)
@@ -919,7 +1004,7 @@ func assertSelectServicesResult(t *testing.T, cfg *Config, serviceName string, a
 		if !strings.Contains(err.Error(), wantErr) {
 			t.Fatalf("SelectServices() error = %v, want substring %q", err, wantErr)
 		}
-		return
+		return nil
 	}
 	if err != nil {
 		t.Fatalf("SelectServices() error = %v", err)
@@ -927,6 +1012,7 @@ func assertSelectServicesResult(t *testing.T, cfg *Config, serviceName string, a
 	if len(services) != wantCount {
 		t.Fatalf("SelectServices() returned %d services, want %d", len(services), wantCount)
 	}
+	return services
 }
 
 func assertServiceSelection(t *testing.T, service *ServiceConfig, wantEnabled bool, wantMode string, wantKinds []string) {
@@ -940,6 +1026,14 @@ func assertServiceSelection(t *testing.T, service *ServiceConfig, wantEnabled bo
 	}
 	if got := service.DefaultIncludeKinds(); !slices.Equal(got, wantKinds) {
 		t.Fatalf("%s includeKinds = %v, want %v", service.Service, got, wantKinds)
+	}
+}
+
+func assertSelectedKinds(t *testing.T, service ServiceConfig, want []string) {
+	t.Helper()
+
+	if got := service.SelectedKinds(); !slices.Equal(got, want) {
+		t.Fatalf("%s selectedKinds = %v, want %v", service.Service, got, want)
 	}
 }
 

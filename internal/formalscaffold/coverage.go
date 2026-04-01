@@ -63,7 +63,7 @@ func VerifyCoverage(opts Options) (CoverageReport, error) {
 	}
 	repoRoot := filepath.Clean(filepath.Join(filepath.Dir(configPath), "..", "..", ".."))
 
-	publishedEntries, err := discoverPublishedKinds(repoRoot, cfg)
+	publishedEntries, _, err := discoverPublishedKinds(repoRoot, cfg)
 	if err != nil {
 		return report, err
 	}

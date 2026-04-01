@@ -52,13 +52,24 @@ func New() *Generator {
 //nolint:gocognit,gocyclo // Generation keeps per-service rendering and failure attribution in one flow.
 func (g *Generator) Generate(ctx context.Context, cfg *Config, services []ServiceConfig, options Options) (RunResult, error) {
 	result := RunResult{}
-	generatedPackages := make([]*PackageModel, 0, len(services))
+	builtPackages := make([]*PackageModel, 0, len(services))
 	for _, service := range services {
 		pkg, err := g.discoverer.BuildPackageModel(ctx, cfg, service)
 		if err != nil {
 			return result, fmt.Errorf("build package model for service %q: %w", service.Service, err)
 		}
+		builtPackages = append(builtPackages, pkg)
+	}
 
+	if options.Overwrite {
+		if err := cleanupGeneratedOutputs(options.OutputRoot, services, builtPackages); err != nil {
+			return result, err
+		}
+	}
+
+	generatedPackages := make([]*PackageModel, 0, len(builtPackages))
+	for index, service := range services {
+		pkg := builtPackages[index]
 		outputDir, err := g.renderer.RenderPackage(options.OutputRoot, pkg, options.Overwrite)
 		if err != nil {
 			var existsErr ErrTargetExists

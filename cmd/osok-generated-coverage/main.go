@@ -158,7 +158,7 @@ func loadCoverageRunInputs(ctx context.Context, opts options) (coverageRunInputs
 	if err != nil {
 		return coverageRunInputs{}, err
 	}
-	if err := cfg.VerifyFormalInputs(); err != nil {
+	if err := cfg.VerifyFormalInputsForServices(services); err != nil {
 		return coverageRunInputs{}, err
 	}
 	packageModels, err := buildPackageModels(ctx, cfg, services)
@@ -214,7 +214,7 @@ func generateCoverageOutput(
 	if err := generateCoverageSnapshot(ctx, opts, inputs, snapshotDir.root); err != nil {
 		return outputReport{}, err
 	}
-	envelope, err := runCoverageValidator(snapshotDir.root, inputs.controllerGenPath, inputs.selectedGroups, opts.validatorJSONOut)
+	envelope, err := runCoverageValidator(snapshotDir.root, inputs.controllerGenPath, opts.service, opts.all, inputs.selectedGroups, opts.validatorJSONOut)
 	if err != nil {
 		return outputReport{}, err
 	}
@@ -243,11 +243,21 @@ func generateCoverageSnapshot(
 func runCoverageValidator(
 	snapshotRoot string,
 	controllerGenPath string,
+	serviceName string,
+	all bool,
 	selectedGroups []string,
 	validatorJSONOut string,
 ) (validatorEnvelope, error) {
 	snapshotEnv := snapshotCommandEnv(snapshotRoot)
-	if err := runCommand(snapshotRoot, snapshotEnv, "go", "run", "./hack/update_validator_registries.go", "--write"); err != nil {
+	args := []string{"run", "./hack/update_validator_registries.go", "--write"}
+	if strings.TrimSpace(serviceName) != "" {
+		args = append(args, "--service", serviceName)
+	} else if all {
+		args = append(args, "--all")
+	} else {
+		args = append(args, "--all")
+	}
+	if err := runCommand(snapshotRoot, snapshotEnv, "go", args...); err != nil {
 		return validatorEnvelope{}, fmt.Errorf("refresh validator registries in snapshot: %w", err)
 	}
 	if err := runCommand(snapshotRoot, snapshotEnv, controllerGenPath, "object:headerFile=hack/boilerplate.go.txt", "paths="+controllerGenPaths(selectedGroups)); err != nil {

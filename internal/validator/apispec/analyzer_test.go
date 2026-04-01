@@ -101,9 +101,23 @@ func TestBuildReportMarksReviewedUntrackedTargetsAsIntentional(t *testing.T) {
 
 func TestBuildReportTracksResponseBodyTargets(t *testing.T) {
 	originalTargets := targets
+	originalResponseBodyCoverageTargets := responseBodyCoverageTargets
 	t.Cleanup(func() {
 		targets = originalTargets
+		responseBodyCoverageTargets = originalResponseBodyCoverageTargets
 	})
+	responseBodyCoverageTargets = map[string]responseBodyCoverage{
+		"NotificationUnsubscription": {
+			SDKStruct: "ons.GetUnsubscriptionResponse",
+			FieldName: "Value",
+			Encoding:  "plain-text",
+		},
+		"DNSZoneContent": {
+			SDKStruct: "dns.GetZoneContentResponse",
+			FieldName: "Content",
+			Encoding:  "binary",
+		},
+	}
 
 	tests := []struct {
 		name      string
