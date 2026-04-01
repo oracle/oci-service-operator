@@ -44,8 +44,8 @@ func run(ctx context.Context, programName string, args []string, stdout io.Write
 	flagSet := flag.NewFlagSet(programName, flag.ContinueOnError)
 	flagSet.SetOutput(stderr)
 	flagSet.StringVar(&opts.configPath, "config", DefaultConfigPath, "Path to the OSOK generator config file.")
-	flagSet.StringVar(&opts.service, "service", "", "Generate a single configured service.")
-	flagSet.BoolVar(&opts.all, "all", false, "Generate all configured services.")
+	flagSet.StringVar(&opts.service, "service", "", "Generate a single service from config, even if it is inactive by default.")
+	flagSet.BoolVar(&opts.all, "all", false, "Generate all enabled services in the default active surface.")
 	flagSet.StringVar(&opts.outputRoot, "output-root", ".", "Root directory where generated outputs are written.")
 	flagSet.BoolVar(&opts.overwrite, "overwrite", false, "Overwrite existing generated package files when the target directory already exists.")
 	if err := flagSet.Parse(args); err != nil {

@@ -138,7 +138,7 @@ focused on API and validator coverage only; generated controller and
 service-manager compilation is covered by the runtime gate below.
 
 ```bash
-# Full generated-output baseline report
+# Full generated-output baseline report for the enabled active surface
 make generated-coverage-report
 
 # Limit the snapshot run to one service and keep the snapshot for inspection
@@ -157,8 +157,8 @@ Common variables and flags:
 | Variable / Flag | Default | Purpose |
 | --- | --- | --- |
 | `--config` | `internal/generator/config/services.yaml` | Generator config used for the snapshot coverage run. The Makefile passes the repo's effective generator config. |
-| `GENERATED_COVERAGE_SERVICE` / `--service` | empty | Run the snapshot report for one configured service. |
-| `--all` | false | Report all configured services. |
+| `GENERATED_COVERAGE_SERVICE` / `--service` | empty | Run the snapshot report for one service from config, even if it is inactive by default. |
+| `--all` | false | Report the enabled default-active service surface from the selected config. |
 | `GENERATED_COVERAGE_REPORT` / `--report-out` | `generated-coverage-report.json` for the Makefile target | Write the generated coverage summary JSON. |
 | `GENERATED_COVERAGE_TOP` / `--top` | `10` | Number of top offenders to keep per category. Use `0` for all. |
 | `GENERATED_COVERAGE_SNAPSHOT_DIR` / `--snapshot-dir` | empty | Keep the generated snapshot at a specific path instead of using an auto-cleaned temp dir. |
@@ -226,7 +226,7 @@ make generated-coverage-gate \
 ```
 
 `generated-coverage-gate` and `generated-coverage-baseline` always operate on
-the full configured service set. Use `make generated-coverage-report
+the enabled default-active service surface from the selected config. Use `make generated-coverage-report
 GENERATED_COVERAGE_SERVICE=<service>` for targeted local inspection, but keep
 the checked-in baseline scoped to `--all`.
 
@@ -275,7 +275,7 @@ When future rollout work needs a pre-promotion snapshot, override
 # Write a runtime validation summary JSON
 make generated-runtime-report
 
-# CI-style gate for the full runtime config
+# CI-style gate for the enabled runtime surface from the selected config
 make generated-runtime-gate
 
 # Keep the snapshot for inspection
@@ -283,7 +283,7 @@ make generated-runtime-gate \
   GENERATED_RUNTIME_SNAPSHOT_DIR=/tmp/osok-generated-runtime \
   GENERATED_RUNTIME_REPORT=/tmp/generated-runtime-report.json
 
-# Direct CLI usage for all configured services
+# Direct CLI usage for the enabled active surface
 go run ./cmd/osok-generated-runtime-check --all
 
 # Direct CLI usage for one service with a retained snapshot
@@ -297,8 +297,8 @@ Common variables and flags:
 | Variable / Flag | Default | Purpose |
 | --- | --- | --- |
 | `GENERATED_RUNTIME_CONFIG` / `--config` | `internal/generator/config/services.yaml` | Generator config used for the runtime snapshot. Override for alternate rollout configs. |
-| `GENERATED_RUNTIME_SERVICE` / `--service` | empty | Run the runtime check for one configured service. |
-| `--all` | false | Validate all services in the selected runtime config. |
+| `GENERATED_RUNTIME_SERVICE` / `--service` | empty | Run the runtime check for one service from config, even if it is inactive by default. |
+| `--all` | false | Validate the enabled default-active service surface from the selected runtime config. |
 | `GENERATED_RUNTIME_REPORT` / `--report-out` | `generated-runtime-report.json` for the Makefile target | Write the generated runtime summary JSON. |
 | `GENERATED_RUNTIME_SNAPSHOT_DIR` / `--snapshot-dir` | empty | Keep the runtime snapshot at a specific path instead of using an auto-cleaned temp dir. |
 | `GENERATED_RUNTIME_KEEP_SNAPSHOT` / `--keep-snapshot` | empty / false | Keep an automatically created temp snapshot after a successful run. |

@@ -85,8 +85,8 @@ type coverageRunInputs struct {
 func main() {
 	opts := options{}
 	flag.StringVar(&opts.configPath, "config", "internal/generator/config/services.yaml", "Path to the OSOK generator config file.")
-	flag.StringVar(&opts.service, "service", "", "Generate and report a single configured service.")
-	flag.BoolVar(&opts.all, "all", false, "Generate and report all configured services.")
+	flag.StringVar(&opts.service, "service", "", "Generate and report a single service from config, even if it is inactive by default.")
+	flag.BoolVar(&opts.all, "all", false, "Generate and report all enabled services in the default active surface.")
 	flag.IntVar(&opts.top, "top", 10, "Number of top offenders to include per category. Use 0 for all.")
 	flag.StringVar(&opts.snapshotDir, "snapshot-dir", "", "Optional path to keep the generated snapshot workspace.")
 	flag.BoolVar(&opts.keepSnapshot, "keep-snapshot", false, "Keep the generated snapshot workspace when using an automatic temp directory.")
@@ -335,7 +335,7 @@ func validateOptions(opts options) error {
 		return fmt.Errorf("--write-baseline cannot be combined with --baseline or --fail-on-regression")
 	}
 	if (strings.TrimSpace(opts.writeBaseline) != "" || opts.failOnRegression) && strings.TrimSpace(opts.service) != "" {
-		return fmt.Errorf("--write-baseline and --fail-on-regression only support all-service runs; remove --service and use --all")
+		return fmt.Errorf("--write-baseline and --fail-on-regression only support default-active-surface runs; remove --service and use --all")
 	}
 	return nil
 }

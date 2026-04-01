@@ -349,7 +349,12 @@ from scaffold coverage into generated runtime:
    `formal/controllers/<service>/<slug>/spec.cfg`,
    `formal/controllers/<service>/<slug>/logic-gaps.md`,
    `formal/controllers/<service>/<slug>/diagrams/`, and
-   `formal/imports/<service>/<slug>.json`.
+   `formal/imports/<service>/<slug>.json`. `make formal-scaffold` is also the
+   authoritative cleanup path for generator-owned formal catalog artifacts: if
+   the active published surface shrinks, the scaffold refresh prunes stale
+   `formal/controllers/<service>/<slug>/...` and
+   `formal/imports/<service>/<slug>.json` entries that are no longer referenced
+   by `formal/controller_manifest.tsv`.
 3. Refresh provider facts with an explicit pinned provider source:
 
    ```sh
@@ -372,7 +377,9 @@ from scaffold coverage into generated runtime:
 
    `formal-verify` checks generated `.puml` sources plus the embedded PlantUML
    metadata inside rendered SVGs, so diagram-affecting formal changes must be
-   followed by `make formal-diagrams` or `make formal-scaffold`.
+   followed by `make formal-diagrams` or `make formal-scaffold`. It also
+   rejects orphan controller directories and import JSON files that are not
+   referenced by `formal/controller_manifest.tsv`.
 
 5. Record every unsupported or legacy-only behavior in `logic-gaps.md` front
    matter with an explicit `stopCondition`, and file follow-up `bd` issues for
@@ -413,6 +420,13 @@ The supported generator interface is direct invocation of `./cmd/generator`:
 go run ./cmd/generator --config internal/generator/config/services.yaml --all
 ```
 
+`--all` means every service with `selection.enabled: true` in the selected
+config. When one of those services uses `selection.mode=explicit`, only its
+configured kind subset reaches package-model construction and downstream
+renderers. Use `--service <name>` to bypass the default-active filter and
+regenerate one configured service explicitly, including backlog or disabled
+services.
+
 Single-service regeneration uses the same interface:
 
 ```sh
@@ -435,7 +449,11 @@ Expected regeneration and validation flow:
    sample kustomization, and package scaffolding for the selected services.
    Generator-owned spec, helper, sample, and package artifacts regenerate
    directly from `services.yaml` and the current v2 contract; there is no
-   legacy-preservation mode in the generator.
+   legacy-preservation mode in the generator. With `--all --overwrite`, the
+   generator performs a full-sync cleanup that removes stale generator-owned
+   outputs under `api/`, `controllers/`, `pkg/servicemanager/`,
+   `internal/registrations/`, `packages/`, and `config/samples/` when they no
+   longer belong to the active surface.
 4. When deepcopy output and CRD manifests also need refresh, run `make generate`
    and `make manifests` after the generator command. That flow also syncs the shared
    `config/crd/kustomization.yaml` resource list from `config/crd/bases/*.yaml`.
@@ -456,10 +474,13 @@ Expected regeneration and validation flow:
 10. Run `make test`.
 11. Run `make build`.
 
-The checked-in generator emits API/package outputs for all configured services
-and can also emit controller, service-manager, and registration outputs for
-services explicitly switched to `generation.*.strategy=generated`. Manual
-groups stay authoritative until later rollout work changes their strategy.
+The checked-in generator emits API/package outputs for all enabled services in
+the default active surface and can also emit controller, service-manager, and
+registration outputs for services explicitly switched to
+`generation.*.strategy=generated`. Use `--service <name>` when local work needs
+to regenerate a configured service that is currently inactive by default.
+Manual groups stay authoritative until later rollout work changes their
+strategy.
 
 Package regeneration stays separate from the API generation step:
 
