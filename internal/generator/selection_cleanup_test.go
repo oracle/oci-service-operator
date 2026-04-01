@@ -117,6 +117,22 @@ func TestGenerateFullSyncCleansStaleGeneratorOwnedOutputsForInactiveServicesAndE
 		t.Fatalf("WriteFile(%q) error = %v", preservedPackageFile, err)
 	}
 
+	staleMySQLOldVersionSample := filepath.Join(outputRoot, "config", "samples", "mysql_v1alpha1_widget.yaml")
+	if err := os.MkdirAll(filepath.Dir(staleMySQLOldVersionSample), 0o755); err != nil {
+		t.Fatalf("MkdirAll(%q) error = %v", filepath.Dir(staleMySQLOldVersionSample), err)
+	}
+	if err := os.WriteFile(staleMySQLOldVersionSample, []byte("apiVersion: mysql.oracle.com/v1alpha1\nkind: Widget\n"), 0o644); err != nil {
+		t.Fatalf("WriteFile(%q) error = %v", staleMySQLOldVersionSample, err)
+	}
+
+	staleIdentityOldVersionSample := filepath.Join(outputRoot, "config", "samples", "identity_v1alpha1_widget.yaml")
+	if err := os.MkdirAll(filepath.Dir(staleIdentityOldVersionSample), 0o755); err != nil {
+		t.Fatalf("MkdirAll(%q) error = %v", filepath.Dir(staleIdentityOldVersionSample), err)
+	}
+	if err := os.WriteFile(staleIdentityOldVersionSample, []byte("apiVersion: identity.oracle.com/v1alpha1\nkind: Widget\n"), 0o644); err != nil {
+		t.Fatalf("WriteFile(%q) error = %v", staleIdentityOldVersionSample, err)
+	}
+
 	activeServices, err := cfg.SelectServices("", true)
 	if err != nil {
 		t.Fatalf("SelectServices(--all) error = %v", err)
@@ -142,6 +158,8 @@ func TestGenerateFullSyncCleansStaleGeneratorOwnedOutputsForInactiveServicesAndE
 	assertPathNotExists(t, filepath.Join(outputRoot, "packages", "identity", "metadata.env"))
 	assertPathNotExists(t, filepath.Join(outputRoot, "packages", "identity", "install", "kustomization.yaml"))
 	assertPathNotExists(t, filepath.Join(outputRoot, "config", "samples", "identity_v1beta1_widget.yaml"))
+	assertPathNotExists(t, staleMySQLOldVersionSample)
+	assertPathNotExists(t, staleIdentityOldVersionSample)
 
 	assertPathExists(t, filepath.Join(outputRoot, "api", "mysql", "v1beta1", "widget_types.go"))
 	assertPathExists(t, filepath.Join(outputRoot, "controllers", "mysql", "widget_controller.go"))
@@ -152,6 +170,10 @@ func TestGenerateFullSyncCleansStaleGeneratorOwnedOutputsForInactiveServicesAndE
 	assertPathExists(t, preservedDeepCopyFile)
 	assertPathExists(t, preservedPackageFile)
 	assertFileDoesNotContain(t, filepath.Join(outputRoot, "internal", "registrations", "mysql_generated.go"), []string{"ReportReconciler"})
+	assertFileDoesNotContain(t, filepath.Join(outputRoot, "config", "samples", "kustomization.yaml"), []string{
+		"mysql_v1alpha1_widget.yaml",
+		"identity_v1alpha1_widget.yaml",
+	})
 	if got := readFile(t, preservedDeepCopyFile); got != "// preserved deepcopy output\n" {
 		t.Fatalf("deepcopy companion content = %q, want preserved content", got)
 	}

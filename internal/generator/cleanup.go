@@ -66,7 +66,7 @@ func buildCleanupInventory(root string, cfg *Config, services []ServiceConfig, p
 
 	for _, service := range services {
 		inventory.selectedGroups[service.Group] = struct{}{}
-		prefix := sampleFilePrefix(service.Group, service.VersionOrDefault(defaultVersion(cfg)))
+		prefix := sampleGroupPrefix(service.Group)
 		inventory.selectedSamplePrefixes[prefix] = struct{}{}
 	}
 
@@ -100,13 +100,6 @@ func buildCleanupInventory(root string, cfg *Config, services []ServiceConfig, p
 	}
 
 	return inventory
-}
-
-func defaultVersion(cfg *Config) string {
-	if cfg == nil {
-		return ""
-	}
-	return cfg.DefaultVersion
 }
 
 func cleanupAPIOutputs(root string, inventory cleanupInventory) error {

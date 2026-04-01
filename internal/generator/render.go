@@ -423,7 +423,7 @@ func renderSamplesKustomization(resources []string) (string, error) {
 func cleanupGeneratedSampleFiles(samplesDir string, packages []*PackageModel) error {
 	prefixes := make([]string, 0, len(packages))
 	for _, pkg := range packages {
-		prefixes = append(prefixes, fmt.Sprintf("%s_%s_", pkg.Service.Group, pkg.Version))
+		prefixes = append(prefixes, sampleGroupPrefix(pkg.Service.Group))
 	}
 
 	entries, err := os.ReadDir(samplesDir)
