@@ -208,6 +208,12 @@ structs:
         reason: Client ACL management is currently left to manual post-provision steps.
   mysql.CreateDbSystemDetails:
     fields:
+      AdminPassword:
+        status: intentionally_omitted
+        reason: OSOK sources the MySQL admin password from a Kubernetes secret reference.
+      AdminUsername:
+        status: intentionally_omitted
+        reason: OSOK sources the MySQL admin username from a Kubernetes secret reference.
       BackupPolicy:
         status: future_consideration
         reason: Database backup policy customisation will be added alongside lifecycle automation.

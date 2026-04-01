@@ -19,10 +19,6 @@ type CrossConnectMappingSpec struct {
 // CrossConnectMappingStatus defines the observed state of CrossConnectMapping.
 type CrossConnectMappingStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
-	// The key for BGP MD5 authentication. Only applicable if your system
-	// requires MD5 authentication. If empty or not set (null), that
-	// means you don't use BGP MD5 authentication.
-	BgpMd5AuthKey string `json:"bgpMd5AuthKey,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the cross-connect or cross-connect group for this mapping.
 	// Specified by the owner of the cross-connect or cross-connect group (the
 	// customer if the customer is colocated with Oracle, or the provider if the

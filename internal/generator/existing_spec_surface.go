@@ -141,12 +141,12 @@ func appendMissingStatusFields(existing []FieldModel, generated []FieldModel) []
 
 	generatedFields := make(map[string]struct{}, len(generated))
 	for _, field := range generated {
-		generatedFields[fieldMergeKey(field)] = struct{}{}
+		generatedFields[preservedFieldMergeKey(field)] = struct{}{}
 	}
 
 	preserved := make([]FieldModel, 0, len(existing))
 	for _, field := range existing {
-		if _, ok := generatedFields[fieldMergeKey(field)]; ok {
+		if _, ok := generatedFields[preservedFieldMergeKey(field)]; ok {
 			continue
 		}
 		preserved = append(preserved, field)
@@ -155,7 +155,7 @@ func appendMissingStatusFields(existing []FieldModel, generated []FieldModel) []
 	return preserved
 }
 
-func fieldMergeKey(field FieldModel) string {
+func preservedFieldMergeKey(field FieldModel) string {
 	if field.Embedded {
 		return "embedded:" + field.Type
 	}

@@ -16,7 +16,7 @@ import (
 	mysqlbackupservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/mysql/backup"
 	mysqlchannelservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/mysql/channel"
 	mysqlconfigurationservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/mysql/configuration"
-	mysqlmysqldbsystemservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/mysql/dbsystem"
+	mysqldbsystemservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/mysql/dbsystem"
 	mysqlheatwaveclusterservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/mysql/heatwavecluster"
 	mysqlheatwaveclustermemoryestimateservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/mysql/heatwaveclustermemoryestimate"
 	mysqlreplicaservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/mysql/replica"
@@ -65,6 +65,17 @@ func init() {
 			}).SetupWithManager(ctx.Manager); err != nil {
 				return fmt.Errorf("setup Configuration controller: %w", err)
 			}
+			if err := (&mysqlcontrollers.DbSystemReconciler{
+				Reconciler: NewBaseReconciler(
+					ctx,
+					"DbSystem",
+					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
+						return mysqldbsystemservicemanager.NewDbSystemServiceManagerWithDeps(deps)
+					},
+				),
+			}).SetupWithManager(ctx.Manager); err != nil {
+				return fmt.Errorf("setup DbSystem controller: %w", err)
+			}
 			if err := (&mysqlcontrollers.HeatWaveClusterReconciler{
 				Reconciler: NewBaseReconciler(
 					ctx,
@@ -86,17 +97,6 @@ func init() {
 				),
 			}).SetupWithManager(ctx.Manager); err != nil {
 				return fmt.Errorf("setup HeatWaveClusterMemoryEstimate controller: %w", err)
-			}
-			if err := (&mysqlcontrollers.MySqlDbSystemReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"MySqlDbSystem",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return mysqlmysqldbsystemservicemanager.NewMySqlDbSystemServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup MySqlDbSystem controller: %w", err)
 			}
 			if err := (&mysqlcontrollers.ReplicaReconciler{
 				Reconciler: NewBaseReconciler(

@@ -58,6 +58,21 @@ spec:
             description: IPSecConnectionTunnelErrorStatus defines the observed state
               of IPSecConnectionTunnelError.
             properties:
+              errorCode:
+                description: Unique code describes the error type.
+                type: string
+              errorDescription:
+                description: A detailed description of the error.
+                type: string
+              id:
+                description: Unique ID generated for each error report.
+                type: string
+              ociResourcesLink:
+                description: Link to more Oracle resources or relevant documentation.
+                type: string
+              solution:
+                description: Resolution for the error.
+                type: string
               status:
                 properties:
                   conditions:
@@ -100,6 +115,9 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              timestamp:
+                description: Timestamp when the error occurred.
+                type: string
             required:
             - status
             type: object

@@ -160,36 +160,25 @@ This happens mostly due to user authorization. Follow below steps for remediatio
 * If using User credentials, cross verify if the secret for user credentials (ocicredentials as per installation doc) is populated correctly.
 * Note that OSOK uses user credentials for authorization if the secret 'ocicredentials' is available during installation. Else it uses instance principal by default. Delete the secret 'ocicredentials' if user principals are not intended and restart the deployment to switch to Instance principals
 
-2. **Secret \"admin-password\" not found**
-```bash
-ERROR	service-manager.AutonomousDatabases	Error while getting the admin password secret	{"error": "Secret \"admin-password\" not found"}
-``` 
-Ensure that secret admin-password (name as specified in the yaml) is present in the current namespace of CR. Sample secret : 
-```bash
-kubectl create secret generic admin-password --from-literal=password=Sample@1234
-```
+2. **Legacy Autonomous Database fields rejected by schema validation**
 
-3. **Password key in admin/wallet password secret not found**
-```bash
-ERROR	service-manager.AutonomousDatabases	password key in admin password secret is not found
-```
- Ensure that secret admin-password/wallet-password (name as specified in the yaml) is present in the current namespace of CR and has a field by key-name as password. Sample secret : 
- ```bash
-kubectl create secret generic admin-password --from-literal=password=Sample@1234
+The generated v2 `AutonomousDatabase` CR no longer accepts the old
+`AutonomousDatabases` compatibility shape. Manifests that still use
+`kind: AutonomousDatabases`, `spec.wallet`, or `spec.walletPassword` will be
+rejected before reconciliation. Migrate those manifests to the generated
+`AutonomousDatabase` fields and use the dedicated
+`AutonomousDatabaseWallet` or `AutonomousDatabaseRegionalWallet` resources for
+wallet material.
 
-kubectl create secret generic wallet-password --from-literal=walletpassword=Sample@1234
-```
-
-4. **Service error:InvalidParameter**
+3. **Service error:InvalidParameter**
 ```
 Sample error msg : 
-ERROR	service-manager.AutonomousDatabases	Create AutonomousDatabase failed	{"error": "Service error:InvalidParameter. The Autonomous Database name cannot be longer than 14 characters
+ERROR	service-manager.AutonomousDatabase	Create AutonomousDatabase failed	{"error": "Service error:InvalidParameter. The Autonomous Database name cannot be longer than 14 characters
 ```
 Invalid parameter error happens when one of the parameter for the associated OCI resource is not valid or not as per the specification. Check the specifications for the parameter being reported as invalid from the documentation page of the associated resource and update the same in the yaml for the CR. Parameter specifications : 
 * AutonomousDB : https://docs.oracle.com/en-us/iaas/api/#/en/database/20160918/AutonomousDatabase/
 * MySql : https://docs.oracle.com/en-us/iaas/api/#/en/mysql/20190415/DbSystem/
 * Streaming : https://docs.oracle.com/en-us/iaas/api/#/en/streaming/20180418/Stream/
 
-5. **If the CR creation fails with any 5XX error :**
+4. **If the CR creation fails with any 5XX error :**
 * Contact respective service team from Oracle for support with details of the request (opc-id) and failure message
-

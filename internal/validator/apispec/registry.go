@@ -122,6 +122,25 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "AutonomousDatabase",
+		SpecType:   reflect.TypeOf(databasev1beta1.AutonomousDatabaseSpec{}),
+		StatusType: reflect.TypeOf(databasev1beta1.AutonomousDatabaseStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "database.CreateAutonomousDatabaseDetails",
+			},
+			{
+				SDKStruct: "database.UpdateAutonomousDatabaseDetails",
+			},
+			{
+				SDKStruct: "database.AutonomousDatabase",
+			},
+			{
+				SDKStruct: "database.AutonomousDatabaseSummary",
+			},
+		},
+	},
+	{
 		Name:       "AutonomousDatabaseBackup",
 		SpecType:   reflect.TypeOf(databasev1beta1.AutonomousDatabaseBackupSpec{}),
 		StatusType: reflect.TypeOf(databasev1beta1.AutonomousDatabaseBackupStatus{}),
@@ -207,19 +226,6 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "database.AutonomousDatabaseWallet",
-			},
-		},
-	},
-	{
-		Name:       "AutonomousDatabases",
-		SpecType:   reflect.TypeOf(databasev1beta1.AutonomousDatabasesSpec{}),
-		StatusType: reflect.TypeOf(databasev1beta1.AutonomousDatabasesStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "database.CreateAutonomousDatabaseDetails",
-			},
-			{
-				SDKStruct: "database.UpdateAutonomousDatabaseDetails",
 			},
 		},
 	},
@@ -1249,6 +1255,25 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "DbSystem",
+		SpecType:   reflect.TypeOf(mysqlv1beta1.DbSystemSpec{}),
+		StatusType: reflect.TypeOf(mysqlv1beta1.DbSystemStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "mysql.CreateDbSystemDetails",
+			},
+			{
+				SDKStruct: "mysql.UpdateDbSystemDetails",
+			},
+			{
+				SDKStruct: "mysql.DbSystem",
+			},
+			{
+				SDKStruct: "mysql.DbSystemSummary",
+			},
+		},
+	},
+	{
 		Name:       "MySqlBackup",
 		SpecType:   reflect.TypeOf(mysqlv1beta1.BackupSpec{}),
 		StatusType: reflect.TypeOf(mysqlv1beta1.BackupStatus{}),
@@ -1302,19 +1327,6 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "mysql.ConfigurationSummary",
-			},
-		},
-	},
-	{
-		Name:       "MySqlDbSystem",
-		SpecType:   reflect.TypeOf(mysqlv1beta1.MySqlDbSystemSpec{}),
-		StatusType: reflect.TypeOf(mysqlv1beta1.MySqlDbSystemStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "mysql.CreateDbSystemDetails",
-			},
-			{
-				SDKStruct: "mysql.UpdateDbSystemDetails",
 			},
 		},
 	},

@@ -22,8 +22,6 @@ type CustomerSecretKeySpec struct {
 // CustomerSecretKeyStatus defines the observed state of CustomerSecretKey.
 type CustomerSecretKeyStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
-	// The secret key.
-	Key string `json:"key,omitempty"`
 	// The access key portion of the key pair.
 	Id string `json:"id,omitempty"`
 	// The OCID of the user the password belongs to.

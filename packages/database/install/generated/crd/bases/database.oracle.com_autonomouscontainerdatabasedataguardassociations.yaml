@@ -1,0 +1,277 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: autonomouscontainerdatabasedataguardassociations.database.oracle.com
+spec:
+  group: database.oracle.com
+  names:
+    kind: AutonomousContainerDatabaseDataguardAssociation
+    listKind: AutonomousContainerDatabaseDataguardAssociationList
+    plural: autonomouscontainerdatabasedataguardassociations
+    singular: autonomouscontainerdatabasedataguardassociation
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: status of the AutonomousContainerDatabaseDataguardAssociation
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the AutonomousContainerDatabaseDataguardAssociation
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: AutonomousContainerDatabaseDataguardAssociation is the Schema
+          for the autonomouscontainerdatabasedataguardassociations API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: AutonomousContainerDatabaseDataguardAssociationSpec defines
+              the desired state of AutonomousContainerDatabaseDataguardAssociation.
+            properties:
+              fastStartFailOverLagLimitInSeconds:
+                description: The lag time for my preference based on data loss tolerance
+                  in seconds.
+                type: integer
+              isAutomaticFailoverEnabled:
+                description: Indicates whether Automatic Failover is enabled for Autonomous
+                  Container Database Dataguard Association
+                type: boolean
+              peerAutonomousContainerDatabaseBackupConfig:
+                description: AutonomousContainerDatabaseDataguardAssociationPeerAutonomousContainerDatabaseBackupConfig
+                  defines nested fields for AutonomousContainerDatabaseDataguardAssociation.PeerAutonomousContainerDatabaseBackupConfig.
+                properties:
+                  backupDestinationDetails:
+                    description: Backup destination details.
+                    items:
+                      description: AutonomousContainerDatabaseDataguardAssociationPeerAutonomousContainerDatabaseBackupConfigBackupDestinationDetail
+                        defines nested fields for AutonomousContainerDatabaseDataguardAssociation.PeerAutonomousContainerDatabaseBackupConfig.BackupDestinationDetail.
+                      properties:
+                        dbrsPolicyId:
+                          description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                            of the DBRS policy used for backup.
+                          type: string
+                        id:
+                          description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                            of the backup destination.
+                          type: string
+                        internetProxy:
+                          description: Proxy URL to connect to object store.
+                          type: string
+                        type:
+                          description: Type of the database backup destination.
+                          type: string
+                        vpcPassword:
+                          description: For a RECOVERY_APPLIANCE backup destination,
+                            the password for the VPC user that is used to access the
+                            Recovery Appliance.
+                          type: string
+                        vpcUser:
+                          description: For a RECOVERY_APPLIANCE backup destination,
+                            the Virtual Private Catalog (VPC) user that is used to
+                            access the Recovery Appliance.
+                          type: string
+                      required:
+                      - type
+                      type: object
+                    type: array
+                  recoveryWindowInDays:
+                    description: |-
+                      Number of days between the current and the earliest point of recoverability covered by automatic backups.
+                      This value applies to automatic backups. After a new automatic backup has been created, Oracle removes old automatic backups that are created before the window.
+                      When the value is updated, it is applied to all existing automatic backups.
+                      If the number of specified days is 0 then there will be no backups.
+                    type: integer
+                type: object
+              peerAutonomousContainerDatabaseCompartmentId:
+                description: |-
+                  The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment where the standby Autonomous Container Database
+                  will be created.
+                type: string
+              peerAutonomousContainerDatabaseDisplayName:
+                description: The display name for the peer Autonomous Container Database.
+                type: string
+              peerAutonomousVmClusterId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the peer Autonomous Exadata VM Cluster.
+                type: string
+              peerCloudAutonomousVmClusterId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the peer cloud Autonomous Exadata VM Cluster.
+                type: string
+              peerDbUniqueName:
+                description: Specifies the `DB_UNIQUE_NAME` of the peer database to
+                  be created.
+                type: string
+              protectionMode:
+                description: |-
+                  The protection mode of this Autonomous Data Guard association. For more information, see
+                  Oracle Data Guard Protection Modes (http://docs.oracle.com/database/122/SBYDB/oracle-data-guard-protection-modes.htm#SBYDB02000)
+                  in the Oracle Data Guard documentation.
+                type: string
+              standbyMaintenanceBufferInDays:
+                description: |-
+                  The scheduling detail for the quarterly maintenance window of the standby Autonomous Container Database.
+                  This value represents the number of days before scheduled maintenance of the primary database.
+                type: integer
+            required:
+            - peerAutonomousContainerDatabaseDisplayName
+            - protectionMode
+            type: object
+          status:
+            description: AutonomousContainerDatabaseDataguardAssociationStatus defines
+              the observed state of AutonomousContainerDatabaseDataguardAssociation.
+            properties:
+              applyLag:
+                description: |-
+                  The lag time between updates to the primary Autonomous Container Database and application of the redo data on the standby Autonomous Container Database,
+                  as computed by the reporting database.
+                  Example: `9 seconds`
+                type: string
+              applyRate:
+                description: |-
+                  The rate at which redo logs are synchronized between the associated Autonomous Container Databases.
+                  Example: `180 Mb per second`
+                type: string
+              autonomousContainerDatabaseId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the Autonomous Container Database that has a relationship with
+                  the peer Autonomous Container Database. Used only by Autonomous
+                  Database on Dedicated Exadata Infrastructure.
+                type: string
+              fastStartFailOverLagLimitInSeconds:
+                description: The lag time for my preference based on data loss tolerance
+                  in seconds.
+                type: integer
+              id:
+                description: The OCID of the Autonomous Data Guard created for a given
+                  Autonomous Container Database.
+                type: string
+              isAutomaticFailoverEnabled:
+                description: Indicates whether Automatic Failover is enabled for Autonomous
+                  Container Database Dataguard Association
+                type: boolean
+              lifecycleDetails:
+                description: Additional information about the current lifecycleState,
+                  if available.
+                type: string
+              lifecycleState:
+                description: The current state of Autonomous Data Guard.
+                type: string
+              peerAutonomousContainerDatabaseDataguardAssociationId:
+                description: The OCID of the peer Autonomous Container Database-Autonomous
+                  Data Guard association.
+                type: string
+              peerAutonomousContainerDatabaseId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the peer Autonomous Container Database.
+                type: string
+              peerLifecycleState:
+                description: The current state of the Autonomous Container Database.
+                type: string
+              peerRole:
+                description: The Data Guard role of the Autonomous Container Database
+                  or Autonomous Database, if Autonomous Data Guard is enabled.
+                type: string
+              protectionMode:
+                description: |-
+                  The protection mode of this Autonomous Data Guard association. For more information, see
+                  Oracle Data Guard Protection Modes (http://docs.oracle.com/database/122/SBYDB/oracle-data-guard-protection-modes.htm#SBYDB02000)
+                  in the Oracle Data Guard documentation.
+                type: string
+              role:
+                description: The Data Guard role of the Autonomous Container Database
+                  or Autonomous Database, if Autonomous Data Guard is enabled.
+                type: string
+              status:
+                properties:
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              timeCreated:
+                description: The date and time the Autonomous DataGuard association
+                  was created.
+                type: string
+              timeLastRoleChanged:
+                description: The date and time when the last role change action happened.
+                type: string
+              timeLastSynced:
+                description: The date and time of the last update to the apply lag,
+                  apply rate, and transport lag values.
+                type: string
+              transportLag:
+                description: |-
+                  The approximate number of seconds of redo data not yet available on the standby Autonomous Container Database,
+                  as computed by the reporting database.
+                  Example: `7 seconds`
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

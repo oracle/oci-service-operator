@@ -54,6 +54,14 @@ type NetworkSourceVirtualSourceList struct {
 	IpRanges []string `json:"ipRanges,omitempty"`
 }
 
+// NetworkSourceVirtualSourceListObservedState defines nested fields for NetworkSource.VirtualSourceList.
+type NetworkSourceVirtualSourceListObservedState struct {
+	// +kubebuilder:validation:Optional
+	VcnId string `json:"vcnId,omitempty"`
+	// +kubebuilder:validation:Optional
+	IpRanges []string `json:"ipRanges,omitempty"`
+}
+
 // NetworkSourceStatus defines the observed state of NetworkSource.
 type NetworkSourceStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
@@ -76,7 +84,7 @@ type NetworkSourceStatus struct {
 	PublicSourceList []string `json:"publicSourceList,omitempty"`
 	// A list of allowed VCN OCID and IP range pairs.
 	// Example:`"vcnId": "ocid1.vcn.oc1.iad.aaaaaaaaexampleuniqueID", "ipRanges": [ "129.213.39.0/24" ]`
-	VirtualSourceList []NetworkSourceVirtualSourceList `json:"virtualSourceList,omitempty"`
+	VirtualSourceList []NetworkSourceVirtualSourceListObservedState `json:"virtualSourceList,omitempty"`
 	// -- The services attribute has no effect and is reserved for use by Oracle. --
 	Services []string `json:"services,omitempty"`
 	// The detailed status of INACTIVE lifecycleState.

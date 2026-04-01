@@ -68,12 +68,6 @@ spec:
                   The availability domain of an instance.
                   Example: `Uocm:PHX-AD-1`
                 type: string
-              chapSecret:
-                description: |-
-                  The Challenge-Handshake-Authentication-Protocol (CHAP) secret
-                  valid for the associated CHAP user name.
-                  (Also called the "CHAP password".)
-                type: string
               chapUsername:
                 description: |-
                   The volume's system-generated Challenge-Handshake-Authentication-Protocol
@@ -141,6 +135,11 @@ spec:
                   Flag indicating if this volume was created for the customer as part of a simplified launch.
                   Used to determine whether the volume requires deletion on instance termination.
                 type: boolean
+              iscsiLoginState:
+                description: |-
+                  The iscsi login state of the volume attachment. For a Iscsi volume attachment,
+                  all iscsi sessions need to be all logged-in or logged-out to be in logged-in or logged-out state.
+                type: string
               lifecycleState:
                 description: The current state of the volume attachment.
                 type: string

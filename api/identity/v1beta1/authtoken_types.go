@@ -23,9 +23,6 @@ type AuthTokenSpec struct {
 // AuthTokenStatus defines the observed state of AuthToken.
 type AuthTokenStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
-	// The auth token. The value is available only in the response for `CreateAuthToken`, and not
-	// for `ListAuthTokens` or `UpdateAuthToken`.
-	Token string `json:"token,omitempty"`
 	// The OCID of the auth token.
 	Id string `json:"id,omitempty"`
 	// The OCID of the user the auth token belongs to.

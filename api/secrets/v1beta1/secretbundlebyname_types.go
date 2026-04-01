@@ -16,14 +16,6 @@ import (
 type SecretBundleByNameSpec struct {
 }
 
-// SecretBundleByNameSecretBundleContent defines nested fields for SecretBundleByName.SecretBundleContent.
-type SecretBundleByNameSecretBundleContent struct {
-	JsonData    string `json:"jsonData,omitempty"`
-	ContentType string `json:"contentType,omitempty"`
-	// The base64-encoded content of the secret.
-	Content string `json:"content,omitempty"`
-}
-
 // SecretBundleByNameStatus defines the observed state of SecretBundleByName.
 type SecretBundleByNameStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
@@ -34,8 +26,7 @@ type SecretBundleByNameStatus struct {
 	// The time when the secret bundle was created.
 	TimeCreated string `json:"timeCreated,omitempty"`
 	// The name of the secret version. Labels are unique across the different versions of a particular secret.
-	VersionName         string                                `json:"versionName,omitempty"`
-	SecretBundleContent SecretBundleByNameSecretBundleContent `json:"secretBundleContent,omitempty"`
+	VersionName string `json:"versionName,omitempty"`
 	// An optional property indicating when to delete the secret version, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
 	// Example: `2019-04-03T21:10:29.600Z`
 	TimeOfDeletion string `json:"timeOfDeletion,omitempty"`

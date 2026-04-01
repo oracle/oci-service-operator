@@ -13,12 +13,12 @@ import (
 	databasev1beta1 "github.com/oracle/oci-service-operator/api/database/v1beta1"
 	databasecontrollers "github.com/oracle/oci-service-operator/controllers/database"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
-	databaseautonomousdatabasesservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/autonomousdatabases/adb"
 	databaseapplicationvipservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/database/applicationvip"
 	databaseautonomouscontainerdatabaseservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/database/autonomouscontainerdatabase"
 	databaseautonomouscontainerdatabasedataguardassociationservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/database/autonomouscontainerdatabasedataguardassociation"
 	databaseautonomouscontainerdatabaseresourceusageservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/database/autonomouscontainerdatabaseresourceusage"
 	databaseautonomouscontainerdatabaseversionservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/database/autonomouscontainerdatabaseversion"
+	databaseautonomousdatabaseservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/database/autonomousdatabase"
 	databaseautonomousdatabasebackupservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/database/autonomousdatabasebackup"
 	databaseautonomousdatabasecharactersetservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/database/autonomousdatabasecharacterset"
 	databaseautonomousdatabasecloneservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/database/autonomousdatabaseclone"
@@ -154,6 +154,17 @@ func init() {
 			}).SetupWithManager(ctx.Manager); err != nil {
 				return fmt.Errorf("setup AutonomousContainerDatabaseVersion controller: %w", err)
 			}
+			if err := (&databasecontrollers.AutonomousDatabaseReconciler{
+				Reconciler: NewBaseReconciler(
+					ctx,
+					"AutonomousDatabase",
+					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
+						return databaseautonomousdatabaseservicemanager.NewAutonomousDatabaseServiceManagerWithDeps(deps)
+					},
+				),
+			}).SetupWithManager(ctx.Manager); err != nil {
+				return fmt.Errorf("setup AutonomousDatabase controller: %w", err)
+			}
 			if err := (&databasecontrollers.AutonomousDatabaseBackupReconciler{
 				Reconciler: NewBaseReconciler(
 					ctx,
@@ -230,17 +241,6 @@ func init() {
 				),
 			}).SetupWithManager(ctx.Manager); err != nil {
 				return fmt.Errorf("setup AutonomousDatabaseWallet controller: %w", err)
-			}
-			if err := (&databasecontrollers.AutonomousDatabasesReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"AutonomousDatabases",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return databaseautonomousdatabasesservicemanager.NewAutonomousDatabasesServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup AutonomousDatabases controller: %w", err)
 			}
 			if err := (&databasecontrollers.AutonomousDbPreviewVersionReconciler{
 				Reconciler: NewBaseReconciler(

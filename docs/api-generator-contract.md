@@ -47,8 +47,8 @@ Rules:
   differs from the discovered OCI SDK resource family name.
 - Service-specific compatibility, rollout, or naming behavior belongs in the
   mapping file, not in hardcoded generator branches.
-- The current locked compatibility kinds are `database/AutonomousDatabases`,
-  `mysql/MySqlDbSystem`, and `streaming/Stream`.
+- The current locked published kinds are `database/AutonomousDatabase`,
+  `mysql/DbSystem`, and `streaming/Stream`.
 
 ## Output Ownership
 
@@ -106,10 +106,8 @@ when controller and service-manager generation is enabled.
   raw SDK family under `generation.resources[].sdkName` in
   `internal/generator/config/services.yaml` rather than adding special-case Go
   code.
-- The current checked-in renamed kind mappings are
-  `database/AutonomousDatabases <- AutonomousDatabase`,
-  `mysql/MySqlDbSystem <- DbSystem`, and
-  `streaming/Stream <- Stream`.
+- The currently locked published kinds are `AutonomousDatabase`, `DbSystem`,
+  and `Stream`.
 
 ### Controller outputs
 
@@ -160,8 +158,6 @@ when controller and service-manager generation is enabled.
   service-manager outputs for that group.
 - `main.go` consumes registration surfaces; the generator never writes raw
   per-group wiring into `main.go` directly.
-- Manual webhook setup remains a separate seam even after registration rollout
-  exists.
 
 ### Runtime dependency contract
 
@@ -174,16 +170,15 @@ when controller and service-manager generation is enabled.
   `servicemanager.RuntimeDeps`.
 - Groups that still retain manual runtime seams can bridge into this contract
   through handwritten files under `internal/registrations/` without changing
-  the shared manager bootstrap shape in `main.go`. Today that remains relevant
-  for parity holdouts such as `database` and `mysql`; `streaming/Stream` is
-  registered through the generated path.
+  the shared manager bootstrap shape in `main.go`; keep any such exceptions
+  explicit in `manual_groups.go`.
 
 ### Webhook ownership
 
 - Webhook ownership defaults to `manual`.
 - Webhook code remains under `api/<group>/<version>/*_webhook.go`.
-- Resource overrides may pin individual kinds to `manual` so existing webhook
-  seams such as `AutonomousDatabases` stay explicit during migration.
+- Resource overrides may pin individual kinds to `manual` so any remaining
+  parity webhooks stay explicit during migration.
 - Webhook generation is not part of this epic.
 
 ### Kubebuilder markers
@@ -448,9 +443,8 @@ This contract intentionally leaves these areas for later issues:
 
 - direct edits to `main.go`
 - webhook generation
-- full replacement of the remaining handwritten parity-runtime seams in
-  `database` and `mysql`, plus the narrow `streaming` endpoint-secret
-  companion
+- full replacement of any remaining handwritten companions beside generated
+  runtime paths, including the narrow `streaming` endpoint-secret companion
 
 Those follow-on items should conform to this contract rather than redefining
 service mapping, naming rules, rollout vocabulary, or package profiles.

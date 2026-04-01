@@ -103,6 +103,21 @@ spec:
                 description: The OCID of the compartment that contains the volume
                   backup.
                 type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a
+                  namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              displayName:
+                description: |-
+                  A user-friendly name. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
+                type: string
               expirationTime:
                 description: |-
                   The date and time the volume backup will expire and be automatically deleted.
@@ -111,8 +126,23 @@ spec:
                   it will be absent, signifying that there is no expiration time and the backup will
                   last forever until manually deleted.
                 type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no
+                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
               id:
                 description: The OCID of the volume backup.
+                type: string
+              kmsKeyId:
+                description: |-
+                  The OCID of the Vault service key which is the master encryption key for the volume backup.
+                  For more information about the Vault service and encryption keys, see
+                  Overview of Vault service (https://docs.cloud.oracle.com/iaas/Content/KeyManagement/Concepts/keyoverview.htm) and
+                  Using Keys (https://docs.cloud.oracle.com/iaas/Content/KeyManagement/Tasks/usingkeys.htm).
                 type: string
               lifecycleState:
                 description: The current state of a volume backup.
@@ -194,6 +224,9 @@ spec:
                 description: The date and time the request to create the volume backup
                   was received. Format defined by [RFC3339]https://tools.ietf.org/html/rfc3339.
                 type: string
+              type:
+                description: The type of a volume backup.
+                type: string
               uniqueSizeInGBs:
                 description: |-
                   The size used by the backup, in GBs. It is typically smaller than sizeInGBs, depending on the space
@@ -207,6 +240,9 @@ spec:
                   This field is deprecated. Please use uniqueSizeInGBs.
                 format: int64
                 type: integer
+              volumeId:
+                description: The OCID of the volume.
+                type: string
             required:
             - status
             type: object

@@ -57,6 +57,25 @@ spec:
             description: BulkActionResourceTypeStatus defines the observed state of
               BulkActionResourceType.
             properties:
+              items:
+                description: Collection of the resource-types supported by a compartment
+                  bulk action.
+                items:
+                  description: BulkActionResourceTypeItem defines nested fields for
+                    BulkActionResourceType.Item.
+                  properties:
+                    metadataKeys:
+                      description: |-
+                        List of metadata keys required to identify a specific resource. Some resource-types require information besides an OCID to identify
+                        a specific resource. For example, the resource-type `buckets` requires metadataKeys DeleteBucket.
+                      items:
+                        type: string
+                      type: array
+                    name:
+                      description: The unique name of the resource-type.
+                      type: string
+                  type: object
+                type: array
               metadataKeys:
                 description: |-
                   List of metadata keys required to identify a specific resource. Some resource-types require information besides an OCID to identify

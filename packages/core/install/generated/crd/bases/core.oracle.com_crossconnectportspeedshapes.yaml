@@ -58,6 +58,16 @@ spec:
             description: CrossconnectPortSpeedShapeStatus defines the observed state
               of CrossconnectPortSpeedShape.
             properties:
+              name:
+                description: |-
+                  The name of the port speed shape.
+                  Example: `10 Gbps`
+                type: string
+              portSpeedInGbps:
+                description: |-
+                  The port speed in Gbps.
+                  Example: `10`
+                type: integer
               status:
                 properties:
                   conditions:

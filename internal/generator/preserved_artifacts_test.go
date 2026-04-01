@@ -26,7 +26,7 @@ func TestGeneratePreservesCheckedInPackageArtifactsFromSeparateRoot(t *testing.T
 	if err := os.MkdirAll(resourceDir, 0o755); err != nil {
 		t.Fatalf("MkdirAll(%s) error = %v", resourceDir, err)
 	}
-	resourcePath := filepath.Join(resourceDir, "mysqldbsystem_types.go")
+	resourcePath := filepath.Join(resourceDir, "dbsystem_types.go")
 	if err := os.WriteFile(resourcePath, []byte(existingCheckedInMySQLTypes), 0o644); err != nil {
 		t.Fatalf("WriteFile(%s) error = %v", resourcePath, err)
 	}
@@ -44,7 +44,7 @@ func TestGeneratePreservesCheckedInPackageArtifactsFromSeparateRoot(t *testing.T
 	if err := os.MkdirAll(samplesDir, 0o755); err != nil {
 		t.Fatalf("MkdirAll(%s) error = %v", samplesDir, err)
 	}
-	samplePath := filepath.Join(samplesDir, "mysql_v1beta1_mysqldbsystem.yaml")
+	samplePath := filepath.Join(samplesDir, "mysql_v1beta1_dbsystem.yaml")
 	if err := os.WriteFile(samplePath, []byte(existingCheckedInMySQLSample), 0o644); err != nil {
 		t.Fatalf("WriteFile(%s) error = %v", samplePath, err)
 	}
@@ -59,7 +59,7 @@ func TestGeneratePreservesCheckedInPackageArtifactsFromSeparateRoot(t *testing.T
 		t.Fatalf("Generate() error = %v", err)
 	}
 
-	renderedResourcePath := filepath.Join(outputRoot, "api", "mysql", "v1beta1", "mysqldbsystem_types.go")
+	renderedResourcePath := filepath.Join(outputRoot, "api", "mysql", "v1beta1", "dbsystem_types.go")
 	content := readFile(t, renderedResourcePath)
 	if content == readFile(t, resourcePath) {
 		t.Fatalf("Generate() copied %s verbatim instead of regenerating status/read-model output", renderedResourcePath)
@@ -75,7 +75,7 @@ func TestGeneratePreservesCheckedInPackageArtifactsFromSeparateRoot(t *testing.T
 		"`json:\"lifecycleState,omitempty\"`",
 	})
 	assertNotContains(t, content, []string{
-		"Preserved custom checked-in MySqlDbSystem marker.",
+		"Preserved custom checked-in DbSystem marker.",
 	})
 	assertExactFileMatch(
 		t,
@@ -85,7 +85,7 @@ func TestGeneratePreservesCheckedInPackageArtifactsFromSeparateRoot(t *testing.T
 	assertExactFileMatch(
 		t,
 		samplePath,
-		filepath.Join(outputRoot, "config", "samples", "mysql_v1beta1_mysqldbsystem.yaml"),
+		filepath.Join(outputRoot, "config", "samples", "mysql_v1beta1_dbsystem.yaml"),
 	)
 }
 
@@ -93,31 +93,31 @@ const existingCheckedInMySQLTypes = `package v1beta1
 
 import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-// MySqlDbSystemSpec defines the desired state of MySqlDbSystem.
-type MySqlDbSystemSpec struct {
+// DbSystemSpec defines the desired state of DbSystem.
+type DbSystemSpec struct {
 	Port int ` + "`json:\"port,omitempty\"`" + `
 }
 
-// MySqlDbSystemStatus defines the observed state of MySqlDbSystem.
-type MySqlDbSystemStatus struct {
+// DbSystemStatus defines the observed state of DbSystem.
+type DbSystemStatus struct {
 	LastSuccessfulSync string ` + "`json:\"lastSuccessfulSync,omitempty\"`" + `
 }
 
 // +kubebuilder:object:root=true
-// Preserved custom checked-in MySqlDbSystem marker.
-type MySqlDbSystem struct {
+// Preserved custom checked-in DbSystem marker.
+type DbSystem struct {
 	metav1.TypeMeta   ` + "`json:\",inline\"`" + `
 	metav1.ObjectMeta ` + "`json:\"metadata,omitempty\"`" + `
 
-	Spec   MySqlDbSystemSpec   ` + "`json:\"spec,omitempty\"`" + `
-	Status MySqlDbSystemStatus ` + "`json:\"status,omitempty\"`" + `
+	Spec   DbSystemSpec   ` + "`json:\"spec,omitempty\"`" + `
+	Status DbSystemStatus ` + "`json:\"status,omitempty\"`" + `
 }
 
 // +kubebuilder:object:root=true
-type MySqlDbSystemList struct {
+type DbSystemList struct {
 	metav1.TypeMeta ` + "`json:\",inline\"`" + `
 	metav1.ListMeta ` + "`json:\"metadata,omitempty\"`" + `
-	Items           []MySqlDbSystem ` + "`json:\"items\"`" + `
+	Items           []DbSystem ` + "`json:\"items\"`" + `
 }
 `
 
@@ -130,9 +130,9 @@ resources:
 `
 
 const existingCheckedInMySQLSample = `apiVersion: mysql.oracle.com/v1beta1
-kind: MySqlDbSystem
+kind: DbSystem
 metadata:
-  name: preserved-mysqldbsystem
+  name: preserved-dbsystem
 spec:
   port: 3307
 `

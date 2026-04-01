@@ -56,12 +56,6 @@ spec:
           status:
             description: CrossConnectMappingStatus defines the observed state of CrossConnectMapping.
             properties:
-              bgpMd5AuthKey:
-                description: |-
-                  The key for BGP MD5 authentication. Only applicable if your system
-                  requires MD5 authentication. If empty or not set (null), that
-                  means you don't use BGP MD5 authentication.
-                type: string
               crossConnectOrCrossConnectGroupId:
                 description: |-
                   The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the cross-connect or cross-connect group for this mapping.

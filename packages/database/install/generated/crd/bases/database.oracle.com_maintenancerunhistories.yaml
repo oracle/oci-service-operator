@@ -1,0 +1,281 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: maintenancerunhistories.database.oracle.com
+spec:
+  group: database.oracle.com
+  names:
+    kind: MaintenanceRunHistory
+    listKind: MaintenanceRunHistoryList
+    plural: maintenancerunhistories
+    singular: maintenancerunhistory
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: status of the MaintenanceRunHistory
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the MaintenanceRunHistory
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: MaintenanceRunHistory is the Schema for the maintenancerunhistories
+          API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: MaintenanceRunHistorySpec defines the desired state of MaintenanceRunHistory.
+            type: object
+          status:
+            description: MaintenanceRunHistoryStatus defines the observed state of
+              MaintenanceRunHistory.
+            properties:
+              dbServersHistoryDetails:
+                description: List of database server history details.
+                items:
+                  description: MaintenanceRunHistoryDbServersHistoryDetail defines
+                    nested fields for MaintenanceRunHistory.DbServersHistoryDetail.
+                  properties:
+                    dbServerPatchingDetails:
+                      description: MaintenanceRunHistoryDbServersHistoryDetailDbServerPatchingDetails
+                        defines nested fields for MaintenanceRunHistory.DbServersHistoryDetail.DbServerPatchingDetails.
+                      properties:
+                        estimatedPatchDuration:
+                          description: Estimated time, in minutes, to patch one database
+                            server.
+                          type: integer
+                        patchingStatus:
+                          description: The status of the patching operation.
+                          type: string
+                        timePatchingEnded:
+                          description: The time when the patching operation ended.
+                          type: string
+                        timePatchingStarted:
+                          description: The time when the patching operation started.
+                          type: string
+                      type: object
+                    displayName:
+                      description: The user-friendly name for the database server.
+                        The name does not need to be unique.
+                      type: string
+                    id:
+                      description: The OCID of the database server.
+                      type: string
+                  type: object
+                type: array
+              id:
+                description: The OCID of the maintenance run history.
+                type: string
+              maintenanceRunDetails:
+                description: MaintenanceRunHistoryMaintenanceRunDetails defines nested
+                  fields for MaintenanceRunHistory.MaintenanceRunDetails.
+                properties:
+                  compartmentId:
+                    description: The OCID of the compartment.
+                    type: string
+                  currentCustomActionTimeoutInMins:
+                    description: Extend current custom action timeout between the
+                      current database servers during waiting state, from 0 (zero)
+                      to 30 minutes.
+                    type: integer
+                  currentPatchingComponent:
+                    description: The name of the current infrastruture component that
+                      is getting patched.
+                    type: string
+                  customActionTimeoutInMins:
+                    description: |-
+                      Determines the amount of time the system will wait before the start of each database server patching operation.
+                      Specify a number of minutes, from 15 to 120.
+                    type: integer
+                  description:
+                    description: Description of the maintenance run.
+                    type: string
+                  displayName:
+                    description: The user-friendly name for the maintenance run.
+                    type: string
+                  estimatedComponentPatchingStartTime:
+                    description: The estimated start time of the next infrastruture
+                      component patching operation.
+                    type: string
+                  estimatedPatchingTime:
+                    description: MaintenanceRunHistoryMaintenanceRunDetailsEstimatedPatchingTime
+                      defines nested fields for MaintenanceRunHistory.MaintenanceRunDetails.EstimatedPatchingTime.
+                    properties:
+                      estimatedDbServerPatchingTime:
+                        description: The estimated time required in minutes for database
+                          server patching.
+                        type: integer
+                      estimatedNetworkSwitchesPatchingTime:
+                        description: The estimated time required in minutes for network
+                          switch patching.
+                        type: integer
+                      estimatedStorageServerPatchingTime:
+                        description: The estimated time required in minutes for storage
+                          server patching.
+                        type: integer
+                      totalEstimatedPatchingTime:
+                        description: The estimated total time required in minutes
+                          for all patching operations.
+                        type: integer
+                    type: object
+                  id:
+                    description: The OCID of the maintenance run.
+                    type: string
+                  isCustomActionTimeoutEnabled:
+                    description: If true, enables the configuration of a custom action
+                      timeout (waiting period) between database servers patching operations.
+                    type: boolean
+                  isDstFileUpdateEnabled:
+                    description: Indicates if an automatic DST Time Zone file update
+                      is enabled for the Autonomous Container Database. If enabled
+                      along with Release Update, patching will be done in a Non-Rolling
+                      manner.
+                    type: boolean
+                  lifecycleDetails:
+                    description: Additional information about the current lifecycle
+                      state.
+                    type: string
+                  lifecycleState:
+                    description: The current state of the maintenance run. For Autonomous
+                      Database Serverless instances, valid states are IN_PROGRESS,
+                      SUCCEEDED, and FAILED.
+                    type: string
+                  maintenanceSubtype:
+                    description: Maintenance sub-type.
+                    type: string
+                  maintenanceType:
+                    description: Maintenance type.
+                    type: string
+                  patchFailureCount:
+                    description: Contain the patch failure count.
+                    type: integer
+                  patchId:
+                    description: The unique identifier of the patch. The identifier
+                      string includes the patch type, the Oracle Database version,
+                      and the patch creation date (using the format YYMMDD). For example,
+                      the identifier `ru_patch_19.9.0.0_201030` is used for an RU
+                      patch for Oracle Database 19.9.0.0 that was released October
+                      30, 2020.
+                    type: string
+                  patchingEndTime:
+                    description: The time when the patching operation ended.
+                    type: string
+                  patchingMode:
+                    description: |-
+                      Cloud Exadata infrastructure node patching method, either "ROLLING" or "NONROLLING". Default value is ROLLING.
+                      *IMPORTANT*: Non-rolling infrastructure patching involves system down time. See Oracle-Managed Infrastructure Maintenance Updates (https://docs.cloud.oracle.com/iaas/Content/Database/Concepts/examaintenance.htm#Oracle) for more information.
+                    type: string
+                  patchingStartTime:
+                    description: The time when the patching operation started.
+                    type: string
+                  patchingStatus:
+                    description: The status of the patching operation.
+                    type: string
+                  peerMaintenanceRunId:
+                    description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                      of the maintenance run for the Autonomous Data Guard association's
+                      peer container database.
+                    type: string
+                  targetDbServerVersion:
+                    description: The target software version for the database server
+                      patching operation.
+                    type: string
+                  targetResourceId:
+                    description: The ID of the target resource on which the maintenance
+                      run occurs.
+                    type: string
+                  targetResourceType:
+                    description: The type of the target resource on which the maintenance
+                      run occurs.
+                    type: string
+                  targetStorageServerVersion:
+                    description: The target Cell version that is to be patched to.
+                    type: string
+                  timeEnded:
+                    description: The date and time the maintenance run was completed.
+                    type: string
+                  timeScheduled:
+                    description: The date and time the maintenance run is scheduled
+                      to occur.
+                    type: string
+                  timeStarted:
+                    description: The date and time the maintenance run starts.
+                    type: string
+                type: object
+              status:
+                properties:
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

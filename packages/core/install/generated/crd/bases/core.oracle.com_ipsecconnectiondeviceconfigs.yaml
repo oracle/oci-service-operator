@@ -121,9 +121,6 @@ spec:
                         The IP address of Oracle's VPN headend.
                         Example: `203.0.113.50 `
                       type: string
-                    sharedSecret:
-                      description: The shared secret of the IPSec tunnel.
-                      type: string
                     timeCreated:
                       description: |-
                         The date and time the IPSec connection was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
