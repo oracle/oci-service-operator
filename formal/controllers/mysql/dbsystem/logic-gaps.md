@@ -3,31 +3,28 @@ schemaVersion: 1
 surface: repo-authored-semantics
 service: mysql
 slug: dbsystem
-gaps:
-  - category: bind-versus-create
-    status: open
-    stopCondition: "Formal semantics can resolve an existing DbSystem through ListDbSystems before create, using the shared generated-runtime identity decision instead of blindly creating when no OCI ID is tracked."
-  - category: list-lookup
-    status: open
-    stopCondition: "Formal semantics encode the current ListDbSystems filters (`compartmentId`, `displayName`, `dbSystemId`, lifecycle state) and the lifecycle-sensitive matching used for bind, update, and delete."
-  - category: mutation-policy
-    status: open
-    stopCondition: "Formal semantics classify the generated DbSystem mutable and force-new fields into create-only, mutable, or rejected-on-update behavior before runtime promotion."
-  - category: waiter-work-request
-    status: open
-    stopCondition: "DbSystem create, update, and delete waits have one shared formal answer for generated-runtime completion instead of remaining implicit in the current read-after-write follow-up."
+gaps: []
 ---
 
 # Logic Gaps
 
 ## Current runtime path
 
-- `DbSystem` already uses the generated `DbSystemServiceManager` and
+- `DbSystem` now uses the generated `DbSystemServiceManager` and
   `generatedruntime.ServiceClient`; there is no checked-in legacy adapter
   override.
-- The current generated path creates whenever no OCI ID is tracked, then relies
-  on `GetDbSystem` for read-after-write and delete confirmation.
-- Imported provider facts now cover `CreateDbSystem`, `GetDbSystem`,
+- The generated request path resolves `spec.adminUsername` and
+  `spec.adminPassword` from same-namespace Kubernetes secrets before OCI
+  create/update calls, then mirrors those secret references into status.
+- When no OCI ID is tracked, the current generated path calls
+  `ListDbSystems` before create and only reuses entries that match an
+  identifying reusable field such as `displayName` while OCI remains in
+  reusable lifecycle states (`ACTIVE`, `CREATING`, or `UPDATING`).
+- Deleting, deleted, failed, or non-identifying list matches still fall
+  through to `CreateDbSystem`, and the generated path continues to rely on
+  `GetDbSystem` or `ListDbSystems` for read-after-write and delete
+  confirmation.
+- Imported provider facts cover `CreateDbSystem`, `GetDbSystem`,
   `ListDbSystems`, `UpdateDbSystem`, and `DeleteDbSystem`.
 
 ## Shared generated-runtime baseline
@@ -43,15 +40,21 @@ gaps:
 
 ## Repo-authored semantics
 
-- `DbSystem` reads same-namespace Kubernetes Secrets for
-  `spec.adminUsername.secret.secretName` and
-  `spec.adminPassword.secret.secretName` before create or update request
-  projection.
-- The generated runtime mirrors the applied secret references into
-  `status.adminUsername` and `status.adminPassword`, but it does not create,
-  update, or delete Kubernetes Secret objects.
+- `DbSystem` reads admin credential secret references from same-namespace
+  Kubernetes secrets in the generated runtime path, but it does not create or
+  update Kubernetes secrets as a side effect.
+- `DbSystem` omits admin credential inputs entirely when the secret references
+  are unset or empty, instead of projecting empty-string OCI payload values.
+- `DbSystem` records only non-empty last applied admin credential secret
+  references in status so force-new checks compare references instead of
+  plaintext values.
+- The shared generated runtime uses `ListDbSystems` before create only when no
+  OCI ID is already tracked, reuses only identifying matches in reusable
+  lifecycle states, and otherwise still calls `CreateDbSystem`.
+- The generated runtime rejects force-new and otherwise unsupported update drift,
+  and only calls `UpdateDbSystem` when the imported mutable surface differs from
+  observed state.
 - Delete should keep the finalizer until `GetDbSystem` or `ListDbSystems`
-  confirms the database system is gone.
-- The imported mutation surface is broader than the current generated contract,
-  so the seeded baseline keeps bind, lifecycle lookup, and mutation closure
-  explicit before promotion.
+  confirms the DB system is gone.
+- The generated runtime follows OCI create, update, and delete requests with
+  shared read-based status projection and delete confirmation semantics.

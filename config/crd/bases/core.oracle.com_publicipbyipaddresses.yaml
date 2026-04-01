@@ -30,7 +30,7 @@ spec:
     name: v1beta1
     schema:
       openAPIV3Schema:
-        description: PublicIpByIpAddress is the Schema for the publicipbyipaddresss
+        description: PublicIpByIpAddress is the Schema for the publicipbyipaddresses
           API.
         properties:
           apiVersion:

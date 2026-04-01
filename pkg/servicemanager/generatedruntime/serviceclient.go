@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"sort"
 	"strings"
 	"time"
 	"unicode"
@@ -33,9 +34,6 @@ const defaultRequeueDuration = time.Minute
 var errResourceNotFound = errors.New("generated runtime resource not found")
 
 var autonomousDatabaseBaseType = reflect.TypeOf((*databasesdk.CreateAutonomousDatabaseBase)(nil)).Elem()
-var omittedRequestFieldSentinel = omittedRequestField{}
-
-type omittedRequestField struct{}
 
 type Operation struct {
 	NewRequest func() any
@@ -146,7 +144,7 @@ func NewServiceClient[T any](cfg Config[T]) ServiceClient[T] {
 	return ServiceClient[T]{config: cfg}
 }
 
-//nolint:gocognit,gocyclo // Generated reconcile keeps create, update, read, and status projection together to preserve one control path.
+//nolint:gocognit,gocyclo // Reconcile orchestration branches across create, update, and read-only generated-runtime flows.
 func (c ServiceClient[T]) CreateOrUpdate(ctx context.Context, resource T, _ ctrl.Request) (servicemanager.OSOKResponse, error) {
 	if c.config.InitError != nil {
 		return servicemanager.OSOKResponse{IsSuccessful: false}, c.markFailure(resource, c.config.InitError)
@@ -160,7 +158,11 @@ func (c ServiceClient[T]) CreateOrUpdate(ctx context.Context, resource T, _ ctrl
 		return servicemanager.OSOKResponse{IsSuccessful: false}, c.markFailure(resource, err)
 	}
 	if currentID != "" {
-		if c.config.Update != nil {
+		shouldUpdate, err := c.shouldUpdateExistingResource(resource)
+		if err != nil {
+			return servicemanager.OSOKResponse{IsSuccessful: false}, c.markFailure(resource, err)
+		}
+		if shouldUpdate {
 			response, err := c.invoke(ctx, c.config.Update, resource, currentID)
 			if err != nil {
 				return servicemanager.OSOKResponse{IsSuccessful: false}, c.markFailure(resource, err)
@@ -172,11 +174,30 @@ func (c ServiceClient[T]) CreateOrUpdate(ctx context.Context, resource T, _ ctrl
 			return c.applySuccess(resource, response, shared.Updating)
 		}
 
+		if c.config.Get == nil && c.config.List == nil {
+			c.markCondition(resource, shared.Active, defaultConditionMessage(shared.Active))
+			return servicemanager.OSOKResponse{
+				IsSuccessful:    true,
+				ShouldRequeue:   false,
+				RequeueDuration: defaultRequeueDuration,
+			}, nil
+		}
+
 		response, err := c.readResource(ctx, resource, currentID)
 		if err != nil {
 			return servicemanager.OSOKResponse{IsSuccessful: false}, c.markFailure(resource, err)
 		}
 		return c.applySuccess(resource, response, shared.Active)
+	}
+
+	if c.shouldBindBeforeCreate() {
+		response, err := c.bindBeforeCreate(ctx, resource)
+		switch {
+		case err == nil:
+			return c.applySuccess(resource, response, shared.Active)
+		case !errors.Is(err, errResourceNotFound):
+			return servicemanager.OSOKResponse{IsSuccessful: false}, c.markFailure(resource, err)
+		}
 	}
 
 	if c.config.Create != nil {
@@ -199,7 +220,7 @@ func (c ServiceClient[T]) CreateOrUpdate(ctx context.Context, resource T, _ ctrl
 	return c.applySuccess(resource, response, shared.Active)
 }
 
-//nolint:gocyclo // Delete confirmation keeps the no-semantics fallback flow aligned with the generated formal path.
+//nolint:gocyclo // Delete must coordinate semantic and legacy fallback paths in one entrypoint.
 func (c ServiceClient[T]) Delete(ctx context.Context, resource T) (bool, error) {
 	if c.config.InitError != nil {
 		return false, c.config.InitError
@@ -283,7 +304,7 @@ func (c ServiceClient[T]) requiresWriteFollowUp(phase string) bool {
 	}
 }
 
-//nolint:gocognit,gocyclo // Formal delete semantics intentionally keep OCI delete and follow-up state handling in one routine.
+//nolint:gocognit,gocyclo // Semantic delete handling encodes policy-specific confirmation behavior and lifecycle mapping.
 func (c ServiceClient[T]) deleteWithSemantics(ctx context.Context, resource T) (bool, error) {
 	semantics := c.config.Semantics
 	if semantics == nil {
@@ -377,19 +398,17 @@ func (c ServiceClient[T]) resolveDeleteID(ctx context.Context, resource T) (stri
 	return currentID, nil
 }
 
-//nolint:gocognit,gocyclo // Mutation-policy validation walks conflicting and force-new fields together against spec/status JSON maps.
+//nolint:gocognit,gocyclo // Mutation validation combines conflicts and force-new comparisons over dotted JSON paths.
 func (c ServiceClient[T]) validateMutationPolicy(resource T, existing bool) error {
 	semantics := c.config.Semantics
 	if semantics == nil {
 		return nil
 	}
 
-	resourceValue, err := resourceStruct(resource)
+	specValues, statusValues, err := c.mutationValues(resource)
 	if err != nil {
 		return err
 	}
-	specValues := jsonMap(fieldInterface(resourceValue, "Spec"))
-	statusValues := jsonMap(fieldInterface(resourceValue, "Status"))
 
 	for field, conflicts := range semantics.Mutation.ConflictsWith {
 		if _, ok := lookupMeaningfulValue(specValues, field); !ok {
@@ -415,12 +434,93 @@ func (c ServiceClient[T]) validateMutationPolicy(resource T, existing bool) erro
 			return fmt.Errorf("%s formal semantics require replacement when %s changes", c.config.Kind, field)
 		}
 	}
+	if c.config.Update == nil {
+		return nil
+	}
 
-	return nil
+	unsupportedPaths := unsupportedUpdateDriftPaths(specValues, statusValues, semantics.Mutation)
+	if len(unsupportedPaths) == 0 {
+		return nil
+	}
+	return fmt.Errorf("%s formal semantics reject unsupported update drift for %s", c.config.Kind, strings.Join(unsupportedPaths, ", "))
+}
+
+func (c ServiceClient[T]) mutationValues(resource T) (map[string]any, map[string]any, error) {
+	resourceValue, err := resourceStruct(resource)
+	if err != nil {
+		return nil, nil, err
+	}
+	return jsonMap(fieldInterface(resourceValue, "Spec")), jsonMap(fieldInterface(resourceValue, "Status")), nil
+}
+
+func (c ServiceClient[T]) shouldUpdateExistingResource(resource T) (bool, error) {
+	if c.config.Update == nil {
+		return false, nil
+	}
+	if c.config.Semantics == nil {
+		return true, nil
+	}
+	return c.hasMutableDrift(resource)
+}
+
+func (c ServiceClient[T]) hasMutableDrift(resource T) (bool, error) {
+	semantics := c.config.Semantics
+	if semantics == nil {
+		return false, nil
+	}
+
+	specValues, statusValues, err := c.mutationValues(resource)
+	if err != nil {
+		return false, err
+	}
+	for _, field := range semantics.Mutation.Mutable {
+		specValue, specOK := lookupValueByPath(specValues, field)
+		statusValue, statusOK := lookupValueByPath(statusValues, field)
+		if !specOK || !statusOK {
+			continue
+		}
+		if !valuesEqual(specValue, statusValue) {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+func unsupportedUpdateDriftPaths(specValues map[string]any, statusValues map[string]any, semantics MutationSemantics) []string {
+	diffPaths := comparableDiffPaths(specValues, statusValues, "")
+	unsupported := make([]string, 0, len(diffPaths))
+	for _, path := range diffPaths {
+		switch {
+		case pathCoveredByAny(path, semantics.Mutable):
+		case pathCoveredByAny(path, semantics.ForceNew):
+		default:
+			unsupported = appendUniqueStrings(unsupported, path)
+		}
+	}
+	sort.Strings(unsupported)
+	return unsupported
+}
+
+func (c ServiceClient[T]) bindBeforeCreate(ctx context.Context, resource T) (any, error) {
+	response, err := c.invoke(ctx, c.config.List, resource, "")
+	if err != nil {
+		return nil, err
+	}
+
+	body, ok := responseBody(response)
+	if !ok {
+		return nil, fmt.Errorf("%s list response did not expose a body payload", c.config.Kind)
+	}
+
+	item, err := c.selectReusableListItem(body, resource)
+	if err != nil {
+		return nil, err
+	}
+	return item, nil
 }
 
 func (c ServiceClient[T]) readResource(ctx context.Context, resource T, preferredID string) (any, error) {
-	if c.config.Get != nil {
+	if c.config.Get != nil && !c.shouldUseFormalListLookup(preferredID) {
 		response, err := c.invoke(ctx, c.config.Get, resource, preferredID)
 		if err == nil {
 			return response, nil
@@ -449,6 +549,40 @@ func (c ServiceClient[T]) readResource(ctx context.Context, resource T, preferre
 		return nil, err
 	}
 	return item, nil
+}
+
+func (c ServiceClient[T]) shouldBindBeforeCreate() bool {
+	return c.config.Create != nil &&
+		c.config.List != nil &&
+		c.config.Semantics != nil &&
+		c.config.Semantics.List != nil
+}
+
+func (c ServiceClient[T]) shouldUseFormalListLookup(preferredID string) bool {
+	return preferredID == "" &&
+		c.config.Semantics != nil &&
+		c.config.Semantics.List != nil &&
+		c.config.List != nil
+}
+
+func (c ServiceClient[T]) selectReusableListItem(body any, resource T) (any, error) {
+	responseItemsField := ""
+	if c.config.Semantics != nil && c.config.Semantics.List != nil {
+		responseItemsField = c.config.Semantics.List.ResponseItemsField
+	}
+	items, err := listItems(body, responseItemsField)
+	if err != nil {
+		return nil, err
+	}
+	if len(items) == 0 {
+		return nil, errResourceNotFound
+	}
+
+	criteria, err := lookupValues(resource)
+	if err != nil {
+		return nil, err
+	}
+	return c.selectFormalReusableListItem(items, criteria)
 }
 
 func (c ServiceClient[T]) invoke(ctx context.Context, op *Operation, resource T, preferredID string) (any, error) {
@@ -642,7 +776,7 @@ func buildExplicitRequest(
 	return nil
 }
 
-//nolint:gocognit,gocyclo // Heuristic request building resolves OCI tags, metadata aliases, and resource IDs in one pass over request fields.
+//nolint:gocognit,gocyclo // Heuristic request projection must account for body, path, query, metadata, and ID alias cases.
 func buildHeuristicRequest(
 	ctx context.Context,
 	requestStruct reflect.Value,
@@ -749,10 +883,58 @@ func normalizeJSONValue(raw any) (any, error) {
 	if err := json.Unmarshal(payload, &normalized); err != nil {
 		return nil, fmt.Errorf("normalize source value: %w", err)
 	}
-	return normalized, nil
+	return compactNormalizedJSONValue(normalized), nil
 }
 
-//nolint:gocognit,gocyclo // Recursive projection handles nested structs, collections, maps, and secret-backed scalars in one pass.
+func compactNormalizedJSONValue(raw any) any {
+	switch value := raw.(type) {
+	case map[string]any:
+		compacted := make(map[string]any, len(value))
+		for key, child := range value {
+			next := compactNormalizedJSONValue(child)
+			if next == nil {
+				continue
+			}
+			compacted[key] = next
+		}
+		if isEmptySecretSourceMap(compacted) {
+			return nil
+		}
+		return compacted
+	case []any:
+		compacted := make([]any, len(value))
+		for i, child := range value {
+			compacted[i] = compactNormalizedJSONValue(child)
+		}
+		return compacted
+	default:
+		return raw
+	}
+}
+
+func isEmptySecretSourceMap(values map[string]any) bool {
+	if len(values) != 1 {
+		return false
+	}
+	secretValue, ok := values["secret"]
+	if !ok {
+		return false
+	}
+	if secretValue == nil {
+		return true
+	}
+	secretMap, ok := secretValue.(map[string]any)
+	if !ok {
+		return false
+	}
+	if len(secretMap) == 0 {
+		return true
+	}
+	secretName, ok := secretMap["secretName"].(string)
+	return ok && strings.TrimSpace(secretName) == ""
+}
+
+//nolint:gocognit,gocyclo // Recursive projection handles structs, collections, maps, and secret-backed scalar inputs.
 func prepareValueForTarget(
 	ctx context.Context,
 	raw any,
@@ -764,15 +946,15 @@ func prepareValueForTarget(
 	if targetType == nil {
 		return raw, nil
 	}
+	for targetType.Kind() == reflect.Pointer {
+		targetType = targetType.Elem()
+	}
 	if targetType == autonomousDatabaseBaseType {
 		concreteType, err := autonomousDatabaseBaseTargetType(raw)
 		if err != nil {
 			return nil, err
 		}
 		return prepareValueForTarget(ctx, raw, concreteType, namespace, credentialClient, path)
-	}
-	for targetType.Kind() == reflect.Pointer {
-		targetType = targetType.Elem()
 	}
 
 	switch targetType.Kind() {
@@ -801,10 +983,6 @@ func prepareValueForTarget(
 			childPrepared, err := prepareValueForTarget(ctx, childRaw, fieldType.Type, namespace, credentialClient, append(path, fieldName))
 			if err != nil {
 				return nil, err
-			}
-			if isOmittedRequestField(childPrepared) {
-				delete(prepared, fieldName)
-				continue
 			}
 			prepared[fieldName] = childPrepared
 		}
@@ -852,37 +1030,29 @@ func maybeResolveSecretInput(
 	namespace string,
 	credentialClient credhelper.CredentialClient,
 	path []string,
-) (any, bool, error) {
+) (string, bool, error) {
 	secretName, ok := extractSecretName(raw)
 	if !ok {
-		if isEmptySecretSourceValue(raw, path) {
-			return omittedRequestFieldSentinel, true, nil
-		}
-		return nil, false, nil
+		return "", false, nil
 	}
 	if secretName == "" {
-		return omittedRequestFieldSentinel, true, nil
+		return "", true, nil
 	}
 	if credentialClient == nil {
-		return nil, false, fmt.Errorf("generated runtime requires a credential client to resolve %s", strings.Join(path, "."))
+		return "", false, fmt.Errorf("generated runtime requires a credential client to resolve %s", strings.Join(path, "."))
 	}
 
 	secretData, err := credentialClient.GetSecret(ctx, secretName, namespace)
 	if err != nil {
-		return nil, false, err
+		return "", false, err
 	}
 
 	key := secretDataKeyForPath(path)
 	value, ok := secretData[key]
 	if !ok {
-		return nil, false, fmt.Errorf("secret %q is missing required key %q for %s", secretName, key, strings.Join(path, "."))
+		return "", false, fmt.Errorf("secret %q is missing required key %q for %s", secretName, key, strings.Join(path, "."))
 	}
 	return string(value), true, nil
-}
-
-func isOmittedRequestField(value any) bool {
-	_, ok := value.(omittedRequestField)
-	return ok
 }
 
 func extractSecretName(raw any) (string, bool) {
@@ -900,42 +1070,6 @@ func extractSecretName(raw any) (string, bool) {
 	}
 	name, _ := secretMap["secretName"].(string)
 	return name, true
-}
-
-func isEmptySecretSourceValue(raw any, path []string) bool {
-	if !pathUsesSecretSource(path) {
-		return false
-	}
-
-	values, ok := raw.(map[string]any)
-	if !ok {
-		return false
-	}
-	if len(values) == 0 {
-		return true
-	}
-	if len(values) != 1 {
-		return false
-	}
-
-	secretValue, ok := values["secret"]
-	if !ok {
-		return false
-	}
-	secretMap, ok := secretValue.(map[string]any)
-	return ok && len(secretMap) == 0
-}
-
-func pathUsesSecretSource(path []string) bool {
-	if len(path) == 0 {
-		return false
-	}
-
-	fieldName := strings.ToLower(path[len(path)-1])
-	if fieldName == "walletpassword" {
-		return true
-	}
-	return strings.HasSuffix(fieldName, "username") || strings.HasSuffix(fieldName, "password")
 }
 
 func secretDataKeyForPath(path []string) string {
@@ -1044,7 +1178,7 @@ func specValue(resource any) any {
 	return fieldInterface(resourceValue, "Spec")
 }
 
-//nolint:gocognit,gocyclo // OCI responses vary between wrapped body fields and direct payloads, so unwrapping stays centralized here.
+//nolint:gocognit,gocyclo // OCI responses vary widely, so body extraction handles several structural fallbacks.
 func responseBody(response any) (any, bool) {
 	if response == nil {
 		return nil, false
@@ -1137,32 +1271,79 @@ func stampSecretSourceStatus(resource any) {
 
 //nolint:gocyclo // Status stamping recursively walks nested structs to preserve secret-reference mirrors.
 func copySecretSourceFields(source reflect.Value, destination reflect.Value) {
+	source, destination, ok := secretSourceStructPair(source, destination)
+	if !ok {
+		return
+	}
+	for i := 0; i < source.NumField(); i++ {
+		copySecretSourceField(source, destination, i)
+	}
+}
+
+func secretSourceStructPair(source reflect.Value, destination reflect.Value) (reflect.Value, reflect.Value, bool) {
 	source = indirectValue(source)
 	destination = indirectValue(destination)
 	if !source.IsValid() || !destination.IsValid() {
-		return
+		return reflect.Value{}, reflect.Value{}, false
 	}
 	if source.Kind() != reflect.Struct || destination.Kind() != reflect.Struct {
+		return reflect.Value{}, reflect.Value{}, false
+	}
+	return source, destination, true
+}
+
+func copySecretSourceField(source reflect.Value, destination reflect.Value, index int) {
+	fieldType := source.Type().Field(index)
+	if !fieldType.IsExported() {
 		return
 	}
 
-	for i := 0; i < source.NumField(); i++ {
-		fieldType := source.Type().Field(i)
-		if !fieldType.IsExported() {
-			continue
-		}
-
-		sourceField := source.Field(i)
-		destinationField := destination.FieldByName(fieldType.Name)
-		if !destinationField.IsValid() || !destinationField.CanSet() {
-			continue
-		}
-		if isSecretSourceType(sourceField.Type()) && destinationField.Type() == sourceField.Type() {
-			destinationField.Set(sourceField)
-			continue
-		}
-		copySecretSourceFields(sourceField, destinationField)
+	sourceField := source.Field(index)
+	destinationField, ok := settableFieldByName(destination, fieldType.Name)
+	if !ok {
+		return
 	}
+	if copySecretSourceLeaf(sourceField, destinationField) {
+		return
+	}
+	copySecretSourceFields(sourceField, destinationField)
+}
+
+func settableFieldByName(value reflect.Value, name string) (reflect.Value, bool) {
+	field := value.FieldByName(name)
+	if !field.IsValid() || !field.CanSet() {
+		return reflect.Value{}, false
+	}
+	return field, true
+}
+
+func copySecretSourceLeaf(source reflect.Value, destination reflect.Value) bool {
+	if !isSecretSourceType(source.Type()) || destination.Type() != source.Type() {
+		return false
+	}
+	if secretSourceValueIsEmpty(source) {
+		destination.Set(reflect.Zero(destination.Type()))
+		return true
+	}
+	destination.Set(source)
+	return true
+}
+
+func secretSourceValueIsEmpty(value reflect.Value) bool {
+	value = indirectValue(value)
+	if !value.IsValid() || value.Kind() != reflect.Struct {
+		return true
+	}
+	secretField := value.FieldByName("Secret")
+	secretField = indirectValue(secretField)
+	if !secretField.IsValid() || secretField.Kind() != reflect.Struct {
+		return true
+	}
+	nameField := secretField.FieldByName("SecretName")
+	if !nameField.IsValid() || nameField.Kind() != reflect.String {
+		return true
+	}
+	return strings.TrimSpace(nameField.String()) == ""
 }
 
 func indirectValue(value reflect.Value) reflect.Value {
@@ -1287,14 +1468,29 @@ func defaultConditionMessage(condition shared.OSOKConditionType) string {
 	}
 }
 
+//nolint:gocyclo // Formal validation aggregates independent semantic compatibility checks into one report.
 func validateFormalSemantics(kind string, semantics *Semantics) error {
 	if semantics == nil {
 		return nil
 	}
 
 	var problems []string
+	for _, gap := range semantics.Unsupported {
+		problems = append(problems, fmt.Sprintf("open formal gap %s: %s", gap.Category, gap.StopCondition))
+	}
 	for _, operation := range semantics.AuxiliaryOperations {
-		problems = append(problems, validateAuxiliaryOperationSemantics(operation)...)
+		problems = append(problems, fmt.Sprintf("unsupported %s auxiliary operation %s", operation.Phase, operation.MethodName))
+	}
+	for phase, followUp := range map[string]FollowUpSemantics{
+		"create": semantics.CreateFollowUp,
+		"update": semantics.UpdateFollowUp,
+		"delete": semantics.DeleteFollowUp,
+	} {
+		for _, hook := range followUp.Hooks {
+			if !supportedFormalHelper(hook.Helper) {
+				problems = append(problems, fmt.Sprintf("%s helper %q is not supported", phase, hook.Helper))
+			}
+		}
 	}
 	if semantics.List != nil && strings.TrimSpace(semantics.List.ResponseItemsField) == "" {
 		problems = append(problems, "list semantics require responseItemsField")
@@ -1308,48 +1504,13 @@ func validateFormalSemantics(kind string, semantics *Semantics) error {
 	return fmt.Errorf("%s formal semantics blocked: %s", kind, strings.Join(problems, "; "))
 }
 
-func validateAuxiliaryOperationSemantics(operation AuxiliaryOperation) []string {
-	phase := strings.TrimSpace(operation.Phase)
-	if phase == "" {
-		phase = "auxiliary"
+func supportedFormalHelper(helper string) bool {
+	switch strings.TrimSpace(helper) {
+	case "", "tfresource.CreateResource", "tfresource.UpdateResource", "tfresource.DeleteResource", "tfresource.WaitForUpdatedState":
+		return true
+	default:
+		return false
 	}
-
-	methodName := strings.TrimSpace(operation.MethodName)
-	if methodName == "" {
-		return []string{fmt.Sprintf("%s operation requires methodName", phase)}
-	}
-
-	var problems []string
-	if problem := validateAuxiliaryOperationTypeName(phase, methodName, operation.RequestTypeName, "request"); problem != "" {
-		problems = append(problems, problem)
-	}
-	if problem := validateAuxiliaryOperationTypeName(phase, methodName, operation.ResponseTypeName, "response"); problem != "" {
-		problems = append(problems, problem)
-	}
-	return problems
-}
-
-func validateAuxiliaryOperationTypeName(phase, methodName, typeName, kind string) string {
-	trimmed := strings.TrimSpace(typeName)
-	if trimmed == "" {
-		return fmt.Sprintf("%s auxiliary operation %s requires %s type metadata", phase, methodName, kind)
-	}
-
-	expectedSuffix := methodName + "Request"
-	if kind == "response" {
-		expectedSuffix = methodName + "Response"
-	}
-	if auxiliaryOperationTypeBase(trimmed) != expectedSuffix {
-		return fmt.Sprintf("%s auxiliary operation %s %s type %q must end with %q", phase, methodName, kind, trimmed, expectedSuffix)
-	}
-	return ""
-}
-
-func auxiliaryOperationTypeBase(typeName string) string {
-	if index := strings.LastIndex(typeName, "."); index >= 0 {
-		return typeName[index+1:]
-	}
-	return typeName
 }
 
 func normalizeOCIError(err error) error {
@@ -1390,7 +1551,7 @@ func isNotFound(err error) bool {
 	return false
 }
 
-//nolint:gocyclo // List selection preserves ID and display-name fallback precedence in one matching routine.
+//nolint:gocyclo // List selection combines preferred-ID, formal semantics, and heuristic matching fallbacks.
 func (c ServiceClient[T]) selectListItem(body any, resource T, preferredID string) (any, error) {
 	responseItemsField := ""
 	if c.config.Semantics != nil && c.config.Semantics.List != nil {
@@ -1438,22 +1599,29 @@ func (c ServiceClient[T]) selectListItem(body any, resource T, preferredID strin
 		return matches[0], nil
 	case len(matches) > 1:
 		return nil, fmt.Errorf("%s list response returned multiple matching resources", c.config.Kind)
-	case len(items) == 1:
-		return items[0], nil
 	default:
 		return nil, errResourceNotFound
 	}
 }
 
-//nolint:gocognit,gocyclo // Formal list matching compares preferred IDs and semantic match fields in a single pass over OCI items.
+//nolint:gocognit,gocyclo // Formal list matching must evaluate preferred IDs, match fields, and ambiguity handling together.
 func (c ServiceClient[T]) selectFormalListItem(items []any, criteria map[string]any, preferredID string) (any, error) {
+	return c.selectFormalListItemWithFilter(items, criteria, preferredID, nil)
+}
+
+func (c ServiceClient[T]) selectFormalReusableListItem(items []any, criteria map[string]any) (any, error) {
+	return c.selectFormalListItemWithFilter(items, criteria, "", c.listItemReusableBeforeCreate)
+}
+
+//nolint:gocognit,gocyclo // Formal list matching must evaluate preferred IDs, match fields, lifecycle filters, and ambiguity handling together.
+func (c ServiceClient[T]) selectFormalListItemWithFilter(items []any, criteria map[string]any, preferredID string, accept func(map[string]any) bool) (any, error) {
 	matchFields := []string{}
 	if c.config.Semantics != nil && c.config.Semantics.List != nil {
 		matchFields = append(matchFields, c.config.Semantics.List.MatchFields...)
 	}
 
 	var matches []any
-	comparedAny := false
+	comparedReusable := false
 	for _, item := range items {
 		values := jsonMap(item)
 		if preferredID != "" && preferredID == firstNonEmpty(values, "id", "ocid") {
@@ -1462,6 +1630,7 @@ func (c ServiceClient[T]) selectFormalListItem(items []any, criteria map[string]
 		}
 
 		comparedFields := 0
+		comparedReusableFields := 0
 		matched := true
 		for _, field := range matchFields {
 			expected, ok := lookupMeaningfulValue(criteria, field)
@@ -1469,17 +1638,20 @@ func (c ServiceClient[T]) selectFormalListItem(items []any, criteria map[string]
 				continue
 			}
 			comparedFields++
+			if isReusableListMatchField(field) {
+				comparedReusableFields++
+			}
 			actual, ok := lookupMeaningfulValue(values, field)
 			if !ok || !valuesEqual(expected, actual) {
 				matched = false
 				break
 			}
 		}
-		if comparedFields == 0 {
+		if comparedFields == 0 || comparedReusableFields == 0 {
 			continue
 		}
-		comparedAny = true
-		if matched {
+		comparedReusable = true
+		if matched && (accept == nil || accept(values)) {
 			matches = append(matches, item)
 		}
 	}
@@ -1489,14 +1661,38 @@ func (c ServiceClient[T]) selectFormalListItem(items []any, criteria map[string]
 		return matches[0], nil
 	case len(matches) > 1:
 		return nil, fmt.Errorf("%s formal list semantics returned multiple matching resources", c.config.Kind)
-	case comparedAny || preferredID != "":
+	case comparedReusable || preferredID != "":
 		return nil, errResourceNotFound
 	default:
-		return nil, fmt.Errorf("%s formal list semantics did not yield any match criteria", c.config.Kind)
+		return nil, errResourceNotFound
 	}
 }
 
-//nolint:gocyclo // OCI list payloads expose items through inconsistent field names, so fallback discovery stays linear here.
+func (c ServiceClient[T]) listItemReusableBeforeCreate(values map[string]any) bool {
+	reusableStates := c.reusableLifecycleStates()
+	if len(reusableStates) == 0 {
+		return true
+	}
+
+	lifecycleState := strings.ToUpper(firstNonEmpty(values, "lifecycleState", "status", "state"))
+	if lifecycleState == "" {
+		return false
+	}
+	return containsString(reusableStates, lifecycleState)
+}
+
+func (c ServiceClient[T]) reusableLifecycleStates() []string {
+	if c.config.Semantics == nil {
+		return nil
+	}
+
+	states := appendUniqueStrings([]string{}, c.config.Semantics.Lifecycle.ActiveStates...)
+	states = appendUniqueStrings(states, c.config.Semantics.Lifecycle.ProvisioningStates...)
+	states = appendUniqueStrings(states, c.config.Semantics.Lifecycle.UpdatingStates...)
+	return states
+}
+
+//nolint:gocognit,gocyclo // OCI list bodies expose item slices through several schema shapes.
 func listItems(body any, responseItemsField string) ([]any, error) {
 	value := reflect.ValueOf(body)
 	for value.IsValid() && value.Kind() == reflect.Pointer {
@@ -1505,7 +1701,13 @@ func listItems(body any, responseItemsField string) ([]any, error) {
 		}
 		value = value.Elem()
 	}
-	if !value.IsValid() || value.Kind() != reflect.Struct {
+	if !value.IsValid() {
+		return nil, fmt.Errorf("OCI list body must be a struct or slice, got %T", body)
+	}
+	if value.Kind() == reflect.Slice {
+		return sliceValues(value), nil
+	}
+	if value.Kind() != reflect.Struct {
 		return nil, fmt.Errorf("OCI list body must be a struct, got %T", body)
 	}
 
@@ -1551,9 +1753,6 @@ func assignField(field reflect.Value, raw any) error {
 
 func convertValue(raw any, targetType reflect.Type) (reflect.Value, error) {
 	if raw == nil {
-		return reflect.Zero(targetType), nil
-	}
-	if isOmittedRequestField(raw) {
 		return reflect.Zero(targetType), nil
 	}
 	payload, err := json.Marshal(raw)
@@ -1743,12 +1942,12 @@ func jsonMap(value any) map[string]any {
 	if value == nil {
 		return nil
 	}
-	payload, err := json.Marshal(value)
+	normalized, err := normalizeJSONValue(value)
 	if err != nil {
 		return nil
 	}
-	var decoded map[string]any
-	if err := json.Unmarshal(payload, &decoded); err != nil {
+	decoded, ok := normalized.(map[string]any)
+	if !ok {
 		return nil
 	}
 	return decoded
@@ -1799,7 +1998,7 @@ func lookupValueByPath(values map[string]any, path string) (any, bool) {
 		if !ok {
 			return nil, false
 		}
-		next, ok := mapValue[segment]
+		next, ok := lookupPathSegment(mapValue, segment)
 		if !ok {
 			return nil, false
 		}
@@ -1807,6 +2006,20 @@ func lookupValueByPath(values map[string]any, path string) (any, bool) {
 	}
 
 	return current, true
+}
+
+func lookupPathSegment(values map[string]any, segment string) (any, bool) {
+	if value, ok := values[segment]; ok {
+		return value, true
+	}
+
+	normalizedSegment := normalizePathSegment(segment)
+	for key, value := range values {
+		if normalizePathSegment(key) == normalizedSegment {
+			return value, true
+		}
+	}
+	return nil, false
 }
 
 func meaningfulValue(value any) bool {
@@ -1837,6 +2050,115 @@ func valuesEqual(left any, right any) bool {
 		return reflect.DeepEqual(left, right)
 	}
 	return string(leftPayload) == string(rightPayload)
+}
+
+func comparableDiffPaths(specValues map[string]any, statusValues map[string]any, prefix string) []string {
+	if specValues == nil || statusValues == nil {
+		return nil
+	}
+
+	keys := meaningfulSortedKeys(specValues)
+	paths := make([]string, 0, len(keys))
+	for _, key := range keys {
+		paths = append(paths, comparableDiffPathsForKey(specValues, statusValues, prefix, key)...)
+	}
+
+	return paths
+}
+
+func meaningfulSortedKeys(values map[string]any) []string {
+	keys := make([]string, 0, len(values))
+	for key, value := range values {
+		if meaningfulValue(value) {
+			keys = append(keys, key)
+		}
+	}
+	sort.Strings(keys)
+	return keys
+}
+
+func comparableDiffPathsForKey(specValues map[string]any, statusValues map[string]any, prefix string, key string) []string {
+	specValue := specValues[key]
+	statusValue, ok := statusValues[key]
+	if !ok {
+		return nil
+	}
+
+	path := key
+	if prefix != "" {
+		path = prefix + "." + key
+	}
+
+	specMap, specIsMap := specValue.(map[string]any)
+	statusMap, statusIsMap := statusValue.(map[string]any)
+	if specIsMap && statusIsMap {
+		return comparableDiffPaths(specMap, statusMap, path)
+	}
+	if !valuesEqual(specValue, statusValue) {
+		return []string{path}
+	}
+	return nil
+}
+
+func pathCoveredByAny(path string, semanticPaths []string) bool {
+	for _, semanticPath := range semanticPaths {
+		if pathCoveredBy(path, semanticPath) {
+			return true
+		}
+	}
+	return false
+}
+
+func pathCoveredBy(path string, semanticPath string) bool {
+	path = normalizePath(path)
+	semanticPath = normalizePath(semanticPath)
+	if path == "" || semanticPath == "" {
+		return false
+	}
+	return path == semanticPath ||
+		strings.HasPrefix(path, semanticPath+".") ||
+		strings.HasPrefix(semanticPath, path+".")
+}
+
+func isReusableListMatchField(path string) bool {
+	switch normalizePathSegment(lastPathSegment(path)) {
+	case "displayname", "id", "metadataname", "name", "ocid":
+		return true
+	default:
+		return false
+	}
+}
+
+func lastPathSegment(path string) string {
+	path = strings.TrimSpace(path)
+	if path == "" {
+		return ""
+	}
+	lastDot := strings.LastIndex(path, ".")
+	if lastDot == -1 {
+		return path
+	}
+	return path[lastDot+1:]
+}
+
+func normalizePath(path string) string {
+	if strings.TrimSpace(path) == "" {
+		return ""
+	}
+
+	segments := strings.Split(path, ".")
+	for index, segment := range segments {
+		segments[index] = normalizePathSegment(segment)
+	}
+	return strings.Join(segments, ".")
+}
+
+func normalizePathSegment(segment string) string {
+	segment = strings.ToLower(strings.TrimSpace(segment))
+	if strings.HasSuffix(segment, "gbs") {
+		return strings.TrimSuffix(segment, "gbs") + "gb"
+	}
+	return segment
 }
 
 func firstNonEmpty(values map[string]any, keys ...string) string {
@@ -1906,7 +2228,7 @@ func lowerCamel(name string) string {
 	return builder.String()
 }
 
-//nolint:gocyclo // Camel-case splitting keeps acronym and digit boundary handling together for stable request-name inference.
+//nolint:gocyclo // Camel splitting preserves acronym boundaries and mixed token transitions.
 func splitCamel(name string) []string {
 	if strings.TrimSpace(name) == "" {
 		return nil

@@ -13,13 +13,6 @@ import (
 	"testing"
 )
 
-type generationStrategyExpectation struct {
-	controller     string
-	serviceManager string
-	registration   string
-	webhook        string
-}
-
 func loadCheckedInConfig(t *testing.T) *Config {
 	t.Helper()
 
@@ -67,80 +60,6 @@ func missingServiceNames(found map[string]*ServiceConfig, names []string) []stri
 	return missing
 }
 
-func assertServiceGenerationStrategies(t *testing.T, service *ServiceConfig, want generationStrategyExpectation) {
-	t.Helper()
-
-	if got := service.ControllerGenerationStrategy(); got != want.controller {
-		t.Fatalf("%s controller strategy = %q, want %q", service.Service, got, want.controller)
-	}
-	if got := service.ServiceManagerGenerationStrategy(); got != want.serviceManager {
-		t.Fatalf("%s service-manager strategy = %q, want %q", service.Service, got, want.serviceManager)
-	}
-	if got := service.RegistrationGenerationStrategy(); got != want.registration {
-		t.Fatalf("%s registration strategy = %q, want %q", service.Service, got, want.registration)
-	}
-	if got := service.WebhookGenerationStrategy(); got != want.webhook {
-		t.Fatalf("%s webhook strategy = %q, want %q", service.Service, got, want.webhook)
-	}
-}
-
-func resourceGenerationOverridesByKind(overrides []ResourceGenerationOverride) map[string]ResourceGenerationOverride {
-	indexed := make(map[string]ResourceGenerationOverride, len(overrides))
-	for _, override := range overrides {
-		indexed[override.Kind] = override
-	}
-
-	return indexed
-}
-
-func assertResourceGenerationDisabled(t *testing.T, service *ServiceConfig, kinds ...string) {
-	t.Helper()
-
-	overrides := resourceGenerationOverridesByKind(service.Generation.Resources)
-	for _, kind := range kinds {
-		override, ok := overrides[kind]
-		if !ok {
-			t.Fatalf("%s override for %s was not found", service.Service, kind)
-		}
-		if override.Controller.Strategy != GenerationStrategyNone {
-			t.Fatalf("%s %s controller strategy = %q, want %q", service.Service, kind, override.Controller.Strategy, GenerationStrategyNone)
-		}
-		if override.ServiceManager.Strategy != GenerationStrategyNone {
-			t.Fatalf("%s %s service-manager strategy = %q, want %q", service.Service, kind, override.ServiceManager.Strategy, GenerationStrategyNone)
-		}
-	}
-}
-
-func assertServiceFormalSpec(t *testing.T, service *ServiceConfig, kind string, want string) {
-	t.Helper()
-
-	if got := service.FormalSpecFor(kind); got != want {
-		t.Fatalf("%s %s formalSpec = %q, want %q", service.Service, kind, got, want)
-	}
-}
-
-func assertSelectServicesResult(t *testing.T, cfg *Config, serviceName string, all bool, wantCount int, wantErr string) {
-	t.Helper()
-
-	services, err := cfg.SelectServices(serviceName, all)
-	if wantErr != "" {
-		if err == nil {
-			t.Fatalf("SelectServices() error = nil, want %q", wantErr)
-		}
-		if !strings.Contains(err.Error(), wantErr) {
-			t.Fatalf("SelectServices() error = %v, want substring %q", err, wantErr)
-		}
-		return
-	}
-
-	if err != nil {
-		t.Fatalf("SelectServices() error = %v", err)
-	}
-	if len(services) != wantCount {
-		t.Fatalf("SelectServices() returned %d services, want %d", len(services), wantCount)
-	}
-}
-
 func assertFieldNamesPresent(t *testing.T, label string, fields []FieldModel, want ...string) {
 	t.Helper()
 
@@ -186,6 +105,14 @@ func assertPackageResourceStatusFields(t *testing.T, pkg *PackageModel, want map
 
 	for kind, fieldNames := range want {
 		assertResourceStatusFields(t, findResource(t, pkg.Resources, kind), fieldNames...)
+	}
+}
+
+func assertServiceFormalSpec(t *testing.T, service *ServiceConfig, kind string, want string) {
+	t.Helper()
+
+	if got := service.FormalSpecFor(kind); got != want {
+		t.Fatalf("%s %s formalSpec = %q, want %q", service.Service, kind, got, want)
 	}
 }
 
@@ -249,28 +176,6 @@ func seedSamplesKustomization(t *testing.T, outputRoot string) {
 	if err := os.WriteFile(filepath.Join(samplesDir, "kustomization.yaml"), []byte(checkedInSampleKustomization), 0o644); err != nil {
 		t.Fatalf("write seeded samples kustomization: %v", err)
 	}
-}
-
-func readSampleKustomizationOrder(path string) ([]string, error) {
-	content, err := os.ReadFile(path)
-	if os.IsNotExist(err) {
-		return nil, nil
-	}
-	if err != nil {
-		return nil, err
-	}
-
-	lines := strings.Split(string(content), "\n")
-	resources := make([]string, 0, len(lines))
-	for _, line := range lines {
-		trimmed := strings.TrimSpace(line)
-		if !strings.HasPrefix(trimmed, "- ") {
-			continue
-		}
-		resources = append(resources, strings.TrimSpace(strings.TrimPrefix(trimmed, "- ")))
-	}
-
-	return resources, nil
 }
 
 func assertGeneratedServiceCounts(t *testing.T, generated []ServiceResult, want map[string]int) {

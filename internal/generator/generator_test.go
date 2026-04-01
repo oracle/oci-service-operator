@@ -1805,17 +1805,17 @@ func TestCheckedInPromotedRuntimeArtifactsMatchGenerator(t *testing.T) {
 		{
 			serviceName:       "database",
 			kind:              "AutonomousDatabase",
-			formalSlug:        "autonomousdatabase",
+			formalSlug:        "databaseautonomousdatabase",
 			serviceClientPath: "pkg/servicemanager/database/autonomousdatabase/autonomousdatabase_serviceclient.go",
 			controllerPath:    "controllers/database/autonomousdatabase_controller.go",
 			controllerContains: []string{
 				`// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch`,
-				`// +kubebuilder:rbac:groups="",resources=events,verbs=get;list;watch;create;update;patch;delete`,
+				`// +kubebuilder:rbac:groups="",resources=events,verbs=create;patch`,
 			},
 			serviceClientChecks: []string{
 				"Semantics: &generatedruntime.Semantics{",
 				`FormalService:     "database"`,
-				`FormalSlug:        "autonomousdatabase"`,
+				`FormalSlug:        "databaseautonomousdatabase"`,
 				`SecretSideEffects: "none"`,
 				`StatusProjection:  "required"`,
 				`CredentialClient: manager.CredentialClient,`,
@@ -1829,7 +1829,6 @@ func TestCheckedInPromotedRuntimeArtifactsMatchGenerator(t *testing.T) {
 			controllerPath:    "controllers/mysql/dbsystem_controller.go",
 			controllerContains: []string{
 				`// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch`,
-				`// +kubebuilder:rbac:groups="",resources=events,verbs=get;list;watch;create;update;patch;delete`,
 			},
 			serviceClientChecks: []string{
 				"Semantics: &generatedruntime.Semantics{",
@@ -2128,7 +2127,7 @@ func TestMySQLDbSystemIncludesOptionalDesiredStateFields(t *testing.T) {
 	})
 }
 
-func TestGenerateOverwritesExistingSampleKustomizationEntries(t *testing.T) {
+func TestGeneratePreservesExistingSampleKustomizationEntries(t *testing.T) {
 	t.Parallel()
 
 	cfg := &Config{
@@ -2158,25 +2157,11 @@ func TestGenerateOverwritesExistingSampleKustomizationEntries(t *testing.T) {
 
 	sampleKustomization := readFile(t, filepath.Join(samplesDir, "kustomization.yaml"))
 	assertContains(t, sampleKustomization, []string{
-		"- mysql_v1beta1_dbsystem.yaml",
-		"# +kubebuilder:scaffold:manifestskustomizesamples",
-	})
-	assertNotContains(t, sampleKustomization, []string{
 		"- existing.yaml",
+		"- mysql_v1beta1_dbsystem.yaml",
 	})
-
-	order, err := readSampleKustomizationOrder(filepath.Join(samplesDir, "kustomization.yaml"))
-	if err != nil {
-		t.Fatalf("readSampleKustomizationOrder(kustomization.yaml) error = %v", err)
-	}
-	if !slices.Equal(order, []string{
-		"mysql_v1beta1_dbsystem.yaml",
-		"mysql_v1beta1_oauthclientcredential.yaml",
-		"mysql_v1beta1_report.yaml",
-		"mysql_v1beta1_reportbyname.yaml",
-		"mysql_v1beta1_widget.yaml",
-	}) {
-		t.Fatalf("sample kustomization resources = %#v, want only generated entries", order)
+	if strings.Index(sampleKustomization, "- existing.yaml") > strings.Index(sampleKustomization, "- mysql_v1beta1_dbsystem.yaml") {
+		t.Fatalf("existing sample entry was not preserved ahead of the generated sample:\n%s", sampleKustomization)
 	}
 }
 

@@ -131,12 +131,48 @@ spec:
                     description: Indicates if the user can use SMTP passwords.
                     type: boolean
                 type: object
+              compartmentId:
+                description: The OCID of the tenancy containing the user.
+                type: string
+              dbUserName:
+                description: DB username of the DB credential. Has to be unique across
+                  the tenancy.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              description:
+                description: |-
+                  The description you assign to the user. Does not have to be unique, and it's changeable.
+                  (For tenancies that support identity domains) You can have an empty description.
+                type: string
+              email:
+                description: |-
+                  The email address you assign to the user.
+                  The email address must be unique across all users in the tenancy.
+                  (For tenancies that support identity domains) The email address is required unless the requirement is disabled at the tenancy level.
+                type: string
               emailVerified:
                 description: Whether the email address has been validated.
                 type: boolean
               externalIdentifier:
                 description: Identifier of the user in the identity provider
                 type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
               id:
                 description: The OCID of the user.
                 type: string
@@ -171,6 +207,11 @@ spec:
                 description: |-
                   The user's current state. After creating a user, make sure its `lifecycleState` changes from CREATING to
                   ACTIVE before using it.
+                type: string
+              name:
+                description: |-
+                  The name you assign to the user during creation. This is the user's login for the Console.
+                  The name must be unique across all users in the tenancy and cannot be changed.
                 type: string
               previousSuccessfulLoginTime:
                 description: |-

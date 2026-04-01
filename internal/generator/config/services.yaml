@@ -36,6 +36,12 @@ services:
     version: v1beta1
     phase: security-and-identity
     packageProfile: controller-backed
+    observedState:
+      excludedFieldPaths:
+        CertificateBundle:
+          - JsonData
+          - PrivateKeyPem
+          - PrivateKeyPemPassphrase
     generation:
       controller:
         strategy: generated
@@ -137,6 +143,20 @@ services:
           - VolumeBackupPolicyAssignment
         WindowsInstanceInitialCredential:
           - InstanceCredentials
+      excludedFieldPaths:
+        CrossConnectMapping:
+          - BgpMd5AuthKey
+        IPSecConnectionDeviceConfig:
+          - Tunnels.SharedSecret
+        IPSecConnectionTunnelSharedSecret:
+          - SharedSecret
+        VirtualCircuit:
+          - CrossConnectMappings.BgpMd5AuthKey
+        VolumeAttachment:
+          - JsonData
+          - ChapSecret
+        WindowsInstanceInitialCredential:
+          - Password
 
   - service: database
     sdkPackage: github.com/oracle/oci-go-sdk/v65/database
@@ -145,6 +165,18 @@ services:
     phase: data-and-storage
     sampleOrder: 10
     packageProfile: controller-backed
+    package:
+      extraResources:
+        - ../../../config/rbac/autonomousdatabases_editor_role.yaml
+        - ../../../config/rbac/autonomousdatabases_viewer_role.yaml
+    observedState:
+      excludedFieldPaths:
+        ExternalBackupJob:
+          - SwiftPassword
+        ExternalDatabaseConnector:
+          - JsonData
+          - ConnectionCredentials.JsonData
+          - ConnectionCredentials.Password
     generation:
       controller:
         strategy: generated
@@ -153,14 +185,14 @@ services:
       registration:
         strategy: generated
       webhooks:
-        strategy: manual
+        strategy: none
       resources:
         - kind: AutonomousDatabase
-          formalSpec: autonomousdatabase
+          formalSpec: databaseautonomousdatabase
           controller:
             extraRBACMarkers:
               - groups="",resources=secrets,verbs=get;list;watch
-              - groups="",resources=events,verbs=get;list;watch;create;update;patch;delete
+              - groups="",resources=events,verbs=create;patch
           specFields:
             - name: AdminPassword
               type: shared.PasswordSource
@@ -170,8 +202,6 @@ services:
                 - The referenced Secret must contain a `password` key. Use `secretId` and `secretVersionNumber` instead to reference an OCI Vault secret.
               markers:
                 - +kubebuilder:validation:Optional
-          webhooks:
-            strategy: manual
 
   - service: dns
     sdkPackage: github.com/oracle/oci-go-sdk/v65/dns
@@ -189,6 +219,9 @@ services:
       webhooks:
         strategy: none
     observedState:
+      excludedFieldPaths:
+        TsigKey:
+          - Secret
       sdkAliases:
         DomainRecord:
           - Record
@@ -248,6 +281,17 @@ services:
         - kind: User
           formalSpec: user
     observedState:
+      excludedFieldPaths:
+        AuthToken:
+          - Token
+        CustomerSecretKey:
+          - Key
+        OrResetUIPassword:
+          - Password
+        SmtpCredential:
+          - Password
+        SwiftPassword:
+          - Password
       sdkAliases:
         BulkActionResourceType:
           - BulkActionResourceTypeCollection
@@ -277,6 +321,10 @@ services:
     version: v1beta1
     phase: security-and-identity
     packageProfile: controller-backed
+    observedState:
+      excludedFieldPaths:
+        PreCoUserCredential:
+          - Password
     generation:
       controller:
         strategy: generated
@@ -383,6 +431,12 @@ services:
     phase: data-and-storage
     sampleOrder: 30
     packageProfile: controller-backed
+    observedState:
+      excludedFieldPaths:
+        Channel:
+          - Source.Password
+        DbSystem:
+          - Source.SourceUrl
     generation:
       controller:
         strategy: generated
@@ -399,7 +453,6 @@ services:
             maxConcurrentReconciles: 3
             extraRBACMarkers:
               - groups="",resources=secrets,verbs=get;list;watch
-              - groups="",resources=events,verbs=get;list;watch;create;update;patch;delete
           specFields:
             - name: AdminUsername
               type: shared.UsernameSource
@@ -444,10 +497,9 @@ services:
                 adminPassword:
                   secret:
                     secretName: admin-secret
-    observedState:
-      excludedFieldPaths:
-        DbSystem:
-          - Source.SourceUrl
+          serviceManager:
+            packagePath: mysql/dbsystem
+            needsCredentialClient: true
 
   - service: networkloadbalancer
     sdkPackage: github.com/oracle/oci-go-sdk/v65/networkloadbalancer
@@ -587,6 +639,11 @@ services:
       webhooks:
         strategy: none
     observedState:
+      excludedFieldPaths:
+        SecretBundle:
+          - SecretBundleContent
+        SecretBundleByName:
+          - SecretBundleContent
       sdkAliases:
         SecretBundleByName:
           - SecretBundle
@@ -613,6 +670,8 @@ services:
           controller:
             extraRBACMarkers:
               - groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
+          serviceManager:
+            packagePath: streaming/stream
         - kind: Cursor
           controller:
             strategy: none

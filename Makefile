@@ -411,7 +411,7 @@ catalog-push: ## Push a catalog image.
 
 delete-crds:
 	kubectl delete crd autonomousdatabases.oci.oracle.com &
-	kubectl delete crd mysqldbsystems.oci.oracle.com &
+	kubectl delete crd dbsystems.mysql.oracle.com &
 	kubectl delete crd streams.oci.oracle.com &
 
 delete-operator:
@@ -420,5 +420,5 @@ delete-operator:
 .PHONY: delete-crds-force
 delete-crds-force:
 	kubectl patch crd/autonomousdatabases.oci.oracle.com -p '{"metadata":{"finalizers":[]}}' --type=merge &
-	kubectl patch crd/mysqldbsystems.oci.oracle.com -p '{"metadata":{"finalizers":[]}}' --type=merge &
+	kubectl patch crd/dbsystems.mysql.oracle.com -p '{"metadata":{"finalizers":[]}}' --type=merge &
 	kubectl patch crd/streams.oci.oracle.com -p '{"metadata":{"finalizers":[]}}' --type=merge

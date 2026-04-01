@@ -160,46 +160,19 @@ This happens mostly due to user authorization. Follow below steps for remediatio
 * If using User credentials, cross verify if the secret for user credentials (ocicredentials as per installation doc) is populated correctly.
 * Note that OSOK uses user credentials for authorization if the secret 'ocicredentials' is available during installation. Else it uses instance principal by default. Delete the secret 'ocicredentials' if user principals are not intended and restart the deployment to switch to Instance principals
 
-2. **AutonomousDatabase credentials use plaintext fields or retired helper shapes**
+2. **Legacy or unsupported Autonomous Database credential fields rejected by schema validation**
 
-The generated v2 `AutonomousDatabase` runtime accepts either a same-namespace
-Kubernetes Secret reference for `spec.adminPassword` or an OCI Vault reference
-through `spec.secretId`. If your manifest still uses plaintext
-`spec.adminPassword: <value>` or retired handwritten helper fields, update it
-to one of the supported v2 credential flows instead:
+The generated v2 `AutonomousDatabase` CR no longer accepts the old
+`AutonomousDatabases` compatibility shape. Manifests that still use
+`kind: AutonomousDatabases`, `spec.wallet`, `spec.walletPassword`, or a
+plaintext `spec.adminPassword` value will be rejected before reconciliation.
+Use either `spec.adminPassword.secret.secretName` or `spec.secretId` instead,
+but not both in the same manifest. Migrate those manifests to the generated
+`AutonomousDatabase` fields and use the dedicated
+`AutonomousDatabaseWallet` or `AutonomousDatabaseRegionalWallet` resources for
+wallet material.
 
-```yaml
-spec:
-  adminPassword:
-    secret:
-      secretName: adb-admin-password
-```
-
-or
-
-```yaml
-spec:
-  secretId: <OCI_VAULT_SECRET_OCID>
-  secretVersionNumber: <OPTIONAL_SECRET_VERSION>
-```
-
-Create the referenced Secret in the same namespace as the CR and store the
-credential under the `password` key. Do not expect OSOK to materialize admin
-credentials or wallets into Kubernetes Secrets for `AutonomousDatabase`. Use
-the current `docs/adb.md` guidance and the resource status surface instead.
-
-3. **AutonomousDatabase credentials are configured with incompatible or invalid values**
-
-For the generated v2 `AutonomousDatabase` CR:
-
-* Set exactly one of `spec.adminPassword.secret.secretName` or `spec.secretId`.
-* Ensure the referenced Kubernetes Secret exists in the same namespace as the CR and includes a `password` key whose value satisfies the Autonomous Database password policy.
-* Ensure `spec.secretId` points to a valid OCI Vault secret OCID; set `spec.secretVersionNumber` when a specific version is required.
-
-If both fields are set, or the chosen password/secret is invalid, OCI rejects
-the create or update request during reconciliation.
-
-4. **Service error:InvalidParameter**
+3. **Service error:InvalidParameter**
 ```
 Sample error msg : 
 ERROR	service-manager.AutonomousDatabase	Create AutonomousDatabase failed	{"error": "Service error:InvalidParameter. The Autonomous Database name cannot be longer than 14 characters
@@ -209,5 +182,5 @@ Invalid parameter error happens when one of the parameter for the associated OCI
 * MySql : https://docs.oracle.com/en-us/iaas/api/#/en/mysql/20190415/DbSystem/
 * Streaming : https://docs.oracle.com/en-us/iaas/api/#/en/streaming/20180418/Stream/
 
-5. **If the CR creation fails with any 5XX error :**
+4. **If the CR creation fails with any 5XX error :**
 * Contact respective service team from Oracle for support with details of the request (opc-id) and failure message

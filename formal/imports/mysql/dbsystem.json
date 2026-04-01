@@ -187,11 +187,13 @@
       "bind-versus-create",
       "list-lookup",
       "mutation-policy",
-      "waiter-lifecycle"
+      "status-projection",
+      "delete-confirmation",
+      "waiter-work-request"
     ]
   },
   "notes": [
-    "Pinned provider facts imported from terraform-provider-oci for the generated DbSystem resource.",
-    "The generated runtime currently needs explicit formal answers for bind-or-create, lifecycle-sensitive list lookup, mutation closure, and wait behavior."
+    "Pinned provider facts imported from terraform-provider-oci for the published DbSystem resource.",
+    "The generated mysql DbSystem runtime no longer uses the legacy secret-backed adapter, but bind-by-lookup, mutation policy, and provider helper semantics still need repo-authored formal closure."
   ]
 }

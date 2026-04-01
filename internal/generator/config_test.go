@@ -45,43 +45,6 @@ services:
 	}
 }
 
-func TestLoadConfigRejectsLegacySDKNameOverrideField(t *testing.T) {
-	t.Parallel()
-
-	configPath := filepath.Join(t.TempDir(), "services.yaml")
-	content := `
-schemaVersion: v1alpha1
-domain: oracle.com
-defaultVersion: v1beta1
-generatorEntrypoint: ./cmd/generator
-packageProfiles:
-  controller-backed:
-    description: manual controllers
-services:
-  - service: mysql
-    sdkPackage: github.com/oracle/oci-go-sdk/v65/mysql
-    group: mysql
-    packageProfile: controller-backed
-    generation:
-      resources:
-        - kind: DbSystem
-          sdkName: MySqlDbSystem
-          controller:
-            strategy: manual
-`
-	if err := os.WriteFile(configPath, []byte(content), 0o644); err != nil {
-		t.Fatalf("write temp config: %v", err)
-	}
-
-	_, err := LoadConfig(configPath)
-	if err == nil {
-		t.Fatal("LoadConfig() unexpectedly succeeded")
-	}
-	if !strings.Contains(err.Error(), "sdkName") {
-		t.Fatalf("LoadConfig() error = %v, want sdkName rejection", err)
-	}
-}
-
 func TestLoadConfigRejectsBlankObservedStateExcludedFieldPath(t *testing.T) {
 	t.Parallel()
 
@@ -171,6 +134,7 @@ func TestSelectServices(t *testing.T) {
 		test := test
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
+
 			assertSelectServicesResult(t, cfg, test.serviceName, test.all, test.wantCount, test.wantErr)
 		})
 	}
@@ -287,7 +251,6 @@ services:
             maxConcurrentReconciles: 3
             extraRBACMarkers:
               - groups="",resources=secrets,verbs=get;list;watch
-              - groups="",resources=events,verbs=get;list;watch;create;update;patch;delete
           specFields:
             - name: AdminUsername
               type: shared.UsernameSource
@@ -308,6 +271,7 @@ services:
                     secretName: admin-secret
           serviceManager:
             packagePath: mysql/dbsystem
+            needsCredentialClient: true
   - service: core
     sdkPackage: github.com/oracle/oci-go-sdk/v65/core
     group: core
@@ -325,17 +289,16 @@ services:
 		t.Fatalf("len(cfg.Services) = %d, want 2", len(cfg.Services))
 	}
 
-	mysqlService := cfg.Services[0]
-	assertServiceGenerationStrategies(t, &mysqlService, generationStrategyExpectation{
+	services := requireServices(t, cfg, "mysql", "core")
+	mysqlService := services["mysql"]
+	assertServiceGenerationStrategies(t, mysqlService, generationStrategyExpectations{
 		controller:     GenerationStrategyManual,
 		serviceManager: GenerationStrategyGenerated,
 		registration:   GenerationStrategyGenerated,
 		webhook:        GenerationStrategyManual,
 	})
-	if len(mysqlService.Generation.Resources) != 1 {
-		t.Fatalf("len(mysql generation resources) = %d, want 1", len(mysqlService.Generation.Resources))
-	}
-
+	assertResourceOverrideCount(t, mysqlService, 1)
+	assertMySQLGenerationOverride(t, mysqlService.Generation.Resources[0], []string{`groups="",resources=secrets,verbs=get;list;watch`})
 	override := mysqlService.Generation.Resources[0]
 	if override.Kind != "DbSystem" {
 		t.Fatalf("mysql override kind = %q, want %q", override.Kind, "DbSystem")
@@ -345,9 +308,8 @@ services:
 	}
 	if !slices.Equal(override.Controller.ExtraRBACMarkers, []string{
 		`groups="",resources=secrets,verbs=get;list;watch`,
-		`groups="",resources=events,verbs=get;list;watch;create;update;patch;delete`,
 	}) {
-		t.Fatalf("mysql extra RBAC markers = %v, want secret and event markers", override.Controller.ExtraRBACMarkers)
+		t.Fatalf("mysql extra RBAC markers = %v, want only the secret marker", override.Controller.ExtraRBACMarkers)
 	}
 	if override.ServiceManager.PackagePath != "mysql/dbsystem" {
 		t.Fatalf("mysql packagePath = %q, want %q", override.ServiceManager.PackagePath, "mysql/dbsystem")
@@ -361,9 +323,7 @@ services:
 	if !strings.Contains(override.Sample.Body, "secretName: admin-secret") {
 		t.Fatalf("mysql sample override = %q, want secret-backed body", override.Sample.Body)
 	}
-
-	coreService := cfg.Services[1]
-	assertServiceGenerationStrategies(t, &coreService, generationStrategyExpectation{
+	assertServiceGenerationStrategies(t, services["core"], generationStrategyExpectations{
 		controller:     GenerationStrategyNone,
 		serviceManager: GenerationStrategyNone,
 		registration:   GenerationStrategyNone,
@@ -679,8 +639,14 @@ func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
 	cfg := loadCheckedInConfig(t)
 	services := serviceConfigsByName(t, cfg, "database", "mysql", "streaming", "core")
 
-	for _, name := range []string{"database", "mysql", "streaming"} {
-		assertServiceGenerationStrategies(t, services[name], generationStrategyExpectation{
+	assertServiceGenerationStrategies(t, services["database"], generationStrategyExpectations{
+		controller:     GenerationStrategyGenerated,
+		serviceManager: GenerationStrategyGenerated,
+		registration:   GenerationStrategyGenerated,
+		webhook:        GenerationStrategyNone,
+	})
+	for _, name := range []string{"mysql", "streaming"} {
+		assertServiceGenerationStrategies(t, services[name], generationStrategyExpectations{
 			controller:     GenerationStrategyGenerated,
 			serviceManager: GenerationStrategyGenerated,
 			registration:   GenerationStrategyGenerated,
@@ -688,43 +654,22 @@ func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
 		})
 	}
 
-	assertCheckedInDatabaseRuntimeRolloutMetadata(t, services["database"])
-	assertCheckedInMySQLRuntimeRolloutMetadata(t, services["mysql"])
-	assertCheckedInStreamingRuntimeRolloutMetadata(t, services["streaming"])
-
-	if services["core"].PackageProfile != PackageProfileControllerBacked {
-		t.Fatalf("core packageProfile = %q, want %q", services["core"].PackageProfile, PackageProfileControllerBacked)
-	}
-	assertServiceGenerationStrategies(t, services["core"], generationStrategyExpectation{
-		controller:     GenerationStrategyGenerated,
-		serviceManager: GenerationStrategyGenerated,
-		registration:   GenerationStrategyGenerated,
-		webhook:        GenerationStrategyNone,
-	})
+	assertDatabaseRuntimeRolloutMetadata(t, services["database"])
+	assertMySQLRuntimeRolloutMetadata(t, services["mysql"])
+	assertStreamingRuntimeRolloutMetadata(t, services["streaming"])
+	assertCoreRuntimeRolloutMetadata(t, services["core"])
 }
 
-func TestCheckedInConfigSetsFormalSpecsForPromotedKinds(t *testing.T) {
+func TestCheckedInConfigPromotesFormalSpecReferences(t *testing.T) {
 	t.Parallel()
 
 	cfg := loadCheckedInConfig(t)
 	services := serviceConfigsByName(t, cfg, "identity", "database", "mysql", "streaming")
-
-	assertServiceFormalSpec(t, services["identity"], "User", "user")
-	if got := services["identity"].FormalSpecFor("Compartment"); got != "" {
-		t.Fatalf("identity Compartment formalSpec = %q, want empty", got)
-	}
-
-	for _, test := range []struct {
-		service *ServiceConfig
-		kind    string
-		want    string
-	}{
-		{service: services["database"], kind: "AutonomousDatabase", want: "autonomousdatabase"},
-		{service: services["mysql"], kind: "DbSystem", want: "dbsystem"},
-		{service: services["streaming"], kind: "Stream", want: "stream"},
-	} {
-		assertServiceFormalSpec(t, test.service, test.kind, test.want)
-	}
+	assertFormalSpecFor(t, services["identity"], "User", "user")
+	assertFormalSpecFor(t, services["identity"], "Compartment", "")
+	assertFormalSpecFor(t, services["database"], "AutonomousDatabase", "databaseautonomousdatabase")
+	assertFormalSpecFor(t, services["mysql"], "DbSystem", "dbsystem")
+	assertFormalSpecFor(t, services["streaming"], "Stream", "stream")
 }
 
 func TestCheckedInConfigOptsOutEndpointBasedGeneratedRuntimeResources(t *testing.T) {
@@ -738,8 +683,231 @@ func TestCheckedInConfigOptsOutEndpointBasedGeneratedRuntimeResources(t *testing
 	}
 
 	for serviceName, kinds := range wantKinds {
-		service := serviceConfigsByName(t, cfg, serviceName)[serviceName]
-		assertResourceGenerationDisabled(t, service, kinds...)
+		assertGeneratedRuntimeOptOutKinds(t, cfg, serviceName, kinds)
+	}
+}
+
+type generationStrategyExpectations struct {
+	controller     string
+	serviceManager string
+	registration   string
+	webhook        string
+}
+
+func assertSelectServicesResult(t *testing.T, cfg *Config, serviceName string, all bool, wantCount int, wantErr string) {
+	t.Helper()
+
+	services, err := cfg.SelectServices(serviceName, all)
+	if wantErr != "" {
+		if err == nil {
+			t.Fatalf("SelectServices() error = nil, want %q", wantErr)
+		}
+		if !strings.Contains(err.Error(), wantErr) {
+			t.Fatalf("SelectServices() error = %v, want substring %q", err, wantErr)
+		}
+		return
+	}
+	if err != nil {
+		t.Fatalf("SelectServices() error = %v", err)
+	}
+	if len(services) != wantCount {
+		t.Fatalf("SelectServices() returned %d services, want %d", len(services), wantCount)
+	}
+}
+
+func requireServices(t *testing.T, cfg *Config, names ...string) map[string]*ServiceConfig {
+	t.Helper()
+
+	services := make(map[string]*ServiceConfig, len(names))
+	for _, name := range names {
+		services[name] = requireService(t, cfg, name)
+	}
+
+	return services
+}
+
+func requireService(t *testing.T, cfg *Config, name string) *ServiceConfig {
+	t.Helper()
+
+	for i := range cfg.Services {
+		if cfg.Services[i].Service == name {
+			return &cfg.Services[i]
+		}
+	}
+
+	t.Fatalf("service %q was not found in services.yaml", name)
+	return nil
+}
+
+func assertServiceGenerationStrategies(t *testing.T, service *ServiceConfig, want generationStrategyExpectations) {
+	t.Helper()
+
+	assertGenerationStrategy(t, service.Service, "controller", service.ControllerGenerationStrategy(), want.controller)
+	assertGenerationStrategy(t, service.Service, "service-manager", service.ServiceManagerGenerationStrategy(), want.serviceManager)
+	assertGenerationStrategy(t, service.Service, "registration", service.RegistrationGenerationStrategy(), want.registration)
+	assertGenerationStrategy(t, service.Service, "webhook", service.WebhookGenerationStrategy(), want.webhook)
+}
+
+func assertGenerationStrategy(t *testing.T, serviceName string, surface string, got string, want string) {
+	t.Helper()
+
+	if got != want {
+		t.Fatalf("%s %s strategy = %q, want %q", serviceName, surface, got, want)
+	}
+}
+
+func assertResourceOverrideCount(t *testing.T, service *ServiceConfig, want int) {
+	t.Helper()
+
+	if len(service.Generation.Resources) != want {
+		t.Fatalf("%s generation overrides = %d, want %d", service.Service, len(service.Generation.Resources), want)
+	}
+}
+
+func assertMySQLGenerationOverride(t *testing.T, override ResourceGenerationOverride, wantExtraRBAC []string) {
+	t.Helper()
+
+	if override.Kind != "DbSystem" {
+		t.Fatalf("mysql override kind = %q, want %q", override.Kind, "DbSystem")
+	}
+	if override.Controller.MaxConcurrentReconciles != 3 {
+		t.Fatalf("mysql maxConcurrentReconciles = %d, want 3", override.Controller.MaxConcurrentReconciles)
+	}
+	if !slices.Equal(override.Controller.ExtraRBACMarkers, wantExtraRBAC) {
+		t.Fatalf("mysql extra RBAC markers = %v, want %v", override.Controller.ExtraRBACMarkers, wantExtraRBAC)
+	}
+	if override.ServiceManager.PackagePath != "mysql/dbsystem" {
+		t.Fatalf("mysql packagePath = %q, want %q", override.ServiceManager.PackagePath, "mysql/dbsystem")
+	}
+	if !override.ServiceManager.NeedsCredentialClient {
+		t.Fatal("mysql needsCredentialClient = false, want true")
+	}
+}
+
+func assertDatabaseRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
+	t.Helper()
+
+	assertResourceOverrideCount(t, service, 1)
+	override := service.Generation.Resources[0]
+	if override.Kind != "AutonomousDatabase" {
+		t.Fatalf("database override kind = %q, want %q", override.Kind, "AutonomousDatabase")
+	}
+	if !slices.Equal(
+		override.Controller.ExtraRBACMarkers,
+		[]string{
+			`groups="",resources=secrets,verbs=get;list;watch`,
+			`groups="",resources=events,verbs=create;patch`,
+		},
+	) {
+		t.Fatalf("database extra RBAC markers = %v", override.Controller.ExtraRBACMarkers)
+	}
+	if override.FormalSpec != "databaseautonomousdatabase" {
+		t.Fatalf("database formalSpec = %q, want %q", override.FormalSpec, "databaseautonomousdatabase")
+	}
+	if len(override.SpecFields) != 1 || override.SpecFields[0].Name != "AdminPassword" || override.SpecFields[0].Type != "shared.PasswordSource" {
+		t.Fatalf("database specFields = %#v, want secret-backed adminPassword override", override.SpecFields)
+	}
+	if !slices.Equal(
+		service.Package.ExtraResources,
+		[]string{
+			"../../../config/rbac/autonomousdatabases_editor_role.yaml",
+			"../../../config/rbac/autonomousdatabases_viewer_role.yaml",
+		},
+	) {
+		t.Fatalf("database package extraResources = %v", service.Package.ExtraResources)
+	}
+	if override.ServiceManager.PackagePath != "" {
+		t.Fatalf("database packagePath = %q, want empty to use default package layout", override.ServiceManager.PackagePath)
+	}
+	if override.Webhooks.Strategy != "" {
+		t.Fatalf("database resource webhook strategy = %q, want empty", override.Webhooks.Strategy)
+	}
+}
+
+func assertMySQLRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
+	t.Helper()
+
+	assertResourceOverrideCount(t, service, 1)
+	override := service.Generation.Resources[0]
+	assertMySQLGenerationOverride(t, override, []string{`groups="",resources=secrets,verbs=get;list;watch`})
+	if len(override.SpecFields) != 2 {
+		t.Fatalf("mysql specFields = %#v, want 2 secret-backed overrides", override.SpecFields)
+	}
+	if len(override.StatusFields) != 2 {
+		t.Fatalf("mysql statusFields = %#v, want 2 secret-backed overrides", override.StatusFields)
+	}
+	if !strings.Contains(override.Sample.Body, "adminPassword:") || !strings.Contains(override.Sample.Body, "secretName: admin-secret") {
+		t.Fatalf("mysql sample override = %q, want secret-backed sample body", override.Sample.Body)
+	}
+	assertFormalSpecFor(t, service, "DbSystem", "dbsystem")
+}
+
+func assertStreamingRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
+	t.Helper()
+
+	assertResourceOverrideCount(t, service, 5)
+	overrides := overridesByKind(service)
+	assertFormalSpecFor(t, service, "Stream", "stream")
+	if overrides["Stream"].ServiceManager.PackagePath != "streaming/stream" {
+		t.Fatalf("streaming packagePath = %q, want %q", overrides["Stream"].ServiceManager.PackagePath, "streaming/stream")
+	}
+	for _, kind := range []string{"Cursor", "Group", "GroupCursor", "Message"} {
+		assertDisabledResourceOverride(t, service.Service, kind, overrides[kind])
+	}
+}
+
+func assertCoreRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
+	t.Helper()
+
+	if service.PackageProfile != PackageProfileControllerBacked {
+		t.Fatalf("core packageProfile = %q, want %q", service.PackageProfile, PackageProfileControllerBacked)
+	}
+	assertServiceGenerationStrategies(t, service, generationStrategyExpectations{
+		controller:     GenerationStrategyGenerated,
+		serviceManager: GenerationStrategyGenerated,
+		registration:   GenerationStrategyGenerated,
+		webhook:        GenerationStrategyNone,
+	})
+}
+
+func assertFormalSpecFor(t *testing.T, service *ServiceConfig, kind string, want string) {
+	t.Helper()
+
+	if got := service.FormalSpecFor(kind); got != want {
+		t.Fatalf("%s %s formalSpec = %q, want %q", service.Service, kind, got, want)
+	}
+}
+
+func assertGeneratedRuntimeOptOutKinds(t *testing.T, cfg *Config, serviceName string, kinds []string) {
+	t.Helper()
+
+	service := requireService(t, cfg, serviceName)
+	overrides := overridesByKind(service)
+	for _, kind := range kinds {
+		assertDisabledResourceOverride(t, serviceName, kind, overrides[kind])
+	}
+}
+
+func overridesByKind(service *ServiceConfig) map[string]ResourceGenerationOverride {
+	overrides := make(map[string]ResourceGenerationOverride, len(service.Generation.Resources))
+	for _, override := range service.Generation.Resources {
+		overrides[override.Kind] = override
+	}
+
+	return overrides
+}
+
+func assertDisabledResourceOverride(t *testing.T, serviceName string, kind string, override ResourceGenerationOverride) {
+	t.Helper()
+
+	if override.Kind == "" {
+		t.Fatalf("%s override for %s was not found", serviceName, kind)
+	}
+	if override.Controller.Strategy != GenerationStrategyNone {
+		t.Fatalf("%s %s controller strategy = %q, want %q", serviceName, kind, override.Controller.Strategy, GenerationStrategyNone)
+	}
+	if override.ServiceManager.Strategy != GenerationStrategyNone {
+		t.Fatalf("%s %s service-manager strategy = %q, want %q", serviceName, kind, override.ServiceManager.Strategy, GenerationStrategyNone)
 	}
 }
 
@@ -873,93 +1041,4 @@ func TestCheckedInConfigExcludesMySQLDbSystemSourceURLFromObservedState(t *testi
 	if _, ok := excluded[wantKey]; !ok {
 		t.Fatalf("mysql DbSystem excluded observed-state paths = %v, want %q", excluded, wantKey)
 	}
-}
-
-func assertCheckedInDatabaseRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
-	t.Helper()
-
-	if len(service.Generation.Resources) != 1 {
-		t.Fatalf("database generation overrides = %d, want 1", len(service.Generation.Resources))
-	}
-
-	override := service.Generation.Resources[0]
-	assertServiceFormalSpec(t, service, "AutonomousDatabase", "autonomousdatabase")
-	if !slices.Equal(
-		override.Controller.ExtraRBACMarkers,
-		[]string{
-			`groups="",resources=secrets,verbs=get;list;watch`,
-			`groups="",resources=events,verbs=get;list;watch;create;update;patch;delete`,
-		},
-	) {
-		t.Fatalf("database extra RBAC markers = %v", override.Controller.ExtraRBACMarkers)
-	}
-	if len(override.SpecFields) != 1 || override.SpecFields[0].Name != "AdminPassword" || override.SpecFields[0].Type != "shared.PasswordSource" {
-		t.Fatalf("database specFields = %#v, want secret-backed adminPassword override", override.SpecFields)
-	}
-	if got := service.ServiceManagerPackagePathFor("AutonomousDatabase", "autonomousdatabase"); got != "database/autonomousdatabase" {
-		t.Fatalf("database packagePath = %q, want %q", got, "database/autonomousdatabase")
-	}
-	if got := generationStrategyOrDefault(override.Webhooks.Strategy, GenerationStrategyManual); got != GenerationStrategyManual {
-		t.Fatalf("database resource webhook strategy = %q, want %q", got, GenerationStrategyManual)
-	}
-}
-
-func assertCheckedInMySQLRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
-	t.Helper()
-
-	if len(service.Generation.Resources) != 1 {
-		t.Fatalf("mysql generation overrides = %d, want 1", len(service.Generation.Resources))
-	}
-
-	override := service.Generation.Resources[0]
-	assertServiceFormalSpec(t, service, "DbSystem", "dbsystem")
-	if override.Controller.MaxConcurrentReconciles != 3 {
-		t.Fatalf("mysql maxConcurrentReconciles = %d, want 3", override.Controller.MaxConcurrentReconciles)
-	}
-	if !slices.Equal(
-		override.Controller.ExtraRBACMarkers,
-		[]string{
-			`groups="",resources=secrets,verbs=get;list;watch`,
-			`groups="",resources=events,verbs=get;list;watch;create;update;patch;delete`,
-		},
-	) {
-		t.Fatalf("mysql extra RBAC markers = %v", override.Controller.ExtraRBACMarkers)
-	}
-	if len(override.SpecFields) != 2 {
-		t.Fatalf("mysql specFields = %#v, want 2 secret-backed overrides", override.SpecFields)
-	}
-	if len(override.StatusFields) != 2 {
-		t.Fatalf("mysql statusFields = %#v, want 2 secret-backed overrides", override.StatusFields)
-	}
-	if !strings.Contains(override.Sample.Body, "adminPassword:") || !strings.Contains(override.Sample.Body, "secretName: admin-secret") {
-		t.Fatalf("mysql sample override = %q, want secret-backed sample body", override.Sample.Body)
-	}
-	if got := service.ServiceManagerPackagePathFor("DbSystem", "dbsystem"); got != "mysql/dbsystem" {
-		t.Fatalf("mysql packagePath = %q, want %q", got, "mysql/dbsystem")
-	}
-}
-
-func assertCheckedInStreamingRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
-	t.Helper()
-
-	if len(service.Generation.Resources) != 5 {
-		t.Fatalf("streaming generation overrides = %d, want 5", len(service.Generation.Resources))
-	}
-
-	overrides := resourceGenerationOverridesByKind(service.Generation.Resources)
-	streamOverride, ok := overrides["Stream"]
-	if !ok {
-		t.Fatal("streaming override for Stream was not found")
-	}
-	assertServiceFormalSpec(t, service, "Stream", "stream")
-	if !slices.Equal(
-		streamOverride.Controller.ExtraRBACMarkers,
-		[]string{`groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete`},
-	) {
-		t.Fatalf("streaming Stream extra RBAC markers = %v", streamOverride.Controller.ExtraRBACMarkers)
-	}
-	if got := service.ServiceManagerPackagePathFor("Stream", "stream"); got != "streaming/stream" {
-		t.Fatalf("streaming packagePath = %q, want %q", got, "streaming/stream")
-	}
-	assertResourceGenerationDisabled(t, service, "Cursor", "Group", "GroupCursor", "Message")
 }

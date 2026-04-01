@@ -128,16 +128,15 @@ list lookup: oci_mysql_mysql_db_systems filters
 compartment_id, configuration_id,
 database_management, db_system_id (+4 more)
 conflicts: none
-open gaps: bind-versus-create, list-lookup,
-mutation-policy, waiter-work-request
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
-Create and update resolve admin credential
-inputs from same-namespace Kubernetes Secrets
-before request projection.
-Status mirrors secret references only; no Secret
-create, update, or delete side effects are
-modeled.
+open gaps: none
+Generated runtime reads admin credential secret
+refs during OCI request projection and does not
+write follow-up Kubernetes secrets.
+When no OCI ID is tracked, generated-runtime
+pre-create lookup reuses only identifying
+ListDbSystems matches that remain in ACTIVE,
+CREATING, or UPDATING; deleting, deleted,
+failed, or non-identifying matches still call
+CreateDbSystem.
 end note
 @enduml

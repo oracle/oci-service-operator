@@ -70,6 +70,7 @@ func buildPackageOutputModel(service ServiceConfig, resources []ResourceModel) P
 			"../../../config/rbac/leader_election_role.yaml",
 			"../../../config/rbac/leader_election_role_binding.yaml",
 		)
+		output.Install.Resources = appendUniqueStrings(output.Install.Resources, service.Package.ExtraResources...)
 	case PackageProfileCRDOnly:
 		output.Install.Resources = append(output.Install.Resources, "generated/crd")
 	default:
@@ -79,7 +80,7 @@ func buildPackageOutputModel(service ServiceConfig, resources []ResourceModel) P
 	return output
 }
 
-//nolint:gocognit,gocyclo // Registration generation validates interdependent controller and service-manager rollout per resource.
+//nolint:gocognit,gocyclo // Registration generation validates several coupled controller and service-manager cases.
 func buildRegistrationOutputModel(
 	service ServiceConfig,
 	version string,
@@ -90,85 +91,23 @@ func buildRegistrationOutputModel(
 	if service.RegistrationGenerationStrategy() != GenerationStrategyGenerated {
 		return RegistrationOutputModel{}, nil
 	}
-	if service.PackageProfile != PackageProfileControllerBacked {
-		return RegistrationOutputModel{}, fmt.Errorf(
-			"service %q registration strategy %q requires packageProfile %q",
-			service.Service,
-			GenerationStrategyGenerated,
-			PackageProfileControllerBacked,
-		)
+	if err := validateGeneratedRegistrationService(service); err != nil {
+		return RegistrationOutputModel{}, err
 	}
 
-	controllersByKind := make(map[string]ControllerModel, len(controllerOutput.Resources))
-	for _, controller := range controllerOutput.Resources {
-		controllersByKind[controller.Kind] = controller
-	}
-
-	serviceManagersByKind := make(map[string]ServiceManagerModel, len(serviceManagers))
-	for _, serviceManager := range serviceManagers {
-		serviceManagersByKind[serviceManager.Kind] = serviceManager
-	}
-
-	output := RegistrationOutputModel{
-		Group:                 service.Group,
-		APIImportPath:         fmt.Sprintf("github.com/oracle/oci-service-operator/api/%s/%s", service.Group, version),
-		APIImportAlias:        fmt.Sprintf("%s%s", service.Group, version),
-		ControllerImportPath:  fmt.Sprintf("github.com/oracle/oci-service-operator/controllers/%s", service.Group),
-		ControllerImportAlias: service.Group + "controllers",
-		Resources:             make([]RegistrationResourceModel, 0, len(resources)),
-	}
+	controllersByKind := controllerModelsByKind(controllerOutput.Resources)
+	serviceManagersByKind := serviceManagerModelsByKind(serviceManagers)
+	output := newRegistrationOutputModel(service, version, len(resources))
 
 	for _, resource := range resources {
-		controllerStrategy := service.ControllerGenerationStrategyFor(resource.Kind)
-		serviceManagerStrategy := service.ServiceManagerGenerationStrategyFor(resource.Kind)
-		if controllerStrategy != GenerationStrategyGenerated && serviceManagerStrategy != GenerationStrategyGenerated {
+		registrationResource, include, err := buildRegistrationResourceModel(service, resource, controllersByKind, serviceManagersByKind)
+		if err != nil {
+			return RegistrationOutputModel{}, err
+		}
+		if !include {
 			continue
 		}
-		if controllerStrategy != GenerationStrategyGenerated {
-			return RegistrationOutputModel{}, fmt.Errorf(
-				"service %q registration strategy %q requires generated controller output for kind %q",
-				service.Service,
-				GenerationStrategyGenerated,
-				resource.Kind,
-			)
-		}
-		if serviceManagerStrategy != GenerationStrategyGenerated {
-			return RegistrationOutputModel{}, fmt.Errorf(
-				"service %q registration strategy %q requires generated service-manager output for kind %q",
-				service.Service,
-				GenerationStrategyGenerated,
-				resource.Kind,
-			)
-		}
-
-		controller, ok := controllersByKind[resource.Kind]
-		if !ok {
-			return RegistrationOutputModel{}, fmt.Errorf(
-				"service %q registration strategy %q requires generated controller output for kind %q",
-				service.Service,
-				GenerationStrategyGenerated,
-				resource.Kind,
-			)
-		}
-
-		serviceManager, ok := serviceManagersByKind[resource.Kind]
-		if !ok {
-			return RegistrationOutputModel{}, fmt.Errorf(
-				"service %q registration strategy %q requires generated service-manager output for kind %q",
-				service.Service,
-				GenerationStrategyGenerated,
-				resource.Kind,
-			)
-		}
-
-		output.Resources = append(output.Resources, RegistrationResourceModel{
-			Kind:                      resource.Kind,
-			ComponentName:             resource.Kind,
-			ReconcilerType:            controller.ReconcilerType,
-			ServiceManagerImportPath:  fmt.Sprintf("github.com/oracle/oci-service-operator/pkg/servicemanager/%s", serviceManager.PackagePath),
-			ServiceManagerImportAlias: registrationServiceManagerImportAlias(service.Group, serviceManager.FileStem),
-			WithDepsConstructor:       serviceManager.WithDepsConstructor,
-		})
+		output.Resources = append(output.Resources, registrationResource)
 	}
 
 	if len(output.Resources) == 0 {
@@ -180,6 +119,103 @@ func buildRegistrationOutputModel(
 	}
 
 	return output, nil
+}
+
+func validateGeneratedRegistrationService(service ServiceConfig) error {
+	if service.PackageProfile == PackageProfileControllerBacked {
+		return nil
+	}
+	return fmt.Errorf(
+		"service %q registration strategy %q requires packageProfile %q",
+		service.Service,
+		GenerationStrategyGenerated,
+		PackageProfileControllerBacked,
+	)
+}
+
+func newRegistrationOutputModel(service ServiceConfig, version string, resourceCount int) RegistrationOutputModel {
+	return RegistrationOutputModel{
+		Group:                 service.Group,
+		APIImportPath:         fmt.Sprintf("github.com/oracle/oci-service-operator/api/%s/%s", service.Group, version),
+		APIImportAlias:        fmt.Sprintf("%s%s", service.Group, version),
+		ControllerImportPath:  fmt.Sprintf("github.com/oracle/oci-service-operator/controllers/%s", service.Group),
+		ControllerImportAlias: service.Group + "controllers",
+		Resources:             make([]RegistrationResourceModel, 0, resourceCount),
+	}
+}
+
+func controllerModelsByKind(controllers []ControllerModel) map[string]ControllerModel {
+	controllersByKind := make(map[string]ControllerModel, len(controllers))
+	for _, controller := range controllers {
+		controllersByKind[controller.Kind] = controller
+	}
+	return controllersByKind
+}
+
+func serviceManagerModelsByKind(serviceManagers []ServiceManagerModel) map[string]ServiceManagerModel {
+	serviceManagersByKind := make(map[string]ServiceManagerModel, len(serviceManagers))
+	for _, serviceManager := range serviceManagers {
+		serviceManagersByKind[serviceManager.Kind] = serviceManager
+	}
+	return serviceManagersByKind
+}
+
+func buildRegistrationResourceModel(
+	service ServiceConfig,
+	resource ResourceModel,
+	controllersByKind map[string]ControllerModel,
+	serviceManagersByKind map[string]ServiceManagerModel,
+) (RegistrationResourceModel, bool, error) {
+	controllerStrategy := service.ControllerGenerationStrategyFor(resource.Kind)
+	serviceManagerStrategy := service.ServiceManagerGenerationStrategyFor(resource.Kind)
+	if controllerStrategy != GenerationStrategyGenerated && serviceManagerStrategy != GenerationStrategyGenerated {
+		return RegistrationResourceModel{}, false, nil
+	}
+	if controllerStrategy != GenerationStrategyGenerated {
+		return RegistrationResourceModel{}, false, fmt.Errorf(
+			"service %q registration strategy %q requires generated controller output for kind %q",
+			service.Service,
+			GenerationStrategyGenerated,
+			resource.Kind,
+		)
+	}
+	if serviceManagerStrategy != GenerationStrategyGenerated {
+		return RegistrationResourceModel{}, false, fmt.Errorf(
+			"service %q registration strategy %q requires generated service-manager output for kind %q",
+			service.Service,
+			GenerationStrategyGenerated,
+			resource.Kind,
+		)
+	}
+
+	controller, ok := controllersByKind[resource.Kind]
+	if !ok {
+		return RegistrationResourceModel{}, false, fmt.Errorf(
+			"service %q registration strategy %q requires generated controller output for kind %q",
+			service.Service,
+			GenerationStrategyGenerated,
+			resource.Kind,
+		)
+	}
+
+	serviceManager, ok := serviceManagersByKind[resource.Kind]
+	if !ok {
+		return RegistrationResourceModel{}, false, fmt.Errorf(
+			"service %q registration strategy %q requires generated service-manager output for kind %q",
+			service.Service,
+			GenerationStrategyGenerated,
+			resource.Kind,
+		)
+	}
+
+	return RegistrationResourceModel{
+		Kind:                      resource.Kind,
+		ComponentName:             resource.Kind,
+		ReconcilerType:            controller.ReconcilerType,
+		ServiceManagerImportPath:  fmt.Sprintf("github.com/oracle/oci-service-operator/pkg/servicemanager/%s", serviceManager.PackagePath),
+		ServiceManagerImportAlias: registrationServiceManagerImportAlias(service.Group, serviceManager.FileStem),
+		WithDepsConstructor:       serviceManager.WithDepsConstructor,
+	}, true, nil
 }
 
 func buildControllerOutputModel(service ServiceConfig, domain string, resources []ResourceModel) ControllerOutputModel {
@@ -258,6 +294,7 @@ func buildServiceManagerModels(service ServiceConfig, version string, resources 
 			SDKClientTypeName:        resource.Runtime.ClientType,
 			SDKClientConstructor:     resource.Runtime.ClientConstructor,
 			SDKClientConstructorKind: resource.Runtime.ClientConstructorKind,
+			NeedsCredentialClient:    service.ServiceManagerNeedsCredentialClientFor(resource.Kind),
 			CreateOperation:          resource.Runtime.Create,
 			GetOperation:             resource.Runtime.Get,
 			ListOperation:            resource.Runtime.List,
@@ -291,7 +328,6 @@ func applyResourceGenerationOverrides(service ServiceConfig, version string, res
 	}
 	return updated
 }
-
 func resourceUsesCredentialClient(resource ResourceModel) bool {
 	helperIndex := make(map[string]TypeModel, len(resource.HelperTypes))
 	for _, helper := range resource.HelperTypes {
@@ -328,7 +364,6 @@ func fieldTypeUsesCredentialClient(typeExpr string, helperIndex map[string]TypeM
 			return true
 		}
 	}
-
 	return false
 }
 
@@ -496,47 +531,70 @@ func defaultStatusFields() []FieldModel {
 	}
 }
 
-//nolint:gocognit // Helper type renaming rewrites resource fields and helper graphs in a single pass over each resource.
+//nolint:gocognit // Helper renaming coordinates reserved names, rewrites, and comment carryover in one pass.
 func assignHelperTypeNames(resources []ResourceModel) []ResourceModel {
+	reservedNames := reservedResourceNames(resources)
+	usedHelperNames := make(map[string]struct{}, len(resources))
+	updated := make([]ResourceModel, 0, len(resources))
+	for _, resource := range resources {
+		updated = append(updated, assignResourceHelperTypeNames(resource, reservedNames, usedHelperNames))
+	}
+
+	return updated
+}
+
+func reservedResourceNames(resources []ResourceModel) map[string]struct{} {
 	reservedNames := make(map[string]struct{}, len(resources))
 	for _, resource := range resources {
 		reservedNames[resource.Kind] = struct{}{}
 	}
+	return reservedNames
+}
 
-	usedHelperNames := make(map[string]struct{}, len(resources))
-	updated := make([]ResourceModel, 0, len(resources))
-	for _, resource := range resources {
-		renames := make(map[string]string, len(resource.HelperTypes))
-		for _, helperType := range resource.HelperTypes {
-			name := helperType.Name
-			if nameConflicts(name, reservedNames, usedHelperNames) {
-				name = uniqueHelperTypeName(helperType.Name, reservedNames, usedHelperNames)
-			}
-			if name != helperType.Name {
-				renames[helperType.Name] = name
-			}
-			usedHelperNames[name] = struct{}{}
-		}
-
-		if len(renames) > 0 {
-			resource.SpecFields = rewriteFieldTypes(resource.SpecFields, renames)
-			resource.StatusFields = rewriteFieldTypes(resource.StatusFields, renames)
-		}
-
-		helperTypes := make([]TypeModel, 0, len(resource.HelperTypes))
-		for _, helperType := range resource.HelperTypes {
-			if renamed, ok := renames[helperType.Name]; ok {
-				helperType = renameHelperType(helperType, renamed)
-			}
-			if len(renames) > 0 {
-				helperType.Fields = rewriteFieldTypes(helperType.Fields, renames)
-			}
-			helperTypes = append(helperTypes, helperType)
-		}
-		resource.HelperTypes = helperTypes
-		updated = append(updated, resource)
+func assignResourceHelperTypeNames(
+	resource ResourceModel,
+	reservedNames map[string]struct{},
+	usedHelperNames map[string]struct{},
+) ResourceModel {
+	renames := helperTypeRenames(resource.HelperTypes, reservedNames, usedHelperNames)
+	if len(renames) == 0 {
+		return resource
 	}
 
+	resource.SpecFields = rewriteFieldTypes(resource.SpecFields, renames)
+	resource.StatusFields = rewriteFieldTypes(resource.StatusFields, renames)
+	resource.HelperTypes = renamedHelperTypes(resource.HelperTypes, renames)
+	return resource
+}
+
+func helperTypeRenames(
+	helperTypes []TypeModel,
+	reservedNames map[string]struct{},
+	usedHelperNames map[string]struct{},
+) map[string]string {
+	renames := make(map[string]string, len(helperTypes))
+	for _, helperType := range helperTypes {
+		name := helperType.Name
+		if nameConflicts(name, reservedNames, usedHelperNames) {
+			name = uniqueHelperTypeName(helperType.Name, reservedNames, usedHelperNames)
+		}
+		if name != helperType.Name {
+			renames[helperType.Name] = name
+		}
+		usedHelperNames[name] = struct{}{}
+	}
+	return renames
+}
+
+func renamedHelperTypes(helperTypes []TypeModel, renames map[string]string) []TypeModel {
+	updated := make([]TypeModel, 0, len(helperTypes))
+	for _, helperType := range helperTypes {
+		if renamed, ok := renames[helperType.Name]; ok {
+			helperType = renameHelperType(helperType, renamed)
+		}
+		helperType.Fields = rewriteFieldTypes(helperType.Fields, renames)
+		updated = append(updated, helperType)
+	}
 	return updated
 }
 

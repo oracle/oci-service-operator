@@ -50,18 +50,6 @@ func TestAllAddToSchemeRegistersManualGroupKinds(t *testing.T) {
 	}
 }
 
-func TestAllExposesManualWebhooksSeparately(t *testing.T) {
-	t.Parallel()
-
-	webhooks := ManualWebhooks()
-	if len(webhooks) != 1 {
-		t.Fatalf("len(ManualWebhooks()) = %d, want 1", len(webhooks))
-	}
-	if webhooks[0].Name != "AutonomousDatabase" {
-		t.Fatalf("ManualWebhooks()[0].Name = %q, want %q", webhooks[0].Name, "AutonomousDatabase")
-	}
-}
-
 func TestNewBaseReconcilerUsesSharedRuntimeDeps(t *testing.T) {
 	t.Parallel()
 

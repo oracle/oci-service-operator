@@ -8,6 +8,12 @@ rules:
   - ""
   resources:
   - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - ""
+  resources:
   - secrets
   verbs:
   - create
@@ -306,7 +312,7 @@ rules:
   - networksecuritygroupsecurityrules
   - networksecuritygroupvnics
   - privateips
-  - publicipbyipaddresss
+  - publicipbyipaddresses
   - publicipbyprivateipids
   - publicippools
   - publicips
@@ -440,7 +446,7 @@ rules:
   - networksecuritygroupsecurityrules/finalizers
   - networksecuritygroupvnics/finalizers
   - privateips/finalizers
-  - publicipbyipaddresss/finalizers
+  - publicipbyipaddresses/finalizers
   - publicipbyprivateipids/finalizers
   - publicippools/finalizers
   - publicips/finalizers
@@ -568,7 +574,7 @@ rules:
   - networksecuritygroupsecurityrules/status
   - networksecuritygroupvnics/status
   - privateips/status
-  - publicipbyipaddresss/status
+  - publicipbyipaddresses/status
   - publicipbyprivateipids/status
   - publicippools/status
   - publicips/status

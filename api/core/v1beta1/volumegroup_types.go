@@ -56,17 +56,17 @@ type VolumeGroupSourceDetails struct {
 	// +kubebuilder:validation:Optional
 	Type string `json:"type,omitempty"`
 	// The OCID of the volume group replica.
-	// +kubebuilder:validation:Required
-	VolumeGroupReplicaId string `json:"volumeGroupReplicaId"`
+	// +kubebuilder:validation:Optional
+	VolumeGroupReplicaId string `json:"volumeGroupReplicaId,omitempty"`
 	// The OCID of the volume group to clone from.
-	// +kubebuilder:validation:Required
-	VolumeGroupId string `json:"volumeGroupId"`
+	// +kubebuilder:validation:Optional
+	VolumeGroupId string `json:"volumeGroupId,omitempty"`
 	// OCIDs for the volumes in this volume group.
-	// +kubebuilder:validation:Required
-	VolumeIds []string `json:"volumeIds"`
+	// +kubebuilder:validation:Optional
+	VolumeIds []string `json:"volumeIds,omitempty"`
 	// The OCID of the volume group backup to restore from.
-	// +kubebuilder:validation:Required
-	VolumeGroupBackupId string `json:"volumeGroupBackupId"`
+	// +kubebuilder:validation:Optional
+	VolumeGroupBackupId string `json:"volumeGroupBackupId,omitempty"`
 }
 
 // VolumeGroupReplicaFields defines nested fields for VolumeGroup.VolumeGroupReplica.
@@ -79,26 +79,6 @@ type VolumeGroupReplicaFields struct {
 	// Avoid entering confidential information.
 	// +kubebuilder:validation:Optional
 	DisplayName string `json:"displayName,omitempty"`
-}
-
-// VolumeGroupSourceDetailsObservedState defines nested fields for VolumeGroup.SourceDetails.
-type VolumeGroupSourceDetailsObservedState struct {
-	// +kubebuilder:validation:Optional
-	JsonData string `json:"jsonData,omitempty"`
-	// +kubebuilder:validation:Optional
-	Type string `json:"type,omitempty"`
-	// The OCID of the volume group replica.
-	// +kubebuilder:validation:Required
-	VolumeGroupReplicaId string `json:"volumeGroupReplicaId"`
-	// The OCID of the volume group to clone from.
-	// +kubebuilder:validation:Required
-	VolumeGroupId string `json:"volumeGroupId"`
-	// OCIDs for the volumes in this volume group.
-	// +kubebuilder:validation:Required
-	VolumeIds []string `json:"volumeIds"`
-	// The OCID of the volume group backup to restore from.
-	// +kubebuilder:validation:Required
-	VolumeGroupBackupId string `json:"volumeGroupBackupId"`
 }
 
 // VolumeGroupStatus defines the observed state of VolumeGroup.
@@ -130,8 +110,8 @@ type VolumeGroupStatus struct {
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// The aggregate size of the volume group in GBs.
-	SizeInGBs     int64                                 `json:"sizeInGBs,omitempty"`
-	SourceDetails VolumeGroupSourceDetailsObservedState `json:"sourceDetails,omitempty"`
+	SizeInGBs     int64                    `json:"sizeInGBs,omitempty"`
+	SourceDetails VolumeGroupSourceDetails `json:"sourceDetails,omitempty"`
 	// Specifies whether the newly created cloned volume group's data has finished copying
 	// from the source volume group or backup.
 	IsHydrated bool `json:"isHydrated,omitempty"`

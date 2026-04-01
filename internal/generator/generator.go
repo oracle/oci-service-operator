@@ -96,7 +96,7 @@ func (g *Generator) Generate(ctx context.Context, cfg *Config, services []Servic
 		generatedPackages = append(generatedPackages, pkg)
 	}
 
-	if err := g.renderer.RenderSamples(options.OutputRoot, cfg, generatedPackages); err != nil {
+	if err := g.renderer.RenderSamples(options.OutputRoot, generatedPackages); err != nil {
 		return result, fmt.Errorf("render sample outputs: %w", err)
 	}
 

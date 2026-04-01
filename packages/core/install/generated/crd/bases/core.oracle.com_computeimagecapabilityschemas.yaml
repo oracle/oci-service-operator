@@ -101,6 +101,8 @@ spec:
                       type: string
                     descriptorType:
                       type: string
+                    jsonData:
+                      type: string
                     source:
                       type: string
                     values:
@@ -124,13 +126,72 @@ spec:
             description: ComputeImageCapabilitySchemaStatus defines the observed state
               of ComputeImageCapabilitySchema.
             properties:
+              compartmentId:
+                description: The OCID of the compartment that contains the resource.
+                type: string
               computeGlobalImageCapabilitySchemaId:
                 description: The ocid of the compute global image capability schema
                 type: string
+              computeGlobalImageCapabilitySchemaVersionName:
+                description: The name of the compute global image capability schema
+                  version
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a
+                  namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              displayName:
+                description: |-
+                  A user-friendly name. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no
+                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
               id:
                 description: The id of the compute global image capability schema
                   version
                 type: string
+              imageId:
+                description: The OCID of the image associated with this compute image
+                  capability schema
+                type: string
+              schemaData:
+                additionalProperties:
+                  description: ComputeImageCapabilitySchemaSchemaData defines nested
+                    fields for ComputeImageCapabilitySchema.SchemaData.
+                  properties:
+                    defaultValue:
+                      description: the default value
+                      type: string
+                    descriptorType:
+                      type: string
+                    jsonData:
+                      type: string
+                    source:
+                      type: string
+                    values:
+                      description: the list of values for the enum
+                      items:
+                        type: string
+                      type: array
+                  required:
+                  - source
+                  - values
+                  type: object
+                description: The map of each capability name to its ImageCapabilityDescriptor.
+                type: object
               status:
                 properties:
                   conditions:

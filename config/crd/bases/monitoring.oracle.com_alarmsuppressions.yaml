@@ -67,8 +67,6 @@ spec:
                     type: string
                   targetType:
                     type: string
-                required:
-                - alarmId
                 type: object
               definedTags:
                 additionalProperties:
@@ -134,8 +132,7 @@ spec:
             description: AlarmSuppressionStatus defines the observed state of AlarmSuppression.
             properties:
               alarmSuppressionTarget:
-                description: AlarmSuppressionTargetObservedState defines nested fields
-                  for AlarmSuppression.AlarmSuppressionTarget.
+                description: AlarmSuppressionTarget defines nested fields for AlarmSuppression.AlarmSuppressionTarget.
                 properties:
                   alarmId:
                     description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
@@ -145,8 +142,6 @@ spec:
                     type: string
                   targetType:
                     type: string
-                required:
-                - alarmId
                 type: object
               compartmentId:
                 description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)

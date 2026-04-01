@@ -118,8 +118,6 @@ spec:
                     type: string
                   strategy:
                     type: string
-                required:
-                - count
                 type: object
               sourceDetails:
                 description: FunctionSourceDetails defines nested fields for Function.SourceDetails.
@@ -133,8 +131,6 @@ spec:
                     type: string
                   sourceType:
                     type: string
-                required:
-                - pbfListingId
                 type: object
               timeoutInSeconds:
                 description: Timeout for executions of the function. Value in seconds.
@@ -219,8 +215,8 @@ spec:
                 format: int64
                 type: integer
               provisionedConcurrencyConfig:
-                description: FunctionProvisionedConcurrencyConfigObservedState defines
-                  nested fields for Function.ProvisionedConcurrencyConfig.
+                description: FunctionProvisionedConcurrencyConfig defines nested fields
+                  for Function.ProvisionedConcurrencyConfig.
                 properties:
                   count:
                     description: Configuration specifying a constant amount of provisioned
@@ -230,8 +226,6 @@ spec:
                     type: string
                   strategy:
                     type: string
-                required:
-                - count
                 type: object
               shape:
                 description: The processor shape (`GENERIC_X86`/`GENERIC_ARM`) on
@@ -239,8 +233,7 @@ spec:
                   manifest.
                 type: string
               sourceDetails:
-                description: FunctionSourceDetailsObservedState defines nested fields
-                  for Function.SourceDetails.
+                description: FunctionSourceDetails defines nested fields for Function.SourceDetails.
                 properties:
                   jsonData:
                     type: string
@@ -251,8 +244,6 @@ spec:
                     type: string
                   sourceType:
                     type: string
-                required:
-                - pbfListingId
                 type: object
               status:
                 properties:

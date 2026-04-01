@@ -5,18 +5,4 @@
 
 package registrations
 
-import (
-	databasev1beta1 "github.com/oracle/oci-service-operator/api/database/v1beta1"
-	ctrl "sigs.k8s.io/controller-runtime"
-)
-
 var manualGroupRegistrations = []GroupRegistration{}
-
-var manualWebhookRegistrations = []WebhookRegistration{
-	{
-		Name: "AutonomousDatabase",
-		SetupWithManager: func(mgr ctrl.Manager) error {
-			return (&databasev1beta1.AutonomousDatabase{}).SetupWebhookWithManager(mgr)
-		},
-	},
-}

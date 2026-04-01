@@ -441,8 +441,7 @@ spec:
                   the list of answers emitted by the one preceding it. The last rule populates the
                   response.
                 items:
-                  description: SteeringPolicyRuleObservedState defines nested fields
-                    for SteeringPolicy.Rule.
+                  description: SteeringPolicyRule defines nested fields for SteeringPolicy.Rule.
                   properties:
                     cases:
                       description: |-

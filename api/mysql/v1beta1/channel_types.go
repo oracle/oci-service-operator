@@ -48,8 +48,8 @@ type ChannelSourceSslCaCertificate struct {
 	// +kubebuilder:validation:Optional
 	CertificateType string `json:"certificateType,omitempty"`
 	// The string containing the CA certificate in PEM format.
-	// +kubebuilder:validation:Required
-	Contents string `json:"contents"`
+	// +kubebuilder:validation:Optional
+	Contents string `json:"contents,omitempty"`
 }
 
 // ChannelSourceAnonymousTransactionsHandling defines nested fields for Channel.Source.AnonymousTransactionsHandling.
@@ -83,19 +83,19 @@ type ChannelSource struct {
 	// +kubebuilder:validation:Optional
 	SourceType string `json:"sourceType,omitempty"`
 	// The network address of the MySQL instance.
-	// +kubebuilder:validation:Required
-	Hostname string `json:"hostname"`
+	// +kubebuilder:validation:Optional
+	Hostname string `json:"hostname,omitempty"`
 	// The name of the replication user on the source MySQL instance.
 	// The username has a maximum length of 96 characters. For more information,
 	// please see the MySQL documentation (https://dev.mysql.com/doc/refman/8.0/en/change-master-to.html)
-	// +kubebuilder:validation:Required
-	Username string `json:"username"`
+	// +kubebuilder:validation:Optional
+	Username string `json:"username,omitempty"`
 	// The password for the replication user. The password must be
 	// between 8 and 32 characters long, and must contain at least 1
 	// numeric character, 1 lowercase character, 1 uppercase character,
 	// and 1 special (nonalphanumeric) character.
-	// +kubebuilder:validation:Required
-	Password string `json:"password"`
+	// +kubebuilder:validation:Optional
+	Password string `json:"password,omitempty"`
 	// The port the source MySQL instance listens on.
 	// +kubebuilder:validation:Optional
 	Port int `json:"port,omitempty"`
@@ -104,8 +104,8 @@ type ChannelSource struct {
 	// +kubebuilder:validation:Optional
 	AnonymousTransactionsHandling ChannelSourceAnonymousTransactionsHandling `json:"anonymousTransactionsHandling,omitempty"`
 	// The SSL mode of the Channel.
-	// +kubebuilder:validation:Required
-	SslMode string `json:"sslMode"`
+	// +kubebuilder:validation:Optional
+	SslMode string `json:"sslMode,omitempty"`
 }
 
 // ChannelTargetFilter defines nested fields for Channel.Target.Filter.
@@ -129,8 +129,8 @@ type ChannelTarget struct {
 	// +kubebuilder:validation:Optional
 	TargetType string `json:"targetType,omitempty"`
 	// The OCID of the target DB System.
-	// +kubebuilder:validation:Required
-	DbSystemId string `json:"dbSystemId"`
+	// +kubebuilder:validation:Optional
+	DbSystemId string `json:"dbSystemId,omitempty"`
 	// The case-insensitive name that identifies the replication channel. Channel names
 	// must follow the rules defined for MySQL identifiers (https://dev.mysql.com/doc/refman/8.0/en/identifiers.html).
 	// The names of non-Deleted Channels must be unique for each DB System.
@@ -152,6 +152,46 @@ type ChannelTarget struct {
 	TablesWithoutPrimaryKeyHandling string `json:"tablesWithoutPrimaryKeyHandling,omitempty"`
 }
 
+// ChannelSourceObservedState defines nested fields for Channel.Source.
+type ChannelSourceObservedState struct {
+	JsonData   string `json:"jsonData,omitempty"`
+	SourceType string `json:"sourceType,omitempty"`
+	// The network address of the MySQL instance.
+	Hostname string `json:"hostname,omitempty"`
+	// The port the source MySQL instance listens on.
+	Port int `json:"port,omitempty"`
+	// The name of the replication user on the source MySQL instance.
+	// The username has a maximum length of 96 characters. For more information,
+	// please see the MySQL documentation (https://dev.mysql.com/doc/refman/8.0/en/change-master-to.html)
+	Username                      string                                     `json:"username,omitempty"`
+	SslCaCertificate              ChannelSourceSslCaCertificate              `json:"sslCaCertificate,omitempty"`
+	AnonymousTransactionsHandling ChannelSourceAnonymousTransactionsHandling `json:"anonymousTransactionsHandling,omitempty"`
+	// The SSL mode of the Channel.
+	SslMode string `json:"sslMode,omitempty"`
+}
+
+// ChannelTargetObservedState defines nested fields for Channel.Target.
+type ChannelTargetObservedState struct {
+	JsonData   string `json:"jsonData,omitempty"`
+	TargetType string `json:"targetType,omitempty"`
+	// The OCID of the source DB System.
+	DbSystemId string `json:"dbSystemId,omitempty"`
+	// The case-insensitive name that identifies the replication channel. Channel names
+	// must follow the rules defined for MySQL identifiers (https://dev.mysql.com/doc/refman/8.0/en/identifiers.html).
+	// The names of non-Deleted Channels must be unique for each DB System.
+	ChannelName string `json:"channelName,omitempty"`
+	// The username for the replication applier of the target MySQL DB System.
+	ApplierUsername string `json:"applierUsername,omitempty"`
+	// Specifies the amount of time, in seconds, that the channel waits before
+	// applying a transaction received from the source.
+	DelayInSeconds int `json:"delayInSeconds,omitempty"`
+	// Replication filter rules to be applied at the DB System Channel target.
+	Filters []ChannelTargetFilter `json:"filters,omitempty"`
+	// Specifies how a replication channel handles the creation and alteration of tables
+	// that do not have a primary key.
+	TablesWithoutPrimaryKeyHandling string `json:"tablesWithoutPrimaryKeyHandling,omitempty"`
+}
+
 // ChannelStatus defines the observed state of Channel.
 type ChannelStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
@@ -162,9 +202,9 @@ type ChannelStatus struct {
 	// The user-friendly name for the Channel. It does not have to be unique.
 	DisplayName string `json:"displayName,omitempty"`
 	// Whether the Channel has been enabled by the user.
-	IsEnabled bool          `json:"isEnabled,omitempty"`
-	Source    ChannelSource `json:"source,omitempty"`
-	Target    ChannelTarget `json:"target,omitempty"`
+	IsEnabled bool                       `json:"isEnabled,omitempty"`
+	Source    ChannelSourceObservedState `json:"source,omitempty"`
+	Target    ChannelTargetObservedState `json:"target,omitempty"`
 	// The state of the Channel.
 	LifecycleState string `json:"lifecycleState,omitempty"`
 	// The date and time the Channel was created, as described by RFC 3339 (https://tools.ietf.org/rfc/rfc3339).

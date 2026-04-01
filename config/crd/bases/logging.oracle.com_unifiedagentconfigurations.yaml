@@ -392,11 +392,6 @@ spec:
                                       "user"   : "-"
                                     }
                               type: object
-                          required:
-                          - expression
-                          - format
-                          - keys
-                          - patterns
                           type: object
                         paths:
                           description: Absolute paths for log source files. Wildcards
@@ -407,14 +402,9 @@ spec:
                         sourceType:
                           type: string
                       required:
-                      - channels
                       - name
-                      - paths
                       type: object
                     type: array
-                required:
-                - destination
-                - sources
                 type: object
             required:
             - compartmentId
@@ -482,20 +472,20 @@ spec:
                 description: The pipeline state.
                 type: string
               serviceConfiguration:
-                description: UnifiedAgentConfigurationServiceConfigurationObservedState
-                  defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.
+                description: UnifiedAgentConfigurationServiceConfiguration defines
+                  nested fields for UnifiedAgentConfiguration.ServiceConfiguration.
                 properties:
                   configurationType:
                     type: string
                   destination:
-                    description: UnifiedAgentConfigurationServiceConfigurationDestinationObservedState
+                    description: UnifiedAgentConfigurationServiceConfigurationDestination
                       defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Destination.
                     properties:
                       logObjectId:
                         description: The OCID of the resource.
                         type: string
                       operationalMetricsConfiguration:
-                        description: UnifiedAgentConfigurationServiceConfigurationDestinationOperationalMetricsConfigurationObservedState
+                        description: UnifiedAgentConfigurationServiceConfigurationDestinationOperationalMetricsConfiguration
                           defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Destination.OperationalMetricsConfiguration.
                         properties:
                           destination:
@@ -510,7 +500,7 @@ spec:
                             - compartmentId
                             type: object
                           source:
-                            description: UnifiedAgentConfigurationServiceConfigurationDestinationOperationalMetricsConfigurationSourceObservedState
+                            description: UnifiedAgentConfigurationServiceConfigurationDestinationOperationalMetricsConfigurationSource
                               defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Destination.OperationalMetricsConfiguration.Source.
                             properties:
                               metrics:
@@ -553,7 +543,7 @@ spec:
                   sources:
                     description: Logging source object.
                     items:
-                      description: UnifiedAgentConfigurationServiceConfigurationSourceObservedState
+                      description: UnifiedAgentConfigurationServiceConfigurationSource
                         defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Source.
                       properties:
                         channels:
@@ -567,7 +557,7 @@ spec:
                           description: Unique name for the source.
                           type: string
                         parser:
-                          description: UnifiedAgentConfigurationServiceConfigurationSourceParserObservedState
+                          description: UnifiedAgentConfigurationServiceConfigurationSourceParser
                             defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Source.Parser.
                           properties:
                             delimiter:
@@ -771,11 +761,6 @@ spec:
                                       "user"   : "-"
                                     }
                               type: object
-                          required:
-                          - expression
-                          - format
-                          - keys
-                          - patterns
                           type: object
                         paths:
                           description: Absolute paths for log source files. Wildcards
@@ -786,14 +771,9 @@ spec:
                         sourceType:
                           type: string
                       required:
-                      - channels
                       - name
-                      - paths
                       type: object
                     type: array
-                required:
-                - destination
-                - sources
                 type: object
               status:
                 properties:

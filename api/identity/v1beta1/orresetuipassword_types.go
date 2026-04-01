@@ -19,8 +19,6 @@ type OrResetUIPasswordSpec struct {
 // OrResetUIPasswordStatus defines the observed state of OrResetUIPassword.
 type OrResetUIPasswordStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
-	// The user's password for the Console.
-	Password string `json:"password,omitempty"`
 	// The OCID of the user.
 	UserId string `json:"userId,omitempty"`
 	// Date and time the password was created, in the format defined by RFC3339.

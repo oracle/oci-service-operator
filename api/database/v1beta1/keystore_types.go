@@ -40,17 +40,17 @@ type KeyStoreTypeDetails struct {
 	// +kubebuilder:validation:Optional
 	Type string `json:"type,omitempty"`
 	// The list of Oracle Key Vault connection IP addresses.
-	// +kubebuilder:validation:Required
-	ConnectionIps []string `json:"connectionIps"`
+	// +kubebuilder:validation:Optional
+	ConnectionIps []string `json:"connectionIps,omitempty"`
 	// The administrator username to connect to Oracle Key Vault
-	// +kubebuilder:validation:Required
-	AdminUsername string `json:"adminUsername"`
+	// +kubebuilder:validation:Optional
+	AdminUsername string `json:"adminUsername,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Oracle Cloud Infrastructure vault (https://docs.cloud.oracle.com/Content/KeyManagement/Concepts/keyoverview.htm#concepts). This parameter and `secretId` are required for Customer Managed Keys.
-	// +kubebuilder:validation:Required
-	VaultId string `json:"vaultId"`
+	// +kubebuilder:validation:Optional
+	VaultId string `json:"vaultId,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Oracle Cloud Infrastructure secret (https://docs.cloud.oracle.com/Content/KeyManagement/Concepts/keyoverview.htm#concepts).
-	// +kubebuilder:validation:Required
-	SecretId string `json:"secretId"`
+	// +kubebuilder:validation:Optional
+	SecretId string `json:"secretId,omitempty"`
 }
 
 // KeyStoreAssociatedDatabase defines nested fields for KeyStore.AssociatedDatabase.

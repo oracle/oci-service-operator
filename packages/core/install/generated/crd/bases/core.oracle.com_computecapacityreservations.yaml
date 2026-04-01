@@ -169,10 +169,114 @@ spec:
             description: ComputeCapacityReservationStatus defines the observed state
               of ComputeCapacityReservation.
             properties:
+              availabilityDomain:
+                description: |-
+                  The availability domain of the compute capacity reservation.
+                  Example: `Uocm:PHX-AD-1`
+                type: string
+              compartmentId:
+                description: |-
+                  The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment
+                  containing the compute capacity reservation.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a
+                  namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              displayName:
+                description: |-
+                  A user-friendly name. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no
+                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
               id:
                 description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the compute capacity reservation.
                 type: string
+              instanceReservationConfigs:
+                description: |-
+                  The capacity configurations for the capacity reservation.
+                  To use the reservation for the desired shape, specify the shape, count, and
+                  optionally the fault domain where you want this configuration.
+                items:
+                  description: ComputeCapacityReservationInstanceReservationConfig
+                    defines nested fields for ComputeCapacityReservation.InstanceReservationConfig.
+                  properties:
+                    clusterConfig:
+                      description: ComputeCapacityReservationInstanceReservationConfigClusterConfig
+                        defines nested fields for ComputeCapacityReservation.InstanceReservationConfig.ClusterConfig.
+                      properties:
+                        hpcIslandId:
+                          description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                            of the HPC island.
+                          type: string
+                        networkBlockIds:
+                          description: The list of OCIDs of the network blocks.
+                          items:
+                            type: string
+                          type: array
+                      required:
+                      - hpcIslandId
+                      type: object
+                    faultDomain:
+                      description: |-
+                        The fault domain to use for instances created using this capacity configuration.
+                        For more information, see Fault Domains (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/regions.htm#fault).
+                        If you do not specify the fault domain, the capacity is available for an instance
+                        that does not specify a fault domain. To change the fault domain for a reservation,
+                        delete the reservation and create a new one in the preferred fault domain.
+                        To retrieve a list of fault domains, use the `ListFaultDomains` operation in
+                        the Identity and Access Management Service API (https://docs.cloud.oracle.com/iaas/api/#/en/identity/20160918/).
+                        Example: `FAULT-DOMAIN-1`
+                      type: string
+                    instanceShape:
+                      description: |-
+                        The shape requested when launching instances using reserved capacity.
+                        The shape determines the number of CPUs, amount of memory,
+                        and other resources allocated to the instance.
+                        You can list all available shapes by calling ListComputeCapacityReservationInstanceShapes.
+                      type: string
+                    instanceShapeConfig:
+                      description: ComputeCapacityReservationInstanceReservationConfigInstanceShapeConfig
+                        defines nested fields for ComputeCapacityReservation.InstanceReservationConfig.InstanceShapeConfig.
+                      properties:
+                        memoryInGBs:
+                          description: The total amount of memory available to the
+                            instance, in gigabytes.
+                          type: number
+                        ocpus:
+                          description: The total number of OCPUs available to the
+                            instance.
+                          type: number
+                      type: object
+                    reservedCount:
+                      description: The total number of instances that can be launched
+                        from the capacity configuration.
+                      format: int64
+                      type: integer
+                  required:
+                  - instanceShape
+                  - reservedCount
+                  type: object
+                type: array
+              isDefaultReservation:
+                description: |-
+                  Whether this capacity reservation is the default.
+                  For more information, see Capacity Reservations (https://docs.cloud.oracle.com/iaas/Content/Compute/Tasks/reserve-capacity.htm#default).
+                type: boolean
               lifecycleState:
                 description: The current state of the compute capacity reservation.
                 type: string

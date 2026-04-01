@@ -52,11 +52,11 @@ type DbHomeSpec struct {
 	// +kubebuilder:validation:Optional
 	Source string `json:"source,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the DB system.
-	// +kubebuilder:validation:Required
-	DbSystemId string `json:"dbSystemId"`
+	// +kubebuilder:validation:Optional
+	DbSystemId string `json:"dbSystemId,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VM cluster.
-	// +kubebuilder:validation:Required
-	VmClusterId string `json:"vmClusterId"`
+	// +kubebuilder:validation:Optional
+	VmClusterId string `json:"vmClusterId,omitempty"`
 }
 
 // DbHomeDatabaseDbBackupConfigBackupDestinationDetail defines nested fields for DbHome.Database.DbBackupConfig.BackupDestinationDetail.

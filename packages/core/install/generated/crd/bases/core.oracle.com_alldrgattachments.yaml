@@ -55,6 +55,9 @@ spec:
           status:
             description: AllDrgAttachmentStatus defines the observed state of AllDrgAttachment.
             properties:
+              id:
+                description: The Oracle-assigned ID of the DRG attachment
+                type: string
               status:
                 properties:
                   conditions:

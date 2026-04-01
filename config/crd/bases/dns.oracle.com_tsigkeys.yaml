@@ -142,9 +142,6 @@ spec:
                 description: A globally unique domain name identifying the key for
                   a given pair of hosts.
                 type: string
-              secret:
-                description: A base64 string encoding the binary shared secret.
-                type: string
               self:
                 description: The canonical absolute URL of the resource.
                 type: string

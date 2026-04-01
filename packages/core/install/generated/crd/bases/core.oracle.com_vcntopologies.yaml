@@ -55,6 +55,14 @@ spec:
           status:
             description: VcnTopologyStatus defines the observed state of VcnTopology.
             properties:
+              entities:
+                description: Lists entities comprising the virtual network topology.
+                items:
+                  description: JSONValue preserves arbitrary JSON values inside generated
+                    CRD fields.
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                type: array
               limitedEntities:
                 description: |-
                   Lists entities that are limited during ingestion.
@@ -89,6 +97,8 @@ spec:
                     id2:
                       description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                         of the second entity in the relationship.
+                      type: string
+                    jsonData:
                       type: string
                     routeRuleDetails:
                       description: VcnTopologyRelationshipRouteRuleDetails defines

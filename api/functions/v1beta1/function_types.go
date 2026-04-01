@@ -67,8 +67,8 @@ type FunctionSourceDetails struct {
 	SourceType string `json:"sourceType,omitempty"`
 	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the PbfListing this
 	// function is sourced from.
-	// +kubebuilder:validation:Required
-	PbfListingId string `json:"pbfListingId"`
+	// +kubebuilder:validation:Optional
+	PbfListingId string `json:"pbfListingId,omitempty"`
 }
 
 // FunctionProvisionedConcurrencyConfig defines nested fields for Function.ProvisionedConcurrencyConfig.
@@ -78,8 +78,8 @@ type FunctionProvisionedConcurrencyConfig struct {
 	// +kubebuilder:validation:Optional
 	Strategy string `json:"strategy,omitempty"`
 	// Configuration specifying a constant amount of provisioned concurrency.
-	// +kubebuilder:validation:Required
-	Count int `json:"count"`
+	// +kubebuilder:validation:Optional
+	Count int `json:"count,omitempty"`
 }
 
 // FunctionTraceConfig defines nested fields for Function.TraceConfig.
@@ -87,29 +87,6 @@ type FunctionTraceConfig struct {
 	// Define if tracing is enabled for the resource.
 	// +kubebuilder:validation:Optional
 	IsEnabled bool `json:"isEnabled,omitempty"`
-}
-
-// FunctionSourceDetailsObservedState defines nested fields for Function.SourceDetails.
-type FunctionSourceDetailsObservedState struct {
-	// +kubebuilder:validation:Optional
-	JsonData string `json:"jsonData,omitempty"`
-	// +kubebuilder:validation:Optional
-	SourceType string `json:"sourceType,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the PbfListing this
-	// function is sourced from.
-	// +kubebuilder:validation:Required
-	PbfListingId string `json:"pbfListingId"`
-}
-
-// FunctionProvisionedConcurrencyConfigObservedState defines nested fields for Function.ProvisionedConcurrencyConfig.
-type FunctionProvisionedConcurrencyConfigObservedState struct {
-	// +kubebuilder:validation:Optional
-	JsonData string `json:"jsonData,omitempty"`
-	// +kubebuilder:validation:Optional
-	Strategy string `json:"strategy,omitempty"`
-	// Configuration specifying a constant amount of provisioned concurrency.
-	// +kubebuilder:validation:Required
-	Count int `json:"count"`
 }
 
 // FunctionStatus defines the observed state of Function.
@@ -132,8 +109,8 @@ type FunctionStatus struct {
 	// The image digest for the version of the image that will be pulled when invoking this function.
 	// If no value is specified, the digest currently associated with the image in the OCI Registry will be used.
 	// Example: `sha256:ca0eeb6fb05351dfc8759c20733c91def84cb8007aa89a5bf606bc8b315b9fc7`
-	ImageDigest   string                             `json:"imageDigest,omitempty"`
-	SourceDetails FunctionSourceDetailsObservedState `json:"sourceDetails,omitempty"`
+	ImageDigest   string                `json:"imageDigest,omitempty"`
+	SourceDetails FunctionSourceDetails `json:"sourceDetails,omitempty"`
 	// The processor shape (`GENERIC_X86`/`GENERIC_ARM`) on which to run functions in the application, extracted from the image manifest.
 	Shape string `json:"shape,omitempty"`
 	// Maximum usable memory for the function (MiB).
@@ -144,9 +121,9 @@ type FunctionStatus struct {
 	// The maximum size for all configuration keys and values is limited to 4KB. This is measured as the sum of octets necessary to represent each key and value in UTF-8.
 	Config map[string]string `json:"config,omitempty"`
 	// Timeout for executions of the function. Value in seconds.
-	TimeoutInSeconds             int                                               `json:"timeoutInSeconds,omitempty"`
-	ProvisionedConcurrencyConfig FunctionProvisionedConcurrencyConfigObservedState `json:"provisionedConcurrencyConfig,omitempty"`
-	TraceConfig                  FunctionTraceConfig                               `json:"traceConfig,omitempty"`
+	TimeoutInSeconds             int                                  `json:"timeoutInSeconds,omitempty"`
+	ProvisionedConcurrencyConfig FunctionProvisionedConcurrencyConfig `json:"provisionedConcurrencyConfig,omitempty"`
+	TraceConfig                  FunctionTraceConfig                  `json:"traceConfig,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
 	// For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`

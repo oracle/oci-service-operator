@@ -8,7 +8,6 @@ import (
 	"github.com/oracle/oci-service-operator/internal/generator"
 )
 
-//nolint:gocyclo // Snapshot-fixture setup is intentionally exhaustive so writable and linked outputs are asserted in one test.
 func TestPopulateSnapshotKeepsSelectedOutputsWritable(t *testing.T) {
 	t.Helper()
 
@@ -26,11 +25,9 @@ func TestPopulateSnapshotKeepsSelectedOutputsWritable(t *testing.T) {
 		filepath.Join(repoRoot, "internal", "registrations"),
 		filepath.Join(repoRoot, "internal", "validator"),
 	} {
-		if err := os.MkdirAll(dir, 0o755); err != nil {
-			t.Fatalf("MkdirAll(%q) error = %v", dir, err)
-		}
+		mustCoverageMkdirAll(t, dir)
 	}
-	for path, content := range map[string]string{
+	writeCoverageTestFiles(t, map[string]string{
 		filepath.Join(repoRoot, "go.mod"):                                             "module example.com/test\n",
 		filepath.Join(repoRoot, "go.sum"):                                             "",
 		filepath.Join(repoRoot, "validator_allowlist.yaml"):                           "{}\n",
@@ -38,51 +35,19 @@ func TestPopulateSnapshotKeepsSelectedOutputsWritable(t *testing.T) {
 		filepath.Join(repoRoot, "internal", "validator", "doc.go"):                    "package validator\n",
 		filepath.Join(repoRoot, "internal", "registrations", "database_generated.go"): "package registrations\n",
 		filepath.Join(repoRoot, "internal", "registrations", "events_generated.go"):   "package registrations\n",
-	} {
-		if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
-			t.Fatalf("WriteFile(%q) error = %v", path, err)
-		}
-	}
+	})
 
 	if err := populateSnapshot(repoRoot, snapshotRoot, []string{"database"}, []string{"database"}); err != nil {
 		t.Fatalf("populateSnapshot() error = %v", err)
 	}
 
-	formalPath := filepath.Join(snapshotRoot, "formal")
-	formalInfo, err := os.Lstat(formalPath)
-	if err != nil {
-		t.Fatalf("Lstat(%q) error = %v", formalPath, err)
-	}
-	if formalInfo.Mode()&os.ModeSymlink == 0 {
-		t.Fatalf("%q mode = %v, want symlink", formalPath, formalInfo.Mode())
-	}
-
-	if _, err := os.Lstat(filepath.Join(snapshotRoot, "internal", "registrations", "database_generated.go")); !os.IsNotExist(err) {
-		t.Fatalf("Lstat(selected registration) error = %v, want not exist", err)
-	}
-	eventsPath := filepath.Join(snapshotRoot, "internal", "registrations", "events_generated.go")
-	eventsInfo, err := os.Lstat(eventsPath)
-	if err != nil {
-		t.Fatalf("Lstat(%q) error = %v", eventsPath, err)
-	}
-	if eventsInfo.Mode()&os.ModeSymlink == 0 {
-		t.Fatalf("%q mode = %v, want symlink", eventsPath, eventsInfo.Mode())
-	}
-
-	if _, err := os.Lstat(filepath.Join(snapshotRoot, "pkg", "servicemanager", "database")); !os.IsNotExist(err) {
-		t.Fatalf("Lstat(selected service-manager root) error = %v, want not exist", err)
-	}
-	identityPath := filepath.Join(snapshotRoot, "pkg", "servicemanager", "identity")
-	identityInfo, err := os.Lstat(identityPath)
-	if err != nil {
-		t.Fatalf("Lstat(%q) error = %v", identityPath, err)
-	}
-	if identityInfo.Mode()&os.ModeSymlink == 0 {
-		t.Fatalf("%q mode = %v, want symlink", identityPath, identityInfo.Mode())
-	}
+	assertCoverageSymlink(t, filepath.Join(snapshotRoot, "formal"))
+	assertCoverageNotExists(t, filepath.Join(snapshotRoot, "internal", "registrations", "database_generated.go"))
+	assertCoverageSymlink(t, filepath.Join(snapshotRoot, "internal", "registrations", "events_generated.go"))
+	assertCoverageNotExists(t, filepath.Join(snapshotRoot, "pkg", "servicemanager", "database"))
+	assertCoverageSymlink(t, filepath.Join(snapshotRoot, "pkg", "servicemanager", "identity"))
 }
 
-//nolint:gocognit,gocyclo // This fixture covers the generator's manual-companion linking cases in one end-to-end snapshot scenario.
 func TestPreserveCheckedInCompanionFilesLinksManualCompanions(t *testing.T) {
 	t.Helper()
 
@@ -90,77 +55,116 @@ func TestPreserveCheckedInCompanionFilesLinksManualCompanions(t *testing.T) {
 	snapshotRoot := t.TempDir()
 
 	apiSourceDir := filepath.Join(repoRoot, "api", "database", "v1beta1")
-	if err := os.MkdirAll(apiSourceDir, 0o755); err != nil {
-		t.Fatalf("MkdirAll(%q) error = %v", apiSourceDir, err)
-	}
-	webhookPath := filepath.Join(apiSourceDir, "autonomousdatabase_webhook.go")
-	if err := os.WriteFile(webhookPath, []byte("package v1beta1\n"), 0o644); err != nil {
-		t.Fatalf("WriteFile(%q) error = %v", webhookPath, err)
-	}
+	mustCoverageMkdirAll(t, apiSourceDir)
+	apiCompanionPath := filepath.Join(apiSourceDir, "autonomousdatabase_helpers.go")
+	mustCoverageWriteFile(t, apiCompanionPath, "package v1beta1\n")
 	typesPath := filepath.Join(apiSourceDir, "autonomousdatabase_types.go")
-	if err := os.WriteFile(typesPath, []byte("package v1beta1\n"), 0o644); err != nil {
-		t.Fatalf("WriteFile(%q) error = %v", typesPath, err)
-	}
+	mustCoverageWriteFile(t, typesPath, "package v1beta1\n")
 
 	serviceManagerSourceDir := filepath.Join(repoRoot, "pkg", "servicemanager", "database", "autonomousdatabase")
-	if err := os.MkdirAll(serviceManagerSourceDir, 0o755); err != nil {
-		t.Fatalf("MkdirAll(%q) error = %v", serviceManagerSourceDir, err)
-	}
-	manualHelperPath := filepath.Join(serviceManagerSourceDir, "manual_helper.go")
-	if err := os.WriteFile(manualHelperPath, []byte("package autonomousdatabase\n"), 0o644); err != nil {
-		t.Fatalf("WriteFile(%q) error = %v", manualHelperPath, err)
-	}
+	mustCoverageMkdirAll(t, serviceManagerSourceDir)
+	adapterPath := filepath.Join(serviceManagerSourceDir, "autonomousdatabase_generated_client_adapter.go")
+	mustCoverageWriteFile(t, adapterPath, "package autonomousdatabase\n")
+	legacyServiceManagerPath := filepath.Join(serviceManagerSourceDir, "legacy_servicemanager.go")
+	mustCoverageWriteFile(t, legacyServiceManagerPath, "package autonomousdatabase\n")
 	generatedServiceClientPath := filepath.Join(serviceManagerSourceDir, "autonomousdatabase_serviceclient.go")
-	if err := os.WriteFile(generatedServiceClientPath, []byte("package autonomousdatabase\n"), 0o644); err != nil {
-		t.Fatalf("WriteFile(%q) error = %v", generatedServiceClientPath, err)
-	}
+	mustCoverageWriteFile(t, generatedServiceClientPath, "package autonomousdatabase\n")
 
 	snapshotServiceManagerDir := filepath.Join(snapshotRoot, "pkg", "servicemanager", "database", "autonomousdatabase")
-	if err := os.MkdirAll(snapshotServiceManagerDir, 0o755); err != nil {
-		t.Fatalf("MkdirAll(%q) error = %v", snapshotServiceManagerDir, err)
-	}
+	mustCoverageMkdirAll(t, snapshotServiceManagerDir)
 	snapshotGeneratedServiceClientPath := filepath.Join(snapshotServiceManagerDir, "autonomousdatabase_serviceclient.go")
-	if err := os.WriteFile(snapshotGeneratedServiceClientPath, []byte("package autonomousdatabase\n"), 0o644); err != nil {
-		t.Fatalf("WriteFile(%q) error = %v", snapshotGeneratedServiceClientPath, err)
-	}
+	mustCoverageWriteFile(t, snapshotGeneratedServiceClientPath, "package autonomousdatabase\n")
 
-	services := []generator.ServiceConfig{
+	packages := []*generator.PackageModel{
 		{
-			Group: "database",
+			Service: generator.ServiceConfig{Group: "database"},
+			Version: "v1beta1",
+			ServiceManagers: []generator.ServiceManagerModel{
+				{
+					PackagePath:            "database/autonomousdatabase",
+					ServiceClientFileName:  "autonomousdatabase_serviceclient.go",
+					ServiceManagerFileName: "autonomousdatabase_servicemanager.go",
+				},
+			},
 		},
 	}
-	if err := preserveCheckedInCompanionFiles(repoRoot, snapshotRoot, "v1beta1", services); err != nil {
+	if err := preserveCheckedInCompanionFiles(repoRoot, snapshotRoot, packages); err != nil {
 		t.Fatalf("preserveCheckedInCompanionFiles() error = %v", err)
 	}
 
-	snapshotWebhookPath := filepath.Join(snapshotRoot, "api", "database", "v1beta1", "autonomousdatabase_webhook.go")
-	webhookInfo, err := os.Lstat(snapshotWebhookPath)
-	if err != nil {
-		t.Fatalf("Lstat(%q) error = %v", snapshotWebhookPath, err)
-	}
-	if webhookInfo.Mode()&os.ModeSymlink == 0 {
-		t.Fatalf("%q mode = %v, want symlink", snapshotWebhookPath, webhookInfo.Mode())
-	}
+	snapshotAPICompanionPath := filepath.Join(snapshotRoot, "api", "database", "v1beta1", "autonomousdatabase_helpers.go")
+	assertCoverageSymlink(t, snapshotAPICompanionPath)
+	assertCoverageReadlink(t, snapshotAPICompanionPath, apiCompanionPath)
+	assertCoverageSymlink(t, filepath.Join(snapshotServiceManagerDir, "autonomousdatabase_generated_client_adapter.go"))
+	assertCoverageSymlink(t, filepath.Join(snapshotServiceManagerDir, "legacy_servicemanager.go"))
+	assertCoverageRegularFile(t, snapshotGeneratedServiceClientPath)
+	assertCoverageNotExists(t, filepath.Join(snapshotRoot, "api", "database", "v1beta1", "autonomousdatabase_types.go"))
+}
 
-	snapshotManualHelperPath := filepath.Join(snapshotServiceManagerDir, "manual_helper.go")
-	manualHelperInfo, err := os.Lstat(snapshotManualHelperPath)
-	if err != nil {
-		t.Fatalf("Lstat(%q) error = %v", snapshotManualHelperPath, err)
-	}
-	if manualHelperInfo.Mode()&os.ModeSymlink == 0 {
-		t.Fatalf("%q mode = %v, want symlink", snapshotManualHelperPath, manualHelperInfo.Mode())
-	}
+func writeCoverageTestFiles(t *testing.T, files map[string]string) {
+	t.Helper()
 
-	generatedInfo, err := os.Lstat(snapshotGeneratedServiceClientPath)
-	if err != nil {
-		t.Fatalf("Lstat(%q) error = %v", snapshotGeneratedServiceClientPath, err)
+	for path, content := range files {
+		mustCoverageWriteFile(t, path, content)
 	}
-	if generatedInfo.Mode()&os.ModeSymlink != 0 {
-		t.Fatalf("%q mode = %v, want regular file", snapshotGeneratedServiceClientPath, generatedInfo.Mode())
-	}
+}
 
-	snapshotTypesPath := filepath.Join(snapshotRoot, "api", "database", "v1beta1", "autonomousdatabase_types.go")
-	if _, err := os.Stat(snapshotTypesPath); !os.IsNotExist(err) {
-		t.Fatalf("Stat(%q) error = %v, want not exist", snapshotTypesPath, err)
+func mustCoverageMkdirAll(t *testing.T, path string) {
+	t.Helper()
+
+	if err := os.MkdirAll(path, 0o755); err != nil {
+		t.Fatalf("MkdirAll(%q) error = %v", path, err)
+	}
+}
+
+func mustCoverageWriteFile(t *testing.T, path string, content string) {
+	t.Helper()
+
+	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+		t.Fatalf("WriteFile(%q) error = %v", path, err)
+	}
+}
+
+func assertCoverageSymlink(t *testing.T, path string) {
+	t.Helper()
+
+	info, err := os.Lstat(path)
+	if err != nil {
+		t.Fatalf("Lstat(%q) error = %v", path, err)
+	}
+	if info.Mode()&os.ModeSymlink == 0 {
+		t.Fatalf("%q mode = %v, want symlink", path, info.Mode())
+	}
+}
+
+func assertCoverageReadlink(t *testing.T, path string, want string) {
+	t.Helper()
+
+	target, err := os.Readlink(path)
+	if err != nil {
+		t.Fatalf("Readlink(%q) error = %v", path, err)
+	}
+	if target != want {
+		t.Fatalf("Readlink(%q) = %q, want %q", path, target, want)
+	}
+}
+
+func assertCoverageRegularFile(t *testing.T, path string) {
+	t.Helper()
+
+	info, err := os.Lstat(path)
+	if err != nil {
+		t.Fatalf("Lstat(%q) error = %v", path, err)
+	}
+	if info.Mode()&os.ModeSymlink != 0 {
+		t.Fatalf("%q mode = %v, want regular file", path, info.Mode())
+	}
+}
+
+func assertCoverageNotExists(t *testing.T, path string) {
+	t.Helper()
+
+	if _, err := os.Lstat(path); !os.IsNotExist(err) {
+		t.Fatalf("Lstat(%q) error = %v, want not exist", path, err)
 	}
 }

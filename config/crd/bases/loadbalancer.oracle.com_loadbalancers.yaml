@@ -784,9 +784,6 @@ spec:
                                     *  **SUFFIX_MATCH** - The ending portion of the incoming URI path must exactly match the `attributeValue`
                                        string.
                                   type: string
-                              required:
-                              - attributeValue
-                              - operator
                               type: object
                             type: array
                           description:
@@ -936,11 +933,6 @@ spec:
                               *  value cannot contain patterns like `{variable_name}`. They are reserved for future extensions. Currently, such values are invalid.
                               Example: `example_value`
                             type: string
-                        required:
-                        - allowedMethods
-                        - conditions
-                        - header
-                        - value
                         type: object
                       type: array
                   required:
@@ -1121,8 +1113,7 @@ spec:
             properties:
               backendSets:
                 additionalProperties:
-                  description: LoadBalancerBackendSetsObservedState defines nested
-                    fields for LoadBalancer.BackendSets.
+                  description: LoadBalancerBackendSets defines nested fields for LoadBalancer.BackendSets.
                   properties:
                     backends:
                       items:
@@ -1578,8 +1569,7 @@ spec:
                 type: string
               listeners:
                 additionalProperties:
-                  description: LoadBalancerListenersObservedState defines nested fields
-                    for LoadBalancer.Listeners.
+                  description: LoadBalancerListeners defines nested fields for LoadBalancer.Listeners.
                   properties:
                     connectionConfiguration:
                       description: LoadBalancerListenersConnectionConfiguration defines
@@ -1915,9 +1905,6 @@ spec:
                                     *  **SUFFIX_MATCH** - The ending portion of the incoming URI path must exactly match the `attributeValue`
                                        string.
                                   type: string
-                              required:
-                              - attributeValue
-                              - operator
                               type: object
                             type: array
                           description:
@@ -2067,11 +2054,6 @@ spec:
                               *  value cannot contain patterns like `{variable_name}`. They are reserved for future extensions. Currently, such values are invalid.
                               Example: `example_value`
                             type: string
-                        required:
-                        - allowedMethods
-                        - conditions
-                        - header
-                        - value
                         type: object
                       type: array
                   required:

@@ -33,38 +33,29 @@ func (e ErrTargetExists) Error() string {
 	return fmt.Sprintf("target output %q already exists", e.Path)
 }
 
-//nolint:gocyclo // Package rendering keeps overwrite checks and per-resource writes in one flow for clearer error attribution.
+type sampleEntry struct {
+	order    int
+	fileName string
+	body     string
+	groupDNS string
+	version  string
+	kind     string
+	metadata string
+	spec     string
+}
+
+//nolint:gocyclo // Package rendering fans out across multiple optional generated surfaces.
 func (r *Renderer) RenderPackage(root string, pkg *PackageModel, overwrite bool) (string, error) {
-	outputDir := targetOutputDir(root, pkg)
-	if _, err := os.Stat(outputDir); err == nil && !overwrite {
-		return "", ErrTargetExists{Path: outputDir}
-	} else if err != nil && !os.IsNotExist(err) {
-		return "", fmt.Errorf("stat output dir %q: %w", outputDir, err)
-	}
-
-	if err := os.MkdirAll(outputDir, 0o755); err != nil {
-		return "", fmt.Errorf("create output dir %q: %w", outputDir, err)
-	}
-
-	groupVersionContent, err := renderGroupVersionFile(pkg)
+	outputDir, err := preparePackageOutputDir(root, pkg, overwrite)
 	if err != nil {
 		return "", err
 	}
-	if err := os.WriteFile(filepath.Join(outputDir, "groupversion_info.go"), []byte(groupVersionContent), 0o644); err != nil {
-		return "", fmt.Errorf("write groupversion_info.go for %s: %w", pkg.Service.Service, err)
+	if err := writeGroupVersionFile(outputDir, pkg); err != nil {
+		return "", err
 	}
-
-	for _, resource := range pkg.Resources {
-		resourceContent, err := renderResourceFile(pkg, resource)
-		if err != nil {
-			return "", err
-		}
-		filePath := filepath.Join(outputDir, resource.FileStem+"_types.go")
-		if err := os.WriteFile(filePath, []byte(resourceContent), 0o644); err != nil {
-			return "", fmt.Errorf("write %s for %s: %w", filepath.Base(filePath), pkg.Service.Service, err)
-		}
+	if err := writePackageResourceFiles(outputDir, pkg); err != nil {
+		return "", err
 	}
-
 	return outputDir, nil
 }
 
@@ -183,19 +174,66 @@ func (r *Renderer) RenderServiceManagers(root string, pkg *PackageModel, overwri
 	return nil
 }
 
-//nolint:gocognit,gocyclo // Sample rendering intentionally combines file cleanup, emission, and inventory rebuild in one pass.
-func (r *Renderer) RenderSamples(root string, cfg *Config, packages []*PackageModel) error {
-	type sampleEntry struct {
-		order    int
-		fileName string
-		body     string
-		groupDNS string
-		version  string
-		kind     string
-		metadata string
-		spec     string
+//nolint:gocognit,gocyclo // Sample rendering preserves ordering and kustomization updates across package groups.
+func (r *Renderer) RenderSamples(root string, packages []*PackageModel) error {
+	samples := collectSamples(packages)
+	if len(samples) == 0 {
+		return nil
 	}
+	sortSamples(samples)
+	samplesDir, err := ensureSamplesDir(root)
+	if err != nil {
+		return err
+	}
+	if err := cleanupGeneratedSampleFiles(samplesDir, packages); err != nil {
+		return err
+	}
+	resourceNames, err := writeSampleFiles(samplesDir, samples)
+	if err != nil {
+		return err
+	}
+	return writeSamplesKustomizationFile(samplesDir, resourceNames)
+}
 
+func preparePackageOutputDir(root string, pkg *PackageModel, overwrite bool) (string, error) {
+	outputDir := targetOutputDir(root, pkg)
+	if _, err := os.Stat(outputDir); err == nil && !overwrite {
+		return "", ErrTargetExists{Path: outputDir}
+	} else if err != nil && !os.IsNotExist(err) {
+		return "", fmt.Errorf("stat output dir %q: %w", outputDir, err)
+	}
+	if err := os.MkdirAll(outputDir, 0o755); err != nil {
+		return "", fmt.Errorf("create output dir %q: %w", outputDir, err)
+	}
+	return outputDir, nil
+}
+
+func writeGroupVersionFile(outputDir string, pkg *PackageModel) error {
+	groupVersionContent, err := renderGroupVersionFile(pkg)
+	if err != nil {
+		return err
+	}
+	if err := os.WriteFile(filepath.Join(outputDir, "groupversion_info.go"), []byte(groupVersionContent), 0o644); err != nil {
+		return fmt.Errorf("write groupversion_info.go for %s: %w", pkg.Service.Service, err)
+	}
+	return nil
+}
+
+func writePackageResourceFiles(outputDir string, pkg *PackageModel) error {
+	for _, resource := range pkg.Resources {
+		resourceContent, err := renderResourceFile(pkg, resource)
+		if err != nil {
+			return err
+		}
+		filePath := filepath.Join(outputDir, resource.FileStem+"_types.go")
+		if err := os.WriteFile(filePath, []byte(resourceContent), 0o644); err != nil {
+			return fmt.Errorf("write %s for %s: %w", filepath.Base(filePath), pkg.Service.Service, err)
+		}
+	}
+	return nil
+}
+
+func collectSamples(packages []*PackageModel) []sampleEntry {
 	var samples []sampleEntry
 	for _, pkg := range packages {
 		for _, resource := range pkg.Resources {
@@ -214,145 +252,54 @@ func (r *Renderer) RenderSamples(root string, cfg *Config, packages []*PackageMo
 			})
 		}
 	}
+	return samples
+}
 
-	if len(samples) == 0 {
-		return nil
-	}
-
+func sortSamples(samples []sampleEntry) {
 	sort.Slice(samples, func(i, j int) bool {
 		if samples[i].order == samples[j].order {
 			return samples[i].fileName < samples[j].fileName
 		}
 		return samples[i].order < samples[j].order
 	})
+}
 
+func ensureSamplesDir(root string) (string, error) {
 	samplesDir := filepath.Join(root, "config", "samples")
 	if err := os.MkdirAll(samplesDir, 0o755); err != nil {
-		return fmt.Errorf("create samples dir %q: %w", samplesDir, err)
+		return "", fmt.Errorf("create samples dir %q: %w", samplesDir, err)
 	}
+	return samplesDir, nil
+}
 
-	if err := cleanupGeneratedSampleFiles(samplesDir, packages); err != nil {
-		return err
-	}
-
+func writeSampleFiles(samplesDir string, samples []sampleEntry) ([]string, error) {
+	resourceNames := make([]string, 0, len(samples))
 	for _, sample := range samples {
 		content, err := renderSampleFile(sample.body, sample.groupDNS, sample.version, sample.kind, sample.metadata, sample.spec)
 		if err != nil {
-			return fmt.Errorf("render sample %s: %w", sample.fileName, err)
+			return nil, fmt.Errorf("render sample %s: %w", sample.fileName, err)
 		}
 		if err := os.WriteFile(filepath.Join(samplesDir, sample.fileName), []byte(content), 0o644); err != nil {
-			return fmt.Errorf("write sample %s: %w", sample.fileName, err)
+			return nil, fmt.Errorf("write sample %s: %w", sample.fileName, err)
 		}
+		resourceNames = append(resourceNames, sample.fileName)
 	}
+	return resourceNames, nil
+}
 
-	resourceNames, err := sampleKustomizationResources(samplesDir, cfg, packages)
+func writeSamplesKustomizationFile(samplesDir string, resourceNames []string) error {
+	orderedResources, err := orderedSampleResources(samplesDir, resourceNames)
 	if err != nil {
 		return err
 	}
-
-	kustomizationContent, err := renderSamplesKustomization(resourceNames)
+	kustomizationContent, err := renderSamplesKustomization(orderedResources)
 	if err != nil {
 		return fmt.Errorf("render samples kustomization: %w", err)
 	}
 	if err := os.WriteFile(filepath.Join(samplesDir, "kustomization.yaml"), []byte(kustomizationContent), 0o644); err != nil {
 		return fmt.Errorf("write samples kustomization: %w", err)
 	}
-
 	return nil
-}
-
-type sampleInventoryPrefix struct {
-	prefix string
-	order  int
-}
-
-type sampleInventoryResource struct {
-	fileName string
-	order    int
-}
-
-func sampleKustomizationResources(samplesDir string, cfg *Config, packages []*PackageModel) ([]string, error) {
-	prefixes := sampleInventoryPrefixes(cfg, packages)
-	if len(prefixes) == 0 {
-		return nil, nil
-	}
-
-	entries, err := os.ReadDir(samplesDir)
-	if err != nil {
-		return nil, fmt.Errorf("read samples dir %q: %w", samplesDir, err)
-	}
-
-	resources := make([]sampleInventoryResource, 0, len(entries))
-	for _, entry := range entries {
-		if entry.IsDir() || entry.Name() == "kustomization.yaml" || filepath.Ext(entry.Name()) != ".yaml" {
-			continue
-		}
-
-		order, ok := sampleInventoryOrder(entry.Name(), prefixes)
-		if !ok {
-			continue
-		}
-
-		resources = append(resources, sampleInventoryResource{
-			fileName: entry.Name(),
-			order:    order,
-		})
-	}
-
-	sort.Slice(resources, func(i, j int) bool {
-		if resources[i].order == resources[j].order {
-			return resources[i].fileName < resources[j].fileName
-		}
-		return resources[i].order < resources[j].order
-	})
-
-	resourceNames := make([]string, 0, len(resources))
-	for _, resource := range resources {
-		resourceNames = append(resourceNames, resource.fileName)
-	}
-
-	return resourceNames, nil
-}
-
-func sampleInventoryPrefixes(cfg *Config, packages []*PackageModel) []sampleInventoryPrefix {
-	seen := make(map[string]struct{})
-	prefixes := make([]sampleInventoryPrefix, 0, len(packages))
-
-	appendPrefix := func(prefix string, order int) {
-		if strings.TrimSpace(prefix) == "" {
-			return
-		}
-		if _, ok := seen[prefix]; ok {
-			return
-		}
-		seen[prefix] = struct{}{}
-		prefixes = append(prefixes, sampleInventoryPrefix{
-			prefix: prefix,
-			order:  order,
-		})
-	}
-
-	if cfg != nil {
-		for _, service := range cfg.Services {
-			appendPrefix(sampleFilePrefix(service.Group, service.VersionOrDefault(cfg.DefaultVersion)), service.SampleOrder)
-		}
-	}
-
-	for _, pkg := range packages {
-		appendPrefix(sampleFilePrefix(pkg.Service.Group, pkg.Version), pkg.SampleOrder)
-	}
-
-	return prefixes
-}
-
-func sampleInventoryOrder(name string, prefixes []sampleInventoryPrefix) (int, bool) {
-	for _, prefix := range prefixes {
-		if strings.HasPrefix(name, prefix.prefix) {
-			return prefix.order, true
-		}
-	}
-
-	return 0, false
 }
 
 func renderGroupVersionFile(pkg *PackageModel) (string, error) {
@@ -499,6 +446,87 @@ func cleanupGeneratedSampleFiles(samplesDir string, packages []*PackageModel) er
 	}
 
 	return nil
+}
+
+func orderedSampleResources(samplesDir string, generatedOrder []string) ([]string, error) {
+	existingOrder, err := readSampleKustomizationOrder(filepath.Join(samplesDir, "kustomization.yaml"))
+	if err != nil {
+		return nil, err
+	}
+
+	currentFiles, err := listSampleFiles(samplesDir)
+	if err != nil {
+		return nil, err
+	}
+
+	remaining := make(map[string]struct{}, len(currentFiles))
+	for _, name := range currentFiles {
+		remaining[name] = struct{}{}
+	}
+
+	ordered := make([]string, 0, len(currentFiles))
+	for _, name := range existingOrder {
+		if _, ok := remaining[name]; !ok {
+			continue
+		}
+		ordered = append(ordered, name)
+		delete(remaining, name)
+	}
+
+	for _, name := range generatedOrder {
+		if _, ok := remaining[name]; !ok {
+			continue
+		}
+		ordered = append(ordered, name)
+		delete(remaining, name)
+	}
+
+	var leftovers []string
+	for name := range remaining {
+		leftovers = append(leftovers, name)
+	}
+	sort.Strings(leftovers)
+	ordered = append(ordered, leftovers...)
+
+	return ordered, nil
+}
+
+func readSampleKustomizationOrder(path string) ([]string, error) {
+	content, err := os.ReadFile(path)
+	if os.IsNotExist(err) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("read sample kustomization %q: %w", path, err)
+	}
+
+	lines := strings.Split(string(content), "\n")
+	resources := make([]string, 0, len(lines))
+	for _, line := range lines {
+		trimmed := strings.TrimSpace(line)
+		if !strings.HasPrefix(trimmed, "- ") {
+			continue
+		}
+		resources = append(resources, strings.TrimSpace(strings.TrimPrefix(trimmed, "- ")))
+	}
+	return resources, nil
+}
+
+func listSampleFiles(samplesDir string) ([]string, error) {
+	entries, err := os.ReadDir(samplesDir)
+	if err != nil {
+		return nil, fmt.Errorf("read samples dir %q: %w", samplesDir, err)
+	}
+
+	files := make([]string, 0, len(entries))
+	for _, entry := range entries {
+		if entry.IsDir() || entry.Name() == "kustomization.yaml" || filepath.Ext(entry.Name()) != ".yaml" {
+			continue
+		}
+		files = append(files, entry.Name())
+	}
+	sort.Strings(files)
+	return files, nil
 }
 
 func matchesSamplePrefix(name string, prefixes []string) bool {
@@ -911,10 +939,10 @@ var new{{ .Kind }}ServiceClient = func(manager *{{ .ManagerTypeName }}) {{ .Clie
 {{- end }}
 {{- end }}
 	config := generatedruntime.Config[*{{ .APIImportAlias }}.{{ .Kind }}]{
-		Kind:    "{{ .Kind }}",
-		SDKName: "{{ .SDKName }}",
-		Log:     manager.Log,
-{{- if .UsesCredentialClient }}
+		Kind:             "{{ .Kind }}",
+		SDKName:          "{{ .SDKName }}",
+		Log:              manager.Log,
+{{- if or .UsesCredentialClient .NeedsCredentialClient }}
 		CredentialClient: manager.CredentialClient,
 {{- end }}
 {{- if .Semantics }}

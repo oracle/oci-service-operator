@@ -88,8 +88,8 @@ type DatabaseSpec struct {
 	DbVersion string `json:"dbVersion,omitempty"`
 	// +kubebuilder:validation:Optional
 	Source string `json:"source,omitempty"`
-	// +kubebuilder:validation:Required
-	Database DatabaseFields `json:"database"`
+	// +kubebuilder:validation:Optional
+	Database DatabaseFields `json:"database,omitempty"`
 }
 
 // DatabaseDbBackupConfigBackupDestinationDetail defines nested fields for Database.DbBackupConfig.BackupDestinationDetail.

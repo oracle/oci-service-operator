@@ -59,6 +59,11 @@ spec:
               drgId:
                 description: The `drgId` of the upgraded DRG.
                 type: string
+              sdkStatus:
+                description: |-
+                  The current upgrade status of the DRG attachment.
+                  This uses a distinct JSON name so it can coexist with the OSOK status envelope.
+                type: string
               status:
                 properties:
                   conditions:

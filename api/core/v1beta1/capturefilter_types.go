@@ -246,102 +246,6 @@ type CaptureFilterFlowLogCaptureFilterRule struct {
 	RuleAction string `json:"ruleAction,omitempty"`
 }
 
-// CaptureFilterVtapCaptureFilterRuleTcpOptionsObservedState defines nested fields for CaptureFilter.VtapCaptureFilterRule.TcpOptions.
-type CaptureFilterVtapCaptureFilterRuleTcpOptionsObservedState struct {
-	// +kubebuilder:validation:Optional
-	DestinationPortRange CaptureFilterVtapCaptureFilterRuleTcpOptionsDestinationPortRange `json:"destinationPortRange,omitempty"`
-	// +kubebuilder:validation:Optional
-	SourcePortRange CaptureFilterVtapCaptureFilterRuleTcpOptionsSourcePortRange `json:"sourcePortRange,omitempty"`
-}
-
-// CaptureFilterVtapCaptureFilterRuleUdpOptionsObservedState defines nested fields for CaptureFilter.VtapCaptureFilterRule.UdpOptions.
-type CaptureFilterVtapCaptureFilterRuleUdpOptionsObservedState struct {
-	// +kubebuilder:validation:Optional
-	DestinationPortRange CaptureFilterVtapCaptureFilterRuleUdpOptionsDestinationPortRange `json:"destinationPortRange,omitempty"`
-	// +kubebuilder:validation:Optional
-	SourcePortRange CaptureFilterVtapCaptureFilterRuleUdpOptionsSourcePortRange `json:"sourcePortRange,omitempty"`
-}
-
-// CaptureFilterVtapCaptureFilterRuleObservedState defines nested fields for CaptureFilter.VtapCaptureFilterRule.
-type CaptureFilterVtapCaptureFilterRuleObservedState struct {
-	// The traffic direction the VTAP is configured to mirror.
-	// +kubebuilder:validation:Required
-	TrafficDirection string `json:"trafficDirection"`
-	// Include or exclude packets meeting this definition from mirrored traffic.
-	// +kubebuilder:validation:Optional
-	RuleAction string `json:"ruleAction,omitempty"`
-	// Traffic from this CIDR block to the VTAP source will be mirrored to the VTAP target.
-	// +kubebuilder:validation:Optional
-	SourceCidr string `json:"sourceCidr,omitempty"`
-	// Traffic sent to this CIDR block through the VTAP source will be mirrored to the VTAP target.
-	// +kubebuilder:validation:Optional
-	DestinationCidr string `json:"destinationCidr,omitempty"`
-	// The transport protocol used in the filter. If do not choose a protocol, all protocols will be used in the filter.
-	// Supported options are:
-	//   * 1 = ICMP
-	//   * 6 = TCP
-	//   * 17 = UDP
-	// +kubebuilder:validation:Optional
-	Protocol string `json:"protocol,omitempty"`
-	// +kubebuilder:validation:Optional
-	IcmpOptions CaptureFilterVtapCaptureFilterRuleIcmpOptions `json:"icmpOptions,omitempty"`
-	// +kubebuilder:validation:Optional
-	TcpOptions CaptureFilterVtapCaptureFilterRuleTcpOptionsObservedState `json:"tcpOptions,omitempty"`
-	// +kubebuilder:validation:Optional
-	UdpOptions CaptureFilterVtapCaptureFilterRuleUdpOptionsObservedState `json:"udpOptions,omitempty"`
-}
-
-// CaptureFilterFlowLogCaptureFilterRuleTcpOptionsObservedState defines nested fields for CaptureFilter.FlowLogCaptureFilterRule.TcpOptions.
-type CaptureFilterFlowLogCaptureFilterRuleTcpOptionsObservedState struct {
-	// +kubebuilder:validation:Optional
-	DestinationPortRange CaptureFilterFlowLogCaptureFilterRuleTcpOptionsDestinationPortRange `json:"destinationPortRange,omitempty"`
-	// +kubebuilder:validation:Optional
-	SourcePortRange CaptureFilterFlowLogCaptureFilterRuleTcpOptionsSourcePortRange `json:"sourcePortRange,omitempty"`
-}
-
-// CaptureFilterFlowLogCaptureFilterRuleUdpOptionsObservedState defines nested fields for CaptureFilter.FlowLogCaptureFilterRule.UdpOptions.
-type CaptureFilterFlowLogCaptureFilterRuleUdpOptionsObservedState struct {
-	// +kubebuilder:validation:Optional
-	DestinationPortRange CaptureFilterFlowLogCaptureFilterRuleUdpOptionsDestinationPortRange `json:"destinationPortRange,omitempty"`
-	// +kubebuilder:validation:Optional
-	SourcePortRange CaptureFilterFlowLogCaptureFilterRuleUdpOptionsSourcePortRange `json:"sourcePortRange,omitempty"`
-}
-
-// CaptureFilterFlowLogCaptureFilterRuleObservedState defines nested fields for CaptureFilter.FlowLogCaptureFilterRule.
-type CaptureFilterFlowLogCaptureFilterRuleObservedState struct {
-	// Indicates whether a VCN flow log capture filter rule is enabled.
-	// +kubebuilder:validation:Optional
-	IsEnabled bool `json:"isEnabled,omitempty"`
-	// A lower number indicates a higher priority, range 0-9. Each rule must have a distinct priority.
-	// +kubebuilder:validation:Optional
-	Priority int `json:"priority,omitempty"`
-	// Sampling interval as `1` of `X`, where `X` is an integer not greater than `100000`.
-	// +kubebuilder:validation:Optional
-	SamplingRate int `json:"samplingRate,omitempty"`
-	// Traffic from this CIDR will be captured in the VCN flow log.
-	// +kubebuilder:validation:Optional
-	SourceCidr string `json:"sourceCidr,omitempty"`
-	// Traffic to this CIDR will be captured in the VCN flow log.
-	// +kubebuilder:validation:Optional
-	DestinationCidr string `json:"destinationCidr,omitempty"`
-	// The transport protocol the filter uses.
-	// +kubebuilder:validation:Optional
-	Protocol string `json:"protocol,omitempty"`
-	// +kubebuilder:validation:Optional
-	IcmpOptions CaptureFilterFlowLogCaptureFilterRuleIcmpOptions `json:"icmpOptions,omitempty"`
-	// +kubebuilder:validation:Optional
-	TcpOptions CaptureFilterFlowLogCaptureFilterRuleTcpOptionsObservedState `json:"tcpOptions,omitempty"`
-	// +kubebuilder:validation:Optional
-	UdpOptions CaptureFilterFlowLogCaptureFilterRuleUdpOptionsObservedState `json:"udpOptions,omitempty"`
-	// Type or types of VCN flow logs to store. `ALL` includes records for both accepted traffic and
-	// rejected traffic.
-	// +kubebuilder:validation:Optional
-	FlowLogType string `json:"flowLogType,omitempty"`
-	// Include or exclude a `ruleAction` object.
-	// +kubebuilder:validation:Optional
-	RuleAction string `json:"ruleAction,omitempty"`
-}
-
 // CaptureFilterStatus defines the observed state of CaptureFilter.
 type CaptureFilterStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
@@ -368,9 +272,9 @@ type CaptureFilterStatus struct {
 	// Example: `2021-08-25T21:10:29.600Z`
 	TimeCreated string `json:"timeCreated,omitempty"`
 	// The set of rules governing what traffic a VTAP mirrors.
-	VtapCaptureFilterRules []CaptureFilterVtapCaptureFilterRuleObservedState `json:"vtapCaptureFilterRules,omitempty"`
+	VtapCaptureFilterRules []CaptureFilterVtapCaptureFilterRule `json:"vtapCaptureFilterRules,omitempty"`
 	// The set of rules governing what traffic the VCN flow log collects.
-	FlowLogCaptureFilterRules []CaptureFilterFlowLogCaptureFilterRuleObservedState `json:"flowLogCaptureFilterRules,omitempty"`
+	FlowLogCaptureFilterRules []CaptureFilterFlowLogCaptureFilterRule `json:"flowLogCaptureFilterRules,omitempty"`
 }
 
 // +kubebuilder:object:root=true

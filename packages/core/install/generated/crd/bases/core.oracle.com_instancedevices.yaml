@@ -55,6 +55,12 @@ spec:
           status:
             description: InstanceDeviceStatus defines the observed state of InstanceDevice.
             properties:
+              isAvailable:
+                description: The flag denoting whether device is available.
+                type: boolean
+              name:
+                description: The device name.
+                type: string
               status:
                 properties:
                   conditions:

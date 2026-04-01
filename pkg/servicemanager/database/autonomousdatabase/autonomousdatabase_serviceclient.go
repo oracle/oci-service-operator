@@ -41,7 +41,7 @@ var newAutonomousDatabaseServiceClient = func(manager *AutonomousDatabaseService
 		CredentialClient: manager.CredentialClient,
 		Semantics: &generatedruntime.Semantics{
 			FormalService:     "database",
-			FormalSlug:        "autonomousdatabase",
+			FormalSlug:        "databaseautonomousdatabase",
 			StatusProjection:  "required",
 			SecretSideEffects: "none",
 			FinalizerPolicy:   "retain-until-confirmed-delete",
@@ -57,7 +57,7 @@ var newAutonomousDatabaseServiceClient = func(manager *AutonomousDatabaseService
 			},
 			List: &generatedruntime.ListSemantics{
 				ResponseItemsField: "Items",
-				MatchFields:        []string{"autonomousContainerDatabaseId", "compartmentId", "dbVersion", "dbWorkload", "displayName", "infrastructureType", "isDataGuardEnabled", "isFreeTier", "isRefreshableClone", "isResourcePoolLeader", "lifecycleStateNotEqualTo", "resourcePoolLeaderId", "state"},
+				MatchFields:        []string{"compartmentId", "displayName"},
 			},
 			Mutation: generatedruntime.MutationSemantics{
 				Mutable:       []string{"adminPassword", "arePrimaryWhitelistedIpsUsed", "autoRefreshFrequencyInSeconds", "autoRefreshPointLagInSeconds", "autonomousDatabaseMaintenanceWindow.dayOfWeek.name", "autonomousDatabaseMaintenanceWindow.maintenanceEndTime", "autonomousDatabaseMaintenanceWindow.maintenanceStartTime", "autonomousMaintenanceScheduleType", "backupRetentionPeriodInDays", "byolComputeCountLimit", "compartmentId", "computeCount", "computeModel", "cpuCoreCount", "customerContacts.email", "dataSafeStatus", "dataStorageSizeInGb", "dataStorageSizeInTbs", "databaseEdition", "databaseManagementStatus", "dbName", "dbToolsDetails.computeCount", "dbToolsDetails.isEnabled", "dbToolsDetails.maxIdleTimeInMinutes", "dbToolsDetails.name", "dbVersion", "dbWorkload", "definedTags", "displayName", "enableDeleteScheduledOperations", "encryptionKey.arnRole", "encryptionKey.autonomousDatabaseProvider", "encryptionKey.certificateDirectoryName", "encryptionKey.certificateId", "encryptionKey.directoryName", "encryptionKey.externalId", "encryptionKey.keyArn", "encryptionKey.keyName", "encryptionKey.keyRing", "encryptionKey.kmsKeyId", "encryptionKey.kmsRestEndpoint", "encryptionKey.location", "encryptionKey.okvKmsKey", "encryptionKey.okvUri", "encryptionKey.project", "encryptionKey.serviceEndpointUri", "encryptionKey.vaultId", "encryptionKey.vaultUri", "freeformTags", "inMemoryPercentage", "isAccessControlEnabled", "isAutoScalingEnabled", "isAutoScalingForStorageEnabled", "isBackupRetentionLocked", "isDataGuardEnabled", "isDevTier", "isDisableDbVersionUpgradeSchedule", "isDisconnectPeer", "isFreeTier", "isLocalDataGuardEnabled", "isMtlsConnectionRequired", "isRefreshableClone", "isReplicateAutomaticBackups", "isScheduleDbVersionUpgradeToEarliest", "isShrinkOnly", "keyVersionId", "kmsKeyId", "licenseModel", "localAdgAutoFailoverMaxDataLossLimit", "localAdgResourcePoolLeaderId", "longTermBackupSchedule.isDisabled", "longTermBackupSchedule.repeatCadence", "longTermBackupSchedule.retentionPeriodInDays", "longTermBackupSchedule.timeOfBackup", "maxCpuCoreCount", "nsgIds", "ocpuCount", "openMode", "operationsInsightsStatus", "peerDbId", "permissionLevel", "privateEndpointIp", "privateEndpointLabel", "refreshableMode", "resourcePoolLeaderId", "resourcePoolSummary.availableStorageCapacityInTbs", "resourcePoolSummary.isDisabled", "resourcePoolSummary.poolSize", "resourcePoolSummary.poolStorageSizeInTbs", "rotateKeyTrigger", "scheduledOperations.dayOfWeek.name", "scheduledOperations.scheduledStartTime", "scheduledOperations.scheduledStopTime", "secretId", "secretVersionNumber", "securityAttributes", "standbyWhitelistedIps", "state", "subnetId", "subscriptionId", "switchoverTo", "switchoverToRemotePeerId", "timeMaintenancePauseUntil", "timeOfAutoRefreshStart", "timeScheduledDbVersionUpgrade", "transportableTablespace.ttsBundleUrl", "vanityUrlDetails.apiGatewayId", "vanityUrlDetails.isDisabled", "vanityUrlDetails.vanityUrlHostName", "vaultId", "whitelistedIps"},
@@ -65,24 +65,24 @@ var newAutonomousDatabaseServiceClient = func(manager *AutonomousDatabaseService
 				ConflictsWith: map[string][]string{"isShrinkOnly": []string{"shrinkAdbTrigger"}},
 			},
 			Hooks: generatedruntime.HookSet{
-				Create: []generatedruntime.Hook{{Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "database", Action: "CREATED"}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "database", Action: "UPDATED"}},
-				Update: []generatedruntime.Hook{{Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "database", Action: "UPDATED"}},
+				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+				Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
 				Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
 			},
 			CreateFollowUp: generatedruntime.FollowUpSemantics{
 				Strategy: "read-after-write",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "database", Action: "CREATED"}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "database", Action: "UPDATED"}},
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
 			},
 			UpdateFollowUp: generatedruntime.FollowUpSemantics{
 				Strategy: "read-after-write",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "database", Action: "UPDATED"}},
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
 			},
 			DeleteFollowUp: generatedruntime.FollowUpSemantics{
 				Strategy: "confirm-delete",
 				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
 			},
-			AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{{Phase: "create", MethodName: "UpdateAutonomousDatabase", RequestTypeName: "database.UpdateAutonomousDatabaseRequest", ResponseTypeName: "database.UpdateAutonomousDatabaseResponse"}, {Phase: "update", MethodName: "ChangeAutonomousDatabaseCompartment", RequestTypeName: "database.ChangeAutonomousDatabaseCompartmentRequest", ResponseTypeName: "database.ChangeAutonomousDatabaseCompartmentResponse"}, {Phase: "update", MethodName: "ChangeAutonomousDatabaseSubscription", RequestTypeName: "database.ChangeAutonomousDatabaseSubscriptionRequest", ResponseTypeName: "database.ChangeAutonomousDatabaseSubscriptionResponse"}, {Phase: "update", MethodName: "ConfigureAutonomousDatabaseVaultKey", RequestTypeName: "database.ConfigureAutonomousDatabaseVaultKeyRequest", ResponseTypeName: "database.ConfigureAutonomousDatabaseVaultKeyResponse"}, {Phase: "update", MethodName: "DeregisterAutonomousDatabaseDataSafe", RequestTypeName: "database.DeregisterAutonomousDatabaseDataSafeRequest", ResponseTypeName: "database.DeregisterAutonomousDatabaseDataSafeResponse"}, {Phase: "update", MethodName: "DisableAutonomousDatabaseManagement", RequestTypeName: "database.DisableAutonomousDatabaseManagementRequest", ResponseTypeName: "database.DisableAutonomousDatabaseManagementResponse"}, {Phase: "update", MethodName: "DisableAutonomousDatabaseOperationsInsights", RequestTypeName: "database.DisableAutonomousDatabaseOperationsInsightsRequest", ResponseTypeName: "database.DisableAutonomousDatabaseOperationsInsightsResponse"}, {Phase: "update", MethodName: "EnableAutonomousDatabaseManagement", RequestTypeName: "database.EnableAutonomousDatabaseManagementRequest", ResponseTypeName: "database.EnableAutonomousDatabaseManagementResponse"}, {Phase: "update", MethodName: "EnableAutonomousDatabaseOperationsInsights", RequestTypeName: "database.EnableAutonomousDatabaseOperationsInsightsRequest", ResponseTypeName: "database.EnableAutonomousDatabaseOperationsInsightsResponse"}, {Phase: "update", MethodName: "RegisterAutonomousDatabaseDataSafe", RequestTypeName: "database.RegisterAutonomousDatabaseDataSafeRequest", ResponseTypeName: "database.RegisterAutonomousDatabaseDataSafeResponse"}},
-			Unsupported:         []generatedruntime.UnsupportedSemantic{{Category: "bind-versus-create", StopCondition: "Formal semantics can resolve an existing AutonomousDatabase through ListAutonomousDatabases before create, using the shared generated-runtime identity decision instead of blindly creating when no OCI ID is tracked."}, {Category: "list-lookup", StopCondition: "Formal semantics encode the current ListAutonomousDatabases filters (`compartmentId`, `autonomousContainerDatabaseId`, `displayName`, lifecycle state) and the lifecycle-sensitive matching used for bind, update, and delete."}, {Category: "mutation-policy", StopCondition: "Formal semantics classify the generated AutonomousDatabase mutable and force-new fields into create-only, mutable, or rejected-on-update behavior before runtime promotion."}, {Category: "waiter-work-request", StopCondition: "AutonomousDatabase create, update, and delete waits have one shared formal answer for generated-runtime completion instead of remaining implicit in the current read-after-write follow-up."}},
+			AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+			Unsupported:         []generatedruntime.UnsupportedSemantic{},
 		},
 		Create: &generatedruntime.Operation{
 			NewRequest: func() any { return &databasesdk.CreateAutonomousDatabaseRequest{} },

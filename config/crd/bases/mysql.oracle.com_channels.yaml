@@ -148,8 +148,6 @@ spec:
                         type: string
                       jsonData:
                         type: string
-                    required:
-                    - contents
                     type: object
                   sslMode:
                     description: The SSL mode of the Channel.
@@ -160,11 +158,6 @@ spec:
                       The username has a maximum length of 96 characters. For more information,
                       please see the MySQL documentation (https://dev.mysql.com/doc/refman/8.0/en/change-master-to.html)
                     type: string
-                required:
-                - hostname
-                - password
-                - sslMode
-                - username
                 type: object
               target:
                 description: ChannelTarget defines nested fields for Channel.Target.
@@ -219,8 +212,6 @@ spec:
                     type: string
                   targetType:
                     type: string
-                required:
-                - dbSystemId
                 type: object
             required:
             - source
@@ -268,7 +259,8 @@ spec:
                 description: The state of the Channel.
                 type: string
               source:
-                description: ChannelSource defines nested fields for Channel.Source.
+                description: ChannelSourceObservedState defines nested fields for
+                  Channel.Source.
                 properties:
                   anonymousTransactionsHandling:
                     description: ChannelSourceAnonymousTransactionsHandling defines
@@ -304,13 +296,6 @@ spec:
                     type: string
                   jsonData:
                     type: string
-                  password:
-                    description: |-
-                      The password for the replication user. The password must be
-                      between 8 and 32 characters long, and must contain at least 1
-                      numeric character, 1 lowercase character, 1 uppercase character,
-                      and 1 special (nonalphanumeric) character.
-                    type: string
                   port:
                     description: The port the source MySQL instance listens on.
                     type: integer
@@ -328,8 +313,6 @@ spec:
                         type: string
                       jsonData:
                         type: string
-                    required:
-                    - contents
                     type: object
                   sslMode:
                     description: The SSL mode of the Channel.
@@ -340,11 +323,6 @@ spec:
                       The username has a maximum length of 96 characters. For more information,
                       please see the MySQL documentation (https://dev.mysql.com/doc/refman/8.0/en/change-master-to.html)
                     type: string
-                required:
-                - hostname
-                - password
-                - sslMode
-                - username
                 type: object
               status:
                 properties:
@@ -389,7 +367,8 @@ spec:
                     type: string
                 type: object
               target:
-                description: ChannelTarget defines nested fields for Channel.Target.
+                description: ChannelTargetObservedState defines nested fields for
+                  Channel.Target.
                 properties:
                   applierUsername:
                     description: The username for the replication applier of the target
@@ -402,7 +381,7 @@ spec:
                       The names of non-Deleted Channels must be unique for each DB System.
                     type: string
                   dbSystemId:
-                    description: The OCID of the target DB System.
+                    description: The OCID of the source DB System.
                     type: string
                   delayInSeconds:
                     description: |-
@@ -437,12 +416,10 @@ spec:
                   tablesWithoutPrimaryKeyHandling:
                     description: |-
                       Specifies how a replication channel handles the creation and alteration of tables
-                      that do not have a primary key. The default value is set to ALLOW.
+                      that do not have a primary key.
                     type: string
                   targetType:
                     type: string
-                required:
-                - dbSystemId
                 type: object
               timeCreated:
                 description: The date and time the Channel was created, as described

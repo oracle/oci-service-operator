@@ -197,8 +197,8 @@ spec:
                 description: The DRG attachment's current state.
                 type: string
               networkDetails:
-                description: DrgAttachmentNetworkDetailsObservedState defines nested
-                  fields for DrgAttachment.NetworkDetails.
+                description: DrgAttachmentNetworkDetails defines nested fields for
+                  DrgAttachment.NetworkDetails.
                 properties:
                   id:
                     description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)

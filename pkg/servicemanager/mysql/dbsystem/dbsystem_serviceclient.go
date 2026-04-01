@@ -82,7 +82,7 @@ var newDbSystemServiceClient = func(manager *DbSystemServiceManager) DbSystemSer
 				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
 			},
 			AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
-			Unsupported:         []generatedruntime.UnsupportedSemantic{{Category: "bind-versus-create", StopCondition: "Formal semantics can resolve an existing DbSystem through ListDbSystems before create, using the shared generated-runtime identity decision instead of blindly creating when no OCI ID is tracked."}, {Category: "list-lookup", StopCondition: "Formal semantics encode the current ListDbSystems filters (`compartmentId`, `displayName`, `dbSystemId`, lifecycle state) and the lifecycle-sensitive matching used for bind, update, and delete."}, {Category: "mutation-policy", StopCondition: "Formal semantics classify the generated DbSystem mutable and force-new fields into create-only, mutable, or rejected-on-update behavior before runtime promotion."}, {Category: "waiter-work-request", StopCondition: "DbSystem create, update, and delete waits have one shared formal answer for generated-runtime completion instead of remaining implicit in the current read-after-write follow-up."}},
+			Unsupported:         []generatedruntime.UnsupportedSemantic{},
 		},
 		Create: &generatedruntime.Operation{
 			NewRequest: func() any { return &mysqlsdk.CreateDbSystemRequest{} },

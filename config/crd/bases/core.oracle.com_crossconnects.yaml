@@ -216,8 +216,8 @@ spec:
                   is installed.
                 type: string
               macsecProperties:
-                description: CrossConnectMacsecPropertiesObservedState defines nested
-                  fields for CrossConnect.MacsecProperties.
+                description: CrossConnectMacsecProperties defines nested fields for
+                  CrossConnect.MacsecProperties.
                 properties:
                   encryptionCipher:
                     description: Type of encryption cipher suite to use for the MACsec
