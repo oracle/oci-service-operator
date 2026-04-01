@@ -54,25 +54,23 @@ endif
 partition "Ready and Drift Handling" {
 :Compare live OCI state against the imported\nfield surface;
 if ("Force-new or conflicting drift detected?") then (yes)
-:Reject drift before OCI mutation for force-new\nfields name, partitions, retention_in_hours\nand conflicts compartment_id ->\nstream_pool_id, stream_pool_id ->\ncompartment_id;
+:Reject drift before OCI mutation for force-new\nfields name, partitions, retention_in_hours;
 stop
 endif
-:Enforce conflictsWith rules compartment_id ->\nstream_pool_id, stream_pool_id ->\ncompartment_id before any OCI mutation;
 if ("Supported mutable drift detected?") then (yes)
-:Apply ChangeStreamCompartment, UpdateStream\nonly for mutable fields compartment_id,\ndefined_tags, freeform_tags, stream_pool_id;
+:Apply UpdateStream only for mutable fields\ndefined_tags, freeform_tags, stream_pool_id;
 else (no)
 :Skip the no-op mutation path;
 endif
 :Run provider helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource,\ntfresource.WaitForUpdatedState;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
-:Apply repo-authored secret policy ready-only\nwrites after ACTIVE;
+:Apply repo-authored secret policy ready-only;
 if ("Secret sync succeeds?") then (yes)
 :Return success for the ACTIVE success state;
 else (no)
 :Block successful completion until Secret sync\nsucceeds;
 endif
-:Project manual status and finalizer policy\nnone;
+:Project required status and finalizer policy\nnone;
 :Requeue on provisioning, updating, terminating;
-:Keep promotion blocked on bind-versus-create,\ndelete-confirmation, endpoint-materialization,\nlegacy-adapter, list-lookup (+2 more);
 }
 endif
 stop
@@ -85,36 +83,43 @@ status-projection details here.
 Controller-local activity diagrams add
 list-lookup hints, secret policies, delete
 handling, and open formal gaps.
-archetype batch: Legacy-adapter controllers
-specialize the shared reconcile path while
-explicit gaps still block generated promotion.
+archetype batch: Generated service-manager
+controllers specialize the shared reconcile path
+with formal runtime ownership.
 service: streaming
 slug: stream
 kind: Stream
-archetype: legacy-adapter
-status/finalizer: manual / none
+archetype: generated-service-manager
+status/finalizer: required / none
 requeue: provisioning, updating, terminating
 provider states: create CREATING; update
 UPDATING; delete DELETING
-supported drift: compartment_id, defined_tags,
-freeform_tags, stream_pool_id
+supported drift: defined_tags, freeform_tags,
+stream_pool_id
 reject before mutate: force-new fields name,
-partitions, retention_in_hours and conflicts
-compartment_id -> stream_pool_id, stream_pool_id
--> compartment_id
+partitions, retention_in_hours
 list lookup: oci_streaming_streams filters
 compartment_id, id, name, state (+1 more)
-conflicts: compartment_id -> stream_pool_id,
-stream_pool_id -> compartment_id
-open gaps: bind-versus-create,
-delete-confirmation, endpoint-materialization,
-legacy-adapter, list-lookup (+2 more)
-Create or bind selection depends on name-based
-list lookup with optional pool and compartment
-filters.
-Endpoint secret materialization happens only
-after ACTIVE.
-Delete is best-effort today; DELETING is treated
-as sufficient for cleanup and finalizer removal.
+conflicts: none
+open gaps: none
+The generated runtime reuses existing streams
+before create by listing on name plus the
+optional pool and compartment filters, while
+delete-phase lookup can still resolve
+terminating or failed matches when no OCI
+identifier is recorded.
+A narrow package-local companion writes or
+updates the ready-only endpoint secret after
+ACTIVE when the same-name Secret already carries
+the current Stream UID ownership label, or when
+a legacy unlabeled Secret already matches the
+desired ready-only payload so reconcile can
+stamp the current UID label before future
+updates. Guarded update or delete revalidates
+the full Secret snapshot before mutating, and
+best-effort delete cleanup skips missing or
+unowned Secrets.
+Delete remains best-effort; DELETING or DELETED
+is sufficient for finalizer removal.
 end note
 @enduml

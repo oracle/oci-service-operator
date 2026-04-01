@@ -41,7 +41,7 @@ var newStreamServiceClient = func(manager *StreamServiceManager) StreamServiceCl
 		Semantics: &generatedruntime.Semantics{
 			FormalService:     "streaming",
 			FormalSlug:        "stream",
-			StatusProjection:  "manual",
+			StatusProjection:  "required",
 			SecretSideEffects: "ready-only",
 			FinalizerPolicy:   "none",
 			Lifecycle: generatedruntime.LifecycleSemantics{
@@ -59,9 +59,9 @@ var newStreamServiceClient = func(manager *StreamServiceManager) StreamServiceCl
 				MatchFields:        []string{"compartmentId", "id", "name", "state", "streamPoolId"},
 			},
 			Mutation: generatedruntime.MutationSemantics{
-				Mutable:       []string{"compartmentId", "definedTags", "freeformTags", "streamPoolId"},
+				Mutable:       []string{"definedTags", "freeformTags", "streamPoolId"},
 				ForceNew:      []string{"name", "partitions", "retentionInHours"},
-				ConflictsWith: map[string][]string{"compartmentId": []string{"streamPoolId"}, "streamPoolId": []string{"compartmentId"}},
+				ConflictsWith: map[string][]string{},
 			},
 			Hooks: generatedruntime.HookSet{
 				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
@@ -80,8 +80,8 @@ var newStreamServiceClient = func(manager *StreamServiceManager) StreamServiceCl
 				Strategy: "confirm-delete",
 				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
 			},
-			AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{{Phase: "update", MethodName: "ChangeStreamCompartment", RequestTypeName: "streaming.ChangeStreamCompartmentRequest", ResponseTypeName: "streaming.ChangeStreamCompartmentResponse"}},
-			Unsupported:         []generatedruntime.UnsupportedSemantic{{Category: "bind-versus-create", StopCondition: "Formal semantics can branch between create, bind-by-id, and bind-by-name flows without routing through the legacy streams package."}, {Category: "delete-confirmation", StopCondition: "Formal semantics capture or replace the current best-effort delete behavior that treats DELETING as sufficient for finalizer removal."}, {Category: "endpoint-materialization", StopCondition: "Formal semantics model the ACTIVE-only secret write that publishes the message endpoint and its delete-time cleanup."}, {Category: "legacy-adapter", StopCondition: "stream_generated_client_adapter.go is removable because the formal runtime covers the current streams.StreamServiceManager behavior."}, {Category: "list-lookup", StopCondition: "Formal semantics encode the current name plus optional pool or compartment filters and the lifecycle-sensitive matching used for create, update, and delete."}, {Category: "mutation-policy", StopCondition: "Formal semantics distinguish mutable fields from rejected changes, including the current partition and retention mismatch failures."}, {Category: "status-projection", StopCondition: "Formal semantics either describe the handwritten OsokStatus projection or preserve it as an explicit legacy-only contract."}},
+			AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+			Unsupported:         []generatedruntime.UnsupportedSemantic{},
 		},
 		Create: &generatedruntime.Operation{
 			NewRequest: func() any { return &streamingsdk.CreateStreamRequest{} },

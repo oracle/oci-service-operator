@@ -30,11 +30,6 @@
     ],
     "update": [
       {
-        "operation": "ChangeStreamCompartment",
-        "requestType": "streaming.ChangeStreamCompartmentRequest",
-        "responseType": "streaming.ChangeStreamCompartmentResponse"
-      },
-      {
         "operation": "UpdateStream",
         "requestType": "streaming.UpdateStreamRequest",
         "responseType": "streaming.UpdateStreamResponse"
@@ -68,7 +63,6 @@
   },
   "mutation": {
     "mutable": [
-      "compartment_id",
       "defined_tags",
       "freeform_tags",
       "stream_pool_id"
@@ -78,14 +72,7 @@
       "partitions",
       "retention_in_hours"
     ],
-    "conflictsWith": {
-      "compartment_id": [
-        "stream_pool_id"
-      ],
-      "stream_pool_id": [
-        "compartment_id"
-      ]
-    }
+    "conflictsWith": {}
   },
   "hooks": {
     "create": [
@@ -137,8 +124,7 @@
       "endpoint-materialization",
       "status-projection",
       "mutation-policy",
-      "delete-confirmation",
-      "legacy-adapter"
+      "delete-confirmation"
     ]
   },
   "notes": [

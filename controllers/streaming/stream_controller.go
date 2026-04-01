@@ -24,7 +24,7 @@ type StreamReconciler struct {
 // +kubebuilder:rbac:groups=streaming.oracle.com,resources=streams,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=streaming.oracle.com,resources=streams/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=streaming.oracle.com,resources=streams/finalizers,verbs=update
-// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;create;update;delete
 
 // Reconcile is part of the main Kubernetes reconciliation loop.
 func (r *StreamReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {

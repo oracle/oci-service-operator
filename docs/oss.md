@@ -50,7 +50,8 @@ Commonly used spec fields are summarized below:
 | `spec.freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. `Example: {"Department": "Finance"}` | object | no |
 | `spec.definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. `Example: {"Operations": {"CostCenter": "42"}}` | object | no |
 
-Do not set both `spec.compartmentId` and `spec.streamPoolId` on the same `Stream`.
+Set `spec.compartmentId` when creating the stream directly in a compartment and
+set `spec.streamPoolId` when creating it in a stream pool.
 
 ## Stream Status Parameters
 
@@ -70,9 +71,16 @@ The `Stream` CR exposes both OSOK control-plane status and mirrored OCI stream f
 | `status.status.updatedAt` | Timestamp for the last OSOK status update. | string | no |
 | `status.status.requestedAt` | Timestamp when the reconcile request was recorded. | string | no |
 | `status.status.deletedAt` | Timestamp when deletion was recorded. | string | no |
+| `status.name` | Stream name mirrored from the OCI read model. | string | no |
 | `status.id` | OCI OCID mirrored on the `Stream` status. | string | no |
+| `status.partitions` | Partition count mirrored from the OCI read model. | integer | no |
+| `status.retentionInHours` | Retention period mirrored from the OCI read model. | integer | no |
+| `status.compartmentId` | OCI compartment OCID associated with the stream. | string | no |
 | `status.lifecycleState` | Current OCI lifecycle state for the stream. | string | no |
 | `status.messagesEndpoint` | The endpoint applications use to publish to or consume from the stream. | string | no |
+| `status.lifecycleStateDetails` | Additional OCI lifecycle detail when OCI provides it. | string | no |
+| `status.freeformTags` | Free-form tags mirrored from the OCI read model. | object | no |
+| `status.definedTags` | Defined tags mirrored from the OCI read model. | object | no |
 | `status.streamPoolId` | OCI stream pool OCID associated with the stream, when applicable. | string | no |
 | `status.timeCreated` | OCI creation timestamp for the stream. | string | no |
 
@@ -121,6 +129,9 @@ kubectl describe stream <NAME_OF_CR_OBJECT>
 - The generated v2 `Stream` contract does not expose the retired bind-by-id field from the legacy API.
 - Do not author new manifests with the retired pre-v2 Stream API group.
 - Manage the stream through the existing `Stream` CR rather than through a separate bind-by-id manifest.
+- In-place updates are limited to `spec.streamPoolId`, `spec.freeformTags`, and
+  `spec.definedTags`. Changes to `spec.name`, `spec.partitions`, and
+  `spec.retentionInHours` are not applied in place.
 - Check `api/streaming/v1beta1/stream_types.go` for the current spec surface when authoring manifests.
 
 ## Access Information

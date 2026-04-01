@@ -53,6 +53,10 @@ Package profile behavior:
 - `crd-only` overlays render only generated CRDs until controller support
   exists for that group.
 
+Runtime seam ownership stays explicit in checked-in files rather than being
+implied by the package profile. `database` and `mysql` still retain parity
+adapters, while `streaming/Stream` only retains the endpoint-secret companion.
+
 Package profile transitions:
 
 - New services stay `crd-only` until controller, service-manager, and
