@@ -181,22 +181,21 @@ func (c *natGatewayRuntimeClient) buildUpdateRequest(resource *corev1beta1.NatGa
 		updateDetails.BlockTraffic = common.Bool(resource.Spec.BlockTraffic)
 		updateNeeded = true
 	}
-	if resource.Spec.DisplayName != "" && !stringPtrEqual(current.DisplayName, resource.Spec.DisplayName) {
+	if !stringPtrEqual(current.DisplayName, resource.Spec.DisplayName) {
 		updateDetails.DisplayName = common.String(resource.Spec.DisplayName)
 		updateNeeded = true
 	}
-	if resource.Spec.FreeformTags != nil && !reflect.DeepEqual(current.FreeformTags, resource.Spec.FreeformTags) {
-		updateDetails.FreeformTags = resource.Spec.FreeformTags
+	desiredFreeformTags := desiredFreeformTagsForUpdate(resource.Spec.FreeformTags, current.FreeformTags)
+	if !reflect.DeepEqual(current.FreeformTags, desiredFreeformTags) {
+		updateDetails.FreeformTags = desiredFreeformTags
 		updateNeeded = true
 	}
-	if resource.Spec.DefinedTags != nil {
-		desiredDefinedTags := *util.ConvertToOciDefinedTags(&resource.Spec.DefinedTags)
-		if !reflect.DeepEqual(current.DefinedTags, desiredDefinedTags) {
-			updateDetails.DefinedTags = desiredDefinedTags
-			updateNeeded = true
-		}
+	desiredDefinedTags := desiredDefinedTagsForUpdate(resource.Spec.DefinedTags, current.DefinedTags)
+	if !reflect.DeepEqual(current.DefinedTags, desiredDefinedTags) {
+		updateDetails.DefinedTags = desiredDefinedTags
+		updateNeeded = true
 	}
-	if resource.Spec.RouteTableId != "" && !stringPtrEqual(current.RouteTableId, resource.Spec.RouteTableId) {
+	if !stringPtrEqual(current.RouteTableId, resource.Spec.RouteTableId) {
 		updateDetails.RouteTableId = common.String(resource.Spec.RouteTableId)
 		updateNeeded = true
 	}
@@ -237,6 +236,26 @@ func buildCreateNatGatewayDetails(spec corev1beta1.NatGatewaySpec) coresdk.Creat
 	}
 
 	return createDetails
+}
+
+func desiredFreeformTagsForUpdate(spec map[string]string, current map[string]string) map[string]string {
+	if spec != nil {
+		return cloneStringMap(spec)
+	}
+	if current != nil {
+		return map[string]string{}
+	}
+	return nil
+}
+
+func desiredDefinedTagsForUpdate(spec map[string]shared.MapValue, current map[string]map[string]interface{}) map[string]map[string]interface{} {
+	if spec != nil {
+		return *util.ConvertToOciDefinedTags(&spec)
+	}
+	if current != nil {
+		return map[string]map[string]interface{}{}
+	}
+	return nil
 }
 
 func validateNatGatewayCreateOnlyDrift(spec corev1beta1.NatGatewaySpec, current coresdk.NatGateway) error {
