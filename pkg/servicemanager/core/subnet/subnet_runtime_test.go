@@ -415,7 +415,7 @@ func TestDelete_RequeuesWhileTerminating(t *testing.T) {
 	assert.Equal(t, string(shared.Terminating), resource.Status.OsokStatus.Reason)
 }
 
-func TestDelete_ConfirmsDeletionOnObservedTerminated(t *testing.T) {
+func TestDelete_RequeuesWhileObservedTerminated(t *testing.T) {
 	manager := newTestManager(&fakeSubnetOCIClient{
 		deleteFn: func(_ context.Context, _ coresdk.DeleteSubnetRequest) (coresdk.DeleteSubnetResponse, error) {
 			return coresdk.DeleteSubnetResponse{}, nil
@@ -433,8 +433,9 @@ func TestDelete_ConfirmsDeletionOnObservedTerminated(t *testing.T) {
 	done, err := manager.Delete(context.Background(), resource)
 
 	assert.NoError(t, err)
-	assert.True(t, done)
-	assert.NotNil(t, resource.Status.OsokStatus.DeletedAt)
+	assert.False(t, done)
+	assert.Nil(t, resource.Status.OsokStatus.DeletedAt)
+	assert.Equal(t, string(shared.Terminating), resource.Status.OsokStatus.Reason)
 }
 
 func TestIsSubnetNotFoundOCI_RejectsAuthAmbiguity(t *testing.T) {

@@ -133,8 +133,8 @@ func (c *subnetRuntimeClient) Delete(ctx context.Context, resource *corev1beta1.
 	}
 	switch current.LifecycleState {
 	case coresdk.SubnetLifecycleStateTerminated:
-		c.markDeleted(resource, "OCI resource reached TERMINATED before disappearing")
-		return true, nil
+		c.markTerminating(resource, current)
+		return false, nil
 	case coresdk.SubnetLifecycleStateTerminating:
 		c.markTerminating(resource, current)
 		return false, nil
