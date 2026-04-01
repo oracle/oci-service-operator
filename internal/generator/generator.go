@@ -67,7 +67,7 @@ func (g *Generator) Generate(ctx context.Context, cfg *Config, services []Servic
 		if options.FullSync && cfg != nil {
 			cleanupServices = cfg.Services
 		}
-		if err := cleanupGeneratedOutputs(options.OutputRoot, cfg, cleanupServices, builtPackages); err != nil {
+		if err := cleanupGeneratedOutputs(options.OutputRoot, cleanupServices, builtPackages, options.FullSync); err != nil {
 			return result, err
 		}
 	}

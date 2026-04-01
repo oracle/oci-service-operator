@@ -182,6 +182,58 @@ func TestGenerateFullSyncCleansStaleGeneratorOwnedOutputsForInactiveServicesAndE
 	}
 }
 
+func TestGenerateFullSyncCleansStaleGeneratorOwnedOutputsForServicesRemovedFromConfig(t *testing.T) {
+	t.Parallel()
+
+	cfg := selectionCleanupTestConfig()
+	outputRoot := t.TempDir()
+	pipeline := newSelectionCleanupTestGenerator(t)
+
+	if _, err := pipeline.Generate(context.Background(), cfg, []ServiceConfig{cfg.Services[0], cfg.Services[1]}, Options{
+		OutputRoot: outputRoot,
+		Overwrite:  true,
+	}); err != nil {
+		t.Fatalf("seed Generate() error = %v", err)
+	}
+
+	cfg.Services = cfg.Services[:1]
+
+	activeServices, err := cfg.SelectServices("", true)
+	if err != nil {
+		t.Fatalf("SelectServices(--all) error = %v", err)
+	}
+	if _, err := pipeline.Generate(context.Background(), cfg, activeServices, Options{
+		OutputRoot: outputRoot,
+		Overwrite:  true,
+		FullSync:   true,
+	}); err != nil {
+		t.Fatalf("Generate() full-sync error = %v", err)
+	}
+
+	for _, relativePath := range []string{
+		"api/identity/v1beta1/widget_types.go",
+		"controllers/identity/widget_controller.go",
+		"pkg/servicemanager/identity/widget/widget_serviceclient.go",
+		"pkg/servicemanager/identity/widget/widget_servicemanager.go",
+		"internal/registrations/identity_generated.go",
+		"packages/identity/metadata.env",
+		"packages/identity/install/kustomization.yaml",
+		"config/samples/identity_v1beta1_widget.yaml",
+	} {
+		assertPathNotExists(t, filepath.Join(outputRoot, relativePath))
+	}
+
+	assertPathExists(t, filepath.Join(outputRoot, "api", "mysql", "v1beta1", "widget_types.go"))
+	assertPathExists(t, filepath.Join(outputRoot, "controllers", "mysql", "widget_controller.go"))
+	assertPathExists(t, filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "widget", "widget_serviceclient.go"))
+	assertPathExists(t, filepath.Join(outputRoot, "internal", "registrations", "mysql_generated.go"))
+	assertPathExists(t, filepath.Join(outputRoot, "packages", "mysql", "metadata.env"))
+	assertPathExists(t, filepath.Join(outputRoot, "config", "samples", "mysql_v1beta1_widget.yaml"))
+	assertFileDoesNotContain(t, filepath.Join(outputRoot, "config", "samples", "kustomization.yaml"), []string{
+		"identity_v1beta1_widget.yaml",
+	})
+}
+
 func TestGenerateFullSyncPrunesSampleKustomizationWhenActiveSurfaceIsEmpty(t *testing.T) {
 	t.Parallel()
 
