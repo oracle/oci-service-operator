@@ -23,35 +23,40 @@ type fakeResource struct {
 }
 
 type fakeSpec struct {
-	Id               string                `json:"Id,omitempty"`
-	CompartmentId    string                `json:"compartmentId,omitempty"`
-	DisplayName      string                `json:"displayName,omitempty"`
-	Name             string                `json:"name,omitempty"`
-	AdminUsername    shared.UsernameSource `json:"adminUsername,omitempty"`
-	AdminPassword    shared.PasswordSource `json:"adminPassword,omitempty"`
-	Partitions       int                   `json:"partitions,omitempty"`
-	RetentionInHours int                   `json:"retentionInHours,omitempty"`
-	Enabled          bool                  `json:"enabled,omitempty"`
+	Id                   string                `json:"Id,omitempty"`
+	CompartmentId        string                `json:"compartmentId,omitempty"`
+	DisplayName          string                `json:"displayName,omitempty"`
+	Name                 string                `json:"name,omitempty"`
+	AdminUsername        shared.UsernameSource `json:"adminUsername,omitempty"`
+	AdminPassword        shared.PasswordSource `json:"adminPassword,omitempty"`
+	DataStorageSizeInGBs int                   `json:"dataStorageSizeInGBs,omitempty"`
+	Partitions           int                   `json:"partitions,omitempty"`
+	RetentionInHours     int                   `json:"retentionInHours,omitempty"`
+	Enabled              bool                  `json:"enabled,omitempty"`
 }
 
 type fakeStatus struct {
-	OsokStatus       shared.OSOKStatus `json:"status"`
-	Id               string            `json:"id,omitempty"`
-	CompartmentId    string            `json:"compartmentId,omitempty"`
-	DisplayName      string            `json:"displayName,omitempty"`
-	Partitions       int               `json:"partitions,omitempty"`
-	RetentionInHours int               `json:"retentionInHours,omitempty"`
-	LifecycleState   string            `json:"lifecycleState,omitempty"`
+	OsokStatus           shared.OSOKStatus     `json:"status"`
+	Id                   string                `json:"id,omitempty"`
+	CompartmentId        string                `json:"compartmentId,omitempty"`
+	DisplayName          string                `json:"displayName,omitempty"`
+	AdminUsername        shared.UsernameSource `json:"adminUsername,omitempty"`
+	AdminPassword        shared.PasswordSource `json:"adminPassword,omitempty"`
+	DataStorageSizeInGBs int                   `json:"dataStorageSizeInGBs,omitempty"`
+	Partitions           int                   `json:"partitions,omitempty"`
+	RetentionInHours     int                   `json:"retentionInHours,omitempty"`
+	LifecycleState       string                `json:"lifecycleState,omitempty"`
 }
 
 type fakeThing struct {
-	Id               string `json:"id,omitempty"`
-	CompartmentId    string `json:"compartmentId,omitempty"`
-	DisplayName      string `json:"displayName,omitempty"`
-	Name             string `json:"name,omitempty"`
-	Partitions       int    `json:"partitions,omitempty"`
-	RetentionInHours int    `json:"retentionInHours,omitempty"`
-	LifecycleState   string `json:"lifecycleState,omitempty"`
+	Id                   string `json:"id,omitempty"`
+	CompartmentId        string `json:"compartmentId,omitempty"`
+	DisplayName          string `json:"displayName,omitempty"`
+	Name                 string `json:"name,omitempty"`
+	DataStorageSizeInGBs int    `json:"dataStorageSizeInGBs,omitempty"`
+	Partitions           int    `json:"partitions,omitempty"`
+	RetentionInHours     int    `json:"retentionInHours,omitempty"`
+	LifecycleState       string `json:"lifecycleState,omitempty"`
 }
 
 type fakeThingSummary struct {
@@ -95,8 +100,9 @@ type fakeGetThingResponse struct {
 }
 
 type FakeUpdateThingDetails struct {
-	DisplayName string `json:"displayName,omitempty"`
-	Enabled     bool   `json:"enabled,omitempty"`
+	DisplayName          string `json:"displayName,omitempty"`
+	Enabled              bool   `json:"enabled,omitempty"`
+	DataStorageSizeInGBs int    `json:"dataStorageSizeInGBs,omitempty"`
 }
 
 type fakeUpdateThingRequest struct {
@@ -291,6 +297,8 @@ func TestServiceClientCreateOrUpdateResolvesSecretBackedBodyFields(t *testing.T)
 	for _, namespace := range credClient.namespaces {
 		requireStringEqual(t, "GetSecret() namespace", namespace, "database-system")
 	}
+	requireStringEqual(t, "status.adminUsername.secret.secretName", resource.Status.AdminUsername.Secret.SecretName, "admin-user")
+	requireStringEqual(t, "status.adminPassword.secret.secretName", resource.Status.AdminPassword.Secret.SecretName, "admin-password")
 }
 
 func TestServiceClientCreateOrUpdateFailsWhenSecretKeyIsMissing(t *testing.T) {
@@ -540,6 +548,102 @@ func TestServiceClientCreateOrUpdateUpdatesWhenMutableStateDiffers(t *testing.T)
 	requireThingIDRequest(t, "update", updateRequest.ThingId, "ocid1.thing.oc1..existing")
 	requireStringEqual(t, "update request displayName", updateRequest.DisplayName, "new-name")
 	requireStringEqual(t, "status.displayName", resource.Status.DisplayName, "new-name")
+}
+
+func TestServiceClientCreateOrUpdateAllowsMutableDriftThroughInGBsAlias(t *testing.T) {
+	t.Parallel()
+
+	updateCalled := false
+	var updateRequest fakeUpdateThingRequest
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Semantics: &Semantics{
+			Lifecycle: LifecycleSemantics{
+				ActiveStates: []string{"ACTIVE"},
+			},
+			Mutation: MutationSemantics{
+				Mutable: []string{"dataStorageSizeInGb"},
+			},
+		},
+		Update: &Operation{
+			NewRequest: func() any { return &fakeUpdateThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				updateCalled = true
+				updateRequest = *request.(*fakeUpdateThingRequest)
+				return fakeUpdateThingResponse{
+					Thing: fakeThing{
+						Id:                   "ocid1.thing.oc1..existing",
+						DataStorageSizeInGBs: updateRequest.DataStorageSizeInGBs,
+						LifecycleState:       "ACTIVE",
+					},
+				}, nil
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Spec: fakeSpec{
+			DataStorageSizeInGBs: 20,
+		},
+		Status: fakeStatus{
+			OsokStatus:           shared.OSOKStatus{Ocid: "ocid1.thing.oc1..existing"},
+			Id:                   "ocid1.thing.oc1..existing",
+			DataStorageSizeInGBs: 10,
+		},
+	}
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	requireCreateOrUpdateSuccess(t, response, err)
+	requireRequeueState(t, response, false, "CreateOrUpdate() should not requeue for ACTIVE lifecycle")
+	if !updateCalled {
+		t.Fatal("Update() should be called when only the InGBs alias differs")
+	}
+	if updateRequest.DataStorageSizeInGBs != 20 {
+		t.Fatalf("update request dataStorageSizeInGBs = %d, want 20", updateRequest.DataStorageSizeInGBs)
+	}
+	if resource.Status.DataStorageSizeInGBs != 20 {
+		t.Fatalf("status.dataStorageSizeInGBs = %d, want 20", resource.Status.DataStorageSizeInGBs)
+	}
+}
+
+func TestServiceClientRejectsUnsupportedUpdateDrift(t *testing.T) {
+	t.Parallel()
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Semantics: &Semantics{
+			Mutation: MutationSemantics{
+				Mutable: []string{"displayName"},
+			},
+		},
+		Update: &Operation{
+			NewRequest: func() any { return &fakeUpdateThingRequest{} },
+			Call: func(_ context.Context, _ any) (any, error) {
+				t.Fatal("Update() should not be called when update drift is outside the supported mutable surface")
+				return nil, nil
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Spec: fakeSpec{
+			CompartmentId: "ocid1.compartment.oc1..new",
+			DisplayName:   "same-name",
+		},
+		Status: fakeStatus{
+			OsokStatus:    shared.OSOKStatus{Ocid: "ocid1.thing.oc1..existing"},
+			Id:            "ocid1.thing.oc1..existing",
+			CompartmentId: "ocid1.compartment.oc1..old",
+			DisplayName:   "same-name",
+		},
+	}
+
+	if _, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{}); err == nil || !strings.Contains(err.Error(), "reject unsupported update drift for compartmentId") {
+		t.Fatalf("CreateOrUpdate() error = %v, want unsupported update drift failure", err)
+	}
 }
 
 func TestServiceClientCreateOrUpdateFallsBackToList(t *testing.T) {

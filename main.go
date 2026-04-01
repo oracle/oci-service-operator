@@ -61,7 +61,7 @@ func main() {
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
 	flag.BoolVar(&initOSOKResources, "init-osok-resources", false,
-		"Install OSOK prerequisites like CRDs and Webhooks at manager bootup")
+		"Install OSOK prerequisites like CRDs and supporting manifests at manager bootup")
 	opts := zap.Options{
 		Development: true,
 	}

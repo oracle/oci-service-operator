@@ -109,7 +109,7 @@ func loadManagerOptionsFromFile(configFile string) (ctrl.Options, error) {
 	}
 
 	var cfg controllerManagerConfigFile
-	if err := yaml.Unmarshal(contents, &cfg); err != nil {
+	if err := yaml.UnmarshalStrict(contents, &cfg); err != nil {
 		return ctrl.Options{}, fmt.Errorf("decode manager config file %q: %w", configFile, err)
 	}
 

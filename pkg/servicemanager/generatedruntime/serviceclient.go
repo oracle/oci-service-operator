@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"sort"
 	"strings"
 	"time"
 	"unicode"
@@ -618,7 +619,18 @@ func (c ServiceClient[T]) validateMutationPolicy(resource T, existing bool, curr
 	if !existing {
 		return nil
 	}
-	return c.validateForceNewFields(specValues, currentValues)
+	if err := c.validateForceNewFields(specValues, currentValues); err != nil {
+		return err
+	}
+	if c.config.Update == nil {
+		return nil
+	}
+
+	unsupportedPaths := unsupportedUpdateDriftPaths(specValues, currentValues, semantics.Mutation)
+	if len(unsupportedPaths) == 0 {
+		return nil
+	}
+	return fmt.Errorf("%s formal semantics reject unsupported update drift for %s", c.config.Kind, strings.Join(unsupportedPaths, ", "))
 }
 
 func mutationValues(resource any, currentResponse any) (map[string]any, map[string]any, error) {
@@ -692,6 +704,109 @@ func (c ServiceClient[T]) hasMutableDrift(resource T, currentResponse any) (bool
 	}
 
 	return false, nil
+}
+
+func unsupportedUpdateDriftPaths(specValues map[string]any, currentValues map[string]any, semantics MutationSemantics) []string {
+	diffPaths := comparableDiffPaths(specValues, currentValues, "")
+	unsupported := make([]string, 0, len(diffPaths))
+	for _, path := range diffPaths {
+		switch {
+		case pathCoveredByAny(path, semantics.Mutable):
+		case pathCoveredByAny(path, semantics.ForceNew):
+		default:
+			unsupported = appendUniqueStrings(unsupported, path)
+		}
+	}
+	sort.Strings(unsupported)
+	return unsupported
+}
+
+func comparableDiffPaths(specValues map[string]any, currentValues map[string]any, prefix string) []string {
+	if specValues == nil || currentValues == nil {
+		return nil
+	}
+
+	keys := meaningfulSortedKeys(specValues)
+	paths := make([]string, 0, len(keys))
+	for _, key := range keys {
+		paths = append(paths, comparableDiffPathsForKey(specValues, currentValues, prefix, key)...)
+	}
+
+	return paths
+}
+
+func meaningfulSortedKeys(values map[string]any) []string {
+	keys := make([]string, 0, len(values))
+	for key, value := range values {
+		if meaningfulValue(value) {
+			keys = append(keys, key)
+		}
+	}
+	sort.Strings(keys)
+	return keys
+}
+
+func comparableDiffPathsForKey(specValues map[string]any, currentValues map[string]any, prefix string, key string) []string {
+	specValue := specValues[key]
+	currentValue, ok := lookupMapKey(currentValues, key)
+	if !ok {
+		return nil
+	}
+
+	path := key
+	if prefix != "" {
+		path = prefix + "." + key
+	}
+
+	specMap, specIsMap := specValue.(map[string]any)
+	currentMap, currentIsMap := currentValue.(map[string]any)
+	if specIsMap && currentIsMap {
+		return comparableDiffPaths(specMap, currentMap, path)
+	}
+	if !valuesEqual(specValue, currentValue) {
+		return []string{path}
+	}
+	return nil
+}
+
+func pathCoveredByAny(path string, semanticPaths []string) bool {
+	for _, semanticPath := range semanticPaths {
+		if pathCoveredBy(path, semanticPath) {
+			return true
+		}
+	}
+	return false
+}
+
+func pathCoveredBy(path string, semanticPath string) bool {
+	path = normalizePath(path)
+	semanticPath = normalizePath(semanticPath)
+	if path == "" || semanticPath == "" {
+		return false
+	}
+	return path == semanticPath ||
+		strings.HasPrefix(path, semanticPath+".") ||
+		strings.HasPrefix(semanticPath, path+".")
+}
+
+func normalizePath(path string) string {
+	if strings.TrimSpace(path) == "" {
+		return ""
+	}
+
+	segments := strings.Split(path, ".")
+	for index, segment := range segments {
+		segments[index] = normalizePathSegment(segment)
+	}
+	return strings.Join(segments, ".")
+}
+
+func normalizePathSegment(segment string) string {
+	segment = strings.ToLower(strings.TrimSpace(segment))
+	if strings.HasSuffix(segment, "gbs") {
+		return strings.TrimSuffix(segment, "gbs") + "gb"
+	}
+	return segment
 }
 
 func (c ServiceClient[T]) readResource(ctx context.Context, resource T, preferredID string, phase readPhase) (any, error) {
@@ -891,6 +1006,7 @@ func (c ServiceClient[T]) applySuccess(resource T, response any, fallback shared
 	if err := mergeResponseIntoStatus(resource, response); err != nil {
 		return servicemanager.OSOKResponse{IsSuccessful: false}, err
 	}
+	stampSecretSourceStatus(resource)
 
 	status, err := osokStatus(resource)
 	if err != nil {
@@ -1617,6 +1733,109 @@ func mergeResponseIntoStatus(resource any, response any) error {
 	return nil
 }
 
+func stampSecretSourceStatus(resource any) {
+	resourceValue, err := resourceStruct(resource)
+	if err != nil {
+		return
+	}
+
+	specField, ok := fieldValue(resourceValue, "Spec")
+	if !ok {
+		return
+	}
+	statusField, ok := fieldValue(resourceValue, "Status")
+	if !ok {
+		return
+	}
+
+	copySecretSourceFields(specField, statusField)
+}
+
+func copySecretSourceFields(source reflect.Value, destination reflect.Value) {
+	source, destination, ok := secretSourceStructPair(source, destination)
+	if !ok {
+		return
+	}
+	for i := 0; i < source.NumField(); i++ {
+		copySecretSourceField(source, destination, i)
+	}
+}
+
+func secretSourceStructPair(source reflect.Value, destination reflect.Value) (reflect.Value, reflect.Value, bool) {
+	var ok bool
+	source, ok = indirectValue(source)
+	if !ok || source.Kind() != reflect.Struct {
+		return reflect.Value{}, reflect.Value{}, false
+	}
+	destination, ok = indirectValue(destination)
+	if !ok || destination.Kind() != reflect.Struct {
+		return reflect.Value{}, reflect.Value{}, false
+	}
+	return source, destination, true
+}
+
+func copySecretSourceField(source reflect.Value, destination reflect.Value, index int) {
+	fieldType := source.Type().Field(index)
+	if !fieldType.IsExported() {
+		return
+	}
+
+	sourceField := source.Field(index)
+	destinationField, ok := settableFieldByName(destination, fieldType.Name)
+	if !ok {
+		return
+	}
+	if copySecretSourceLeaf(sourceField, destinationField) {
+		return
+	}
+	copySecretSourceFields(sourceField, destinationField)
+}
+
+func settableFieldByName(value reflect.Value, name string) (reflect.Value, bool) {
+	field := value.FieldByName(name)
+	if !field.IsValid() || !field.CanSet() {
+		return reflect.Value{}, false
+	}
+	return field, true
+}
+
+func copySecretSourceLeaf(source reflect.Value, destination reflect.Value) bool {
+	if !isSecretSourceType(source.Type()) || destination.Type() != source.Type() {
+		return false
+	}
+	if secretSourceValueIsEmpty(source) {
+		destination.Set(reflect.Zero(destination.Type()))
+		return true
+	}
+	destination.Set(source)
+	return true
+}
+
+func secretSourceValueIsEmpty(value reflect.Value) bool {
+	var ok bool
+	value, ok = indirectValue(value)
+	if !ok || value.Kind() != reflect.Struct {
+		return true
+	}
+	secretField := value.FieldByName("Secret")
+	secretField, ok = indirectValue(secretField)
+	if !ok || secretField.Kind() != reflect.Struct {
+		return true
+	}
+	nameField := secretField.FieldByName("SecretName")
+	if !nameField.IsValid() || nameField.Kind() != reflect.String {
+		return true
+	}
+	return strings.TrimSpace(nameField.String()) == ""
+}
+
+func isSecretSourceType(typ reflect.Type) bool {
+	for typ.Kind() == reflect.Pointer {
+		typ = typ.Elem()
+	}
+	return typ == usernameSourceType || typ == passwordSourceType
+}
+
 func responseID(response any) string {
 	body, ok := responseBody(response)
 	if !ok || body == nil {
@@ -2091,6 +2310,9 @@ func listItems(body any, responseItemsField string) ([]any, error) {
 	if err != nil {
 		return nil, err
 	}
+	if value.Kind() == reflect.Slice {
+		return sliceValues(value), nil
+	}
 
 	if items, ok, err := configuredListItems(value, responseItemsField); ok || err != nil {
 		return items, err
@@ -2320,9 +2542,9 @@ func lookupMapKey(values map[string]any, segment string) (any, bool) {
 		return value, true
 	}
 
-	normalized := lowerCamel(segment)
+	normalized := normalizePathSegment(segment)
 	for key, value := range values {
-		if strings.EqualFold(key, segment) || lowerCamel(key) == normalized {
+		if normalizePathSegment(key) == normalized {
 			return value, true
 		}
 	}
@@ -2449,8 +2671,8 @@ func listBodyStruct(body any) (reflect.Value, error) {
 	if !ok {
 		return reflect.Value{}, errResourceNotFound
 	}
-	if value.Kind() != reflect.Struct {
-		return reflect.Value{}, fmt.Errorf("OCI list body must be a struct, got %T", body)
+	if value.Kind() != reflect.Struct && value.Kind() != reflect.Slice {
+		return reflect.Value{}, fmt.Errorf("OCI list body must be a struct or slice, got %T", body)
 	}
 	return value, nil
 }
