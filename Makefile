@@ -419,7 +419,7 @@ publish-service-olm: controller-gen kustomize operator-sdk ## Build/push a per-s
 	@test -f "cmd/manager/$(GROUP)/main.go" || { echo "GROUP '$(GROUP)' does not have a dedicated controller entrypoint under cmd/manager."; exit 1; }
 	@[ -n "$(PUBLISH_VERSION)" ] || { echo "PUBLISH_VERSION must be set (image tag)"; exit 1; }
 	@[ -n "$(PUBLISH_REGISTRY)" ] || { echo "PUBLISH_REGISTRY must be set (e.g. iad.ocir.io/org)"; exit 1; }
-	@set -euo pipefail; \
+	@set -eu; \
 		image="$(PUBLISH_REGISTRY)/oci-service-operator-$(GROUP):$(PUBLISH_VERSION)"; \
 		bundle_image="$(PUBLISH_REGISTRY)/oci-service-operator-$(GROUP)-bundle:$(PUBLISH_VERSION)"; \
 		if [ -n "$(PUBLISH_PLATFORMS)" ]; then \
@@ -446,7 +446,7 @@ publish-service-olm: controller-gen kustomize operator-sdk ## Build/push a per-s
 publish-monolith-olm: operator-sdk ## Build/push the monolithic controller image, generate the matching bundle, and build/push the bundle image.
 	@[ -n "$(PUBLISH_VERSION)" ] || { echo "PUBLISH_VERSION must be set (image tag)"; exit 1; }
 	@[ -n "$(PUBLISH_REGISTRY)" ] || { echo "PUBLISH_REGISTRY must be set (e.g. iad.ocir.io/org)"; exit 1; }
-	@set -euo pipefail; \
+	@set -eu; \
 	image="$(PUBLISH_REGISTRY)/oci-service-operator:$(PUBLISH_VERSION)"; \
 	bundle_image="$(MONOLITH_OLM_BUNDLE_IMG)"; \
 	bundle_version="$(PUBLISH_VERSION)"; \
@@ -469,7 +469,7 @@ publish-monolith-olm: operator-sdk ## Build/push the monolithic controller image
 publish-monolith: kustomize ## Build, push, and render the monolithic controller manifest.
 	@[ -n "$(PUBLISH_VERSION)" ] || { echo "PUBLISH_VERSION must be set (image tag)"; exit 1; }
 	@[ -n "$(PUBLISH_REGISTRY)" ] || { echo "PUBLISH_REGISTRY must be set (e.g. iad.ocir.io/org)"; exit 1; }
-	@set -euo pipefail; \
+	@set -eu; \
 	image="$(PUBLISH_REGISTRY)/oci-service-operator:$(PUBLISH_VERSION)"; \
 	echo ">>> Building $$image"; \
 	$(MAKE) --no-print-directory docker-build-raw IMG="$$image" CONTROLLER_MAIN="."; \
@@ -486,7 +486,7 @@ install-service-olm: operator-sdk ## Install a per-service bundle into a cluster
 	$(OPERATOR_SDK) run bundle "$(PUBLISH_REGISTRY)/oci-service-operator-$(GROUP)-bundle:$(PUBLISH_VERSION)"
 
 install-monolith-olm: operator-sdk ## Install the monolithic controller bundle into a cluster with OLM.
-	@set -euo pipefail; \
+	@set -eu; \
 	bundle_image="$(MONOLITH_OLM_BUNDLE_IMG)"; \
 	if [ -z "$$bundle_image" ]; then \
 		[ -n "$(PUBLISH_VERSION)" ] || { echo "Set MONOLITH_OLM_BUNDLE_IMG or PUBLISH_VERSION"; exit 1; }; \
@@ -502,7 +502,7 @@ upgrade-service-olm: operator-sdk ## Upgrade a per-service bundle in a cluster w
 	$(OPERATOR_SDK) run bundle-upgrade "$(PUBLISH_REGISTRY)/oci-service-operator-$(GROUP)-bundle:$(PUBLISH_VERSION)"
 
 upgrade-monolith-olm: operator-sdk ## Upgrade the monolithic controller bundle in a cluster with OLM.
-	@set -euo pipefail; \
+	@set -eu; \
 	bundle_image="$(MONOLITH_OLM_BUNDLE_IMG)"; \
 	if [ -z "$$bundle_image" ]; then \
 		[ -n "$(PUBLISH_VERSION)" ] || { echo "Set MONOLITH_OLM_BUNDLE_IMG or PUBLISH_VERSION"; exit 1; }; \
