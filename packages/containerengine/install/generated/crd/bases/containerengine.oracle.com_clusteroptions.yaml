@@ -119,6 +119,8 @@ spec:
                   properties:
                     cniType:
                       type: string
+                    jsonData:
+                      type: string
                   type: object
                 type: array
               kubernetesVersions:

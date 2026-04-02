@@ -1616,21 +1616,14 @@ func TestGeneratedServiceManagerScaffoldCompiles(t *testing.T) {
 	}
 }
 
-func TestCurrentServiceGeneratedArtifactsMatchCheckedInOutputs(t *testing.T) {
-	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
-	cfg, err := LoadConfig(cfgPath)
+func TestCurrentDefaultActiveGeneratedArtifactsMatchCheckedInOutputs(t *testing.T) {
+	cfg := loadCheckedInConfig(t)
+	services, err := cfg.SelectServices("", true)
 	if err != nil {
-		t.Fatalf("LoadConfig(%q) error = %v", cfgPath, err)
+		t.Fatalf("SelectServices(--all) error = %v", err)
 	}
-
-	var services []ServiceConfig
-	for _, service := range cfg.Services {
-		if slices.Contains([]string{"database", "mysql", "streaming"}, service.Service) {
-			services = append(services, service)
-		}
-	}
-	if len(services) != 3 {
-		t.Fatalf("selected %d generated runtime services, want 3", len(services))
+	if len(services) != 6 {
+		t.Fatalf("selected %d default-active services, want 6", len(services))
 	}
 
 	outputRoot := t.TempDir()
@@ -1643,60 +1636,78 @@ func TestCurrentServiceGeneratedArtifactsMatchCheckedInOutputs(t *testing.T) {
 		t.Fatalf("Generate() error = %v", err)
 	}
 	assertGeneratedServiceCounts(t, result.Generated, map[string]int{
-		"database":  79,
-		"mysql":     12,
-		"streaming": 7,
+		"containerengine": 18,
+		"database":        1,
+		"mysql":           12,
+		"nosql":           8,
+		"psql":            11,
+		"streaming":       1,
 	})
 
 	apiFiles := []string{
+		"api/containerengine/v1beta1/groupversion_info.go",
+		"api/containerengine/v1beta1/cluster_types.go",
 		"api/database/v1beta1/groupversion_info.go",
 		"api/database/v1beta1/autonomousdatabase_types.go",
-		"api/database/v1beta1/autonomousdatabasebackup_types.go",
 		"api/mysql/v1beta1/groupversion_info.go",
 		"api/mysql/v1beta1/dbsystem_types.go",
-		"api/mysql/v1beta1/backup_types.go",
+		"api/nosql/v1beta1/groupversion_info.go",
+		"api/nosql/v1beta1/table_types.go",
+		"api/psql/v1beta1/groupversion_info.go",
+		"api/psql/v1beta1/dbsystem_types.go",
 		"api/streaming/v1beta1/groupversion_info.go",
 		"api/streaming/v1beta1/stream_types.go",
-		"api/streaming/v1beta1/streampool_types.go",
 	}
 	for _, relativePath := range apiFiles {
 		assertGoEquivalent(t, filepath.Join(repoRoot(t), relativePath), filepath.Join(outputRoot, relativePath))
 	}
 
 	exactFiles := []string{
+		"config/samples/containerengine_v1beta1_cluster.yaml",
 		"config/samples/database_v1beta1_autonomousdatabase.yaml",
 		"config/samples/mysql_v1beta1_dbsystem.yaml",
+		"config/samples/nosql_v1beta1_table.yaml",
+		"config/samples/psql_v1beta1_dbsystem.yaml",
 		"config/samples/streaming_v1beta1_stream.yaml",
+		"packages/containerengine/metadata.env",
+		"packages/containerengine/install/kustomization.yaml",
 		"packages/database/metadata.env",
 		"packages/database/install/kustomization.yaml",
 		"packages/mysql/metadata.env",
 		"packages/mysql/install/kustomization.yaml",
+		"packages/nosql/metadata.env",
+		"packages/nosql/install/kustomization.yaml",
+		"packages/psql/metadata.env",
+		"packages/psql/install/kustomization.yaml",
 		"packages/streaming/metadata.env",
 		"packages/streaming/install/kustomization.yaml",
 	}
 	assertExactFileMatchesAll(t, repoRoot(t), outputRoot, exactFiles)
 
 	runtimeFiles := []string{
+		"controllers/containerengine/cluster_controller.go",
+		"pkg/servicemanager/containerengine/cluster/cluster_serviceclient.go",
+		"pkg/servicemanager/containerengine/cluster/cluster_servicemanager.go",
 		"controllers/database/autonomousdatabase_controller.go",
-		"controllers/database/autonomousdatabasebackup_controller.go",
 		"controllers/mysql/dbsystem_controller.go",
-		"controllers/mysql/backup_controller.go",
+		"controllers/nosql/table_controller.go",
+		"controllers/psql/dbsystem_controller.go",
 		"controllers/streaming/stream_controller.go",
-		"controllers/streaming/streampool_controller.go",
 		"pkg/servicemanager/database/autonomousdatabase/autonomousdatabase_serviceclient.go",
 		"pkg/servicemanager/database/autonomousdatabase/autonomousdatabase_servicemanager.go",
-		"pkg/servicemanager/database/autonomousdatabasebackup/autonomousdatabasebackup_serviceclient.go",
-		"pkg/servicemanager/database/autonomousdatabasebackup/autonomousdatabasebackup_servicemanager.go",
 		"pkg/servicemanager/mysql/dbsystem/dbsystem_serviceclient.go",
 		"pkg/servicemanager/mysql/dbsystem/dbsystem_servicemanager.go",
-		"pkg/servicemanager/mysql/backup/backup_serviceclient.go",
-		"pkg/servicemanager/mysql/backup/backup_servicemanager.go",
+		"pkg/servicemanager/nosql/table/table_serviceclient.go",
+		"pkg/servicemanager/nosql/table/table_servicemanager.go",
+		"pkg/servicemanager/psql/dbsystem/dbsystem_serviceclient.go",
+		"pkg/servicemanager/psql/dbsystem/dbsystem_servicemanager.go",
 		"pkg/servicemanager/streaming/stream/stream_serviceclient.go",
 		"pkg/servicemanager/streaming/stream/stream_servicemanager.go",
-		"pkg/servicemanager/streaming/streampool/streampool_serviceclient.go",
-		"pkg/servicemanager/streaming/streampool/streampool_servicemanager.go",
+		"internal/registrations/containerengine_generated.go",
 		"internal/registrations/database_generated.go",
 		"internal/registrations/mysql_generated.go",
+		"internal/registrations/nosql_generated.go",
+		"internal/registrations/psql_generated.go",
 		"internal/registrations/streaming_generated.go",
 	}
 	for _, relativePath := range runtimeFiles {
@@ -1710,7 +1721,7 @@ func TestCurrentServiceGeneratedArtifactsMatchCheckedInOutputs(t *testing.T) {
 	)
 }
 
-func TestCheckedInPromotedCoreRuntimeArtifactsMatchGenerator(t *testing.T) {
+func TestExplicitCoreRuntimeArtifactsGenerateFromConfig(t *testing.T) {
 	cfg := loadCheckedInConfig(t)
 	coreService := serviceConfigsByName(t, cfg, "core")["core"]
 
@@ -1728,21 +1739,16 @@ func TestCheckedInPromotedCoreRuntimeArtifactsMatchGenerator(t *testing.T) {
 		t.Fatalf("Generate() generated %d services, want 1", len(result.Generated))
 	}
 
-	runtimeFiles := []string{
-		"controllers/core/vcn_controller.go",
-		"pkg/servicemanager/core/vcn/vcn_serviceclient.go",
-		"pkg/servicemanager/core/vcn/vcn_servicemanager.go",
-		"internal/registrations/core_generated.go",
-	}
-	for _, relativePath := range runtimeFiles {
-		assertGoEquivalent(t, filepath.Join(repoRoot(t), relativePath), filepath.Join(outputRoot, relativePath))
-	}
-
-	exactFiles := []string{
-		"packages/core/metadata.env",
-		"packages/core/install/kustomization.yaml",
-	}
-	assertExactFileMatchesAll(t, repoRoot(t), outputRoot, exactFiles)
+	assertPathsExist(t, []string{
+		filepath.Join(outputRoot, "api", "core", "v1beta1", "vcn_types.go"),
+		filepath.Join(outputRoot, "controllers", "core", "vcn_controller.go"),
+		filepath.Join(outputRoot, "pkg", "servicemanager", "core", "vcn", "vcn_serviceclient.go"),
+		filepath.Join(outputRoot, "pkg", "servicemanager", "core", "vcn", "vcn_servicemanager.go"),
+		filepath.Join(outputRoot, "internal", "registrations", "core_generated.go"),
+		filepath.Join(outputRoot, "packages", "core", "metadata.env"),
+		filepath.Join(outputRoot, "packages", "core", "install", "kustomization.yaml"),
+		filepath.Join(outputRoot, "config", "samples", "core_v1beta1_vcn.yaml"),
+	})
 }
 
 func TestCheckedInStreamingPreservesStreamNamePrinterColumn(t *testing.T) {
@@ -1773,7 +1779,7 @@ func TestCheckedInStreamingPreservesStreamNamePrinterColumn(t *testing.T) {
 	}
 }
 
-func TestCheckedInIdentityUserRuntimeArtifactsMatchGenerator(t *testing.T) {
+func TestExplicitIdentityUserRuntimeArtifactsGenerateFromConfig(t *testing.T) {
 	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
 	cfg, err := LoadConfig(cfgPath)
 	if err != nil {
@@ -1817,8 +1823,16 @@ func TestCheckedInIdentityUserRuntimeArtifactsMatchGenerator(t *testing.T) {
 
 	serviceClientPath := "pkg/servicemanager/identity/user/user_serviceclient.go"
 	serviceManagerPath := "pkg/servicemanager/identity/user/user_servicemanager.go"
-	assertGoEquivalent(t, filepath.Join(repoRoot(t), serviceClientPath), filepath.Join(outputRoot, serviceClientPath))
-	assertGoEquivalent(t, filepath.Join(repoRoot(t), serviceManagerPath), filepath.Join(outputRoot, serviceManagerPath))
+	assertPathsExist(t, []string{
+		filepath.Join(outputRoot, "api", "identity", "v1beta1", "user_types.go"),
+		filepath.Join(outputRoot, "controllers", "identity", "user_controller.go"),
+		filepath.Join(outputRoot, serviceClientPath),
+		filepath.Join(outputRoot, serviceManagerPath),
+		filepath.Join(outputRoot, "internal", "registrations", "identity_generated.go"),
+		filepath.Join(outputRoot, "packages", "identity", "metadata.env"),
+		filepath.Join(outputRoot, "packages", "identity", "install", "kustomization.yaml"),
+		filepath.Join(outputRoot, "config", "samples", "identity_v1beta1_user.yaml"),
+	})
 
 	content := readFile(t, filepath.Join(outputRoot, serviceClientPath))
 	assertContains(t, content, []string{

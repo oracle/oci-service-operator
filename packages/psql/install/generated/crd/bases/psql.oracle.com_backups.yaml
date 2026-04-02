@@ -100,6 +100,10 @@ spec:
               backupSize:
                 description: The size of the backup, in gigabytes.
                 type: integer
+              compartmentId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the compartment that contains the backup.
+                type: string
               dbSystemDetails:
                 description: BackupDbSystemDetails defines nested fields for Backup.DbSystemDetails.
                 properties:
@@ -110,6 +114,33 @@ spec:
                   systemType:
                     description: Type of the database system.
                     type: string
+                type: object
+              dbSystemId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the backup's source database system.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: A description for the backup.
+                type: string
+              displayName:
+                description: A user-friendly display name for the backup. Avoid entering
+                  confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
                 type: object
               id:
                 description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
@@ -129,6 +160,9 @@ spec:
               lifecycleState:
                 description: The current state of the backup.
                 type: string
+              retentionPeriod:
+                description: Backup retention period in days.
+                type: integer
               sourceType:
                 description: Specifies whether the backup was created manually, or
                   by a management policy.

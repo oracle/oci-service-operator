@@ -74,6 +74,18 @@ spec:
             description: ClusterEndpointConfigStatus defines the observed state of
               ClusterEndpointConfig.
             properties:
+              isPublicIpEnabled:
+                description: Whether the cluster should be assigned a public IP address.
+                  Defaults to false. If set to true on a private subnet, the cluster
+                  provisioning will fail.
+                type: boolean
+              nsgIds:
+                description: A list of the OCIDs of the network security groups (NSGs)
+                  to apply to the cluster endpoint. For more information about NSGs,
+                  see NetworkSecurityGroup.
+                items:
+                  type: string
+                type: array
               status:
                 properties:
                   conditions:
@@ -116,6 +128,10 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              subnetId:
+                description: The OCID of the regional subnet in which to place the
+                  Cluster endpoint.
+                type: string
             required:
             - status
             type: object

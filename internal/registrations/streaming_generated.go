@@ -13,9 +13,7 @@ import (
 	streamingv1beta1 "github.com/oracle/oci-service-operator/api/streaming/v1beta1"
 	streamingcontrollers "github.com/oracle/oci-service-operator/controllers/streaming"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
-	streamingconnectharnessservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/streaming/connectharness"
 	streamingstreamservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/streaming/stream"
-	streamingstreampoolservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/streaming/streampool"
 )
 
 func init() {
@@ -23,17 +21,6 @@ func init() {
 		Group:       "streaming",
 		AddToScheme: streamingv1beta1.AddToScheme,
 		SetupWithManager: func(ctx Context) error {
-			if err := (&streamingcontrollers.ConnectHarnessReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"ConnectHarness",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return streamingconnectharnessservicemanager.NewConnectHarnessServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup ConnectHarness controller: %w", err)
-			}
 			if err := (&streamingcontrollers.StreamReconciler{
 				Reconciler: NewBaseReconciler(
 					ctx,
@@ -44,17 +31,6 @@ func init() {
 				),
 			}).SetupWithManager(ctx.Manager); err != nil {
 				return fmt.Errorf("setup Stream controller: %w", err)
-			}
-			if err := (&streamingcontrollers.StreamPoolReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"StreamPool",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return streamingstreampoolservicemanager.NewStreamPoolServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup StreamPool controller: %w", err)
 			}
 			return nil
 		},

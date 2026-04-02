@@ -3,9 +3,11 @@
 This checklist seeds `nosql/Table`, `psql/DbSystem`, and `mysql/DbSystem` from
 the same reference points:
 
-- `formal/controllers/identity/user` is the generated-runtime precedent for
-  required status projection, read-after-write, and finalizer retention until
-  delete confirmation.
+- `formal/controllers/identity/user` remains the explicit backlog
+  generated-runtime reference for required status projection, read-after-write,
+  and finalizer retention until delete confirmation, even though
+  blank/default-active runs no longer check the `User` controller and
+  service-manager into the repo.
 - `formal/controllers/streaming/stream` is the generated-runtime reference for
   bind-versus-create, lifecycle-sensitive list lookup, and delete-side lookup
   branching, while its ready-only secret companion still uses Stream UID
@@ -75,8 +77,9 @@ the same reference points:
 
 ### Status projection
 
-- Shared rule: `identity/User` is the generated-runtime precedent for required
-  status projection plus OSOK lifecycle conditions.
+- Shared rule: preserve the `identity/User` backlog reference for required
+  status projection plus OSOK lifecycle conditions even though blank/default-
+  active runs no longer check in that runtime.
 - `nosql/Table`, `psql/DbSystem`, and `mysql/DbSystem`: seed the
   generated-runtime baseline with required status projection.
 - Owner: shared generated-runtime baseline for all three resources.
@@ -99,8 +102,8 @@ the same reference points:
 
 ### Delete semantics
 
-- Shared rule: `identity/User` is the generated-runtime precedent for retaining
-  the finalizer until `Get` or list fallback confirms deletion.
+- Shared rule: preserve the `identity/User` backlog reference for retaining the
+  finalizer until `Get` or list fallback confirms deletion.
 - `nosql/Table`, `psql/DbSystem`, and `mysql/DbSystem`: seed required delete
   confirmation plus `retain-until-confirmed-delete`.
 - Owner: shared generated-runtime baseline for all three resources.

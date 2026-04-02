@@ -55,6 +55,10 @@ spec:
           status:
             description: PrimaryDbInstanceStatus defines the observed state of PrimaryDbInstance.
             properties:
+              dbInstanceId:
+                description: A unique identifier for the primary database instance
+                  node.
+                type: string
               status:
                 properties:
                   conditions:

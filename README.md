@@ -8,14 +8,21 @@ OSOK is based on the [Operator Framework](https://operatorframework.io/), an ope
 
 **Supported API Groups**
 
-OSOK now ships generator-owned APIs and runtime scaffolding from the checked-in
-service map in `internal/generator/config/services.yaml`. The current inventory
-spans `artifacts`, `certificates`, `certificatesmanagement`,
+OSOK now ships generator-owned APIs and runtime scaffolding for the
+default-active first-wave surface declared in
+`internal/generator/config/services.yaml`: `containerengine`, `mysql`,
+`nosql`, `psql`, `database/AutonomousDatabase`, and `streaming/Stream`.
+
+The checked-in config still tracks a broader backlog inventory across
+`artifacts`, `certificates`, `certificatesmanagement`,
 `containerengine`, `core`, `database`, `dns`, `events`, `functions`,
 `identity`, `keymanagement`, `limits`, `loadbalancer`, `logging`,
 `monitoring`, `mysql`, `networkloadbalancer`, `nosql`, `objectstorage`,
 `ons`, `psql`, `queue`, `secrets`, `streaming`, `vault`, and
-`workrequests`.
+`workrequests`. Use
+`go run ./cmd/generator --config internal/generator/config/services.yaml --service <service> --overwrite`
+when local work needs one of those inactive or backlog services generated
+explicitly.
 
 See [docs/services.md](docs/services.md#services) for the supported service map
 and [config/samples](config/samples) for generated manifest examples.

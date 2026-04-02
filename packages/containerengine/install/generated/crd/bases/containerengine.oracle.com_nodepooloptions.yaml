@@ -81,6 +81,8 @@ spec:
                     imageId:
                       description: The OCID of the image.
                       type: string
+                    jsonData:
+                      type: string
                     sourceName:
                       description: The user-friendly name of the entity corresponding
                         to the OCID.
