@@ -694,6 +694,11 @@ func TestReconcileDelete_ReleasesFinalizerOnUnambiguousNotFound(t *testing.T) {
 }
 
 func TestIsNotFoundOCI_RejectsAuthAmbiguity(t *testing.T) {
+	assert.True(t, isNotFoundOCI(errorutil.NotFoundOciError{
+		HTTPStatusCode: 404,
+		ErrorCode:      errorutil.NotFound,
+		Description:    "normalized not found",
+	}))
 	assert.False(t, isNotFoundOCI(errorutil.UnauthorizedAndNotFoundOciError{
 		HTTPStatusCode: 404,
 		ErrorCode:      errorutil.NotAuthorizedOrNotFound,
@@ -709,7 +714,7 @@ func TestIsNotFoundOCI_RejectsAuthAmbiguity(t *testing.T) {
 		code:       "NotFound",
 		message:    "not found",
 	}))
-	assert.True(t, isNotFoundOCI(fakeServiceError{
+	assert.False(t, isNotFoundOCI(fakeServiceError{
 		statusCode: 404,
 		code:       "UnexpectedCode",
 		message:    "resource not found",
@@ -719,10 +724,15 @@ func TestIsNotFoundOCI_RejectsAuthAmbiguity(t *testing.T) {
 		code:       "UnexpectedCode",
 		message:    "resource not authorized",
 	}))
+	assert.False(t, isNotFoundOCI(errorutil.ConflictOciError{
+		HTTPStatusCode: 409,
+		ErrorCode:      errorutil.IncorrectState,
+		Description:    "normalized conflict",
+	}))
 	assert.False(t, isNotFoundOCI(fakeServiceError{
-		statusCode: 404,
-		code:       "UnexpectedCode",
-		message:    "resource terminated",
+		statusCode: 409,
+		code:       errorutil.IncorrectState,
+		message:    "resource conflict",
 	}))
 }
 
