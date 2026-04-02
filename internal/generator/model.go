@@ -72,13 +72,18 @@ type PackageMetadataModel struct {
 	DefaultControllerImage string
 }
 
+// InstallPatchModel renders one kustomize patch stanza for install overlays.
+type InstallPatchModel struct {
+	Path   string
+	Target string
+}
+
 // InstallKustomizationModel renders to packages/<group>/install/kustomization.yaml.
 type InstallKustomizationModel struct {
-	Namespace   string
-	NamePrefix  string
-	Resources   []string
-	PatchPath   string
-	PatchTarget string
+	Namespace  string
+	NamePrefix string
+	Resources  []string
+	Patches    []InstallPatchModel
 }
 
 // ServiceManagerModel describes one generated pkg/servicemanager scaffold package.

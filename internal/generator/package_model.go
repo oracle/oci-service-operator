@@ -44,6 +44,9 @@ func buildPackageModel(cfg *Config, service ServiceConfig, discovered []Resource
 }
 
 func buildPackageOutputModel(service ServiceConfig, resources []ResourceModel) PackageOutputModel {
+	defaultControllerImage := fmt.Sprintf("iad.ocir.io/oracle/oci-service-operator-%s:latest", service.Group)
+	managerOverlay := fmt.Sprintf("../../../config/manager/%s", service.Group)
+
 	output := PackageOutputModel{
 		Generate: true,
 		Metadata: PackageMetadataModel{
@@ -51,7 +54,7 @@ func buildPackageOutputModel(service ServiceConfig, resources []ResourceModel) P
 			PackageNamespace:       fmt.Sprintf("oci-service-operator-%s-system", service.Group),
 			PackageNamePrefix:      fmt.Sprintf("oci-service-operator-%s-", service.Group),
 			CRDPaths:               fmt.Sprintf("./api/%s/...", service.Group),
-			DefaultControllerImage: "iad.ocir.io/oracle/oci-service-operator:latest",
+			DefaultControllerImage: defaultControllerImage,
 		},
 	}
 
@@ -60,17 +63,29 @@ func buildPackageOutputModel(service ServiceConfig, resources []ResourceModel) P
 		output.Metadata.RBACPaths = fmt.Sprintf("./controllers/%s/...", service.Group)
 		output.Install.Namespace = fmt.Sprintf("oci-service-operator-%s-system", service.Group)
 		output.Install.NamePrefix = fmt.Sprintf("oci-service-operator-%s-", service.Group)
-		output.Install.PatchPath = "../../../config/default/manager_config_patch.yaml"
-		output.Install.PatchTarget = "Deployment"
 		output.Install.Resources = append(output.Install.Resources,
 			"generated/crd",
 			"generated/rbac",
-			"../../../config/manager",
+			managerOverlay,
 			"../../../config/rbac/role_binding.yaml",
 			"../../../config/rbac/leader_election_role.yaml",
 			"../../../config/rbac/leader_election_role_binding.yaml",
 		)
 		output.Install.Resources = appendUniqueStrings(output.Install.Resources, service.Package.ExtraResources...)
+		if service.Group == "database" {
+			output.Install.Resources = appendUniqueStrings(output.Install.Resources,
+				"../../../config/webhook",
+				"../../../config/certmanager",
+			)
+			output.Install.Patches = append(output.Install.Patches,
+				InstallPatchModel{Path: "../../../config/default/manager_webhook_patch.yaml", Target: "Deployment"},
+				InstallPatchModel{Path: "../../../config/default/webhookcainjection_patch.yaml"},
+			)
+		}
+		output.Install.Patches = append(output.Install.Patches, InstallPatchModel{
+			Path:   "../../../config/default/manager_config_patch.yaml",
+			Target: "Deployment",
+		})
 	case PackageProfileCRDOnly:
 		output.Install.Resources = append(output.Install.Resources, "generated/crd")
 	default:

@@ -7,7 +7,7 @@ namePrefix: oci-service-operator-psql-
 resources:
 - generated/crd
 - generated/rbac
-- ../../../config/manager
+- ../../../config/manager/psql
 - ../../../config/rbac/role_binding.yaml
 - ../../../config/rbac/leader_election_role.yaml
 - ../../../config/rbac/leader_election_role_binding.yaml
