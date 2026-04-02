@@ -12,7 +12,9 @@ rules:
   - create
   - delete
   - get
+  - list
   - update
+  - watch
 - apiGroups:
   - streaming.oracle.com
   resources:
