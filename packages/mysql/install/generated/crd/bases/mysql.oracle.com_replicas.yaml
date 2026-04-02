@@ -1,0 +1,279 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: replicas.mysql.oracle.com
+spec:
+  group: mysql.oracle.com
+  names:
+    kind: Replica
+    listKind: ReplicaList
+    plural: replicas
+    singular: replica
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the Replica
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the Replica
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Replica is the Schema for the replicas API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ReplicaSpec defines the desired state of Replica.
+            properties:
+              dbSystemId:
+                description: The OCID of the DB System the read replica is associated
+                  with.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: User provided description of the read replica.
+                type: string
+              displayName:
+                description: The user-friendly name for the read replica. It does
+                  not have to be unique.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              isDeleteProtected:
+                description: |-
+                  Specifies whether the read replica can be deleted. Set to true to prevent deletion, false (default) to allow.
+                  Note that if a read replica is delete protected it also prevents the entire DB System from being deleted. If
+                  the DB System is delete protected, read replicas can still be deleted individually if they are not delete
+                  protected themselves.
+                type: boolean
+              replicaOverrides:
+                description: ReplicaOverrides defines nested fields for Replica.ReplicaOverrides.
+                properties:
+                  configurationId:
+                    description: The OCID of the Configuration to be used by the read
+                      replica.
+                    type: string
+                  mysqlVersion:
+                    description: The MySQL version to be used by the read replica.
+                    type: string
+                  shapeName:
+                    description: |-
+                      The shape to be used by the read replica. The shape determines the resources allocated:
+                      CPU cores and memory for VM shapes, CPU cores, memory and storage for non-VM (bare metal) shapes.
+                      To get a list of shapes, use the ListShapes operation.
+                    type: string
+                type: object
+            required:
+            - dbSystemId
+            type: object
+          status:
+            description: ReplicaStatus defines the observed state of Replica.
+            properties:
+              availabilityDomain:
+                description: The name of the Availability Domain the read replica
+                  is located in.
+                type: string
+              compartmentId:
+                description: The OCID of the compartment that contains the read replica.
+                type: string
+              configurationId:
+                description: The OCID of the Configuration currently in use by the
+                  read replica.
+                type: string
+              dbSystemId:
+                description: The OCID of the DB System the read replica is associated
+                  with.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: User provided description of the read replica.
+                type: string
+              displayName:
+                description: The user-friendly name for the read replica. It does
+                  not have to be unique.
+                type: string
+              faultDomain:
+                description: The name of the Fault Domain the read replica is located
+                  in.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              id:
+                description: The OCID of the read replica.
+                type: string
+              ipAddress:
+                description: The IP address the read replica is configured to listen
+                  on.
+                type: string
+              isDeleteProtected:
+                description: |-
+                  Specifies whether the read replica can be deleted. Set to true to prevent deletion, false (default) to allow.
+                  Note that if a read replica is delete protected it also prevents the entire DB System from being deleted. If
+                  the DB System is delete protected, read replicas can still be deleted individually if they are not delete
+                  protected themselves.
+                type: boolean
+              lifecycleDetails:
+                description: A message describing the state of the read replica.
+                type: string
+              lifecycleState:
+                description: The state of the read replica.
+                type: string
+              mysqlVersion:
+                description: The MySQL version currently in use by the read replica.
+                type: string
+              port:
+                description: The port the read replica is configured to listen on.
+                type: integer
+              portX:
+                description: The TCP network port on which X Plugin listens for connections.
+                  This is the X Plugin equivalent of port.
+                type: integer
+              replicaOverrides:
+                description: ReplicaOverrides defines nested fields for Replica.ReplicaOverrides.
+                properties:
+                  configurationId:
+                    description: The OCID of the Configuration to be used by the read
+                      replica.
+                    type: string
+                  mysqlVersion:
+                    description: The MySQL version to be used by the read replica.
+                    type: string
+                  shapeName:
+                    description: |-
+                      The shape to be used by the read replica. The shape determines the resources allocated:
+                      CPU cores and memory for VM shapes, CPU cores, memory and storage for non-VM (bare metal) shapes.
+                      To get a list of shapes, use the ListShapes operation.
+                    type: string
+                type: object
+              secureConnections:
+                description: ReplicaSecureConnections defines nested fields for Replica.SecureConnections.
+                properties:
+                  certificateGenerationType:
+                    description: Select whether to use MySQL Database Service-managed
+                      certificate (SYSTEM) or your own certificate (BYOC).
+                    type: string
+                  certificateId:
+                    description: The OCID of the certificate to use.
+                    type: string
+                type: object
+              shapeName:
+                description: |-
+                  The shape currently in use by the read replica. The shape determines the resources allocated:
+                  CPU cores and memory for VM shapes, CPU cores, memory and storage for non-VM (bare metal) shapes.
+                  To get a list of shapes, use the ListShapes operation.
+                type: string
+              status:
+                properties:
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              timeCreated:
+                description: The date and time the read replica was created, as described
+                  by RFC 3339 (https://tools.ietf.org/rfc/rfc3339).
+                type: string
+              timeUpdated:
+                description: The time the read replica was last updated, as described
+                  by RFC 3339 (https://tools.ietf.org/rfc/rfc3339).
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

@@ -1,162 +1,160 @@
 # Oracle MySQL Database Service
 
 - [Introduction](#introduction)
-- [MySQL DB System Pre-requisites](#pre-requisites-for-setting-up-mysql-dbsystems)
-- [MySQL DB System Specification Parameters](#mysql-dbsystem-specification-parameters)
-- [MySQL DB System Status Parameters](#mysql-dbsystem-status-parameters)
-- [Provision](#provisioning-a-mysql-dbsystem)
-- [Bind](#binding-to-an-existing-mysql-dbsystem)
-- [Update](#updating-a-mysql-dbsystem)
-- [Access Information in Kubernetes Secret](#access-information-in-kubernetes-secrets)
+- [MySQL DB System Pre-requisites](#pre-requisites-for-setting-up-mysql-db-systems)
+- [MySQL DB System Specification Parameters](#mysql-db-system-specification-parameters)
+- [MySQL DB System Status Parameters](#mysql-db-system-status-parameters)
+- [Provision](#provisioning-a-mysql-db-system)
+- [Update](#updating-a-mysql-db-system)
+- [Kubernetes Secrets](#kubernetes-secrets)
 
 ## Introduction
 
-[Oracle MySQL Database Service](https://www.oracle.com/mysql/) is a fully managed database service that lets developers quickly develop and deploy secure, cloud native applications using the world’s most popular open source database. Oracle MySQL Database Service is also offered via the OCI Service Operator for Kubernetes, making it easy for applications to provision and integrate seamlessly with MySQL databases.
+[Oracle MySQL Database Service](https://www.oracle.com/mysql/) is a fully
+managed database service that lets developers provision and operate MySQL DB
+Systems on OCI.
 
+The generator-owned v2 mysql API now uses:
+
+- `apiVersion: mysql.oracle.com/v1beta1`
+- `kind: DbSystem`
+
+The legacy mysql compatibility surface is no longer published.
 
 ## Pre-requisites for setting up MySQL DB Systems
 
-If this is your first time using MySQL Database Service, ensure your tenancy administrator has performed the following tasks:
+If this is your first time using MySQL Database Service, ensure your tenancy
+administrator has performed the following tasks.
 
 ### Create VCN/Subnets
-  - [Virtual Networking Quickstart](https://docs.oracle.com/en-us/iaas/Content/Network/Tasks/quickstartnetworking.htm) Create VCN and subnets using Virtual Cloud Networks > Start VCN Wizard > Create a VCN with Internet Connectivity.
-  - It would be advisable if the VCN for Mysql DbSystem is created in the same vcn as the Kubernetes cluster.
-  - [Comprehensive networking setup](https://docs.oracle.com/en-us/iaas/mysql-database/doc/networking-setup-mysql-db-systems.html#MYAAS-GUID-2B4F78DD-72D3-45BA-8F6A-AC5E3A11B729)
+
+- Follow the [Virtual Networking Quickstart](https://docs.oracle.com/en-us/iaas/Content/Network/Tasks/quickstartnetworking.htm) to create a VCN and subnets.
+- Prefer placing the MySQL DB System in the same VCN as the Kubernetes cluster.
+- Review the [MySQL networking setup guide](https://docs.oracle.com/en-us/iaas/mysql-database/doc/networking-setup-mysql-db-systems.html#MYAAS-GUID-2B4F78DD-72D3-45BA-8F6A-AC5E3A11B729).
 
 ### Create Policies
 
-Create policies in the root compartment with the following statements [Policy Setup Documentation](https://docs.oracle.com/en-us/iaas/mysql-database/doc/policy-details-mysql-database-service.html#GUID-2D9D3C84-07A3-4BEE-82C7-B5A72A943F53)
+Create policies in the root compartment with the following statements.
 
-**When using Instance Principals**
-The OCI Service Operator dynamic group should have the `manage` permission for the `mysql-family` resource type. Use this approach when levraging Instance Principals for OSOK. This the recommended approach for running OSOK within OCI.
-
-**Sample Policy:**
+When using Instance Principals:
 
 ```plain
 Allow dynamic-group <OSOK_DYNAMIC_GROUP> to {SUBNET_READ, SUBNET_ATTACH, SUBNET_DETACH, VCN_READ, COMPARTMENT_INSPECT} in [ tenancy | compartment <compartment_name> | compartment id <compartment_ocid> ]
-```
-```plain
 Allow dynamic-group <OSOK_DYNAMIC_GROUP> to manage mysql-family in [ tenancy | compartment <compartment_name> | compartment id <compartment_ocid> ]
-```
-```plain
 Allow dynamic-group <OSOK_DYNAMIC_GROUP> to use tag-namespaces in tenancy
 ```
 
-**When using User Principals**
-The OCI Service Operator user should have the `manage` permission for the `mysql-family` resource type. Use this approach when levraging User Principals for OSOK. This the recommended approach for running OSOK outside OCI.
-
-
-**Sample Policy:**
+When using User Principals:
 
 ```plain
 Allow group <OSOK_GROUP> to {SUBNET_READ, SUBNET_ATTACH, SUBNET_DETACH, VCN_READ, COMPARTMENT_INSPECT} in [ tenancy | compartment <compartment_name> | compartment id <compartment_ocid> ]
-```
-```plain
 Allow group <OSOK_GROUP> to manage mysql-family in [ tenancy | compartment <compartment_name> | compartment id <compartment_ocid> ]
-```
-```plain
 Allow group <OSOK_GROUP> to use tag-namespaces in tenancy
 ```
-
 
 Without these policies, the service will not function correctly.
 
 ## MySQL DB System Specification Parameters
 
-The Complete Specification of the `mysqldbsystems` Custom Resource (CR) is as detailed below:
+The published CRD is `dbsystems.mysql.oracle.com`, and the top-level kind is
+`DbSystem`. The generated v2 surface does not preserve the old `spec.id` bind
+alias or the legacy kind name.
 
-| Parameter                          | Description                                                         | Type   | Mandatory |
-| ---------------------------------- | ------------------------------------------------------------------- | ------ | --------- |
-| `spec.id` | The Mysql DbSystem [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm). | string | no  |
-| `spec.displayName` | The user-friendly name for the Mysql DbSystem. The name does not have to be unique. | string | yes       |
-| `spec.compartmentId` | The [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment of the Mysql DbSystem. | string | yes       |
-| `spec.shapeName` | The name of the shape. The shape determines the resources allocated. CPU cores and memory for VM shapes; CPU cores, memory and storage for non-VM (or bare metal) shapes.  | string | yes       |
-| `spec.subnetId` | The OCID of the subnet the DB System is associated with.  | string | yes       |
-| `spec.dataStorageSizeInGBs`| Initial size of the data volume in GBs that will be created and attached. Keep in mind that this only specifies the size of the database data volume, the log volume for the database will be scaled appropriately with its shape. | int    | yes       |
-| `spec.isHighlyAvailable` | Specifies if the DB System is highly available.  | boolean | yes       |
-| `spec.availabilityDomain`| The availability domain on which to deploy the Read/Write endpoint. This defines the preferred primary instance. | string | yes        |
-| `spec.faultDomain`| The fault domain on which to deploy the Read/Write endpoint. This defines the preferred primary instance. | string | no        |
-| `spec.configuration.id` | The OCID of the Configuration to be used for this DB System. [More info about Configurations](https://docs.oracle.com/en-us/iaas/mysql-database/doc/db-systems.html#GUID-E2A83218-9700-4A49-B55D-987867D81871)| string | yes |
-| `spec.description` | User-provided data about the DB System. | string | no |
-| `spec.hostnameLabel` | The hostname for the primary endpoint of the DB System. Used for DNS. | string | no |
-| `spec.mysqlVersion` | The specific MySQL version identifier. | string | no |
-| `spec.port` | The port for primary endpoint of the DB System to listen on. | int | no |
-| `spec.portX` | The TCP network port on which X Plugin listens for connections. This is the X Plugin equivalent of port. | int | no |
-| `spec.ipAddress` | The IP address the DB System is configured to listen on. A private IP address of your choice to assign to the primary endpoint of the DB System. Must be an available IP address within the subnet's CIDR. If you don't specify a value, Oracle automatically assigns a private IP address from the subnet. This should be a "dotted-quad" style IPv4 address. | string | no |
-| `spec.freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see [Resource Tags](https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). `Example: {"Department": "Finance"}` | string | no |
-| `spec.definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see [Resource Tags](https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). | string | no |
-| `spec.adminUsername.secret.secretName` | The username for the administrative user. | string | yes       |
-| `spec.adminPassword.secret.secretName` | The Kubernetes Secret Name that contains admin password for Mysql DbSystem. The password must be between 8 and 32 characters long, and must contain at least 1 numeric character, 1 lowercase character, 1 uppercase character, and 1 special (nonalphanumeric) character. | string | yes       |
+| Parameter | Description | Type | Mandatory |
+| --- | --- | --- | --- |
+| `spec.compartmentId` | OCID of the compartment. | string | yes |
+| `spec.shapeName` | Shape name for the DB System. | string | yes |
+| `spec.subnetId` | OCID of the subnet associated with the DB System. | string | yes |
+| `spec.displayName` | User-friendly display name. | string | no |
+| `spec.description` | User-provided description. | string | no |
+| `spec.isHighlyAvailable` | Whether the DB System is highly available. | boolean | no |
+| `spec.availabilityDomain` | Preferred availability domain. | string | no |
+| `spec.faultDomain` | Preferred fault domain. | string | no |
+| `spec.configurationId` | OCID of the MySQL configuration to use. | string | no |
+| `spec.mysqlVersion` | Specific MySQL version identifier. | string | no |
+| `spec.adminUsername` | Administrative username secret reference. Set `spec.adminUsername.secret.secretName` to a Secret in the same namespace that contains a `username` key. | object | no |
+| `spec.adminPassword` | Administrative password secret reference. Set `spec.adminPassword.secret.secretName` to a Secret in the same namespace that contains a `password` key. | object | no |
+| `spec.dataStorageSizeInGBs` | Initial data volume size in GBs. | int | no |
+| `spec.hostnameLabel` | Hostname label for the primary endpoint. | string | no |
+| `spec.ipAddress` | Private IP address for the primary endpoint. | string | no |
+| `spec.port` | Primary MySQL port. | int | no |
+| `spec.portX` | X Plugin port. | int | no |
+| `spec.backupPolicy` | Backup policy details. | object | no |
+| `spec.source` | Restore source details. | object | no |
+| `spec.maintenance` | Maintenance window settings. | object | no |
+| `spec.freeformTags` | Free-form OCI tags. | object | no |
+| `spec.definedTags` | Defined OCI tags. | object | no |
+| `spec.deletionPolicy` | Delete protection and final backup settings. | object | no |
+| `spec.crashRecovery` | Crash recovery mode. | string | no |
+| `spec.databaseManagement` | Database Management service mode. | string | no |
+| `spec.secureConnections` | TLS certificate configuration. | object | no |
 
+When `spec.source` is set, choose a `spec.source.sourceType` and provide only
+the matching variant field:
 
+- `BACKUP`: `spec.source.backupId`
+- `PITR`: `spec.source.dbSystemId` with optional `spec.source.recoveryPoint`
+- `IMPORTURL`: `spec.source.sourceUrl`
+- `NONE`: no additional source field
 
 ## MySQL DB System Status Parameters
 
-| Parameter                                         | Description                                                         | Type   | Mandatory |
-| --------------------------------------------------| ------------------------------------------------------------------- | ------ | --------- |
-| `status.osokstatus.conditions.type`               | Lifecycle state of the Mysql DbSystem Service. The following values are valid: <ul><li>**Provisioning** - indicates an Mysql DbSystem is provisioning. </li><li>**Active** - indicates an Mysql DbSystem is Active. </li><li>**Failed** - indicates an Mysql DbSystem failed provisioning. </li><li>**Terminating** - indicates an Mysql DbSystem is Deleting. </li></ul>|  string  |  no  |
-| `status.osokstatus.conditions.status`             | Status of the Mysql DbSystem Custom Resource during the condition update. |  string  |  no  |
-| `status.osokstatus.conditions.lastTransitionTime` | Last time the Mysql DbSystem  CR was Updated. |  string  |  no  | 
-| `status.osokstatus.conditions.message`            | Message of the status condition of the CR. | string | no | 
-| `status.osokstatus.conditions.reason`             | Resource if any of status condition of the CR. | string | no |
-| `status.osokstatus.ocid`                          | The Mysql DbSystem [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm). |  string  | yes |
-| `status.osokstatus.message`                       | Overall status message of the CR.  |  string  | no  |
-| `status.osokstatus.reason`                        | Overall status reason of the CR.   | string | no |
-| `status.osokstatus.createdAt`                     | Created time of the Mysql DbSystem.            | string | no |  
-| `status.osokstatus.updatedAt`                     | Updated time of the Mysql DbSystem.            | string | no |
-| `status.osokstatus.requestedAt`                   | Requested time of the CR.          | string | no |
-| `status.osokstatus.deletedAt`                     | Deleted time of the CR.            | string | no | 
+| Parameter | Description | Type |
+| --- | --- | --- |
+| `status.status.conditions.type` | OSOK lifecycle condition such as provisioning, active, failed, or terminating. | string |
+| `status.status.conditions.message` | Condition message. | string |
+| `status.status.conditions.reason` | Condition reason. | string |
+| `status.status.ocid` | OCI identifier tracked by OSOK. | string |
+| `status.id` | OCI DB System OCID returned by the generated runtime. | string |
+| `status.displayName` | Observed display name. | string |
+| `status.lifecycleState` | Observed OCI lifecycle state. | string |
+| `status.timeCreated` | OCI creation time. | string |
+| `status.timeUpdated` | OCI update time. | string |
+| `status.currentPlacement` | Observed availability and fault domain placement. | object |
+| `status.adminUsername.secret.secretName` | Last applied administrative username secret reference. | string |
+| `status.adminPassword.secret.secretName` | Last applied administrative password secret reference. | string |
 
 ## Provisioning a MySQL DB System
 
-Provisioning of a MySQL DB System requires the user to input the admin username and admin password as a Kubernetes secret. OSOK acquires the admin usernmame and admin password from the Kubernetes secret whose name is provided in the `spec`. 
-The Kubernetes secret should contain the admin username in `username` field. 
-The Kubernetes secret should contain the admin password in `password` field. 
+Provisioning a MySQL DB System requires a same-namespace Kubernetes Secret for
+the administrative credentials. The operator reads the `username` and
+`password` keys from that Secret when it builds the OCI create request; the
+credential values are not stored in the CR.
+
+- `SUBNET_OCID`: OCID of the subnet created in the pre-requisites step
+- `CONFIGURATION_OCID`: OCID of the MySQL configuration to attach
+
+Create the credentials Secret first:
 
 ```yaml
 apiVersion: v1
 kind: Secret
 metadata:
-  name: <ADMIN_SECRET_NAME>
+  name: admin-secret
 type: Opaque
-data:
-  username: <USERNAME_BASE64_ENCODED>
-  password: <PASSWORD_BASE64_ENCODED>
+stringData:
+  username: admin
+  password: S3cr3t!
 ```
-
-Run the following command to create a secret for the Mysql DbSystem:
-```sh
-kubectl apply -f <CREATE_SECRET>.yaml
-```
-
-The MySQL DB System can be accessed from the Secret which will be persisted as part of the provision/bind operation of the CR.
-
-The OSOK MySqlDbSystem controller automatically provisions a MySQL DB System when you provide mandatory fields to the `spec`. The following is a sample CR yaml for MySqlDbSystem.
-
-- SUBNET_OCID - OCID of the subnet created in the pre-requisites step
-- CONFIGURATION_ID - [More info about Configurations](https://docs.oracle.com/en-us/iaas/mysql-database/doc/db-systems.html#GUID-E2A83218-9700-4A49-B55D-987867D81871) Get your [Configuration_id](https://console.us-ashburn-1.oraclecloud.com/mysqlaas/configurations) 
-
 
 ```yaml
-
-apiVersion: oci.oracle.com/v1beta1
-kind: MySqlDbSystem
+apiVersion: mysql.oracle.com/v1beta1
+kind: DbSystem
 metadata:
-  name: <CR_OBJECT_NAME>
+  name: example-dbsystem
 spec:
   compartmentId: <COMPARTMENT_OCID>
   displayName: <DISPLAY_NAME>
   shapeName: <SHAPE>
   subnetId: <SUBNET_OCID>
-  configuration:
-    id: <CONFIGURATION_OCID>
-  availabilityDomain: <AVAIALABILITY_DOMAIN>
+  configurationId: <CONFIGURATION_OCID>
+  availabilityDomain: <AVAILABILITY_DOMAIN>
   adminUsername:
     secret:
-      secretName: <ADMIN_SECRET>
+      secretName: admin-secret
   adminPassword:
     secret:
-      secretName: <ADMIN_SECRET>
+      secretName: admin-secret
   description: <DESCRIPTION>
   dataStorageSizeInGBs: <DB_SIZE>
   port: <PORT>
@@ -164,94 +162,73 @@ spec:
   freeformTags:
     <KEY1>: <VALUE1>
   definedTags:
-    <TAGNAMESPACE1>:
+    <TAG_NAMESPACE>:
       <KEY1>: <VALUE1>
-
 ```
 
-Run the following command to create a CR to the cluster:
+Apply the resource:
+
 ```sh
 kubectl apply -f <CREATE_YAML>.yaml
 ```
 
-Once the CR is created, OSOK will Reconcile and creates a MySQL DB System. OSOK will ensure the MySQL DB System instance is Available.
+Inspect the resource:
 
-The MySqlDbSystem CR can list the MySQL DB Systems in the cluster: 
 ```sh
-$ kubectl get mysqldbsystems
-NAME                       STATUS         AGE
-mysqldbsystems-sample      Active         4d
-```
-
-The MySqlDbSystem CR can list the MySQL DB Systems in the cluster with detailed information: 
-```sh
-$ kubectl get mysqldbsystems -o wide
-NAME                         DISPLAYNAME     STATUS         OCID                                   AGE
-mysqldbsystems-sample        BusyBoxDB       Active         ocid1.mysqldbsystem.oc1.iad.........   4d
-```
-
-The MysqlDbSystem CR can be described as below:
-```sh
-$ kubectl describe mysqldbsystems <NAME_OF_CR_OBJECT>
-```
-
-## Binding to an Existing MySQL DB System
-
-OSOK allows you to bind to an existing MySQL DB System. In this case, `Id` is the only required field in the CR `spec`.
-
-```yaml
-apiVersion: oci.oracle.com/v1beta1
-kind: MySqlDbSystem
-metadata:
-  name: <CR_OBJECT_NAME>
-spec:
-  id: <MYSQLDBSYSTEM_OCID>
-```
-
-Run the following command to create a CR that binds to an existing MySQL DB System:
-```sh
-kubectl apply -f <BIND_YAML>.yaml
+kubectl get dbsystems
+kubectl get dbsystems -o wide
+kubectl describe dbsystems <NAME_OF_CR_OBJECT>
 ```
 
 ## Updating a MySQL DB System
 
-You can also update a number of [parameters](https://docs.oracle.com/en-us/iaas/mysql-database/doc/managing-db-system.html#GUID-24D56090-C7E8-4A21-B450-BCBFAD231911) of the MySQL DB System.
+Update the same `DbSystem` object by modifying supported mutable fields. Keep
+the admin credential references in their secret-backed form.
+
 ```yaml
-apiVersion: oci.oracle.com/v1beta1
-kind: MySqlDbSystem
+apiVersion: mysql.oracle.com/v1beta1
+kind: DbSystem
 metadata:
-  name: <CR_OBJECT_NAME>
+  name: example-dbsystem
 spec:
-  id: <MYSQLDBSYSTEM_OCID>
-  displayName: <UPDATE_DISPLAY_NAME>
-  description: <UPDATE_DESCRIPTION>
-  configuration:
-    id: <UPDATE_CONFIGURATION_ID>
+  compartmentId: <COMPARTMENT_OCID>
+  shapeName: <SHAPE>
+  subnetId: <SUBNET_OCID>
+  displayName: <UPDATED_DISPLAY_NAME>
+  description: <UPDATED_DESCRIPTION>
+  configurationId: <UPDATED_CONFIGURATION_OCID>
+  adminUsername:
+    secret:
+      secretName: admin-secret
+  adminPassword:
+    secret:
+      secretName: admin-secret
   freeformTags:
     <KEY1>: <VALUE1>
   definedTags:
-    <TAGNAMESPACE1>:
+    <TAG_NAMESPACE>:
       <KEY1>: <VALUE1>
 ```
 
-Run the following command to create a CR that updates an existing MySQL DB System. 
+Apply the updated manifest:
+
 ```sh
 kubectl apply -f <UPDATE_YAML>.yaml
 ```
 
-## Access Information in Kubernetes Secrets
+## Kubernetes Secrets
 
-The Access information of a OCI Service or Resource will be created as a Kubernetes secret to manage the MySQL DB System. The name of the secret can be provided in the CR yaml or by default the name of the CR will be used.
+The generated v2 mysql `DbSystem` surface preserves secret-backed admin
+credentials without restoring the old handwritten runtime path.
 
-You will get the access information as Kubernetes Secret to use the MySQL DB System. The following files/details will be made available to you:
-
-| Parameter           | Description                                                              | Type   |
-| ------------------  | ------------------------------------------------------------------------ | ------ |
-| `InternalFQDN`      | DNS endpoint                                                             | string |
-| `MySQLPort`         | Mysql port                                                               | string |
-| `MySQLXProtocolPort`| Mysql portx                                                              | string |
-| `PrivateIPAddress`  | DbSystem's PrivateIPAddress                                              | string |
-| `AvailabilityDomain`| AvailabilityDomain                                                       | string |
-| `FaultDomain`       | FaultDomain                                                              | string |
-| `Endpoints`         | Endpoints to connect to mysql db system                                  | json   |
- 
+- `spec.adminUsername.secret.secretName` must reference a Secret in the same
+  namespace with a `username` entry.
+- `spec.adminPassword.secret.secretName` must reference a Secret in the same
+  namespace with a `password` entry.
+- If either admin secret reference is omitted, OSOK omits that field from the
+  OCI request instead of sending an empty string.
+- OSOK mirrors only non-empty referenced secret names into
+  `status.adminUsername` and `status.adminPassword` for drift tracking, but it
+  does not write the secret payload into the CR status.
+- OSOK does not create a follow-up Kubernetes Secret containing DB System
+  connection details for this generated surface.

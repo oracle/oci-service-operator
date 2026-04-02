@@ -211,28 +211,58 @@ paths such as `~/.oci/...`.
 The OCI Service Operator for Kubernetes is packaged as Operator Lifecycle Manager (OLM) Bundle for making it easy to install in Kubernetes Clusters. The bundle can be downloaded as docker image using below command.
 
 ```bash
-$ docker pull iad.ocir.io/oracle/oci-service-operator-bundle:1.1.1
+$ docker pull iad.ocir.io/oracle/oci-service-operator-bundle:<VERSION>
 ```
 
 The OSOK OLM bundle contains all the required details like CRDs, RBACs, Configmaps, deployment which will install the OSOK in the kubernetes cluster.
+
+The checked-in bundle currently ships the first-wave default-active generator
+surface from `internal/generator/config/services.yaml`: `containerengine`,
+`mysql`, `nosql`, `psql`, `database/AutonomousDatabase`, and
+`streaming/Stream`. Backlog services that remain configured but inactive by
+default are not included in the checked-in bundle until later rollout stories
+promote and regenerate them.
 
 
 Install the OSOK Operator in the Kubernetes Cluster using below command
 
 ```bash
-$ operator-sdk run bundle iad.ocir.io/oracle/oci-service-operator-bundle:1.1.1
+$ operator-sdk run bundle iad.ocir.io/oracle/oci-service-operator-bundle:<VERSION>
 ```
 
 Upgrade the OSOK Operator in the Kubernetes Cluster using below command
 
 ```bash
-$ operator-sdk run bundle-upgrade iad.ocir.io/oracle/oci-service-operator-bundle:1.1.1
+$ operator-sdk run bundle-upgrade iad.ocir.io/oracle/oci-service-operator-bundle:<VERSION>
 ```
 
 The successful installation of the OSOK in your cluster will provide the final message as below:
 ```bash
-INFO[0040] OLM has successfully installed "oci-service-operator.v1.1.1"
+INFO[0040] OLM has successfully installed "oci-service-operator.v<VERSION>"
 ```
+
+### Controller Manager Config
+
+The default kustomize deployment under `config/default` loads controller-runtime
+options from `config/manager/controller_manager_config.yaml`. The manager
+package builds the `manager-config` ConfigMap from that file and
+`config/default/manager_config_patch.yaml` mounts it into the pod while adding
+`--config=controller_manager_config.yaml` to the manager container arguments.
+
+When `--config` is present, OSOK treats the file as authoritative instead of
+merging it with the default `--metrics-bind-address`,
+`--health-probe-bind-address`, or `--leader-elect` flag values. Keep the type
+metadata exactly as shown below:
+
+```yaml
+apiVersion: controller-runtime.sigs.k8s.io/v1alpha1
+kind: ControllerManagerConfig
+```
+
+OSOK validates this file strictly during startup. Unknown fields or mismatched
+type metadata fail manager startup instead of falling back to defaults. If you
+remove `--config` from a custom deployment, the manager reverts to the built-in
+command-line defaults from `main_manager_config.go`.
 
 ### Undeploy OSOK
 
@@ -246,5 +276,5 @@ $ operator-sdk cleanup oci-service-operator
 
 The OCI Service Operator for Kubernetes by default mounts the `/etc/pki` host path so that the host
 certificate chains can be used for TLS verification. The default container image is built on top of
-Oracle Linux 7 which has the default CA trust bundle under `/etc/pki`. A new container image can be
+Oracle Linux 9 which has the default CA trust bundle under `/etc/pki`. A new container image can be
 created with a custom CA trust bundle.

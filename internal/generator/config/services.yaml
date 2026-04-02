@@ -1,0 +1,816 @@
+# Source-of-truth service map for the OSOK generator contract.
+# Service selection metadata declares the default active generation surface.
+# - selection.enabled=false keeps a service inactive by default.
+# - selection.mode=all enables all discovered kinds for that service.
+# - selection.mode=explicit limits default activity to selection.includeKinds.
+# Services without a `generation` block default to:
+# - controller/serviceManager/registration: none
+# - webhooks: manual
+schemaVersion: v1alpha1
+domain: oracle.com
+defaultVersion: v1beta1
+generatorEntrypoint: ./cmd/generator
+
+packageProfiles:
+  controller-backed:
+    description: Groups that participate in the shared manager install, whether runtime pieces are manual or generated.
+  crd-only:
+    description: Generated API groups that ship CRDs and samples before controller, service-manager, and registration rollout is enabled.
+
+services:
+  - service: artifacts
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/artifacts
+    group: artifacts
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: certificates
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/certificates
+    group: certificates
+    version: v1beta1
+    phase: security-and-identity
+    packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
+    observedState:
+      excludedFieldPaths:
+        CertificateBundle:
+          - JsonData
+          - PrivateKeyPem
+          - PrivateKeyPemPassphrase
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: certificatesmanagement
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/certificatesmanagement
+    group: certificatesmanagement
+    version: v1beta1
+    phase: security-and-identity
+    packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: containerengine
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/containerengine
+    group: containerengine
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: all
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+    observedState:
+      sdkAliases:
+        WorkRequestLog:
+          - WorkRequestLogEntry
+
+  - service: core
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/core
+    group: core
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+    observedState:
+      sdkAliases:
+        AllDrgAttachment:
+          - DrgAttachmentInfo
+        AllowedPeerRegionsForRemotePeering:
+          - PeerRegionForRemotePeering
+        AppCatalogListingAgreement:
+          - AppCatalogListingResourceVersionAgreements
+        ClusterNetworkInstance:
+          - InstanceSummary
+        ComputeCapacityReservationInstance:
+          - CapacityReservationInstanceSummary
+        ComputeGlobalImageCapabilitySchema:
+          - ComputeGlobalImageCapabilitySchemaVersionSummary
+        CrossConnectLetterOfAuthority:
+          - LetterOfAuthority
+        CrossConnectMapping:
+          - CrossConnectMappingDetails
+        CrossconnectPortSpeedShape:
+          - CrossConnectPortSpeedShape
+        DhcpOption:
+          - DhcpOptions
+        FastConnectProviderVirtualCircuitBandwidthShape:
+          - VirtualCircuitBandwidthShape
+        IPSecConnectionTunnelError:
+          - IpSecConnectionTunnelErrorDetails
+        IPSecConnectionTunnelRoute:
+          - TunnelRouteSummary
+        IPSecConnectionTunnelSecurityAssociation:
+          - TunnelSecurityAssociationSummary
+        InstanceDevice:
+          - Device
+        NetworkSecurityGroupSecurityRule:
+          - SecurityRule
+        VirtualCircuitAssociatedTunnel:
+          - VirtualCircuitAssociatedTunnelDetails
+        VolumeBackupPolicyAssetAssignment:
+          - VolumeBackupPolicyAssignment
+        WindowsInstanceInitialCredential:
+          - InstanceCredentials
+      excludedFieldPaths:
+        CrossConnectMapping:
+          - BgpMd5AuthKey
+        IPSecConnectionDeviceConfig:
+          - Tunnels.SharedSecret
+        IPSecConnectionTunnelSharedSecret:
+          - SharedSecret
+        VirtualCircuit:
+          - CrossConnectMappings.BgpMd5AuthKey
+        VolumeAttachment:
+          - JsonData
+          - ChapSecret
+        WindowsInstanceInitialCredential:
+          - Password
+
+  - service: database
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/database
+    group: database
+    version: v1beta1
+    phase: data-and-storage
+    sampleOrder: 10
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - AutonomousDatabase
+    package:
+      extraResources:
+        - ../../../config/rbac/autonomousdatabases_editor_role.yaml
+        - ../../../config/rbac/autonomousdatabases_viewer_role.yaml
+    observedState:
+      excludedFieldPaths:
+        ExternalBackupJob:
+          - SwiftPassword
+        ExternalDatabaseConnector:
+          - JsonData
+          - ConnectionCredentials.JsonData
+          - ConnectionCredentials.Password
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: AutonomousDatabase
+          formalSpec: databaseautonomousdatabase
+          controller:
+            extraRBACMarkers:
+              - groups="",resources=secrets,verbs=get;list;watch
+              - groups="",resources=events,verbs=create;patch
+          specFields:
+            - name: AdminPassword
+              type: shared.PasswordSource
+              tag: 'json:"adminPassword,omitempty,omitzero"'
+              comments:
+                - The administrative password sourced from a Kubernetes Secret in the same namespace.
+                - The referenced Secret must contain a `password` key. Use `secretId` and `secretVersionNumber` instead to reference an OCI Vault secret.
+              markers:
+                - +kubebuilder:validation:Optional
+
+  - service: dns
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/dns
+    group: dns
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+    observedState:
+      excludedFieldPaths:
+        TsigKey:
+          - Secret
+      sdkAliases:
+        DomainRecord:
+          - Record
+        ZoneFromZoneFile:
+          - Zone
+        ZoneRecord:
+          - Record
+
+  - service: events
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/events
+    group: events
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: functions
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/functions
+    group: functions
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: identity
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/identity
+    group: identity
+    version: v1beta1
+    phase: security-and-identity
+    packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: User
+          formalSpec: user
+    observedState:
+      excludedFieldPaths:
+        AuthToken:
+          - Token
+        CustomerSecretKey:
+          - Key
+        OrResetUIPassword:
+          - Password
+        SmtpCredential:
+          - Password
+        SwiftPassword:
+          - Password
+      sdkAliases:
+        BulkActionResourceType:
+          - BulkActionResourceTypeCollection
+        BulkEditTagsResourceType:
+          - BulkEditTagsResourceTypeCollection
+        CostTrackingTag:
+          - Tag
+        IdentityProvider:
+          - Saml2IdentityProvider
+        NetworkSource:
+          - NetworkSources
+        OrResetUIPassword:
+          - UiPassword
+        StandardTagNamespace:
+          - StandardTagNamespaceTemplate
+          - StandardTagNamespaceTemplateSummary
+        StandardTagTemplate:
+          - StandardTagDefinitionTemplate
+        UserState:
+          - User
+        UserUIPasswordInformation:
+          - UiPasswordInformation
+
+  - service: keymanagement
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/keymanagement
+    group: keymanagement
+    version: v1beta1
+    phase: security-and-identity
+    packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
+    observedState:
+      excludedFieldPaths:
+        PreCoUserCredential:
+          - Password
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: Key
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: KeyVersion
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: ReplicationStatus
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WrappingKey
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+
+  - service: limits
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/limits
+    group: limits
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: loadbalancer
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/loadbalancer
+    group: loadbalancer
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: logging
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/logging
+    group: logging
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: monitoring
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/monitoring
+    group: monitoring
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+    observedState:
+      sdkAliases:
+        AlarmHistory:
+          - AlarmHistoryCollection
+
+  - service: mysql
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/mysql
+    group: mysql
+    version: v1beta1
+    phase: data-and-storage
+    sampleOrder: 30
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: all
+    observedState:
+      excludedFieldPaths:
+        Channel:
+          - Source.Password
+        DbSystem:
+          - Source.SourceUrl
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: manual
+      resources:
+        - kind: DbSystem
+          formalSpec: dbsystem
+          controller:
+            maxConcurrentReconciles: 3
+            extraRBACMarkers:
+              - groups="",resources=secrets,verbs=get;list;watch
+          specFields:
+            - name: AdminUsername
+              type: shared.UsernameSource
+              tag: 'json:"adminUsername,omitempty,omitzero"'
+              comments:
+                - The username for the administrative user sourced from a Kubernetes Secret in the same namespace.
+                - The referenced Secret must contain a `username` key.
+              markers:
+                - +kubebuilder:validation:Optional
+            - name: AdminPassword
+              type: shared.PasswordSource
+              tag: 'json:"adminPassword,omitempty,omitzero"'
+              comments:
+                - The password for the administrative user sourced from a Kubernetes Secret in the same namespace.
+                - The referenced Secret must contain a `password` key.
+              markers:
+                - +kubebuilder:validation:Optional
+          statusFields:
+            - name: AdminUsername
+              type: shared.UsernameSource
+              tag: 'json:"adminUsername,omitempty,omitzero"'
+              comments:
+                - The last applied secret reference for the administrative username.
+            - name: AdminPassword
+              type: shared.PasswordSource
+              tag: 'json:"adminPassword,omitempty,omitzero"'
+              comments:
+                - The last applied secret reference for the administrative password.
+          sample:
+            body: |-
+              apiVersion: mysql.oracle.com/v1beta1
+              kind: DbSystem
+              metadata:
+                name: dbsystem-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                shapeName: MySQL.VM.Standard.E3.1.8GB
+                subnetId: ocid1.subnet.oc1..exampleuniqueID
+                adminUsername:
+                  secret:
+                    secretName: admin-secret
+                adminPassword:
+                  secret:
+                    secretName: admin-secret
+          serviceManager:
+            packagePath: mysql/dbsystem
+            needsCredentialClient: true
+
+  - service: networkloadbalancer
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/networkloadbalancer
+    group: networkloadbalancer
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+    observedState:
+      sdkAliases:
+        WorkRequestLog:
+          - WorkRequestLogEntry
+
+  - service: nosql
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/nosql
+    group: nosql
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: all
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+    observedState:
+      sdkAliases:
+        WorkRequestLog:
+          - WorkRequestLogEntry
+
+  - service: objectstorage
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/objectstorage
+    group: objectstorage
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+    observedState:
+      sdkAliases:
+        WorkRequestLog:
+          - WorkRequestLogEntry
+
+  - service: ons
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/ons
+    group: ons
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+    observedState:
+      sdkAliases:
+        ConfirmSubscription:
+          - ConfirmationResult
+
+  - service: psql
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/psql
+    group: psql
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: all
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+    observedState:
+      sdkAliases:
+        PrimaryDbInstance:
+          - PrimaryDbInstanceDetails
+        WorkRequestLog:
+          - WorkRequestLogEntry
+
+  - service: queue
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/queue
+    group: queue
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+    observedState:
+      sdkAliases:
+        WorkRequestLog:
+          - WorkRequestLogEntry
+
+  - service: secrets
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/secrets
+    group: secrets
+    version: v1beta1
+    phase: security-and-identity
+    packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+    observedState:
+      excludedFieldPaths:
+        SecretBundle:
+          - SecretBundleContent
+        SecretBundleByName:
+          - SecretBundleContent
+      sdkAliases:
+        SecretBundleByName:
+          - SecretBundle
+
+  - service: streaming
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/streaming
+    group: streaming
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    sampleOrder: 20
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Stream
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: manual
+      resources:
+        - kind: Stream
+          formalSpec: stream
+          controller:
+            extraRBACMarkers:
+              - groups="",resources=secrets,verbs=get;create;update;delete
+          serviceManager:
+            packagePath: streaming/stream
+        - kind: Cursor
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: Group
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: GroupCursor
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: Message
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+
+  - service: vault
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/vault
+    group: vault
+    version: v1beta1
+    phase: security-and-identity
+    packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: workrequests
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/workrequests
+    group: workrequests
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+    observedState:
+      sdkAliases:
+        WorkRequestLog:
+          - WorkRequestLogEntry

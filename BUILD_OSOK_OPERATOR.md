@@ -2,6 +2,25 @@
 
 ## OSOK Operator Build
 
+### Prerequisites
+
+* Go 1.25
+* Docker
+* Operator SDK for bundle and OLM workflows
+
+### Local Validation
+
+1. Regenerate and validate the retained-service operator locally
+    ```
+    make generate
+    make manifests
+    make test
+    make build
+    go run ./main.go -h
+    ```
+
+### Image Build
+
 1. Build the source code of OSOK Operator
     ```
     make build

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "sources": [
+    {
+      "name": "terraform-provider-oci",
+      "surface": "provider-facts",
+      "status": "pinned",
+      "path": "github.com/oracle/terraform-provider-oci",
+      "revision": "eb653febb1bab4cc6650a96d404a8baf36fdf671",
+      "notes": [
+        "Pinned module path and revision imported by formal-import."
+      ]
+    }
+  ]
+}

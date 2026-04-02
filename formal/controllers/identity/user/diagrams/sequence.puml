@@ -1,0 +1,133 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Sequence - identity/User
+hide footbox
+skinparam sequence {
+  actorBorderColor #0f172a
+  actorBackgroundColor #e2e8f0
+  participantBorderColor #0f172a
+  participantBackgroundColor #e2e8f0
+  participantFontColor #0f172a
+  lifeLineBorderColor #94a3b8
+  groupBorderColor #cbd5e1
+  groupBackgroundColor #f8fafc
+}
+actor Kubernetes
+participant Controller
+participant BaseReconciler
+participant "OSOKServiceManager" as ServiceManager
+participant OCI
+note over BaseReconciler,ServiceManager
+shared resolution:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete:
+shared/diagrams/shared-delete-sequence.svg
+end note
+Kubernetes -> Controller: enqueue User reconcile
+Controller -> BaseReconciler: Reconcile(request)
+BaseReconciler -> ServiceManager: reconcile desired User
+group Lookup and bind
+alt tracked or explicit OCI identity already exists
+ServiceManager -> OCI: GetUser
+else tracked identity is missing
+ServiceManager -> OCI: ListUsers(filters: compartment_id,\nexternal_identifier,\nidentity_provider_id, name (+1\nmore))
+alt reusable OCI resource is not found
+ServiceManager -> OCI: CreateUser
+loop create pending CREATING
+ServiceManager -> OCI: GetUser
+end
+else reusable OCI resource already exists
+ServiceManager -> OCI: GetUser
+end
+ServiceManager --> BaseReconciler: persist resolved OCI identity in status
+end
+alt delete requested
+group Delete
+ServiceManager -> OCI: DeleteUser
+ServiceManager -> OCI: confirm delete via GetUser or\nListUsers
+loop delete pending DELETING
+ServiceManager -> OCI: GetUser or ListUsers
+end
+alt cleanup or finalizer release is blocked
+ServiceManager --> BaseReconciler: retain delete state and retry
+else delete completion observed
+ServiceManager --> BaseReconciler: release finalizer after delete completion
+end
+end
+else OCI state is retryable
+ServiceManager --> BaseReconciler: requeue while OCI remains in\nCREATING, DELETING
+else live state requires field-aware\ndrift evaluation
+group Drift handling
+note over ServiceManager,OCI
+Supported update surface: defined_tags,
+description, email, freeform_tags
+Reject before mutate: force-new fields
+compartment_id, name
+Lookup filters: compartment_id,
+external_identifier,
+identity_provider_id, name (+1 more)
+end note
+opt force-new or conflicting drift is detected
+ServiceManager --> BaseReconciler: reject before OCI mutation
+end
+opt supported mutable drift is detected
+ServiceManager -> OCI: Apply UpdateUser only for mutable\nfields defined_tags, description,\nemail, freeform_tags
+end
+ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
+end
+ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
+end
+BaseReconciler --> Controller: requeue on provisioning, updating,\nterminating
+note right of ServiceManager
+shared diagram:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete diagram:
+shared/diagrams/shared-delete-sequence.svg
+Start from the shared resolution sequence for
+OCID binding, datasource pagination, and
+create-or-update dispatch.
+Layer the shared delete sequence when finalizer
+retention, delete confirmation, work-request
+polling, or Secret cleanup apply.
+archetype batch: Generated service-manager
+controllers follow the shared resolution and
+delete sequences with imported waits and
+controller-local policy.
+service: identity
+slug: user
+kind: User
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create CREATING; update none;
+delete DELETING
+supported drift: defined_tags, description,
+email, freeform_tags
+reject before mutate: force-new fields
+compartment_id, name
+list lookup: oci_identity_users filters
+compartment_id, external_identifier,
+identity_provider_id, name (+1 more)
+conflicts: none
+open gaps: none
+Blank/default-active runs no longer check in the
+generated User runtime, but explicit backlog
+regeneration still preserves this row.
+The preserved generated runtime reads back the
+OCI user after create or update and projects the
+response into status.
+Finalizer removal still waits for delete
+confirmation through Get or list fallback, and
+no secret side effects or legacy adapter seams
+are involved.
+end note
+@enduml

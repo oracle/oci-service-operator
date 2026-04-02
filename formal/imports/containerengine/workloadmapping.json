@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "containerengine",
+  "slug": "workloadmapping",
+  "kind": "WorkloadMapping",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_containerengine_workloadmapping",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateWorkloadMapping",
+        "requestType": "containerengine.CreateWorkloadMappingRequest",
+        "responseType": "containerengine.CreateWorkloadMappingResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetWorkloadMapping",
+        "requestType": "containerengine.GetWorkloadMappingRequest",
+        "responseType": "containerengine.GetWorkloadMappingResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListWorkloadMapping",
+        "requestType": "containerengine.ListWorkloadMappingRequest",
+        "responseType": "containerengine.ListWorkloadMappingResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateWorkloadMapping",
+        "requestType": "containerengine.UpdateWorkloadMappingRequest",
+        "responseType": "containerengine.UpdateWorkloadMappingResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteWorkloadMapping",
+        "requestType": "containerengine.DeleteWorkloadMappingRequest",
+        "responseType": "containerengine.DeleteWorkloadMappingResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_containerengine_workloadmapping",
+    "collectionField": "workloadmapping",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/containerengine/workloadmapping/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/containerengine/workloadmapping/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for containerengine/workloadmapping; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

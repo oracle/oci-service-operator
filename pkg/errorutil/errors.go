@@ -90,7 +90,7 @@ func check5xxFailures(se ocierrors) (bool, error) {
 	}
 }
 
-//Return specific 400 error. Their are different types of 400 error ex. Invalid-Parameter or Missing-Parameter etc.
+// Return specific 400 error. Their are different types of 400 error ex. Invalid-Parameter or Missing-Parameter etc.
 func specific400Error(se ocierrors) (bool, error) {
 
 	switch errorCode := se.ErrorCode; {

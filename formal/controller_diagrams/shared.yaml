@@ -1,0 +1,31 @@
+schemaVersion: 1
+diagrams:
+  - file: shared/diagrams/shared-reconcile-activity.svg
+    title: Shared Reconcile Activity
+    subtitle: Common reconcile flow specialized by controller-local activity diagrams
+    lines:
+      - Read desired spec and existing status from Kubernetes.
+      - Resolve current OCI identity through GET or datasource list fallback before choosing bind, create, update, or delete.
+      - Apply controller-local spec, secret, and delete policies while keeping BaseReconciler invariants intact.
+      - Project OSOK status, finalizer state, and retryable conditions back to the reconciler.
+  - file: shared/diagrams/shared-resolution-sequence.svg
+    title: Shared Resolution Sequence
+    subtitle: Shared ID binding, datasource pagination, and create-update dispatch
+    lines:
+      - BaseReconciler asks the service manager to resolve the controller's current OCI identity.
+      - Controller-local specialization supplies datasource filters, pagination behavior, and bind-versus-create policy.
+      - Imported terraform-provider-oci waits and read-after-write behavior keep retryable states explicit.
+  - file: shared/diagrams/shared-delete-sequence.svg
+    title: Shared Delete Sequence
+    subtitle: Finalizer discipline, delete confirmation, work requests, and optional Secret cleanup
+    lines:
+      - Keep the OSOK finalizer until delete confirmation or an explicit not-supported policy says otherwise.
+      - Controller-local specialization supplies delete confirmation via GET, datasource list fallback, or provider wait helpers.
+      - Optional Secret cleanup remains explicit and only happens when repo-authored policy allows it.
+  - file: shared/diagrams/shared-controller-state-machine.svg
+    title: Shared Controller State Machine
+    subtitle: Common controller phases specialized by provider-backed lifecycle states
+    lines:
+      - Provisioning, Active, Updating, Terminating, and Failed are the shared controller phases.
+      - Controller-local state machines map imported provider states into those phases and keep delete targets explicit.
+      - Open gaps and legacy adapters stay visible instead of being hidden behind a generic steady-state path.

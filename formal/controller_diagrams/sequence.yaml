@@ -1,0 +1,18 @@
+schemaVersion: 1
+family: sequence
+title: Sequence
+sharedDiagram: shared/diagrams/shared-resolution-sequence.svg
+sharedDeleteDiagram: shared/diagrams/shared-delete-sequence.svg
+summary:
+  - Start from the shared resolution sequence for OCID binding, datasource pagination, and create-or-update dispatch.
+  - Layer the shared delete sequence when finalizer retention, delete confirmation, work-request polling, or Secret cleanup apply.
+participants:
+  - Kubernetes
+  - Controller
+  - BaseReconciler
+  - ServiceManager
+  - OCI
+  - SecretStore
+archetypeBatches:
+  generated-service-manager: Generated service-manager controllers follow the shared resolution and delete sequences with imported waits and controller-local policy.
+  legacy-adapter: Legacy-adapter controllers follow the shared resolution and delete sequences but preserve handwritten stop conditions until promotion is safe.

@@ -3,55 +3,75 @@
 # Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
 #
 
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
 # This kustomization.yaml is not intended to be run by itself,
 # since it depends on service name and namespace that are out of this kustomize package.
 # It should be run by config/default
 resources:
-- bases/oci.oracle.com_autonomousdatabases.yaml
-- bases/oci.oracle.com_streams.yaml
-- bases/oci.oracle.com_mysqldbsystems.yaml
-- bases/servicemesh.oci.oracle.com_meshes.yaml
-- bases/servicemesh.oci.oracle.com_virtualservices.yaml
-- bases/servicemesh.oci.oracle.com_virtualdeployments.yaml
-- bases/servicemesh.oci.oracle.com_virtualserviceroutetables.yaml
-- bases/servicemesh.oci.oracle.com_virtualdeploymentbindings.yaml
-- bases/servicemesh.oci.oracle.com_accesspolicies.yaml
-- bases/servicemesh.oci.oracle.com_ingressgateways.yaml
-- bases/servicemesh.oci.oracle.com_ingressgatewaydeployments.yaml
-- bases/servicemesh.oci.oracle.com_ingressgatewayroutetables.yaml
+- bases/containerengine.oracle.com_addonoptions.yaml
+- bases/containerengine.oracle.com_addons.yaml
+- bases/containerengine.oracle.com_clusterendpointconfigs.yaml
+- bases/containerengine.oracle.com_clustermigratetonativevcnstatuses.yaml
+- bases/containerengine.oracle.com_clusteroptions.yaml
+- bases/containerengine.oracle.com_clusters.yaml
+- bases/containerengine.oracle.com_credentialrotationstatuses.yaml
+- bases/containerengine.oracle.com_kubeconfigs.yaml
+- bases/containerengine.oracle.com_nodepooloptions.yaml
+- bases/containerengine.oracle.com_nodepools.yaml
+- bases/containerengine.oracle.com_nodes.yaml
+- bases/containerengine.oracle.com_podshapes.yaml
+- bases/containerengine.oracle.com_virtualnodepools.yaml
+- bases/containerengine.oracle.com_virtualnodes.yaml
+- bases/containerengine.oracle.com_workloadmappings.yaml
+- bases/containerengine.oracle.com_workrequesterrors.yaml
+- bases/containerengine.oracle.com_workrequestlogs.yaml
+- bases/containerengine.oracle.com_workrequests.yaml
+- bases/database.oracle.com_autonomousdatabases.yaml
+- bases/mysql.oracle.com_backups.yaml
+- bases/mysql.oracle.com_channels.yaml
+- bases/mysql.oracle.com_configurations.yaml
+- bases/mysql.oracle.com_dbsystems.yaml
+- bases/mysql.oracle.com_heatwaveclustermemoryestimates.yaml
+- bases/mysql.oracle.com_heatwaveclusters.yaml
+- bases/mysql.oracle.com_replicas.yaml
+- bases/mysql.oracle.com_shapes.yaml
+- bases/mysql.oracle.com_versions.yaml
+- bases/mysql.oracle.com_workrequesterrors.yaml
+- bases/mysql.oracle.com_workrequestlogs.yaml
+- bases/mysql.oracle.com_workrequests.yaml
+- bases/nosql.oracle.com_indices.yaml
+- bases/nosql.oracle.com_replicas.yaml
+- bases/nosql.oracle.com_rows.yaml
+- bases/nosql.oracle.com_tables.yaml
+- bases/nosql.oracle.com_tableusages.yaml
+- bases/nosql.oracle.com_workrequesterrors.yaml
+- bases/nosql.oracle.com_workrequestlogs.yaml
+- bases/nosql.oracle.com_workrequests.yaml
+- bases/psql.oracle.com_backups.yaml
+- bases/psql.oracle.com_configurations.yaml
+- bases/psql.oracle.com_connectiondetails.yaml
+- bases/psql.oracle.com_dbsystemdbinstances.yaml
+- bases/psql.oracle.com_dbsystems.yaml
+- bases/psql.oracle.com_defaultconfigurations.yaml
+- bases/psql.oracle.com_primarydbinstances.yaml
+- bases/psql.oracle.com_shapes.yaml
+- bases/psql.oracle.com_workrequesterrors.yaml
+- bases/psql.oracle.com_workrequestlogs.yaml
+- bases/psql.oracle.com_workrequests.yaml
+- bases/streaming.oracle.com_streams.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
-patchesStrategicMerge:
+# patches:
 # [WEBHOOK] To enable webhook, uncomment all the sections with [WEBHOOK] prefix.
 # patches here are for enabling the conversion webhook for each CRD
-#- patches/webhook_in_autonomousdatabases.yaml
 #- patches/webhook_in_streams.yaml
-#- patches/webhook_in_mysqldbsystems.yaml
-#- patches/webhook_in_meshes.yaml
-#- patches/webhook_in_virtualservices.yaml
-#- patches/webhook_in_accesspolicies.yaml
-#- patches/webhook_in_ingressgateways.yaml
-#- patches/webhook_in_virtualdeploymentbindings.yaml
-#- patches/webhook_in_virtualserviceroutetables.yaml
-#- patches/webhook_in_virtualdeployments.yaml
-#- patches/webhook_in_ingressgatewayroutetables.yaml
-#- patches/webhook_in_ingressgatewaydeployments.yaml
 # +kubebuilder:scaffold:crdkustomizewebhookpatch
 
 # [CERTMANAGER] To enable webhook, uncomment all the sections with [CERTMANAGER] prefix.
 # patches here are for enabling the CA injection for each CRD
-#- patches/cainjection_in_autonomousdatabases.yaml
 #- patches/cainjection_in_streams.yaml
-#- patches/cainjection_in_mysqldbsystems.yaml
-- patches/cainjection_in_meshes.yaml
-- patches/cainjection_in_virtualservices.yaml
-- patches/cainjection_in_virtualdeployments.yaml
-- patches/cainjection_in_virtualserviceroutetables.yaml
-- patches/cainjection_in_virtualdeploymentbindings.yaml
-- patches/cainjection_in_accesspolicies.yaml
-- patches/cainjection_in_ingressgateways.yaml
-- patches/cainjection_in_ingressgatewaydeployments.yaml
-- patches/cainjection_in_ingressgatewayroutetables.yaml
 # +kubebuilder:scaffold:crdkustomizecainjectionpatch
 
 # the following config is for teaching kustomize how to do kustomization for CRDs.

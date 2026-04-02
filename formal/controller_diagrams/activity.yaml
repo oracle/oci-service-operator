@@ -1,0 +1,10 @@
+schemaVersion: 1
+family: activity
+title: Activity
+sharedDiagram: shared/diagrams/shared-reconcile-activity.svg
+summary:
+  - Start from the shared reconcile activity and specialize provider-backed CRUD, wait, and status-projection details here.
+  - Controller-local activity diagrams add list-lookup hints, secret policies, delete handling, and open formal gaps.
+archetypeBatches:
+  generated-service-manager: Generated service-manager controllers specialize the shared reconcile path with formal runtime ownership.
+  legacy-adapter: Legacy-adapter controllers specialize the shared reconcile path while explicit gaps still block generated promotion.

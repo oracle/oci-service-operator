@@ -1,0 +1,15 @@
+schemaVersion: 1
+family: state-machine
+title: State Machine
+sharedDiagram: shared/diagrams/shared-controller-state-machine.svg
+summary:
+  - Start from the shared controller phase model and specialize imported provider states, delete targets, and failure exits here.
+baseStates:
+  - provisioning
+  - active
+  - updating
+  - terminating
+  - failed
+archetypeBatches:
+  generated-service-manager: Generated service-manager controllers map provider states into the shared controller phases with explicit finalizer and requeue policies.
+  legacy-adapter: Legacy-adapter controllers map provider states into the shared controller phases while open gaps keep additional transitions explicit.

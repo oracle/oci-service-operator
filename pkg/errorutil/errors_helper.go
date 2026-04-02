@@ -53,7 +53,7 @@ func (ua UnauthorizedAndNotFoundOciError) Error() string {
 		ua.Description, ua.HTTPStatusCode, ua.OpcRequestID)
 }
 
-//For 405 errors
+// For 405 errors
 type MethodNotAllowedOciError OciErrors
 
 func (mna MethodNotAllowedOciError) Error() string {
@@ -61,7 +61,7 @@ func (mna MethodNotAllowedOciError) Error() string {
 		mna.Description, mna.HTTPStatusCode, mna.OpcRequestID)
 }
 
-//For 409 errors
+// For 409 errors
 type ConflictOciError OciErrors
 
 func (c ConflictOciError) Error() string {
@@ -69,7 +69,7 @@ func (c ConflictOciError) Error() string {
 		c.Description, c.HTTPStatusCode, c.OpcRequestID)
 }
 
-//For 412 errors
+// For 412 errors
 type NoEtagMatchOciError OciErrors
 
 func (nem NoEtagMatchOciError) Error() string {
@@ -85,7 +85,7 @@ func (tmr TooManyRequestsOciError) Error() string {
 		tmr.Description, tmr.HTTPStatusCode, tmr.OpcRequestID)
 }
 
-//For 500 Error
+// For 500 Error
 type InternalServerErrorOciError OciErrors
 
 func (nf InternalServerErrorOciError) Error() string {
@@ -93,7 +93,7 @@ func (nf InternalServerErrorOciError) Error() string {
 		nf.Description, nf.HTTPStatusCode, nf.OpcRequestID)
 }
 
-//For 501 Error
+// For 501 Error
 type MethodNotImplementedOciError OciErrors
 
 func (mni MethodNotImplementedOciError) Error() string {
@@ -101,7 +101,7 @@ func (mni MethodNotImplementedOciError) Error() string {
 		mni.Description, mni.HTTPStatusCode, mni.OpcRequestID)
 }
 
-//For 503 Error
+// For 503 Error
 type ServiceUnavailableOciError OciErrors
 
 func (su ServiceUnavailableOciError) Error() string {
@@ -146,7 +146,7 @@ func BadRequestResponse(err error, description string) error {
 	return br
 }
 
-//For 401 errros
+// For 401 errros
 func NotAuthenticatedResponse(err error, description string) error {
 
 	na := NotAuthenticatedOciError{
@@ -183,7 +183,7 @@ func UnauthorizedAndNotFoundResponse(err error, description string) error {
 	return uanf
 }
 
-//For 405 errors
+// For 405 errors
 func MethodNotAllowedResponse(err error, description string) error {
 
 	mna := MethodNotAllowedOciError{
@@ -196,7 +196,7 @@ func MethodNotAllowedResponse(err error, description string) error {
 	return mna
 }
 
-//For 409 errors
+// For 409 errors
 func ConflictResponse(err error, description string) error {
 
 	c := ConflictOciError{
@@ -209,7 +209,7 @@ func ConflictResponse(err error, description string) error {
 	return c
 }
 
-//For 412 errors
+// For 412 errors
 func NoEtagMatchResponse(err error, description string) error {
 
 	nem := NoEtagMatchOciError{
@@ -234,7 +234,7 @@ func TooManyRequestsResponse(err error, description string) error {
 	return tmr
 }
 
-//For 500 error
+// For 500 error
 func InternalServerErrorResponse(err error, description string) error {
 
 	ise := InternalServerErrorOciError{
@@ -246,7 +246,7 @@ func InternalServerErrorResponse(err error, description string) error {
 	return ise
 }
 
-//For 501 error
+// For 501 error
 func MethodNotImplementedResponse(err error, description string) error {
 
 	mni := MethodNotImplementedOciError{
@@ -258,7 +258,7 @@ func MethodNotImplementedResponse(err error, description string) error {
 	return mni
 }
 
-//For 503 error
+// For 503 error
 func ServiceUnavailableResponse(err error, description string) error {
 
 	su := ServiceUnavailableOciError{

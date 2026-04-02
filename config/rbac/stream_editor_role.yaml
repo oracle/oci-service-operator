@@ -10,7 +10,7 @@ metadata:
   name: stream-editor-role
 rules:
 - apiGroups:
-  - oci.oracle.com
+  - streaming.oracle.com
   resources:
   - streams
   verbs:
@@ -22,7 +22,7 @@ rules:
   - update
   - watch
 - apiGroups:
-  - oci.oracle.com
+  - streaming.oracle.com
   resources:
   - streams/status
   verbs:

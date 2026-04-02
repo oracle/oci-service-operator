@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "containerengine",
+  "slug": "virtualnodepool",
+  "kind": "VirtualNodePool",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_containerengine_virtualnodepool",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateVirtualNodePool",
+        "requestType": "containerengine.CreateVirtualNodePoolRequest",
+        "responseType": "containerengine.CreateVirtualNodePoolResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetVirtualNodePool",
+        "requestType": "containerengine.GetVirtualNodePoolRequest",
+        "responseType": "containerengine.GetVirtualNodePoolResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListVirtualNodePool",
+        "requestType": "containerengine.ListVirtualNodePoolRequest",
+        "responseType": "containerengine.ListVirtualNodePoolResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateVirtualNodePool",
+        "requestType": "containerengine.UpdateVirtualNodePoolRequest",
+        "responseType": "containerengine.UpdateVirtualNodePoolResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteVirtualNodePool",
+        "requestType": "containerengine.DeleteVirtualNodePoolRequest",
+        "responseType": "containerengine.DeleteVirtualNodePoolResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_containerengine_virtualnodepool",
+    "collectionField": "virtualnodepool",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/containerengine/virtualnodepool/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/containerengine/virtualnodepool/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for containerengine/virtualnodepool; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

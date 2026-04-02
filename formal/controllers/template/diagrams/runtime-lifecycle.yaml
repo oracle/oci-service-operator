@@ -1,0 +1,13 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: template
+slug: template
+kind: Template
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+notes:
+  - Scaffold metadata only; replace with a controller-specific diagram set before promotion.

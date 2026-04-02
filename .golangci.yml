@@ -1,0 +1,37 @@
+version: "2"
+
+run:
+  relative-path-mode: gomod
+  modules-download-mode: vendor
+  timeout: 10m
+
+linters:
+  default: none
+  enable:
+    - errcheck
+    - gocognit
+    - gocyclo
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+  settings:
+    gocognit:
+      min-complexity: 15
+    gocyclo:
+      min-complexity: 10
+  exclusions:
+    generated: lax
+    warn-unused: true
+    paths:
+      - ^vendor/
+      - .*\.pb\.go$
+      - .*_generated\.go$
+      - .*zz_generated.*\.go$
+
+issues:
+  new: true
+  new-from-merge-base: main
+  whole-files: true
+  max-issues-per-linter: 0
+  max-same-issues: 0
