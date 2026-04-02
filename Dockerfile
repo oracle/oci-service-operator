@@ -24,6 +24,9 @@ WORKDIR /
 
 COPY --from=builder /workspace/manager .
 
+ARG SKIP_FIPS=true
+ENV OSOK_SKIP_FIPS=${SKIP_FIPS}
+
 USER 65532:65532
 
 ENTRYPOINT ["/manager"]

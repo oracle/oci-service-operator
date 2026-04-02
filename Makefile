@@ -47,6 +47,12 @@ IMG ?= $(IMAGE_TAG_BASE):$(VERSION)
 SERVICE ?=
 PUBLISH_VERSION ?=
 PUBLISH_REGISTRY ?=
+PUBLISH_PLATFORMS ?=
+PUBLISH_PLATFORM ?= linux_amd64
+PUBLISH_CGO_ENABLED ?= 0
+PUBLISH_GOEXPERIMENT ?=
+PUBLISH_SKIP_FIPS ?= true
+PUBLISH_USE_DOCKER_PLATFORM ?= false
 MONOLITH_OLM_BUNDLE_IMG ?=
 TARGETOS ?= linux
 TARGETARCH ?= amd64
@@ -414,15 +420,24 @@ publish-service-olm: controller-gen kustomize operator-sdk ## Build/push a per-s
 	@[ -n "$(PUBLISH_VERSION)" ] || { echo "PUBLISH_VERSION must be set (image tag)"; exit 1; }
 	@[ -n "$(PUBLISH_REGISTRY)" ] || { echo "PUBLISH_REGISTRY must be set (e.g. iad.ocir.io/org)"; exit 1; }
 	@set -euo pipefail; \
-	image="$(PUBLISH_REGISTRY)/oci-service-operator-$(GROUP):$(PUBLISH_VERSION)"; \
-	bundle_image="$(PUBLISH_REGISTRY)/oci-service-operator-$(GROUP)-bundle:$(PUBLISH_VERSION)"; \
-	echo ">>> Building $$image"; \
-	$(MAKE) --no-print-directory docker-build-service-raw SERVICE="$(GROUP)" SERVICE_IMG="$$image"; \
-	echo ">>> Pushing $$image"; \
-	$(MAKE) --no-print-directory docker-push IMG="$$image"; \
-	echo ">>> Generating $(GROUP) bundle for $$bundle_image"; \
-	$(MAKE) --no-print-directory package-bundle-olm GROUP="$(GROUP)" CONTROLLER_IMG="$$image" VERSION="$(PUBLISH_VERSION)"; \
-	echo ">>> Building $$bundle_image"; \
+		image="$(PUBLISH_REGISTRY)/oci-service-operator-$(GROUP):$(PUBLISH_VERSION)"; \
+		bundle_image="$(PUBLISH_REGISTRY)/oci-service-operator-$(GROUP)-bundle:$(PUBLISH_VERSION)"; \
+		if [ -n "$(PUBLISH_PLATFORMS)" ]; then \
+			echo ">>> Building and pushing $$image for $(PUBLISH_PLATFORMS)"; \
+			IMAGE="$$image" CONTROLLER_MAIN="./cmd/manager/$(GROUP)" PLATFORMS="$(PUBLISH_PLATFORMS)" USE_DOCKER_PLATFORM="$(PUBLISH_USE_DOCKER_PLATFORM)" CGO_ENABLED="$(PUBLISH_CGO_ENABLED)" GOEXPERIMENT="$(PUBLISH_GOEXPERIMENT)" SKIP_FIPS="$(PUBLISH_SKIP_FIPS)" "$(BASH)" "$(PWD)/hack/publish-platform-image.sh"; \
+		else \
+			platform="$(PUBLISH_PLATFORM)"; \
+			platform="$$(printf '%s' "$$platform" | tr '_' '/')"; \
+			os="$${platform%%/*}"; \
+			arch="$${platform##*/}"; \
+			echo ">>> Building $$image for $$platform"; \
+			docker build --build-arg CONTROLLER_MAIN=./cmd/manager/$(GROUP) --build-arg TARGETOS="$$os" --build-arg TARGETARCH="$$arch" --build-arg CGO_ENABLED=$(PUBLISH_CGO_ENABLED) --build-arg GOEXPERIMENT=$(PUBLISH_GOEXPERIMENT) --build-arg SKIP_FIPS=$(PUBLISH_SKIP_FIPS) -t "$$image" .; \
+			echo ">>> Pushing $$image"; \
+			docker push "$$image"; \
+		fi; \
+		echo ">>> Generating $(GROUP) bundle for $$bundle_image"; \
+		$(MAKE) --no-print-directory package-bundle-olm GROUP="$(GROUP)" CONTROLLER_IMG="$$image" VERSION="$(PUBLISH_VERSION)"; \
+		echo ">>> Building $$bundle_image"; \
 	$(MAKE) --no-print-directory bundle-build BUNDLE_IMG="$$bundle_image"; \
 	echo ">>> Pushing $$bundle_image"; \
 	$(MAKE) --no-print-directory bundle-push BUNDLE_IMG="$$bundle_image"; \
