@@ -78,7 +78,7 @@ func (c *routeTableRuntimeClient) CreateOrUpdate(ctx context.Context, resource *
 
 	current, err := c.get(ctx, trackedID)
 	if err != nil {
-		if isRouteTableNotFoundOCI(err) {
+		if isRouteTableReadNotFoundOCI(err) {
 			c.clearTrackedIdentity(resource)
 			return c.create(ctx, resource)
 		}
@@ -128,7 +128,7 @@ func (c *routeTableRuntimeClient) Delete(ctx context.Context, resource *corev1be
 		RtId: common.String(trackedID),
 	}
 	if _, err := c.client.DeleteRouteTable(ctx, deleteRequest); err != nil {
-		if isRouteTableNotFoundOCI(err) {
+		if isRouteTableDeleteNotFoundOCI(err) {
 			c.markDeleted(resource, "OCI resource no longer exists")
 			return true, nil
 		}
@@ -137,7 +137,7 @@ func (c *routeTableRuntimeClient) Delete(ctx context.Context, resource *corev1be
 
 	current, err := c.get(ctx, trackedID)
 	if err != nil {
-		if isRouteTableNotFoundOCI(err) {
+		if isRouteTableDeleteNotFoundOCI(err) {
 			c.markDeleted(resource, "OCI resource deleted")
 			return true, nil
 		}
@@ -482,7 +482,12 @@ func normalizeRouteTableOCIError(err error) error {
 	return err
 }
 
-func isRouteTableNotFoundOCI(err error) bool {
+func isRouteTableReadNotFoundOCI(err error) bool {
+	classification := errorutil.ClassifyDeleteError(err)
+	return classification.IsUnambiguousNotFound()
+}
+
+func isRouteTableDeleteNotFoundOCI(err error) bool {
 	classification := errorutil.ClassifyDeleteError(err)
 	return classification.IsUnambiguousNotFound() || classification.IsAuthShapedNotFound()
 }

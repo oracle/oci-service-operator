@@ -69,7 +69,7 @@ func (c *networkSecurityGroupRuntimeClient) CreateOrUpdate(ctx context.Context, 
 
 	current, err := c.get(ctx, trackedID)
 	if err != nil {
-		if isNetworkSecurityGroupNotFoundOCI(err) {
+		if isNetworkSecurityGroupReadNotFoundOCI(err) {
 			c.clearTrackedIdentity(resource)
 			return c.create(ctx, resource)
 		}
@@ -119,7 +119,7 @@ func (c *networkSecurityGroupRuntimeClient) Delete(ctx context.Context, resource
 		NetworkSecurityGroupId: common.String(trackedID),
 	}
 	if _, err := c.client.DeleteNetworkSecurityGroup(ctx, deleteRequest); err != nil {
-		if isNetworkSecurityGroupNotFoundOCI(err) {
+		if isNetworkSecurityGroupDeleteNotFoundOCI(err) {
 			c.markDeleted(resource, "OCI resource no longer exists")
 			return true, nil
 		}
@@ -128,7 +128,7 @@ func (c *networkSecurityGroupRuntimeClient) Delete(ctx context.Context, resource
 
 	current, err := c.get(ctx, trackedID)
 	if err != nil {
-		if isNetworkSecurityGroupNotFoundOCI(err) {
+		if isNetworkSecurityGroupDeleteNotFoundOCI(err) {
 			c.markDeleted(resource, "OCI resource deleted")
 			return true, nil
 		}
@@ -369,7 +369,12 @@ func normalizeNetworkSecurityGroupOCIError(err error) error {
 	return err
 }
 
-func isNetworkSecurityGroupNotFoundOCI(err error) bool {
+func isNetworkSecurityGroupReadNotFoundOCI(err error) bool {
+	classification := errorutil.ClassifyDeleteError(err)
+	return classification.IsUnambiguousNotFound()
+}
+
+func isNetworkSecurityGroupDeleteNotFoundOCI(err error) bool {
 	classification := errorutil.ClassifyDeleteError(err)
 	return classification.IsUnambiguousNotFound() || classification.IsAuthShapedNotFound()
 }

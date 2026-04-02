@@ -71,7 +71,7 @@ func (c *serviceGatewayRuntimeClient) CreateOrUpdate(ctx context.Context, resour
 
 	current, err := c.get(ctx, trackedID)
 	if err != nil {
-		if isServiceGatewayNotFoundOCI(err) {
+		if isServiceGatewayReadNotFoundOCI(err) {
 			c.clearTrackedIdentity(resource)
 			return c.create(ctx, resource)
 		}
@@ -121,7 +121,7 @@ func (c *serviceGatewayRuntimeClient) Delete(ctx context.Context, resource *core
 		ServiceGatewayId: common.String(trackedID),
 	}
 	if _, err := c.client.DeleteServiceGateway(ctx, deleteRequest); err != nil {
-		if isServiceGatewayNotFoundOCI(err) {
+		if isServiceGatewayDeleteNotFoundOCI(err) {
 			c.markDeleted(resource, "OCI resource no longer exists")
 			return true, nil
 		}
@@ -130,7 +130,7 @@ func (c *serviceGatewayRuntimeClient) Delete(ctx context.Context, resource *core
 
 	current, err := c.get(ctx, trackedID)
 	if err != nil {
-		if isServiceGatewayNotFoundOCI(err) {
+		if isServiceGatewayDeleteNotFoundOCI(err) {
 			c.markDeleted(resource, "OCI resource deleted")
 			return true, nil
 		}
@@ -440,7 +440,12 @@ func normalizeServiceGatewayOCIError(err error) error {
 	return err
 }
 
-func isServiceGatewayNotFoundOCI(err error) bool {
+func isServiceGatewayReadNotFoundOCI(err error) bool {
+	classification := errorutil.ClassifyDeleteError(err)
+	return classification.IsUnambiguousNotFound()
+}
+
+func isServiceGatewayDeleteNotFoundOCI(err error) bool {
 	classification := errorutil.ClassifyDeleteError(err)
 	return classification.IsUnambiguousNotFound() || classification.IsAuthShapedNotFound()
 }

@@ -67,7 +67,7 @@ func (c *vcnRuntimeClient) CreateOrUpdate(ctx context.Context, resource *corev1b
 
 	current, err := c.get(ctx, trackedID)
 	if err != nil {
-		if isNotFoundOCI(err) {
+		if isReadNotFoundOCI(err) {
 			c.clearTrackedIdentity(resource)
 			return c.create(ctx, resource)
 		}
@@ -120,7 +120,7 @@ func (c *vcnRuntimeClient) Delete(ctx context.Context, resource *corev1beta1.Vcn
 		VcnId: common.String(trackedID),
 	}
 	if _, err := c.client.DeleteVcn(ctx, deleteRequest); err != nil {
-		if isNotFoundOCI(err) {
+		if isDeleteNotFoundOCI(err) {
 			c.markDeleted(resource, "OCI resource no longer exists")
 			return true, nil
 		}
@@ -129,7 +129,7 @@ func (c *vcnRuntimeClient) Delete(ctx context.Context, resource *corev1beta1.Vcn
 
 	current, err := c.get(ctx, trackedID)
 	if err != nil {
-		if isNotFoundOCI(err) {
+		if isDeleteNotFoundOCI(err) {
 			c.markDeleted(resource, "OCI resource deleted")
 			return true, nil
 		}
@@ -458,7 +458,12 @@ func normalizeOCIError(err error) error {
 	return err
 }
 
-func isNotFoundOCI(err error) bool {
+func isReadNotFoundOCI(err error) bool {
+	classification := errorutil.ClassifyDeleteError(err)
+	return classification.IsUnambiguousNotFound()
+}
+
+func isDeleteNotFoundOCI(err error) bool {
 	classification := errorutil.ClassifyDeleteError(err)
 	return classification.IsUnambiguousNotFound() || classification.IsAuthShapedNotFound()
 }

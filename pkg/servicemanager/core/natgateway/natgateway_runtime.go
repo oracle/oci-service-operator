@@ -66,7 +66,7 @@ func (c *natGatewayRuntimeClient) CreateOrUpdate(ctx context.Context, resource *
 
 	current, err := c.get(ctx, trackedID)
 	if err != nil {
-		if isNatGatewayNotFoundOCI(err) {
+		if isNatGatewayReadNotFoundOCI(err) {
 			c.clearTrackedIdentity(resource)
 			return c.create(ctx, resource)
 		}
@@ -116,7 +116,7 @@ func (c *natGatewayRuntimeClient) Delete(ctx context.Context, resource *corev1be
 		NatGatewayId: common.String(trackedID),
 	}
 	if _, err := c.client.DeleteNatGateway(ctx, deleteRequest); err != nil {
-		if isNatGatewayNotFoundOCI(err) {
+		if isNatGatewayDeleteNotFoundOCI(err) {
 			c.markDeleted(resource, "OCI resource no longer exists")
 			return true, nil
 		}
@@ -125,7 +125,7 @@ func (c *natGatewayRuntimeClient) Delete(ctx context.Context, resource *corev1be
 
 	current, err := c.get(ctx, trackedID)
 	if err != nil {
-		if isNatGatewayNotFoundOCI(err) {
+		if isNatGatewayDeleteNotFoundOCI(err) {
 			c.markDeleted(resource, "OCI resource deleted")
 			return true, nil
 		}
@@ -388,7 +388,12 @@ func normalizeNatGatewayOCIError(err error) error {
 	return err
 }
 
-func isNatGatewayNotFoundOCI(err error) bool {
+func isNatGatewayReadNotFoundOCI(err error) bool {
+	classification := errorutil.ClassifyDeleteError(err)
+	return classification.IsUnambiguousNotFound()
+}
+
+func isNatGatewayDeleteNotFoundOCI(err error) bool {
 	classification := errorutil.ClassifyDeleteError(err)
 	return classification.IsUnambiguousNotFound() || classification.IsAuthShapedNotFound()
 }

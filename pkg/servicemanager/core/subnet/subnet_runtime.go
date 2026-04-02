@@ -67,7 +67,7 @@ func (c *subnetRuntimeClient) CreateOrUpdate(ctx context.Context, resource *core
 
 	current, err := c.get(ctx, trackedID)
 	if err != nil {
-		if isSubnetNotFoundOCI(err) {
+		if isSubnetReadNotFoundOCI(err) {
 			c.clearTrackedIdentity(resource)
 			return c.create(ctx, resource)
 		}
@@ -117,7 +117,7 @@ func (c *subnetRuntimeClient) Delete(ctx context.Context, resource *corev1beta1.
 		SubnetId: common.String(trackedID),
 	}
 	if _, err := c.client.DeleteSubnet(ctx, deleteRequest); err != nil {
-		if isSubnetNotFoundOCI(err) {
+		if isSubnetDeleteNotFoundOCI(err) {
 			c.markDeleted(resource, "OCI resource no longer exists")
 			return true, nil
 		}
@@ -126,7 +126,7 @@ func (c *subnetRuntimeClient) Delete(ctx context.Context, resource *corev1beta1.
 
 	current, err := c.get(ctx, trackedID)
 	if err != nil {
-		if isSubnetNotFoundOCI(err) {
+		if isSubnetDeleteNotFoundOCI(err) {
 			c.markDeleted(resource, "OCI resource deleted")
 			return true, nil
 		}
@@ -454,7 +454,12 @@ func normalizeSubnetOCIError(err error) error {
 	return err
 }
 
-func isSubnetNotFoundOCI(err error) bool {
+func isSubnetReadNotFoundOCI(err error) bool {
+	classification := errorutil.ClassifyDeleteError(err)
+	return classification.IsUnambiguousNotFound()
+}
+
+func isSubnetDeleteNotFoundOCI(err error) bool {
 	classification := errorutil.ClassifyDeleteError(err)
 	return classification.IsUnambiguousNotFound() || classification.IsAuthShapedNotFound()
 }

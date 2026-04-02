@@ -445,38 +445,76 @@ func TestDelete_KeepsFinalizerWhileObservedTerminating(t *testing.T) {
 	assert.Equal(t, string(shared.Terminating), resource.Status.OsokStatus.Reason)
 }
 
-func TestIsNetworkSecurityGroupNotFoundOCI_RejectsAuthAmbiguity(t *testing.T) {
-	assert.True(t, isNetworkSecurityGroupNotFoundOCI(errorutil.NotFoundOciError{
+func TestIsNetworkSecurityGroupReadNotFoundOCI_RejectsAuthAmbiguity(t *testing.T) {
+	assert.True(t, isNetworkSecurityGroupReadNotFoundOCI(errorutil.NotFoundOciError{
 		HTTPStatusCode: 404,
 		ErrorCode:      errorutil.NotFound,
 		Description:    "normalized not found",
 	}))
-	assert.True(t, isNetworkSecurityGroupNotFoundOCI(errorutil.UnauthorizedAndNotFoundOciError{
+	assert.False(t, isNetworkSecurityGroupReadNotFoundOCI(errorutil.UnauthorizedAndNotFoundOciError{
 		HTTPStatusCode: 404,
 		ErrorCode:      errorutil.NotAuthorizedOrNotFound,
 		Description:    "normalized auth ambiguity",
 	}))
-	assert.True(t, isNetworkSecurityGroupNotFoundOCI(fakeNetworkSecurityGroupServiceError{
+	assert.False(t, isNetworkSecurityGroupReadNotFoundOCI(fakeNetworkSecurityGroupServiceError{
 		statusCode: 404,
 		code:       "NotAuthorizedOrNotFound",
 		message:    "auth ambiguity",
 	}))
-	assert.True(t, isNetworkSecurityGroupNotFoundOCI(fakeNetworkSecurityGroupServiceError{
+	assert.True(t, isNetworkSecurityGroupReadNotFoundOCI(fakeNetworkSecurityGroupServiceError{
 		statusCode: 404,
 		code:       "NotFound",
 		message:    "not found",
 	}))
-	assert.False(t, isNetworkSecurityGroupNotFoundOCI(fakeNetworkSecurityGroupServiceError{
+	assert.False(t, isNetworkSecurityGroupReadNotFoundOCI(fakeNetworkSecurityGroupServiceError{
 		statusCode: 404,
 		code:       "UnexpectedCode",
 		message:    "resource not found",
 	}))
-	assert.False(t, isNetworkSecurityGroupNotFoundOCI(errorutil.ConflictOciError{
+	assert.False(t, isNetworkSecurityGroupReadNotFoundOCI(errorutil.ConflictOciError{
 		HTTPStatusCode: 409,
 		ErrorCode:      errorutil.IncorrectState,
 		Description:    "normalized conflict",
 	}))
-	assert.False(t, isNetworkSecurityGroupNotFoundOCI(fakeNetworkSecurityGroupServiceError{
+	assert.False(t, isNetworkSecurityGroupReadNotFoundOCI(fakeNetworkSecurityGroupServiceError{
+		statusCode: 409,
+		code:       errorutil.IncorrectState,
+		message:    "resource conflict",
+	}))
+}
+
+func TestIsNetworkSecurityGroupDeleteNotFoundOCI_AcceptsAuthShaped404(t *testing.T) {
+	assert.True(t, isNetworkSecurityGroupDeleteNotFoundOCI(errorutil.NotFoundOciError{
+		HTTPStatusCode: 404,
+		ErrorCode:      errorutil.NotFound,
+		Description:    "normalized not found",
+	}))
+	assert.True(t, isNetworkSecurityGroupDeleteNotFoundOCI(errorutil.UnauthorizedAndNotFoundOciError{
+		HTTPStatusCode: 404,
+		ErrorCode:      errorutil.NotAuthorizedOrNotFound,
+		Description:    "normalized auth ambiguity",
+	}))
+	assert.True(t, isNetworkSecurityGroupDeleteNotFoundOCI(fakeNetworkSecurityGroupServiceError{
+		statusCode: 404,
+		code:       "NotAuthorizedOrNotFound",
+		message:    "auth ambiguity",
+	}))
+	assert.True(t, isNetworkSecurityGroupDeleteNotFoundOCI(fakeNetworkSecurityGroupServiceError{
+		statusCode: 404,
+		code:       "NotFound",
+		message:    "not found",
+	}))
+	assert.False(t, isNetworkSecurityGroupDeleteNotFoundOCI(fakeNetworkSecurityGroupServiceError{
+		statusCode: 404,
+		code:       "UnexpectedCode",
+		message:    "resource not found",
+	}))
+	assert.False(t, isNetworkSecurityGroupDeleteNotFoundOCI(errorutil.ConflictOciError{
+		HTTPStatusCode: 409,
+		ErrorCode:      errorutil.IncorrectState,
+		Description:    "normalized conflict",
+	}))
+	assert.False(t, isNetworkSecurityGroupDeleteNotFoundOCI(fakeNetworkSecurityGroupServiceError{
 		statusCode: 409,
 		code:       errorutil.IncorrectState,
 		message:    "resource conflict",

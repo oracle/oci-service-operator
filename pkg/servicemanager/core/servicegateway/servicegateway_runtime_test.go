@@ -426,38 +426,76 @@ func TestDelete_KeepsFinalizerWhileObservedTerminating(t *testing.T) {
 	assert.Equal(t, string(shared.Terminating), resource.Status.OsokStatus.Reason)
 }
 
-func TestIsServiceGatewayNotFoundOCI_RejectsAuthAmbiguity(t *testing.T) {
-	assert.True(t, isServiceGatewayNotFoundOCI(errorutil.NotFoundOciError{
+func TestIsServiceGatewayReadNotFoundOCI_RejectsAuthAmbiguity(t *testing.T) {
+	assert.True(t, isServiceGatewayReadNotFoundOCI(errorutil.NotFoundOciError{
 		HTTPStatusCode: 404,
 		ErrorCode:      errorutil.NotFound,
 		Description:    "normalized not found",
 	}))
-	assert.True(t, isServiceGatewayNotFoundOCI(errorutil.UnauthorizedAndNotFoundOciError{
+	assert.False(t, isServiceGatewayReadNotFoundOCI(errorutil.UnauthorizedAndNotFoundOciError{
 		HTTPStatusCode: 404,
 		ErrorCode:      errorutil.NotAuthorizedOrNotFound,
 		Description:    "normalized auth ambiguity",
 	}))
-	assert.True(t, isServiceGatewayNotFoundOCI(fakeServiceGatewayServiceError{
+	assert.False(t, isServiceGatewayReadNotFoundOCI(fakeServiceGatewayServiceError{
 		statusCode: 404,
 		code:       "NotAuthorizedOrNotFound",
 		message:    "auth ambiguity",
 	}))
-	assert.True(t, isServiceGatewayNotFoundOCI(fakeServiceGatewayServiceError{
+	assert.True(t, isServiceGatewayReadNotFoundOCI(fakeServiceGatewayServiceError{
 		statusCode: 404,
 		code:       "NotFound",
 		message:    "not found",
 	}))
-	assert.False(t, isServiceGatewayNotFoundOCI(fakeServiceGatewayServiceError{
+	assert.False(t, isServiceGatewayReadNotFoundOCI(fakeServiceGatewayServiceError{
 		statusCode: 404,
 		code:       "UnexpectedCode",
 		message:    "resource not found",
 	}))
-	assert.False(t, isServiceGatewayNotFoundOCI(errorutil.ConflictOciError{
+	assert.False(t, isServiceGatewayReadNotFoundOCI(errorutil.ConflictOciError{
 		HTTPStatusCode: 409,
 		ErrorCode:      errorutil.IncorrectState,
 		Description:    "normalized conflict",
 	}))
-	assert.False(t, isServiceGatewayNotFoundOCI(fakeServiceGatewayServiceError{
+	assert.False(t, isServiceGatewayReadNotFoundOCI(fakeServiceGatewayServiceError{
+		statusCode: 409,
+		code:       errorutil.IncorrectState,
+		message:    "resource conflict",
+	}))
+}
+
+func TestIsServiceGatewayDeleteNotFoundOCI_AcceptsAuthShaped404(t *testing.T) {
+	assert.True(t, isServiceGatewayDeleteNotFoundOCI(errorutil.NotFoundOciError{
+		HTTPStatusCode: 404,
+		ErrorCode:      errorutil.NotFound,
+		Description:    "normalized not found",
+	}))
+	assert.True(t, isServiceGatewayDeleteNotFoundOCI(errorutil.UnauthorizedAndNotFoundOciError{
+		HTTPStatusCode: 404,
+		ErrorCode:      errorutil.NotAuthorizedOrNotFound,
+		Description:    "normalized auth ambiguity",
+	}))
+	assert.True(t, isServiceGatewayDeleteNotFoundOCI(fakeServiceGatewayServiceError{
+		statusCode: 404,
+		code:       "NotAuthorizedOrNotFound",
+		message:    "auth ambiguity",
+	}))
+	assert.True(t, isServiceGatewayDeleteNotFoundOCI(fakeServiceGatewayServiceError{
+		statusCode: 404,
+		code:       "NotFound",
+		message:    "not found",
+	}))
+	assert.False(t, isServiceGatewayDeleteNotFoundOCI(fakeServiceGatewayServiceError{
+		statusCode: 404,
+		code:       "UnexpectedCode",
+		message:    "resource not found",
+	}))
+	assert.False(t, isServiceGatewayDeleteNotFoundOCI(errorutil.ConflictOciError{
+		HTTPStatusCode: 409,
+		ErrorCode:      errorutil.IncorrectState,
+		Description:    "normalized conflict",
+	}))
+	assert.False(t, isServiceGatewayDeleteNotFoundOCI(fakeServiceGatewayServiceError{
 		statusCode: 409,
 		code:       errorutil.IncorrectState,
 		message:    "resource conflict",

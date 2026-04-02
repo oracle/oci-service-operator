@@ -104,7 +104,7 @@ func (c *securityListRuntimeClient) CreateOrUpdate(ctx context.Context, resource
 
 	current, err := c.get(ctx, trackedID)
 	if err != nil {
-		if isSecurityListNotFoundOCI(err) {
+		if isSecurityListReadNotFoundOCI(err) {
 			c.clearTrackedIdentity(resource)
 			return c.create(ctx, resource)
 		}
@@ -157,7 +157,7 @@ func (c *securityListRuntimeClient) Delete(ctx context.Context, resource *corev1
 		SecurityListId: common.String(trackedID),
 	}
 	if _, err := c.client.DeleteSecurityList(ctx, deleteRequest); err != nil {
-		if isSecurityListNotFoundOCI(err) {
+		if isSecurityListDeleteNotFoundOCI(err) {
 			c.markDeleted(resource, "OCI resource no longer exists")
 			return true, nil
 		}
@@ -166,7 +166,7 @@ func (c *securityListRuntimeClient) Delete(ctx context.Context, resource *corev1
 
 	current, err := c.get(ctx, trackedID)
 	if err != nil {
-		if isSecurityListNotFoundOCI(err) {
+		if isSecurityListDeleteNotFoundOCI(err) {
 			c.markDeleted(resource, "OCI resource deleted")
 			return true, nil
 		}
@@ -788,7 +788,12 @@ func normalizeSecurityListOCIError(err error) error {
 	return err
 }
 
-func isSecurityListNotFoundOCI(err error) bool {
+func isSecurityListReadNotFoundOCI(err error) bool {
+	classification := errorutil.ClassifyDeleteError(err)
+	return classification.IsUnambiguousNotFound()
+}
+
+func isSecurityListDeleteNotFoundOCI(err error) bool {
 	classification := errorutil.ClassifyDeleteError(err)
 	return classification.IsUnambiguousNotFound() || classification.IsAuthShapedNotFound()
 }

@@ -552,43 +552,86 @@ func assertNoUpdateWhileLifecycleRetryable(t *testing.T, state coresdk.SubnetLif
 	assert.Equal(t, string(state), resource.Status.LifecycleState)
 }
 
-func TestIsSubnetNotFoundOCI_RejectsAuthAmbiguity(t *testing.T) {
-	assert.True(t, isSubnetNotFoundOCI(errorutil.NotFoundOciError{
+func TestIsSubnetReadNotFoundOCI_RejectsAuthAmbiguity(t *testing.T) {
+	assert.True(t, isSubnetReadNotFoundOCI(errorutil.NotFoundOciError{
 		HTTPStatusCode: 404,
 		ErrorCode:      errorutil.NotFound,
 		Description:    "normalized not found",
 	}))
-	assert.True(t, isSubnetNotFoundOCI(errorutil.UnauthorizedAndNotFoundOciError{
+	assert.False(t, isSubnetReadNotFoundOCI(errorutil.UnauthorizedAndNotFoundOciError{
 		HTTPStatusCode: 404,
 		ErrorCode:      errorutil.NotAuthorizedOrNotFound,
 		Description:    "normalized auth ambiguity",
 	}))
-	assert.True(t, isSubnetNotFoundOCI(fakeServiceError{
+	assert.False(t, isSubnetReadNotFoundOCI(fakeServiceError{
 		statusCode: 404,
 		code:       "NotAuthorizedOrNotFound",
 		message:    "auth ambiguity",
 	}))
-	assert.True(t, isSubnetNotFoundOCI(fakeServiceError{
+	assert.True(t, isSubnetReadNotFoundOCI(fakeServiceError{
 		statusCode: 404,
 		code:       "NotFound",
 		message:    "not found",
 	}))
-	assert.False(t, isSubnetNotFoundOCI(fakeServiceError{
+	assert.False(t, isSubnetReadNotFoundOCI(fakeServiceError{
 		statusCode: 404,
 		code:       "UnexpectedCode",
 		message:    "resource not found",
 	}))
-	assert.False(t, isSubnetNotFoundOCI(fakeServiceError{
+	assert.False(t, isSubnetReadNotFoundOCI(fakeServiceError{
 		statusCode: 404,
 		code:       "UnexpectedCode",
 		message:    "resource not authorized",
 	}))
-	assert.False(t, isSubnetNotFoundOCI(errorutil.ConflictOciError{
+	assert.False(t, isSubnetReadNotFoundOCI(errorutil.ConflictOciError{
 		HTTPStatusCode: 409,
 		ErrorCode:      errorutil.IncorrectState,
 		Description:    "normalized conflict",
 	}))
-	assert.False(t, isSubnetNotFoundOCI(fakeServiceError{
+	assert.False(t, isSubnetReadNotFoundOCI(fakeServiceError{
+		statusCode: 409,
+		code:       errorutil.IncorrectState,
+		message:    "resource conflict",
+	}))
+}
+
+func TestIsSubnetDeleteNotFoundOCI_AcceptsAuthShaped404(t *testing.T) {
+	assert.True(t, isSubnetDeleteNotFoundOCI(errorutil.NotFoundOciError{
+		HTTPStatusCode: 404,
+		ErrorCode:      errorutil.NotFound,
+		Description:    "normalized not found",
+	}))
+	assert.True(t, isSubnetDeleteNotFoundOCI(errorutil.UnauthorizedAndNotFoundOciError{
+		HTTPStatusCode: 404,
+		ErrorCode:      errorutil.NotAuthorizedOrNotFound,
+		Description:    "normalized auth ambiguity",
+	}))
+	assert.True(t, isSubnetDeleteNotFoundOCI(fakeServiceError{
+		statusCode: 404,
+		code:       "NotAuthorizedOrNotFound",
+		message:    "auth ambiguity",
+	}))
+	assert.True(t, isSubnetDeleteNotFoundOCI(fakeServiceError{
+		statusCode: 404,
+		code:       "NotFound",
+		message:    "not found",
+	}))
+	assert.False(t, isSubnetDeleteNotFoundOCI(fakeServiceError{
+		statusCode: 404,
+		code:       "UnexpectedCode",
+		message:    "resource not found",
+	}))
+	assert.False(t, isSubnetDeleteNotFoundOCI(fakeServiceError{
+		statusCode: 404,
+		code:       "UnexpectedCode",
+		message:    "resource not authorized",
+	}))
+	assert.False(t, isSubnetDeleteNotFoundOCI(errorutil.ConflictOciError{
+		HTTPStatusCode: 409,
+		ErrorCode:      errorutil.IncorrectState,
+		Description:    "normalized conflict",
+	}))
+	assert.False(t, isSubnetDeleteNotFoundOCI(fakeServiceError{
 		statusCode: 409,
 		code:       errorutil.IncorrectState,
 		message:    "resource conflict",

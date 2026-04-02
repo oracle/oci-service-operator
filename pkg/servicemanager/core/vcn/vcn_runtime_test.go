@@ -755,43 +755,86 @@ func TestReconcileDelete_ReleasesFinalizerOnAuthShapedNotFound(t *testing.T) {
 	assertNoEventContains(t, events, "Failed to delete resource")
 }
 
-func TestIsNotFoundOCI_AcceptsAuthShaped404(t *testing.T) {
-	assert.True(t, isNotFoundOCI(errorutil.NotFoundOciError{
+func TestIsReadNotFoundOCI_RejectsAuthShaped404(t *testing.T) {
+	assert.True(t, isReadNotFoundOCI(errorutil.NotFoundOciError{
 		HTTPStatusCode: 404,
 		ErrorCode:      errorutil.NotFound,
 		Description:    "normalized not found",
 	}))
-	assert.True(t, isNotFoundOCI(errorutil.UnauthorizedAndNotFoundOciError{
+	assert.False(t, isReadNotFoundOCI(errorutil.UnauthorizedAndNotFoundOciError{
 		HTTPStatusCode: 404,
 		ErrorCode:      errorutil.NotAuthorizedOrNotFound,
 		Description:    "normalized auth ambiguity",
 	}))
-	assert.True(t, isNotFoundOCI(fakeServiceError{
+	assert.False(t, isReadNotFoundOCI(fakeServiceError{
 		statusCode: 404,
 		code:       "NotAuthorizedOrNotFound",
 		message:    "auth ambiguity",
 	}))
-	assert.True(t, isNotFoundOCI(fakeServiceError{
+	assert.True(t, isReadNotFoundOCI(fakeServiceError{
 		statusCode: 404,
 		code:       "NotFound",
 		message:    "not found",
 	}))
-	assert.False(t, isNotFoundOCI(fakeServiceError{
+	assert.False(t, isReadNotFoundOCI(fakeServiceError{
 		statusCode: 404,
 		code:       "UnexpectedCode",
 		message:    "resource not found",
 	}))
-	assert.False(t, isNotFoundOCI(fakeServiceError{
+	assert.False(t, isReadNotFoundOCI(fakeServiceError{
 		statusCode: 404,
 		code:       "UnexpectedCode",
 		message:    "resource not authorized",
 	}))
-	assert.False(t, isNotFoundOCI(errorutil.ConflictOciError{
+	assert.False(t, isReadNotFoundOCI(errorutil.ConflictOciError{
 		HTTPStatusCode: 409,
 		ErrorCode:      errorutil.IncorrectState,
 		Description:    "normalized conflict",
 	}))
-	assert.False(t, isNotFoundOCI(fakeServiceError{
+	assert.False(t, isReadNotFoundOCI(fakeServiceError{
+		statusCode: 409,
+		code:       errorutil.IncorrectState,
+		message:    "resource conflict",
+	}))
+}
+
+func TestIsDeleteNotFoundOCI_AcceptsAuthShaped404(t *testing.T) {
+	assert.True(t, isDeleteNotFoundOCI(errorutil.NotFoundOciError{
+		HTTPStatusCode: 404,
+		ErrorCode:      errorutil.NotFound,
+		Description:    "normalized not found",
+	}))
+	assert.True(t, isDeleteNotFoundOCI(errorutil.UnauthorizedAndNotFoundOciError{
+		HTTPStatusCode: 404,
+		ErrorCode:      errorutil.NotAuthorizedOrNotFound,
+		Description:    "normalized auth ambiguity",
+	}))
+	assert.True(t, isDeleteNotFoundOCI(fakeServiceError{
+		statusCode: 404,
+		code:       "NotAuthorizedOrNotFound",
+		message:    "auth ambiguity",
+	}))
+	assert.True(t, isDeleteNotFoundOCI(fakeServiceError{
+		statusCode: 404,
+		code:       "NotFound",
+		message:    "not found",
+	}))
+	assert.False(t, isDeleteNotFoundOCI(fakeServiceError{
+		statusCode: 404,
+		code:       "UnexpectedCode",
+		message:    "resource not found",
+	}))
+	assert.False(t, isDeleteNotFoundOCI(fakeServiceError{
+		statusCode: 404,
+		code:       "UnexpectedCode",
+		message:    "resource not authorized",
+	}))
+	assert.False(t, isDeleteNotFoundOCI(errorutil.ConflictOciError{
+		HTTPStatusCode: 409,
+		ErrorCode:      errorutil.IncorrectState,
+		Description:    "normalized conflict",
+	}))
+	assert.False(t, isDeleteNotFoundOCI(fakeServiceError{
 		statusCode: 409,
 		code:       errorutil.IncorrectState,
 		message:    "resource conflict",

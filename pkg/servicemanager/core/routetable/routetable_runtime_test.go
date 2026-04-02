@@ -476,38 +476,76 @@ func TestDelete_KeepsFinalizerWhileObservedTerminated(t *testing.T) {
 	assert.Equal(t, string(shared.Terminating), resource.Status.OsokStatus.Reason)
 }
 
-func TestIsRouteTableNotFoundOCI_RejectsAuthAmbiguity(t *testing.T) {
-	assert.True(t, isRouteTableNotFoundOCI(errorutil.NotFoundOciError{
+func TestIsRouteTableReadNotFoundOCI_RejectsAuthAmbiguity(t *testing.T) {
+	assert.True(t, isRouteTableReadNotFoundOCI(errorutil.NotFoundOciError{
 		HTTPStatusCode: 404,
 		ErrorCode:      errorutil.NotFound,
 		Description:    "normalized not found",
 	}))
-	assert.True(t, isRouteTableNotFoundOCI(errorutil.UnauthorizedAndNotFoundOciError{
+	assert.False(t, isRouteTableReadNotFoundOCI(errorutil.UnauthorizedAndNotFoundOciError{
 		HTTPStatusCode: 404,
 		ErrorCode:      errorutil.NotAuthorizedOrNotFound,
 		Description:    "normalized auth ambiguity",
 	}))
-	assert.True(t, isRouteTableNotFoundOCI(fakeRouteTableServiceError{
+	assert.False(t, isRouteTableReadNotFoundOCI(fakeRouteTableServiceError{
 		statusCode: 404,
 		code:       "NotAuthorizedOrNotFound",
 		message:    "auth ambiguity",
 	}))
-	assert.True(t, isRouteTableNotFoundOCI(fakeRouteTableServiceError{
+	assert.True(t, isRouteTableReadNotFoundOCI(fakeRouteTableServiceError{
 		statusCode: 404,
 		code:       "NotFound",
 		message:    "not found",
 	}))
-	assert.False(t, isRouteTableNotFoundOCI(fakeRouteTableServiceError{
+	assert.False(t, isRouteTableReadNotFoundOCI(fakeRouteTableServiceError{
 		statusCode: 404,
 		code:       "UnexpectedCode",
 		message:    "resource not found",
 	}))
-	assert.False(t, isRouteTableNotFoundOCI(errorutil.ConflictOciError{
+	assert.False(t, isRouteTableReadNotFoundOCI(errorutil.ConflictOciError{
 		HTTPStatusCode: 409,
 		ErrorCode:      errorutil.IncorrectState,
 		Description:    "normalized conflict",
 	}))
-	assert.False(t, isRouteTableNotFoundOCI(fakeRouteTableServiceError{
+	assert.False(t, isRouteTableReadNotFoundOCI(fakeRouteTableServiceError{
+		statusCode: 409,
+		code:       errorutil.IncorrectState,
+		message:    "resource conflict",
+	}))
+}
+
+func TestIsRouteTableDeleteNotFoundOCI_AcceptsAuthShaped404(t *testing.T) {
+	assert.True(t, isRouteTableDeleteNotFoundOCI(errorutil.NotFoundOciError{
+		HTTPStatusCode: 404,
+		ErrorCode:      errorutil.NotFound,
+		Description:    "normalized not found",
+	}))
+	assert.True(t, isRouteTableDeleteNotFoundOCI(errorutil.UnauthorizedAndNotFoundOciError{
+		HTTPStatusCode: 404,
+		ErrorCode:      errorutil.NotAuthorizedOrNotFound,
+		Description:    "normalized auth ambiguity",
+	}))
+	assert.True(t, isRouteTableDeleteNotFoundOCI(fakeRouteTableServiceError{
+		statusCode: 404,
+		code:       "NotAuthorizedOrNotFound",
+		message:    "auth ambiguity",
+	}))
+	assert.True(t, isRouteTableDeleteNotFoundOCI(fakeRouteTableServiceError{
+		statusCode: 404,
+		code:       "NotFound",
+		message:    "not found",
+	}))
+	assert.False(t, isRouteTableDeleteNotFoundOCI(fakeRouteTableServiceError{
+		statusCode: 404,
+		code:       "UnexpectedCode",
+		message:    "resource not found",
+	}))
+	assert.False(t, isRouteTableDeleteNotFoundOCI(errorutil.ConflictOciError{
+		HTTPStatusCode: 409,
+		ErrorCode:      errorutil.IncorrectState,
+		Description:    "normalized conflict",
+	}))
+	assert.False(t, isRouteTableDeleteNotFoundOCI(fakeRouteTableServiceError{
 		statusCode: 409,
 		code:       errorutil.IncorrectState,
 		message:    "resource conflict",
