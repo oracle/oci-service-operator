@@ -360,7 +360,8 @@ func normalizeInternetGatewayOCIError(err error) error {
 }
 
 func isInternetGatewayNotFoundOCI(err error) bool {
-	return errorutil.ClassifyDeleteError(err).IsUnambiguousNotFound()
+	classification := errorutil.ClassifyDeleteError(err)
+	return classification.IsUnambiguousNotFound() || classification.IsAuthShapedNotFound()
 }
 
 func stringPtrEqual(actual *string, expected string) bool {

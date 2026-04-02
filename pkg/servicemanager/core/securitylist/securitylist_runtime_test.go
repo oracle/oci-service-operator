@@ -562,12 +562,12 @@ func TestIsSecurityListNotFoundOCI_RejectsAuthAmbiguity(t *testing.T) {
 		ErrorCode:      errorutil.NotFound,
 		Description:    "normalized not found",
 	}))
-	assert.False(t, isSecurityListNotFoundOCI(errorutil.UnauthorizedAndNotFoundOciError{
+	assert.True(t, isSecurityListNotFoundOCI(errorutil.UnauthorizedAndNotFoundOciError{
 		HTTPStatusCode: 404,
 		ErrorCode:      errorutil.NotAuthorizedOrNotFound,
 		Description:    "normalized auth ambiguity",
 	}))
-	assert.False(t, isSecurityListNotFoundOCI(fakeSecurityListServiceError{
+	assert.True(t, isSecurityListNotFoundOCI(fakeSecurityListServiceError{
 		statusCode: 404,
 		code:       "NotAuthorizedOrNotFound",
 		message:    "auth ambiguity",
@@ -592,6 +592,68 @@ func TestIsSecurityListNotFoundOCI_RejectsAuthAmbiguity(t *testing.T) {
 		code:       errorutil.IncorrectState,
 		message:    "resource conflict",
 	}))
+}
+
+func TestReconcileDelete_ReleasesFinalizerOnAuthShapedNotFound(t *testing.T) {
+	scheme := runtime.NewScheme()
+	assert.NoError(t, corev1beta1.AddToScheme(scheme))
+
+	now := metav1.NewTime(time.Now())
+	resource := &corev1beta1.SecurityList{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: "core.oracle.com/v1beta1",
+			Kind:       "SecurityList",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:              "test-security-list-auth-shaped-404",
+			Namespace:         "default",
+			Finalizers:        []string{osokcore.OSOKFinalizerName},
+			DeletionTimestamp: &now,
+		},
+		Status: corev1beta1.SecurityListStatus{
+			OsokStatus: shared.OSOKStatus{
+				Ocid: shared.OCID("ocid1.securitylist.oc1..delete"),
+			},
+		},
+	}
+
+	manager := newSecurityListTestManager(&fakeSecurityListOCIClient{
+		deleteFn: func(_ context.Context, req coresdk.DeleteSecurityListRequest) (coresdk.DeleteSecurityListResponse, error) {
+			assert.Equal(t, "ocid1.securitylist.oc1..delete", *req.SecurityListId)
+			return coresdk.DeleteSecurityListResponse{}, nil
+		},
+		getFn: func(_ context.Context, _ coresdk.GetSecurityListRequest) (coresdk.GetSecurityListResponse, error) {
+			return coresdk.GetSecurityListResponse{}, fakeSecurityListServiceError{
+				statusCode: 404,
+				code:       errorutil.NotAuthorizedOrNotFound,
+				message:    "not authorized or not found",
+			}
+		},
+	})
+
+	kubeClient := newMemorySecurityListClient(scheme, resource)
+	recorder := record.NewFakeRecorder(10)
+	log := loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("test")}
+	reconciler := &osokcore.BaseReconciler{
+		Client:             kubeClient,
+		OSOKServiceManager: manager,
+		Log:                log,
+		Metrics:            &metrics.Metrics{Name: "oci", ServiceName: "core", Logger: log},
+		Recorder:           recorder,
+		Scheme:             scheme,
+	}
+
+	result, err := reconciler.Reconcile(context.Background(), ctrl.Request{
+		NamespacedName: ctrlclient.ObjectKey{Name: "test-security-list-auth-shaped-404", Namespace: "default"},
+	}, &corev1beta1.SecurityList{})
+
+	assert.NoError(t, err)
+	assert.Equal(t, ctrl.Result{}, result)
+	assert.False(t, osokcore.HasFinalizer(kubeClient.StoredSecurityList(), osokcore.OSOKFinalizerName))
+
+	events := drainSecurityListEvents(recorder)
+	assertSecurityListEventContains(t, events, "Removed finalizer")
+	assertNoSecurityListEventContains(t, events, "Failed to delete resource")
 }
 
 func TestReconcileDelete_ReleasesFinalizerOnUnambiguousNotFound(t *testing.T) {

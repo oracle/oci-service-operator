@@ -482,12 +482,12 @@ func TestIsRouteTableNotFoundOCI_RejectsAuthAmbiguity(t *testing.T) {
 		ErrorCode:      errorutil.NotFound,
 		Description:    "normalized not found",
 	}))
-	assert.False(t, isRouteTableNotFoundOCI(errorutil.UnauthorizedAndNotFoundOciError{
+	assert.True(t, isRouteTableNotFoundOCI(errorutil.UnauthorizedAndNotFoundOciError{
 		HTTPStatusCode: 404,
 		ErrorCode:      errorutil.NotAuthorizedOrNotFound,
 		Description:    "normalized auth ambiguity",
 	}))
-	assert.False(t, isRouteTableNotFoundOCI(fakeRouteTableServiceError{
+	assert.True(t, isRouteTableNotFoundOCI(fakeRouteTableServiceError{
 		statusCode: 404,
 		code:       "NotAuthorizedOrNotFound",
 		message:    "auth ambiguity",
@@ -512,6 +512,68 @@ func TestIsRouteTableNotFoundOCI_RejectsAuthAmbiguity(t *testing.T) {
 		code:       errorutil.IncorrectState,
 		message:    "resource conflict",
 	}))
+}
+
+func TestReconcileDelete_ReleasesFinalizerOnAuthShapedNotFound(t *testing.T) {
+	scheme := runtime.NewScheme()
+	assert.NoError(t, corev1beta1.AddToScheme(scheme))
+
+	now := metav1.NewTime(time.Now())
+	resource := &corev1beta1.RouteTable{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: "core.oracle.com/v1beta1",
+			Kind:       "RouteTable",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:              "test-route-table-auth-shaped-404",
+			Namespace:         "default",
+			Finalizers:        []string{osokcore.OSOKFinalizerName},
+			DeletionTimestamp: &now,
+		},
+		Status: corev1beta1.RouteTableStatus{
+			OsokStatus: shared.OSOKStatus{
+				Ocid: shared.OCID("ocid1.routetable.oc1..delete"),
+			},
+		},
+	}
+
+	manager := newRouteTableTestManager(&fakeRouteTableOCIClient{
+		deleteFn: func(_ context.Context, req coresdk.DeleteRouteTableRequest) (coresdk.DeleteRouteTableResponse, error) {
+			assert.Equal(t, "ocid1.routetable.oc1..delete", *req.RtId)
+			return coresdk.DeleteRouteTableResponse{}, nil
+		},
+		getFn: func(_ context.Context, _ coresdk.GetRouteTableRequest) (coresdk.GetRouteTableResponse, error) {
+			return coresdk.GetRouteTableResponse{}, fakeRouteTableServiceError{
+				statusCode: 404,
+				code:       errorutil.NotAuthorizedOrNotFound,
+				message:    "not authorized or not found",
+			}
+		},
+	})
+
+	kubeClient := newMemoryRouteTableClient(scheme, resource)
+	recorder := record.NewFakeRecorder(10)
+	log := loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("test")}
+	reconciler := &osokcore.BaseReconciler{
+		Client:             kubeClient,
+		OSOKServiceManager: manager,
+		Log:                log,
+		Metrics:            &metrics.Metrics{Name: "oci", ServiceName: "core", Logger: log},
+		Recorder:           recorder,
+		Scheme:             scheme,
+	}
+
+	result, err := reconciler.Reconcile(context.Background(), ctrl.Request{
+		NamespacedName: ctrlclient.ObjectKey{Name: "test-route-table-auth-shaped-404", Namespace: "default"},
+	}, &corev1beta1.RouteTable{})
+
+	assert.NoError(t, err)
+	assert.Equal(t, ctrl.Result{}, result)
+	assert.False(t, osokcore.HasFinalizer(kubeClient.StoredRouteTable(), osokcore.OSOKFinalizerName))
+
+	events := drainRouteTableEvents(recorder)
+	assertRouteTableEventContains(t, events, "Removed finalizer")
+	assertNoRouteTableEventContains(t, events, "Failed to delete resource")
 }
 
 func TestReconcileDelete_ReleasesFinalizerOnUnambiguousNotFound(t *testing.T) {

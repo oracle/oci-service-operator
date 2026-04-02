@@ -494,12 +494,12 @@ func TestIsNatGatewayNotFoundOCI_RejectsAuthAmbiguity(t *testing.T) {
 		ErrorCode:      errorutil.NotFound,
 		Description:    "normalized not found",
 	}))
-	assert.False(t, isNatGatewayNotFoundOCI(errorutil.UnauthorizedAndNotFoundOciError{
+	assert.True(t, isNatGatewayNotFoundOCI(errorutil.UnauthorizedAndNotFoundOciError{
 		HTTPStatusCode: 404,
 		ErrorCode:      errorutil.NotAuthorizedOrNotFound,
 		Description:    "normalized auth ambiguity",
 	}))
-	assert.False(t, isNatGatewayNotFoundOCI(fakeNatGatewayServiceError{
+	assert.True(t, isNatGatewayNotFoundOCI(fakeNatGatewayServiceError{
 		statusCode: 404,
 		code:       "NotAuthorizedOrNotFound",
 		message:    "auth ambiguity",
@@ -524,6 +524,68 @@ func TestIsNatGatewayNotFoundOCI_RejectsAuthAmbiguity(t *testing.T) {
 		code:       errorutil.IncorrectState,
 		message:    "resource conflict",
 	}))
+}
+
+func TestReconcileDelete_ReleasesFinalizerOnAuthShapedNotFound(t *testing.T) {
+	scheme := runtime.NewScheme()
+	assert.NoError(t, corev1beta1.AddToScheme(scheme))
+
+	now := metav1.NewTime(time.Now())
+	resource := &corev1beta1.NatGateway{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: "core.oracle.com/v1beta1",
+			Kind:       "NatGateway",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:              "test-nat-gateway-auth-shaped-404",
+			Namespace:         "default",
+			Finalizers:        []string{osokcore.OSOKFinalizerName},
+			DeletionTimestamp: &now,
+		},
+		Status: corev1beta1.NatGatewayStatus{
+			OsokStatus: shared.OSOKStatus{
+				Ocid: shared.OCID("ocid1.natgateway.oc1..delete"),
+			},
+		},
+	}
+
+	manager := newNatGatewayTestManager(&fakeNatGatewayOCIClient{
+		deleteFn: func(_ context.Context, req coresdk.DeleteNatGatewayRequest) (coresdk.DeleteNatGatewayResponse, error) {
+			assert.Equal(t, "ocid1.natgateway.oc1..delete", *req.NatGatewayId)
+			return coresdk.DeleteNatGatewayResponse{}, nil
+		},
+		getFn: func(_ context.Context, _ coresdk.GetNatGatewayRequest) (coresdk.GetNatGatewayResponse, error) {
+			return coresdk.GetNatGatewayResponse{}, fakeNatGatewayServiceError{
+				statusCode: 404,
+				code:       errorutil.NotAuthorizedOrNotFound,
+				message:    "not authorized or not found",
+			}
+		},
+	})
+
+	kubeClient := newMemoryNatGatewayClient(scheme, resource)
+	recorder := record.NewFakeRecorder(10)
+	log := loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("test")}
+	reconciler := &osokcore.BaseReconciler{
+		Client:             kubeClient,
+		OSOKServiceManager: manager,
+		Log:                log,
+		Metrics:            &metrics.Metrics{Name: "oci", ServiceName: "core", Logger: log},
+		Recorder:           recorder,
+		Scheme:             scheme,
+	}
+
+	result, err := reconciler.Reconcile(context.Background(), ctrl.Request{
+		NamespacedName: ctrlclient.ObjectKey{Name: "test-nat-gateway-auth-shaped-404", Namespace: "default"},
+	}, &corev1beta1.NatGateway{})
+
+	assert.NoError(t, err)
+	assert.Equal(t, ctrl.Result{}, result)
+	assert.False(t, osokcore.HasFinalizer(kubeClient.StoredNatGateway(), osokcore.OSOKFinalizerName))
+
+	events := drainNatGatewayEvents(recorder)
+	assertNatGatewayEventContains(t, events, "Removed finalizer")
+	assertNoNatGatewayEventContains(t, events, "Failed to delete resource")
 }
 
 func TestReconcileDelete_ReleasesFinalizerOnUnambiguousNotFound(t *testing.T) {
