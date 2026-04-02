@@ -7,12 +7,10 @@ package core
 
 import (
 	"context"
-	stderrors "errors"
 	"fmt"
 	"strings"
 	"time"
 
-	"github.com/oracle/oci-go-sdk/v65/common"
 	v1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -172,7 +170,7 @@ func (r *BaseReconciler) DeleteResource(ctx context.Context, obj client.Object, 
 	delSucc, err := r.OSOKServiceManager.Delete(ctx, obj)
 	if err != nil {
 		classification := errorutil.ClassifyDeleteError(err)
-		if isUnambiguousNotFoundOCI(err) {
+		if classification.IsUnambiguousNotFound() {
 			r.Log.InfoLogWithFixedMessage(ctx, "Delete treated as successful because OCI resource no longer exists",
 				"oci_http_status_code", classification.HTTPStatusCodeString(),
 				"oci_error_code", classification.ErrorCodeString(),
@@ -197,37 +195,6 @@ func (r *BaseReconciler) DeleteResource(ctx context.Context, obj client.Object, 
 	}
 	// TODO Emit Delete Success metrics end
 	return delSucc, nil
-}
-
-func isUnambiguousNotFoundOCI(err error) bool {
-	var unauthorizedAndNotFound errorutil.UnauthorizedAndNotFoundOciError
-	if stderrors.As(err, &unauthorizedAndNotFound) {
-		return false
-	}
-
-	var serviceErr common.ServiceError
-	if stderrors.As(err, &serviceErr) {
-		switch serviceErr.GetCode() {
-		case "NotFound":
-			return true
-		case "NotAuthorizedOrNotFound":
-			return false
-		}
-		if serviceErr.GetHTTPStatusCode() == 404 {
-			message := strings.ToLower(strings.TrimSpace(serviceErr.GetMessage()))
-			if message != "" && strings.Contains(message, "not found") && !strings.Contains(message, "not authorized") {
-				return true
-			}
-		}
-	}
-
-	message := strings.ToLower(err.Error())
-	if strings.Contains(message, "notauthorizedornotfound") {
-		return false
-	}
-	return strings.Contains(message, "http status code: 404") &&
-		strings.Contains(message, "not found") &&
-		!strings.Contains(message, "not authorized")
 }
 
 func (r *BaseReconciler) addFinalizer(ctx context.Context, obj client.Object, finalizers ...string) error {

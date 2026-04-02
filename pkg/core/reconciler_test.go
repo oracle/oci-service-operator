@@ -134,6 +134,31 @@ func TestDeleteResourceLogsOCIClassificationOnDeleteFailure(t *testing.T) {
 	assertAnyMessageContains(t, sink.errors, "normalized_error_type: errorutil.ConflictOciError")
 }
 
+func TestDeleteResourceAuthShapedNotFoundRemainsFatal(t *testing.T) {
+	t.Parallel()
+
+	sink := &collectingLogSink{}
+	reconciler, _, kubeClient := newDeleteReconcilerWithLogger(t, deleteBehavior{
+		err: testServiceError{
+			statusCode: 404,
+			code:       errorutil.NotAuthorizedOrNotFound,
+			message:    "not authorized or not found",
+		},
+	}, sink)
+
+	done, err := reconciler.DeleteResource(context.Background(), kubeClient.StoredConfigMap(), testRequest())
+	if err == nil {
+		t.Fatal("DeleteResource() error = nil, want auth-shaped 404 failure")
+	}
+	if done {
+		t.Fatal("DeleteResource() done = true, want false")
+	}
+
+	assertAnyMessageContains(t, sink.errors, "oci_http_status_code: 404")
+	assertAnyMessageContains(t, sink.errors, "oci_error_code: NotAuthorizedOrNotFound")
+	assertAnyMessageContains(t, sink.errors, "normalized_error_type: errorutil.UnauthorizedAndNotFoundOciError")
+}
+
 func TestDeleteResourceLogsOCIClassificationOnDeleteNotFoundSuccess(t *testing.T) {
 	t.Parallel()
 

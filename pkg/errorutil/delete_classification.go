@@ -69,6 +69,18 @@ func (c DeleteErrorClassification) NormalizedTypeString() string {
 	return c.NormalizedType
 }
 
+func (c DeleteErrorClassification) IsUnambiguousNotFound() bool {
+	return c.HTTPStatusCode == 404 && c.ErrorCode == NotFound
+}
+
+func (c DeleteErrorClassification) IsAuthShapedNotFound() bool {
+	return c.HTTPStatusCode == 404 && c.ErrorCode == NotAuthorizedOrNotFound
+}
+
+func (c DeleteErrorClassification) IsConflict() bool {
+	return c.HTTPStatusCode == 409
+}
+
 func structuredOCIErrorFields(err error) (int, string, bool) {
 	value := reflect.ValueOf(err)
 	if !value.IsValid() {
