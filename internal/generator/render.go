@@ -64,7 +64,7 @@ func (r *Renderer) RenderPackageOutputs(root string, pkg *PackageModel) error {
 		return nil
 	}
 
-	packageDir := filepath.Join(root, "packages", pkg.Service.Group)
+	packageDir := filepath.Join(root, "packages", pkg.OutputName)
 	installDir := filepath.Join(packageDir, "install")
 	if err := os.MkdirAll(installDir, 0o755); err != nil {
 		return fmt.Errorf("create package install dir %q: %w", installDir, err)
@@ -213,7 +213,7 @@ func (r *Renderer) RenderManagerOutputs(root string, pkg *PackageModel, overwrit
 		return err
 	}
 
-	controllerConfigContent, err := renderControllerManagerConfigFile(pkg.Service.Group)
+	controllerConfigContent, err := renderControllerManagerConfigFile(pkg.OutputName)
 	if err != nil {
 		return fmt.Errorf("render controller manager config for %s: %w", pkg.Service.Service, err)
 	}
@@ -441,9 +441,9 @@ func renderManagerMainFile(pkg *PackageModel) (string, error) {
 	}{
 		APIImportAlias:      fmt.Sprintf("%s%s", pkg.Service.Group, pkg.Version),
 		APIImportPath:       fmt.Sprintf("github.com/oracle/oci-service-operator/api/%s/%s", pkg.Service.Group, pkg.Version),
-		Group:               pkg.Service.Group,
-		LeaderElectionID:    fmt.Sprintf("40558063.oci.%s", pkg.Service.Group),
-		MetricsServiceName:  pkg.Service.Group,
+		Group:               pkg.OutputName,
+		LeaderElectionID:    fmt.Sprintf("40558063.oci.%s", pkg.OutputName),
+		MetricsServiceName:  pkg.OutputName,
 		ManagerServicesPath: "github.com/oracle/oci-service-operator/pkg/manager/services",
 	}
 
@@ -740,11 +740,11 @@ func serviceManagerOutputDir(root string, serviceManager ServiceManagerModel) st
 }
 
 func managerCmdOutputDir(root string, pkg *PackageModel) string {
-	return filepath.Join(root, "cmd", "manager", pkg.Service.Group)
+	return filepath.Join(root, "cmd", "manager", pkg.OutputName)
 }
 
 func managerConfigOutputDir(root string, pkg *PackageModel) string {
-	return filepath.Join(root, "config", "manager", pkg.Service.Group)
+	return filepath.Join(root, "config", "manager", pkg.OutputName)
 }
 
 func controllerOutputDir(root string, pkg *PackageModel) string {
@@ -1331,6 +1331,9 @@ const packageMetadataTemplate = `PACKAGE_NAME={{ .PackageName }}
 PACKAGE_NAMESPACE={{ .PackageNamespace }}
 PACKAGE_NAME_PREFIX={{ .PackageNamePrefix }}
 CRD_PATHS={{ .CRDPaths }}
+{{- if .CRDKindFilter }}
+CRD_KIND_FILTER={{ .CRDKindFilter }}
+{{- end }}
 {{- if .RBACPaths }}
 RBAC_PATHS={{ .RBACPaths }}
 {{- end }}

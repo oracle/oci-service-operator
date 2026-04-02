@@ -1269,6 +1269,7 @@ func TestBuildRegistrationOutputSkipsKindsOptedOutOfGeneratedRuntime(t *testing.
 				WithDepsConstructor: "NewStreamServiceManagerWithDeps",
 			},
 		},
+		"streaming",
 	)
 	if err != nil {
 		t.Fatalf("buildRegistrationOutputModel() error = %v", err)
@@ -1475,6 +1476,60 @@ func TestGenerateRendersPerServiceManagerOutputs(t *testing.T) {
 		"kind: Deployment",
 		"name: controller-manager",
 		"image: controller:latest",
+	})
+}
+
+func TestGenerateRendersPackageSplitOutputs(t *testing.T) {
+	t.Parallel()
+
+	cfg := &Config{
+		Domain:         "oracle.com",
+		DefaultVersion: "v1beta1",
+	}
+	service := testServiceConfig(PackageProfileControllerBacked)
+	service.PackageSplits = []PackageSplitConfig{
+		{
+			Name:                   "mysql-split",
+			DefaultControllerImage: "iad.ocir.io/oracle/oci-service-operator-mysql-split:latest",
+			IncludeKinds:           []string{"DbSystem"},
+		},
+	}
+	service.Generation.Controller.Strategy = GenerationStrategyGenerated
+	service.Generation.ServiceManager.Strategy = GenerationStrategyGenerated
+	service.Generation.Registration.Strategy = GenerationStrategyGenerated
+	pipeline := newTestGenerator(t)
+
+	outputRoot := t.TempDir()
+	if _, err := pipeline.Generate(context.Background(), cfg, []ServiceConfig{service}, Options{
+		OutputRoot: outputRoot,
+	}); err != nil {
+		t.Fatalf("Generate() error = %v", err)
+	}
+
+	metadataContent := readFile(t, filepath.Join(outputRoot, "packages", "mysql-split", "metadata.env"))
+	assertContains(t, metadataContent, []string{
+		"PACKAGE_NAME=oci-service-operator-mysql-split",
+		"PACKAGE_NAMESPACE=oci-service-operator-mysql-split-system",
+		"PACKAGE_NAME_PREFIX=oci-service-operator-mysql-split-",
+		"CRD_PATHS=./api/mysql/...",
+		"CRD_KIND_FILTER=DbSystem",
+		"RBAC_PATHS=./controllers/mysql/...",
+		"DEFAULT_CONTROLLER_IMAGE=iad.ocir.io/oracle/oci-service-operator-mysql-split:latest",
+	})
+
+	registrationContent := readFile(t, filepath.Join(outputRoot, "internal", "registrations", "mysql-split_generated.go"))
+	assertContains(t, registrationContent, []string{
+		`Group:       "mysql-split",`,
+		`mysqlv1beta1 "github.com/oracle/oci-service-operator/api/mysql/v1beta1"`,
+		`mysqlcontrollers "github.com/oracle/oci-service-operator/controllers/mysql"`,
+	})
+
+	managerMainContent := readFile(t, filepath.Join(outputRoot, "cmd", "manager", "mysql-split", "main.go"))
+	assertContains(t, managerMainContent, []string{
+		`mysqlv1beta1 "github.com/oracle/oci-service-operator/api/mysql/v1beta1"`,
+		`MetricsServiceName: "mysql-split"`,
+		`LeaderElectionID:   "40558063.oci.mysql-split"`,
+		`}, managerservices.ForGroup("mysql-split")); err != nil {`,
 	})
 }
 

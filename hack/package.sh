@@ -48,6 +48,11 @@ generated_crd_dir="${generated_dir}/crd"
 generated_crd_bases_dir="${generated_crd_dir}/bases"
 generated_rbac_dir="${generated_dir}/rbac"
 
+split_csv() {
+	local value=$1
+	IFS=',' read -r -a __split_csv_result <<<"${value}"
+}
+
 run_controller_gen() {
 	"${controller_gen_runner}" "${controller_gen}" "$@"
 }
@@ -74,6 +79,34 @@ write_crd_kustomization() {
 	fi
 }
 
+filter_generated_crds() {
+	local kind_filter=${CRD_KIND_FILTER:-}
+	local file kind keep raw_kind
+
+	if [[ -z "${kind_filter}" ]]; then
+		return
+	fi
+
+	split_csv "${kind_filter}"
+	local keep_kinds=("${__split_csv_result[@]}")
+
+	shopt -s nullglob
+	for file in "${generated_crd_bases_dir}"/*.yaml; do
+		kind=$(awk '/^    kind:/{print $2; exit}' "${file}")
+		keep=1
+		for raw_kind in "${keep_kinds[@]}"; do
+			if [[ "${kind}" == "${raw_kind//[[:space:]]/}" ]]; then
+				keep=0
+				break
+			fi
+		done
+		if [[ ${keep} -ne 0 ]]; then
+			rm -f "${file}"
+		fi
+	done
+	shopt -u nullglob
+}
+
 generate_assets() {
 	rm -rf "${generated_dir}"
 	mkdir -p "${generated_crd_bases_dir}"
@@ -83,6 +116,7 @@ generate_assets() {
 		paths="${CRD_PATHS}" \
 		output:crd:artifacts:config="${generated_crd_bases_dir}"
 
+	filter_generated_crds
 	write_crd_kustomization "${generated_crd_dir}/kustomization.yaml"
 
 	if [[ -z "${RBAC_PATHS:-}" ]]; then
