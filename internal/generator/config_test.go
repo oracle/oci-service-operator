@@ -276,25 +276,14 @@ func TestNormalizeDefaultActiveSelection(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
-			serviceName, all, err := NormalizeDefaultActiveSelection(test.serviceName, test.all)
-			if test.wantErr != "" {
-				if err == nil {
-					t.Fatalf("NormalizeDefaultActiveSelection() error = nil, want %q", test.wantErr)
-				}
-				if !strings.Contains(err.Error(), test.wantErr) {
-					t.Fatalf("NormalizeDefaultActiveSelection() error = %v, want substring %q", err, test.wantErr)
-				}
-				return
-			}
-			if err != nil {
-				t.Fatalf("NormalizeDefaultActiveSelection() error = %v", err)
-			}
-			if serviceName != test.wantService {
-				t.Fatalf("NormalizeDefaultActiveSelection() service = %q, want %q", serviceName, test.wantService)
-			}
-			if all != test.wantAll {
-				t.Fatalf("NormalizeDefaultActiveSelection() all = %t, want %t", all, test.wantAll)
-			}
+			assertNormalizeDefaultActiveSelection(
+				t,
+				test.serviceName,
+				test.all,
+				test.wantService,
+				test.wantAll,
+				test.wantErr,
+			)
 		})
 	}
 }
@@ -1102,6 +1091,37 @@ type generationStrategyExpectations struct {
 	serviceManager string
 	registration   string
 	webhook        string
+}
+
+func assertNormalizeDefaultActiveSelection(
+	t *testing.T,
+	serviceName string,
+	all bool,
+	wantService string,
+	wantAll bool,
+	wantErr string,
+) {
+	t.Helper()
+
+	gotService, gotAll, err := NormalizeDefaultActiveSelection(serviceName, all)
+	if wantErr != "" {
+		if err == nil {
+			t.Fatalf("NormalizeDefaultActiveSelection() error = nil, want %q", wantErr)
+		}
+		if !strings.Contains(err.Error(), wantErr) {
+			t.Fatalf("NormalizeDefaultActiveSelection() error = %v, want substring %q", err, wantErr)
+		}
+		return
+	}
+	if err != nil {
+		t.Fatalf("NormalizeDefaultActiveSelection() error = %v", err)
+	}
+	if gotService != wantService {
+		t.Fatalf("NormalizeDefaultActiveSelection() service = %q, want %q", gotService, wantService)
+	}
+	if gotAll != wantAll {
+		t.Fatalf("NormalizeDefaultActiveSelection() all = %t, want %t", gotAll, wantAll)
+	}
 }
 
 func assertSelectServicesResult(t *testing.T, cfg *Config, serviceName string, all bool, wantCount int, wantErr string) []ServiceConfig {
