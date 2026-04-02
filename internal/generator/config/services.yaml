@@ -772,6 +772,16 @@ services:
             strategy: none
           serviceManager:
             strategy: none
+        - kind: ConnectHarness
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: StreamPool
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
 
   - service: vault
     sdkPackage: github.com/oracle/oci-go-sdk/v65/vault

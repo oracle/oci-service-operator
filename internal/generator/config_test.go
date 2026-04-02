@@ -1078,7 +1078,7 @@ func TestCheckedInConfigOptsOutEndpointBasedGeneratedRuntimeResources(t *testing
 
 	wantKinds := map[string][]string{
 		"keymanagement": {"Key", "KeyVersion", "ReplicationStatus", "WrappingKey"},
-		"streaming":     {"Cursor", "Group", "GroupCursor", "Message"},
+		"streaming":     {"ConnectHarness", "Cursor", "Group", "GroupCursor", "Message", "StreamPool"},
 	}
 
 	for serviceName, kinds := range wantKinds {
@@ -1325,13 +1325,13 @@ func assertMySQLRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
 func assertStreamingRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
 	t.Helper()
 
-	assertResourceOverrideCount(t, service, 5)
+	assertResourceOverrideCount(t, service, 7)
 	overrides := overridesByKind(service)
 	assertFormalSpecFor(t, service, "Stream", "stream")
 	if overrides["Stream"].ServiceManager.PackagePath != "streaming/stream" {
 		t.Fatalf("streaming packagePath = %q, want %q", overrides["Stream"].ServiceManager.PackagePath, "streaming/stream")
 	}
-	for _, kind := range []string{"Cursor", "Group", "GroupCursor", "Message"} {
+	for _, kind := range []string{"ConnectHarness", "Cursor", "Group", "GroupCursor", "Message", "StreamPool"} {
 		assertDisabledResourceOverride(t, service.Service, kind, overrides[kind])
 	}
 }

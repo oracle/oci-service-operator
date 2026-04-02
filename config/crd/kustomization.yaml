@@ -60,6 +60,12 @@ resources:
 - bases/psql.oracle.com_workrequesterrors.yaml
 - bases/psql.oracle.com_workrequestlogs.yaml
 - bases/psql.oracle.com_workrequests.yaml
+- bases/streaming.oracle.com_connectharnesses.yaml
+- bases/streaming.oracle.com_cursors.yaml
+- bases/streaming.oracle.com_groupcursors.yaml
+- bases/streaming.oracle.com_groups.yaml
+- bases/streaming.oracle.com_messages.yaml
+- bases/streaming.oracle.com_streampools.yaml
 - bases/streaming.oracle.com_streams.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
