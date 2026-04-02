@@ -49,6 +49,56 @@ func TestValidatorRegistriesAreInSync(t *testing.T) {
 	}
 }
 
+func TestNormalizeConfiguredServiceSelectionDefaultsBlankRunToAll(t *testing.T) {
+	t.Parallel()
+
+	serviceName, all, err := normalizeConfiguredServiceSelection("", false)
+	if err != nil {
+		t.Fatalf("normalizeConfiguredServiceSelection() error = %v", err)
+	}
+	if serviceName != "" {
+		t.Fatalf("normalizeConfiguredServiceSelection() service = %q, want empty", serviceName)
+	}
+	if !all {
+		t.Fatal("normalizeConfiguredServiceSelection() all = false, want true")
+	}
+}
+
+func TestLoadConfiguredServicesDefaultsBlankRunToDefaultActiveSurface(t *testing.T) {
+	t.Parallel()
+
+	root := writeValidatorSelectionRepo(t)
+	services, err := loadConfiguredServices(root, "", false)
+	if err != nil {
+		t.Fatalf("loadConfiguredServices() error = %v", err)
+	}
+	if got := configuredServiceNames(services); !slices.Equal(got, []string{"database", "mysql"}) {
+		t.Fatalf("loadConfiguredServices() services = %v, want %v", got, []string{"database", "mysql"})
+	}
+	if got := services[0].SelectedKinds; !slices.Equal(got, []string{"AutonomousDatabase"}) {
+		t.Fatalf("database SelectedKinds = %v, want %v", got, []string{"AutonomousDatabase"})
+	}
+	if got := services[1].SelectedKinds; got != nil {
+		t.Fatalf("mysql SelectedKinds = %v, want nil", got)
+	}
+}
+
+func TestLoadConfiguredServicesAllowsExplicitDisabledService(t *testing.T) {
+	t.Parallel()
+
+	root := writeValidatorSelectionRepo(t)
+	services, err := loadConfiguredServices(root, "identity", false)
+	if err != nil {
+		t.Fatalf("loadConfiguredServices(identity) error = %v", err)
+	}
+	if len(services) != 1 || services[0].Service != "identity" {
+		t.Fatalf("loadConfiguredServices(identity) = %#v, want identity only", services)
+	}
+	if services[0].SelectedKinds != nil {
+		t.Fatalf("identity SelectedKinds = %v, want nil", services[0].SelectedKinds)
+	}
+}
+
 func TestDeriveSDKTypes(t *testing.T) {
 	t.Parallel()
 
@@ -680,4 +730,58 @@ func assertExactMappings(t *testing.T, got []sdkMapping, want map[string]sdkMapp
 	if len(expected) != 0 {
 		t.Fatalf("missing mappings: %#v", expected)
 	}
+}
+
+func writeValidatorSelectionRepo(t *testing.T) string {
+	t.Helper()
+
+	root := t.TempDir()
+	configPath := filepath.Join(root, "internal", "generator", "config", "services.yaml")
+	if err := os.MkdirAll(filepath.Dir(configPath), 0o755); err != nil {
+		t.Fatalf("MkdirAll(%q) error = %v", filepath.Dir(configPath), err)
+	}
+	const config = `schemaVersion: v1alpha1
+domain: oracle.com
+defaultVersion: v1beta1
+generatorEntrypoint: ./cmd/generator
+packageProfiles:
+  controller-backed:
+    description: runtime-integrated groups
+services:
+  - service: database
+    sdkPackage: example.com/database
+    group: database
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - AutonomousDatabase
+  - service: mysql
+    sdkPackage: example.com/mysql
+    group: mysql
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: all
+  - service: identity
+    sdkPackage: example.com/identity
+    group: identity
+    packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
+`
+	if err := os.WriteFile(configPath, []byte(config), 0o644); err != nil {
+		t.Fatalf("WriteFile(%q) error = %v", configPath, err)
+	}
+	return root
+}
+
+func configuredServiceNames(services []configuredService) []string {
+	names := make([]string, 0, len(services))
+	for _, service := range services {
+		names = append(names, service.Service)
+	}
+	return names
 }

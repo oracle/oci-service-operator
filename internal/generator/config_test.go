@@ -243,6 +243,106 @@ func TestSelectServicesExplicitServiceClearsDefaultKindSubset(t *testing.T) {
 	assertSelectedKinds(t, services[0], nil)
 }
 
+func TestNormalizeDefaultActiveSelection(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name        string
+		serviceName string
+		all         bool
+		wantService string
+		wantAll     bool
+		wantErr     string
+	}{
+		{
+			name:    "blank defaults to default active surface",
+			wantAll: true,
+		},
+		{
+			name:        "explicit service is preserved",
+			serviceName: "mysql",
+			wantService: "mysql",
+		},
+		{
+			name:        "conflicting selectors fail",
+			serviceName: "mysql",
+			all:         true,
+			wantErr:     "use either --all or --service",
+		},
+	}
+
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			assertNormalizeDefaultActiveSelection(
+				t,
+				test.serviceName,
+				test.all,
+				test.wantService,
+				test.wantAll,
+				test.wantErr,
+			)
+		})
+	}
+}
+
+func TestSelectDefaultActiveOrExplicitServices(t *testing.T) {
+	t.Parallel()
+
+	cfg := &Config{
+		SchemaVersion:  "v1alpha1",
+		Domain:         "oracle.com",
+		DefaultVersion: "v1beta1",
+		PackageProfiles: map[string]PackageProfile{
+			"controller-backed": {Description: "runtime-integrated groups"},
+		},
+		Services: []ServiceConfig{
+			{
+				Service:        "database",
+				SDKPackage:     "example/database",
+				Group:          "database",
+				PackageProfile: "controller-backed",
+				Selection:      selectionExplicit(true, "AutonomousDatabase"),
+			},
+			{
+				Service:        "mysql",
+				SDKPackage:     "example/mysql",
+				Group:          "mysql",
+				PackageProfile: "controller-backed",
+				Selection:      selectionAll(true),
+			},
+			{
+				Service:        "identity",
+				SDKPackage:     "example/identity",
+				Group:          "identity",
+				PackageProfile: "controller-backed",
+				Selection:      selectionAll(false),
+			},
+		},
+	}
+
+	services, err := cfg.SelectDefaultActiveOrExplicitServices("", false)
+	if err != nil {
+		t.Fatalf("SelectDefaultActiveOrExplicitServices() error = %v", err)
+	}
+	if got := serviceNames(services); !slices.Equal(got, []string{"database", "mysql"}) {
+		t.Fatalf("SelectDefaultActiveOrExplicitServices() services = %v, want %v", got, []string{"database", "mysql"})
+	}
+	assertSelectedKinds(t, services[0], []string{"AutonomousDatabase"})
+	assertSelectedKinds(t, services[1], nil)
+
+	explicit, err := cfg.SelectDefaultActiveOrExplicitServices("identity", false)
+	if err != nil {
+		t.Fatalf("SelectDefaultActiveOrExplicitServices(identity) error = %v", err)
+	}
+	if len(explicit) != 1 || explicit[0].Service != "identity" {
+		t.Fatalf("SelectDefaultActiveOrExplicitServices(identity) = %#v, want identity only", explicit)
+	}
+	assertSelectedKinds(t, explicit[0], nil)
+}
+
 func TestLoadConfigIncludesSelectionMetadata(t *testing.T) {
 	t.Parallel()
 
@@ -991,6 +1091,37 @@ type generationStrategyExpectations struct {
 	serviceManager string
 	registration   string
 	webhook        string
+}
+
+func assertNormalizeDefaultActiveSelection(
+	t *testing.T,
+	serviceName string,
+	all bool,
+	wantService string,
+	wantAll bool,
+	wantErr string,
+) {
+	t.Helper()
+
+	gotService, gotAll, err := NormalizeDefaultActiveSelection(serviceName, all)
+	if wantErr != "" {
+		if err == nil {
+			t.Fatalf("NormalizeDefaultActiveSelection() error = nil, want %q", wantErr)
+		}
+		if !strings.Contains(err.Error(), wantErr) {
+			t.Fatalf("NormalizeDefaultActiveSelection() error = %v, want substring %q", err, wantErr)
+		}
+		return
+	}
+	if err != nil {
+		t.Fatalf("NormalizeDefaultActiveSelection() error = %v", err)
+	}
+	if gotService != wantService {
+		t.Fatalf("NormalizeDefaultActiveSelection() service = %q, want %q", gotService, wantService)
+	}
+	if gotAll != wantAll {
+		t.Fatalf("NormalizeDefaultActiveSelection() all = %t, want %t", gotAll, wantAll)
+	}
 }
 
 func assertSelectServicesResult(t *testing.T, cfg *Config, serviceName string, all bool, wantCount int, wantErr string) []ServiceConfig {

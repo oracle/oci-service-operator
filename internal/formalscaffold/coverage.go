@@ -96,7 +96,7 @@ func expectedCoverageEntries(formalRoot string, configPath string, providerPath 
 	if err != nil {
 		return nil, err
 	}
-	providerEntries, err := discoverProviderKinds(providerPath)
+	providerEntries, err := discoverProviderKinds(providerPath, publishedEntries)
 	if err != nil {
 		return nil, err
 	}

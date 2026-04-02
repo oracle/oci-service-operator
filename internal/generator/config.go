@@ -601,6 +601,20 @@ func validateFormalSpec(field string, value string) error {
 	return nil
 }
 
+// NormalizeDefaultActiveSelection normalizes downstream CLI selectors so blank
+// runs target the default active generator surface while explicit service
+// targeting remains available for disabled or backlog services.
+func NormalizeDefaultActiveSelection(serviceName string, all bool) (string, bool, error) {
+	serviceName = strings.TrimSpace(serviceName)
+	if serviceName != "" && all {
+		return "", false, fmt.Errorf("use either --all or --service, not both")
+	}
+	if serviceName == "" && !all {
+		return "", true, nil
+	}
+	return serviceName, all, nil
+}
+
 // SelectServices resolves the requested services from the config.
 // `--all` returns only the default-active services and applies any explicit
 // default kind subset before package-model construction. `--service` returns
@@ -629,6 +643,16 @@ func (c *Config) SelectServices(serviceName string, all bool) ([]ServiceConfig, 
 	}
 
 	return nil, fmt.Errorf("service %q was not found in the generator config", serviceName)
+}
+
+// SelectDefaultActiveOrExplicitServices applies downstream blank-run semantics
+// before resolving services from the config.
+func (c *Config) SelectDefaultActiveOrExplicitServices(serviceName string, all bool) ([]ServiceConfig, error) {
+	serviceName, all, err := NormalizeDefaultActiveSelection(serviceName, all)
+	if err != nil {
+		return nil, err
+	}
+	return c.SelectServices(serviceName, all)
 }
 
 // FormalRoot returns the repo-local formal catalog root implied by the config location.

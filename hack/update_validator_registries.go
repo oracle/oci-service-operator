@@ -62,7 +62,7 @@ var (
 func main() {
 	write := flag.Bool("write", false, "write changes to registry files")
 	serviceName := flag.String("service", "", "refresh validator registries for a single configured service")
-	all := flag.Bool("all", false, "refresh validator registries for the default active generator surface")
+	all := flag.Bool("all", false, "explicitly refresh validator registries for the default active generator surface")
 	flag.Parse()
 
 	root, err := findRepoRoot()
@@ -463,11 +463,7 @@ func loadConfiguredServices(root string, serviceName string, all bool) ([]config
 	if err != nil {
 		return nil, err
 	}
-	serviceName, all, err = normalizeConfiguredServiceSelection(serviceName, all)
-	if err != nil {
-		return nil, err
-	}
-	selectedServices, err := cfg.SelectServices(serviceName, all)
+	selectedServices, err := cfg.SelectDefaultActiveOrExplicitServices(serviceName, all)
 	if err != nil {
 		return nil, err
 	}
@@ -498,14 +494,7 @@ func loadConfiguredServices(root string, serviceName string, all bool) ([]config
 }
 
 func normalizeConfiguredServiceSelection(serviceName string, all bool) (string, bool, error) {
-	serviceName = strings.TrimSpace(serviceName)
-	if serviceName != "" && all {
-		return "", false, fmt.Errorf("use either --all or --service, not both")
-	}
-	if serviceName == "" && !all {
-		return "", true, nil
-	}
-	return serviceName, all, nil
+	return generator.NormalizeDefaultActiveSelection(serviceName, all)
 }
 
 func scanConfiguredAPISpecs(root string, services []configuredService) (map[string][]apiTypeInfo, error) {

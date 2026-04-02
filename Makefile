@@ -181,10 +181,10 @@ formal-import: ## Refresh provider-fact JSON and pin sources.lock from FORMAL_IM
 formal-verify: ## Validate the repo-local formal schema scaffold, bindings, and gap categories.
 	go run ./cmd/formal-verify --root $(FORMAL_ROOT)
 
-formal-scaffold: ## Expand scaffold-only formal entries from the published API inventory and optional terraform-provider-oci coverage.
+formal-scaffold: ## Expand scaffold-only formal entries from the published default-active API surface and optional matching terraform-provider-oci facts.
 	go run ./cmd/formal-scaffold --root $(FORMAL_ROOT) --config $(EFFECTIVE_GENERATOR_CONFIG) $(FORMAL_PROVIDER_PATH_ARG)
 
-formal-scaffold-verify: ## Verify formal scaffold coverage against the published API inventory plus terraform-provider-oci.
+formal-scaffold-verify: ## Verify formal scaffold coverage for the published default-active API surface against matching terraform-provider-oci facts.
 	@test -n "$(FORMAL_PROVIDER_PATH)" || (echo "Set FORMAL_PROVIDER_PATH=/path/to/terraform-provider-oci" && exit 1)
 	go run ./cmd/formal-scaffold-verify --root $(FORMAL_ROOT) --config $(EFFECTIVE_GENERATOR_CONFIG) --provider-path $(FORMAL_PROVIDER_PATH)
 
