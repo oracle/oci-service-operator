@@ -17,6 +17,7 @@ import (
 	coresdk "github.com/oracle/oci-go-sdk/v65/core"
 	corev1beta1 "github.com/oracle/oci-service-operator/api/core/v1beta1"
 	osokcore "github.com/oracle/oci-service-operator/pkg/core"
+	"github.com/oracle/oci-service-operator/pkg/errorutil"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/metrics"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
@@ -553,6 +554,44 @@ func TestDelete_KeepsFinalizerWhileObservedTerminating(t *testing.T) {
 	assert.False(t, deleted)
 	assert.Equal(t, "TERMINATING", resource.Status.LifecycleState)
 	assert.Equal(t, string(shared.Terminating), resource.Status.OsokStatus.Reason)
+}
+
+func TestIsSecurityListNotFoundOCI_RejectsAuthAmbiguity(t *testing.T) {
+	assert.True(t, isSecurityListNotFoundOCI(errorutil.NotFoundOciError{
+		HTTPStatusCode: 404,
+		ErrorCode:      errorutil.NotFound,
+		Description:    "normalized not found",
+	}))
+	assert.False(t, isSecurityListNotFoundOCI(errorutil.UnauthorizedAndNotFoundOciError{
+		HTTPStatusCode: 404,
+		ErrorCode:      errorutil.NotAuthorizedOrNotFound,
+		Description:    "normalized auth ambiguity",
+	}))
+	assert.False(t, isSecurityListNotFoundOCI(fakeSecurityListServiceError{
+		statusCode: 404,
+		code:       "NotAuthorizedOrNotFound",
+		message:    "auth ambiguity",
+	}))
+	assert.True(t, isSecurityListNotFoundOCI(fakeSecurityListServiceError{
+		statusCode: 404,
+		code:       "NotFound",
+		message:    "not found",
+	}))
+	assert.False(t, isSecurityListNotFoundOCI(fakeSecurityListServiceError{
+		statusCode: 404,
+		code:       "UnexpectedCode",
+		message:    "resource not found",
+	}))
+	assert.False(t, isSecurityListNotFoundOCI(errorutil.ConflictOciError{
+		HTTPStatusCode: 409,
+		ErrorCode:      errorutil.IncorrectState,
+		Description:    "normalized conflict",
+	}))
+	assert.False(t, isSecurityListNotFoundOCI(fakeSecurityListServiceError{
+		statusCode: 409,
+		code:       errorutil.IncorrectState,
+		message:    "resource conflict",
+	}))
 }
 
 func TestReconcileDelete_ReleasesFinalizerOnUnambiguousNotFound(t *testing.T) {
