@@ -7,18 +7,29 @@ package subnet
 
 import (
 	"context"
+	stderrors "errors"
+	"reflect"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/oracle/oci-go-sdk/v65/common"
 	coresdk "github.com/oracle/oci-go-sdk/v65/core"
 	corev1beta1 "github.com/oracle/oci-service-operator/api/core/v1beta1"
+	osokcore "github.com/oracle/oci-service-operator/pkg/core"
 	"github.com/oracle/oci-service-operator/pkg/errorutil"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
+	"github.com/oracle/oci-service-operator/pkg/metrics"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/stretchr/testify/assert"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
+	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
+	ctrlclientfake "sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
 type fakeSubnetOCIClient struct {
@@ -450,6 +461,68 @@ func TestDelete_RequeuesWhileObservedTerminated(t *testing.T) {
 	assert.Equal(t, string(shared.Terminating), resource.Status.OsokStatus.Reason)
 }
 
+func TestReconcileDelete_ReleasesFinalizerOnUnambiguousNotFound(t *testing.T) {
+	scheme := runtime.NewScheme()
+	assert.NoError(t, corev1beta1.AddToScheme(scheme))
+
+	now := metav1.NewTime(time.Now())
+	resource := &corev1beta1.Subnet{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: "core.oracle.com/v1beta1",
+			Kind:       "Subnet",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:              "test-subnet",
+			Namespace:         "default",
+			Finalizers:        []string{osokcore.OSOKFinalizerName},
+			DeletionTimestamp: &now,
+		},
+		Status: corev1beta1.SubnetStatus{
+			OsokStatus: shared.OSOKStatus{
+				Ocid: shared.OCID("ocid1.subnet.oc1..delete"),
+			},
+		},
+	}
+
+	manager := newTestManager(&fakeSubnetOCIClient{
+		deleteFn: func(_ context.Context, req coresdk.DeleteSubnetRequest) (coresdk.DeleteSubnetResponse, error) {
+			assert.Equal(t, "ocid1.subnet.oc1..delete", *req.SubnetId)
+			return coresdk.DeleteSubnetResponse{}, nil
+		},
+		getFn: func(_ context.Context, _ coresdk.GetSubnetRequest) (coresdk.GetSubnetResponse, error) {
+			return coresdk.GetSubnetResponse{}, fakeServiceError{
+				statusCode: 404,
+				code:       "NotFound",
+				message:    "resource not found",
+			}
+		},
+	})
+
+	kubeClient := newMemorySubnetClient(scheme, resource)
+	recorder := record.NewFakeRecorder(10)
+	log := loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("test")}
+	reconciler := &osokcore.BaseReconciler{
+		Client:             kubeClient,
+		OSOKServiceManager: manager,
+		Log:                log,
+		Metrics:            &metrics.Metrics{Name: "oci", ServiceName: "core", Logger: log},
+		Recorder:           recorder,
+		Scheme:             scheme,
+	}
+
+	result, err := reconciler.Reconcile(context.Background(), ctrl.Request{
+		NamespacedName: ctrlclient.ObjectKey{Name: "test-subnet", Namespace: "default"},
+	}, &corev1beta1.Subnet{})
+
+	assert.NoError(t, err)
+	assert.Equal(t, ctrl.Result{}, result)
+	assert.False(t, osokcore.HasFinalizer(kubeClient.StoredSubnet(), osokcore.OSOKFinalizerName))
+
+	events := drainSubnetEvents(recorder)
+	assertSubnetEventContains(t, events, "Removed finalizer")
+	assertNoSubnetEventContains(t, events, "Failed to delete resource")
+}
+
 func assertNoUpdateWhileLifecycleRetryable(t *testing.T, state coresdk.SubnetLifecycleStateEnum) {
 	t.Helper()
 
@@ -544,4 +617,70 @@ func TestCreateOrUpdate_RecreateClearsStaleNestedOsokStatusMetadata(t *testing.T
 	assert.Equal(t, string(shared.Active), resource.Status.OsokStatus.Reason)
 	assert.Len(t, resource.Status.OsokStatus.Conditions, 1)
 	assert.Equal(t, shared.Active, resource.Status.OsokStatus.Conditions[0].Type)
+}
+
+func drainSubnetEvents(recorder *record.FakeRecorder) []string {
+	events := make([]string, 0, len(recorder.Events))
+	for {
+		select {
+		case event := <-recorder.Events:
+			events = append(events, event)
+		default:
+			return events
+		}
+	}
+}
+
+func assertSubnetEventContains(t *testing.T, events []string, want string) {
+	t.Helper()
+	for _, event := range events {
+		if strings.Contains(event, want) {
+			return
+		}
+	}
+	t.Fatalf("events %v do not contain %q", events, want)
+}
+
+func assertNoSubnetEventContains(t *testing.T, events []string, unexpected string) {
+	t.Helper()
+	for _, event := range events {
+		if strings.Contains(event, unexpected) {
+			t.Fatalf("events %v unexpectedly contain %q", events, unexpected)
+		}
+	}
+}
+
+type memorySubnetClient struct {
+	ctrlclient.Client
+	stored ctrlclient.Object
+}
+
+func newMemorySubnetClient(scheme *runtime.Scheme, obj ctrlclient.Object) *memorySubnetClient {
+	return &memorySubnetClient{
+		Client: ctrlclientfake.NewClientBuilder().WithScheme(scheme).Build(),
+		stored: obj.DeepCopyObject().(ctrlclient.Object),
+	}
+}
+
+func (c *memorySubnetClient) Get(_ context.Context, key ctrlclient.ObjectKey, obj ctrlclient.Object, _ ...ctrlclient.GetOption) error {
+	if c.stored == nil || c.stored.GetName() != key.Name || c.stored.GetNamespace() != key.Namespace {
+		return apierrors.NewNotFound(schema.GroupResource{Group: "core.oracle.com", Resource: "subnets"}, key.Name)
+	}
+
+	value := reflect.ValueOf(obj)
+	source := reflect.ValueOf(c.stored.DeepCopyObject())
+	if value.Kind() != reflect.Ptr || source.Kind() != reflect.Ptr {
+		return stderrors.New("memory client requires pointer objects")
+	}
+	value.Elem().Set(source.Elem())
+	return nil
+}
+
+func (c *memorySubnetClient) Update(_ context.Context, obj ctrlclient.Object, _ ...ctrlclient.UpdateOption) error {
+	c.stored = obj.DeepCopyObject().(ctrlclient.Object)
+	return nil
+}
+
+func (c *memorySubnetClient) StoredSubnet() *corev1beta1.Subnet {
+	return c.stored.DeepCopyObject().(*corev1beta1.Subnet)
 }
