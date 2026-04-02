@@ -171,12 +171,19 @@ func (r *BaseReconciler) DeleteResource(ctx context.Context, obj client.Object, 
 	//TODO Emit Delete Start metrics
 	delSucc, err := r.OSOKServiceManager.Delete(ctx, obj)
 	if err != nil {
+		classification := errorutil.ClassifyDeleteError(err)
 		if isUnambiguousNotFoundOCI(err) {
-			r.Log.InfoLogWithFixedMessage(ctx, "Delete treated as successful because OCI resource no longer exists")
+			r.Log.InfoLogWithFixedMessage(ctx, "Delete treated as successful because OCI resource no longer exists",
+				"oci_http_status_code", classification.HTTPStatusCodeString(),
+				"oci_error_code", classification.ErrorCodeString(),
+				"normalized_error_type", classification.NormalizedTypeString())
 			return true, nil
 		}
 		r.Log.ErrorLogWithFixedMessage(ctx, err, "Delete failed in the Service Manager with error", "name", req.Name,
-			"namespace", req.Namespace, "namespacedName", req.String())
+			"namespace", req.Namespace, "namespacedName", req.String(),
+			"oci_http_status_code", classification.HTTPStatusCodeString(),
+			"oci_error_code", classification.ErrorCodeString(),
+			"normalized_error_type", classification.NormalizedTypeString())
 		r.Recorder.Event(obj, v1.EventTypeWarning, "Failed",
 			fmt.Sprintf("Failed to delete resource: %s", err.Error()))
 		// TODO Emit Delete Fault metrics end

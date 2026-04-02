@@ -15,6 +15,7 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/oracle/oci-go-sdk/v65/common"
+	"github.com/oracle/oci-service-operator/pkg/errorutil"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/metrics"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
@@ -108,7 +109,61 @@ func TestReconcileNotFoundDeleteRemovesFinalizer(t *testing.T) {
 	assertNoEventContains(t, events, "Failed to delete resource")
 }
 
+func TestDeleteResourceLogsOCIClassificationOnDeleteFailure(t *testing.T) {
+	t.Parallel()
+
+	sink := &collectingLogSink{}
+	reconciler, _, kubeClient := newDeleteReconcilerWithLogger(t, deleteBehavior{
+		err: testServiceError{
+			statusCode: 409,
+			code:       errorutil.IncorrectState,
+			message:    "delete conflict",
+		},
+	}, sink)
+
+	done, err := reconciler.DeleteResource(context.Background(), kubeClient.StoredConfigMap(), testRequest())
+	if err == nil {
+		t.Fatal("DeleteResource() error = nil, want delete failure")
+	}
+	if done {
+		t.Fatal("DeleteResource() done = true, want false")
+	}
+
+	assertAnyMessageContains(t, sink.errors, "oci_http_status_code: 409")
+	assertAnyMessageContains(t, sink.errors, "oci_error_code: IncorrectState")
+	assertAnyMessageContains(t, sink.errors, "normalized_error_type: errorutil.ConflictOciError")
+}
+
+func TestDeleteResourceLogsOCIClassificationOnDeleteNotFoundSuccess(t *testing.T) {
+	t.Parallel()
+
+	sink := &collectingLogSink{}
+	reconciler, _, kubeClient := newDeleteReconcilerWithLogger(t, deleteBehavior{
+		err: testServiceError{
+			statusCode: 404,
+			code:       errorutil.NotFound,
+			message:    "resource not found",
+		},
+	}, sink)
+
+	done, err := reconciler.DeleteResource(context.Background(), kubeClient.StoredConfigMap(), testRequest())
+	if err != nil {
+		t.Fatalf("DeleteResource() error = %v, want nil", err)
+	}
+	if !done {
+		t.Fatal("DeleteResource() done = false, want true")
+	}
+
+	assertAnyMessageContains(t, sink.infos, "oci_http_status_code: 404")
+	assertAnyMessageContains(t, sink.infos, "oci_error_code: NotFound")
+	assertAnyMessageContains(t, sink.infos, "normalized_error_type: errorutil.UnauthorizedAndNotFoundOciError")
+}
+
 func newDeleteReconciler(t *testing.T, behavior deleteBehavior) (*BaseReconciler, *record.FakeRecorder, *memoryClient) {
+	return newDeleteReconcilerWithLogger(t, behavior, &collectingLogSink{})
+}
+
+func newDeleteReconcilerWithLogger(t *testing.T, behavior deleteBehavior, sink *collectingLogSink) (*BaseReconciler, *record.FakeRecorder, *memoryClient) {
 	t.Helper()
 
 	scheme := runtime.NewScheme()
@@ -133,7 +188,10 @@ func newDeleteReconciler(t *testing.T, behavior deleteBehavior) (*BaseReconciler
 	kubeClient := newMemoryClient(scheme, configMap)
 
 	recorder := record.NewFakeRecorder(10)
-	log := loggerutil.OSOKLogger{Logger: logr.Discard()}
+	if sink == nil {
+		sink = &collectingLogSink{}
+	}
+	log := loggerutil.OSOKLogger{Logger: logr.New(sink)}
 
 	return &BaseReconciler{
 		Client: kubeClient,
@@ -176,6 +234,16 @@ func assertNoEventContains(t *testing.T, events []string, unexpected string) {
 			t.Fatalf("events %v unexpectedly contain %q", events, unexpected)
 		}
 	}
+}
+
+func assertAnyMessageContains(t *testing.T, messages []string, want string) {
+	t.Helper()
+	for _, message := range messages {
+		if strings.Contains(message, want) {
+			return
+		}
+	}
+	t.Fatalf("messages %v do not contain %q", messages, want)
 }
 
 func testRequest() ctrl.Request {
@@ -292,4 +360,31 @@ func (c *memoryClient) Update(_ context.Context, obj ctrlclient.Object, _ ...ctr
 
 func (c *memoryClient) StoredConfigMap() *corev1.ConfigMap {
 	return c.stored.DeepCopyObject().(*corev1.ConfigMap)
+}
+
+type collectingLogSink struct {
+	infos  []string
+	errors []string
+}
+
+func (s *collectingLogSink) Init(logr.RuntimeInfo) {}
+
+func (s *collectingLogSink) Enabled(int) bool {
+	return true
+}
+
+func (s *collectingLogSink) Info(_ int, msg string, _ ...interface{}) {
+	s.infos = append(s.infos, msg)
+}
+
+func (s *collectingLogSink) Error(_ error, msg string, _ ...interface{}) {
+	s.errors = append(s.errors, msg)
+}
+
+func (s *collectingLogSink) WithValues(...interface{}) logr.LogSink {
+	return s
+}
+
+func (s *collectingLogSink) WithName(string) logr.LogSink {
+	return s
 }
