@@ -59,25 +59,120 @@ jobs:
           python3 -c "import math; packages = [item for item in \"$SUBPACKAGES\".split(',') if item]; print(f'indices={list(range(0, math.ceil(len(packages) / int(\"${{ inputs.size }}\"))))}')" >> "$GITHUB_OUTPUT"
           echo "subpackages=$SUBPACKAGES" >> "$GITHUB_OUTPUT"
 
-  publish-artifacts:
+  publish-images-amd64:
+    if: contains(inputs.platform, 'linux_amd64')
+    needs: index
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         index: ${{ fromJSON(needs.index.outputs.indices) }}
-
-    needs: index
-    runs-on: ubuntu-latest
     steps:
-      - name: Setup QEMU
-        uses: docker/setup-qemu-action@2b82ce82d56a2a04d2637cd93a637ae1b359c0a7
-        with:
-          platforms: all
-
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@885d1462b80bc1c1c7f0b00334ad271f09369c55
         with:
           version: ${{ env.DOCKER_BUILDX_VERSION }}
           install: true
 
+      - name: Login to GHCR using GITHUB_TOKEN
+        uses: docker/login-action@v3.3.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608
+
+      - name: Calculate packages to build & push
+        id: packages
+        shell: bash
+        run: |
+          PACKAGES_BATCH=$(python3 -c "all_packages = [item for item in \"${{ needs.index.outputs.subpackages }}\".split(',') if item]; start_idx = int(\"${{ matrix.index }}\") * int(\"${{ inputs.size }}\"); batch = all_packages[start_idx:start_idx + int(\"${{ inputs.size }}\")]; print(','.join(batch))")
+          echo "packages_batch=$PACKAGES_BATCH" >> "$GITHUB_OUTPUT"
+
+      - name: Publish amd64 Images
+        shell: bash
+        run: |
+          set -euo pipefail
+          IFS=',' read -r -a services <<< "${{ steps.packages.outputs.packages_batch }}"
+          for service in "${services[@]}"; do
+            [ -n "${service}" ] || continue
+            image="${{ env.GHCR_REGORG }}/oci-service-operator-${service}:${{ inputs.version }}"
+            IMAGE="$image" \
+            CONTROLLER_MAIN="./cmd/manager/${service}" \
+            PLATFORMS="linux_amd64" \
+            USE_DOCKER_PLATFORM=true \
+            CGO_ENABLED=1 \
+            GOEXPERIMENT=boringcrypto \
+            SKIP_FIPS=false \
+            SKIP_MANIFEST=true \
+            /bin/bash ./hack/publish-platform-image.sh
+          done
+
+  publish-images-arm64:
+    if: contains(inputs.platform, 'linux_arm64')
+    needs: index
+    runs-on: ubuntu-24.04-arm
+    strategy:
+      matrix:
+        index: ${{ fromJSON(needs.index.outputs.indices) }}
+    steps:
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@885d1462b80bc1c1c7f0b00334ad271f09369c55
+        with:
+          version: ${{ env.DOCKER_BUILDX_VERSION }}
+          install: true
+
+      - name: Login to GHCR using GITHUB_TOKEN
+        uses: docker/login-action@v3.3.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608
+
+      - name: Calculate packages to build & push
+        id: packages
+        shell: bash
+        run: |
+          PACKAGES_BATCH=$(python3 -c "all_packages = [item for item in \"${{ needs.index.outputs.subpackages }}\".split(',') if item]; start_idx = int(\"${{ matrix.index }}\") * int(\"${{ inputs.size }}\"); batch = all_packages[start_idx:start_idx + int(\"${{ inputs.size }}\")]; print(','.join(batch))")
+          echo "packages_batch=$PACKAGES_BATCH" >> "$GITHUB_OUTPUT"
+
+      - name: Publish arm64 Images
+        shell: bash
+        run: |
+          set -euo pipefail
+          IFS=',' read -r -a services <<< "${{ steps.packages.outputs.packages_batch }}"
+          for service in "${services[@]}"; do
+            [ -n "${service}" ] || continue
+            image="${{ env.GHCR_REGORG }}/oci-service-operator-${service}:${{ inputs.version }}"
+            IMAGE="$image" \
+            CONTROLLER_MAIN="./cmd/manager/${service}" \
+            PLATFORMS="linux_arm64" \
+            USE_DOCKER_PLATFORM=true \
+            CGO_ENABLED=1 \
+            GOEXPERIMENT=boringcrypto \
+            SKIP_FIPS=false \
+            SKIP_MANIFEST=true \
+            /bin/bash ./hack/publish-platform-image.sh
+          done
+
+  publish-artifacts:
+    needs:
+      - index
+      - publish-images-amd64
+      - publish-images-arm64
+    if: |
+      !cancelled() &&
+      (needs.publish-images-amd64.result == 'success' || needs.publish-images-amd64.result == 'skipped') &&
+      (needs.publish-images-arm64.result == 'success' || needs.publish-images-arm64.result == 'skipped')
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        index: ${{ fromJSON(needs.index.outputs.indices) }}
+    steps:
       - name: Login to GHCR using GITHUB_TOKEN
         uses: docker/login-action@v3.3.0
         with:
@@ -121,20 +216,41 @@ jobs:
           PACKAGES_BATCH=$(python3 -c "all_packages = [item for item in \"${{ needs.index.outputs.subpackages }}\".split(',') if item]; start_idx = int(\"${{ matrix.index }}\") * int(\"${{ inputs.size }}\"); batch = all_packages[start_idx:start_idx + int(\"${{ inputs.size }}\")]; print(','.join(batch))")
           echo "packages_batch=$PACKAGES_BATCH" >> "$GITHUB_OUTPUT"
 
-      - name: Publish Artifacts
+      - name: Publish Manifests and Bundles
         shell: bash
         run: |
           set -euo pipefail
           IFS=',' read -r -a services <<< "${{ steps.packages.outputs.packages_batch }}"
+          raw_platforms="${{ inputs.platform }}"
+          raw_platforms="${raw_platforms// /,}"
+          IFS=',' read -r -a platform_list <<< "${raw_platforms}"
+
           for service in "${services[@]}"; do
             [ -n "${service}" ] || continue
-            make publish-service-olm \
-              GROUP="${service}" \
-              PUBLISH_REGISTRY="${{ env.GHCR_REGORG }}" \
-              PUBLISH_VERSION="${{ inputs.version }}" \
-              PUBLISH_PLATFORMS="${{ inputs.platform }}" \
-              PUBLISH_USE_DOCKER_PLATFORM=true \
-              PUBLISH_CGO_ENABLED=1 \
-              PUBLISH_GOEXPERIMENT=boringcrypto \
-              PUBLISH_SKIP_FIPS=false
+            image="${{ env.GHCR_REGORG }}/oci-service-operator-${service}:${{ inputs.version }}"
+            bundle_image="${{ env.GHCR_REGORG }}/oci-service-operator-${service}-bundle:${{ inputs.version }}"
+
+            refs=()
+            for platform in "${platform_list[@]}"; do
+              [ -n "${platform}" ] || continue
+              normalized=$(printf '%s' "${platform}" | tr '_' '/')
+              os="${normalized%%/*}"
+              arch="${normalized##*/}"
+              refs+=("${image}-${arch}")
+            done
+
+            docker manifest rm "${image}" >/dev/null 2>&1 || true
+            docker manifest create "${image}" "${refs[@]}"
+            for platform in "${platform_list[@]}"; do
+              [ -n "${platform}" ] || continue
+              normalized=$(printf '%s' "${platform}" | tr '_' '/')
+              os="${normalized%%/*}"
+              arch="${normalized##*/}"
+              docker manifest annotate "${image}" "${image}-${arch}" --os "${os}" --arch "${arch}"
+            done
+            docker manifest push "${image}"
+
+            make package-bundle-olm GROUP="${service}" CONTROLLER_IMG="${image}" VERSION="${{ inputs.version }}"
+            make bundle-build BUNDLE_IMG="${bundle_image}"
+            make bundle-push BUNDLE_IMG="${bundle_image}"
           done

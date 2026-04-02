@@ -20,6 +20,7 @@ Optional environment variables:
   CGO_ENABLED      CGO setting passed to the Docker build. Defaults to 0.
   GOEXPERIMENT     GOEXPERIMENT setting passed to the Docker build. Defaults to empty.
   SKIP_FIPS        OSOK_SKIP_FIPS value baked into the image. Defaults to true.
+  SKIP_MANIFEST    When true, only push arch-specific tags and skip manifest creation. Defaults to false.
 EOF
 }
 
@@ -31,6 +32,7 @@ use_docker_platform=${USE_DOCKER_PLATFORM:-false}
 cgo_enabled=${CGO_ENABLED:-0}
 goexperiment=${GOEXPERIMENT:-}
 skip_fips=${SKIP_FIPS:-true}
+skip_manifest=${SKIP_MANIFEST:-false}
 
 if [[ -z "${image}" || -z "${controller_main}" ]]; then
 	usage >&2
@@ -100,6 +102,10 @@ for platform in "${normalized_platforms[@]}"; do
 	fi
 	arch_images+=("${platform_image}")
 done
+
+if [[ "${skip_manifest}" == "true" ]]; then
+	exit 0
+fi
 
 "${docker_bin}" manifest rm "${image}" >/dev/null 2>&1 || true
 "${docker_bin}" manifest create "${image}" "${arch_images[@]}"
