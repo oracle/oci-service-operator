@@ -20,10 +20,13 @@ rows for `database/AutonomousDatabase`, `mysql/DbSystem`,
 `streaming/Stream`, and `identity/User` exercise the first
 resource-specific formal corpus.
 
-Use `make formal-scaffold` to expand scaffold-only entries from the published API
-inventory in `internal/generator/config/services.yaml`, and optionally merge in
-provider-discovered rows with
-`FORMAL_PROVIDER_PATH=/path/to/terraform-provider-oci`.
+Use `make formal-scaffold` to expand scaffold-only entries from the published
+default-active API surface in `internal/generator/config/services.yaml`. That
+surface follows the generator's blank-run selection rules and honors any
+per-service selected kind subset. When
+`FORMAL_PROVIDER_PATH=/path/to/terraform-provider-oci` is set, the scaffold
+uses the pinned provider checkout only to enrich and verify those same selected
+published rows.
 Use `make formal-diagrams` to deterministically rerender the checked-in
 shared `activity`, `sequence`, `state-machine`, and `legend` `.puml` and `.svg`
 artifacts under `shared/diagrams/` plus each controller's `activity`,
@@ -32,7 +35,8 @@ artifacts under `shared/diagrams/` plus each controller's `activity`,
 The SVGs are rendered by the `plantuml` CLI, so keep `plantuml` available on `PATH`
 before running `make formal-diagrams`, `make formal-scaffold`, or `make formal-verify`.
 Use `make formal-scaffold-verify FORMAL_PROVIDER_PATH=/path/to/terraform-provider-oci`
-to confirm the checked-in formal catalog covers the provider-backed inventory.
+to confirm the checked-in formal catalog covers that selected published surface
+against matching provider facts.
 Use `make formal-import FORMAL_IMPORT_PROVIDER_PATH=/path/to/terraform-provider-oci` to pin the source lock and refresh non-scaffold provider-fact imports.
 
 ## Onboarding and Promotion Checklist
@@ -45,9 +49,10 @@ controller-backed promotion:
    `packageProfile: crd-only`; add `formalSpec` at the service level or under
    `generation.resources[]` once the published kind has a matching manifest row.
 2. Run `make formal-scaffold` to create or refresh scaffold-only rows for the
-   published API inventory, and pass
-   `FORMAL_PROVIDER_PATH=/path/to/terraform-provider-oci` when provider-wide
-   coverage should be refreshed. The command also renders deterministic
+   published default-active API surface, and pass
+   `FORMAL_PROVIDER_PATH=/path/to/terraform-provider-oci` when matching
+   provider facts for that selected surface should be refreshed. The command
+   also renders deterministic
    shared `.puml` and `.svg` diagrams in `formal/shared/diagrams/` and controller-local
    `activity`, `sequence`, and `state-machine` `.puml` and `.svg` files from
    `controller_diagrams/*.yaml`, `runtime-lifecycle.yaml`, `controller_manifest.tsv`,
@@ -106,22 +111,24 @@ generator specializes those controller-local diagrams from the shared
 `spec.cfg`, repo-authored runtime metadata, and imported provider facts derived
 from the public `terraform-provider-oci` behavior.
 
-`formal/` is controller-scoped, not service-scoped. The steady-state target is one
-manifest row plus sibling `controllers/<service>/<slug>/...` and
+`formal/` is controller-scoped, not service-scoped. The steady-state target is
+one manifest row plus sibling `controllers/<service>/<slug>/...` and
 `imports/<service>/<slug>.json` entries for each published top-level API kind
-resolved from `internal/generator/config/services.yaml`, plus provider-backed
-rows for additional `terraform-provider-oci` groups and resources that are not
-yet published as OSOK APIs.
+resolved from `internal/generator/config/services.yaml` after default-active
+service filtering and any per-service selected-kind narrowing.
+`FORMAL_PROVIDER_PATH` only enriches and verifies those same published rows
+against matching `terraform-provider-oci` resources; unpublished provider-only
+resources are out of scope for the checked-in scaffold.
 
 When expanding `formal/` across existing API groups:
 
-- use `make formal-scaffold` to generate scaffold rows from the resolved OSOK
-  API inventory and, when `FORMAL_PROVIDER_PATH` is set, merge in
-  `terraform-provider-oci` registrations without copying upstream diagram
-  artifacts;
+- use `make formal-scaffold` to generate scaffold rows from the resolved
+  default-active OSOK API surface and, when `FORMAL_PROVIDER_PATH` is set,
+  merge matching `terraform-provider-oci` registrations for that same selected
+  surface without copying upstream diagram artifacts;
 - keep new rows at `stage=scaffold` with placeholder imports until repo-authored
   semantics and logic gaps are written; scaffold rows must pass
-  `make formal-verify`, provider-backed coverage should pass
+  `make formal-verify`, selected-surface coverage should pass
   `make formal-scaffold-verify`, and `make formal-import` will skip scaffold
   rows;
 - do not add `formalSpec` to a service or resource until its row is promoted
