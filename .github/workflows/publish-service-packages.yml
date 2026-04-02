@@ -31,7 +31,7 @@ on:
 
 env:
   DOCKER_BUILDX_VERSION: 'v0.20.1'
-  GHCR_REGORG: 'ghcr.io/${{ github.repository_owner }}'
+  GHCR_REGORG: 'ghcr.io/haoyl666'
 
 permissions:
   contents: read
