@@ -17,6 +17,7 @@ import (
 	coresdk "github.com/oracle/oci-go-sdk/v65/core"
 	corev1beta1 "github.com/oracle/oci-service-operator/api/core/v1beta1"
 	osokcore "github.com/oracle/oci-service-operator/pkg/core"
+	"github.com/oracle/oci-service-operator/pkg/errorutil"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/metrics"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
@@ -473,6 +474,44 @@ func TestDelete_KeepsFinalizerWhileObservedTerminated(t *testing.T) {
 	assert.False(t, done)
 	assert.Nil(t, resource.Status.OsokStatus.DeletedAt)
 	assert.Equal(t, string(shared.Terminating), resource.Status.OsokStatus.Reason)
+}
+
+func TestIsRouteTableNotFoundOCI_RejectsAuthAmbiguity(t *testing.T) {
+	assert.True(t, isRouteTableNotFoundOCI(errorutil.NotFoundOciError{
+		HTTPStatusCode: 404,
+		ErrorCode:      errorutil.NotFound,
+		Description:    "normalized not found",
+	}))
+	assert.False(t, isRouteTableNotFoundOCI(errorutil.UnauthorizedAndNotFoundOciError{
+		HTTPStatusCode: 404,
+		ErrorCode:      errorutil.NotAuthorizedOrNotFound,
+		Description:    "normalized auth ambiguity",
+	}))
+	assert.False(t, isRouteTableNotFoundOCI(fakeRouteTableServiceError{
+		statusCode: 404,
+		code:       "NotAuthorizedOrNotFound",
+		message:    "auth ambiguity",
+	}))
+	assert.True(t, isRouteTableNotFoundOCI(fakeRouteTableServiceError{
+		statusCode: 404,
+		code:       "NotFound",
+		message:    "not found",
+	}))
+	assert.False(t, isRouteTableNotFoundOCI(fakeRouteTableServiceError{
+		statusCode: 404,
+		code:       "UnexpectedCode",
+		message:    "resource not found",
+	}))
+	assert.False(t, isRouteTableNotFoundOCI(errorutil.ConflictOciError{
+		HTTPStatusCode: 409,
+		ErrorCode:      errorutil.IncorrectState,
+		Description:    "normalized conflict",
+	}))
+	assert.False(t, isRouteTableNotFoundOCI(fakeRouteTableServiceError{
+		statusCode: 409,
+		code:       errorutil.IncorrectState,
+		message:    "resource conflict",
+	}))
 }
 
 func TestReconcileDelete_ReleasesFinalizerOnUnambiguousNotFound(t *testing.T) {
