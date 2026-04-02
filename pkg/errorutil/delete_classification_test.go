@@ -34,10 +34,10 @@ func TestClassifyDeleteError(t *testing.T) {
 			},
 			wantHTTPStatusCode:   404,
 			wantErrorCode:        NotFound,
-			wantNormalizedType:   "errorutil.UnauthorizedAndNotFoundOciError",
+			wantNormalizedType:   "errorutil.NotFoundOciError",
 			wantStatusCodeString: "404",
 			wantErrorCodeString:  NotFound,
-			wantTypeString:       "errorutil.UnauthorizedAndNotFoundOciError",
+			wantTypeString:       "errorutil.NotFoundOciError",
 		},
 		{
 			name: "raw service auth shaped 404",
@@ -55,7 +55,7 @@ func TestClassifyDeleteError(t *testing.T) {
 		},
 		{
 			name: "normalized not found",
-			err: UnauthorizedAndNotFoundOciError{
+			err: NotFoundOciError{
 				HTTPStatusCode: 404,
 				ErrorCode:      NotFound,
 				Description:    "normalized not found",
@@ -63,10 +63,10 @@ func TestClassifyDeleteError(t *testing.T) {
 			},
 			wantHTTPStatusCode:   404,
 			wantErrorCode:        NotFound,
-			wantNormalizedType:   "errorutil.UnauthorizedAndNotFoundOciError",
+			wantNormalizedType:   "errorutil.NotFoundOciError",
 			wantStatusCodeString: "404",
 			wantErrorCodeString:  NotFound,
-			wantTypeString:       "errorutil.UnauthorizedAndNotFoundOciError",
+			wantTypeString:       "errorutil.NotFoundOciError",
 		},
 		{
 			name: "normalized auth shaped 404",

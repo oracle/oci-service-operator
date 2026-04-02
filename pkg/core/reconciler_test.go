@@ -156,7 +156,7 @@ func TestDeleteResourceLogsOCIClassificationOnDeleteNotFoundSuccess(t *testing.T
 
 	assertAnyMessageContains(t, sink.infos, "oci_http_status_code: 404")
 	assertAnyMessageContains(t, sink.infos, "oci_error_code: NotFound")
-	assertAnyMessageContains(t, sink.infos, "normalized_error_type: errorutil.UnauthorizedAndNotFoundOciError")
+	assertAnyMessageContains(t, sink.infos, "normalized_error_type: errorutil.NotFoundOciError")
 }
 
 func newDeleteReconciler(t *testing.T, behavior deleteBehavior) (*BaseReconciler, *record.FakeRecorder, *memoryClient) {

@@ -53,6 +53,14 @@ func (ua UnauthorizedAndNotFoundOciError) Error() string {
 		ua.Description, ua.HTTPStatusCode, ua.OpcRequestID)
 }
 
+// For unambiguous 404 not found errors
+type NotFoundOciError OciErrors
+
+func (nf NotFoundOciError) Error() string {
+	return fmt.Sprintf("Service error:%s. http status code: %d. Opc request id: %s",
+		nf.Description, nf.HTTPStatusCode, nf.OpcRequestID)
+}
+
 // For 405 errors
 type MethodNotAllowedOciError OciErrors
 
@@ -181,6 +189,19 @@ func UnauthorizedAndNotFoundResponse(err error, description string) error {
 	}
 
 	return uanf
+}
+
+// For unambiguous 404 not found errors
+func NotFoundResponse(err error, description string) error {
+
+	nf := NotFoundOciError{
+		ErrorCode:      err.(ocierrors).ErrorCode,
+		HTTPStatusCode: err.(ocierrors).HTTPStatusCode,
+		Description:    description,
+		OpcRequestID:   err.(ocierrors).OpcRequestID,
+	}
+
+	return nf
 }
 
 // For 405 errors
