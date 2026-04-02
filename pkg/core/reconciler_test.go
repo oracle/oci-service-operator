@@ -163,8 +163,9 @@ func TestReconcileConflictDeleteRequeuesAndKeepsFinalizer(t *testing.T) {
 	}
 
 	events := drainEvents(recorder)
-	assertContainsEvent(t, events, "Failed to delete resource: delete conflict")
+	assertContainsEvent(t, events, "Delete blocked and will be retried: delete conflict")
 	assertNoEventContains(t, events, "Removed finalizer")
+	assertNoEventContains(t, events, "Failed Delete the resource")
 }
 
 func TestReconcileDeleteInProgressRequeuesAndKeepsFinalizer(t *testing.T) {
@@ -186,8 +187,9 @@ func TestReconcileDeleteInProgressRequeuesAndKeepsFinalizer(t *testing.T) {
 	}
 
 	events := drainEvents(recorder)
-	assertContainsEvent(t, events, "Delete Unsuccessful")
+	assertContainsEvent(t, events, "Delete is in progress")
 	assertNoEventContains(t, events, "Removed finalizer")
+	assertNoEventContains(t, events, "Failed Delete the resource")
 }
 
 func TestDeleteResourceLogsOCIClassificationOnDeleteFailure(t *testing.T) {
@@ -196,9 +198,9 @@ func TestDeleteResourceLogsOCIClassificationOnDeleteFailure(t *testing.T) {
 	sink := &collectingLogSink{}
 	reconciler, _, kubeClient := newDeleteReconcilerWithLogger(t, deleteBehavior{
 		err: testServiceError{
-			statusCode: 409,
-			code:       errorutil.IncorrectState,
-			message:    "delete conflict",
+			statusCode: 500,
+			code:       errorutil.InternalServerError,
+			message:    "delete failed",
 		},
 	}, sink)
 
@@ -210,9 +212,9 @@ func TestDeleteResourceLogsOCIClassificationOnDeleteFailure(t *testing.T) {
 		t.Fatal("DeleteResource() done = true, want false")
 	}
 
-	assertAnyMessageContains(t, sink.errors, "oci_http_status_code: 409")
-	assertAnyMessageContains(t, sink.errors, "oci_error_code: IncorrectState")
-	assertAnyMessageContains(t, sink.errors, "normalized_error_type: errorutil.ConflictOciError")
+	assertAnyMessageContains(t, sink.errors, "oci_http_status_code: 500")
+	assertAnyMessageContains(t, sink.errors, "oci_error_code: InternalServerError")
+	assertAnyMessageContains(t, sink.errors, "normalized_error_type: errorutil.InternalServerErrorOciError")
 }
 
 func TestDeleteResourceAuthShapedNotFoundRemainsFatal(t *testing.T) {

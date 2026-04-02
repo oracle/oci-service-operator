@@ -33,6 +33,11 @@ const (
 	defaultRequeueTime = time.Minute * 2
 )
 
+const (
+	deleteEventReasonBlocked    = "DeleteBlocked"
+	deleteEventReasonInProgress = "DeleteInProgress"
+)
+
 type BaseReconciler struct {
 	client.Client
 	OSOKServiceManager   servicemanager.OSOKServiceManager
@@ -83,10 +88,6 @@ func (r *BaseReconciler) Reconcile(ctx context.Context, req ctrl.Request, obj cl
 				r.Recorder.Event(obj, v1.EventTypeNormal, "Success", "Removed finalizer")
 				return util.DoNotRequeue()
 			} else {
-				r.Log.ErrorLogWithFixedMessage(ctx, err, "Re-queuing object as delete was unsuccessful")
-				r.Metrics.AddCRDeleteFaultMetrics(ctx, obj.GetObjectKind().GroupVersionKind().Kind,
-					"Re-queuing object as delete was unsuccessful", req.Name, req.Namespace)
-				r.Recorder.Event(obj, v1.EventTypeWarning, "Failed", "Failed Delete the resource")
 				return util.RequeueWithoutError(ctx, defaultRequeueTime, r.Log)
 			}
 		}
@@ -177,6 +178,15 @@ func (r *BaseReconciler) DeleteResource(ctx context.Context, obj client.Object, 
 				"normalized_error_type", classification.NormalizedTypeString())
 			return true, nil
 		}
+		if classification.IsConflict() {
+			r.Log.InfoLogWithFixedMessage(ctx, "Delete is blocked and will be retried",
+				"oci_http_status_code", classification.HTTPStatusCodeString(),
+				"oci_error_code", classification.ErrorCodeString(),
+				"normalized_error_type", classification.NormalizedTypeString())
+			r.Recorder.Event(obj, v1.EventTypeNormal, deleteEventReasonBlocked,
+				fmt.Sprintf("Delete blocked and will be retried: %s", err.Error()))
+			return false, nil
+		}
 		r.Log.ErrorLogWithFixedMessage(ctx, err, "Delete failed in the Service Manager with error", "name", req.Name,
 			"namespace", req.Namespace, "namespacedName", req.String(),
 			"oci_http_status_code", classification.HTTPStatusCodeString(),
@@ -190,8 +200,8 @@ func (r *BaseReconciler) DeleteResource(ctx context.Context, obj client.Object, 
 	if delSucc {
 		r.Log.InfoLogWithFixedMessage(ctx, "Delete Successful")
 	} else {
-		r.Log.InfoLogWithFixedMessage(ctx, "Delete Unsuccessful, re-queuing the request after 2 minutes")
-		r.Recorder.Event(obj, v1.EventTypeWarning, "Failed", "Delete Unsuccessful")
+		r.Log.InfoLogWithFixedMessage(ctx, "Delete is in progress and will be retried")
+		r.Recorder.Event(obj, v1.EventTypeNormal, deleteEventReasonInProgress, "Delete is in progress")
 	}
 	// TODO Emit Delete Success metrics end
 	return delSucc, nil
