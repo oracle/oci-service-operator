@@ -6,15 +6,47 @@ The OCI Service Operator for Kubernetes (OSOK) makes it easy to create, manage, 
 
 OSOK is based on the [Operator Framework](https://operatorframework.io/), an open-source toolkit used to manage Operators. It uses the [controller-runtime](https://github.com/kubernetes-sigs/controller-runtime) library, which provides high-level APIs and abstractions to write operational logic and also provides tools for scaffolding and code generation for Operators.
 
-**Services Supported**
-1. [Autonomous Database Service](https://www.oracle.com/in/autonomous-database/)
-1. [Oracle Streaming Service](https://docs.cloud.oracle.com/iaas/Content/Streaming/Concepts/streamingoverview.htm)
-1. [MySQL DB System Service](https://www.oracle.com/mysql/)
-1. [Service Mesh Service](https://docs.oracle.com/iaas/Content/service-mesh/home.htm)
+**Supported API Groups**
+
+OSOK now ships generator-owned APIs and runtime scaffolding for the
+default-active first-wave surface declared in
+`internal/generator/config/services.yaml`: `containerengine`, `mysql`,
+`nosql`, `psql`, `database/AutonomousDatabase`, and `streaming/Stream`.
+
+The checked-in config still tracks a broader backlog inventory across
+`artifacts`, `certificates`, `certificatesmanagement`,
+`containerengine`, `core`, `database`, `dns`, `events`, `functions`,
+`identity`, `keymanagement`, `limits`, `loadbalancer`, `logging`,
+`monitoring`, `mysql`, `networkloadbalancer`, `nosql`, `objectstorage`,
+`ons`, `psql`, `queue`, `secrets`, `streaming`, `vault`, and
+`workrequests`. Use
+`go run ./cmd/generator --config internal/generator/config/services.yaml --service <service> --overwrite`
+when local work needs one of those inactive or backlog services generated
+explicitly.
+
+See [docs/services.md](docs/services.md#services) for the supported service map
+and [config/samples](config/samples) for generated manifest examples.
 
 ## Installation
 
 See the [Installation](docs/installation.md#install-operator-sdk) instructions for detailed installation and configuration of OCI Service Operator for Kubernetes.
+
+## Controller Manager Config
+
+The default `config/default` deployment turns
+`config/manager/controller_manager_config.yaml` into the `manager-config`
+ConfigMap and starts the manager with `--config=controller_manager_config.yaml`.
+When that flag is present, the file is authoritative for controller-runtime
+settings such as metrics, health probes, webhooks, cache behavior, and leader
+election instead of the built-in flag defaults.
+
+The file must keep
+`apiVersion: controller-runtime.sigs.k8s.io/v1alpha1` and
+`kind: ControllerManagerConfig`. OSOK now unmarshals this file strictly, so
+unknown fields or mismatched type metadata fail startup instead of silently
+falling back to defaults. See
+[docs/installation.md](docs/installation.md#controller-manager-config) for the
+deployment wiring details.
 
 ## Documentation
 
@@ -25,7 +57,7 @@ See the [Documentation](docs/README.md#oci-service-operator-for-kubernetes) for 
 The OCI Service Operator for Kubernetes is packaged as Operator Lifecycle Manager (OLM) Bundle for making it easy to install in Kubernetes Clusters. The bundle can be downloaded as docker image using below command.
 
 ```
-docker pull iad.ocir.io/oracle/oci-service-operator-bundle:1.1.9
+docker pull iad.ocir.io/oracle/oci-service-operator-bundle:<VERSION>
 ```
 
 ## Samples

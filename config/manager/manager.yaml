@@ -17,13 +17,6 @@ metadata:
 data:
   useinstanceprincipal: dHJ1ZQ==
 ---
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: servicemesh-config
-  namespace: system
-data:
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -132,10 +125,6 @@ spec:
               secretKeyRef:
                 name: osokconfig
                 key: useinstanceprincipal
-          - name: POD_NAMESPACE
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.namespace
         volumeMounts:
           - name: oci-credentials
             mountPath: /etc/oci

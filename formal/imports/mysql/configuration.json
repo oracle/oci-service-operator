@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "mysql",
+  "slug": "configuration",
+  "kind": "Configuration",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_mysql_configuration",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateConfiguration",
+        "requestType": "mysql.CreateConfigurationRequest",
+        "responseType": "mysql.CreateConfigurationResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetConfiguration",
+        "requestType": "mysql.GetConfigurationRequest",
+        "responseType": "mysql.GetConfigurationResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListConfiguration",
+        "requestType": "mysql.ListConfigurationRequest",
+        "responseType": "mysql.ListConfigurationResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateConfiguration",
+        "requestType": "mysql.UpdateConfigurationRequest",
+        "responseType": "mysql.UpdateConfigurationResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteConfiguration",
+        "requestType": "mysql.DeleteConfigurationRequest",
+        "responseType": "mysql.DeleteConfigurationResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_mysql_configuration",
+    "collectionField": "configuration",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/mysql/configuration/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/mysql/configuration/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for mysql/configuration; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

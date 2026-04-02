@@ -1,0 +1,569 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: dbsystems.psql.oracle.com
+spec:
+  group: psql.oracle.com
+  names:
+    kind: DbSystem
+    listKind: DbSystemList
+    plural: dbsystems
+    singular: dbsystem
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the DbSystem
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the DbSystem
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: DbSystem is the Schema for the dbsystems API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: DbSystemSpec defines the desired state of DbSystem.
+            properties:
+              compartmentId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the compartment that contains the database system.
+                type: string
+              configId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the configuration associated with the database system.
+                type: string
+              credentials:
+                description: DbSystemCredentials defines nested fields for DbSystem.Credentials.
+                properties:
+                  passwordDetails:
+                    description: DbSystemCredentialsPasswordDetails defines nested
+                      fields for DbSystem.Credentials.PasswordDetails.
+                    properties:
+                      jsonData:
+                        type: string
+                      password:
+                        description: The database system password.
+                        type: string
+                      passwordType:
+                        type: string
+                      secretId:
+                        description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                          of the secret where the password is stored.
+                        type: string
+                      secretVersion:
+                        description: The secret version of the stored password.
+                        type: string
+                    type: object
+                  username:
+                    description: The database system administrator username.
+                    type: string
+                required:
+                - passwordDetails
+                - username
+                type: object
+              dbConfigurationParams:
+                description: DbSystemDbConfigurationParams defines nested fields for
+                  DbSystem.DbConfigurationParams.
+                properties:
+                  applyConfig:
+                    description: |-
+                      Whether a configuration update requires a restart of the database instance or a reload of the configuration.
+                      Some configuration changes require a restart of database instances to be applied.
+                    type: string
+                  configId:
+                    description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                      of the configuration.
+                    type: string
+                required:
+                - configId
+                type: object
+              dbVersion:
+                description: Version of database system software.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: A user-provided description of a database system.
+                type: string
+              displayName:
+                description: A user-friendly display name for the database system.
+                  Avoid entering confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              instanceCount:
+                description: Count of database instances nodes to be created in the
+                  database system.
+                type: integer
+              instanceMemorySizeInGBs:
+                description: The total amount of memory available to each database
+                  instance node, in gigabytes.
+                type: integer
+              instanceOcpuCount:
+                description: The total number of OCPUs available to each database
+                  instance node.
+                type: integer
+              instancesDetails:
+                description: |-
+                  Details of database instances nodes to be created. This parameter is optional.
+                  If specified, its size must match `instanceCount`.
+                items:
+                  description: DbSystemInstancesDetail defines nested fields for DbSystem.InstancesDetail.
+                  properties:
+                    description:
+                      description: A user-provided description of the database instance
+                        node.
+                      type: string
+                    displayName:
+                      description: Display name of the database instance node. Avoid
+                        entering confidential information.
+                      type: string
+                    privateIp:
+                      description: |-
+                        Private IP in customer subnet that will be assigned to the database instance node. This value is optional.
+                        If the IP is not provided, the IP will be chosen from the available IP addresses in the specified subnet.
+                      type: string
+                  type: object
+                type: array
+              managementPolicy:
+                description: DbSystemManagementPolicy defines nested fields for DbSystem.ManagementPolicy.
+                properties:
+                  backupPolicy:
+                    description: DbSystemManagementPolicyBackupPolicy defines nested
+                      fields for DbSystem.ManagementPolicy.BackupPolicy.
+                    properties:
+                      backupStart:
+                        description: Hour of the day when the backup starts.
+                        type: string
+                      daysOfTheMonth:
+                        description: |-
+                          Day of the month when the backup should start.
+                          To ensure that the backup runs monthly, the latest day of the month that you can use to schedule a backup is the the 28th day.
+                        items:
+                          type: integer
+                        type: array
+                      daysOfTheWeek:
+                        description: The day of the week that the backup starts.
+                        items:
+                          type: string
+                        type: array
+                      jsonData:
+                        type: string
+                      kind:
+                        type: string
+                      retentionDays:
+                        description: How many days the data should be stored after
+                          the database system deletion.
+                        type: integer
+                    type: object
+                  maintenanceWindowStart:
+                    description: The start of the maintenance window.
+                    type: string
+                type: object
+              networkDetails:
+                description: DbSystemNetworkDetails defines nested fields for DbSystem.NetworkDetails.
+                properties:
+                  nsgIds:
+                    description: List of customer Network Security Group OCIDs (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                      associated with the database system.
+                    items:
+                      type: string
+                    type: array
+                  primaryDbEndpointPrivateIp:
+                    description: |-
+                      Private IP in customer subnet. The value is optional.
+                      If the IP is not provided, the IP will be chosen from the available IP addresses from the specified subnet.
+                    type: string
+                  subnetId:
+                    description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                      of the customer subnet associated with the database system.
+                    type: string
+                required:
+                - subnetId
+                type: object
+              shape:
+                description: |-
+                  The name of the shape for the database instance node. Use the /shapes API for accepted shapes.
+                  Example: `VM.Standard.E4.Flex`
+                type: string
+              source:
+                description: DbSystemSource defines nested fields for DbSystem.Source.
+                properties:
+                  backupId:
+                    description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                      of the database system backup.
+                    type: string
+                  isHavingRestoreConfigOverrides:
+                    description: Deprecated. Don't use.
+                    type: boolean
+                  jsonData:
+                    type: string
+                  sourceType:
+                    type: string
+                type: object
+              storageDetails:
+                description: DbSystemStorageDetails defines nested fields for DbSystem.StorageDetails.
+                properties:
+                  availabilityDomain:
+                    description: |-
+                      Specifies the availability domain of AD-local storage.
+                      If `isRegionallyDurable` is set to true, `availabilityDomain` should not be specified.
+                      If `isRegionallyDurable` is set to false, `availabilityDomain` must be specified.
+                    type: string
+                  iops:
+                    description: Guaranteed input/output storage requests per second
+                      (IOPS) available to the database system.
+                    format: int64
+                    type: integer
+                  isRegionallyDurable:
+                    description: |-
+                      Specifies if the block volume used for the database system is regional or AD-local.
+                      If not specified, it will be set to false.
+                      If `isRegionallyDurable` is set to true, `availabilityDomain` should not be specified.
+                      If `isRegionallyDurable` is set to false, `availabilityDomain` must be specified.
+                    type: boolean
+                  jsonData:
+                    type: string
+                  systemType:
+                    type: string
+                required:
+                - isRegionallyDurable
+                type: object
+              systemType:
+                description: Type of the database system.
+                type: string
+            required:
+            - compartmentId
+            - dbVersion
+            - displayName
+            - networkDetails
+            - shape
+            - storageDetails
+            type: object
+          status:
+            description: DbSystemStatus defines the observed state of DbSystem.
+            properties:
+              adminUsername:
+                description: The database system administrator username.
+                type: string
+              compartmentId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the compartment that contains the database system.
+                type: string
+              configId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the configuration associated with the database system.
+                type: string
+              dbVersion:
+                description: The major and minor versions of the database system software.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: A description of the database system.
+                type: string
+              displayName:
+                description: A user-friendly display name for the database system.
+                  Avoid entering confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              id:
+                description: A unique identifier for the database system. Immutable
+                  on creation.
+                type: string
+              instanceCount:
+                description: Count of instances, or nodes, in the database system.
+                type: integer
+              instanceMemorySizeInGBs:
+                description: The total amount of memory available to each database
+                  instance node, in gigabytes.
+                type: integer
+              instanceOcpuCount:
+                description: The total number of OCPUs available to each database
+                  instance node.
+                type: integer
+              instances:
+                description: The list of instances, or nodes, in the database system.
+                items:
+                  description: DbSystemInstance defines nested fields for DbSystem.Instance.
+                  properties:
+                    availabilityDomain:
+                      description: The availability domain in which the database instance
+                        node is located.
+                      type: string
+                    description:
+                      description: Description of the database instance node.
+                      type: string
+                    displayName:
+                      description: A user-friendly display name for the database instance
+                        node. Avoid entering confidential information.
+                      type: string
+                    id:
+                      description: A unique identifier for the database instance node.
+                        Immutable on creation.
+                      type: string
+                    lifecycleDetails:
+                      description: A message describing the current state in more
+                        detail. For example, can be used to provide actionable information
+                        for a resource in Failed state.
+                      type: string
+                    lifecycleState:
+                      description: The current state of the database instance node.
+                      type: string
+                    timeCreated:
+                      description: |-
+                        The date and time that the database instance node was created, expressed in
+                        RFC 3339 (https://tools.ietf.org/rfc/rfc3339) timestamp format.
+                        Example: `2016-08-25T21:10:29.600Z`
+                      type: string
+                    timeUpdated:
+                      description: |-
+                        The date and time that the database instance node was updated, expressed in
+                        RFC 3339 (https://tools.ietf.org/rfc/rfc3339) timestamp format.
+                        Example: `2016-08-25T21:10:29.600Z`
+                      type: string
+                  type: object
+                type: array
+              lifecycleDetails:
+                description: A message describing the current state in more detail.
+                  For example, can be used to provide actionable information for a
+                  resource in Failed state.
+                type: string
+              lifecycleState:
+                description: The current state of the database system.
+                type: string
+              managementPolicy:
+                description: DbSystemManagementPolicy defines nested fields for DbSystem.ManagementPolicy.
+                properties:
+                  backupPolicy:
+                    description: DbSystemManagementPolicyBackupPolicy defines nested
+                      fields for DbSystem.ManagementPolicy.BackupPolicy.
+                    properties:
+                      backupStart:
+                        description: Hour of the day when the backup starts.
+                        type: string
+                      daysOfTheMonth:
+                        description: |-
+                          Day of the month when the backup should start.
+                          To ensure that the backup runs monthly, the latest day of the month that you can use to schedule a backup is the the 28th day.
+                        items:
+                          type: integer
+                        type: array
+                      daysOfTheWeek:
+                        description: The day of the week that the backup starts.
+                        items:
+                          type: string
+                        type: array
+                      jsonData:
+                        type: string
+                      kind:
+                        type: string
+                      retentionDays:
+                        description: How many days the data should be stored after
+                          the database system deletion.
+                        type: integer
+                    type: object
+                  maintenanceWindowStart:
+                    description: The start of the maintenance window.
+                    type: string
+                type: object
+              networkDetails:
+                description: DbSystemNetworkDetails defines nested fields for DbSystem.NetworkDetails.
+                properties:
+                  nsgIds:
+                    description: List of customer Network Security Group OCIDs (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                      associated with the database system.
+                    items:
+                      type: string
+                    type: array
+                  primaryDbEndpointPrivateIp:
+                    description: |-
+                      Private IP in customer subnet. The value is optional.
+                      If the IP is not provided, the IP will be chosen from the available IP addresses from the specified subnet.
+                    type: string
+                  subnetId:
+                    description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                      of the customer subnet associated with the database system.
+                    type: string
+                required:
+                - subnetId
+                type: object
+              shape:
+                description: |-
+                  The name of the shape for the database instance.
+                  Example: `VM.Standard.E4.Flex`
+                type: string
+              source:
+                description: DbSystemSource defines nested fields for DbSystem.Source.
+                properties:
+                  backupId:
+                    description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                      of the database system backup.
+                    type: string
+                  isHavingRestoreConfigOverrides:
+                    description: Deprecated. Don't use.
+                    type: boolean
+                  jsonData:
+                    type: string
+                  sourceType:
+                    type: string
+                type: object
+              status:
+                properties:
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              storageDetails:
+                description: DbSystemStorageDetails defines nested fields for DbSystem.StorageDetails.
+                properties:
+                  availabilityDomain:
+                    description: |-
+                      Specifies the availability domain of AD-local storage.
+                      If `isRegionallyDurable` is set to true, `availabilityDomain` should not be specified.
+                      If `isRegionallyDurable` is set to false, `availabilityDomain` must be specified.
+                    type: string
+                  iops:
+                    description: Guaranteed input/output storage requests per second
+                      (IOPS) available to the database system.
+                    format: int64
+                    type: integer
+                  isRegionallyDurable:
+                    description: |-
+                      Specifies if the block volume used for the database system is regional or AD-local.
+                      If not specified, it will be set to false.
+                      If `isRegionallyDurable` is set to true, `availabilityDomain` should not be specified.
+                      If `isRegionallyDurable` is set to false, `availabilityDomain` must be specified.
+                    type: boolean
+                  jsonData:
+                    type: string
+                  systemType:
+                    type: string
+                required:
+                - isRegionallyDurable
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  System tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              systemType:
+                description: Type of the database system.
+                type: string
+              timeCreated:
+                description: |-
+                  The date and time that the database system was created, expressed in
+                  RFC 3339 (https://tools.ietf.org/rfc/rfc3339) timestamp format.
+                  Example: `2016-08-25T21:10:29.600Z`
+                type: string
+              timeUpdated:
+                description: |-
+                  The date and time that the database system was updated, expressed in
+                  RFC 3339 (https://tools.ietf.org/rfc/rfc3339) timestamp format.
+                  Example: `2016-08-25T21:10:29.600Z`
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

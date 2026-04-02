@@ -1,9 +1,7 @@
-
 ---
 apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
-  creationTimestamp: null
   name: mutating-webhook-configuration
 webhooks:
 - admissionReviewVersions:
@@ -12,26 +10,24 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /mutate-oci-oci-v1beta1-autonomousdatabases
+      path: /mutate-database-oracle-com-v1beta1-autonomousdatabase
   failurePolicy: Ignore
-  name: mautonomousdatabases.kb.io
+  name: mautonomousdatabase.kb.io
   rules:
   - apiGroups:
-    - oci.oracle.com
+    - database.oracle.com
     apiVersions:
-    - v1
+    - v1beta1
     operations:
     - CREATE
     - UPDATE
     resources:
     - autonomousdatabases
   sideEffects: None
-
 ---
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
-  creationTimestamp: null
   name: validating-webhook-configuration
 webhooks:
 - admissionReviewVersions:
@@ -40,215 +36,17 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-oci-oci-v1beta1-autonomousdatabases
+      path: /validate-database-oracle-com-v1beta1-autonomousdatabase
   failurePolicy: Fail
-  name: vautonomousdatabases.kb.io
+  name: vautonomousdatabase.kb.io
   rules:
   - apiGroups:
-    - oci.oracle.com
+    - database.oracle.com
     apiVersions:
-    - v1
+    - v1beta1
     operations:
     - CREATE
     - UPDATE
     resources:
     - autonomousdatabases
-  sideEffects: None
-- admissionReviewVersions:
-  - v1
-  - v1beta1
-  clientConfig:
-    service:
-      name: webhook-service
-      namespace: system
-      path: /validate-servicemesh-oci-oracle-com-v1beta1-accesspolicy
-  failurePolicy: Fail
-  name: ap-validator.servicemesh.oci.oracle.cloud.com
-  rules:
-  - apiGroups:
-    - servicemesh.oci.oracle.com
-    apiVersions:
-    - v1beta1
-    operations:
-    - CREATE
-    - UPDATE
-    - DELETE
-    resources:
-    - accesspolicies
-  sideEffects: None
-- admissionReviewVersions:
-  - v1
-  - v1beta1
-  clientConfig:
-    service:
-      name: webhook-service
-      namespace: system
-      path: /validate-servicemesh-oci-oracle-com-v1beta1-ingressgateway
-  failurePolicy: Fail
-  name: ig-validator.servicemesh.oci.oracle.cloud.com
-  rules:
-  - apiGroups:
-    - servicemesh.oci.oracle.com
-    apiVersions:
-    - v1beta1
-    operations:
-    - CREATE
-    - UPDATE
-    - DELETE
-    resources:
-    - ingressgateways
-  sideEffects: None
-- admissionReviewVersions:
-  - v1
-  - v1beta1
-  clientConfig:
-    service:
-      name: webhook-service
-      namespace: system
-      path: /validate-servicemesh-oci-oracle-com-v1beta1-ingressgatewaydeployment
-  failurePolicy: Fail
-  name: igd-validator.servicemesh.oci.oracle.cloud.com
-  rules:
-  - apiGroups:
-    - servicemesh.oci.oracle.com
-    apiVersions:
-    - v1beta1
-    operations:
-    - CREATE
-    - UPDATE
-    - DELETE
-    resources:
-    - ingressgatewaydeployments
-  sideEffects: None
-- admissionReviewVersions:
-  - v1
-  - v1beta1
-  clientConfig:
-    service:
-      name: webhook-service
-      namespace: system
-      path: /validate-servicemesh-oci-oracle-com-v1beta1-ingressgatewayroutetable
-  failurePolicy: Fail
-  name: igrt-validator.servicemesh.oci.oracle.cloud.com
-  rules:
-  - apiGroups:
-    - servicemesh.oci.oracle.com
-    apiVersions:
-    - v1beta1
-    operations:
-    - CREATE
-    - UPDATE
-    - DELETE
-    resources:
-    - ingressgatewayroutetables
-  sideEffects: None
-- admissionReviewVersions:
-  - v1
-  - v1beta1
-  clientConfig:
-    service:
-      name: webhook-service
-      namespace: system
-      path: /validate-servicemesh-oci-oracle-com-v1beta1-mesh
-  failurePolicy: Fail
-  name: mesh-validator.servicemesh.oci.oracle.cloud.com
-  rules:
-  - apiGroups:
-    - servicemesh.oci.oracle.com
-    apiVersions:
-    - v1beta1
-    operations:
-    - CREATE
-    - UPDATE
-    - DELETE
-    resources:
-    - meshes
-  sideEffects: None
-- admissionReviewVersions:
-  - v1
-  - v1beta1
-  clientConfig:
-    service:
-      name: webhook-service
-      namespace: system
-      path: /validate-servicemesh-oci-oracle-com-v1beta1-virtualdeployment
-  failurePolicy: Fail
-  name: vd-validator.servicemesh.oci.oracle.cloud.com
-  rules:
-  - apiGroups:
-    - servicemesh.oci.oracle.com
-    apiVersions:
-    - v1beta1
-    operations:
-    - CREATE
-    - UPDATE
-    - DELETE
-    resources:
-    - virtualdeployments
-  sideEffects: None
-- admissionReviewVersions:
-  - v1
-  - v1beta1
-  clientConfig:
-    service:
-      name: webhook-service
-      namespace: system
-      path: /validate-servicemesh-oci-oracle-com-v1beta1-virtualdeploymentbinding
-  failurePolicy: Fail
-  name: vdb-validator.servicemesh.oci.oracle.cloud.com
-  rules:
-  - apiGroups:
-    - servicemesh.oci.oracle.com
-    apiVersions:
-    - v1beta1
-    operations:
-    - CREATE
-    - UPDATE
-    - DELETE
-    resources:
-    - virtualdeploymentbindings
-  sideEffects: None
-- admissionReviewVersions:
-  - v1
-  - v1beta1
-  clientConfig:
-    service:
-      name: webhook-service
-      namespace: system
-      path: /validate-servicemesh-oci-oracle-com-v1beta1-virtualservice
-  failurePolicy: Fail
-  name: vs-validator.servicemesh.oci.oracle.cloud.com
-  rules:
-  - apiGroups:
-    - servicemesh.oci.oracle.com
-    apiVersions:
-    - v1beta1
-    operations:
-    - CREATE
-    - UPDATE
-    - DELETE
-    resources:
-    - virtualservices
-  sideEffects: None
-- admissionReviewVersions:
-  - v1
-  - v1beta1
-  clientConfig:
-    service:
-      name: webhook-service
-      namespace: system
-      path: /validate-servicemesh-oci-oracle-com-v1beta1-virtualserviceroutetable
-  failurePolicy: Fail
-  name: vsrt-validator.servicemesh.oci.oracle.cloud.com
-  rules:
-  - apiGroups:
-    - servicemesh.oci.oracle.com
-    apiVersions:
-    - v1beta1
-    operations:
-    - CREATE
-    - UPDATE
-    - DELETE
-    resources:
-    - virtualserviceroutetables
   sideEffects: None

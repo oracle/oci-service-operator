@@ -20,7 +20,6 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"net/url"
@@ -33,13 +32,13 @@ import (
 	"time"
 )
 
-// ListenAddr represents some listening address and port
+// ListenAddr represents some listening address and port.
 type ListenAddr struct {
 	Address string
 	Port    string
 }
 
-// URL returns a URL for this address with the given scheme and subpath
+// URL returns a URL for this address with the given scheme and subpath.
 func (l *ListenAddr) URL(scheme string, path string) *url.URL {
 	return &url.URL{
 		Scheme: scheme,
@@ -48,7 +47,7 @@ func (l *ListenAddr) URL(scheme string, path string) *url.URL {
 	}
 }
 
-// HostPort returns the joined host-port pair for this address
+// HostPort returns the joined host-port pair for this address.
 func (l *ListenAddr) HostPort() string {
 	return net.JoinHostPort(l.Address, l.Port)
 }
@@ -84,7 +83,7 @@ type State struct {
 	DirNeedsCleaning bool
 	Path             string
 
-	// ready holds wether the process is currently in ready state (hit the ready condition) or not.
+	// ready holds whether the process is currently in ready state (hit the ready condition) or not.
 	// It will be set to true on a successful `Start()` and set to false on a successful `Stop()`
 	ready bool
 
@@ -109,7 +108,7 @@ func (ps *State) Init(name string) error {
 	}
 
 	if ps.Dir == "" {
-		newDir, err := ioutil.TempDir("", "k8s_test_framework_")
+		newDir, err := os.MkdirTemp("", "k8s_test_framework_")
 		if err != nil {
 			return err
 		}
@@ -156,11 +155,11 @@ func (ps *State) Start(stdout, stderr io.Writer) (err error) {
 	ps.Cmd = exec.Command(ps.Path, ps.Args...)
 	ps.Cmd.Stdout = stdout
 	ps.Cmd.Stderr = stderr
+	ps.Cmd.SysProcAttr = GetSysProcAttr()
 
 	ready := make(chan bool)
 	timedOut := time.After(ps.StartTimeout)
-	var pollerStopCh stopChannel
-	pollerStopCh = make(stopChannel)
+	pollerStopCh := make(stopChannel)
 	go pollURLUntilOK(ps.HealthCheck.URL, ps.HealthCheck.PollInterval, ready, pollerStopCh)
 
 	ps.waitDone = make(chan struct{})
@@ -186,19 +185,15 @@ func (ps *State) Start(stdout, stderr io.Writer) (err error) {
 		ps.ready = true
 		return nil
 	case <-ps.waitDone:
-		if pollerStopCh != nil {
-			close(pollerStopCh)
-		}
+		close(pollerStopCh)
 		return fmt.Errorf("timeout waiting for process %s to start successfully "+
 			"(it may have failed to start, or stopped unexpectedly before becoming ready)",
 			path.Base(ps.Path))
 	case <-timedOut:
-		if pollerStopCh != nil {
-			close(pollerStopCh)
-		}
+		close(pollerStopCh)
 		if ps.Cmd != nil {
 			// intentionally ignore this -- we might've crashed, failed to start, etc
-			ps.Cmd.Process.Signal(syscall.SIGTERM) //nolint errcheck
+			ps.Cmd.Process.Signal(syscall.SIGTERM) //nolint:errcheck
 		}
 		return fmt.Errorf("timeout waiting for process %s to start", path.Base(ps.Path))
 	}
@@ -220,7 +215,7 @@ func pollURLUntilOK(url url.URL, interval time.Duration, ready chan bool, stopCh
 				// there's probably certs *somewhere*,
 				// but it's fine to just skip validating
 				// them for health checks during testing
-				InsecureSkipVerify: true,
+				InsecureSkipVerify: true, //nolint:gosec
 			},
 		},
 	}
@@ -249,6 +244,12 @@ func pollURLUntilOK(url url.URL, interval time.Duration, ready chan bool, stopCh
 // Stop stops this process gracefully, waits for its termination, and cleans up
 // the CertDir if necessary.
 func (ps *State) Stop() error {
+	// Always clear the directory if we need to.
+	defer func() {
+		if ps.DirNeedsCleaning {
+			_ = os.RemoveAll(ps.Dir)
+		}
+	}()
 	if ps.Cmd == nil {
 		return nil
 	}
@@ -265,12 +266,11 @@ func (ps *State) Stop() error {
 	case <-ps.waitDone:
 		break
 	case <-timedOut:
+		if err := ps.Cmd.Process.Signal(syscall.SIGKILL); err != nil {
+			return fmt.Errorf("unable to kill process %s: %w", ps.Path, err)
+		}
 		return fmt.Errorf("timeout waiting for process %s to stop", path.Base(ps.Path))
 	}
 	ps.ready = false
-	if ps.DirNeedsCleaning {
-		return os.RemoveAll(ps.Dir)
-	}
-
 	return nil
 }

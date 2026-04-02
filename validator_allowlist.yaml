@@ -1,0 +1,309 @@
+structs:
+  database.CreateAutonomousDatabaseDetails:
+    fields:
+      ArePrimaryWhitelistedIpsUsed:
+        status: future_consideration
+        reason: Standby access control is not managed by the initial OSOK controllers.
+      AutonomousContainerDatabaseId:
+        status: future_consideration
+        reason: Dedicated autonomous container selection will be modeled in a later iteration.
+      AutonomousMaintenanceScheduleType:
+        status: future_consideration
+        reason: Maintenance scheduling options are out of scope for the first validator pass.
+      BackupRetentionPeriodInDays:
+        status: future_consideration
+        reason: Retention policies are left at service defaults until lifecycle stories land.
+      CharacterSet:
+        status: future_consideration
+        reason: Character set customisation is deferred to keep the CRD surface minimal.
+      CustomerContacts:
+        status: future_consideration
+        reason: Customer contact metadata is not surfaced through OSOK today.
+      DataStorageSizeInGBs:
+        status: future_consideration
+        reason: Only the terabyte-based sizing workflow is supported by the current controllers.
+      DatabaseEdition:
+        status: future_consideration
+        reason: Edition selection is not yet exposed through the OSOK CRDs.
+      DbToolsDetails:
+        status: future_consideration
+        reason: DB Tools integration will be considered in a follow-up release.
+      InMemoryPercentage:
+        status: future_consideration
+        reason: In-memory tuning is intentionally omitted for the initial managed experience.
+      IsAccessControlEnabled:
+        status: future_consideration
+        reason: VCN level controls are preferred; database-level ACL toggles will come later.
+      IsAutoScalingForStorageEnabled:
+        status: future_consideration
+        reason: Storage autoscaling will be evaluated after core create/update flows stabilize.
+      IsDevTier:
+        status: future_consideration
+        reason: Developer tier provisioning is not planned for the first validator milestone.
+      IsLocalDataGuardEnabled:
+        status: future_consideration
+        reason: Local Data Guard configuration is handled manually outside OSOK for now.
+      IsMtlsConnectionRequired:
+        status: future_consideration
+        reason: mTLS enforcement remains at the OCI default pending operator UX work.
+      IsPreviewVersionWithServiceTermsAccepted:
+        status: future_consideration
+        reason: Preview database provisioning is intentionally gated outside OSOK.
+      KmsKeyId:
+        status: future_consideration
+        reason: Customer managed keys will be modelled once the secret workflow solidifies.
+      NcharacterSet:
+        status: future_consideration
+        reason: NCHAR character set overrides are not exposed yet.
+      NsgIds:
+        status: future_consideration
+        reason: Network security group selection will be added with broader networking stories.
+      OcpuCount:
+        status: future_consideration
+        reason: OCPU-based sizing is intentionally deferred in favour of computeCount.
+      PrivateEndpointIp:
+        status: future_consideration
+        reason: Private endpoint IP management is not part of the initial OSOK contract.
+      PrivateEndpointLabel:
+        status: future_consideration
+        reason: Private endpoint labelling is pending design for private-cluster rollouts.
+      ResourcePoolLeaderId:
+        status: future_consideration
+        reason: Resource pool coordination is not yet supported.
+      ResourcePoolSummary:
+        status: future_consideration
+        reason: Resource pool coordination is not yet supported.
+      ScheduledOperations:
+        status: future_consideration
+        reason: Scheduled operations are intentionally omitted from the first release.
+      SecretId:
+        status: intentionally_omitted
+        reason: OSOK sources admin credentials from Kubernetes secrets instead of OCI vault references.
+      SecretVersionNumber:
+        status: intentionally_omitted
+        reason: OSOK sources admin credentials from Kubernetes secrets instead of OCI vault references.
+      StandbyWhitelistedIps:
+        status: future_consideration
+        reason: Standby access control is not managed by the initial OSOK controllers.
+      SubnetId:
+        status: future_consideration
+        reason: Private endpoint networking will be handled in a later networking enhancement.
+      VaultId:
+        status: future_consideration
+        reason: Customer managed keys will be modelled once the secret workflow solidifies.
+      WhitelistedIps:
+        status: future_consideration
+        reason: Client ACL management is currently left to manual post-provision steps.
+  database.GenerateAutonomousDatabaseWalletDetails:
+    fields:
+      GenerateType:
+        status: intentionally_omitted
+        reason: Wallet generation always uses the default package until multi-wallet support is needed.
+      IsRegional:
+        status: intentionally_omitted
+        reason: Regional wallet exports are not part of the initial wallet automation.
+  database.UpdateAutonomousDatabaseDetails:
+    fields:
+      AdminPassword:
+        status: intentionally_omitted
+        reason: Password rotation is handled through dedicated secret flows rather than the update API.
+      ArePrimaryWhitelistedIpsUsed:
+        status: future_consideration
+        reason: Standby access control is not managed by the initial OSOK controllers.
+      BackupRetentionPeriodInDays:
+        status: future_consideration
+        reason: Retention policies are left at service defaults until lifecycle stories land.
+      ComputeCount:
+        status: future_consideration
+        reason: Compute scaling is limited to the supported ECPU workflow for now.
+      ComputeModel:
+        status: future_consideration
+        reason: Compute scaling is limited to the supported ECPU workflow for now.
+      CustomerContacts:
+        status: future_consideration
+        reason: Customer contact metadata is not surfaced through OSOK today.
+      DataStorageSizeInGBs:
+        status: future_consideration
+        reason: Only the terabyte-based sizing workflow is supported by the current controllers.
+      DatabaseEdition:
+        status: future_consideration
+        reason: Edition selection is not yet exposed through the OSOK CRDs.
+      DbToolsDetails:
+        status: future_consideration
+        reason: DB Tools integration will be considered in a follow-up release.
+      InMemoryPercentage:
+        status: future_consideration
+        reason: In-memory tuning is intentionally omitted for the initial managed experience.
+      IsAccessControlEnabled:
+        status: future_consideration
+        reason: VCN level controls are preferred; database-level ACL toggles will come later.
+      IsAutoScalingForStorageEnabled:
+        status: future_consideration
+        reason: Storage autoscaling will be evaluated after core create/update flows stabilize.
+      IsDevTier:
+        status: future_consideration
+        reason: Developer tier provisioning is not planned for the first validator milestone.
+      IsLocalDataGuardEnabled:
+        status: future_consideration
+        reason: Local Data Guard configuration is handled manually outside OSOK for now.
+      IsMtlsConnectionRequired:
+        status: future_consideration
+        reason: mTLS enforcement remains at the OCI default pending operator UX work.
+      IsRefreshableClone:
+        status: future_consideration
+        reason: Refreshable clones are not orchestrated by OSOK yet.
+      LocalAdgAutoFailoverMaxDataLossLimit:
+        status: future_consideration
+        reason: Local Data Guard configuration is handled manually outside OSOK for now.
+      LongTermBackupSchedule:
+        status: future_consideration
+        reason: Backup scheduling customisation is not surfaced yet.
+      NsgIds:
+        status: future_consideration
+        reason: Network security group selection will be added with broader networking stories.
+      OcpuCount:
+        status: future_consideration
+        reason: OCPU-based sizing is intentionally deferred in favour of computeCount.
+      OpenMode:
+        status: future_consideration
+        reason: Database open mode changes are managed manually outside of OSOK.
+      PeerDbId:
+        status: future_consideration
+        reason: Cross-region peer wiring is not currently automated.
+      PermissionLevel:
+        status: future_consideration
+        reason: Permission level toggles are deferred until multi-tenant scenarios are ready.
+      PrivateEndpointIp:
+        status: future_consideration
+        reason: Private endpoint IP management is not part of the initial OSOK contract.
+      PrivateEndpointLabel:
+        status: future_consideration
+        reason: Private endpoint labelling is pending design for private-cluster rollouts.
+      RefreshableMode:
+        status: future_consideration
+        reason: Refreshable clones are not orchestrated by OSOK yet.
+      ResourcePoolLeaderId:
+        status: future_consideration
+        reason: Resource pool coordination is not yet supported.
+      ResourcePoolSummary:
+        status: future_consideration
+        reason: Resource pool coordination is not yet supported.
+      ScheduledOperations:
+        status: future_consideration
+        reason: Scheduled operations are intentionally omitted from the first release.
+      SecretId:
+        status: intentionally_omitted
+        reason: OSOK sources admin credentials from Kubernetes secrets instead of OCI vault references.
+      SecretVersionNumber:
+        status: intentionally_omitted
+        reason: OSOK sources admin credentials from Kubernetes secrets instead of OCI vault references.
+      StandbyWhitelistedIps:
+        status: future_consideration
+        reason: Standby access control is not managed by the initial OSOK controllers.
+      SubnetId:
+        status: future_consideration
+        reason: Private endpoint networking will be handled in a later networking enhancement.
+      WhitelistedIps:
+        status: future_consideration
+        reason: Client ACL management is currently left to manual post-provision steps.
+  mysql.CreateDbSystemDetails:
+    fields:
+      AdminPassword:
+        status: intentionally_omitted
+        reason: OSOK sources the MySQL admin password from a Kubernetes secret reference.
+      AdminUsername:
+        status: intentionally_omitted
+        reason: OSOK sources the MySQL admin username from a Kubernetes secret reference.
+      BackupPolicy:
+        status: future_consideration
+        reason: Database backup policy customisation will be added alongside lifecycle automation.
+      CrashRecovery:
+        status: future_consideration
+        reason: Crash recovery tuning is left at service defaults for now.
+      DatabaseManagement:
+        status: future_consideration
+        reason: Database Management integration is not targeted in this release.
+      DeletionPolicy:
+        status: future_consideration
+        reason: Deletion policy configuration is deferred until we support managed teardown flows.
+      Maintenance:
+        status: future_consideration
+        reason: Maintenance scheduling is not yet surfaced through OSOK CRDs.
+      SecureConnections:
+        status: future_consideration
+        reason: TLS configuration will be modelled with a broader security story.
+      Source:
+        status: intentionally_omitted
+        reason: OSOK provisions fresh MySQL DB Systems and does not orchestrate backup or PITR restores yet.
+  mysql.UpdateDbSystemDetails:
+    fields:
+      AdminPassword:
+        status: intentionally_omitted
+        reason: Password rotation is handled through credential workflows outside the update API.
+      AdminUsername:
+        status: intentionally_omitted
+        reason: Admin identity updates are intentionally blocked from automation.
+      AvailabilityDomain:
+        status: future_consideration
+        reason: Placement changes are out of scope for the update reconciler.
+      BackupPolicy:
+        status: future_consideration
+        reason: Database backup policy customisation will be added alongside lifecycle automation.
+      CrashRecovery:
+        status: future_consideration
+        reason: Crash recovery tuning is left at service defaults for now.
+      DataStorageSizeInGBs:
+        status: future_consideration
+        reason: Storage scaling for MySQL DB Systems will be introduced in a later milestone.
+      DatabaseManagement:
+        status: future_consideration
+        reason: Database Management integration is not targeted in this release.
+      DeletionPolicy:
+        status: future_consideration
+        reason: Deletion policy configuration is deferred until we support managed teardown flows.
+      FaultDomain:
+        status: future_consideration
+        reason: Placement changes are out of scope for the update reconciler.
+      HostnameLabel:
+        status: future_consideration
+        reason: Endpoint renaming is intentionally left manual to avoid DNS churn.
+      IpAddress:
+        status: future_consideration
+        reason: Endpoint IP management is intentionally left manual to avoid DNS churn.
+      IsHighlyAvailable:
+        status: future_consideration
+        reason: Availability topology changes require reprovisioning today.
+      Maintenance:
+        status: future_consideration
+        reason: Maintenance scheduling is not yet surfaced through OSOK CRDs.
+      MysqlVersion:
+        status: future_consideration
+        reason: Version upgrades are orchestrated separately from the day-one validator.
+      Port:
+        status: future_consideration
+        reason: Port changes are intentionally out of scope for the update flow.
+      PortX:
+        status: future_consideration
+        reason: Port changes are intentionally out of scope for the update flow.
+      SecureConnections:
+        status: future_consideration
+        reason: TLS configuration will be modelled with a broader security story.
+      ShapeName:
+        status: future_consideration
+        reason: Shape changes require recreate operations and are not tackled in-place.
+      SubnetId:
+        status: future_consideration
+        reason: Subnet migrations demand reprovisioning and are left manual.
+  core.UpgradeStatus:
+    fields:
+      Status:
+        status: intentionally_omitted
+        reason: The SDK field collides with the CRD's existing `status.status` envelope and cannot be exposed as a sibling status field.
+  streaming.CreateStreamDetails:
+    fields:
+      DefinedTags:
+        status: future_consideration
+        reason: Tag management will be enabled once the tagging story is aligned across services.
+      FreeformTags:
+        status: future_consideration
+        reason: Tag management will be enabled once the tagging story is aligned across services.

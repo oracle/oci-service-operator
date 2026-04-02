@@ -10,7 +10,7 @@ metadata:
   name: stream-viewer-role
 rules:
 - apiGroups:
-  - oci.oracle.com
+  - streaming.oracle.com
   resources:
   - streams
   verbs:
@@ -18,7 +18,7 @@ rules:
   - list
   - watch
 - apiGroups:
-  - oci.oracle.com
+  - streaming.oracle.com
   resources:
   - streams/status
   verbs:

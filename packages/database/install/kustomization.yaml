@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: oci-service-operator-database-system
+namePrefix: oci-service-operator-database-
+
+resources:
+- generated/crd
+- generated/rbac
+- ../../../config/manager
+- ../../../config/rbac/role_binding.yaml
+- ../../../config/rbac/leader_election_role.yaml
+- ../../../config/rbac/leader_election_role_binding.yaml
+- ../../../config/rbac/autonomousdatabases_editor_role.yaml
+- ../../../config/rbac/autonomousdatabases_viewer_role.yaml
+
+patches:
+- path: ../../../config/default/manager_config_patch.yaml
+  target:
+    kind: Deployment

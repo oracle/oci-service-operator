@@ -1,0 +1,181 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: heatwaveclustermemoryestimates.mysql.oracle.com
+spec:
+  group: mysql.oracle.com
+  names:
+    kind: HeatWaveClusterMemoryEstimate
+    listKind: HeatWaveClusterMemoryEstimateList
+    plural: heatwaveclustermemoryestimates
+    singular: heatwaveclustermemoryestimate
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: status of the HeatWaveClusterMemoryEstimate
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the HeatWaveClusterMemoryEstimate
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: HeatWaveClusterMemoryEstimate is the Schema for the heatwaveclustermemoryestimates
+          API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: HeatWaveClusterMemoryEstimateSpec defines the desired state
+              of HeatWaveClusterMemoryEstimate.
+            type: object
+          status:
+            description: HeatWaveClusterMemoryEstimateStatus defines the observed
+              state of HeatWaveClusterMemoryEstimate.
+            properties:
+              dbSystemId:
+                description: The OCID of the DB System the HeatWave cluster memory
+                  estimate is associated with.
+                type: string
+              sdkStatus:
+                description: |-
+                  Current status of the Work Request generating the HeatWave cluster memory estimate.
+                  This uses a distinct JSON name so it can coexist with the OSOK status envelope.
+                type: string
+              status:
+                properties:
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              tableSchemas:
+                description: |-
+                  Collection of schemas with estimated memory footprints for MySQL user tables of each schema
+                  when loaded to HeatWave cluster memory.
+                items:
+                  description: HeatWaveClusterMemoryEstimateTableSchema defines nested
+                    fields for HeatWaveClusterMemoryEstimate.TableSchema.
+                  properties:
+                    perTableEstimates:
+                      description: |-
+                        Estimated memory footprints for MySQL user tables of the schema
+                        when loaded to HeatWave cluster memory.
+                      items:
+                        description: HeatWaveClusterMemoryEstimateTableSchemaPerTableEstimate
+                          defines nested fields for HeatWaveClusterMemoryEstimate.TableSchema.PerTableEstimate.
+                        properties:
+                          analyticalFootprintInMbs:
+                            description: |-
+                              The estimated memory footprint of the table in MBs when loaded to
+                              HeatWave cluster memory (null if the table cannot be loaded to the
+                              HeatWave cluster).
+                            format: int64
+                            type: integer
+                          errorComment:
+                            description: Error comment (empty string if no errors
+                              occured).
+                            type: string
+                          estimatedRowCount:
+                            description: |-
+                              The estimated number of rows in the table. This number was used to
+                              derive the analytical memory footprint.
+                            format: int64
+                            type: integer
+                          tableName:
+                            description: The table name.
+                            type: string
+                          toLoadColumnCount:
+                            description: |-
+                              The number of columns to be loaded to HeatWave cluster memory.
+                              These columns contribute to the analytical memory footprint.
+                            type: integer
+                          varlenColumnCount:
+                            description: |-
+                              The number of variable-length columns to be loaded to HeatWave cluster memory.
+                              These columns contribute to the analytical memory footprint.
+                            type: integer
+                        type: object
+                      type: array
+                    schemaName:
+                      description: The name of the schema.
+                      type: string
+                  type: object
+                type: array
+              timeCreated:
+                description: The date and time that the Work Request to generate the
+                  HeatWave cluster memory estimate was issued, as described by RFC
+                  3339 (https://tools.ietf.org/rfc/rfc333).
+                type: string
+              timeUpdated:
+                description: The date and time that the HeatWave cluster memory estimate
+                  was generated, as described by RFC 3339 (https://tools.ietf.org/rfc/rfc333).
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

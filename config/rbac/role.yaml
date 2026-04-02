@@ -1,83 +1,16 @@
-
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  creationTimestamp: null
   name: manager-role
 rules:
-- apiGroups:
-  - ""
-  resources:
-  - configmaps
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - configmaps/status
-  verbs:
-  - get
-  - patch
-  - update
 - apiGroups:
   - ""
   resources:
   - events
   verbs:
   - create
-  - delete
-  - get
-  - list
   - patch
-  - update
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - namespaces
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - namespaces/status
-  verbs:
-  - get
-- apiGroups:
-  - ""
-  resources:
-  - pods
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - pods/eviction
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - pods/status
-  verbs:
-  - get
 - apiGroups:
   - ""
   resources:
@@ -87,27 +20,29 @@ rules:
   - delete
   - get
   - list
-  - patch
   - update
   - watch
 - apiGroups:
-  - ""
+  - containerengine.oracle.com
   resources:
-  - services
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - services/status
-  verbs:
-  - get
-- apiGroups:
-  - apps
-  resources:
-  - deployments
+  - addonoptions
+  - addons
+  - clusterendpointconfigs
+  - clustermigratetonativevcnstatuses
+  - clusteroptions
+  - clusters
+  - credentialrotationstatuses
+  - kubeconfigs
+  - nodepooloptions
+  - nodepools
+  - nodes
+  - podshapes
+  - virtualnodepools
+  - virtualnodes
+  - workloadmappings
+  - workrequesterrors
+  - workrequestlogs
+  - workrequests
   verbs:
   - create
   - delete
@@ -117,55 +52,55 @@ rules:
   - update
   - watch
 - apiGroups:
-  - apps
+  - containerengine.oracle.com
   resources:
-  - deployments/status
+  - addonoptions/finalizers
+  - addons/finalizers
+  - clusterendpointconfigs/finalizers
+  - clustermigratetonativevcnstatuses/finalizers
+  - clusteroptions/finalizers
+  - clusters/finalizers
+  - credentialrotationstatuses/finalizers
+  - kubeconfigs/finalizers
+  - nodepooloptions/finalizers
+  - nodepools/finalizers
+  - nodes/finalizers
+  - podshapes/finalizers
+  - virtualnodepools/finalizers
+  - virtualnodes/finalizers
+  - workloadmappings/finalizers
+  - workrequesterrors/finalizers
+  - workrequestlogs/finalizers
+  - workrequests/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - containerengine.oracle.com
+  resources:
+  - addonoptions/status
+  - addons/status
+  - clusterendpointconfigs/status
+  - clustermigratetonativevcnstatuses/status
+  - clusteroptions/status
+  - clusters/status
+  - credentialrotationstatuses/status
+  - kubeconfigs/status
+  - nodepooloptions/status
+  - nodepools/status
+  - nodes/status
+  - podshapes/status
+  - virtualnodepools/status
+  - virtualnodes/status
+  - workloadmappings/status
+  - workrequesterrors/status
+  - workrequestlogs/status
+  - workrequests/status
   verbs:
   - get
   - patch
   - update
 - apiGroups:
-  - autoscaling
-  resources:
-  - horizontalpodautoscalers
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - autoscaling
-  resources:
-  - horizontalpodautoscalers/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - ""
-  resources:
-  - services
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - services/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - oci.oracle.com
+  - database.oracle.com
   resources:
   - autonomousdatabases
   verbs:
@@ -177,13 +112,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - oci.oracle.com
+  - database.oracle.com
   resources:
   - autonomousdatabases/finalizers
   verbs:
   - update
 - apiGroups:
-  - oci.oracle.com
+  - database.oracle.com
   resources:
   - autonomousdatabases/status
   verbs:
@@ -191,9 +126,20 @@ rules:
   - patch
   - update
 - apiGroups:
-  - oci.oracle.com
+  - mysql.oracle.com
   resources:
-  - mysqldbsystems
+  - backups
+  - channels
+  - configurations
+  - dbsystems
+  - heatwaveclustermemoryestimates
+  - heatwaveclusters
+  - replicas
+  - shapes
+  - versions
+  - workrequesterrors
+  - workrequestlogs
+  - workrequests
   verbs:
   - create
   - delete
@@ -203,21 +149,146 @@ rules:
   - update
   - watch
 - apiGroups:
-  - oci.oracle.com
+  - mysql.oracle.com
   resources:
-  - mysqldbsystems/finalizers
+  - backups/finalizers
+  - channels/finalizers
+  - configurations/finalizers
+  - dbsystems/finalizers
+  - heatwaveclustermemoryestimates/finalizers
+  - heatwaveclusters/finalizers
+  - replicas/finalizers
+  - shapes/finalizers
+  - versions/finalizers
+  - workrequesterrors/finalizers
+  - workrequestlogs/finalizers
+  - workrequests/finalizers
   verbs:
   - update
 - apiGroups:
-  - oci.oracle.com
+  - mysql.oracle.com
   resources:
-  - mysqldbsystems/status
+  - backups/status
+  - channels/status
+  - configurations/status
+  - dbsystems/status
+  - heatwaveclustermemoryestimates/status
+  - heatwaveclusters/status
+  - replicas/status
+  - shapes/status
+  - versions/status
+  - workrequesterrors/status
+  - workrequestlogs/status
+  - workrequests/status
   verbs:
   - get
   - patch
   - update
 - apiGroups:
-  - oci.oracle.com
+  - nosql.oracle.com
+  resources:
+  - indexes
+  - replicas
+  - rows
+  - tables
+  - tableusages
+  - workrequesterrors
+  - workrequestlogs
+  - workrequests
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - nosql.oracle.com
+  resources:
+  - indexes/finalizers
+  - replicas/finalizers
+  - rows/finalizers
+  - tables/finalizers
+  - tableusages/finalizers
+  - workrequesterrors/finalizers
+  - workrequestlogs/finalizers
+  - workrequests/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - nosql.oracle.com
+  resources:
+  - indexes/status
+  - replicas/status
+  - rows/status
+  - tables/status
+  - tableusages/status
+  - workrequesterrors/status
+  - workrequestlogs/status
+  - workrequests/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - psql.oracle.com
+  resources:
+  - backups
+  - configurations
+  - connectiondetails
+  - dbsystemdbinstances
+  - dbsystems
+  - defaultconfigurations
+  - primarydbinstances
+  - shapes
+  - workrequesterrors
+  - workrequestlogs
+  - workrequests
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - psql.oracle.com
+  resources:
+  - backups/finalizers
+  - configurations/finalizers
+  - connectiondetails/finalizers
+  - dbsystemdbinstances/finalizers
+  - dbsystems/finalizers
+  - defaultconfigurations/finalizers
+  - primarydbinstances/finalizers
+  - shapes/finalizers
+  - workrequesterrors/finalizers
+  - workrequestlogs/finalizers
+  - workrequests/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - psql.oracle.com
+  resources:
+  - backups/status
+  - configurations/status
+  - connectiondetails/status
+  - dbsystemdbinstances/status
+  - dbsystems/status
+  - defaultconfigurations/status
+  - primarydbinstances/status
+  - shapes/status
+  - workrequesterrors/status
+  - workrequestlogs/status
+  - workrequests/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - streaming.oracle.com
   resources:
   - streams
   verbs:
@@ -229,249 +300,15 @@ rules:
   - update
   - watch
 - apiGroups:
-  - oci.oracle.com
+  - streaming.oracle.com
   resources:
   - streams/finalizers
   verbs:
   - update
 - apiGroups:
-  - oci.oracle.com
+  - streaming.oracle.com
   resources:
   - streams/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - servicemesh.oci.oracle.com
-  resources:
-  - accesspolicies
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - servicemesh.oci.oracle.com
-  resources:
-  - accesspolicies/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - servicemesh.oci.oracle.com
-  resources:
-  - accesspolicies/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - servicemesh.oci.oracle.com
-  resources:
-  - ingressgatewaydeployments
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - servicemesh.oci.oracle.com
-  resources:
-  - ingressgatewaydeployments/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - servicemesh.oci.oracle.com
-  resources:
-  - ingressgatewaydeployments/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - servicemesh.oci.oracle.com
-  resources:
-  - ingressgatewayroutetables
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - servicemesh.oci.oracle.com
-  resources:
-  - ingressgatewayroutetables/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - servicemesh.oci.oracle.com
-  resources:
-  - ingressgatewayroutetables/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - servicemesh.oci.oracle.com
-  resources:
-  - ingressgateways
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - servicemesh.oci.oracle.com
-  resources:
-  - ingressgateways/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - servicemesh.oci.oracle.com
-  resources:
-  - ingressgateways/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - servicemesh.oci.oracle.com
-  resources:
-  - meshes
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - servicemesh.oci.oracle.com
-  resources:
-  - meshes/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - servicemesh.oci.oracle.com
-  resources:
-  - meshes/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - servicemesh.oci.oracle.com
-  resources:
-  - virtualdeploymentbindings
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - servicemesh.oci.oracle.com
-  resources:
-  - virtualdeploymentbindings/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - servicemesh.oci.oracle.com
-  resources:
-  - virtualdeploymentbindings/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - servicemesh.oci.oracle.com
-  resources:
-  - virtualdeployments
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - servicemesh.oci.oracle.com
-  resources:
-  - virtualdeployments/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - servicemesh.oci.oracle.com
-  resources:
-  - virtualdeployments/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - servicemesh.oci.oracle.com
-  resources:
-  - virtualserviceroutetables
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - servicemesh.oci.oracle.com
-  resources:
-  - virtualserviceroutetables/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - servicemesh.oci.oracle.com
-  resources:
-  - virtualserviceroutetables/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - servicemesh.oci.oracle.com
-  resources:
-  - virtualservices
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - servicemesh.oci.oracle.com
-  resources:
-  - virtualservices/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - servicemesh.oci.oracle.com
-  resources:
-  - virtualservices/status
   verbs:
   - get
   - patch

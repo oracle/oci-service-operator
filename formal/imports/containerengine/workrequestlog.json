@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "containerengine",
+  "slug": "workrequestlog",
+  "kind": "WorkRequestLog",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_containerengine_workrequestlog",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateWorkRequestLog",
+        "requestType": "containerengine.CreateWorkRequestLogRequest",
+        "responseType": "containerengine.CreateWorkRequestLogResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetWorkRequestLog",
+        "requestType": "containerengine.GetWorkRequestLogRequest",
+        "responseType": "containerengine.GetWorkRequestLogResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListWorkRequestLog",
+        "requestType": "containerengine.ListWorkRequestLogRequest",
+        "responseType": "containerengine.ListWorkRequestLogResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateWorkRequestLog",
+        "requestType": "containerengine.UpdateWorkRequestLogRequest",
+        "responseType": "containerengine.UpdateWorkRequestLogResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteWorkRequestLog",
+        "requestType": "containerengine.DeleteWorkRequestLogRequest",
+        "responseType": "containerengine.DeleteWorkRequestLogResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_containerengine_workrequestlog",
+    "collectionField": "workrequestlog",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/containerengine/workrequestlog/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/containerengine/workrequestlog/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for containerengine/workrequestlog; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

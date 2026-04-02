@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "nosql",
+  "slug": "replica",
+  "kind": "Replica",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_nosql_replica",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateReplica",
+        "requestType": "nosql.CreateReplicaRequest",
+        "responseType": "nosql.CreateReplicaResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetReplica",
+        "requestType": "nosql.GetReplicaRequest",
+        "responseType": "nosql.GetReplicaResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListReplica",
+        "requestType": "nosql.ListReplicaRequest",
+        "responseType": "nosql.ListReplicaResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateReplica",
+        "requestType": "nosql.UpdateReplicaRequest",
+        "responseType": "nosql.UpdateReplicaResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteReplica",
+        "requestType": "nosql.DeleteReplicaRequest",
+        "responseType": "nosql.DeleteReplicaResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_nosql_replica",
+    "collectionField": "replica",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/nosql/replica/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/nosql/replica/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for nosql/replica; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

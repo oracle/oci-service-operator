@@ -1,0 +1,186 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "psql",
+  "slug": "dbsystem",
+  "kind": "DbSystem",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_psql_db_system",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDbSystem",
+        "requestType": "psql.CreateDbSystemRequest",
+        "responseType": "psql.CreateDbSystemResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDbSystem",
+        "requestType": "psql.GetDbSystemRequest",
+        "responseType": "psql.GetDbSystemResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDbSystems",
+        "requestType": "psql.ListDbSystemsRequest",
+        "responseType": "psql.ListDbSystemsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeDbSystemCompartment",
+        "requestType": "psql.ChangeDbSystemCompartmentRequest",
+        "responseType": "psql.ChangeDbSystemCompartmentResponse"
+      },
+      {
+        "operation": "PatchDbSystem",
+        "requestType": "psql.PatchDbSystemRequest",
+        "responseType": "psql.PatchDbSystemResponse"
+      },
+      {
+        "operation": "ResetMasterUserPassword",
+        "requestType": "psql.ResetMasterUserPasswordRequest",
+        "responseType": "psql.ResetMasterUserPasswordResponse"
+      },
+      {
+        "operation": "UpdateDbSystem",
+        "requestType": "psql.UpdateDbSystemRequest",
+        "responseType": "psql.UpdateDbSystemResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDbSystem",
+        "requestType": "psql.DeleteDbSystemRequest",
+        "responseType": "psql.DeleteDbSystemResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "NEEDS_ATTENTION"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "apply_config",
+      "compartment_id",
+      "config_id",
+      "credentials.password_details.password",
+      "credentials.password_details.password_type",
+      "credentials.password_details.secret_id",
+      "credentials.password_details.secret_version",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "instance_count",
+      "instance_memory_size_in_gbs",
+      "instance_ocpu_count",
+      "management_policy.backup_policy.backup_start",
+      "management_policy.backup_policy.copy_policy.compartment_id",
+      "management_policy.backup_policy.copy_policy.regions",
+      "management_policy.backup_policy.copy_policy.retention_period",
+      "management_policy.backup_policy.days_of_the_month",
+      "management_policy.backup_policy.days_of_the_week",
+      "management_policy.backup_policy.kind",
+      "management_policy.backup_policy.retention_days",
+      "management_policy.maintenance_window_start",
+      "network_details.is_reader_endpoint_enabled",
+      "network_details.nsg_ids",
+      "patch_operations.from",
+      "patch_operations.operation",
+      "patch_operations.position",
+      "patch_operations.selected_item",
+      "patch_operations.selection",
+      "patch_operations.value",
+      "shape",
+      "storage_details.iops"
+    ],
+    "forceNew": [
+      "credentials",
+      "credentials.username",
+      "db_version",
+      "instances_details",
+      "instances_details.description",
+      "instances_details.display_name",
+      "instances_details.private_ip",
+      "network_details.primary_db_endpoint_private_ip",
+      "network_details.subnet_id",
+      "source",
+      "source.backup_id",
+      "source.is_having_restore_config_overrides",
+      "source.source_type",
+      "storage_details.availability_domain",
+      "storage_details.is_regionally_durable",
+      "storage_details.system_type",
+      "system_type"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_psql_db_systems",
+    "collectionField": "db_system_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/psql/dbsystem/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/psql/dbsystem/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "delete-confirmation",
+      "waiter-work-request"
+    ]
+  },
+  "notes": [
+    "Pinned provider facts imported from terraform-provider-oci for the published DbSystem resource.",
+    "The provider datasource and create/update wait behavior still need repo-authored formal closure before generated-runtime promotion."
+  ]
+}

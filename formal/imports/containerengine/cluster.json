@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "containerengine",
+  "slug": "cluster",
+  "kind": "Cluster",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_containerengine_cluster",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCluster",
+        "requestType": "containerengine.CreateClusterRequest",
+        "responseType": "containerengine.CreateClusterResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCluster",
+        "requestType": "containerengine.GetClusterRequest",
+        "responseType": "containerengine.GetClusterResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCluster",
+        "requestType": "containerengine.ListClusterRequest",
+        "responseType": "containerengine.ListClusterResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCluster",
+        "requestType": "containerengine.UpdateClusterRequest",
+        "responseType": "containerengine.UpdateClusterResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCluster",
+        "requestType": "containerengine.DeleteClusterRequest",
+        "responseType": "containerengine.DeleteClusterResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_containerengine_cluster",
+    "collectionField": "cluster",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/containerengine/cluster/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/containerengine/cluster/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for containerengine/cluster; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

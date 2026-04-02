@@ -10,7 +10,7 @@ metadata:
   name: autonomousdatabases-viewer-role
 rules:
 - apiGroups:
-  - oci.oracle.com
+  - database.oracle.com
   resources:
   - autonomousdatabases
   verbs:
@@ -18,7 +18,7 @@ rules:
   - list
   - watch
 - apiGroups:
-  - oci.oracle.com
+  - database.oracle.com
   resources:
   - autonomousdatabases/status
   verbs:

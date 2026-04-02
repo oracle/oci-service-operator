@@ -6,28 +6,42 @@
 package kubesecret
 
 import (
+	"bytes"
 	"context"
+	"fmt"
+	"strings"
+
+	"github.com/oracle/oci-service-operator/pkg/credhelper"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/metrics"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/api/validation"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
-	"regexp"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"strings"
 )
 
 type KubeSecretClient struct {
 	Client  client.Client
+	Reader  client.Reader
 	Log     loggerutil.OSOKLogger
 	Metrics *metrics.Metrics
 }
 
-func New(client client.Client, logger loggerutil.OSOKLogger, metrics *metrics.Metrics) *KubeSecretClient {
+var _ credhelper.SecretRecordReader = (*KubeSecretClient)(nil)
+var _ credhelper.GuardedSecretMutator = (*KubeSecretClient)(nil)
+
+func New(kubeClient client.Client, logger loggerutil.OSOKLogger, metrics *metrics.Metrics) *KubeSecretClient {
+	return NewWithReader(kubeClient, kubeClient, logger, metrics)
+}
+
+func NewWithReader(kubeClient client.Client, reader client.Reader, logger loggerutil.OSOKLogger, metrics *metrics.Metrics) *KubeSecretClient {
+	if reader == nil {
+		reader = kubeClient
+	}
 	return &KubeSecretClient{
-		Client:  client,
+		Client:  kubeClient,
+		Reader:  reader,
 		Log:     logger,
 		Metrics: metrics,
 	}
@@ -44,40 +58,26 @@ func (c *KubeSecretClient) CreateSecret(ctx context.Context, secretName string, 
 		Data: data,
 	}
 
-	currentSecret := &v1.Secret{}
-	err := c.Client.Get(ctx, types.NamespacedName{Name: newSecret.Name, Namespace: newSecret.Namespace}, currentSecret)
-	if err == nil {
-		c.Log.InfoLog("Secret already exists with provided details, Not creating a new Secret",
-			"newSecret.Namespace", newSecret.Namespace, "newSecret.Name", newSecret.Name)
-		return false, errors.NewAlreadyExists(v1.Resource("secret"), secretName)
-	}
-
-	if errors.IsNotFound(err) {
-		c.Log.InfoLog("Secret does not exist, Creating a new Secret", "newSecret.Namespace", newSecret.Namespace, "newSecret.Name", newSecret.Name)
-		if err = c.Client.Create(ctx, newSecret); err != nil {
-			return false, err
+	c.Log.InfoLog("Creating Kubernetes Secret", "newSecret.Namespace", newSecret.Namespace, "newSecret.Name", newSecret.Name)
+	if err := c.Client.Create(ctx, newSecret); err != nil {
+		if errors.IsAlreadyExists(err) {
+			c.Log.InfoLog("Secret already exists with provided details, Not creating a new Secret",
+				"newSecret.Namespace", newSecret.Namespace, "newSecret.Name", newSecret.Name)
 		}
-		c.Metrics.AddSecretCountMetrics(ctx, "kubesecretclient", "New Secret got created", secretName, secretNamespace)
-		c.Log.InfoLog("Secret Created successfully", "Secret Name", newSecret.Name)
-		return true, nil
-	} else {
 		return false, err
 	}
+	c.Metrics.AddSecretCountMetrics(ctx, "kubesecretclient", "New Secret got created", secretName, secretNamespace)
+	c.Log.InfoLog("Secret Created successfully", "Secret Name", newSecret.Name)
+	return true, nil
 }
 
 func (c *KubeSecretClient) DeleteSecret(ctx context.Context, secretName string, secretNamespace string) (bool, error) {
-	existingSecret := &v1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      secretName,
-			Namespace: secretNamespace,
-		},
-	}
-	err := c.Client.Get(ctx, types.NamespacedName{Name: secretName, Namespace: secretNamespace}, existingSecret)
+	existingSecret, err := c.getSecretObject(ctx, secretName, secretNamespace)
 	if err != nil {
 		c.Log.ErrorLog(err, "error getting Kubernetes secret", "Secret Name", secretName, "Secret Namespace", secretNamespace)
 		return false, err
 	}
-	err = c.Client.Delete(ctx, existingSecret)
+	err = c.deleteSecretObject(ctx, existingSecret)
 	if err != nil {
 		c.Log.ErrorLog(err, "error deleting Kubernetes secret", "Secret Name", secretName, "Secret Namespace", secretNamespace)
 		return false, err
@@ -86,67 +86,218 @@ func (c *KubeSecretClient) DeleteSecret(ctx context.Context, secretName string, 
 	return true, nil
 }
 
-func (c *KubeSecretClient) GetSecret(ctx context.Context, secretName string, secretNamespace string) (map[string][]byte, error) {
-	data := map[string][]byte{}
+func (c *KubeSecretClient) DeleteSecretIfCurrent(
+	ctx context.Context,
+	secretName string,
+	secretNamespace string,
+	current credhelper.SecretRecord,
+) (bool, error) {
+	existingSecret, err := c.getSecretObject(ctx, secretName, secretNamespace)
+	if err != nil {
+		c.Log.ErrorLog(err, "error getting Kubernetes secret before guarded delete", "Secret Name", secretName, "Secret Namespace", secretNamespace)
+		return false, err
+	}
+	if err := validateSecretIdentity(secretName, secretNamespace, current, existingSecret); err != nil {
+		c.Log.ErrorLog(err, "guarded delete rejected because the Kubernetes secret changed", "Secret Name", secretName, "Secret Namespace", secretNamespace)
+		return false, err
+	}
+	if err := c.deleteSecretObject(ctx, existingSecret); err != nil {
+		c.Log.ErrorLog(err, "error deleting Kubernetes secret", "Secret Name", secretName, "Secret Namespace", secretNamespace)
+		return false, err
+	}
+	c.Log.InfoLog("Secret deleted successfully after guarded identity check", "Secret Name", secretName, "Secret Namespace", secretNamespace)
+	return true, nil
+}
 
-	existingSecret := &v1.Secret{}
-	err := c.Client.Get(ctx, types.NamespacedName{Name: secretName, Namespace: secretNamespace}, existingSecret)
+func (c *KubeSecretClient) GetSecret(ctx context.Context, secretName string, secretNamespace string) (map[string][]byte, error) {
+	record, err := c.GetSecretRecord(ctx, secretName, secretNamespace)
+	if err != nil {
+		return map[string][]byte{}, err
+	}
+	return record.Data, nil
+}
+
+func (c *KubeSecretClient) GetSecretRecord(ctx context.Context, secretName string, secretNamespace string) (credhelper.SecretRecord, error) {
+	existingSecret, err := c.getSecretObject(ctx, secretName, secretNamespace)
 	if err != nil {
 		c.Log.ErrorLog(err, "error getting Kubernetes secret", "Secret Name", secretName, "Secret Namespace", secretNamespace)
-		return data, err
+		return credhelper.SecretRecord{}, err
 	}
 
 	c.Log.InfoLog("Secret retrieved successfully", "Secret Name", existingSecret.Name, "Secret Namespace", existingSecret.Namespace)
-	for k, v := range existingSecret.Data {
-		data[k] = v
-	}
-	return data, nil
+	return credhelper.SecretRecord{
+		UID:    existingSecret.UID,
+		Labels: cloneLabels(existingSecret.Labels),
+		Data:   cloneSecretData(existingSecret.Data),
+	}, nil
 }
 
 func (c *KubeSecretClient) UpdateSecret(ctx context.Context, secretName string, secretNamespace string, labels map[string]string,
 	updatedData map[string][]byte) (bool, error) {
-	existingSecret := &v1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      secretName,
-			Namespace: secretNamespace,
-			Labels:    labels,
-		},
-		Data: updatedData,
+	existingSecret, err := c.getSecretObject(ctx, secretName, secretNamespace)
+	if err != nil {
+		c.Log.ErrorLog(err, "Failed to get kubernetes secret before update", "Secret Name", secretName, "Secret Namespace", secretNamespace)
+		return false, err
 	}
-	err := c.Client.Update(ctx, existingSecret)
+	err = c.updateSecretObject(ctx, existingSecret, secretName, secretNamespace, labels, updatedData)
 	if err != nil {
 		c.Log.ErrorLog(err, "Failed to update kubernetes secret", "Secret Name", secretName, "Secret Namespace", secretNamespace)
 		return false, err
 	}
+	c.Log.InfoLog("Secret updated successfully", "Secret Name", secretName, "Secret Namespace", secretNamespace)
 	return true, nil
 }
 
-/***
-This method is used to convert the given secret name into lowercase and validate it against the kubernetes secret naming conventions
-https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#dns-subdomain-names
-*/
+func (c *KubeSecretClient) UpdateSecretIfCurrent(
+	ctx context.Context,
+	secretName string,
+	secretNamespace string,
+	current credhelper.SecretRecord,
+	labels map[string]string,
+	updatedData map[string][]byte,
+) (bool, error) {
+	existingSecret, err := c.getSecretObject(ctx, secretName, secretNamespace)
+	if err != nil {
+		c.Log.ErrorLog(err, "Failed to get kubernetes secret before guarded update", "Secret Name", secretName, "Secret Namespace", secretNamespace)
+		return false, err
+	}
+	if err := validateSecretIdentity(secretName, secretNamespace, current, existingSecret); err != nil {
+		c.Log.ErrorLog(err, "guarded update rejected because the Kubernetes secret changed", "Secret Name", secretName, "Secret Namespace", secretNamespace)
+		return false, err
+	}
+	err = c.updateSecretObject(ctx, existingSecret, secretName, secretNamespace, labels, updatedData)
+	if err != nil {
+		c.Log.ErrorLog(err, "Failed to update kubernetes secret", "Secret Name", secretName, "Secret Namespace", secretNamespace)
+		return false, err
+	}
+	c.Log.InfoLog("Secret updated successfully after guarded identity check", "Secret Name", secretName, "Secret Namespace", secretNamespace)
+	return true, nil
+}
 
-func (c *KubeSecretClient) isValidSecretName(ctx context.Context, secretName string) bool {
-	validationResults := validation.NameIsDNSSubdomain(secretName, false)
-	if validationResults != nil && len(validationResults) > 0 {
+func (c *KubeSecretClient) updateSecretObject(
+	ctx context.Context,
+	existingSecret *v1.Secret,
+	secretName string,
+	secretNamespace string,
+	labels map[string]string,
+	updatedData map[string][]byte,
+) error {
+	if labels != nil {
+		existingSecret.Labels = labels
+	}
+	existingSecret.Data = updatedData
+	return c.Client.Update(ctx, existingSecret)
+}
+
+func (c *KubeSecretClient) deleteSecretObject(ctx context.Context, existingSecret *v1.Secret) error {
+	uid := existingSecret.UID
+	preconditions := client.Preconditions{UID: &uid}
+	if resourceVersion := strings.TrimSpace(existingSecret.ResourceVersion); resourceVersion != "" {
+		preconditions.ResourceVersion = &resourceVersion
+	}
+	return c.Client.Delete(ctx, existingSecret, preconditions)
+}
+
+func (c *KubeSecretClient) reader() client.Reader {
+	if c.Reader != nil {
+		return c.Reader
+	}
+	return c.Client
+}
+
+func (c *KubeSecretClient) getSecretObject(ctx context.Context, secretName string, secretNamespace string) (*v1.Secret, error) {
+	existingSecret := &v1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      secretName,
+			Namespace: secretNamespace,
+		},
+	}
+	if err := c.reader().Get(ctx, types.NamespacedName{Name: secretName, Namespace: secretNamespace}, existingSecret); err != nil {
+		return nil, err
+	}
+	return existingSecret, nil
+}
+
+func cloneLabels(labels map[string]string) map[string]string {
+	if labels == nil {
+		return nil
+	}
+	cloned := make(map[string]string, len(labels))
+	for key, value := range labels {
+		cloned[key] = value
+	}
+	return cloned
+}
+
+func cloneSecretData(data map[string][]byte) map[string][]byte {
+	if data == nil {
+		return nil
+	}
+	cloned := make(map[string][]byte, len(data))
+	for key, value := range data {
+		cloned[key] = append([]byte(nil), value...)
+	}
+	return cloned
+}
+
+func validateSecretIdentity(
+	secretName string,
+	secretNamespace string,
+	current credhelper.SecretRecord,
+	existingSecret *v1.Secret,
+) error {
+	expectedUID := strings.TrimSpace(string(current.UID))
+	if expectedUID == "" {
+		return fmt.Errorf("guarded secret mutation requires the previously read Secret UID for %s/%s", secretNamespace, secretName)
+	}
+	if existingSecret == nil {
+		return fmt.Errorf("guarded secret mutation requires the current Kubernetes Secret for %s/%s", secretNamespace, secretName)
+	}
+	actualUID := strings.TrimSpace(string(existingSecret.UID))
+	if actualUID != expectedUID {
+		return errors.NewConflict(
+			v1.Resource("secret"),
+			secretName,
+			fmt.Errorf("secret %s/%s changed UID from %q to %q", secretNamespace, secretName, expectedUID, actualUID),
+		)
+	}
+	if !secretLabelsEqual(current.Labels, existingSecret.Labels) {
+		return errors.NewConflict(
+			v1.Resource("secret"),
+			secretName,
+			fmt.Errorf("secret %s/%s labels changed since the guarded read", secretNamespace, secretName),
+		)
+	}
+	if !secretDataEqual(current.Data, existingSecret.Data) {
+		return errors.NewConflict(
+			v1.Resource("secret"),
+			secretName,
+			fmt.Errorf("secret %s/%s data changed since the guarded read", secretNamespace, secretName),
+		)
+	}
+	return nil
+}
+
+func secretLabelsEqual(left map[string]string, right map[string]string) bool {
+	if len(left) != len(right) {
 		return false
+	}
+	for key, value := range left {
+		if right[key] != value {
+			return false
+		}
 	}
 	return true
 }
-func (c *KubeSecretClient) getValidSecretName(ctx context.Context, secretName string) string {
-	secretName = strings.ToLower(secretName)
 
-	regex := regexp.MustCompile("[^a-z0-9-.]+")
-	secretName = regex.ReplaceAllString(secretName, "")
-
-	consecutiveCharRegex := regexp.MustCompile("[-.]{2,}")
-	secretName = consecutiveCharRegex.ReplaceAllString(secretName, ".")
-
-	/** ToDo
-	Add length validation and trim the length to 256 chars, if it is more
-	Check the beginning and end characters of the secret name as it should be an alphanumeric char
-	*/
-
-	c.Log.InfoLog("Updated secret name is ", "Secret Name", secretName)
-	return secretName
+func secretDataEqual(left map[string][]byte, right map[string][]byte) bool {
+	if len(left) != len(right) {
+		return false
+	}
+	for key, value := range left {
+		if !bytes.Equal(value, right[key]) {
+			return false
+		}
+	}
+	return true
 }

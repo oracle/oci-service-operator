@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "mysql",
+  "slug": "workrequesterror",
+  "kind": "WorkRequestError",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_mysql_workrequesterror",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateWorkRequestError",
+        "requestType": "mysql.CreateWorkRequestErrorRequest",
+        "responseType": "mysql.CreateWorkRequestErrorResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetWorkRequestError",
+        "requestType": "mysql.GetWorkRequestErrorRequest",
+        "responseType": "mysql.GetWorkRequestErrorResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListWorkRequestError",
+        "requestType": "mysql.ListWorkRequestErrorRequest",
+        "responseType": "mysql.ListWorkRequestErrorResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateWorkRequestError",
+        "requestType": "mysql.UpdateWorkRequestErrorRequest",
+        "responseType": "mysql.UpdateWorkRequestErrorResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteWorkRequestError",
+        "requestType": "mysql.DeleteWorkRequestErrorRequest",
+        "responseType": "mysql.DeleteWorkRequestErrorResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_mysql_workrequesterror",
+    "collectionField": "workrequesterror",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/mysql/workrequesterror/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/mysql/workrequesterror/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for mysql/workrequesterror; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

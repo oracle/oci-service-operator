@@ -1,0 +1,14 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: mysql
+slug: dbsystem
+kind: DbSystem
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+notes:
+  - Generated runtime reads admin credential secret refs during OCI request projection and does not write follow-up Kubernetes secrets.
+  - When no OCI ID is tracked, generated-runtime pre-create lookup reuses only identifying ListDbSystems matches that remain in ACTIVE, CREATING, or UPDATING; deleting, deleted, failed, or non-identifying matches still call CreateDbSystem.

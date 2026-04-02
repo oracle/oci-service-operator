@@ -22,30 +22,29 @@ import (
 	"strings"
 	"time"
 
+	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
+	logf "sigs.k8s.io/controller-runtime/pkg/internal/log"
 	"sigs.k8s.io/controller-runtime/pkg/internal/testing/controlplane"
 	"sigs.k8s.io/controller-runtime/pkg/internal/testing/process"
-
-	logf "sigs.k8s.io/controller-runtime/pkg/internal/log"
 )
 
 var log = logf.RuntimeLog.WithName("test-env")
 
 /*
 It's possible to override some defaults, by setting the following environment variables:
-	USE_EXISTING_CLUSTER (boolean): if set to true, envtest will use an existing cluster
-	TEST_ASSET_KUBE_APISERVER (string): path to the api-server binary to use
-	TEST_ASSET_ETCD (string): path to the etcd binary to use
-	TEST_ASSET_KUBECTL (string): path to the kubectl binary to use
-	KUBEBUILDER_ASSETS (string): directory containing the binaries to use (api-server, etcd and kubectl). Defaults to /usr/local/kubebuilder/bin.
-	KUBEBUILDER_CONTROLPLANE_START_TIMEOUT (string supported by time.ParseDuration): timeout for test control plane to start. Defaults to 20s.
-	KUBEBUILDER_CONTROLPLANE_STOP_TIMEOUT (string supported by time.ParseDuration): timeout for test control plane to start. Defaults to 20s.
-	KUBEBUILDER_ATTACH_CONTROL_PLANE_OUTPUT (boolean): if set to true, the control plane's stdout and stderr are attached to os.Stdout and os.Stderr
-
+* USE_EXISTING_CLUSTER (boolean): if set to true, envtest will use an existing cluster
+* TEST_ASSET_KUBE_APISERVER (string): path to the api-server binary to use
+* TEST_ASSET_ETCD (string): path to the etcd binary to use
+* TEST_ASSET_KUBECTL (string): path to the kubectl binary to use
+* KUBEBUILDER_ASSETS (string): directory containing the binaries to use (api-server, etcd and kubectl). Defaults to /usr/local/kubebuilder/bin.
+* KUBEBUILDER_CONTROLPLANE_START_TIMEOUT (string supported by time.ParseDuration): timeout for test control plane to start. Defaults to 20s.
+* KUBEBUILDER_CONTROLPLANE_STOP_TIMEOUT (string supported by time.ParseDuration): timeout for test control plane to start. Defaults to 20s.
+* KUBEBUILDER_ATTACH_CONTROL_PLANE_OUTPUT (boolean): if set to true, the control plane's stdout and stderr are attached to os.Stdout and os.Stderr
 */
 const (
 	envUseExistingCluster = "USE_EXISTING_CLUSTER"
@@ -59,15 +58,15 @@ const (
 	defaultKubebuilderControlPlaneStopTimeout  = 20 * time.Second
 )
 
-// internal types we expose as part of our public API
+// internal types we expose as part of our public API.
 type (
-	// ControlPlane is the re-exported ControlPlane type from the internal testing package
+	// ControlPlane is the re-exported ControlPlane type from the internal testing package.
 	ControlPlane = controlplane.ControlPlane
 
-	// APIServer is the re-exported APIServer from the internal testing package
+	// APIServer is the re-exported APIServer from the internal testing package.
 	APIServer = controlplane.APIServer
 
-	// Etcd is the re-exported Etcd from the internal testing package
+	// Etcd is the re-exported Etcd from the internal testing package.
 	Etcd = controlplane.Etcd
 
 	// User represents a Kubernetes user to provision for auth purposes.
@@ -103,7 +102,7 @@ var (
 )
 
 // Environment creates a Kubernetes test environment that will start / stop the Kubernetes control plane and
-// install extension APIs
+// install extension APIs.
 type Environment struct {
 	// ControlPlane is the ControlPlane including the apiserver and etcd
 	ControlPlane controlplane.ControlPlane
@@ -136,7 +135,7 @@ type Environment struct {
 	// CRDs is a list of CRDs to install.
 	// If both this field and CRDs field in CRDInstallOptions are specified, the
 	// values are merged.
-	CRDs []client.Object
+	CRDs []*apiextensionsv1.CustomResourceDefinition
 
 	// CRDDirectoryPaths is a list of paths containing CRD yaml or json configs.
 	// If both this field and Paths field in CRDInstallOptions are specified, the
@@ -161,11 +160,6 @@ type Environment struct {
 	// may take to stop. It defaults to the KUBEBUILDER_CONTROLPLANE_STOP_TIMEOUT
 	// environment variable or 20 seconds if unspecified
 	ControlPlaneStopTimeout time.Duration
-
-	// KubeAPIServerFlags is the set of flags passed while starting the api server.
-	//
-	// Deprecated: use ControlPlane.GetAPIServer().Configure() instead.
-	KubeAPIServerFlags []string
 
 	// AttachControlPlaneOutput indicates if control plane output will be attached to os.Stdout and os.Stderr.
 	// Enable this to get more visibility of the testing control plane.
@@ -194,7 +188,7 @@ func (te *Environment) Stop() error {
 	return te.ControlPlane.Stop()
 }
 
-// Start starts a local Kubernetes server and updates te.ApiserverPort with the port it is listening on
+// Start starts a local Kubernetes server and updates te.ApiserverPort with the port it is listening on.
 func (te *Environment) Start() (*rest.Config, error) {
 	if te.useExistingCluster() {
 		log.V(1).Info("using existing cluster")
@@ -211,19 +205,7 @@ func (te *Environment) Start() (*rest.Config, error) {
 		}
 	} else {
 		apiServer := te.ControlPlane.GetAPIServer()
-		if len(apiServer.Args) == 0 {
-			// pass these through separately from above in case something like
-			// AddUser defaults APIServer.
-			//
-			// TODO(directxman12): if/when we feel like making a bigger
-			// breaking change here, just make APIServer and Etcd non-pointers
-			// in ControlPlane.
 
-			// NB(directxman12): we still pass these in so that things work if the
-			// user manually specifies them, but in most cases we expect them to
-			// be nil so that we use the new .Configure() logic.
-			apiServer.Args = te.KubeAPIServerFlags
-		}
 		if te.ControlPlane.Etcd == nil {
 			te.ControlPlane.Etcd = &controlplane.Etcd{}
 		}
@@ -231,17 +213,19 @@ func (te *Environment) Start() (*rest.Config, error) {
 		if os.Getenv(envAttachOutput) == "true" {
 			te.AttachControlPlaneOutput = true
 		}
-		if apiServer.Out == nil && te.AttachControlPlaneOutput {
-			apiServer.Out = os.Stdout
-		}
-		if apiServer.Err == nil && te.AttachControlPlaneOutput {
-			apiServer.Err = os.Stderr
-		}
-		if te.ControlPlane.Etcd.Out == nil && te.AttachControlPlaneOutput {
-			te.ControlPlane.Etcd.Out = os.Stdout
-		}
-		if te.ControlPlane.Etcd.Err == nil && te.AttachControlPlaneOutput {
-			te.ControlPlane.Etcd.Err = os.Stderr
+		if te.AttachControlPlaneOutput {
+			if apiServer.Out == nil {
+				apiServer.Out = os.Stdout
+			}
+			if apiServer.Err == nil {
+				apiServer.Err = os.Stderr
+			}
+			if te.ControlPlane.Etcd.Out == nil {
+				te.ControlPlane.Etcd.Out = os.Stdout
+			}
+			if te.ControlPlane.Etcd.Err == nil {
+				te.ControlPlane.Etcd.Err = os.Stderr
+			}
 		}
 
 		apiServer.Path = process.BinPathFinder("kube-apiserver", te.BinaryAssetsDirectory)
@@ -256,7 +240,7 @@ func (te *Environment) Start() (*rest.Config, error) {
 		apiServer.StartTimeout = te.ControlPlaneStartTimeout
 		apiServer.StopTimeout = te.ControlPlaneStopTimeout
 
-		log.V(1).Info("starting control plane", "api server flags", apiServer.Args)
+		log.V(1).Info("starting control plane")
 		if err := te.startControlPlane(); err != nil {
 			return nil, fmt.Errorf("unable to start control plane itself: %w", err)
 		}
@@ -288,6 +272,9 @@ func (te *Environment) Start() (*rest.Config, error) {
 	}
 
 	log.V(1).Info("installing CRDs")
+	if te.CRDInstallOptions.Scheme == nil {
+		te.CRDInstallOptions.Scheme = te.Scheme
+	}
 	te.CRDInstallOptions.CRDs = mergeCRDs(te.CRDInstallOptions.CRDs, te.CRDs)
 	te.CRDInstallOptions.Paths = mergePaths(te.CRDInstallOptions.Paths, te.CRDDirectoryPaths)
 	te.CRDInstallOptions.ErrorIfPathMissing = te.ErrorIfCRDPathMissing
@@ -372,4 +359,4 @@ func (te *Environment) useExistingCluster() bool {
 // you can use those to append your own additional arguments.
 //
 // Deprecated: use APIServer.Configure() instead.
-var DefaultKubeAPIServerFlags = controlplane.APIServerDefaultArgs
+var DefaultKubeAPIServerFlags = controlplane.APIServerDefaultArgs //nolint:staticcheck
