@@ -4,14 +4,20 @@
 #
 
 # Build the manager binary
-FROM golang:1.25 as builder
+FROM golang:1.25 AS builder
 
 WORKDIR /workspace
 COPY go.mod go.sum ./
 COPY vendor/ vendor/
 COPY . ./
 
-RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 GOEXPERIMENT=boringcrypto go build -mod vendor -a -o manager main.go
+ARG CONTROLLER_MAIN=.
+ARG TARGETOS=linux
+ARG TARGETARCH=amd64
+ARG CGO_ENABLED=0
+ARG GOEXPERIMENT=
+RUN GOOS="${TARGETOS}" GOARCH="${TARGETARCH}" CGO_ENABLED="${CGO_ENABLED}" GOEXPERIMENT="${GOEXPERIMENT}" \
+    go build -mod vendor -a -o manager ${CONTROLLER_MAIN}
 
 FROM oraclelinux:9-slim
 WORKDIR /

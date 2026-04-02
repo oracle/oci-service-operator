@@ -124,7 +124,9 @@ EOF
 
 	(
 		cd "${workdir}"
-		"${kustomize}" edit set image "controller=${controller_image}" >/dev/null
+		"${kustomize}" edit set image \
+			"controller=${controller_image}" \
+			"iad.ocir.io/oracle/oci-service-operator=${controller_image}" >/dev/null
 	)
 
 	printf '%s\n' "${workdir}"
