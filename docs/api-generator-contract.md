@@ -335,9 +335,9 @@ from scaffold coverage into generated runtime:
    `generation.resources[]` once the published OSOK kind has a matching formal
    manifest row.
 2. Run `make formal-scaffold` to create or refresh scaffold-only rows for the
-   published API inventory. Pass
-   `FORMAL_PROVIDER_PATH=/path/to/terraform-provider-oci` when provider-wide
-   scaffold coverage should also be refreshed. The scaffold flow keeps
+   published default-active API surface. Pass
+   `FORMAL_PROVIDER_PATH=/path/to/terraform-provider-oci` when matching
+   provider facts for that selected surface should also be refreshed. The scaffold flow keeps
    `runtime-lifecycle.yaml` as structured metadata, generates shared
    `activity`, `sequence`, `state-machine`, and `legend` `.puml` and `.svg`
    artifacts under `formal/shared/diagrams/`, and renders deterministic
