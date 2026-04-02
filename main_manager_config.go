@@ -20,7 +20,7 @@ const defaultLeaderElectionID = "40558063.oci"
 
 const (
 	expectedControllerManagerConfigAPIVersion = "controller-runtime.sigs.k8s.io/v1alpha1"
-	expectedControllerManagerConfigKind       = "ControllerManagerConfig"
+	expectedControllerManagerConfigKind       = "ControllerManagerConfiguration"
 )
 
 type startupFlags struct {
