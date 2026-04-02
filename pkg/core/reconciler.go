@@ -7,12 +7,14 @@ package core
 
 import (
 	"context"
+	stderrors "errors"
 	"fmt"
 	"strings"
 	"time"
 
+	"github.com/oracle/oci-go-sdk/v65/common"
 	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
@@ -20,6 +22,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
+	"github.com/oracle/oci-service-operator/pkg/errorutil"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/metrics"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
@@ -48,7 +51,7 @@ func (r *BaseReconciler) Reconcile(ctx context.Context, req ctrl.Request, obj cl
 	ctx = metrics.AddFixedLogMapEntries(ctx, req.Name, req.Namespace)
 	r.Log.DebugLogWithFixedMessage(ctx, "Fetching the resource from server")
 	if err := r.Get(ctx, req.NamespacedName, obj); err != nil {
-		if errors.IsNotFound(err) {
+		if apierrors.IsNotFound(err) {
 			r.Log.ErrorLogWithFixedMessage(ctx, err, "The resource could be in deleting state. Ignoring")
 			return ctrl.Result{}, client.IgnoreNotFound(err)
 		}
@@ -67,8 +70,6 @@ func (r *BaseReconciler) Reconcile(ctx context.Context, req ctrl.Request, obj cl
 				r.Log.ErrorLogWithFixedMessage(ctx, err, "Requeuing object due to error during delete of CR")
 				r.Metrics.AddCRDeleteFaultMetrics(ctx, obj.GetObjectKind().GroupVersionKind().Kind,
 					"Requeuing object due to error during delete of CR", req.Name, req.Namespace)
-				r.Recorder.Event(obj, v1.EventTypeWarning, "Failed",
-					fmt.Sprintf("Failed to remove the finalizer: %s", err.Error()))
 				return util.RequeueWithError(ctx, err, defaultRequeueTime, r.Log)
 			}
 			if delSuc {
@@ -170,6 +171,10 @@ func (r *BaseReconciler) DeleteResource(ctx context.Context, obj client.Object, 
 	//TODO Emit Delete Start metrics
 	delSucc, err := r.OSOKServiceManager.Delete(ctx, obj)
 	if err != nil {
+		if isUnambiguousNotFoundOCI(err) {
+			r.Log.InfoLogWithFixedMessage(ctx, "Delete treated as successful because OCI resource no longer exists")
+			return true, nil
+		}
 		r.Log.ErrorLogWithFixedMessage(ctx, err, "Delete failed in the Service Manager with error", "name", req.Name,
 			"namespace", req.Namespace, "namespacedName", req.String())
 		r.Recorder.Event(obj, v1.EventTypeWarning, "Failed",
@@ -185,6 +190,37 @@ func (r *BaseReconciler) DeleteResource(ctx context.Context, obj client.Object, 
 	}
 	// TODO Emit Delete Success metrics end
 	return delSucc, nil
+}
+
+func isUnambiguousNotFoundOCI(err error) bool {
+	var unauthorizedAndNotFound errorutil.UnauthorizedAndNotFoundOciError
+	if stderrors.As(err, &unauthorizedAndNotFound) {
+		return false
+	}
+
+	var serviceErr common.ServiceError
+	if stderrors.As(err, &serviceErr) {
+		switch serviceErr.GetCode() {
+		case "NotFound":
+			return true
+		case "NotAuthorizedOrNotFound":
+			return false
+		}
+		if serviceErr.GetHTTPStatusCode() == 404 {
+			message := strings.ToLower(strings.TrimSpace(serviceErr.GetMessage()))
+			if message != "" && strings.Contains(message, "not found") && !strings.Contains(message, "not authorized") {
+				return true
+			}
+		}
+	}
+
+	message := strings.ToLower(err.Error())
+	if strings.Contains(message, "notauthorizedornotfound") {
+		return false
+	}
+	return strings.Contains(message, "http status code: 404") &&
+		strings.Contains(message, "not found") &&
+		!strings.Contains(message, "not authorized")
 }
 
 func (r *BaseReconciler) addFinalizer(ctx context.Context, obj client.Object, finalizers ...string) error {
