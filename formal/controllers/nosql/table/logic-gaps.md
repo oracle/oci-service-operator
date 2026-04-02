@@ -38,8 +38,9 @@ gaps:
 - Use the [shared generated-runtime baseline](../../../shared/generated-runtime-baseline.md)
   as the category map for bind, lookup, waiter, mutation, status, secret, and
   delete decisions.
-- Follow `identity/User` for required status projection, required delete
-  confirmation, and `retain-until-confirmed-delete`.
+- Follow the preserved explicit-backlog `identity/User` row for required
+  status projection, required delete confirmation, and
+  `retain-until-confirmed-delete`.
 - Use `streaming/Stream` as the generated-runtime reference for pre-create
   lookup and lifecycle-sensitive matching. Do not inherit its secret or
   best-effort delete behavior.

@@ -15,10 +15,12 @@ This tree is the repo-local source of truth for formal runtime inputs.
 - `sources.lock` records the pinned provider source boundary that `formal-import` refreshes.
 - `controller_manifest.tsv` binds one controller row to exactly one import, spec, logic-gap file, and diagrams directory. That manifest is authoritative for generator-owned formal catalog artifacts; orphan controller directories or import JSON files are drift and fail `make formal-verify`.
 
-The checked-in `template` row remains scaffold-only as a schema example. Seeded
-rows for `database/AutonomousDatabase`, `mysql/DbSystem`,
-`streaming/Stream`, and `identity/User` exercise the first
-resource-specific formal corpus.
+The checked-in `template` row remains scaffold-only as a schema example. The
+current seeded default-active corpus lives in `mysql/DbSystem`,
+`nosql/Table`, `psql/DbSystem`, and `streaming/Stream`.
+`database/AutonomousDatabase` remains the default-active promotable reference
+row, and `identity/User` remains a preserved explicit-backlog promotable
+reference row.
 
 Use `make formal-scaffold` to expand scaffold-only entries from the published
 default-active API surface in `internal/generator/config/services.yaml`. That

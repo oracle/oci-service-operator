@@ -80,13 +80,16 @@ compartment_id, external_identifier,
 identity_provider_id, name (+1 more)
 conflicts: none
 open gaps: none
-The generated runtime reads back the OCI user
-after create or update and projects the response
-into status.
-Finalizer removal waits for delete confirmation
-through Get or list fallback.
-No secret side effects or legacy adapter seams
-are involved in the current User path.
+Blank/default-active runs no longer check in the
+generated User runtime, but explicit backlog
+regeneration still preserves this row.
+The preserved generated runtime reads back the
+OCI user after create or update and projects the
+response into status.
+Finalizer removal still waits for delete
+confirmation through Get or list fallback, and
+no secret side effects or legacy adapter seams
+are involved.
 end note
 note right of delete_pending
 delete policy: required
