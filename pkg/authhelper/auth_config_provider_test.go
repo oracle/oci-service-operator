@@ -37,30 +37,8 @@ func (s stubOsokConfig) VaultDetails() string {
 }
 
 func TestGetAuthProviderWithSecurityToken(t *testing.T) {
-	dir := t.TempDir()
-	keyPath := filepath.Join(dir, "privatekey")
-	tokenPath := filepath.Join(dir, "security_token")
-	configPath := filepath.Join(dir, "config")
-
-	if err := os.WriteFile(keyPath, generateRSAPrivateKeyPEM(t), 0o600); err != nil {
-		t.Fatalf("write private key: %v", err)
-	}
-	if err := os.WriteFile(tokenPath, []byte("session-token"), 0o600); err != nil {
-		t.Fatalf("write security token: %v", err)
-	}
-
 	profile := "WORKLOAD"
-	configFile := strings.Join([]string{
-		"[" + profile + "]",
-		"tenancy=ocid1.tenancy.oc1..exampleuniqueID",
-		"region=us-ashburn-1",
-		"fingerprint=20:3b:97:13:55:1c",
-		"key_file=" + keyPath,
-		"security_token_file=" + tokenPath,
-	}, "\n")
-	if err := os.WriteFile(configPath, []byte(configFile), 0o600); err != nil {
-		t.Fatalf("write config file: %v", err)
-	}
+	configPath := writeSecurityTokenConfigFixture(t, profile)
 
 	provider, err := (&AuthConfigProvider{
 		Log: loggerutil.OSOKLogger{Logger: logr.Discard()},
@@ -78,22 +56,10 @@ func TestGetAuthProviderWithSecurityToken(t *testing.T) {
 		t.Fatalf("get auth provider: %v", err)
 	}
 
-	if tenancy, err := provider.TenancyOCID(); err != nil || tenancy != "ocid1.tenancy.oc1..exampleuniqueID" {
-		t.Fatalf("unexpected tenancy: got %q err=%v", tenancy, err)
-	}
-	if region, err := provider.Region(); err != nil || region != "us-ashburn-1" {
-		t.Fatalf("unexpected region: got %q err=%v", region, err)
-	}
-	keyID, err := provider.KeyID()
-	if err != nil {
-		t.Fatalf("get key id: %v", err)
-	}
-	if !strings.HasPrefix(keyID, "ST$session-token") {
-		t.Fatalf("expected session token key id prefix, got %q", keyID)
-	}
-	if _, err := provider.PrivateRSAKey(); err != nil {
-		t.Fatalf("load private key: %v", err)
-	}
+	assertProviderTenancy(t, provider, "ocid1.tenancy.oc1..exampleuniqueID")
+	assertProviderRegion(t, provider, "us-ashburn-1")
+	assertProviderKeyIDPrefix(t, provider, "ST$session-token")
+	assertProviderLoadsPrivateKey(t, provider)
 }
 
 func TestGetAuthProviderRejectsIncompleteUserPrincipalConfig(t *testing.T) {
@@ -176,4 +142,74 @@ func generateRSAPrivateKeyPEM(t *testing.T) []byte {
 		Type:  "RSA PRIVATE KEY",
 		Bytes: x509.MarshalPKCS1PrivateKey(key),
 	})
+}
+
+func writeSecurityTokenConfigFixture(t *testing.T, profile string) string {
+	t.Helper()
+
+	dir := t.TempDir()
+	keyPath := filepath.Join(dir, "privatekey")
+	tokenPath := filepath.Join(dir, "security_token")
+	configPath := filepath.Join(dir, "config")
+
+	mustWriteFile(t, keyPath, generateRSAPrivateKeyPEM(t))
+	mustWriteFile(t, tokenPath, []byte("session-token"))
+
+	configFile := strings.Join([]string{
+		"[" + profile + "]",
+		"tenancy=ocid1.tenancy.oc1..exampleuniqueID",
+		"region=us-ashburn-1",
+		"fingerprint=20:3b:97:13:55:1c",
+		"key_file=" + keyPath,
+		"security_token_file=" + tokenPath,
+	}, "\n")
+	mustWriteFile(t, configPath, []byte(configFile))
+
+	return configPath
+}
+
+func mustWriteFile(t *testing.T, path string, contents []byte) {
+	t.Helper()
+
+	if err := os.WriteFile(path, contents, 0o600); err != nil {
+		t.Fatalf("write %s: %v", path, err)
+	}
+}
+
+func assertProviderTenancy(t *testing.T, provider common.ConfigurationProvider, want string) {
+	t.Helper()
+
+	got, err := provider.TenancyOCID()
+	if err != nil || got != want {
+		t.Fatalf("unexpected tenancy: got %q err=%v", got, err)
+	}
+}
+
+func assertProviderRegion(t *testing.T, provider common.ConfigurationProvider, want string) {
+	t.Helper()
+
+	got, err := provider.Region()
+	if err != nil || got != want {
+		t.Fatalf("unexpected region: got %q err=%v", got, err)
+	}
+}
+
+func assertProviderKeyIDPrefix(t *testing.T, provider common.ConfigurationProvider, prefix string) {
+	t.Helper()
+
+	keyID, err := provider.KeyID()
+	if err != nil {
+		t.Fatalf("get key id: %v", err)
+	}
+	if !strings.HasPrefix(keyID, prefix) {
+		t.Fatalf("expected session token key id prefix, got %q", keyID)
+	}
+}
+
+func assertProviderLoadsPrivateKey(t *testing.T, provider common.ConfigurationProvider) {
+	t.Helper()
+
+	if _, err := provider.PrivateRSAKey(); err != nil {
+		t.Fatalf("load private key: %v", err)
+	}
 }

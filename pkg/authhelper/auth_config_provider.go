@@ -15,76 +15,87 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/identity"
 	"github.com/pkg/errors"
 
-	. "github.com/oracle/oci-service-operator/pkg/config"
+	configpkg "github.com/oracle/oci-service-operator/pkg/config"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 )
 
 type AuthConfigProvider struct {
 	Log       loggerutil.OSOKLogger
-	Validator func(context.Context, common.ConfigurationProvider, OsokConfig) bool
+	Validator func(context.Context, common.ConfigurationProvider, configpkg.OsokConfig) bool
 }
 
-func (configProvider *AuthConfigProvider) GetAuthProvider(osokConfig OsokConfig) (common.ConfigurationProvider, error) {
-	var config common.ConfigurationProvider
-	var err error
-	if osokConfig != nil {
-		configProvider.Log.InfoLog("The OSOK config is present, validating config parameters")
-		authCfg := osokConfig.Auth()
-
-		switch {
-		case authCfg.WantsSecurityToken():
-			configProvider.Log.InfoLog("Security token auth requested, validating configuration")
-			config, err = configProvider.securityTokenProvider(authCfg)
-			if err != nil {
-				return nil, err
-			}
-			if !configProvider.validateProvider(context.Background(), config, osokConfig) {
-				configProvider.Log.InfoLog("Security token configuration is not valid. Setup will now terminate")
-				err = errors.New("Failed to instantiate Security Token auth provider")
-			}
-		case authCfg.HasAnyUserPrincipalField():
-			if !authCfg.HasCompleteUserPrincipal() {
-				err = errors.New("incomplete user principal configuration")
-				configProvider.Log.ErrorLog(err, "User principals are configured incompletely")
-				return nil, err
-			}
-			configProvider.Log.InfoLog("User principals available, validating user credentials")
-			config = common.NewRawConfigurationProvider(
-				authCfg.Tenancy,
-				authCfg.User,
-				authCfg.Region,
-				authCfg.Fingerprint,
-				authCfg.PrivateKey,
-				common.String(authCfg.Passphrase))
-
-			//If user principals failed to validate, setup will stop
-			if !configProvider.validateProvider(context.Background(), config, osokConfig) {
-				configProvider.Log.InfoLog("User Principals are not valid. Setup will now terminate")
-				err = errors.New("Failed to instantiate User Principals")
-			}
-		default:
-			configProvider.Log.InfoLog("User Principals are not present, switching to Instance principals")
-			config, err = auth.InstancePrincipalConfigurationProvider()
-			if err != nil {
-				configProvider.Log.InfoLog("Failed to instantiate InstancePrincipals")
-			}
-		}
-	} else {
+func (configProvider *AuthConfigProvider) GetAuthProvider(osokConfig configpkg.OsokConfig) (common.ConfigurationProvider, error) {
+	if osokConfig == nil {
 		configProvider.Log.InfoLog("The OSOK config is not present. Using default Config provider")
-		config = common.DefaultConfigProvider()
+		return common.DefaultConfigProvider(), nil
+	} else {
+		configProvider.Log.InfoLog("The OSOK config is present, validating config parameters")
 	}
-	return config, err
+
+	authCfg := osokConfig.Auth()
+	if authCfg.WantsSecurityToken() {
+		return configProvider.securityTokenAuthProvider(osokConfig, authCfg)
+	}
+	if authCfg.HasAnyUserPrincipalField() {
+		return configProvider.userPrincipalAuthProvider(osokConfig, authCfg)
+	}
+	return configProvider.instancePrincipalAuthProvider()
 }
 
-func (configProvider *AuthConfigProvider) securityTokenProvider(authCfg UserAuthConfig) (common.ConfigurationProvider, error) {
+func (configProvider *AuthConfigProvider) securityTokenAuthProvider(osokConfig configpkg.OsokConfig, authCfg configpkg.UserAuthConfig) (common.ConfigurationProvider, error) {
+	configProvider.Log.InfoLog("Security token auth requested, validating configuration")
+	provider, err := configProvider.securityTokenProvider(authCfg)
+	if err != nil {
+		return nil, err
+	}
+	if !configProvider.validateProvider(context.Background(), provider, osokConfig) {
+		configProvider.Log.InfoLog("Security token configuration is not valid. Setup will now terminate")
+		return provider, errors.New("Failed to instantiate Security Token auth provider")
+	}
+	return provider, nil
+}
+
+func (configProvider *AuthConfigProvider) userPrincipalAuthProvider(osokConfig configpkg.OsokConfig, authCfg configpkg.UserAuthConfig) (common.ConfigurationProvider, error) {
+	if !authCfg.HasCompleteUserPrincipal() {
+		err := errors.New("incomplete user principal configuration")
+		configProvider.Log.ErrorLog(err, "User principals are configured incompletely")
+		return nil, err
+	}
+
+	configProvider.Log.InfoLog("User principals available, validating user credentials")
+	provider := common.NewRawConfigurationProvider(
+		authCfg.Tenancy,
+		authCfg.User,
+		authCfg.Region,
+		authCfg.Fingerprint,
+		authCfg.PrivateKey,
+		common.String(authCfg.Passphrase))
+
+	if !configProvider.validateProvider(context.Background(), provider, osokConfig) {
+		configProvider.Log.InfoLog("User Principals are not valid. Setup will now terminate")
+		return provider, errors.New("Failed to instantiate User Principals")
+	}
+	return provider, nil
+}
+
+func (configProvider *AuthConfigProvider) instancePrincipalAuthProvider() (common.ConfigurationProvider, error) {
+	configProvider.Log.InfoLog("User Principals are not present, switching to Instance principals")
+	provider, err := auth.InstancePrincipalConfigurationProvider()
+	if err != nil {
+		configProvider.Log.InfoLog("Failed to instantiate InstancePrincipals")
+	}
+	return provider, err
+}
+
+func (configProvider *AuthConfigProvider) securityTokenProvider(authCfg configpkg.UserAuthConfig) (common.ConfigurationProvider, error) {
 	configFilePath := strings.TrimSpace(authCfg.ConfigFilePath)
 	if configFilePath == "" {
-		configFilePath = DefaultSecurityTokenConfigFilePath
+		configFilePath = configpkg.DefaultSecurityTokenConfigFilePath
 	}
 
 	profile := strings.TrimSpace(authCfg.ConfigFileProfile)
 	if profile == "" {
-		profile = DefaultSecurityTokenConfigProfile
+		profile = configpkg.DefaultSecurityTokenConfigProfile
 	}
 
 	provider, err := common.ConfigurationProviderForSessionTokenWithProfile(configFilePath, profile, authCfg.Passphrase)
@@ -94,14 +105,14 @@ func (configProvider *AuthConfigProvider) securityTokenProvider(authCfg UserAuth
 	return provider, nil
 }
 
-func (configProvider *AuthConfigProvider) validateProvider(ctx context.Context, provider common.ConfigurationProvider, config OsokConfig) bool {
+func (configProvider *AuthConfigProvider) validateProvider(ctx context.Context, provider common.ConfigurationProvider, config configpkg.OsokConfig) bool {
 	if configProvider.Validator != nil {
 		return configProvider.Validator(ctx, provider, config)
 	}
 	return configProvider.authValidate(ctx, provider, config)
 }
 
-func (configProvider *AuthConfigProvider) authValidate(ctx context.Context, provider common.ConfigurationProvider, config OsokConfig) bool {
+func (configProvider *AuthConfigProvider) authValidate(ctx context.Context, provider common.ConfigurationProvider, config configpkg.OsokConfig) bool {
 	configProvider.Log.InfoLog("Validating the Configuration Provider")
 	tenancy, err := resolveValidationTenancy(provider, config)
 	if err != nil {
@@ -134,7 +145,7 @@ func (configProvider *AuthConfigProvider) authValidate(ctx context.Context, prov
 	return true
 }
 
-func resolveValidationTenancy(provider common.ConfigurationProvider, config OsokConfig) (string, error) {
+func resolveValidationTenancy(provider common.ConfigurationProvider, config configpkg.OsokConfig) (string, error) {
 	if tenancy := strings.TrimSpace(config.Auth().Tenancy); tenancy != "" {
 		return tenancy, nil
 	}
