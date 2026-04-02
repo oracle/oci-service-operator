@@ -333,7 +333,7 @@ func discoverPublishedKinds(repoRoot string, cfg *generator.Config) ([]inventory
 		return nil, nil, fmt.Errorf("generator config is required")
 	}
 
-	services, err := cfg.SelectServices("", true)
+	services, err := cfg.SelectDefaultActiveOrExplicitServices("", false)
 	if err != nil {
 		return nil, nil, err
 	}

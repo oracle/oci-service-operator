@@ -47,6 +47,41 @@ func TestNormalizeRuntimeCheckOptionsRejectsConflictingSelection(t *testing.T) {
 	}
 }
 
+func TestLoadRuntimeCheckSelectedServicesDefaultsBlankRunToDefaultActiveSurface(t *testing.T) {
+	t.Helper()
+
+	configPath := writeRuntimeCheckSelectionConfig(t)
+	_, services, err := loadRuntimeCheckSelectedServices(configPath, "", false)
+	if err != nil {
+		t.Fatalf("loadRuntimeCheckSelectedServices() error = %v", err)
+	}
+	if got := runtimeCheckServiceNames(services); !slices.Equal(got, []string{"database", "mysql"}) {
+		t.Fatalf("loadRuntimeCheckSelectedServices() services = %v, want %v", got, []string{"database", "mysql"})
+	}
+	if got := services[0].SelectedKinds(); !slices.Equal(got, []string{"AutonomousDatabase"}) {
+		t.Fatalf("database SelectedKinds() = %v, want %v", got, []string{"AutonomousDatabase"})
+	}
+	if got := services[1].SelectedKinds(); got != nil {
+		t.Fatalf("mysql SelectedKinds() = %v, want nil", got)
+	}
+}
+
+func TestLoadRuntimeCheckSelectedServicesAllowsExplicitDisabledService(t *testing.T) {
+	t.Helper()
+
+	configPath := writeRuntimeCheckSelectionConfig(t)
+	_, services, err := loadRuntimeCheckSelectedServices(configPath, "identity", false)
+	if err != nil {
+		t.Fatalf("loadRuntimeCheckSelectedServices(identity) error = %v", err)
+	}
+	if len(services) != 1 || services[0].Service != "identity" {
+		t.Fatalf("loadRuntimeCheckSelectedServices(identity) = %#v, want identity only", services)
+	}
+	if services[0].SelectedKinds() != nil {
+		t.Fatalf("identity SelectedKinds() = %v, want nil", services[0].SelectedKinds())
+	}
+}
+
 func TestCollectBuildPlanFindsGeneratedRuntimePackages(t *testing.T) {
 	t.Helper()
 
@@ -365,4 +400,53 @@ func assertRuntimeCheckNotExists(t *testing.T, path string) {
 	if _, err := os.Lstat(path); !os.IsNotExist(err) {
 		t.Fatalf("Lstat(%q) error = %v, want not exist", path, err)
 	}
+}
+
+func writeRuntimeCheckSelectionConfig(t *testing.T) string {
+	t.Helper()
+
+	root := t.TempDir()
+	configPath := filepath.Join(root, "services.yaml")
+	const config = `schemaVersion: v1alpha1
+domain: oracle.com
+defaultVersion: v1beta1
+generatorEntrypoint: ./cmd/generator
+packageProfiles:
+  controller-backed:
+    description: runtime-integrated groups
+services:
+  - service: database
+    sdkPackage: example.com/database
+    group: database
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - AutonomousDatabase
+  - service: mysql
+    sdkPackage: example.com/mysql
+    group: mysql
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: all
+  - service: identity
+    sdkPackage: example.com/identity
+    group: identity
+    packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
+`
+	mustRuntimeCheckWriteFile(t, configPath, config)
+	return configPath
+}
+
+func runtimeCheckServiceNames(services []generator.ServiceConfig) []string {
+	names := make([]string, 0, len(services))
+	for _, service := range services {
+		names = append(names, service.Service)
+	}
+	return names
 }

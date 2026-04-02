@@ -13,6 +13,7 @@ import (
 	"testing"
 
 	"github.com/oracle/oci-service-operator/internal/formal"
+	"github.com/oracle/oci-service-operator/internal/generator"
 )
 
 const testGeneratorConfig = `schemaVersion: v1
@@ -747,6 +748,74 @@ func TestGenerateIgnoresProviderInventoryOutsidePublishedActiveSurface(t *testin
 	assertSharedDiagramStrategyArtifacts(t, filepath.Join(repoRoot, "formal", "shared", "diagrams"))
 	assertGeneratedCatalogRowAdded(t, catalog)
 	assertRenderedDiagramFamily(t, filepath.Join(repoRoot, "formal", "controllers", "identity", "networksource", "diagrams"))
+}
+
+func TestDiscoverPublishedKindsDefaultsBlankRunToDefaultActiveSurface(t *testing.T) {
+	t.Parallel()
+
+	repoRoot := t.TempDir()
+	configPath := filepath.Join(repoRoot, "internal", "generator", "config", "services.yaml")
+	writeTestFile(t, configPath, `schemaVersion: v1
+domain: oracle.com
+defaultVersion: v1beta1
+generatorEntrypoint: ./cmd/generator
+packageProfiles:
+  controller-backed:
+    description: Shared manager install
+services:
+  - service: identity
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/identity
+    group: identity
+    version: v1beta1
+    phase: security-and-identity
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - User
+  - service: database
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/database
+    group: database
+    version: v1beta1
+    phase: data
+    packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
+`)
+	writeTestFile(t, filepath.Join(repoRoot, "api", "identity", "v1beta1", "user_types.go"), testUserAPI)
+	writeTestFile(t, filepath.Join(repoRoot, "api", "identity", "v1beta1", "networksource_types.go"), testNetworkSourceAPI)
+	writeTestFile(t, filepath.Join(repoRoot, "api", "database", "v1beta1", "backup_types.go"), testBackupAPI)
+
+	cfg, err := generator.LoadConfig(configPath)
+	if err != nil {
+		t.Fatalf("generator.LoadConfig() error = %v", err)
+	}
+
+	entries, services, err := discoverPublishedKinds(repoRoot, cfg)
+	if err != nil {
+		t.Fatalf("discoverPublishedKinds() error = %v", err)
+	}
+	if len(services) != 1 || services[0].Service != "identity" {
+		t.Fatalf("discoverPublishedKinds() services = %#v, want identity only", services)
+	}
+	if got := services[0].SelectedKinds(); !reflect.DeepEqual(got, []string{"User"}) {
+		t.Fatalf("identity SelectedKinds() = %#v, want %#v", got, []string{"User"})
+	}
+
+	want := []inventoryEntry{
+		{
+			Service: "identity",
+			Group:   "identity",
+			Version: "v1beta1",
+			Slug:    "user",
+			Kind:    "User",
+		},
+	}
+	if !reflect.DeepEqual(entries, want) {
+		t.Fatalf("discoverPublishedKinds() = %#v, want %#v", entries, want)
+	}
 }
 
 func TestGeneratePrunesRowsOutsideDefaultActiveSurface(t *testing.T) {

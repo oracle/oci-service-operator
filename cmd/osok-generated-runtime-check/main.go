@@ -164,15 +164,8 @@ func loadRuntimeCheckRunInputs(ctx context.Context, opts options) (runtimeCheckR
 	}
 
 	configPath := absFromRoot(repoRoot, opts.configPath)
-	cfg, err := generator.LoadConfig(configPath)
+	cfg, services, err := loadRuntimeCheckSelectedServices(configPath, opts.service, opts.all)
 	if err != nil {
-		return runtimeCheckRunInputs{}, err
-	}
-	services, err := cfg.SelectServices(opts.service, opts.all)
-	if err != nil {
-		return runtimeCheckRunInputs{}, err
-	}
-	if err := cfg.VerifyFormalInputsForServices(services); err != nil {
 		return runtimeCheckRunInputs{}, err
 	}
 	packageModels, err := buildPackageModels(ctx, cfg, services)
@@ -195,6 +188,21 @@ func loadRuntimeCheckRunInputs(ctx context.Context, opts options) (runtimeCheckR
 		selectedRegistrationGroups:  registrationGroups(services),
 		selectedServiceManagerRoots: serviceManagerRoots(packageModels),
 	}, nil
+}
+
+func loadRuntimeCheckSelectedServices(configPath string, serviceName string, all bool) (*generator.Config, []generator.ServiceConfig, error) {
+	cfg, err := generator.LoadConfig(configPath)
+	if err != nil {
+		return nil, nil, err
+	}
+	services, err := cfg.SelectDefaultActiveOrExplicitServices(serviceName, all)
+	if err != nil {
+		return nil, nil, err
+	}
+	if err := cfg.VerifyFormalInputsForServices(services); err != nil {
+		return nil, nil, err
+	}
+	return cfg, services, nil
 }
 
 func resolveRuntimeCheckControllerGenPath(repoRoot string, controllerGenPath string) (string, error) {
@@ -278,14 +286,7 @@ func normalizeRuntimeCheckOptions(opts options) (options, error) {
 }
 
 func normalizeRuntimeCheckSelection(serviceName string, all bool) (string, bool, error) {
-	serviceName = strings.TrimSpace(serviceName)
-	if serviceName != "" && all {
-		return "", false, fmt.Errorf("use either --all or --service, not both")
-	}
-	if serviceName == "" && !all {
-		return "", true, nil
-	}
-	return serviceName, all, nil
+	return generator.NormalizeDefaultActiveSelection(serviceName, all)
 }
 
 func findRepoRoot() (string, error) {

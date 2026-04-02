@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"os"
 	"path/filepath"
+	"slices"
 	"testing"
 
 	"github.com/oracle/oci-service-operator/internal/generator"
@@ -44,6 +45,41 @@ func TestNormalizeCoverageOptionsRejectsConflictingSelection(t *testing.T) {
 
 	if _, err := normalizeCoverageOptions(options{service: "mysql", all: true}); err == nil {
 		t.Fatal("normalizeCoverageOptions() error = nil, want conflict failure")
+	}
+}
+
+func TestLoadCoverageSelectedServicesDefaultsBlankRunToDefaultActiveSurface(t *testing.T) {
+	t.Helper()
+
+	configPath := writeCoverageSelectionConfig(t)
+	_, services, err := loadCoverageSelectedServices(configPath, "", false)
+	if err != nil {
+		t.Fatalf("loadCoverageSelectedServices() error = %v", err)
+	}
+	if got := coverageServiceNames(services); !slices.Equal(got, []string{"database", "mysql"}) {
+		t.Fatalf("loadCoverageSelectedServices() services = %v, want %v", got, []string{"database", "mysql"})
+	}
+	if got := services[0].SelectedKinds(); !slices.Equal(got, []string{"AutonomousDatabase"}) {
+		t.Fatalf("database SelectedKinds() = %v, want %v", got, []string{"AutonomousDatabase"})
+	}
+	if got := services[1].SelectedKinds(); got != nil {
+		t.Fatalf("mysql SelectedKinds() = %v, want nil", got)
+	}
+}
+
+func TestLoadCoverageSelectedServicesAllowsExplicitDisabledService(t *testing.T) {
+	t.Helper()
+
+	configPath := writeCoverageSelectionConfig(t)
+	_, services, err := loadCoverageSelectedServices(configPath, "identity", false)
+	if err != nil {
+		t.Fatalf("loadCoverageSelectedServices(identity) error = %v", err)
+	}
+	if len(services) != 1 || services[0].Service != "identity" {
+		t.Fatalf("loadCoverageSelectedServices(identity) = %#v, want identity only", services)
+	}
+	if services[0].SelectedKinds() != nil {
+		t.Fatalf("identity SelectedKinds() = %v, want nil", services[0].SelectedKinds())
 	}
 }
 
@@ -267,4 +303,53 @@ func TestRenderOutputOmitsRetiredPreserveExistingSpecSurfaceField(t *testing.T) 
 	if bytes.Contains(rendered, []byte("preserveExistingSpecSurface")) {
 		t.Fatalf("renderOutput() unexpectedly rendered retired preserveExistingSpecSurface field:\n%s", rendered)
 	}
+}
+
+func writeCoverageSelectionConfig(t *testing.T) string {
+	t.Helper()
+
+	root := t.TempDir()
+	configPath := filepath.Join(root, "services.yaml")
+	const config = `schemaVersion: v1alpha1
+domain: oracle.com
+defaultVersion: v1beta1
+generatorEntrypoint: ./cmd/generator
+packageProfiles:
+  controller-backed:
+    description: runtime-integrated groups
+services:
+  - service: database
+    sdkPackage: example.com/database
+    group: database
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - AutonomousDatabase
+  - service: mysql
+    sdkPackage: example.com/mysql
+    group: mysql
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: all
+  - service: identity
+    sdkPackage: example.com/identity
+    group: identity
+    packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
+`
+	mustCoverageWriteFile(t, configPath, config)
+	return configPath
+}
+
+func coverageServiceNames(services []generator.ServiceConfig) []string {
+	names := make([]string, 0, len(services))
+	for _, service := range services {
+		names = append(names, service.Service)
+	}
+	return names
 }
