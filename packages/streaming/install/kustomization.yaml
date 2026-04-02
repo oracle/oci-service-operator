@@ -7,7 +7,7 @@ namePrefix: oci-service-operator-streaming-
 resources:
 - generated/crd
 - generated/rbac
-- ../../../config/manager
+- ../../../config/manager/streaming
 - ../../../config/rbac/role_binding.yaml
 - ../../../config/rbac/leader_election_role.yaml
 - ../../../config/rbac/leader_election_role_binding.yaml

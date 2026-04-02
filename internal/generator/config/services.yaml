@@ -749,7 +749,7 @@ services:
           formalSpec: stream
           controller:
             extraRBACMarkers:
-              - groups="",resources=secrets,verbs=get;create;update;delete
+              - groups="",resources=secrets,verbs=get;list;watch;create;update;delete
           serviceManager:
             packagePath: streaming/stream
         - kind: Cursor
@@ -768,6 +768,16 @@ services:
           serviceManager:
             strategy: none
         - kind: Message
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: ConnectHarness
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: StreamPool
           controller:
             strategy: none
           serviceManager:

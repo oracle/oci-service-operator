@@ -23,7 +23,7 @@ import (
 )
 
 const sampleManagerConfigYAML = `apiVersion: controller-runtime.sigs.k8s.io/v1alpha1
-kind: ControllerManagerConfig
+kind: ControllerManagerConfiguration
 syncPeriod: 30m
 cacheNamespace: tenant-system
 gracefulShutDown: 45s
@@ -85,7 +85,7 @@ func TestManagerOptionsWithoutConfigUsesCommandArguments(t *testing.T) {
 	}
 }
 
-func TestManagerOptionsWithCheckedInConfigMatchesControllerRuntime(t *testing.T) {
+func TestManagerOptionsWithCheckedInConfigMatchesExpectedValues(t *testing.T) {
 	t.Parallel()
 
 	configPath := filepath.Join("config", "manager", "controller_manager_config.yaml")
@@ -95,12 +95,7 @@ func TestManagerOptionsWithCheckedInConfigMatchesControllerRuntime(t *testing.T)
 		t.Fatalf("managerOptions() error = %v", err)
 	}
 
-	want, err := loadControllerRuntimeManagerOptions(t, configPath, ctrl.Options{Scheme: scheme})
-	if err != nil {
-		t.Fatalf("loadControllerRuntimeManagerOptions() error = %v", err)
-	}
-
-	assertManagerOptionsEqual(t, got, want)
+	assertManagerOptionsEqual(t, got, checkedInManagerConfigOptions())
 }
 
 func TestLoadManagerOptionsFromConfigAppliesSupportedFields(t *testing.T) {
@@ -306,6 +301,16 @@ func sampleAppliedCoreOptions() ctrl.Options {
 		LivenessEndpointName:    "live",
 	}
 	options.Metrics.BindAddress = "127.0.0.1:9090"
+	return options
+}
+
+func checkedInManagerConfigOptions() ctrl.Options {
+	options := ctrl.Options{Scheme: scheme}
+	options.Metrics.BindAddress = "127.0.0.1:8080"
+	options.HealthProbeBindAddress = ":8081"
+	options.LeaderElection = true
+	options.LeaderElectionID = defaultLeaderElectionID
+	options.WebhookServer = webhook.NewServer(webhook.Options{})
 	return options
 }
 

@@ -1253,11 +1253,15 @@ resources:
 {{- range .Resources }}
 - {{ . }}
 {{- end }}
-{{- if .PatchPath }}
+{{- if .Patches }}
 
 patches:
-- path: {{ .PatchPath }}
+{{- range .Patches }}
+- path: {{ .Path }}
+{{- if .Target }}
   target:
-    kind: {{ .PatchTarget }}
+    kind: {{ .Target }}
+{{- end }}
+{{- end }}
 {{- end }}
 `

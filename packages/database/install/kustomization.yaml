@@ -7,14 +7,20 @@ namePrefix: oci-service-operator-database-
 resources:
 - generated/crd
 - generated/rbac
-- ../../../config/manager
+- ../../../config/manager/database
 - ../../../config/rbac/role_binding.yaml
 - ../../../config/rbac/leader_election_role.yaml
 - ../../../config/rbac/leader_election_role_binding.yaml
 - ../../../config/rbac/autonomousdatabases_editor_role.yaml
 - ../../../config/rbac/autonomousdatabases_viewer_role.yaml
+- ../../../config/webhook
+- ../../../config/certmanager
 
 patches:
+- path: ../../../config/default/manager_webhook_patch.yaml
+  target:
+    kind: Deployment
+- path: ../../../config/default/webhookcainjection_patch.yaml
 - path: ../../../config/default/manager_config_patch.yaml
   target:
     kind: Deployment

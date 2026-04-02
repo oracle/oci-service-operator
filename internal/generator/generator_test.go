@@ -1898,7 +1898,7 @@ func TestCheckedInPromotedRuntimeArtifactsMatchGenerator(t *testing.T) {
 			serviceClientPath: "pkg/servicemanager/streaming/stream/stream_serviceclient.go",
 			controllerPath:    "controllers/streaming/stream_controller.go",
 			controllerContains: []string{
-				`// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;create;update;delete`,
+				`// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;create;update;delete`,
 			},
 			serviceClientChecks: []string{
 				"Semantics: &generatedruntime.Semantics{",

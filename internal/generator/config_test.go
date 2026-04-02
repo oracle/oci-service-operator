@@ -1078,7 +1078,7 @@ func TestCheckedInConfigOptsOutEndpointBasedGeneratedRuntimeResources(t *testing
 
 	wantKinds := map[string][]string{
 		"keymanagement": {"Key", "KeyVersion", "ReplicationStatus", "WrappingKey"},
-		"streaming":     {"Cursor", "Group", "GroupCursor", "Message"},
+		"streaming":     {"ConnectHarness", "Cursor", "Group", "GroupCursor", "Message", "StreamPool"},
 	}
 
 	for serviceName, kinds := range wantKinds {
@@ -1325,13 +1325,13 @@ func assertMySQLRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
 func assertStreamingRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
 	t.Helper()
 
-	assertResourceOverrideCount(t, service, 5)
+	assertResourceOverrideCount(t, service, 7)
 	overrides := overridesByKind(service)
 	assertFormalSpecFor(t, service, "Stream", "stream")
 	if overrides["Stream"].ServiceManager.PackagePath != "streaming/stream" {
 		t.Fatalf("streaming packagePath = %q, want %q", overrides["Stream"].ServiceManager.PackagePath, "streaming/stream")
 	}
-	for _, kind := range []string{"Cursor", "Group", "GroupCursor", "Message"} {
+	for _, kind := range []string{"ConnectHarness", "Cursor", "Group", "GroupCursor", "Message", "StreamPool"} {
 		assertDisabledResourceOverride(t, service.Service, kind, overrides[kind])
 	}
 }
@@ -1449,7 +1449,7 @@ func TestCheckedInStreamingRuntimeRolloutIncludesSecretRBAC(t *testing.T) {
 	if !slices.Equal(
 		overrides["Stream"].Controller.ExtraRBACMarkers,
 		[]string{
-			`groups="",resources=secrets,verbs=get;create;update;delete`,
+			`groups="",resources=secrets,verbs=get;list;watch;create;update;delete`,
 		},
 	) {
 		t.Fatalf("streaming Stream extra RBAC markers = %v", overrides["Stream"].Controller.ExtraRBACMarkers)
@@ -1466,11 +1466,11 @@ func TestCheckedInStreamingPackageInstallRoleNarrowsSecretVerbs(t *testing.T) {
 	}
 
 	rendered := string(content)
-	if !strings.Contains(rendered, "  - secrets\n  verbs:\n  - create\n  - delete\n  - get\n  - update\n") {
-		t.Fatalf("streaming package install role is missing the narrowed secret verbs:\n%s", rendered)
-	}
+	assertCoreResourceVerbs(t, rolePath, map[string][]string{
+		"secrets": {"create", "delete", "get", "list", "update", "watch"},
+	})
 	if strings.Contains(rendered, "  - secrets\n  verbs:\n  - create\n  - delete\n  - get\n  - list\n  - patch\n  - update\n  - watch\n") {
-		t.Fatalf("streaming package install role still grants broad secret verbs:\n%s", rendered)
+		t.Fatalf("streaming package install role still grants patch on secrets:\n%s", rendered)
 	}
 }
 

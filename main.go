@@ -253,6 +253,11 @@ func setupRegistrations(mgr ctrl.Manager, initOSOKResources bool) error {
 			return err
 		}
 	}
+	for _, webhook := range registrations.ManualWebhooks() {
+		if err := webhook.SetupWithManager(mgr); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 

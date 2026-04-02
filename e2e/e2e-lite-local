@@ -11,6 +11,7 @@ CONTROLLER_IMG="${CONTROLLER_IMG:-}"
 SKIP_IMAGE_BUILD="${SKIP_IMAGE_BUILD:-false}"
 SKIP_IMAGE_LOAD="${SKIP_IMAGE_LOAD:-false}"
 SKIP_GENERATOR_REFRESH="${SKIP_GENERATOR_REFRESH:-false}"
+GENERATOR_OVERWRITE="${GENERATOR_OVERWRITE:-true}"
 SKIP_PACKAGE_RENDER="${SKIP_PACKAGE_RENDER:-false}"
 REFRESH_OCI_SECRET="${REFRESH_OCI_SECRET:-false}"
 SAMPLE_DIR="${SAMPLE_DIR:-${REPO_ROOT}/config/samples}"
@@ -47,6 +48,8 @@ MAKE_GOCACHE="${MAKE_GOCACHE:-${ARTIFACT_DIR}/.gocache}"
 MAKE_GOMODCACHE="${MAKE_GOMODCACHE:-${ARTIFACT_DIR}/.gomodcache}"
 MAKE_GOTMPDIR="${MAKE_GOTMPDIR:-${ARTIFACT_DIR}/.gotmp}"
 MAKE_GOPATH="${MAKE_GOPATH:-${ARTIFACT_DIR}/.gopath}"
+DOCKER_CONFIG_DIR="${DOCKER_CONFIG_DIR:-${ARTIFACT_DIR}/.docker}"
+BUILDX_CONFIG_DIR="${BUILDX_CONFIG_DIR:-${ARTIFACT_DIR}/.buildx}"
 
 export KUBECONFIG="${KUBECONFIG_PATH}"
 export KIND_EXPERIMENTAL_PROVIDER=docker
@@ -382,6 +385,17 @@ EOF
   done
 }
 
+refresh_cluster_dns() {
+  if ! "${KUBECTL_BIN}" -n kube-system get deployment coredns >/dev/null 2>&1; then
+    warn "coredns deployment not found; skipping CoreDNS restart"
+    return
+  fi
+
+  log "Restarting CoreDNS so updated Kind node resolvers take effect in pods"
+  "${KUBECTL_BIN}" -n kube-system rollout restart deployment/coredns >/dev/null
+  "${KUBECTL_BIN}" -n kube-system rollout status deployment/coredns --timeout 2m >/dev/null
+}
+
 probe_kind_node_url() {
   local node="$1"
   local url="$2"
@@ -450,6 +464,7 @@ create_cluster() {
   export_kubeconfig
   "${KUBECTL_BIN}" cluster-info >/dev/null
   configure_kind_node_dns
+  refresh_cluster_dns
   preflight_olm_registry
 }
 
@@ -496,7 +511,7 @@ load_service_metadata() {
 }
 
 ensure_make_cache_dirs() {
-  mkdir -p "${MAKE_GOCACHE}" "${MAKE_GOMODCACHE}" "${MAKE_GOTMPDIR}" "${MAKE_GOPATH}"
+  mkdir -p "${MAKE_GOCACHE}" "${MAKE_GOMODCACHE}" "${MAKE_GOTMPDIR}" "${MAKE_GOPATH}" "${DOCKER_CONFIG_DIR}" "${BUILDX_CONFIG_DIR}"
 }
 
 run_make() {
@@ -512,14 +527,38 @@ run_make() {
 }
 
 build_local_controller_image() {
+  local controller_main
+  local target_arch
+
   [ -n "${CONTROLLER_IMG}" ] || die "CONTROLLER_IMG is empty"
-  log "Building controller image ${CONTROLLER_IMG}"
-  docker build -t "${CONTROLLER_IMG}" "${BUILD_CONTEXT}"
+  controller_main="."
+  if [ -n "${SERVICE}" ] && [ -f "${REPO_ROOT}/cmd/manager/${SERVICE}/main.go" ]; then
+    controller_main="./cmd/manager/${SERVICE}"
+  fi
+  target_arch="${HOST_ARCH}"
+  if cluster_exists; then
+    target_arch="$("${KUBECTL_BIN}" get nodes -o jsonpath='{.items[0].status.nodeInfo.architecture}' 2>/dev/null || true)"
+    target_arch="${target_arch:-${HOST_ARCH}}"
+  fi
+
+  log "Building controller image ${CONTROLLER_IMG} from ${controller_main} for linux/${target_arch}"
+  DOCKER_CONFIG="${DOCKER_CONFIG_DIR}" \
+  BUILDX_CONFIG="${BUILDX_CONFIG_DIR}" \
+  docker build \
+    --build-arg CONTROLLER_MAIN="${controller_main}" \
+    --build-arg TARGETOS=linux \
+    --build-arg TARGETARCH="${target_arch}" \
+    --build-arg CGO_ENABLED=0 \
+    --build-arg GOEXPERIMENT= \
+    -t "${CONTROLLER_IMG}" \
+    "${BUILD_CONTEXT}"
 }
 
 load_local_controller_image() {
   [ -n "${CONTROLLER_IMG}" ] || die "CONTROLLER_IMG is empty"
   log "Loading controller image ${CONTROLLER_IMG} into Kind cluster ${CLUSTER_NAME}"
+  DOCKER_CONFIG="${DOCKER_CONFIG_DIR}" \
+  BUILDX_CONFIG="${BUILDX_CONFIG_DIR}" \
   "${KIND_BIN}" load docker-image "${CONTROLLER_IMG}" --name "${CLUSTER_NAME}"
 }
 
@@ -709,6 +748,12 @@ patch_kind_local_mismatches() {
   local pki_mount_index
   local pki_volume_index
   local patch_ops
+  local auth_patch
+
+  log "Patching deployment ${DEPLOYMENT_NAME} image=${CONTROLLER_IMG} for Kind"
+  "${KUBECTL_BIN}" -n "${PACKAGE_NAMESPACE}" patch deployment "${DEPLOYMENT_NAME}" \
+    --type=json \
+    -p="[{\"op\":\"replace\",\"path\":\"/spec/template/spec/containers/0/image\",\"value\":\"${CONTROLLER_IMG}\"}]" >/dev/null
 
   log "Patching deployment ${DEPLOYMENT_NAME} imagePullPolicy=IfNotPresent for Kind"
   "${KUBECTL_BIN}" -n "${PACKAGE_NAMESPACE}" patch deployment "${DEPLOYMENT_NAME}" \
@@ -719,6 +764,46 @@ patch_kind_local_mismatches() {
   "${KUBECTL_BIN}" -n "${PACKAGE_NAMESPACE}" patch secret "${OSOKCONFIG_SECRET_NAME}" \
     --type=merge \
     -p='{"stringData":{"useinstanceprincipal":"false"}}' >/dev/null
+
+  auth_patch="$(cat <<'EOF'
+spec:
+  template:
+    spec:
+      containers:
+      - name: manager
+        env:
+        - name: AUTH_TYPE
+          valueFrom:
+            secretKeyRef:
+              name: ocicredentials
+              key: auth_type
+              optional: true
+        - name: OCI_CONFIG_FILE_PATH
+          valueFrom:
+            secretKeyRef:
+              name: ocicredentials
+              key: config_file_path
+              optional: true
+        - name: OCI_CONFIG_PROFILE
+          valueFrom:
+            secretKeyRef:
+              name: ocicredentials
+              key: config_file_profile
+              optional: true
+        volumeMounts:
+        - name: ocicredentials
+          mountPath: /etc/oci
+          readOnly: true
+      volumes:
+      - name: ocicredentials
+        secret:
+          secretName: ocicredentials
+EOF
+)"
+  log "Patching deployment ${DEPLOYMENT_NAME} with ocicredentials env and /etc/oci mount"
+  "${KUBECTL_BIN}" -n "${PACKAGE_NAMESPACE}" patch deployment "${DEPLOYMENT_NAME}" \
+    --type=strategic \
+    -p "${auth_patch}" >/dev/null
 
   pki_mount_index="$("${KUBECTL_BIN}" -n "${PACKAGE_NAMESPACE}" get deployment "${DEPLOYMENT_NAME}" \
     -o jsonpath='{range .spec.template.spec.containers[0].volumeMounts[*]}{@.mountPath}{"\n"}{end}' \
@@ -750,8 +835,43 @@ patch_kind_local_mismatches() {
 }
 
 wait_for_controller_rollout() {
+  local timeout_seconds
+  local deadline
+  local sleep_seconds=5
+  local last_status=""
+  local status_output=""
+  local failure_details
+
+  timeout_seconds="$(duration_to_seconds "${CONTROLLER_ROLLOUT_TIMEOUT}")"
+  deadline="$(( $(date +%s) + timeout_seconds ))"
+
   log "Waiting for deployment ${DEPLOYMENT_NAME} rollout"
-  "${KUBECTL_BIN}" -n "${PACKAGE_NAMESPACE}" rollout status "deployment/${DEPLOYMENT_NAME}" --timeout "${CONTROLLER_ROLLOUT_TIMEOUT}"
+  while :; do
+    status_output="$("${KUBECTL_BIN}" -n "${PACKAGE_NAMESPACE}" rollout status "deployment/${DEPLOYMENT_NAME}" --watch=false 2>&1 || true)"
+    if [ -n "${status_output}" ] && [ "${status_output}" != "${last_status}" ]; then
+      printf '%s\n' "${status_output}" >&2
+      last_status="${status_output}"
+    fi
+
+    if deployment_rollout_complete; then
+      return 0
+    fi
+
+    failure_details="$(controller_rollout_failure_details || true)"
+    if [ -n "${failure_details}" ]; then
+      capture_controller_logs || true
+      warn "deployment ${DEPLOYMENT_NAME} has failing rollout pod(s):"
+      printf '%s\n' "${failure_details}" >&2
+      die "deployment ${DEPLOYMENT_NAME} entered a failed pod state during rollout; see ${CONTROLLER_LOG_FILE}"
+    fi
+
+    if [ "$(date +%s)" -ge "${deadline}" ]; then
+      capture_controller_logs || true
+      die "deployment ${DEPLOYMENT_NAME} did not finish rolling out within ${CONTROLLER_ROLLOUT_TIMEOUT}; see ${CONTROLLER_LOG_FILE}"
+    fi
+
+    sleep "${sleep_seconds}"
+  done
 }
 
 record_result() {
@@ -967,13 +1087,124 @@ discover_service_samples() {
   find "${SAMPLE_DIR}" -maxdepth 1 -type f -name "${pattern}" | LC_ALL=C sort
 }
 
+deployment_rollout_complete() {
+  local observed_generation
+  local generation
+  local desired_replicas
+  local updated_replicas
+  local available_replicas
+  local unavailable_replicas
+
+  read -r observed_generation generation desired_replicas updated_replicas available_replicas unavailable_replicas <<EOF || true
+$("${KUBECTL_BIN}" -n "${PACKAGE_NAMESPACE}" get deployment "${DEPLOYMENT_NAME}" \
+  -o jsonpath='{.status.observedGeneration} {.metadata.generation} {.spec.replicas} {.status.updatedReplicas} {.status.availableReplicas} {.status.unavailableReplicas}' \
+  2>/dev/null || true)
+EOF
+
+  [ -n "${observed_generation}" ] || return 1
+  [ -n "${generation}" ] || return 1
+  [ -n "${desired_replicas}" ] || return 1
+
+  updated_replicas="${updated_replicas:-0}"
+  available_replicas="${available_replicas:-0}"
+  unavailable_replicas="${unavailable_replicas:-0}"
+
+  [ "${observed_generation}" = "${generation}" ] || return 1
+  [ "${updated_replicas}" = "${desired_replicas}" ] || return 1
+  [ "${available_replicas}" = "${desired_replicas}" ] || return 1
+  [ "${unavailable_replicas}" = "0" ] || return 1
+}
+
+deployment_selector() {
+  local selector
+
+  selector="$("${KUBECTL_BIN}" -n "${PACKAGE_NAMESPACE}" get deployment "${DEPLOYMENT_NAME}" \
+    -o go-template='{{range $k, $v := .spec.selector.matchLabels}}{{printf "%s=%s," $k $v}}{{end}}' \
+    2>/dev/null || true)"
+  selector="${selector%,}"
+  [ -n "${selector}" ] || return 1
+  printf '%s\n' "${selector}"
+}
+
+current_rollout_selector() {
+  local selector
+  local revision
+  local pod_template_hash
+
+  selector="$(deployment_selector)" || return 1
+  revision="$("${KUBECTL_BIN}" -n "${PACKAGE_NAMESPACE}" get deployment "${DEPLOYMENT_NAME}" \
+    -o jsonpath='{.metadata.annotations.deployment\.kubernetes\.io/revision}' \
+    2>/dev/null || true)"
+  if [ -z "${revision}" ]; then
+    printf '%s\n' "${selector}"
+    return 0
+  fi
+
+  pod_template_hash="$("${KUBECTL_BIN}" -n "${PACKAGE_NAMESPACE}" get rs -l "${selector}" \
+    -o custom-columns=REVISION:.metadata.annotations.deployment\\.kubernetes\\.io/revision,HASH:.spec.selector.matchLabels.pod-template-hash \
+    --no-headers 2>/dev/null \
+    | awk -v revision="${revision}" '$1 == revision { print $2; exit }')"
+  if [ -z "${pod_template_hash}" ]; then
+    printf '%s\n' "${selector}"
+    return 0
+  fi
+
+  printf '%s,pod-template-hash=%s\n' "${selector}" "${pod_template_hash}"
+}
+
+controller_rollout_failure_details() {
+  local selector
+  local pods
+
+  selector="$(current_rollout_selector)" || return 1
+  pods="$("${KUBECTL_BIN}" -n "${PACKAGE_NAMESPACE}" get pods -l "${selector}" --no-headers 2>/dev/null || true)"
+  [ -n "${pods}" ] || return 1
+
+  pods="$(printf '%s\n' "${pods}" \
+    | grep -E 'CrashLoopBackOff|ImagePullBackOff|ErrImagePull|CreateContainer(Config)?Error|RunContainerError|InvalidImageName|StartError|Error' \
+    || true)"
+  [ -n "${pods}" ] || return 1
+
+  printf '%s\n' "${pods}"
+}
+
 capture_controller_logs() {
+  local selector
+  local pods
+  local pod
+  local wrote_logs=0
+
   if ! is_true "${SERVICE_INSTALL_APPLIED}"; then
     return 0
   fi
 
   [ -n "${CONTROLLER_LOG_FILE}" ] || return 0
   mkdir -p "$(dirname -- "${CONTROLLER_LOG_FILE}")"
+  : > "${CONTROLLER_LOG_FILE}"
+
+  selector="$(deployment_selector || true)"
+  pods="$("${KUBECTL_BIN}" -n "${PACKAGE_NAMESPACE}" get pods -l "${selector}" \
+    -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' 2>/dev/null || true)"
+  if [ -n "${selector}" ] && [ -n "${pods}" ]; then
+    while IFS= read -r pod; do
+      [ -n "${pod}" ] || continue
+      {
+        printf '=== pod/%s current ===\n' "${pod}"
+        "${KUBECTL_BIN}" -n "${PACKAGE_NAMESPACE}" logs "${pod}" --all-containers=true 2>&1 || true
+        printf '\n=== pod/%s previous ===\n' "${pod}"
+        "${KUBECTL_BIN}" -n "${PACKAGE_NAMESPACE}" logs "${pod}" --all-containers=true --previous 2>&1 || true
+        printf '\n'
+      } >> "${CONTROLLER_LOG_FILE}"
+      wrote_logs=1
+    done <<EOF
+${pods}
+EOF
+  fi
+
+  if [ "${wrote_logs}" -eq 1 ]; then
+    log "Controller logs written to ${CONTROLLER_LOG_FILE}"
+    return 0
+  fi
 
   if "${KUBECTL_BIN}" -n "${PACKAGE_NAMESPACE}" logs "deployment/${DEPLOYMENT_NAME}" --all-containers=true > "${CONTROLLER_LOG_FILE}" 2>/dev/null; then
     log "Controller logs written to ${CONTROLLER_LOG_FILE}"

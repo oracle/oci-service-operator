@@ -44,7 +44,7 @@ func TestResolveManagerOptionsLoadsControllerManagerConfigFile(t *testing.T) {
 
 	configPath := writeTempManagerConfig(t, `
 apiVersion: controller-runtime.sigs.k8s.io/v1alpha1
-kind: ControllerManagerConfig
+kind: ControllerManagerConfiguration
 syncPeriod: "45s"
 cacheNamespace: operator-system
 gracefulShutDown: "30s"
@@ -111,7 +111,7 @@ func TestLoadManagerOptionsFromFileRejectsUnknownFields(t *testing.T) {
 
 	configPath := writeTempManagerConfig(t, `
 apiVersion: controller-runtime.sigs.k8s.io/v1alpha1
-kind: ControllerManagerConfig
+kind: ControllerManagerConfiguration
 metrics:
   bindAddress: 127.0.0.1:38080
 unexpectedField: true

@@ -56,4 +56,10 @@ resources:
 - mysql_v1beta1_workrequest.yaml
 - mysql_v1beta1_workrequesterror.yaml
 - mysql_v1beta1_workrequestlog.yaml
+- streaming_v1beta1_connectharness.yaml
+- streaming_v1beta1_cursor.yaml
+- streaming_v1beta1_group.yaml
+- streaming_v1beta1_groupcursor.yaml
+- streaming_v1beta1_message.yaml
+- streaming_v1beta1_streampool.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples
