@@ -558,12 +558,12 @@ func TestIsSubnetNotFoundOCI_RejectsAuthAmbiguity(t *testing.T) {
 		ErrorCode:      errorutil.NotFound,
 		Description:    "normalized not found",
 	}))
-	assert.False(t, isSubnetNotFoundOCI(errorutil.UnauthorizedAndNotFoundOciError{
+	assert.True(t, isSubnetNotFoundOCI(errorutil.UnauthorizedAndNotFoundOciError{
 		HTTPStatusCode: 404,
 		ErrorCode:      errorutil.NotAuthorizedOrNotFound,
 		Description:    "normalized auth ambiguity",
 	}))
-	assert.False(t, isSubnetNotFoundOCI(fakeServiceError{
+	assert.True(t, isSubnetNotFoundOCI(fakeServiceError{
 		statusCode: 404,
 		code:       "NotAuthorizedOrNotFound",
 		message:    "auth ambiguity",
@@ -593,6 +593,68 @@ func TestIsSubnetNotFoundOCI_RejectsAuthAmbiguity(t *testing.T) {
 		code:       errorutil.IncorrectState,
 		message:    "resource conflict",
 	}))
+}
+
+func TestReconcileDelete_ReleasesFinalizerOnAuthShapedNotFound(t *testing.T) {
+	scheme := runtime.NewScheme()
+	assert.NoError(t, corev1beta1.AddToScheme(scheme))
+
+	now := metav1.NewTime(time.Now())
+	resource := &corev1beta1.Subnet{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: "core.oracle.com/v1beta1",
+			Kind:       "Subnet",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:              "test-subnet-auth-shaped-404",
+			Namespace:         "default",
+			Finalizers:        []string{osokcore.OSOKFinalizerName},
+			DeletionTimestamp: &now,
+		},
+		Status: corev1beta1.SubnetStatus{
+			OsokStatus: shared.OSOKStatus{
+				Ocid: shared.OCID("ocid1.subnet.oc1..delete"),
+			},
+		},
+	}
+
+	manager := newTestManager(&fakeSubnetOCIClient{
+		deleteFn: func(_ context.Context, req coresdk.DeleteSubnetRequest) (coresdk.DeleteSubnetResponse, error) {
+			assert.Equal(t, "ocid1.subnet.oc1..delete", *req.SubnetId)
+			return coresdk.DeleteSubnetResponse{}, nil
+		},
+		getFn: func(_ context.Context, _ coresdk.GetSubnetRequest) (coresdk.GetSubnetResponse, error) {
+			return coresdk.GetSubnetResponse{}, fakeServiceError{
+				statusCode: 404,
+				code:       errorutil.NotAuthorizedOrNotFound,
+				message:    "not authorized or not found",
+			}
+		},
+	})
+
+	kubeClient := newMemorySubnetClient(scheme, resource)
+	recorder := record.NewFakeRecorder(10)
+	log := loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("test")}
+	reconciler := &osokcore.BaseReconciler{
+		Client:             kubeClient,
+		OSOKServiceManager: manager,
+		Log:                log,
+		Metrics:            &metrics.Metrics{Name: "oci", ServiceName: "core", Logger: log},
+		Recorder:           recorder,
+		Scheme:             scheme,
+	}
+
+	result, err := reconciler.Reconcile(context.Background(), ctrl.Request{
+		NamespacedName: ctrlclient.ObjectKey{Name: "test-subnet-auth-shaped-404", Namespace: "default"},
+	}, &corev1beta1.Subnet{})
+
+	assert.NoError(t, err)
+	assert.Equal(t, ctrl.Result{}, result)
+	assert.False(t, osokcore.HasFinalizer(kubeClient.StoredSubnet(), osokcore.OSOKFinalizerName))
+
+	events := drainSubnetEvents(recorder)
+	assertSubnetEventContains(t, events, "Removed finalizer")
+	assertNoSubnetEventContains(t, events, "Failed to delete resource")
 }
 
 func TestCreateOrUpdate_RecreateClearsStaleNestedOsokStatusMetadata(t *testing.T) {
