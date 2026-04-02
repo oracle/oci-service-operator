@@ -109,6 +109,87 @@ func TestReconcileNotFoundDeleteRemovesFinalizer(t *testing.T) {
 	assertNoEventContains(t, events, "Failed to delete resource")
 }
 
+func TestReconcileAuthShapedNotFoundDeleteRequeuesAndKeepsFinalizer(t *testing.T) {
+	t.Parallel()
+
+	reconciler, recorder, kubeClient := newDeleteReconciler(t, deleteBehavior{
+		err: testServiceError{
+			statusCode: 404,
+			code:       errorutil.NotAuthorizedOrNotFound,
+			message:    "not authorized or not found",
+		},
+	})
+
+	result, err := reconciler.Reconcile(context.Background(), testRequest(), &corev1.ConfigMap{})
+	if err != nil {
+		t.Fatalf("Reconcile() error = %v, want nil", err)
+	}
+	if result.RequeueAfter != defaultRequeueTime {
+		t.Fatalf("Reconcile() requeueAfter = %v, want %v", result.RequeueAfter, defaultRequeueTime)
+	}
+
+	stored := kubeClient.StoredConfigMap()
+	if !HasFinalizer(stored, OSOKFinalizerName) {
+		t.Fatal("finalizer removed after auth-shaped 404, want retained")
+	}
+
+	events := drainEvents(recorder)
+	assertContainsEvent(t, events, "Failed to delete resource: not authorized or not found")
+	assertNoEventContains(t, events, "Removed finalizer")
+}
+
+func TestReconcileConflictDeleteRequeuesAndKeepsFinalizer(t *testing.T) {
+	t.Parallel()
+
+	reconciler, recorder, kubeClient := newDeleteReconciler(t, deleteBehavior{
+		err: testServiceError{
+			statusCode: 409,
+			code:       errorutil.IncorrectState,
+			message:    "delete conflict",
+		},
+	})
+
+	result, err := reconciler.Reconcile(context.Background(), testRequest(), &corev1.ConfigMap{})
+	if err != nil {
+		t.Fatalf("Reconcile() error = %v, want nil", err)
+	}
+	if result.RequeueAfter != defaultRequeueTime {
+		t.Fatalf("Reconcile() requeueAfter = %v, want %v", result.RequeueAfter, defaultRequeueTime)
+	}
+
+	stored := kubeClient.StoredConfigMap()
+	if !HasFinalizer(stored, OSOKFinalizerName) {
+		t.Fatal("finalizer removed after conflict, want retained")
+	}
+
+	events := drainEvents(recorder)
+	assertContainsEvent(t, events, "Failed to delete resource: delete conflict")
+	assertNoEventContains(t, events, "Removed finalizer")
+}
+
+func TestReconcileDeleteInProgressRequeuesAndKeepsFinalizer(t *testing.T) {
+	t.Parallel()
+
+	reconciler, recorder, kubeClient := newDeleteReconciler(t, deleteBehavior{})
+
+	result, err := reconciler.Reconcile(context.Background(), testRequest(), &corev1.ConfigMap{})
+	if err != nil {
+		t.Fatalf("Reconcile() error = %v, want nil", err)
+	}
+	if result.RequeueAfter != defaultRequeueTime {
+		t.Fatalf("Reconcile() requeueAfter = %v, want %v", result.RequeueAfter, defaultRequeueTime)
+	}
+
+	stored := kubeClient.StoredConfigMap()
+	if !HasFinalizer(stored, OSOKFinalizerName) {
+		t.Fatal("finalizer removed during delete-in-progress, want retained")
+	}
+
+	events := drainEvents(recorder)
+	assertContainsEvent(t, events, "Delete Unsuccessful")
+	assertNoEventContains(t, events, "Removed finalizer")
+}
+
 func TestDeleteResourceLogsOCIClassificationOnDeleteFailure(t *testing.T) {
 	t.Parallel()
 
