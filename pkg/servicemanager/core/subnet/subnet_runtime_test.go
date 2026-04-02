@@ -553,6 +553,11 @@ func assertNoUpdateWhileLifecycleRetryable(t *testing.T, state coresdk.SubnetLif
 }
 
 func TestIsSubnetNotFoundOCI_RejectsAuthAmbiguity(t *testing.T) {
+	assert.True(t, isSubnetNotFoundOCI(errorutil.NotFoundOciError{
+		HTTPStatusCode: 404,
+		ErrorCode:      errorutil.NotFound,
+		Description:    "normalized not found",
+	}))
 	assert.False(t, isSubnetNotFoundOCI(errorutil.UnauthorizedAndNotFoundOciError{
 		HTTPStatusCode: 404,
 		ErrorCode:      errorutil.NotAuthorizedOrNotFound,
@@ -568,7 +573,7 @@ func TestIsSubnetNotFoundOCI_RejectsAuthAmbiguity(t *testing.T) {
 		code:       "NotFound",
 		message:    "not found",
 	}))
-	assert.True(t, isSubnetNotFoundOCI(fakeServiceError{
+	assert.False(t, isSubnetNotFoundOCI(fakeServiceError{
 		statusCode: 404,
 		code:       "UnexpectedCode",
 		message:    "resource not found",
@@ -577,6 +582,16 @@ func TestIsSubnetNotFoundOCI_RejectsAuthAmbiguity(t *testing.T) {
 		statusCode: 404,
 		code:       "UnexpectedCode",
 		message:    "resource not authorized",
+	}))
+	assert.False(t, isSubnetNotFoundOCI(errorutil.ConflictOciError{
+		HTTPStatusCode: 409,
+		ErrorCode:      errorutil.IncorrectState,
+		Description:    "normalized conflict",
+	}))
+	assert.False(t, isSubnetNotFoundOCI(fakeServiceError{
+		statusCode: 409,
+		code:       errorutil.IncorrectState,
+		message:    "resource conflict",
 	}))
 }
 
