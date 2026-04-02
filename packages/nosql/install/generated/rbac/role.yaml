@@ -1,0 +1,53 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - nosql.oracle.com
+  resources:
+  - indexes
+  - replicas
+  - rows
+  - tables
+  - tableusages
+  - workrequesterrors
+  - workrequestlogs
+  - workrequests
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - nosql.oracle.com
+  resources:
+  - indexes/finalizers
+  - replicas/finalizers
+  - rows/finalizers
+  - tables/finalizers
+  - tableusages/finalizers
+  - workrequesterrors/finalizers
+  - workrequestlogs/finalizers
+  - workrequests/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - nosql.oracle.com
+  resources:
+  - indexes/status
+  - replicas/status
+  - rows/status
+  - tables/status
+  - tableusages/status
+  - workrequesterrors/status
+  - workrequestlogs/status
+  - workrequests/status
+  verbs:
+  - get
+  - patch
+  - update

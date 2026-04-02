@@ -30,12 +30,17 @@ Current workflow:
    writes generated API packages, sample manifests, sample kustomization,
    per-group package scaffolding, and the configured controller,
    service-manager, and registration outputs from
-   `internal/generator/config/services.yaml`.
+   `internal/generator/config/services.yaml`. `--all` targets only the
+   default-active first-wave surface; `--service <service>` is the explicit
+   backlog path for inactive-but-configured services.
 2. Run `make generator-refresh GENERATOR_SERVICE=<service>` or
    `make generator-refresh GENERATOR_ALL=true` when the same refresh also needs
    `zz_generated.deepcopy.go` and `config/crd/` artifacts updated.
 3. `make package-generate GROUP=<group>` generates CRDs and optional controller
-   RBAC into `packages/<group>/install/generated/`.
+   RBAC into `packages/<group>/install/generated/`. The checked-in package
+   directories follow the current default-active surface; run this after an
+   explicit `--service` regeneration if you need to check in backlog package
+   artifacts for one group.
 4. `make package-install GROUP=<group>` renders a single install YAML into
    `dist/packages/<group>/install.yaml` for either package profile.
 
@@ -51,7 +56,8 @@ Runtime rollout defaults:
 Package profile behavior:
 
 - `controller-backed` overlays include generated CRDs, generated controller
-  RBAC, and the shared manager install overlay for every checked-in service.
+  RBAC, and the shared manager install overlay for every checked-in
+  default-active service.
 - `crd-only` overlays render only generated CRDs until a staged config opts the
   service into runtime rollout.
 

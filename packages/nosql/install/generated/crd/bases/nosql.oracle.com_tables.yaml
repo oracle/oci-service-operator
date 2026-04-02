@@ -118,9 +118,36 @@ spec:
           status:
             description: TableStatus defines the observed state of Table.
             properties:
+              compartmentId:
+                description: Compartment Identifier.
+                type: string
+              ddlStatement:
+                description: A DDL statement representing the schema.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and
+                  scoped to a namespace.  Example: `{"foo-namespace":
+                  {"bar-key": "value"}}`
+                type: object
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined
+                  name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
               id:
                 description: Unique identifier that is immutable.
                 type: string
+              isAutoReclaimable:
+                description: True if this table can be reclaimed after an idle period.
+                type: boolean
               isMultiRegion:
                 description: True if this table is currently a member of a replication
                   set.
@@ -137,6 +164,9 @@ spec:
                   the progress of the initialization of the replica's data.  A
                   value of 100 indicates that initialization has completed.
                 type: integer
+              name:
+                description: Human-friendly table name, immutable.
+                type: string
               replicas:
                 description: An array of Replica listing this table's replicas, if
                   any
@@ -281,6 +311,30 @@ spec:
                   `"orcl-cloud"`; and the only key in that namespace is
                   `"free-tier-retained"`.
                   Example: `{"orcl-cloud"": {"free-tier-retained": "true"}}`
+                type: object
+              tableLimits:
+                description: TableLimits defines nested fields for Table.TableLimits.
+                properties:
+                  capacityMode:
+                    description: |-
+                      The capacity mode of the table.  If capacityMode = ON_DEMAND,
+                      maxReadUnits and maxWriteUnits are not used, and both will have
+                      the value of zero.
+                    type: string
+                  maxReadUnits:
+                    description: Maximum sustained read throughput limit for the table.
+                    type: integer
+                  maxStorageInGBs:
+                    description: Maximum size of storage used by the table.
+                    type: integer
+                  maxWriteUnits:
+                    description: Maximum sustained write throughput limit for the
+                      table.
+                    type: integer
+                required:
+                - maxReadUnits
+                - maxStorageInGBs
+                - maxWriteUnits
                 type: object
               timeCreated:
                 description: |-

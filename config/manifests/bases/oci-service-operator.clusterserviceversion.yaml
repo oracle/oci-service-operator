@@ -10,17 +10,17 @@ spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
     owned:
-    - description: AutonomousDatabase is the Schema for the autonomousdatabases API
+    - description: AutonomousDatabase is the Schema for the autonomousdatabases API.
       displayName: Autonomous Database
       kind: AutonomousDatabase
       name: autonomousdatabases.database.oracle.com
       version: v1beta1
-    - description: DbSystem is the Schema for the dbsystems API
+    - description: DbSystem is the Schema for the dbsystems API.
       displayName: Db System
       kind: DbSystem
       name: dbsystems.mysql.oracle.com
       version: v1beta1
-    - description: Stream is the Schema for the streams API
+    - description: Stream is the Schema for the streams API.
       displayName: Stream
       kind: Stream
       name: streams.streaming.oracle.com

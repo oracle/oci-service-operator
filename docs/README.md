@@ -13,8 +13,11 @@
 ## Introduction
 
 The OCI Service Operator for Kubernetes (OSOK) now ships generator-owned API,
-controller, service-manager, registration, and package outputs from the
-checked-in service map in `internal/generator/config/services.yaml`.
+controller, service-manager, registration, and package outputs for the
+first-wave default-active services selected in
+`internal/generator/config/services.yaml`. The same config also keeps broader
+backlog services available for explicit `--service <name>` generation when
+local rollout work needs them.
 
 The default deployment also mounts
 `config/manager/controller_manager_config.yaml` and passes

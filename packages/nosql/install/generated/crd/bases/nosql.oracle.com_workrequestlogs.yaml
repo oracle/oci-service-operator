@@ -55,6 +55,9 @@ spec:
           status:
             description: WorkRequestLogStatus defines the observed state of WorkRequestLog.
             properties:
+              message:
+                description: Human-readable log message.
+                type: string
               status:
                 properties:
                   conditions:
@@ -97,6 +100,10 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              timestamp:
+                description: The time the log message was written. An RFC3339 formatted
+                  datetime string.
+                type: string
             required:
             - status
             type: object

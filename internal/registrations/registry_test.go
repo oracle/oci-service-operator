@@ -10,9 +10,11 @@ import (
 	"testing"
 
 	"github.com/oracle/oci-go-sdk/v65/common"
-	corev1beta1 "github.com/oracle/oci-service-operator/api/core/v1beta1"
+	containerenginev1beta1 "github.com/oracle/oci-service-operator/api/containerengine/v1beta1"
 	databasev1beta1 "github.com/oracle/oci-service-operator/api/database/v1beta1"
 	mysqlv1beta1 "github.com/oracle/oci-service-operator/api/mysql/v1beta1"
+	nosqlv1beta1 "github.com/oracle/oci-service-operator/api/nosql/v1beta1"
+	psqlv1beta1 "github.com/oracle/oci-service-operator/api/psql/v1beta1"
 	streamingv1beta1 "github.com/oracle/oci-service-operator/api/streaming/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/credhelper"
 	"github.com/oracle/oci-service-operator/pkg/metrics"
@@ -24,7 +26,7 @@ import (
 	ctrlclientfake "sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
-func TestAllAddToSchemeRegistersManualGroupKinds(t *testing.T) {
+func TestAllAddToSchemeRegistersDefaultActiveGroupKinds(t *testing.T) {
 	t.Parallel()
 
 	scheme := runtime.NewScheme()
@@ -35,9 +37,11 @@ func TestAllAddToSchemeRegistersManualGroupKinds(t *testing.T) {
 	}
 
 	for _, obj := range []runtime.Object{
-		&corev1beta1.Vcn{},
+		&containerenginev1beta1.Cluster{},
 		&databasev1beta1.AutonomousDatabase{},
 		&mysqlv1beta1.DbSystem{},
+		&nosqlv1beta1.Table{},
+		&psqlv1beta1.DbSystem{},
 		&streamingv1beta1.Stream{},
 	} {
 		gvks, _, err := scheme.ObjectKinds(obj)

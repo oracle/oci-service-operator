@@ -1,6 +1,7 @@
 # Services
 
-OSOK's checked-in generator config currently publishes these API groups:
+`internal/generator/config/services.yaml` still tracks the broader configured
+service inventory for rollout planning and explicit backlog generation:
 
 - `artifacts`
 - `certificates`
@@ -29,6 +30,34 @@ OSOK's checked-in generator config currently publishes these API groups:
 - `vault`
 - `workrequests`
 
+The checked-in generated APIs, CRDs, samples, package scaffolding, and release
+bundle only ship the first-wave default-active surface declared through each
+service's `selection` block:
+
+- whole-service: `containerengine`
+- whole-service: `mysql`
+- whole-service: `nosql`
+- whole-service: `psql`
+- explicit kind: `database/AutonomousDatabase`
+- explicit kind: `streaming/Stream`
+
+Refresh that shipped surface with:
+
+```sh
+go run ./cmd/generator --config internal/generator/config/services.yaml --all --overwrite
+```
+
+Use explicit service selection when you need backlog or inactive services that
+are still configured in `services.yaml` but are not checked in by default:
+
+```sh
+go run ./cmd/generator --config internal/generator/config/services.yaml --service <service> --overwrite
+```
+
+Follow explicit backlog generation with `make generate`, `make manifests`, and
+`make package-generate GROUP=<group>` when the targeted group's checked-in
+package-local install artifacts also need refresh.
+
 Every listed API group currently uses the `controller-backed` package profile
 and generated group registration rollout, but generated controller and
 service-manager coverage is still resource-scoped. The published kinds that
@@ -38,17 +67,6 @@ intentionally keep `controller.strategy: none` and
 `keymanagement/KeyVersion`, `keymanagement/ReplicationStatus`,
 `keymanagement/WrappingKey`, `streaming/Cursor`, `streaming/Group`,
 `streaming/GroupCursor`, and `streaming/Message`.
-
-The default active generator surface is also declared in
-`internal/generator/config/services.yaml` through each service's `selection`
-block. The current first-wave default-active surface is:
-
-- whole-service: `containerengine`
-- whole-service: `mysql`
-- whole-service: `nosql`
-- whole-service: `psql`
-- explicit kind: `database/AutonomousDatabase`
-- explicit kind: `streaming/Stream`
 
 All other configured services remain inactive by default until future rollout
 stories promote them, but they stay available for explicit generator runs.
