@@ -607,7 +607,7 @@ func TestDelete_KeepsFinalizerWhileObservedTerminating(t *testing.T) {
 	assert.Equal(t, string(shared.Terminating), resource.Status.OsokStatus.Reason)
 }
 
-func TestDelete_DoesNotConfirmDeletionOnAuthAmbiguity(t *testing.T) {
+func TestDelete_ConfirmsDeletionOnAuthShapedNotFound(t *testing.T) {
 	manager := newTestManager(&fakeVcnOCIClient{
 		deleteFn: func(_ context.Context, _ coresdk.DeleteVcnRequest) (coresdk.DeleteVcnResponse, error) {
 			return coresdk.DeleteVcnResponse{}, nil
@@ -626,9 +626,9 @@ func TestDelete_DoesNotConfirmDeletionOnAuthAmbiguity(t *testing.T) {
 
 	done, err := manager.Delete(context.Background(), resource)
 
-	assert.Error(t, err)
-	assert.False(t, done)
-	assert.Nil(t, resource.Status.OsokStatus.DeletedAt)
+	assert.NoError(t, err)
+	assert.True(t, done)
+	assert.NotNil(t, resource.Status.OsokStatus.DeletedAt)
 }
 
 func TestReconcileDelete_ReleasesFinalizerOnUnambiguousNotFound(t *testing.T) {
@@ -693,18 +693,80 @@ func TestReconcileDelete_ReleasesFinalizerOnUnambiguousNotFound(t *testing.T) {
 	assertNoEventContains(t, events, "Failed to delete resource")
 }
 
-func TestIsNotFoundOCI_RejectsAuthAmbiguity(t *testing.T) {
+func TestReconcileDelete_ReleasesFinalizerOnAuthShapedNotFound(t *testing.T) {
+	scheme := runtime.NewScheme()
+	assert.NoError(t, corev1beta1.AddToScheme(scheme))
+
+	now := metav1.NewTime(time.Now())
+	resource := &corev1beta1.Vcn{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: "core.oracle.com/v1beta1",
+			Kind:       "Vcn",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:              "test-vcn-auth-shaped-404",
+			Namespace:         "default",
+			Finalizers:        []string{osokcore.OSOKFinalizerName},
+			DeletionTimestamp: &now,
+		},
+		Status: corev1beta1.VcnStatus{
+			OsokStatus: shared.OSOKStatus{
+				Ocid: shared.OCID("ocid1.vcn.oc1..delete"),
+			},
+		},
+	}
+
+	manager := newTestManager(&fakeVcnOCIClient{
+		deleteFn: func(_ context.Context, req coresdk.DeleteVcnRequest) (coresdk.DeleteVcnResponse, error) {
+			assert.Equal(t, "ocid1.vcn.oc1..delete", *req.VcnId)
+			return coresdk.DeleteVcnResponse{}, nil
+		},
+		getFn: func(_ context.Context, _ coresdk.GetVcnRequest) (coresdk.GetVcnResponse, error) {
+			return coresdk.GetVcnResponse{}, fakeServiceError{
+				statusCode: 404,
+				code:       "NotAuthorizedOrNotFound",
+				message:    "auth ambiguity",
+			}
+		},
+	})
+
+	kubeClient := newMemoryVcnClient(scheme, resource)
+	recorder := record.NewFakeRecorder(10)
+	log := loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("test")}
+	reconciler := &osokcore.BaseReconciler{
+		Client:             kubeClient,
+		OSOKServiceManager: manager,
+		Log:                log,
+		Metrics:            &metrics.Metrics{Name: "oci", ServiceName: "core", Logger: log},
+		Recorder:           recorder,
+		Scheme:             scheme,
+	}
+
+	result, err := reconciler.Reconcile(context.Background(), ctrl.Request{
+		NamespacedName: ctrlclient.ObjectKey{Name: "test-vcn-auth-shaped-404", Namespace: "default"},
+	}, &corev1beta1.Vcn{})
+
+	assert.NoError(t, err)
+	assert.Equal(t, ctrl.Result{}, result)
+	assert.False(t, osokcore.HasFinalizer(kubeClient.StoredVcn(), osokcore.OSOKFinalizerName))
+
+	events := drainVcnEvents(recorder)
+	assertEventContains(t, events, "Removed finalizer")
+	assertNoEventContains(t, events, "Failed to delete resource")
+}
+
+func TestIsNotFoundOCI_AcceptsAuthShaped404(t *testing.T) {
 	assert.True(t, isNotFoundOCI(errorutil.NotFoundOciError{
 		HTTPStatusCode: 404,
 		ErrorCode:      errorutil.NotFound,
 		Description:    "normalized not found",
 	}))
-	assert.False(t, isNotFoundOCI(errorutil.UnauthorizedAndNotFoundOciError{
+	assert.True(t, isNotFoundOCI(errorutil.UnauthorizedAndNotFoundOciError{
 		HTTPStatusCode: 404,
 		ErrorCode:      errorutil.NotAuthorizedOrNotFound,
 		Description:    "normalized auth ambiguity",
 	}))
-	assert.False(t, isNotFoundOCI(fakeServiceError{
+	assert.True(t, isNotFoundOCI(fakeServiceError{
 		statusCode: 404,
 		code:       "NotAuthorizedOrNotFound",
 		message:    "auth ambiguity",
