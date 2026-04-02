@@ -441,34 +441,7 @@ func normalizeServiceGatewayOCIError(err error) error {
 }
 
 func isServiceGatewayNotFoundOCI(err error) bool {
-	var unauthorizedAndNotFound errorutil.UnauthorizedAndNotFoundOciError
-	if errors.As(err, &unauthorizedAndNotFound) {
-		return false
-	}
-
-	var serviceErr common.ServiceError
-	if errors.As(err, &serviceErr) {
-		switch serviceErr.GetCode() {
-		case "NotFound":
-			return true
-		case "NotAuthorizedOrNotFound":
-			return false
-		}
-		if serviceErr.GetHTTPStatusCode() == 404 {
-			message := strings.ToLower(strings.TrimSpace(serviceErr.GetMessage()))
-			if message != "" && strings.Contains(message, "not found") && !strings.Contains(message, "not authorized") {
-				return true
-			}
-		}
-	}
-
-	message := strings.ToLower(err.Error())
-	if strings.Contains(message, "notauthorizedornotfound") {
-		return false
-	}
-	return strings.Contains(message, "http status code: 404") &&
-		strings.Contains(message, "not found") &&
-		!strings.Contains(message, "not authorized")
+	return errorutil.ClassifyDeleteError(err).IsUnambiguousNotFound()
 }
 
 func stringPtrEqual(actual *string, expected string) bool {
