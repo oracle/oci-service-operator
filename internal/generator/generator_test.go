@@ -1429,6 +1429,55 @@ func TestGenerateRendersServiceManagerScaffolds(t *testing.T) {
 	})
 }
 
+func TestGenerateRendersPerServiceManagerOutputs(t *testing.T) {
+	t.Parallel()
+
+	cfg := &Config{
+		Domain:         "oracle.com",
+		DefaultVersion: "v1beta1",
+	}
+	service := testServiceConfig(PackageProfileControllerBacked)
+	pipeline := newTestGenerator(t)
+
+	outputRoot := t.TempDir()
+	if _, err := pipeline.Generate(context.Background(), cfg, []ServiceConfig{service}, Options{
+		OutputRoot: outputRoot,
+	}); err != nil {
+		t.Fatalf("Generate() error = %v", err)
+	}
+
+	managerMainContent := readFile(t, filepath.Join(outputRoot, "cmd", "manager", "mysql", "main.go"))
+	assertContains(t, managerMainContent, []string{
+		"package main",
+		`mysqlv1beta1 "github.com/oracle/oci-service-operator/api/mysql/v1beta1"`,
+		`MetricsServiceName: "mysql"`,
+		`LeaderElectionID:   "40558063.oci.mysql"`,
+		`}, managerservices.ForGroup("mysql")); err != nil {`,
+	})
+
+	controllerConfigContent := readFile(t, filepath.Join(outputRoot, "config", "manager", "mysql", "controller_manager_config.yaml"))
+	assertContains(t, controllerConfigContent, []string{
+		"apiVersion: controller-runtime.sigs.k8s.io/v1alpha1",
+		"kind: ControllerManagerConfiguration",
+		"resourceName: 40558063.oci.mysql",
+	})
+
+	kustomizationContent := readFile(t, filepath.Join(outputRoot, "config", "manager", "mysql", "kustomization.yaml"))
+	assertContains(t, kustomizationContent, []string{
+		"kind: Kustomization",
+		"- manager.yaml",
+		"- controller_manager_config.yaml",
+		"name: manager-config",
+	})
+
+	managerDeploymentContent := readFile(t, filepath.Join(outputRoot, "config", "manager", "mysql", "manager.yaml"))
+	assertContains(t, managerDeploymentContent, []string{
+		"kind: Deployment",
+		"name: controller-manager",
+		"image: controller:latest",
+	})
+}
+
 func TestRenderServiceClientFileHandlesEndpointConstructors(t *testing.T) {
 	t.Parallel()
 
