@@ -74,7 +74,7 @@ for platform in "${normalized_platforms[@]}"; do
 	platform_image="${image}-${arch}"
 	echo ">>> Building ${platform_image} for ${platform}"
 	if [[ "${use_docker_platform}" == "true" ]]; then
-		"${docker_bin}" build \
+		"${docker_bin}" buildx build \
 			--platform "${platform}" \
 			--build-arg CONTROLLER_MAIN="${controller_main}" \
 			--build-arg TARGETOS="${os}" \
@@ -83,6 +83,7 @@ for platform in "${normalized_platforms[@]}"; do
 			--build-arg GOEXPERIMENT="${goexperiment}" \
 			--build-arg SKIP_FIPS="${skip_fips}" \
 			-t "${platform_image}" \
+			--push \
 			"${ROOT_DIR}"
 	else
 		"${docker_bin}" build \
@@ -94,9 +95,9 @@ for platform in "${normalized_platforms[@]}"; do
 			--build-arg SKIP_FIPS="${skip_fips}" \
 			-t "${platform_image}" \
 			"${ROOT_DIR}"
+		echo ">>> Pushing ${platform_image}"
+		"${docker_bin}" push "${platform_image}"
 	fi
-	echo ">>> Pushing ${platform_image}"
-	"${docker_bin}" push "${platform_image}"
 	arch_images+=("${platform_image}")
 done
 
