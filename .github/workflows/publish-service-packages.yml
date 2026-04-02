@@ -173,6 +173,12 @@ jobs:
       matrix:
         index: ${{ fromJSON(needs.index.outputs.indices) }}
     steps:
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@885d1462b80bc1c1c7f0b00334ad271f09369c55
+        with:
+          version: ${{ env.DOCKER_BUILDX_VERSION }}
+          install: true
+
       - name: Login to GHCR using GITHUB_TOKEN
         uses: docker/login-action@v3.3.0
         with:
@@ -234,21 +240,11 @@ jobs:
             for platform in "${platform_list[@]}"; do
               [ -n "${platform}" ] || continue
               normalized=$(printf '%s' "${platform}" | tr '_' '/')
-              os="${normalized%%/*}"
               arch="${normalized##*/}"
               refs+=("${image}-${arch}")
             done
 
-            docker manifest rm "${image}" >/dev/null 2>&1 || true
-            docker manifest create "${image}" "${refs[@]}"
-            for platform in "${platform_list[@]}"; do
-              [ -n "${platform}" ] || continue
-              normalized=$(printf '%s' "${platform}" | tr '_' '/')
-              os="${normalized%%/*}"
-              arch="${normalized##*/}"
-              docker manifest annotate "${image}" "${image}-${arch}" --os "${os}" --arch "${arch}"
-            done
-            docker manifest push "${image}"
+            docker buildx imagetools create --tag "${image}" "${refs[@]}"
 
             make package-bundle-olm GROUP="${service}" CONTROLLER_IMG="${image}" VERSION="${{ inputs.version }}"
             make bundle-build BUNDLE_IMG="${bundle_image}"
