@@ -392,6 +392,75 @@ services:
 	}
 }
 
+func TestValidatePackageSplits(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name    string
+		splits  []PackageSplitConfig
+		wantErr string
+	}{
+		{
+			name: "blank split name",
+			splits: []PackageSplitConfig{{
+				Name:         " ",
+				IncludeKinds: []string{"Subnet"},
+			}},
+			wantErr: `packageSplits name is required`,
+		},
+		{
+			name: "duplicate split names",
+			splits: []PackageSplitConfig{
+				{Name: "core-network", IncludeKinds: []string{"Subnet"}},
+				{Name: "core-network", IncludeKinds: []string{"Vcn"}},
+			},
+			wantErr: `packageSplit "core-network" is duplicated`,
+		},
+		{
+			name: "blank included kind",
+			splits: []PackageSplitConfig{{
+				Name:         "core-network",
+				IncludeKinds: []string{"Subnet", " "},
+			}},
+			wantErr: `packageSplit "core-network" contains a blank kind`,
+		},
+	}
+
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			cfg := &Config{
+				SchemaVersion:  "v1alpha1",
+				Domain:         "oracle.com",
+				DefaultVersion: "v1beta1",
+				PackageProfiles: map[string]PackageProfile{
+					"controller-backed": {Description: "runtime-integrated groups"},
+				},
+				Services: []ServiceConfig{
+					{
+						Service:        "core",
+						SDKPackage:     "example/core",
+						Group:          "core",
+						PackageProfile: "controller-backed",
+						PackageSplits:  test.splits,
+						Selection:      selectionAll(false),
+					},
+				},
+			}
+
+			err := cfg.Validate()
+			if err == nil {
+				t.Fatal("Validate() unexpectedly succeeded")
+			}
+			if !strings.Contains(err.Error(), test.wantErr) {
+				t.Fatalf("Validate() error = %v, want substring %q", err, test.wantErr)
+			}
+		})
+	}
+}
+
 func TestLoadConfigIncludesObservedStateAliases(t *testing.T) {
 	t.Parallel()
 

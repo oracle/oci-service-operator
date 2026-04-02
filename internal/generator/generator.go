@@ -102,6 +102,24 @@ func (g *Generator) Generate(ctx context.Context, cfg *Config, services []Servic
 		if err := g.renderer.RenderServiceManagers(options.OutputRoot, pkg, options.Overwrite); err != nil {
 			return result, fmt.Errorf("render service-manager outputs for service %q: %w", service.Service, err)
 		}
+		if err := g.renderer.RenderManagerOutputs(options.OutputRoot, pkg, options.Overwrite); err != nil {
+			return result, fmt.Errorf("render manager outputs for service %q: %w", service.Service, err)
+		}
+		splitPackages, err := buildPackageSplitModels(pkg)
+		if err != nil {
+			return result, fmt.Errorf("build split package models for service %q: %w", service.Service, err)
+		}
+		for _, splitPkg := range splitPackages {
+			if err := g.renderer.RenderPackageOutputs(options.OutputRoot, splitPkg); err != nil {
+				return result, fmt.Errorf("render split package outputs for service %q split %q: %w", service.Service, splitPkg.OutputName, err)
+			}
+			if err := g.renderer.RenderRegistrations(options.OutputRoot, splitPkg, options.Overwrite); err != nil {
+				return result, fmt.Errorf("render split registration outputs for service %q split %q: %w", service.Service, splitPkg.OutputName, err)
+			}
+			if err := g.renderer.RenderManagerOutputs(options.OutputRoot, splitPkg, options.Overwrite); err != nil {
+				return result, fmt.Errorf("render split manager outputs for service %q split %q: %w", service.Service, splitPkg.OutputName, err)
+			}
+		}
 
 		result.Generated = append(result.Generated, ServiceResult{
 			Service:       service.Service,
