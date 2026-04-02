@@ -451,12 +451,12 @@ func TestIsNetworkSecurityGroupNotFoundOCI_RejectsAuthAmbiguity(t *testing.T) {
 		ErrorCode:      errorutil.NotFound,
 		Description:    "normalized not found",
 	}))
-	assert.False(t, isNetworkSecurityGroupNotFoundOCI(errorutil.UnauthorizedAndNotFoundOciError{
+	assert.True(t, isNetworkSecurityGroupNotFoundOCI(errorutil.UnauthorizedAndNotFoundOciError{
 		HTTPStatusCode: 404,
 		ErrorCode:      errorutil.NotAuthorizedOrNotFound,
 		Description:    "normalized auth ambiguity",
 	}))
-	assert.False(t, isNetworkSecurityGroupNotFoundOCI(fakeNetworkSecurityGroupServiceError{
+	assert.True(t, isNetworkSecurityGroupNotFoundOCI(fakeNetworkSecurityGroupServiceError{
 		statusCode: 404,
 		code:       "NotAuthorizedOrNotFound",
 		message:    "auth ambiguity",
@@ -481,6 +481,68 @@ func TestIsNetworkSecurityGroupNotFoundOCI_RejectsAuthAmbiguity(t *testing.T) {
 		code:       errorutil.IncorrectState,
 		message:    "resource conflict",
 	}))
+}
+
+func TestReconcileDelete_ReleasesFinalizerOnAuthShapedNotFound(t *testing.T) {
+	scheme := runtime.NewScheme()
+	assert.NoError(t, corev1beta1.AddToScheme(scheme))
+
+	now := metav1.NewTime(time.Now())
+	resource := &corev1beta1.NetworkSecurityGroup{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: "core.oracle.com/v1beta1",
+			Kind:       "NetworkSecurityGroup",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:              "test-network-security-group-auth-shaped-404",
+			Namespace:         "default",
+			Finalizers:        []string{osokcore.OSOKFinalizerName},
+			DeletionTimestamp: &now,
+		},
+		Status: corev1beta1.NetworkSecurityGroupStatus{
+			OsokStatus: shared.OSOKStatus{
+				Ocid: shared.OCID("ocid1.networksecuritygroup.oc1..delete"),
+			},
+		},
+	}
+
+	manager := newNetworkSecurityGroupTestManager(&fakeNetworkSecurityGroupOCIClient{
+		deleteFn: func(_ context.Context, req coresdk.DeleteNetworkSecurityGroupRequest) (coresdk.DeleteNetworkSecurityGroupResponse, error) {
+			assert.Equal(t, "ocid1.networksecuritygroup.oc1..delete", *req.NetworkSecurityGroupId)
+			return coresdk.DeleteNetworkSecurityGroupResponse{}, nil
+		},
+		getFn: func(_ context.Context, _ coresdk.GetNetworkSecurityGroupRequest) (coresdk.GetNetworkSecurityGroupResponse, error) {
+			return coresdk.GetNetworkSecurityGroupResponse{}, fakeNetworkSecurityGroupServiceError{
+				statusCode: 404,
+				code:       errorutil.NotAuthorizedOrNotFound,
+				message:    "not authorized or not found",
+			}
+		},
+	})
+
+	kubeClient := newMemoryNetworkSecurityGroupClient(scheme, resource)
+	recorder := record.NewFakeRecorder(10)
+	log := loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("test")}
+	reconciler := &osokcore.BaseReconciler{
+		Client:             kubeClient,
+		OSOKServiceManager: manager,
+		Log:                log,
+		Metrics:            &metrics.Metrics{Name: "oci", ServiceName: "core", Logger: log},
+		Recorder:           recorder,
+		Scheme:             scheme,
+	}
+
+	result, err := reconciler.Reconcile(context.Background(), ctrl.Request{
+		NamespacedName: ctrlclient.ObjectKey{Name: "test-network-security-group-auth-shaped-404", Namespace: "default"},
+	}, &corev1beta1.NetworkSecurityGroup{})
+
+	assert.NoError(t, err)
+	assert.Equal(t, ctrl.Result{}, result)
+	assert.False(t, osokcore.HasFinalizer(kubeClient.StoredNetworkSecurityGroup(), osokcore.OSOKFinalizerName))
+
+	events := drainNetworkSecurityGroupEvents(recorder)
+	assertNetworkSecurityGroupEventContains(t, events, "Removed finalizer")
+	assertNoNetworkSecurityGroupEventContains(t, events, "Failed to delete resource")
 }
 
 func TestReconcileDelete_ReleasesFinalizerOnUnambiguousNotFound(t *testing.T) {
