@@ -15,8 +15,10 @@ import (
 
 	"github.com/oracle/oci-go-sdk/v65/common"
 	ociopensearch "github.com/oracle/oci-go-sdk/v65/opensearch"
-	ociv1beta1 "github.com/oracle/oci-service-operator/api/v1beta1"
+	ociv1beta1 "github.com/oracle/oci-service-operator/api/opensearch/v1beta1"
+	streamingv1beta1 "github.com/oracle/oci-service-operator/api/streaming/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
+	"github.com/oracle/oci-service-operator/pkg/shared"
 	. "github.com/oracle/oci-service-operator/pkg/servicemanager/opensearch"
 	"github.com/stretchr/testify/assert"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -170,7 +172,7 @@ func TestGetCrdStatus_ReturnsStatus(t *testing.T) {
 
 	status, err := mgr.GetCrdStatus(cluster)
 	assert.NoError(t, err)
-	assert.Equal(t, ociv1beta1.OCID("ocid1.opensearchcluster.oc1..xxx"), status.Ocid)
+	assert.Equal(t, shared.OCID("ocid1.opensearchcluster.oc1..xxx"), status.Ocid)
 }
 
 // TestGetCrdStatus_FullyPopulated verifies status extraction when all status fields are set.
@@ -183,7 +185,7 @@ func TestGetCrdStatus_FullyPopulated(t *testing.T) {
 
 	status, err := mgr.GetCrdStatus(cluster)
 	assert.NoError(t, err)
-	assert.Equal(t, ociv1beta1.OCID("ocid1.opensearchcluster.oc1..abc"), status.Ocid)
+	assert.Equal(t, shared.OCID("ocid1.opensearchcluster.oc1..abc"), status.Ocid)
 	assert.Equal(t, "OpenSearch cluster is Active", status.Message)
 }
 
@@ -191,7 +193,7 @@ func TestGetCrdStatus_FullyPopulated(t *testing.T) {
 func TestGetCrdStatus_WrongType(t *testing.T) {
 	mgr := makeManager()
 
-	stream := &ociv1beta1.Stream{}
+	stream := &streamingv1beta1.Stream{}
 	_, err := mgr.GetCrdStatus(stream)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "failed to convert type assertion")
@@ -203,7 +205,7 @@ func TestGetCrdStatus_WrongType(t *testing.T) {
 func TestCreateOrUpdate_BadType(t *testing.T) {
 	mgr := makeManager()
 
-	stream := &ociv1beta1.Stream{}
+	stream := &streamingv1beta1.Stream{}
 	resp, err := mgr.CreateOrUpdate(context.Background(), stream, ctrl.Request{})
 	assert.Error(t, err)
 	assert.False(t, resp.IsSuccessful)
@@ -250,7 +252,7 @@ func TestCreateOrUpdate_CreatePath(t *testing.T) {
 	// Create returns work request, requeues (IsSuccessful=false, no error)
 	assert.NoError(t, err)
 	assert.False(t, resp.IsSuccessful)
-	assert.Equal(t, ociv1beta1.Provisioning, cluster.Status.OsokStatus.Conditions[0].Type)
+	assert.Equal(t, shared.Provisioning, cluster.Status.OsokStatus.Conditions[0].Type)
 }
 
 // TestCreateOrUpdate_CreateFails verifies error handling when create call fails.
@@ -272,7 +274,7 @@ func TestCreateOrUpdate_CreateFails(t *testing.T) {
 	resp, err := mgr.CreateOrUpdate(context.Background(), cluster, ctrl.Request{})
 	assert.Error(t, err)
 	assert.False(t, resp.IsSuccessful)
-	assert.Equal(t, ociv1beta1.Failed, cluster.Status.OsokStatus.Conditions[0].Type)
+	assert.Equal(t, shared.Failed, cluster.Status.OsokStatus.Conditions[0].Type)
 }
 
 // TestCreateOrUpdate_ExistingClusterGetError verifies error when fetching existing cluster fails.
@@ -339,7 +341,7 @@ func TestCreateOrUpdate_UpdatePath(t *testing.T) {
 	resp, err := mgr.CreateOrUpdate(context.Background(), cluster, ctrl.Request{})
 	assert.NoError(t, err)
 	assert.True(t, resp.IsSuccessful)
-	assert.Equal(t, ociv1beta1.OCID(existingOCID), cluster.Status.OsokStatus.Ocid)
+	assert.Equal(t, shared.OCID(existingOCID), cluster.Status.OsokStatus.Ocid)
 }
 
 // TestCreateOrUpdate_UpdateFails verifies error handling when update call fails.
@@ -408,14 +410,14 @@ func TestCreateOrUpdate_LifecycleActive(t *testing.T) {
 	mgr := makeManagerWithFake(fake)
 
 	cluster := &ociv1beta1.OpenSearchCluster{}
-	cluster.Spec.OpenSearchClusterId = ociv1beta1.OCID(clusterID)
+	cluster.Spec.OpenSearchClusterId = shared.OCID(clusterID)
 	cluster.Spec.DisplayName = "my-cluster" // same name → no update
 
 	resp, err := mgr.CreateOrUpdate(context.Background(), cluster, ctrl.Request{})
 	assert.NoError(t, err)
 	assert.True(t, resp.IsSuccessful)
-	assert.Equal(t, ociv1beta1.OCID(clusterID), cluster.Status.OsokStatus.Ocid)
-	assert.Equal(t, ociv1beta1.Active, cluster.Status.OsokStatus.Conditions[0].Type)
+	assert.Equal(t, shared.OCID(clusterID), cluster.Status.OsokStatus.Ocid)
+	assert.Equal(t, shared.Active, cluster.Status.OsokStatus.Conditions[0].Type)
 }
 
 // TestCreateOrUpdate_LifecycleFailed verifies Failed state sets Failed OSOK condition.
@@ -431,7 +433,7 @@ func TestCreateOrUpdate_LifecycleFailed(t *testing.T) {
 	mgr := makeManagerWithFake(fake)
 
 	cluster := &ociv1beta1.OpenSearchCluster{}
-	cluster.Spec.OpenSearchClusterId = ociv1beta1.OCID(clusterID)
+	cluster.Spec.OpenSearchClusterId = shared.OCID(clusterID)
 	cluster.Spec.DisplayName = "my-cluster"
 
 	resp, err := mgr.CreateOrUpdate(context.Background(), cluster, ctrl.Request{})
@@ -440,7 +442,7 @@ func TestCreateOrUpdate_LifecycleFailed(t *testing.T) {
 	// The lifecycle switch appends a condition after the "bound" condition; check the last one.
 	conds := cluster.Status.OsokStatus.Conditions
 	assert.NotEmpty(t, conds)
-	assert.Equal(t, ociv1beta1.Failed, conds[len(conds)-1].Type)
+	assert.Equal(t, shared.Failed, conds[len(conds)-1].Type)
 }
 
 // TestCreateOrUpdate_LifecycleCreating verifies CREATING state sets Provisioning OSOK condition (requeue).
@@ -456,7 +458,7 @@ func TestCreateOrUpdate_LifecycleCreating(t *testing.T) {
 	mgr := makeManagerWithFake(fake)
 
 	cluster := &ociv1beta1.OpenSearchCluster{}
-	cluster.Spec.OpenSearchClusterId = ociv1beta1.OCID(clusterID)
+	cluster.Spec.OpenSearchClusterId = shared.OCID(clusterID)
 	cluster.Spec.DisplayName = "my-cluster"
 
 	resp, err := mgr.CreateOrUpdate(context.Background(), cluster, ctrl.Request{})
@@ -465,7 +467,7 @@ func TestCreateOrUpdate_LifecycleCreating(t *testing.T) {
 	assert.True(t, resp.ShouldRequeue)
 	conds := cluster.Status.OsokStatus.Conditions
 	assert.NotEmpty(t, conds)
-	assert.Equal(t, ociv1beta1.Provisioning, conds[len(conds)-1].Type)
+	assert.Equal(t, shared.Provisioning, conds[len(conds)-1].Type)
 }
 
 // TestCreateOrUpdate_LifecycleUpdating verifies UPDATING state sets Provisioning OSOK condition (requeue).
@@ -481,7 +483,7 @@ func TestCreateOrUpdate_LifecycleUpdating(t *testing.T) {
 	mgr := makeManagerWithFake(fake)
 
 	cluster := &ociv1beta1.OpenSearchCluster{}
-	cluster.Spec.OpenSearchClusterId = ociv1beta1.OCID(clusterID)
+	cluster.Spec.OpenSearchClusterId = shared.OCID(clusterID)
 	cluster.Spec.DisplayName = "my-cluster"
 
 	resp, err := mgr.CreateOrUpdate(context.Background(), cluster, ctrl.Request{})
@@ -490,7 +492,7 @@ func TestCreateOrUpdate_LifecycleUpdating(t *testing.T) {
 	assert.True(t, resp.ShouldRequeue)
 	conds := cluster.Status.OsokStatus.Conditions
 	assert.NotEmpty(t, conds)
-	assert.Equal(t, ociv1beta1.Provisioning, conds[len(conds)-1].Type)
+	assert.Equal(t, shared.Provisioning, conds[len(conds)-1].Type)
 }
 
 // TestCreateOrUpdate_ExplicitID_WithUpdate verifies update via explicit OCID when display name changed.
@@ -508,13 +510,13 @@ func TestCreateOrUpdate_ExplicitID_WithUpdate(t *testing.T) {
 	mgr := makeManagerWithFake(fake)
 
 	cluster := &ociv1beta1.OpenSearchCluster{}
-	cluster.Spec.OpenSearchClusterId = ociv1beta1.OCID(clusterID)
+	cluster.Spec.OpenSearchClusterId = shared.OCID(clusterID)
 	cluster.Spec.DisplayName = "new-name" // changed
 
 	resp, err := mgr.CreateOrUpdate(context.Background(), cluster, ctrl.Request{})
 	assert.NoError(t, err)
 	assert.True(t, resp.IsSuccessful)
-	assert.Equal(t, ociv1beta1.Updating, cluster.Status.OsokStatus.Conditions[0].Type)
+	assert.Equal(t, shared.Updating, cluster.Status.OsokStatus.Conditions[0].Type)
 }
 
 // TestCreateOrUpdate_ExplicitID_UpdateFails verifies error propagation when update fails.
@@ -532,7 +534,7 @@ func TestCreateOrUpdate_ExplicitID_UpdateFails(t *testing.T) {
 	mgr := makeManagerWithFake(fake)
 
 	cluster := &ociv1beta1.OpenSearchCluster{}
-	cluster.Spec.OpenSearchClusterId = ociv1beta1.OCID(clusterID)
+	cluster.Spec.OpenSearchClusterId = shared.OCID(clusterID)
 	cluster.Spec.DisplayName = "new-name"
 
 	resp, err := mgr.CreateOrUpdate(context.Background(), cluster, ctrl.Request{})
@@ -601,7 +603,7 @@ func TestDelete_WithSpecOcid(t *testing.T) {
 func TestDelete_WrongType(t *testing.T) {
 	mgr := makeManager()
 
-	stream := &ociv1beta1.Stream{}
+	stream := &streamingv1beta1.Stream{}
 	done, err := mgr.Delete(context.Background(), stream)
 	assert.NoError(t, err)
 	assert.True(t, done)
@@ -643,14 +645,14 @@ func TestCreateOrUpdate_EndpointFieldsInStatus(t *testing.T) {
 	mgr := makeManagerWithFake(fake)
 
 	cluster := &ociv1beta1.OpenSearchCluster{}
-	cluster.Spec.OpenSearchClusterId = ociv1beta1.OCID(clusterID)
+	cluster.Spec.OpenSearchClusterId = shared.OCID(clusterID)
 	cluster.Spec.DisplayName = "ep-cluster"
 
 	resp, err := mgr.CreateOrUpdate(context.Background(), cluster, ctrl.Request{})
 	assert.NoError(t, err)
 	assert.True(t, resp.IsSuccessful)
 	// Status OCID is set; cluster endpoints are accessible via the returned OCI object
-	assert.Equal(t, ociv1beta1.OCID(clusterID), cluster.Status.OsokStatus.Ocid)
+	assert.Equal(t, shared.OCID(clusterID), cluster.Status.OsokStatus.Ocid)
 }
 
 // TestCreateOrUpdate_NoUpdateNeeded verifies bound path when no changes are detected.
@@ -683,5 +685,5 @@ func TestCreateOrUpdate_NoUpdateNeeded(t *testing.T) {
 	resp, err := mgr.CreateOrUpdate(context.Background(), cluster, ctrl.Request{})
 	assert.NoError(t, err)
 	assert.True(t, resp.IsSuccessful)
-	assert.Equal(t, ociv1beta1.OCID(clusterID), cluster.Status.OsokStatus.Ocid)
+	assert.Equal(t, shared.OCID(clusterID), cluster.Status.OsokStatus.Ocid)
 }

@@ -13,7 +13,8 @@ import (
 
 	"github.com/oracle/oci-go-sdk/v65/common"
 	ociredis "github.com/oracle/oci-go-sdk/v65/redis"
-	ociv1beta1 "github.com/oracle/oci-service-operator/api/v1beta1"
+	ociv1beta1 "github.com/oracle/oci-service-operator/api/redis/v1beta1"
+	"github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/stretchr/testify/assert"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
@@ -169,7 +170,7 @@ func TestPropertyRedisTagDriftTriggersUpdate(t *testing.T) {
 	cluster := makeRedisSpec("redis")
 	cluster.Status.OsokStatus.Ocid = "ocid1.redis.oc1..tags"
 	cluster.Spec.FreeFormTags = map[string]string{"team": "platform"}
-	cluster.Spec.DefinedTags = map[string]ociv1beta1.MapValue{"ops": {"env": "prod"}}
+	cluster.Spec.DefinedTags = map[string]shared.MapValue{"ops": {"env": "prod"}}
 
 	assert.NoError(t, mgr.UpdateRedisCluster(context.Background(), cluster))
 	assert.Equal(t, "platform", updated.FreeformTags["team"])

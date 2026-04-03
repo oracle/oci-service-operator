@@ -16,13 +16,16 @@ import (
 
 	"github.com/oracle/oci-go-sdk/v65/common"
 	ociobjectstorage "github.com/oracle/oci-go-sdk/v65/objectstorage"
-	ociv1beta1 "github.com/oracle/oci-service-operator/api/v1beta1"
+	objectstoragev1beta1 "github.com/oracle/oci-service-operator/api/objectstorage/v1beta1"
+	"github.com/oracle/oci-service-operator/pkg/shared"
 	. "github.com/oracle/oci-service-operator/pkg/servicemanager/objectstorage"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
+
+type ObjectStorageBucket = objectstoragev1beta1.Bucket
 
 func TestObjectStorageBucket_PropertyCredentialMapNeverUsesPlaceholder(t *testing.T) {
 	property := func(seed uint16) bool {
@@ -58,7 +61,7 @@ func TestObjectStorageBucket_PropertyResolveNamespaceDoesNotMutateSpec(t *testin
 		}
 
 		mgr := mgrWithFake(&fakeCredentialClient{}, fake)
-		bucket := &ociv1beta1.ObjectStorageBucket{}
+		bucket := &ObjectStorageBucket{}
 		bucket.Name = "bucket-cr"
 		bucket.Namespace = "default"
 		bucket.Spec.CompartmentId = "ocid1.compartment.oc1..xxx"
@@ -68,7 +71,7 @@ func TestObjectStorageBucket_PropertyResolveNamespaceDoesNotMutateSpec(t *testin
 		return err == nil &&
 			resp.IsSuccessful &&
 			bucket.Spec.Namespace == "" &&
-			bucket.Status.OsokStatus.Ocid == ociv1beta1.OCID(namespace+"/"+bucketName)
+			bucket.Status.OsokStatus.Ocid == shared.OCID(namespace+"/"+bucketName)
 	}
 
 	if err := quick.Check(property, nil); err != nil {
@@ -103,10 +106,10 @@ func TestObjectStorageBucket_PropertyDeleteUsesSpecIDAndIgnoresMissingSecret(t *
 		}
 		mgr := mgrWithFake(credClient, fake)
 
-		bucket := &ociv1beta1.ObjectStorageBucket{}
+		bucket := &ObjectStorageBucket{}
 		bucket.Name = "bucket-cr"
 		bucket.Namespace = "default"
-		bucket.Spec.BucketId = ociv1beta1.OCID(namespace + "/" + bucketName)
+		bucket.Spec.BucketId = shared.OCID(namespace + "/" + bucketName)
 
 		done, err := mgr.Delete(context.Background(), bucket)
 		return err == nil &&
@@ -149,12 +152,12 @@ func TestObjectStorageBucket_PropertyTagDriftTriggersUpdate(t *testing.T) {
 		}
 
 		mgr := mgrWithFake(&fakeCredentialClient{}, fake)
-		bucket := &ociv1beta1.ObjectStorageBucket{}
+		bucket := &ObjectStorageBucket{}
 		bucket.Name = "bucket-cr"
 		bucket.Namespace = "default"
-		bucket.Status.OsokStatus.Ocid = ociv1beta1.OCID(namespace + "/" + bucketName)
+		bucket.Status.OsokStatus.Ocid = shared.OCID(namespace + "/" + bucketName)
 		bucket.Spec.FreeFormTags = map[string]string{"team": "platform"}
-		bucket.Spec.DefinedTags = map[string]ociv1beta1.MapValue{
+		bucket.Spec.DefinedTags = map[string]shared.MapValue{
 			"ops": {"env": "prod"},
 		}
 
@@ -193,10 +196,10 @@ func TestObjectStorageBucket_PropertyCompartmentDriftTriggersUpdate(t *testing.T
 		}
 
 		mgr := mgrWithFake(&fakeCredentialClient{}, fake)
-		bucket := &ociv1beta1.ObjectStorageBucket{}
+		bucket := &ObjectStorageBucket{}
 		bucket.Name = "bucket-cr"
 		bucket.Namespace = "default"
-		bucket.Status.OsokStatus.Ocid = ociv1beta1.OCID(namespace + "/" + bucketName)
+		bucket.Status.OsokStatus.Ocid = shared.OCID(namespace + "/" + bucketName)
 		bucket.Spec.CompartmentId = "ocid1.compartment.oc1..new"
 
 		resp, err := mgr.CreateOrUpdate(context.Background(), bucket, ctrl.Request{})
@@ -233,10 +236,10 @@ func TestObjectStorageBucket_PropertyImmutableDriftFailsBeforeUpdate(t *testing.
 	}
 
 	mgr := mgrWithFake(&fakeCredentialClient{}, fake)
-	bucket := &ociv1beta1.ObjectStorageBucket{}
+	bucket := &ObjectStorageBucket{}
 	bucket.Name = "bucket-cr"
 	bucket.Namespace = "default"
-	bucket.Status.OsokStatus.Ocid = ociv1beta1.OCID(namespace + "/" + bucketName)
+	bucket.Status.OsokStatus.Ocid = shared.OCID(namespace + "/" + bucketName)
 	bucket.Spec.StorageType = "Standard"
 
 	resp, err := mgr.CreateOrUpdate(context.Background(), bucket, ctrl.Request{})

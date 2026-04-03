@@ -13,10 +13,12 @@ import (
 
 	"github.com/oracle/oci-go-sdk/v65/common"
 	ociopensearch "github.com/oracle/oci-go-sdk/v65/opensearch"
-	ociv1beta1 "github.com/oracle/oci-service-operator/api/v1beta1"
+	opensearchv1beta1 "github.com/oracle/oci-service-operator/api/opensearch/v1beta1"
 	"github.com/stretchr/testify/assert"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
+
+type OpenSearchCluster = opensearchv1beta1.OpensearchCluster
 
 func makePendingOpenSearchCluster(id, name string, state ociopensearch.OpensearchClusterLifecycleStateEnum) ociopensearch.OpensearchCluster {
 	cluster := makeActiveCluster(id, name)
@@ -24,8 +26,8 @@ func makePendingOpenSearchCluster(id, name string, state ociopensearch.Opensearc
 	return cluster
 }
 
-func makeOpenSearchSpec(name string) *ociv1beta1.OpenSearchCluster {
-	cluster := &ociv1beta1.OpenSearchCluster{}
+func makeOpenSearchSpec(name string) *OpenSearchCluster {
+	cluster := &OpenSearchCluster{}
 	cluster.Name = name
 	cluster.Namespace = "default"
 	cluster.Spec.DisplayName = name

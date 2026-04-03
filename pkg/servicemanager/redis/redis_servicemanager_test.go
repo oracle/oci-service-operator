@@ -16,8 +16,10 @@ import (
 
 	"github.com/oracle/oci-go-sdk/v65/common"
 	ociredis "github.com/oracle/oci-go-sdk/v65/redis"
-	ociv1beta1 "github.com/oracle/oci-service-operator/api/v1beta1"
+	ociv1beta1 "github.com/oracle/oci-service-operator/api/redis/v1beta1"
+	streamingv1beta1 "github.com/oracle/oci-service-operator/api/streaming/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
+	"github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	. "github.com/oracle/oci-service-operator/pkg/servicemanager/redis"
 	"github.com/stretchr/testify/assert"
@@ -214,7 +216,7 @@ func TestGetCrdStatus_ReturnsStatus(t *testing.T) {
 
 	status, err := mgr.GetCrdStatus(cluster)
 	assert.NoError(t, err)
-	assert.Equal(t, ociv1beta1.OCID("ocid1.redis.xxx"), status.Ocid)
+	assert.Equal(t, shared.OCID("ocid1.redis.xxx"), status.Ocid)
 }
 
 // TestGetCrdStatus_WrongType verifies convert fails gracefully on wrong type.
@@ -226,7 +228,7 @@ func TestGetCrdStatus_WrongType(t *testing.T) {
 		common.NewRawConfigurationProvider("", "", "", "", "", nil),
 		credClient, nil, log)
 
-	stream := &ociv1beta1.Stream{}
+	stream := &streamingv1beta1.Stream{}
 	_, err := mgr.GetCrdStatus(stream)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "failed type assertion")
@@ -241,7 +243,7 @@ func TestCreateOrUpdate_BadType(t *testing.T) {
 		common.NewRawConfigurationProvider("", "", "", "", "", nil),
 		credClient, nil, log)
 
-	stream := &ociv1beta1.Stream{}
+	stream := &streamingv1beta1.Stream{}
 	resp, err := mgr.CreateOrUpdate(context.Background(), stream, ctrl.Request{})
 	assert.Error(t, err)
 	assert.False(t, resp.IsSuccessful)
@@ -408,7 +410,7 @@ func TestCreateOrUpdate_StatusOcidUsesUpdatePath(t *testing.T) {
 	}
 	mgr := newMgrWithFakeClient(ociCl, &fakeCredentialClient{})
 	cluster := makeRedisSpec("new-redis")
-	cluster.Status.OsokStatus.Ocid = ociv1beta1.OCID(clusterID)
+	cluster.Status.OsokStatus.Ocid = shared.OCID(clusterID)
 
 	resp, err := mgr.CreateOrUpdate(context.Background(), cluster, ctrl.Request{})
 	assert.NoError(t, err)
@@ -432,7 +434,7 @@ func TestUpdateRedisCluster_SendsCompartmentMove(t *testing.T) {
 	}
 	mgr := newMgrWithFakeClient(ociCl, &fakeCredentialClient{})
 	cluster := makeRedisSpec("redis")
-	cluster.Status.OsokStatus.Ocid = ociv1beta1.OCID(clusterID)
+	cluster.Status.OsokStatus.Ocid = shared.OCID(clusterID)
 	cluster.Spec.CompartmentId = "ocid1.compartment.oc1..new"
 
 	err := mgr.UpdateRedisCluster(context.Background(), cluster)

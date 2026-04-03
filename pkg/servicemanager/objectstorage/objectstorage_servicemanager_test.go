@@ -14,8 +14,10 @@ import (
 
 	"github.com/oracle/oci-go-sdk/v65/common"
 	ociobjectstorage "github.com/oracle/oci-go-sdk/v65/objectstorage"
-	ociv1beta1 "github.com/oracle/oci-service-operator/api/v1beta1"
+	objectstoragev1beta1 "github.com/oracle/oci-service-operator/api/objectstorage/v1beta1"
+	streamingv1beta1 "github.com/oracle/oci-service-operator/api/streaming/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
+	"github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	. "github.com/oracle/oci-service-operator/pkg/servicemanager/objectstorage"
 	"github.com/stretchr/testify/assert"
@@ -24,6 +26,8 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
+
+type ObjectStorageBucket = objectstoragev1beta1.Bucket
 
 // ---------------------------------------------------------------------------
 // fakeCredentialClient — implements credhelper.CredentialClient for testing.
@@ -165,18 +169,18 @@ func TestGetCredentialMap(t *testing.T) {
 func TestGetCrdStatus_ReturnsStatus(t *testing.T) {
 	mgr := NewObjectStorageBucketServiceManager(emptyProvider(), &fakeCredentialClient{}, nil, defaultLog())
 
-	b := &ociv1beta1.ObjectStorageBucket{}
+	b := &ObjectStorageBucket{}
 	b.Status.OsokStatus.Ocid = "mynamespace/mybucket"
 
 	status, err := mgr.GetCrdStatus(b)
 	assert.NoError(t, err)
-	assert.Equal(t, ociv1beta1.OCID("mynamespace/mybucket"), status.Ocid)
+	assert.Equal(t, shared.OCID("mynamespace/mybucket"), status.Ocid)
 }
 
 func TestGetCrdStatus_WrongType(t *testing.T) {
 	mgr := NewObjectStorageBucketServiceManager(emptyProvider(), &fakeCredentialClient{}, nil, defaultLog())
 
-	stream := &ociv1beta1.Stream{}
+	stream := &streamingv1beta1.Stream{}
 	_, err := mgr.GetCrdStatus(stream)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "failed type assertion")
@@ -189,7 +193,7 @@ func TestGetCrdStatus_WrongType(t *testing.T) {
 func TestCreateOrUpdate_BadType(t *testing.T) {
 	mgr := NewObjectStorageBucketServiceManager(emptyProvider(), &fakeCredentialClient{}, nil, defaultLog())
 
-	stream := &ociv1beta1.Stream{}
+	stream := &streamingv1beta1.Stream{}
 	resp, err := mgr.CreateOrUpdate(context.Background(), stream, ctrl.Request{})
 	assert.Error(t, err)
 	assert.False(t, resp.IsSuccessful)
@@ -211,7 +215,7 @@ func TestCreateOrUpdate_CreateNew(t *testing.T) {
 	credClient := &fakeCredentialClient{}
 	mgr := mgrWithFake(credClient, fake)
 
-	b := &ociv1beta1.ObjectStorageBucket{}
+	b := &ObjectStorageBucket{}
 	b.Name = "my-bucket-cr"
 	b.Namespace = "default"
 	b.Spec.CompartmentId = "ocid1.compartment.oc1..xxx"
@@ -220,7 +224,7 @@ func TestCreateOrUpdate_CreateNew(t *testing.T) {
 	resp, err := mgr.CreateOrUpdate(context.Background(), b, ctrl.Request{})
 	assert.NoError(t, err)
 	assert.True(t, resp.IsSuccessful)
-	assert.Equal(t, ociv1beta1.OCID("mynamespace/mybucket"), b.Status.OsokStatus.Ocid)
+	assert.Equal(t, shared.OCID("mynamespace/mybucket"), b.Status.OsokStatus.Ocid)
 	assert.True(t, credClient.createCalled)
 }
 
@@ -232,7 +236,7 @@ func TestCreateOrUpdate_CreateNew_GetNamespaceFailure(t *testing.T) {
 	}
 	mgr := mgrWithFake(&fakeCredentialClient{}, fake)
 
-	b := &ociv1beta1.ObjectStorageBucket{}
+	b := &ObjectStorageBucket{}
 	b.Spec.CompartmentId = "ocid1.compartment.oc1..xxx"
 	b.Spec.Name = "mybucket"
 
@@ -250,7 +254,7 @@ func TestCreateOrUpdate_CreateNew_CreateBucketFailure(t *testing.T) {
 	}
 	mgr := mgrWithFake(&fakeCredentialClient{}, fake)
 
-	b := &ociv1beta1.ObjectStorageBucket{}
+	b := &ObjectStorageBucket{}
 	b.Spec.CompartmentId = "ocid1.compartment.oc1..xxx"
 	b.Spec.Name = "mybucket"
 
@@ -278,7 +282,7 @@ func TestCreateOrUpdate_CreateNew_WithSpecNamespace(t *testing.T) {
 	credClient := &fakeCredentialClient{}
 	mgr := mgrWithFake(credClient, fake)
 
-	b := &ociv1beta1.ObjectStorageBucket{}
+	b := &ObjectStorageBucket{}
 	b.Name = "my-bucket-cr"
 	b.Namespace = "default"
 	b.Spec.CompartmentId = "ocid1.compartment.oc1..xxx"
@@ -289,7 +293,7 @@ func TestCreateOrUpdate_CreateNew_WithSpecNamespace(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, resp.IsSuccessful)
 	assert.False(t, getNamespaceCalled, "GetNamespace should not be called when namespace is preset in spec")
-	assert.Equal(t, ociv1beta1.OCID("presetnamespace/mybucket"), b.Status.OsokStatus.Ocid)
+	assert.Equal(t, shared.OCID("presetnamespace/mybucket"), b.Status.OsokStatus.Ocid)
 }
 
 // ---------------------------------------------------------------------------
@@ -307,7 +311,7 @@ func TestCreateOrUpdate_Bind(t *testing.T) {
 	credClient := &fakeCredentialClient{}
 	mgr := mgrWithFake(credClient, fake)
 
-	b := &ociv1beta1.ObjectStorageBucket{}
+	b := &ObjectStorageBucket{}
 	b.Name = "my-bucket-cr"
 	b.Namespace = "default"
 	b.Spec.BucketId = "mynamespace/mybucket"
@@ -317,14 +321,14 @@ func TestCreateOrUpdate_Bind(t *testing.T) {
 	resp, err := mgr.CreateOrUpdate(context.Background(), b, ctrl.Request{})
 	assert.NoError(t, err)
 	assert.True(t, resp.IsSuccessful)
-	assert.Equal(t, ociv1beta1.OCID("mynamespace/mybucket"), b.Status.OsokStatus.Ocid)
+	assert.Equal(t, shared.OCID("mynamespace/mybucket"), b.Status.OsokStatus.Ocid)
 	assert.True(t, credClient.createCalled)
 }
 
 func TestCreateOrUpdate_Bind_InvalidId(t *testing.T) {
 	mgr := mgrWithFake(&fakeCredentialClient{}, &fakeObjectStorageClient{})
 
-	b := &ociv1beta1.ObjectStorageBucket{}
+	b := &ObjectStorageBucket{}
 	b.Spec.BucketId = "invalidformat"
 
 	resp, err := mgr.CreateOrUpdate(context.Background(), b, ctrl.Request{})
@@ -341,7 +345,7 @@ func TestCreateOrUpdate_Bind_GetBucketError(t *testing.T) {
 	}
 	mgr := mgrWithFake(&fakeCredentialClient{}, fake)
 
-	b := &ociv1beta1.ObjectStorageBucket{}
+	b := &ObjectStorageBucket{}
 	b.Spec.BucketId = "mynamespace/mybucket"
 
 	resp, err := mgr.CreateOrUpdate(context.Background(), b, ctrl.Request{})
@@ -367,7 +371,7 @@ func TestCreateOrUpdate_Update(t *testing.T) {
 	credClient := &fakeCredentialClient{}
 	mgr := mgrWithFake(credClient, fake)
 
-	b := &ociv1beta1.ObjectStorageBucket{}
+	b := &ObjectStorageBucket{}
 	b.Name = "my-bucket-cr"
 	b.Namespace = "default"
 	b.Spec.CompartmentId = "ocid1.compartment.oc1..xxx"
@@ -399,7 +403,7 @@ func TestCreateOrUpdate_UpdateSendsCompartmentMove(t *testing.T) {
 	}
 	mgr := mgrWithFake(&fakeCredentialClient{}, fake)
 
-	b := &ociv1beta1.ObjectStorageBucket{}
+	b := &ObjectStorageBucket{}
 	b.Name = "my-bucket-cr"
 	b.Namespace = "default"
 	b.Spec.CompartmentId = "ocid1.compartment.oc1..new"
@@ -428,7 +432,7 @@ func TestCreateOrUpdate_SecretAlreadyExists(t *testing.T) {
 	}
 	mgr := mgrWithFake(credClient, fake)
 
-	b := &ociv1beta1.ObjectStorageBucket{}
+	b := &ObjectStorageBucket{}
 	b.Name = "my-bucket-cr"
 	b.Namespace = "default"
 	b.Spec.CompartmentId = "ocid1.compartment.oc1..xxx"
@@ -449,7 +453,7 @@ func TestDelete_NoOcid(t *testing.T) {
 	credClient := &fakeCredentialClient{}
 	mgr := NewObjectStorageBucketServiceManager(emptyProvider(), credClient, nil, defaultLog())
 
-	b := &ociv1beta1.ObjectStorageBucket{}
+	b := &ObjectStorageBucket{}
 	b.Name = "my-bucket-cr"
 	b.Namespace = "default"
 
@@ -479,7 +483,7 @@ func TestDelete_Success(t *testing.T) {
 	}
 	mgr := mgrWithFake(credClient, fake)
 
-	b := &ociv1beta1.ObjectStorageBucket{}
+	b := &ObjectStorageBucket{}
 	b.Name = "my-bucket-cr"
 	b.Namespace = "default"
 	b.Status.OsokStatus.Ocid = "mynamespace/mybucket"
@@ -505,7 +509,7 @@ func TestDelete_NotFound(t *testing.T) {
 	}
 	mgr := mgrWithFake(credClient, fake)
 
-	b := &ociv1beta1.ObjectStorageBucket{}
+	b := &ObjectStorageBucket{}
 	b.Name = "my-bucket-cr"
 	b.Namespace = "default"
 	b.Status.OsokStatus.Ocid = "mynamespace/mybucket"
@@ -539,7 +543,7 @@ func TestDelete_UsesSpecBucketIdWhenStatusIsEmpty(t *testing.T) {
 	}
 	mgr := mgrWithFake(credClient, fake)
 
-	b := &ociv1beta1.ObjectStorageBucket{}
+	b := &ObjectStorageBucket{}
 	b.Name = "my-bucket-cr"
 	b.Namespace = "default"
 	b.Spec.BucketId = "mynamespace/mybucket"
@@ -556,7 +560,7 @@ func TestDelete_MalformedOcid(t *testing.T) {
 	credClient := &fakeCredentialClient{}
 	mgr := NewObjectStorageBucketServiceManager(emptyProvider(), credClient, nil, defaultLog())
 
-	b := &ociv1beta1.ObjectStorageBucket{}
+	b := &ObjectStorageBucket{}
 	b.Name = "my-bucket-cr"
 	b.Namespace = "default"
 	b.Status.OsokStatus.Ocid = "malformed"
