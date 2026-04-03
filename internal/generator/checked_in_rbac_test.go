@@ -104,31 +104,13 @@ func TestCheckedInNoSQLPackageRBACMatchesEventRecorderSemantics(t *testing.T) {
 }
 
 func TestCheckedInIdentityPackageRBACUsesActualResourceNames(t *testing.T) {
-	assertFileContains(t, filepath.Join(repoRoot(t), "controllers", "identity", "apikey_controller.go"), []string{
-		"// +kubebuilder:rbac:groups=identity.oracle.com,resources=apikeys,verbs=get;list;watch;create;update;patch;delete",
-		"// +kubebuilder:rbac:groups=identity.oracle.com,resources=apikeys/status,verbs=get;update;patch",
-		"// +kubebuilder:rbac:groups=identity.oracle.com,resources=apikeys/finalizers,verbs=update",
+	assertFileContains(t, filepath.Join(repoRoot(t), "controllers", "identity", "compartment_controller.go"), []string{
+		"// +kubebuilder:rbac:groups=identity.oracle.com,resources=compartments,verbs=get;list;watch;create;update;patch;delete",
+		"// +kubebuilder:rbac:groups=identity.oracle.com,resources=compartments/status,verbs=get;update;patch",
+		"// +kubebuilder:rbac:groups=identity.oracle.com,resources=compartments/finalizers,verbs=update",
 	})
-	assertFileDoesNotContain(t, filepath.Join(repoRoot(t), "controllers", "identity", "apikey_controller.go"), []string{
-		"// +kubebuilder:rbac:groups=identity.oracle.com,resources=apikeies,verbs=get;list;watch;create;update;patch;delete",
-	})
-
-	assertFileContains(t, filepath.Join(repoRoot(t), "controllers", "identity", "customersecretkey_controller.go"), []string{
-		"// +kubebuilder:rbac:groups=identity.oracle.com,resources=customersecretkeys,verbs=get;list;watch;create;update;patch;delete",
-		"// +kubebuilder:rbac:groups=identity.oracle.com,resources=customersecretkeys/status,verbs=get;update;patch",
-		"// +kubebuilder:rbac:groups=identity.oracle.com,resources=customersecretkeys/finalizers,verbs=update",
-	})
-	assertFileDoesNotContain(t, filepath.Join(repoRoot(t), "controllers", "identity", "customersecretkey_controller.go"), []string{
-		"// +kubebuilder:rbac:groups=identity.oracle.com,resources=customersecretkeies,verbs=get;list;watch;create;update;patch;delete",
-	})
-
-	assertFileContains(t, filepath.Join(repoRoot(t), "controllers", "identity", "useruipasswordinformation_controller.go"), []string{
-		"// +kubebuilder:rbac:groups=identity.oracle.com,resources=useruipasswordinformation,verbs=get;list;watch;create;update;patch;delete",
-		"// +kubebuilder:rbac:groups=identity.oracle.com,resources=useruipasswordinformation/status,verbs=get;update;patch",
-		"// +kubebuilder:rbac:groups=identity.oracle.com,resources=useruipasswordinformation/finalizers,verbs=update",
-	})
-	assertFileDoesNotContain(t, filepath.Join(repoRoot(t), "controllers", "identity", "useruipasswordinformation_controller.go"), []string{
-		"// +kubebuilder:rbac:groups=identity.oracle.com,resources=useruipasswordinformations,verbs=get;list;watch;create;update;patch;delete",
+	assertFileDoesNotContain(t, filepath.Join(repoRoot(t), "controllers", "identity", "compartment_controller.go"), []string{
+		"// +kubebuilder:rbac:groups=identity.oracle.com,resources=compartmentes,verbs=get;list;watch;create;update;patch;delete",
 	})
 
 	assertAPIGroupResourceVerbs(
@@ -136,15 +118,9 @@ func TestCheckedInIdentityPackageRBACUsesActualResourceNames(t *testing.T) {
 		filepath.Join(repoRoot(t), "packages", "identity", "install", "generated", "rbac", "role.yaml"),
 		"identity.oracle.com",
 		map[string][]string{
-			"apikeys":                              {"create", "delete", "get", "list", "patch", "update", "watch"},
-			"apikeys/finalizers":                   {"update"},
-			"apikeys/status":                       {"get", "patch", "update"},
-			"customersecretkeys":                   {"create", "delete", "get", "list", "patch", "update", "watch"},
-			"customersecretkeys/finalizers":        {"update"},
-			"customersecretkeys/status":            {"get", "patch", "update"},
-			"useruipasswordinformation":            {"create", "delete", "get", "list", "patch", "update", "watch"},
-			"useruipasswordinformation/finalizers": {"update"},
-			"useruipasswordinformation/status":     {"get", "patch", "update"},
+			"compartments":            {"create", "delete", "get", "list", "patch", "update", "watch"},
+			"compartments/finalizers": {"update"},
+			"compartments/status":     {"get", "patch", "update"},
 		},
 	)
 }

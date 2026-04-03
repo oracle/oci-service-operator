@@ -518,53 +518,62 @@ rules:
   - patch
   - update
 - apiGroups:
+  - dataflow.oracle.com
+  resources:
+  - applications
+  - pools
+  - privateendpoints
+  - runlogs
+  - runs
+  - sqlendpoints
+  - statements
+  - workrequesterrors
+  - workrequestlogs
+  - workrequests
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - dataflow.oracle.com
+  resources:
+  - applications/finalizers
+  - pools/finalizers
+  - privateendpoints/finalizers
+  - runlogs/finalizers
+  - runs/finalizers
+  - sqlendpoints/finalizers
+  - statements/finalizers
+  - workrequesterrors/finalizers
+  - workrequestlogs/finalizers
+  - workrequests/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - dataflow.oracle.com
+  resources:
+  - applications/status
+  - pools/status
+  - privateendpoints/status
+  - runlogs/status
+  - runs/status
+  - sqlendpoints/status
+  - statements/status
+  - workrequesterrors/status
+  - workrequestlogs/status
+  - workrequests/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - identity.oracle.com
   resources:
-  - alloweddomainlicensetypes
-  - apikeys
-  - authenticationpolicies
-  - authtokens
-  - availabilitydomains
-  - bulkactionresourcetypes
-  - bulkedittagsresourcetypes
   - compartments
-  - costtrackingtags
-  - customersecretkeys
-  - dbcredentials
-  - domains
-  - dynamicgroups
-  - faultdomains
-  - groups
-  - iamworkrequesterrors
-  - iamworkrequestlogs
-  - iamworkrequests
-  - identityprovidergroups
-  - identityproviders
-  - idpgroupmappings
-  - mfatotpdevices
-  - networksources
-  - oauthclientcredentials
-  - orresetuipasswords
-  - policies
-  - regions
-  - regionsubscriptions
-  - smtpcredentials
-  - standardtagnamespaces
-  - standardtagtemplates
-  - swiftpasswords
-  - tagdefaults
-  - taggingworkrequesterrors
-  - taggingworkrequestlogs
-  - taggingworkrequests
-  - tagnamespaces
-  - tags
-  - tenancies
-  - usercapabilities
-  - usergroupmemberships
-  - users
-  - userstates
-  - useruipasswordinformation
-  - workrequests
   verbs:
   - create
   - delete
@@ -576,101 +585,13 @@ rules:
 - apiGroups:
   - identity.oracle.com
   resources:
-  - alloweddomainlicensetypes/finalizers
-  - apikeys/finalizers
-  - authenticationpolicies/finalizers
-  - authtokens/finalizers
-  - availabilitydomains/finalizers
-  - bulkactionresourcetypes/finalizers
-  - bulkedittagsresourcetypes/finalizers
   - compartments/finalizers
-  - costtrackingtags/finalizers
-  - customersecretkeys/finalizers
-  - dbcredentials/finalizers
-  - domains/finalizers
-  - dynamicgroups/finalizers
-  - faultdomains/finalizers
-  - groups/finalizers
-  - iamworkrequesterrors/finalizers
-  - iamworkrequestlogs/finalizers
-  - iamworkrequests/finalizers
-  - identityprovidergroups/finalizers
-  - identityproviders/finalizers
-  - idpgroupmappings/finalizers
-  - mfatotpdevices/finalizers
-  - networksources/finalizers
-  - oauthclientcredentials/finalizers
-  - orresetuipasswords/finalizers
-  - policies/finalizers
-  - regions/finalizers
-  - regionsubscriptions/finalizers
-  - smtpcredentials/finalizers
-  - standardtagnamespaces/finalizers
-  - standardtagtemplates/finalizers
-  - swiftpasswords/finalizers
-  - tagdefaults/finalizers
-  - taggingworkrequesterrors/finalizers
-  - taggingworkrequestlogs/finalizers
-  - taggingworkrequests/finalizers
-  - tagnamespaces/finalizers
-  - tags/finalizers
-  - tenancies/finalizers
-  - usercapabilities/finalizers
-  - usergroupmemberships/finalizers
-  - users/finalizers
-  - userstates/finalizers
-  - useruipasswordinformation/finalizers
-  - workrequests/finalizers
   verbs:
   - update
 - apiGroups:
   - identity.oracle.com
   resources:
-  - alloweddomainlicensetypes/status
-  - apikeys/status
-  - authenticationpolicies/status
-  - authtokens/status
-  - availabilitydomains/status
-  - bulkactionresourcetypes/status
-  - bulkedittagsresourcetypes/status
   - compartments/status
-  - costtrackingtags/status
-  - customersecretkeys/status
-  - dbcredentials/status
-  - domains/status
-  - dynamicgroups/status
-  - faultdomains/status
-  - groups/status
-  - iamworkrequesterrors/status
-  - iamworkrequestlogs/status
-  - iamworkrequests/status
-  - identityprovidergroups/status
-  - identityproviders/status
-  - idpgroupmappings/status
-  - mfatotpdevices/status
-  - networksources/status
-  - oauthclientcredentials/status
-  - orresetuipasswords/status
-  - policies/status
-  - regions/status
-  - regionsubscriptions/status
-  - smtpcredentials/status
-  - standardtagnamespaces/status
-  - standardtagtemplates/status
-  - swiftpasswords/status
-  - tagdefaults/status
-  - taggingworkrequesterrors/status
-  - taggingworkrequestlogs/status
-  - taggingworkrequests/status
-  - tagnamespaces/status
-  - tags/status
-  - tenancies/status
-  - usercapabilities/status
-  - usergroupmemberships/status
-  - users/status
-  - userstates/status
-  - useruipasswordinformation/status
-  - workrequests/status
   verbs:
   - get
   - patch
@@ -856,7 +777,6 @@ rules:
   - opensearch.oracle.com
   resources:
   - opensearchclusters
-  - opensearchversions
   verbs:
   - create
   - delete
@@ -869,14 +789,12 @@ rules:
   - opensearch.oracle.com
   resources:
   - opensearchclusters/finalizers
-  - opensearchversions/finalizers
   verbs:
   - update
 - apiGroups:
   - opensearch.oracle.com
   resources:
   - opensearchclusters/status
-  - opensearchversions/status
   verbs:
   - get
   - patch
@@ -938,9 +856,12 @@ rules:
   - patch
   - update
 - apiGroups:
-  - redis.oracle.com
+  - queue.oracle.com
   resources:
-  - redisclusters
+  - channels
+  - messages
+  - queues
+  - stats
   - workrequesterrors
   - workrequestlogs
   - workrequests
@@ -953,21 +874,53 @@ rules:
   - update
   - watch
 - apiGroups:
-  - redis.oracle.com
+  - queue.oracle.com
   resources:
-  - redisclusters/finalizers
+  - channels/finalizers
+  - messages/finalizers
+  - queues/finalizers
+  - stats/finalizers
   - workrequesterrors/finalizers
   - workrequestlogs/finalizers
   - workrequests/finalizers
   verbs:
   - update
 - apiGroups:
-  - redis.oracle.com
+  - queue.oracle.com
   resources:
-  - redisclusters/status
+  - channels/status
+  - messages/status
+  - queues/status
+  - stats/status
   - workrequesterrors/status
   - workrequestlogs/status
   - workrequests/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - redis.oracle.com
+  resources:
+  - redisclusters
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - redis.oracle.com
+  resources:
+  - redisclusters/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - redis.oracle.com
+  resources:
+  - redisclusters/status
   verbs:
   - get
   - patch
@@ -994,6 +947,35 @@ rules:
   - streaming.oracle.com
   resources:
   - streams/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - vault.oracle.com
+  resources:
+  - secrets
+  - secretversions
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - vault.oracle.com
+  resources:
+  - secrets/finalizers
+  - secretversions/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - vault.oracle.com
+  resources:
+  - secrets/status
+  - secretversions/status
   verbs:
   - get
   - patch

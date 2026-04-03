@@ -216,12 +216,14 @@ $ docker pull iad.ocir.io/oracle/oci-service-operator-bundle:<VERSION>
 
 The OSOK OLM bundle contains all the required details like CRDs, RBACs, Configmaps, deployment which will install the OSOK in the kubernetes cluster.
 
-The checked-in bundle currently ships the first-wave default-active generator
-surface from `internal/generator/config/services.yaml`: `containerengine`,
-`mysql`, `nosql`, `psql`, `database/AutonomousDatabase`, and
-`streaming/Stream`. Backlog services that remain configured but inactive by
-default are not included in the checked-in bundle until later rollout stories
-promote and regenerate them.
+The checked-in bundle currently ships the default-active generator surface from
+`internal/generator/config/services.yaml`: whole-service `containerengine`,
+`core`, `dataflow`, `mysql`, `nosql`, `psql`, `queue`, and `vault`, plus the
+explicit-kind selections `database/AutonomousDatabase`,
+`identity/Compartment`, `opensearch/OpensearchCluster`,
+`redis/RedisCluster`, and `streaming/Stream`. Backlog services that remain
+configured but inactive by default are not included in the checked-in bundle
+until later rollout stories promote and regenerate them.
 
 
 Install the OSOK Operator in the Kubernetes Cluster using below command

@@ -245,6 +245,25 @@ services:
               markers:
                 - +kubebuilder:validation:Optional
 
+  - service: dataflow
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/dataflow
+    group: dataflow
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: all
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
   - service: dns
     sdkPackage: github.com/oracle/oci-go-sdk/v65/dns
     group: dns

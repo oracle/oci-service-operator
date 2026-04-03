@@ -1,0 +1,345 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: pools.dataflow.oracle.com
+spec:
+  group: dataflow.oracle.com
+  names:
+    kind: Pool
+    listKind: PoolList
+    plural: pools
+    singular: pool
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the Pool
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the Pool
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Pool is the Schema for the pools API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: PoolSpec defines the desired state of Pool.
+            properties:
+              compartmentId:
+                description: The OCID of a compartment.
+                type: string
+              configurations:
+                description: List of PoolConfig items.
+                items:
+                  description: PoolConfiguration defines nested fields for Pool.Configuration.
+                  properties:
+                    max:
+                      description: Maximum number of compute instances in the pool
+                        for a given compute shape.
+                      type: integer
+                    min:
+                      description: Minimum number of compute instances in the pool
+                        for a given compute shape.
+                      type: integer
+                    shape:
+                      description: The compute shape of the resources you would like
+                        to provision.
+                      type: string
+                    shapeConfig:
+                      description: PoolConfigurationShapeConfig defines nested fields
+                        for Pool.Configuration.ShapeConfig.
+                      properties:
+                        memoryInGBs:
+                          description: The amount of memory used for the driver or
+                            executors.
+                          type: number
+                        ocpus:
+                          description: |-
+                            The total number of OCPUs used for the driver or executors.
+                            See here (https://docs.cloud.oracle.com/en-us/iaas/api/#/en/iaas/20160918/Shape/) for details.
+                          type: number
+                      type: object
+                  type: object
+                type: array
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              description:
+                description: A user-friendly description. Avoid entering confidential
+                  information.
+                type: string
+              displayName:
+                description: A user-friendly name. It does not have to be unique.
+                  Avoid entering confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              idleTimeoutInMinutes:
+                description: |-
+                  Optional timeout value in minutes used to auto stop Pools. A Pool will be auto stopped after inactivity for this amount of time period.
+                  If value not set, pool will not be auto stopped auto.
+                type: integer
+              schedules:
+                description: A list of schedules for pool to auto start and stop.
+                items:
+                  description: PoolSchedule defines nested fields for Pool.Schedule.
+                  properties:
+                    dayOfWeek:
+                      description: Day of the week SUN-SAT
+                      type: string
+                    startTime:
+                      description: Hour of the day to start or stop pool.
+                      type: integer
+                    stopTime:
+                      description: Hour of the day to stop the pool.
+                      type: integer
+                  type: object
+                type: array
+            required:
+            - compartmentId
+            - configurations
+            - displayName
+            type: object
+          status:
+            description: PoolStatus defines the observed state of Pool.
+            properties:
+              compartmentId:
+                description: The OCID of a compartment.
+                type: string
+              configurations:
+                description: List of PoolConfig items.
+                items:
+                  description: PoolConfiguration defines nested fields for Pool.Configuration.
+                  properties:
+                    max:
+                      description: Maximum number of compute instances in the pool
+                        for a given compute shape.
+                      type: integer
+                    min:
+                      description: Minimum number of compute instances in the pool
+                        for a given compute shape.
+                      type: integer
+                    shape:
+                      description: The compute shape of the resources you would like
+                        to provision.
+                      type: string
+                    shapeConfig:
+                      description: PoolConfigurationShapeConfig defines nested fields
+                        for Pool.Configuration.ShapeConfig.
+                      properties:
+                        memoryInGBs:
+                          description: The amount of memory used for the driver or
+                            executors.
+                          type: number
+                        ocpus:
+                          description: |-
+                            The total number of OCPUs used for the driver or executors.
+                            See here (https://docs.cloud.oracle.com/en-us/iaas/api/#/en/iaas/20160918/Shape/) for details.
+                          type: number
+                      type: object
+                  type: object
+                type: array
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              description:
+                description: A user-friendly description. Avoid entering confidential
+                  information.
+                type: string
+              displayName:
+                description: A user-friendly name. It does not have to be unique.
+                  Avoid entering confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              id:
+                description: The OCID of a pool. Unique Id to indentify a dataflow
+                  pool resource.
+                type: string
+              idleTimeoutInMinutes:
+                description: |-
+                  Optional timeout value in minutes used to auto stop Pools. A Pool will be auto stopped after inactivity for this amount of time period.
+                  If value not set, pool will not be auto stopped auto.
+                type: integer
+              lifecycleDetails:
+                description: The detailed messages about the lifecycle state.
+                type: string
+              lifecycleState:
+                description: The current state of this pool.
+                type: string
+              ownerPrincipalId:
+                description: The OCID of the user who created the resource.
+                type: string
+              ownerUserName:
+                description: |-
+                  The username of the user who created the resource.  If the username of the owner does not exist,
+                  `null` will be returned and the caller should refer to the ownerPrincipalId value instead.
+                type: string
+              poolMetrics:
+                description: PoolMetrics defines nested fields for Pool.PoolMetrics.
+                properties:
+                  activeRunsCount:
+                    description: The number of runs that are currently running that
+                      are using this pool.
+                    format: int64
+                    type: integer
+                  activelyUsedNodeCount:
+                    description: A count of the nodes that are currently being used
+                      for each shape in this pool.
+                    items:
+                      description: PoolMetricsActivelyUsedNodeCount defines nested
+                        fields for Pool.PoolMetrics.ActivelyUsedNodeCount.
+                      properties:
+                        count:
+                          description: The node count of this compute shape.
+                          type: integer
+                        logicalShape:
+                          description: The compute shape of the nodes that the count
+                            is for.
+                          type: string
+                      type: object
+                    type: array
+                  timeLastMetricsUpdated:
+                    description: The last time the mertics were updated for this.
+                    type: string
+                  timeLastStarted:
+                    description: The last time this pool was started.
+                    type: string
+                  timeLastStopped:
+                    description: The last time this pool was stopped.
+                    type: string
+                  timeLastUsed:
+                    description: The last time a run used this pool.
+                    type: string
+                type: object
+              schedules:
+                description: A list of schedules for pool to auto start and stop.
+                items:
+                  description: PoolSchedule defines nested fields for Pool.Schedule.
+                  properties:
+                    dayOfWeek:
+                      description: Day of the week SUN-SAT
+                      type: string
+                    startTime:
+                      description: Hour of the day to start or stop pool.
+                      type: integer
+                    stopTime:
+                      description: Hour of the day to stop the pool.
+                      type: integer
+                  type: object
+                type: array
+              status:
+                properties:
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              timeCreated:
+                description: |-
+                  The date and time the resource was created, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+                  Example: `2018-04-03T21:10:29.600Z`
+                type: string
+              timeUpdated:
+                description: |-
+                  The date and time the resource was updated, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+                  Example: `2018-04-03T21:10:29.600Z`
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

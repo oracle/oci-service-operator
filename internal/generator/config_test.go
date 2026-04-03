@@ -633,7 +633,7 @@ services:
 		controller:     GenerationStrategyManual,
 		serviceManager: GenerationStrategyGenerated,
 		registration:   GenerationStrategyGenerated,
-		webhook:        GenerationStrategyManual,
+		webhook:        GenerationStrategyNone,
 	})
 	assertResourceOverrideCount(t, mysqlService, 1)
 	assertMySQLGenerationOverride(t, mysqlService.Generation.Resources[0], []string{`groups="",resources=secrets,verbs=get;list;watch`})
@@ -1085,22 +1085,25 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	cfg := loadCheckedInConfig(t)
 
 	activeServices := serviceNames(cfg.DefaultActiveServices())
-	wantActiveServices := []string{"containerengine", "database", "mysql", "nosql", "psql", "streaming"}
+	wantActiveServices := []string{"containerengine", "core", "database", "dataflow", "identity", "mysql", "nosql", "opensearch", "psql", "queue", "redis", "streaming", "vault"}
 	if !slices.Equal(activeServices, wantActiveServices) {
 		t.Fatalf("DefaultActiveServices() = %v, want %v", activeServices, wantActiveServices)
 	}
 
-	services := requireServices(t, cfg, "containerengine", "database", "mysql", "nosql", "opensearch", "psql", "streaming", "core", "identity", "redis")
+	services := requireServices(t, cfg, "containerengine", "core", "database", "dataflow", "identity", "mysql", "nosql", "opensearch", "psql", "queue", "redis", "streaming", "vault")
 	assertServiceSelection(t, services["containerengine"], true, SelectionModeAll, nil)
+	assertServiceSelection(t, services["core"], true, SelectionModeAll, nil)
 	assertServiceSelection(t, services["database"], true, SelectionModeExplicit, []string{"AutonomousDatabase"})
+	assertServiceSelection(t, services["dataflow"], true, SelectionModeAll, nil)
+	assertServiceSelection(t, services["identity"], true, SelectionModeExplicit, []string{"Compartment"})
 	assertServiceSelection(t, services["mysql"], true, SelectionModeAll, nil)
 	assertServiceSelection(t, services["nosql"], true, SelectionModeAll, nil)
-	assertServiceSelection(t, services["opensearch"], false, SelectionModeExplicit, []string{"OpensearchOpensearchCluster"})
+	assertServiceSelection(t, services["opensearch"], true, SelectionModeExplicit, []string{"OpensearchCluster"})
 	assertServiceSelection(t, services["psql"], true, SelectionModeAll, nil)
+	assertServiceSelection(t, services["queue"], true, SelectionModeAll, nil)
+	assertServiceSelection(t, services["redis"], true, SelectionModeExplicit, []string{"RedisCluster"})
 	assertServiceSelection(t, services["streaming"], true, SelectionModeExplicit, []string{"Stream"})
-	assertServiceSelection(t, services["core"], false, SelectionModeExplicit, []string{"Instance"})
-	assertServiceSelection(t, services["identity"], false, SelectionModeExplicit, []string{"Compartment"})
-	assertServiceSelection(t, services["redis"], false, SelectionModeExplicit, []string{"RedisCluster"})
+	assertServiceSelection(t, services["vault"], true, SelectionModeAll, nil)
 }
 
 func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
@@ -1149,7 +1152,7 @@ func TestCheckedInConfigPromotesFormalSpecReferences(t *testing.T) {
 	assertFormalSpecFor(t, services["database"], "AutonomousDatabase", "databaseautonomousdatabase")
 	assertFormalSpecFor(t, services["mysql"], "DbSystem", "dbsystem")
 	assertFormalSpecFor(t, services["objectstorage"], "Bucket", "objectstoragebucket")
-	assertFormalSpecFor(t, services["opensearch"], "OpensearchOpensearchCluster", "opensearchopensearchcluster")
+	assertFormalSpecFor(t, services["opensearch"], "OpensearchCluster", "opensearchopensearchcluster")
 	assertFormalSpecFor(t, services["psql"], "DbSystem", "dbsystem")
 	assertFormalSpecFor(t, services["redis"], "RedisCluster", "rediscluster")
 	assertFormalSpecFor(t, services["streaming"], "Stream", "stream")
@@ -1572,9 +1575,9 @@ func assertOpensearchRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig
 
 	assertResourceOverrideCount(t, service, 7)
 	overrides := overridesByKind(service)
-	assertFormalSpecFor(t, service, "OpensearchOpensearchCluster", "opensearchopensearchcluster")
-	if overrides["OpensearchOpensearchCluster"].ServiceManager.PackagePath != "opensearch/opensearchopensearchcluster" {
-		t.Fatalf("opensearch packagePath = %q, want %q", overrides["OpensearchOpensearchCluster"].ServiceManager.PackagePath, "opensearch/opensearchopensearchcluster")
+	assertFormalSpecFor(t, service, "OpensearchCluster", "opensearchopensearchcluster")
+	if overrides["OpensearchCluster"].ServiceManager.PackagePath != "opensearch/opensearchcluster" {
+		t.Fatalf("opensearch packagePath = %q, want %q", overrides["OpensearchCluster"].ServiceManager.PackagePath, "opensearch/opensearchcluster")
 	}
 	for _, kind := range []string{"Manifest", "OpensearchClusterBackup", "OpensearchOpensearchVersion", "WorkRequest", "WorkRequestError", "WorkRequestLog"} {
 		assertDisabledResourceOverride(t, service.Service, kind, overrides[kind])
