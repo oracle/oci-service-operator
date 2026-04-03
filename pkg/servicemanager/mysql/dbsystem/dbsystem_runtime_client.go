@@ -1,0 +1,279 @@
+/*
+  Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
+  Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+*/
+
+package dbsystem
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"strings"
+
+	"github.com/oracle/oci-go-sdk/v65/common"
+	"github.com/oracle/oci-go-sdk/v65/identity"
+	mysqlsdk "github.com/oracle/oci-go-sdk/v65/mysql"
+	mysqlv1beta1 "github.com/oracle/oci-service-operator/api/mysql/v1beta1"
+	"github.com/oracle/oci-service-operator/pkg/credhelper"
+	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
+)
+
+type dbSystemAvailabilityDomainClient interface {
+	ListAvailabilityDomains(context.Context, identity.ListAvailabilityDomainsRequest) (identity.ListAvailabilityDomainsResponse, error)
+	GetCompartment(context.Context, identity.GetCompartmentRequest) (identity.GetCompartmentResponse, error)
+}
+
+var newDbSystemAvailabilityDomainClient = func(provider common.ConfigurationProvider) (dbSystemAvailabilityDomainClient, error) {
+	return identity.NewIdentityClientWithConfigurationProvider(provider)
+}
+
+func init() {
+	newDbSystemServiceClient = func(manager *DbSystemServiceManager) DbSystemServiceClient {
+		sdkClient, err := mysqlsdk.NewDbSystemClientWithConfigurationProvider(manager.Provider)
+		config := generatedruntime.Config[*mysqlv1beta1.DbSystem]{
+			Kind:             "DbSystem",
+			SDKName:          "DbSystem",
+			Log:              manager.Log,
+			CredentialClient: manager.CredentialClient,
+			BuildCreateBody: func(ctx context.Context, resource *mysqlv1beta1.DbSystem, namespace string) (any, error) {
+				return buildDbSystemCreateDetails(ctx, manager.Provider, manager.CredentialClient, resource, namespace)
+			},
+			Semantics: &generatedruntime.Semantics{
+				FormalService:     "mysql",
+				FormalSlug:        "dbsystem",
+				StatusProjection:  "required",
+				SecretSideEffects: "ready-only",
+				FinalizerPolicy:   "retain-until-confirmed-delete",
+				Lifecycle: generatedruntime.LifecycleSemantics{
+					ProvisioningStates: []string{"CREATING", "UPDATING"},
+					UpdatingStates:     []string{"UPDATING"},
+					ActiveStates:       []string{"ACTIVE"},
+				},
+				Delete: generatedruntime.DeleteSemantics{
+					Policy:         "required",
+					PendingStates:  []string{"DELETING"},
+					TerminalStates: []string{"DELETED"},
+				},
+				List: &generatedruntime.ListSemantics{
+					ResponseItemsField: "Items",
+					MatchFields:        []string{"compartmentId", "configurationId", "databaseManagement", "dbSystemId", "displayName", "isHeatWaveClusterAttached", "isUpToDate", "state"},
+				},
+				Mutation: generatedruntime.MutationSemantics{
+					Mutable:       []string{"accessMode", "backupPolicy.copyPolicies.backupCopyRetentionInDays", "backupPolicy.copyPolicies.copyToRegion", "backupPolicy.definedTags", "backupPolicy.freeformTags", "backupPolicy.isEnabled", "backupPolicy.pitrPolicy.isEnabled", "backupPolicy.retentionInDays", "backupPolicy.softDelete", "backupPolicy.windowStartTime", "configurationId", "crashRecovery", "customerContacts.email", "dataStorage.isAutoExpandStorageEnabled", "dataStorage.maxStorageSizeInGbs", "dataStorageSizeInGb", "databaseConsole.port", "databaseConsole.status", "databaseManagement", "databaseMode", "definedTags", "deletionPolicy.automaticBackupRetention", "deletionPolicy.finalBackup", "deletionPolicy.isDeleteProtected", "description", "displayName", "encryptData.keyGenerationType", "encryptData.keyId", "freeformTags", "hostnameLabel", "isHighlyAvailable", "maintenance.maintenanceDisabledWindows.timeEnd", "maintenance.maintenanceDisabledWindows.timeStart", "maintenance.maintenanceScheduleType", "maintenance.versionPreference", "maintenance.versionTrackPreference", "maintenance.windowStartTime", "nsgIds", "readEndpoint.excludeIps", "readEndpoint.isEnabled", "readEndpoint.readEndpointHostnameLabel", "readEndpoint.readEndpointIpAddress", "rest.configuration", "rest.port", "secureConnections.certificateGenerationType", "secureConnections.certificateId", "securityAttributes", "shapeName", "shutdownType", "state", "telemetryConfiguration.logs.destination", "telemetryConfiguration.logs.destinationConfigurations.key", "telemetryConfiguration.logs.destinationConfigurations.value", "telemetryConfiguration.logs.logTypes"},
+					ForceNew:      []string{"adminPassword", "adminUsername", "availabilityDomain", "compartmentId", "faultDomain", "ipAddress", "mysqlVersion", "port", "portX", "source", "source.backupId", "source.dbSystemId", "source.recoveryPoint", "source.sourceType", "source.sourceUrl", "subnetId"},
+					ConflictsWith: map[string][]string{},
+				},
+				Hooks: generatedruntime.HookSet{
+					Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+					Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+					Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+				},
+				CreateFollowUp: generatedruntime.FollowUpSemantics{
+					Strategy: "read-after-write",
+					Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+				},
+				UpdateFollowUp: generatedruntime.FollowUpSemantics{
+					Strategy: "read-after-write",
+					Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+				},
+				DeleteFollowUp: generatedruntime.FollowUpSemantics{
+					Strategy: "confirm-delete",
+					Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+				},
+				AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+				Unsupported:         []generatedruntime.UnsupportedSemantic{},
+			},
+			Create: &generatedruntime.Operation{
+				NewRequest: func() any { return &mysqlsdk.CreateDbSystemRequest{} },
+				Call: func(ctx context.Context, request any) (any, error) {
+					return sdkClient.CreateDbSystem(ctx, *request.(*mysqlsdk.CreateDbSystemRequest))
+				},
+				Fields: []generatedruntime.RequestField{{FieldName: "CreateDbSystemDetails", RequestName: "CreateDbSystemDetails", Contribution: "body", PreferResourceID: false}},
+			},
+			Get: &generatedruntime.Operation{
+				NewRequest: func() any { return &mysqlsdk.GetDbSystemRequest{} },
+				Call: func(ctx context.Context, request any) (any, error) {
+					return sdkClient.GetDbSystem(ctx, *request.(*mysqlsdk.GetDbSystemRequest))
+				},
+				Fields: []generatedruntime.RequestField{{FieldName: "DbSystemId", RequestName: "dbSystemId", Contribution: "path", PreferResourceID: true}},
+			},
+			List: &generatedruntime.Operation{
+				NewRequest: func() any { return &mysqlsdk.ListDbSystemsRequest{} },
+				Call: func(ctx context.Context, request any) (any, error) {
+					return sdkClient.ListDbSystems(ctx, *request.(*mysqlsdk.ListDbSystemsRequest))
+				},
+				Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "IsHeatWaveClusterAttached", RequestName: "isHeatWaveClusterAttached", Contribution: "query", PreferResourceID: false}, {FieldName: "DbSystemId", RequestName: "dbSystemId", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "ConfigurationId", RequestName: "configurationId", Contribution: "query", PreferResourceID: false}, {FieldName: "IsUpToDate", RequestName: "isUpToDate", Contribution: "query", PreferResourceID: false}, {FieldName: "DatabaseManagement", RequestName: "databaseManagement", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}},
+			},
+			Update: &generatedruntime.Operation{
+				NewRequest: func() any { return &mysqlsdk.UpdateDbSystemRequest{} },
+				Call: func(ctx context.Context, request any) (any, error) {
+					return sdkClient.UpdateDbSystem(ctx, *request.(*mysqlsdk.UpdateDbSystemRequest))
+				},
+				Fields: []generatedruntime.RequestField{{FieldName: "DbSystemId", RequestName: "dbSystemId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateDbSystemDetails", RequestName: "UpdateDbSystemDetails", Contribution: "body", PreferResourceID: false}},
+			},
+			Delete: &generatedruntime.Operation{
+				NewRequest: func() any { return &mysqlsdk.DeleteDbSystemRequest{} },
+				Call: func(ctx context.Context, request any) (any, error) {
+					return sdkClient.DeleteDbSystem(ctx, *request.(*mysqlsdk.DeleteDbSystemRequest))
+				},
+				Fields: []generatedruntime.RequestField{{FieldName: "DbSystemId", RequestName: "dbSystemId", Contribution: "path", PreferResourceID: true}},
+			},
+		}
+		if err != nil {
+			config.InitError = fmt.Errorf("initialize DbSystem OCI client: %w", err)
+		}
+		return defaultDbSystemServiceClient{
+			ServiceClient: generatedruntime.NewServiceClient[*mysqlv1beta1.DbSystem](config),
+		}
+	}
+}
+
+func buildDbSystemCreateDetails(
+	ctx context.Context,
+	provider common.ConfigurationProvider,
+	credentialClient credhelper.CredentialClient,
+	resource *mysqlv1beta1.DbSystem,
+	namespace string,
+) (mysqlsdk.CreateDbSystemDetails, error) {
+	resolvedSpec, err := generatedruntime.ResolveSpecValue(resource, ctx, credentialClient, namespace)
+	if err != nil {
+		return mysqlsdk.CreateDbSystemDetails{}, err
+	}
+
+	payload, err := json.Marshal(resolvedSpec)
+	if err != nil {
+		return mysqlsdk.CreateDbSystemDetails{}, fmt.Errorf("marshal resolved mysql dbsystem spec: %w", err)
+	}
+
+	var details mysqlsdk.CreateDbSystemDetails
+	if err := json.Unmarshal(payload, &details); err != nil {
+		return mysqlsdk.CreateDbSystemDetails{}, fmt.Errorf("decode mysql create request body: %w", err)
+	}
+
+	normalizedAD, err := normalizeDbSystemAvailabilityDomain(ctx, provider, resource.Spec.CompartmentId, resource.Spec.AvailabilityDomain)
+	if err != nil {
+		return mysqlsdk.CreateDbSystemDetails{}, err
+	}
+	if normalizedAD == "" {
+		details.AvailabilityDomain = nil
+	} else {
+		details.AvailabilityDomain = common.String(normalizedAD)
+	}
+
+	// Preserve standalone intent. The generic JSON projection drops explicit false
+	// booleans behind json:",omitempty", but mysql create expects the same
+	// always-projected value the legacy manager sent.
+	details.IsHighlyAvailable = common.Bool(resource.Spec.IsHighlyAvailable)
+
+	return details, nil
+}
+
+func normalizeDbSystemAvailabilityDomain(
+	ctx context.Context,
+	provider common.ConfigurationProvider,
+	compartmentID string,
+	requested string,
+) (string, error) {
+	requested = strings.TrimSpace(requested)
+	if requested == "" || provider == nil {
+		return requested, nil
+	}
+
+	identityClient, err := newDbSystemAvailabilityDomainClient(provider)
+	if err != nil {
+		return "", fmt.Errorf("initialize mysql dbsystem availabilityDomain client: %w", err)
+	}
+
+	tenancy, err := resolveDbSystemAvailabilityDomainTenancy(ctx, identityClient, compartmentID)
+	if err != nil {
+		return "", err
+	}
+
+	response, err := identityClient.ListAvailabilityDomains(ctx, identity.ListAvailabilityDomainsRequest{
+		CompartmentId: common.String(tenancy),
+	})
+	if err != nil {
+		return "", fmt.Errorf("list mysql dbsystem availability domains: %w", err)
+	}
+
+	available := make([]string, 0, len(response.Items))
+	for _, item := range response.Items {
+		if item.Name == nil {
+			continue
+		}
+		name := strings.TrimSpace(*item.Name)
+		if name == "" {
+			continue
+		}
+		available = append(available, name)
+		if name == requested {
+			return requested, nil
+		}
+	}
+
+	requestedSuffix := availabilityDomainSuffix(requested)
+	matches := make([]string, 0, len(available))
+	for _, name := range available {
+		if availabilityDomainSuffix(name) == requestedSuffix {
+			matches = append(matches, name)
+		}
+	}
+
+	switch len(matches) {
+	case 1:
+		return matches[0], nil
+	case 0:
+		return "", fmt.Errorf("mysql dbsystem availabilityDomain %q does not match the current auth context availability domains %q", requested, strings.Join(available, ", "))
+	default:
+		return "", fmt.Errorf("mysql dbsystem availabilityDomain %q maps to multiple current auth context availability domains %q", requested, strings.Join(matches, ", "))
+	}
+}
+
+func resolveDbSystemAvailabilityDomainTenancy(
+	ctx context.Context,
+	identityClient dbSystemAvailabilityDomainClient,
+	compartmentID string,
+) (string, error) {
+	current := strings.TrimSpace(compartmentID)
+	if current == "" {
+		return "", fmt.Errorf("resolve mysql dbsystem availabilityDomain tenancy: empty compartment id")
+	}
+	if strings.HasPrefix(current, "ocid1.tenancy.") {
+		return current, nil
+	}
+
+	for depth := 0; depth < 16; depth++ {
+		response, err := identityClient.GetCompartment(ctx, identity.GetCompartmentRequest{
+			CompartmentId: common.String(current),
+		})
+		if err != nil {
+			return "", fmt.Errorf("resolve mysql dbsystem availabilityDomain tenancy for compartment %q: %w", current, err)
+		}
+
+		parent := ""
+		if response.Compartment.CompartmentId != nil {
+			parent = strings.TrimSpace(*response.Compartment.CompartmentId)
+		}
+		if parent == "" {
+			return "", fmt.Errorf("resolve mysql dbsystem availabilityDomain tenancy for compartment %q: empty parent compartment", current)
+		}
+		if strings.HasPrefix(parent, "ocid1.tenancy.") {
+			return parent, nil
+		}
+		if parent == current {
+			return "", fmt.Errorf("resolve mysql dbsystem availabilityDomain tenancy for compartment %q: parent points to self", current)
+		}
+		current = parent
+	}
+
+	return "", fmt.Errorf("resolve mysql dbsystem availabilityDomain tenancy for compartment %q: exceeded parent traversal limit", compartmentID)
+}
+
+func availabilityDomainSuffix(name string) string {
+	name = strings.TrimSpace(name)
+	if idx := strings.Index(name, ":"); idx >= 0 && idx+1 < len(name) {
+		return name[idx+1:]
+	}
+	return name
+}

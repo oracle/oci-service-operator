@@ -471,6 +471,8 @@ func TestBuildRequestPopulatesAutonomousDatabasePolymorphicCreateBody(t *testing
 				[]RequestField{{FieldName: "CreateAutonomousDatabaseDetails", RequestName: "createAutonomousDatabaseDetails", Contribution: "body"}},
 				nil,
 				requestBuildOptions{Context: context.Background()},
+				nil,
+				false,
 			)
 			if err != nil {
 				t.Fatalf("buildRequest() error = %v", err)
@@ -500,7 +502,7 @@ func TestBuildRequestOmitsUnsetGeneratedAdminCredentialSources(t *testing.T) {
 		t.Fatalf("lookupValues(mysql) error = %v", err)
 	}
 
-	if err := buildRequest(mysqlRequest, mysqlResource, mysqlValues, "", nil, nil, requestBuildOptions{Context: context.Background()}); err != nil {
+	if err := buildRequest(mysqlRequest, mysqlResource, mysqlValues, "", nil, nil, requestBuildOptions{Context: context.Background()}, nil, false); err != nil {
 		t.Fatalf("buildRequest(mysql) error = %v", err)
 	}
 	if mysqlRequest.AdminUsername != nil {
@@ -530,6 +532,8 @@ func TestBuildRequestOmitsUnsetGeneratedAdminCredentialSources(t *testing.T) {
 		[]RequestField{{FieldName: "CreateAutonomousDatabaseDetails", RequestName: "createAutonomousDatabaseDetails", Contribution: "body"}},
 		nil,
 		requestBuildOptions{Context: context.Background()},
+		nil,
+		false,
 	); err != nil {
 		t.Fatalf("buildRequest(adb) error = %v", err)
 	}
@@ -576,6 +580,8 @@ func TestBuildRequestOmitsZeroValueAutonomousDatabaseNestedStructs(t *testing.T)
 		[]RequestField{{FieldName: "CreateAutonomousDatabaseDetails", RequestName: "createAutonomousDatabaseDetails", Contribution: "body"}},
 		nil,
 		requestBuildOptions{Context: context.Background()},
+		nil,
+		false,
 	); err != nil {
 		t.Fatalf("buildRequest(adb) error = %v", err)
 	}

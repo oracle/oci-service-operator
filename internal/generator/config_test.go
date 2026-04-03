@@ -1046,14 +1046,18 @@ func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
 		registration:   GenerationStrategyGenerated,
 		webhook:        GenerationStrategyNone,
 	})
-	for _, name := range []string{"mysql", "streaming"} {
-		assertServiceGenerationStrategies(t, services[name], generationStrategyExpectations{
-			controller:     GenerationStrategyGenerated,
-			serviceManager: GenerationStrategyGenerated,
-			registration:   GenerationStrategyGenerated,
-			webhook:        GenerationStrategyManual,
-		})
-	}
+	assertServiceGenerationStrategies(t, services["mysql"], generationStrategyExpectations{
+		controller:     GenerationStrategyGenerated,
+		serviceManager: GenerationStrategyGenerated,
+		registration:   GenerationStrategyGenerated,
+		webhook:        GenerationStrategyNone,
+	})
+	assertServiceGenerationStrategies(t, services["streaming"], generationStrategyExpectations{
+		controller:     GenerationStrategyGenerated,
+		serviceManager: GenerationStrategyGenerated,
+		registration:   GenerationStrategyGenerated,
+		webhook:        GenerationStrategyManual,
+	})
 
 	assertDatabaseRuntimeRolloutMetadata(t, services["database"])
 	assertMySQLRuntimeRolloutMetadata(t, services["mysql"])

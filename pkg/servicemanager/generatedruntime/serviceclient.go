@@ -131,6 +131,7 @@ type Config[T any] struct {
 	CredentialClient credhelper.CredentialClient
 	InitError        error
 	Semantics        *Semantics
+	BuildCreateBody  func(context.Context, T, string) (any, error)
 
 	Create *Operation
 	Get    *Operation
@@ -1030,7 +1031,11 @@ func (c ServiceClient[T]) invokeWithValues(ctx context.Context, op *Operation, r
 	if request == nil {
 		return nil, fmt.Errorf("%s generated runtime did not create an OCI request value", c.config.Kind)
 	}
-	if err := buildRequest(request, resource, values, preferredID, op.Fields, c.idFieldAliases(), options); err != nil {
+	bodyOverride, hasBodyOverride, err := c.requestBodyOverride(ctx, op, resource, options.Namespace)
+	if err != nil {
+		return nil, err
+	}
+	if err := buildRequest(request, resource, values, preferredID, op.Fields, c.idFieldAliases(), options, bodyOverride, hasBodyOverride); err != nil {
 		return nil, fmt.Errorf("build %s OCI request: %w", c.config.Kind, err)
 	}
 
@@ -1039,6 +1044,17 @@ func (c ServiceClient[T]) invokeWithValues(ctx context.Context, op *Operation, r
 		return nil, normalizeOCIError(err)
 	}
 	return response, nil
+}
+
+func (c ServiceClient[T]) requestBodyOverride(ctx context.Context, op *Operation, resource T, namespace string) (any, bool, error) {
+	if op == c.config.Create && c.config.BuildCreateBody != nil {
+		body, err := c.config.BuildCreateBody(ctx, resource, namespace)
+		if err != nil {
+			return nil, false, fmt.Errorf("build %s create body: %w", c.config.Kind, err)
+		}
+		return body, true, nil
+	}
+	return nil, false, nil
 }
 
 func (c ServiceClient[T]) applySuccess(resource T, response any, fallback shared.OSOKConditionType) (servicemanager.OSOKResponse, error) {
@@ -1171,7 +1187,17 @@ type requestBuildOptions struct {
 	Namespace        string
 }
 
-func buildRequest(request any, resource any, values map[string]any, preferredID string, fields []RequestField, idAliases []string, options requestBuildOptions) error {
+func buildRequest(
+	request any,
+	resource any,
+	values map[string]any,
+	preferredID string,
+	fields []RequestField,
+	idAliases []string,
+	options requestBuildOptions,
+	bodyOverride any,
+	hasBodyOverride bool,
+) error {
 	requestValue := reflect.ValueOf(request)
 	if !requestValue.IsValid() || requestValue.Kind() != reflect.Pointer || requestValue.IsNil() {
 		return fmt.Errorf("expected pointer OCI request, got %T", request)
@@ -1183,7 +1209,10 @@ func buildRequest(request any, resource any, values map[string]any, preferredID 
 	}
 
 	var resolvedSpec any
-	if requestNeedsResolvedSpec(fields, requestStruct.Type()) {
+	switch {
+	case hasBodyOverride:
+		resolvedSpec = bodyOverride
+	case requestNeedsResolvedSpec(fields, requestStruct.Type()):
 		var err error
 		resolvedSpec, err = resolvedSpecValue(resource, options)
 		if err != nil {
@@ -1233,6 +1262,16 @@ func buildExplicitRequest(requestStruct reflect.Value, values map[string]any, pr
 	}
 
 	return nil
+}
+
+// ResolveSpecValue rewrites secret-backed spec inputs and omits zero-value nested
+// structs using the same projection rules as generated runtime request builders.
+func ResolveSpecValue(resource any, ctx context.Context, credentialClient credhelper.CredentialClient, namespace string) (any, error) {
+	return resolvedSpecValue(resource, requestBuildOptions{
+		Context:          ctx,
+		CredentialClient: credentialClient,
+		Namespace:        namespace,
+	})
 }
 
 func buildHeuristicRequest(
