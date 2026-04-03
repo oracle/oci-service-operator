@@ -238,8 +238,20 @@ func (c *queueRuntimeClient) resumeDelete(ctx context.Context, resource *queuev1
 	workRequest, err := c.getWorkRequest(ctx, workRequestID)
 	if err != nil {
 		if trackedID != "" && isQueueDeleteNotFoundOCI(err) {
-			c.markDeleted(resource, "OCI Queue delete confirmed")
-			return true, nil
+			current, readErr := c.getQueue(ctx, trackedID)
+			if readErr != nil {
+				if isQueueDeleteNotFoundOCI(readErr) {
+					c.markDeleted(resource, "OCI Queue deleted")
+					return true, nil
+				}
+				return false, normalizeQueueOCIError(readErr)
+			}
+			if current.LifecycleState == queuesdk.QueueLifecycleStateDeleted {
+				c.markDeleted(resource, "OCI Queue deleted")
+				return true, nil
+			}
+			c.markDeleteProgress(resource, fmt.Sprintf("Queue delete work request %s is no longer readable; waiting for Queue %s to disappear", workRequestID, trackedID))
+			return false, nil
 		}
 		return false, normalizeQueueOCIError(err)
 	}
@@ -260,13 +272,17 @@ func (c *queueRuntimeClient) resumeDelete(ctx context.Context, resource *queuev1
 			return true, nil
 		}
 
-		_, err := c.getQueue(ctx, trackedID)
+		current, err := c.getQueue(ctx, trackedID)
 		if err != nil {
 			if isQueueDeleteNotFoundOCI(err) {
 				c.markDeleted(resource, "OCI Queue deleted")
 				return true, nil
 			}
 			return false, normalizeQueueOCIError(err)
+		}
+		if current.LifecycleState == queuesdk.QueueLifecycleStateDeleted {
+			c.markDeleted(resource, "OCI Queue deleted")
+			return true, nil
 		}
 
 		c.markDeleteProgress(resource, fmt.Sprintf("Queue delete work request %s succeeded; waiting for Queue %s to disappear", workRequestID, trackedID))
