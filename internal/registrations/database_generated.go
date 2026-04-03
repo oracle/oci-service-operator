@@ -13,7 +13,7 @@ import (
 	databasev1beta1 "github.com/oracle/oci-service-operator/api/database/v1beta1"
 	databasecontrollers "github.com/oracle/oci-service-operator/controllers/database"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
-	databaseautonomousdatabaseservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/autonomousdatabases/adb"
+	databaseautonomousdatabaseservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/database/autonomousdatabase"
 )
 
 func init() {

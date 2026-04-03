@@ -1396,8 +1396,8 @@ func assertDatabaseRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) 
 	) {
 		t.Fatalf("database package extraResources = %v", service.Package.ExtraResources)
 	}
-	if override.ServiceManager.PackagePath != "autonomousdatabases/adb" {
-		t.Fatalf("database packagePath = %q, want %q", override.ServiceManager.PackagePath, "autonomousdatabases/adb")
+	if override.ServiceManager.PackagePath != "database/autonomousdatabase" {
+		t.Fatalf("database packagePath = %q, want %q", override.ServiceManager.PackagePath, "database/autonomousdatabase")
 	}
 	if override.Webhooks.Strategy != "" {
 		t.Fatalf("database resource webhook strategy = %q, want empty", override.Webhooks.Strategy)

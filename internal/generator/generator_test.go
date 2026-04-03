@@ -1797,8 +1797,8 @@ func TestCurrentDefaultActiveGeneratedArtifactsMatchCheckedInOutputs(t *testing.
 		"controllers/nosql/table_controller.go",
 		"controllers/psql/dbsystem_controller.go",
 		"controllers/streaming/stream_controller.go",
-		"pkg/servicemanager/autonomousdatabases/adb/autonomousdatabase_serviceclient.go",
-		"pkg/servicemanager/autonomousdatabases/adb/autonomousdatabase_servicemanager.go",
+		"pkg/servicemanager/database/autonomousdatabase/autonomousdatabase_serviceclient.go",
+		"pkg/servicemanager/database/autonomousdatabase/autonomousdatabase_servicemanager.go",
 		"pkg/servicemanager/mysql/dbsystem/dbsystem_serviceclient.go",
 		"pkg/servicemanager/mysql/dbsystem/dbsystem_servicemanager.go",
 		"pkg/servicemanager/nosql/table/table_serviceclient.go",
@@ -1962,7 +1962,7 @@ func TestCheckedInPromotedRuntimeArtifactsMatchGenerator(t *testing.T) {
 			serviceName:       "database",
 			kind:              "AutonomousDatabase",
 			formalSlug:        "databaseautonomousdatabase",
-			serviceClientPath: "pkg/servicemanager/autonomousdatabases/adb/autonomousdatabase_serviceclient.go",
+			serviceClientPath: "pkg/servicemanager/database/autonomousdatabase/autonomousdatabase_serviceclient.go",
 			controllerPath:    "controllers/database/autonomousdatabase_controller.go",
 			controllerContains: []string{
 				`// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch`,
@@ -2051,7 +2051,7 @@ func TestCheckedInDatabaseAutonomousDatabaseUsesSecretBackedAdminPassword(t *tes
 		`AdminPassword string ` + "`json:\"adminPassword,omitempty\"`",
 	})
 
-	serviceClientContent := readFile(t, filepath.Join(outputRoot, "pkg", "servicemanager", "autonomousdatabases", "adb", "autonomousdatabase_serviceclient.go"))
+	serviceClientContent := readFile(t, filepath.Join(outputRoot, "pkg", "servicemanager", "database", "autonomousdatabase", "autonomousdatabase_serviceclient.go"))
 	assertContains(t, serviceClientContent, []string{
 		`CredentialClient: manager.CredentialClient,`,
 	})

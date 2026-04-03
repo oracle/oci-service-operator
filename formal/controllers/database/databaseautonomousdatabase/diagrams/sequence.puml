@@ -140,7 +140,7 @@ filters compartment_id, display_name
 conflicts: is_shrink_only -> shrink_adb_trigger
 open gaps: none
 Promoted generated-runtime metadata for
-database/AutonomousDatabase preserved after the
-autonomousdatabases/adb layout port.
+database/AutonomousDatabase now lives under
+pkg/servicemanager/database/autonomousdatabase.
 end note
 @enduml

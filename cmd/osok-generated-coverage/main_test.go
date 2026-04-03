@@ -136,19 +136,19 @@ func TestPreserveCheckedInCompanionFilesLinksManualCompanions(t *testing.T) {
 	typesPath := filepath.Join(apiSourceDir, "autonomousdatabase_types.go")
 	mustCoverageWriteFile(t, typesPath, "package v1beta1\n")
 
-	serviceManagerSourceDir := filepath.Join(repoRoot, "pkg", "servicemanager", "autonomousdatabases", "adb")
+	serviceManagerSourceDir := filepath.Join(repoRoot, "pkg", "servicemanager", "database", "autonomousdatabase")
 	mustCoverageMkdirAll(t, serviceManagerSourceDir)
 	adapterPath := filepath.Join(serviceManagerSourceDir, "autonomousdatabase_generated_client_adapter.go")
-	mustCoverageWriteFile(t, adapterPath, "package adb\n")
+	mustCoverageWriteFile(t, adapterPath, "package autonomousdatabase\n")
 	legacyServiceManagerPath := filepath.Join(serviceManagerSourceDir, "legacy_servicemanager.go")
-	mustCoverageWriteFile(t, legacyServiceManagerPath, "package adb\n")
+	mustCoverageWriteFile(t, legacyServiceManagerPath, "package autonomousdatabase\n")
 	generatedServiceClientPath := filepath.Join(serviceManagerSourceDir, "autonomousdatabase_serviceclient.go")
-	mustCoverageWriteFile(t, generatedServiceClientPath, "package adb\n")
+	mustCoverageWriteFile(t, generatedServiceClientPath, "package autonomousdatabase\n")
 
-	snapshotServiceManagerDir := filepath.Join(snapshotRoot, "pkg", "servicemanager", "autonomousdatabases", "adb")
+	snapshotServiceManagerDir := filepath.Join(snapshotRoot, "pkg", "servicemanager", "database", "autonomousdatabase")
 	mustCoverageMkdirAll(t, snapshotServiceManagerDir)
 	snapshotGeneratedServiceClientPath := filepath.Join(snapshotServiceManagerDir, "autonomousdatabase_serviceclient.go")
-	mustCoverageWriteFile(t, snapshotGeneratedServiceClientPath, "package adb\n")
+	mustCoverageWriteFile(t, snapshotGeneratedServiceClientPath, "package autonomousdatabase\n")
 
 	packages := []*generator.PackageModel{
 		{
@@ -156,7 +156,7 @@ func TestPreserveCheckedInCompanionFilesLinksManualCompanions(t *testing.T) {
 			Version: "v1beta1",
 			ServiceManagers: []generator.ServiceManagerModel{
 				{
-					PackagePath:            "autonomousdatabases/adb",
+					PackagePath:            "database/autonomousdatabase",
 					ServiceClientFileName:  "autonomousdatabase_serviceclient.go",
 					ServiceManagerFileName: "autonomousdatabase_servicemanager.go",
 				},
@@ -182,26 +182,26 @@ func TestPreserveCheckedInCompanionFilesSkipsExcludedGeneratedServiceManagerPack
 	repoRoot := t.TempDir()
 	snapshotRoot := t.TempDir()
 
-	selectedSourceDir := filepath.Join(repoRoot, "pkg", "servicemanager", "autonomousdatabases", "adb")
+	selectedSourceDir := filepath.Join(repoRoot, "pkg", "servicemanager", "database", "autonomousdatabase")
 	mustCoverageMkdirAll(t, selectedSourceDir)
 	selectedCompanionPath := filepath.Join(selectedSourceDir, "legacy_servicemanager.go")
-	mustCoverageWriteFile(t, selectedCompanionPath, "package adb\n")
+	mustCoverageWriteFile(t, selectedCompanionPath, "package autonomousdatabase\n")
 
 	excludedSourceDir := filepath.Join(repoRoot, "pkg", "servicemanager", "database", "dbsystem")
 	mustCoverageMkdirAll(t, excludedSourceDir)
 	mustCoverageWriteFile(t, filepath.Join(excludedSourceDir, "dbsystem_serviceclient.go"), "package dbsystem\n\n"+generatedFileMarker+"\n")
 	mustCoverageWriteFile(t, filepath.Join(excludedSourceDir, "dbsystem_servicemanager.go"), "package dbsystem\n\n"+generatedFileMarker+"\n")
 
-	snapshotSelectedDir := filepath.Join(snapshotRoot, "pkg", "servicemanager", "autonomousdatabases", "adb")
+	snapshotSelectedDir := filepath.Join(snapshotRoot, "pkg", "servicemanager", "database", "autonomousdatabase")
 	mustCoverageMkdirAll(t, snapshotSelectedDir)
-	mustCoverageWriteFile(t, filepath.Join(snapshotSelectedDir, "autonomousdatabase_serviceclient.go"), "package adb\n\n"+generatedFileMarker+"\n")
+	mustCoverageWriteFile(t, filepath.Join(snapshotSelectedDir, "autonomousdatabase_serviceclient.go"), "package autonomousdatabase\n\n"+generatedFileMarker+"\n")
 
 	packages := []*generator.PackageModel{
 		{
 			Service: generator.ServiceConfig{Group: "database"},
 			ServiceManagers: []generator.ServiceManagerModel{
 				{
-					PackagePath:            "autonomousdatabases/adb",
+					PackagePath:            "database/autonomousdatabase",
 					ServiceClientFileName:  "autonomousdatabase_serviceclient.go",
 					ServiceManagerFileName: "autonomousdatabase_servicemanager.go",
 				},
