@@ -3,7 +3,7 @@
   "surface": "provider-facts",
   "service": "objectstorage",
   "slug": "objectstoragebucket",
-  "kind": "ObjectStorageBucket",
+  "kind": "Bucket",
   "sourceRef": "terraform-provider-oci",
   "providerResource": "oci_objectstorage_bucket",
   "operations": {
@@ -117,6 +117,6 @@
     ]
   },
   "notes": [
-    "Seeded ObjectStorageBucket row for objectstorage; the published kind reuses the Bucket SDK family while the repo-owned service client resolves namespaceName through GetNamespace when spec.namespace is omitted."
+    "Seeded Bucket row for objectstorage; the published kind reuses the Bucket SDK family while the repo-owned service client resolves namespaceName through GetNamespace when spec.namespace is omitted."
   ]
 }

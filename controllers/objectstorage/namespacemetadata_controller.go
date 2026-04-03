@@ -20,9 +20,9 @@ type NamespaceMetadataReconciler struct {
 	Reconciler *core.BaseReconciler
 }
 
-// +kubebuilder:rbac:groups=objectstorage.oracle.com,resources=namespacemetadatas,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=objectstorage.oracle.com,resources=namespacemetadatas/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=objectstorage.oracle.com,resources=namespacemetadatas/finalizers,verbs=update
+// +kubebuilder:rbac:groups=objectstorage.oracle.com,resources=namespacemetadata,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=objectstorage.oracle.com,resources=namespacemetadata/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=objectstorage.oracle.com,resources=namespacemetadata/finalizers,verbs=update
 
 // Reconcile is part of the main Kubernetes reconciliation loop.
 func (r *NamespaceMetadataReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {

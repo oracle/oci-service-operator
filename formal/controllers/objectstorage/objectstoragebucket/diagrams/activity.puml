@@ -8,7 +8,7 @@ skinparam noteBackgroundColor #fff7d6
 skinparam noteBorderColor #b45309
 skinparam noteFontColor #334155
 skinparam roundcorner 16
-title Activity - objectstorage/ObjectStorageBucket
+title Activity - objectstorage/Bucket
 skinparam activity {
   backgroundColor #f8fafc
   borderColor #0f172a
@@ -23,7 +23,7 @@ skinparam activity {
 start
 partition "Observe and Bind" {
 :Start from shared flow\nshared/diagrams/shared-reconcile-activity.svg;
-:Read desired ObjectStorageBucket spec, tracked\nstatus, and delete intent;
+:Read desired Bucket spec, tracked status, and\ndelete intent;
 if ("Tracked or explicit OCI identity present?") then (yes)
 :Get the current OCI resource via GetBucket;
 else (no)
@@ -82,7 +82,7 @@ controllers specialize the shared reconcile path
 with formal runtime ownership.
 service: objectstorage
 slug: objectstoragebucket
-kind: ObjectStorageBucket
+kind: Bucket
 archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
@@ -98,11 +98,10 @@ list lookup: oci_objectstorage_buckets filters
 name, namespace, compartment_id
 conflicts: none
 open gaps: none
-The published ObjectStorageBucket kind reuses
-the Bucket SDK family and resolves namespaceName
-from observed status first, then through a
-GetNamespace lookup when spec.namespace is
-omitted.
+The published Bucket kind reuses the Bucket SDK
+family and resolves namespaceName from observed
+status first, then through a GetNamespace lookup
+when spec.namespace is omitted.
 Successful create and update responses without
 lifecycle fields are treated as synchronous
 success and projected directly into status,

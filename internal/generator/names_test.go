@@ -26,6 +26,7 @@ func TestSingularizeAndPluralize(t *testing.T) {
 		{name: "status suffix is preserved", input: "AlarmsStatus", singular: "AlarmStatus", plural: "AlarmStatuses"},
 		{name: "statuses singularize to status", input: "AlarmStatuses", singular: "AlarmStatus", plural: "AlarmStatuses"},
 		{name: "stats stay plural", input: "Stats", singular: "Stats", plural: "Stats"},
+		{name: "metadata stays uncountable", input: "NamespaceMetadata", singular: "NamespaceMetadata", plural: "NamespaceMetadata"},
 		{name: "ss suffix uses es pluralization", input: "ConnectHarnesses", singular: "ConnectHarness", plural: "ConnectHarnesses"},
 	}
 

@@ -1313,6 +1313,15 @@ func populateHeuristicRequestField(fieldValue reflect.Value, fieldType reflect.S
 
 func heuristicRequestValue(values map[string]any, fieldType reflect.StructField, preferredID string, idAliases []string) (any, bool) {
 	lookupKey := requestLookupKey(fieldType)
+	if lookupKey == "namespaceName" {
+		if value, ok := lookupValueByPaths(values, "namespace"); ok {
+			return value, true
+		}
+		if value, ok := lookupValueByPaths(values, "namespaceName"); ok {
+			return value, true
+		}
+		return nil, false
+	}
 	if rawValue, ok := lookupValueByPaths(values, lookupKey); ok {
 		return rawValue, true
 	}
@@ -1322,11 +1331,6 @@ func heuristicRequestValue(values map[string]any, fieldType reflect.StructField,
 	switch lookupKey {
 	case "name":
 		return lookupValueByPaths(values, "metadataName")
-	case "namespaceName":
-		if value, ok := lookupValueByPaths(values, "namespaceName"); ok {
-			return value, true
-		}
-		return lookupValueByPaths(values, "namespace")
 	default:
 		return nil, false
 	}
@@ -1352,18 +1356,21 @@ func explicitRequestValue(values map[string]any, field RequestField, preferredID
 			return rawValue, true
 		}
 	}
+	if lookupKey == "namespaceName" {
+		if value, ok := lookupValueByPaths(values, "namespace"); ok {
+			return value, true
+		}
+		if value, ok := lookupValueByPaths(values, "namespaceName"); ok {
+			return value, true
+		}
+		return nil, false
+	}
 
 	if rawValue, ok := lookupValueByPaths(values, lookupKey); ok {
 		return rawValue, true
 	}
 	if lookupKey == "name" {
 		return lookupValueByPaths(values, "metadataName")
-	}
-	if lookupKey == "namespaceName" {
-		if value, ok := lookupValueByPaths(values, "namespaceName"); ok {
-			return value, true
-		}
-		return lookupValueByPaths(values, "namespace")
 	}
 
 	return nil, false

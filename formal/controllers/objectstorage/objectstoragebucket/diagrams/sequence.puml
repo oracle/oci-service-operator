@@ -8,7 +8,7 @@ skinparam noteBackgroundColor #fff7d6
 skinparam noteBorderColor #b45309
 skinparam noteFontColor #334155
 skinparam roundcorner 16
-title Sequence - objectstorage/ObjectStorageBucket
+title Sequence - objectstorage/Bucket
 hide footbox
 skinparam sequence {
   actorBorderColor #0f172a
@@ -31,9 +31,9 @@ shared/diagrams/shared-resolution-sequence.svg
 shared delete:
 shared/diagrams/shared-delete-sequence.svg
 end note
-Kubernetes -> Controller: enqueue ObjectStorageBucket\nreconcile
+Kubernetes -> Controller: enqueue Bucket reconcile
 Controller -> BaseReconciler: Reconcile(request)
-BaseReconciler -> ServiceManager: reconcile desired\nObjectStorageBucket
+BaseReconciler -> ServiceManager: reconcile desired Bucket
 group Lookup and bind
 alt tracked or explicit OCI identity already exists
 ServiceManager -> OCI: GetBucket
@@ -95,7 +95,7 @@ delete sequences with imported waits and
 controller-local policy.
 service: objectstorage
 slug: objectstoragebucket
-kind: ObjectStorageBucket
+kind: Bucket
 archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
@@ -111,11 +111,10 @@ list lookup: oci_objectstorage_buckets filters
 name, namespace, compartment_id
 conflicts: none
 open gaps: none
-The published ObjectStorageBucket kind reuses
-the Bucket SDK family and resolves namespaceName
-from observed status first, then through a
-GetNamespace lookup when spec.namespace is
-omitted.
+The published Bucket kind reuses the Bucket SDK
+family and resolves namespaceName from observed
+status first, then through a GetNamespace lookup
+when spec.namespace is omitted.
 Successful create and update responses without
 lifecycle fields are treated as synchronous
 success and projected directly into status,

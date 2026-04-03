@@ -46,6 +46,8 @@ func pluralize(name string) string {
 		return strings.TrimSuffix(name, "Index") + "Indices"
 	case strings.HasSuffix(name, "index"):
 		return strings.TrimSuffix(name, "index") + "indices"
+	case strings.HasSuffix(name, "Metadata"), strings.HasSuffix(name, "metadata"):
+		return name
 	case strings.HasSuffix(name, "Status"), strings.HasSuffix(name, "status"):
 		return name + "es"
 	case strings.HasSuffix(name, "Stats"), strings.HasSuffix(name, "stats"):

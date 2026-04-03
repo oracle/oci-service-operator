@@ -10,8 +10,8 @@ gaps: []
 
 ## Current runtime path
 
-- `ObjectStorageBucket` is the published v2alpha controller target and now routes through the reference-style `pkg/servicemanager/objectstorage/bucket` package via `BucketServiceManager`.
-- The service client delegates CRUD, list reuse, status projection, and delete confirmation to the shared `pkg/servicemanager/generatedruntime` implementation while keeping the published-kind compatibility explicit through `Kind=ObjectStorageBucket` and `SDKName=Bucket`.
+- `Bucket` is the published v2alpha controller target and now routes through the reference-style `pkg/servicemanager/objectstorage/bucket` package via `BucketServiceManager`.
+- The service client delegates CRUD, list reuse, status projection, and delete confirmation to the shared `pkg/servicemanager/generatedruntime` implementation while keeping the SDK family binding explicit through `Kind=Bucket` and `SDKName=Bucket`.
 - When `spec.namespace` is empty, the service client resolves the tenancy namespace with `GetNamespace` before create or delete so the published surface does not require the caller to discover that OCI path value up front.
 
 ## Repo-authored semantics

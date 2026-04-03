@@ -8,7 +8,7 @@ skinparam noteBackgroundColor #fff7d6
 skinparam noteBorderColor #b45309
 skinparam noteFontColor #334155
 skinparam roundcorner 16
-title State Machine - objectstorage/ObjectStorageBucket
+title State Machine - objectstorage/Bucket
 skinparam state {
   backgroundColor #f8fafc
   borderColor #0f172a
@@ -62,7 +62,7 @@ controller phases with explicit finalizer and
 requeue policies.
 service: objectstorage
 slug: objectstoragebucket
-kind: ObjectStorageBucket
+kind: Bucket
 archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
@@ -78,11 +78,10 @@ list lookup: oci_objectstorage_buckets filters
 name, namespace, compartment_id
 conflicts: none
 open gaps: none
-The published ObjectStorageBucket kind reuses
-the Bucket SDK family and resolves namespaceName
-from observed status first, then through a
-GetNamespace lookup when spec.namespace is
-omitted.
+The published Bucket kind reuses the Bucket SDK
+family and resolves namespaceName from observed
+status first, then through a GetNamespace lookup
+when spec.namespace is omitted.
 Successful create and update responses without
 lifecycle fields are treated as synchronous
 success and projected directly into status,

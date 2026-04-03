@@ -38,35 +38,85 @@ var newBucketServiceClient = func(manager *BucketServiceManager) BucketServiceCl
 		Kind:    "Bucket",
 		SDKName: "Bucket",
 		Log:     manager.Log,
+		Semantics: &generatedruntime.Semantics{
+			FormalService:     "objectstorage",
+			FormalSlug:        "objectstoragebucket",
+			StatusProjection:  "required",
+			SecretSideEffects: "none",
+			FinalizerPolicy:   "retain-until-confirmed-delete",
+			Lifecycle: generatedruntime.LifecycleSemantics{
+				ProvisioningStates: []string{},
+				UpdatingStates:     []string{},
+				ActiveStates:       []string{"ACTIVE"},
+			},
+			Delete: generatedruntime.DeleteSemantics{
+				Policy:         "required",
+				PendingStates:  []string{},
+				TerminalStates: []string{"DELETED"},
+			},
+			List: &generatedruntime.ListSemantics{
+				ResponseItemsField: "Items",
+				MatchFields:        []string{"compartmentId", "name", "namespace"},
+			},
+			Mutation: generatedruntime.MutationSemantics{
+				Mutable:       []string{"autoTiering", "compartmentId", "definedTags", "freeformTags", "kmsKeyId", "metadata", "name", "namespace", "objectEventsEnabled", "publicAccessType", "versioning"},
+				ForceNew:      []string{"storageTier"},
+				ConflictsWith: map[string][]string{},
+			},
+			Hooks: generatedruntime.HookSet{
+				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+				Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+				Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+			},
+			CreateFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "read-after-write",
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			},
+			UpdateFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "read-after-write",
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			},
+			DeleteFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "confirm-delete",
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+			},
+			AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+			Unsupported:         []generatedruntime.UnsupportedSemantic{},
+		},
 		Create: &generatedruntime.Operation{
 			NewRequest: func() any { return &objectstoragesdk.CreateBucketRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.CreateBucket(ctx, *request.(*objectstoragesdk.CreateBucketRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "NamespaceName", RequestName: "namespaceName", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateBucketDetails", RequestName: "CreateBucketDetails", Contribution: "body", PreferResourceID: false}},
 		},
 		Get: &generatedruntime.Operation{
 			NewRequest: func() any { return &objectstoragesdk.GetBucketRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.GetBucket(ctx, *request.(*objectstoragesdk.GetBucketRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "NamespaceName", RequestName: "namespaceName", Contribution: "path", PreferResourceID: false}, {FieldName: "BucketName", RequestName: "bucketName", Contribution: "path", PreferResourceID: false}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}},
 		},
 		List: &generatedruntime.Operation{
 			NewRequest: func() any { return &objectstoragesdk.ListBucketsRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.ListBuckets(ctx, *request.(*objectstoragesdk.ListBucketsRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "NamespaceName", RequestName: "namespaceName", Contribution: "path", PreferResourceID: true}, {FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}},
 		},
 		Update: &generatedruntime.Operation{
 			NewRequest: func() any { return &objectstoragesdk.UpdateBucketRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.UpdateBucket(ctx, *request.(*objectstoragesdk.UpdateBucketRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "NamespaceName", RequestName: "namespaceName", Contribution: "path", PreferResourceID: false}, {FieldName: "BucketName", RequestName: "bucketName", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateBucketDetails", RequestName: "UpdateBucketDetails", Contribution: "body", PreferResourceID: false}},
 		},
 		Delete: &generatedruntime.Operation{
 			NewRequest: func() any { return &objectstoragesdk.DeleteBucketRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.DeleteBucket(ctx, *request.(*objectstoragesdk.DeleteBucketRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "NamespaceName", RequestName: "namespaceName", Contribution: "path", PreferResourceID: false}, {FieldName: "BucketName", RequestName: "bucketName", Contribution: "path", PreferResourceID: false}},
 		},
 	}
 	if err != nil {

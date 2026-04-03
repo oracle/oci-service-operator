@@ -667,7 +667,7 @@ services:
       webhooks:
         strategy: none
       resources:
-        - kind: ObjectStorageBucket
+        - kind: Bucket
           formalSpec: objectstoragebucket
           serviceManager:
             packagePath: objectstorage/bucket

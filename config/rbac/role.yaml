@@ -395,7 +395,7 @@ rules:
   - buckets
   - multipartuploadparts
   - multipartuploads
-  - namespacemetadatas
+  - namespacemetadata
   - namespaces
   - objectlifecyclepolicies
   - objects
@@ -422,7 +422,7 @@ rules:
   - buckets/finalizers
   - multipartuploadparts/finalizers
   - multipartuploads/finalizers
-  - namespacemetadatas/finalizers
+  - namespacemetadata/finalizers
   - namespaces/finalizers
   - objectlifecyclepolicies/finalizers
   - objects/finalizers
@@ -443,7 +443,7 @@ rules:
   - buckets/status
   - multipartuploadparts/status
   - multipartuploads/status
-  - namespacemetadatas/status
+  - namespacemetadata/status
   - namespaces/status
   - objectlifecyclepolicies/status
   - objects/status
