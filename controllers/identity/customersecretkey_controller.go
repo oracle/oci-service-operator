@@ -20,9 +20,9 @@ type CustomerSecretKeyReconciler struct {
 	Reconciler *core.BaseReconciler
 }
 
-// +kubebuilder:rbac:groups=identity.oracle.com,resources=customersecretkeies,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=identity.oracle.com,resources=customersecretkeies/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=identity.oracle.com,resources=customersecretkeies/finalizers,verbs=update
+// +kubebuilder:rbac:groups=identity.oracle.com,resources=customersecretkeys,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=identity.oracle.com,resources=customersecretkeys/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=identity.oracle.com,resources=customersecretkeys/finalizers,verbs=update
 
 // Reconcile is part of the main Kubernetes reconciliation loop.
 func (r *CustomerSecretKeyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {

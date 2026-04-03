@@ -30,6 +30,8 @@ var specialSingularRules = []singularRule{
 
 var esPluralSuffixes = []string{"sses", "shes", "ches", "xes", "zes"}
 
+var unpluralizedSuffixes = []string{"Metadata", "metadata", "Information", "information"}
+
 func singularize(name string) string {
 	if singular, ok := applySpecialSingularRules(name); ok {
 		return singular
@@ -46,7 +48,7 @@ func pluralize(name string) string {
 		return strings.TrimSuffix(name, "Index") + "Indices"
 	case strings.HasSuffix(name, "index"):
 		return strings.TrimSuffix(name, "index") + "indices"
-	case strings.HasSuffix(name, "Metadata"), strings.HasSuffix(name, "metadata"):
+	case hasUnpluralizedSuffix(name):
 		return name
 	case strings.HasSuffix(name, "Status"), strings.HasSuffix(name, "status"):
 		return name + "es"
@@ -55,6 +57,9 @@ func pluralize(name string) string {
 	case strings.HasSuffix(name, "s") && !strings.HasSuffix(name, "ss"):
 		return name
 	case strings.HasSuffix(name, "y") && len(name) > 1:
+		if hasVowelBeforeSuffix(name, 'y') {
+			return name + "s"
+		}
 		return strings.TrimSuffix(name, "y") + "ies"
 	case strings.HasSuffix(name, "ss"):
 		return name + "es"
@@ -189,4 +194,27 @@ func appendLowerToken(tokens []string, current []rune) []string {
 	}
 
 	return append(tokens, strings.ToLower(string(current)))
+}
+
+func hasUnpluralizedSuffix(name string) bool {
+	for _, suffix := range unpluralizedSuffixes {
+		if strings.HasSuffix(name, suffix) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func hasVowelBeforeSuffix(name string, suffix byte) bool {
+	if len(name) < 2 || name[len(name)-1] != suffix {
+		return false
+	}
+
+	switch unicode.ToLower(rune(name[len(name)-2])) {
+	case 'a', 'e', 'i', 'o', 'u':
+		return true
+	default:
+		return false
+	}
 }

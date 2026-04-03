@@ -474,6 +474,9 @@ func (c ServiceClient[T]) deleteWithSemantics(ctx context.Context, resource T) (
 		}
 		return false, err
 	}
+	if deleted, err, handled := c.confirmDeleteIfAlreadyPending(ctx, resource, currentID, semantics); handled {
+		return deleted, err
+	}
 	deleted, err := c.invokeDeleteOperation(ctx, resource, currentID)
 	if deleted {
 		return true, nil
@@ -482,6 +485,34 @@ func (c ServiceClient[T]) deleteWithSemantics(ctx context.Context, resource T) (
 		return false, err
 	}
 	return c.confirmDeleteWithSemantics(ctx, resource, currentID, semantics)
+}
+
+func (c ServiceClient[T]) confirmDeleteIfAlreadyPending(ctx context.Context, resource T, currentID string, semantics *Semantics) (bool, error, bool) {
+	if semantics.DeleteFollowUp.Strategy != "confirm-delete" {
+		return false, nil, false
+	}
+	if c.config.Get == nil && c.config.List == nil {
+		return false, nil, false
+	}
+
+	response, err := c.readResource(ctx, resource, currentID, readPhaseDelete)
+	if err != nil {
+		if isNotFound(err) || errors.Is(err, errResourceNotFound) {
+			c.markDeleted(resource, "OCI resource deleted")
+			return true, nil, true
+		}
+		return false, nil, false
+	}
+
+	lifecycleState := strings.ToUpper(responseLifecycleState(response))
+	if !containsString(semantics.Delete.PendingStates, lifecycleState) &&
+		!containsString(semantics.Delete.TerminalStates, lifecycleState) {
+		return false, nil, false
+	}
+
+	_ = mergeResponseIntoStatus(resource, response)
+	deleted, err := c.applyDeletePolicy(resource, response, semantics)
+	return deleted, err, true
 }
 
 func (c ServiceClient[T]) shouldConfirmDeleteAfterError(err error) bool {
@@ -1134,16 +1165,7 @@ func (c ServiceClient[T]) markCondition(resource T, condition shared.OSOKConditi
 }
 
 func (c ServiceClient[T]) currentID(resource T) string {
-	status, err := osokStatus(resource)
-	if err == nil && status.Ocid != "" {
-		return string(status.Ocid)
-	}
-
-	values, err := lookupValues(resource)
-	if err != nil {
-		return ""
-	}
-	return firstNonEmpty(values, c.idFieldAliases()...)
+	return c.statusID(resource)
 }
 
 func (c ServiceClient[T]) usesStatusOnlyCurrentID(resource T, currentID string) bool {
@@ -1383,6 +1405,12 @@ func explicitRequestValue(values map[string]any, field RequestField, preferredID
 		if currentID, ok := lookupValueByPaths(values, "id", "ocid"); ok {
 			return currentID, true
 		}
+		if len(field.LookupPaths) != 0 {
+			if rawValue, ok := lookupValueByPaths(values, field.LookupPaths...); ok {
+				return rawValue, true
+			}
+		}
+		return nil, false
 	}
 
 	lookupKey := strings.TrimSpace(field.RequestName)

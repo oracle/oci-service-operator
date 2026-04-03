@@ -48,7 +48,7 @@ type CustomerSecretKeyStatus struct {
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.status.conditions[-1].type",description="status of the CustomerSecretKey",priority=0
 // +kubebuilder:printcolumn:name="Ocid",type="string",JSONPath=".status.status.ocid",description="Ocid of the CustomerSecretKey",priority=1
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0
-// CustomerSecretKey is the Schema for the customersecretkeies API.
+// CustomerSecretKey is the Schema for the customersecretkeys API.
 type CustomerSecretKey struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

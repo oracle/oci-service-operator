@@ -103,6 +103,52 @@ func TestCheckedInNoSQLPackageRBACMatchesEventRecorderSemantics(t *testing.T) {
 	)
 }
 
+func TestCheckedInIdentityPackageRBACUsesActualResourceNames(t *testing.T) {
+	assertFileContains(t, filepath.Join(repoRoot(t), "controllers", "identity", "apikey_controller.go"), []string{
+		"// +kubebuilder:rbac:groups=identity.oracle.com,resources=apikeys,verbs=get;list;watch;create;update;patch;delete",
+		"// +kubebuilder:rbac:groups=identity.oracle.com,resources=apikeys/status,verbs=get;update;patch",
+		"// +kubebuilder:rbac:groups=identity.oracle.com,resources=apikeys/finalizers,verbs=update",
+	})
+	assertFileDoesNotContain(t, filepath.Join(repoRoot(t), "controllers", "identity", "apikey_controller.go"), []string{
+		"// +kubebuilder:rbac:groups=identity.oracle.com,resources=apikeies,verbs=get;list;watch;create;update;patch;delete",
+	})
+
+	assertFileContains(t, filepath.Join(repoRoot(t), "controllers", "identity", "customersecretkey_controller.go"), []string{
+		"// +kubebuilder:rbac:groups=identity.oracle.com,resources=customersecretkeys,verbs=get;list;watch;create;update;patch;delete",
+		"// +kubebuilder:rbac:groups=identity.oracle.com,resources=customersecretkeys/status,verbs=get;update;patch",
+		"// +kubebuilder:rbac:groups=identity.oracle.com,resources=customersecretkeys/finalizers,verbs=update",
+	})
+	assertFileDoesNotContain(t, filepath.Join(repoRoot(t), "controllers", "identity", "customersecretkey_controller.go"), []string{
+		"// +kubebuilder:rbac:groups=identity.oracle.com,resources=customersecretkeies,verbs=get;list;watch;create;update;patch;delete",
+	})
+
+	assertFileContains(t, filepath.Join(repoRoot(t), "controllers", "identity", "useruipasswordinformation_controller.go"), []string{
+		"// +kubebuilder:rbac:groups=identity.oracle.com,resources=useruipasswordinformation,verbs=get;list;watch;create;update;patch;delete",
+		"// +kubebuilder:rbac:groups=identity.oracle.com,resources=useruipasswordinformation/status,verbs=get;update;patch",
+		"// +kubebuilder:rbac:groups=identity.oracle.com,resources=useruipasswordinformation/finalizers,verbs=update",
+	})
+	assertFileDoesNotContain(t, filepath.Join(repoRoot(t), "controllers", "identity", "useruipasswordinformation_controller.go"), []string{
+		"// +kubebuilder:rbac:groups=identity.oracle.com,resources=useruipasswordinformations,verbs=get;list;watch;create;update;patch;delete",
+	})
+
+	assertAPIGroupResourceVerbs(
+		t,
+		filepath.Join(repoRoot(t), "packages", "identity", "install", "generated", "rbac", "role.yaml"),
+		"identity.oracle.com",
+		map[string][]string{
+			"apikeys":                              {"create", "delete", "get", "list", "patch", "update", "watch"},
+			"apikeys/finalizers":                   {"update"},
+			"apikeys/status":                       {"get", "patch", "update"},
+			"customersecretkeys":                   {"create", "delete", "get", "list", "patch", "update", "watch"},
+			"customersecretkeys/finalizers":        {"update"},
+			"customersecretkeys/status":            {"get", "patch", "update"},
+			"useruipasswordinformation":            {"create", "delete", "get", "list", "patch", "update", "watch"},
+			"useruipasswordinformation/finalizers": {"update"},
+			"useruipasswordinformation/status":     {"get", "patch", "update"},
+		},
+	)
+}
+
 func assertCoreResourceVerbs(t *testing.T, path string, want map[string][]string) {
 	t.Helper()
 
@@ -131,6 +177,31 @@ func collectCoreResourceVerbs(rules []rbacv1.PolicyRule, tracked map[string][]st
 	got := make(map[string]map[string]struct{}, len(tracked))
 	for _, rule := range rules {
 		if !containsString(rule.APIGroups, "") {
+			continue
+		}
+		mergeTrackedResourceVerbs(got, tracked, rule.Resources, rule.Verbs)
+	}
+	return got
+}
+
+func assertAPIGroupResourceVerbs(t *testing.T, path string, apiGroup string, want map[string][]string) {
+	t.Helper()
+
+	role := loadClusterRole(t, path)
+	got := collectAPIGroupResourceVerbs(role.Rules, apiGroup, want)
+
+	for resource, wantVerbs := range want {
+		gotVerbs := sortedKeys(got[resource])
+		if !slices.Equal(gotVerbs, wantVerbs) {
+			t.Fatalf("%s %s/%s verbs = %v, want %v", path, apiGroup, resource, gotVerbs, wantVerbs)
+		}
+	}
+}
+
+func collectAPIGroupResourceVerbs(rules []rbacv1.PolicyRule, apiGroup string, tracked map[string][]string) map[string]map[string]struct{} {
+	got := make(map[string]map[string]struct{}, len(tracked))
+	for _, rule := range rules {
+		if !containsString(rule.APIGroups, apiGroup) {
 			continue
 		}
 		mergeTrackedResourceVerbs(got, tracked, rule.Resources, rule.Verbs)

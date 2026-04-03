@@ -20,9 +20,9 @@ type UserUIPasswordInformationReconciler struct {
 	Reconciler *core.BaseReconciler
 }
 
-// +kubebuilder:rbac:groups=identity.oracle.com,resources=useruipasswordinformations,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=identity.oracle.com,resources=useruipasswordinformations/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=identity.oracle.com,resources=useruipasswordinformations/finalizers,verbs=update
+// +kubebuilder:rbac:groups=identity.oracle.com,resources=useruipasswordinformation,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=identity.oracle.com,resources=useruipasswordinformation/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=identity.oracle.com,resources=useruipasswordinformation/finalizers,verbs=update
 
 // Reconcile is part of the main Kubernetes reconciliation loop.
 func (r *UserUIPasswordInformationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {

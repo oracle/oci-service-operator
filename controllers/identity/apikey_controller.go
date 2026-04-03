@@ -20,9 +20,9 @@ type ApiKeyReconciler struct {
 	Reconciler *core.BaseReconciler
 }
 
-// +kubebuilder:rbac:groups=identity.oracle.com,resources=apikeies,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=identity.oracle.com,resources=apikeies/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=identity.oracle.com,resources=apikeies/finalizers,verbs=update
+// +kubebuilder:rbac:groups=identity.oracle.com,resources=apikeys,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=identity.oracle.com,resources=apikeys/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=identity.oracle.com,resources=apikeys/finalizers,verbs=update
 
 // Reconcile is part of the main Kubernetes reconciliation loop.
 func (r *ApiKeyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {

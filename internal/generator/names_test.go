@@ -19,7 +19,10 @@ func TestSingularizeAndPluralize(t *testing.T) {
 		plural   string
 	}{
 		{name: "simple s suffix", input: "Widgets", singular: "Widget", plural: "Widgets"},
+		{name: "vowel+y keeps s suffix", input: "ApiKeys", singular: "ApiKey", plural: "ApiKeys"},
+		{name: "compound vowel+y keeps s suffix", input: "CustomerSecretKeys", singular: "CustomerSecretKey", plural: "CustomerSecretKeys"},
 		{name: "index uses indices pluralization", input: "Indices", singular: "Index", plural: "Indices"},
+		{name: "information stays unpluralized", input: "UserUIPasswordInformation", singular: "UserUIPasswordInformation", plural: "UserUIPasswordInformation"},
 		{name: "ies suffix", input: "Policies", singular: "Policy", plural: "Policies"},
 		{name: "autonomous database plural", input: "AutonomousDatabases", singular: "AutonomousDatabase", plural: "AutonomousDatabases"},
 		{name: "ss suffix gains es", input: "ConnectHarnesses", singular: "ConnectHarness", plural: "ConnectHarnesses"},

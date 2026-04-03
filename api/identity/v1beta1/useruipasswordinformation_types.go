@@ -34,7 +34,7 @@ type UserUIPasswordInformationStatus struct {
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.status.conditions[-1].type",description="status of the UserUIPasswordInformation",priority=0
 // +kubebuilder:printcolumn:name="Ocid",type="string",JSONPath=".status.status.ocid",description="Ocid of the UserUIPasswordInformation",priority=1
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0
-// UserUIPasswordInformation is the Schema for the useruipasswordinformations API.
+// UserUIPasswordInformation is the Schema for the useruipasswordinformation API.
 type UserUIPasswordInformation struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
