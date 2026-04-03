@@ -50,6 +50,10 @@ const (
 	queueWorkRequestPhaseDelete queueWorkRequestPhase = "delete"
 )
 
+var queueServiceClientDecorator = func(_ *QueueServiceManager, delegate QueueServiceClient) QueueServiceClient {
+	return delegate
+}
+
 func init() {
 	newQueueServiceClient = func(manager *QueueServiceManager) QueueServiceClient {
 		sdkClient, err := queuesdk.NewQueueAdminClientWithConfigurationProvider(manager.Provider)
@@ -60,7 +64,7 @@ func init() {
 		if err != nil {
 			runtimeClient.initErr = fmt.Errorf("initialize Queue OCI client: %w", err)
 		}
-		return runtimeClient
+		return queueServiceClientDecorator(manager, runtimeClient)
 	}
 }
 

@@ -10,8 +10,10 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/oracle/oci-go-sdk/v65/common"
 	queuev1beta1 "github.com/oracle/oci-service-operator/api/queue/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/credhelper"
+	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/stretchr/testify/assert"
@@ -575,4 +577,24 @@ func TestQueueEndpointSecretClientDeleteSkipsUnownedSecret(t *testing.T) {
 	deleted, err := client.Delete(context.Background(), resource)
 	requireQueueDeleteSuccess(t, deleted, err, "skipping an unowned same-name secret")
 	assertQueueCredentialCalls(t, credClient, queueSecretCallExpectation{get: true})
+}
+
+func TestQueueEndpointSecretClientInstalledOnManagerPath(t *testing.T) {
+	t.Parallel()
+
+	manager := NewQueueServiceManager(
+		common.NewRawConfigurationProvider("", "", "", "", "", nil),
+		&fakeQueueCredentialClient{},
+		nil,
+		loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("test")},
+		nil,
+	)
+
+	client, ok := manager.client.(queueEndpointSecretClient)
+	if !ok {
+		t.Fatalf("manager client type = %T, want queueEndpointSecretClient", manager.client)
+	}
+	if _, ok := client.delegate.(*queueRuntimeClient); !ok {
+		t.Fatalf("wrapped delegate type = %T, want *queueRuntimeClient", client.delegate)
+	}
 }

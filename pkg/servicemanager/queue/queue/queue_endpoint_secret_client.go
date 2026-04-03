@@ -22,9 +22,9 @@ import (
 const queueEndpointSecretOwnerUIDLabel = "queue.oracle.com/queue-uid"
 
 func init() {
-	runtimeFactory := newQueueServiceClient
-	newQueueServiceClient = func(manager *QueueServiceManager) QueueServiceClient {
-		return newQueueEndpointSecretClient(manager, runtimeFactory(manager))
+	previousDecorator := queueServiceClientDecorator
+	queueServiceClientDecorator = func(manager *QueueServiceManager, delegate QueueServiceClient) QueueServiceClient {
+		return newQueueEndpointSecretClient(manager, previousDecorator(manager, delegate))
 	}
 }
 
