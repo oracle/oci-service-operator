@@ -684,8 +684,10 @@ services:
     phase: data-and-storage
     packageProfile: controller-backed
     selection:
-      enabled: false
-      mode: all
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Bucket
     generation:
       controller:
         strategy: generated

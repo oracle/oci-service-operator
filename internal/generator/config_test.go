@@ -1085,12 +1085,12 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	cfg := loadCheckedInConfig(t)
 
 	activeServices := serviceNames(cfg.DefaultActiveServices())
-	wantActiveServices := []string{"containerengine", "core", "database", "dataflow", "identity", "mysql", "nosql", "opensearch", "psql", "queue", "redis", "streaming", "vault"}
+	wantActiveServices := []string{"containerengine", "core", "database", "dataflow", "identity", "mysql", "nosql", "objectstorage", "opensearch", "psql", "queue", "redis", "streaming", "vault"}
 	if !slices.Equal(activeServices, wantActiveServices) {
 		t.Fatalf("DefaultActiveServices() = %v, want %v", activeServices, wantActiveServices)
 	}
 
-	services := requireServices(t, cfg, "containerengine", "core", "database", "dataflow", "identity", "mysql", "nosql", "opensearch", "psql", "queue", "redis", "streaming", "vault")
+	services := requireServices(t, cfg, "containerengine", "core", "database", "dataflow", "identity", "mysql", "nosql", "objectstorage", "opensearch", "psql", "queue", "redis", "streaming", "vault")
 	assertServiceSelection(t, services["containerengine"], true, SelectionModeAll, nil)
 	assertServiceSelection(t, services["core"], true, SelectionModeAll, nil)
 	assertServiceSelection(t, services["database"], true, SelectionModeExplicit, []string{"AutonomousDatabase"})
@@ -1098,6 +1098,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["identity"], true, SelectionModeExplicit, []string{"Compartment"})
 	assertServiceSelection(t, services["mysql"], true, SelectionModeAll, nil)
 	assertServiceSelection(t, services["nosql"], true, SelectionModeAll, nil)
+	assertServiceSelection(t, services["objectstorage"], true, SelectionModeExplicit, []string{"Bucket"})
 	assertServiceSelection(t, services["opensearch"], true, SelectionModeExplicit, []string{"OpensearchCluster"})
 	assertServiceSelection(t, services["psql"], true, SelectionModeAll, nil)
 	assertServiceSelection(t, services["queue"], true, SelectionModeAll, nil)

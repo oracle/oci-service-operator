@@ -1726,8 +1726,8 @@ func TestCurrentDefaultActiveGeneratedArtifactsMatchCheckedInOutputs(t *testing.
 	if err != nil {
 		t.Fatalf("SelectServices(--all) error = %v", err)
 	}
-	if len(services) != 13 {
-		t.Fatalf("selected %d default-active services, want 13", len(services))
+	if len(services) != 14 {
+		t.Fatalf("selected %d default-active services, want 14", len(services))
 	}
 
 	outputRoot := t.TempDir()
@@ -1747,6 +1747,7 @@ func TestCurrentDefaultActiveGeneratedArtifactsMatchCheckedInOutputs(t *testing.
 		"identity":        1,
 		"mysql":           12,
 		"nosql":           8,
+		"objectstorage":   1,
 		"opensearch":      1,
 		"psql":            11,
 		"queue":           7,
@@ -1770,6 +1771,8 @@ func TestCurrentDefaultActiveGeneratedArtifactsMatchCheckedInOutputs(t *testing.
 		"api/mysql/v1beta1/dbsystem_types.go",
 		"api/nosql/v1beta1/groupversion_info.go",
 		"api/nosql/v1beta1/table_types.go",
+		"api/objectstorage/v1beta1/groupversion_info.go",
+		"api/objectstorage/v1beta1/bucket_types.go",
 		"api/opensearch/v1beta1/groupversion_info.go",
 		"api/opensearch/v1beta1/opensearchcluster_types.go",
 		"api/psql/v1beta1/groupversion_info.go",
@@ -1795,6 +1798,7 @@ func TestCurrentDefaultActiveGeneratedArtifactsMatchCheckedInOutputs(t *testing.
 		"config/samples/identity_v1beta1_compartment.yaml",
 		"config/samples/mysql_v1beta1_dbsystem.yaml",
 		"config/samples/nosql_v1beta1_table.yaml",
+		"config/samples/objectstorage_v1beta1_bucket.yaml",
 		"config/samples/opensearch_v1beta1_opensearchcluster.yaml",
 		"config/samples/psql_v1beta1_dbsystem.yaml",
 		"config/samples/queue_v1beta1_queue.yaml",
@@ -1817,6 +1821,8 @@ func TestCurrentDefaultActiveGeneratedArtifactsMatchCheckedInOutputs(t *testing.
 		"packages/mysql/install/kustomization.yaml",
 		"packages/nosql/metadata.env",
 		"packages/nosql/install/kustomization.yaml",
+		"packages/objectstorage/metadata.env",
+		"packages/objectstorage/install/kustomization.yaml",
 		"packages/opensearch/metadata.env",
 		"packages/opensearch/install/kustomization.yaml",
 		"packages/psql/metadata.env",
@@ -1843,6 +1849,7 @@ func TestCurrentDefaultActiveGeneratedArtifactsMatchCheckedInOutputs(t *testing.
 		"controllers/identity/compartment_controller.go",
 		"controllers/mysql/dbsystem_controller.go",
 		"controllers/nosql/table_controller.go",
+		"controllers/objectstorage/bucket_controller.go",
 		"controllers/opensearch/opensearchcluster_controller.go",
 		"controllers/psql/dbsystem_controller.go",
 		"controllers/queue/queue_controller.go",
@@ -1863,6 +1870,8 @@ func TestCurrentDefaultActiveGeneratedArtifactsMatchCheckedInOutputs(t *testing.
 		"pkg/servicemanager/mysql/dbsystem/dbsystem_servicemanager.go",
 		"pkg/servicemanager/nosql/table/table_serviceclient.go",
 		"pkg/servicemanager/nosql/table/table_servicemanager.go",
+		"pkg/servicemanager/objectstorage/bucket/bucket_serviceclient.go",
+		"pkg/servicemanager/objectstorage/bucket/bucket_servicemanager.go",
 		"pkg/servicemanager/opensearch/opensearchcluster/opensearchcluster_serviceclient.go",
 		"pkg/servicemanager/opensearch/opensearchcluster/opensearchcluster_servicemanager.go",
 		"pkg/servicemanager/psql/dbsystem/dbsystem_serviceclient.go",
@@ -1883,6 +1892,7 @@ func TestCurrentDefaultActiveGeneratedArtifactsMatchCheckedInOutputs(t *testing.
 		"internal/registrations/identity_generated.go",
 		"internal/registrations/mysql_generated.go",
 		"internal/registrations/nosql_generated.go",
+		"internal/registrations/objectstorage_generated.go",
 		"internal/registrations/opensearch_generated.go",
 		"internal/registrations/psql_generated.go",
 		"internal/registrations/queue_generated.go",
