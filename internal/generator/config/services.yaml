@@ -859,7 +859,7 @@ services:
     phase: eventing-messaging-and-observability
     packageProfile: controller-backed
     selection:
-      enabled: false
+      enabled: true
       mode: all
     generation:
       controller:

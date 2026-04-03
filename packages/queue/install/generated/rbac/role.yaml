@@ -1,0 +1,50 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - queue.oracle.com
+  resources:
+  - channels
+  - messages
+  - queues
+  - stats
+  - workrequesterrors
+  - workrequestlogs
+  - workrequests
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - queue.oracle.com
+  resources:
+  - channels/finalizers
+  - messages/finalizers
+  - queues/finalizers
+  - stats/finalizers
+  - workrequesterrors/finalizers
+  - workrequestlogs/finalizers
+  - workrequests/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - queue.oracle.com
+  resources:
+  - channels/status
+  - messages/status
+  - queues/status
+  - stats/status
+  - workrequesterrors/status
+  - workrequestlogs/status
+  - workrequests/status
+  verbs:
+  - get
+  - patch
+  - update
