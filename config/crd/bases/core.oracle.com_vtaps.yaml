@@ -1,0 +1,295 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: vtaps.core.oracle.com
+spec:
+  group: core.oracle.com
+  names:
+    kind: Vtap
+    listKind: VtapList
+    plural: vtaps
+    singular: vtap
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the Vtap
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the Vtap
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Vtap is the Schema for the vtaps API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: VtapSpec defines the desired state of Vtap.
+            properties:
+              captureFilterId:
+                description: The capture filter's Oracle ID (OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)).
+                type: string
+              compartmentId:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment containing the `Vtap` resource.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a
+                  namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              displayName:
+                description: |-
+                  A user-friendly name. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
+                type: string
+              encapsulationProtocol:
+                description: Defines an encapsulation header type for the VTAP's mirrored
+                  traffic.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no
+                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              isVtapEnabled:
+                description: |-
+                  Used to start or stop a `Vtap` resource.
+                  * `TRUE` directs the VTAP to start mirroring traffic.
+                  * `FALSE` (Default) directs the VTAP to stop mirroring traffic.
+                type: boolean
+              maxPacketSize:
+                description: The maximum size of the packets to be included in the
+                  filter.
+                type: integer
+              sourceId:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the source point where packets are captured.
+                type: string
+              sourcePrivateEndpointIp:
+                description: The IP Address of the source private endpoint.
+                type: string
+              sourcePrivateEndpointSubnetId:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the subnet that source private endpoint belongs to.
+                type: string
+              sourceType:
+                description: The source type for the VTAP.
+                type: string
+              targetId:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the destination resource where mirrored packets are sent.
+                type: string
+              targetIp:
+                description: The IP address of the destination resource where mirrored
+                  packets are sent.
+                type: string
+              targetType:
+                description: The target type for the VTAP.
+                type: string
+              trafficMode:
+                description: Used to control the priority of traffic. It is an optional
+                  field. If it not passed, the value is DEFAULT
+                type: string
+              vcnId:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the VCN containing the `Vtap` resource.
+                type: string
+              vxlanNetworkIdentifier:
+                description: The virtual extensible LAN (VXLAN) network identifier
+                  (or VXLAN segment ID) that uniquely identifies the VXLAN.
+                format: int64
+                type: integer
+            required:
+            - captureFilterId
+            - compartmentId
+            - sourceId
+            - vcnId
+            type: object
+          status:
+            description: VtapStatus defines the observed state of Vtap.
+            properties:
+              captureFilterId:
+                description: The capture filter's Oracle ID (OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)).
+                type: string
+              compartmentId:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment containing the `Vtap` resource.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a
+                  namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              displayName:
+                description: |-
+                  A user-friendly name. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
+                type: string
+              encapsulationProtocol:
+                description: Defines an encapsulation header type for the VTAP's mirrored
+                  traffic.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no
+                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              id:
+                description: The VTAP's Oracle ID (OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)).
+                type: string
+              isVtapEnabled:
+                description: |-
+                  Used to start or stop a `Vtap` resource.
+                  * `TRUE` directs the VTAP to start mirroring traffic.
+                  * `FALSE` (Default) directs the VTAP to stop mirroring traffic.
+                type: boolean
+              lifecycleState:
+                description: The VTAP's administrative lifecycle state.
+                type: string
+              lifecycleStateDetails:
+                description: The VTAP's current running state.
+                type: string
+              maxPacketSize:
+                description: The maximum size of the packets to be included in the
+                  filter.
+                type: integer
+              sourceId:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the source point where packets are captured.
+                type: string
+              sourcePrivateEndpointIp:
+                description: The IP Address of the source private endpoint.
+                type: string
+              sourcePrivateEndpointSubnetId:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the subnet that source private endpoint belongs to.
+                type: string
+              sourceType:
+                description: The source type for the VTAP.
+                type: string
+              status:
+                properties:
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              targetId:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the destination resource where mirrored packets are sent.
+                type: string
+              targetIp:
+                description: The IP address of the destination resource where mirrored
+                  packets are sent.
+                type: string
+              targetType:
+                description: The target type for the VTAP.
+                type: string
+              timeCreated:
+                description: |-
+                  The date and time the VTAP was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+                  Example: `2020-08-25T21:10:29.600Z`
+                type: string
+              trafficMode:
+                description: Used to control the priority of traffic. It is an optional
+                  field. If it not passed, the value is DEFAULT
+                type: string
+              vcnId:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the VCN containing the `Vtap` resource.
+                type: string
+              vxlanNetworkIdentifier:
+                description: The virtual extensible LAN (VXLAN) network identifier
+                  (or VXLAN segment ID) that uniquely identifies the VXLAN.
+                format: int64
+                type: integer
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

@@ -1,0 +1,123 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: cpedeviceshapes.core.oracle.com
+spec:
+  group: core.oracle.com
+  names:
+    kind: CpeDeviceShape
+    listKind: CpeDeviceShapeList
+    plural: cpedeviceshapes
+    singular: cpedeviceshape
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: status of the CpeDeviceShape
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the CpeDeviceShape
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: CpeDeviceShape is the Schema for the cpedeviceshapes API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: CpeDeviceShapeSpec defines the desired state of CpeDeviceShape.
+            type: object
+          status:
+            description: CpeDeviceShapeStatus defines the observed state of CpeDeviceShape.
+            properties:
+              cpeDeviceInfo:
+                description: CpeDeviceShapeCpeDeviceInfo defines nested fields for
+                  CpeDeviceShape.CpeDeviceInfo.
+                properties:
+                  platformSoftwareVersion:
+                    description: The platform or software version of the CPE device.
+                    type: string
+                  vendor:
+                    description: The vendor that makes the CPE device.
+                    type: string
+                type: object
+              id:
+                description: |-
+                  The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the CPE device shape.
+                  This value uniquely identifies the type of CPE device.
+                type: string
+              status:
+                properties:
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

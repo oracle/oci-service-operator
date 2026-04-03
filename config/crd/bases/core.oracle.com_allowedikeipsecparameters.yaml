@@ -1,0 +1,188 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: allowedikeipsecparameters.core.oracle.com
+spec:
+  group: core.oracle.com
+  names:
+    kind: AllowedIkeIPSecParameter
+    listKind: AllowedIkeIPSecParameterList
+    plural: allowedikeipsecparameters
+    singular: allowedikeipsecparameter
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: status of the AllowedIkeIPSecParameter
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the AllowedIkeIPSecParameter
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: AllowedIkeIPSecParameter is the Schema for the allowedikeipsecparameters
+          API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: AllowedIkeIPSecParameterSpec defines the desired state of
+              AllowedIkeIPSecParameter.
+            type: object
+          status:
+            description: AllowedIkeIPSecParameterStatus defines the observed state
+              of AllowedIkeIPSecParameter.
+            properties:
+              allowedPhaseOneParameters:
+                description: AllowedIkeIPSecParameterAllowedPhaseOneParameters defines
+                  nested fields for AllowedIkeIPSecParameter.AllowedPhaseOneParameters.
+                properties:
+                  authenticationAlgorithms:
+                    description: Allowed phase one authentication algorithms.
+                    items:
+                      type: string
+                    type: array
+                  dhGroups:
+                    description: Allowed phase one Diffie-Hellman groups.
+                    items:
+                      type: string
+                    type: array
+                  encryptionAlgorithms:
+                    description: Allowed phase one encryption algorithms.
+                    items:
+                      type: string
+                    type: array
+                type: object
+              allowedPhaseTwoParameters:
+                description: AllowedIkeIPSecParameterAllowedPhaseTwoParameters defines
+                  nested fields for AllowedIkeIPSecParameter.AllowedPhaseTwoParameters.
+                properties:
+                  authenticationAlgorithms:
+                    description: Allowed phase two authentication algorithms.
+                    items:
+                      type: string
+                    type: array
+                  encryptionAlgorithms:
+                    description: Allowed phase two encryption algorithms.
+                    items:
+                      type: string
+                    type: array
+                  pfsDhGroups:
+                    description: Allowed perfect forward secrecy Diffie-Hellman groups.
+                    items:
+                      type: string
+                    type: array
+                type: object
+              defaultPhaseOneParameters:
+                description: AllowedIkeIPSecParameterDefaultPhaseOneParameters defines
+                  nested fields for AllowedIkeIPSecParameter.DefaultPhaseOneParameters.
+                properties:
+                  defaultAuthenticationAlgorithms:
+                    description: Default phase one authentication algorithms.
+                    items:
+                      type: string
+                    type: array
+                  defaultDhGroups:
+                    description: Default phase one Diffie-Hellman groups.
+                    items:
+                      type: string
+                    type: array
+                  defaultEncryptionAlgorithms:
+                    description: Default phase one encryption algorithms.
+                    items:
+                      type: string
+                    type: array
+                type: object
+              defaultPhaseTwoParameters:
+                description: AllowedIkeIPSecParameterDefaultPhaseTwoParameters defines
+                  nested fields for AllowedIkeIPSecParameter.DefaultPhaseTwoParameters.
+                properties:
+                  defaultAuthenticationAlgorithms:
+                    description: Default phase two authentication algorithms.
+                    items:
+                      type: string
+                    type: array
+                  defaultEncryptionAlgorithms:
+                    description: Default phase two encryption algorithms.
+                    items:
+                      type: string
+                    type: array
+                  defaultPfsDhGroup:
+                    description: Default perfect forward secrecy Diffie-Hellman groups.
+                    type: string
+                type: object
+              status:
+                properties:
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
