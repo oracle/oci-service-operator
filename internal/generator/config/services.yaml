@@ -999,7 +999,7 @@ services:
     phase: security-and-identity
     packageProfile: controller-backed
     selection:
-      enabled: false
+      enabled: true
       mode: all
     generation:
       controller:
