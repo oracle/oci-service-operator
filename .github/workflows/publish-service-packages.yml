@@ -51,7 +51,7 @@ jobs:
         shell: bash
         run: |
           if [ "${{ inputs.subpackages }}" = "all" ]; then
-            SUBPACKAGES=$(ruby -e "require 'yaml'; cfg = YAML.load_file('internal/generator/config/services.yaml'); services = cfg.fetch('services').flat_map { |svc| next [] unless svc['packageProfile'] == 'controller-backed'; splits = svc['packageSplits'] || []; splits.empty? ? [svc['service']] : splits.map { |split| split.fetch('name') } }; puts services.join(',')")
+            SUBPACKAGES=$(find packages -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | sort | grep -v '^core$' | paste -sd, -)
           else
             SUBPACKAGES="${{ inputs.subpackages }}"
           fi
