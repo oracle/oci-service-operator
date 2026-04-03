@@ -145,6 +145,8 @@
     ]
   },
   "notes": [
-    "Seed stub for the promoted Queue kind; later runtime tasks will refine the imported provider facts and repo-authored semantics together."
+    "Queue create, update, and delete are work-request-backed operations in the handwritten runtime.",
+    "The repo-authored Queue runtime recovers the created Queue OCID from work-request resources instead of binding by display-name-only list lookup.",
+    "Status projection, create-only drift rejection, required delete confirmation, and ready-only endpoint Secret side effects are explicit repo-authored semantics layered on top of these provider facts."
   ]
 }
