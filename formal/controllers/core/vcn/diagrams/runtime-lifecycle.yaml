@@ -1,0 +1,17 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: core
+slug: vcn
+kind: Vcn
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+  - terminated
+  - deleted
+notes:
+  - Ready state maps to OCI AVAILABLE.
+  - Requeue continues while OCI reports PROVISIONING, UPDATING, or TERMINATING.
+  - Delete completes only after GetVcn returns not found; TERMINATED is an accepted observed pre-delete state.

@@ -1,0 +1,174 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: crossconnectmappings.core.oracle.com
+spec:
+  group: core.oracle.com
+  names:
+    kind: CrossConnectMapping
+    listKind: CrossConnectMappingList
+    plural: crossconnectmappings
+    singular: crossconnectmapping
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: status of the CrossConnectMapping
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the CrossConnectMapping
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: CrossConnectMapping is the Schema for the crossconnectmappings
+          API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: CrossConnectMappingSpec defines the desired state of CrossConnectMapping.
+            type: object
+          status:
+            description: CrossConnectMappingStatus defines the observed state of CrossConnectMapping.
+            properties:
+              crossConnectOrCrossConnectGroupId:
+                description: |-
+                  The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the cross-connect or cross-connect group for this mapping.
+                  Specified by the owner of the cross-connect or cross-connect group (the
+                  customer if the customer is colocated with Oracle, or the provider if the
+                  customer is connecting via provider).
+                type: string
+              customerBgpPeeringIp:
+                description: |-
+                  The BGP IPv4 address for the router on the other end of the BGP session from
+                  Oracle. Specified by the owner of that router. If the session goes from Oracle
+                  to a customer, this is the BGP IPv4 address of the customer's edge router. If the
+                  session goes from Oracle to a provider, this is the BGP IPv4 address of the
+                  provider's edge router. Must use a subnet mask from /28 to /31.
+                  There's one exception: for a public virtual circuit, Oracle specifies the BGP IPv4 addresses.
+                  Example: `10.0.0.18/31`
+                type: string
+              customerBgpPeeringIpv6:
+                description: |-
+                  The BGP IPv6 address for the router on the other end of the BGP session from
+                  Oracle. Specified by the owner of that router. If the session goes from Oracle
+                  to a customer, this is the BGP IPv6 address of the customer's edge router. If the
+                  session goes from Oracle to a provider, this is the BGP IPv6 address of the
+                  provider's edge router. Only subnet masks from /64 up to /127 are allowed.
+                  There's one exception: for a public virtual circuit, Oracle specifies the BGP IPv6 addresses.
+                  IPv6 addressing is supported for all commercial and government regions. See
+                  IPv6 Addresses (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/ipv6.htm).
+                  Example: `2001:db8::1/64`
+                type: string
+              ipv4BgpStatus:
+                description: The state of the Ipv4 BGP session.
+                type: string
+              ipv6BgpStatus:
+                description: The state of the Ipv6 BGP session.
+                type: string
+              ociLogicalDeviceName:
+                description: The FastConnect device that terminates the logical connection.
+                type: string
+              oracleBgpPeeringIp:
+                description: |-
+                  The IPv4 address for Oracle's end of the BGP session. Must use a subnet mask from /28 to /31.
+                  If the session goes from Oracle to a customer's edge router,
+                  the customer specifies this information. If the session goes from Oracle to
+                  a provider's edge router, the provider specifies this.
+                  There's one exception: for a public virtual circuit, Oracle specifies the BGP IPv4 addresses.
+                  Example: `10.0.0.19/31`
+                type: string
+              oracleBgpPeeringIpv6:
+                description: |-
+                  The IPv6 address for Oracle's end of the BGP session. Only subnet masks from /64 up to /127 are allowed.
+                  If the session goes from Oracle to a customer's edge router,
+                  the customer specifies this information. If the session goes from Oracle to
+                  a provider's edge router, the provider specifies this.
+                  There's one exception: for a public virtual circuit, Oracle specifies the BGP IPv6 addresses.
+                  Note that IPv6 addressing is currently supported only in certain regions. See
+                  IPv6 Addresses (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/ipv6.htm).
+                  Example: `2001:db8::2/64`
+                type: string
+              status:
+                properties:
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              vlan:
+                description: |-
+                  The number of the specific VLAN (on the cross-connect or cross-connect group)
+                  that is assigned to this virtual circuit. Specified by the owner of the cross-connect
+                  or cross-connect group (the customer if the customer is colocated with Oracle, or
+                  the provider if the customer is connecting via provider).
+                  Example: `200`
+                type: integer
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

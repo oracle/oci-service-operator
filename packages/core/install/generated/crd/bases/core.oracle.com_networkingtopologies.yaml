@@ -1,0 +1,187 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: networkingtopologies.core.oracle.com
+spec:
+  group: core.oracle.com
+  names:
+    kind: NetworkingTopology
+    listKind: NetworkingTopologyList
+    plural: networkingtopologies
+    singular: networkingtopology
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: status of the NetworkingTopology
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the NetworkingTopology
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: NetworkingTopology is the Schema for the networkingtopologies
+          API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: NetworkingTopologySpec defines the desired state of NetworkingTopology.
+            type: object
+          status:
+            description: NetworkingTopologyStatus defines the observed state of NetworkingTopology.
+            properties:
+              entities:
+                description: Lists entities comprising the virtual network topology.
+                items:
+                  description: JSONValue preserves arbitrary JSON values inside generated
+                    CRD fields.
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                type: array
+              limitedEntities:
+                description: |-
+                  Lists entities that are limited during ingestion.
+                  The values for the items in the list are the entity type names of the limitedEntities.
+                  Example: `vcn`
+                items:
+                  type: string
+                type: array
+              relationships:
+                description: Lists relationships between entities in the virtual network
+                  topology.
+                items:
+                  description: NetworkingTopologyRelationship defines nested fields
+                    for NetworkingTopology.Relationship.
+                  properties:
+                    associatedWithDetails:
+                      description: NetworkingTopologyRelationshipAssociatedWithDetails
+                        defines nested fields for NetworkingTopology.Relationship.AssociatedWithDetails.
+                      properties:
+                        via:
+                          description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                            of the entities via which the relationship is created.
+                            For example an instance is associated with a network security
+                            group via the VNIC attachment and the VNIC.
+                          items:
+                            type: string
+                          type: array
+                      type: object
+                    id1:
+                      description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                        of the first entity in the relationship.
+                      type: string
+                    id2:
+                      description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                        of the second entity in the relationship.
+                      type: string
+                    jsonData:
+                      type: string
+                    routeRuleDetails:
+                      description: NetworkingTopologyRelationshipRouteRuleDetails
+                        defines nested fields for NetworkingTopology.Relationship.RouteRuleDetails.
+                      properties:
+                        destination:
+                          description: An IP address range in CIDR notation or the
+                            `cidrBlock` value for a Service.
+                          type: string
+                        destinationType:
+                          description: |-
+                            The destinationType can be set to one of two values:
+                            * Use `CIDR_BLOCK` if the rule's `destination` is an IP address range in CIDR notation.
+                            * Use `SERVICE_CIDR_BLOCK` if the rule's `destination` is the `cidrBlock` value for a Service.
+                          type: string
+                        routeTableId:
+                          description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                            of the routing table that contains the route rule.
+                          type: string
+                        routeType:
+                          description: A route rule can be `STATIC` if manually added
+                            to the route table or `DYNAMIC` if imported from another
+                            route table.
+                          type: string
+                      type: object
+                    type:
+                      type: string
+                  type: object
+                type: array
+              status:
+                properties:
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              timeCreated:
+                description: Records when the virtual network topology was created,
+                  in RFC3339 (https://tools.ietf.org/html/rfc3339) format for date
+                  and time.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

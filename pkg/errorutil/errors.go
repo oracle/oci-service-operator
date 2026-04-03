@@ -144,7 +144,7 @@ func specific403Error(se ocierrors) (bool, error) {
 func specific404Error(se ocierrors) (bool, error) {
 
 	if se.ErrorCode == NotFound {
-		return false, UnauthorizedAndNotFoundResponse(se, "There is no operation supported at the "+
+		return false, NotFoundResponse(se, "There is no operation supported at the "+
 			"URI path and HTTP method you specified in the request")
 	} else if se.ErrorCode == NotAuthorizedOrNotFound {
 		return false, UnauthorizedAndNotFoundResponse(se, "A resource specified via the URI (path or "+

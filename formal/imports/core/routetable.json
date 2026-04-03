@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "routetable",
+  "kind": "RouteTable",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_core_route_table",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateRouteTable",
+        "requestType": "core.CreateRouteTableRequest",
+        "responseType": "core.CreateRouteTableResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetRouteTable",
+        "requestType": "core.GetRouteTableRequest",
+        "responseType": "core.GetRouteTableResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListRouteTables",
+        "requestType": "core.ListRouteTablesRequest",
+        "responseType": "core.ListRouteTablesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateRouteTable",
+        "requestType": "core.UpdateRouteTableRequest",
+        "responseType": "core.UpdateRouteTableResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteRouteTable",
+        "requestType": "core.DeleteRouteTableRequest",
+        "responseType": "core.DeleteRouteTableResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "AVAILABLE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "AVAILABLE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "route_rules"
+    ],
+    "forceNew": [
+      "compartment_id",
+      "vcn_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "TERMINATING",
+      "TERMINATED"
+    ],
+    "target": [
+      "NOT_FOUND"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_core_route_tables",
+    "collectionField": "route_table",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "vcn_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/routetable/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/routetable/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: UpdateRouteTableDetails exposes defined_tags, display_name, freeform_tags, and route_rules as in-place updates; the handwritten runtime rejects create-only drift for compartment_id and vcn_id.",
+    "Repo-authored route-rule comparison normalizes ordering and filters OCI-managed LOCAL rules so order-only diffs and implicit local rules do not trigger updates.",
+    "Repo-authored delete confirmation requires GetRouteTable to return not found; observed TERMINATING and TERMINATED remain intermediate finalizer-holding states.",
+    "formal/controllers/core/routetable/* is the authoritative formal path for this RouteTable runtime work; the separate coreroutetable manifest row is tracked as distinct cleanup, not folded into this row."
+  ]
+}

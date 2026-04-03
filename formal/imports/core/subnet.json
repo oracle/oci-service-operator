@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "subnet",
+  "kind": "Subnet",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_core_subnet",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateSubnet",
+        "requestType": "core.CreateSubnetRequest",
+        "responseType": "core.CreateSubnetResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetSubnet",
+        "requestType": "core.GetSubnetRequest",
+        "responseType": "core.GetSubnetResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListSubnets",
+        "requestType": "core.ListSubnetsRequest",
+        "responseType": "core.ListSubnetsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateSubnet",
+        "requestType": "core.UpdateSubnetRequest",
+        "responseType": "core.UpdateSubnetResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteSubnet",
+        "requestType": "core.DeleteSubnetRequest",
+        "responseType": "core.DeleteSubnetResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "AVAILABLE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "AVAILABLE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "cidr_block",
+      "defined_tags",
+      "dhcp_options_id",
+      "display_name",
+      "freeform_tags",
+      "ipv6_cidr_block",
+      "ipv6_cidr_blocks",
+      "route_table_id",
+      "security_list_ids"
+    ],
+    "forceNew": [
+      "availability_domain",
+      "compartment_id",
+      "dns_label",
+      "prohibit_internet_ingress",
+      "prohibit_public_ip_on_vnic",
+      "vcn_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "TERMINATING",
+      "TERMINATED"
+    ],
+    "target": [
+      "NOT_FOUND"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_core_subnets",
+    "collectionField": "subnet",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "vcn_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/subnet/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/subnet/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: UpdateSubnetDetails exposes cidr_block, defined_tags, dhcp_options_id, display_name, freeform_tags, ipv6_cidr_block, ipv6_cidr_blocks, route_table_id, and security_list_ids as in-place updates.",
+    "Repo-authored delete confirmation requires GetSubnet to return not found; observed TERMINATED remains an accepted intermediate state."
+  ]
+}

@@ -1,0 +1,18 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: core
+slug: servicegateway
+kind: ServiceGateway
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - terminating
+  - terminated
+  - deleted
+notes:
+  - Ready state maps to OCI AVAILABLE.
+  - Requeue continues while OCI reports PROVISIONING, TERMINATING, or TERMINATED.
+  - Delete completes only after GetServiceGateway returns not found; TERMINATING and TERMINATED are accepted observed pre-delete states.
+  - In-place updates are limited to blockTraffic, displayName, definedTags, freeformTags, routeTableId, and services.
+  - Service comparisons normalize by serviceId so ordering and response-only serviceName fields do not trigger updates.

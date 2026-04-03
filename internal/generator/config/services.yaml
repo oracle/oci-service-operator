@@ -764,6 +764,11 @@ services:
               - groups="",resources=secrets,verbs=get;list;watch;create;update;delete
           serviceManager:
             packagePath: streaming/stream
+        - kind: ConnectHarness
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
         - kind: Cursor
           controller:
             strategy: none
@@ -780,11 +785,6 @@ services:
           serviceManager:
             strategy: none
         - kind: Message
-          controller:
-            strategy: none
-          serviceManager:
-            strategy: none
-        - kind: ConnectHarness
           controller:
             strategy: none
           serviceManager:
