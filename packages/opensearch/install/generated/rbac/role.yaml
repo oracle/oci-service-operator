@@ -8,7 +8,6 @@ rules:
   - opensearch.oracle.com
   resources:
   - opensearchclusters
-  - opensearchversions
   verbs:
   - create
   - delete
@@ -21,14 +20,12 @@ rules:
   - opensearch.oracle.com
   resources:
   - opensearchclusters/finalizers
-  - opensearchversions/finalizers
   verbs:
   - update
 - apiGroups:
   - opensearch.oracle.com
   resources:
   - opensearchclusters/status
-  - opensearchversions/status
   verbs:
   - get
   - patch

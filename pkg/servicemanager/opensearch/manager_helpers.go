@@ -13,8 +13,8 @@ import (
 
 	"github.com/oracle/oci-go-sdk/v65/common"
 	ociopensearch "github.com/oracle/oci-go-sdk/v65/opensearch"
-	ociv1beta1 "github.com/oracle/oci-service-operator/api/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
+	"github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	"github.com/oracle/oci-service-operator/pkg/util"
 	v1 "k8s.io/api/core/v1"
@@ -30,7 +30,7 @@ func safeString(s *string) string {
 	return *s
 }
 
-func setCreatedAtIfUnset(status *ociv1beta1.OSOKStatus) {
+func setCreatedAtIfUnset(status *shared.OSOKStatus) {
 	if status.CreatedAt != nil {
 		return
 	}
@@ -38,7 +38,7 @@ func setCreatedAtIfUnset(status *ociv1beta1.OSOKStatus) {
 	status.CreatedAt = &now
 }
 
-func resolveClusterID(statusID, specID ociv1beta1.OCID) (ociv1beta1.OCID, error) {
+func resolveClusterID(statusID, specID shared.OCID) (shared.OCID, error) {
 	if statusID != "" {
 		return statusID, nil
 	}
@@ -53,19 +53,19 @@ func isNotFoundServiceError(err error) bool {
 	return ok && serviceErr.GetHTTPStatusCode() == 404
 }
 
-func reconcileLifecycleStatus(status *ociv1beta1.OSOKStatus, cluster *ociopensearch.OpensearchCluster,
+func reconcileLifecycleStatus(status *shared.OSOKStatus, cluster *ociopensearch.OpensearchCluster,
 	log loggerutil.OSOKLogger) servicemanager.OSOKResponse {
-	status.Ocid = ociv1beta1.OCID(safeString(cluster.Id))
+	status.Ocid = shared.OCID(safeString(cluster.Id))
 
 	switch cluster.LifecycleState {
 	case ociopensearch.OpensearchClusterLifecycleStateActive:
 		setCreatedAtIfUnset(status)
-		*status = util.UpdateOSOKStatusCondition(*status, ociv1beta1.Active, v1.ConditionTrue, "",
+		*status = util.UpdateOSOKStatusCondition(*status, shared.Active, v1.ConditionTrue, "",
 			fmt.Sprintf("OpenSearch cluster %s is %s", safeString(cluster.DisplayName), cluster.LifecycleState), log)
 		return servicemanager.OSOKResponse{IsSuccessful: true}
 	case ociopensearch.OpensearchClusterLifecycleStateCreating,
 		ociopensearch.OpensearchClusterLifecycleStateUpdating:
-		*status = util.UpdateOSOKStatusCondition(*status, ociv1beta1.Provisioning, v1.ConditionTrue, "",
+		*status = util.UpdateOSOKStatusCondition(*status, shared.Provisioning, v1.ConditionTrue, "",
 			fmt.Sprintf("OpenSearch cluster %s is %s", safeString(cluster.DisplayName), cluster.LifecycleState), log)
 		return servicemanager.OSOKResponse{
 			IsSuccessful:    false,
@@ -73,7 +73,7 @@ func reconcileLifecycleStatus(status *ociv1beta1.OSOKStatus, cluster *ociopensea
 			RequeueDuration: openSearchRequeueDuration,
 		}
 	default:
-		*status = util.UpdateOSOKStatusCondition(*status, ociv1beta1.Failed, v1.ConditionFalse, "",
+		*status = util.UpdateOSOKStatusCondition(*status, shared.Failed, v1.ConditionFalse, "",
 			fmt.Sprintf("OpenSearch cluster %s is %s", safeString(cluster.DisplayName), cluster.LifecycleState), log)
 		return servicemanager.OSOKResponse{IsSuccessful: false}
 	}

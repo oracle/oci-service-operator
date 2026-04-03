@@ -4,7 +4,12 @@ import "strings"
 
 const intentionalUntrackedPrefix = "Intentionally untracked: "
 
-var reviewedUntrackedReasons = map[string]string{}
+var reviewedUntrackedReasons = map[string]string{
+	"CoreConsoleHistoryContent":        binaryContentReason("the OCI API only returns console history content as a raw binary payload"),
+	"CoreCpeDeviceConfigContent":       scalarContentReason("the OCI API only returns CPE device config content as plain-text content"),
+	"CoreIpsecCpeDeviceConfigContent":  scalarContentReason("the OCI API only returns IPSec CPE device config content as plain-text content"),
+	"CoreTunnelCpeDeviceConfigContent": scalarContentReason("the OCI API only returns tunnel CPE device config content as plain-text content"),
+}
 
 func reviewedUntrackedReason(targetName string) string {
 	return reviewedUntrackedReasons[strings.TrimSpace(targetName)]

@@ -10,4 +10,4 @@ states:
   - updating
   - terminating
 notes:
-  - Promoted generated-runtime metadata for database/AutonomousDatabase preserved after the autonomousdatabases/adb layout port.
+  - Promoted generated-runtime metadata for database/AutonomousDatabase now lives under pkg/servicemanager/database/autonomousdatabase.

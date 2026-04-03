@@ -3,43 +3,43 @@
   "surface": "provider-facts",
   "service": "opensearch",
   "slug": "opensearchopensearchcluster",
-  "kind": "OpensearchOpensearchCluster",
+  "kind": "OpensearchCluster",
   "sourceRef": "terraform-provider-oci",
   "providerResource": "oci_opensearch_opensearch_cluster",
   "operations": {
     "create": [
       {
-        "operation": "CreateOpensearchOpensearchCluster",
-        "requestType": "opensearch.CreateOpensearchOpensearchClusterRequest",
-        "responseType": "opensearch.CreateOpensearchOpensearchClusterResponse"
+        "operation": "CreateOpensearchCluster",
+        "requestType": "opensearch.CreateOpensearchClusterRequest",
+        "responseType": "opensearch.CreateOpensearchClusterResponse"
       }
     ],
     "get": [
       {
-        "operation": "GetOpensearchOpensearchCluster",
-        "requestType": "opensearch.GetOpensearchOpensearchClusterRequest",
-        "responseType": "opensearch.GetOpensearchOpensearchClusterResponse"
+        "operation": "GetOpensearchCluster",
+        "requestType": "opensearch.GetOpensearchClusterRequest",
+        "responseType": "opensearch.GetOpensearchClusterResponse"
       }
     ],
     "list": [
       {
-        "operation": "ListOpensearchOpensearchCluster",
-        "requestType": "opensearch.ListOpensearchOpensearchClusterRequest",
-        "responseType": "opensearch.ListOpensearchOpensearchClusterResponse"
+        "operation": "ListOpensearchClusters",
+        "requestType": "opensearch.ListOpensearchClustersRequest",
+        "responseType": "opensearch.ListOpensearchClustersResponse"
       }
     ],
     "update": [
       {
-        "operation": "UpdateOpensearchOpensearchCluster",
-        "requestType": "opensearch.UpdateOpensearchOpensearchClusterRequest",
-        "responseType": "opensearch.UpdateOpensearchOpensearchClusterResponse"
+        "operation": "UpdateOpensearchCluster",
+        "requestType": "opensearch.UpdateOpensearchClusterRequest",
+        "responseType": "opensearch.UpdateOpensearchClusterResponse"
       }
     ],
     "delete": [
       {
-        "operation": "DeleteOpensearchOpensearchCluster",
-        "requestType": "opensearch.DeleteOpensearchOpensearchClusterRequest",
-        "responseType": "opensearch.DeleteOpensearchOpensearchClusterResponse"
+        "operation": "DeleteOpensearchCluster",
+        "requestType": "opensearch.DeleteOpensearchClusterRequest",
+        "responseType": "opensearch.DeleteOpensearchClusterResponse"
       }
     ]
   },
@@ -101,8 +101,8 @@
     ]
   },
   "listLookup": {
-    "datasource": "scaffold_opensearch_opensearchopensearchcluster",
-    "collectionField": "opensearchopensearchcluster",
+    "datasource": "oci_opensearch_opensearch_clusters",
+    "collectionField": "opensearchClusters",
     "responseItemsField": "Items",
     "filterFields": [
       "compartment_id",
@@ -119,6 +119,6 @@
     ]
   },
   "notes": [
-    "Seeded published OpensearchOpensearchCluster row for opensearch; generatedruntime now preserves the published kind while binding through compartmentId and displayName before create."
+    "Seeded published OpensearchCluster row for opensearch; generatedruntime binds through compartmentId and displayName before create."
   ]
 }

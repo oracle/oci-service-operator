@@ -1668,8 +1668,8 @@ func TestServiceClientDeleteUsesFormalRequiredConfirmation(t *testing.T) {
 	if deleted {
 		t.Fatal("Delete() should keep waiting while lifecycle is DELETING")
 	}
-	if deleteRequest.ThingId == nil || *deleteRequest.ThingId != "ocid1.thing.oc1..delete" {
-		t.Fatalf("delete request thingId = %v, want existing OCID", deleteRequest.ThingId)
+	if deleteRequest.ThingId != nil {
+		t.Fatalf("delete request thingId = %v, want no delete request once confirm-delete already reports DELETING", deleteRequest.ThingId)
 	}
 	if len(resource.Status.OsokStatus.Conditions) == 0 || resource.Status.OsokStatus.Conditions[len(resource.Status.OsokStatus.Conditions)-1].Type != shared.Terminating {
 		t.Fatalf("status conditions = %#v, want trailing Terminating condition", resource.Status.OsokStatus.Conditions)

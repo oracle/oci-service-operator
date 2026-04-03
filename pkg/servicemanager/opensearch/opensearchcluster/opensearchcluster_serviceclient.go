@@ -38,35 +38,85 @@ var newOpensearchClusterServiceClient = func(manager *OpensearchClusterServiceMa
 		Kind:    "OpensearchCluster",
 		SDKName: "OpensearchCluster",
 		Log:     manager.Log,
+		Semantics: &generatedruntime.Semantics{
+			FormalService:     "opensearch",
+			FormalSlug:        "opensearchopensearchcluster",
+			StatusProjection:  "required",
+			SecretSideEffects: "none",
+			FinalizerPolicy:   "retain-until-confirmed-delete",
+			Lifecycle: generatedruntime.LifecycleSemantics{
+				ProvisioningStates: []string{"PROVISIONING"},
+				UpdatingStates:     []string{"UPDATING"},
+				ActiveStates:       []string{"ACTIVE"},
+			},
+			Delete: generatedruntime.DeleteSemantics{
+				Policy:         "required",
+				PendingStates:  []string{"DELETING"},
+				TerminalStates: []string{"DELETED"},
+			},
+			List: &generatedruntime.ListSemantics{
+				ResponseItemsField: "Items",
+				MatchFields:        []string{"compartmentId", "displayName", "state"},
+			},
+			Mutation: generatedruntime.MutationSemantics{
+				Mutable:       []string{"displayName"},
+				ForceNew:      []string{"compartmentId"},
+				ConflictsWith: map[string][]string{},
+			},
+			Hooks: generatedruntime.HookSet{
+				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
+				Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+				Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+			},
+			CreateFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "read-after-write",
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
+			},
+			UpdateFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "read-after-write",
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			},
+			DeleteFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "confirm-delete",
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+			},
+			AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+			Unsupported:         []generatedruntime.UnsupportedSemantic{},
+		},
 		Create: &generatedruntime.Operation{
 			NewRequest: func() any { return &opensearchsdk.CreateOpensearchClusterRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.CreateOpensearchCluster(ctx, *request.(*opensearchsdk.CreateOpensearchClusterRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "CreateOpensearchClusterDetails", RequestName: "CreateOpensearchClusterDetails", Contribution: "body", PreferResourceID: false}},
 		},
 		Get: &generatedruntime.Operation{
 			NewRequest: func() any { return &opensearchsdk.GetOpensearchClusterRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.GetOpensearchCluster(ctx, *request.(*opensearchsdk.GetOpensearchClusterRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "OpensearchClusterId", RequestName: "opensearchClusterId", Contribution: "path", PreferResourceID: true}},
 		},
 		List: &generatedruntime.Operation{
 			NewRequest: func() any { return &opensearchsdk.ListOpensearchClustersRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.ListOpensearchClusters(ctx, *request.(*opensearchsdk.ListOpensearchClustersRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "Id", RequestName: "id", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
 		},
 		Update: &generatedruntime.Operation{
 			NewRequest: func() any { return &opensearchsdk.UpdateOpensearchClusterRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.UpdateOpensearchCluster(ctx, *request.(*opensearchsdk.UpdateOpensearchClusterRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "OpensearchClusterId", RequestName: "opensearchClusterId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateOpensearchClusterDetails", RequestName: "UpdateOpensearchClusterDetails", Contribution: "body", PreferResourceID: false}},
 		},
 		Delete: &generatedruntime.Operation{
 			NewRequest: func() any { return &opensearchsdk.DeleteOpensearchClusterRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.DeleteOpensearchCluster(ctx, *request.(*opensearchsdk.DeleteOpensearchClusterRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "OpensearchClusterId", RequestName: "opensearchClusterId", Contribution: "path", PreferResourceID: true}},
 		},
 	}
 	if err != nil {

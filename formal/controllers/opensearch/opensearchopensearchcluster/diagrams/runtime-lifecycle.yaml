@@ -2,7 +2,7 @@ schemaVersion: 1
 surface: repo-authored-semantics
 service: opensearch
 slug: opensearchopensearchcluster
-kind: OpensearchOpensearchCluster
+kind: OpensearchCluster
 archetype: generated-service-manager
 states:
   - provisioning

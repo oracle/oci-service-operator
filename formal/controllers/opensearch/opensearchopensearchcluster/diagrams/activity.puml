@@ -8,7 +8,7 @@ skinparam noteBackgroundColor #fff7d6
 skinparam noteBorderColor #b45309
 skinparam noteFontColor #334155
 skinparam roundcorner 16
-title Activity - opensearch/OpensearchOpensearchCluster
+title Activity - opensearch/OpensearchCluster
 skinparam activity {
   backgroundColor #f8fafc
   borderColor #0f172a
@@ -23,19 +23,19 @@ skinparam activity {
 start
 partition "Observe and Bind" {
 :Start from shared flow\nshared/diagrams/shared-reconcile-activity.svg;
-:Read desired OpensearchOpensearchCluster spec,\ntracked status, and delete intent;
+:Read desired OpensearchCluster spec, tracked\nstatus, and delete intent;
 if ("Tracked or explicit OCI identity present?") then (yes)
-:Get the current OCI resource via\nGetOpensearchOpensearchCluster;
+:Get the current OCI resource via\nGetOpensearchCluster;
 else (no)
-:Resolve an existing OCI resource through\nListOpensearchOpensearchCluster using filters\ncompartment_id, display_name, state;
-:Create the OCI resource via\nCreateOpensearchOpensearchCluster when no\nreusable match is found;
+:Resolve an existing OCI resource through\nListOpensearchClusters using filters\ncompartment_id, display_name, state;
+:Create the OCI resource via\nCreateOpensearchCluster when no reusable match\nis found;
 :Persist the resolved or created OCI identity\ninto status;
 endif
 }
 if ("Delete requested?") then (yes)
 partition "Delete" {
-:Delete path uses\nDeleteOpensearchOpensearchCluster with\nrequired via GetOpensearchOpensearchCluster or\nListOpensearchOpensearchCluster to DELETED\nconfirmation;
-:Confirm deletion via\nGetOpensearchOpensearchCluster or\nListOpensearchOpensearchCluster until OCI\nreaches DELETED;
+:Delete path uses DeleteOpensearchCluster with\nrequired via GetOpensearchCluster or\nListOpensearchClusters to DELETED confirmation;
+:Confirm deletion via GetOpensearchCluster or\nListOpensearchClusters until OCI reaches\nDELETED;
 if ("Delete cleanup and finalizer release succeed?") then (yes)
 :Remove the finalizer after delete completion;
 else (no)
@@ -61,7 +61,7 @@ if ("Force-new or conflicting drift detected?") then (yes)
 stop
 endif
 if ("Supported mutable drift detected?") then (yes)
-:Apply UpdateOpensearchOpensearchCluster only\nfor mutable fields display_name;
+:Apply UpdateOpensearchCluster only for mutable\nfields display_name;
 else (no)
 :Skip the no-op mutation path;
 endif
@@ -86,7 +86,7 @@ controllers specialize the shared reconcile path
 with formal runtime ownership.
 service: opensearch
 slug: opensearchopensearchcluster
-kind: OpensearchOpensearchCluster
+kind: OpensearchCluster
 archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
@@ -97,8 +97,7 @@ supported drift: display_name
 reject before mutate: force-new fields
 compartment_id
 create-only fields: none
-list lookup:
-scaffold_opensearch_opensearchopensearchcluster
+list lookup: oci_opensearch_opensearch_clusters
 filters compartment_id, display_name, state
 conflicts: none
 open gaps: none

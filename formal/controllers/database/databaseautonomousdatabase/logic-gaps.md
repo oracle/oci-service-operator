@@ -9,8 +9,8 @@ gaps: []
 # Logic Gaps
 
 No open logic gaps remain for the promoted `database/AutonomousDatabase`
-runtime semantics after the service-manager layout port to
-`pkg/servicemanager/autonomousdatabases/adb`.
+runtime semantics now that the main service-manager path is
+`pkg/servicemanager/database/autonomousdatabase`.
 
 The promoted row still binds the published API kind to generator-owned
 lifecycle, delete confirmation, same-namespace secret resolution, and

@@ -230,7 +230,7 @@ services:
         - kind: AutonomousDatabase
           formalSpec: databaseautonomousdatabase
           serviceManager:
-            packagePath: autonomousdatabases/adb
+            packagePath: database/autonomousdatabase
           controller:
             extraRBACMarkers:
               - groups="",resources=secrets,verbs=get;list;watch
@@ -244,6 +244,25 @@ services:
                 - The referenced Secret must contain a `password` key. Use `secretId` and `secretVersionNumber` instead to reference an OCI Vault secret.
               markers:
                 - +kubebuilder:validation:Optional
+
+  - service: dataflow
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/dataflow
+    group: dataflow
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: all
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
 
   - service: dns
     sdkPackage: github.com/oracle/oci-go-sdk/v65/dns
@@ -301,7 +320,7 @@ services:
     phase: eventing-messaging-and-observability
     packageProfile: controller-backed
     selection:
-      enabled: false
+      enabled: true
       mode: all
     generation:
       controller:
@@ -320,7 +339,7 @@ services:
     phase: security-and-identity
     packageProfile: controller-backed
     selection:
-      enabled: false
+      enabled: true
       mode: explicit
       includeKinds:
         - Compartment
@@ -665,8 +684,10 @@ services:
     phase: data-and-storage
     packageProfile: controller-backed
     selection:
-      enabled: false
-      mode: all
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Bucket
     generation:
       controller:
         strategy: generated
@@ -693,10 +714,10 @@ services:
     phase: data-and-storage
     packageProfile: controller-backed
     selection:
-      enabled: false
+      enabled: true
       mode: explicit
       includeKinds:
-        - OpensearchOpensearchCluster
+        - OpensearchCluster
     generation:
       controller:
         strategy: generated
@@ -707,10 +728,10 @@ services:
       webhooks:
         strategy: none
       resources:
-        - kind: OpensearchOpensearchCluster
+        - kind: OpensearchCluster
           formalSpec: opensearchopensearchcluster
           serviceManager:
-            packagePath: opensearch/opensearchopensearchcluster
+            packagePath: opensearch/opensearchcluster
         - kind: Manifest
           controller:
             strategy: none
@@ -859,7 +880,7 @@ services:
     phase: eventing-messaging-and-observability
     packageProfile: controller-backed
     selection:
-      enabled: false
+      enabled: true
       mode: all
     generation:
       controller:
@@ -882,7 +903,7 @@ services:
     phase: data-and-storage
     packageProfile: controller-backed
     selection:
-      enabled: false
+      enabled: true
       mode: explicit
       includeKinds:
         - RedisCluster
@@ -999,7 +1020,7 @@ services:
     phase: security-and-identity
     packageProfile: controller-backed
     selection:
-      enabled: false
+      enabled: true
       mode: all
     generation:
       controller:

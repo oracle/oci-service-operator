@@ -9,6 +9,7 @@ service inventory for rollout planning and explicit backlog generation:
 - `containerengine`
 - `core`
 - `database`
+- `dataflow`
 - `dns`
 - `events`
 - `functions`
@@ -31,14 +32,21 @@ service inventory for rollout planning and explicit backlog generation:
 - `workrequests`
 
 The checked-in generated APIs, CRDs, samples, package scaffolding, and release
-bundle only ship the first-wave default-active surface declared through each
-service's `selection` block:
+bundle ship the current default-active surface declared through each service's
+`selection` block:
 
 - whole-service: `containerengine`
+- whole-service: `core`
+- whole-service: `dataflow`
 - whole-service: `mysql`
 - whole-service: `nosql`
 - whole-service: `psql`
+- whole-service: `queue`
+- whole-service: `vault`
 - explicit kind: `database/AutonomousDatabase`
+- explicit kind: `identity/Compartment`
+- explicit kind: `opensearch/OpensearchCluster`
+- explicit kind: `redis/RedisCluster`
 - explicit kind: `streaming/Stream`
 
 Refresh that shipped surface with:

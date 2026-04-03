@@ -14,7 +14,6 @@ import (
 	opensearchcontrollers "github.com/oracle/oci-service-operator/controllers/opensearch"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	opensearchopensearchclusterservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/opensearch/opensearchcluster"
-	opensearchopensearchversionservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/opensearch/opensearchversion"
 )
 
 func init() {
@@ -32,17 +31,6 @@ func init() {
 				),
 			}).SetupWithManager(ctx.Manager); err != nil {
 				return fmt.Errorf("setup OpensearchCluster controller: %w", err)
-			}
-			if err := (&opensearchcontrollers.OpensearchVersionReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"OpensearchVersion",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return opensearchopensearchversionservicemanager.NewOpensearchVersionServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup OpensearchVersion controller: %w", err)
 			}
 			return nil
 		},

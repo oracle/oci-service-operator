@@ -1,0 +1,119 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Activity - core/ServiceGateway
+skinparam activity {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  diamondBackgroundColor #e2e8f0
+  diamondBorderColor #1d4ed8
+  diamondFontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+  barColor #1d4ed8
+}
+start
+partition "Observe and Bind" {
+:Start from shared flow\nshared/diagrams/shared-reconcile-activity.svg;
+:Read desired ServiceGateway spec, tracked\nstatus, and delete intent;
+if ("Tracked or explicit OCI identity present?") then (yes)
+:Get the current OCI resource via\nGetServiceGateway;
+else (no)
+:Resolve an existing OCI resource through\nListServiceGateways using filters\ncompartment_id, display_name, id, vcn_id (+1\nmore);
+:Create the OCI resource via\nCreateServiceGateway when no reusable match is\nfound;
+:Persist the resolved or created OCI identity\ninto status;
+endif
+}
+if ("Delete requested?") then (yes)
+partition "Delete" {
+:Delete path uses DeleteServiceGateway with\nrequired via GetServiceGateway or\nListServiceGateways to NOT_FOUND confirmation;
+:Confirm deletion via GetServiceGateway or\nListServiceGateways until OCI reaches\nNOT_FOUND;
+if ("Delete cleanup and finalizer release succeed?") then (yes)
+:Remove the finalizer after delete completion;
+else (no)
+:Stay blocked until cleanup or finalizer\nrelease succeeds;
+endif
+}
+stop
+else (no)
+partition "Lifecycle Classification" {
+if ("OCI state in retryable set?") then (yes)
+:Request requeue while OCI remains in\nPROVISIONING, TERMINATING, TERMINATED;
+stop
+endif
+if ("OCI state is outside success targets?") then (yes)
+:Return an unsuccessful reconcile result until\nOCI reaches AVAILABLE;
+stop
+endif
+}
+partition "Ready and Drift Handling" {
+:Compare live OCI state against the imported\nfield surface;
+if ("Force-new or conflicting drift detected?") then (yes)
+:Reject drift before OCI mutation for force-new\nfields compartment_id, vcn_id;
+stop
+endif
+if ("Supported mutable drift detected?") then (yes)
+:Apply UpdateServiceGateway only for mutable\nfields block_traffic, defined_tags,\ndisplay_name, freeform_tags (+2 more);
+else (no)
+:Skip the no-op mutation path;
+endif
+:Run provider helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=template action=CREATED;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
+:Return success for the AVAILABLE success state;
+:Project required status and finalizer policy\nretain-until-confirmed-delete;
+:Requeue on provisioning, terminating;
+}
+endif
+stop
+note right
+shared diagram:
+shared/diagrams/shared-reconcile-activity.svg
+Start from the shared reconcile activity and
+specialize provider-backed CRUD, wait, and
+status-projection details here.
+Controller-local activity diagrams add
+list-lookup hints, secret policies, delete
+handling, and open formal gaps.
+archetype batch: Generated service-manager
+controllers specialize the shared reconcile path
+with formal runtime ownership.
+service: core
+slug: servicegateway
+kind: ServiceGateway
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, terminating
+provider states: create PROVISIONING; update
+none; delete TERMINATING, TERMINATED
+supported drift: block_traffic, defined_tags,
+display_name, freeform_tags (+2 more)
+reject before mutate: force-new fields
+compartment_id, vcn_id
+create-only fields: none
+list lookup: oci_core_service_gateways filters
+compartment_id, display_name, id, vcn_id (+1
+more)
+conflicts: none
+open gaps: none
+Ready state maps to OCI AVAILABLE.
+Requeue continues while OCI reports
+PROVISIONING, TERMINATING, or TERMINATED.
+Delete completes only after GetServiceGateway
+returns not found; TERMINATING and TERMINATED
+are accepted observed pre-delete states.
+In-place updates are limited to blockTraffic,
+displayName, definedTags, freeformTags,
+routeTableId, and services.
+Service comparisons normalize by serviceId so
+ordering and response-only serviceName fields do
+not trigger updates.
+end note
+@enduml

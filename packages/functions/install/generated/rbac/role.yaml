@@ -1,0 +1,44 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - functions.oracle.com
+  resources:
+  - applications
+  - functions
+  - pbflistings
+  - pbflistingversions
+  - triggers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - functions.oracle.com
+  resources:
+  - applications/finalizers
+  - functions/finalizers
+  - pbflistings/finalizers
+  - pbflistingversions/finalizers
+  - triggers/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - functions.oracle.com
+  resources:
+  - applications/status
+  - functions/status
+  - pbflistings/status
+  - pbflistingversions/status
+  - triggers/status
+  verbs:
+  - get
+  - patch
+  - update

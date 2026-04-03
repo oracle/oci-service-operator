@@ -13,7 +13,6 @@ import (
 	corev1beta1 "github.com/oracle/oci-service-operator/api/core/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/core"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
 )
 
 // CrossConnectLocationReconciler reconciles a CrossConnectLocation object.
@@ -36,6 +35,6 @@ func (r *CrossConnectLocationReconciler) SetupWithManager(mgr ctrl.Manager) erro
 	builder := ctrl.NewControllerManagedBy(mgr).
 		For(&corev1beta1.CrossConnectLocation{})
 	return builder.
-		WithEventFilter(predicate.GenerationChangedPredicate{}).
+		WithEventFilter(core.ReconcilePredicate()).
 		Complete(r)
 }
