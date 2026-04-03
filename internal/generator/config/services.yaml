@@ -586,7 +586,9 @@ services:
                 name: dbsystem-sample
               spec:
                 compartmentId: ocid1.compartment.oc1..exampleuniqueID
-                shapeName: MySQL.VM.Standard.E3.1.8GB
+                # Replace with a currently supported MySQL DB System shape for your tenancy.
+                shapeName: MySQL.2
+                # Replace with a private subnet OCID. MySQL DB Systems reject public subnets.
                 subnetId: ocid1.subnet.oc1..exampleuniqueID
                 adminUsername:
                   secret:
