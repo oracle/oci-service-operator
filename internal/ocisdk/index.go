@@ -193,17 +193,45 @@ func (pkg *Package) ClientConstructor(clientType string) (ClientConstructor, boo
 
 func (pkg *Package) ResourceOperations(rawName string) map[string]OperationMethod {
 	operations := make(map[string]OperationMethod)
-	for _, method := range pkg.requestMethods {
+	bestMatches := make(map[string]string)
+	requestTypes := make([]string, 0, len(pkg.requestMethods))
+	for requestType := range pkg.requestMethods {
+		requestTypes = append(requestTypes, requestType)
+	}
+	sort.Strings(requestTypes)
+	for _, requestType := range requestTypes {
+		method := pkg.requestMethods[requestType]
 		matches := crudRequestPattern.FindStringSubmatch(method.RequestType)
 		if len(matches) == 0 {
 			continue
 		}
-		if sdkSingularize(matches[2]) != rawName {
+		stem := matches[2]
+		if sdkSingularize(stem) != rawName {
 			continue
 		}
-		operations[matches[1]] = method
+		verb := matches[1]
+		if currentStem, ok := bestMatches[verb]; ok && !preferOperationStem(rawName, stem, currentStem) {
+			continue
+		}
+		bestMatches[verb] = stem
+		operations[verb] = method
 	}
 	return operations
+}
+
+func preferOperationStem(rawName string, candidate string, current string) bool {
+	candidateExact := candidate == rawName
+	currentExact := current == rawName
+	switch {
+	case candidateExact && !currentExact:
+		return true
+	case !candidateExact && currentExact:
+		return false
+	case len(candidate) != len(current):
+		return len(candidate) < len(current)
+	default:
+		return candidate < current
+	}
 }
 
 func (pkg *Package) Struct(typeName string) (Struct, bool) {
