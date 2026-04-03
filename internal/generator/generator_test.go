@@ -1726,8 +1726,8 @@ func TestCurrentDefaultActiveGeneratedArtifactsMatchCheckedInOutputs(t *testing.
 	if err != nil {
 		t.Fatalf("SelectServices(--all) error = %v", err)
 	}
-	if len(services) != 15 {
-		t.Fatalf("selected %d default-active services, want 15", len(services))
+	if len(services) != 16 {
+		t.Fatalf("selected %d default-active services, want 16", len(services))
 	}
 
 	outputRoot := t.TempDir()
@@ -1740,26 +1740,29 @@ func TestCurrentDefaultActiveGeneratedArtifactsMatchCheckedInOutputs(t *testing.
 		t.Fatalf("Generate() error = %v", err)
 	}
 	assertGeneratedServiceCounts(t, result.Generated, map[string]int{
-		"containerengine": 18,
-		"core":            123,
-		"database":        1,
-		"dataflow":        10,
-		"functions":       5,
-		"identity":        1,
-		"mysql":           12,
-		"nosql":           8,
-		"objectstorage":   1,
-		"opensearch":      1,
-		"psql":            11,
-		"queue":           7,
-		"redis":           1,
-		"streaming":       1,
-		"vault":           2,
+		"containerengine":    18,
+		"containerinstances": 1,
+		"core":               123,
+		"database":           1,
+		"dataflow":           10,
+		"functions":          5,
+		"identity":           1,
+		"mysql":              12,
+		"nosql":              8,
+		"objectstorage":      1,
+		"opensearch":         1,
+		"psql":               11,
+		"queue":              7,
+		"redis":              1,
+		"streaming":          1,
+		"vault":              2,
 	})
 
 	apiFiles := []string{
 		"api/containerengine/v1beta1/groupversion_info.go",
 		"api/containerengine/v1beta1/cluster_types.go",
+		"api/containerinstances/v1beta1/groupversion_info.go",
+		"api/containerinstances/v1beta1/containerinstance_types.go",
 		"api/core/v1beta1/groupversion_info.go",
 		"api/core/v1beta1/vcn_types.go",
 		"api/database/v1beta1/groupversion_info.go",
@@ -1795,6 +1798,7 @@ func TestCurrentDefaultActiveGeneratedArtifactsMatchCheckedInOutputs(t *testing.
 
 	exactFiles := []string{
 		"config/samples/containerengine_v1beta1_cluster.yaml",
+		"config/samples/containerinstances_v1beta1_containerinstance.yaml",
 		"config/samples/core_v1beta1_vcn.yaml",
 		"config/samples/database_v1beta1_autonomousdatabase.yaml",
 		"config/samples/dataflow_v1beta1_application.yaml",
@@ -1811,6 +1815,8 @@ func TestCurrentDefaultActiveGeneratedArtifactsMatchCheckedInOutputs(t *testing.
 		"config/samples/vault_v1beta1_secret.yaml",
 		"packages/containerengine/metadata.env",
 		"packages/containerengine/install/kustomization.yaml",
+		"packages/containerinstances/metadata.env",
+		"packages/containerinstances/install/kustomization.yaml",
 		"packages/core/metadata.env",
 		"packages/core/install/kustomization.yaml",
 		"packages/core-network/metadata.env",
@@ -1846,6 +1852,7 @@ func TestCurrentDefaultActiveGeneratedArtifactsMatchCheckedInOutputs(t *testing.
 
 	runtimeFiles := []string{
 		"controllers/containerengine/cluster_controller.go",
+		"controllers/containerinstances/containerinstance_controller.go",
 		"pkg/servicemanager/containerengine/cluster/cluster_serviceclient.go",
 		"pkg/servicemanager/containerengine/cluster/cluster_servicemanager.go",
 		"controllers/core/instance_controller.go",

@@ -4,6 +4,7 @@ import (
 	"reflect"
 
 	containerenginev1beta1 "github.com/oracle/oci-service-operator/api/containerengine/v1beta1"
+	containerinstancesv1beta1 "github.com/oracle/oci-service-operator/api/containerinstances/v1beta1"
 	corev1beta1 "github.com/oracle/oci-service-operator/api/core/v1beta1"
 	databasev1beta1 "github.com/oracle/oci-service-operator/api/database/v1beta1"
 	dataflowv1beta1 "github.com/oracle/oci-service-operator/api/dataflow/v1beta1"
@@ -2793,6 +2794,28 @@ var targets = []Target{
 			{
 				SDKStruct:  "core.InstanceCredentials",
 				APISurface: "status",
+			},
+		},
+	},
+	{
+		Name:       "ContainerinstancesContainerInstance",
+		SpecType:   reflect.TypeOf(containerinstancesv1beta1.ContainerInstanceSpec{}),
+		StatusType: reflect.TypeOf(containerinstancesv1beta1.ContainerInstanceStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "containerinstances.CreateContainerInstanceDetails",
+			},
+			{
+				SDKStruct: "containerinstances.UpdateContainerInstanceDetails",
+			},
+			{
+				SDKStruct: "containerinstances.ContainerInstance",
+			},
+			{
+				SDKStruct: "containerinstances.ContainerInstanceCollection",
+			},
+			{
+				SDKStruct: "containerinstances.ContainerInstanceSummary",
 			},
 		},
 	},
