@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- bases/opensearch.oracle.com_manifests.yaml
+- bases/opensearch.oracle.com_opensearchclusterbackups.yaml
+- bases/opensearch.oracle.com_opensearchclusters.yaml
+- bases/opensearch.oracle.com_opensearchversions.yaml
+- bases/opensearch.oracle.com_workrequesterrors.yaml
+- bases/opensearch.oracle.com_workrequestlogs.yaml
+- bases/opensearch.oracle.com_workrequests.yaml

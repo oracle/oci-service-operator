@@ -13,7 +13,6 @@ import (
 	nosqlv1beta1 "github.com/oracle/oci-service-operator/api/nosql/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/core"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
 )
 
 // TableReconciler reconciles a Table object.
@@ -24,6 +23,7 @@ type TableReconciler struct {
 // +kubebuilder:rbac:groups=nosql.oracle.com,resources=tables,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=nosql.oracle.com,resources=tables/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=nosql.oracle.com,resources=tables/finalizers,verbs=update
+// +kubebuilder:rbac:groups="",resources=events,verbs=create;patch
 
 // Reconcile is part of the main Kubernetes reconciliation loop.
 func (r *TableReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
@@ -36,6 +36,6 @@ func (r *TableReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	builder := ctrl.NewControllerManagedBy(mgr).
 		For(&nosqlv1beta1.Table{})
 	return builder.
-		WithEventFilter(predicate.GenerationChangedPredicate{}).
+		WithEventFilter(core.ReconcilePredicate()).
 		Complete(r)
 }

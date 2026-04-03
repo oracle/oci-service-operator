@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "redis",
+  "slug": "rediscluster",
+  "kind": "RedisCluster",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_redis_redis_cluster",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateRedisCluster",
+        "requestType": "redis.CreateRedisClusterRequest",
+        "responseType": "redis.CreateRedisClusterResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetRedisCluster",
+        "requestType": "redis.GetRedisClusterRequest",
+        "responseType": "redis.GetRedisClusterResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListRedisClusters",
+        "requestType": "redis.ListRedisClustersRequest",
+        "responseType": "redis.ListRedisClustersResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateRedisCluster",
+        "requestType": "redis.UpdateRedisClusterRequest",
+        "responseType": "redis.UpdateRedisClusterResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteRedisCluster",
+        "requestType": "redis.DeleteRedisClusterRequest",
+        "responseType": "redis.DeleteRedisClusterResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "node_count",
+      "node_memory_in_gbs"
+    ],
+    "forceNew": [
+      "compartment_id",
+      "software_version",
+      "subnet_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_redis_redis_clusters",
+    "collectionField": "redis_cluster_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/redis/rediscluster/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/redis/rediscluster/logic-gaps.md",
+    "excludedSemantics": [
+      "runtime-implementation"
+    ]
+  },
+  "notes": [
+    "Published RedisCluster controller target for redis; the vendored OCI SDK uses CreateRedisCluster/GetRedisCluster/ListRedisClusters/UpdateRedisCluster/DeleteRedisCluster for this resource.",
+    "Bind resolution first honors an explicit OCI identity and otherwise adopts only a unique ListRedisClusters match on compartment_id plus display_name before create."
+  ]
+}

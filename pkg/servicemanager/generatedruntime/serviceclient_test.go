@@ -8,6 +8,7 @@ package generatedruntime
 import (
 	"context"
 	"encoding/json"
+	"io"
 	"strings"
 	"testing"
 
@@ -23,6 +24,7 @@ import (
 type fakeResource struct {
 	Name      string     `json:"-"`
 	Namespace string     `json:"-"`
+	UID       string     `json:"-"`
 	Spec      fakeSpec   `json:"spec,omitempty"`
 	Status    fakeStatus `json:"status,omitempty"`
 }
@@ -79,6 +81,7 @@ type FakeCreateThingDetails struct {
 }
 
 type fakeCreateThingRequest struct {
+	OpcRetryToken          *string `contributesTo:"header" name:"opc-retry-token"`
 	FakeCreateThingDetails `contributesTo:"body"`
 }
 
@@ -468,6 +471,8 @@ func TestBuildRequestPopulatesAutonomousDatabasePolymorphicCreateBody(t *testing
 				[]RequestField{{FieldName: "CreateAutonomousDatabaseDetails", RequestName: "createAutonomousDatabaseDetails", Contribution: "body"}},
 				nil,
 				requestBuildOptions{Context: context.Background()},
+				nil,
+				false,
 			)
 			if err != nil {
 				t.Fatalf("buildRequest() error = %v", err)
@@ -497,7 +502,7 @@ func TestBuildRequestOmitsUnsetGeneratedAdminCredentialSources(t *testing.T) {
 		t.Fatalf("lookupValues(mysql) error = %v", err)
 	}
 
-	if err := buildRequest(mysqlRequest, mysqlResource, mysqlValues, "", nil, nil, requestBuildOptions{Context: context.Background()}); err != nil {
+	if err := buildRequest(mysqlRequest, mysqlResource, mysqlValues, "", nil, nil, requestBuildOptions{Context: context.Background()}, nil, false); err != nil {
 		t.Fatalf("buildRequest(mysql) error = %v", err)
 	}
 	if mysqlRequest.AdminUsername != nil {
@@ -527,6 +532,8 @@ func TestBuildRequestOmitsUnsetGeneratedAdminCredentialSources(t *testing.T) {
 		[]RequestField{{FieldName: "CreateAutonomousDatabaseDetails", RequestName: "createAutonomousDatabaseDetails", Contribution: "body"}},
 		nil,
 		requestBuildOptions{Context: context.Background()},
+		nil,
+		false,
 	); err != nil {
 		t.Fatalf("buildRequest(adb) error = %v", err)
 	}
@@ -539,6 +546,68 @@ func TestBuildRequestOmitsUnsetGeneratedAdminCredentialSources(t *testing.T) {
 	}
 	if adbDetails.AdminPassword != nil {
 		t.Fatalf("autonomous database adminPassword = %v, want nil when secret source is omitted", adbDetails.AdminPassword)
+	}
+}
+
+func TestBuildRequestOmitsZeroValueAutonomousDatabaseNestedStructs(t *testing.T) {
+	t.Parallel()
+
+	adbRequest := &databasesdk.CreateAutonomousDatabaseRequest{}
+	adbResource := &databasev1beta1.AutonomousDatabase{
+		Spec: databasev1beta1.AutonomousDatabaseSpec{
+			CompartmentId:        "ocid1.compartment.oc1..adb",
+			DisplayName:          "adb-sample",
+			DbName:               "adbsample",
+			DbWorkload:           "OLTP",
+			IsDedicated:          false,
+			DbVersion:            "19c",
+			DataStorageSizeInTBs: 1,
+			CpuCoreCount:         1,
+			LicenseModel:         "LICENSE_INCLUDED",
+			IsAutoScalingEnabled: true,
+		},
+	}
+	adbValues, err := lookupValues(adbResource)
+	if err != nil {
+		t.Fatalf("lookupValues(adb) error = %v", err)
+	}
+
+	if err := buildRequest(
+		adbRequest,
+		adbResource,
+		adbValues,
+		"",
+		[]RequestField{{FieldName: "CreateAutonomousDatabaseDetails", RequestName: "createAutonomousDatabaseDetails", Contribution: "body"}},
+		nil,
+		requestBuildOptions{Context: context.Background()},
+		nil,
+		false,
+	); err != nil {
+		t.Fatalf("buildRequest(adb) error = %v", err)
+	}
+	if adbRequest.CreateAutonomousDatabaseDetails == nil {
+		t.Fatal("buildRequest(adb) should populate CreateAutonomousDatabaseDetails")
+	}
+
+	httpRequest, err := adbRequest.HTTPRequest("POST", "/autonomousDatabases", nil, nil)
+	if err != nil {
+		t.Fatalf("HTTPRequest(adb create body) error = %v", err)
+	}
+	payload, err := io.ReadAll(httpRequest.Body)
+	if err != nil {
+		t.Fatalf("io.ReadAll(adb create body) error = %v", err)
+	}
+	body := string(payload)
+
+	for _, unwanted := range []string{`"resourcePoolSummary"`, `"longTermBackupSchedule"`} {
+		if strings.Contains(body, unwanted) {
+			t.Fatalf("adb create body = %s, unexpected token %s", body, unwanted)
+		}
+	}
+	for _, wanted := range []string{`"dbVersion":"19c"`, `"cpuCoreCount":1`, `"dataStorageSizeInTBs":1`, `"isAutoScalingEnabled":true`} {
+		if !strings.Contains(body, wanted) {
+			t.Fatalf("adb create body = %s, missing token %s", body, wanted)
+		}
 	}
 }
 
@@ -681,6 +750,153 @@ func TestServiceClientCreateOrUpdateSkipsUpdateWhenMutableStateMatches(t *testin
 	}
 	if len(resource.Status.OsokStatus.Conditions) == 0 || resource.Status.OsokStatus.Conditions[len(resource.Status.OsokStatus.Conditions)-1].Type != shared.Active {
 		t.Fatalf("status conditions = %#v, want trailing Active condition", resource.Status.OsokStatus.Conditions)
+	}
+}
+
+func TestServiceClientCreateOrUpdateSkipsUpdateWhileLifecycleProvisioning(t *testing.T) {
+	t.Parallel()
+
+	getCalled := false
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Semantics: &Semantics{
+			Lifecycle: LifecycleSemantics{
+				ProvisioningStates: []string{"CREATING"},
+				ActiveStates:       []string{"ACTIVE"},
+			},
+			Mutation: MutationSemantics{
+				Mutable: []string{"displayName"},
+			},
+		},
+		Get: &Operation{
+			NewRequest: func() any { return &fakeGetThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				getCalled = true
+				if request.(*fakeGetThingRequest).ThingId == nil || *request.(*fakeGetThingRequest).ThingId != "ocid1.thing.oc1..existing" {
+					t.Fatalf("get request thingId = %v, want existing OCID", request.(*fakeGetThingRequest).ThingId)
+				}
+				return fakeGetThingResponse{
+					Thing: fakeThing{
+						Id:             "ocid1.thing.oc1..existing",
+						DisplayName:    "creating-name",
+						LifecycleState: "CREATING",
+					},
+				}, nil
+			},
+			Fields: []RequestField{
+				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
+			},
+		},
+		Update: &Operation{
+			NewRequest: func() any { return &fakeUpdateThingRequest{} },
+			Call: func(_ context.Context, _ any) (any, error) {
+				t.Fatal("Update() should not be called while lifecycle is still provisioning")
+				return nil, nil
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Spec: fakeSpec{
+			DisplayName: "desired-name",
+		},
+		Status: fakeStatus{
+			OsokStatus: shared.OSOKStatus{Ocid: "ocid1.thing.oc1..existing"},
+			Id:         "ocid1.thing.oc1..existing",
+		},
+	}
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful {
+		t.Fatal("CreateOrUpdate() should succeed while observing provisioning lifecycle")
+	}
+	if !response.ShouldRequeue {
+		t.Fatal("CreateOrUpdate() should requeue while lifecycle is provisioning")
+	}
+	if !getCalled {
+		t.Fatal("Get() should be called to observe current provisioning lifecycle")
+	}
+	if resource.Status.LifecycleState != "CREATING" {
+		t.Fatalf("status.lifecycleState = %q, want CREATING", resource.Status.LifecycleState)
+	}
+	if len(resource.Status.OsokStatus.Conditions) == 0 || resource.Status.OsokStatus.Conditions[len(resource.Status.OsokStatus.Conditions)-1].Type != shared.Provisioning {
+		t.Fatalf("status conditions = %#v, want trailing Provisioning condition", resource.Status.OsokStatus.Conditions)
+	}
+}
+
+func TestServiceClientCreateOrUpdateSkipsUpdateWhenMutableFieldIsNotReturnedByService(t *testing.T) {
+	t.Parallel()
+
+	getCalled := false
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Semantics: &Semantics{
+			Lifecycle: LifecycleSemantics{
+				ActiveStates: []string{"ACTIVE"},
+			},
+			Mutation: MutationSemantics{
+				Mutable: []string{"adminPassword"},
+			},
+		},
+		Get: &Operation{
+			NewRequest: func() any { return &fakeGetThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				getCalled = true
+				if request.(*fakeGetThingRequest).ThingId == nil || *request.(*fakeGetThingRequest).ThingId != "ocid1.thing.oc1..existing" {
+					t.Fatalf("get request thingId = %v, want existing OCID", request.(*fakeGetThingRequest).ThingId)
+				}
+				return fakeGetThingResponse{
+					Thing: fakeThing{
+						Id:             "ocid1.thing.oc1..existing",
+						DisplayName:    "steady-name",
+						LifecycleState: "ACTIVE",
+					},
+				}, nil
+			},
+			Fields: []RequestField{
+				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
+			},
+		},
+		Update: &Operation{
+			NewRequest: func() any { return &fakeUpdateThingRequest{} },
+			Call: func(_ context.Context, _ any) (any, error) {
+				t.Fatal("Update() should not be called when a mutable field is write-only in the service response")
+				return nil, nil
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Spec: fakeSpec{
+			AdminPassword: shared.PasswordSource{
+				Secret: shared.SecretSource{SecretName: "admin-password"},
+			},
+		},
+		Status: fakeStatus{
+			OsokStatus: shared.OSOKStatus{Ocid: "ocid1.thing.oc1..existing"},
+			Id:         "ocid1.thing.oc1..existing",
+		},
+	}
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful {
+		t.Fatal("CreateOrUpdate() should succeed when write-only mutable fields are not returned")
+	}
+	if response.ShouldRequeue {
+		t.Fatal("CreateOrUpdate() should not requeue for ACTIVE lifecycle")
+	}
+	if !getCalled {
+		t.Fatal("Get() should be called to observe the current resource")
 	}
 }
 
@@ -1097,6 +1313,221 @@ func TestServiceClientCreateOrUpdateUsesFormalListMatching(t *testing.T) {
 	}
 }
 
+func TestServiceClientCurrentIDIgnoresSpecCompartmentReference(t *testing.T) {
+	t.Parallel()
+
+	createCalled := false
+	getCalled := false
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Compartment",
+		SDKName: "Compartment",
+		Semantics: &Semantics{
+			Lifecycle: LifecycleSemantics{
+				ActiveStates: []string{"ACTIVE"},
+			},
+			Mutation: MutationSemantics{
+				ForceNew: []string{"compartmentId"},
+			},
+		},
+		Create: &Operation{
+			NewRequest: func() any { return &fakeCreateThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				createCalled = true
+				createRequest := request.(*fakeCreateThingRequest)
+				if createRequest.CompartmentId != "ocid1.compartment.oc1..parent" {
+					t.Fatalf("create request compartmentId = %q, want parent compartment ID", createRequest.CompartmentId)
+				}
+				return fakeCreateThingResponse{
+					Thing: fakeThing{
+						Id:             "ocid1.compartment.oc1..child",
+						CompartmentId:  "ocid1.compartment.oc1..parent",
+						DisplayName:    "created-name",
+						LifecycleState: "ACTIVE",
+					},
+				}, nil
+			},
+			Fields: []RequestField{
+				{FieldName: "FakeCreateThingDetails", Contribution: "body"},
+			},
+		},
+		Get: &Operation{
+			NewRequest: func() any { return &fakeGetThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				getCalled = true
+				t.Fatalf("Get() should not be called before a tracked OCID exists, got request=%+v", request)
+				return nil, nil
+			},
+			Fields: []RequestField{
+				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Spec: fakeSpec{
+			CompartmentId: "ocid1.compartment.oc1..parent",
+			DisplayName:   "created-name",
+		},
+	}
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful {
+		t.Fatal("CreateOrUpdate() should report success")
+	}
+	if !createCalled {
+		t.Fatal("Create() should be called when only a parent compartment reference exists in spec")
+	}
+	if getCalled {
+		t.Fatal("Get() should not be called before the created child OCID is tracked")
+	}
+	if string(resource.Status.OsokStatus.Ocid) != "ocid1.compartment.oc1..child" {
+		t.Fatalf("status.ocid = %q, want created child OCID", resource.Status.OsokStatus.Ocid)
+	}
+}
+
+func TestServiceClientCompartmentCreateIgnoresParentListItem(t *testing.T) {
+	t.Parallel()
+
+	createCalled := false
+	getCalled := false
+	var listRequest fakeListThingRequest
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Compartment",
+		SDKName: "Compartment",
+		Semantics: &Semantics{
+			Lifecycle: LifecycleSemantics{
+				ProvisioningStates: []string{"CREATING"},
+				ActiveStates:       []string{"ACTIVE", "INACTIVE"},
+			},
+			Delete: DeleteSemantics{
+				Policy:         "required",
+				PendingStates:  []string{"DELETING"},
+				TerminalStates: []string{"DELETED"},
+			},
+			List: &ListSemantics{
+				ResponseItemsField: "Resources",
+				MatchFields:        []string{"compartmentId", "lifecycleState", "name"},
+			},
+			Mutation: MutationSemantics{
+				Mutable:  []string{"description", "name"},
+				ForceNew: []string{"compartmentId"},
+			},
+			CreateFollowUp: FollowUpSemantics{
+				Strategy: "read-after-write",
+			},
+		},
+		Create: &Operation{
+			NewRequest: func() any { return &fakeCreateThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				createCalled = true
+				createRequest := request.(*fakeCreateThingRequest)
+				if createRequest.CompartmentId != "ocid1.compartment.oc1..parent" {
+					t.Fatalf("create request compartmentId = %q, want parent compartment ID", createRequest.CompartmentId)
+				}
+				return fakeCreateThingResponse{
+					Thing: fakeThing{
+						Id:             "ocid1.compartment.oc1..child",
+						CompartmentId:  "ocid1.compartment.oc1..parent",
+						Name:           "codex-identity-compartment-20260403083600",
+						DisplayName:    "codex-identity-compartment-20260403083600",
+						LifecycleState: "ACTIVE",
+					},
+				}, nil
+			},
+			Fields: []RequestField{
+				{FieldName: "FakeCreateThingDetails", Contribution: "body"},
+			},
+		},
+		Get: &Operation{
+			NewRequest: func() any { return &fakeGetThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				getCalled = true
+				if !createCalled {
+					t.Fatalf("Get() should not be called before Create(), got request=%+v", request)
+				}
+				getRequest := request.(*fakeGetThingRequest)
+				if getRequest.ThingId == nil || *getRequest.ThingId != "ocid1.compartment.oc1..child" {
+					t.Fatalf("Get() should only follow the created child OCID, got request=%+v", request)
+				}
+				return fakeGetThingResponse{
+					Thing: fakeThing{
+						Id:             "ocid1.compartment.oc1..child",
+						CompartmentId:  "ocid1.compartment.oc1..parent",
+						Name:           "codex-identity-compartment-20260403083600",
+						DisplayName:    "codex-identity-compartment-20260403083600",
+						LifecycleState: "ACTIVE",
+					},
+				}, nil
+			},
+			Fields: []RequestField{
+				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
+			},
+		},
+		List: &Operation{
+			NewRequest: func() any { return &fakeListThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				listRequest = *request.(*fakeListThingRequest)
+				return fakeNamedListThingResponse{
+					Collection: fakeNamedThingCollection{
+						Resources: []fakeThingSummary{
+							{
+								Id:             "ocid1.compartment.oc1..parent",
+								CompartmentId:  "ocid1.tenancy.oc1..tenancy",
+								Name:           "vdittaka",
+								LifecycleState: "ACTIVE",
+							},
+						},
+					},
+				}, nil
+			},
+			Fields: []RequestField{
+				{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
+				{FieldName: "Name", RequestName: "name", Contribution: "query"},
+				{FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query"},
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Spec: fakeSpec{
+			CompartmentId: "ocid1.compartment.oc1..parent",
+			Name:          "codex-identity-compartment-20260403083600",
+			DisplayName:   "codex-identity-compartment-20260403083600",
+		},
+	}
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful {
+		t.Fatal("CreateOrUpdate() should report success")
+	}
+	if listRequest.CompartmentId != "ocid1.compartment.oc1..parent" {
+		t.Fatalf("list request compartmentId = %q, want parent compartment ID", listRequest.CompartmentId)
+	}
+	if listRequest.Name != "codex-identity-compartment-20260403083600" {
+		t.Fatalf("list request name = %q, want sample compartment name", listRequest.Name)
+	}
+	if !createCalled {
+		t.Fatal("Create() should be called when the only listed compartment is the parent")
+	}
+	if !getCalled {
+		t.Fatal("Get() should be called for create follow-up using the created child OCID")
+	}
+	if string(resource.Status.OsokStatus.Ocid) != "ocid1.compartment.oc1..child" {
+		t.Fatalf("status.ocid = %q, want created child OCID", resource.Status.OsokStatus.Ocid)
+	}
+	if resource.Status.CompartmentId != "ocid1.compartment.oc1..parent" {
+		t.Fatalf("status.compartmentId = %q, want parent compartment ID", resource.Status.CompartmentId)
+	}
+}
+
 func TestServiceClientRejectsForceNewMutationChanges(t *testing.T) {
 	t.Parallel()
 
@@ -1239,6 +1670,252 @@ func TestServiceClientDeleteUsesFormalRequiredConfirmation(t *testing.T) {
 	}
 	if deleteRequest.ThingId == nil || *deleteRequest.ThingId != "ocid1.thing.oc1..delete" {
 		t.Fatalf("delete request thingId = %v, want existing OCID", deleteRequest.ThingId)
+	}
+	if len(resource.Status.OsokStatus.Conditions) == 0 || resource.Status.OsokStatus.Conditions[len(resource.Status.OsokStatus.Conditions)-1].Type != shared.Terminating {
+		t.Fatalf("status conditions = %#v, want trailing Terminating condition", resource.Status.OsokStatus.Conditions)
+	}
+}
+
+func TestServiceClientDeleteConflictStillConfirmsFormalPendingState(t *testing.T) {
+	t.Parallel()
+
+	var deleteRequest fakeDeleteThingRequest
+	getCalls := 0
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Semantics: &Semantics{
+			Delete: DeleteSemantics{
+				Policy:         "required",
+				PendingStates:  []string{"TERMINATING"},
+				TerminalStates: []string{"TERMINATED"},
+			},
+			DeleteFollowUp: FollowUpSemantics{
+				Strategy: "confirm-delete",
+				Hooks:    []Hook{{Helper: "tfresource.DeleteResource"}},
+			},
+		},
+		Delete: &Operation{
+			NewRequest: func() any { return &fakeDeleteThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				deleteRequest = *request.(*fakeDeleteThingRequest)
+				return nil, fakeServiceError{
+					code:       "IncorrectState",
+					message:    "delete is still settling",
+					statusCode: 409,
+					opcID:      "opc-delete-conflict",
+				}
+			},
+			Fields: []RequestField{
+				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
+			},
+		},
+		Get: &Operation{
+			NewRequest: func() any { return &fakeGetThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				getCalls++
+				lifecycleState := "ACTIVE"
+				if getCalls > 1 {
+					lifecycleState = "TERMINATING"
+				}
+				return fakeGetThingResponse{
+					Thing: fakeThing{
+						Id:             "ocid1.thing.oc1..delete",
+						LifecycleState: lifecycleState,
+					},
+				}, nil
+			},
+			Fields: []RequestField{
+				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Status: fakeStatus{
+			OsokStatus: shared.OSOKStatus{Ocid: "ocid1.thing.oc1..delete"},
+		},
+	}
+
+	deleted, err := client.Delete(context.Background(), resource)
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
+	}
+	if deleted {
+		t.Fatal("Delete() should keep waiting while the confirmed lifecycle remains TERMINATING")
+	}
+	if getCalls != 2 {
+		t.Fatalf("Get() calls = %d, want pre-delete read plus one follow-up after conflict", getCalls)
+	}
+	if deleteRequest.ThingId == nil || *deleteRequest.ThingId != "ocid1.thing.oc1..delete" {
+		t.Fatalf("delete request thingId = %v, want existing OCID", deleteRequest.ThingId)
+	}
+	if resource.Status.OsokStatus.DeletedAt != nil {
+		t.Fatal("status.deletedAt should stay empty while delete remains pending")
+	}
+	if resource.Status.LifecycleState != "TERMINATING" {
+		t.Fatalf("status.lifecycleState = %q, want TERMINATING", resource.Status.LifecycleState)
+	}
+	if len(resource.Status.OsokStatus.Conditions) == 0 || resource.Status.OsokStatus.Conditions[len(resource.Status.OsokStatus.Conditions)-1].Type != shared.Terminating {
+		t.Fatalf("status conditions = %#v, want trailing Terminating condition", resource.Status.OsokStatus.Conditions)
+	}
+}
+
+func TestServiceClientDeleteSkipsReissuingDeleteWhenFormalStateAlreadyPending(t *testing.T) {
+	t.Parallel()
+
+	deleteCalls := 0
+	getCalls := 0
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Semantics: &Semantics{
+			Delete: DeleteSemantics{
+				Policy:         "required",
+				PendingStates:  []string{"DELETING"},
+				TerminalStates: []string{"DELETED"},
+			},
+			DeleteFollowUp: FollowUpSemantics{
+				Strategy: "confirm-delete",
+				Hooks:    []Hook{{Helper: "tfresource.DeleteResource"}},
+			},
+		},
+		Delete: &Operation{
+			NewRequest: func() any { return &fakeDeleteThingRequest{} },
+			Call: func(_ context.Context, _ any) (any, error) {
+				deleteCalls++
+				t.Fatal("Delete() should not be called once delete confirmation already reports DELETING")
+				return nil, nil
+			},
+			Fields: []RequestField{
+				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
+			},
+		},
+		Get: &Operation{
+			NewRequest: func() any { return &fakeGetThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				getCalls++
+				getRequest := request.(*fakeGetThingRequest)
+				if getRequest.ThingId == nil || *getRequest.ThingId != "ocid1.thing.oc1..delete" {
+					t.Fatalf("get request thingId = %v, want existing OCID", getRequest.ThingId)
+				}
+				return fakeGetThingResponse{
+					Thing: fakeThing{
+						Id:             "ocid1.thing.oc1..delete",
+						LifecycleState: "DELETING",
+					},
+				}, nil
+			},
+			Fields: []RequestField{
+				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Status: fakeStatus{
+			OsokStatus: shared.OSOKStatus{Ocid: "ocid1.thing.oc1..delete"},
+		},
+	}
+
+	deleted, err := client.Delete(context.Background(), resource)
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
+	}
+	if deleted {
+		t.Fatal("Delete() should keep waiting while the confirmed lifecycle remains DELETING")
+	}
+	if deleteCalls != 0 {
+		t.Fatalf("Delete() calls = %d, want 0 once delete is already pending", deleteCalls)
+	}
+	if getCalls != 1 {
+		t.Fatalf("Get() calls = %d, want 1 confirmation read", getCalls)
+	}
+	if resource.Status.LifecycleState != "DELETING" {
+		t.Fatalf("status.lifecycleState = %q, want DELETING", resource.Status.LifecycleState)
+	}
+	if len(resource.Status.OsokStatus.Conditions) == 0 || resource.Status.OsokStatus.Conditions[len(resource.Status.OsokStatus.Conditions)-1].Type != shared.Terminating {
+		t.Fatalf("status conditions = %#v, want trailing Terminating condition", resource.Status.OsokStatus.Conditions)
+	}
+}
+
+func TestServiceClientDeleteConflictStillConfirmsFormalTerminalState(t *testing.T) {
+	t.Parallel()
+
+	getCalls := 0
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Semantics: &Semantics{
+			Delete: DeleteSemantics{
+				Policy:         "required",
+				PendingStates:  []string{"TERMINATING"},
+				TerminalStates: []string{"TERMINATED"},
+			},
+			DeleteFollowUp: FollowUpSemantics{
+				Strategy: "confirm-delete",
+				Hooks:    []Hook{{Helper: "tfresource.DeleteResource"}},
+			},
+		},
+		Delete: &Operation{
+			NewRequest: func() any { return &fakeDeleteThingRequest{} },
+			Call: func(_ context.Context, _ any) (any, error) {
+				return nil, fakeServiceError{
+					code:       "IncorrectState",
+					message:    "delete is still settling",
+					statusCode: 409,
+					opcID:      "opc-delete-conflict",
+				}
+			},
+			Fields: []RequestField{
+				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
+			},
+		},
+		Get: &Operation{
+			NewRequest: func() any { return &fakeGetThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				getCalls++
+				lifecycleState := "ACTIVE"
+				if getCalls > 1 {
+					lifecycleState = "TERMINATED"
+				}
+				return fakeGetThingResponse{
+					Thing: fakeThing{
+						Id:             "ocid1.thing.oc1..delete",
+						LifecycleState: lifecycleState,
+					},
+				}, nil
+			},
+			Fields: []RequestField{
+				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Status: fakeStatus{
+			OsokStatus: shared.OSOKStatus{Ocid: "ocid1.thing.oc1..delete"},
+		},
+	}
+
+	deleted, err := client.Delete(context.Background(), resource)
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
+	}
+	if !deleted {
+		t.Fatal("Delete() should succeed once the conflict follow-up confirms TERMINATED")
+	}
+	if getCalls != 2 {
+		t.Fatalf("Get() calls = %d, want pre-delete read plus one follow-up after conflict", getCalls)
+	}
+	if resource.Status.OsokStatus.DeletedAt == nil {
+		t.Fatal("status.deletedAt should be set after confirmed terminal delete")
+	}
+	if resource.Status.LifecycleState != "TERMINATED" {
+		t.Fatalf("status.lifecycleState = %q, want TERMINATED", resource.Status.LifecycleState)
 	}
 	if len(resource.Status.OsokStatus.Conditions) == 0 || resource.Status.OsokStatus.Conditions[len(resource.Status.OsokStatus.Conditions)-1].Type != shared.Terminating {
 		t.Fatalf("status conditions = %#v, want trailing Terminating condition", resource.Status.OsokStatus.Conditions)
@@ -1577,6 +2254,50 @@ func TestServiceClientCreateOrUpdateSkipsGetWithoutOcidBeforeListReuse(t *testin
 	}
 	if string(resource.Status.OsokStatus.Ocid) != "ocid1.thing.oc1..existing" {
 		t.Fatalf("status.ocid = %q, want reused OCID", resource.Status.OsokStatus.Ocid)
+	}
+}
+
+func TestServiceClientCreateOrUpdateReusesDeterministicCreateRetryToken(t *testing.T) {
+	t.Parallel()
+
+	var tokens []string
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Create: &Operation{
+			NewRequest: func() any { return &fakeCreateThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				token := request.(*fakeCreateThingRequest).OpcRetryToken
+				if token == nil || strings.TrimSpace(*token) == "" {
+					t.Fatal("create request should set opc retry token")
+				}
+				tokens = append(tokens, *token)
+				return fakeCreateThingResponse{}, nil
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Name:      "thing-sample",
+		Namespace: "default",
+		UID:       "123e4567-e89b-12d3-a456-426614174000",
+		Spec: fakeSpec{
+			CompartmentId: "ocid1.compartment.oc1..sample",
+			DisplayName:   "sample-name",
+		},
+	}
+
+	for i := 0; i < 2; i++ {
+		response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+		requireCreateOrUpdateSuccess(t, response, err)
+	}
+
+	if len(tokens) != 2 {
+		t.Fatalf("create calls = %d, want 2", len(tokens))
+	}
+	if tokens[0] != resource.UID || tokens[1] != resource.UID {
+		t.Fatalf("create retry tokens = %v, want both %q", tokens, resource.UID)
 	}
 }
 
@@ -2233,6 +2954,25 @@ func TestServiceClientDeleteResolvesDeletePhaseListMatchWithoutOcid(t *testing.T
 	}
 	if deleteRequest.ThingId == nil || *deleteRequest.ThingId != "ocid1.thing.oc1..deleting" {
 		t.Fatalf("delete request thingId = %v, want delete-phase OCID", deleteRequest.ThingId)
+	}
+}
+
+func TestValidateFormalSemanticsAllowsWorkRequestFollowUpHelper(t *testing.T) {
+	t.Parallel()
+
+	err := validateFormalSemantics("RedisCluster", &Semantics{
+		Delete: DeleteSemantics{
+			Policy: "best-effort",
+		},
+		CreateFollowUp: FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks: []Hook{
+				{Helper: "tfresource.WaitForWorkRequestWithErrorHandling"},
+			},
+		},
+	})
+	if err != nil {
+		t.Fatalf("validateFormalSemantics() error = %v, want helper accepted", err)
 	}
 }
 

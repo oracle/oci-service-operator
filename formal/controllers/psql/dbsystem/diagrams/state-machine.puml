@@ -33,14 +33,14 @@ state "DeleteCleanupBlocked" as delete_cleanup_blocked
 [*] --> observe : CreateDbSystem
 observe --> resolve_by_lookup : tracked identity missing
 resolve_by_lookup --> evaluate_ready : lookup or create reaches\nACTIVE, NEEDS_ATTENTION
-resolve_by_lookup --> retryable : OCI state in CREATING,\nDELETING
+resolve_by_lookup --> retryable : OCI state in CREATING,\nUPDATING, DELETING
 resolve_by_lookup --> failed : unresolved OCI error or non-success state
 observe --> evaluate_ready : OCI state in ACTIVE,\nNEEDS_ATTENTION
-observe --> retryable : OCI state in CREATING,\nDELETING
+observe --> retryable : OCI state in CREATING,\nUPDATING, DELETING
 observe --> failed : unresolved OCI error or non-success state
 evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
 reject_unsupported_drift --> ready : wait for spec or live state change
-evaluate_ready --> apply_update : supported mutable drift for\napply_config,\ncompartment_id, config_id\n(+30 more)
+evaluate_ready --> apply_update : supported mutable drift for\ndbConfigurationParams.applyConfig,\ndbConfigurationParams.configId,\ndefinedTags (+5 more)
 apply_update --> ready : update path completes
 evaluate_ready --> ready : no supported drift remains
 ready --> ready : no supported drift remains
@@ -69,22 +69,47 @@ archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
-provider states: create CREATING; update none;
-delete DELETING
-supported drift: apply_config, compartment_id,
-config_id, credentials.password_details.password
-(+29 more)
+provider states: create CREATING; update
+UPDATING; delete DELETING
+supported drift:
+dbConfigurationParams.applyConfig,
+dbConfigurationParams.configId, definedTags,
+description (+4 more)
 reject before mutate: force-new fields
-credentials, credentials.username, db_version,
-instances_details (+13 more)
+compartmentId, dbVersion, instanceCount,
+instanceMemorySizeInGBs (+7 more)
+create-only fields:
+adminPassword.secret.secretName,
+adminUsername.secret.secretName, configId,
+credentials (+2 more)
 list lookup: oci_psql_db_systems filters
-compartment_id, display_name, id, state
+compartmentId, displayName; tracked OCI ID via
+GetDbSystem wins; otherwise exact compartmentId
+plus displayName unique match in ACTIVE,
+CREATING, UPDATING, INACTIVE, or
+NEEDS_ATTENTION; duplicate matches fail
 conflicts: none
-open gaps: bind-versus-create, list-lookup,
-mutation-policy, waiter-work-request
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+open gaps: none
+Handwritten DbSystem bind first checks the
+tracked OCID with GetDbSystem, then searches
+ListDbSystems for an exact compartment plus
+displayName match, rereads a single candidate
+through GetDbSystem, and fails on ambiguous
+duplicates instead of guessing.
+Create resolves inline credentials or
+same-namespace admin secret refs, stamps only
+non-empty secret refs into status, and does not
+write follow-up Kubernetes secrets.
+Create and update do not poll work requests
+directly; provider-backed completion is modeled
+through GetDbSystem lifecycle projection with
+one-minute requeues while OCI reports CREATING,
+UPDATING, or DELETING.
+ACTIVE, INACTIVE, and NEEDS_ATTENTION settle as
+Active unless the reconcile is already in update
+or delete follow-up, and delete retains the
+finalizer until GetDbSystem or ListDbSystems
+confirms the DbSystem is deleted or not found.
 end note
 note right of delete_pending
 delete policy: required

@@ -33,6 +33,7 @@ KIND_NODE_IMAGE="${KIND_NODE_IMAGE:-mirror.gcr.io/kindest/node:v1.35.0}"
 OPERATOR_SDK_VERSION="${OPERATOR_SDK_VERSION:-v1.37.0}"
 OLM_VERSION="${OLM_VERSION:-v0.28.0}"
 KIND_WAIT="${KIND_WAIT:-5m}"
+COREDNS_ROLLOUT_TIMEOUT="${COREDNS_ROLLOUT_TIMEOUT:-5m}"
 OLM_TIMEOUT="${OLM_TIMEOUT:-10m}"
 RECREATE_CLUSTER="${RECREATE_CLUSTER:-false}"
 SKIP_OLM="${SKIP_OLM:-false}"
@@ -120,6 +121,7 @@ Common environment overrides:
   KIND_VERSION=${KIND_VERSION}
   KIND_NODE_IMAGE=${KIND_NODE_IMAGE}
   KIND_NODE_NAMESERVERS=${KIND_NODE_NAMESERVERS}
+  COREDNS_ROLLOUT_TIMEOUT=${COREDNS_ROLLOUT_TIMEOUT}
   OLM_REGISTRY_PROBE_URL=${OLM_REGISTRY_PROBE_URL}
   OPERATOR_SDK_VERSION=${OPERATOR_SDK_VERSION}
   OLM_VERSION=${OLM_VERSION}
@@ -393,7 +395,7 @@ refresh_cluster_dns() {
 
   log "Restarting CoreDNS so updated Kind node resolvers take effect in pods"
   "${KUBECTL_BIN}" -n kube-system rollout restart deployment/coredns >/dev/null
-  "${KUBECTL_BIN}" -n kube-system rollout status deployment/coredns --timeout 2m >/dev/null
+  "${KUBECTL_BIN}" -n kube-system rollout status deployment/coredns --timeout "${COREDNS_ROLLOUT_TIMEOUT}" >/dev/null
 }
 
 probe_kind_node_url() {

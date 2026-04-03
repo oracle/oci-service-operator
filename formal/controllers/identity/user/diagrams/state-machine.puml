@@ -75,6 +75,7 @@ supported drift: defined_tags, description,
 email, freeform_tags
 reject before mutate: force-new fields
 compartment_id, name
+create-only fields: none
 list lookup: oci_identity_users filters
 compartment_id, external_identifier,
 identity_provider_id, name (+1 more)

@@ -78,6 +78,7 @@ backup_policy.defined_tags (+50 more)
 reject before mutate: force-new fields
 admin_password, admin_username,
 availability_domain, compartment_id (+12 more)
+create-only fields: none
 list lookup: oci_mysql_mysql_db_systems filters
 compartment_id, configuration_id,
 database_management, db_system_id (+4 more)

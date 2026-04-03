@@ -56,6 +56,28 @@ spec:
           spec:
             description: DbSystemSpec defines the desired state of DbSystem.
             properties:
+              adminPassword:
+                description: |-
+                  The administrative password sourced from a Kubernetes Secret in the same namespace.
+                  The referenced Secret must contain a `password` key. If omitted, `spec.credentials.passwordDetails` remains available for plaintext or OCI Vault secret input.
+                properties:
+                  secret:
+                    properties:
+                      secretName:
+                        type: string
+                    type: object
+                type: object
+              adminUsername:
+                description: |-
+                  The administrative username sourced from a Kubernetes Secret in the same namespace.
+                  The referenced Secret must contain a `username` key. If omitted, `spec.credentials.username` remains available for direct credential input.
+                properties:
+                  secret:
+                    properties:
+                      secretName:
+                        type: string
+                    type: object
+                type: object
               compartmentId:
                 description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
                   of the compartment that contains the database system.
@@ -287,9 +309,29 @@ spec:
           status:
             description: DbSystemStatus defines the observed state of DbSystem.
             properties:
+              adminPasswordSource:
+                description: The last applied secret reference for the administrative
+                  password.
+                properties:
+                  secret:
+                    properties:
+                      secretName:
+                        type: string
+                    type: object
+                type: object
               adminUsername:
                 description: The database system administrator username.
                 type: string
+              adminUsernameSource:
+                description: The last applied secret reference for the administrative
+                  username.
+                properties:
+                  secret:
+                    properties:
+                      secretName:
+                        type: string
+                    type: object
+                type: object
               compartmentId:
                 description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
                   of the compartment that contains the database system.

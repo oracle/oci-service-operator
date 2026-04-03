@@ -38,6 +38,50 @@ func TestCheckedInDatabaseAndMySQLPackageInstallKustomizationsReferenceExistingA
 	}
 }
 
+func TestCheckedInPackageInstallKustomizationsOmitWebhookOverlaysWhenWebhooksAreDisabled(t *testing.T) {
+	t.Parallel()
+
+	for _, service := range []string{"database", "mysql"} {
+		service := service
+		t.Run(service, func(t *testing.T) {
+			t.Parallel()
+
+			content, err := os.ReadFile(filepath.Join(repoRoot(t), "packages", service, "install", "kustomization.yaml"))
+			if err != nil {
+				t.Fatalf("ReadFile(%s install kustomization) error = %v", service, err)
+			}
+
+			var cfg packageInstallKustomization
+			if err := yaml.Unmarshal(content, &cfg); err != nil {
+				t.Fatalf("Unmarshal(%s install kustomization) error = %v", service, err)
+			}
+
+			for _, disallowed := range []string{
+				"../../../config/webhook",
+				"../../../config/certmanager",
+				"../../../config/default/manager_webhook_patch.yaml",
+				"../../../config/default/webhookcainjection_patch.yaml",
+			} {
+				for _, resource := range cfg.Resources {
+					if resource == disallowed {
+						t.Fatalf("%s install resources unexpectedly contain %q while webhooks are disabled", service, disallowed)
+					}
+				}
+				for _, patch := range cfg.Patches {
+					if patch.Path == disallowed {
+						t.Fatalf("%s install patches unexpectedly contain %q while webhooks are disabled", service, disallowed)
+					}
+				}
+				for _, patchPath := range cfg.PatchesStrategicMerge {
+					if patchPath == disallowed {
+						t.Fatalf("%s install strategic merge patches unexpectedly contain %q while webhooks are disabled", service, disallowed)
+					}
+				}
+			}
+		})
+	}
+}
+
 func assertKustomizationTreePathsExist(t *testing.T, kustomizationPath string, visited map[string]struct{}) {
 	t.Helper()
 

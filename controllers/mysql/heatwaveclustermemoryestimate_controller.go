@@ -13,7 +13,6 @@ import (
 	mysqlv1beta1 "github.com/oracle/oci-service-operator/api/mysql/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/core"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
 )
 
 // HeatWaveClusterMemoryEstimateReconciler reconciles a HeatWaveClusterMemoryEstimate object.
@@ -36,6 +35,6 @@ func (r *HeatWaveClusterMemoryEstimateReconciler) SetupWithManager(mgr ctrl.Mana
 	builder := ctrl.NewControllerManagedBy(mgr).
 		For(&mysqlv1beta1.HeatWaveClusterMemoryEstimate{})
 	return builder.
-		WithEventFilter(predicate.GenerationChangedPredicate{}).
+		WithEventFilter(core.ReconcilePredicate()).
 		Complete(r)
 }

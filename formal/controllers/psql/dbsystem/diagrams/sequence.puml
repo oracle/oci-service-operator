@@ -38,7 +38,7 @@ group Lookup and bind
 alt tracked or explicit OCI identity already exists
 ServiceManager -> OCI: GetDbSystem
 else tracked identity is missing
-ServiceManager -> OCI: ListDbSystems(filters:\ncompartment_id, display_name, id,\nstate)
+ServiceManager -> OCI: ListDbSystems(filters:\ncompartmentId, displayName)
 alt reusable OCI resource is not found
 ServiceManager -> OCI: CreateDbSystem
 loop create pending CREATING
@@ -63,25 +63,38 @@ ServiceManager --> BaseReconciler: release finalizer after delete completion
 end
 end
 else OCI state is retryable
-ServiceManager --> BaseReconciler: requeue while OCI remains in\nCREATING, DELETING
+ServiceManager --> BaseReconciler: requeue while OCI remains in\nCREATING, UPDATING, DELETING
 else live state requires field-aware\ndrift evaluation
 group Drift handling
 note over ServiceManager,OCI
-Supported update surface: apply_config,
-compartment_id, config_id,
-credentials.password_details.password
-(+29 more)
+Supported update surface:
+dbConfigurationParams.applyConfig,
+dbConfigurationParams.configId,
+definedTags, description (+4 more)
 Reject before mutate: force-new fields
-credentials, credentials.username,
-db_version, instances_details (+13 more)
-Lookup filters: compartment_id,
-display_name, id, state
+compartmentId, dbVersion, instanceCount,
+instanceMemorySizeInGBs (+7 more)
+Create-only fields:
+adminPassword.secret.secretName,
+adminUsername.secret.secretName,
+configId, credentials (+2 more)
+Lookup filters: compartmentId,
+displayName
+Lookup matching: tracked OCI ID via
+GetDbSystem wins; otherwise exact
+compartmentId plus displayName unique
+match in ACTIVE, CREATING, UPDATING,
+INACTIVE, or NEEDS_ATTENTION; duplicate
+matches fail
 end note
 opt force-new or conflicting drift is detected
 ServiceManager --> BaseReconciler: reject before OCI mutation
 end
 opt supported mutable drift is detected
-ServiceManager -> OCI: Apply ChangeDbSystemCompartment,\nPatchDbSystem,\nResetMasterUserPassword (+1 more)\nonly for mutable fields\napply_config, compartment_id,\nconfig_id,\ncredentials.password_details.password\n(+29 more)
+ServiceManager -> OCI: Apply ChangeDbSystemCompartment,\nPatchDbSystem,\nResetMasterUserPassword (+1 more)\nonly for mutable fields\ndbConfigurationParams.applyConfig,\ndbConfigurationParams.configId,\ndefinedTags, description (+4 more)
+loop update pending UPDATING
+ServiceManager -> OCI: GetDbSystem
+end
 end
 ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource,\ntfresource.WaitForUpdatedState;\ndelete=tfresource.DeleteResource
 end
@@ -110,21 +123,46 @@ archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
-provider states: create CREATING; update none;
-delete DELETING
-supported drift: apply_config, compartment_id,
-config_id, credentials.password_details.password
-(+29 more)
+provider states: create CREATING; update
+UPDATING; delete DELETING
+supported drift:
+dbConfigurationParams.applyConfig,
+dbConfigurationParams.configId, definedTags,
+description (+4 more)
 reject before mutate: force-new fields
-credentials, credentials.username, db_version,
-instances_details (+13 more)
+compartmentId, dbVersion, instanceCount,
+instanceMemorySizeInGBs (+7 more)
+create-only fields:
+adminPassword.secret.secretName,
+adminUsername.secret.secretName, configId,
+credentials (+2 more)
 list lookup: oci_psql_db_systems filters
-compartment_id, display_name, id, state
+compartmentId, displayName; tracked OCI ID via
+GetDbSystem wins; otherwise exact compartmentId
+plus displayName unique match in ACTIVE,
+CREATING, UPDATING, INACTIVE, or
+NEEDS_ATTENTION; duplicate matches fail
 conflicts: none
-open gaps: bind-versus-create, list-lookup,
-mutation-policy, waiter-work-request
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+open gaps: none
+Handwritten DbSystem bind first checks the
+tracked OCID with GetDbSystem, then searches
+ListDbSystems for an exact compartment plus
+displayName match, rereads a single candidate
+through GetDbSystem, and fails on ambiguous
+duplicates instead of guessing.
+Create resolves inline credentials or
+same-namespace admin secret refs, stamps only
+non-empty secret refs into status, and does not
+write follow-up Kubernetes secrets.
+Create and update do not poll work requests
+directly; provider-backed completion is modeled
+through GetDbSystem lifecycle projection with
+one-minute requeues while OCI reports CREATING,
+UPDATING, or DELETING.
+ACTIVE, INACTIVE, and NEEDS_ATTENTION settle as
+Active unless the reconcile is already in update
+or delete follow-up, and delete retains the
+finalizer until GetDbSystem or ListDbSystems
+confirms the DbSystem is deleted or not found.
 end note
 @enduml

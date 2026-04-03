@@ -919,7 +919,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 {{- end }}
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
 )
 
 // {{ .ReconcilerType }} reconciles a {{ .Kind }} object.
@@ -945,7 +944,7 @@ func (r *{{ .ReconcilerType }}) SetupWithManager(mgr ctrl.Manager) error {
 	builder = builder.WithOptions(controller.Options{MaxConcurrentReconciles: {{ .MaxConcurrentReconciles }}})
 {{- end }}
 	return builder.
-		WithEventFilter(predicate.GenerationChangedPredicate{}).
+		WithEventFilter(core.ReconcilePredicate()).
 		Complete(r)
 }
 `

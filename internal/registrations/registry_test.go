@@ -14,6 +14,7 @@ import (
 	databasev1beta1 "github.com/oracle/oci-service-operator/api/database/v1beta1"
 	mysqlv1beta1 "github.com/oracle/oci-service-operator/api/mysql/v1beta1"
 	nosqlv1beta1 "github.com/oracle/oci-service-operator/api/nosql/v1beta1"
+	opensearchv1beta1 "github.com/oracle/oci-service-operator/api/opensearch/v1beta1"
 	psqlv1beta1 "github.com/oracle/oci-service-operator/api/psql/v1beta1"
 	streamingv1beta1 "github.com/oracle/oci-service-operator/api/streaming/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/credhelper"
@@ -41,6 +42,7 @@ func TestAllAddToSchemeRegistersDefaultActiveGroupKinds(t *testing.T) {
 		&databasev1beta1.AutonomousDatabase{},
 		&mysqlv1beta1.DbSystem{},
 		&nosqlv1beta1.Table{},
+		&opensearchv1beta1.OpensearchCluster{},
 		&psqlv1beta1.DbSystem{},
 		&streamingv1beta1.Stream{},
 	} {
@@ -185,6 +187,15 @@ func TestAllSkipsGeneratedGroupsThatDuplicateManualEntries(t *testing.T) {
 	}
 	if count != 1 {
 		t.Fatalf("mysql registration count = %d, want 1", count)
+	}
+}
+
+func TestManualWebhooksByGroupOmitsDatabase(t *testing.T) {
+	t.Parallel()
+
+	webhooks := ManualWebhooksByGroup("database")
+	if len(webhooks) != 0 {
+		t.Fatalf("ManualWebhooksByGroup(database) = %v, want no manual webhooks", webhooks)
 	}
 }
 

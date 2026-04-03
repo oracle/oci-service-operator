@@ -1,0 +1,14 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: objectstorage
+slug: objectstoragebucket
+kind: Bucket
+archetype: generated-service-manager
+states:
+  - active
+  - updating
+  - terminating
+notes:
+  - The published Bucket kind reuses the Bucket SDK family and resolves namespaceName from observed status first, then through a GetNamespace lookup when spec.namespace is omitted.
+  - Successful create and update responses without lifecycle fields are treated as synchronous success and projected directly into status, including status.status.ocid.
+  - Delete keeps the finalizer until DeleteBucket succeeds and a follow-up read confirms the bucket is gone.

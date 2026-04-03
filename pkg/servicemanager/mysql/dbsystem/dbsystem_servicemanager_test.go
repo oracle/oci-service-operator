@@ -344,6 +344,47 @@ func TestDbSystemServiceManagerCreateOrUpdateTreatsEmptyAdminSecretObjectsAsOmit
 	}
 }
 
+func TestDbSystemServiceManagerCreateOrUpdateOmitsEmptyOptionalNestedBlocks(t *testing.T) {
+	t.Parallel()
+
+	resource := &mysqlv1beta1.DbSystem{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "default",
+		},
+		Spec: mysqlv1beta1.DbSystemSpec{
+			CompartmentId:      "ocid1.compartment.oc1..example",
+			ShapeName:          "MySQL.VM.Standard.E3.1.8GB",
+			SubnetId:           "ocid1.subnet.oc1..example",
+			DisplayName:        "wanted",
+			Description:        "test create request",
+			AvailabilityDomain: "ypKW:US-ASHBURN-AD-1",
+		},
+	}
+
+	request, err := projectCreateDbSystemRequest(resource, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if request.BackupPolicy != nil {
+		t.Fatalf("CreateDbSystemDetails.BackupPolicy = %#v, want nil", request.BackupPolicy)
+	}
+	if request.Source != nil {
+		t.Fatalf("CreateDbSystemDetails.Source = %#v, want nil", request.Source)
+	}
+	if request.Maintenance != nil {
+		t.Fatalf("CreateDbSystemDetails.Maintenance = %#v, want nil", request.Maintenance)
+	}
+	if request.DeletionPolicy != nil {
+		t.Fatalf("CreateDbSystemDetails.DeletionPolicy = %#v, want nil", request.DeletionPolicy)
+	}
+	if request.SecureConnections != nil {
+		t.Fatalf("CreateDbSystemDetails.SecureConnections = %#v, want nil", request.SecureConnections)
+	}
+	if request.IsHighlyAvailable != nil {
+		t.Fatalf("CreateDbSystemDetails.IsHighlyAvailable = %#v, want nil", request.IsHighlyAvailable)
+	}
+}
+
 func TestDbSystemServiceManagerCreateOrUpdateListBindingUsesReusableLifecycleStates(t *testing.T) {
 	t.Parallel()
 

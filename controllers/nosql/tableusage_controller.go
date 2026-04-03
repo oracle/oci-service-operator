@@ -13,7 +13,6 @@ import (
 	nosqlv1beta1 "github.com/oracle/oci-service-operator/api/nosql/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/core"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
 )
 
 // TableUsageReconciler reconciles a TableUsage object.
@@ -24,6 +23,7 @@ type TableUsageReconciler struct {
 // +kubebuilder:rbac:groups=nosql.oracle.com,resources=tableusages,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=nosql.oracle.com,resources=tableusages/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=nosql.oracle.com,resources=tableusages/finalizers,verbs=update
+// +kubebuilder:rbac:groups="",resources=events,verbs=create;patch
 
 // Reconcile is part of the main Kubernetes reconciliation loop.
 func (r *TableUsageReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
@@ -36,6 +36,6 @@ func (r *TableUsageReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	builder := ctrl.NewControllerManagedBy(mgr).
 		For(&nosqlv1beta1.TableUsage{})
 	return builder.
-		WithEventFilter(predicate.GenerationChangedPredicate{}).
+		WithEventFilter(core.ReconcilePredicate()).
 		Complete(r)
 }
