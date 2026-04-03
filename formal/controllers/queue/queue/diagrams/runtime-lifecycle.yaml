@@ -1,0 +1,15 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: queue
+slug: queue
+kind: Queue
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+notes:
+  - Queue reconciliation is expected to track OCI work requests across create, update, and delete so the controller can resume asynchronous operations across requeues.
+  - Queue endpoint Secret handling is ready-only and should publish the OCI messages endpoint only after the Queue reaches ACTIVE.
+  - Mutable drift is limited to UpdateQueueDetails fields, while create-only inputs like compartment and retention remain force-new.

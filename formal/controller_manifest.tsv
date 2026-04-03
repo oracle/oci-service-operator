@@ -64,5 +64,6 @@ psql	shape	Shape	scaffold	repo-authored-semantics	imports/psql/shape.json	contro
 psql	workrequest	WorkRequest	scaffold	repo-authored-semantics	imports/psql/workrequest.json	controllers/psql/workrequest/spec.cfg	controllers/psql/workrequest/logic-gaps.md	controllers/psql/workrequest/diagrams
 psql	workrequesterror	WorkRequestError	scaffold	repo-authored-semantics	imports/psql/workrequesterror.json	controllers/psql/workrequesterror/spec.cfg	controllers/psql/workrequesterror/logic-gaps.md	controllers/psql/workrequesterror/diagrams
 psql	workrequestlog	WorkRequestLog	scaffold	repo-authored-semantics	imports/psql/workrequestlog.json	controllers/psql/workrequestlog/spec.cfg	controllers/psql/workrequestlog/logic-gaps.md	controllers/psql/workrequestlog/diagrams
+queue	queue	Queue	seeded	repo-authored-semantics	imports/queue/queue.json	controllers/queue/queue/spec.cfg	controllers/queue/queue/logic-gaps.md	controllers/queue/queue/diagrams
 redis	rediscluster	RedisCluster	seeded	repo-authored-semantics	imports/redis/rediscluster.json	controllers/redis/rediscluster/spec.cfg	controllers/redis/rediscluster/logic-gaps.md	controllers/redis/rediscluster/diagrams
 streaming	stream	Stream	seeded	repo-authored-semantics	imports/streaming/stream.json	controllers/streaming/stream/spec.cfg	controllers/streaming/stream/logic-gaps.md	controllers/streaming/stream/diagrams

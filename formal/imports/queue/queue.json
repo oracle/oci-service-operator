@@ -1,0 +1,150 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "queue",
+  "slug": "queue",
+  "kind": "Queue",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_queue_queue",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateQueue",
+        "requestType": "queue.CreateQueueRequest",
+        "responseType": "queue.CreateQueueResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetQueue",
+        "requestType": "queue.GetQueueRequest",
+        "responseType": "queue.GetQueueResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListQueues",
+        "requestType": "queue.ListQueuesRequest",
+        "responseType": "queue.ListQueuesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateQueue",
+        "requestType": "queue.UpdateQueueRequest",
+        "responseType": "queue.UpdateQueueResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteQueue",
+        "requestType": "queue.DeleteQueueRequest",
+        "responseType": "queue.DeleteQueueResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING",
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "channel_consumption_limit",
+      "custom_encryption_key_id",
+      "dead_letter_queue_delivery_count",
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "timeout_in_seconds",
+      "visibility_in_seconds"
+    ],
+    "forceNew": [
+      "compartment_id",
+      "retention_in_seconds"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "queue",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "queue",
+        "action": "UPDATED"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "queue",
+        "action": "DELETED"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_queue_queues",
+    "collectionField": "queues",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "lifecycle_state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/queue/queue/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/queue/queue/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "secret-output",
+      "delete-confirmation",
+      "waiter-work-request"
+    ]
+  },
+  "notes": [
+    "Seed stub for the promoted Queue kind; later runtime tasks will refine the imported provider facts and repo-authored semantics together."
+  ]
+}
