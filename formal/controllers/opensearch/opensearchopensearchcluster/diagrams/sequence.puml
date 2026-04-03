@@ -8,7 +8,7 @@ skinparam noteBackgroundColor #fff7d6
 skinparam noteBorderColor #b45309
 skinparam noteFontColor #334155
 skinparam roundcorner 16
-title Sequence - opensearch/OpensearchOpensearchCluster
+title Sequence - opensearch/OpensearchCluster
 hide footbox
 skinparam sequence {
   actorBorderColor #0f172a
@@ -31,30 +31,30 @@ shared/diagrams/shared-resolution-sequence.svg
 shared delete:
 shared/diagrams/shared-delete-sequence.svg
 end note
-Kubernetes -> Controller: enqueue OpensearchOpensearchCluster\nreconcile
+Kubernetes -> Controller: enqueue OpensearchCluster reconcile
 Controller -> BaseReconciler: Reconcile(request)
-BaseReconciler -> ServiceManager: reconcile desired\nOpensearchOpensearchCluster
+BaseReconciler -> ServiceManager: reconcile desired OpensearchCluster
 group Lookup and bind
 alt tracked or explicit OCI identity already exists
-ServiceManager -> OCI: GetOpensearchOpensearchCluster
+ServiceManager -> OCI: GetOpensearchCluster
 else tracked identity is missing
-ServiceManager -> OCI: ListOpensearchOpensearchCluster(filters:\ncompartment_id, display_name, state)
+ServiceManager -> OCI: ListOpensearchClusters(filters:\ncompartment_id, display_name, state)
 alt reusable OCI resource is not found
-ServiceManager -> OCI: CreateOpensearchOpensearchCluster
+ServiceManager -> OCI: CreateOpensearchCluster
 loop create pending PROVISIONING
-ServiceManager -> OCI: GetOpensearchOpensearchCluster
+ServiceManager -> OCI: GetOpensearchCluster
 end
 else reusable OCI resource already exists
-ServiceManager -> OCI: GetOpensearchOpensearchCluster
+ServiceManager -> OCI: GetOpensearchCluster
 end
 ServiceManager --> BaseReconciler: persist resolved OCI identity in status
 end
 alt delete requested
 group Delete
-ServiceManager -> OCI: DeleteOpensearchOpensearchCluster
-ServiceManager -> OCI: confirm delete via\nGetOpensearchOpensearchCluster or\nListOpensearchOpensearchCluster
+ServiceManager -> OCI: DeleteOpensearchCluster
+ServiceManager -> OCI: confirm delete via\nGetOpensearchCluster or\nListOpensearchClusters
 loop delete pending DELETING
-ServiceManager -> OCI: GetOpensearchOpensearchCluster or\nListOpensearchOpensearchCluster
+ServiceManager -> OCI: GetOpensearchCluster or\nListOpensearchClusters
 end
 alt cleanup or finalizer release is blocked
 ServiceManager --> BaseReconciler: retain delete state and retry
@@ -77,9 +77,9 @@ opt force-new or conflicting drift is detected
 ServiceManager --> BaseReconciler: reject before OCI mutation
 end
 opt supported mutable drift is detected
-ServiceManager -> OCI: Apply\nUpdateOpensearchOpensearchCluster\nonly for mutable fields display_name
+ServiceManager -> OCI: Apply UpdateOpensearchCluster only\nfor mutable fields display_name
 loop update pending UPDATING
-ServiceManager -> OCI: GetOpensearchOpensearchCluster
+ServiceManager -> OCI: GetOpensearchCluster
 end
 end
 ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=template action=CREATED;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
@@ -104,7 +104,7 @@ delete sequences with imported waits and
 controller-local policy.
 service: opensearch
 slug: opensearchopensearchcluster
-kind: OpensearchOpensearchCluster
+kind: OpensearchCluster
 archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
@@ -115,8 +115,7 @@ supported drift: display_name
 reject before mutate: force-new fields
 compartment_id
 create-only fields: none
-list lookup:
-scaffold_opensearch_opensearchopensearchcluster
+list lookup: oci_opensearch_opensearch_clusters
 filters compartment_id, display_name, state
 conflicts: none
 open gaps: none

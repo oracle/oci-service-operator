@@ -230,7 +230,7 @@ services:
         - kind: AutonomousDatabase
           formalSpec: databaseautonomousdatabase
           serviceManager:
-            packagePath: autonomousdatabases/adb
+            packagePath: database/autonomousdatabase
           controller:
             extraRBACMarkers:
               - groups="",resources=secrets,verbs=get;list;watch
@@ -693,10 +693,10 @@ services:
     phase: data-and-storage
     packageProfile: controller-backed
     selection:
-      enabled: false
+      enabled: true
       mode: explicit
       includeKinds:
-        - OpensearchOpensearchCluster
+        - OpensearchCluster
     generation:
       controller:
         strategy: generated
@@ -707,10 +707,10 @@ services:
       webhooks:
         strategy: none
       resources:
-        - kind: OpensearchOpensearchCluster
+        - kind: OpensearchCluster
           formalSpec: opensearchopensearchcluster
           serviceManager:
-            packagePath: opensearch/opensearchopensearchcluster
+            packagePath: opensearch/opensearchcluster
         - kind: Manifest
           controller:
             strategy: none

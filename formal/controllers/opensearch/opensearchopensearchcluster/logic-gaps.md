@@ -10,16 +10,15 @@ gaps: []
 
 ## Current runtime path
 
-- `OpensearchOpensearchCluster` routes through the generated
-  `OpensearchOpensearchClusterServiceManager` and
+- `OpensearchCluster` routes through the generated
+  `OpensearchClusterServiceManager` and
   `generatedruntime.ServiceClient`; there is no legacy handwritten adapter for
   this resource.
 - Non-primary OpenSearch helper kinds remain deferred in this checkout. Only
-  `OpensearchOpensearchCluster` is wired into controller and service-manager
+  `OpensearchCluster` is wired into controller and service-manager
   registration.
-- The generated runtime uses the published OSOK kind
-  `OpensearchOpensearchCluster` while the OCI SDK continues to expose
-  `OpensearchCluster` request and response types.
+- The generated runtime now uses the published OSOK kind `OpensearchCluster`,
+  matching the OCI SDK request and response types.
 - Create or bind is explicit: the runtime first resolves a tracked OCI
   identifier when one is present, otherwise it lists clusters in the requested
   compartment and reuses a unique `displayName` match before issuing create.

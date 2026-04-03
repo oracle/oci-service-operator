@@ -8,7 +8,7 @@ skinparam noteBackgroundColor #fff7d6
 skinparam noteBorderColor #b45309
 skinparam noteFontColor #334155
 skinparam roundcorner 16
-title State Machine - opensearch/OpensearchOpensearchCluster
+title State Machine - opensearch/OpensearchCluster
 skinparam state {
   backgroundColor #f8fafc
   borderColor #0f172a
@@ -30,7 +30,7 @@ state "ApplyUpdate" as apply_update
 state "DeletePending" as delete_pending
 state "Deleted" as deleted
 state "DeleteCleanupBlocked" as delete_cleanup_blocked
-[*] --> observe : CreateOpensearchOpensearchCluster
+[*] --> observe : CreateOpensearchCluster
 observe --> resolve_by_lookup : tracked identity missing
 resolve_by_lookup --> evaluate_ready : lookup or create reaches\nACTIVE
 resolve_by_lookup --> retryable : OCI state in PROVISIONING,\nUPDATING, DELETING
@@ -64,7 +64,7 @@ controller phases with explicit finalizer and
 requeue policies.
 service: opensearch
 slug: opensearchopensearchcluster
-kind: OpensearchOpensearchCluster
+kind: OpensearchCluster
 archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
@@ -75,8 +75,7 @@ supported drift: display_name
 reject before mutate: force-new fields
 compartment_id
 create-only fields: none
-list lookup:
-scaffold_opensearch_opensearchopensearchcluster
+list lookup: oci_opensearch_opensearch_clusters
 filters compartment_id, display_name, state
 conflicts: none
 open gaps: none
@@ -96,8 +95,8 @@ this runtime path.
 end note
 note right of delete_pending
 delete policy: required
-delete observe: GetOpensearchOpensearchCluster
-or ListOpensearchOpensearchCluster
+delete observe: GetOpensearchCluster or
+ListOpensearchClusters
 delete targets: DELETED
 end note
 @enduml
