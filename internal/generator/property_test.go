@@ -53,8 +53,12 @@ func TestSelectServicesQuickAppliesDefaultSurfaceAndExplicitOverride(t *testing.
 		if err != nil || len(gotOne) != 1 {
 			return false
 		}
+		wantKinds := []string(nil)
+		if quickMaskBit(explicitMask, targetIndex) {
+			wantKinds = []string{candidates[targetIndex].kind}
+		}
 		return gotOne[0].Service == candidates[targetIndex].name &&
-			gotOne[0].SelectedKinds() == nil
+			slices.Equal(gotOne[0].SelectedKinds(), wantKinds)
 	}
 
 	if err := quick.Check(property, &quick.Config{MaxCount: 96}); err != nil {

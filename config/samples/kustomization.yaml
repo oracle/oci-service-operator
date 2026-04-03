@@ -207,4 +207,5 @@ resources:
 - functions_v1beta1_pbflistingversion.yaml
 - functions_v1beta1_trigger.yaml
 - objectstorage_v1beta1_bucket.yaml
+- containerinstances_v1beta1_containerinstance.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

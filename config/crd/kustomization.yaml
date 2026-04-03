@@ -10,6 +10,8 @@ kind: Kustomization
 # since it depends on service name and namespace that are out of this kustomize package.
 # It should be run by config/default
 resources:
+- bases/apigateway.oracle.com_apigatewaydeployments.yaml
+- bases/apigateway.oracle.com_apigateways.yaml
 - bases/containerengine.oracle.com_addonoptions.yaml
 - bases/containerengine.oracle.com_addons.yaml
 - bases/containerengine.oracle.com_clusterendpointconfigs.yaml
@@ -28,6 +30,7 @@ resources:
 - bases/containerengine.oracle.com_workrequesterrors.yaml
 - bases/containerengine.oracle.com_workrequestlogs.yaml
 - bases/containerengine.oracle.com_workrequests.yaml
+- bases/containerinstances.oracle.com_containerinstances.yaml
 - bases/core.oracle.com_alldrgattachments.yaml
 - bases/core.oracle.com_allowedikeipsecparameters.yaml
 - bases/core.oracle.com_allowedpeerregionsforremotepeerings.yaml

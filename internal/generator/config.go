@@ -674,7 +674,8 @@ func NormalizeDefaultActiveSelection(serviceName string, all bool) (string, bool
 // `--all` returns only the default-active services and applies any explicit
 // default kind subset before package-model construction. `--service` returns
 // the named service without applying default-active filtering so backlog and
-// disabled services remain addressable explicitly.
+// disabled services remain addressable explicitly, while still preserving any
+// explicit kind subset configured for that service.
 func (c *Config) SelectServices(serviceName string, all bool) ([]ServiceConfig, error) {
 	if all && strings.TrimSpace(serviceName) != "" {
 		return nil, fmt.Errorf("use either --all or --service, not both")
@@ -693,7 +694,7 @@ func (c *Config) SelectServices(serviceName string, all bool) ([]ServiceConfig, 
 
 	for _, service := range c.Services {
 		if service.Service == serviceName {
-			return []ServiceConfig{service.withSelectedKinds(nil)}, nil
+			return []ServiceConfig{service.defaultSelectedSurface()}, nil
 		}
 	}
 

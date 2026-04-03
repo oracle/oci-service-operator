@@ -43,14 +43,14 @@ var newCompartmentServiceClient = func(manager *CompartmentServiceManager) Compa
 			FormalSlug:        "compartment",
 			StatusProjection:  "required",
 			SecretSideEffects: "none",
-			FinalizerPolicy:   "retain-until-confirmed-delete",
+			FinalizerPolicy:   "none",
 			Lifecycle: generatedruntime.LifecycleSemantics{
 				ProvisioningStates: []string{"CREATING"},
 				UpdatingStates:     []string{},
 				ActiveStates:       []string{"ACTIVE", "INACTIVE"},
 			},
 			Delete: generatedruntime.DeleteSemantics{
-				Policy:         "required",
+				Policy:         "best-effort",
 				PendingStates:  []string{"DELETING"},
 				TerminalStates: []string{"DELETED"},
 			},

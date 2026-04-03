@@ -4,7 +4,7 @@
 #
 
 apiVersion: objectstorage.oracle.com/v1beta1
-kind: ObjectStorageBucket
+kind: Bucket
 metadata:
   name: bucket-sample
 spec:

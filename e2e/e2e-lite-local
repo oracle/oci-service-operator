@@ -947,6 +947,21 @@ resource_has_controller() {
   local controller_dir
 
   controller_dir="${REPO_ROOT}/controllers/${SERVICE}"
+  if [ ! -d "${controller_dir}" ]; then
+    for candidate in ${RBAC_PATHS:-}; do
+      case "${candidate}" in
+        ./controllers/*)
+          candidate="${candidate#./}"
+          candidate="${candidate%%/...}"
+          candidate="${REPO_ROOT}/${candidate}"
+          if [ -d "${candidate}" ]; then
+            controller_dir="${candidate}"
+            break
+          fi
+          ;;
+      esac
+    done
+  fi
   [ -d "${controller_dir}" ] || return 1
 
   grep -R -E -q "type[[:space:]]+${kind}Reconciler|For\\(&[[:alnum:]_]+\\.${kind}\\{\\}\\)" "${controller_dir}" 2>/dev/null

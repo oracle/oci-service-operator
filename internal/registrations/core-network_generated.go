@@ -13,6 +13,7 @@ import (
 	corev1beta1 "github.com/oracle/oci-service-operator/api/core/v1beta1"
 	corecontrollers "github.com/oracle/oci-service-operator/controllers/core"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
+	coredrgservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/core/drg"
 	coreinternetgatewayservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/core/internetgateway"
 	corenatgatewayservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/core/natgateway"
 	corenetworksecuritygroupservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/core/networksecuritygroup"
@@ -28,6 +29,17 @@ func init() {
 		Group:       "core-network",
 		AddToScheme: corev1beta1.AddToScheme,
 		SetupWithManager: func(ctx Context) error {
+			if err := (&corecontrollers.DrgReconciler{
+				Reconciler: NewBaseReconciler(
+					ctx,
+					"Drg",
+					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
+						return coredrgservicemanager.NewDrgServiceManagerWithDeps(deps)
+					},
+				),
+			}).SetupWithManager(ctx.Manager); err != nil {
+				return fmt.Errorf("setup Drg controller: %w", err)
+			}
 			if err := (&corecontrollers.InternetGatewayReconciler{
 				Reconciler: NewBaseReconciler(
 					ctx,

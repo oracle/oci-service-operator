@@ -1,5 +1,9 @@
 #
 # Replace the OCI identifiers below before running e2e.
+# Use a currently supported MySQL DB System shape for your tenancy. `MySQL.2`
+# is the checked-in default because the older E3 sample shape is retired in
+# some tenancies.
+# Replace subnetId with a private subnet OCID (`prohibitPublicIpOnVnic=true`).
 # Update metadata.name and spec.displayName if you want to force a fresh create
 # instead of binding to an existing DbSystem with the same display name.
 # The mysql controller reads admin credentials from the same-namespace
@@ -13,7 +17,7 @@ metadata:
 spec:
   compartmentId: ocid1.compartment.oc1..exampleuniqueID
   displayName: mysql-dbsystem-sample
-  shapeName: MySQL.VM.Standard.E3.1.8GB
+  shapeName: MySQL.2
   subnetId: ocid1.subnet.oc1..exampleuniqueID
   availabilityDomain: qqZb:US-ASHBURN-AD-1
   isHighlyAvailable: false

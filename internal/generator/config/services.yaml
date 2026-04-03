@@ -104,6 +104,67 @@ services:
         WorkRequestLog:
           - WorkRequestLogEntry
 
+  - service: containerinstances
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/containerinstances
+    group: containerinstances
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - ContainerInstance
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: manual
+      registration:
+        strategy: manual
+      webhooks:
+        strategy: none
+      resources:
+        - kind: ContainerInstance
+          sample:
+            body: |-
+              #
+              # Replace the OCI identifiers below before running e2e.
+              # Update metadata.name and spec.displayName if you want to force a fresh create
+              # instead of binding to an existing ContainerInstance with the same display name in
+              # the same compartment and availability domain.
+              #
+              apiVersion: containerinstances.oracle.com/v1beta1
+              kind: ContainerInstance
+              metadata:
+                name: containerinstance-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                availabilityDomain: "AD-1"
+                shape: "CI.Standard.E4.Flex"
+                shapeConfig:
+                  ocpus: 1
+                  memoryInGBs: 4
+                containers:
+                  - imageUrl: "busybox:latest"
+                    displayName: "hello"
+                    command:
+                      - "/bin/sh"
+                    arguments:
+                      - "-c"
+                      - "echo hello && sleep 3600"
+                vnics:
+                  - subnetId: ocid1.subnet.oc1..exampleuniqueID
+                    displayName: "primary-vnic"
+                displayName: "containerinstance-sample"
+                containerRestartPolicy: "NEVER"
+          serviceManager:
+            packagePath: containerinstance
+    observedState:
+      excludedFieldPaths:
+        ContainerInstance:
+          - ImagePullSecrets.Password
+
   - service: core
     sdkPackage: github.com/oracle/oci-go-sdk/v65/core
     group: core
@@ -117,6 +178,7 @@ services:
       - name: core-network
         defaultControllerImage: iad.ocir.io/oracle/oci-service-operator-core-network:latest
         includeKinds:
+          - Drg
           - InternetGateway
           - NatGateway
           - NetworkSecurityGroup
@@ -586,7 +648,9 @@ services:
                 name: dbsystem-sample
               spec:
                 compartmentId: ocid1.compartment.oc1..exampleuniqueID
-                shapeName: MySQL.VM.Standard.E3.1.8GB
+                # Replace with a currently supported MySQL DB System shape for your tenancy.
+                shapeName: MySQL.2
+                # Replace with a private subnet OCID. MySQL DB Systems reject public subnets.
                 subnetId: ocid1.subnet.oc1..exampleuniqueID
                 adminUsername:
                   secret:
@@ -1015,36 +1079,6 @@ services:
               - groups="",resources=secrets,verbs=get;list;watch;create;update;delete
           serviceManager:
             packagePath: streaming/stream
-        - kind: ConnectHarness
-          controller:
-            strategy: none
-          serviceManager:
-            strategy: none
-        - kind: Cursor
-          controller:
-            strategy: none
-          serviceManager:
-            strategy: none
-        - kind: Group
-          controller:
-            strategy: none
-          serviceManager:
-            strategy: none
-        - kind: GroupCursor
-          controller:
-            strategy: none
-          serviceManager:
-            strategy: none
-        - kind: Message
-          controller:
-            strategy: none
-          serviceManager:
-            strategy: none
-        - kind: StreamPool
-          controller:
-            strategy: none
-          serviceManager:
-            strategy: none
 
   - service: vault
     sdkPackage: github.com/oracle/oci-go-sdk/v65/vault

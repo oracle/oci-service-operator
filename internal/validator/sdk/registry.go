@@ -5,6 +5,7 @@ import (
 	"reflect"
 
 	"github.com/oracle/oci-go-sdk/v65/containerengine"
+	"github.com/oracle/oci-go-sdk/v65/containerinstances"
 	"github.com/oracle/oci-go-sdk/v65/core"
 	"github.com/oracle/oci-go-sdk/v65/database"
 	"github.com/oracle/oci-go-sdk/v65/dataflow"
@@ -466,6 +467,13 @@ var seedTargets = []Target{
 	newTarget("core", "PublicIpPoolSummary", reflect.TypeOf(core.PublicIpPoolSummary{})),
 	newTarget("core", "TunnelRouteSummary", reflect.TypeOf(core.TunnelRouteSummary{})),
 	newTarget("core", "TunnelSecurityAssociationSummary", reflect.TypeOf(core.TunnelSecurityAssociationSummary{})),
+
+	// Containerinstances CRD support
+	newTarget("containerinstances", "CreateContainerInstanceDetails", reflect.TypeOf(containerinstances.CreateContainerInstanceDetails{})),
+	newTarget("containerinstances", "UpdateContainerInstanceDetails", reflect.TypeOf(containerinstances.UpdateContainerInstanceDetails{})),
+	newTarget("containerinstances", "ContainerInstance", reflect.TypeOf(containerinstances.ContainerInstance{})),
+	newTarget("containerinstances", "ContainerInstanceCollection", reflect.TypeOf(containerinstances.ContainerInstanceCollection{})),
+	newTarget("containerinstances", "ContainerInstanceSummary", reflect.TypeOf(containerinstances.ContainerInstanceSummary{})),
 
 	// Dataflow CRD support
 	newTarget("dataflow", "CreateApplicationDetails", reflect.TypeOf(dataflow.CreateApplicationDetails{})),
