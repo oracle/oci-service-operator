@@ -45,9 +45,9 @@ var newMessageServiceClient = func(manager *MessageServiceManager) MessageServic
 			},
 		},
 		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &queuesdk.UpdateMessagesRequest{} },
+			NewRequest: func() any { return &queuesdk.UpdateMessageRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateMessages(ctx, *request.(*queuesdk.UpdateMessagesRequest))
+				return sdkClient.UpdateMessage(ctx, *request.(*queuesdk.UpdateMessageRequest))
 			},
 		},
 		Delete: &generatedruntime.Operation{
