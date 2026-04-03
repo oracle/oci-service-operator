@@ -1,0 +1,18 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: core
+slug: routetable
+kind: RouteTable
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+  - terminated
+  - deleted
+notes:
+  - Ready state maps to OCI AVAILABLE.
+  - Requeue continues while OCI reports PROVISIONING, UPDATING, or TERMINATING.
+  - Delete completes only after GetRouteTable returns not found; TERMINATING and TERMINATED are accepted observed pre-delete states.
+  - Route-rule drift is normalized before update evaluation so order-only diffs and OCI-managed LOCAL rules do not trigger updates.

@@ -98,11 +98,11 @@ func TestNotFoundResponse(t *testing.T) {
 
 	resp, err := NewServiceFailureFromResponse(code, statusCode, opcRequestId, message)
 	assert.False(t, resp)
-	_, ok := err.(UnauthorizedAndNotFoundOciError)
+	_, ok := err.(NotFoundOciError)
 	assert.Equal(t, true, ok)
 	assert.Equal(t, "There is no operation supported at the URI path and HTTP method you specified in the request",
-		err.(UnauthorizedAndNotFoundOciError).Description)
-	assert.Equal(t, 404, err.(UnauthorizedAndNotFoundOciError).HTTPStatusCode)
+		err.(NotFoundOciError).Description)
+	assert.Equal(t, 404, err.(NotFoundOciError).HTTPStatusCode)
 }
 
 func TestNotAuthorizedOrNotFoundResponse(t *testing.T) {

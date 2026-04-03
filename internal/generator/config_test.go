@@ -579,7 +579,7 @@ services:
       registration:
         strategy: generated
       webhooks:
-        strategy: manual
+        strategy: none
       resources:
         - kind: DbSystem
           controller:

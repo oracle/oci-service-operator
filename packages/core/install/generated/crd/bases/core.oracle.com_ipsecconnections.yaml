@@ -1,0 +1,470 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: ipsecconnections.core.oracle.com
+spec:
+  group: core.oracle.com
+  names:
+    kind: IPSecConnection
+    listKind: IPSecConnectionList
+    plural: ipsecconnections
+    singular: ipsecconnection
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the IPSecConnection
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the IPSecConnection
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: IPSecConnection is the Schema for the ipsecconnections API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: IPSecConnectionSpec defines the desired state of IPSecConnection.
+            properties:
+              compartmentId:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment to contain the IPSec connection.
+                type: string
+              cpeId:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the Cpe object.
+                type: string
+              cpeLocalIdentifier:
+                description: |-
+                  Your identifier for your CPE device. Can be either an IP address or a hostname (specifically, the
+                  fully qualified domain name (FQDN)). The type of identifier you provide here must correspond
+                  to the value for `cpeLocalIdentifierType`.
+                  If you don't provide a value, the `ipAddress` attribute for the Cpe
+                  object specified by `cpeId` is used as the `cpeLocalIdentifier`.
+                  For information about why you'd provide this value, see
+                  If Your CPE Is Behind a NAT Device (https://docs.cloud.oracle.com/iaas/Content/Network/Tasks/overviewIPsec.htm#nat).
+                  Example IP address: `10.0.3.3`
+                  Example hostname: `cpe.example.com`
+                type: string
+              cpeLocalIdentifierType:
+                description: |-
+                  The type of identifier for your CPE device. The value you provide here must correspond to the value
+                  for `cpeLocalIdentifier`.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a
+                  namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              displayName:
+                description: |-
+                  A user-friendly name. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
+                type: string
+              drgId:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the DRG.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no
+                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              staticRoutes:
+                description: |-
+                  Static routes to the CPE. A static route's CIDR must not be a
+                  multicast address or class E address.
+                  Used for routing a given IPSec tunnel's traffic only if the tunnel
+                  is using static routing. If you configure at least one tunnel to use static routing, then
+                  you must provide at least one valid static route. If you configure both
+                  tunnels to use BGP dynamic routing, you can provide an empty list for the static routes.
+                  For more information, see the important note in IPSecConnection.
+                  The CIDR can be either IPv4 or IPv6. IPv6 addressing is supported for all commercial and government regions.
+                  See IPv6 Addresses (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/ipv6.htm).
+                  Example: `10.0.1.0/24`
+                  Example: `2001:db8::/32`
+                items:
+                  type: string
+                type: array
+              tunnelConfiguration:
+                description: |-
+                  Information for creating the individual tunnels in the IPSec connection. You can provide a
+                  maximum of 2 `tunnelConfiguration` objects in the array (one for each of the
+                  two tunnels).
+                items:
+                  description: IPSecConnectionTunnelConfiguration defines nested fields
+                    for IPSecConnection.TunnelConfiguration.
+                  properties:
+                    associatedVirtualCircuits:
+                      description: The list of virtual circuit OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)s
+                        over which your network can reach this tunnel.
+                      items:
+                        type: string
+                      type: array
+                    bgpSessionConfig:
+                      description: IPSecConnectionTunnelConfigurationBgpSessionConfig
+                        defines nested fields for IPSecConnection.TunnelConfiguration.BgpSessionConfig.
+                      properties:
+                        customerBgpAsn:
+                          description: |-
+                            If the tunnel's `routing` attribute is set to `BGP`
+                            (see IPSecConnectionTunnel), this ASN
+                            is required and used for the tunnel's BGP session. This is the ASN of the network on the
+                            CPE end of the BGP session. Can be a 2-byte or 4-byte ASN. Uses "asplain" format.
+                            If the tunnel's `routing` attribute is set to `STATIC`, the `customerBgpAsn` must be null.
+                            Example: `12345` (2-byte) or `1587232876` (4-byte)
+                          type: string
+                        customerInterfaceIp:
+                          description: |-
+                            The IP address for the CPE end of the inside tunnel interface.
+                            If the tunnel's `routing` attribute is set to `BGP`
+                            (see IPSecConnectionTunnel), this IP address
+                            is required and used for the tunnel's BGP session.
+                            If `routing` is instead set to `STATIC`, this IP address is optional. You can set this IP
+                            address to troubleshoot or monitor the tunnel.
+                            The value must be a /30 or /31.
+                            Example: `10.0.0.5/31`
+                          type: string
+                        customerInterfaceIpv6:
+                          description: |-
+                            The IPv6 address for the CPE end of the inside tunnel interface. This IP address is optional.
+                            If the tunnel's `routing` attribute is set to `BGP`
+                            (see IPSecConnectionTunnel), this IP address
+                            is used for the tunnel's BGP session.
+                            If `routing` is instead set to `STATIC`, you can set this IP
+                            address to troubleshoot or monitor the tunnel.
+                            Only subnet masks from /64 up to /127 are allowed.
+                            Example: `2001:db8::1/64`
+                          type: string
+                        oracleInterfaceIp:
+                          description: |-
+                            The IP address for the Oracle end of the inside tunnel interface.
+                            If the tunnel's `routing` attribute is set to `BGP`
+                            (see IPSecConnectionTunnel), this IP address
+                            is required and used for the tunnel's BGP session.
+                            If `routing` is instead set to `STATIC`, this IP address is optional. You can set this IP
+                            address to troubleshoot or monitor the tunnel.
+                            The value must be a /30 or /31.
+                            Example: `10.0.0.4/31`
+                          type: string
+                        oracleInterfaceIpv6:
+                          description: |-
+                            The IPv6 address for the Oracle end of the inside tunnel interface. This IP address is optional.
+                            If the tunnel's `routing` attribute is set to `BGP`
+                            (see IPSecConnectionTunnel), this IP address
+                            is used for the tunnel's BGP session.
+                            If `routing` is instead set to `STATIC`, you can set this IP
+                            address to troubleshoot or monitor the tunnel.
+                            Only subnet masks from /64 up to /127 are allowed.
+                            Example: `2001:db8::1/64`
+                          type: string
+                      type: object
+                    displayName:
+                      description: |-
+                        A user-friendly name. Does not have to be unique, and it's changeable.
+                        Avoid entering confidential information.
+                      type: string
+                    dpdConfig:
+                      description: IPSecConnectionTunnelConfigurationDpdConfig defines
+                        nested fields for IPSecConnection.TunnelConfiguration.DpdConfig.
+                      properties:
+                        dpdMode:
+                          description: This option defines whether DPD can be initiated
+                            from the Oracle side of the connection.
+                          type: string
+                        dpdTimeoutInSec:
+                          description: DPD timeout in seconds. This sets the longest
+                            interval between CPE device health messages before the
+                            IPSec connection indicates it has lost contact with the
+                            CPE. The default is 20 seconds.
+                          type: integer
+                      type: object
+                    drgRouteTableId:
+                      description: |-
+                        The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the DRG route table assigned to this attachment.
+                        The DRG route table manages traffic inside the DRG.
+                      type: string
+                    encryptionDomainConfig:
+                      description: IPSecConnectionTunnelConfigurationEncryptionDomainConfig
+                        defines nested fields for IPSecConnection.TunnelConfiguration.EncryptionDomainConfig.
+                      properties:
+                        cpeTrafficSelector:
+                          description: Lists IPv4 or IPv6-enabled subnets in your
+                            on-premises network.
+                          items:
+                            type: string
+                          type: array
+                        oracleTrafficSelector:
+                          description: Lists IPv4 or IPv6-enabled subnets in your
+                            Oracle tenancy.
+                          items:
+                            type: string
+                          type: array
+                      type: object
+                    ikeVersion:
+                      description: Internet Key Exchange protocol version.
+                      type: string
+                    natTranslationEnabled:
+                      description: |-
+                        By default (the `AUTO` setting), IKE sends packets with a source and destination port set to 500,
+                        and when it detects that the port used to forward packets has changed (most likely because a NAT device
+                        is between the CPE device and the Oracle VPN headend) it will try to negotiate the use of NAT-T.
+                        The `ENABLED` option sets the IKE protocol to use port 4500 instead of 500 and forces encapsulating traffic with the ESP protocol inside UDP packets.
+                        The `DISABLED` option directs IKE to completely refuse to negotiate NAT-T
+                        even if it senses there may be a NAT device in use.
+                      type: string
+                    oracleInitiation:
+                      description: Indicates whether the Oracle end of the IPSec connection
+                        is able to initiate starting up the IPSec tunnel.
+                      type: string
+                    oracleTunnelIp:
+                      description: The headend IP that you can choose on the Oracle
+                        side to terminate your private IPSec tunnel.
+                      type: string
+                    phaseOneConfig:
+                      description: IPSecConnectionTunnelConfigurationPhaseOneConfig
+                        defines nested fields for IPSecConnection.TunnelConfiguration.PhaseOneConfig.
+                      properties:
+                        authenticationAlgorithm:
+                          description: The custom authentication algorithm proposed
+                            during phase one tunnel negotiation.
+                          type: string
+                        diffieHelmanGroup:
+                          description: The custom Diffie-Hellman group proposed during
+                            phase one tunnel negotiation.
+                          type: string
+                        encryptionAlgorithm:
+                          description: The custom encryption algorithm proposed during
+                            phase one tunnel negotiation.
+                          type: string
+                        isCustomPhaseOneConfig:
+                          description: Indicates whether custom configuration is enabled
+                            for phase one options.
+                          type: boolean
+                        lifetimeInSeconds:
+                          description: Internet key association (IKE) session key
+                            lifetime in seconds for IPSec phase one. The default is
+                            28800 which is equivalent to 8 hours.
+                          type: integer
+                      type: object
+                    phaseTwoConfig:
+                      description: IPSecConnectionTunnelConfigurationPhaseTwoConfig
+                        defines nested fields for IPSecConnection.TunnelConfiguration.PhaseTwoConfig.
+                      properties:
+                        authenticationAlgorithm:
+                          description: The authentication algorithm proposed during
+                            phase two tunnel negotiation.
+                          type: string
+                        encryptionAlgorithm:
+                          description: The encryption algorithm proposed during phase
+                            two tunnel negotiation.
+                          type: string
+                        isCustomPhaseTwoConfig:
+                          description: Indicates whether custom configuration is enabled
+                            for phase two options.
+                          type: boolean
+                        isPfsEnabled:
+                          description: Indicates whether perfect forward secrecy (PFS)
+                            is enabled.
+                          type: boolean
+                        lifetimeInSeconds:
+                          description: Lifetime in seconds for the IPSec session key
+                            set in phase two. The default is 3600 which is equivalent
+                            to 1 hour.
+                          type: integer
+                        pfsDhGroup:
+                          description: The Diffie-Hellman group used for PFS, if PFS
+                            is enabled.
+                          type: string
+                      type: object
+                    routing:
+                      description: The type of routing to use for this tunnel (BGP
+                        dynamic routing, static routing, or policy-based routing).
+                      type: string
+                    sharedSecret:
+                      description: |-
+                        The shared secret (pre-shared key) to use for the IPSec tunnel. Only numbers, letters, and
+                        spaces are allowed. If you don't provide a value,
+                        Oracle generates a value for you. You can specify your own shared secret later if
+                        you like with UpdateIPSecConnectionTunnelSharedSecret.
+                      type: string
+                  type: object
+                type: array
+            required:
+            - compartmentId
+            - cpeId
+            - drgId
+            - staticRoutes
+            type: object
+          status:
+            description: IPSecConnectionStatus defines the observed state of IPSecConnection.
+            properties:
+              compartmentId:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment containing the IPSec connection.
+                type: string
+              cpeId:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the Cpe object.
+                type: string
+              cpeLocalIdentifier:
+                description: |-
+                  Your identifier for your CPE device. Can be either an IP address or a hostname (specifically,
+                  the fully qualified domain name (FQDN)). The type of identifier here must correspond
+                  to the value for `cpeLocalIdentifierType`.
+                  If you don't provide a value when creating the IPSec connection, the `ipAddress` attribute
+                  for the Cpe object specified by `cpeId` is used as the `cpeLocalIdentifier`.
+                  For information about why you'd provide this value, see
+                  If Your CPE Is Behind a NAT Device (https://docs.cloud.oracle.com/iaas/Content/Network/Tasks/overviewIPsec.htm#nat).
+                  Example IP address: `10.0.3.3`
+                  Example hostname: `cpe.example.com`
+                type: string
+              cpeLocalIdentifierType:
+                description: |-
+                  The type of identifier for your CPE device. The value here must correspond to the value
+                  for `cpeLocalIdentifier`.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a
+                  namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              displayName:
+                description: |-
+                  A user-friendly name. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
+                type: string
+              drgId:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the DRG.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no
+                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              id:
+                description: The IPSec connection's Oracle ID (OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)).
+                type: string
+              lifecycleState:
+                description: The IPSec connection's current state.
+                type: string
+              staticRoutes:
+                description: |-
+                  Static routes to the CPE. The CIDR must not be a
+                  multicast address or class E address.
+                  Used for routing a given IPSec tunnel's traffic only if the tunnel
+                  is using static routing. If you configure at least one tunnel to use static routing, then
+                  you must provide at least one valid static route. If you configure both
+                  tunnels to use BGP dynamic routing, you can provide an empty list for the static routes.
+                  The CIDR can be either IPv4 or IPv6. IPv6 addressing is supported for all commercial and government regions.
+                  See IPv6 Addresses (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/ipv6.htm).
+                  Example: `10.0.1.0/24`
+                  Example: `2001:db8::/32`
+                items:
+                  type: string
+                type: array
+              status:
+                properties:
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              timeCreated:
+                description: |-
+                  The date and time the IPSec connection was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+                  Example: `2016-08-25T21:10:29.600Z`
+                type: string
+              transportType:
+                description: The transport type used for the IPSec connection.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
