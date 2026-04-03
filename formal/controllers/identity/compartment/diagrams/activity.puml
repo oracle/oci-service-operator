@@ -34,13 +34,9 @@ endif
 }
 if ("Delete requested?") then (yes)
 partition "Delete" {
-:Delete path uses DeleteCompartment with\nrequired via GetCompartment or\nListCompartments to DELETED confirmation;
+:Delete path uses DeleteCompartment with\nbest-effort via GetCompartment or\nListCompartments to DELETED confirmation;
 :Confirm deletion via GetCompartment or\nListCompartments until OCI reaches DELETED;
-if ("Delete cleanup and finalizer release succeed?") then (yes)
-:Remove the finalizer after delete completion;
-else (no)
-:Stay blocked until cleanup or finalizer\nrelease succeeds;
-endif
+:Allow best-effort completion without finalizer\nretention;
 }
 stop
 else (no)
@@ -67,7 +63,7 @@ else (no)
 endif
 :Run provider helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
 :Return success for the ACTIVE, INACTIVE\nsuccess state;
-:Project required status and finalizer policy\nretain-until-confirmed-delete;
+:Project required status and finalizer policy\nnone;
 :Requeue on provisioning, terminating;
 }
 endif
@@ -88,8 +84,7 @@ service: identity
 slug: compartment
 kind: Compartment
 archetype: generated-service-manager
-status/finalizer: required /
-retain-until-confirmed-delete
+status/finalizer: required / none
 requeue: provisioning, terminating
 provider states: create CREATING; update none;
 delete DELETING
@@ -110,8 +105,10 @@ Generated runtime binds through
 `ListCompartments`, reads back the live
 Compartment with `GetCompartment`, and stamps
 the observed OCI identity into status.
-Delete keeps the finalizer until follow-up
-observation confirms `DELETED` or the resource
-is no longer returned by OCI.
+Delete is best-effort for compartments. After
+`DeleteCompartment` is accepted, or OCI already
+reports `DELETING` or `DELETED`, the controller
+clears the finalizer and lets cloud-side
+teardown finish asynchronously.
 end note
 @enduml

@@ -17,5 +17,6 @@ gaps: []
 ## Repo-authored semantics
 
 - Status projection is required. The current `Compartment` response is merged into the CR status after create, observe, or update, and `status.status.ocid` tracks the bound OCI identity.
-- Lifecycle closure is explicit for this path: `CREATING` requeues as provisioning, `ACTIVE` and `INACTIVE` are treated as steady states, and delete retains the finalizer until `GetCompartment` or list fallback confirms `DELETED` or NotFound.
+- Lifecycle closure is explicit for this path: `CREATING` requeues as provisioning, `ACTIVE` and `INACTIVE` are treated as steady states, and compartment delete is intentionally best-effort because OCI can leave the resource in `DELETING` for an extended period after the delete request is accepted.
+- Delete confirmation for `Compartment` stops at accepted asynchronous teardown. Once `DeleteCompartment` succeeds, or the live OCI read already reports `DELETING`, `DELETED`, or NotFound, the controller clears the finalizer and orphans cloud-side completion instead of holding the CR until terminal OCI disappearance.
 - Update follows OCI-supported metadata mutation only: `description`, `name`, and tags remain mutable, `compartmentId` stays create-only, and no additional endpoint or secret materialization happens in this path.
