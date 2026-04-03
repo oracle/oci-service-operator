@@ -221,7 +221,7 @@ func checkDeleteQuickCase(t *testing.T, tc deleteQuickCase) bool {
 	t.Helper()
 
 	outcome := runDeleteQuickCase(tc)
-	if !checkDeleteQuickRequest(t, outcome.request) {
+	if !checkDeleteQuickRequest(t, tc, outcome.request) {
 		return false
 	}
 	return checkDeleteQuickOutcome(t, tc, outcome)
@@ -288,8 +288,16 @@ func newDeleteQuickClient(tc deleteQuickCase, inputState string, deleteRequest *
 	})
 }
 
-func checkDeleteQuickRequest(t *testing.T, request fakeDeleteThingRequest) bool {
+func checkDeleteQuickRequest(t *testing.T, tc deleteQuickCase, request fakeDeleteThingRequest) bool {
 	t.Helper()
+
+	if tc.InputBucket%4 == 1 || tc.InputBucket%4 == 2 {
+		if request.ThingId != nil {
+			t.Logf("delete request thingId = %v, want no delete request once lifecycle is already pending or terminal", request.ThingId)
+			return false
+		}
+		return true
+	}
 
 	if request.ThingId == nil || *request.ThingId != "ocid1.thing.oc1..delete" {
 		t.Logf("delete request thingId = %v, want ocid1.thing.oc1..delete", request.ThingId)
