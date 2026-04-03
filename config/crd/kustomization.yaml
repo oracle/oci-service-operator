@@ -162,6 +162,11 @@ resources:
 - bases/dataflow.oracle.com_workrequesterrors.yaml
 - bases/dataflow.oracle.com_workrequestlogs.yaml
 - bases/dataflow.oracle.com_workrequests.yaml
+- bases/functions.oracle.com_applications.yaml
+- bases/functions.oracle.com_functions.yaml
+- bases/functions.oracle.com_pbflistings.yaml
+- bases/functions.oracle.com_pbflistingversions.yaml
+- bases/functions.oracle.com_triggers.yaml
 - bases/identity.oracle.com_compartments.yaml
 - bases/mysql.oracle.com_backups.yaml
 - bases/mysql.oracle.com_channels.yaml

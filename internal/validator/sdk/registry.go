@@ -8,9 +8,11 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/core"
 	"github.com/oracle/oci-go-sdk/v65/database"
 	"github.com/oracle/oci-go-sdk/v65/dataflow"
+	"github.com/oracle/oci-go-sdk/v65/functions"
 	"github.com/oracle/oci-go-sdk/v65/identity"
 	"github.com/oracle/oci-go-sdk/v65/mysql"
 	"github.com/oracle/oci-go-sdk/v65/nosql"
+	"github.com/oracle/oci-go-sdk/v65/objectstorage"
 	"github.com/oracle/oci-go-sdk/v65/opensearch"
 	"github.com/oracle/oci-go-sdk/v65/psql"
 	"github.com/oracle/oci-go-sdk/v65/queue"
@@ -86,6 +88,22 @@ var seedTargets = []Target{
 	newTarget("queue", "QueueSummary", reflect.TypeOf(queue.QueueSummary{})),
 	newTarget("queue", "WorkRequestSummary", reflect.TypeOf(queue.WorkRequestSummary{})),
 
+	// Functions CRD support
+	newTarget("functions", "CreateApplicationDetails", reflect.TypeOf(functions.CreateApplicationDetails{})),
+	newTarget("functions", "CreateFunctionDetails", reflect.TypeOf(functions.CreateFunctionDetails{})),
+	newTarget("functions", "UpdateApplicationDetails", reflect.TypeOf(functions.UpdateApplicationDetails{})),
+	newTarget("functions", "UpdateFunctionDetails", reflect.TypeOf(functions.UpdateFunctionDetails{})),
+	newTarget("functions", "Application", reflect.TypeOf(functions.Application{})),
+	newTarget("functions", "Function", reflect.TypeOf(functions.Function{})),
+	newTarget("functions", "PbfListing", reflect.TypeOf(functions.PbfListing{})),
+	newTarget("functions", "PbfListingVersion", reflect.TypeOf(functions.PbfListingVersion{})),
+	newTarget("functions", "Trigger", reflect.TypeOf(functions.Trigger{})),
+	newTarget("functions", "PbfListingVersionSummary", reflect.TypeOf(functions.PbfListingVersionSummary{})),
+	newTarget("functions", "ApplicationSummary", reflect.TypeOf(functions.ApplicationSummary{})),
+	newTarget("functions", "FunctionSummary", reflect.TypeOf(functions.FunctionSummary{})),
+	newTarget("functions", "PbfListingSummary", reflect.TypeOf(functions.PbfListingSummary{})),
+	newTarget("functions", "TriggerSummary", reflect.TypeOf(functions.TriggerSummary{})),
+
 	// NoSQL CRD support
 	newTarget("nosql", "CreateIndexDetails", reflect.TypeOf(nosql.CreateIndexDetails{})),
 	newTarget("nosql", "CreateReplicaDetails", reflect.TypeOf(nosql.CreateReplicaDetails{})),
@@ -109,6 +127,12 @@ var seedTargets = []Target{
 	newTarget("nosql", "TableSummary", reflect.TypeOf(nosql.TableSummary{})),
 	newTarget("nosql", "TableUsageSummary", reflect.TypeOf(nosql.TableUsageSummary{})),
 	newTarget("nosql", "WorkRequestSummary", reflect.TypeOf(nosql.WorkRequestSummary{})),
+
+	// Object Storage CRD support
+	newTarget("objectstorage", "CreateBucketDetails", reflect.TypeOf(objectstorage.CreateBucketDetails{})),
+	newTarget("objectstorage", "UpdateBucketDetails", reflect.TypeOf(objectstorage.UpdateBucketDetails{})),
+	newTarget("objectstorage", "Bucket", reflect.TypeOf(objectstorage.Bucket{})),
+	newTarget("objectstorage", "BucketSummary", reflect.TypeOf(objectstorage.BucketSummary{})),
 
 	// PostgreSQL CRD support
 	newTarget("psql", "CreateBackupDetails", reflect.TypeOf(psql.CreateBackupDetails{})),

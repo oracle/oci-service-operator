@@ -7,9 +7,11 @@ import (
 	corev1beta1 "github.com/oracle/oci-service-operator/api/core/v1beta1"
 	databasev1beta1 "github.com/oracle/oci-service-operator/api/database/v1beta1"
 	dataflowv1beta1 "github.com/oracle/oci-service-operator/api/dataflow/v1beta1"
+	functionsv1beta1 "github.com/oracle/oci-service-operator/api/functions/v1beta1"
 	identityv1beta1 "github.com/oracle/oci-service-operator/api/identity/v1beta1"
 	mysqlv1beta1 "github.com/oracle/oci-service-operator/api/mysql/v1beta1"
 	nosqlv1beta1 "github.com/oracle/oci-service-operator/api/nosql/v1beta1"
+	objectstoragev1beta1 "github.com/oracle/oci-service-operator/api/objectstorage/v1beta1"
 	opensearchv1beta1 "github.com/oracle/oci-service-operator/api/opensearch/v1beta1"
 	psqlv1beta1 "github.com/oracle/oci-service-operator/api/psql/v1beta1"
 	queuev1beta1 "github.com/oracle/oci-service-operator/api/queue/v1beta1"
@@ -358,6 +360,94 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "FunctionsApplication",
+		SpecType:   reflect.TypeOf(functionsv1beta1.ApplicationSpec{}),
+		StatusType: reflect.TypeOf(functionsv1beta1.ApplicationStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "functions.CreateApplicationDetails",
+			},
+			{
+				SDKStruct: "functions.UpdateApplicationDetails",
+			},
+			{
+				SDKStruct:  "functions.Application",
+				APISurface: "status",
+			},
+			{
+				SDKStruct:  "functions.ApplicationSummary",
+				APISurface: "status",
+			},
+		},
+	},
+	{
+		Name:       "FunctionsFunction",
+		SpecType:   reflect.TypeOf(functionsv1beta1.FunctionSpec{}),
+		StatusType: reflect.TypeOf(functionsv1beta1.FunctionStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "functions.CreateFunctionDetails",
+			},
+			{
+				SDKStruct: "functions.UpdateFunctionDetails",
+			},
+			{
+				SDKStruct:  "functions.Function",
+				APISurface: "status",
+			},
+			{
+				SDKStruct:  "functions.FunctionSummary",
+				APISurface: "status",
+			},
+		},
+	},
+	{
+		Name:       "FunctionsPbfListing",
+		SpecType:   reflect.TypeOf(functionsv1beta1.PbfListingSpec{}),
+		StatusType: reflect.TypeOf(functionsv1beta1.PbfListingStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct:  "functions.PbfListing",
+				APISurface: "status",
+			},
+			{
+				SDKStruct: "functions.PbfListingVersionSummary",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: version summaries belong to the dedicated PbfListingVersion status surface.",
+			},
+			{
+				SDKStruct:  "functions.PbfListingSummary",
+				APISurface: "status",
+			},
+		},
+	},
+	{
+		Name:       "FunctionsPbfListingVersion",
+		SpecType:   reflect.TypeOf(functionsv1beta1.PbfListingVersionSpec{}),
+		StatusType: reflect.TypeOf(functionsv1beta1.PbfListingVersionStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "functions.PbfListingVersion",
+			},
+			{
+				SDKStruct: "functions.PbfListingVersionSummary",
+			},
+		},
+	},
+	{
+		Name:       "FunctionsTrigger",
+		SpecType:   reflect.TypeOf(functionsv1beta1.TriggerSpec{}),
+		StatusType: reflect.TypeOf(functionsv1beta1.TriggerStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "functions.Trigger",
+			},
+			{
+				SDKStruct: "functions.TriggerSummary",
+			},
+		},
+	},
+	{
 		Name:       "NoSQLIndex",
 		SpecType:   reflect.TypeOf(nosqlv1beta1.IndexSpec{}),
 		StatusType: reflect.TypeOf(nosqlv1beta1.IndexStatus{}),
@@ -497,6 +587,27 @@ var targets = []Target{
 				SDKStruct: "nosql.WorkRequestLogEntryCollection",
 				Exclude:   true,
 				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			},
+		},
+	},
+	{
+		Name:       "ObjectStorageBucket",
+		SpecType:   reflect.TypeOf(objectstoragev1beta1.BucketSpec{}),
+		StatusType: reflect.TypeOf(objectstoragev1beta1.BucketStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "objectstorage.CreateBucketDetails",
+			},
+			{
+				SDKStruct: "objectstorage.UpdateBucketDetails",
+			},
+			{
+				SDKStruct:  "objectstorage.Bucket",
+				APISurface: "status",
+			},
+			{
+				SDKStruct:  "objectstorage.BucketSummary",
+				APISurface: "status",
 			},
 		},
 	},

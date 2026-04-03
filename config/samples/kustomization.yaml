@@ -201,5 +201,10 @@ resources:
 - dataflow_v1beta1_workrequest.yaml
 - dataflow_v1beta1_workrequesterror.yaml
 - dataflow_v1beta1_workrequestlog.yaml
+- functions_v1beta1_application.yaml
+- functions_v1beta1_function.yaml
+- functions_v1beta1_pbflisting.yaml
+- functions_v1beta1_pbflistingversion.yaml
+- functions_v1beta1_trigger.yaml
 - objectstorage_v1beta1_bucket.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

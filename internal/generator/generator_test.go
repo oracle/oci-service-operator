@@ -1726,8 +1726,8 @@ func TestCurrentDefaultActiveGeneratedArtifactsMatchCheckedInOutputs(t *testing.
 	if err != nil {
 		t.Fatalf("SelectServices(--all) error = %v", err)
 	}
-	if len(services) != 14 {
-		t.Fatalf("selected %d default-active services, want 14", len(services))
+	if len(services) != 15 {
+		t.Fatalf("selected %d default-active services, want 15", len(services))
 	}
 
 	outputRoot := t.TempDir()
@@ -1744,6 +1744,7 @@ func TestCurrentDefaultActiveGeneratedArtifactsMatchCheckedInOutputs(t *testing.
 		"core":            123,
 		"database":        1,
 		"dataflow":        10,
+		"functions":       5,
 		"identity":        1,
 		"mysql":           12,
 		"nosql":           8,
@@ -1765,6 +1766,8 @@ func TestCurrentDefaultActiveGeneratedArtifactsMatchCheckedInOutputs(t *testing.
 		"api/database/v1beta1/autonomousdatabase_types.go",
 		"api/dataflow/v1beta1/groupversion_info.go",
 		"api/dataflow/v1beta1/application_types.go",
+		"api/functions/v1beta1/groupversion_info.go",
+		"api/functions/v1beta1/application_types.go",
 		"api/identity/v1beta1/groupversion_info.go",
 		"api/identity/v1beta1/compartment_types.go",
 		"api/mysql/v1beta1/groupversion_info.go",
@@ -1795,6 +1798,7 @@ func TestCurrentDefaultActiveGeneratedArtifactsMatchCheckedInOutputs(t *testing.
 		"config/samples/core_v1beta1_vcn.yaml",
 		"config/samples/database_v1beta1_autonomousdatabase.yaml",
 		"config/samples/dataflow_v1beta1_application.yaml",
+		"config/samples/functions_v1beta1_application.yaml",
 		"config/samples/identity_v1beta1_compartment.yaml",
 		"config/samples/mysql_v1beta1_dbsystem.yaml",
 		"config/samples/nosql_v1beta1_table.yaml",
@@ -1815,6 +1819,8 @@ func TestCurrentDefaultActiveGeneratedArtifactsMatchCheckedInOutputs(t *testing.
 		"packages/database/install/kustomization.yaml",
 		"packages/dataflow/metadata.env",
 		"packages/dataflow/install/kustomization.yaml",
+		"packages/functions/metadata.env",
+		"packages/functions/install/kustomization.yaml",
 		"packages/identity/metadata.env",
 		"packages/identity/install/kustomization.yaml",
 		"packages/mysql/metadata.env",
@@ -1846,6 +1852,7 @@ func TestCurrentDefaultActiveGeneratedArtifactsMatchCheckedInOutputs(t *testing.
 		"controllers/core/vcn_controller.go",
 		"controllers/database/autonomousdatabase_controller.go",
 		"controllers/dataflow/application_controller.go",
+		"controllers/functions/application_controller.go",
 		"controllers/identity/compartment_controller.go",
 		"controllers/mysql/dbsystem_controller.go",
 		"controllers/nosql/table_controller.go",
@@ -1864,6 +1871,8 @@ func TestCurrentDefaultActiveGeneratedArtifactsMatchCheckedInOutputs(t *testing.
 		"pkg/servicemanager/database/autonomousdatabase/autonomousdatabase_servicemanager.go",
 		"pkg/servicemanager/dataflow/application/application_serviceclient.go",
 		"pkg/servicemanager/dataflow/application/application_servicemanager.go",
+		"pkg/servicemanager/functions/application/application_serviceclient.go",
+		"pkg/servicemanager/functions/application/application_servicemanager.go",
 		"pkg/servicemanager/identity/compartment/compartment_serviceclient.go",
 		"pkg/servicemanager/identity/compartment/compartment_servicemanager.go",
 		"pkg/servicemanager/mysql/dbsystem/dbsystem_serviceclient.go",
@@ -1889,6 +1898,7 @@ func TestCurrentDefaultActiveGeneratedArtifactsMatchCheckedInOutputs(t *testing.
 		"internal/registrations/core_generated.go",
 		"internal/registrations/database_generated.go",
 		"internal/registrations/dataflow_generated.go",
+		"internal/registrations/functions_generated.go",
 		"internal/registrations/identity_generated.go",
 		"internal/registrations/mysql_generated.go",
 		"internal/registrations/nosql_generated.go",

@@ -1085,16 +1085,17 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	cfg := loadCheckedInConfig(t)
 
 	activeServices := serviceNames(cfg.DefaultActiveServices())
-	wantActiveServices := []string{"containerengine", "core", "database", "dataflow", "identity", "mysql", "nosql", "objectstorage", "opensearch", "psql", "queue", "redis", "streaming", "vault"}
+	wantActiveServices := []string{"containerengine", "core", "database", "dataflow", "functions", "identity", "mysql", "nosql", "objectstorage", "opensearch", "psql", "queue", "redis", "streaming", "vault"}
 	if !slices.Equal(activeServices, wantActiveServices) {
 		t.Fatalf("DefaultActiveServices() = %v, want %v", activeServices, wantActiveServices)
 	}
 
-	services := requireServices(t, cfg, "containerengine", "core", "database", "dataflow", "identity", "mysql", "nosql", "objectstorage", "opensearch", "psql", "queue", "redis", "streaming", "vault")
+	services := requireServices(t, cfg, "containerengine", "core", "database", "dataflow", "functions", "identity", "mysql", "nosql", "objectstorage", "opensearch", "psql", "queue", "redis", "streaming", "vault")
 	assertServiceSelection(t, services["containerengine"], true, SelectionModeAll, nil)
 	assertServiceSelection(t, services["core"], true, SelectionModeAll, nil)
 	assertServiceSelection(t, services["database"], true, SelectionModeExplicit, []string{"AutonomousDatabase"})
 	assertServiceSelection(t, services["dataflow"], true, SelectionModeAll, nil)
+	assertServiceSelection(t, services["functions"], true, SelectionModeAll, nil)
 	assertServiceSelection(t, services["identity"], true, SelectionModeExplicit, []string{"Compartment"})
 	assertServiceSelection(t, services["mysql"], true, SelectionModeAll, nil)
 	assertServiceSelection(t, services["nosql"], true, SelectionModeAll, nil)
