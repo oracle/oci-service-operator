@@ -27,7 +27,7 @@ partition "Observe and Bind" {
 if ("Tracked or explicit OCI identity present?") then (yes)
 :Get the current OCI resource via GetTable;
 else (no)
-:Resolve an existing OCI resource through\nListTables using filters compartment_id, name,\nstate;
+:Resolve an existing OCI resource through\nListTables using filters compartment_id, name,\nstate=ALL;
 :Create the OCI resource via CreateTable when\nno reusable match is found;
 :Persist the resolved or created OCI identity\ninto status;
 endif
@@ -46,7 +46,7 @@ stop
 else (no)
 partition "Lifecycle Classification" {
 if ("OCI state in retryable set?") then (yes)
-:Request requeue while OCI remains in CREATING,\nDELETING;
+:Request requeue while OCI remains in CREATING,\nUPDATING, DELETING;
 stop
 endif
 if ("OCI state is outside success targets?") then (yes)
@@ -55,13 +55,13 @@ stop
 endif
 }
 partition "Ready and Drift Handling" {
-:Compare live OCI state against the imported\nfield surface;
+:Compare live OCI state against the\nrepo-authored mutation surface;
 if ("Force-new or conflicting drift detected?") then (yes)
 :Reject drift before OCI mutation for force-new\nfields is_auto_reclaimable, name;
 stop
 endif
 if ("Supported mutable drift detected?") then (yes)
-:Apply ChangeTableCompartment, UpdateTable only\nfor mutable fields compartment_id,\nddl_statement, defined_tags, freeform_tags (+4\nmore);
+:Apply ChangeTableCompartment, UpdateTable only\nfor mutable fields compartment_id,\ndefined_tags, freeform_tags,\ntable_limits.capacity_mode (+3 more);
 else (no)
 :Skip the no-op mutation path;
 endif
@@ -69,7 +69,6 @@ endif
 :Return success for the ACTIVE success state;
 :Project required status and finalizer policy\nretain-until-confirmed-delete;
 :Requeue on provisioning, updating, terminating;
-:Keep promotion blocked on bind-versus-create,\nlist-lookup, mutation-policy,\nwaiter-work-request;
 }
 endif
 stop
@@ -92,19 +91,34 @@ archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
-provider states: create CREATING; update none;
-delete DELETING
-supported drift: compartment_id, ddl_statement,
-defined_tags, freeform_tags (+4 more)
+provider states: create CREATING; update
+UPDATING; delete DELETING
+supported drift: compartment_id, defined_tags,
+freeform_tags, table_limits.capacity_mode (+3
+more)
 reject before mutate: force-new fields
 is_auto_reclaimable, name
+create-only fields: ddl_statement
 list lookup: oci_nosql_tables filters
-compartment_id, name, state
+compartment_id, name, state=ALL; exact-name
+unique match only; duplicate exact-name matches
+fail
 conflicts: none
-open gaps: bind-versus-create, list-lookup,
-mutation-policy, waiter-work-request
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+open gaps: none
+Handwritten Table bind first checks the tracked
+OCID, then searches ListTables in the requested
+compartment, and rereads a single exact-name
+match through GetTable before reusing it.
+Create, compartment move, update, and delete use
+read-after-write confirmation instead of
+explicit work-request polling; CREATING,
+UPDATING, and DELETING keep one-minute requeues
+until ACTIVE or delete confirmation.
+DDL remains create-only; compartment moves run
+before table-limit or tag updates when both
+kinds of drift are present.
+Delete retains the finalizer until GetTable or
+ListTables confirms the Table is deleted or not
+found.
 end note
 @enduml

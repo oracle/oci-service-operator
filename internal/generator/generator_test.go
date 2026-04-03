@@ -1797,8 +1797,8 @@ func TestCurrentDefaultActiveGeneratedArtifactsMatchCheckedInOutputs(t *testing.
 		"controllers/nosql/table_controller.go",
 		"controllers/psql/dbsystem_controller.go",
 		"controllers/streaming/stream_controller.go",
-		"pkg/servicemanager/database/autonomousdatabase/autonomousdatabase_serviceclient.go",
-		"pkg/servicemanager/database/autonomousdatabase/autonomousdatabase_servicemanager.go",
+		"pkg/servicemanager/autonomousdatabases/adb/autonomousdatabase_serviceclient.go",
+		"pkg/servicemanager/autonomousdatabases/adb/autonomousdatabase_servicemanager.go",
 		"pkg/servicemanager/mysql/dbsystem/dbsystem_serviceclient.go",
 		"pkg/servicemanager/mysql/dbsystem/dbsystem_servicemanager.go",
 		"pkg/servicemanager/nosql/table/table_serviceclient.go",
@@ -1962,7 +1962,7 @@ func TestCheckedInPromotedRuntimeArtifactsMatchGenerator(t *testing.T) {
 			serviceName:       "database",
 			kind:              "AutonomousDatabase",
 			formalSlug:        "databaseautonomousdatabase",
-			serviceClientPath: "pkg/servicemanager/database/autonomousdatabase/autonomousdatabase_serviceclient.go",
+			serviceClientPath: "pkg/servicemanager/autonomousdatabases/adb/autonomousdatabase_serviceclient.go",
 			controllerPath:    "controllers/database/autonomousdatabase_controller.go",
 			controllerContains: []string{
 				`// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch`,
@@ -2051,7 +2051,7 @@ func TestCheckedInDatabaseAutonomousDatabaseUsesSecretBackedAdminPassword(t *tes
 		`AdminPassword string ` + "`json:\"adminPassword,omitempty\"`",
 	})
 
-	serviceClientContent := readFile(t, filepath.Join(outputRoot, "pkg", "servicemanager", "database", "autonomousdatabase", "autonomousdatabase_serviceclient.go"))
+	serviceClientContent := readFile(t, filepath.Join(outputRoot, "pkg", "servicemanager", "autonomousdatabases", "adb", "autonomousdatabase_serviceclient.go"))
 	assertContains(t, serviceClientContent, []string{
 		`CredentialClient: manager.CredentialClient,`,
 	})
@@ -2097,6 +2097,56 @@ func TestCheckedInMySQLDbSystemUsesSecretBackedAdminCredentials(t *testing.T) {
 	})
 
 	serviceClientContent := readFile(t, filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "dbsystem", "dbsystem_serviceclient.go"))
+	assertContains(t, serviceClientContent, []string{
+		`CredentialClient: manager.CredentialClient,`,
+	})
+}
+
+func TestCheckedInPSQLDbSystemUsesSecretBackedAdminCredentials(t *testing.T) {
+	cfg := loadCheckedInConfig(t)
+	psqlService := serviceConfigsByName(t, cfg, "psql")["psql"]
+
+	outputRoot := t.TempDir()
+	seedSamplesKustomization(t, outputRoot)
+
+	pipeline := New()
+	result, err := pipeline.Generate(context.Background(), cfg, []ServiceConfig{*psqlService}, Options{
+		OutputRoot: outputRoot,
+	})
+	if err != nil {
+		t.Fatalf("Generate() error = %v", err)
+	}
+	if len(result.Generated) != 1 {
+		t.Fatalf("Generate() generated %d services, want 1", len(result.Generated))
+	}
+
+	apiContent := readFile(t, filepath.Join(outputRoot, "api", "psql", "v1beta1", "dbsystem_types.go"))
+	assertContains(t, apiContent, []string{
+		`AdminUsername shared.UsernameSource ` + "`json:\"adminUsername,omitempty,omitzero\"`",
+		`AdminPassword shared.PasswordSource ` + "`json:\"adminPassword,omitempty,omitzero\"`",
+		`AdminUsernameSource shared.UsernameSource ` + "`json:\"adminUsernameSource,omitempty,omitzero\"`",
+		`AdminPasswordSource shared.PasswordSource ` + "`json:\"adminPasswordSource,omitempty,omitzero\"`",
+		"// The administrative username sourced from a Kubernetes Secret in the same namespace.\n\t// The referenced Secret must contain a `username` key. If omitted, `spec.credentials.username` remains available for direct credential input.\n\t// +kubebuilder:validation:Optional\n\tAdminUsername shared.UsernameSource `json:\"adminUsername,omitempty,omitzero\"`",
+		"// The administrative password sourced from a Kubernetes Secret in the same namespace.\n\t// The referenced Secret must contain a `password` key. If omitted, `spec.credentials.passwordDetails` remains available for plaintext or OCI Vault secret input.\n\t// +kubebuilder:validation:Optional\n\tAdminPassword shared.PasswordSource `json:\"adminPassword,omitempty,omitzero\"`",
+		"// The last applied secret reference for the administrative username.\n\tAdminUsernameSource shared.UsernameSource `json:\"adminUsernameSource,omitempty,omitzero\"`",
+		"// The last applied secret reference for the administrative password.\n\tAdminPasswordSource shared.PasswordSource `json:\"adminPasswordSource,omitempty,omitzero\"`",
+		`AdminUsername string ` + "`json:\"adminUsername,omitempty\"`",
+	})
+	assertNotContains(t, apiContent, []string{
+		`AdminPassword string ` + "`json:\"adminPassword,omitempty\"`",
+	})
+
+	sampleContent := readFile(t, filepath.Join(outputRoot, "config", "samples", "psql_v1beta1_dbsystem.yaml"))
+	assertContains(t, sampleContent, []string{
+		"adminUsername:",
+		"adminPassword:",
+		"secretName: admin-secret",
+	})
+	assertNotContains(t, sampleContent, []string{
+		"credentials:",
+	})
+
+	serviceClientContent := readFile(t, filepath.Join(outputRoot, "pkg", "servicemanager", "psql", "dbsystem", "dbsystem_serviceclient.go"))
 	assertContains(t, serviceClientContent, []string{
 		`CredentialClient: manager.CredentialClient,`,
 	})
@@ -2281,6 +2331,106 @@ func TestMySQLDbSystemIncludesOptionalDesiredStateFields(t *testing.T) {
 		"DatabaseManagement string `json:\"databaseManagement,omitempty\"`",
 		"SecureConnections DbSystemSecureConnections `json:\"secureConnections,omitempty\"`",
 	})
+}
+
+func TestCheckedInRedisClusterFormalBindingMatchesDiscovery(t *testing.T) {
+	t.Parallel()
+
+	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
+	cfg, err := LoadConfig(cfgPath)
+	if err != nil {
+		t.Fatalf("LoadConfig(%q) error = %v", cfgPath, err)
+	}
+
+	var redisService *ServiceConfig
+	for i := range cfg.Services {
+		if cfg.Services[i].Service == "redis" {
+			redisService = &cfg.Services[i]
+			break
+		}
+	}
+	if redisService == nil {
+		t.Fatal("redis service was not found in services.yaml")
+	}
+	if got := redisService.FormalSpecFor("RedisCluster"); got != "rediscluster" {
+		t.Fatalf("redis RedisCluster formalSpec = %q, want %q", got, "rediscluster")
+	}
+	if got := redisService.FormalSpecFor("RedisRedisCluster"); got != "" {
+		t.Fatalf("redis RedisRedisCluster formalSpec = %q, want empty", got)
+	}
+
+	pkg, err := NewDiscoverer().BuildPackageModel(context.Background(), cfg, *redisService)
+	if err != nil {
+		if strings.Contains(err.Error(), "github.com/oracle/oci-go-sdk/v65/redis") &&
+			strings.Contains(err.Error(), "cannot find module providing package") {
+			t.Skip("redis SDK is not vendored in this checkout yet")
+		}
+		t.Fatalf("BuildPackageModel() error = %v", err)
+	}
+
+	redisCluster := findResource(t, pkg.Resources, "RedisCluster")
+	if redisCluster.SDKName != "RedisCluster" {
+		t.Fatalf("RedisCluster SDK name = %q, want %q", redisCluster.SDKName, "RedisCluster")
+	}
+	if redisCluster.Formal == nil {
+		t.Fatal("RedisCluster formal model was not attached")
+	}
+	if redisCluster.Formal.Reference.Service != "redis" {
+		t.Fatalf("RedisCluster formal service = %q, want %q", redisCluster.Formal.Reference.Service, "redis")
+	}
+	if redisCluster.Formal.Reference.Slug != "rediscluster" {
+		t.Fatalf("RedisCluster formal slug = %q, want %q", redisCluster.Formal.Reference.Slug, "rediscluster")
+	}
+	if redisCluster.Formal.Binding.Spec.Kind != "RedisCluster" {
+		t.Fatalf("RedisCluster formal kind = %q, want %q", redisCluster.Formal.Binding.Spec.Kind, "RedisCluster")
+	}
+	if redisCluster.Formal.Binding.Import.ProviderResource != "oci_redis_redis_cluster" {
+		t.Fatalf("RedisCluster provider resource = %q, want %q", redisCluster.Formal.Binding.Import.ProviderResource, "oci_redis_redis_cluster")
+	}
+	if redisCluster.Runtime == nil {
+		t.Fatal("RedisCluster runtime model was not attached")
+	}
+	if redisCluster.Runtime.Create == nil || redisCluster.Runtime.Create.MethodName != "CreateRedisCluster" {
+		t.Fatalf("RedisCluster create method = %#v, want CreateRedisCluster", redisCluster.Runtime.Create)
+	}
+	if redisCluster.Runtime.Get == nil || redisCluster.Runtime.Get.MethodName != "GetRedisCluster" {
+		t.Fatalf("RedisCluster get method = %#v, want GetRedisCluster", redisCluster.Runtime.Get)
+	}
+	if redisCluster.Runtime.List == nil || redisCluster.Runtime.List.MethodName != "ListRedisClusters" {
+		t.Fatalf("RedisCluster list method = %#v, want ListRedisClusters", redisCluster.Runtime.List)
+	}
+	if redisCluster.Runtime.Update == nil || redisCluster.Runtime.Update.MethodName != "UpdateRedisCluster" {
+		t.Fatalf("RedisCluster update method = %#v, want UpdateRedisCluster", redisCluster.Runtime.Update)
+	}
+	if redisCluster.Runtime.Delete == nil || redisCluster.Runtime.Delete.MethodName != "DeleteRedisCluster" {
+		t.Fatalf("RedisCluster delete method = %#v, want DeleteRedisCluster", redisCluster.Runtime.Delete)
+	}
+	if redisCluster.Runtime.Semantics == nil {
+		t.Fatal("RedisCluster runtime semantics were not attached")
+	}
+	if got := redisCluster.Runtime.Semantics.List; got == nil {
+		t.Fatal("RedisCluster list semantics were not attached")
+	} else if !slices.Equal(got.MatchFields, []string{"compartmentId", "displayName"}) {
+		t.Fatalf("RedisCluster list match fields = %v, want [compartmentId displayName]", got.MatchFields)
+	}
+	if got := redisCluster.Runtime.Semantics.Mutation.Mutable; !slices.Equal(got, []string{"definedTags", "displayName", "freeformTags", "nodeCount", "nodeMemoryInGbs"}) {
+		t.Fatalf("RedisCluster mutable fields = %v, want reviewed mutable surface", got)
+	}
+	if got := redisCluster.Runtime.Semantics.Mutation.ForceNew; !slices.Equal(got, []string{"compartmentId", "softwareVersion", "subnetId"}) {
+		t.Fatalf("RedisCluster force-new fields = %v, want [compartmentId softwareVersion subnetId]", got)
+	}
+	if len(redisCluster.Runtime.Semantics.AuxiliaryOperations) != 0 {
+		t.Fatalf("RedisCluster auxiliary operations = %v, want none", redisCluster.Runtime.Semantics.AuxiliaryOperations)
+	}
+	if len(redisCluster.Runtime.Semantics.OpenGaps) != 0 {
+		t.Fatalf("RedisCluster open gaps = %v, want none", redisCluster.Runtime.Semantics.OpenGaps)
+	}
+
+	for _, resource := range pkg.Resources {
+		if resource.Kind == "RedisRedisCluster" {
+			t.Fatal("discovered RedisRedisCluster resource kind, want published RedisCluster only")
+		}
+	}
 }
 
 func TestGeneratePreservesExistingSampleKustomizationEntries(t *testing.T) {

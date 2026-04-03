@@ -1,0 +1,399 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: opensearchclusters.opensearch.oracle.com
+spec:
+  group: opensearch.oracle.com
+  names:
+    kind: OpensearchCluster
+    listKind: OpensearchClusterList
+    plural: opensearchclusters
+    singular: opensearchcluster
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the OpensearchCluster
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the OpensearchCluster
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: OpensearchCluster is the Schema for the opensearchclusters API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: OpensearchClusterSpec defines the desired state of OpensearchCluster.
+            properties:
+              compartmentId:
+                description: The OCID of the compartment to create the cluster in.
+                type: string
+              dataNodeCount:
+                description: The number of data nodes to configure for the cluster.
+                type: integer
+              dataNodeHostBareMetalShape:
+                description: The bare metal shape for the cluster's data nodes.
+                type: string
+              dataNodeHostMemoryGB:
+                description: The amount of memory in GB, to configure per node for
+                  the cluster's data nodes.
+                type: integer
+              dataNodeHostOcpuCount:
+                description: The number of OCPUs to configure for the cluster's data
+                  nodes.
+                type: integer
+              dataNodeHostType:
+                description: TThe instance type for the cluster's data nodes.
+                type: string
+              dataNodeStorageGB:
+                description: The amount of storage in GB, to configure per node for
+                  the cluster's data nodes.
+                type: integer
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              displayName:
+                description: The name of the cluster. Avoid entering confidential
+                  information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              masterNodeCount:
+                description: The number of master nodes to configure for the cluster.
+                type: integer
+              masterNodeHostBareMetalShape:
+                description: The bare metal shape for the cluster's master nodes.
+                type: string
+              masterNodeHostMemoryGB:
+                description: The amount of memory in GB, to configure per node for
+                  the cluster's master nodes.
+                type: integer
+              masterNodeHostOcpuCount:
+                description: The number of OCPUs to configure for the cluser's master
+                  nodes.
+                type: integer
+              masterNodeHostType:
+                description: The instance type for the cluster's master nodes.
+                type: string
+              opendashboardNodeCount:
+                description: The number of OpenSearch Dashboard nodes to configure
+                  for the cluster.
+                type: integer
+              opendashboardNodeHostMemoryGB:
+                description: The amount of memory in GB, to configure for the cluster's
+                  OpenSearch Dashboard nodes.
+                type: integer
+              opendashboardNodeHostOcpuCount:
+                description: The number of OCPUs to configure for the cluster's OpenSearch
+                  Dashboard nodes.
+                type: integer
+              securityMasterUserName:
+                description: The name of the master user that are used to manage security
+                  config
+                type: string
+              securityMasterUserPasswordHash:
+                description: The password hash of the master user that are used to
+                  manage security config
+                type: string
+              securityMode:
+                description: The security mode of the cluster.
+                type: string
+              softwareVersion:
+                description: The version of the software the cluster is running.
+                type: string
+              subnetCompartmentId:
+                description: The OCID for the compartment where the cluster's subnet
+                  is located.
+                type: string
+              subnetId:
+                description: The OCID of the cluster's subnet.
+                type: string
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of system tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              vcnCompartmentId:
+                description: The OCID for the compartment where the cluster's VCN
+                  is located.
+                type: string
+              vcnId:
+                description: The OCID of the cluster's VCN.
+                type: string
+            required:
+            - compartmentId
+            - dataNodeCount
+            - dataNodeHostMemoryGB
+            - dataNodeHostOcpuCount
+            - dataNodeHostType
+            - dataNodeStorageGB
+            - displayName
+            - masterNodeCount
+            - masterNodeHostMemoryGB
+            - masterNodeHostOcpuCount
+            - masterNodeHostType
+            - opendashboardNodeCount
+            - opendashboardNodeHostMemoryGB
+            - opendashboardNodeHostOcpuCount
+            - softwareVersion
+            - subnetCompartmentId
+            - subnetId
+            - vcnCompartmentId
+            - vcnId
+            type: object
+          status:
+            description: OpensearchClusterStatus defines the observed state of OpensearchCluster.
+            properties:
+              availabilityDomains:
+                description: The availability domains to distribute the cluser nodes
+                  across.
+                items:
+                  type: string
+                type: array
+              compartmentId:
+                description: The OCID of the compartment where the cluster is located.
+                type: string
+              dataNodeCount:
+                description: The number of data nodes configured for the cluster.
+                type: integer
+              dataNodeHostBareMetalShape:
+                description: The bare metal shape for the cluster's data nodes.
+                type: string
+              dataNodeHostMemoryGB:
+                description: The amount of memory in GB, for the cluster's data nodes.
+                type: integer
+              dataNodeHostOcpuCount:
+                description: The number of OCPUs configured for the cluster's data
+                  nodes.
+                type: integer
+              dataNodeHostType:
+                description: The instance type for the cluster's data nodes.
+                type: string
+              dataNodeStorageGB:
+                description: The amount of storage in GB, to configure per node for
+                  the cluster's data nodes.
+                type: integer
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              displayName:
+                description: The name of the cluster. Avoid entering confidential
+                  information.
+                type: string
+              fqdn:
+                description: The fully qualified domain name (FQDN) for the cluster's
+                  API endpoint.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              id:
+                description: The OCID of the cluster.
+                type: string
+              lifecycleDetails:
+                description: Additional information about the current lifecycle state
+                  of the cluster.
+                type: string
+              lifecycleState:
+                description: The current state of the cluster.
+                type: string
+              masterNodeCount:
+                description: The number of master nodes configured for the cluster.
+                type: integer
+              masterNodeHostBareMetalShape:
+                description: The bare metal shape for the cluster's master nodes.
+                type: string
+              masterNodeHostMemoryGB:
+                description: The amount of memory in GB, for the cluster's master
+                  nodes.
+                type: integer
+              masterNodeHostOcpuCount:
+                description: The number of OCPUs configured for cluster's master nodes.
+                type: integer
+              masterNodeHostType:
+                description: The instance type for the cluster's master nodes.
+                type: string
+              opendashboardFqdn:
+                description: The fully qualified domain name (FQDN) for the cluster's
+                  OpenSearch Dashboard API endpoint.
+                type: string
+              opendashboardNodeCount:
+                description: The number of OpenSearch Dashboard nodes configured for
+                  the cluster.
+                type: integer
+              opendashboardNodeHostMemoryGB:
+                description: The amount of memory in GB, for the cluster's OpenSearch
+                  Dashboard nodes.
+                type: integer
+              opendashboardNodeHostOcpuCount:
+                description: The amount of memory in GB, for the cluster's OpenSearch
+                  Dashboard nodes.
+                type: integer
+              opendashboardPrivateIp:
+                description: The private IP address for the cluster's OpenSearch Dashboard.
+                type: string
+              opensearchFqdn:
+                description: The fully qualified domain name (FQDN) for the cluster's
+                  API endpoint.
+                type: string
+              opensearchPrivateIp:
+                description: The cluster's private IP address.
+                type: string
+              securityMasterUserName:
+                description: The name of the master user that are used to manage security
+                  config
+                type: string
+              securityMasterUserPasswordHash:
+                description: The password hash of the master user that are used to
+                  manage security config
+                type: string
+              securityMode:
+                description: The security mode of the cluster.
+                type: string
+              softwareVersion:
+                description: The software version the cluster is running.
+                type: string
+              status:
+                properties:
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              subnetCompartmentId:
+                description: The OCID for the compartment where the cluster's subnet
+                  is located.
+                type: string
+              subnetId:
+                description: The OCID of the cluster's subnet.
+                type: string
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of system tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeCreated:
+                description: The amount of time in milliseconds since the cluster
+                  was created.
+                type: string
+              timeDeleted:
+                description: The amount of time in milliseconds since the cluster
+                  was updated.
+                type: string
+              timeUpdated:
+                description: The amount of time in milliseconds since the cluster
+                  was updated.
+                type: string
+              totalStorageGB:
+                description: The size in GB of the cluster's total storage.
+                type: integer
+              vcnCompartmentId:
+                description: The OCID for the compartment where the cluster's VCN
+                  is located.
+                type: string
+              vcnId:
+                description: The OCID of the cluster's VCN.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

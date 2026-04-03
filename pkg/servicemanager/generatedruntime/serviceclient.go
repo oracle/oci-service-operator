@@ -7,6 +7,7 @@ package generatedruntime
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -50,6 +51,7 @@ type RequestField struct {
 	RequestName      string
 	Contribution     string
 	PreferResourceID bool
+	LookupPaths      []string
 }
 
 type Hook struct {
@@ -129,6 +131,7 @@ type Config[T any] struct {
 	CredentialClient credhelper.CredentialClient
 	InitError        error
 	Semantics        *Semantics
+	BuildCreateBody  func(context.Context, T, string) (any, error)
 
 	Create *Operation
 	Get    *Operation
@@ -471,10 +474,55 @@ func (c ServiceClient[T]) deleteWithSemantics(ctx context.Context, resource T) (
 		}
 		return false, err
 	}
-	if deleted, err := c.invokeDeleteOperation(ctx, resource, currentID); deleted || err != nil {
+	if deleted, err, handled := c.confirmDeleteIfAlreadyPending(ctx, resource, currentID, semantics); handled {
 		return deleted, err
 	}
+	deleted, err := c.invokeDeleteOperation(ctx, resource, currentID)
+	if deleted {
+		return true, nil
+	}
+	if err != nil && !c.shouldConfirmDeleteAfterError(err) {
+		return false, err
+	}
 	return c.confirmDeleteWithSemantics(ctx, resource, currentID, semantics)
+}
+
+func (c ServiceClient[T]) confirmDeleteIfAlreadyPending(ctx context.Context, resource T, currentID string, semantics *Semantics) (bool, error, bool) {
+	if semantics.DeleteFollowUp.Strategy != "confirm-delete" {
+		return false, nil, false
+	}
+	if c.config.Get == nil && c.config.List == nil {
+		return false, nil, false
+	}
+
+	response, err := c.readResource(ctx, resource, currentID, readPhaseDelete)
+	if err != nil {
+		if isNotFound(err) || errors.Is(err, errResourceNotFound) {
+			c.markDeleted(resource, "OCI resource deleted")
+			return true, nil, true
+		}
+		return false, nil, false
+	}
+
+	lifecycleState := strings.ToUpper(responseLifecycleState(response))
+	if !containsString(semantics.Delete.PendingStates, lifecycleState) &&
+		!containsString(semantics.Delete.TerminalStates, lifecycleState) {
+		return false, nil, false
+	}
+
+	_ = mergeResponseIntoStatus(resource, response)
+	deleted, err := c.applyDeletePolicy(resource, response, semantics)
+	return deleted, err, true
+}
+
+func (c ServiceClient[T]) shouldConfirmDeleteAfterError(err error) bool {
+	if err == nil || !isConflict(err) {
+		return false
+	}
+	if c.config.Semantics == nil || c.config.Semantics.DeleteFollowUp.Strategy != "confirm-delete" {
+		return false
+	}
+	return c.config.Get != nil || c.config.List != nil
 }
 
 func (c ServiceClient[T]) semanticDeleteConfig() (*Semantics, error) {
@@ -598,10 +646,28 @@ func (c ServiceClient[T]) shouldInvokeUpdate(resource T, currentResponse any) (b
 	if c.config.Update == nil {
 		return false, nil
 	}
+	if c.shouldObserveCurrentLifecycle(currentResponse) {
+		return false, nil
+	}
 	if c.config.Semantics == nil {
 		return true, nil
 	}
 	return c.hasMutableDrift(resource, currentResponse)
+}
+
+func (c ServiceClient[T]) shouldObserveCurrentLifecycle(currentResponse any) bool {
+	if c.config.Semantics == nil || currentResponse == nil {
+		return false
+	}
+
+	lifecycleState := strings.ToUpper(responseLifecycleState(currentResponse))
+	if lifecycleState == "" {
+		return false
+	}
+
+	return containsString(c.config.Semantics.Lifecycle.ProvisioningStates, lifecycleState) ||
+		containsString(c.config.Semantics.Lifecycle.UpdatingStates, lifecycleState) ||
+		containsString(c.config.Semantics.Delete.PendingStates, lifecycleState)
 }
 
 func (c ServiceClient[T]) validateMutationPolicy(resource T, existing bool, currentResponse any) error {
@@ -644,7 +710,7 @@ func mutationValues(resource any, currentResponse any) (map[string]any, map[stri
 	specValues := jsonMap(fieldInterface(resourceValue, "Spec"))
 	currentValues := jsonMap(fieldInterface(resourceValue, "Status"))
 	if body, ok := responseBody(currentResponse); ok && body != nil {
-		currentValues = jsonMap(body)
+		mergeJSONMapOverwrite(currentValues, body)
 	}
 	return specValues, currentValues, nil
 }
@@ -665,7 +731,7 @@ func (c ServiceClient[T]) validateMutationConflicts(specValues map[string]any) e
 
 func (c ServiceClient[T]) validateForceNewFields(specValues map[string]any, currentValues map[string]any) error {
 	for _, field := range c.config.Semantics.Mutation.ForceNew {
-		specValue, specOK := lookupValueByPath(specValues, field)
+		specValue, specOK := lookupMeaningfulValue(specValues, field)
 		statusValue, statusOK := lookupValueByPath(currentValues, field)
 		if !specOK || !statusOK {
 			continue
@@ -700,7 +766,10 @@ func (c ServiceClient[T]) hasMutableDrift(resource T, currentResponse any) (bool
 			continue
 		}
 		currentValue, currentOK := lookupMeaningfulValue(currentValues, field)
-		if !currentOK || !valuesEqual(specValue, currentValue) {
+		if !currentOK {
+			continue
+		}
+		if !valuesEqual(specValue, currentValue) {
 			return true, nil
 		}
 	}
@@ -993,7 +1062,11 @@ func (c ServiceClient[T]) invokeWithValues(ctx context.Context, op *Operation, r
 	if request == nil {
 		return nil, fmt.Errorf("%s generated runtime did not create an OCI request value", c.config.Kind)
 	}
-	if err := buildRequest(request, resource, values, preferredID, op.Fields, c.idFieldAliases(), options); err != nil {
+	bodyOverride, hasBodyOverride, err := c.requestBodyOverride(ctx, op, resource, options.Namespace)
+	if err != nil {
+		return nil, err
+	}
+	if err := buildRequest(request, resource, values, preferredID, op.Fields, c.idFieldAliases(), options, bodyOverride, hasBodyOverride); err != nil {
 		return nil, fmt.Errorf("build %s OCI request: %w", c.config.Kind, err)
 	}
 
@@ -1002,6 +1075,17 @@ func (c ServiceClient[T]) invokeWithValues(ctx context.Context, op *Operation, r
 		return nil, normalizeOCIError(err)
 	}
 	return response, nil
+}
+
+func (c ServiceClient[T]) requestBodyOverride(ctx context.Context, op *Operation, resource T, namespace string) (any, bool, error) {
+	if op == c.config.Create && c.config.BuildCreateBody != nil {
+		body, err := c.config.BuildCreateBody(ctx, resource, namespace)
+		if err != nil {
+			return nil, false, fmt.Errorf("build %s create body: %w", c.config.Kind, err)
+		}
+		return body, true, nil
+	}
+	return nil, false, nil
 }
 
 func (c ServiceClient[T]) applySuccess(resource T, response any, fallback shared.OSOKConditionType) (servicemanager.OSOKResponse, error) {
@@ -1081,16 +1165,7 @@ func (c ServiceClient[T]) markCondition(resource T, condition shared.OSOKConditi
 }
 
 func (c ServiceClient[T]) currentID(resource T) string {
-	status, err := osokStatus(resource)
-	if err == nil && status.Ocid != "" {
-		return string(status.Ocid)
-	}
-
-	values, err := lookupValues(resource)
-	if err != nil {
-		return ""
-	}
-	return firstNonEmpty(values, c.idFieldAliases()...)
+	return c.statusID(resource)
 }
 
 func (c ServiceClient[T]) usesStatusOnlyCurrentID(resource T, currentID string) bool {
@@ -1134,7 +1209,17 @@ type requestBuildOptions struct {
 	Namespace        string
 }
 
-func buildRequest(request any, resource any, values map[string]any, preferredID string, fields []RequestField, idAliases []string, options requestBuildOptions) error {
+func buildRequest(
+	request any,
+	resource any,
+	values map[string]any,
+	preferredID string,
+	fields []RequestField,
+	idAliases []string,
+	options requestBuildOptions,
+	bodyOverride any,
+	hasBodyOverride bool,
+) error {
 	requestValue := reflect.ValueOf(request)
 	if !requestValue.IsValid() || requestValue.Kind() != reflect.Pointer || requestValue.IsNil() {
 		return fmt.Errorf("expected pointer OCI request, got %T", request)
@@ -1146,7 +1231,10 @@ func buildRequest(request any, resource any, values map[string]any, preferredID 
 	}
 
 	var resolvedSpec any
-	if requestNeedsResolvedSpec(fields, requestStruct.Type()) {
+	switch {
+	case hasBodyOverride:
+		resolvedSpec = bodyOverride
+	case requestNeedsResolvedSpec(fields, requestStruct.Type()):
 		var err error
 		resolvedSpec, err = resolvedSpecValue(resource, options)
 		if err != nil {
@@ -1155,10 +1243,18 @@ func buildRequest(request any, resource any, values map[string]any, preferredID 
 	}
 
 	if len(fields) > 0 {
-		return buildExplicitRequest(requestStruct, values, preferredID, fields, resolvedSpec)
+		if err := buildExplicitRequest(requestStruct, values, preferredID, fields, resolvedSpec); err != nil {
+			return err
+		}
+		assignDeterministicRetryToken(requestStruct, resource)
+		return nil
 	}
 
-	return buildHeuristicRequest(requestStruct, requestStruct.Type(), values, preferredID, idAliases, resolvedSpec)
+	if err := buildHeuristicRequest(requestStruct, requestStruct.Type(), values, preferredID, idAliases, resolvedSpec); err != nil {
+		return err
+	}
+	assignDeterministicRetryToken(requestStruct, resource)
+	return nil
 }
 
 func buildExplicitRequest(requestStruct reflect.Value, values map[string]any, preferredID string, fields []RequestField, resolvedSpec any) error {
@@ -1188,6 +1284,16 @@ func buildExplicitRequest(requestStruct reflect.Value, values map[string]any, pr
 	}
 
 	return nil
+}
+
+// ResolveSpecValue rewrites secret-backed spec inputs and omits zero-value nested
+// structs using the same projection rules as generated runtime request builders.
+func ResolveSpecValue(resource any, ctx context.Context, credentialClient credhelper.CredentialClient, namespace string) (any, error) {
+	return resolvedSpecValue(resource, requestBuildOptions{
+		Context:          ctx,
+		CredentialClient: credentialClient,
+		Namespace:        namespace,
+	})
 }
 
 func buildHeuristicRequest(
@@ -1268,6 +1374,15 @@ func populateHeuristicRequestField(fieldValue reflect.Value, fieldType reflect.S
 
 func heuristicRequestValue(values map[string]any, fieldType reflect.StructField, preferredID string, idAliases []string) (any, bool) {
 	lookupKey := requestLookupKey(fieldType)
+	if lookupKey == "namespaceName" {
+		if value, ok := lookupValueByPaths(values, "namespace"); ok {
+			return value, true
+		}
+		if value, ok := lookupValueByPaths(values, "namespaceName"); ok {
+			return value, true
+		}
+		return nil, false
+	}
 	if rawValue, ok := lookupValueByPaths(values, lookupKey); ok {
 		return rawValue, true
 	}
@@ -1277,11 +1392,6 @@ func heuristicRequestValue(values map[string]any, fieldType reflect.StructField,
 	switch lookupKey {
 	case "name":
 		return lookupValueByPaths(values, "metadataName")
-	case "namespaceName":
-		if value, ok := lookupValueByPaths(values, "namespaceName"); ok {
-			return value, true
-		}
-		return lookupValueByPaths(values, "namespace")
 	default:
 		return nil, false
 	}
@@ -1295,6 +1405,12 @@ func explicitRequestValue(values map[string]any, field RequestField, preferredID
 		if currentID, ok := lookupValueByPaths(values, "id", "ocid"); ok {
 			return currentID, true
 		}
+		if len(field.LookupPaths) != 0 {
+			if rawValue, ok := lookupValueByPaths(values, field.LookupPaths...); ok {
+				return rawValue, true
+			}
+		}
+		return nil, false
 	}
 
 	lookupKey := strings.TrimSpace(field.RequestName)
@@ -1302,17 +1418,26 @@ func explicitRequestValue(values map[string]any, field RequestField, preferredID
 		lookupKey = lowerCamel(field.FieldName)
 	}
 
+	if len(field.LookupPaths) != 0 {
+		if rawValue, ok := lookupValueByPaths(values, field.LookupPaths...); ok {
+			return rawValue, true
+		}
+	}
+	if lookupKey == "namespaceName" {
+		if value, ok := lookupValueByPaths(values, "namespace"); ok {
+			return value, true
+		}
+		if value, ok := lookupValueByPaths(values, "namespaceName"); ok {
+			return value, true
+		}
+		return nil, false
+	}
+
 	if rawValue, ok := lookupValueByPaths(values, lookupKey); ok {
 		return rawValue, true
 	}
 	if lookupKey == "name" {
 		return lookupValueByPaths(values, "metadataName")
-	}
-	if lookupKey == "namespaceName" {
-		if value, ok := lookupValueByPaths(values, "namespaceName"); ok {
-			return value, true
-		}
-		return lookupValueByPaths(values, "namespace")
 	}
 
 	return nil, false
@@ -1377,6 +1502,23 @@ func mergeJSONMap(dst map[string]any, source any) {
 		if _, exists := dst[key]; exists {
 			continue
 		}
+		dst[key] = value
+	}
+}
+
+func mergeJSONMapOverwrite(dst map[string]any, source any) {
+	if source == nil {
+		return
+	}
+	payload, err := json.Marshal(source)
+	if err != nil {
+		return
+	}
+	var decoded map[string]any
+	if err := json.Unmarshal(payload, &decoded); err != nil {
+		return
+	}
+	for key, value := range decoded {
 		dst[key] = value
 	}
 }
@@ -1455,6 +1597,9 @@ func rewriteSecretSources(value reflect.Value, decoded any, options requestBuild
 	}
 	if rewritten, include, handled, err := rewriteSharedSecretSource(value, options); handled {
 		return rewritten, include, err
+	}
+	if value.Kind() == reflect.Struct && value.IsZero() {
+		return nil, false, nil
 	}
 
 	switch value.Kind() {
@@ -2007,7 +2152,7 @@ func invalidDeleteSemanticsProblems(semantics *Semantics) []string {
 
 func supportedFormalHelper(helper string) bool {
 	switch strings.TrimSpace(helper) {
-	case "", "tfresource.CreateResource", "tfresource.UpdateResource", "tfresource.DeleteResource", "tfresource.WaitForUpdatedState":
+	case "", "tfresource.CreateResource", "tfresource.UpdateResource", "tfresource.DeleteResource", "tfresource.WaitForUpdatedState", "tfresource.WaitForWorkRequestWithErrorHandling":
 		return true
 	default:
 		return false
@@ -2050,6 +2195,24 @@ func isNotFound(err error) bool {
 		return true
 	}
 	return false
+}
+
+func isConflict(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	var serviceErr common.ServiceError
+	if errors.As(err, &serviceErr) {
+		return serviceErr.GetHTTPStatusCode() == 409
+	}
+
+	var conflictErr errorutil.ConflictOciError
+	if errors.As(err, &conflictErr) {
+		return true
+	}
+
+	return strings.Contains(err.Error(), "http status code: 409")
 }
 
 func (c ServiceClient[T]) selectListItem(body any, criteria map[string]any, preferredID string, phase readPhase) (any, error) {
@@ -2530,6 +2693,51 @@ func lookupMetadataString(value reflect.Value, fieldName string) string {
 		return ""
 	}
 	return field.String()
+}
+
+func assignDeterministicRetryToken(requestStruct reflect.Value, resource any) {
+	field, ok := fieldValue(requestStruct, "OpcRetryToken")
+	if !ok || !field.IsValid() || !field.CanSet() {
+		return
+	}
+
+	switch field.Kind() {
+	case reflect.Pointer:
+		if !field.IsNil() {
+			return
+		}
+	case reflect.String:
+		if strings.TrimSpace(field.String()) != "" {
+			return
+		}
+	default:
+		return
+	}
+
+	token := resourceRetryToken(resource)
+	if token == "" {
+		return
+	}
+	_ = assignField(field, token)
+}
+
+func resourceRetryToken(resource any) string {
+	resourceValue, err := resourceStruct(resource)
+	if err != nil {
+		return ""
+	}
+	if uid := strings.TrimSpace(lookupMetadataString(resourceValue, "UID")); uid != "" {
+		return uid
+	}
+
+	namespace := strings.TrimSpace(lookupMetadataString(resourceValue, "Namespace"))
+	name := strings.TrimSpace(lookupMetadataString(resourceValue, "Name"))
+	if namespace == "" && name == "" {
+		return ""
+	}
+
+	sum := sha256.Sum256([]byte(namespace + "/" + name))
+	return fmt.Sprintf("%x", sum[:16])
 }
 
 func resourceNamespace(resource any, fallback string) string {

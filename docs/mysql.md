@@ -230,5 +230,11 @@ credentials without restoring the old handwritten runtime path.
 - OSOK mirrors only non-empty referenced secret names into
   `status.adminUsername` and `status.adminPassword` for drift tracking, but it
   does not write the secret payload into the CR status.
-- OSOK does not create a follow-up Kubernetes Secret containing DB System
-  connection details for this generated surface.
+- Once the `DbSystem` reaches `Active`, OSOK materializes a same-name Secret in
+  the resource namespace containing `InternalFQDN`, `MySQLPort`,
+  `MySQLXProtocolPort`, `PrivateIPAddress`, `AvailabilityDomain`,
+  `FaultDomain`, and `Endpoints`.
+- OSOK only mutates or deletes that endpoint Secret when it owns the object via
+  the `mysql.oracle.com/dbsystem-uid` label. A legacy unlabeled same-name
+  Secret is adopted once when its data already matches the observed endpoint
+  payload.

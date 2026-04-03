@@ -14,7 +14,6 @@ import (
 	"github.com/oracle/oci-service-operator/pkg/core"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
 )
 
 // DbSystemReconciler reconciles a DbSystem object.
@@ -39,6 +38,6 @@ func (r *DbSystemReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		For(&mysqlv1beta1.DbSystem{})
 	builder = builder.WithOptions(controller.Options{MaxConcurrentReconciles: 3})
 	return builder.
-		WithEventFilter(predicate.GenerationChangedPredicate{}).
+		WithEventFilter(core.ReconcilePredicate()).
 		Complete(r)
 }

@@ -235,6 +235,7 @@ func qualifiedTypeName(typeRef types.Type) string {
 		}
 		typeRef = pointerType.Elem()
 	}
+	typeRef = types.Unalias(typeRef)
 	namedType, ok := typeRef.(*types.Named)
 	if !ok {
 		return ""

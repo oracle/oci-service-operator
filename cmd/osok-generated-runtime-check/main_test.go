@@ -118,23 +118,23 @@ func TestCollectBuildPlanFindsDatabaseGeneratedRuntimePackages(t *testing.T) {
 
 	root := t.TempDir()
 	mustRuntimeCheckMkdirAll(t, filepath.Join(root, "controllers", "database"))
-	mustRuntimeCheckMkdirAll(t, filepath.Join(root, "pkg", "servicemanager", "database", "autonomousdatabase"))
+	mustRuntimeCheckMkdirAll(t, filepath.Join(root, "pkg", "servicemanager", "autonomousdatabases", "adb"))
 	mustRuntimeCheckMkdirAll(t, filepath.Join(root, "internal", "registrations"))
 
 	writeRuntimeCheckFiles(t, map[string]string{
-		filepath.Join(root, "controllers", "database", "autonomousdatabase_controller.go"):                                     "package database\n",
-		filepath.Join(root, "pkg", "servicemanager", "database", "autonomousdatabase", "autonomousdatabase_servicemanager.go"): generatedServiceManagerSource("autonomousdatabase"),
-		filepath.Join(root, "pkg", "servicemanager", "database", "autonomousdatabase", "autonomousdatabase_serviceclient.go"):  generatedServiceManagerSource("autonomousdatabase"),
-		filepath.Join(root, "internal", "registrations", "database_generated.go"):                                              generatedRegistrationSource(),
+		filepath.Join(root, "controllers", "database", "autonomousdatabase_controller.go"):                                 "package database\n",
+		filepath.Join(root, "pkg", "servicemanager", "autonomousdatabases", "adb", "autonomousdatabase_servicemanager.go"): generatedServiceManagerSource("adb"),
+		filepath.Join(root, "pkg", "servicemanager", "autonomousdatabases", "adb", "autonomousdatabase_serviceclient.go"):  generatedServiceManagerSource("adb"),
+		filepath.Join(root, "internal", "registrations", "database_generated.go"):                                          generatedRegistrationSource(),
 	})
 
-	build, err := collectBuildPlan(root, []string{"database"}, []string{"database"}, []string{"database"})
+	build, err := collectBuildPlan(root, []string{"database"}, []string{"database"}, []string{"autonomousdatabases"})
 	if err != nil {
 		t.Fatalf("collectBuildPlan() error = %v", err)
 	}
 
-	if !slices.Equal(build.ServiceManagerPackages, []string{"./pkg/servicemanager/database/autonomousdatabase"}) {
-		t.Fatalf("ServiceManagerPackages = %v, want %v", build.ServiceManagerPackages, []string{"./pkg/servicemanager/database/autonomousdatabase"})
+	if !slices.Equal(build.ServiceManagerPackages, []string{"./pkg/servicemanager/autonomousdatabases/adb"}) {
+		t.Fatalf("ServiceManagerPackages = %v, want %v", build.ServiceManagerPackages, []string{"./pkg/servicemanager/autonomousdatabases/adb"})
 	}
 }
 
@@ -154,17 +154,17 @@ func TestCollectBuildPlanRejectsLegacyOnlyServiceManagerPackages(t *testing.T) {
 
 	root := t.TempDir()
 	mustRuntimeCheckMkdirAll(t, filepath.Join(root, "controllers", "database"))
-	mustRuntimeCheckMkdirAll(t, filepath.Join(root, "pkg", "servicemanager", "database", "autonomousdatabase"))
+	mustRuntimeCheckMkdirAll(t, filepath.Join(root, "pkg", "servicemanager", "autonomousdatabases", "adb"))
 	mustRuntimeCheckMkdirAll(t, filepath.Join(root, "internal", "registrations"))
 
 	writeRuntimeCheckFiles(t, map[string]string{
-		filepath.Join(root, "controllers", "database", "autonomousdatabase_controller.go"):                         "package database\n",
-		filepath.Join(root, "pkg", "servicemanager", "database", "autonomousdatabase", "legacy_servicemanager.go"): "package autonomousdatabase\n",
-		filepath.Join(root, "pkg", "servicemanager", "database", "autonomousdatabase", "manual_helper.go"):         "package autonomousdatabase\n",
-		filepath.Join(root, "internal", "registrations", "database_generated.go"):                                  generatedRegistrationSource(),
+		filepath.Join(root, "controllers", "database", "autonomousdatabase_controller.go"):                     "package database\n",
+		filepath.Join(root, "pkg", "servicemanager", "autonomousdatabases", "adb", "legacy_servicemanager.go"): "package adb\n",
+		filepath.Join(root, "pkg", "servicemanager", "autonomousdatabases", "adb", "manual_helper.go"):         "package adb\n",
+		filepath.Join(root, "internal", "registrations", "database_generated.go"):                              generatedRegistrationSource(),
 	})
 
-	_, err := collectBuildPlan(root, []string{"database"}, []string{"database"}, []string{"database"})
+	_, err := collectBuildPlan(root, []string{"database"}, []string{"database"}, []string{"autonomousdatabases"})
 	if err == nil {
 		t.Fatal("collectBuildPlan() error = nil, want missing generated service-manager packages error")
 	}
@@ -245,19 +245,19 @@ func TestPreserveCheckedInCompanionFilesLinksCheckedInCompatibilityCompanions(t 
 	typesPath := filepath.Join(apiSourceDir, "autonomousdatabase_types.go")
 	mustRuntimeCheckWriteFile(t, typesPath, "package v1beta1\n")
 
-	serviceManagerSourceDir := filepath.Join(repoRoot, "pkg", "servicemanager", "database", "autonomousdatabase")
+	serviceManagerSourceDir := filepath.Join(repoRoot, "pkg", "servicemanager", "autonomousdatabases", "adb")
 	mustRuntimeCheckMkdirAll(t, serviceManagerSourceDir)
 	adapterPath := filepath.Join(serviceManagerSourceDir, "autonomousdatabase_generated_client_adapter.go")
-	mustRuntimeCheckWriteFile(t, adapterPath, "package autonomousdatabase\n")
+	mustRuntimeCheckWriteFile(t, adapterPath, "package adb\n")
 	legacyServiceManagerPath := filepath.Join(serviceManagerSourceDir, "legacy_servicemanager.go")
-	mustRuntimeCheckWriteFile(t, legacyServiceManagerPath, "package autonomousdatabase\n")
+	mustRuntimeCheckWriteFile(t, legacyServiceManagerPath, "package adb\n")
 	generatedServiceClientPath := filepath.Join(serviceManagerSourceDir, "autonomousdatabase_serviceclient.go")
-	mustRuntimeCheckWriteFile(t, generatedServiceClientPath, generatedServiceManagerSource("autonomousdatabase"))
+	mustRuntimeCheckWriteFile(t, generatedServiceClientPath, generatedServiceManagerSource("adb"))
 
-	snapshotServiceManagerDir := filepath.Join(snapshotRoot, "pkg", "servicemanager", "database", "autonomousdatabase")
+	snapshotServiceManagerDir := filepath.Join(snapshotRoot, "pkg", "servicemanager", "autonomousdatabases", "adb")
 	mustRuntimeCheckMkdirAll(t, snapshotServiceManagerDir)
 	snapshotGeneratedServiceClientPath := filepath.Join(snapshotServiceManagerDir, "autonomousdatabase_serviceclient.go")
-	mustRuntimeCheckWriteFile(t, snapshotGeneratedServiceClientPath, generatedServiceManagerSource("autonomousdatabase"))
+	mustRuntimeCheckWriteFile(t, snapshotGeneratedServiceClientPath, generatedServiceManagerSource("adb"))
 
 	packages := []*generator.PackageModel{
 		{
@@ -265,7 +265,7 @@ func TestPreserveCheckedInCompanionFilesLinksCheckedInCompatibilityCompanions(t 
 			Version: "v1beta1",
 			ServiceManagers: []generator.ServiceManagerModel{
 				{
-					PackagePath:            "database/autonomousdatabase",
+					PackagePath:            "autonomousdatabases/adb",
 					ServiceClientFileName:  "autonomousdatabase_serviceclient.go",
 					ServiceManagerFileName: "autonomousdatabase_servicemanager.go",
 				},
@@ -291,26 +291,26 @@ func TestPreserveCheckedInCompanionFilesSkipsExcludedGeneratedServiceManagerPack
 	repoRoot := t.TempDir()
 	snapshotRoot := t.TempDir()
 
-	selectedSourceDir := filepath.Join(repoRoot, "pkg", "servicemanager", "database", "autonomousdatabase")
+	selectedSourceDir := filepath.Join(repoRoot, "pkg", "servicemanager", "autonomousdatabases", "adb")
 	mustRuntimeCheckMkdirAll(t, selectedSourceDir)
 	selectedCompanionPath := filepath.Join(selectedSourceDir, "legacy_servicemanager.go")
-	mustRuntimeCheckWriteFile(t, selectedCompanionPath, "package autonomousdatabase\n")
+	mustRuntimeCheckWriteFile(t, selectedCompanionPath, "package adb\n")
 
 	excludedSourceDir := filepath.Join(repoRoot, "pkg", "servicemanager", "database", "dbsystem")
 	mustRuntimeCheckMkdirAll(t, excludedSourceDir)
 	mustRuntimeCheckWriteFile(t, filepath.Join(excludedSourceDir, "dbsystem_serviceclient.go"), generatedServiceManagerSource("dbsystem"))
 	mustRuntimeCheckWriteFile(t, filepath.Join(excludedSourceDir, "dbsystem_servicemanager.go"), generatedServiceManagerSource("dbsystem"))
 
-	snapshotSelectedDir := filepath.Join(snapshotRoot, "pkg", "servicemanager", "database", "autonomousdatabase")
+	snapshotSelectedDir := filepath.Join(snapshotRoot, "pkg", "servicemanager", "autonomousdatabases", "adb")
 	mustRuntimeCheckMkdirAll(t, snapshotSelectedDir)
-	mustRuntimeCheckWriteFile(t, filepath.Join(snapshotSelectedDir, "autonomousdatabase_serviceclient.go"), generatedServiceManagerSource("autonomousdatabase"))
+	mustRuntimeCheckWriteFile(t, filepath.Join(snapshotSelectedDir, "autonomousdatabase_serviceclient.go"), generatedServiceManagerSource("adb"))
 
 	packages := []*generator.PackageModel{
 		{
 			Service: generator.ServiceConfig{Group: "database"},
 			ServiceManagers: []generator.ServiceManagerModel{
 				{
-					PackagePath:            "database/autonomousdatabase",
+					PackagePath:            "autonomousdatabases/adb",
 					ServiceClientFileName:  "autonomousdatabase_serviceclient.go",
 					ServiceManagerFileName: "autonomousdatabase_servicemanager.go",
 				},

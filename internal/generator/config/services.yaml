@@ -111,7 +111,7 @@ services:
     phase: networking-and-infrastructure
     packageProfile: controller-backed
     selection:
-      enabled: false
+      enabled: true
       mode: all
     packageSplits:
       - name: core-network
@@ -134,6 +134,10 @@ services:
         strategy: generated
       webhooks:
         strategy: none
+      resources:
+        - kind: Instance
+          serviceManager:
+            packagePath: core/instance
     observedState:
       sdkAliases:
         AllDrgAttachment:
@@ -225,6 +229,8 @@ services:
       resources:
         - kind: AutonomousDatabase
           formalSpec: databaseautonomousdatabase
+          serviceManager:
+            packagePath: autonomousdatabases/adb
           controller:
             extraRBACMarkers:
               - groups="",resources=secrets,verbs=get;list;watch
@@ -315,7 +321,9 @@ services:
     packageProfile: controller-backed
     selection:
       enabled: false
-      mode: all
+      mode: explicit
+      includeKinds:
+        - Compartment
     generation:
       controller:
         strategy: generated
@@ -326,6 +334,10 @@ services:
       webhooks:
         strategy: none
       resources:
+        - kind: Compartment
+          formalSpec: compartment
+          serviceManager:
+            packagePath: identity/compartment
         - kind: User
           formalSpec: user
     observedState:
@@ -511,7 +523,7 @@ services:
       registration:
         strategy: generated
       webhooks:
-        strategy: manual
+        strategy: none
       resources:
         - kind: DbSystem
           formalSpec: dbsystem
@@ -608,6 +620,39 @@ services:
         strategy: generated
       webhooks:
         strategy: none
+      resources:
+        - kind: Index
+          controller:
+            extraRBACMarkers:
+              - groups="",resources=events,verbs=create;patch
+        - kind: Replica
+          controller:
+            extraRBACMarkers:
+              - groups="",resources=events,verbs=create;patch
+        - kind: Row
+          controller:
+            extraRBACMarkers:
+              - groups="",resources=events,verbs=create;patch
+        - kind: Table
+          controller:
+            extraRBACMarkers:
+              - groups="",resources=events,verbs=create;patch
+        - kind: TableUsage
+          controller:
+            extraRBACMarkers:
+              - groups="",resources=events,verbs=create;patch
+        - kind: WorkRequest
+          controller:
+            extraRBACMarkers:
+              - groups="",resources=events,verbs=create;patch
+        - kind: WorkRequestError
+          controller:
+            extraRBACMarkers:
+              - groups="",resources=events,verbs=create;patch
+        - kind: WorkRequestLog
+          controller:
+            extraRBACMarkers:
+              - groups="",resources=events,verbs=create;patch
     observedState:
       sdkAliases:
         WorkRequestLog:
@@ -631,10 +676,71 @@ services:
         strategy: generated
       webhooks:
         strategy: none
+      resources:
+        - kind: Bucket
+          formalSpec: objectstoragebucket
+          serviceManager:
+            packagePath: objectstorage/bucket
     observedState:
       sdkAliases:
         WorkRequestLog:
           - WorkRequestLogEntry
+
+  - service: opensearch
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/opensearch
+    group: opensearch
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: explicit
+      includeKinds:
+        - OpensearchOpensearchCluster
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: OpensearchOpensearchCluster
+          formalSpec: opensearchopensearchcluster
+          serviceManager:
+            packagePath: opensearch/opensearchopensearchcluster
+        - kind: Manifest
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: OpensearchClusterBackup
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: OpensearchOpensearchVersion
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequest
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestError
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestLog
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
 
   - service: ons
     sdkPackage: github.com/oracle/oci-go-sdk/v65/ons
@@ -677,6 +783,68 @@ services:
         strategy: generated
       webhooks:
         strategy: none
+      resources:
+        - kind: DbSystem
+          formalSpec: dbsystem
+          controller:
+            extraRBACMarkers:
+              - groups="",resources=secrets,verbs=get;list;watch
+              - groups="",resources=events,verbs=create;patch
+          specFields:
+            - name: AdminUsername
+              type: shared.UsernameSource
+              tag: 'json:"adminUsername,omitempty,omitzero"'
+              comments:
+                - The administrative username sourced from a Kubernetes Secret in the same namespace.
+                - The referenced Secret must contain a `username` key. If omitted, `spec.credentials.username` remains available for direct credential input.
+              markers:
+                - +kubebuilder:validation:Optional
+            - name: AdminPassword
+              type: shared.PasswordSource
+              tag: 'json:"adminPassword,omitempty,omitzero"'
+              comments:
+                - The administrative password sourced from a Kubernetes Secret in the same namespace.
+                - The referenced Secret must contain a `password` key. If omitted, `spec.credentials.passwordDetails` remains available for plaintext or OCI Vault secret input.
+              markers:
+                - +kubebuilder:validation:Optional
+          statusFields:
+            - name: AdminUsernameSource
+              type: shared.UsernameSource
+              tag: 'json:"adminUsernameSource,omitempty,omitzero"'
+              comments:
+                - The last applied secret reference for the administrative username.
+            - name: AdminPasswordSource
+              type: shared.PasswordSource
+              tag: 'json:"adminPasswordSource,omitempty,omitzero"'
+              comments:
+                - The last applied secret reference for the administrative password.
+          sample:
+            body: |-
+              apiVersion: psql.oracle.com/v1beta1
+              kind: DbSystem
+              metadata:
+                name: dbsystem-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                displayName: dbsystem-sample
+                dbVersion: "14"
+                shape: PostgreSQL.VM.Standard.E5.Flex
+                instanceOcpuCount: 2
+                instanceMemorySizeInGBs: 32
+                storageDetails:
+                  systemType: OCI_OPTIMIZED_STORAGE
+                  isRegionallyDurable: true
+                networkDetails:
+                  subnetId: ocid1.subnet.oc1..exampleuniqueID
+                adminUsername:
+                  secret:
+                    secretName: admin-secret
+                adminPassword:
+                  secret:
+                    secretName: admin-secret
+          serviceManager:
+            packagePath: psql/dbsystem
+            needsCredentialClient: true
     observedState:
       sdkAliases:
         PrimaryDbInstance:
@@ -706,6 +874,35 @@ services:
       sdkAliases:
         WorkRequestLog:
           - WorkRequestLogEntry
+
+  - service: redis
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/redis
+    group: redis
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: explicit
+      includeKinds:
+        - RedisCluster
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: RedisCluster
+          formalSpec: rediscluster
+          controller:
+            extraRBACMarkers:
+              - groups="",resources=events,verbs=create;patch
+          serviceManager:
+            packagePath: redis/rediscluster
 
   - service: secrets
     sdkPackage: github.com/oracle/oci-go-sdk/v65/secrets

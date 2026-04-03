@@ -13,7 +13,6 @@ import (
 	nosqlv1beta1 "github.com/oracle/oci-service-operator/api/nosql/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/core"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
 )
 
 // IndexReconciler reconciles a Index object.
@@ -21,9 +20,10 @@ type IndexReconciler struct {
 	Reconciler *core.BaseReconciler
 }
 
-// +kubebuilder:rbac:groups=nosql.oracle.com,resources=indexes,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=nosql.oracle.com,resources=indexes/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=nosql.oracle.com,resources=indexes/finalizers,verbs=update
+// +kubebuilder:rbac:groups=nosql.oracle.com,resources=indices,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=nosql.oracle.com,resources=indices/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=nosql.oracle.com,resources=indices/finalizers,verbs=update
+// +kubebuilder:rbac:groups="",resources=events,verbs=create;patch
 
 // Reconcile is part of the main Kubernetes reconciliation loop.
 func (r *IndexReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
@@ -36,6 +36,6 @@ func (r *IndexReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	builder := ctrl.NewControllerManagedBy(mgr).
 		For(&nosqlv1beta1.Index{})
 	return builder.
-		WithEventFilter(predicate.GenerationChangedPredicate{}).
+		WithEventFilter(core.ReconcilePredicate()).
 		Complete(r)
 }

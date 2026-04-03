@@ -18,6 +18,8 @@ type singularRule struct {
 }
 
 var specialSingularRules = []singularRule{
+	{suffix: "Indices", replacement: "Index"},
+	{suffix: "indices", replacement: "index"},
 	{suffix: "Statuses", replacement: "Status"},
 	{suffix: "statuses", replacement: "status"},
 	{suffix: "Status", replacement: "Status", recursive: true, preserveExact: true},
@@ -27,6 +29,8 @@ var specialSingularRules = []singularRule{
 }
 
 var esPluralSuffixes = []string{"sses", "shes", "ches", "xes", "zes"}
+
+var unpluralizedSuffixes = []string{"Metadata", "metadata", "Information", "information"}
 
 func singularize(name string) string {
 	if singular, ok := applySpecialSingularRules(name); ok {
@@ -40,6 +44,12 @@ func singularize(name string) string {
 
 func pluralize(name string) string {
 	switch {
+	case strings.HasSuffix(name, "Index"):
+		return strings.TrimSuffix(name, "Index") + "Indices"
+	case strings.HasSuffix(name, "index"):
+		return strings.TrimSuffix(name, "index") + "indices"
+	case hasUnpluralizedSuffix(name):
+		return name
 	case strings.HasSuffix(name, "Status"), strings.HasSuffix(name, "status"):
 		return name + "es"
 	case strings.HasSuffix(name, "Stats"), strings.HasSuffix(name, "stats"):
@@ -47,7 +57,7 @@ func pluralize(name string) string {
 	case strings.HasSuffix(name, "s") && !strings.HasSuffix(name, "ss"):
 		return name
 	case strings.HasSuffix(name, "y") && len(name) > 1:
-		if isVowel(name[len(name)-2]) {
+		if hasVowelBeforeSuffix(name, 'y') {
 			return name + "s"
 		}
 		return strings.TrimSuffix(name, "y") + "ies"
@@ -194,4 +204,27 @@ func appendLowerToken(tokens []string, current []rune) []string {
 	}
 
 	return append(tokens, strings.ToLower(string(current)))
+}
+
+func hasUnpluralizedSuffix(name string) bool {
+	for _, suffix := range unpluralizedSuffixes {
+		if strings.HasSuffix(name, suffix) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func hasVowelBeforeSuffix(name string, suffix byte) bool {
+	if len(name) < 2 || name[len(name)-1] != suffix {
+		return false
+	}
+
+	switch unicode.ToLower(rune(name[len(name)-2])) {
+	case 'a', 'e', 'i', 'o', 'u':
+		return true
+	default:
+		return false
+	}
 }

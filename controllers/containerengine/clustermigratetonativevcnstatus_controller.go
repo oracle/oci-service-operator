@@ -13,7 +13,6 @@ import (
 	containerenginev1beta1 "github.com/oracle/oci-service-operator/api/containerengine/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/core"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
 )
 
 // ClusterMigrateToNativeVcnStatusReconciler reconciles a ClusterMigrateToNativeVcnStatus object.
@@ -36,6 +35,6 @@ func (r *ClusterMigrateToNativeVcnStatusReconciler) SetupWithManager(mgr ctrl.Ma
 	builder := ctrl.NewControllerManagedBy(mgr).
 		For(&containerenginev1beta1.ClusterMigrateToNativeVcnStatus{})
 	return builder.
-		WithEventFilter(predicate.GenerationChangedPredicate{}).
+		WithEventFilter(core.ReconcilePredicate()).
 		Complete(r)
 }

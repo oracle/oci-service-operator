@@ -13,7 +13,6 @@ import (
 	psqlv1beta1 "github.com/oracle/oci-service-operator/api/psql/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/core"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
 )
 
 // DefaultConfigurationReconciler reconciles a DefaultConfiguration object.
@@ -36,6 +35,6 @@ func (r *DefaultConfigurationReconciler) SetupWithManager(mgr ctrl.Manager) erro
 	builder := ctrl.NewControllerManagedBy(mgr).
 		For(&psqlv1beta1.DefaultConfiguration{})
 	return builder.
-		WithEventFilter(predicate.GenerationChangedPredicate{}).
+		WithEventFilter(core.ReconcilePredicate()).
 		Complete(r)
 }

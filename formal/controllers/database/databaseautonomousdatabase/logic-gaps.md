@@ -8,9 +8,10 @@ gaps: []
 
 # Logic Gaps
 
-No open logic gaps remain for the generated `database/AutonomousDatabase`
-runtime path.
+No open logic gaps remain for the promoted `database/AutonomousDatabase`
+runtime semantics after the service-manager layout port to
+`pkg/servicemanager/autonomousdatabases/adb`.
 
-The promoted row binds the published API kind to generator-owned lifecycle,
-delete confirmation, and list-lookup semantics without the legacy adapter or
-manual webhook seam.
+The promoted row still binds the published API kind to generator-owned
+lifecycle, delete confirmation, same-namespace secret resolution, and
+list-lookup semantics without the legacy adapter or manual webhook seam.

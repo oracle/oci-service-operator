@@ -83,12 +83,14 @@ autonomous_database_backup_id,
 autonomous_database_id, character_set (+12 more)
 and conflicts is_shrink_only ->
 shrink_adb_trigger
+create-only fields: none
 list lookup: oci_database_autonomous_databases
 filters compartment_id, display_name
 conflicts: is_shrink_only -> shrink_adb_trigger
 open gaps: none
 Promoted generated-runtime metadata for
-database/AutonomousDatabase.
+database/AutonomousDatabase preserved after the
+autonomousdatabases/adb layout port.
 end note
 note right of delete_pending
 delete policy: required

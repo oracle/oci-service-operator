@@ -1,0 +1,184 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: preauthenticatedrequests.objectstorage.oracle.com
+spec:
+  group: objectstorage.oracle.com
+  names:
+    kind: PreauthenticatedRequest
+    listKind: PreauthenticatedRequestList
+    plural: preauthenticatedrequests
+    singular: preauthenticatedrequest
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.name
+      name: Name
+      priority: 1
+      type: string
+    - description: status of the PreauthenticatedRequest
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the PreauthenticatedRequest
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: PreauthenticatedRequest is the Schema for the preauthenticatedrequests
+          API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: PreauthenticatedRequestSpec defines the desired state of
+              PreauthenticatedRequest.
+            properties:
+              accessType:
+                description: The operation that can be performed on this resource.
+                type: string
+              bucketListingAction:
+                description: |-
+                  Specifies whether a list operation is allowed on a PAR with accessType "AnyObjectRead" or "AnyObjectReadWrite".
+                  Deny: Prevents the user from performing a list operation.
+                  ListObjects: Authorizes the user to perform a list operation.
+                type: string
+              name:
+                description: |-
+                  A user-specified name for the pre-authenticated request. Names can be helpful in managing pre-authenticated requests.
+                  Avoid entering confidential information.
+                type: string
+              objectName:
+                description: |-
+                  The name of the object that is being granted access to by the pre-authenticated request. Avoid entering confidential
+                  information. The object name can be null and if so, the pre-authenticated request grants access to the entire bucket
+                  if the access type allows that. The object name can be a prefix as well, in that case pre-authenticated request
+                  grants access to all the objects within the bucket starting with that prefix provided that we have the correct access type.
+                type: string
+              timeExpires:
+                description: |-
+                  The expiration date for the pre-authenticated request as per RFC 3339 (https://tools.ietf.org/html/rfc3339).
+                  After this date the pre-authenticated request will no longer be valid.
+                type: string
+            required:
+            - accessType
+            - name
+            - timeExpires
+            type: object
+          status:
+            description: PreauthenticatedRequestStatus defines the observed state
+              of PreauthenticatedRequest.
+            properties:
+              accessType:
+                description: The operation that can be performed on this resource.
+                type: string
+              accessUri:
+                description: The URI to embed in the URL when using the pre-authenticated
+                  request.
+                type: string
+              bucketListingAction:
+                description: |-
+                  Specifies whether a list operation is allowed on a PAR with accessType "AnyObjectRead" or "AnyObjectReadWrite".
+                  Deny: Prevents the user from performing a list operation.
+                  ListObjects: Authorizes the user to perform a list operation.
+                type: string
+              fullPath:
+                description: The full Path for the object.
+                type: string
+              id:
+                description: The unique identifier to use when directly addressing
+                  the pre-authenticated request.
+                type: string
+              name:
+                description: The user-provided name of the pre-authenticated request.
+                type: string
+              objectName:
+                description: |-
+                  The name of the object that is being granted access to by the pre-authenticated request. Avoid entering confidential
+                  information. The object name can be null and if so, the pre-authenticated request grants access to the entire bucket.
+                  Example: test/object1.log
+                type: string
+              status:
+                properties:
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              timeCreated:
+                description: |-
+                  The date when the pre-authenticated request was created as per specification
+                  RFC 3339 (https://tools.ietf.org/html/rfc3339).
+                type: string
+              timeExpires:
+                description: |-
+                  The expiration date for the pre-authenticated request as per RFC 3339 (https://tools.ietf.org/html/rfc3339). After
+                  this date the pre-authenticated request will no longer be valid.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

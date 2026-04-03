@@ -46,25 +46,6 @@ var targets = []Target{
 		},
 	},
 	{
-		Name:       "DbSystem",
-		SpecType:   reflect.TypeOf(mysqlv1beta1.DbSystemSpec{}),
-		StatusType: reflect.TypeOf(mysqlv1beta1.DbSystemStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "mysql.CreateDbSystemDetails",
-			},
-			{
-				SDKStruct: "mysql.UpdateDbSystemDetails",
-			},
-			{
-				SDKStruct: "mysql.DbSystem",
-			},
-			{
-				SDKStruct: "mysql.DbSystemSummary",
-			},
-		},
-	},
-	{
 		Name:       "MySqlBackup",
 		SpecType:   reflect.TypeOf(mysqlv1beta1.BackupSpec{}),
 		StatusType: reflect.TypeOf(mysqlv1beta1.BackupStatus{}),
@@ -118,6 +99,25 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "mysql.ConfigurationSummary",
+			},
+		},
+	},
+	{
+		Name:       "MySqlDbSystem",
+		SpecType:   reflect.TypeOf(mysqlv1beta1.DbSystemSpec{}),
+		StatusType: reflect.TypeOf(mysqlv1beta1.DbSystemStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "mysql.CreateDbSystemDetails",
+			},
+			{
+				SDKStruct: "mysql.UpdateDbSystemDetails",
+			},
+			{
+				SDKStruct: "mysql.DbSystem",
+			},
+			{
+				SDKStruct: "mysql.DbSystemSummary",
 			},
 		},
 	},
@@ -458,6 +458,35 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "PSQLDbSystem",
+		SpecType:   reflect.TypeOf(psqlv1beta1.DbSystemSpec{}),
+		StatusType: reflect.TypeOf(psqlv1beta1.DbSystemStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "psql.CreateDbSystemDetails",
+			},
+			{
+				SDKStruct: "psql.UpdateDbSystemDetails",
+			},
+			{
+				SDKStruct: "psql.DbSystemDetails",
+			},
+			{
+				SDKStruct:  "psql.DbSystem",
+				APISurface: "status",
+			},
+			{
+				SDKStruct: "psql.DbSystemCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: transport wrapper type does not correspond to a top-level CRD spec or status surface.",
+			},
+			{
+				SDKStruct:  "psql.DbSystemSummary",
+				APISurface: "status",
+			},
+		},
+	},
+	{
 		Name:       "PSQLDbSystemDbInstance",
 		SpecType:   reflect.TypeOf(psqlv1beta1.DbSystemDbInstanceSpec{}),
 		StatusType: reflect.TypeOf(psqlv1beta1.DbSystemDbInstanceStatus{}),
@@ -563,35 +592,6 @@ var targets = []Target{
 				SDKStruct: "psql.WorkRequestLogEntryCollection",
 				Exclude:   true,
 				Reason:    "Intentionally untracked: transport wrapper type does not correspond to a top-level CRD spec or status surface.",
-			},
-		},
-	},
-	{
-		Name:       "PostgreSQLDbSystem",
-		SpecType:   reflect.TypeOf(psqlv1beta1.DbSystemSpec{}),
-		StatusType: reflect.TypeOf(psqlv1beta1.DbSystemStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "psql.CreateDbSystemDetails",
-			},
-			{
-				SDKStruct: "psql.UpdateDbSystemDetails",
-			},
-			{
-				SDKStruct: "psql.DbSystemDetails",
-			},
-			{
-				SDKStruct:  "psql.DbSystem",
-				APISurface: "status",
-			},
-			{
-				SDKStruct: "psql.DbSystemCollection",
-				Exclude:   true,
-				Reason:    "Intentionally untracked: transport wrapper type does not correspond to a top-level CRD spec or status surface.",
-			},
-			{
-				SDKStruct:  "psql.DbSystemSummary",
-				APISurface: "status",
 			},
 		},
 	},

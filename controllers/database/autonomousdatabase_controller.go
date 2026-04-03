@@ -13,7 +13,6 @@ import (
 	databasev1beta1 "github.com/oracle/oci-service-operator/api/database/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/core"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
 )
 
 // AutonomousDatabaseReconciler reconciles a AutonomousDatabase object.
@@ -38,6 +37,6 @@ func (r *AutonomousDatabaseReconciler) SetupWithManager(mgr ctrl.Manager) error 
 	builder := ctrl.NewControllerManagedBy(mgr).
 		For(&databasev1beta1.AutonomousDatabase{})
 	return builder.
-		WithEventFilter(predicate.GenerationChangedPredicate{}).
+		WithEventFilter(core.ReconcilePredicate()).
 		Complete(r)
 }

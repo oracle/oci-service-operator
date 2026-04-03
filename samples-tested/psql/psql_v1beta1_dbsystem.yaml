@@ -1,0 +1,40 @@
+#
+# Replace the OCI identifiers below before running e2e.
+# Update metadata.name and spec.displayName if you want to force a fresh create
+# instead of binding to an existing DbSystem with the same displayName in the
+# target compartment.
+# The psql controller reads admin credentials from the same-namespace Secret
+# named by spec.adminUsername/spec.adminPassword.
+# This sample targets the E5 flex quota bucket instead of the legacy generic
+# dbsystem-count bucket.
+#
+
+apiVersion: psql.oracle.com/v1beta1
+kind: DbSystem
+metadata:
+  name: codex-psql-dbsystem-h0u
+spec:
+  compartmentId: ocid1.compartment.oc1..exampleuniqueID
+  displayName: codex-psql-dbsystem-h0u
+  dbVersion: "14"
+  shape: PostgreSQL.VM.Standard.E5.Flex
+  instanceOcpuCount: 2
+  instanceMemorySizeInGBs: 32
+  instanceCount: 1
+  storageDetails:
+    systemType: OCI_OPTIMIZED_STORAGE
+    isRegionallyDurable: true
+    iops: 75000
+  networkDetails:
+    subnetId: ocid1.subnet.oc1..exampleuniqueID
+    # nsgIds:
+    # - <replace-with-network-security-group-ocid>
+  adminUsername:
+    secret:
+      secretName: admin-secret
+  adminPassword:
+    secret:
+      secretName: admin-secret
+  description: OSOK psql DbSystem e2e sample
+  # Optional. Set only when you want to pin a specific PostgreSQL configuration.
+  # configId: <replace-with-configuration-ocid>

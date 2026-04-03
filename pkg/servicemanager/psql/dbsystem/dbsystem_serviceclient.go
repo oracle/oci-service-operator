@@ -35,38 +35,89 @@ var _ DbSystemServiceClient = defaultDbSystemServiceClient{}
 var newDbSystemServiceClient = func(manager *DbSystemServiceManager) DbSystemServiceClient {
 	sdkClient, err := psqlsdk.NewPostgresqlClientWithConfigurationProvider(manager.Provider)
 	config := generatedruntime.Config[*psqlv1beta1.DbSystem]{
-		Kind:    "DbSystem",
-		SDKName: "DbSystem",
-		Log:     manager.Log,
+		Kind:             "DbSystem",
+		SDKName:          "DbSystem",
+		Log:              manager.Log,
+		CredentialClient: manager.CredentialClient,
+		Semantics: &generatedruntime.Semantics{
+			FormalService:     "psql",
+			FormalSlug:        "dbsystem",
+			StatusProjection:  "required",
+			SecretSideEffects: "none",
+			FinalizerPolicy:   "retain-until-confirmed-delete",
+			Lifecycle: generatedruntime.LifecycleSemantics{
+				ProvisioningStates: []string{"CREATING"},
+				UpdatingStates:     []string{},
+				ActiveStates:       []string{"ACTIVE", "NEEDS_ATTENTION"},
+			},
+			Delete: generatedruntime.DeleteSemantics{
+				Policy:         "required",
+				PendingStates:  []string{"DELETING"},
+				TerminalStates: []string{"DELETED"},
+			},
+			List: &generatedruntime.ListSemantics{
+				ResponseItemsField: "Items",
+				MatchFields:        []string{"compartmentId", "displayName", "id", "state"},
+			},
+			Mutation: generatedruntime.MutationSemantics{
+				Mutable:       []string{"applyConfig", "compartmentId", "configId", "credentials.passwordDetails.password", "credentials.passwordDetails.passwordType", "credentials.passwordDetails.secretId", "credentials.passwordDetails.secretVersion", "definedTags", "description", "displayName", "freeformTags", "instanceCount", "instanceMemorySizeInGbs", "instanceOcpuCount", "managementPolicy.backupPolicy.backupStart", "managementPolicy.backupPolicy.copyPolicy.compartmentId", "managementPolicy.backupPolicy.copyPolicy.regions", "managementPolicy.backupPolicy.copyPolicy.retentionPeriod", "managementPolicy.backupPolicy.daysOfTheMonth", "managementPolicy.backupPolicy.daysOfTheWeek", "managementPolicy.backupPolicy.kind", "managementPolicy.backupPolicy.retentionDays", "managementPolicy.maintenanceWindowStart", "networkDetails.isReaderEndpointEnabled", "networkDetails.nsgIds", "patchOperations.from", "patchOperations.operation", "patchOperations.position", "patchOperations.selectedItem", "patchOperations.selection", "patchOperations.value", "shape", "storageDetails.iops"},
+				ForceNew:      []string{"credentials", "credentials.username", "dbVersion", "instancesDetails", "instancesDetails.description", "instancesDetails.displayName", "instancesDetails.privateIp", "networkDetails.primaryDbEndpointPrivateIp", "networkDetails.subnetId", "source", "source.backupId", "source.isHavingRestoreConfigOverrides", "source.sourceType", "storageDetails.availabilityDomain", "storageDetails.isRegionallyDurable", "storageDetails.systemType", "systemType"},
+				ConflictsWith: map[string][]string{},
+			},
+			Hooks: generatedruntime.HookSet{
+				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+				Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForUpdatedState", EntityType: "", Action: ""}},
+				Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+			},
+			CreateFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "read-after-write",
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			},
+			UpdateFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "read-after-write",
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForUpdatedState", EntityType: "", Action: ""}},
+			},
+			DeleteFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "confirm-delete",
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+			},
+			AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{{Phase: "update", MethodName: "ChangeDbSystemCompartment", RequestTypeName: "psql.ChangeDbSystemCompartmentRequest", ResponseTypeName: "psql.ChangeDbSystemCompartmentResponse"}, {Phase: "update", MethodName: "PatchDbSystem", RequestTypeName: "psql.PatchDbSystemRequest", ResponseTypeName: "psql.PatchDbSystemResponse"}, {Phase: "update", MethodName: "ResetMasterUserPassword", RequestTypeName: "psql.ResetMasterUserPasswordRequest", ResponseTypeName: "psql.ResetMasterUserPasswordResponse"}},
+			Unsupported:         []generatedruntime.UnsupportedSemantic{},
+		},
 		Create: &generatedruntime.Operation{
 			NewRequest: func() any { return &psqlsdk.CreateDbSystemRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.CreateDbSystem(ctx, *request.(*psqlsdk.CreateDbSystemRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "CreateDbSystemDetails", RequestName: "CreateDbSystemDetails", Contribution: "body", PreferResourceID: false}},
 		},
 		Get: &generatedruntime.Operation{
 			NewRequest: func() any { return &psqlsdk.GetDbSystemRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.GetDbSystem(ctx, *request.(*psqlsdk.GetDbSystemRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "DbSystemId", RequestName: "dbSystemId", Contribution: "path", PreferResourceID: true}, {FieldName: "ExcludedFields", RequestName: "excludedFields", Contribution: "query", PreferResourceID: false}},
 		},
 		List: &generatedruntime.Operation{
 			NewRequest: func() any { return &psqlsdk.ListDbSystemsRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.ListDbSystems(ctx, *request.(*psqlsdk.ListDbSystemsRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "Id", RequestName: "id", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
 		},
 		Update: &generatedruntime.Operation{
 			NewRequest: func() any { return &psqlsdk.UpdateDbSystemRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.UpdateDbSystem(ctx, *request.(*psqlsdk.UpdateDbSystemRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "DbSystemId", RequestName: "dbSystemId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateDbSystemDetails", RequestName: "UpdateDbSystemDetails", Contribution: "body", PreferResourceID: false}},
 		},
 		Delete: &generatedruntime.Operation{
 			NewRequest: func() any { return &psqlsdk.DeleteDbSystemRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.DeleteDbSystem(ctx, *request.(*psqlsdk.DeleteDbSystemRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "DbSystemId", RequestName: "dbSystemId", Contribution: "path", PreferResourceID: true}},
 		},
 	}
 	if err != nil {

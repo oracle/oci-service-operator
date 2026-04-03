@@ -1,0 +1,34 @@
+#
+# Replace the OCI identifiers below before running e2e.
+# Replace softwareVersion with a version supported in your region.
+# Use a tenancy-unique displayName if you want to force a fresh create instead
+# of binding to an existing OpenSearch cluster with the same
+# compartmentId/displayName.
+# Adjust node counts and sizing to match your tenancy quota and service limits.
+#
+
+apiVersion: opensearch.oracle.com/v1beta1
+kind: OpensearchOpensearchCluster
+metadata:
+  name: opensearchopensearchcluster-sample
+spec:
+  compartmentId: ocid1.compartment.oc1..exampleuniqueID
+  displayName: opensearchcluster-sample
+  softwareVersion: "2.11.0"
+  masterNodeCount: 1
+  masterNodeHostType: FLEX
+  masterNodeHostOcpuCount: 1
+  masterNodeHostMemoryGB: 16
+  dataNodeCount: 1
+  dataNodeHostType: FLEX
+  dataNodeHostOcpuCount: 1
+  dataNodeHostMemoryGB: 16
+  dataNodeStorageGB: 50
+  opendashboardNodeCount: 1
+  opendashboardNodeHostOcpuCount: 1
+  opendashboardNodeHostMemoryGB: 8
+  vcnId: ocid1.vcn.oc1..exampleuniqueID
+  subnetId: ocid1.subnet.oc1..exampleuniqueID
+  vcnCompartmentId: ocid1.compartment.oc1..exampleuniqueID
+  subnetCompartmentId: ocid1.compartment.oc1..exampleuniqueID
+  securityMode: DISABLED

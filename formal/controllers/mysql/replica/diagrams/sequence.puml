@@ -113,6 +113,7 @@ UPDATING; delete DELETING
 supported drift: display_name
 reject before mutate: force-new fields
 compartment_id
+create-only fields: none
 list lookup: scaffold_mysql_replica filters
 compartment_id, state
 conflicts: none

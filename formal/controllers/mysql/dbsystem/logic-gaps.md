@@ -42,8 +42,17 @@ gaps: []
 ## Repo-authored semantics
 
 - `DbSystem` reads admin credential secret references from same-namespace
-  Kubernetes secrets in the generated runtime path, but it does not create or
-  update Kubernetes secrets as a side effect.
+  Kubernetes secrets in the generated runtime path and materializes a same-name
+  same-namespace endpoint Secret once the resource reaches `Active`. Delete
+  only removes Secrets owned through the `mysql.oracle.com/dbsystem-uid`
+  label, with one-time adoption of matching legacy unlabeled Secrets.
+- `DbSystem` normalizes tenancy-scoped availability domain aliases by matching
+  the stable regional suffix from the current auth context before OCI create
+  calls, so samples authored under a different tenancy alias still resolve to
+  the current tenancy's concrete AD name.
+- `DbSystem` preserves `isHighlyAvailable=false` in the OCI create request
+  instead of dropping that explicit standalone intent through JSON
+  `omitempty` projection.
 - `DbSystem` omits admin credential inputs entirely when the secret references
   are unset or empty, instead of projecting empty-string OCI payload values.
 - `DbSystem` records only non-empty last applied admin credential secret

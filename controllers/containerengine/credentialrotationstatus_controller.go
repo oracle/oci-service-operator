@@ -13,7 +13,6 @@ import (
 	containerenginev1beta1 "github.com/oracle/oci-service-operator/api/containerengine/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/core"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
 )
 
 // CredentialRotationStatusReconciler reconciles a CredentialRotationStatus object.
@@ -36,6 +35,6 @@ func (r *CredentialRotationStatusReconciler) SetupWithManager(mgr ctrl.Manager) 
 	builder := ctrl.NewControllerManagedBy(mgr).
 		For(&containerenginev1beta1.CredentialRotationStatus{})
 	return builder.
-		WithEventFilter(predicate.GenerationChangedPredicate{}).
+		WithEventFilter(core.ReconcilePredicate()).
 		Complete(r)
 }

@@ -13,7 +13,6 @@ import (
 	psqlv1beta1 "github.com/oracle/oci-service-operator/api/psql/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/core"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
 )
 
 // DbSystemReconciler reconciles a DbSystem object.
@@ -24,6 +23,8 @@ type DbSystemReconciler struct {
 // +kubebuilder:rbac:groups=psql.oracle.com,resources=dbsystems,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=psql.oracle.com,resources=dbsystems/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=psql.oracle.com,resources=dbsystems/finalizers,verbs=update
+// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch
+// +kubebuilder:rbac:groups="",resources=events,verbs=create;patch
 
 // Reconcile is part of the main Kubernetes reconciliation loop.
 func (r *DbSystemReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
@@ -36,6 +37,6 @@ func (r *DbSystemReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	builder := ctrl.NewControllerManagedBy(mgr).
 		For(&psqlv1beta1.DbSystem{})
 	return builder.
-		WithEventFilter(predicate.GenerationChangedPredicate{}).
+		WithEventFilter(core.ReconcilePredicate()).
 		Complete(r)
 }

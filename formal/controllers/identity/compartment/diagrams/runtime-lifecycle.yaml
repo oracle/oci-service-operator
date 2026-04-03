@@ -1,0 +1,14 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: identity
+slug: compartment
+kind: Compartment
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - terminating
+notes:
+  - The checked-in Compartment runtime keeps the `identity` service disabled for blank/default-active runs while preserving the explicit Compartment rollout in-repo.
+  - Generated runtime binds through `ListCompartments`, reads back the live Compartment with `GetCompartment`, and stamps the observed OCI identity into status.
+  - Delete keeps the finalizer until follow-up observation confirms `DELETED` or the resource is no longer returned by OCI.

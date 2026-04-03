@@ -151,7 +151,7 @@ func buildPackageOutputModelFor(service ServiceConfig, outputName string, defaul
 			"../../../config/rbac/leader_election_role_binding.yaml",
 		)
 		output.Install.Resources = appendUniqueStrings(output.Install.Resources, service.Package.ExtraResources...)
-		if service.Group == "database" {
+		if service.WebhookGenerationStrategy() == GenerationStrategyManual {
 			output.Install.Resources = appendUniqueStrings(output.Install.Resources,
 				"../../../config/webhook",
 				"../../../config/certmanager",
