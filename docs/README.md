@@ -1,6 +1,7 @@
 # OCI Service Operator for Kubernetes
 
 - [Introduction](#introduction)
+- [User Guide](user-guide.md)
 - [Installation](installation.md#installation)
 - [Services](services.md#services)
 - [Oracle Autonomous Database Service](adb.md#oracle-autonomous-database-service)
@@ -12,12 +13,24 @@
 
 ## Introduction
 
-The OCI Service Operator for Kubernetes (OSOK) now ships generator-owned API,
-controller, service-manager, registration, and package outputs for the
-first-wave default-active services selected in
-`internal/generator/config/services.yaml`. The same config also keeps broader
-backlog services available for explicit `--service <name>` generation when
-local rollout work needs them.
+The OCI Service Operator for Kubernetes (OSOK) now documents two related
+distribution views:
+
+- the default-active generated surface selected in
+  `internal/generator/config/services.yaml`
+- the per-package OLM bundles published from `packages/` by
+  `.github/workflows/publish-service-packages.yml`
+
+Those views overlap, but they are not identical. In particular, package names
+such as `core-network` and published packages such as `apigateway` need to be
+read from the package and workflow surfaces instead of inferred from
+`services.yaml` alone.
+
+> **Important:** Start with a test or non-production environment.
+>
+> **Do not deploy OSOK to production first.** Install and exercise the selected
+> package bundle in an isolated cluster and OCI tenancy or compartment, confirm
+> expected CRUD behavior, and only then promote the same flow to production.
 
 The default deployment also mounts
 `config/manager/controller_manager_config.yaml` and passes
@@ -31,10 +44,14 @@ System, and Streaming flows. The pre-v2 manual compatibility guides were
 removed because they no longer match the generated-runtime contract. Start
 with:
 
+- `docs/user-guide.md` as the primary end-to-end quickstart for OSOK users
 - `config/samples/` for concrete manifests
+- `docs/installation.md` for published bundle naming, package namespaces, and
+  `v2.0.0-alpha` install and upgrade commands
+- `docs/services.md` for the difference between the generator-active service map
+  and the published subpackage bundles
 - `docs/installation.md#controller-manager-config` for the default manager
   deployment contract
-- `docs/services.md` for the supported API groups
 - `docs/adb.md`, `docs/mysql.md`, and `docs/oss.md` for the current
   service-specific guides
 - `docs/api-generator-contract.md` for ownership and regeneration rules
