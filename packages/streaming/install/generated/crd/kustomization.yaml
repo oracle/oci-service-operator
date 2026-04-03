@@ -1,10 +1,4 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-- bases/streaming.oracle.com_connectharnesses.yaml
-- bases/streaming.oracle.com_cursors.yaml
-- bases/streaming.oracle.com_groupcursors.yaml
-- bases/streaming.oracle.com_groups.yaml
-- bases/streaming.oracle.com_messages.yaml
-- bases/streaming.oracle.com_streampools.yaml
 - bases/streaming.oracle.com_streams.yaml
