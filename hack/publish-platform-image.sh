@@ -19,7 +19,6 @@ Optional environment variables:
   USE_DOCKER_PLATFORM  When true, pass --platform to docker build. Defaults to false.
   CGO_ENABLED      CGO setting passed to the Docker build. Defaults to 0.
   GOEXPERIMENT     GOEXPERIMENT setting passed to the Docker build. Defaults to empty.
-  SKIP_FIPS        OSOK_SKIP_FIPS value baked into the image. Defaults to true.
   SKIP_MANIFEST    When true, only push arch-specific tags and skip manifest creation. Defaults to false.
 EOF
 }
@@ -31,7 +30,6 @@ docker_bin=${DOCKER_BIN:-docker}
 use_docker_platform=${USE_DOCKER_PLATFORM:-false}
 cgo_enabled=${CGO_ENABLED:-0}
 goexperiment=${GOEXPERIMENT:-}
-skip_fips=${SKIP_FIPS:-true}
 skip_manifest=${SKIP_MANIFEST:-false}
 
 if [[ -z "${image}" || -z "${controller_main}" ]]; then
@@ -83,7 +81,6 @@ for platform in "${normalized_platforms[@]}"; do
 			--build-arg TARGETARCH="${arch}" \
 			--build-arg CGO_ENABLED="${cgo_enabled}" \
 			--build-arg GOEXPERIMENT="${goexperiment}" \
-			--build-arg SKIP_FIPS="${skip_fips}" \
 			-t "${platform_image}" \
 			--push \
 			"${ROOT_DIR}"
@@ -94,7 +91,6 @@ for platform in "${normalized_platforms[@]}"; do
 			--build-arg TARGETARCH="${arch}" \
 			--build-arg CGO_ENABLED="${cgo_enabled}" \
 			--build-arg GOEXPERIMENT="${goexperiment}" \
-			--build-arg SKIP_FIPS="${skip_fips}" \
 			-t "${platform_image}" \
 			"${ROOT_DIR}"
 		echo ">>> Pushing ${platform_image}"

@@ -51,7 +51,6 @@ PUBLISH_PLATFORMS ?=
 PUBLISH_PLATFORM ?= linux_amd64
 PUBLISH_CGO_ENABLED ?= 0
 PUBLISH_GOEXPERIMENT ?=
-PUBLISH_SKIP_FIPS ?= true
 PUBLISH_USE_DOCKER_PLATFORM ?= false
 MONOLITH_OLM_BUNDLE_IMG ?=
 TARGETOS ?= linux
@@ -424,14 +423,14 @@ publish-service-olm: controller-gen kustomize operator-sdk ## Build/push a per-s
 		bundle_image="$(PUBLISH_REGISTRY)/oci-service-operator-$(GROUP)-bundle:$(PUBLISH_VERSION)"; \
 		if [ -n "$(PUBLISH_PLATFORMS)" ]; then \
 			echo ">>> Building and pushing $$image for $(PUBLISH_PLATFORMS)"; \
-			IMAGE="$$image" CONTROLLER_MAIN="./cmd/manager/$(GROUP)" PLATFORMS="$(PUBLISH_PLATFORMS)" USE_DOCKER_PLATFORM="$(PUBLISH_USE_DOCKER_PLATFORM)" CGO_ENABLED="$(PUBLISH_CGO_ENABLED)" GOEXPERIMENT="$(PUBLISH_GOEXPERIMENT)" SKIP_FIPS="$(PUBLISH_SKIP_FIPS)" "$(BASH)" "$(PWD)/hack/publish-platform-image.sh"; \
+			IMAGE="$$image" CONTROLLER_MAIN="./cmd/manager/$(GROUP)" PLATFORMS="$(PUBLISH_PLATFORMS)" USE_DOCKER_PLATFORM="$(PUBLISH_USE_DOCKER_PLATFORM)" CGO_ENABLED="$(PUBLISH_CGO_ENABLED)" GOEXPERIMENT="$(PUBLISH_GOEXPERIMENT)" "$(BASH)" "$(PWD)/hack/publish-platform-image.sh"; \
 		else \
 			platform="$(PUBLISH_PLATFORM)"; \
 			platform="$$(printf '%s' "$$platform" | tr '_' '/')"; \
 			os="$${platform%%/*}"; \
 			arch="$${platform##*/}"; \
 			echo ">>> Building $$image for $$platform"; \
-			docker build --build-arg CONTROLLER_MAIN=./cmd/manager/$(GROUP) --build-arg TARGETOS="$$os" --build-arg TARGETARCH="$$arch" --build-arg CGO_ENABLED=$(PUBLISH_CGO_ENABLED) --build-arg GOEXPERIMENT=$(PUBLISH_GOEXPERIMENT) --build-arg SKIP_FIPS=$(PUBLISH_SKIP_FIPS) -t "$$image" .; \
+			docker build --build-arg CONTROLLER_MAIN=./cmd/manager/$(GROUP) --build-arg TARGETOS="$$os" --build-arg TARGETARCH="$$arch" --build-arg CGO_ENABLED=$(PUBLISH_CGO_ENABLED) --build-arg GOEXPERIMENT=$(PUBLISH_GOEXPERIMENT) -t "$$image" .; \
 			echo ">>> Pushing $$image"; \
 			docker push "$$image"; \
 		fi; \

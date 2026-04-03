@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/oracle/oci-go-sdk/v65/common"
@@ -54,7 +53,6 @@ const (
 	defaultMetricsService    = "osok"
 	expectedConfigAPIVersion = "controller-runtime.sigs.k8s.io/v1alpha1"
 	expectedConfigKind       = "ControllerManagerConfiguration"
-	skipFIPSEnvVar          = "OSOK_SKIP_FIPS"
 )
 
 type controllerManagerConfigFile struct {
@@ -114,16 +112,7 @@ func Run(opts Options, registrars ...RegisterFunc) error {
 		opts.MetricsServiceName = defaultMetricsService
 	}
 
-	skipFIPS := opts.SkipFIPS
-	if raw, ok := os.LookupEnv(skipFIPSEnvVar); ok {
-		parsed, err := strconv.ParseBool(raw)
-		if err != nil {
-			return fmt.Errorf("manager: parse %s: %w", skipFIPSEnvVar, err)
-		}
-		skipFIPS = parsed
-	}
-
-	if !skipFIPS {
+	if !opts.SkipFIPS {
 		go_ensurefips.Compliant()
 	}
 	common.EnableInstanceMetadataServiceLookup()

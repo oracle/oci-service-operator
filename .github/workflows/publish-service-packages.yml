@@ -101,9 +101,8 @@ jobs:
             CONTROLLER_MAIN="./cmd/manager/${service}" \
             PLATFORMS="linux_amd64" \
             USE_DOCKER_PLATFORM=true \
-            CGO_ENABLED=1 \
-            GOEXPERIMENT=boringcrypto \
-            SKIP_FIPS=false \
+            CGO_ENABLED=0 \
+            GOEXPERIMENT= \
             SKIP_MANIFEST=true \
             /bin/bash ./hack/publish-platform-image.sh
           done
@@ -150,9 +149,8 @@ jobs:
             CONTROLLER_MAIN="./cmd/manager/${service}" \
             PLATFORMS="linux_arm64" \
             USE_DOCKER_PLATFORM=true \
-            CGO_ENABLED=1 \
-            GOEXPERIMENT=boringcrypto \
-            SKIP_FIPS=false \
+            CGO_ENABLED=0 \
+            GOEXPERIMENT= \
             SKIP_MANIFEST=true \
             /bin/bash ./hack/publish-platform-image.sh
           done
