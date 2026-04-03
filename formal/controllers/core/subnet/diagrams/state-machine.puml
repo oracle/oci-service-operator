@@ -1,0 +1,97 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title State Machine - core/Subnet
+skinparam state {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+}
+left to right direction
+hide empty description
+state "Observe" as observe
+state "EvaluateReady" as evaluate_ready
+state "Ready" as ready
+state "Retryable" as retryable
+state "Failed" as failed
+observe : read spec, tracked status, delete intent,\nand current OCI lifecycle
+state "ResolveByLookup" as resolve_by_lookup
+state "RejectUnsupportedDrift" as reject_unsupported_drift
+state "ApplyUpdate" as apply_update
+state "DeletePending" as delete_pending
+state "Deleted" as deleted
+state "DeleteCleanupBlocked" as delete_cleanup_blocked
+[*] --> observe : CreateSubnet
+observe --> resolve_by_lookup : tracked identity missing
+resolve_by_lookup --> evaluate_ready : lookup or create reaches\nAVAILABLE
+resolve_by_lookup --> retryable : OCI state in PROVISIONING,\nUPDATING, TERMINATING,\nTERMINATED
+resolve_by_lookup --> failed : unresolved OCI error or non-success state
+observe --> evaluate_ready : OCI state in AVAILABLE
+observe --> retryable : OCI state in PROVISIONING,\nUPDATING, TERMINATING,\nTERMINATED
+observe --> failed : unresolved OCI error or non-success state
+evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
+reject_unsupported_drift --> ready : wait for spec or live state change
+evaluate_ready --> apply_update : supported mutable drift for\ncidr_block, defined_tags,\ndhcp_options_id (+6 more)
+apply_update --> ready : update path completes
+evaluate_ready --> ready : no supported drift remains
+ready --> ready : no supported drift remains
+retryable --> retryable : OCI remains retryable
+failed --> failed : OCI remains terminal
+ready --> delete_pending : delete requested
+retryable --> delete_pending : delete requested
+failed --> delete_pending : delete requested
+delete_pending --> delete_cleanup_blocked : cleanup or finalizer release remains blocked
+delete_cleanup_blocked --> deleted : retry delete completion until allowed
+deleted --> deleted : terminal stutter
+note right of ready
+shared diagram:
+shared/diagrams/shared-controller-state-machine.svg
+Start from the shared controller phase model and
+specialize imported provider states, delete
+targets, and failure exits here.
+archetype batch: Generated service-manager
+controllers map provider states into the shared
+controller phases with explicit finalizer and
+requeue policies.
+service: core
+slug: subnet
+kind: Subnet
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create PROVISIONING; update
+UPDATING; delete TERMINATING, TERMINATED
+supported drift: cidr_block, defined_tags,
+dhcp_options_id, display_name (+5 more)
+reject before mutate: force-new fields
+availability_domain, compartment_id, dns_label,
+prohibit_internet_ingress (+2 more)
+create-only fields: none
+list lookup: oci_core_subnets filters
+compartment_id, display_name, id, vcn_id (+1
+more)
+conflicts: none
+open gaps: none
+Ready state maps to OCI AVAILABLE.
+Requeue continues while OCI reports
+PROVISIONING, UPDATING, or TERMINATING.
+Delete completes only after GetSubnet returns
+not found; TERMINATED is an accepted observed
+pre-delete state.
+end note
+note right of delete_pending
+delete policy: required
+delete observe: GetSubnet or ListSubnets
+delete targets: NOT_FOUND
+end note
+@enduml

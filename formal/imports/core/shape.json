@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "shape",
+  "kind": "Shape",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_core_shape",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateShape",
+        "requestType": "core.CreateShapeRequest",
+        "responseType": "core.CreateShapeResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetShape",
+        "requestType": "core.GetShapeRequest",
+        "responseType": "core.GetShapeResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListShape",
+        "requestType": "core.ListShapeRequest",
+        "responseType": "core.ListShapeResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateShape",
+        "requestType": "core.UpdateShapeRequest",
+        "responseType": "core.UpdateShapeResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteShape",
+        "requestType": "core.DeleteShapeRequest",
+        "responseType": "core.DeleteShapeResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_core_shape",
+    "collectionField": "shape",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/shape/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/shape/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for core/shape; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

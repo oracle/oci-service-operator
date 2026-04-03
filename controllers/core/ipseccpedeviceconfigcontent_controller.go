@@ -13,7 +13,6 @@ import (
 	corev1beta1 "github.com/oracle/oci-service-operator/api/core/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/core"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
 )
 
 // IpsecCpeDeviceConfigContentReconciler reconciles a IpsecCpeDeviceConfigContent object.
@@ -36,6 +35,6 @@ func (r *IpsecCpeDeviceConfigContentReconciler) SetupWithManager(mgr ctrl.Manage
 	builder := ctrl.NewControllerManagedBy(mgr).
 		For(&corev1beta1.IpsecCpeDeviceConfigContent{})
 	return builder.
-		WithEventFilter(predicate.GenerationChangedPredicate{}).
+		WithEventFilter(core.ReconcilePredicate()).
 		Complete(r)
 }
