@@ -7,4 +7,6 @@ apiVersion: queue.oracle.com/v1beta1
 kind: Queue
 metadata:
   name: queue-sample
-spec: {}
+spec:
+  compartmentId: ocid1.compartment.oc1..exampleuniqueID
+  displayName: queue-sample

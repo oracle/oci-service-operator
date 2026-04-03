@@ -90,6 +90,12 @@ type QueueStatus struct {
 	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`
 	// The percentage of allocated queue resources that can be consumed by a single channel. For example, if a queue has a storage limit of 2Gb, and a single channel consumption limit is 0.1 (10%), that means data size of a single channel  can't exceed 200Mb. Consumption limit of 100% (default) means that a single channel can consume up-to all allocated queue's resources.
 	ChannelConsumptionLimit int `json:"channelConsumptionLimit,omitempty"`
+	// The work request OCID tracking the in-flight create operation.
+	CreateWorkRequestId string `json:"createWorkRequestId,omitempty"`
+	// The work request OCID tracking the in-flight update operation.
+	UpdateWorkRequestId string `json:"updateWorkRequestId,omitempty"`
+	// The work request OCID tracking the in-flight delete operation.
+	DeleteWorkRequestId string `json:"deleteWorkRequestId,omitempty"`
 }
 
 // +kubebuilder:object:root=true
