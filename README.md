@@ -6,30 +6,70 @@ The OCI Service Operator for Kubernetes (OSOK) makes it easy to create, manage, 
 
 OSOK is based on the [Operator Framework](https://operatorframework.io/), an open-source toolkit used to manage Operators. It uses the [controller-runtime](https://github.com/kubernetes-sigs/controller-runtime) library, which provides high-level APIs and abstractions to write operational logic and also provides tools for scaffolding and code generation for Operators.
 
+> **Important:** Use OSOK in a test or non-production OCI and Kubernetes
+> environment first.
+>
+> **Do not make a production cluster your first deployment target.** Validate
+> authentication, IAM policy scope, create and delete behavior, finalizers, and
+> service-specific limits in an isolated test environment before promoting any
+> package bundle to production.
+
+## Start Here
+
+The primary user-facing getting-started reference is
+[docs/user-guide.md](docs/user-guide.md). It walks through an end-to-end OSOK
+plus kro example that provisions an OCI MySQL DB System from one user-facing
+custom resource.
+
 **Supported API Groups**
 
-OSOK now ships generator-owned APIs and runtime scaffolding for the
-default-active first-wave surface declared in
-`internal/generator/config/services.yaml`: `containerengine`, `mysql`,
-`nosql`, `psql`, `database/AutonomousDatabase`, and `streaming/Stream`.
+OSOK now has two related surfaces that are easy to confuse:
 
-The checked-in config still tracks a broader backlog inventory across
-`artifacts`, `certificates`, `certificatesmanagement`,
-`containerengine`, `core`, `database`, `dns`, `events`, `functions`,
-`identity`, `keymanagement`, `limits`, `loadbalancer`, `logging`,
-`monitoring`, `mysql`, `networkloadbalancer`, `nosql`, `objectstorage`,
-`ons`, `psql`, `queue`, `secrets`, `streaming`, `vault`, and
-`workrequests`. Use
-`go run ./cmd/generator --config internal/generator/config/services.yaml --service <service> --overwrite`
-when local work needs one of those inactive or backlog services generated
-explicitly.
+- `internal/generator/config/services.yaml` is the generator source of truth and
+  defines the default-active generated surface.
+- `packages/` plus
+  `.github/workflows/publish-service-packages.yml` define the package-local OLM
+  bundles that are currently published.
+
+The default-active generated surface in this checkout is:
+
+- whole-service: `containerengine`, `core`, `dataflow`, `functions`, `mysql`,
+  `nosql`, `psql`, `queue`, `vault`
+- focused-kind: `containerinstances/ContainerInstance`,
+  `database/AutonomousDatabase`, `identity/Compartment`,
+  `objectstorage/Bucket`, `opensearch/OpensearchCluster`,
+  `redis/RedisCluster`, `streaming/Stream`
+
+The current subpackage publish workflow builds controller and bundle images for:
+`apigateway`, `containerengine`, `containerinstances`, `core-network`,
+`database`, `dataflow`, `functions`, `identity`, `mysql`, `nosql`,
+`objectstorage`, `opensearch`, `psql`, `queue`, `redis`, `streaming`, and
+`vault`.
+
+A few names are intentionally package-oriented instead of matching
+`services.yaml` one-for-one:
+
+- `core-network` is a split package carved from selected `core` networking
+  kinds.
+- `database`, `identity`, `objectstorage`, `opensearch`, `redis`, and
+  `streaming` publish focused bundles even though their default-active scope is
+  narrower than the full OCI service.
+- `apigateway` is published from `packages/apigateway`, even though it is not
+  part of the current default-active `services.yaml` surface.
+
+The workflow's default `subpackages=all` batch intentionally excludes `core`,
+so do not assume a published `oci-service-operator-core-bundle:v2.0.0-alpha`
+image unless it was released separately.
 
 See [docs/services.md](docs/services.md#services) for the supported service map
 and [config/samples](config/samples) for generated manifest examples.
 
 ## Installation
 
-See the [Installation](docs/installation.md#install-operator-sdk) instructions for detailed installation and configuration of OCI Service Operator for Kubernetes.
+Start with the [User Guide](docs/user-guide.md) for the quickest single-resource
+quickstart. Use the [Installation](docs/installation.md#installation) guide for
+OLM prerequisites, authentication setup, and the published per-package bundle
+commands.
 
 ## Controller Manager Config
 
@@ -50,15 +90,36 @@ deployment wiring details.
 
 ## Documentation
 
-See the [Documentation](docs/README.md#oci-service-operator-for-kubernetes) for complete details on installation, security and service related configurations of OCI Service Operator for Kubernetes.
+See the [Documentation](docs/README.md#oci-service-operator-for-kubernetes) for
+the full docs index. The primary quickstart is
+[docs/user-guide.md](docs/user-guide.md).
 
-## Release Bundle
+## Published Bundles
 
-The OCI Service Operator for Kubernetes is packaged as Operator Lifecycle Manager (OLM) Bundle for making it easy to install in Kubernetes Clusters. The bundle can be downloaded as docker image using below command.
+The repo still carries monolithic bundle targets in the `Makefile`, but the
+current GitHub publish workflow is centered on per-package OLM bundles in GHCR.
 
+Bundle images use:
+
+```text
+ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-<GROUP>-bundle:v2.0.0-alpha
 ```
-docker pull iad.ocir.io/oracle/oci-service-operator-bundle:<VERSION>
+
+The matching controller images use:
+
+```text
+ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-<GROUP>:v2.0.0-alpha
 ```
+
+Example:
+
+```bash
+docker pull ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-mysql-bundle:v2.0.0-alpha
+```
+
+See [docs/installation.md](docs/installation.md#deploy-oci-service-operator-for-kubernetes)
+for install and upgrade commands and [docs/services.md](docs/services.md#published-subpackage-bundles)
+for the published package list.
 
 ## Samples
 
