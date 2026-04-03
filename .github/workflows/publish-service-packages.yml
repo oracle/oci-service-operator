@@ -1,0 +1,247 @@
+name: Publish Service Packages
+
+on:
+  workflow_dispatch:
+    inputs:
+      subpackages:
+        description: 'Services to be built individually (for example database,streaming or "all")'
+        default: 'all'
+        required: true
+      version:
+        description: 'Version string to use while publishing the packages (for example v0.1.0-alpha.1)'
+        default: ''
+        required: true
+      platform:
+        type: choice
+        description: 'Platform string to use while building and publishing the packages'
+        default: linux_amd64,linux_arm64
+        options:
+          - linux_amd64,linux_arm64
+          - linux_amd64
+          - linux_arm64
+        required: true
+      go-version:
+        description: 'Go version to use if building needs to be done'
+        default: '1.25'
+        required: false
+      size:
+        description: 'Number of smaller service packages to build and push with each build job'
+        default: '10'
+        required: true
+
+env:
+  DOCKER_BUILDX_VERSION: 'v0.20.1'
+  GHCR_REGORG: 'ghcr.io/${{ github.repository_owner }}'
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  index:
+    runs-on: ubuntu-latest
+    outputs:
+      indices: ${{ steps.calc.outputs.indices }}
+      subpackages: ${{ steps.calc.outputs.subpackages }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608
+
+      - id: calc
+        shell: bash
+        run: |
+          if [ "${{ inputs.subpackages }}" = "all" ]; then
+            SUBPACKAGES=$(find packages -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | sort | grep -v '^core$' | paste -sd, -)
+          else
+            SUBPACKAGES="${{ inputs.subpackages }}"
+          fi
+
+          python3 -c "import math; packages = [item for item in \"$SUBPACKAGES\".split(',') if item]; print(f'indices={list(range(0, math.ceil(len(packages) / int(\"${{ inputs.size }}\"))))}')" >> "$GITHUB_OUTPUT"
+          echo "subpackages=$SUBPACKAGES" >> "$GITHUB_OUTPUT"
+
+  publish-images-amd64:
+    if: contains(inputs.platform, 'linux_amd64')
+    needs: index
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        index: ${{ fromJSON(needs.index.outputs.indices) }}
+    steps:
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@885d1462b80bc1c1c7f0b00334ad271f09369c55
+        with:
+          version: ${{ env.DOCKER_BUILDX_VERSION }}
+
+      - name: Login to GHCR using GITHUB_TOKEN
+        uses: docker/login-action@v3.3.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608
+
+      - name: Calculate packages to build & push
+        id: packages
+        shell: bash
+        run: |
+          PACKAGES_BATCH=$(python3 -c "all_packages = [item for item in \"${{ needs.index.outputs.subpackages }}\".split(',') if item]; start_idx = int(\"${{ matrix.index }}\") * int(\"${{ inputs.size }}\"); batch = all_packages[start_idx:start_idx + int(\"${{ inputs.size }}\")]; print(','.join(batch))")
+          echo "packages_batch=$PACKAGES_BATCH" >> "$GITHUB_OUTPUT"
+
+      - name: Publish amd64 Images
+        shell: bash
+        run: |
+          set -euo pipefail
+          IFS=',' read -r -a services <<< "${{ steps.packages.outputs.packages_batch }}"
+          for service in "${services[@]}"; do
+            [ -n "${service}" ] || continue
+            image="${{ env.GHCR_REGORG }}/oci-service-operator-${service}:${{ inputs.version }}"
+            IMAGE="$image" \
+            CONTROLLER_MAIN="./cmd/manager/${service}" \
+            PLATFORMS="linux_amd64" \
+            USE_DOCKER_PLATFORM=true \
+            CGO_ENABLED=0 \
+            GOEXPERIMENT= \
+            SKIP_MANIFEST=true \
+            /bin/bash ./hack/publish-platform-image.sh
+          done
+
+  publish-images-arm64:
+    if: contains(inputs.platform, 'linux_arm64')
+    needs: index
+    runs-on: ubuntu-24.04-arm
+    strategy:
+      matrix:
+        index: ${{ fromJSON(needs.index.outputs.indices) }}
+    steps:
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@885d1462b80bc1c1c7f0b00334ad271f09369c55
+        with:
+          version: ${{ env.DOCKER_BUILDX_VERSION }}
+
+      - name: Login to GHCR using GITHUB_TOKEN
+        uses: docker/login-action@v3.3.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608
+
+      - name: Calculate packages to build & push
+        id: packages
+        shell: bash
+        run: |
+          PACKAGES_BATCH=$(python3 -c "all_packages = [item for item in \"${{ needs.index.outputs.subpackages }}\".split(',') if item]; start_idx = int(\"${{ matrix.index }}\") * int(\"${{ inputs.size }}\"); batch = all_packages[start_idx:start_idx + int(\"${{ inputs.size }}\")]; print(','.join(batch))")
+          echo "packages_batch=$PACKAGES_BATCH" >> "$GITHUB_OUTPUT"
+
+      - name: Publish arm64 Images
+        shell: bash
+        run: |
+          set -euo pipefail
+          IFS=',' read -r -a services <<< "${{ steps.packages.outputs.packages_batch }}"
+          for service in "${services[@]}"; do
+            [ -n "${service}" ] || continue
+            image="${{ env.GHCR_REGORG }}/oci-service-operator-${service}:${{ inputs.version }}"
+            IMAGE="$image" \
+            CONTROLLER_MAIN="./cmd/manager/${service}" \
+            PLATFORMS="linux_arm64" \
+            USE_DOCKER_PLATFORM=true \
+            CGO_ENABLED=0 \
+            GOEXPERIMENT= \
+            SKIP_MANIFEST=true \
+            /bin/bash ./hack/publish-platform-image.sh
+          done
+
+  publish-artifacts:
+    needs:
+      - index
+      - publish-images-amd64
+      - publish-images-arm64
+    if: |
+      !cancelled() &&
+      (needs.publish-images-amd64.result == 'success' || needs.publish-images-amd64.result == 'skipped') &&
+      (needs.publish-images-arm64.result == 'success' || needs.publish-images-arm64.result == 'skipped')
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        index: ${{ fromJSON(needs.index.outputs.indices) }}
+    steps:
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@885d1462b80bc1c1c7f0b00334ad271f09369c55
+        with:
+          version: ${{ env.DOCKER_BUILDX_VERSION }}
+
+      - name: Login to GHCR using GITHUB_TOKEN
+        uses: docker/login-action@v3.3.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608
+
+      - name: Setup Go
+        uses: actions/setup-go@6edd4406fa81c3da01a34fa6f6343087c207a568
+        with:
+          go-version: ${{ inputs.go-version }}
+
+      - name: Find the Go Build Cache
+        id: go_cache
+        shell: bash
+        run: |
+          echo "cache=$(go env GOCACHE)" >> "$GITHUB_OUTPUT"
+          echo "mod_cache=$(go env GOMODCACHE)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache the Go Build Cache
+        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf
+        with:
+          path: ${{ steps.go_cache.outputs.cache }}
+          key: ${{ runner.os }}-build-publish-service-packages-${{ hashFiles('**/go.sum') }}
+          restore-keys: ${{ runner.os }}-build-publish-service-packages-
+
+      - name: Cache Go Dependencies
+        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf
+        with:
+          path: ${{ steps.go_cache.outputs.mod_cache }}
+          key: ${{ runner.os }}-gomod-publish-service-packages-${{ hashFiles('**/go.sum') }}
+          restore-keys: ${{ runner.os }}-gomod-publish-service-packages-
+
+      - name: Calculate packages to build & push
+        id: packages
+        shell: bash
+        run: |
+          PACKAGES_BATCH=$(python3 -c "all_packages = [item for item in \"${{ needs.index.outputs.subpackages }}\".split(',') if item]; start_idx = int(\"${{ matrix.index }}\") * int(\"${{ inputs.size }}\"); batch = all_packages[start_idx:start_idx + int(\"${{ inputs.size }}\")]; print(','.join(batch))")
+          echo "packages_batch=$PACKAGES_BATCH" >> "$GITHUB_OUTPUT"
+
+      - name: Publish Manifests and Bundles
+        shell: bash
+        run: |
+          set -euo pipefail
+          IFS=',' read -r -a services <<< "${{ steps.packages.outputs.packages_batch }}"
+          raw_platforms="${{ inputs.platform }}"
+          raw_platforms="${raw_platforms// /,}"
+          IFS=',' read -r -a platform_list <<< "${raw_platforms}"
+
+          for service in "${services[@]}"; do
+            [ -n "${service}" ] || continue
+            image="${{ env.GHCR_REGORG }}/oci-service-operator-${service}:${{ inputs.version }}"
+            bundle_image="${{ env.GHCR_REGORG }}/oci-service-operator-${service}-bundle:${{ inputs.version }}"
+
+            refs=()
+            for platform in "${platform_list[@]}"; do
+              [ -n "${platform}" ] || continue
+              normalized=$(printf '%s' "${platform}" | tr '_' '/')
+              arch="${normalized##*/}"
+              refs+=("${image}-${arch}")
+            done
+
+            docker buildx imagetools create --tag "${image}" "${refs[@]}"
+
+            make package-bundle-olm GROUP="${service}" CONTROLLER_IMG="${image}" VERSION="${{ inputs.version }}"
+            make bundle-build BUNDLE_IMG="${bundle_image}"
+            make bundle-push BUNDLE_IMG="${bundle_image}"
+          done
