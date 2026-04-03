@@ -1,0 +1,163 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Sequence - queue/Queue
+hide footbox
+skinparam sequence {
+  actorBorderColor #0f172a
+  actorBackgroundColor #e2e8f0
+  participantBorderColor #0f172a
+  participantBackgroundColor #e2e8f0
+  participantFontColor #0f172a
+  lifeLineBorderColor #94a3b8
+  groupBorderColor #cbd5e1
+  groupBackgroundColor #f8fafc
+}
+actor Kubernetes
+participant Controller
+participant BaseReconciler
+participant "OSOKServiceManager" as ServiceManager
+participant OCI
+participant "Kubernetes Secret" as SecretStore
+note over BaseReconciler,ServiceManager
+shared resolution:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete:
+shared/diagrams/shared-delete-sequence.svg
+end note
+Kubernetes -> Controller: enqueue Queue reconcile
+Controller -> BaseReconciler: Reconcile(request)
+BaseReconciler -> ServiceManager: reconcile desired Queue
+group Lookup and bind
+alt tracked or explicit OCI identity already exists
+ServiceManager -> OCI: GetQueue
+else tracked identity is missing
+ServiceManager -> OCI: ListQueues(filters: compartment_id,\ndisplay_name, id, lifecycle_state)
+alt reusable OCI resource is not found
+ServiceManager -> OCI: CreateQueue
+loop create pending CREATING, UPDATING
+ServiceManager -> OCI: GetQueue
+end
+else reusable OCI resource already exists
+ServiceManager -> OCI: GetQueue
+end
+ServiceManager --> BaseReconciler: persist resolved OCI identity in status
+end
+alt delete requested
+group Delete
+ServiceManager -> OCI: DeleteQueue
+ServiceManager -> OCI: confirm delete via GetQueue or\nListQueues
+loop delete pending DELETING
+ServiceManager -> OCI: GetQueue or ListQueues
+end
+ServiceManager -> SecretStore: delete owned Secret after OCI delete\nconfirmation
+alt cleanup or finalizer release is blocked
+ServiceManager --> BaseReconciler: retain delete state and retry
+else delete completion observed
+ServiceManager --> BaseReconciler: release finalizer after delete completion
+end
+end
+else OCI state is retryable
+ServiceManager --> BaseReconciler: requeue while OCI remains in\nCREATING, UPDATING, DELETING
+else live state requires field-aware\ndrift evaluation
+group Drift handling
+note over ServiceManager,OCI
+Supported update surface:
+channel_consumption_limit,
+custom_encryption_key_id,
+dead_letter_queue_delivery_count,
+defined_tags (+4 more)
+Reject before mutate: force-new fields
+compartment_id, retention_in_seconds
+Lookup filters: compartment_id,
+display_name, id, lifecycle_state
+end note
+opt force-new or conflicting drift is detected
+ServiceManager --> BaseReconciler: reject before OCI mutation
+end
+opt supported mutable drift is detected
+ServiceManager -> OCI: Apply UpdateQueue only for mutable\nfields channel_consumption_limit,\ncustom_encryption_key_id,\ndead_letter_queue_delivery_count,\ndefined_tags (+4 more)
+loop update pending UPDATING
+ServiceManager -> OCI: GetQueue
+end
+end
+ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=queue action=CREATED;\nupdate=tfresource.UpdateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=queue action=UPDATED;\ndelete=tfresource.DeleteResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=queue action=DELETED
+ServiceManager -> SecretStore: write ready-only connection secret
+alt Secret sync fails
+ServiceManager --> BaseReconciler: block success and retry
+end
+end
+ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
+end
+BaseReconciler --> Controller: requeue on provisioning, updating,\nterminating
+note right of ServiceManager
+shared diagram:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete diagram:
+shared/diagrams/shared-delete-sequence.svg
+Start from the shared resolution sequence for
+OCID binding, datasource pagination, and
+create-or-update dispatch.
+Layer the shared delete sequence when finalizer
+retention, delete confirmation, work-request
+polling, or Secret cleanup apply.
+archetype batch: Generated service-manager
+controllers follow the shared resolution and
+delete sequences with imported waits and
+controller-local policy.
+service: queue
+slug: queue
+kind: Queue
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create CREATING, UPDATING;
+update UPDATING; delete DELETING
+supported drift: channel_consumption_limit,
+custom_encryption_key_id,
+dead_letter_queue_delivery_count, defined_tags
+(+4 more)
+reject before mutate: force-new fields
+compartment_id, retention_in_seconds
+create-only fields: none
+list lookup: oci_queue_queues filters
+compartment_id, display_name, id,
+lifecycle_state
+conflicts: none
+open gaps: none
+Queue create, update, and delete are
+work-request-backed. The runtime persists
+createWorkRequestId, updateWorkRequestId, and
+deleteWorkRequestId in status so reconcile
+resumes asynchronous OCI operations across
+requeues instead of relying on name-only lookup.
+Create binds identity from Queue work-request
+resources, then reads the Queue by recovered
+OCID before projecting status. Delete is not
+best-effort; it only completes after GetQueue
+confirms the tracked Queue is gone or exposes
+lifecycle state DELETED.
+Mutable drift is limited to UpdateQueueDetails
+fields such as displayName, timeout, visibility,
+tags, channelConsumptionLimit,
+deadLetterQueueDeliveryCount, and
+customEncryptionKeyId. Create-only inputs like
+compartmentId and retentionInSeconds are
+rejected as force-new drift.
+A package-local companion writes or updates the
+same-name endpoint Secret only after ACTIVE when
+messagesEndpoint is present, adopts only
+unlabeled matching Secrets, uses guarded
+updates/deletes for owned Secrets, and skips
+missing or unowned Secrets during delete
+cleanup.
+end note
+@enduml

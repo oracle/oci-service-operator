@@ -891,6 +891,39 @@ services:
         strategy: generated
       webhooks:
         strategy: none
+      resources:
+        - kind: Queue
+          formalSpec: queue
+          controller:
+            extraRBACMarkers:
+              - groups="",resources=secrets,verbs=get;list;watch;create;update;delete
+          serviceManager:
+            packagePath: queue/queue
+          statusFields:
+            - name: CreateWorkRequestId
+              type: string
+              tag: 'json:"createWorkRequestId,omitempty"'
+              comments:
+                - The work request OCID tracking the in-flight create operation.
+            - name: UpdateWorkRequestId
+              type: string
+              tag: 'json:"updateWorkRequestId,omitempty"'
+              comments:
+                - The work request OCID tracking the in-flight update operation.
+            - name: DeleteWorkRequestId
+              type: string
+              tag: 'json:"deleteWorkRequestId,omitempty"'
+              comments:
+                - The work request OCID tracking the in-flight delete operation.
+          sample:
+            body: |-
+              apiVersion: queue.oracle.com/v1beta1
+              kind: Queue
+              metadata:
+                name: queue-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                displayName: queue-sample
     observedState:
       sdkAliases:
         WorkRequestLog:

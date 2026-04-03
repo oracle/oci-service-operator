@@ -126,6 +126,9 @@ spec:
                 description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the compartment containing the queue.
                 type: string
+              createWorkRequestId:
+                description: The work request OCID tracking the in-flight create operation.
+                type: string
               customEncryptionKeyId:
                 description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the custom encryption key to be used to encrypt messages content.
@@ -144,6 +147,9 @@ spec:
                   Defined tags for this resource. Each key is predefined and scoped to a namespace.
                   Example: `{"foo-namespace": {"bar-key": "value"}}`
                 type: object
+              deleteWorkRequestId:
+                description: The work request OCID tracking the in-flight delete operation.
+                type: string
               displayName:
                 description: A user-friendly name for the queue. Does not have to
                   be unique, and it's changeable. Avoid entering confidential information.
@@ -239,6 +245,9 @@ spec:
                 description: The default polling timeout of the messages in the queue,
                   in seconds.
                 type: integer
+              updateWorkRequestId:
+                description: The work request OCID tracking the in-flight update operation.
+                type: string
               visibilityInSeconds:
                 description: The default visibility timeout of the messages consumed
                   from the queue, in seconds.

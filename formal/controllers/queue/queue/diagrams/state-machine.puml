@@ -1,0 +1,125 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title State Machine - queue/Queue
+skinparam state {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+}
+left to right direction
+hide empty description
+state "Observe" as observe
+state "EvaluateReady" as evaluate_ready
+state "Ready" as ready
+state "Retryable" as retryable
+state "Failed" as failed
+observe : read spec, tracked status, delete intent,\nand current OCI lifecycle
+state "ResolveByLookup" as resolve_by_lookup
+state "RejectUnsupportedDrift" as reject_unsupported_drift
+state "ApplyUpdate" as apply_update
+state "SyncSecret" as sync_secret
+state "SecretBlocked" as secret_blocked
+state "DeletePending" as delete_pending
+state "Deleted" as deleted
+state "DeleteCleanupBlocked" as delete_cleanup_blocked
+[*] --> observe : CreateQueue
+observe --> resolve_by_lookup : tracked identity missing
+resolve_by_lookup --> evaluate_ready : lookup or create reaches\nACTIVE
+resolve_by_lookup --> retryable : OCI state in CREATING,\nUPDATING, DELETING
+resolve_by_lookup --> failed : unresolved OCI error or non-success state
+observe --> evaluate_ready : OCI state in ACTIVE
+observe --> retryable : OCI state in CREATING,\nUPDATING, DELETING
+observe --> failed : unresolved OCI error or non-success state
+evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
+reject_unsupported_drift --> ready : wait for spec or live state change
+evaluate_ready --> apply_update : supported mutable drift for\nchannel_consumption_limit,\ncustom_encryption_key_id,\ndead_letter_queue_delivery_count\n(+5 more)
+apply_update --> sync_secret : update path completes
+evaluate_ready --> sync_secret : apply secret policy\nready-only
+sync_secret --> secret_blocked : Secret sync fails
+secret_blocked --> sync_secret : retry Secret sync
+sync_secret --> ready : Secret side effects succeed
+ready --> ready : no supported drift remains
+retryable --> retryable : OCI remains retryable
+failed --> failed : OCI remains terminal
+ready --> delete_pending : delete requested
+retryable --> delete_pending : delete requested
+failed --> delete_pending : delete requested
+delete_pending --> delete_cleanup_blocked : cleanup or finalizer release remains blocked
+delete_cleanup_blocked --> deleted : retry delete completion until allowed
+deleted --> deleted : terminal stutter
+note right of ready
+shared diagram:
+shared/diagrams/shared-controller-state-machine.svg
+Start from the shared controller phase model and
+specialize imported provider states, delete
+targets, and failure exits here.
+archetype batch: Generated service-manager
+controllers map provider states into the shared
+controller phases with explicit finalizer and
+requeue policies.
+service: queue
+slug: queue
+kind: Queue
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create CREATING, UPDATING;
+update UPDATING; delete DELETING
+supported drift: channel_consumption_limit,
+custom_encryption_key_id,
+dead_letter_queue_delivery_count, defined_tags
+(+4 more)
+reject before mutate: force-new fields
+compartment_id, retention_in_seconds
+create-only fields: none
+list lookup: oci_queue_queues filters
+compartment_id, display_name, id,
+lifecycle_state
+conflicts: none
+open gaps: none
+Queue create, update, and delete are
+work-request-backed. The runtime persists
+createWorkRequestId, updateWorkRequestId, and
+deleteWorkRequestId in status so reconcile
+resumes asynchronous OCI operations across
+requeues instead of relying on name-only lookup.
+Create binds identity from Queue work-request
+resources, then reads the Queue by recovered
+OCID before projecting status. Delete is not
+best-effort; it only completes after GetQueue
+confirms the tracked Queue is gone or exposes
+lifecycle state DELETED.
+Mutable drift is limited to UpdateQueueDetails
+fields such as displayName, timeout, visibility,
+tags, channelConsumptionLimit,
+deadLetterQueueDeliveryCount, and
+customEncryptionKeyId. Create-only inputs like
+compartmentId and retentionInSeconds are
+rejected as force-new drift.
+A package-local companion writes or updates the
+same-name endpoint Secret only after ACTIVE when
+messagesEndpoint is present, adopts only
+unlabeled matching Secrets, uses guarded
+updates/deletes for owned Secrets, and skips
+missing or unowned Secrets during delete
+cleanup.
+end note
+note right of delete_pending
+delete policy: required
+delete observe: GetQueue or ListQueues
+delete targets: DELETED
+Secret cleanup waits for OCI delete
+confirmation.
+end note
+@enduml

@@ -533,6 +533,27 @@ func TestPackageResourceOperations(t *testing.T) {
 				}
 			},
 		},
+		{
+			name:       "queue Message prefers exact singular operations",
+			importPath: "github.com/oracle/oci-go-sdk/v65/queue",
+			rawName:    "Message",
+			assert: func(t *testing.T, operations map[string]OperationMethod) {
+				update := operations["Update"]
+				if update.MethodName != "UpdateMessage" {
+					t.Fatalf("Message update method = %q, want UpdateMessage", update.MethodName)
+				}
+				if update.RequestType != "UpdateMessageRequest" {
+					t.Fatalf("Message update request type = %q, want UpdateMessageRequest", update.RequestType)
+				}
+				deleteOp := operations["Delete"]
+				if deleteOp.MethodName != "DeleteMessage" {
+					t.Fatalf("Message delete method = %q, want DeleteMessage", deleteOp.MethodName)
+				}
+				if deleteOp.RequestType != "DeleteMessageRequest" {
+					t.Fatalf("Message delete request type = %q, want DeleteMessageRequest", deleteOp.RequestType)
+				}
+			},
+		},
 	}
 
 	for _, tt := range tests {
