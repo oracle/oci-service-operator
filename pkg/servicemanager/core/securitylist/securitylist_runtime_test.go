@@ -418,13 +418,13 @@ func TestCreateOrUpdate_ClearsStaleOptionalStatusFieldsOnProjection(t *testing.T
 	resource.Status.DefinedTags = map[string]shared.MapValue{"Operations": {"CostCenter": "42"}}
 	resource.Status.FreeformTags = map[string]string{"env": "stale"}
 	resource.Status.TimeCreated = "2026-04-01T00:00:00Z"
-	resource.Status.EgressSecurityRules = []corev1beta1.SecurityListEgressSecurityRuleObservedState{{
+	resource.Status.EgressSecurityRules = []corev1beta1.SecurityListEgressSecurityRule{{
 		Destination: "stale",
-		TcpOptions:  corev1beta1.SecurityListEgressSecurityRuleTcpOptionsObservedState{DestinationPortRange: corev1beta1.SecurityListEgressSecurityRuleTcpOptionsDestinationPortRange{Min: 1, Max: 1}},
+		TcpOptions:  corev1beta1.SecurityListEgressSecurityRuleTcpOptions{DestinationPortRange: corev1beta1.SecurityListEgressSecurityRuleTcpOptionsDestinationPortRange{Min: 1, Max: 1}},
 	}}
-	resource.Status.IngressSecurityRules = []corev1beta1.SecurityListIngressSecurityRuleObservedState{{
+	resource.Status.IngressSecurityRules = []corev1beta1.SecurityListIngressSecurityRule{{
 		Source: "stale",
-		UdpOptions: corev1beta1.SecurityListIngressSecurityRuleUdpOptionsObservedState{
+		UdpOptions: corev1beta1.SecurityListIngressSecurityRuleUdpOptions{
 			DestinationPortRange: corev1beta1.SecurityListIngressSecurityRuleUdpOptionsDestinationPortRange{Min: 53, Max: 53},
 		},
 	}}

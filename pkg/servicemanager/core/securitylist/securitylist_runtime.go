@@ -448,10 +448,10 @@ func convertSpecPortRange(min, max int) *coresdk.PortRange {
 	}
 }
 
-func convertOCIEgressRulesToStatus(rules []coresdk.EgressSecurityRule) []corev1beta1.SecurityListEgressSecurityRuleObservedState {
-	converted := make([]corev1beta1.SecurityListEgressSecurityRuleObservedState, 0, len(rules))
+func convertOCIEgressRulesToStatus(rules []coresdk.EgressSecurityRule) []corev1beta1.SecurityListEgressSecurityRule {
+	converted := make([]corev1beta1.SecurityListEgressSecurityRule, 0, len(rules))
 	for _, rule := range rules {
-		converted = append(converted, corev1beta1.SecurityListEgressSecurityRuleObservedState{
+		converted = append(converted, corev1beta1.SecurityListEgressSecurityRule{
 			Destination:     stringValue(rule.Destination),
 			Protocol:        stringValue(rule.Protocol),
 			DestinationType: string(rule.DestinationType),
@@ -460,7 +460,7 @@ func convertOCIEgressRulesToStatus(rules []coresdk.EgressSecurityRule) []corev1b
 				Code: intValue(rule.IcmpOptions, func(v *coresdk.IcmpOptions) *int { return v.Code }),
 			},
 			IsStateless: boolValue(rule.IsStateless),
-			TcpOptions: corev1beta1.SecurityListEgressSecurityRuleTcpOptionsObservedState{
+			TcpOptions: corev1beta1.SecurityListEgressSecurityRuleTcpOptions{
 				DestinationPortRange: convertOCIPortRangeToEgressTCPDestinationStatus(rule.TcpOptions, func(v *coresdk.TcpOptions) *coresdk.PortRange {
 					return v.DestinationPortRange
 				}),
@@ -468,7 +468,7 @@ func convertOCIEgressRulesToStatus(rules []coresdk.EgressSecurityRule) []corev1b
 					return v.SourcePortRange
 				}),
 			},
-			UdpOptions: corev1beta1.SecurityListEgressSecurityRuleUdpOptionsObservedState{
+			UdpOptions: corev1beta1.SecurityListEgressSecurityRuleUdpOptions{
 				DestinationPortRange: convertOCIPortRangeToEgressUDPDestinationStatus(rule.UdpOptions, func(v *coresdk.UdpOptions) *coresdk.PortRange {
 					return v.DestinationPortRange
 				}),
@@ -482,10 +482,10 @@ func convertOCIEgressRulesToStatus(rules []coresdk.EgressSecurityRule) []corev1b
 	return converted
 }
 
-func convertOCIIngressRulesToStatus(rules []coresdk.IngressSecurityRule) []corev1beta1.SecurityListIngressSecurityRuleObservedState {
-	converted := make([]corev1beta1.SecurityListIngressSecurityRuleObservedState, 0, len(rules))
+func convertOCIIngressRulesToStatus(rules []coresdk.IngressSecurityRule) []corev1beta1.SecurityListIngressSecurityRule {
+	converted := make([]corev1beta1.SecurityListIngressSecurityRule, 0, len(rules))
 	for _, rule := range rules {
-		converted = append(converted, corev1beta1.SecurityListIngressSecurityRuleObservedState{
+		converted = append(converted, corev1beta1.SecurityListIngressSecurityRule{
 			Protocol: stringValue(rule.Protocol),
 			Source:   stringValue(rule.Source),
 			IcmpOptions: corev1beta1.SecurityListIngressSecurityRuleIcmpOptions{
@@ -494,7 +494,7 @@ func convertOCIIngressRulesToStatus(rules []coresdk.IngressSecurityRule) []corev
 			},
 			IsStateless: boolValue(rule.IsStateless),
 			SourceType:  string(rule.SourceType),
-			TcpOptions: corev1beta1.SecurityListIngressSecurityRuleTcpOptionsObservedState{
+			TcpOptions: corev1beta1.SecurityListIngressSecurityRuleTcpOptions{
 				DestinationPortRange: convertOCIPortRangeToIngressTCPDestinationStatus(rule.TcpOptions, func(v *coresdk.TcpOptions) *coresdk.PortRange {
 					return v.DestinationPortRange
 				}),
@@ -502,7 +502,7 @@ func convertOCIIngressRulesToStatus(rules []coresdk.IngressSecurityRule) []corev
 					return v.SourcePortRange
 				}),
 			},
-			UdpOptions: corev1beta1.SecurityListIngressSecurityRuleUdpOptionsObservedState{
+			UdpOptions: corev1beta1.SecurityListIngressSecurityRuleUdpOptions{
 				DestinationPortRange: convertOCIPortRangeToIngressUDPDestinationStatus(rule.UdpOptions, func(v *coresdk.UdpOptions) *coresdk.PortRange {
 					return v.DestinationPortRange
 				}),
