@@ -78,7 +78,8 @@ func (c *applicationRuntimeClient) CreateOrUpdate(ctx context.Context, resource 
 	}
 
 	if current.LifecycleState == dataflowsdk.ApplicationLifecycleStateDeleted {
-		return c.applyLifecycle(resource, current)
+		c.clearTrackedIdentity(resource)
+		return c.create(ctx, resource)
 	}
 
 	updateRequest, updateNeeded, err := c.buildUpdateRequest(resource, current)
