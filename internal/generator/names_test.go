@@ -30,7 +30,6 @@ func TestSingularizeAndPluralize(t *testing.T) {
 		{name: "statuses singularize to status", input: "AlarmStatuses", singular: "AlarmStatus", plural: "AlarmStatuses"},
 		{name: "stats stay plural", input: "Stats", singular: "Stats", plural: "Stats"},
 		{name: "metadata stays uncountable", input: "NamespaceMetadata", singular: "NamespaceMetadata", plural: "NamespaceMetadata"},
-		{name: "ss suffix uses es pluralization", input: "ConnectHarnesses", singular: "ConnectHarness", plural: "ConnectHarnesses"},
 		{name: "vowel y suffix uses s", input: "Gateways", singular: "Gateway", plural: "Gateways"},
 		{name: "key suffix uses s", input: "Keys", singular: "Key", plural: "Keys"},
 		{name: "ss suffix uses es", input: "Addresses", singular: "Address", plural: "Addresses"},
