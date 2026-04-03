@@ -15,9 +15,6 @@ rules:
   - redis.oracle.com
   resources:
   - redisclusters
-  - workrequesterrors
-  - workrequestlogs
-  - workrequests
   verbs:
   - create
   - delete
@@ -30,18 +27,12 @@ rules:
   - redis.oracle.com
   resources:
   - redisclusters/finalizers
-  - workrequesterrors/finalizers
-  - workrequestlogs/finalizers
-  - workrequests/finalizers
   verbs:
   - update
 - apiGroups:
   - redis.oracle.com
   resources:
   - redisclusters/status
-  - workrequesterrors/status
-  - workrequestlogs/status
-  - workrequests/status
   verbs:
   - get
   - patch

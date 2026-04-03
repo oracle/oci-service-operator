@@ -882,7 +882,7 @@ services:
     phase: data-and-storage
     packageProfile: controller-backed
     selection:
-      enabled: false
+      enabled: true
       mode: explicit
       includeKinds:
         - RedisCluster

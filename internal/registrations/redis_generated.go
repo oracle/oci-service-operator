@@ -14,9 +14,6 @@ import (
 	rediscontrollers "github.com/oracle/oci-service-operator/controllers/redis"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	redisredisclusterservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/redis/rediscluster"
-	redisworkrequestservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/redis/workrequest"
-	redisworkrequesterrorservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/redis/workrequesterror"
-	redisworkrequestlogservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/redis/workrequestlog"
 )
 
 func init() {
@@ -34,39 +31,6 @@ func init() {
 				),
 			}).SetupWithManager(ctx.Manager); err != nil {
 				return fmt.Errorf("setup RedisCluster controller: %w", err)
-			}
-			if err := (&rediscontrollers.WorkRequestReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"WorkRequest",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return redisworkrequestservicemanager.NewWorkRequestServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup WorkRequest controller: %w", err)
-			}
-			if err := (&rediscontrollers.WorkRequestErrorReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"WorkRequestError",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return redisworkrequesterrorservicemanager.NewWorkRequestErrorServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup WorkRequestError controller: %w", err)
-			}
-			if err := (&rediscontrollers.WorkRequestLogReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"WorkRequestLog",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return redisworkrequestlogservicemanager.NewWorkRequestLogServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup WorkRequestLog controller: %w", err)
 			}
 			return nil
 		},
