@@ -38,6 +38,43 @@ func TestCheckedInDatabaseAndMySQLPackageInstallKustomizationsReferenceExistingA
 	}
 }
 
+func TestCheckedInDatabasePackageInstallKustomizationOmitsWebhookOverlaysWhenWebhooksAreDisabled(t *testing.T) {
+	t.Parallel()
+
+	content, err := os.ReadFile(filepath.Join(repoRoot(t), "packages", "database", "install", "kustomization.yaml"))
+	if err != nil {
+		t.Fatalf("ReadFile(database install kustomization) error = %v", err)
+	}
+
+	var cfg packageInstallKustomization
+	if err := yaml.Unmarshal(content, &cfg); err != nil {
+		t.Fatalf("Unmarshal(database install kustomization) error = %v", err)
+	}
+
+	for _, disallowed := range []string{
+		"../../../config/webhook",
+		"../../../config/certmanager",
+		"../../../config/default/manager_webhook_patch.yaml",
+		"../../../config/default/webhookcainjection_patch.yaml",
+	} {
+		for _, resource := range cfg.Resources {
+			if resource == disallowed {
+				t.Fatalf("database install resources unexpectedly contain %q while webhooks are disabled", disallowed)
+			}
+		}
+		for _, patch := range cfg.Patches {
+			if patch.Path == disallowed {
+				t.Fatalf("database install patches unexpectedly contain %q while webhooks are disabled", disallowed)
+			}
+		}
+		for _, patchPath := range cfg.PatchesStrategicMerge {
+			if patchPath == disallowed {
+				t.Fatalf("database install strategic merge patches unexpectedly contain %q while webhooks are disabled", disallowed)
+			}
+		}
+	}
+}
+
 func assertKustomizationTreePathsExist(t *testing.T, kustomizationPath string, visited map[string]struct{}) {
 	t.Helper()
 

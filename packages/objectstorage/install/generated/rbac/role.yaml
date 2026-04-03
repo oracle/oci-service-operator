@@ -1,0 +1,77 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - objectstorage.oracle.com
+  resources:
+  - buckets
+  - multipartuploadparts
+  - multipartuploads
+  - namespacemetadatas
+  - namespaces
+  - objectlifecyclepolicies
+  - objects
+  - objectstoragetiers
+  - objectversions
+  - preauthenticatedrequests
+  - replicationpolicies
+  - replicationsources
+  - retentionrules
+  - workrequesterrors
+  - workrequestlogs
+  - workrequests
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - objectstorage.oracle.com
+  resources:
+  - buckets/finalizers
+  - multipartuploadparts/finalizers
+  - multipartuploads/finalizers
+  - namespacemetadatas/finalizers
+  - namespaces/finalizers
+  - objectlifecyclepolicies/finalizers
+  - objects/finalizers
+  - objectstoragetiers/finalizers
+  - objectversions/finalizers
+  - preauthenticatedrequests/finalizers
+  - replicationpolicies/finalizers
+  - replicationsources/finalizers
+  - retentionrules/finalizers
+  - workrequesterrors/finalizers
+  - workrequestlogs/finalizers
+  - workrequests/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - objectstorage.oracle.com
+  resources:
+  - buckets/status
+  - multipartuploadparts/status
+  - multipartuploads/status
+  - namespacemetadatas/status
+  - namespaces/status
+  - objectlifecyclepolicies/status
+  - objects/status
+  - objectstoragetiers/status
+  - objectversions/status
+  - preauthenticatedrequests/status
+  - replicationpolicies/status
+  - replicationsources/status
+  - retentionrules/status
+  - workrequesterrors/status
+  - workrequestlogs/status
+  - workrequests/status
+  verbs:
+  - get
+  - patch
+  - update

@@ -3,35 +3,30 @@ schemaVersion: 1
 surface: repo-authored-semantics
 service: nosql
 slug: table
-gaps:
-  - category: bind-versus-create
-    status: open
-    stopCondition: "Formal semantics can resolve an existing Table through ListTables before create, using the shared generated-runtime identity decision instead of blindly creating when no OCI ID is tracked."
-  - category: list-lookup
-    status: open
-    stopCondition: "Formal semantics encode the current ListTables filters (`compartmentId`, `name`, lifecycle state) and the lifecycle-sensitive matching used for bind, update, and delete."
-  - category: mutation-policy
-    status: open
-    stopCondition: "Formal semantics classify `name`, `compartmentId`, `ddlStatement`, `tableLimits`, `isAutoReclaimable`, and tags into create-only, mutable, or rejected-on-update behavior before runtime promotion."
-  - category: waiter-work-request
-    status: open
-    stopCondition: "Table create and update waits have one shared formal answer for provider work-request-backed completion instead of remaining implicit in provider CRUD helpers."
+gaps: []
 ---
 
 # Logic Gaps
 
+No open logic gaps remain for the seeded `nosql/Table` row after the
+handwritten Table runtime semantics were encoded into the repo-authored formal
+metadata and regenerated diagrams.
+
 ## Current runtime path
 
-- `Table` already uses the generated `TableServiceManager` and
-  `generatedruntime.ServiceClient`; there is no checked-in legacy adapter
-  override.
-- The current generated path creates whenever no OCI ID is tracked, then relies
-  on `GetTable` or `ListTables` only for read-after-write and delete
-  confirmation.
-- Imported provider facts now cover `CreateTable`, `GetTable`, `ListTables`,
-  `ChangeTableCompartment`, `UpdateTable`, and `DeleteTable`, but the
-  bind-or-create decision and waiter semantics still need repo-authored
-  closure.
+- `Table` now keeps the generated `TableServiceManager` shell but overrides the
+  generated client seam with
+  `pkg/servicemanager/nosql/table/table_generated_client_adapter.go`.
+- The handwritten adapter resolves by tracked OCI ID first, then uses
+  `ListTables` with `compartmentId`, `name`, and `LifecycleState=ALL`. It
+  reuses only a single exact-name match, rereads that candidate through
+  `GetTable`, and fails on ambiguous duplicate matches instead of guessing.
+- The runtime projects OCI lifecycle into OSOK status, mapping `CREATING`,
+  `UPDATING`, and `DELETING` into `Provisioning`, `Updating`, and
+  `Terminating` with one-minute requeues, while `ACTIVE` settles success and
+  `FAILED` becomes terminal without requeue.
+- Delete keeps the finalizer until `GetTable` or `ListTables` confirms the
+  table is deleted or no longer exists.
 
 ## Shared generated-runtime baseline
 
@@ -48,8 +43,15 @@ gaps:
 ## Repo-authored semantics
 
 - `Table` has no Kubernetes secret reads or secret writes.
-- Delete should keep the finalizer until `GetTable` or `ListTables` confirms
-  the table is gone.
-- The provider update path combines `ChangeTableCompartment` with
-  work-request-backed `UpdateTable` calls for DDL, tag, and table-limit
-  changes, so the seeded baseline keeps mutation and waiter closure explicit.
+- Bind-before-create is explicit: tracked OCID wins, then `ListTables` searches
+  the requested compartment for an exact-name match, and only zero matches open
+  the `CreateTable` path.
+- Mutation policy is explicit: `name` and `isAutoReclaimable` are rejected as
+  replacement-only drift, `ddlStatement` remains create-only and never opens an
+  implicit update path, and `compartmentId`, `tableLimits`, `freeformTags`, and
+  `definedTags` are the supported mutable surface. When both compartment and
+  tag/limit drift exist, `ChangeTableCompartment` runs before `UpdateTable`.
+- Waiter closure is explicit: the handwritten path does not poll work requests.
+  Create, compartment move, update, and delete all use read-after-write
+  confirmation through `GetTable` plus list fallback when needed until OCI
+  reaches `ACTIVE`, `DELETED`, or NotFound.

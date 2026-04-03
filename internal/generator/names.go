@@ -18,6 +18,8 @@ type singularRule struct {
 }
 
 var specialSingularRules = []singularRule{
+	{suffix: "Indices", replacement: "Index"},
+	{suffix: "indices", replacement: "index"},
 	{suffix: "Statuses", replacement: "Status"},
 	{suffix: "statuses", replacement: "status"},
 	{suffix: "Status", replacement: "Status", recursive: true, preserveExact: true},
@@ -40,6 +42,10 @@ func singularize(name string) string {
 
 func pluralize(name string) string {
 	switch {
+	case strings.HasSuffix(name, "Index"):
+		return strings.TrimSuffix(name, "Index") + "Indices"
+	case strings.HasSuffix(name, "index"):
+		return strings.TrimSuffix(name, "index") + "indices"
 	case strings.HasSuffix(name, "Status"), strings.HasSuffix(name, "status"):
 		return name + "es"
 	case strings.HasSuffix(name, "Stats"), strings.HasSuffix(name, "stats"):

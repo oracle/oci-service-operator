@@ -27,7 +27,7 @@ partition "Observe and Bind" {
 if ("Tracked or explicit OCI identity present?") then (yes)
 :Get the current OCI resource via GetDbSystem;
 else (no)
-:Resolve an existing OCI resource through\nListDbSystems using filters compartment_id,\ndisplay_name, id, state;
+:Resolve an existing OCI resource through\nListDbSystems using filters compartmentId,\ndisplayName;
 :Create the OCI resource via CreateDbSystem\nwhen no reusable match is found;
 :Persist the resolved or created OCI identity\ninto status;
 endif
@@ -46,7 +46,7 @@ stop
 else (no)
 partition "Lifecycle Classification" {
 if ("OCI state in retryable set?") then (yes)
-:Request requeue while OCI remains in CREATING,\nDELETING;
+:Request requeue while OCI remains in CREATING,\nUPDATING, DELETING;
 stop
 endif
 if ("OCI state is outside success targets?") then (yes)
@@ -55,13 +55,13 @@ stop
 endif
 }
 partition "Ready and Drift Handling" {
-:Compare live OCI state against the imported\nfield surface;
+:Compare live OCI state against the\nrepo-authored mutation surface;
 if ("Force-new or conflicting drift detected?") then (yes)
-:Reject drift before OCI mutation for force-new\nfields credentials, credentials.username,\ndb_version, instances_details (+13 more);
+:Reject drift before OCI mutation for force-new\nfields compartmentId, dbVersion,\ninstanceCount, instanceMemorySizeInGBs (+7\nmore);
 stop
 endif
 if ("Supported mutable drift detected?") then (yes)
-:Apply ChangeDbSystemCompartment,\nPatchDbSystem, ResetMasterUserPassword (+1\nmore) only for mutable fields apply_config,\ncompartment_id, config_id,\ncredentials.password_details.password (+29\nmore);
+:Apply ChangeDbSystemCompartment,\nPatchDbSystem, ResetMasterUserPassword (+1\nmore) only for mutable fields\ndbConfigurationParams.applyConfig,\ndbConfigurationParams.configId, definedTags,\ndescription (+4 more);
 else (no)
 :Skip the no-op mutation path;
 endif
@@ -69,7 +69,6 @@ endif
 :Return success for the ACTIVE, NEEDS_ATTENTION\nsuccess state;
 :Project required status and finalizer policy\nretain-until-confirmed-delete;
 :Requeue on provisioning, updating, terminating;
-:Keep promotion blocked on bind-versus-create,\nlist-lookup, mutation-policy,\nwaiter-work-request;
 }
 endif
 stop
@@ -92,21 +91,46 @@ archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
-provider states: create CREATING; update none;
-delete DELETING
-supported drift: apply_config, compartment_id,
-config_id, credentials.password_details.password
-(+29 more)
+provider states: create CREATING; update
+UPDATING; delete DELETING
+supported drift:
+dbConfigurationParams.applyConfig,
+dbConfigurationParams.configId, definedTags,
+description (+4 more)
 reject before mutate: force-new fields
-credentials, credentials.username, db_version,
-instances_details (+13 more)
+compartmentId, dbVersion, instanceCount,
+instanceMemorySizeInGBs (+7 more)
+create-only fields:
+adminPassword.secret.secretName,
+adminUsername.secret.secretName, configId,
+credentials (+2 more)
 list lookup: oci_psql_db_systems filters
-compartment_id, display_name, id, state
+compartmentId, displayName; tracked OCI ID via
+GetDbSystem wins; otherwise exact compartmentId
+plus displayName unique match in ACTIVE,
+CREATING, UPDATING, INACTIVE, or
+NEEDS_ATTENTION; duplicate matches fail
 conflicts: none
-open gaps: bind-versus-create, list-lookup,
-mutation-policy, waiter-work-request
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+open gaps: none
+Handwritten DbSystem bind first checks the
+tracked OCID with GetDbSystem, then searches
+ListDbSystems for an exact compartment plus
+displayName match, rereads a single candidate
+through GetDbSystem, and fails on ambiguous
+duplicates instead of guessing.
+Create resolves inline credentials or
+same-namespace admin secret refs, stamps only
+non-empty secret refs into status, and does not
+write follow-up Kubernetes secrets.
+Create and update do not poll work requests
+directly; provider-backed completion is modeled
+through GetDbSystem lifecycle projection with
+one-minute requeues while OCI reports CREATING,
+UPDATING, or DELETING.
+ACTIVE, INACTIVE, and NEEDS_ATTENTION settle as
+Active unless the reconcile is already in update
+or delete follow-up, and delete retains the
+finalizer until GetDbSystem or ListDbSystems
+confirms the DbSystem is deleted or not found.
 end note
 @enduml

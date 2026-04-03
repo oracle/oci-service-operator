@@ -7,6 +7,7 @@ package generatedruntime
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -50,6 +51,7 @@ type RequestField struct {
 	RequestName      string
 	Contribution     string
 	PreferResourceID bool
+	LookupPaths      []string
 }
 
 type Hook struct {
@@ -471,10 +473,24 @@ func (c ServiceClient[T]) deleteWithSemantics(ctx context.Context, resource T) (
 		}
 		return false, err
 	}
-	if deleted, err := c.invokeDeleteOperation(ctx, resource, currentID); deleted || err != nil {
-		return deleted, err
+	deleted, err := c.invokeDeleteOperation(ctx, resource, currentID)
+	if deleted {
+		return true, nil
+	}
+	if err != nil && !c.shouldConfirmDeleteAfterError(err) {
+		return false, err
 	}
 	return c.confirmDeleteWithSemantics(ctx, resource, currentID, semantics)
+}
+
+func (c ServiceClient[T]) shouldConfirmDeleteAfterError(err error) bool {
+	if err == nil || !isConflict(err) {
+		return false
+	}
+	if c.config.Semantics == nil || c.config.Semantics.DeleteFollowUp.Strategy != "confirm-delete" {
+		return false
+	}
+	return c.config.Get != nil || c.config.List != nil
 }
 
 func (c ServiceClient[T]) semanticDeleteConfig() (*Semantics, error) {
@@ -598,10 +614,28 @@ func (c ServiceClient[T]) shouldInvokeUpdate(resource T, currentResponse any) (b
 	if c.config.Update == nil {
 		return false, nil
 	}
+	if c.shouldObserveCurrentLifecycle(currentResponse) {
+		return false, nil
+	}
 	if c.config.Semantics == nil {
 		return true, nil
 	}
 	return c.hasMutableDrift(resource, currentResponse)
+}
+
+func (c ServiceClient[T]) shouldObserveCurrentLifecycle(currentResponse any) bool {
+	if c.config.Semantics == nil || currentResponse == nil {
+		return false
+	}
+
+	lifecycleState := strings.ToUpper(responseLifecycleState(currentResponse))
+	if lifecycleState == "" {
+		return false
+	}
+
+	return containsString(c.config.Semantics.Lifecycle.ProvisioningStates, lifecycleState) ||
+		containsString(c.config.Semantics.Lifecycle.UpdatingStates, lifecycleState) ||
+		containsString(c.config.Semantics.Delete.PendingStates, lifecycleState)
 }
 
 func (c ServiceClient[T]) validateMutationPolicy(resource T, existing bool, currentResponse any) error {
@@ -644,7 +678,7 @@ func mutationValues(resource any, currentResponse any) (map[string]any, map[stri
 	specValues := jsonMap(fieldInterface(resourceValue, "Spec"))
 	currentValues := jsonMap(fieldInterface(resourceValue, "Status"))
 	if body, ok := responseBody(currentResponse); ok && body != nil {
-		currentValues = jsonMap(body)
+		mergeJSONMapOverwrite(currentValues, body)
 	}
 	return specValues, currentValues, nil
 }
@@ -665,7 +699,7 @@ func (c ServiceClient[T]) validateMutationConflicts(specValues map[string]any) e
 
 func (c ServiceClient[T]) validateForceNewFields(specValues map[string]any, currentValues map[string]any) error {
 	for _, field := range c.config.Semantics.Mutation.ForceNew {
-		specValue, specOK := lookupValueByPath(specValues, field)
+		specValue, specOK := lookupMeaningfulValue(specValues, field)
 		statusValue, statusOK := lookupValueByPath(currentValues, field)
 		if !specOK || !statusOK {
 			continue
@@ -700,7 +734,10 @@ func (c ServiceClient[T]) hasMutableDrift(resource T, currentResponse any) (bool
 			continue
 		}
 		currentValue, currentOK := lookupMeaningfulValue(currentValues, field)
-		if !currentOK || !valuesEqual(specValue, currentValue) {
+		if !currentOK {
+			continue
+		}
+		if !valuesEqual(specValue, currentValue) {
 			return true, nil
 		}
 	}
@@ -1155,10 +1192,18 @@ func buildRequest(request any, resource any, values map[string]any, preferredID 
 	}
 
 	if len(fields) > 0 {
-		return buildExplicitRequest(requestStruct, values, preferredID, fields, resolvedSpec)
+		if err := buildExplicitRequest(requestStruct, values, preferredID, fields, resolvedSpec); err != nil {
+			return err
+		}
+		assignDeterministicRetryToken(requestStruct, resource)
+		return nil
 	}
 
-	return buildHeuristicRequest(requestStruct, requestStruct.Type(), values, preferredID, idAliases, resolvedSpec)
+	if err := buildHeuristicRequest(requestStruct, requestStruct.Type(), values, preferredID, idAliases, resolvedSpec); err != nil {
+		return err
+	}
+	assignDeterministicRetryToken(requestStruct, resource)
+	return nil
 }
 
 func buildExplicitRequest(requestStruct reflect.Value, values map[string]any, preferredID string, fields []RequestField, resolvedSpec any) error {
@@ -1302,6 +1347,12 @@ func explicitRequestValue(values map[string]any, field RequestField, preferredID
 		lookupKey = lowerCamel(field.FieldName)
 	}
 
+	if len(field.LookupPaths) != 0 {
+		if rawValue, ok := lookupValueByPaths(values, field.LookupPaths...); ok {
+			return rawValue, true
+		}
+	}
+
 	if rawValue, ok := lookupValueByPaths(values, lookupKey); ok {
 		return rawValue, true
 	}
@@ -1381,6 +1432,23 @@ func mergeJSONMap(dst map[string]any, source any) {
 	}
 }
 
+func mergeJSONMapOverwrite(dst map[string]any, source any) {
+	if source == nil {
+		return
+	}
+	payload, err := json.Marshal(source)
+	if err != nil {
+		return
+	}
+	var decoded map[string]any
+	if err := json.Unmarshal(payload, &decoded); err != nil {
+		return
+	}
+	for key, value := range decoded {
+		dst[key] = value
+	}
+}
+
 func specValue(resource any) any {
 	resourceValue, err := resourceStruct(resource)
 	if err != nil {
@@ -1455,6 +1523,9 @@ func rewriteSecretSources(value reflect.Value, decoded any, options requestBuild
 	}
 	if rewritten, include, handled, err := rewriteSharedSecretSource(value, options); handled {
 		return rewritten, include, err
+	}
+	if value.Kind() == reflect.Struct && value.IsZero() {
+		return nil, false, nil
 	}
 
 	switch value.Kind() {
@@ -2007,7 +2078,7 @@ func invalidDeleteSemanticsProblems(semantics *Semantics) []string {
 
 func supportedFormalHelper(helper string) bool {
 	switch strings.TrimSpace(helper) {
-	case "", "tfresource.CreateResource", "tfresource.UpdateResource", "tfresource.DeleteResource", "tfresource.WaitForUpdatedState":
+	case "", "tfresource.CreateResource", "tfresource.UpdateResource", "tfresource.DeleteResource", "tfresource.WaitForUpdatedState", "tfresource.WaitForWorkRequestWithErrorHandling":
 		return true
 	default:
 		return false
@@ -2050,6 +2121,24 @@ func isNotFound(err error) bool {
 		return true
 	}
 	return false
+}
+
+func isConflict(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	var serviceErr common.ServiceError
+	if errors.As(err, &serviceErr) {
+		return serviceErr.GetHTTPStatusCode() == 409
+	}
+
+	var conflictErr errorutil.ConflictOciError
+	if errors.As(err, &conflictErr) {
+		return true
+	}
+
+	return strings.Contains(err.Error(), "http status code: 409")
 }
 
 func (c ServiceClient[T]) selectListItem(body any, criteria map[string]any, preferredID string, phase readPhase) (any, error) {
@@ -2530,6 +2619,51 @@ func lookupMetadataString(value reflect.Value, fieldName string) string {
 		return ""
 	}
 	return field.String()
+}
+
+func assignDeterministicRetryToken(requestStruct reflect.Value, resource any) {
+	field, ok := fieldValue(requestStruct, "OpcRetryToken")
+	if !ok || !field.IsValid() || !field.CanSet() {
+		return
+	}
+
+	switch field.Kind() {
+	case reflect.Pointer:
+		if !field.IsNil() {
+			return
+		}
+	case reflect.String:
+		if strings.TrimSpace(field.String()) != "" {
+			return
+		}
+	default:
+		return
+	}
+
+	token := resourceRetryToken(resource)
+	if token == "" {
+		return
+	}
+	_ = assignField(field, token)
+}
+
+func resourceRetryToken(resource any) string {
+	resourceValue, err := resourceStruct(resource)
+	if err != nil {
+		return ""
+	}
+	if uid := strings.TrimSpace(lookupMetadataString(resourceValue, "UID")); uid != "" {
+		return uid
+	}
+
+	namespace := strings.TrimSpace(lookupMetadataString(resourceValue, "Namespace"))
+	name := strings.TrimSpace(lookupMetadataString(resourceValue, "Name"))
+	if namespace == "" && name == "" {
+		return ""
+	}
+
+	sum := sha256.Sum256([]byte(namespace + "/" + name))
+	return fmt.Sprintf("%x", sum[:16])
 }
 
 func resourceNamespace(resource any, fallback string) string {

@@ -36,6 +36,73 @@ func TestCheckedInDatabaseAutonomousDatabasePackageRBACMatchesReadOnlySecretSema
 	)
 }
 
+func TestCheckedInPSQLDbSystemPackageRBACMatchesSecretAndEventRecorderSemantics(t *testing.T) {
+	controllerPath := filepath.Join(repoRoot(t), "controllers", "psql", "dbsystem_controller.go")
+	assertFileContains(t, controllerPath, []string{
+		`// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch`,
+		`// +kubebuilder:rbac:groups="",resources=events,verbs=create;patch`,
+	})
+	assertFileDoesNotContain(t, controllerPath, []string{
+		`// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete`,
+		`// +kubebuilder:rbac:groups="",resources=events,verbs=get;list;watch;create;update;patch;delete`,
+	})
+
+	assertCoreResourceVerbs(
+		t,
+		filepath.Join(repoRoot(t), "packages", "psql", "install", "generated", "rbac", "role.yaml"),
+		map[string][]string{
+			"events":  {"create", "patch"},
+			"secrets": {"get", "list", "watch"},
+		},
+	)
+}
+
+func TestCheckedInRedisClusterPackageRBACMatchesEventRecorderSemantics(t *testing.T) {
+	controllerPath := filepath.Join(repoRoot(t), "controllers", "redis", "rediscluster_controller.go")
+	assertFileContains(t, controllerPath, []string{
+		`// +kubebuilder:rbac:groups="",resources=events,verbs=create;patch`,
+	})
+	assertFileDoesNotContain(t, controllerPath, []string{
+		`// +kubebuilder:rbac:groups="",resources=events,verbs=get;list;watch;create;update;patch;delete`,
+	})
+
+	assertCoreResourceVerbs(
+		t,
+		filepath.Join(repoRoot(t), "packages", "redis", "install", "generated", "rbac", "role.yaml"),
+		map[string][]string{
+			"events": {"create", "patch"},
+		},
+	)
+}
+
+func TestCheckedInNoSQLPackageRBACMatchesEventRecorderSemantics(t *testing.T) {
+	controllerPaths, err := filepath.Glob(filepath.Join(repoRoot(t), "controllers", "nosql", "*_controller.go"))
+	if err != nil {
+		t.Fatalf("Glob(nosql controllers) error = %v", err)
+	}
+	if len(controllerPaths) == 0 {
+		t.Fatal("nosql controllers were not found")
+	}
+	sort.Strings(controllerPaths)
+
+	for _, controllerPath := range controllerPaths {
+		assertFileContains(t, controllerPath, []string{
+			`// +kubebuilder:rbac:groups="",resources=events,verbs=create;patch`,
+		})
+		assertFileDoesNotContain(t, controllerPath, []string{
+			`// +kubebuilder:rbac:groups="",resources=events,verbs=get;list;watch;create;update;patch;delete`,
+		})
+	}
+
+	assertCoreResourceVerbs(
+		t,
+		filepath.Join(repoRoot(t), "packages", "nosql", "install", "generated", "rbac", "role.yaml"),
+		map[string][]string{
+			"events": {"create", "patch"},
+		},
+	)
+}
+
 func assertCoreResourceVerbs(t *testing.T, path string, want map[string][]string) {
 	t.Helper()
 

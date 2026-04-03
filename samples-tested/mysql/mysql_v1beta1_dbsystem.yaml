@@ -1,0 +1,27 @@
+#
+# Replace the OCI identifiers below before running e2e.
+# Update metadata.name and spec.displayName if you want to force a fresh create
+# instead of binding to an existing DbSystem with the same display name.
+# The mysql controller reads admin credentials from the same-namespace
+# Secret named by spec.adminUsername/spec.adminPassword.
+#
+
+apiVersion: mysql.oracle.com/v1beta1
+kind: DbSystem
+metadata:
+  name: mysql-dbsystem-sample
+spec:
+  compartmentId: ocid1.compartment.oc1..exampleuniqueID
+  displayName: mysql-dbsystem-sample
+  shapeName: MySQL.VM.Standard.E3.1.8GB
+  subnetId: ocid1.subnet.oc1..exampleuniqueID
+  availabilityDomain: qqZb:US-ASHBURN-AD-1
+  isHighlyAvailable: false
+  adminUsername:
+    secret:
+      secretName: admin-secret
+  adminPassword:
+    secret:
+      secretName: admin-secret
+  description: OSOK mysql DbSystem e2e sample
+  dataStorageSizeInGBs: 50

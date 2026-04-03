@@ -38,7 +38,7 @@ group Lookup and bind
 alt tracked or explicit OCI identity already exists
 ServiceManager -> OCI: GetTable
 else tracked identity is missing
-ServiceManager -> OCI: ListTables(filters: compartment_id,\nname, state)
+ServiceManager -> OCI: ListTables(filters: compartment_id,\nname, state=ALL)
 alt reusable OCI resource is not found
 ServiceManager -> OCI: CreateTable
 loop create pending CREATING
@@ -63,23 +63,30 @@ ServiceManager --> BaseReconciler: release finalizer after delete completion
 end
 end
 else OCI state is retryable
-ServiceManager --> BaseReconciler: requeue while OCI remains in\nCREATING, DELETING
+ServiceManager --> BaseReconciler: requeue while OCI remains in\nCREATING, UPDATING, DELETING
 else live state requires field-aware\ndrift evaluation
 group Drift handling
 note over ServiceManager,OCI
 Supported update surface:
-compartment_id, ddl_statement,
-defined_tags, freeform_tags (+4 more)
+compartment_id, defined_tags,
+freeform_tags,
+table_limits.capacity_mode (+3 more)
 Reject before mutate: force-new fields
 is_auto_reclaimable, name
+Create-only fields: ddl_statement
 Lookup filters: compartment_id, name,
-state
+state=ALL
+Lookup matching: exact-name unique match
+only; duplicate exact-name matches fail
 end note
 opt force-new or conflicting drift is detected
 ServiceManager --> BaseReconciler: reject before OCI mutation
 end
 opt supported mutable drift is detected
-ServiceManager -> OCI: Apply ChangeTableCompartment,\nUpdateTable only for mutable fields\ncompartment_id, ddl_statement,\ndefined_tags, freeform_tags (+4\nmore)
+ServiceManager -> OCI: Apply ChangeTableCompartment,\nUpdateTable only for mutable fields\ncompartment_id, defined_tags,\nfreeform_tags,\ntable_limits.capacity_mode (+3 more)
+loop update pending UPDATING
+ServiceManager -> OCI: GetTable
+end
 end
 ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
 end
@@ -108,19 +115,34 @@ archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
-provider states: create CREATING; update none;
-delete DELETING
-supported drift: compartment_id, ddl_statement,
-defined_tags, freeform_tags (+4 more)
+provider states: create CREATING; update
+UPDATING; delete DELETING
+supported drift: compartment_id, defined_tags,
+freeform_tags, table_limits.capacity_mode (+3
+more)
 reject before mutate: force-new fields
 is_auto_reclaimable, name
+create-only fields: ddl_statement
 list lookup: oci_nosql_tables filters
-compartment_id, name, state
+compartment_id, name, state=ALL; exact-name
+unique match only; duplicate exact-name matches
+fail
 conflicts: none
-open gaps: bind-versus-create, list-lookup,
-mutation-policy, waiter-work-request
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+open gaps: none
+Handwritten Table bind first checks the tracked
+OCID, then searches ListTables in the requested
+compartment, and rereads a single exact-name
+match through GetTable before reusing it.
+Create, compartment move, update, and delete use
+read-after-write confirmation instead of
+explicit work-request polling; CREATING,
+UPDATING, and DELETING keep one-minute requeues
+until ACTIVE or delete confirmation.
+DDL remains create-only; compartment moves run
+before table-limit or tag updates when both
+kinds of drift are present.
+Delete retains the finalizer until GetTable or
+ListTables confirms the Table is deleted or not
+found.
 end note
 @enduml

@@ -1,0 +1,21 @@
+apiVersion: database.oracle.com/v1beta1
+kind: AutonomousDatabase
+metadata:
+  name: autonomousdatabase-sample
+spec:
+  # Replace with a real compartment OCID before running against OCI.
+  compartmentId: ocid1.compartment.oc1..exampleuniqueID
+  displayName: SampleADB
+  # Must start with a letter and be unique in the tenancy.
+  dbName: sampleadb
+  dbWorkload: OLTP
+  isDedicated: false
+  dbVersion: "19c"
+  dataStorageSizeInTBs: 1
+  cpuCoreCount: 1
+  adminPassword:
+    secret:
+      secretName: admin-password
+  isAutoScalingEnabled: true
+  isFreeTier: false
+  licenseModel: LICENSE_INCLUDED

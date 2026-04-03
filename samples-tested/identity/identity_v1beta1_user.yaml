@@ -1,0 +1,18 @@
+#
+# Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+# Replace spec.compartmentId with your tenancy OCID before running e2e.
+# Update metadata.name, spec.name, and spec.email before reusing to avoid
+# unique-name conflicts in the tenancy.
+#
+
+apiVersion: identity.oracle.com/v1beta1
+kind: User
+metadata:
+  name: codex-identity-user-20260402130819
+spec:
+  compartmentId: ocid1.tenancy.oc1..exampleuniqueID
+  name: codex-identity-user-20260402130819
+  description: OSOK identity user e2e 20260402130819
+  email: codex-identity-user-20260402130819@example.com

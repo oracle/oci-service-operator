@@ -1,0 +1,222 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: policies.identity.oracle.com
+spec:
+  group: identity.oracle.com
+  names:
+    kind: Policy
+    listKind: PolicyList
+    plural: policies
+    singular: policy
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.name
+      name: Name
+      priority: 1
+      type: string
+    - description: status of the Policy
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the Policy
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Policy is the Schema for the policies API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: PolicySpec defines the desired state of Policy.
+            properties:
+              compartmentId:
+                description: The OCID of the compartment containing the policy (either
+                  the tenancy or another compartment).
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              description:
+                description: The description you assign to the policy during creation.
+                  Does not have to be unique, and it's changeable.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              name:
+                description: |-
+                  The name you assign to the policy during creation. The name must be unique across all policies
+                  in the tenancy and cannot be changed.
+                type: string
+              statements:
+                description: |-
+                  An array of policy statements written in the policy language. See
+                  How Policies Work (https://docs.cloud.oracle.com/Content/Identity/policieshow/how-policies-work.htm) and
+                  Common Policies (https://docs.cloud.oracle.com/Content/Identity/policiescommon/commonpolicies.htm).
+                items:
+                  type: string
+                type: array
+              versionDate:
+                description: |-
+                  The version of the policy. If null or set to an empty string, when a request comes in for authorization, the
+                  policy will be evaluated according to the current behavior of the services at that moment. If set to a particular
+                  date (YYYY-MM-DD), the policy will be evaluated according to the behavior of the services on that date.
+                type: string
+            required:
+            - compartmentId
+            - description
+            - name
+            - statements
+            type: object
+          status:
+            description: PolicyStatus defines the observed state of Policy.
+            properties:
+              compartmentId:
+                description: The OCID of the compartment containing the policy (either
+                  the tenancy or another compartment).
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              description:
+                description: The description you assign to the policy. Does not have
+                  to be unique, and it's changeable.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              id:
+                description: The OCID of the policy.
+                type: string
+              inactiveStatus:
+                description: The detailed status of INACTIVE lifecycleState.
+                format: int64
+                type: integer
+              lifecycleState:
+                description: |-
+                  The policy's current state. After creating a policy, make sure its `lifecycleState` changes from CREATING to
+                  ACTIVE before using it.
+                type: string
+              name:
+                description: |-
+                  The name you assign to the policy during creation. The name must be unique across all policies
+                  in the tenancy and cannot be changed.
+                type: string
+              statements:
+                description: An array of one or more policy statements written in
+                  the policy language.
+                items:
+                  type: string
+                type: array
+              status:
+                properties:
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              timeCreated:
+                description: |-
+                  Date and time the policy was created, in the format defined by RFC3339.
+                  Example: `2016-08-25T21:10:29.600Z`
+                type: string
+              versionDate:
+                description: |-
+                  The version of the policy. If null or set to an empty string, when a request comes in for authorization, the
+                  policy will be evaluated according to the current behavior of the services at that moment. If set to a particular
+                  date (YYYY-MM-DD), the policy will be evaluated according to the behavior of the services on that date.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

@@ -1,0 +1,114 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Activity - objectstorage/ObjectStorageBucket
+skinparam activity {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  diamondBackgroundColor #e2e8f0
+  diamondBorderColor #1d4ed8
+  diamondFontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+  barColor #1d4ed8
+}
+start
+partition "Observe and Bind" {
+:Start from shared flow\nshared/diagrams/shared-reconcile-activity.svg;
+:Read desired ObjectStorageBucket spec, tracked\nstatus, and delete intent;
+if ("Tracked or explicit OCI identity present?") then (yes)
+:Get the current OCI resource via GetBucket;
+else (no)
+:Resolve an existing OCI resource through\nListBuckets using filters name, namespace,\ncompartment_id;
+:Create the OCI resource via CreateBucket when\nno reusable match is found;
+:Persist the resolved or created OCI identity\ninto status;
+endif
+}
+if ("Delete requested?") then (yes)
+partition "Delete" {
+:Delete path uses DeleteBucket with required\nvia GetBucket or ListBuckets to DELETED\nconfirmation;
+:Confirm deletion via GetBucket or ListBuckets\nuntil OCI reaches DELETED;
+if ("Delete cleanup and finalizer release succeed?") then (yes)
+:Remove the finalizer after delete completion;
+else (no)
+:Stay blocked until cleanup or finalizer\nrelease succeeds;
+endif
+}
+stop
+else (no)
+partition "Lifecycle Classification" {
+if ("OCI state is outside success targets?") then (yes)
+:Return an unsuccessful reconcile result until\nOCI reaches ACTIVE;
+stop
+endif
+}
+partition "Ready and Drift Handling" {
+:Compare live OCI state against the imported\nfield surface;
+if ("Force-new or conflicting drift detected?") then (yes)
+:Reject drift before OCI mutation for force-new\nfields storage_tier;
+stop
+endif
+if ("Supported mutable drift detected?") then (yes)
+:Apply UpdateBucket only for mutable fields\nauto_tiering, compartment_id, defined_tags,\nfreeform_tags (+7 more);
+else (no)
+:Skip the no-op mutation path;
+endif
+:Run provider helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
+:Return success for the ACTIVE success state;
+:Project required status and finalizer policy\nretain-until-confirmed-delete;
+:Requeue on updating, terminating;
+}
+endif
+stop
+note right
+shared diagram:
+shared/diagrams/shared-reconcile-activity.svg
+Start from the shared reconcile activity and
+specialize provider-backed CRUD, wait, and
+status-projection details here.
+Controller-local activity diagrams add
+list-lookup hints, secret policies, delete
+handling, and open formal gaps.
+archetype batch: Generated service-manager
+controllers specialize the shared reconcile path
+with formal runtime ownership.
+service: objectstorage
+slug: objectstoragebucket
+kind: ObjectStorageBucket
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: updating, terminating
+provider states: create none; update none;
+delete none
+supported drift: auto_tiering, compartment_id,
+defined_tags, freeform_tags (+7 more)
+reject before mutate: force-new fields
+storage_tier
+create-only fields: none
+list lookup: oci_objectstorage_buckets filters
+name, namespace, compartment_id
+conflicts: none
+open gaps: none
+The published ObjectStorageBucket kind reuses
+the Bucket SDK family and resolves namespaceName
+from observed status first, then through a
+GetNamespace lookup when spec.namespace is
+omitted.
+Successful create and update responses without
+lifecycle fields are treated as synchronous
+success and projected directly into status,
+including status.status.ocid.
+Delete keeps the finalizer until DeleteBucket
+succeeds and a follow-up read confirms the
+bucket is gone.
+end note
+@enduml

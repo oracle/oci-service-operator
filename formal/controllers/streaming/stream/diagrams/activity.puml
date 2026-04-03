@@ -98,6 +98,7 @@ supported drift: defined_tags, freeform_tags,
 stream_pool_id
 reject before mutate: force-new fields name,
 partitions, retention_in_hours
+create-only fields: none
 list lookup: oci_streaming_streams filters
 compartment_id, id, name, state (+1 more)
 conflicts: none

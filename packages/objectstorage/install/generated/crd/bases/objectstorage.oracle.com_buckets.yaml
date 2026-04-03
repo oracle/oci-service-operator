@@ -1,0 +1,303 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: buckets.objectstorage.oracle.com
+spec:
+  group: objectstorage.oracle.com
+  names:
+    kind: Bucket
+    listKind: BucketList
+    plural: buckets
+    singular: bucket
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.name
+      name: Name
+      priority: 1
+      type: string
+    - description: status of the Bucket
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the Bucket
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Bucket is the Schema for the buckets API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: BucketSpec defines the desired state of Bucket.
+            properties:
+              autoTiering:
+                description: |-
+                  Set the auto tiering status on the bucket. By default, a bucket is created with auto tiering `Disabled`.
+                  Use this option to enable auto tiering during bucket creation. Objects in a bucket with auto tiering set to
+                  `InfrequentAccess` are transitioned automatically between the 'Standard' and 'InfrequentAccess'
+                  tiers based on the access pattern of the objects.
+                type: string
+              compartmentId:
+                description: The ID of the compartment in which to create the bucket.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              kmsKeyId:
+                description: |-
+                  The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of a master encryption key used to call the Key
+                  Management service to generate a data encryption key or to encrypt or decrypt a data encryption key.
+                type: string
+              metadata:
+                additionalProperties:
+                  type: string
+                description: Arbitrary string, up to 4KB, of keys and values for user-defined
+                  metadata.
+                type: object
+              name:
+                description: |-
+                  The name of the bucket. Valid characters are uppercase or lowercase letters, numbers, hyphens, underscores, and periods.
+                  Bucket names must be unique within an Object Storage namespace. Avoid entering confidential information.
+                  example: Example: my-new-bucket1
+                type: string
+              namespace:
+                description: The Object Storage namespace in which the bucket lives.
+                type: string
+              objectEventsEnabled:
+                description: |-
+                  Whether or not events are emitted for object state changes in this bucket. By default, `objectEventsEnabled` is
+                  set to `false`. Set `objectEventsEnabled` to `true` to emit events for object state changes. For more information
+                  about events, see Overview of Events (https://docs.cloud.oracle.com/Content/Events/Concepts/eventsoverview.htm).
+                type: boolean
+              publicAccessType:
+                description: |-
+                  The type of public access enabled on this bucket.
+                  A bucket is set to `NoPublicAccess` by default, which only allows an authenticated caller to access the
+                  bucket and its contents. When `ObjectRead` is enabled on the bucket, public access is allowed for the
+                  `GetObject`, `HeadObject`, and `ListObjects` operations. When `ObjectReadWithoutList` is enabled on the bucket,
+                  public access is allowed for the `GetObject` and `HeadObject` operations.
+                type: string
+              storageTier:
+                description: |-
+                  The type of storage tier of this bucket.
+                  A bucket is set to 'Standard' tier by default, which means the bucket will be put in the standard storage tier.
+                  When 'Archive' tier type is set explicitly, the bucket is put in the Archive Storage tier. The 'storageTier'
+                  property is immutable after bucket is created.
+                type: string
+              versioning:
+                description: Set the versioning status on the bucket. By default,
+                  a bucket is created with versioning `Disabled`. Use this option
+                  to enable versioning during bucket creation. Objects in a version
+                  enabled bucket are protected from overwrites and deletions. Previous
+                  versions of the same object will be available in the bucket.
+                type: string
+            required:
+            - compartmentId
+            - name
+            type: object
+          status:
+            description: BucketStatus defines the observed state of Bucket.
+            properties:
+              approximateCount:
+                description: |-
+                  The approximate number of objects in the bucket. Count statistics are reported periodically. You will see a
+                  lag between what is displayed and the actual object count.
+                format: int64
+                type: integer
+              approximateSize:
+                description: |-
+                  The approximate total size in bytes of all objects in the bucket. Size statistics are reported periodically. You will
+                  see a lag between what is displayed and the actual size of the bucket.
+                format: int64
+                type: integer
+              autoTiering:
+                description: |-
+                  The auto tiering status on the bucket. A bucket is created with auto tiering `Disabled` by default.
+                  For auto tiering `InfrequentAccess`, objects are transitioned automatically between the 'Standard'
+                  and 'InfrequentAccess' tiers based on the access pattern of the objects.
+                type: string
+              compartmentId:
+                description: The compartment ID in which the bucket is authorized.
+                type: string
+              createdBy:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the user who created the bucket.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              etag:
+                description: The entity tag (ETag) for the bucket.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              id:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the bucket.
+                type: string
+              isReadOnly:
+                description: |-
+                  Whether or not this bucket is read only. By default, `isReadOnly` is set to `false`. This will
+                  be set to 'true' when this bucket is configured as a destination in a replication policy.
+                type: boolean
+              kmsKeyId:
+                description: |-
+                  The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of a master encryption key used to call the Key Management
+                  service to generate a data encryption key or to encrypt or decrypt a data encryption key.
+                type: string
+              metadata:
+                additionalProperties:
+                  type: string
+                description: Arbitrary string keys and values for user-defined metadata.
+                type: object
+              name:
+                description: |-
+                  The name of the bucket. Avoid entering confidential information.
+                  Example: my-new-bucket1
+                type: string
+              namespace:
+                description: The Object Storage namespace in which the bucket resides.
+                type: string
+              objectEventsEnabled:
+                description: |-
+                  Whether or not events are emitted for object state changes in this bucket. By default, `objectEventsEnabled` is
+                  set to `false`. Set `objectEventsEnabled` to `true` to emit events for object state changes. For more information
+                  about events, see Overview of Events (https://docs.cloud.oracle.com/Content/Events/Concepts/eventsoverview.htm).
+                type: boolean
+              objectLifecyclePolicyEtag:
+                description: The entity tag (ETag) for the live object lifecycle policy
+                  on the bucket.
+                type: string
+              publicAccessType:
+                description: |-
+                  The type of public access enabled on this bucket.
+                  A bucket is set to `NoPublicAccess` by default, which only allows an authenticated caller to access the
+                  bucket and its contents. When `ObjectRead` is enabled on the bucket, public access is allowed for the
+                  `GetObject`, `HeadObject`, and `ListObjects` operations. When `ObjectReadWithoutList` is enabled on the
+                  bucket, public access is allowed for the `GetObject` and `HeadObject` operations.
+                type: string
+              replicationEnabled:
+                description: |-
+                  Whether or not this bucket is a replication source. By default, `replicationEnabled` is set to `false`. This will
+                  be set to 'true' when you create a replication policy for the bucket.
+                type: boolean
+              status:
+                properties:
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              storageTier:
+                description: |-
+                  The storage tier type assigned to the bucket. A bucket is set to `Standard` tier by default, which means
+                  objects uploaded or copied to the bucket will be in the standard storage tier. When the `Archive` tier type
+                  is set explicitly for a bucket, objects uploaded or copied to the bucket will be stored in archive storage.
+                  The `storageTier` property is immutable after bucket is created.
+                type: string
+              timeCreated:
+                description: The date and time the bucket was created, as described
+                  in RFC 2616 (https://tools.ietf.org/html/rfc2616#section-14.29).
+                type: string
+              versioning:
+                description: |-
+                  The versioning status on the bucket. A bucket is created with versioning `Disabled` by default.
+                  For versioning `Enabled`, objects are protected from overwrites and deletes, by maintaining their version history. When versioning is `Suspended`, the previous versions will still remain but new versions will no longer be created when overwitten or deleted.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

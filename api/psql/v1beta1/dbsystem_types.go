@@ -69,6 +69,14 @@ type DbSystemSpec struct {
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// +kubebuilder:validation:Optional
 	DbConfigurationParams DbSystemDbConfigurationParams `json:"dbConfigurationParams,omitempty"`
+	// The administrative username sourced from a Kubernetes Secret in the same namespace.
+	// The referenced Secret must contain a `username` key. If omitted, `spec.credentials.username` remains available for direct credential input.
+	// +kubebuilder:validation:Optional
+	AdminUsername shared.UsernameSource `json:"adminUsername,omitempty,omitzero"`
+	// The administrative password sourced from a Kubernetes Secret in the same namespace.
+	// The referenced Secret must contain a `password` key. If omitted, `spec.credentials.passwordDetails` remains available for plaintext or OCI Vault secret input.
+	// +kubebuilder:validation:Optional
+	AdminPassword shared.PasswordSource `json:"adminPassword,omitempty,omitzero"`
 }
 
 // DbSystemStorageDetails defines nested fields for DbSystem.StorageDetails.
@@ -281,6 +289,10 @@ type DbSystemStatus struct {
 	// The list of instances, or nodes, in the database system.
 	Instances []DbSystemInstance `json:"instances,omitempty"`
 	Source    DbSystemSource     `json:"source,omitempty"`
+	// The last applied secret reference for the administrative username.
+	AdminUsernameSource shared.UsernameSource `json:"adminUsernameSource,omitempty,omitzero"`
+	// The last applied secret reference for the administrative password.
+	AdminPasswordSource shared.PasswordSource `json:"adminPasswordSource,omitempty,omitzero"`
 }
 
 // +kubebuilder:object:root=true

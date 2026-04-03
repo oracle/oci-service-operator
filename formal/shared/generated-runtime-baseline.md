@@ -26,8 +26,9 @@ the same reference points:
   best-effort delete behavior into generated-runtime rows.
 - `nosql/Table`: use `ListTables` with `compartment_id`, `name`, and lifecycle
   state to decide whether create is required.
-- `psql/DbSystem`: use `ListDbSystems` with `compartment_id`, `display_name`,
-  `id`, and lifecycle state to decide whether create is required.
+- `psql/DbSystem`: resolve tracked OCIDs through `GetDbSystem` first, then use
+  `ListDbSystems` with exact `compartment_id` plus `display_name` matching and
+  reusable lifecycle states to decide whether create is required.
 - `mysql/DbSystem`: use `ListDbSystems` with `compartmentId`,
   `configurationId`, `databaseManagement`, `dbSystemId`, `displayName`, and
   lifecycle state to decide whether create is required.
@@ -52,8 +53,11 @@ the same reference points:
   answer before generated-runtime promotion.
 - `nosql/Table`: provider CRUD uses work-request-backed completion for create,
   update, and delete.
-- `psql/DbSystem`: create is work-request-backed and update also exposes
-  `tfresource.WaitForUpdatedState`.
+- `psql/DbSystem`: the handwritten adapter models create and update completion
+  through `GetDbSystem` lifecycle projection plus one-minute requeues while OCI
+  remains `CREATING` or `UPDATING`; delete confirmation waits for `DELETED` or
+  NotFound through `GetDbSystem` with list fallback when identity must be
+  re-resolved.
 - `mysql/DbSystem`: the generated runtime currently uses read-after-write for
   create and update plus confirm-delete for delete, while the remaining
   `waiter-work-request` stop condition stays explicit in formal semantics.
@@ -66,9 +70,12 @@ the same reference points:
 - `nosql/Table`: downstream work must classify `name`, `compartmentId`,
   `ddlStatement`, `tableLimits`, `isAutoReclaimable`, and tags into
   create-only, mutable, or rejected drift.
-- `psql/DbSystem`: downstream work must classify `displayName`,
-  `compartmentId`, `dbVersion`, `storageDetails`, `shape`, `networkDetails`,
-  `credentials`, `source`, `configId`, and tags.
+- `psql/DbSystem`: the handwritten adapter allows only `displayName`,
+  `description`, `storageDetails.iops`,
+  `dbConfigurationParams.{configId,applyConfig}`, `managementPolicy`, and tag
+  updates; credential payloads, admin secret refs, `instancesDetails`,
+  `source`, and top-level `configId` stay create-only, and sizing, network,
+  placement, version, and identity drift are rejected before OCI mutation.
 - `mysql/DbSystem`: downstream work must classify the broader generated
   `DbSystem` surface, including `displayName`, `description`,
   `configurationId`, `backupPolicy`, `maintenance`, `deletionPolicy`,
@@ -89,8 +96,9 @@ the same reference points:
 - Shared rule: make repo-authored secret behavior explicit instead of implying
   it from provider facts.
 - `nosql/Table`: no repo-authored secret reads or writes.
-- `psql/DbSystem`: no Kubernetes secret reads or writes; credential fields
-  remain OCI payload inputs.
+- `psql/DbSystem`: create may read same-namespace `adminUsername` and
+  `adminPassword` secret refs, mirrors only non-empty refs into status for
+  later drift checks, and does not write follow-up Kubernetes secrets.
 - `mysql/DbSystem`: generated-runtime request projection reads
   same-namespace Kubernetes secrets for `adminUsername` and `adminPassword`,
   omits those inputs entirely when the secret references are unset or empty,

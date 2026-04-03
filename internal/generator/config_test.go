@@ -1021,22 +1021,24 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		t.Fatalf("DefaultActiveServices() = %v, want %v", activeServices, wantActiveServices)
 	}
 
-	services := requireServices(t, cfg, "containerengine", "database", "mysql", "nosql", "psql", "streaming", "core", "identity")
+	services := requireServices(t, cfg, "containerengine", "database", "mysql", "nosql", "opensearch", "psql", "streaming", "core", "identity", "redis")
 	assertServiceSelection(t, services["containerengine"], true, SelectionModeAll, nil)
 	assertServiceSelection(t, services["database"], true, SelectionModeExplicit, []string{"AutonomousDatabase"})
 	assertServiceSelection(t, services["mysql"], true, SelectionModeAll, nil)
 	assertServiceSelection(t, services["nosql"], true, SelectionModeAll, nil)
+	assertServiceSelection(t, services["opensearch"], false, SelectionModeExplicit, []string{"OpensearchOpensearchCluster"})
 	assertServiceSelection(t, services["psql"], true, SelectionModeAll, nil)
 	assertServiceSelection(t, services["streaming"], true, SelectionModeExplicit, []string{"Stream"})
-	assertServiceSelection(t, services["core"], false, SelectionModeAll, nil)
-	assertServiceSelection(t, services["identity"], false, SelectionModeAll, nil)
+	assertServiceSelection(t, services["core"], false, SelectionModeExplicit, []string{"Instance"})
+	assertServiceSelection(t, services["identity"], false, SelectionModeExplicit, []string{"Compartment"})
+	assertServiceSelection(t, services["redis"], false, SelectionModeExplicit, []string{"RedisCluster"})
 }
 
 func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
 	t.Parallel()
 
 	cfg := loadCheckedInConfig(t)
-	services := serviceConfigsByName(t, cfg, "database", "mysql", "streaming", "core")
+	services := serviceConfigsByName(t, cfg, "database", "mysql", "nosql", "psql", "streaming", "core", "identity", "redis")
 
 	assertServiceGenerationStrategies(t, services["database"], generationStrategyExpectations{
 		controller:     GenerationStrategyGenerated,
@@ -1055,20 +1057,45 @@ func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
 
 	assertDatabaseRuntimeRolloutMetadata(t, services["database"])
 	assertMySQLRuntimeRolloutMetadata(t, services["mysql"])
+	assertNoSQLRuntimeRolloutMetadata(t, services["nosql"])
+	assertPSQLRuntimeRolloutMetadata(t, services["psql"])
 	assertStreamingRuntimeRolloutMetadata(t, services["streaming"])
 	assertCoreRuntimeRolloutMetadata(t, services["core"])
+	assertIdentityRuntimeRolloutMetadata(t, services["identity"])
+	assertRedisRuntimeRolloutMetadata(t, services["redis"])
 }
 
 func TestCheckedInConfigPromotesFormalSpecReferences(t *testing.T) {
 	t.Parallel()
 
 	cfg := loadCheckedInConfig(t)
-	services := serviceConfigsByName(t, cfg, "identity", "database", "mysql", "streaming")
+	services := serviceConfigsByName(t, cfg, "identity", "core", "database", "mysql", "objectstorage", "opensearch", "psql", "streaming", "redis")
 	assertFormalSpecFor(t, services["identity"], "User", "user")
-	assertFormalSpecFor(t, services["identity"], "Compartment", "")
+	assertFormalSpecFor(t, services["identity"], "Compartment", "compartment")
+	assertFormalSpecFor(t, services["core"], "Instance", "")
 	assertFormalSpecFor(t, services["database"], "AutonomousDatabase", "databaseautonomousdatabase")
 	assertFormalSpecFor(t, services["mysql"], "DbSystem", "dbsystem")
+	assertFormalSpecFor(t, services["objectstorage"], "ObjectStorageBucket", "objectstoragebucket")
+	assertFormalSpecFor(t, services["opensearch"], "OpensearchOpensearchCluster", "opensearchopensearchcluster")
+	assertFormalSpecFor(t, services["psql"], "DbSystem", "dbsystem")
+	assertFormalSpecFor(t, services["redis"], "RedisCluster", "rediscluster")
 	assertFormalSpecFor(t, services["streaming"], "Stream", "stream")
+}
+
+func TestCheckedInConfigCoordinatesPrimaryPortPackagePaths(t *testing.T) {
+	t.Parallel()
+
+	cfg := loadCheckedInConfig(t)
+	services := serviceConfigsByName(t, cfg, "core", "database", "identity", "mysql", "objectstorage", "opensearch", "psql", "redis")
+
+	assertPrimaryPortOverride(t, services["core"], "Instance", "", "core/instance")
+	assertDatabaseRuntimeRolloutMetadata(t, services["database"])
+	assertPrimaryPortOverride(t, services["identity"], "Compartment", "compartment", "identity/compartment")
+	assertMySQLRuntimeRolloutMetadata(t, services["mysql"])
+	assertPrimaryPortOverride(t, services["objectstorage"], "ObjectStorageBucket", "objectstoragebucket", "objectstorage/bucket")
+	assertOpensearchRuntimeRolloutMetadata(t, services["opensearch"])
+	assertPSQLRuntimeRolloutMetadata(t, services["psql"])
+	assertPrimaryPortOverride(t, services["redis"], "RedisCluster", "rediscluster", "redis/rediscluster")
 }
 
 func TestCheckedInConfigOptsOutEndpointBasedGeneratedRuntimeResources(t *testing.T) {
@@ -1296,8 +1323,8 @@ func assertDatabaseRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) 
 	) {
 		t.Fatalf("database package extraResources = %v", service.Package.ExtraResources)
 	}
-	if override.ServiceManager.PackagePath != "" {
-		t.Fatalf("database packagePath = %q, want empty to use default package layout", override.ServiceManager.PackagePath)
+	if override.ServiceManager.PackagePath != "autonomousdatabases/adb" {
+		t.Fatalf("database packagePath = %q, want %q", override.ServiceManager.PackagePath, "autonomousdatabases/adb")
 	}
 	if override.Webhooks.Strategy != "" {
 		t.Fatalf("database resource webhook strategy = %q, want empty", override.Webhooks.Strategy)
@@ -1320,6 +1347,92 @@ func assertMySQLRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
 		t.Fatalf("mysql sample override = %q, want secret-backed sample body", override.Sample.Body)
 	}
 	assertFormalSpecFor(t, service, "DbSystem", "dbsystem")
+}
+
+func assertNoSQLRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
+	t.Helper()
+
+	assertServiceGenerationStrategies(t, service, generationStrategyExpectations{
+		controller:     GenerationStrategyGenerated,
+		serviceManager: GenerationStrategyGenerated,
+		registration:   GenerationStrategyGenerated,
+		webhook:        GenerationStrategyNone,
+	})
+	assertResourceOverrideCount(t, service, 8)
+
+	overrides := overridesByKind(service)
+	for _, kind := range []string{
+		"Index",
+		"Replica",
+		"Row",
+		"Table",
+		"TableUsage",
+		"WorkRequest",
+		"WorkRequestError",
+		"WorkRequestLog",
+	} {
+		override, ok := overrides[kind]
+		if !ok {
+			t.Fatalf("nosql does not define a generation override for %q", kind)
+		}
+		if !slices.Equal(override.Controller.ExtraRBACMarkers, []string{`groups="",resources=events,verbs=create;patch`}) {
+			t.Fatalf("nosql %s extra RBAC markers = %v, want event recorder permissions only", kind, override.Controller.ExtraRBACMarkers)
+		}
+	}
+}
+
+func assertPSQLRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
+	t.Helper()
+
+	assertResourceOverrideCount(t, service, 1)
+	override := service.Generation.Resources[0]
+	if override.Kind != "DbSystem" {
+		t.Fatalf("psql override kind = %q, want %q", override.Kind, "DbSystem")
+	}
+	if !slices.Equal(
+		override.Controller.ExtraRBACMarkers,
+		[]string{
+			`groups="",resources=secrets,verbs=get;list;watch`,
+			`groups="",resources=events,verbs=create;patch`,
+		},
+	) {
+		t.Fatalf("psql extra RBAC markers = %v, want secret read and event recorder markers", override.Controller.ExtraRBACMarkers)
+	}
+	if len(override.SpecFields) != 2 {
+		t.Fatalf("psql specFields = %#v, want 2 secret-backed overrides", override.SpecFields)
+	}
+	if len(override.StatusFields) != 2 {
+		t.Fatalf("psql statusFields = %#v, want 2 secret-source tracking overrides", override.StatusFields)
+	}
+	if !strings.Contains(override.Sample.Body, "adminPassword:") || !strings.Contains(override.Sample.Body, "secretName: admin-secret") {
+		t.Fatalf("psql sample override = %q, want secret-backed sample body", override.Sample.Body)
+	}
+	assertFormalSpecFor(t, service, "DbSystem", "dbsystem")
+	if override.ServiceManager.PackagePath != "psql/dbsystem" {
+		t.Fatalf("psql packagePath = %q, want %q", override.ServiceManager.PackagePath, "psql/dbsystem")
+	}
+	if !override.ServiceManager.NeedsCredentialClient {
+		t.Fatal("psql needsCredentialClient = false, want true")
+	}
+}
+
+func assertPrimaryPortOverride(t *testing.T, service *ServiceConfig, kind string, formalSpec string, packagePath string) {
+	t.Helper()
+
+	overrides := overridesByKind(service)
+	override, ok := overrides[kind]
+	if !ok {
+		t.Fatalf("%s does not define a generation override for %q", service.Service, kind)
+	}
+	if override.Kind != kind {
+		t.Fatalf("%s override kind = %q, want %q", service.Service, override.Kind, kind)
+	}
+	if override.FormalSpec != formalSpec {
+		t.Fatalf("%s %s formalSpec = %q, want %q", service.Service, kind, override.FormalSpec, formalSpec)
+	}
+	if override.ServiceManager.PackagePath != packagePath {
+		t.Fatalf("%s %s packagePath = %q, want %q", service.Service, kind, override.ServiceManager.PackagePath, packagePath)
+	}
 }
 
 func assertStreamingRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
@@ -1348,6 +1461,51 @@ func assertCoreRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
 		registration:   GenerationStrategyGenerated,
 		webhook:        GenerationStrategyNone,
 	})
+	assertResourceOverrideCount(t, service, 1)
+	assertPrimaryPortOverride(t, service, "Instance", "", "core/instance")
+}
+
+func assertIdentityRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
+	t.Helper()
+
+	if service.PackageProfile != PackageProfileControllerBacked {
+		t.Fatalf("identity packageProfile = %q, want %q", service.PackageProfile, PackageProfileControllerBacked)
+	}
+	assertServiceGenerationStrategies(t, service, generationStrategyExpectations{
+		controller:     GenerationStrategyGenerated,
+		serviceManager: GenerationStrategyGenerated,
+		registration:   GenerationStrategyGenerated,
+		webhook:        GenerationStrategyNone,
+	})
+	assertResourceOverrideCount(t, service, 2)
+	assertFormalSpecFor(t, service, "User", "user")
+	assertPrimaryPortOverride(t, service, "Compartment", "compartment", "identity/compartment")
+}
+
+func assertRedisRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
+	t.Helper()
+
+	assertServiceGenerationStrategies(t, service, generationStrategyExpectations{
+		controller:     GenerationStrategyGenerated,
+		serviceManager: GenerationStrategyGenerated,
+		registration:   GenerationStrategyGenerated,
+		webhook:        GenerationStrategyNone,
+	})
+	assertPrimaryPortOverride(t, service, "RedisCluster", "rediscluster", "redis/rediscluster")
+}
+
+func assertOpensearchRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
+	t.Helper()
+
+	assertResourceOverrideCount(t, service, 7)
+	overrides := overridesByKind(service)
+	assertFormalSpecFor(t, service, "OpensearchOpensearchCluster", "opensearchopensearchcluster")
+	if overrides["OpensearchOpensearchCluster"].ServiceManager.PackagePath != "opensearch/opensearchopensearchcluster" {
+		t.Fatalf("opensearch packagePath = %q, want %q", overrides["OpensearchOpensearchCluster"].ServiceManager.PackagePath, "opensearch/opensearchopensearchcluster")
+	}
+	for _, kind := range []string{"Manifest", "OpensearchClusterBackup", "OpensearchOpensearchVersion", "WorkRequest", "WorkRequestError", "WorkRequestLog"} {
+		assertDisabledResourceOverride(t, service.Service, kind, overrides[kind])
+	}
 }
 
 func assertFormalSpecFor(t *testing.T, service *ServiceConfig, kind string, want string) {

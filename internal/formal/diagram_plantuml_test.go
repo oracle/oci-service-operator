@@ -120,6 +120,100 @@ func TestRenderDiagramsWriteFieldAwarePlantUMLSources(t *testing.T) {
 	}
 }
 
+func TestRenderDiagramsUseRepoAuthoredOverridesWhenPresent(t *testing.T) {
+	root := writeScaffold(t)
+
+	writeFile(t, filepath.Join(root, "controllers", "template", "diagrams", "runtime-lifecycle.yaml"), `schemaVersion: 1
+surface: repo-authored-semantics
+service: template
+slug: template
+kind: Template
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending:
+      - BOOTING
+    updatePending:
+      - PATCHING
+    deletePending:
+      - REMOVING
+  listLookup:
+    filters:
+      - compartment_id
+      - display_name
+      - state=ALL
+    matchRule: exact-name unique match only
+  mutation:
+    mutable:
+      - repo_display_name
+    forceNew:
+      - repo_compartment_id
+    createOnly:
+      - seed_payload
+notes:
+  - Repo-authored overrides should replace imported mutation and pending-state summaries.
+`)
+	if _, err := RenderDiagrams(RenderOptions{Root: root}); err != nil {
+		t.Fatalf("RenderDiagrams(%q) error = %v", root, err)
+	}
+
+	for _, tc := range []struct {
+		path    string
+		needles []string
+	}{
+		{
+			path: filepath.Join(root, "controllers", "template", "diagrams", "activity.puml"),
+			needles: []string{
+				"repo-authored mutation surface",
+				"Request requeue while OCI remains in BOOTING",
+				"PATCHING, REMOVING",
+				"Apply UpdateTemplate only for mutable fields",
+				"repo_display_name",
+			},
+		},
+		{
+			path: filepath.Join(root, "controllers", "template", "diagrams", "sequence.puml"),
+			needles: []string{
+				"Supported update surface:",
+				"repo_display_name",
+				"Reject before mutate: force-new fields",
+				"repo_compartment_id",
+				"Create-only fields: seed_payload",
+				"Lookup matching: exact-name unique match",
+				"only",
+			},
+		},
+		{
+			path: filepath.Join(root, "controllers", "template", "diagrams", "state-machine.puml"),
+			needles: []string{
+				"provider states: create BOOTING; update",
+				"PATCHING; delete REMOVING",
+				"create-only fields: seed_payload",
+				"list lookup: oci_template_templates filters",
+				"display_name, state=ALL;",
+				"exact-name unique match",
+				"only",
+			},
+		},
+	} {
+		data, err := os.ReadFile(tc.path)
+		if err != nil {
+			t.Fatalf("ReadFile(%q) error = %v", tc.path, err)
+		}
+		text := string(data)
+		for _, needle := range tc.needles {
+			if !strings.Contains(text, needle) {
+				t.Fatalf("%s missing %q:\n%s", tc.path, needle, text)
+			}
+		}
+	}
+}
+
 func TestRenderDiagramsWritesSharedPlantUMLArtifacts(t *testing.T) {
 	root := writeScaffold(t)
 

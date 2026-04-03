@@ -34,7 +34,7 @@ spec:
     name: v1beta1
     schema:
       openAPIV3Schema:
-        description: Index is the Schema for the indexes API.
+        description: Index is the Schema for the indices API.
         properties:
           apiVersion:
             description: |-

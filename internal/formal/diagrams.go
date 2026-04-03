@@ -56,14 +56,38 @@ func (r RenderReport) String() string {
 }
 
 type diagramSpec struct {
-	SchemaVersion int      `yaml:"schemaVersion"`
-	Surface       string   `yaml:"surface"`
-	Service       string   `yaml:"service"`
-	Slug          string   `yaml:"slug"`
-	Kind          string   `yaml:"kind"`
-	Archetype     string   `yaml:"archetype"`
-	States        []string `yaml:"states"`
-	Notes         []string `yaml:"notes"`
+	SchemaVersion int                           `yaml:"schemaVersion"`
+	Surface       string                        `yaml:"surface"`
+	Service       string                        `yaml:"service"`
+	Slug          string                        `yaml:"slug"`
+	Kind          string                        `yaml:"kind"`
+	Archetype     string                        `yaml:"archetype"`
+	States        []string                      `yaml:"states"`
+	Notes         []string                      `yaml:"notes"`
+	RepoAuthored  *diagramRepoAuthoredSemantics `yaml:"repoAuthored,omitempty"`
+}
+
+type diagramRepoAuthoredSemantics struct {
+	ProviderLifecycle *diagramProviderLifecycle   `yaml:"providerLifecycle,omitempty"`
+	ListLookup        *diagramListLookupSemantics `yaml:"listLookup,omitempty"`
+	Mutation          *diagramMutationSemantics   `yaml:"mutation,omitempty"`
+}
+
+type diagramProviderLifecycle struct {
+	CreatePending []string `yaml:"createPending,omitempty"`
+	UpdatePending []string `yaml:"updatePending,omitempty"`
+	DeletePending []string `yaml:"deletePending,omitempty"`
+}
+
+type diagramListLookupSemantics struct {
+	Filters   []string `yaml:"filters,omitempty"`
+	MatchRule string   `yaml:"matchRule,omitempty"`
+}
+
+type diagramMutationSemantics struct {
+	Mutable    []string `yaml:"mutable,omitempty"`
+	ForceNew   []string `yaml:"forceNew,omitempty"`
+	CreateOnly []string `yaml:"createOnly,omitempty"`
 }
 
 type renderedDiagramArtifacts struct {
@@ -278,7 +302,7 @@ func renderActivityPUML(ctx diagramContext) []byte {
 	lines = append(lines,
 		`partition "Lifecycle Classification" {`,
 	)
-	if retryable := retryableStateSummary(binding); retryable != "none" {
+	if retryable := retryableStateSummary(ctx); retryable != "none" {
 		lines = append(lines,
 			`if ("OCI state in retryable set?") then (yes)`,
 			plantUMLAction(fmt.Sprintf("Request requeue while OCI remains in %s", retryable)),
@@ -293,7 +317,7 @@ func renderActivityPUML(ctx diagramContext) []byte {
 		"endif",
 		"}",
 		`partition "Ready and Drift Handling" {`,
-		plantUMLAction("Compare live OCI state against the imported field surface"),
+		plantUMLAction(driftComparisonSurfaceSummary(ctx)),
 	)
 	if hasRejectableDrift(ctx) {
 		lines = append(lines,
@@ -309,10 +333,10 @@ func renderActivityPUML(ctx diagramContext) []byte {
 			summarizeValues(ctx.ConflictSets, 3),
 		)))
 	}
-	if len(binding.Import.Mutation.Mutable) > 0 && len(binding.Import.Operations.Update) > 0 {
+	if len(mutableSurface(ctx)) > 0 && len(binding.Import.Operations.Update) > 0 {
 		lines = append(lines,
 			`if ("Supported mutable drift detected?") then (yes)`,
-			plantUMLAction(updateActivitySummary(binding)),
+			plantUMLAction(updateActivitySummary(ctx)),
 			"else (no)",
 			plantUMLAction("Skip the no-op mutation path"),
 			"endif",
@@ -367,7 +391,7 @@ func renderSequencePUML(ctx diagramContext) []byte {
 	lines = append(lines, renderObserveAndBindSequence(ctx)...)
 	lines = append(lines, "alt delete requested")
 	lines = append(lines, renderDeleteSequence(ctx)...)
-	if retryable := retryableStateSummary(binding); retryable != "none" {
+	if retryable := retryableStateSummary(ctx); retryable != "none" {
 		lines = append(lines,
 			fmt.Sprintf("else %s", wrapPlantUMLText("OCI state is retryable", 36)),
 			fmt.Sprintf("ServiceManager --> BaseReconciler: %s", wrapPlantUMLText(fmt.Sprintf("requeue while OCI remains in %s", retryable), 36)),
@@ -403,13 +427,13 @@ func renderStateMachinePUML(ctx diagramContext) []byte {
 		`state "Failed" as failed`,
 		"observe : read spec, tracked status, delete intent,\\nand current OCI lifecycle",
 	)
-	if binding.Import.ListLookup != nil {
+	if hasListLookup(ctx) {
 		lines = append(lines, `state "ResolveByLookup" as resolve_by_lookup`)
 	}
 	if hasRejectableDrift(ctx) {
 		lines = append(lines, `state "RejectUnsupportedDrift" as reject_unsupported_drift`)
 	}
-	if len(binding.Import.Mutation.Mutable) > 0 && len(binding.Import.Operations.Update) > 0 {
+	if len(mutableSurface(ctx)) > 0 && len(binding.Import.Operations.Update) > 0 {
 		lines = append(lines, `state "ApplyUpdate" as apply_update`)
 	}
 	if includeSecretsParticipant(ctx) {
@@ -428,16 +452,16 @@ func renderStateMachinePUML(ctx diagramContext) []byte {
 		}
 	}
 	lines = append(lines, fmt.Sprintf("[*] --> observe : %s", wrapPlantUMLText(createEntryLabel(binding), 28)))
-	if binding.Import.ListLookup != nil {
+	if hasListLookup(ctx) {
 		lines = append(lines, "observe --> resolve_by_lookup : tracked identity missing")
 		lines = append(lines, fmt.Sprintf("resolve_by_lookup --> evaluate_ready : %s", wrapPlantUMLText(fmt.Sprintf("lookup or create reaches %s", successTargetSummary(binding)), 28)))
-		if retryable := retryableStateSummary(binding); retryable != "none" {
+		if retryable := retryableStateSummary(ctx); retryable != "none" {
 			lines = append(lines, fmt.Sprintf("resolve_by_lookup --> retryable : %s", wrapPlantUMLText(fmt.Sprintf("OCI state in %s", retryable), 28)))
 		}
 		lines = append(lines, "resolve_by_lookup --> failed : unresolved OCI error or non-success state")
 	}
 	lines = append(lines, fmt.Sprintf("observe --> evaluate_ready : %s", wrapPlantUMLText(fmt.Sprintf("OCI state in %s", successTargetSummary(binding)), 28)))
-	if retryable := retryableStateSummary(binding); retryable != "none" {
+	if retryable := retryableStateSummary(ctx); retryable != "none" {
 		lines = append(lines, fmt.Sprintf("observe --> retryable : %s", wrapPlantUMLText(fmt.Sprintf("OCI state in %s", retryable), 28)))
 	}
 	lines = append(lines, "observe --> failed : unresolved OCI error or non-success state")
@@ -447,10 +471,10 @@ func renderStateMachinePUML(ctx diagramContext) []byte {
 			"reject_unsupported_drift --> ready : wait for spec or live state change",
 		)
 	}
-	if len(binding.Import.Mutation.Mutable) > 0 && len(binding.Import.Operations.Update) > 0 {
+	if len(mutableSurface(ctx)) > 0 && len(binding.Import.Operations.Update) > 0 {
 		lines = append(lines, fmt.Sprintf(
 			"evaluate_ready --> apply_update : %s",
-			wrapPlantUMLText(fmt.Sprintf("supported mutable drift for %s", summarizeValues(binding.Import.Mutation.Mutable, 3)), 28),
+			wrapPlantUMLText(fmt.Sprintf("supported mutable drift for %s", summarizeValues(mutableSurface(ctx), 3)), 28),
 		))
 		if includeSecretsParticipant(ctx) {
 			lines = append(lines, "apply_update --> sync_secret : update path completes")
@@ -532,13 +556,14 @@ func commonNoteLines(ctx diagramContext) []string {
 		fmt.Sprintf("status/finalizer: %s / %s", binding.Spec.StatusProjection, binding.Spec.FinalizerPolicy),
 		fmt.Sprintf("requeue: %s", summarizeValues(binding.Spec.RequeueConditions, 4)),
 		fmt.Sprintf("provider states: create %s; update %s; delete %s",
-			transitionSummary(binding.Import.Lifecycle.Create.Pending, "none"),
-			transitionSummary(binding.Import.Lifecycle.Update.Pending, "none"),
-			transitionSummary(binding.Import.DeleteConfirmation.Pending, "none"),
+			transitionSummary(createPendingStates(ctx), "none"),
+			transitionSummary(updatePendingStates(ctx), "none"),
+			transitionSummary(deletePendingStates(ctx), "none"),
 		),
-		fmt.Sprintf("supported drift: %s", summarizeValues(binding.Import.Mutation.Mutable, 4)),
+		fmt.Sprintf("supported drift: %s", summarizeValues(mutableSurface(ctx), 4)),
 		fmt.Sprintf("reject before mutate: %s", rejectSurfaceSummary(ctx)),
-		fmt.Sprintf("list lookup: %s", listLookupSummary(binding)),
+		fmt.Sprintf("create-only fields: %s", summarizeValues(createOnlySurface(ctx), 4)),
+		fmt.Sprintf("list lookup: %s", listLookupSummary(ctx)),
 		fmt.Sprintf("conflicts: %s", summarizeValues(ctx.ConflictSets, 3)),
 		fmt.Sprintf("open gaps: %s", summarizeValues(ctx.OpenGaps, 5)),
 	}
@@ -656,7 +681,7 @@ func deleteActivityLine(ctx diagramContext) string {
 
 func renderObserveAndBindActivity(ctx diagramContext) []string {
 	binding := ctx.Binding
-	if len(binding.Import.Operations.Get) == 0 && binding.Import.ListLookup == nil && len(binding.Import.Operations.Create) == 0 {
+	if len(binding.Import.Operations.Get) == 0 && !hasListLookup(ctx) && len(binding.Import.Operations.Create) == 0 {
 		return []string{plantUMLAction(fmt.Sprintf("Resolve OCI state via %s", observePathSummary(binding)))}
 	}
 
@@ -667,21 +692,21 @@ func renderObserveAndBindActivity(ctx diagramContext) []string {
 		lines = append(lines, plantUMLAction("Use the tracked OCI identity for follow-up reconciliation"))
 	}
 	lines = append(lines, "else (no)")
-	if binding.Import.ListLookup != nil {
+	if hasListLookup(ctx) {
 		lines = append(lines, plantUMLAction(fmt.Sprintf(
 			"Resolve an existing OCI resource through %s using filters %s",
 			summarizeOperations(binding.Import.Operations.List, 2),
-			summarizeValues(binding.Import.ListLookup.FilterFields, 4),
+			listLookupFiltersSummary(ctx),
 		)))
 	}
 	if len(binding.Import.Operations.Create) > 0 {
 		createAction := fmt.Sprintf("Create the OCI resource via %s when no reusable match is found", summarizeOperations(binding.Import.Operations.Create, 3))
-		if binding.Import.ListLookup == nil {
+		if !hasListLookup(ctx) {
 			createAction = fmt.Sprintf("Create the OCI resource via %s when no tracked identity is present", summarizeOperations(binding.Import.Operations.Create, 3))
 		}
 		lines = append(lines, plantUMLAction(createAction))
 	}
-	if binding.Import.ListLookup != nil || len(binding.Import.Operations.Create) > 0 {
+	if hasListLookup(ctx) || len(binding.Import.Operations.Create) > 0 {
 		lines = append(lines, plantUMLAction("Persist the resolved or created OCI identity into status"))
 	}
 	lines = append(lines, "endif")
@@ -741,12 +766,12 @@ func renderObserveAndBindSequence(ctx diagramContext) []string {
 			fmt.Sprintf("ServiceManager -> OCI: %s", wrapPlantUMLText(summarizeOperations(binding.Import.Operations.Get, 2), 36)),
 		)
 	}
-	if binding.Import.ListLookup != nil || len(binding.Import.Operations.Create) > 0 {
+	if hasListLookup(ctx) || len(binding.Import.Operations.Create) > 0 {
 		lines = append(lines, "else tracked identity is missing")
-		if binding.Import.ListLookup != nil {
+		if hasListLookup(ctx) {
 			lines = append(lines,
 				fmt.Sprintf("ServiceManager -> OCI: %s", wrapPlantUMLText(
-					fmt.Sprintf("%s(filters: %s)", summarizeOperations(binding.Import.Operations.List, 2), summarizeValues(binding.Import.ListLookup.FilterFields, 4)),
+					fmt.Sprintf("%s(filters: %s)", summarizeOperations(binding.Import.Operations.List, 2), listLookupFiltersSummary(ctx)),
 					36,
 				)),
 			)
@@ -756,9 +781,9 @@ func renderObserveAndBindSequence(ctx diagramContext) []string {
 				"alt reusable OCI resource is not found",
 				fmt.Sprintf("ServiceManager -> OCI: %s", wrapPlantUMLText(summarizeOperations(binding.Import.Operations.Create, 3), 36)),
 			)
-			if len(binding.Import.Lifecycle.Create.Pending) > 0 && len(binding.Import.Operations.Get) > 0 {
+			if len(createPendingStates(ctx)) > 0 && len(binding.Import.Operations.Get) > 0 {
 				lines = append(lines,
-					fmt.Sprintf("loop %s", wrapPlantUMLText(fmt.Sprintf("create pending %s", summarizeValues(binding.Import.Lifecycle.Create.Pending, 4)), 36)),
+					fmt.Sprintf("loop %s", wrapPlantUMLText(fmt.Sprintf("create pending %s", summarizeValues(createPendingStates(ctx), 4)), 36)),
 					fmt.Sprintf("ServiceManager -> OCI: %s", wrapPlantUMLText(summarizeOperations(binding.Import.Operations.Get, 2), 36)),
 					"end",
 				)
@@ -788,9 +813,9 @@ func renderDeleteSequence(ctx diagramContext) []string {
 		fmt.Sprintf("ServiceManager -> OCI: %s", wrapPlantUMLText(summarizeOperations(binding.Import.Operations.Delete, 2), 36)),
 		fmt.Sprintf("ServiceManager -> OCI: %s", wrapPlantUMLText(fmt.Sprintf("confirm delete via %s", deleteObserveSummary(binding)), 36)),
 	)
-	if len(binding.Import.DeleteConfirmation.Pending) > 0 && (len(binding.Import.Operations.Get) > 0 || len(binding.Import.Operations.List) > 0) {
+	if len(deletePendingStates(ctx)) > 0 && (len(binding.Import.Operations.Get) > 0 || len(binding.Import.Operations.List) > 0) {
 		lines = append(lines,
-			fmt.Sprintf("loop %s", wrapPlantUMLText(fmt.Sprintf("delete pending %s", summarizeValues(binding.Import.DeleteConfirmation.Pending, 3)), 36)),
+			fmt.Sprintf("loop %s", wrapPlantUMLText(fmt.Sprintf("delete pending %s", summarizeValues(deletePendingStates(ctx), 3)), 36)),
 			fmt.Sprintf("ServiceManager -> OCI: %s", wrapPlantUMLText(deleteObserveSummary(binding), 36)),
 			"end",
 		)
@@ -826,14 +851,14 @@ func renderDriftHandlingSequence(ctx diagramContext) []string {
 			"end",
 		)
 	}
-	if len(binding.Import.Mutation.Mutable) > 0 && len(binding.Import.Operations.Update) > 0 {
+	if len(mutableSurface(ctx)) > 0 && len(binding.Import.Operations.Update) > 0 {
 		lines = append(lines,
 			"opt supported mutable drift is detected",
-			fmt.Sprintf("ServiceManager -> OCI: %s", wrapPlantUMLText(updateActivitySummary(binding), 36)),
+			fmt.Sprintf("ServiceManager -> OCI: %s", wrapPlantUMLText(updateActivitySummary(ctx), 36)),
 		)
-		if len(binding.Import.Lifecycle.Update.Pending) > 0 && len(binding.Import.Operations.Get) > 0 {
+		if len(updatePendingStates(ctx)) > 0 && len(binding.Import.Operations.Get) > 0 {
 			lines = append(lines,
-				fmt.Sprintf("loop %s", wrapPlantUMLText(fmt.Sprintf("update pending %s", summarizeValues(binding.Import.Lifecycle.Update.Pending, 4)), 36)),
+				fmt.Sprintf("loop %s", wrapPlantUMLText(fmt.Sprintf("update pending %s", summarizeValues(updatePendingStates(ctx), 4)), 36)),
 				fmt.Sprintf("ServiceManager -> OCI: %s", wrapPlantUMLText(summarizeOperations(binding.Import.Operations.Get, 2), 36)),
 				"end",
 			)
@@ -869,14 +894,15 @@ func renderDeleteStateMachineNote(ctx diagramContext) []string {
 }
 
 func hasRejectableDrift(ctx diagramContext) bool {
-	return len(ctx.Binding.Import.Mutation.ForceNew) > 0 || len(ctx.ConflictSets) > 0
+	return len(forceNewSurface(ctx)) > 0 || len(ctx.ConflictSets) > 0
 }
 
-func updateActivitySummary(binding ControllerBinding) string {
+func updateActivitySummary(ctx diagramContext) string {
+	binding := ctx.Binding
 	return fmt.Sprintf(
 		"Apply %s only for mutable fields %s",
 		summarizeOperations(binding.Import.Operations.Update, 3),
-		summarizeValues(binding.Import.Mutation.Mutable, 4),
+		summarizeValues(mutableSurface(ctx), 4),
 	)
 }
 
@@ -886,8 +912,8 @@ func rejectDriftActivitySummary(ctx diagramContext) string {
 
 func rejectSurfaceSummary(ctx diagramContext) string {
 	parts := make([]string, 0, 2)
-	if len(ctx.Binding.Import.Mutation.ForceNew) > 0 {
-		parts = append(parts, fmt.Sprintf("force-new fields %s", summarizeValues(ctx.Binding.Import.Mutation.ForceNew, 4)))
+	if len(forceNewSurface(ctx)) > 0 {
+		parts = append(parts, fmt.Sprintf("force-new fields %s", summarizeValues(forceNewSurface(ctx), 4)))
 	}
 	if len(ctx.ConflictSets) > 0 {
 		parts = append(parts, fmt.Sprintf("conflicts %s", summarizeValues(ctx.ConflictSets, 3)))
@@ -908,23 +934,29 @@ func successTargetSummary(binding ControllerBinding) string {
 	}
 }
 
-func retryableStateSummary(binding ControllerBinding) string {
-	values := append([]string(nil), binding.Import.Lifecycle.Create.Pending...)
-	values = append(values, binding.Import.Lifecycle.Update.Pending...)
-	values = append(values, binding.Import.DeleteConfirmation.Pending...)
+func retryableStateSummary(ctx diagramContext) string {
+	values := append([]string(nil), createPendingStates(ctx)...)
+	values = append(values, updatePendingStates(ctx)...)
+	values = append(values, deletePendingStates(ctx)...)
 	return summarizeValues(values, 4)
 }
 
 func driftHandlingNoteLines(ctx diagramContext) []string {
 	lines := []string{
-		fmt.Sprintf("Supported update surface: %s", summarizeValues(ctx.Binding.Import.Mutation.Mutable, 4)),
+		fmt.Sprintf("Supported update surface: %s", summarizeValues(mutableSurface(ctx), 4)),
 		fmt.Sprintf("Reject before mutate: %s", rejectSurfaceSummary(ctx)),
+	}
+	if len(createOnlySurface(ctx)) > 0 {
+		lines = append(lines, fmt.Sprintf("Create-only fields: %s", summarizeValues(createOnlySurface(ctx), 4)))
 	}
 	if len(ctx.ConflictSets) > 0 {
 		lines = append(lines, fmt.Sprintf("Conflicts: %s", summarizeValues(ctx.ConflictSets, 3)))
 	}
-	if ctx.Binding.Import.ListLookup != nil {
-		lines = append(lines, fmt.Sprintf("Lookup filters: %s", summarizeValues(ctx.Binding.Import.ListLookup.FilterFields, 4)))
+	if hasListLookup(ctx) {
+		lines = append(lines, fmt.Sprintf("Lookup filters: %s", listLookupFiltersSummary(ctx)))
+		if matchRule := listLookupMatchRule(ctx); matchRule != "" {
+			lines = append(lines, fmt.Sprintf("Lookup matching: %s", matchRule))
+		}
 	}
 	return lines
 }
@@ -966,11 +998,16 @@ func deleteObserveSummary(binding ControllerBinding) string {
 	}
 }
 
-func listLookupSummary(binding ControllerBinding) string {
-	if binding.Import.ListLookup == nil {
+func listLookupSummary(ctx diagramContext) string {
+	binding := ctx.Binding
+	if !hasListLookup(ctx) {
 		return "none"
 	}
-	return fmt.Sprintf("%s filters %s", binding.Import.ListLookup.Datasource, summarizeValues(binding.Import.ListLookup.FilterFields, 4))
+	summary := fmt.Sprintf("%s filters %s", binding.Import.ListLookup.Datasource, listLookupFiltersSummary(ctx))
+	if matchRule := listLookupMatchRule(ctx); matchRule != "" {
+		summary += "; " + matchRule
+	}
+	return summary
 }
 
 func hookPhaseSummary(ctx diagramContext) string {
@@ -1073,6 +1110,90 @@ func transitionSummary(values []string, fallback string) string {
 	return summary
 }
 
+func createPendingStates(ctx diagramContext) []string {
+	if ctx.Diagram.RepoAuthored != nil &&
+		ctx.Diagram.RepoAuthored.ProviderLifecycle != nil &&
+		len(ctx.Diagram.RepoAuthored.ProviderLifecycle.CreatePending) > 0 {
+		return ctx.Diagram.RepoAuthored.ProviderLifecycle.CreatePending
+	}
+	return ctx.Binding.Import.Lifecycle.Create.Pending
+}
+
+func updatePendingStates(ctx diagramContext) []string {
+	if ctx.Diagram.RepoAuthored != nil &&
+		ctx.Diagram.RepoAuthored.ProviderLifecycle != nil &&
+		len(ctx.Diagram.RepoAuthored.ProviderLifecycle.UpdatePending) > 0 {
+		return ctx.Diagram.RepoAuthored.ProviderLifecycle.UpdatePending
+	}
+	return ctx.Binding.Import.Lifecycle.Update.Pending
+}
+
+func deletePendingStates(ctx diagramContext) []string {
+	if ctx.Diagram.RepoAuthored != nil &&
+		ctx.Diagram.RepoAuthored.ProviderLifecycle != nil &&
+		len(ctx.Diagram.RepoAuthored.ProviderLifecycle.DeletePending) > 0 {
+		return ctx.Diagram.RepoAuthored.ProviderLifecycle.DeletePending
+	}
+	return ctx.Binding.Import.DeleteConfirmation.Pending
+}
+
+func mutableSurface(ctx diagramContext) []string {
+	if ctx.Diagram.RepoAuthored != nil &&
+		ctx.Diagram.RepoAuthored.Mutation != nil &&
+		len(ctx.Diagram.RepoAuthored.Mutation.Mutable) > 0 {
+		return ctx.Diagram.RepoAuthored.Mutation.Mutable
+	}
+	return ctx.Binding.Import.Mutation.Mutable
+}
+
+func forceNewSurface(ctx diagramContext) []string {
+	if ctx.Diagram.RepoAuthored != nil &&
+		ctx.Diagram.RepoAuthored.Mutation != nil &&
+		len(ctx.Diagram.RepoAuthored.Mutation.ForceNew) > 0 {
+		return ctx.Diagram.RepoAuthored.Mutation.ForceNew
+	}
+	return ctx.Binding.Import.Mutation.ForceNew
+}
+
+func createOnlySurface(ctx diagramContext) []string {
+	if ctx.Diagram.RepoAuthored != nil &&
+		ctx.Diagram.RepoAuthored.Mutation != nil &&
+		len(ctx.Diagram.RepoAuthored.Mutation.CreateOnly) > 0 {
+		return ctx.Diagram.RepoAuthored.Mutation.CreateOnly
+	}
+	return nil
+}
+
+func hasListLookup(ctx diagramContext) bool {
+	return ctx.Binding.Import.ListLookup != nil
+}
+
+func listLookupFiltersSummary(ctx diagramContext) string {
+	if ctx.Diagram.RepoAuthored != nil &&
+		ctx.Diagram.RepoAuthored.ListLookup != nil &&
+		len(ctx.Diagram.RepoAuthored.ListLookup.Filters) > 0 {
+		return summarizeValues(ctx.Diagram.RepoAuthored.ListLookup.Filters, 4)
+	}
+	if ctx.Binding.Import.ListLookup == nil {
+		return "none"
+	}
+	return summarizeValues(ctx.Binding.Import.ListLookup.FilterFields, 4)
+}
+
+func listLookupMatchRule(ctx diagramContext) string {
+	if ctx.Diagram.RepoAuthored != nil && ctx.Diagram.RepoAuthored.ListLookup != nil {
+		return strings.TrimSpace(ctx.Diagram.RepoAuthored.ListLookup.MatchRule)
+	}
+	return ""
+}
+
+func driftComparisonSurfaceSummary(ctx diagramContext) string {
+	if ctx.Diagram.RepoAuthored != nil && ctx.Diagram.RepoAuthored.Mutation != nil {
+		return "Compare live OCI state against the repo-authored mutation surface"
+	}
+	return "Compare live OCI state against the imported field surface"
+}
+
 func createEntryLabel(binding ControllerBinding) string {
 	if len(binding.Import.Operations.Create) > 0 {
 		return summarizeOperations(binding.Import.Operations.Create, 2)
@@ -1084,13 +1205,13 @@ func stateLabel(bucket string, ctx diagramContext) string {
 	var providerStates []string
 	switch bucket {
 	case "provisioning":
-		providerStates = ctx.Binding.Import.Lifecycle.Create.Pending
+		providerStates = createPendingStates(ctx)
 	case "active":
 		providerStates = append(append([]string(nil), ctx.Binding.Import.Lifecycle.Create.Target...), ctx.Binding.Import.Lifecycle.Update.Target...)
 	case "updating":
-		providerStates = ctx.Binding.Import.Lifecycle.Update.Pending
+		providerStates = updatePendingStates(ctx)
 	case "terminating":
-		providerStates = ctx.Binding.Import.DeleteConfirmation.Pending
+		providerStates = deletePendingStates(ctx)
 	case "failed":
 		providerStates = []string{"repo-authored failure bucket"}
 	}

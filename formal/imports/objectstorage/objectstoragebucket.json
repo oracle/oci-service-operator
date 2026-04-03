@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "objectstorage",
+  "slug": "objectstoragebucket",
+  "kind": "ObjectStorageBucket",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_objectstorage_bucket",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateBucket",
+        "requestType": "objectstorage.CreateBucketRequest",
+        "responseType": "objectstorage.CreateBucketResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetBucket",
+        "requestType": "objectstorage.GetBucketRequest",
+        "responseType": "objectstorage.GetBucketResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListBuckets",
+        "requestType": "objectstorage.ListBucketsRequest",
+        "responseType": "objectstorage.ListBucketsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateBucket",
+        "requestType": "objectstorage.UpdateBucketRequest",
+        "responseType": "objectstorage.UpdateBucketResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteBucket",
+        "requestType": "objectstorage.DeleteBucketRequest",
+        "responseType": "objectstorage.DeleteBucketResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "auto_tiering",
+      "compartment_id",
+      "defined_tags",
+      "freeform_tags",
+      "kms_key_id",
+      "metadata",
+      "name",
+      "namespace",
+      "object_events_enabled",
+      "public_access_type",
+      "versioning"
+    ],
+    "forceNew": [
+      "storage_tier"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_objectstorage_buckets",
+    "collectionField": "buckets",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "name",
+      "namespace",
+      "compartment_id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/objectstorage/objectstoragebucket/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/objectstorage/objectstoragebucket/logic-gaps.md",
+    "excludedSemantics": [
+      "published-kind-alias",
+      "implicit-namespace-lookup",
+      "synchronous-write-success"
+    ]
+  },
+  "notes": [
+    "Seeded ObjectStorageBucket row for objectstorage; the published kind reuses the Bucket SDK family while the repo-owned service client resolves namespaceName through GetNamespace when spec.namespace is omitted."
+  ]
+}

@@ -5,9 +5,16 @@ metadata:
   name: manager-role
 rules:
 - apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
   - nosql.oracle.com
   resources:
-  - indexes
+  - indices
   - replicas
   - rows
   - tables
@@ -26,7 +33,7 @@ rules:
 - apiGroups:
   - nosql.oracle.com
   resources:
-  - indexes/finalizers
+  - indices/finalizers
   - replicas/finalizers
   - rows/finalizers
   - tables/finalizers
@@ -39,7 +46,7 @@ rules:
 - apiGroups:
   - nosql.oracle.com
   resources:
-  - indexes/status
+  - indices/status
   - replicas/status
   - rows/status
   - tables/status

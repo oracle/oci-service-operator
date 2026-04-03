@@ -1,0 +1,266 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: redisclusters.redis.oracle.com
+spec:
+  group: redis.oracle.com
+  names:
+    kind: RedisCluster
+    listKind: RedisClusterList
+    plural: redisclusters
+    singular: rediscluster
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the RedisCluster
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the RedisCluster
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: RedisCluster is the Schema for the redisclusters API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: RedisClusterSpec defines the desired state of RedisCluster.
+            properties:
+              compartmentId:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm#Oracle)
+                  of the compartment that contains the Redis cluster.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              displayName:
+                description: A user-friendly name. Does not have to be unique, and
+                  it's changeable. Avoid entering confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              nodeCount:
+                description: The number of nodes in the Redis cluster.
+                type: integer
+              nodeMemoryInGBs:
+                description: The amount of memory allocated to the Redis cluster's
+                  nodes, in gigabytes.
+                type: number
+              softwareVersion:
+                description: The Redis version that the cluster is running.
+                type: string
+              subnetId:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm#Oracle)
+                  of the Redis cluster's subnet.
+                type: string
+            required:
+            - compartmentId
+            - displayName
+            - nodeCount
+            - nodeMemoryInGBs
+            - softwareVersion
+            - subnetId
+            type: object
+          status:
+            description: RedisClusterStatus defines the observed state of RedisCluster.
+            properties:
+              compartmentId:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm#Oracle)
+                  of the compartment that contains the Redis cluster.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              displayName:
+                description: A user-friendly name. Does not have to be unique, and
+                  it's changeable. Avoid entering confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              id:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm#Oracle)
+                  of the Redis cluster.
+                type: string
+              lifecycleDetails:
+                description: A message describing the current state in more detail.
+                  For example, the message might provide actionable information for
+                  a resource in `FAILED` state.
+                type: string
+              lifecycleState:
+                description: The current state of the Redis cluster.
+                type: string
+              nodeCollection:
+                description: RedisClusterNodeCollection defines nested fields for
+                  RedisCluster.NodeCollection.
+                properties:
+                  items:
+                    description: Collection of node objects.
+                    items:
+                      description: RedisClusterNodeCollectionItem defines nested fields
+                        for RedisCluster.NodeCollection.Item.
+                      properties:
+                        displayName:
+                          description: A user-friendly name of a Redis cluster node.
+                          type: string
+                        privateEndpointFqdn:
+                          description: The fully qualified domain name (FQDN) of the
+                            API endpoint to access a specific node.
+                          type: string
+                        privateEndpointIpAddress:
+                          description: The private IP address of the API endpoint
+                            to access a specific node.
+                          type: string
+                      type: object
+                    type: array
+                type: object
+              nodeCount:
+                description: The number of nodes in the Redis cluster.
+                type: integer
+              nodeMemoryInGBs:
+                description: The amount of memory allocated to the Redis cluster's
+                  nodes, in gigabytes.
+                type: number
+              primaryEndpointIpAddress:
+                description: The private IP address of the API endpoint for the Redis
+                  cluster's primary node.
+                type: string
+              primaryFqdn:
+                description: The fully qualified domain name (FQDN) of the API endpoint
+                  for the Redis cluster's primary node.
+                type: string
+              replicasEndpointIpAddress:
+                description: The private IP address of the API endpoint for the Redis
+                  cluster's replica nodes.
+                type: string
+              replicasFqdn:
+                description: The fully qualified domain name (FQDN) of the API endpoint
+                  for the Redis cluster's replica nodes.
+                type: string
+              softwareVersion:
+                description: The Redis version that the cluster is running.
+                type: string
+              status:
+                properties:
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              subnetId:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm#Oracle)
+                  of the Redis cluster's subnet.
+                type: string
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of system tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeCreated:
+                description: The date and time the Redis cluster was created. An RFC3339
+                  (https://datatracker.ietf.org/doc/html/rfc3339) formatted datetime
+                  string.
+                type: string
+              timeUpdated:
+                description: The date and time the Redis cluster was updated. An RFC3339
+                  (https://datatracker.ietf.org/doc/html/rfc3339) formatted datetime
+                  string.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
