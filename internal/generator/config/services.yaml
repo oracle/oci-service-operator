@@ -984,36 +984,6 @@ services:
               - groups="",resources=secrets,verbs=get;list;watch;create;update;delete
           serviceManager:
             packagePath: streaming/stream
-        - kind: ConnectHarness
-          controller:
-            strategy: none
-          serviceManager:
-            strategy: none
-        - kind: Cursor
-          controller:
-            strategy: none
-          serviceManager:
-            strategy: none
-        - kind: Group
-          controller:
-            strategy: none
-          serviceManager:
-            strategy: none
-        - kind: GroupCursor
-          controller:
-            strategy: none
-          serviceManager:
-            strategy: none
-        - kind: Message
-          controller:
-            strategy: none
-          serviceManager:
-            strategy: none
-        - kind: StreamPool
-          controller:
-            strategy: none
-          serviceManager:
-            strategy: none
 
   - service: vault
     sdkPackage: github.com/oracle/oci-go-sdk/v65/vault

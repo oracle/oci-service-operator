@@ -218,7 +218,7 @@ func TestSelectServicesAllAppliesDefaultKindSubsets(t *testing.T) {
 	}
 }
 
-func TestSelectServicesExplicitServiceClearsDefaultKindSubset(t *testing.T) {
+func TestSelectServicesExplicitServicePreservesDefaultKindSubset(t *testing.T) {
 	t.Parallel()
 
 	cfg := &Config{
@@ -240,7 +240,7 @@ func TestSelectServicesExplicitServiceClearsDefaultKindSubset(t *testing.T) {
 	}
 
 	services := assertSelectServicesResult(t, cfg, "database", false, 1, "")
-	assertSelectedKinds(t, services[0], nil)
+	assertSelectedKinds(t, services[0], []string{"AutonomousDatabase"})
 }
 
 func TestNormalizeDefaultActiveSelection(t *testing.T) {
@@ -341,6 +341,15 @@ func TestSelectDefaultActiveOrExplicitServices(t *testing.T) {
 		t.Fatalf("SelectDefaultActiveOrExplicitServices(identity) = %#v, want identity only", explicit)
 	}
 	assertSelectedKinds(t, explicit[0], nil)
+
+	explicit, err = cfg.SelectDefaultActiveOrExplicitServices("database", false)
+	if err != nil {
+		t.Fatalf("SelectDefaultActiveOrExplicitServices(database) error = %v", err)
+	}
+	if len(explicit) != 1 || explicit[0].Service != "database" {
+		t.Fatalf("SelectDefaultActiveOrExplicitServices(database) = %#v, want database only", explicit)
+	}
+	assertSelectedKinds(t, explicit[0], []string{"AutonomousDatabase"})
 }
 
 func TestLoadConfigIncludesSelectionMetadata(t *testing.T) {
@@ -1183,7 +1192,6 @@ func TestCheckedInConfigOptsOutEndpointBasedGeneratedRuntimeResources(t *testing
 
 	wantKinds := map[string][]string{
 		"keymanagement": {"Key", "KeyVersion", "ReplicationStatus", "WrappingKey"},
-		"streaming":     {"ConnectHarness", "Cursor", "Group", "GroupCursor", "Message", "StreamPool"},
 	}
 
 	for serviceName, kinds := range wantKinds {
@@ -1516,14 +1524,11 @@ func assertPrimaryPortOverride(t *testing.T, service *ServiceConfig, kind string
 func assertStreamingRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
 	t.Helper()
 
-	assertResourceOverrideCount(t, service, 7)
+	assertResourceOverrideCount(t, service, 1)
 	overrides := overridesByKind(service)
 	assertFormalSpecFor(t, service, "Stream", "stream")
 	if overrides["Stream"].ServiceManager.PackagePath != "streaming/stream" {
 		t.Fatalf("streaming packagePath = %q, want %q", overrides["Stream"].ServiceManager.PackagePath, "streaming/stream")
-	}
-	for _, kind := range []string{"ConnectHarness", "Cursor", "Group", "GroupCursor", "Message", "StreamPool"} {
-		assertDisabledResourceOverride(t, service.Service, kind, overrides[kind])
 	}
 }
 
