@@ -129,7 +129,7 @@ rules:
   - identity.oracle.com
   resources:
   - alloweddomainlicensetypes
-  - apikeies
+  - apikeys
   - authenticationpolicies
   - authtokens
   - availabilitydomains
@@ -137,7 +137,7 @@ rules:
   - bulkedittagsresourcetypes
   - compartments
   - costtrackingtags
-  - customersecretkeies
+  - customersecretkeys
   - dbcredentials
   - domains
   - dynamicgroups
@@ -171,7 +171,7 @@ rules:
   - usergroupmemberships
   - users
   - userstates
-  - useruipasswordinformations
+  - useruipasswordinformation
   - workrequests
   verbs:
   - create
@@ -185,7 +185,7 @@ rules:
   - identity.oracle.com
   resources:
   - alloweddomainlicensetypes/finalizers
-  - apikeies/finalizers
+  - apikeys/finalizers
   - authenticationpolicies/finalizers
   - authtokens/finalizers
   - availabilitydomains/finalizers
@@ -193,7 +193,7 @@ rules:
   - bulkedittagsresourcetypes/finalizers
   - compartments/finalizers
   - costtrackingtags/finalizers
-  - customersecretkeies/finalizers
+  - customersecretkeys/finalizers
   - dbcredentials/finalizers
   - domains/finalizers
   - dynamicgroups/finalizers
@@ -227,7 +227,7 @@ rules:
   - usergroupmemberships/finalizers
   - users/finalizers
   - userstates/finalizers
-  - useruipasswordinformations/finalizers
+  - useruipasswordinformation/finalizers
   - workrequests/finalizers
   verbs:
   - update
@@ -235,7 +235,7 @@ rules:
   - identity.oracle.com
   resources:
   - alloweddomainlicensetypes/status
-  - apikeies/status
+  - apikeys/status
   - authenticationpolicies/status
   - authtokens/status
   - availabilitydomains/status
@@ -243,7 +243,7 @@ rules:
   - bulkedittagsresourcetypes/status
   - compartments/status
   - costtrackingtags/status
-  - customersecretkeies/status
+  - customersecretkeys/status
   - dbcredentials/status
   - domains/status
   - dynamicgroups/status
@@ -277,7 +277,7 @@ rules:
   - usergroupmemberships/status
   - users/status
   - userstates/status
-  - useruipasswordinformations/status
+  - useruipasswordinformation/status
   - workrequests/status
   verbs:
   - get
