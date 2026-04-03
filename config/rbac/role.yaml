@@ -23,6 +23,35 @@ rules:
   - update
   - watch
 - apiGroups:
+  - apigateway.oracle.com
+  resources:
+  - apigatewaydeployments
+  - apigateways
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apigateway.oracle.com
+  resources:
+  - apigatewaydeployments/finalizers
+  - apigateways/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - apigateway.oracle.com
+  resources:
+  - apigatewaydeployments/status
+  - apigateways/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - containerengine.oracle.com
   resources:
   - addonoptions
@@ -95,6 +124,32 @@ rules:
   - workrequesterrors/status
   - workrequestlogs/status
   - workrequests/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - containerinstances.oracle.com
+  resources:
+  - containerinstances
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - containerinstances.oracle.com
+  resources:
+  - containerinstances/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - containerinstances.oracle.com
+  resources:
+  - containerinstances/status
   verbs:
   - get
   - patch

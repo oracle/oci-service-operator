@@ -1,0 +1,206 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: apigatewaydeployments.apigateway.oracle.com
+spec:
+  group: apigateway.oracle.com
+  names:
+    kind: ApiGatewayDeployment
+    listKind: ApiGatewayDeploymentList
+    plural: apigatewaydeployments
+    singular: apigatewaydeployment
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - jsonPath: .spec.pathPrefix
+      name: PathPrefix
+      priority: 1
+      type: string
+    - description: status of the ApiGatewayDeployment
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the ApiGatewayDeployment
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: ApiGatewayDeployment is the Schema for the apigatewaydeployments
+          API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ApiGatewayDeploymentSpec defines the desired state of ApiGatewayDeployment.
+            properties:
+              compartmentId:
+                description: CompartmentId is the OCID of the compartment in which
+                  to create the deployment.
+                maxLength: 255
+                minLength: 1
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                type: object
+              displayName:
+                description: DisplayName is a user-friendly name for the deployment.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                type: object
+              gatewayId:
+                description: GatewayId is the OCID of the API Gateway to deploy to.
+                maxLength: 255
+                minLength: 1
+                type: string
+                x-kubernetes-validations:
+                - message: gatewayId is immutable
+                  rule: self == oldSelf
+              id:
+                description: The OCID of an existing Deployment to bind to.
+                maxLength: 255
+                minLength: 1
+                type: string
+              pathPrefix:
+                description: PathPrefix is the path prefix for all routes in this
+                  deployment.
+                type: string
+                x-kubernetes-validations:
+                - message: pathPrefix is immutable
+                  rule: self == oldSelf
+              routes:
+                description: Routes is the list of API routes in this deployment.
+                items:
+                  description: ApiGatewayRoute defines a single route in a deployment
+                    specification.
+                  properties:
+                    backend:
+                      description: Backend defines where the route sends traffic.
+                      properties:
+                        body:
+                          description: Body is the response body for STOCK_RESPONSE_BACKEND.
+                          type: string
+                        functionId:
+                          description: FunctionId is the OCID of the Oracle Function
+                            for ORACLE_FUNCTIONS_BACKEND.
+                          type: string
+                        status:
+                          description: Status is the HTTP status code for STOCK_RESPONSE_BACKEND.
+                          type: integer
+                        type:
+                          description: Type is the backend type.
+                          enum:
+                          - HTTP_BACKEND
+                          - ORACLE_FUNCTIONS_BACKEND
+                          - STOCK_RESPONSE_BACKEND
+                          type: string
+                        url:
+                          description: Url is the backend URL for HTTP_BACKEND.
+                          type: string
+                      required:
+                      - type
+                      type: object
+                    methods:
+                      description: Methods is the list of HTTP methods.
+                      items:
+                        type: string
+                      type: array
+                    path:
+                      description: Path is the route path.
+                      type: string
+                  required:
+                  - backend
+                  - path
+                  type: object
+                type: array
+            required:
+            - compartmentId
+            - gatewayId
+            - pathPrefix
+            type: object
+          status:
+            description: ApiGatewayDeploymentStatus defines the observed state of
+              ApiGatewayDeployment.
+            properties:
+              status:
+                properties:
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

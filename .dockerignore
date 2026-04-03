@@ -20,6 +20,7 @@ unittests.percent
 baseline.json
 
 # Local worktree artifacts that are not part of the manager build context.
+packages/
 containerengine/
 database/
 identity/
