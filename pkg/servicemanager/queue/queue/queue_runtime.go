@@ -343,7 +343,7 @@ func (c *queueRuntimeClient) buildUpdateRequest(resource *queuev1beta1.Queue, cu
 		updateDetails.DeadLetterQueueDeliveryCount = common.Int(resource.Spec.DeadLetterQueueDeliveryCount)
 		updateNeeded = true
 	}
-	if resource.Spec.CustomEncryptionKeyId != "" && !stringPtrEqual(current.CustomEncryptionKeyId, resource.Spec.CustomEncryptionKeyId) {
+	if !stringPtrEqual(current.CustomEncryptionKeyId, resource.Spec.CustomEncryptionKeyId) {
 		updateDetails.CustomEncryptionKeyId = common.String(resource.Spec.CustomEncryptionKeyId)
 		updateNeeded = true
 	}
