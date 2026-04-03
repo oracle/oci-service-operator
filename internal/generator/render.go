@@ -64,7 +64,7 @@ func (r *Renderer) RenderPackageOutputs(root string, pkg *PackageModel) error {
 		return nil
 	}
 
-	packageDir := filepath.Join(root, "packages", pkg.Service.Group)
+	packageDir := filepath.Join(root, "packages", pkg.OutputName)
 	installDir := filepath.Join(packageDir, "install")
 	if err := os.MkdirAll(installDir, 0o755); err != nil {
 		return fmt.Errorf("create package install dir %q: %w", installDir, err)
@@ -169,6 +169,56 @@ func (r *Renderer) RenderServiceManagers(root string, pkg *PackageModel, overwri
 		if err := writeGeneratedFile(serviceManagerPath, serviceManagerContent, overwrite); err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (r *Renderer) RenderManagerOutputs(root string, pkg *PackageModel, overwrite bool) error {
+	if !pkg.Service.IsControllerBacked() {
+		return nil
+	}
+
+	managerCmdDir := managerCmdOutputDir(root, pkg)
+	if err := os.MkdirAll(managerCmdDir, 0o755); err != nil {
+		return fmt.Errorf("create manager cmd dir %q: %w", managerCmdDir, err)
+	}
+
+	mainContent, err := renderManagerMainFile(pkg)
+	if err != nil {
+		return fmt.Errorf("render manager main for %s: %w", pkg.Service.Service, err)
+	}
+	if err := writeGeneratedFile(filepath.Join(managerCmdDir, "main.go"), mainContent, overwrite); err != nil {
+		return err
+	}
+
+	managerConfigDir := managerConfigOutputDir(root, pkg)
+	if err := os.MkdirAll(managerConfigDir, 0o755); err != nil {
+		return fmt.Errorf("create manager config dir %q: %w", managerConfigDir, err)
+	}
+
+	kustomizationContent, err := renderManagerKustomizationFile()
+	if err != nil {
+		return fmt.Errorf("render manager kustomization for %s: %w", pkg.Service.Service, err)
+	}
+	if err := writeGeneratedFile(filepath.Join(managerConfigDir, "kustomization.yaml"), kustomizationContent, overwrite); err != nil {
+		return err
+	}
+
+	managerDeploymentContent, err := renderManagerDeploymentFile()
+	if err != nil {
+		return fmt.Errorf("render manager deployment for %s: %w", pkg.Service.Service, err)
+	}
+	if err := writeGeneratedFile(filepath.Join(managerConfigDir, "manager.yaml"), managerDeploymentContent, overwrite); err != nil {
+		return err
+	}
+
+	controllerConfigContent, err := renderControllerManagerConfigFile(pkg.OutputName)
+	if err != nil {
+		return fmt.Errorf("render controller manager config for %s: %w", pkg.Service.Service, err)
+	}
+	if err := writeGeneratedFile(filepath.Join(managerConfigDir, "controller_manager_config.yaml"), controllerConfigContent, overwrite); err != nil {
+		return err
 	}
 
 	return nil
@@ -378,6 +428,46 @@ func renderPackageMetadata(metadata PackageMetadataModel) (string, error) {
 
 func renderInstallKustomization(install InstallKustomizationModel) (string, error) {
 	return executeTemplate(installKustomizationTemplate, install)
+}
+
+func renderManagerMainFile(pkg *PackageModel) (string, error) {
+	data := struct {
+		APIImportAlias      string
+		APIImportPath       string
+		Group               string
+		LeaderElectionID    string
+		MetricsServiceName  string
+		ManagerServicesPath string
+	}{
+		APIImportAlias:      fmt.Sprintf("%s%s", pkg.Service.Group, pkg.Version),
+		APIImportPath:       fmt.Sprintf("github.com/oracle/oci-service-operator/api/%s/%s", pkg.Service.Group, pkg.Version),
+		Group:               pkg.OutputName,
+		LeaderElectionID:    fmt.Sprintf("40558063.oci.%s", pkg.OutputName),
+		MetricsServiceName:  pkg.OutputName,
+		ManagerServicesPath: "github.com/oracle/oci-service-operator/pkg/manager/services",
+	}
+
+	content, err := executeTemplate(managerMainTemplate, data)
+	if err != nil {
+		return "", err
+	}
+	return formatGoSource(content)
+}
+
+func renderManagerKustomizationFile() (string, error) {
+	return executeTemplate(managerKustomizationTemplate, struct{}{})
+}
+
+func renderManagerDeploymentFile() (string, error) {
+	return executeTemplate(managerDeploymentTemplate, struct{}{})
+}
+
+func renderControllerManagerConfigFile(group string) (string, error) {
+	return executeTemplate(controllerManagerConfigTemplate, struct {
+		LeaderElectionID string
+	}{
+		LeaderElectionID: fmt.Sprintf("40558063.oci.%s", group),
+	})
 }
 
 func renderServiceClientFile(serviceManager ServiceManagerModel) (string, error) {
@@ -647,6 +737,14 @@ func preflightServiceManagerDirs(root string, serviceManagers []ServiceManagerMo
 
 func serviceManagerOutputDir(root string, serviceManager ServiceManagerModel) string {
 	return filepath.Join(root, "pkg", "servicemanager", filepath.FromSlash(serviceManager.PackagePath))
+}
+
+func managerCmdOutputDir(root string, pkg *PackageModel) string {
+	return filepath.Join(root, "cmd", "manager", pkg.OutputName)
+}
+
+func managerConfigOutputDir(root string, pkg *PackageModel) string {
+	return filepath.Join(root, "config", "manager", pkg.OutputName)
 }
 
 func controllerOutputDir(root string, pkg *PackageModel) string {
@@ -1232,6 +1330,9 @@ const packageMetadataTemplate = `PACKAGE_NAME={{ .PackageName }}
 PACKAGE_NAMESPACE={{ .PackageNamespace }}
 PACKAGE_NAME_PREFIX={{ .PackageNamePrefix }}
 CRD_PATHS={{ .CRDPaths }}
+{{- if .CRDKindFilter }}
+CRD_KIND_FILTER={{ .CRDKindFilter }}
+{{- end }}
 {{- if .RBACPaths }}
 RBAC_PATHS={{ .RBACPaths }}
 {{- end }}
@@ -1263,4 +1364,190 @@ patches:
 {{- end }}
 {{- end }}
 {{- end }}
+`
+
+const managerMainTemplate = `package main
+
+import (
+	"os"
+
+	"k8s.io/apimachinery/pkg/runtime"
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
+	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
+	_ "k8s.io/client-go/plugin/pkg/client/auth"
+
+	{{ .APIImportAlias }} "{{ .APIImportPath }}"
+	"github.com/oracle/oci-service-operator/pkg/manager"
+	managerservices "{{ .ManagerServicesPath }}"
+)
+
+var scheme = runtime.NewScheme()
+
+func init() {
+	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
+	utilruntime.Must({{ .APIImportAlias }}.AddToScheme(scheme))
+}
+
+func main() {
+	if err := manager.Run(manager.Options{
+		Scheme:             scheme,
+		MetricsServiceName: "{{ .MetricsServiceName }}",
+		LeaderElectionID:   "{{ .LeaderElectionID }}",
+		SkipFIPS:           true,
+	}, managerservices.ForGroup("{{ .Group }}")); err != nil {
+		os.Exit(1)
+	}
+}
+`
+
+const managerKustomizationTemplate = `apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- manager.yaml
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+configMapGenerator:
+- files:
+  - controller_manager_config.yaml
+  name: manager-config
+`
+
+const managerDeploymentTemplate = `#
+# Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    control-plane: controller-manager
+  name: system
+---
+apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: osokconfig
+data:
+  useinstanceprincipal: dHJ1ZQ==
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: controller-manager
+  namespace: system
+  labels:
+    control-plane: controller-manager
+spec:
+  selector:
+    matchLabels:
+      control-plane: controller-manager
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        control-plane: controller-manager
+    spec:
+      securityContext:
+        runAsUser: 65532
+      containers:
+      - command:
+        - /manager
+        args:
+        - --leader-elect
+        image: controller:latest
+        imagePullPolicy: Always
+        name: manager
+        securityContext:
+          allowPrivilegeEscalation: false
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8081
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8081
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+          limits:
+            cpu: 500m
+            memory: 300Mi
+          requests:
+            cpu: 500m
+            memory: 200Mi
+        env:
+          - name: USER
+            valueFrom:
+              secretKeyRef:
+                name: ocicredentials
+                key: user
+                optional: true
+          - name: TENANCY
+            valueFrom:
+              secretKeyRef:
+                name: ocicredentials
+                key: tenancy
+                optional: true
+          - name: REGION
+            valueFrom:
+              secretKeyRef:
+                name: ocicredentials
+                key: region
+                optional: true
+          - name: FINGERPRINT
+            valueFrom:
+              secretKeyRef:
+                name: ocicredentials
+                key: fingerprint
+                optional: true
+          - name: PASSPHRASE
+            valueFrom:
+              secretKeyRef:
+                name: ocicredentials
+                key: passphrase
+                optional: true
+          - name: PRIVATEKEY
+            valueFrom:
+              secretKeyRef:
+                name: ocicredentials
+                key: privatekey
+                optional: true
+          - name: USEINSTANCEPRINCIPAL
+            valueFrom:
+              secretKeyRef:
+                name: osokconfig
+                key: useinstanceprincipal
+        volumeMounts:
+          - name: pki
+            mountPath: /etc/pki
+            readOnly: true
+      volumes:
+        - name: pki
+          hostPath:
+            path: /etc/pki
+      terminationGracePeriodSeconds: 10
+`
+
+const controllerManagerConfigTemplate = `#
+# Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+apiVersion: controller-runtime.sigs.k8s.io/v1alpha1
+kind: ControllerManagerConfiguration
+health:
+  healthProbeBindAddress: :8081
+metrics:
+  bindAddress: 127.0.0.1:8080
+webhook:
+  port: 9443
+leaderElection:
+  leaderElect: true
+  resourceName: {{ .LeaderElectionID }}
 `

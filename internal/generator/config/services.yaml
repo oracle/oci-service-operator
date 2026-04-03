@@ -111,10 +111,20 @@ services:
     phase: networking-and-infrastructure
     packageProfile: controller-backed
     selection:
-      enabled: false
-      mode: explicit
-      includeKinds:
-        - Instance
+      enabled: true
+      mode: all
+    packageSplits:
+      - name: core-network
+        defaultControllerImage: iad.ocir.io/oracle/oci-service-operator-core-network:latest
+        includeKinds:
+          - InternetGateway
+          - NatGateway
+          - NetworkSecurityGroup
+          - RouteTable
+          - SecurityList
+          - ServiceGateway
+          - Subnet
+          - Vcn
     generation:
       controller:
         strategy: generated

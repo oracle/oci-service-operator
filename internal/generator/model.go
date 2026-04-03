@@ -8,6 +8,7 @@ package generator
 // PackageModel is the intermediate representation rendered into generator-owned OSOK outputs.
 type PackageModel struct {
 	Service         ServiceConfig
+	OutputName      string
 	Domain          string
 	Version         string
 	GroupDNSName    string
@@ -68,6 +69,7 @@ type PackageMetadataModel struct {
 	PackageNamespace       string
 	PackageNamePrefix      string
 	CRDPaths               string
+	CRDKindFilter          string
 	RBACPaths              string
 	DefaultControllerImage string
 }
