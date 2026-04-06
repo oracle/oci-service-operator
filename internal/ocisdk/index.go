@@ -123,9 +123,23 @@ type fieldDefinition struct {
 	Contribution  FieldContribution
 }
 
-var crudMethodPattern = regexp.MustCompile(`^(Create|Get|List|Update|Delete)(.+)$`)
-var crudRequestPattern = regexp.MustCompile(`^(Create|Get|List|Update|Delete)(.+)Request$`)
+var operationMethodPattern = regexp.MustCompile(`^(Create|Get|List|Update|Delete|Launch|Terminate)(.+)$`)
+var operationRequestPattern = regexp.MustCompile(`^(Create|Get|List|Update|Delete|Launch|Terminate)(.+)Request$`)
 var constructorPattern = regexp.MustCompile(`^New(.+)WithConfigurationProvider$`)
+
+// CanonicalOperationVerb collapses SDK verb aliases onto the generator's primary CRUD phases.
+func CanonicalOperationVerb(verb string) (string, bool) {
+	switch verb {
+	case "Create", "Get", "List", "Update", "Delete":
+		return verb, true
+	case "Launch":
+		return "Create", true
+	case "Terminate":
+		return "Delete", true
+	default:
+		return "", false
+	}
+}
 
 func NewIndex(resolveDir ResolveDirFunc) *Index {
 	return &Index{
@@ -201,7 +215,7 @@ func (pkg *Package) ResourceOperations(rawName string) map[string]OperationMetho
 	sort.Strings(requestTypes)
 	for _, requestType := range requestTypes {
 		method := pkg.requestMethods[requestType]
-		matches := crudRequestPattern.FindStringSubmatch(method.RequestType)
+		matches := operationRequestPattern.FindStringSubmatch(method.RequestType)
 		if len(matches) == 0 {
 			continue
 		}
@@ -209,7 +223,10 @@ func (pkg *Package) ResourceOperations(rawName string) map[string]OperationMetho
 		if sdkSingularize(stem) != rawName {
 			continue
 		}
-		verb := matches[1]
+		verb, ok := CanonicalOperationVerb(matches[1])
+		if !ok {
+			continue
+		}
 		if currentStem, ok := bestMatches[verb]; ok && !preferOperationStem(rawName, stem, currentStem) {
 			continue
 		}
@@ -924,8 +941,12 @@ func operationMethod(decl *ast.FuncDecl) (OperationMethod, bool) {
 		return OperationMethod{}, false
 	}
 
-	matches := crudMethodPattern.FindStringSubmatch(decl.Name.Name)
+	matches := operationMethodPattern.FindStringSubmatch(decl.Name.Name)
 	if len(matches) == 0 {
+		return OperationMethod{}, false
+	}
+	verb, ok := CanonicalOperationVerb(matches[1])
+	if !ok {
 		return OperationMethod{}, false
 	}
 
@@ -953,7 +974,7 @@ func operationMethod(decl *ast.FuncDecl) (OperationMethod, bool) {
 	}
 
 	return OperationMethod{
-		Verb:         matches[1],
+		Verb:         verb,
 		MethodName:   decl.Name.Name,
 		ClientType:   clientType,
 		RequestType:  requestType,

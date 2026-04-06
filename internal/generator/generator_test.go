@@ -1764,6 +1764,7 @@ func TestExplicitCoreRuntimeArtifactsGenerateFromConfig(t *testing.T) {
 	if got := coreService.SelectedKinds(); !slices.Equal(got, []string{"Instance", "Drg", "InternetGateway", "NatGateway", "NetworkSecurityGroup", "RouteTable", "SecurityList", "ServiceGateway", "Subnet", "Vcn"}) {
 		t.Fatalf("core SelectedKinds() = %v, want instance plus core-network split kinds", got)
 	}
+	assertServiceFormalSpec(t, &coreService, "Instance", "instance")
 
 	outputRoot := t.TempDir()
 	seedSamplesKustomization(t, outputRoot)
@@ -1805,6 +1806,26 @@ func TestExplicitCoreRuntimeArtifactsGenerateFromConfig(t *testing.T) {
 		filepath.Join(outputRoot, "api", "core", "v1beta1", "bootvolume_types.go"),
 		filepath.Join(outputRoot, "controllers", "core", "bootvolume_controller.go"),
 		filepath.Join(outputRoot, "pkg", "servicemanager", "core", "bootvolume", "bootvolume_serviceclient.go"),
+	})
+
+	instanceServiceClient := readFile(t, filepath.Join(outputRoot, "pkg", "servicemanager", "core", "instance", "instance_serviceclient.go"))
+	assertContains(t, instanceServiceClient, []string{
+		"Semantics: &generatedruntime.Semantics{",
+		`FormalService:     "core"`,
+		`FormalSlug:        "instance"`,
+		`ResponseItemsField: "Items"`,
+		`CreateFollowUp: generatedruntime.FollowUpSemantics{`,
+		`DeleteFollowUp: generatedruntime.FollowUpSemantics{`,
+		`Fields: []generatedruntime.RequestField{{FieldName: "LaunchInstanceDetails", RequestName: "LaunchInstanceDetails", Contribution: "body", PreferResourceID: false}},`,
+		`Fields: []generatedruntime.RequestField{{FieldName: "InstanceId", RequestName: "instanceId", Contribution: "path", PreferResourceID: true}},`,
+	})
+
+	instanceSample := readFile(t, filepath.Join(outputRoot, "config", "samples", "core_v1beta1_instance.yaml"))
+	assertContains(t, instanceSample, []string{
+		"availabilityDomain:",
+		"subnetId:",
+		"sourceDetails:",
+		"imageId:",
 	})
 }
 
@@ -1849,9 +1870,7 @@ func TestExplicitIdentityCompartmentRuntimeArtifactsGenerateFromConfig(t *testin
 	if got := identityService.SelectedKinds(); !slices.Equal(got, []string{"Compartment"}) {
 		t.Fatalf("identity SelectedKinds() = %v, want [Compartment]", got)
 	}
-	if got := identityService.FormalSpecFor("Compartment"); got != "compartment" {
-		t.Fatalf("identity Compartment formalSpec = %q, want %q", got, "compartment")
-	}
+	assertServiceFormalSpec(t, &identityService, "Compartment", "compartment")
 
 	outputRoot := t.TempDir()
 	seedSamplesKustomization(t, outputRoot)

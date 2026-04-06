@@ -3,8 +3,27 @@
 # Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
 #
 
+#
+# Replace the OCI identifiers below before running e2e.
+# Update metadata.name and spec.displayName if you want to force a fresh create
+# instead of reusing an existing Instance with the same display name in the same
+# compartment and availability domain.
+# Adjust spec.shape and spec.shapeConfig if your tenancy or region does not have
+# capacity for this starter shape.
+#
 apiVersion: core.oracle.com/v1beta1
 kind: Instance
 metadata:
   name: instance-sample
-spec: {}
+spec:
+  compartmentId: ocid1.compartment.oc1..exampleuniqueID
+  availabilityDomain: "AD-1"
+  subnetId: ocid1.subnet.oc1..exampleuniqueID
+  displayName: "instance-sample"
+  shape: "VM.Standard.E4.Flex"
+  shapeConfig:
+    ocpus: 1
+    memoryInGBs: 16
+  sourceDetails:
+    sourceType: image
+    imageId: ocid1.image.oc1..exampleuniqueID

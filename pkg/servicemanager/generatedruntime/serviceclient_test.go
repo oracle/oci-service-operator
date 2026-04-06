@@ -12,8 +12,10 @@ import (
 	"strings"
 	"testing"
 
+	coresdk "github.com/oracle/oci-go-sdk/v65/core"
 	databasesdk "github.com/oracle/oci-go-sdk/v65/database"
 	mysqlsdk "github.com/oracle/oci-go-sdk/v65/mysql"
+	corev1beta1 "github.com/oracle/oci-service-operator/api/core/v1beta1"
 	databasev1beta1 "github.com/oracle/oci-service-operator/api/database/v1beta1"
 	mysqlv1beta1 "github.com/oracle/oci-service-operator/api/mysql/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
@@ -34,6 +36,8 @@ type fakeSpec struct {
 	CompartmentId        string                `json:"compartmentId,omitempty"`
 	DisplayName          string                `json:"displayName,omitempty"`
 	Name                 string                `json:"name,omitempty"`
+	FreeformTags         map[string]string     `json:"freeformTags,omitempty"`
+	ShapeConfig          *fakeShapeConfig      `json:"shapeConfig,omitempty"`
 	AdminUsername        shared.UsernameSource `json:"adminUsername,omitempty"`
 	AdminPassword        shared.PasswordSource `json:"adminPassword,omitempty"`
 	DataStorageSizeInGBs int                   `json:"dataStorageSizeInGBs,omitempty"`
@@ -47,6 +51,8 @@ type fakeStatus struct {
 	Id                   string                `json:"id,omitempty"`
 	CompartmentId        string                `json:"compartmentId,omitempty"`
 	DisplayName          string                `json:"displayName,omitempty"`
+	FreeformTags         map[string]string     `json:"freeformTags,omitempty"`
+	ShapeConfig          *fakeShapeConfig      `json:"shapeConfig,omitempty"`
 	AdminUsername        shared.UsernameSource `json:"adminUsername,omitempty"`
 	AdminPassword        shared.PasswordSource `json:"adminPassword,omitempty"`
 	DataStorageSizeInGBs int                   `json:"dataStorageSizeInGBs,omitempty"`
@@ -55,15 +61,23 @@ type fakeStatus struct {
 	LifecycleState       string                `json:"lifecycleState,omitempty"`
 }
 
+type fakeShapeConfig struct {
+	Ocpus       int `json:"ocpus,omitempty"`
+	MemoryInGBs int `json:"memoryInGBs,omitempty"`
+	Vcpus       int `json:"vcpus,omitempty"`
+}
+
 type fakeThing struct {
-	Id                   string `json:"id,omitempty"`
-	CompartmentId        string `json:"compartmentId,omitempty"`
-	DisplayName          string `json:"displayName,omitempty"`
-	Name                 string `json:"name,omitempty"`
-	DataStorageSizeInGBs int    `json:"dataStorageSizeInGBs,omitempty"`
-	Partitions           int    `json:"partitions,omitempty"`
-	RetentionInHours     int    `json:"retentionInHours,omitempty"`
-	LifecycleState       string `json:"lifecycleState,omitempty"`
+	Id                   string            `json:"id,omitempty"`
+	CompartmentId        string            `json:"compartmentId,omitempty"`
+	DisplayName          string            `json:"displayName,omitempty"`
+	Name                 string            `json:"name,omitempty"`
+	FreeformTags         map[string]string `json:"freeformTags,omitempty"`
+	ShapeConfig          *fakeShapeConfig  `json:"shapeConfig,omitempty"`
+	DataStorageSizeInGBs int               `json:"dataStorageSizeInGBs,omitempty"`
+	Partitions           int               `json:"partitions,omitempty"`
+	RetentionInHours     int               `json:"retentionInHours,omitempty"`
+	LifecycleState       string            `json:"lifecycleState,omitempty"`
 }
 
 type fakeThingSummary struct {
@@ -108,9 +122,11 @@ type fakeGetThingResponse struct {
 }
 
 type FakeUpdateThingDetails struct {
-	DisplayName          string `json:"displayName,omitempty"`
-	Enabled              bool   `json:"enabled,omitempty"`
-	DataStorageSizeInGBs int    `json:"dataStorageSizeInGBs,omitempty"`
+	DisplayName          string            `json:"displayName,omitempty"`
+	Enabled              bool              `json:"enabled,omitempty"`
+	DataStorageSizeInGBs int               `json:"dataStorageSizeInGBs,omitempty"`
+	FreeformTags         map[string]string `json:"freeformTags,omitempty"`
+	ShapeConfig          *fakeShapeConfig  `json:"shapeConfig,omitempty"`
 }
 
 type fakeUpdateThingRequest struct {
@@ -251,6 +267,75 @@ func TestServiceClientCreateOrUpdateCreatesAndProjectsStatus(t *testing.T) {
 	requireStringEqual(t, "status.lifecycleState", resource.Status.LifecycleState, "ACTIVE")
 	requireCreatedAt(t, resource)
 	requireTrailingCondition(t, resource, shared.Active)
+}
+
+func TestServiceClientHasMutableDriftDetectsTagAddition(t *testing.T) {
+	t.Parallel()
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Semantics: &Semantics{
+			Mutation: MutationSemantics{
+				Mutable: []string{"freeformTags"},
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Spec: fakeSpec{
+			FreeformTags: map[string]string{"scenario": "e2e"},
+		},
+	}
+	current := fakeGetThingResponse{
+		Thing: fakeThing{
+			Id:             "ocid1.thing.oc1..existing",
+			LifecycleState: "ACTIVE",
+		},
+	}
+
+	drift, err := client.hasMutableDrift(resource, current)
+	if err != nil {
+		t.Fatalf("hasMutableDrift() error = %v", err)
+	}
+	if !drift {
+		t.Fatal("hasMutableDrift() = false, want true when spec adds a mutable tag")
+	}
+}
+
+func TestServiceClientHasMutableDriftIgnoresIdenticalTags(t *testing.T) {
+	t.Parallel()
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Semantics: &Semantics{
+			Mutation: MutationSemantics{
+				Mutable: []string{"freeformTags"},
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Spec: fakeSpec{
+			FreeformTags: map[string]string{"scenario": "e2e"},
+		},
+	}
+	current := fakeGetThingResponse{
+		Thing: fakeThing{
+			Id:             "ocid1.thing.oc1..existing",
+			FreeformTags:   map[string]string{"scenario": "e2e"},
+			LifecycleState: "ACTIVE",
+		},
+	}
+
+	drift, err := client.hasMutableDrift(resource, current)
+	if err != nil {
+		t.Fatalf("hasMutableDrift() error = %v", err)
+	}
+	if drift {
+		t.Fatal("hasMutableDrift() = true, want false when mutable tags already match")
+	}
 }
 
 func TestServiceClientCreateOrUpdateResolvesSecretBackedBodyFields(t *testing.T) {
@@ -482,6 +567,106 @@ func TestBuildRequestPopulatesAutonomousDatabasePolymorphicCreateBody(t *testing
 			}
 
 			tc.assert(t, request.CreateAutonomousDatabaseDetails)
+		})
+	}
+}
+
+func TestBuildRequestPopulatesLaunchInstancePolymorphicSourceDetails(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name   string
+		spec   corev1beta1.InstanceSpec
+		assert func(*testing.T, coresdk.LaunchInstanceDetails)
+	}{
+		{
+			name: "image source details",
+			spec: corev1beta1.InstanceSpec{
+				CompartmentId:      "ocid1.compartment.oc1..instance",
+				AvailabilityDomain: "AD-1",
+				SubnetId:           "ocid1.subnet.oc1..instance",
+				DisplayName:        "instance-sample",
+				Shape:              "VM.Standard.E4.Flex",
+				SourceDetails: corev1beta1.InstanceSourceDetails{
+					SourceType:          "image",
+					ImageId:             "ocid1.image.oc1..image",
+					BootVolumeSizeInGBs: 50,
+				},
+			},
+			assert: func(t *testing.T, details coresdk.LaunchInstanceDetails) {
+				t.Helper()
+
+				if details.CompartmentId == nil || *details.CompartmentId != "ocid1.compartment.oc1..instance" {
+					t.Fatalf("details.compartmentId = %v, want ocid1.compartment.oc1..instance", details.CompartmentId)
+				}
+				if details.AvailabilityDomain == nil || *details.AvailabilityDomain != "AD-1" {
+					t.Fatalf("details.availabilityDomain = %v, want AD-1", details.AvailabilityDomain)
+				}
+				source, ok := details.SourceDetails.(coresdk.InstanceSourceViaImageDetails)
+				if !ok {
+					t.Fatalf("details.sourceDetails type = %T, want %T", details.SourceDetails, coresdk.InstanceSourceViaImageDetails{})
+				}
+				if source.ImageId == nil || *source.ImageId != "ocid1.image.oc1..image" {
+					t.Fatalf("image source imageId = %v, want ocid1.image.oc1..image", source.ImageId)
+				}
+				if source.BootVolumeSizeInGBs == nil || *source.BootVolumeSizeInGBs != 50 {
+					t.Fatalf("image source bootVolumeSizeInGBs = %v, want 50", source.BootVolumeSizeInGBs)
+				}
+			},
+		},
+		{
+			name: "boot volume source details",
+			spec: corev1beta1.InstanceSpec{
+				CompartmentId:      "ocid1.compartment.oc1..boot",
+				AvailabilityDomain: "AD-2",
+				Shape:              "VM.Standard.E4.Flex",
+				SourceDetails: corev1beta1.InstanceSourceDetails{
+					SourceType:   "bootVolume",
+					BootVolumeId: "ocid1.bootvolume.oc1..boot",
+				},
+			},
+			assert: func(t *testing.T, details coresdk.LaunchInstanceDetails) {
+				t.Helper()
+
+				source, ok := details.SourceDetails.(coresdk.InstanceSourceViaBootVolumeDetails)
+				if !ok {
+					t.Fatalf("details.sourceDetails type = %T, want %T", details.SourceDetails, coresdk.InstanceSourceViaBootVolumeDetails{})
+				}
+				if source.BootVolumeId == nil || *source.BootVolumeId != "ocid1.bootvolume.oc1..boot" {
+					t.Fatalf("boot volume source bootVolumeId = %v, want ocid1.bootvolume.oc1..boot", source.BootVolumeId)
+				}
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			request := &coresdk.LaunchInstanceRequest{}
+			resource := &corev1beta1.Instance{Spec: tc.spec}
+			values, err := lookupValues(resource)
+			if err != nil {
+				t.Fatalf("lookupValues() error = %v", err)
+			}
+
+			err = buildRequest(
+				request,
+				resource,
+				values,
+				"",
+				[]RequestField{{FieldName: "LaunchInstanceDetails", RequestName: "LaunchInstanceDetails", Contribution: "body"}},
+				nil,
+				requestBuildOptions{Context: context.Background()},
+				nil,
+				false,
+			)
+			if err != nil {
+				t.Fatalf("buildRequest() error = %v", err)
+			}
+
+			tc.assert(t, request.LaunchInstanceDetails)
 		})
 	}
 }
@@ -750,6 +935,91 @@ func TestServiceClientCreateOrUpdateSkipsUpdateWhenMutableStateMatches(t *testin
 	}
 	if len(resource.Status.OsokStatus.Conditions) == 0 || resource.Status.OsokStatus.Conditions[len(resource.Status.OsokStatus.Conditions)-1].Type != shared.Active {
 		t.Fatalf("status conditions = %#v, want trailing Active condition", resource.Status.OsokStatus.Conditions)
+	}
+}
+
+func TestServiceClientCreateOrUpdateBuildsMinimalUpdateBodyFromChangedMutableFields(t *testing.T) {
+	t.Parallel()
+
+	var updateRequest fakeUpdateThingRequest
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Semantics: &Semantics{
+			Lifecycle: LifecycleSemantics{
+				ActiveStates: []string{"ACTIVE"},
+			},
+			Mutation: MutationSemantics{
+				Mutable: []string{"displayName", "freeformTags"},
+			},
+		},
+		Update: &Operation{
+			NewRequest: func() any { return &fakeUpdateThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				updateRequest = *request.(*fakeUpdateThingRequest)
+				return fakeUpdateThingResponse{
+					Thing: fakeThing{
+						Id:             "ocid1.thing.oc1..existing",
+						DisplayName:    "steady-name",
+						FreeformTags:   map[string]string{"scenario": "update", "run": "123"},
+						LifecycleState: "ACTIVE",
+					},
+				}, nil
+			},
+		},
+		Get: &Operation{
+			NewRequest: func() any { return &fakeGetThingRequest{} },
+			Call: func(_ context.Context, _ any) (any, error) {
+				return fakeGetThingResponse{
+					Thing: fakeThing{
+						Id:           "ocid1.thing.oc1..existing",
+						DisplayName:  "steady-name",
+						FreeformTags: map[string]string{"scenario": "create", "run": "123"},
+						ShapeConfig: &fakeShapeConfig{
+							Ocpus:       1,
+							MemoryInGBs: 16,
+							Vcpus:       2,
+						},
+						LifecycleState: "ACTIVE",
+					},
+				}, nil
+			},
+			Fields: []RequestField{
+				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Spec: fakeSpec{
+			DisplayName:  "steady-name",
+			FreeformTags: map[string]string{"scenario": "update", "run": "123"},
+			ShapeConfig: &fakeShapeConfig{
+				Ocpus:       1,
+				MemoryInGBs: 16,
+			},
+		},
+		Status: fakeStatus{
+			OsokStatus: shared.OSOKStatus{Ocid: "ocid1.thing.oc1..existing"},
+			Id:         "ocid1.thing.oc1..existing",
+		},
+	}
+
+	if _, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{}); err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if updateRequest.ThingId == nil || *updateRequest.ThingId != "ocid1.thing.oc1..existing" {
+		t.Fatalf("update request thingId = %v, want existing OCID", updateRequest.ThingId)
+	}
+	if updateRequest.DisplayName != "" {
+		t.Fatalf("update request displayName = %q, want unchanged field omitted", updateRequest.DisplayName)
+	}
+	if updateRequest.ShapeConfig != nil {
+		t.Fatalf("update request shapeConfig = %#v, want non-mutable field omitted", updateRequest.ShapeConfig)
+	}
+	if got := updateRequest.FreeformTags; !valuesEqual(got, map[string]string{"scenario": "update", "run": "123"}) {
+		t.Fatalf("update request freeformTags = %#v, want only changed mutable tags", got)
 	}
 }
 
@@ -2397,6 +2667,120 @@ func TestServiceClientCreateOrUpdateForcesLiveGetForForceNewValidationAfterListR
 	}
 	if resource.Status.RetentionInHours != 24 {
 		t.Fatalf("status.retentionInHours = %d, want 24 from live Get", resource.Status.RetentionInHours)
+	}
+}
+
+func TestServiceClientCreateOrUpdateIgnoresProviderManagedNestedForceNewFields(t *testing.T) {
+	t.Parallel()
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Semantics: &Semantics{
+			Lifecycle: LifecycleSemantics{
+				ProvisioningStates: []string{"CREATING"},
+				ActiveStates:       []string{"ACTIVE"},
+			},
+			Mutation: MutationSemantics{
+				ForceNew: []string{"shapeConfig"},
+			},
+		},
+		Get: &Operation{
+			NewRequest: func() any { return &fakeGetThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				getRequest := *request.(*fakeGetThingRequest)
+				if getRequest.ThingId == nil || *getRequest.ThingId != "ocid1.thing.oc1..existing" {
+					t.Fatalf("get request thingId = %v, want reused OCID", getRequest.ThingId)
+				}
+				return fakeGetThingResponse{
+					Thing: fakeThing{
+						Id: "ocid1.thing.oc1..existing",
+						ShapeConfig: &fakeShapeConfig{
+							Ocpus:       1,
+							MemoryInGBs: 16,
+							Vcpus:       2,
+						},
+						LifecycleState: "CREATING",
+					},
+				}, nil
+			},
+			Fields: []RequestField{
+				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Spec: fakeSpec{
+			ShapeConfig: &fakeShapeConfig{
+				Ocpus:       1,
+				MemoryInGBs: 16,
+			},
+		},
+		Status: fakeStatus{
+			OsokStatus: shared.OSOKStatus{Ocid: "ocid1.thing.oc1..existing"},
+			Id:         "ocid1.thing.oc1..existing",
+		},
+	}
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v, want nil", err)
+	}
+	if !response.IsSuccessful || !response.ShouldRequeue {
+		t.Fatalf("CreateOrUpdate() response = %#v, want successful requeue while live resource is provisioning", response)
+	}
+	if resource.Status.ShapeConfig == nil || resource.Status.ShapeConfig.Vcpus != 2 {
+		t.Fatalf("status.shapeConfig = %#v, want live provider-managed fields merged", resource.Status.ShapeConfig)
+	}
+	conditions := resource.Status.OsokStatus.Conditions
+	if len(conditions) == 0 || conditions[len(conditions)-1].Type != shared.Provisioning {
+		t.Fatalf("status conditions = %#v, want trailing Provisioning condition", conditions)
+	}
+}
+
+func TestForceNewValuesEqualIgnoresMeaninglessNestedMaps(t *testing.T) {
+	t.Parallel()
+
+	spec := map[string]any{
+		"imageId":    "ocid1.image.oc1..example",
+		"sourceType": "image",
+		"instanceSourceImageFilterDetails": map[string]any{
+			"compartmentId": "",
+		},
+	}
+	current := map[string]any{
+		"imageId":                          "ocid1.image.oc1..example",
+		"sourceType":                       "image",
+		"instanceSourceImageFilterDetails": nil,
+	}
+
+	if !forceNewValuesEqual(spec, current) {
+		t.Fatalf("forceNewValuesEqual() = false, want true when only meaningless nested maps differ")
+	}
+}
+
+func TestUnsupportedUpdateDriftPathsIgnoresMeaninglessNestedMaps(t *testing.T) {
+	t.Parallel()
+
+	spec := map[string]any{
+		"displayName": "example",
+		"preemptibleInstanceConfig": map[string]any{
+			"preemptionAction": map[string]any{
+				"jsonData": "",
+				"type":     "",
+			},
+		},
+	}
+	current := map[string]any{
+		"displayName": "example",
+	}
+
+	paths := unsupportedUpdateDriftPaths(spec, current, MutationSemantics{
+		Mutable: []string{"displayName"},
+	})
+	if len(paths) != 0 {
+		t.Fatalf("unsupportedUpdateDriftPaths() = %v, want no drift for meaningless nested maps", paths)
 	}
 }
 

@@ -286,13 +286,16 @@ func (c ServiceClient[T]) reconcileExistingResource(ctx context.Context, resourc
 		return c.failCreateOrUpdate(resource, err)
 	}
 	if shouldUpdate {
-		return c.updateExistingResource(ctx, resource, state.currentID, namespace)
+		return c.updateExistingResource(ctx, resource, state.currentID, namespace, state.liveResponse)
 	}
 	return c.observeExistingResource(ctx, resource, state.currentID, state.liveResponse)
 }
 
-func (c ServiceClient[T]) updateExistingResource(ctx context.Context, resource T, currentID string, namespace string) (servicemanager.OSOKResponse, error) {
-	response, err := c.invoke(ctx, c.config.Update, resource, currentID, c.requestBuildOptions(ctx, namespace))
+func (c ServiceClient[T]) updateExistingResource(ctx context.Context, resource T, currentID string, namespace string, currentResponse any) (servicemanager.OSOKResponse, error) {
+	options := c.requestBuildOptions(ctx, namespace)
+	options.CurrentResponse = currentResponse
+
+	response, err := c.invoke(ctx, c.config.Update, resource, currentID, options)
 	if err != nil {
 		return c.failCreateOrUpdate(resource, err)
 	}
@@ -736,11 +739,49 @@ func (c ServiceClient[T]) validateForceNewFields(specValues map[string]any, curr
 		if !specOK || !statusOK {
 			continue
 		}
-		if !valuesEqual(specValue, statusValue) {
+		if !forceNewValuesEqual(specValue, statusValue) {
 			return fmt.Errorf("%s formal semantics require replacement when %s changes", c.config.Kind, field)
 		}
 	}
 	return nil
+}
+
+func forceNewValuesEqual(specValue any, currentValue any) bool {
+	specValue, specMeaningful := pruneComparableValue(specValue)
+	currentValue, currentMeaningful := pruneComparableValue(currentValue)
+	if !specMeaningful || !currentMeaningful {
+		return !specMeaningful && !currentMeaningful
+	}
+
+	specMap, specIsMap := specValue.(map[string]any)
+	currentMap, currentIsMap := currentValue.(map[string]any)
+	if specIsMap && currentIsMap {
+		return len(comparableDiffPaths(specMap, currentMap, "")) == 0
+	}
+	return valuesEqual(specValue, currentValue)
+}
+
+func pruneComparableValue(value any) (any, bool) {
+	switch concrete := value.(type) {
+	case map[string]any:
+		pruned := make(map[string]any, len(concrete))
+		for key, child := range concrete {
+			prunedChild, ok := pruneComparableValue(child)
+			if !ok {
+				continue
+			}
+			pruned[key] = prunedChild
+		}
+		if len(pruned) == 0 {
+			return nil, false
+		}
+		return pruned, true
+	default:
+		if !meaningfulValue(concrete) {
+			return nil, false
+		}
+		return concrete, true
+	}
 }
 
 func (c ServiceClient[T]) hasMutableDrift(resource T, currentResponse any) (bool, error) {
@@ -761,12 +802,15 @@ func (c ServiceClient[T]) hasMutableDrift(resource T, currentResponse any) (bool
 	}
 
 	for _, field := range semantics.Mutation.Mutable {
-		specValue, specOK := lookupMeaningfulValue(specValues, field)
-		if !specOK {
+		specValue, specFound := lookupValueByPath(specValues, field)
+		if !specFound || !meaningfulValue(specValue) {
 			continue
 		}
-		currentValue, currentOK := lookupMeaningfulValue(currentValues, field)
-		if !currentOK {
+		currentValue, currentFound := lookupValueByPath(currentValues, field)
+		if !currentFound || !meaningfulValue(currentValue) {
+			if responseExposesFieldPath(currentResponse, field) {
+				return true, nil
+			}
 			continue
 		}
 		if !valuesEqual(specValue, currentValue) {
@@ -809,7 +853,7 @@ func comparableDiffPaths(specValues map[string]any, currentValues map[string]any
 func meaningfulSortedKeys(values map[string]any) []string {
 	keys := make([]string, 0, len(values))
 	for key, value := range values {
-		if meaningfulValue(value) {
+		if _, ok := pruneComparableValue(value); ok {
 			keys = append(keys, key)
 		}
 	}
@@ -878,6 +922,68 @@ func normalizePathSegment(segment string) string {
 		return strings.TrimSuffix(segment, "gbs") + "gb"
 	}
 	return segment
+}
+
+func responseExposesFieldPath(response any, path string) bool {
+	body, ok := responseBody(response)
+	if !ok || body == nil {
+		return false
+	}
+	return typeExposesFieldPath(reflect.TypeOf(body), strings.Split(strings.TrimSpace(path), "."))
+}
+
+func typeExposesFieldPath(t reflect.Type, segments []string) bool {
+	t = indirectType(t)
+	if t == nil || len(segments) == 0 {
+		return false
+	}
+
+	segment := strings.TrimSpace(segments[0])
+	if segment == "" {
+		return false
+	}
+
+	switch t.Kind() {
+	case reflect.Struct:
+		fieldType, ok := structFieldTypeByPathSegment(t, segment)
+		if !ok {
+			return false
+		}
+		if len(segments) == 1 {
+			return true
+		}
+		return typeExposesFieldPath(fieldType, segments[1:])
+	case reflect.Map:
+		if len(segments) == 1 {
+			return true
+		}
+		return typeExposesFieldPath(t.Elem(), segments[1:])
+	case reflect.Slice, reflect.Array:
+		return typeExposesFieldPath(t.Elem(), segments)
+	default:
+		return len(segments) == 1
+	}
+}
+
+func indirectType(t reflect.Type) reflect.Type {
+	for t != nil && (t.Kind() == reflect.Pointer || t.Kind() == reflect.Interface) {
+		t = t.Elem()
+	}
+	return t
+}
+
+func structFieldTypeByPathSegment(t reflect.Type, segment string) (reflect.Type, bool) {
+	normalized := normalizePathSegment(segment)
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+		if !field.IsExported() {
+			continue
+		}
+		if normalizePathSegment(field.Name) == normalized || normalizePathSegment(fieldJSONName(field)) == normalized {
+			return field.Type, true
+		}
+	}
+	return nil, false
 }
 
 func (c ServiceClient[T]) readResource(ctx context.Context, resource T, preferredID string, phase readPhase) (any, error) {
@@ -1062,7 +1168,7 @@ func (c ServiceClient[T]) invokeWithValues(ctx context.Context, op *Operation, r
 	if request == nil {
 		return nil, fmt.Errorf("%s generated runtime did not create an OCI request value", c.config.Kind)
 	}
-	bodyOverride, hasBodyOverride, err := c.requestBodyOverride(ctx, op, resource, options.Namespace)
+	bodyOverride, hasBodyOverride, err := c.requestBodyOverride(op, resource, options)
 	if err != nil {
 		return nil, err
 	}
@@ -1077,15 +1183,69 @@ func (c ServiceClient[T]) invokeWithValues(ctx context.Context, op *Operation, r
 	return response, nil
 }
 
-func (c ServiceClient[T]) requestBodyOverride(ctx context.Context, op *Operation, resource T, namespace string) (any, bool, error) {
+func (c ServiceClient[T]) requestBodyOverride(op *Operation, resource T, options requestBuildOptions) (any, bool, error) {
 	if op == c.config.Create && c.config.BuildCreateBody != nil {
-		body, err := c.config.BuildCreateBody(ctx, resource, namespace)
+		body, err := c.config.BuildCreateBody(options.Context, resource, options.Namespace)
 		if err != nil {
 			return nil, false, fmt.Errorf("build %s create body: %w", c.config.Kind, err)
 		}
 		return body, true, nil
 	}
+	if op == c.config.Update {
+		body, ok, err := c.filteredUpdateBody(resource, options)
+		if err != nil {
+			return nil, false, fmt.Errorf("build %s update body: %w", c.config.Kind, err)
+		}
+		if ok {
+			return body, true, nil
+		}
+	}
 	return nil, false, nil
+}
+
+func (c ServiceClient[T]) filteredUpdateBody(resource T, options requestBuildOptions) (any, bool, error) {
+	if c.config.Update == nil || c.config.Semantics == nil || len(c.config.Semantics.Mutation.Mutable) == 0 {
+		return nil, false, nil
+	}
+
+	resolvedSpec, err := resolvedSpecValue(resource, options)
+	if err != nil {
+		return nil, false, err
+	}
+	specValues := jsonMap(resolvedSpec)
+	if len(specValues) == 0 {
+		return nil, false, nil
+	}
+
+	currentValues := map[string]any{}
+	if options.CurrentResponse != nil {
+		if body, ok := responseBody(options.CurrentResponse); ok && body != nil {
+			currentValues = jsonMap(body)
+		}
+	}
+	if len(currentValues) == 0 {
+		statusValue, err := statusStruct(resource)
+		if err != nil {
+			return nil, false, err
+		}
+		currentValues = jsonMap(statusValue.Interface())
+	}
+
+	body := make(map[string]any)
+	for _, path := range c.config.Semantics.Mutation.Mutable {
+		specValue, ok := lookupMeaningfulValue(specValues, path)
+		if !ok {
+			continue
+		}
+		if currentValue, currentFound := lookupValueByPath(currentValues, path); currentFound && valuesEqual(specValue, currentValue) {
+			continue
+		}
+		setValueByPath(body, canonicalValuePath(specValues, path), specValue)
+	}
+	if len(body) == 0 {
+		return nil, false, nil
+	}
+	return body, true, nil
 }
 
 func (c ServiceClient[T]) applySuccess(resource T, response any, fallback shared.OSOKConditionType) (servicemanager.OSOKResponse, error) {
@@ -1207,6 +1367,7 @@ type requestBuildOptions struct {
 	Context          context.Context
 	CredentialClient credhelper.CredentialClient
 	Namespace        string
+	CurrentResponse  any
 }
 
 func buildRequest(
@@ -1441,6 +1602,72 @@ func explicitRequestValue(values map[string]any, field RequestField, preferredID
 	}
 
 	return nil, false
+}
+
+func setValueByPath(values map[string]any, path string, value any) {
+	path = strings.TrimSpace(path)
+	if path == "" {
+		return
+	}
+
+	segments := strings.Split(path, ".")
+	current := values
+	for index, segment := range segments {
+		segment = strings.TrimSpace(segment)
+		if segment == "" {
+			return
+		}
+		if index == len(segments)-1 {
+			current[segment] = value
+			return
+		}
+		next, ok := current[segment].(map[string]any)
+		if !ok {
+			next = make(map[string]any)
+			current[segment] = next
+		}
+		current = next
+	}
+}
+
+func canonicalValuePath(values map[string]any, path string) string {
+	path = strings.TrimSpace(path)
+	if path == "" {
+		return ""
+	}
+
+	segments := strings.Split(path, ".")
+	resolved := make([]string, 0, len(segments))
+	current := values
+	for _, segment := range segments {
+		segment = strings.TrimSpace(segment)
+		if segment == "" {
+			return strings.Join(resolved, ".")
+		}
+		key := canonicalMapKey(current, segment)
+		resolved = append(resolved, key)
+
+		next, ok := current[key].(map[string]any)
+		if !ok {
+			current = nil
+			continue
+		}
+		current = next
+	}
+	return strings.Join(resolved, ".")
+}
+
+func canonicalMapKey(values map[string]any, segment string) string {
+	if values == nil {
+		return segment
+	}
+	normalized := normalizePathSegment(segment)
+	for key := range values {
+		if normalizePathSegment(key) == normalized {
+			return key
+		}
+	}
+	return segment
 }
 
 func requestFieldRequiresResourceID(field RequestField, idAliases []string) bool {

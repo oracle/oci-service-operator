@@ -1,0 +1,16 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: core
+slug: instance
+kind: Instance
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+  - failed
+notes:
+  - Create uses LaunchInstance and projects the returned OCI Instance into status before later reconciles observe with GetInstance or a narrowed ListInstances lookup.
+  - Ready state covers OCI RUNNING and STOPPED. Requeue continues while OCI reports PROVISIONING, STARTING, MOVING, STOPPING, or TERMINATING.
+  - Delete remains finalizer-backed until OCI readback reports TERMINATED or stops finding the tracked instance.

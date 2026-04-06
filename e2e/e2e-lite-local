@@ -442,6 +442,24 @@ preflight_olm_registry() {
   die "OLM registry preflight failed from ${first_node}; expected ${OLM_REGISTRY_PROBE_URL} to return 200 or 401 after DNS setup, got ${http_code:-<no response>} (default) and ${ipv4_http_code:-<no response>} (curl -4). Check Kind-node egress to Quay or override OLM_REGISTRY_PROBE_URL if your environment uses a different reachable registry endpoint."
 }
 
+wait_for_cluster_api() {
+  local timeout_seconds
+  local deadline
+
+  timeout_seconds="$(duration_to_seconds "${KIND_WAIT}")"
+  deadline="$(( $(date +%s) + timeout_seconds ))"
+
+  while :; do
+    if "${KUBECTL_BIN}" cluster-info >/dev/null 2>&1; then
+      return 0
+    fi
+    if [ "$(date +%s)" -ge "${deadline}" ]; then
+      die "Kind cluster ${CLUSTER_NAME} API did not become ready within ${KIND_WAIT}"
+    fi
+    sleep 5
+  done
+}
+
 create_cluster() {
   write_kind_config
   ensure_kind_node_image
@@ -457,14 +475,14 @@ create_cluster() {
       --name "${CLUSTER_NAME}" \
       --config "${KIND_CONFIG_PATH}" \
       --image "${KIND_NODE_IMAGE}" \
-      --wait "${KIND_WAIT}" \
+      --wait 0s \
       --kubeconfig "${KUBECONFIG_PATH}"
   else
     log "Reusing existing Kind cluster ${CLUSTER_NAME}"
   fi
 
   export_kubeconfig
-  "${KUBECTL_BIN}" cluster-info >/dev/null
+  wait_for_cluster_api
   configure_kind_node_dns
   refresh_cluster_dns
   preflight_olm_registry
