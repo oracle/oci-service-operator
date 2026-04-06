@@ -3,6 +3,3 @@ kind: Kustomization
 resources:
 - bases/functions.oracle.com_applications.yaml
 - bases/functions.oracle.com_functions.yaml
-- bases/functions.oracle.com_pbflistings.yaml
-- bases/functions.oracle.com_pbflistingversions.yaml
-- bases/functions.oracle.com_triggers.yaml

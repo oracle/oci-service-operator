@@ -5,13 +5,29 @@ metadata:
   name: manager-role
 rules:
 - apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
   - functions.oracle.com
   resources:
   - applications
   - functions
-  - pbflistings
-  - pbflistingversions
-  - triggers
   verbs:
   - create
   - delete
@@ -25,9 +41,6 @@ rules:
   resources:
   - applications/finalizers
   - functions/finalizers
-  - pbflistings/finalizers
-  - pbflistingversions/finalizers
-  - triggers/finalizers
   verbs:
   - update
 - apiGroups:
@@ -35,9 +48,6 @@ rules:
   resources:
   - applications/status
   - functions/status
-  - pbflistings/status
-  - pbflistingversions/status
-  - triggers/status
   verbs:
   - get
   - patch

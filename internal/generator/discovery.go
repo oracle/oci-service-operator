@@ -19,7 +19,7 @@ import (
 	"github.com/oracle/oci-service-operator/internal/ocisdk"
 )
 
-var operationPattern = regexp.MustCompile(`^(Create|Get|List|Update|Delete)(.+?)(Request|Response)$`)
+var operationPattern = regexp.MustCompile(`^(Create|Get|List|Update|Delete|Launch|Terminate)(.+?)(Request|Response)$`)
 
 type packageDirResolver = ocisdk.ResolveDirFunc
 
@@ -220,13 +220,17 @@ func operationTypeParts(typeName string) (operation string, rawName string, requ
 	if len(matches) == 0 {
 		return "", "", false, false
 	}
+	operation, ok = ocisdk.CanonicalOperationVerb(matches[1])
+	if !ok {
+		return "", "", false, false
+	}
 
 	rawName = singularize(matches[2])
 	if rawName == "" {
 		return "", "", false, false
 	}
 
-	return matches[1], rawName, matches[3] == "Request", true
+	return operation, rawName, matches[3] == "Request", true
 }
 
 func buildResourceModel(index *ocisdk.Package, service ServiceConfig, entry resourceCandidate) (ResourceModel, error) {

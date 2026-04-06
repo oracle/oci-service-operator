@@ -10,13 +10,16 @@ import (
 	"testing"
 
 	"github.com/oracle/oci-go-sdk/v65/common"
-	containerenginev1beta1 "github.com/oracle/oci-service-operator/api/containerengine/v1beta1"
 	containerinstancesv1beta1 "github.com/oracle/oci-service-operator/api/containerinstances/v1beta1"
+	corev1beta1 "github.com/oracle/oci-service-operator/api/core/v1beta1"
 	databasev1beta1 "github.com/oracle/oci-service-operator/api/database/v1beta1"
+	identityv1beta1 "github.com/oracle/oci-service-operator/api/identity/v1beta1"
 	mysqlv1beta1 "github.com/oracle/oci-service-operator/api/mysql/v1beta1"
 	nosqlv1beta1 "github.com/oracle/oci-service-operator/api/nosql/v1beta1"
 	opensearchv1beta1 "github.com/oracle/oci-service-operator/api/opensearch/v1beta1"
 	psqlv1beta1 "github.com/oracle/oci-service-operator/api/psql/v1beta1"
+	queuev1beta1 "github.com/oracle/oci-service-operator/api/queue/v1beta1"
+	redisv1beta1 "github.com/oracle/oci-service-operator/api/redis/v1beta1"
 	streamingv1beta1 "github.com/oracle/oci-service-operator/api/streaming/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/credhelper"
 	"github.com/oracle/oci-service-operator/pkg/metrics"
@@ -40,12 +43,15 @@ func TestAllAddToSchemeRegistersDefaultActiveGroupKinds(t *testing.T) {
 
 	for _, obj := range []runtime.Object{
 		&containerinstancesv1beta1.ContainerInstance{},
-		&containerenginev1beta1.Cluster{},
+		&corev1beta1.Instance{},
 		&databasev1beta1.AutonomousDatabase{},
+		&identityv1beta1.Compartment{},
 		&mysqlv1beta1.DbSystem{},
 		&nosqlv1beta1.Table{},
 		&opensearchv1beta1.OpensearchCluster{},
 		&psqlv1beta1.DbSystem{},
+		&queuev1beta1.Queue{},
+		&redisv1beta1.RedisCluster{},
 		&streamingv1beta1.Stream{},
 	} {
 		gvks, _, err := scheme.ObjectKinds(obj)

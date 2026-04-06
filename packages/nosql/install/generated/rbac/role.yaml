@@ -14,14 +14,7 @@ rules:
 - apiGroups:
   - nosql.oracle.com
   resources:
-  - indices
-  - replicas
-  - rows
   - tables
-  - tableusages
-  - workrequesterrors
-  - workrequestlogs
-  - workrequests
   verbs:
   - create
   - delete
@@ -33,27 +26,13 @@ rules:
 - apiGroups:
   - nosql.oracle.com
   resources:
-  - indices/finalizers
-  - replicas/finalizers
-  - rows/finalizers
   - tables/finalizers
-  - tableusages/finalizers
-  - workrequesterrors/finalizers
-  - workrequestlogs/finalizers
-  - workrequests/finalizers
   verbs:
   - update
 - apiGroups:
   - nosql.oracle.com
   resources:
-  - indices/status
-  - replicas/status
-  - rows/status
   - tables/status
-  - tableusages/status
-  - workrequesterrors/status
-  - workrequestlogs/status
-  - workrequests/status
   verbs:
   - get
   - patch

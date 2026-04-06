@@ -123,9 +123,10 @@ func init() {
 		if err != nil {
 			config.InitError = fmt.Errorf("initialize DbSystem OCI client: %w", err)
 		}
-		return defaultDbSystemServiceClient{
+		runtimeClient := defaultDbSystemServiceClient{
 			ServiceClient: generatedruntime.NewServiceClient[*mysqlv1beta1.DbSystem](config),
 		}
+		return newDbSystemEndpointSecretClient(manager, runtimeClient)
 	}
 }
 
@@ -222,6 +223,13 @@ func normalizeDbSystemAvailabilityDomain(
 
 	switch len(matches) {
 	case 1:
+		// Preserve explicit caller-supplied aliases. MySQL accepts historical or
+		// subnet-derived tenancy tokens such as qqZb:... even when Identity lists
+		// the same regional AD under a different alias token for the current auth
+		// context. Only expand suffix-only inputs.
+		if strings.Contains(requested, ":") {
+			return requested, nil
+		}
 		return matches[0], nil
 	case 0:
 		return "", fmt.Errorf("mysql dbsystem availabilityDomain %q does not match the current auth context availability domains %q", requested, strings.Join(available, ", "))

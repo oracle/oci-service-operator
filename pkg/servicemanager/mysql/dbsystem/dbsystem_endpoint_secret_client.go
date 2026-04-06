@@ -27,13 +27,6 @@ type dbSystemEndpointSecretRecordReader interface {
 	GetSecretRecord(context.Context, string, string) (credhelper.SecretRecord, error)
 }
 
-func init() {
-	generatedFactory := newDbSystemServiceClient
-	newDbSystemServiceClient = func(manager *DbSystemServiceManager) DbSystemServiceClient {
-		return newDbSystemEndpointSecretClient(manager, generatedFactory(manager))
-	}
-}
-
 type dbSystemEndpointSecretClient struct {
 	delegate             DbSystemServiceClient
 	credentialClient     credhelper.CredentialClient

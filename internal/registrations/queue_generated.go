@@ -13,13 +13,7 @@ import (
 	queuev1beta1 "github.com/oracle/oci-service-operator/api/queue/v1beta1"
 	queuecontrollers "github.com/oracle/oci-service-operator/controllers/queue"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
-	queuechannelservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/queue/channel"
-	queuemessageservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/queue/message"
 	queuequeueservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/queue/queue"
-	queuestatsservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/queue/stats"
-	queueworkrequestservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/queue/workrequest"
-	queueworkrequesterrorservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/queue/workrequesterror"
-	queueworkrequestlogservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/queue/workrequestlog"
 )
 
 func init() {
@@ -27,28 +21,6 @@ func init() {
 		Group:       "queue",
 		AddToScheme: queuev1beta1.AddToScheme,
 		SetupWithManager: func(ctx Context) error {
-			if err := (&queuecontrollers.ChannelReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"Channel",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return queuechannelservicemanager.NewChannelServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup Channel controller: %w", err)
-			}
-			if err := (&queuecontrollers.MessageReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"Message",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return queuemessageservicemanager.NewMessageServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup Message controller: %w", err)
-			}
 			if err := (&queuecontrollers.QueueReconciler{
 				Reconciler: NewBaseReconciler(
 					ctx,
@@ -59,50 +31,6 @@ func init() {
 				),
 			}).SetupWithManager(ctx.Manager); err != nil {
 				return fmt.Errorf("setup Queue controller: %w", err)
-			}
-			if err := (&queuecontrollers.StatsReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"Stats",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return queuestatsservicemanager.NewStatsServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup Stats controller: %w", err)
-			}
-			if err := (&queuecontrollers.WorkRequestReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"WorkRequest",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return queueworkrequestservicemanager.NewWorkRequestServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup WorkRequest controller: %w", err)
-			}
-			if err := (&queuecontrollers.WorkRequestErrorReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"WorkRequestError",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return queueworkrequesterrorservicemanager.NewWorkRequestErrorServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup WorkRequestError controller: %w", err)
-			}
-			if err := (&queuecontrollers.WorkRequestLogReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"WorkRequestLog",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return queueworkrequestlogservicemanager.NewWorkRequestLogServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup WorkRequestLog controller: %w", err)
 			}
 			return nil
 		},

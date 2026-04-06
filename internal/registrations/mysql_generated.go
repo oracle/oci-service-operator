@@ -13,18 +13,7 @@ import (
 	mysqlv1beta1 "github.com/oracle/oci-service-operator/api/mysql/v1beta1"
 	mysqlcontrollers "github.com/oracle/oci-service-operator/controllers/mysql"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
-	mysqlbackupservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/mysql/backup"
-	mysqlchannelservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/mysql/channel"
-	mysqlconfigurationservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/mysql/configuration"
 	mysqldbsystemservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/mysql/dbsystem"
-	mysqlheatwaveclusterservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/mysql/heatwavecluster"
-	mysqlheatwaveclustermemoryestimateservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/mysql/heatwaveclustermemoryestimate"
-	mysqlreplicaservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/mysql/replica"
-	mysqlshapeservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/mysql/shape"
-	mysqlversionservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/mysql/version"
-	mysqlworkrequestservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/mysql/workrequest"
-	mysqlworkrequesterrorservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/mysql/workrequesterror"
-	mysqlworkrequestlogservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/mysql/workrequestlog"
 )
 
 func init() {
@@ -32,39 +21,6 @@ func init() {
 		Group:       "mysql",
 		AddToScheme: mysqlv1beta1.AddToScheme,
 		SetupWithManager: func(ctx Context) error {
-			if err := (&mysqlcontrollers.BackupReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"Backup",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return mysqlbackupservicemanager.NewBackupServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup Backup controller: %w", err)
-			}
-			if err := (&mysqlcontrollers.ChannelReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"Channel",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return mysqlchannelservicemanager.NewChannelServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup Channel controller: %w", err)
-			}
-			if err := (&mysqlcontrollers.ConfigurationReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"Configuration",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return mysqlconfigurationservicemanager.NewConfigurationServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup Configuration controller: %w", err)
-			}
 			if err := (&mysqlcontrollers.DbSystemReconciler{
 				Reconciler: NewBaseReconciler(
 					ctx,
@@ -75,94 +31,6 @@ func init() {
 				),
 			}).SetupWithManager(ctx.Manager); err != nil {
 				return fmt.Errorf("setup DbSystem controller: %w", err)
-			}
-			if err := (&mysqlcontrollers.HeatWaveClusterReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"HeatWaveCluster",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return mysqlheatwaveclusterservicemanager.NewHeatWaveClusterServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup HeatWaveCluster controller: %w", err)
-			}
-			if err := (&mysqlcontrollers.HeatWaveClusterMemoryEstimateReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"HeatWaveClusterMemoryEstimate",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return mysqlheatwaveclustermemoryestimateservicemanager.NewHeatWaveClusterMemoryEstimateServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup HeatWaveClusterMemoryEstimate controller: %w", err)
-			}
-			if err := (&mysqlcontrollers.ReplicaReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"Replica",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return mysqlreplicaservicemanager.NewReplicaServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup Replica controller: %w", err)
-			}
-			if err := (&mysqlcontrollers.ShapeReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"Shape",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return mysqlshapeservicemanager.NewShapeServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup Shape controller: %w", err)
-			}
-			if err := (&mysqlcontrollers.VersionReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"Version",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return mysqlversionservicemanager.NewVersionServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup Version controller: %w", err)
-			}
-			if err := (&mysqlcontrollers.WorkRequestReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"WorkRequest",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return mysqlworkrequestservicemanager.NewWorkRequestServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup WorkRequest controller: %w", err)
-			}
-			if err := (&mysqlcontrollers.WorkRequestErrorReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"WorkRequestError",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return mysqlworkrequesterrorservicemanager.NewWorkRequestErrorServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup WorkRequestError controller: %w", err)
-			}
-			if err := (&mysqlcontrollers.WorkRequestLogReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"WorkRequestLog",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return mysqlworkrequestlogservicemanager.NewWorkRequestLogServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup WorkRequestLog controller: %w", err)
 			}
 			return nil
 		},

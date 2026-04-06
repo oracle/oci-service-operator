@@ -103,6 +103,28 @@ func TestCheckedInNoSQLPackageRBACMatchesEventRecorderSemantics(t *testing.T) {
 	)
 }
 
+func TestCheckedInFunctionsPackageRBACMatchesSecretAndEventRecorderSemantics(t *testing.T) {
+	assertFileContains(t, filepath.Join(repoRoot(t), "controllers", "functions", "application_controller.go"), []string{
+		`// +kubebuilder:rbac:groups="",resources=events,verbs=create;patch`,
+	})
+	assertFileContains(t, filepath.Join(repoRoot(t), "controllers", "functions", "function_controller.go"), []string{
+		`// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete`,
+		`// +kubebuilder:rbac:groups="",resources=events,verbs=create;patch`,
+	})
+	assertFileDoesNotContain(t, filepath.Join(repoRoot(t), "controllers", "functions", "application_controller.go"), []string{
+		`// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete`,
+	})
+
+	assertCoreResourceVerbs(
+		t,
+		filepath.Join(repoRoot(t), "packages", "functions", "install", "generated", "rbac", "role.yaml"),
+		map[string][]string{
+			"events":  {"create", "patch"},
+			"secrets": {"create", "delete", "get", "list", "patch", "update", "watch"},
+		},
+	)
+}
+
 func TestCheckedInIdentityPackageRBACUsesActualResourceNames(t *testing.T) {
 	assertFileContains(t, filepath.Join(repoRoot(t), "controllers", "identity", "compartment_controller.go"), []string{
 		"// +kubebuilder:rbac:groups=identity.oracle.com,resources=compartments,verbs=get;list;watch;create;update;patch;delete",

@@ -495,7 +495,7 @@ func TestDbSystemServiceManagerCreateOrUpdateRejectsSourceMutationsQuick(t *test
 	manager := newDbSystemSourceMutationManager()
 
 	err := quick.Check(func(current, desired quickDbSystemSourceCase) bool {
-		if current.equal(desired) {
+		if reflect.DeepEqual(observedDbSystemSource(current.Source), observedDbSystemSource(desired.Source)) {
 			return true
 		}
 
@@ -763,7 +763,7 @@ func TestDbSystemServiceManagerCreateOrUpdateRejectsWrongObjectType(t *testing.T
 
 	manager := &DbSystemServiceManager{}
 
-	response, err := manager.CreateOrUpdate(context.Background(), &mysqlv1beta1.Backup{}, ctrl.Request{})
+	response, err := manager.CreateOrUpdate(context.Background(), &mysqlv1beta1.DbSystemList{}, ctrl.Request{})
 	if err == nil {
 		t.Fatal("CreateOrUpdate() error = nil, want conversion failure")
 	}

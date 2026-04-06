@@ -534,6 +534,27 @@ func TestPackageResourceOperations(t *testing.T) {
 			},
 		},
 		{
+			name:       "core Instance maps launch and terminate aliases",
+			importPath: "github.com/oracle/oci-go-sdk/v65/core",
+			rawName:    "Instance",
+			assert: func(t *testing.T, operations map[string]OperationMethod) {
+				create := operations["Create"]
+				if create.MethodName != "LaunchInstance" {
+					t.Fatalf("Instance create method = %q, want LaunchInstance", create.MethodName)
+				}
+				if create.RequestType != "LaunchInstanceRequest" {
+					t.Fatalf("Instance create request type = %q, want LaunchInstanceRequest", create.RequestType)
+				}
+				deleteOp := operations["Delete"]
+				if deleteOp.MethodName != "TerminateInstance" {
+					t.Fatalf("Instance delete method = %q, want TerminateInstance", deleteOp.MethodName)
+				}
+				if deleteOp.RequestType != "TerminateInstanceRequest" {
+					t.Fatalf("Instance delete request type = %q, want TerminateInstanceRequest", deleteOp.RequestType)
+				}
+			},
+		},
+		{
 			name:       "queue Message prefers exact singular operations",
 			importPath: "github.com/oracle/oci-go-sdk/v65/queue",
 			rawName:    "Message",

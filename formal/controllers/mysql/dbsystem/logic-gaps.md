@@ -46,10 +46,11 @@ gaps: []
   same-namespace endpoint Secret once the resource reaches `Active`. Delete
   only removes Secrets owned through the `mysql.oracle.com/dbsystem-uid`
   label, with one-time adoption of matching legacy unlabeled Secrets.
-- `DbSystem` normalizes tenancy-scoped availability domain aliases by matching
-  the stable regional suffix from the current auth context before OCI create
-  calls, so samples authored under a different tenancy alias still resolve to
-  the current tenancy's concrete AD name.
+- `DbSystem` validates `spec.availabilityDomain` against the current auth
+  context by matching the stable regional suffix before OCI create calls, but
+  preserves explicit caller-supplied alias tokens instead of rewriting them to
+  the alias returned by `ListAvailabilityDomains`. Suffix-only inputs still
+  expand to the current auth context alias.
 - `DbSystem` preserves `isHighlyAvailable=false` in the OCI create request
   instead of dropping that explicit standalone intent through JSON
   `omitempty` projection.

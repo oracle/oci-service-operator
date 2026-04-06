@@ -1726,8 +1726,8 @@ func TestCurrentDefaultActiveGeneratedArtifactsMatchCheckedInOutputs(t *testing.
 	if err != nil {
 		t.Fatalf("SelectServices(--all) error = %v", err)
 	}
-	if len(services) != 16 {
-		t.Fatalf("selected %d default-active services, want 16", len(services))
+	if len(services) != len(cfg.DefaultActiveServices()) {
+		t.Fatalf("selected %d default-active services, want %d", len(services), len(cfg.DefaultActiveServices()))
 	}
 
 	outputRoot := t.TempDir()
@@ -1739,204 +1739,38 @@ func TestCurrentDefaultActiveGeneratedArtifactsMatchCheckedInOutputs(t *testing.
 	if err != nil {
 		t.Fatalf("Generate() error = %v", err)
 	}
-	assertGeneratedServiceCounts(t, result.Generated, map[string]int{
-		"containerengine":    18,
-		"containerinstances": 1,
-		"core":               123,
-		"database":           1,
-		"dataflow":           10,
-		"functions":          5,
-		"identity":           1,
-		"mysql":              12,
-		"nosql":              8,
-		"objectstorage":      1,
-		"opensearch":         1,
-		"psql":               11,
-		"queue":              7,
-		"redis":              1,
-		"streaming":          1,
-		"vault":              2,
-	})
-
-	apiFiles := []string{
-		"api/containerengine/v1beta1/groupversion_info.go",
-		"api/containerengine/v1beta1/cluster_types.go",
-		"api/containerinstances/v1beta1/groupversion_info.go",
-		"api/containerinstances/v1beta1/containerinstance_types.go",
-		"api/core/v1beta1/groupversion_info.go",
-		"api/core/v1beta1/vcn_types.go",
-		"api/database/v1beta1/groupversion_info.go",
-		"api/database/v1beta1/autonomousdatabase_types.go",
-		"api/dataflow/v1beta1/groupversion_info.go",
-		"api/dataflow/v1beta1/application_types.go",
-		"api/functions/v1beta1/groupversion_info.go",
-		"api/functions/v1beta1/application_types.go",
-		"api/identity/v1beta1/groupversion_info.go",
-		"api/identity/v1beta1/compartment_types.go",
-		"api/mysql/v1beta1/groupversion_info.go",
-		"api/mysql/v1beta1/dbsystem_types.go",
-		"api/nosql/v1beta1/groupversion_info.go",
-		"api/nosql/v1beta1/table_types.go",
-		"api/objectstorage/v1beta1/groupversion_info.go",
-		"api/objectstorage/v1beta1/bucket_types.go",
-		"api/opensearch/v1beta1/groupversion_info.go",
-		"api/opensearch/v1beta1/opensearchcluster_types.go",
-		"api/psql/v1beta1/groupversion_info.go",
-		"api/psql/v1beta1/dbsystem_types.go",
-		"api/queue/v1beta1/groupversion_info.go",
-		"api/queue/v1beta1/queue_types.go",
-		"api/redis/v1beta1/groupversion_info.go",
-		"api/redis/v1beta1/rediscluster_types.go",
-		"api/streaming/v1beta1/groupversion_info.go",
-		"api/streaming/v1beta1/stream_types.go",
-		"api/vault/v1beta1/groupversion_info.go",
-		"api/vault/v1beta1/secret_types.go",
-	}
-	for _, relativePath := range apiFiles {
-		assertGoEquivalent(t, filepath.Join(repoRoot(t), relativePath), filepath.Join(outputRoot, relativePath))
+	if len(result.Generated) != len(services) {
+		t.Fatalf("generated %d services, want %d", len(result.Generated), len(services))
 	}
 
-	exactFiles := []string{
-		"config/samples/containerengine_v1beta1_cluster.yaml",
-		"config/samples/containerinstances_v1beta1_containerinstance.yaml",
-		"config/samples/core_v1beta1_vcn.yaml",
-		"config/samples/database_v1beta1_autonomousdatabase.yaml",
-		"config/samples/dataflow_v1beta1_application.yaml",
-		"config/samples/functions_v1beta1_application.yaml",
-		"config/samples/identity_v1beta1_compartment.yaml",
-		"config/samples/mysql_v1beta1_dbsystem.yaml",
-		"config/samples/nosql_v1beta1_table.yaml",
-		"config/samples/objectstorage_v1beta1_bucket.yaml",
-		"config/samples/opensearch_v1beta1_opensearchcluster.yaml",
-		"config/samples/psql_v1beta1_dbsystem.yaml",
-		"config/samples/queue_v1beta1_queue.yaml",
-		"config/samples/redis_v1beta1_rediscluster.yaml",
-		"config/samples/streaming_v1beta1_stream.yaml",
-		"config/samples/vault_v1beta1_secret.yaml",
-		"packages/containerengine/metadata.env",
-		"packages/containerengine/install/kustomization.yaml",
-		"packages/containerinstances/metadata.env",
-		"packages/containerinstances/install/kustomization.yaml",
-		"packages/core/metadata.env",
-		"packages/core/install/kustomization.yaml",
-		"packages/core-network/metadata.env",
-		"packages/core-network/install/kustomization.yaml",
-		"packages/database/metadata.env",
-		"packages/database/install/kustomization.yaml",
-		"packages/dataflow/metadata.env",
-		"packages/dataflow/install/kustomization.yaml",
-		"packages/functions/metadata.env",
-		"packages/functions/install/kustomization.yaml",
-		"packages/identity/metadata.env",
-		"packages/identity/install/kustomization.yaml",
-		"packages/mysql/metadata.env",
-		"packages/mysql/install/kustomization.yaml",
-		"packages/nosql/metadata.env",
-		"packages/nosql/install/kustomization.yaml",
-		"packages/objectstorage/metadata.env",
-		"packages/objectstorage/install/kustomization.yaml",
-		"packages/opensearch/metadata.env",
-		"packages/opensearch/install/kustomization.yaml",
-		"packages/psql/metadata.env",
-		"packages/psql/install/kustomization.yaml",
-		"packages/queue/metadata.env",
-		"packages/queue/install/kustomization.yaml",
-		"packages/redis/metadata.env",
-		"packages/redis/install/kustomization.yaml",
-		"packages/streaming/metadata.env",
-		"packages/streaming/install/kustomization.yaml",
-		"packages/vault/metadata.env",
-		"packages/vault/install/kustomization.yaml",
-	}
-	assertExactFileMatchesAll(t, repoRoot(t), outputRoot, exactFiles)
-
-	runtimeFiles := []string{
-		"controllers/containerengine/cluster_controller.go",
-		"controllers/containerinstances/containerinstance_controller.go",
-		"pkg/servicemanager/containerengine/cluster/cluster_serviceclient.go",
-		"pkg/servicemanager/containerengine/cluster/cluster_servicemanager.go",
-		"controllers/core/instance_controller.go",
-		"controllers/core/vcn_controller.go",
-		"controllers/database/autonomousdatabase_controller.go",
-		"controllers/dataflow/application_controller.go",
-		"controllers/functions/application_controller.go",
-		"controllers/identity/compartment_controller.go",
-		"controllers/mysql/dbsystem_controller.go",
-		"controllers/nosql/table_controller.go",
-		"controllers/objectstorage/bucket_controller.go",
-		"controllers/opensearch/opensearchcluster_controller.go",
-		"controllers/psql/dbsystem_controller.go",
-		"controllers/queue/queue_controller.go",
-		"controllers/redis/rediscluster_controller.go",
-		"controllers/streaming/stream_controller.go",
-		"controllers/vault/secret_controller.go",
-		"pkg/servicemanager/core/instance/instance_serviceclient.go",
-		"pkg/servicemanager/core/instance/instance_servicemanager.go",
-		"pkg/servicemanager/core/vcn/vcn_serviceclient.go",
-		"pkg/servicemanager/core/vcn/vcn_servicemanager.go",
-		"pkg/servicemanager/database/autonomousdatabase/autonomousdatabase_serviceclient.go",
-		"pkg/servicemanager/database/autonomousdatabase/autonomousdatabase_servicemanager.go",
-		"pkg/servicemanager/dataflow/application/application_serviceclient.go",
-		"pkg/servicemanager/dataflow/application/application_servicemanager.go",
-		"pkg/servicemanager/functions/application/application_serviceclient.go",
-		"pkg/servicemanager/functions/application/application_servicemanager.go",
-		"pkg/servicemanager/identity/compartment/compartment_serviceclient.go",
-		"pkg/servicemanager/identity/compartment/compartment_servicemanager.go",
-		"pkg/servicemanager/mysql/dbsystem/dbsystem_serviceclient.go",
-		"pkg/servicemanager/mysql/dbsystem/dbsystem_servicemanager.go",
-		"pkg/servicemanager/nosql/table/table_serviceclient.go",
-		"pkg/servicemanager/nosql/table/table_servicemanager.go",
-		"pkg/servicemanager/objectstorage/bucket/bucket_serviceclient.go",
-		"pkg/servicemanager/objectstorage/bucket/bucket_servicemanager.go",
-		"pkg/servicemanager/opensearch/opensearchcluster/opensearchcluster_serviceclient.go",
-		"pkg/servicemanager/opensearch/opensearchcluster/opensearchcluster_servicemanager.go",
-		"pkg/servicemanager/psql/dbsystem/dbsystem_serviceclient.go",
-		"pkg/servicemanager/psql/dbsystem/dbsystem_servicemanager.go",
-		"pkg/servicemanager/queue/queue/queue_serviceclient.go",
-		"pkg/servicemanager/queue/queue/queue_servicemanager.go",
-		"pkg/servicemanager/redis/rediscluster/rediscluster_serviceclient.go",
-		"pkg/servicemanager/redis/rediscluster/rediscluster_servicemanager.go",
-		"pkg/servicemanager/streaming/stream/stream_serviceclient.go",
-		"pkg/servicemanager/streaming/stream/stream_servicemanager.go",
-		"pkg/servicemanager/vault/secret/secret_serviceclient.go",
-		"pkg/servicemanager/vault/secret/secret_servicemanager.go",
-		"internal/registrations/containerengine_generated.go",
-		"internal/registrations/core-network_generated.go",
-		"internal/registrations/core_generated.go",
-		"internal/registrations/database_generated.go",
-		"internal/registrations/dataflow_generated.go",
-		"internal/registrations/functions_generated.go",
-		"internal/registrations/identity_generated.go",
-		"internal/registrations/mysql_generated.go",
-		"internal/registrations/nosql_generated.go",
-		"internal/registrations/objectstorage_generated.go",
-		"internal/registrations/opensearch_generated.go",
-		"internal/registrations/psql_generated.go",
-		"internal/registrations/queue_generated.go",
-		"internal/registrations/redis_generated.go",
-		"internal/registrations/streaming_generated.go",
-		"internal/registrations/vault_generated.go",
-	}
-	for _, relativePath := range runtimeFiles {
-		assertGoEquivalent(t, filepath.Join(repoRoot(t), relativePath), filepath.Join(outputRoot, relativePath))
-	}
-
-	assertResourceOrderContainsSubset(
-		t,
-		filepath.Join(repoRoot(t), "config", "samples", "kustomization.yaml"),
-		filepath.Join(outputRoot, "config", "samples", "kustomization.yaml"),
-	)
+	desiredGoFiles, desiredExactFiles := collectDesiredGeneratorOwnedRelativePaths(t, cfg, services)
+	generatedGoFiles, generatedExactFiles := collectGeneratorOwnedRelativePaths(t, outputRoot)
+	assertRelativePathSetEqual(t, "generated Go file set", generatedGoFiles, desiredGoFiles)
+	assertRelativePathSetEqual(t, "generated exact file set", generatedExactFiles, desiredExactFiles)
+	assertGeneratedGoMatchesAll(t, repoRoot(t), outputRoot, desiredGoFiles)
+	assertExactFileMatchesAll(t, repoRoot(t), outputRoot, desiredExactFiles)
 }
 
 func TestExplicitCoreRuntimeArtifactsGenerateFromConfig(t *testing.T) {
 	cfg := loadCheckedInConfig(t)
-	coreService := serviceConfigsByName(t, cfg, "core")["core"]
+	services, err := cfg.SelectServices("core", false)
+	if err != nil {
+		t.Fatalf("SelectServices(--service core) error = %v", err)
+	}
+	if len(services) != 1 {
+		t.Fatalf("SelectServices(--service core) returned %d services, want 1", len(services))
+	}
+	coreService := services[0]
+	if got := coreService.SelectedKinds(); !slices.Equal(got, []string{"Instance", "Drg", "InternetGateway", "NatGateway", "NetworkSecurityGroup", "RouteTable", "SecurityList", "ServiceGateway", "Subnet", "Vcn"}) {
+		t.Fatalf("core SelectedKinds() = %v, want instance plus core-network split kinds", got)
+	}
+	assertServiceFormalSpec(t, &coreService, "Instance", "instance")
 
 	outputRoot := t.TempDir()
 	seedSamplesKustomization(t, outputRoot)
 
 	pipeline := New()
-	result, err := pipeline.Generate(context.Background(), cfg, []ServiceConfig{*coreService}, Options{
+	result, err := pipeline.Generate(context.Background(), cfg, []ServiceConfig{coreService}, Options{
 		OutputRoot: outputRoot,
 	})
 	if err != nil {
@@ -1947,14 +1781,51 @@ func TestExplicitCoreRuntimeArtifactsGenerateFromConfig(t *testing.T) {
 	}
 
 	assertPathsExist(t, []string{
+		filepath.Join(outputRoot, "api", "core", "v1beta1", "instance_types.go"),
 		filepath.Join(outputRoot, "api", "core", "v1beta1", "vcn_types.go"),
+		filepath.Join(outputRoot, "controllers", "core", "instance_controller.go"),
 		filepath.Join(outputRoot, "controllers", "core", "vcn_controller.go"),
+		filepath.Join(outputRoot, "pkg", "servicemanager", "core", "instance", "instance_serviceclient.go"),
+		filepath.Join(outputRoot, "pkg", "servicemanager", "core", "instance", "instance_servicemanager.go"),
 		filepath.Join(outputRoot, "pkg", "servicemanager", "core", "vcn", "vcn_serviceclient.go"),
 		filepath.Join(outputRoot, "pkg", "servicemanager", "core", "vcn", "vcn_servicemanager.go"),
 		filepath.Join(outputRoot, "internal", "registrations", "core_generated.go"),
+		filepath.Join(outputRoot, "internal", "registrations", "core-network_generated.go"),
 		filepath.Join(outputRoot, "packages", "core", "metadata.env"),
 		filepath.Join(outputRoot, "packages", "core", "install", "kustomization.yaml"),
+		filepath.Join(outputRoot, "packages", "core-network", "metadata.env"),
+		filepath.Join(outputRoot, "packages", "core-network", "install", "kustomization.yaml"),
+		filepath.Join(outputRoot, "cmd", "manager", "core", "main.go"),
+		filepath.Join(outputRoot, "cmd", "manager", "core-network", "main.go"),
+		filepath.Join(outputRoot, "config", "manager", "core", "manager.yaml"),
+		filepath.Join(outputRoot, "config", "manager", "core-network", "manager.yaml"),
+		filepath.Join(outputRoot, "config", "samples", "core_v1beta1_instance.yaml"),
 		filepath.Join(outputRoot, "config", "samples", "core_v1beta1_vcn.yaml"),
+	})
+	assertPathsNotExist(t, []string{
+		filepath.Join(outputRoot, "api", "core", "v1beta1", "bootvolume_types.go"),
+		filepath.Join(outputRoot, "controllers", "core", "bootvolume_controller.go"),
+		filepath.Join(outputRoot, "pkg", "servicemanager", "core", "bootvolume", "bootvolume_serviceclient.go"),
+	})
+
+	instanceServiceClient := readFile(t, filepath.Join(outputRoot, "pkg", "servicemanager", "core", "instance", "instance_serviceclient.go"))
+	assertContains(t, instanceServiceClient, []string{
+		"Semantics: &generatedruntime.Semantics{",
+		`FormalService:     "core"`,
+		`FormalSlug:        "instance"`,
+		`ResponseItemsField: "Items"`,
+		`CreateFollowUp: generatedruntime.FollowUpSemantics{`,
+		`DeleteFollowUp: generatedruntime.FollowUpSemantics{`,
+		`Fields: []generatedruntime.RequestField{{FieldName: "LaunchInstanceDetails", RequestName: "LaunchInstanceDetails", Contribution: "body", PreferResourceID: false}},`,
+		`Fields: []generatedruntime.RequestField{{FieldName: "InstanceId", RequestName: "instanceId", Contribution: "path", PreferResourceID: true}},`,
+	})
+
+	instanceSample := readFile(t, filepath.Join(outputRoot, "config", "samples", "core_v1beta1_instance.yaml"))
+	assertContains(t, instanceSample, []string{
+		"availabilityDomain:",
+		"subnetId:",
+		"sourceDetails:",
+		"imageId:",
 	})
 }
 
@@ -1986,39 +1857,26 @@ func TestCheckedInStreamingPreservesStreamNamePrinterColumn(t *testing.T) {
 	}
 }
 
-func TestExplicitIdentityUserRuntimeArtifactsGenerateFromConfig(t *testing.T) {
-	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
-	cfg, err := LoadConfig(cfgPath)
+func TestExplicitIdentityCompartmentRuntimeArtifactsGenerateFromConfig(t *testing.T) {
+	cfg := loadCheckedInConfig(t)
+	services, err := cfg.SelectServices("identity", false)
 	if err != nil {
-		t.Fatalf("LoadConfig(%q) error = %v", cfgPath, err)
+		t.Fatalf("SelectServices(--service identity) error = %v", err)
 	}
-
-	var identityService *ServiceConfig
-	for i := range cfg.Services {
-		if cfg.Services[i].Service == "identity" {
-			identityService = &cfg.Services[i]
-			break
-		}
+	if len(services) != 1 {
+		t.Fatalf("SelectServices(--service identity) returned %d services, want 1", len(services))
 	}
-	if identityService == nil {
-		t.Fatal("identity service was not found in services.yaml")
+	identityService := services[0]
+	if got := identityService.SelectedKinds(); !slices.Equal(got, []string{"Compartment"}) {
+		t.Fatalf("identity SelectedKinds() = %v, want [Compartment]", got)
 	}
-	if got := identityService.FormalSpecFor("User"); got != "user" {
-		t.Fatalf("identity User formalSpec = %q, want %q", got, "user")
-	}
+	assertServiceFormalSpec(t, &identityService, "Compartment", "compartment")
 
 	outputRoot := t.TempDir()
-	samplesDir := filepath.Join(outputRoot, "config", "samples")
-	if err := os.MkdirAll(samplesDir, 0o755); err != nil {
-		t.Fatalf("mkdir %s: %v", samplesDir, err)
-	}
-	checkedInSampleKustomization := readFile(t, filepath.Join(repoRoot(t), "config", "samples", "kustomization.yaml"))
-	if err := os.WriteFile(filepath.Join(samplesDir, "kustomization.yaml"), []byte(checkedInSampleKustomization), 0o644); err != nil {
-		t.Fatalf("write seeded samples kustomization: %v", err)
-	}
+	seedSamplesKustomization(t, outputRoot)
 
 	pipeline := New()
-	result, err := pipeline.Generate(context.Background(), cfg, []ServiceConfig{*identityService}, Options{
+	result, err := pipeline.Generate(context.Background(), cfg, []ServiceConfig{identityService}, Options{
 		OutputRoot: outputRoot,
 	})
 	if err != nil {
@@ -2028,31 +1886,36 @@ func TestExplicitIdentityUserRuntimeArtifactsGenerateFromConfig(t *testing.T) {
 		t.Fatalf("Generate() generated %d services, want 1", len(result.Generated))
 	}
 
-	serviceClientPath := "pkg/servicemanager/identity/user/user_serviceclient.go"
-	serviceManagerPath := "pkg/servicemanager/identity/user/user_servicemanager.go"
+	serviceClientPath := "pkg/servicemanager/identity/compartment/compartment_serviceclient.go"
+	serviceManagerPath := "pkg/servicemanager/identity/compartment/compartment_servicemanager.go"
 	assertPathsExist(t, []string{
-		filepath.Join(outputRoot, "api", "identity", "v1beta1", "user_types.go"),
-		filepath.Join(outputRoot, "controllers", "identity", "user_controller.go"),
+		filepath.Join(outputRoot, "api", "identity", "v1beta1", "compartment_types.go"),
+		filepath.Join(outputRoot, "controllers", "identity", "compartment_controller.go"),
 		filepath.Join(outputRoot, serviceClientPath),
 		filepath.Join(outputRoot, serviceManagerPath),
 		filepath.Join(outputRoot, "internal", "registrations", "identity_generated.go"),
 		filepath.Join(outputRoot, "packages", "identity", "metadata.env"),
 		filepath.Join(outputRoot, "packages", "identity", "install", "kustomization.yaml"),
-		filepath.Join(outputRoot, "config", "samples", "identity_v1beta1_user.yaml"),
+		filepath.Join(outputRoot, "config", "samples", "identity_v1beta1_compartment.yaml"),
+	})
+	assertPathsNotExist(t, []string{
+		filepath.Join(outputRoot, "api", "identity", "v1beta1", "user_types.go"),
+		filepath.Join(outputRoot, "controllers", "identity", "user_controller.go"),
+		filepath.Join(outputRoot, "pkg", "servicemanager", "identity", "user", "user_serviceclient.go"),
 	})
 
 	content := readFile(t, filepath.Join(outputRoot, serviceClientPath))
 	assertContains(t, content, []string{
 		"Semantics: &generatedruntime.Semantics{",
 		`FormalService:     "identity"`,
-		`FormalSlug:        "user"`,
+		`FormalSlug:        "compartment"`,
 		`ResponseItemsField: "Items"`,
 		`CreateFollowUp: generatedruntime.FollowUpSemantics{`,
 		`Strategy: "read-after-write"`,
 		`DeleteFollowUp: generatedruntime.FollowUpSemantics{`,
 		`Strategy: "confirm-delete"`,
-		`Fields: []generatedruntime.RequestField{{FieldName: "CreateUserDetails", RequestName: "CreateUserDetails", Contribution: "body", PreferResourceID: false}},`,
-		`Fields: []generatedruntime.RequestField{{FieldName: "UserId", RequestName: "userId", Contribution: "path", PreferResourceID: true}},`,
+		`Fields: []generatedruntime.RequestField{{FieldName: "CreateCompartmentDetails", RequestName: "CreateCompartmentDetails", Contribution: "body", PreferResourceID: false}},`,
+		`Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "path", PreferResourceID: true}},`,
 	})
 }
 

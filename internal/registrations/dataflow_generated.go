@@ -14,15 +14,6 @@ import (
 	dataflowcontrollers "github.com/oracle/oci-service-operator/controllers/dataflow"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	dataflowapplicationservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/dataflow/application"
-	dataflowpoolservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/dataflow/pool"
-	dataflowprivateendpointservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/dataflow/privateendpoint"
-	dataflowrunservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/dataflow/run"
-	dataflowrunlogservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/dataflow/runlog"
-	dataflowsqlendpointservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/dataflow/sqlendpoint"
-	dataflowstatementservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/dataflow/statement"
-	dataflowworkrequestservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/dataflow/workrequest"
-	dataflowworkrequesterrorservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/dataflow/workrequesterror"
-	dataflowworkrequestlogservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/dataflow/workrequestlog"
 )
 
 func init() {
@@ -40,105 +31,6 @@ func init() {
 				),
 			}).SetupWithManager(ctx.Manager); err != nil {
 				return fmt.Errorf("setup Application controller: %w", err)
-			}
-			if err := (&dataflowcontrollers.PoolReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"Pool",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return dataflowpoolservicemanager.NewPoolServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup Pool controller: %w", err)
-			}
-			if err := (&dataflowcontrollers.PrivateEndpointReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"PrivateEndpoint",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return dataflowprivateendpointservicemanager.NewPrivateEndpointServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup PrivateEndpoint controller: %w", err)
-			}
-			if err := (&dataflowcontrollers.RunReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"Run",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return dataflowrunservicemanager.NewRunServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup Run controller: %w", err)
-			}
-			if err := (&dataflowcontrollers.RunLogReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"RunLog",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return dataflowrunlogservicemanager.NewRunLogServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup RunLog controller: %w", err)
-			}
-			if err := (&dataflowcontrollers.SqlEndpointReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"SqlEndpoint",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return dataflowsqlendpointservicemanager.NewSqlEndpointServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup SqlEndpoint controller: %w", err)
-			}
-			if err := (&dataflowcontrollers.StatementReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"Statement",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return dataflowstatementservicemanager.NewStatementServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup Statement controller: %w", err)
-			}
-			if err := (&dataflowcontrollers.WorkRequestReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"WorkRequest",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return dataflowworkrequestservicemanager.NewWorkRequestServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup WorkRequest controller: %w", err)
-			}
-			if err := (&dataflowcontrollers.WorkRequestErrorReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"WorkRequestError",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return dataflowworkrequesterrorservicemanager.NewWorkRequestErrorServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup WorkRequestError controller: %w", err)
-			}
-			if err := (&dataflowcontrollers.WorkRequestLogReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"WorkRequestLog",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return dataflowworkrequestlogservicemanager.NewWorkRequestLogServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup WorkRequestLog controller: %w", err)
 			}
 			return nil
 		},
