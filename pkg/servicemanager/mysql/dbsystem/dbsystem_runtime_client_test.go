@@ -40,7 +40,7 @@ func (f *fakeDbSystemAvailabilityDomainClient) GetCompartment(_ context.Context,
 	return f.getCompartmentResponse, f.getCompartmentErr
 }
 
-func TestBuildDbSystemCreateDetailsNormalizesAvailabilityDomainAlias(t *testing.T) {
+func TestBuildDbSystemCreateDetailsPreservesExplicitAvailabilityDomainAlias(t *testing.T) {
 	restoreClient := newDbSystemAvailabilityDomainClient
 	newDbSystemAvailabilityDomainClient = func(common.ConfigurationProvider) (dbSystemAvailabilityDomainClient, error) {
 		return &fakeDbSystemAvailabilityDomainClient{
@@ -92,8 +92,8 @@ func TestBuildDbSystemCreateDetailsNormalizesAvailabilityDomainAlias(t *testing.
 	if err != nil {
 		t.Fatalf("buildDbSystemCreateDetails() error = %v", err)
 	}
-	if details.AvailabilityDomain == nil || *details.AvailabilityDomain != "ypKW:US-ASHBURN-AD-1" {
-		t.Fatalf("AvailabilityDomain = %v, want normalized current-tenant alias", details.AvailabilityDomain)
+	if details.AvailabilityDomain == nil || *details.AvailabilityDomain != "qqZb:US-ASHBURN-AD-1" {
+		t.Fatalf("AvailabilityDomain = %v, want explicit alias preserved", details.AvailabilityDomain)
 	}
 	if details.AdminUsername == nil || *details.AdminUsername != "adminuser" {
 		t.Fatalf("AdminUsername = %v, want resolved username", details.AdminUsername)
@@ -210,7 +210,7 @@ func TestBuildDbSystemCreateDetailsPreservesStandaloneFalse(t *testing.T) {
 	}
 }
 
-func TestBuildDbSystemCreateDetailsNormalizesAvailabilityDomainAgainstCompartmentTenancy(t *testing.T) {
+func TestBuildDbSystemCreateDetailsExpandsSuffixOnlyAvailabilityDomainAgainstCompartmentTenancy(t *testing.T) {
 	fakeClient := &fakeDbSystemAvailabilityDomainClient{
 		response: identity.ListAvailabilityDomainsResponse{
 			Items: []identity.AvailabilityDomain{
@@ -252,7 +252,7 @@ func TestBuildDbSystemCreateDetailsNormalizesAvailabilityDomainAgainstCompartmen
 				DisplayName:          "mysql-dbsystem-sample",
 				ShapeName:            "MySQL.2",
 				SubnetId:             "ocid1.subnet.oc1..example",
-				AvailabilityDomain:   "ypKW:US-ASHBURN-AD-1",
+				AvailabilityDomain:   "US-ASHBURN-AD-1",
 				AdminUsername:        usernameSecretSource("admin-secret"),
 				AdminPassword:        passwordSecretSource("admin-secret"),
 				DataStorageSizeInGBs: 50,
@@ -264,7 +264,7 @@ func TestBuildDbSystemCreateDetailsNormalizesAvailabilityDomainAgainstCompartmen
 		t.Fatalf("buildDbSystemCreateDetails() error = %v", err)
 	}
 	if details.AvailabilityDomain == nil || *details.AvailabilityDomain != "qqZb:US-ASHBURN-AD-1" {
-		t.Fatalf("AvailabilityDomain = %v, want target-compartment tenancy alias", details.AvailabilityDomain)
+		t.Fatalf("AvailabilityDomain = %v, want suffix-only input expanded against target-compartment tenancy", details.AvailabilityDomain)
 	}
 	if len(fakeClient.getCompartmentRequests) != 1 {
 		t.Fatalf("GetCompartment() calls = %d, want 1", len(fakeClient.getCompartmentRequests))
@@ -397,7 +397,7 @@ func TestBuildDbSystemCreateDetailsMatchesLegacyStandaloneProjection(t *testing.
 		DisplayName:          common.String(resource.Spec.DisplayName),
 		Description:          common.String(resource.Spec.Description),
 		IsHighlyAvailable:    common.Bool(resource.Spec.IsHighlyAvailable),
-		AvailabilityDomain:   common.String("ypKW:US-ASHBURN-AD-1"),
+		AvailabilityDomain:   common.String(resource.Spec.AvailabilityDomain),
 		ConfigurationId:      common.String(resource.Spec.ConfigurationId),
 		AdminUsername:        common.String("admin"),
 		AdminPassword:        common.String("ChangeMe123!!"),
@@ -410,6 +410,24 @@ func TestBuildDbSystemCreateDetailsMatchesLegacyStandaloneProjection(t *testing.
 		currentJSON, _ := json.Marshal(current)
 		legacyJSON, _ := json.Marshal(legacy)
 		t.Fatalf("current mysql create body != legacy standalone projection\ncurrent=%s\nlegacy=%s", currentJSON, legacyJSON)
+	}
+}
+
+func TestNewDbSystemServiceClientWrapsRuntimeWithEndpointSecretClient(t *testing.T) {
+	privateKey := testRSAKey(t)
+	manager := &DbSystemServiceManager{
+		Provider:         testConfigurationProvider{privateKey: privateKey},
+		CredentialClient: &fakeDbSystemEndpointCredentialClient{},
+	}
+
+	client := newDbSystemServiceClient(manager)
+
+	wrapped, ok := client.(dbSystemEndpointSecretClient)
+	if !ok {
+		t.Fatalf("newDbSystemServiceClient() type = %T, want dbSystemEndpointSecretClient", client)
+	}
+	if _, ok := wrapped.delegate.(defaultDbSystemServiceClient); !ok {
+		t.Fatalf("wrapped delegate type = %T, want defaultDbSystemServiceClient", wrapped.delegate)
 	}
 }
 

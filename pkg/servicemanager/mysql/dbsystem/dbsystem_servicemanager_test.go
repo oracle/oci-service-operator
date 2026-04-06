@@ -495,7 +495,7 @@ func TestDbSystemServiceManagerCreateOrUpdateRejectsSourceMutationsQuick(t *test
 	manager := newDbSystemSourceMutationManager()
 
 	err := quick.Check(func(current, desired quickDbSystemSourceCase) bool {
-		if current.equal(desired) {
+		if reflect.DeepEqual(observedDbSystemSource(current.Source), observedDbSystemSource(desired.Source)) {
 			return true
 		}
 

@@ -625,7 +625,7 @@ services:
           controller:
             maxConcurrentReconciles: 3
             extraRBACMarkers:
-              - groups="",resources=secrets,verbs=get;list;watch
+              - groups="",resources=secrets,verbs=get;list;watch;create;update;delete
           specFields:
             - name: AdminUsername
               type: shared.UsernameSource
@@ -676,7 +676,7 @@ services:
 		webhook:        GenerationStrategyNone,
 	})
 	assertResourceOverrideCount(t, mysqlService, 1)
-	assertMySQLGenerationOverride(t, mysqlService.Generation.Resources[0], []string{`groups="",resources=secrets,verbs=get;list;watch`})
+	assertMySQLGenerationOverride(t, mysqlService.Generation.Resources[0], mysqlSecretRBACMarkers())
 	override := mysqlService.Generation.Resources[0]
 	if override.Kind != "DbSystem" {
 		t.Fatalf("mysql override kind = %q, want %q", override.Kind, "DbSystem")
@@ -684,10 +684,8 @@ services:
 	if override.Controller.MaxConcurrentReconciles != 3 {
 		t.Fatalf("mysql maxConcurrentReconciles = %d, want 3", override.Controller.MaxConcurrentReconciles)
 	}
-	if !slices.Equal(override.Controller.ExtraRBACMarkers, []string{
-		`groups="",resources=secrets,verbs=get;list;watch`,
-	}) {
-		t.Fatalf("mysql extra RBAC markers = %v, want only the secret marker", override.Controller.ExtraRBACMarkers)
+	if !slices.Equal(override.Controller.ExtraRBACMarkers, mysqlSecretRBACMarkers()) {
+		t.Fatalf("mysql extra RBAC markers = %v, want secret read and write markers", override.Controller.ExtraRBACMarkers)
 	}
 	if override.ServiceManager.PackagePath != "mysql/dbsystem" {
 		t.Fatalf("mysql packagePath = %q, want %q", override.ServiceManager.PackagePath, "mysql/dbsystem")
@@ -1212,7 +1210,7 @@ func TestCheckedInConfigPromotesFormalSpecReferences(t *testing.T) {
 	services := serviceConfigsByName(t, cfg, "containerinstances", "identity", "core", "database", "mysql", "objectstorage", "opensearch", "psql", "streaming", "redis")
 	assertFormalSpecFor(t, services["containerinstances"], "ContainerInstance", "")
 	assertFormalSpecFor(t, services["identity"], "Compartment", "compartment")
-	assertFormalSpecFor(t, services["core"], "Instance", "")
+	assertFormalSpecFor(t, services["core"], "Instance", "instance")
 	assertFormalSpecFor(t, services["database"], "AutonomousDatabase", "databaseautonomousdatabase")
 	assertFormalSpecFor(t, services["mysql"], "DbSystem", "dbsystem")
 	assertFormalSpecFor(t, services["objectstorage"], "Bucket", "objectstoragebucket")
@@ -1229,7 +1227,7 @@ func TestCheckedInConfigCoordinatesPrimaryPortPackagePaths(t *testing.T) {
 	services := serviceConfigsByName(t, cfg, "containerinstances", "core", "database", "identity", "mysql", "objectstorage", "opensearch", "psql", "redis")
 
 	assertContainerInstancesRuntimeRolloutMetadata(t, services["containerinstances"])
-	assertPrimaryPortOverride(t, services["core"], "Instance", "", "core/instance")
+	assertPrimaryPortOverride(t, services["core"], "Instance", "instance", "core/instance")
 	assertDatabaseRuntimeRolloutMetadata(t, services["database"])
 	assertPrimaryPortOverride(t, services["identity"], "Compartment", "compartment", "identity/compartment")
 	assertMySQLRuntimeRolloutMetadata(t, services["mysql"])
@@ -1431,6 +1429,12 @@ func assertMySQLGenerationOverride(t *testing.T, override ResourceGenerationOver
 	}
 }
 
+func mysqlSecretRBACMarkers() []string {
+	return []string{
+		`groups="",resources=secrets,verbs=get;list;watch;create;update;delete`,
+	}
+}
+
 func assertDatabaseRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
 	t.Helper()
 
@@ -1476,7 +1480,7 @@ func assertMySQLRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
 
 	assertResourceOverrideCount(t, service, 1)
 	override := service.Generation.Resources[0]
-	assertMySQLGenerationOverride(t, override, []string{`groups="",resources=secrets,verbs=get;list;watch`})
+	assertMySQLGenerationOverride(t, override, mysqlSecretRBACMarkers())
 	if len(override.SpecFields) != 2 {
 		t.Fatalf("mysql specFields = %#v, want 2 secret-backed overrides", override.SpecFields)
 	}
@@ -1587,7 +1591,7 @@ func assertCoreRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
 		webhook:        GenerationStrategyNone,
 	})
 	assertResourceOverrideCount(t, service, 1)
-	assertPrimaryPortOverride(t, service, "Instance", "", "core/instance")
+	assertPrimaryPortOverride(t, service, "Instance", "instance", "core/instance")
 	assertPackageSplitContainsKind(t, service, "core-network", "Drg")
 }
 

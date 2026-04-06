@@ -202,6 +202,33 @@ services:
         strategy: none
       resources:
         - kind: Instance
+          formalSpec: instance
+          sample:
+            body: |-
+              #
+              # Replace the OCI identifiers below before running e2e.
+              # Update metadata.name and spec.displayName if you want to force a fresh create
+              # instead of reusing an existing Instance with the same display name in the same
+              # compartment and availability domain.
+              # Adjust spec.shape and spec.shapeConfig if your tenancy or region does not have
+              # capacity for this starter shape.
+              #
+              apiVersion: core.oracle.com/v1beta1
+              kind: Instance
+              metadata:
+                name: instance-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                availabilityDomain: "AD-1"
+                subnetId: ocid1.subnet.oc1..exampleuniqueID
+                displayName: "instance-sample"
+                shape: "VM.Standard.E4.Flex"
+                shapeConfig:
+                  ocpus: 1
+                  memoryInGBs: 16
+                sourceDetails:
+                  sourceType: image
+                  imageId: ocid1.image.oc1..exampleuniqueID
           serviceManager:
             packagePath: core/instance
     observedState:
@@ -620,7 +647,7 @@ services:
           controller:
             maxConcurrentReconciles: 3
             extraRBACMarkers:
-              - groups="",resources=secrets,verbs=get;list;watch
+              - groups="",resources=secrets,verbs=get;list;watch;create;update;delete
           specFields:
             - name: AdminUsername
               type: shared.UsernameSource
