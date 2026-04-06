@@ -13,17 +13,7 @@ import (
 	psqlv1beta1 "github.com/oracle/oci-service-operator/api/psql/v1beta1"
 	psqlcontrollers "github.com/oracle/oci-service-operator/controllers/psql"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
-	psqlbackupservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/psql/backup"
-	psqlconfigurationservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/psql/configuration"
-	psqlconnectiondetailservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/psql/connectiondetail"
 	psqldbsystemservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/psql/dbsystem"
-	psqldbsystemdbinstanceservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/psql/dbsystemdbinstance"
-	psqldefaultconfigurationservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/psql/defaultconfiguration"
-	psqlprimarydbinstanceservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/psql/primarydbinstance"
-	psqlshapeservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/psql/shape"
-	psqlworkrequestservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/psql/workrequest"
-	psqlworkrequesterrorservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/psql/workrequesterror"
-	psqlworkrequestlogservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/psql/workrequestlog"
 )
 
 func init() {
@@ -31,39 +21,6 @@ func init() {
 		Group:       "psql",
 		AddToScheme: psqlv1beta1.AddToScheme,
 		SetupWithManager: func(ctx Context) error {
-			if err := (&psqlcontrollers.BackupReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"Backup",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return psqlbackupservicemanager.NewBackupServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup Backup controller: %w", err)
-			}
-			if err := (&psqlcontrollers.ConfigurationReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"Configuration",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return psqlconfigurationservicemanager.NewConfigurationServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup Configuration controller: %w", err)
-			}
-			if err := (&psqlcontrollers.ConnectionDetailReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"ConnectionDetail",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return psqlconnectiondetailservicemanager.NewConnectionDetailServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup ConnectionDetail controller: %w", err)
-			}
 			if err := (&psqlcontrollers.DbSystemReconciler{
 				Reconciler: NewBaseReconciler(
 					ctx,
@@ -74,83 +31,6 @@ func init() {
 				),
 			}).SetupWithManager(ctx.Manager); err != nil {
 				return fmt.Errorf("setup DbSystem controller: %w", err)
-			}
-			if err := (&psqlcontrollers.DbSystemDbInstanceReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"DbSystemDbInstance",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return psqldbsystemdbinstanceservicemanager.NewDbSystemDbInstanceServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup DbSystemDbInstance controller: %w", err)
-			}
-			if err := (&psqlcontrollers.DefaultConfigurationReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"DefaultConfiguration",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return psqldefaultconfigurationservicemanager.NewDefaultConfigurationServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup DefaultConfiguration controller: %w", err)
-			}
-			if err := (&psqlcontrollers.PrimaryDbInstanceReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"PrimaryDbInstance",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return psqlprimarydbinstanceservicemanager.NewPrimaryDbInstanceServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup PrimaryDbInstance controller: %w", err)
-			}
-			if err := (&psqlcontrollers.ShapeReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"Shape",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return psqlshapeservicemanager.NewShapeServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup Shape controller: %w", err)
-			}
-			if err := (&psqlcontrollers.WorkRequestReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"WorkRequest",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return psqlworkrequestservicemanager.NewWorkRequestServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup WorkRequest controller: %w", err)
-			}
-			if err := (&psqlcontrollers.WorkRequestErrorReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"WorkRequestError",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return psqlworkrequesterrorservicemanager.NewWorkRequestErrorServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup WorkRequestError controller: %w", err)
-			}
-			if err := (&psqlcontrollers.WorkRequestLogReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"WorkRequestLog",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return psqlworkrequestlogservicemanager.NewWorkRequestLogServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup WorkRequestLog controller: %w", err)
 			}
 			return nil
 		},

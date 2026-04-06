@@ -22,17 +22,7 @@ rules:
 - apiGroups:
   - psql.oracle.com
   resources:
-  - backups
-  - configurations
-  - connectiondetails
-  - dbsystemdbinstances
   - dbsystems
-  - defaultconfigurations
-  - primarydbinstances
-  - shapes
-  - workrequesterrors
-  - workrequestlogs
-  - workrequests
   verbs:
   - create
   - delete
@@ -44,33 +34,13 @@ rules:
 - apiGroups:
   - psql.oracle.com
   resources:
-  - backups/finalizers
-  - configurations/finalizers
-  - connectiondetails/finalizers
-  - dbsystemdbinstances/finalizers
   - dbsystems/finalizers
-  - defaultconfigurations/finalizers
-  - primarydbinstances/finalizers
-  - shapes/finalizers
-  - workrequesterrors/finalizers
-  - workrequestlogs/finalizers
-  - workrequests/finalizers
   verbs:
   - update
 - apiGroups:
   - psql.oracle.com
   resources:
-  - backups/status
-  - configurations/status
-  - connectiondetails/status
-  - dbsystemdbinstances/status
   - dbsystems/status
-  - defaultconfigurations/status
-  - primarydbinstances/status
-  - shapes/status
-  - workrequesterrors/status
-  - workrequestlogs/status
-  - workrequests/status
   verbs:
   - get
   - patch

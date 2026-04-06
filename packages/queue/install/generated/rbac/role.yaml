@@ -18,13 +18,7 @@ rules:
 - apiGroups:
   - queue.oracle.com
   resources:
-  - channels
-  - messages
   - queues
-  - stats
-  - workrequesterrors
-  - workrequestlogs
-  - workrequests
   verbs:
   - create
   - delete
@@ -36,25 +30,13 @@ rules:
 - apiGroups:
   - queue.oracle.com
   resources:
-  - channels/finalizers
-  - messages/finalizers
   - queues/finalizers
-  - stats/finalizers
-  - workrequesterrors/finalizers
-  - workrequestlogs/finalizers
-  - workrequests/finalizers
   verbs:
   - update
 - apiGroups:
   - queue.oracle.com
   resources:
-  - channels/status
-  - messages/status
   - queues/status
-  - stats/status
-  - workrequesterrors/status
-  - workrequestlogs/status
-  - workrequests/status
   verbs:
   - get
   - patch

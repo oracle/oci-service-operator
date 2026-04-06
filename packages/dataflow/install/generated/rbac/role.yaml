@@ -8,15 +8,6 @@ rules:
   - dataflow.oracle.com
   resources:
   - applications
-  - pools
-  - privateendpoints
-  - runlogs
-  - runs
-  - sqlendpoints
-  - statements
-  - workrequesterrors
-  - workrequestlogs
-  - workrequests
   verbs:
   - create
   - delete
@@ -29,30 +20,12 @@ rules:
   - dataflow.oracle.com
   resources:
   - applications/finalizers
-  - pools/finalizers
-  - privateendpoints/finalizers
-  - runlogs/finalizers
-  - runs/finalizers
-  - sqlendpoints/finalizers
-  - statements/finalizers
-  - workrequesterrors/finalizers
-  - workrequestlogs/finalizers
-  - workrequests/finalizers
   verbs:
   - update
 - apiGroups:
   - dataflow.oracle.com
   resources:
   - applications/status
-  - pools/status
-  - privateendpoints/status
-  - runlogs/status
-  - runs/status
-  - sqlendpoints/status
-  - statements/status
-  - workrequesterrors/status
-  - workrequestlogs/status
-  - workrequests/status
   verbs:
   - get
   - patch

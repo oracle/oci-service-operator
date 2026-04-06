@@ -98,10 +98,14 @@ func TestGenerateFullSyncCleansStaleGeneratorOwnedOutputsForInactiveServicesAndE
 
 	preservedDeepCopyFile := filepath.Join(outputRoot, "api", "mysql", "v1beta1", "zz_generated.deepcopy.go")
 	preservedPackageFile := filepath.Join(outputRoot, "packages", "mysql", "install", "generated", "crd", "bases", "mysql.oracle.com_report.yaml")
+	staleIdentityDeepCopyFile := filepath.Join(outputRoot, "api", "identity", "v1beta1", "zz_generated.deepcopy.go")
+	staleIdentityPackageGeneratedFile := filepath.Join(outputRoot, "packages", "identity", "install", "generated", "crd", "bases", "identity.oracle.com_widget.yaml")
 	staleMySQLOldVersionSample := filepath.Join(outputRoot, "config", "samples", "mysql_v1alpha1_widget.yaml")
 	staleIdentityOldVersionSample := filepath.Join(outputRoot, "config", "samples", "identity_v1alpha1_widget.yaml")
 	writeSelectionCleanupFile(t, preservedDeepCopyFile, "// preserved deepcopy output\n")
 	writeSelectionCleanupFile(t, preservedPackageFile, "preserved manifest output\n")
+	writeSelectionCleanupFile(t, staleIdentityDeepCopyFile, "// stale identity deepcopy output\n")
+	writeSelectionCleanupFile(t, staleIdentityPackageGeneratedFile, "stale identity package manifest\n")
 	writeSelectionCleanupFile(t, staleMySQLOldVersionSample, "apiVersion: mysql.oracle.com/v1alpha1\nkind: Widget\n")
 	writeSelectionCleanupFile(t, staleIdentityOldVersionSample, "apiVersion: identity.oracle.com/v1alpha1\nkind: Widget\n")
 
@@ -130,7 +134,13 @@ func TestGenerateFullSyncCleansStaleGeneratorOwnedOutputsForInactiveServicesAndE
 		filepath.Join(outputRoot, "internal", "registrations", "identity_generated.go"),
 		filepath.Join(outputRoot, "packages", "identity", "metadata.env"),
 		filepath.Join(outputRoot, "packages", "identity", "install", "kustomization.yaml"),
+		filepath.Join(outputRoot, "packages", "identity", "install", "generated", "crd", "bases", "identity.oracle.com_widget.yaml"),
+		filepath.Join(outputRoot, "cmd", "manager", "identity", "main.go"),
+		filepath.Join(outputRoot, "config", "manager", "identity", "kustomization.yaml"),
+		filepath.Join(outputRoot, "config", "manager", "identity", "manager.yaml"),
+		filepath.Join(outputRoot, "config", "manager", "identity", "controller_manager_config.yaml"),
 		filepath.Join(outputRoot, "config", "samples", "identity_v1beta1_widget.yaml"),
+		staleIdentityDeepCopyFile,
 		staleMySQLOldVersionSample,
 		staleIdentityOldVersionSample,
 	})
@@ -141,6 +151,10 @@ func TestGenerateFullSyncCleansStaleGeneratorOwnedOutputsForInactiveServicesAndE
 		filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "widget", "widget_serviceclient.go"),
 		filepath.Join(outputRoot, "packages", "mysql", "metadata.env"),
 		filepath.Join(outputRoot, "internal", "registrations", "mysql_generated.go"),
+		filepath.Join(outputRoot, "cmd", "manager", "mysql", "main.go"),
+		filepath.Join(outputRoot, "config", "manager", "mysql", "kustomization.yaml"),
+		filepath.Join(outputRoot, "config", "manager", "mysql", "manager.yaml"),
+		filepath.Join(outputRoot, "config", "manager", "mysql", "controller_manager_config.yaml"),
 		filepath.Join(outputRoot, "config", "samples", "mysql_v1beta1_widget.yaml"),
 		preservedDeepCopyFile,
 		preservedPackageFile,
@@ -168,6 +182,11 @@ func TestGenerateFullSyncCleansStaleGeneratorOwnedOutputsForServicesRemovedFromC
 		t.Fatalf("seed Generate() error = %v", err)
 	}
 
+	staleIdentityDeepCopyFile := filepath.Join(outputRoot, "api", "identity", "v1beta1", "zz_generated.deepcopy.go")
+	staleIdentityPackageGeneratedFile := filepath.Join(outputRoot, "packages", "identity", "install", "generated", "crd", "bases", "identity.oracle.com_widget.yaml")
+	writeSelectionCleanupFile(t, staleIdentityDeepCopyFile, "// stale identity deepcopy output\n")
+	writeSelectionCleanupFile(t, staleIdentityPackageGeneratedFile, "stale identity package manifest\n")
+
 	cfg.Services = cfg.Services[:1]
 
 	activeServices, err := cfg.SelectServices("", true)
@@ -190,16 +209,24 @@ func TestGenerateFullSyncCleansStaleGeneratorOwnedOutputsForServicesRemovedFromC
 		"internal/registrations/identity_generated.go",
 		"packages/identity/metadata.env",
 		"packages/identity/install/kustomization.yaml",
+		"packages/identity/install/generated/crd/bases/identity.oracle.com_widget.yaml",
+		"cmd/manager/identity/main.go",
+		"config/manager/identity/kustomization.yaml",
+		"config/manager/identity/manager.yaml",
+		"config/manager/identity/controller_manager_config.yaml",
 		"config/samples/identity_v1beta1_widget.yaml",
 	} {
 		assertPathNotExists(t, filepath.Join(outputRoot, relativePath))
 	}
+	assertPathNotExists(t, staleIdentityDeepCopyFile)
 
 	assertPathExists(t, filepath.Join(outputRoot, "api", "mysql", "v1beta1", "widget_types.go"))
 	assertPathExists(t, filepath.Join(outputRoot, "controllers", "mysql", "widget_controller.go"))
 	assertPathExists(t, filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "widget", "widget_serviceclient.go"))
 	assertPathExists(t, filepath.Join(outputRoot, "internal", "registrations", "mysql_generated.go"))
 	assertPathExists(t, filepath.Join(outputRoot, "packages", "mysql", "metadata.env"))
+	assertPathExists(t, filepath.Join(outputRoot, "cmd", "manager", "mysql", "main.go"))
+	assertPathExists(t, filepath.Join(outputRoot, "config", "manager", "mysql", "manager.yaml"))
 	assertPathExists(t, filepath.Join(outputRoot, "config", "samples", "mysql_v1beta1_widget.yaml"))
 	assertFileDoesNotContain(t, filepath.Join(outputRoot, "config", "samples", "kustomization.yaml"), []string{
 		"identity_v1beta1_widget.yaml",

@@ -13,14 +13,7 @@ import (
 	nosqlv1beta1 "github.com/oracle/oci-service-operator/api/nosql/v1beta1"
 	nosqlcontrollers "github.com/oracle/oci-service-operator/controllers/nosql"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
-	nosqlindexservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/nosql/index"
-	nosqlreplicaservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/nosql/replica"
-	nosqlrowservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/nosql/row"
 	nosqltableservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/nosql/table"
-	nosqltableusageservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/nosql/tableusage"
-	nosqlworkrequestservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/nosql/workrequest"
-	nosqlworkrequesterrorservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/nosql/workrequesterror"
-	nosqlworkrequestlogservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/nosql/workrequestlog"
 )
 
 func init() {
@@ -28,39 +21,6 @@ func init() {
 		Group:       "nosql",
 		AddToScheme: nosqlv1beta1.AddToScheme,
 		SetupWithManager: func(ctx Context) error {
-			if err := (&nosqlcontrollers.IndexReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"Index",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return nosqlindexservicemanager.NewIndexServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup Index controller: %w", err)
-			}
-			if err := (&nosqlcontrollers.ReplicaReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"Replica",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return nosqlreplicaservicemanager.NewReplicaServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup Replica controller: %w", err)
-			}
-			if err := (&nosqlcontrollers.RowReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"Row",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return nosqlrowservicemanager.NewRowServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup Row controller: %w", err)
-			}
 			if err := (&nosqlcontrollers.TableReconciler{
 				Reconciler: NewBaseReconciler(
 					ctx,
@@ -71,50 +31,6 @@ func init() {
 				),
 			}).SetupWithManager(ctx.Manager); err != nil {
 				return fmt.Errorf("setup Table controller: %w", err)
-			}
-			if err := (&nosqlcontrollers.TableUsageReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"TableUsage",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return nosqltableusageservicemanager.NewTableUsageServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup TableUsage controller: %w", err)
-			}
-			if err := (&nosqlcontrollers.WorkRequestReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"WorkRequest",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return nosqlworkrequestservicemanager.NewWorkRequestServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup WorkRequest controller: %w", err)
-			}
-			if err := (&nosqlcontrollers.WorkRequestErrorReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"WorkRequestError",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return nosqlworkrequesterrorservicemanager.NewWorkRequestErrorServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup WorkRequestError controller: %w", err)
-			}
-			if err := (&nosqlcontrollers.WorkRequestLogReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"WorkRequestLog",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return nosqlworkrequestlogservicemanager.NewWorkRequestLogServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup WorkRequestLog controller: %w", err)
 			}
 			return nil
 		},

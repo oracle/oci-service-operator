@@ -243,6 +243,37 @@ func TestSelectServicesExplicitServicePreservesDefaultKindSubset(t *testing.T) {
 	assertSelectedKinds(t, services[0], []string{"AutonomousDatabase"})
 }
 
+func TestSelectServicesExplicitServiceIncludesPackageSplitKinds(t *testing.T) {
+	t.Parallel()
+
+	cfg := &Config{
+		SchemaVersion:  "v1alpha1",
+		Domain:         "oracle.com",
+		DefaultVersion: "v1beta1",
+		PackageProfiles: map[string]PackageProfile{
+			"controller-backed": {Description: "runtime-integrated groups"},
+		},
+		Services: []ServiceConfig{
+			{
+				Service:        "core",
+				SDKPackage:     "example/core",
+				Group:          "core",
+				PackageProfile: "controller-backed",
+				Selection:      selectionExplicit(true, "Instance"),
+				PackageSplits: []PackageSplitConfig{
+					{
+						Name:         "core-network",
+						IncludeKinds: []string{"Subnet", "Vcn"},
+					},
+				},
+			},
+		},
+	}
+
+	services := assertSelectServicesResult(t, cfg, "core", false, 1, "")
+	assertSelectedKinds(t, services[0], []string{"Instance", "Subnet", "Vcn"})
+}
+
 func TestNormalizeDefaultActiveSelection(t *testing.T) {
 	t.Parallel()
 
@@ -1094,28 +1125,28 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	cfg := loadCheckedInConfig(t)
 
 	activeServices := serviceNames(cfg.DefaultActiveServices())
-	wantActiveServices := []string{"containerengine", "containerinstances", "core", "database", "dataflow", "functions", "identity", "mysql", "nosql", "objectstorage", "opensearch", "psql", "queue", "redis", "streaming", "vault"}
+	wantActiveServices := []string{"containerinstances", "core", "database", "dataflow", "functions", "identity", "mysql", "nosql", "objectstorage", "opensearch", "psql", "queue", "redis", "streaming"}
 	if !slices.Equal(activeServices, wantActiveServices) {
 		t.Fatalf("DefaultActiveServices() = %v, want %v", activeServices, wantActiveServices)
 	}
 
 	services := requireServices(t, cfg, "containerengine", "containerinstances", "core", "database", "dataflow", "functions", "identity", "mysql", "nosql", "objectstorage", "opensearch", "psql", "queue", "redis", "streaming", "vault")
-	assertServiceSelection(t, services["containerengine"], true, SelectionModeAll, nil)
+	assertServiceSelection(t, services["containerengine"], false, SelectionModeAll, nil)
 	assertServiceSelection(t, services["containerinstances"], true, SelectionModeExplicit, []string{"ContainerInstance"})
-	assertServiceSelection(t, services["core"], true, SelectionModeAll, nil)
+	assertServiceSelection(t, services["core"], true, SelectionModeExplicit, []string{"Instance"})
 	assertServiceSelection(t, services["database"], true, SelectionModeExplicit, []string{"AutonomousDatabase"})
-	assertServiceSelection(t, services["dataflow"], true, SelectionModeAll, nil)
-	assertServiceSelection(t, services["functions"], true, SelectionModeAll, nil)
+	assertServiceSelection(t, services["dataflow"], true, SelectionModeExplicit, []string{"Application"})
+	assertServiceSelection(t, services["functions"], true, SelectionModeExplicit, []string{"Application", "Function"})
 	assertServiceSelection(t, services["identity"], true, SelectionModeExplicit, []string{"Compartment"})
-	assertServiceSelection(t, services["mysql"], true, SelectionModeAll, nil)
-	assertServiceSelection(t, services["nosql"], true, SelectionModeAll, nil)
+	assertServiceSelection(t, services["mysql"], true, SelectionModeExplicit, []string{"DbSystem"})
+	assertServiceSelection(t, services["nosql"], true, SelectionModeExplicit, []string{"Table"})
 	assertServiceSelection(t, services["objectstorage"], true, SelectionModeExplicit, []string{"Bucket"})
 	assertServiceSelection(t, services["opensearch"], true, SelectionModeExplicit, []string{"OpensearchCluster"})
-	assertServiceSelection(t, services["psql"], true, SelectionModeAll, nil)
-	assertServiceSelection(t, services["queue"], true, SelectionModeAll, nil)
+	assertServiceSelection(t, services["psql"], true, SelectionModeExplicit, []string{"DbSystem"})
+	assertServiceSelection(t, services["queue"], true, SelectionModeExplicit, []string{"Queue"})
 	assertServiceSelection(t, services["redis"], true, SelectionModeExplicit, []string{"RedisCluster"})
 	assertServiceSelection(t, services["streaming"], true, SelectionModeExplicit, []string{"Stream"})
-	assertServiceSelection(t, services["vault"], true, SelectionModeAll, nil)
+	assertServiceSelection(t, services["vault"], false, SelectionModeAll, nil)
 }
 
 func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
@@ -1154,13 +1185,32 @@ func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
 	assertRedisRuntimeRolloutMetadata(t, services["redis"])
 }
 
+func TestCheckedInConfigSelectServicesPreservesCorePackageSplitKinds(t *testing.T) {
+	t.Parallel()
+
+	cfg := loadCheckedInConfig(t)
+
+	services := assertSelectServicesResult(t, cfg, "core", false, 1, "")
+	assertSelectedKinds(t, services[0], []string{
+		"Instance",
+		"Drg",
+		"InternetGateway",
+		"NatGateway",
+		"NetworkSecurityGroup",
+		"RouteTable",
+		"SecurityList",
+		"ServiceGateway",
+		"Subnet",
+		"Vcn",
+	})
+}
+
 func TestCheckedInConfigPromotesFormalSpecReferences(t *testing.T) {
 	t.Parallel()
 
 	cfg := loadCheckedInConfig(t)
 	services := serviceConfigsByName(t, cfg, "containerinstances", "identity", "core", "database", "mysql", "objectstorage", "opensearch", "psql", "streaming", "redis")
 	assertFormalSpecFor(t, services["containerinstances"], "ContainerInstance", "")
-	assertFormalSpecFor(t, services["identity"], "User", "user")
 	assertFormalSpecFor(t, services["identity"], "Compartment", "compartment")
 	assertFormalSpecFor(t, services["core"], "Instance", "")
 	assertFormalSpecFor(t, services["database"], "AutonomousDatabase", "databaseautonomousdatabase")
@@ -1448,26 +1498,14 @@ func assertNoSQLRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
 		registration:   GenerationStrategyGenerated,
 		webhook:        GenerationStrategyNone,
 	})
-	assertResourceOverrideCount(t, service, 8)
+	assertResourceOverrideCount(t, service, 1)
 
-	overrides := overridesByKind(service)
-	for _, kind := range []string{
-		"Index",
-		"Replica",
-		"Row",
-		"Table",
-		"TableUsage",
-		"WorkRequest",
-		"WorkRequestError",
-		"WorkRequestLog",
-	} {
-		override, ok := overrides[kind]
-		if !ok {
-			t.Fatalf("nosql does not define a generation override for %q", kind)
-		}
-		if !slices.Equal(override.Controller.ExtraRBACMarkers, []string{`groups="",resources=events,verbs=create;patch`}) {
-			t.Fatalf("nosql %s extra RBAC markers = %v, want event recorder permissions only", kind, override.Controller.ExtraRBACMarkers)
-		}
+	override, ok := overridesByKind(service)["Table"]
+	if !ok {
+		t.Fatal("nosql does not define a generation override for Table")
+	}
+	if !slices.Equal(override.Controller.ExtraRBACMarkers, []string{`groups="",resources=events,verbs=create;patch`}) {
+		t.Fatalf("nosql Table extra RBAC markers = %v, want event recorder permissions only", override.Controller.ExtraRBACMarkers)
 	}
 }
 
@@ -1597,8 +1635,8 @@ func assertIdentityRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) 
 		registration:   GenerationStrategyGenerated,
 		webhook:        GenerationStrategyNone,
 	})
-	assertResourceOverrideCount(t, service, 2)
-	assertFormalSpecFor(t, service, "User", "user")
+	assertResourceOverrideCount(t, service, 1)
+	assertFormalSpecFor(t, service, "Compartment", "compartment")
 	assertPrimaryPortOverride(t, service, "Compartment", "compartment", "identity/compartment")
 }
 

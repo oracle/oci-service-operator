@@ -2,7 +2,9 @@
 # Service selection metadata declares the default active generation surface.
 # - selection.enabled=false keeps a service inactive by default.
 # - selection.mode=all enables all discovered kinds for that service.
-# - selection.mode=explicit limits default activity to selection.includeKinds.
+# - selection.mode=explicit limits the primary default activity to selection.includeKinds.
+# - packageSplits.includeKinds stay active for split outputs even when the primary
+#   service selection is explicit.
 # Services without a `generation` block default to:
 # - controller/serviceManager/registration: none
 # - webhooks: manual
@@ -88,7 +90,7 @@ services:
     phase: networking-and-infrastructure
     packageProfile: controller-backed
     selection:
-      enabled: true
+      enabled: false
       mode: all
     generation:
       controller:
@@ -173,7 +175,9 @@ services:
     packageProfile: controller-backed
     selection:
       enabled: true
-      mode: all
+      mode: explicit
+      includeKinds:
+        - Instance
     packageSplits:
       - name: core-network
         defaultControllerImage: iad.ocir.io/oracle/oci-service-operator-core-network:latest
@@ -315,7 +319,9 @@ services:
     packageProfile: controller-backed
     selection:
       enabled: true
-      mode: all
+      mode: explicit
+      includeKinds:
+        - Application
     generation:
       controller:
         strategy: generated
@@ -383,7 +389,10 @@ services:
     packageProfile: controller-backed
     selection:
       enabled: true
-      mode: all
+      mode: explicit
+      includeKinds:
+        - Application
+        - Function
     generation:
       controller:
         strategy: generated
@@ -419,8 +428,6 @@ services:
           formalSpec: compartment
           serviceManager:
             packagePath: identity/compartment
-        - kind: User
-          formalSpec: user
     observedState:
       excludedFieldPaths:
         AuthToken:
@@ -589,7 +596,9 @@ services:
     packageProfile: controller-backed
     selection:
       enabled: true
-      mode: all
+      mode: explicit
+      includeKinds:
+        - DbSystem
     observedState:
       excludedFieldPaths:
         Channel:
@@ -693,7 +702,9 @@ services:
     packageProfile: controller-backed
     selection:
       enabled: true
-      mode: all
+      mode: explicit
+      includeKinds:
+        - Table
     generation:
       controller:
         strategy: generated
@@ -704,35 +715,7 @@ services:
       webhooks:
         strategy: none
       resources:
-        - kind: Index
-          controller:
-            extraRBACMarkers:
-              - groups="",resources=events,verbs=create;patch
-        - kind: Replica
-          controller:
-            extraRBACMarkers:
-              - groups="",resources=events,verbs=create;patch
-        - kind: Row
-          controller:
-            extraRBACMarkers:
-              - groups="",resources=events,verbs=create;patch
         - kind: Table
-          controller:
-            extraRBACMarkers:
-              - groups="",resources=events,verbs=create;patch
-        - kind: TableUsage
-          controller:
-            extraRBACMarkers:
-              - groups="",resources=events,verbs=create;patch
-        - kind: WorkRequest
-          controller:
-            extraRBACMarkers:
-              - groups="",resources=events,verbs=create;patch
-        - kind: WorkRequestError
-          controller:
-            extraRBACMarkers:
-              - groups="",resources=events,verbs=create;patch
-        - kind: WorkRequestLog
           controller:
             extraRBACMarkers:
               - groups="",resources=events,verbs=create;patch
@@ -858,7 +841,9 @@ services:
     packageProfile: controller-backed
     selection:
       enabled: true
-      mode: all
+      mode: explicit
+      includeKinds:
+        - DbSystem
     generation:
       controller:
         strategy: generated
@@ -945,7 +930,9 @@ services:
     packageProfile: controller-backed
     selection:
       enabled: true
-      mode: all
+      mode: explicit
+      includeKinds:
+        - Queue
     generation:
       controller:
         strategy: generated
@@ -1087,7 +1074,7 @@ services:
     phase: security-and-identity
     packageProfile: controller-backed
     selection:
-      enabled: true
+      enabled: false
       mode: all
     generation:
       controller:

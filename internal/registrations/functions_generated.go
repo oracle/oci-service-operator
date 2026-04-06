@@ -15,9 +15,6 @@ import (
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	functionsapplicationservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/functions/application"
 	functionsfunctionservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/functions/function"
-	functionspbflistingservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/functions/pbflisting"
-	functionspbflistingversionservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/functions/pbflistingversion"
-	functionstriggerservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/functions/trigger"
 )
 
 func init() {
@@ -46,39 +43,6 @@ func init() {
 				),
 			}).SetupWithManager(ctx.Manager); err != nil {
 				return fmt.Errorf("setup Function controller: %w", err)
-			}
-			if err := (&functionscontrollers.PbfListingReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"PbfListing",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return functionspbflistingservicemanager.NewPbfListingServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup PbfListing controller: %w", err)
-			}
-			if err := (&functionscontrollers.PbfListingVersionReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"PbfListingVersion",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return functionspbflistingversionservicemanager.NewPbfListingVersionServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup PbfListingVersion controller: %w", err)
-			}
-			if err := (&functionscontrollers.TriggerReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"Trigger",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return functionstriggerservicemanager.NewTriggerServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup Trigger controller: %w", err)
 			}
 			return nil
 		},

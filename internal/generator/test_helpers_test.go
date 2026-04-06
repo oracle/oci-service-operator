@@ -6,6 +6,8 @@
 package generator
 
 import (
+	"context"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"slices"
@@ -206,6 +208,144 @@ func assertExactFileMatchesAll(t *testing.T, wantRoot string, gotRoot string, re
 	for _, relativePath := range relativePaths {
 		assertExactFileMatch(t, filepath.Join(wantRoot, relativePath), filepath.Join(gotRoot, relativePath))
 	}
+}
+
+func collectGeneratorOwnedRelativePaths(t *testing.T, root string) ([]string, []string) {
+	t.Helper()
+
+	goPaths := make([]string, 0)
+	exactPaths := make([]string, 0)
+
+	err := filepath.WalkDir(root, func(path string, entry fs.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			return walkErr
+		}
+		if entry.IsDir() {
+			return nil
+		}
+
+		relPath, err := filepath.Rel(root, path)
+		if err != nil {
+			return err
+		}
+		relPath = filepath.ToSlash(relPath)
+		name := entry.Name()
+
+		switch {
+		case strings.HasPrefix(relPath, "api/") && (name == "groupversion_info.go" || strings.HasSuffix(name, "_types.go")):
+			goPaths = append(goPaths, relPath)
+		case strings.HasPrefix(relPath, "controllers/") && strings.HasSuffix(name, "_controller.go"):
+			goPaths = append(goPaths, relPath)
+		case strings.HasPrefix(relPath, "pkg/servicemanager/") && (strings.HasSuffix(name, "_serviceclient.go") || strings.HasSuffix(name, "_servicemanager.go")):
+			goPaths = append(goPaths, relPath)
+		case strings.HasPrefix(relPath, "internal/registrations/") && strings.HasSuffix(name, "_generated.go"):
+			goPaths = append(goPaths, relPath)
+		case strings.HasPrefix(relPath, "cmd/manager/") && name == "main.go":
+			goPaths = append(goPaths, relPath)
+		case strings.HasPrefix(relPath, "packages/") && (name == "metadata.env" || strings.HasSuffix(relPath, "/install/kustomization.yaml")):
+			exactPaths = append(exactPaths, relPath)
+		case strings.HasPrefix(relPath, "config/manager/") && (name == "kustomization.yaml" || name == "manager.yaml" || name == "controller_manager_config.yaml"):
+			exactPaths = append(exactPaths, relPath)
+		case strings.HasPrefix(relPath, "config/samples/") && filepath.Ext(name) == ".yaml":
+			exactPaths = append(exactPaths, relPath)
+		}
+
+		return nil
+	})
+	if err != nil {
+		t.Fatalf("WalkDir(%q) error = %v", root, err)
+	}
+
+	slices.Sort(goPaths)
+	slices.Sort(exactPaths)
+	return goPaths, exactPaths
+}
+
+func collectDesiredGeneratorOwnedRelativePaths(t *testing.T, cfg *Config, services []ServiceConfig) ([]string, []string) {
+	t.Helper()
+
+	root := t.TempDir()
+	pipeline := New()
+	packages := make([]*PackageModel, 0, len(services))
+	for _, service := range services {
+		pkg, err := pipeline.discoverer.BuildPackageModel(context.Background(), cfg, service)
+		if err != nil {
+			t.Fatalf("BuildPackageModel(%q) error = %v", service.Service, err)
+		}
+		packages = append(packages, pkg)
+	}
+
+	inventory, err := buildCleanupInventory(root, services, packages, false)
+	if err != nil {
+		t.Fatalf("buildCleanupInventory() error = %v", err)
+	}
+
+	goPaths := make([]string, 0, len(inventory.apiFiles)+len(inventory.controllerFiles)+len(inventory.registrationFiles)+len(inventory.serviceManagerFiles)+len(inventory.managerCmdFiles))
+	exactPaths := make([]string, 0, len(inventory.managerConfigFiles)+len(inventory.sampleFiles)+(len(inventory.packageGroups)*2)+1)
+	appendRelativePaths := func(dst []string, paths map[string]struct{}) []string {
+		for path := range paths {
+			relPath, err := filepath.Rel(root, path)
+			if err != nil {
+				t.Fatalf("Rel(%q, %q) error = %v", root, path, err)
+			}
+			dst = append(dst, filepath.ToSlash(relPath))
+		}
+		return dst
+	}
+
+	goPaths = appendRelativePaths(goPaths, inventory.apiFiles)
+	goPaths = appendRelativePaths(goPaths, inventory.controllerFiles)
+	goPaths = appendRelativePaths(goPaths, inventory.registrationFiles)
+	goPaths = appendRelativePaths(goPaths, inventory.serviceManagerFiles)
+	goPaths = appendRelativePaths(goPaths, inventory.managerCmdFiles)
+
+	exactPaths = appendRelativePaths(exactPaths, inventory.managerConfigFiles)
+	exactPaths = appendRelativePaths(exactPaths, inventory.sampleFiles)
+	if len(inventory.sampleFiles) != 0 {
+		exactPaths = append(exactPaths, "config/samples/kustomization.yaml")
+	}
+	for group := range inventory.packageGroups {
+		exactPaths = append(exactPaths,
+			filepath.ToSlash(filepath.Join("packages", group, "metadata.env")),
+			filepath.ToSlash(filepath.Join("packages", group, "install", "kustomization.yaml")),
+		)
+	}
+
+	slices.Sort(goPaths)
+	slices.Sort(exactPaths)
+	return goPaths, exactPaths
+}
+
+func assertRelativePathSetEqual(t *testing.T, label string, got []string, want []string) {
+	t.Helper()
+
+	if slices.Equal(got, want) {
+		return
+	}
+
+	extra := make([]string, 0)
+	missing := make([]string, 0)
+	gotSet := make(map[string]struct{}, len(got))
+	wantSet := make(map[string]struct{}, len(want))
+	for _, path := range got {
+		gotSet[path] = struct{}{}
+	}
+	for _, path := range want {
+		wantSet[path] = struct{}{}
+	}
+	for _, path := range got {
+		if _, ok := wantSet[path]; !ok {
+			extra = append(extra, path)
+		}
+	}
+	for _, path := range want {
+		if _, ok := gotSet[path]; !ok {
+			missing = append(missing, path)
+		}
+	}
+	slices.Sort(extra)
+	slices.Sort(missing)
+	t.Fatalf("%s mismatch\nextra: %v\nmissing: %v", label, extra, missing)
 }
 
 func assertFileContains(t *testing.T, path string, want []string) {

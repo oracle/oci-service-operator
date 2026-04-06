@@ -675,7 +675,9 @@ func NormalizeDefaultActiveSelection(serviceName string, all bool) (string, bool
 // default kind subset before package-model construction. `--service` returns
 // the named service without applying default-active filtering so backlog and
 // disabled services remain addressable explicitly, while still preserving any
-// explicit kind subset configured for that service.
+// explicit kind subset configured for that service. Package-split kinds remain
+// part of the effective selected surface so split outputs can still render when
+// the primary service selection is explicit.
 func (c *Config) SelectServices(serviceName string, all bool) ([]ServiceConfig, error) {
 	if all && strings.TrimSpace(serviceName) != "" {
 		return nil, fmt.Errorf("use either --all or --service, not both")
@@ -843,7 +845,24 @@ func (s ServiceConfig) defaultSelectedSurface() ServiceConfig {
 	if s.DefaultSelectionMode() != SelectionModeExplicit {
 		return s.withSelectedKinds(nil)
 	}
-	return s.withSelectedKinds(s.DefaultIncludeKinds())
+	return s.withSelectedKinds(s.defaultSelectedKinds())
+}
+
+func (s ServiceConfig) defaultSelectedKinds() []string {
+	kinds := append([]string(nil), s.DefaultIncludeKinds()...)
+	for _, split := range s.PackageSplits {
+		for _, rawKind := range split.IncludeKinds {
+			kind := strings.TrimSpace(rawKind)
+			if kind == "" {
+				continue
+			}
+			kinds = appendUniqueStrings(kinds, kind)
+		}
+	}
+	if len(kinds) == 0 {
+		return nil
+	}
+	return kinds
 }
 
 func (s ServiceConfig) withSelectedKinds(kinds []string) ServiceConfig {

@@ -24,6 +24,8 @@ type cleanupInventory struct {
 	controllerFiles        map[string]struct{}
 	registrationFiles      map[string]struct{}
 	serviceManagerFiles    map[string]struct{}
+	managerCmdFiles        map[string]struct{}
+	managerConfigFiles     map[string]struct{}
 	packageGroups          map[string]struct{}
 	sampleFiles            map[string]struct{}
 	selectedGroups         map[string]struct{}
@@ -40,6 +42,9 @@ func cleanupGeneratedOutputs(root string, services []ServiceConfig, packages []*
 	if err := cleanupAPIOutputs(root, inventory); err != nil {
 		return fmt.Errorf("cleanup api outputs: %w", err)
 	}
+	if err := cleanupAPICompanionOutputs(root, inventory); err != nil {
+		return fmt.Errorf("cleanup api companion outputs: %w", err)
+	}
 	if err := cleanupControllerOutputs(root, inventory); err != nil {
 		return fmt.Errorf("cleanup controller outputs: %w", err)
 	}
@@ -48,6 +53,12 @@ func cleanupGeneratedOutputs(root string, services []ServiceConfig, packages []*
 	}
 	if err := cleanupServiceManagerOutputs(root, inventory); err != nil {
 		return fmt.Errorf("cleanup service-manager outputs: %w", err)
+	}
+	if err := cleanupManagerCmdOutputs(root, inventory); err != nil {
+		return fmt.Errorf("cleanup manager cmd outputs: %w", err)
+	}
+	if err := cleanupManagerConfigOutputs(root, inventory); err != nil {
+		return fmt.Errorf("cleanup manager config outputs: %w", err)
 	}
 	if err := cleanupPackageOutputs(root, inventory); err != nil {
 		return fmt.Errorf("cleanup package outputs: %w", err)
@@ -69,6 +80,13 @@ func buildCleanupInventory(root string, services []ServiceConfig, packages []*Pa
 
 	for _, pkg := range packages {
 		inventory.includePackageOutputs(root, pkg)
+		splitPackages, err := buildPackageSplitModels(pkg)
+		if err != nil {
+			return cleanupInventory{}, err
+		}
+		for _, splitPkg := range splitPackages {
+			inventory.includeSplitPackageOutputs(root, splitPkg)
+		}
 	}
 
 	return inventory, nil
@@ -80,6 +98,8 @@ func newCleanupInventory(services []ServiceConfig) cleanupInventory {
 		controllerFiles:        map[string]struct{}{},
 		registrationFiles:      map[string]struct{}{},
 		serviceManagerFiles:    map[string]struct{}{},
+		managerCmdFiles:        map[string]struct{}{},
+		managerConfigFiles:     map[string]struct{}{},
 		packageGroups:          map[string]struct{}{},
 		sampleFiles:            map[string]struct{}{},
 		selectedGroups:         map[string]struct{}{},
@@ -95,13 +115,24 @@ func newCleanupInventory(services []ServiceConfig) cleanupInventory {
 
 func (inventory *cleanupInventory) includePackageOutputs(root string, pkg *PackageModel) {
 	apiDir := filepath.Join(root, "api", pkg.Service.Group, pkg.Version)
+	inventory.addSelectedGroup(pkg.OutputName)
 	inventory.apiFiles[filepath.Join(apiDir, "groupversion_info.go")] = struct{}{}
 	inventory.includeResourceOutputs(root, apiDir, pkg.Resources)
 	inventory.includeControllerOutputs(root, pkg)
 	inventory.includeRegistrationOutputs(root, pkg)
 	inventory.includeServiceManagerOutputs(root, pkg.ServiceManagers)
+	inventory.includeManagerOutputs(root, pkg)
 	if pkg.PackageOutput.Generate {
-		inventory.packageGroups[pkg.Service.Group] = struct{}{}
+		inventory.packageGroups[pkg.OutputName] = struct{}{}
+	}
+}
+
+func (inventory *cleanupInventory) includeSplitPackageOutputs(root string, pkg *PackageModel) {
+	inventory.addSelectedGroup(pkg.OutputName)
+	inventory.includeRegistrationOutputs(root, pkg)
+	inventory.includeManagerOutputs(root, pkg)
+	if pkg.PackageOutput.Generate {
+		inventory.packageGroups[pkg.OutputName] = struct{}{}
 	}
 }
 
@@ -135,12 +166,59 @@ func (inventory *cleanupInventory) includeServiceManagerOutputs(root string, ser
 	}
 }
 
+func (inventory *cleanupInventory) includeManagerOutputs(root string, pkg *PackageModel) {
+	if !pkg.Service.IsControllerBacked() {
+		return
+	}
+
+	managerCmdDir := managerCmdOutputDir(root, pkg)
+	inventory.managerCmdFiles[filepath.Join(managerCmdDir, "main.go")] = struct{}{}
+
+	managerConfigDir := managerConfigOutputDir(root, pkg)
+	for _, name := range []string{"kustomization.yaml", "manager.yaml", "controller_manager_config.yaml"} {
+		inventory.managerConfigFiles[filepath.Join(managerConfigDir, name)] = struct{}{}
+	}
+}
+
 func cleanupAPIOutputs(root string, inventory cleanupInventory) error {
 	apiRoot := filepath.Join(root, "api")
 	for _, group := range scopedGroupEntries(inventory.selectedGroups) {
 		groupDir := filepath.Join(apiRoot, group)
 		if err := deleteGeneratedFiles(groupDir, apiRoot, inventory.apiFiles, isOwnedAPIFile); err != nil {
 			return err
+		}
+	}
+	return nil
+}
+
+func cleanupAPICompanionOutputs(root string, inventory cleanupInventory) error {
+	apiRoot := filepath.Join(root, "api")
+	for _, group := range scopedGroupEntries(inventory.selectedGroups) {
+		groupDir := filepath.Join(apiRoot, group)
+		entries, err := os.ReadDir(groupDir)
+		if os.IsNotExist(err) {
+			continue
+		}
+		if err != nil {
+			return err
+		}
+
+		for _, entry := range entries {
+			if !entry.IsDir() {
+				continue
+			}
+			versionDir := filepath.Join(groupDir, entry.Name())
+			if versionDirHasDesiredAPIFiles(versionDir, inventory.apiFiles) {
+				continue
+			}
+
+			deepcopyPath := filepath.Join(versionDir, "zz_generated.deepcopy.go")
+			if err := os.Remove(deepcopyPath); err != nil && !os.IsNotExist(err) {
+				return err
+			}
+			if err := pruneEmptyParents(versionDir, apiRoot); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
@@ -190,7 +268,29 @@ func cleanupServiceManagerOutputs(root string, inventory cleanupInventory) error
 	serviceManagerRoot := filepath.Join(root, "pkg", "servicemanager")
 	for _, scopeRoot := range scopedGroupEntries(inventory.serviceManagerRoots) {
 		rootDir := filepath.Join(serviceManagerRoot, scopeRoot)
-		if err := deleteGeneratedFiles(rootDir, serviceManagerRoot, inventory.serviceManagerFiles, isOwnedServiceManagerFile); err != nil {
+		if err := deleteGeneratedMarkedFiles(rootDir, serviceManagerRoot, inventory.serviceManagerFiles, isOwnedServiceManagerFile); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func cleanupManagerCmdOutputs(root string, inventory cleanupInventory) error {
+	managerCmdRoot := filepath.Join(root, "cmd", "manager")
+	for _, group := range scopedGroupEntries(inventory.selectedGroups) {
+		groupDir := filepath.Join(managerCmdRoot, group)
+		if err := deleteGeneratedFiles(groupDir, managerCmdRoot, inventory.managerCmdFiles, isOwnedManagerCmdFile); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func cleanupManagerConfigOutputs(root string, inventory cleanupInventory) error {
+	managerConfigRoot := filepath.Join(root, "config", "manager")
+	for _, group := range scopedGroupEntries(inventory.selectedGroups) {
+		groupDir := filepath.Join(managerConfigRoot, group)
+		if err := deleteGeneratedFiles(groupDir, managerConfigRoot, inventory.managerConfigFiles, isOwnedManagerConfigFile); err != nil {
 			return err
 		}
 	}
@@ -256,6 +356,12 @@ func cleanupPackageGroup(groupDir string, packagesRoot string, desired bool) err
 		return err
 	}
 
+	if !desired {
+		if err := os.RemoveAll(filepath.Join(groupDir, "install", "generated")); err != nil {
+			return err
+		}
+	}
+
 	// cmd/generator owns the package metadata and install kustomization files.
 	// install/generated is refreshed by downstream manifest targets.
 	for _, path := range []string{
@@ -302,13 +408,54 @@ func deleteGeneratedFiles(rootDir string, cleanupRoot string, desired map[string
 	})
 }
 
+func deleteGeneratedMarkedFiles(rootDir string, cleanupRoot string, desired map[string]struct{}, owned func(string) bool) error {
+	if info, err := os.Lstat(rootDir); os.IsNotExist(err) {
+		return nil
+	} else if err != nil {
+		return err
+	} else if info.Mode()&os.ModeSymlink != 0 {
+		return os.Remove(rootDir)
+	}
+
+	return filepath.WalkDir(rootDir, func(path string, entry fs.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			return walkErr
+		}
+		if entry.IsDir() || !owned(entry.Name()) {
+			return nil
+		}
+		if _, ok := desired[path]; ok {
+			return nil
+		}
+		generated, err := fileContainsGeneratedMarker(path)
+		if err != nil {
+			return err
+		}
+		if !generated {
+			return nil
+		}
+		if err := os.Remove(path); err != nil && !os.IsNotExist(err) {
+			return err
+		}
+		return pruneEmptyParents(filepath.Dir(path), cleanupRoot)
+	})
+}
+
 func (inventory *cleanupInventory) addCleanupGroup(group string) {
 	group = strings.TrimSpace(group)
 	if group == "" {
 		return
 	}
-	inventory.selectedGroups[group] = struct{}{}
+	inventory.addSelectedGroup(group)
 	inventory.selectedSamplePrefixes[sampleGroupPrefix(group)] = struct{}{}
+}
+
+func (inventory *cleanupInventory) addSelectedGroup(group string) {
+	group = strings.TrimSpace(group)
+	if group == "" {
+		return
+	}
+	inventory.selectedGroups[group] = struct{}{}
 }
 
 func (inventory *cleanupInventory) addSamplePrefix(prefix string) {
@@ -340,9 +487,6 @@ func (inventory *cleanupInventory) includeExistingGeneratedCleanupScope(root str
 		}
 	}
 	if err := inventory.includeGeneratedRegistrationGroups(filepath.Join(root, "internal", "registrations")); err != nil {
-		return err
-	}
-	if err := inventory.includeGeneratedPackageGroups(filepath.Join(root, "packages")); err != nil {
 		return err
 	}
 	if err := inventory.includeGeneratedSamplePrefixes(filepath.Join(root, "config", "samples")); err != nil {
@@ -401,27 +545,6 @@ func (inventory *cleanupInventory) includeGeneratedRegistrationGroups(registrati
 			continue
 		}
 		inventory.addCleanupGroup(strings.TrimSuffix(entry.Name(), "_generated.go"))
-	}
-	return nil
-}
-
-func (inventory *cleanupInventory) includeGeneratedPackageGroups(packagesRoot string) error {
-	entries, err := os.ReadDir(packagesRoot)
-	if os.IsNotExist(err) {
-		return nil
-	}
-	if err != nil {
-		return err
-	}
-
-	for _, entry := range entries {
-		if !entry.IsDir() {
-			continue
-		}
-		groupDir := filepath.Join(packagesRoot, entry.Name())
-		if packageGroupHasOwnedOutputs(groupDir) {
-			inventory.addCleanupGroup(entry.Name())
-		}
 	}
 	return nil
 }
@@ -513,12 +636,9 @@ func fileContainsGeneratedMarker(path string) (bool, error) {
 	return strings.Contains(string(content), generatedFileMarker), nil
 }
 
-func packageGroupHasOwnedOutputs(groupDir string) bool {
-	for _, path := range []string{
-		filepath.Join(groupDir, "metadata.env"),
-		filepath.Join(groupDir, "install", "kustomization.yaml"),
-	} {
-		if _, err := os.Stat(path); err == nil {
+func versionDirHasDesiredAPIFiles(versionDir string, desired map[string]struct{}) bool {
+	for path := range desired {
+		if filepath.Dir(path) == versionDir {
 			return true
 		}
 	}
@@ -620,4 +740,14 @@ func isOwnedRegistrationFile(name string) bool {
 func isOwnedServiceManagerFile(name string) bool {
 	return strings.HasSuffix(name, "_serviceclient.go") ||
 		strings.HasSuffix(name, "_servicemanager.go")
+}
+
+func isOwnedManagerCmdFile(name string) bool {
+	return name == "main.go"
+}
+
+func isOwnedManagerConfigFile(name string) bool {
+	return name == "kustomization.yaml" ||
+		name == "manager.yaml" ||
+		name == "controller_manager_config.yaml"
 }

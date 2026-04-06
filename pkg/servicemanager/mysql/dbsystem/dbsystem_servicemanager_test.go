@@ -763,7 +763,7 @@ func TestDbSystemServiceManagerCreateOrUpdateRejectsWrongObjectType(t *testing.T
 
 	manager := &DbSystemServiceManager{}
 
-	response, err := manager.CreateOrUpdate(context.Background(), &mysqlv1beta1.Backup{}, ctrl.Request{})
+	response, err := manager.CreateOrUpdate(context.Background(), &mysqlv1beta1.DbSystemList{}, ctrl.Request{})
 	if err == nil {
 		t.Fatal("CreateOrUpdate() error = nil, want conversion failure")
 	}
