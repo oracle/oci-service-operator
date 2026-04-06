@@ -1727,6 +1727,7 @@ func TestCheckedInGeneratedServicesWithoutManualWebhooksUseSharedManagerRollout(
 	}
 	manualRuntimeServices := map[string]struct{}{
 		"containerinstances": {},
+		"functions":          {},
 	}
 	promotedNames := make([]string, 0)
 	for _, service := range servicesCfg.Services {

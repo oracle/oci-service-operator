@@ -424,11 +424,25 @@ services:
       controller:
         strategy: generated
       serviceManager:
-        strategy: generated
+        strategy: manual
       registration:
-        strategy: generated
+        strategy: manual
       webhooks:
         strategy: none
+      resources:
+        - kind: Application
+          controller:
+            extraRBACMarkers:
+              - groups="",resources=events,verbs=create;patch
+          serviceManager:
+            packagePath: functions
+        - kind: Function
+          controller:
+            extraRBACMarkers:
+              - groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
+              - groups="",resources=events,verbs=create;patch
+          serviceManager:
+            packagePath: functions
 
   - service: identity
     sdkPackage: github.com/oracle/oci-go-sdk/v65/identity
