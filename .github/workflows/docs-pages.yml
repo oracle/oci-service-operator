@@ -1,0 +1,83 @@
+name: Publish Docs Pages
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - v2alpha-docs
+    paths:
+      - README.md
+      - Makefile
+      - api/**
+      - cmd/sitegen/**
+      - config/crd/bases/**
+      - config/samples/**
+      - docs/**
+      - go.mod
+      - go.sum
+      - internal/generator/config/services.yaml
+      - internal/sitegen/**
+      - mkdocs.yml
+      - packages/**/metadata.env
+      - .github/workflows/docs-pages.yml
+      - .github/workflows/docs-verify.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: docs/requirements.txt
+
+      - name: Configure GitHub Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
+      - name: Install docs dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r docs/requirements.txt
+
+      - name: Verify and build docs site
+        run: make docs-verify
+
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+
+  deploy:
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
