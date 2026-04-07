@@ -22,7 +22,7 @@ MySQL DB System with one custom resource manifest.
 - This is a starter workflow for a single infrastructure example.
 - It intentionally focuses on OCI MySQL infrastructure only.
 - It does not replace the detailed references in [installation.md](installation.md),
-  [mysql.md](mysql.md), or [services.md](services.md).
+  [mysql.md](mysql.md), or [Supported Resources](reference/index.md).
 
 ## Prerequisites
 

@@ -223,6 +223,7 @@ func generatedDocsPaths(root string) ([]string, error) {
 	}); err != nil {
 		return nil, fmt.Errorf("walk checked-in docs/reference outputs: %w", err)
 	}
+	paths = append(paths, filepath.ToSlash(filepath.Join("docs", "guides", "index.md")))
 	paths = append(paths, "mkdocs.yml")
 	sort.Strings(paths)
 	return paths, nil

@@ -12,7 +12,7 @@ Manage OCI Streaming streams from Kubernetes.
 | Install Namespace | `oci-service-operator-streaming-system` |
 | Controller Image Pattern | `ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-streaming:<version>` |
 | Bundle Image Pattern | `ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-streaming-bundle:<version>` |
-| Primary Guide | [Open guide](../../../installation.md) |
+| Primary Guide | [Open guide](../../../oss.md) |
 
 ## Notes
 

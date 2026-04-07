@@ -14,7 +14,6 @@ theme:
   features:
     - navigation.sections
     - navigation.indexes
-    - navigation.expand
     - navigation.top
     - toc.integrate
     - content.code.copy
@@ -36,16 +35,21 @@ nav:
       - get-started/index.md
       - User Guide: user-guide.md
       - Installation: installation.md
-  - Guides:
+  - Resource Guides:
       - guides/index.md
-      - Autonomous Database: adb.md
-      - MySQL DB Systems: mysql.md
-      - Queue: queue.md
-      - Streaming: oss.md
+      # BEGIN GENERATED RESOURCE GUIDE NAV
+      - database:
+          - AutonomousDatabase: adb.md
+      - mysql:
+          - DbSystem: mysql.md
+      - queue:
+          - Queue: queue.md
+      - streaming:
+          - Stream: oss.md
+      # END GENERATED RESOURCE GUIDE NAV
       - Troubleshooting: TROUBLESHOOT.md
   - Supported Resources:
       - reference/index.md
-      - Current Services Overview: services.md
       # BEGIN GENERATED REFERENCE PACKAGE NAV
       - Package Pages:
           - API Gateway: reference/packages/apigateway/index.md

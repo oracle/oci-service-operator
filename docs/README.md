@@ -3,7 +3,7 @@
 - [Introduction](#introduction)
 - [User Guide](user-guide.md)
 - [Installation](installation.md#installation)
-- [Services](services.md#services)
+- [Supported Resources](reference/index.md#supported-resources)
 - [Oracle Autonomous Database Service](adb.md#oracle-autonomous-database-service)
 - [Oracle MySQL Database Service](mysql.md#oracle-mysql-database-service)
 - [Oracle Streaming Service](oss.md#oracle-streaming-service)
@@ -48,8 +48,7 @@ with:
 - `config/samples/` for concrete manifests
 - `docs/installation.md` for published bundle naming, package namespaces, and
   `v2.0.0-alpha` install and upgrade commands
-- `docs/services.md` for the difference between the generator-active service map
-  and the published subpackage bundles
+- `docs/reference/index.md` for the generated package and resource catalog
 - `docs/installation.md#controller-manager-config` for the default manager
   deployment contract
 - `docs/adb.md`, `docs/mysql.md`, and `docs/oss.md` for the current

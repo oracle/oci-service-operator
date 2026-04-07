@@ -121,6 +121,7 @@ func checkedInGeneratedPaths(root string) ([]string, error) {
 	}); err != nil {
 		return nil, err
 	}
+	paths = append(paths, filepath.ToSlash(filepath.Join("docs", "guides", "index.md")))
 	paths = append(paths, "mkdocs.yml")
 
 	return paths, nil

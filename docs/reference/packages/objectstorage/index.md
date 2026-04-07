@@ -12,7 +12,7 @@ Manage OCI Object Storage buckets from Kubernetes.
 | Install Namespace | `oci-service-operator-objectstorage-system` |
 | Controller Image Pattern | `ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-objectstorage:<version>` |
 | Bundle Image Pattern | `ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-objectstorage-bundle:<version>` |
-| Primary Guide | [Open guide](../../../oss.md) |
+| Primary Guide | [Open guide](../../../installation.md) |
 
 ## Notes
 

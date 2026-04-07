@@ -125,7 +125,7 @@ packages:
     summary: Manage OCI Object Storage buckets from Kubernetes.
     supportStatus: preview
     customerVisible: true
-    guidePath: docs/oss.md
+    guidePath: docs/installation.md
     packageNotes:
       - Current package scope is intentionally limited to Bucket.
     kindOverrides:
@@ -186,7 +186,7 @@ packages:
     summary: Manage OCI Streaming streams from Kubernetes.
     supportStatus: preview
     customerVisible: true
-    guidePath: docs/installation.md
+    guidePath: docs/oss.md
     packageNotes:
       - Current package scope is intentionally limited to Stream.
     kindOverrides:
