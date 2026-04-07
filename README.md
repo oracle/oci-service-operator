@@ -22,19 +22,20 @@ The checked-in source for that site lives under [docs/](docs/).
 
 For the quickest repo-local path, start with:
 
-- [User Guide](docs/user-guide.md)
 - [Installation](docs/installation.md#installation)
+- [Quick start with KRO](docs/user-guide.md)
 - [Supported Resources](docs/reference/index.md)
 - [API Reference](docs/reference/api/index.md)
 - [Contributor Docs](docs/contributor/index.md)
 
 ## Installation
 
-Start with the [User Guide](docs/user-guide.md) for the quickest single-resource
-quickstart. Use the [Installation](docs/installation.md#installation) guide for
-OLM prerequisites, authentication setup, and published per-package bundle
-commands. Use [Supported Resources](docs/reference/index.md) for the generated
-package and kind inventory behind the current docs set.
+Start with the [Installation](docs/installation.md#installation) guide for OLM
+prerequisites, authentication setup, and published per-package bundle commands.
+Then use [Quick start with KRO](docs/user-guide.md) for the end-to-end MySQL
+example that assumes those installation prerequisites are already complete. Use
+[Supported Resources](docs/reference/index.md) for the generated package and
+kind inventory behind the current docs set.
 
 ## Controller Manager Config
 

@@ -33,17 +33,50 @@ nav:
   - Home: index.md
   - Get Started:
       - get-started/index.md
-      - User Guide: user-guide.md
       - Installation: installation.md
+      - Quick start with KRO: user-guide.md
   - Resource Guides:
       - guides/index.md
       # BEGIN GENERATED RESOURCE GUIDE NAV
+      - apigateway:
+          - ApiGateway: guides/apigateway/apigateway.md
+          - ApiGatewayDeployment: guides/apigateway/apigatewaydeployment.md
+      - containerinstances:
+          - ContainerInstance: guides/containerinstances/containerinstance.md
+      - core:
+          - Drg: guides/core/drg.md
+          - Instance: guides/core/instance.md
+          - InternetGateway: guides/core/internetgateway.md
+          - NatGateway: guides/core/natgateway.md
+          - NetworkSecurityGroup: guides/core/networksecuritygroup.md
+          - RouteTable: guides/core/routetable.md
+          - SecurityList: guides/core/securitylist.md
+          - ServiceGateway: guides/core/servicegateway.md
+          - Subnet: guides/core/subnet.md
+          - Vcn: guides/core/vcn.md
       - database:
           - AutonomousDatabase: adb.md
+      - dataflow:
+          - Application: guides/dataflow/application.md
+      - functions:
+          - Application: guides/functions/application.md
+          - Function: guides/functions/function.md
+      - identity:
+          - Compartment: guides/identity/compartment.md
       - mysql:
           - DbSystem: mysql.md
+      - nosql:
+          - Table: guides/nosql/table.md
+      - objectstorage:
+          - Bucket: guides/objectstorage/bucket.md
+      - opensearch:
+          - OpensearchCluster: guides/opensearch/opensearchcluster.md
+      - psql:
+          - DbSystem: guides/psql/dbsystem.md
       - queue:
           - Queue: queue.md
+      - redis:
+          - RedisCluster: guides/redis/rediscluster.md
       - streaming:
           - Stream: oss.md
       # END GENERATED RESOURCE GUIDE NAV

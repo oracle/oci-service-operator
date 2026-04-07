@@ -75,6 +75,7 @@ type ReferenceResource struct {
 	Kind             string
 	APIVersion       string
 	Summary          string
+	GuideOutputPath  string
 	APIPagePath      string
 	APIAnchor        string
 	SampleSourcePath string
@@ -254,11 +255,7 @@ func BuildReferenceSite(root string) (*ReferenceSite, error) {
 		APIVersions: apiVersions,
 		SamplePages: samplePages,
 	}
-	for _, pkg := range packages {
-		if pkg.CustomerVisible {
-			site.PublicPackages = append(site.PublicPackages, pkg)
-		}
-	}
+	site.PublicPackages = filterPublicPackages(packages)
 	return site, nil
 }
 
@@ -284,9 +281,19 @@ func GenerateReferenceDocs(opts GenerateOptions) (*GenerateResult, error) {
 		outputRoot = repoRoot
 	}
 
+	guidePages, guidePathByKey, err := buildResourceGuidePages(repoRoot, site)
+	if err != nil {
+		return nil, err
+	}
+	site.Packages = applyResourceGuidePaths(site.Packages, guidePathByKey)
+	site.PublicPackages = filterPublicPackages(site.Packages)
+
 	files := map[string]string{
 		filepath.ToSlash(filepath.Join("docs", "guides", "index.md")):    renderResourceGuidesIndex(site.PublicPackages),
 		filepath.ToSlash(filepath.Join("docs", "reference", "index.md")): renderSupportedResourcesPage(site),
+	}
+	for _, page := range guidePages {
+		files[page.OutputPath] = renderResourceGuidePage(page)
 	}
 	apiSite, err := BuildAPIReferenceSite(APIReferenceBuildOptions{
 		RepoRoot: repoRoot,
@@ -386,7 +393,7 @@ func renderMkDocsResourceGuideNav(packages []ReferencePackage) string {
 		b.WriteString("          - ")
 		b.WriteString(entry.Resource)
 		b.WriteString(": ")
-		b.WriteString(entry.GuidePath)
+		b.WriteString(strings.TrimPrefix(entry.GuidePath, "docs/"))
 		b.WriteString("\n")
 	}
 	return b.String()
@@ -457,7 +464,7 @@ func renderResourceGuidesIndex(packages []ReferencePackage) string {
 			b.WriteString("` | `")
 			b.WriteString(entry.Resource)
 			b.WriteString("` | ")
-			b.WriteString(markdownLink("Guide", docsLink("docs/guides/index.md", filepath.ToSlash(filepath.Join("docs", entry.GuidePath)))))
+			b.WriteString(markdownLink("Guide", docsLink("docs/guides/index.md", entry.GuidePath)))
 			b.WriteString(" |\n")
 		}
 		b.WriteString("\n")
@@ -472,15 +479,14 @@ func resourceGuideEntries(packages []ReferencePackage) []resourceGuideEntry {
 	entries := make([]resourceGuideEntry, 0)
 	seen := make(map[string]struct{})
 	for _, pkg := range packages {
-		guidePath := resourceGuidePath(pkg.GuidePath)
-		if guidePath == "" {
-			continue
-		}
 		for _, resource := range pkg.Resources {
+			if strings.TrimSpace(resource.GuideOutputPath) == "" {
+				continue
+			}
 			entry := resourceGuideEntry{
 				Service:   resource.Group,
 				Resource:  resource.Kind,
-				GuidePath: guidePath,
+				GuidePath: resource.GuideOutputPath,
 			}
 			key := entry.Service + "\x00" + entry.Resource + "\x00" + entry.GuidePath
 			if _, ok := seen[key]; ok {
@@ -865,8 +871,8 @@ func renderSupportedResourcesPage(site *ReferenceSite) string {
 			b.WriteString("\n")
 		}
 
-		b.WriteString("| Package | Group/Kind | API Version | Support Status | Latest Released Version | Sample | API Spec |\n")
-		b.WriteString("| --- | --- | --- | --- | --- | --- | --- |\n")
+		b.WriteString("| Package | Group/Kind | API Version | Support Status | Latest Released Version | Guide | Sample | API Spec |\n")
+		b.WriteString("| --- | --- | --- | --- | --- | --- | --- | --- |\n")
 		for _, resource := range pkg.Resources {
 			b.WriteString("| ")
 			b.WriteString(markdownLink(pkg.DisplayName, docsLink(outputPath, pkg.OutputPath)))
@@ -881,6 +887,8 @@ func renderSupportedResourcesPage(site *ReferenceSite) string {
 			b.WriteString(" | `")
 			b.WriteString(displayReleaseVersion(pkg.LatestReleaseVersion))
 			b.WriteString("` | ")
+			b.WriteString(guideCell(outputPath, resource))
+			b.WriteString(" | ")
 			b.WriteString(sampleCell(outputPath, resource))
 			b.WriteString(" | ")
 			b.WriteString(markdownLink("Reference", docsLink(outputPath, resource.APIPagePath)+"#"+resource.APIAnchor))
@@ -959,7 +967,7 @@ func renderPackagePage(pkg ReferencePackage) string {
 	b.WriteString("| Bundle Image Pattern | `")
 	b.WriteString(pkg.BundleImagePattern)
 	b.WriteString("` |\n")
-	b.WriteString("| Primary Guide | ")
+	b.WriteString("| Setup Guide | ")
 	b.WriteString(markdownLink("Open guide", docsLink(pkg.OutputPath, pkg.GuidePath)))
 	b.WriteString(" |\n")
 
@@ -973,8 +981,8 @@ func renderPackagePage(pkg ReferencePackage) string {
 	}
 
 	b.WriteString("\n## Exposed Resources\n\n")
-	b.WriteString("| Resource | API Version | Summary | Sample | API Spec |\n")
-	b.WriteString("| --- | --- | --- | --- | --- |\n")
+	b.WriteString("| Resource | API Version | Summary | Guide | Sample | API Spec |\n")
+	b.WriteString("| --- | --- | --- | --- | --- | --- |\n")
 	for _, resource := range pkg.Resources {
 		b.WriteString("| `")
 		b.WriteString(resource.Group)
@@ -984,6 +992,8 @@ func renderPackagePage(pkg ReferencePackage) string {
 		b.WriteString(resource.APIVersion)
 		b.WriteString("` | ")
 		b.WriteString(summaryCell(resource.Summary))
+		b.WriteString(" | ")
+		b.WriteString(guideCell(pkg.OutputPath, resource))
 		b.WriteString(" | ")
 		b.WriteString(sampleCell(pkg.OutputPath, resource))
 		b.WriteString(" | ")
@@ -1167,6 +1177,13 @@ func sampleCell(from string, resource ReferenceResource) string {
 	return markdownLink("Sample", docsLink(from, resource.SampleOutputPath))
 }
 
+func guideCell(from string, resource ReferenceResource) string {
+	if strings.TrimSpace(resource.GuideOutputPath) == "" {
+		return "—"
+	}
+	return markdownLink("Guide", docsLink(from, resource.GuideOutputPath))
+}
+
 func summaryCell(summary string) string {
 	if strings.TrimSpace(summary) == "" {
 		return "—"
@@ -1206,4 +1223,14 @@ func backtickJoin(values []string) string {
 func escapeMarkdownCell(value string) string {
 	replacer := strings.NewReplacer("|", "\\|", "\n", "<br>")
 	return replacer.Replace(value)
+}
+
+func filterPublicPackages(packages []ReferencePackage) []ReferencePackage {
+	public := make([]ReferencePackage, 0, len(packages))
+	for _, pkg := range packages {
+		if pkg.CustomerVisible {
+			public = append(public, pkg)
+		}
+	}
+	return public
 }

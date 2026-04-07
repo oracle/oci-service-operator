@@ -12,10 +12,10 @@ Manage OCI MySQL DB Systems from Kubernetes.
 | Install Namespace | `oci-service-operator-mysql-system` |
 | Controller Image Pattern | `ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-mysql:<version>` |
 | Bundle Image Pattern | `ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-mysql-bundle:<version>` |
-| Primary Guide | [Open guide](../../../mysql.md) |
+| Setup Guide | [Open guide](../../../mysql.md) |
 
 ## Exposed Resources
 
-| Resource | API Version | Summary | Sample | API Spec |
-| --- | --- | --- | --- | --- |
-| `mysql/DbSystem` | `mysql.oracle.com/v1beta1` | Manage OCI MySQL DB Systems. | [Sample](../../samples/mysql/v1beta1/dbsystem.md) | [Reference](../../api/mysql/v1beta1/index.md#kind-dbsystem) |
+| Resource | API Version | Summary | Guide | Sample | API Spec |
+| --- | --- | --- | --- | --- | --- |
+| `mysql/DbSystem` | `mysql.oracle.com/v1beta1` | Manage OCI MySQL DB Systems. | [Guide](../../../mysql.md) | [Sample](../../samples/mysql/v1beta1/dbsystem.md) | [Reference](../../api/mysql/v1beta1/index.md#kind-dbsystem) |

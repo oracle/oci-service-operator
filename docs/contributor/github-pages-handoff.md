@@ -15,7 +15,8 @@ out of scope for local issue execution.
    push landed before Pages was enabled.
 4. Verify the published site loads at
    `https://oracle.github.io/oci-service-operator/` and that the main nav,
-   Supported Resources, API Reference, and User Guide pages render correctly.
+   Supported Resources, API Reference, Installation, and Quick start with KRO
+   pages render correctly.
 5. If the public repository owner or repo name differs from the expected Pages
    path, update `mkdocs.yml` `site_url` before the publish step is repeated.
 

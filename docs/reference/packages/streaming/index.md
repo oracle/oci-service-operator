@@ -12,7 +12,7 @@ Manage OCI Streaming streams from Kubernetes.
 | Install Namespace | `oci-service-operator-streaming-system` |
 | Controller Image Pattern | `ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-streaming:<version>` |
 | Bundle Image Pattern | `ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-streaming-bundle:<version>` |
-| Primary Guide | [Open guide](../../../oss.md) |
+| Setup Guide | [Open guide](../../../oss.md) |
 
 ## Notes
 
@@ -20,6 +20,6 @@ Manage OCI Streaming streams from Kubernetes.
 
 ## Exposed Resources
 
-| Resource | API Version | Summary | Sample | API Spec |
-| --- | --- | --- | --- | --- |
-| `streaming/Stream` | `streaming.oracle.com/v1beta1` | Manage OCI Streaming streams. | [Sample](../../samples/streaming/v1beta1/stream.md) | [Reference](../../api/streaming/v1beta1/index.md#kind-stream) |
+| Resource | API Version | Summary | Guide | Sample | API Spec |
+| --- | --- | --- | --- | --- | --- |
+| `streaming/Stream` | `streaming.oracle.com/v1beta1` | Manage OCI Streaming streams. | [Guide](../../../oss.md) | [Sample](../../samples/streaming/v1beta1/stream.md) | [Reference](../../api/streaming/v1beta1/index.md#kind-stream) |

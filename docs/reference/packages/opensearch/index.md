@@ -12,7 +12,7 @@ Manage OCI OpenSearch clusters from Kubernetes.
 | Install Namespace | `oci-service-operator-opensearch-system` |
 | Controller Image Pattern | `ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-opensearch:<version>` |
 | Bundle Image Pattern | `ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-opensearch-bundle:<version>` |
-| Primary Guide | [Open guide](../../../installation.md) |
+| Setup Guide | [Open guide](../../../installation.md) |
 
 ## Notes
 
@@ -20,6 +20,6 @@ Manage OCI OpenSearch clusters from Kubernetes.
 
 ## Exposed Resources
 
-| Resource | API Version | Summary | Sample | API Spec |
-| --- | --- | --- | --- | --- |
-| `opensearch/OpensearchCluster` | `opensearch.oracle.com/v1beta1` | Manage OCI OpenSearch clusters. | [Sample](../../samples/opensearch/v1beta1/opensearchcluster.md) | [Reference](../../api/opensearch/v1beta1/index.md#kind-opensearchcluster) |
+| Resource | API Version | Summary | Guide | Sample | API Spec |
+| --- | --- | --- | --- | --- | --- |
+| `opensearch/OpensearchCluster` | `opensearch.oracle.com/v1beta1` | Manage OCI OpenSearch clusters. | [Guide](../../../guides/opensearch/opensearchcluster.md) | [Sample](../../samples/opensearch/v1beta1/opensearchcluster.md) | [Reference](../../api/opensearch/v1beta1/index.md#kind-opensearchcluster) |

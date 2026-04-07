@@ -12,7 +12,7 @@ Manage OCI Identity compartments from Kubernetes.
 | Install Namespace | `oci-service-operator-identity-system` |
 | Controller Image Pattern | `ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-identity:<version>` |
 | Bundle Image Pattern | `ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-identity-bundle:<version>` |
-| Primary Guide | [Open guide](../../../installation.md) |
+| Setup Guide | [Open guide](../../../installation.md) |
 
 ## Notes
 
@@ -20,6 +20,6 @@ Manage OCI Identity compartments from Kubernetes.
 
 ## Exposed Resources
 
-| Resource | API Version | Summary | Sample | API Spec |
-| --- | --- | --- | --- | --- |
-| `identity/Compartment` | `identity.oracle.com/v1beta1` | Manage OCI IAM compartments. | [Sample](../../samples/identity/v1beta1/compartment.md) | [Reference](../../api/identity/v1beta1/index.md#kind-compartment) |
+| Resource | API Version | Summary | Guide | Sample | API Spec |
+| --- | --- | --- | --- | --- | --- |
+| `identity/Compartment` | `identity.oracle.com/v1beta1` | Manage OCI IAM compartments. | [Guide](../../../guides/identity/compartment.md) | [Sample](../../samples/identity/v1beta1/compartment.md) | [Reference](../../api/identity/v1beta1/index.md#kind-compartment) |

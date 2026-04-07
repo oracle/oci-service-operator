@@ -12,10 +12,10 @@ Manage OCI PostgreSQL DB Systems from Kubernetes.
 | Install Namespace | `oci-service-operator-psql-system` |
 | Controller Image Pattern | `ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-psql:<version>` |
 | Bundle Image Pattern | `ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-psql-bundle:<version>` |
-| Primary Guide | [Open guide](../../../installation.md) |
+| Setup Guide | [Open guide](../../../installation.md) |
 
 ## Exposed Resources
 
-| Resource | API Version | Summary | Sample | API Spec |
-| --- | --- | --- | --- | --- |
-| `psql/DbSystem` | `psql.oracle.com/v1beta1` | Manage OCI PostgreSQL DB Systems. | [Sample](../../samples/psql/v1beta1/dbsystem.md) | [Reference](../../api/psql/v1beta1/index.md#kind-dbsystem) |
+| Resource | API Version | Summary | Guide | Sample | API Spec |
+| --- | --- | --- | --- | --- | --- |
+| `psql/DbSystem` | `psql.oracle.com/v1beta1` | Manage OCI PostgreSQL DB Systems. | [Guide](../../../guides/psql/dbsystem.md) | [Sample](../../samples/psql/v1beta1/dbsystem.md) | [Reference](../../api/psql/v1beta1/index.md#kind-dbsystem) |

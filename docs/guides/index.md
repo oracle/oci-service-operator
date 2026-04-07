@@ -8,9 +8,31 @@ Use these guides after the initial install and quickstart path.
 
 | Service | Resource | Guide |
 | --- | --- | --- |
+| `apigateway` | `ApiGateway` | [Guide](apigateway/apigateway.md) |
+| `apigateway` | `ApiGatewayDeployment` | [Guide](apigateway/apigatewaydeployment.md) |
+| `containerinstances` | `ContainerInstance` | [Guide](containerinstances/containerinstance.md) |
+| `core` | `Drg` | [Guide](core/drg.md) |
+| `core` | `Instance` | [Guide](core/instance.md) |
+| `core` | `InternetGateway` | [Guide](core/internetgateway.md) |
+| `core` | `NatGateway` | [Guide](core/natgateway.md) |
+| `core` | `NetworkSecurityGroup` | [Guide](core/networksecuritygroup.md) |
+| `core` | `RouteTable` | [Guide](core/routetable.md) |
+| `core` | `SecurityList` | [Guide](core/securitylist.md) |
+| `core` | `ServiceGateway` | [Guide](core/servicegateway.md) |
+| `core` | `Subnet` | [Guide](core/subnet.md) |
+| `core` | `Vcn` | [Guide](core/vcn.md) |
 | `database` | `AutonomousDatabase` | [Guide](../adb.md) |
+| `dataflow` | `Application` | [Guide](dataflow/application.md) |
+| `functions` | `Application` | [Guide](functions/application.md) |
+| `functions` | `Function` | [Guide](functions/function.md) |
+| `identity` | `Compartment` | [Guide](identity/compartment.md) |
 | `mysql` | `DbSystem` | [Guide](../mysql.md) |
+| `nosql` | `Table` | [Guide](nosql/table.md) |
+| `objectstorage` | `Bucket` | [Guide](objectstorage/bucket.md) |
+| `opensearch` | `OpensearchCluster` | [Guide](opensearch/opensearchcluster.md) |
+| `psql` | `DbSystem` | [Guide](psql/dbsystem.md) |
 | `queue` | `Queue` | [Guide](../queue.md) |
+| `redis` | `RedisCluster` | [Guide](redis/rediscluster.md) |
 | `streaming` | `Stream` | [Guide](../oss.md) |
 
 ## Operations

@@ -12,7 +12,7 @@ Manage OCI Autonomous Databases from Kubernetes.
 | Install Namespace | `oci-service-operator-database-system` |
 | Controller Image Pattern | `ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-database:<version>` |
 | Bundle Image Pattern | `ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-database-bundle:<version>` |
-| Primary Guide | [Open guide](../../../adb.md) |
+| Setup Guide | [Open guide](../../../adb.md) |
 
 ## Notes
 
@@ -20,6 +20,6 @@ Manage OCI Autonomous Databases from Kubernetes.
 
 ## Exposed Resources
 
-| Resource | API Version | Summary | Sample | API Spec |
-| --- | --- | --- | --- | --- |
-| `database/AutonomousDatabase` | `database.oracle.com/v1beta1` | Manage OCI Autonomous Database instances. | [Sample](../../samples/database/v1beta1/autonomousdatabase.md) | [Reference](../../api/database/v1beta1/index.md#kind-autonomousdatabase) |
+| Resource | API Version | Summary | Guide | Sample | API Spec |
+| --- | --- | --- | --- | --- | --- |
+| `database/AutonomousDatabase` | `database.oracle.com/v1beta1` | Manage OCI Autonomous Database instances. | [Guide](../../../adb.md) | [Sample](../../samples/database/v1beta1/autonomousdatabase.md) | [Reference](../../api/database/v1beta1/index.md#kind-autonomousdatabase) |

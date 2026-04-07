@@ -12,10 +12,10 @@ Manage OCI Container Instances from Kubernetes.
 | Install Namespace | `oci-service-operator-containerinstances-system` |
 | Controller Image Pattern | `ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-containerinstances:<version>` |
 | Bundle Image Pattern | `ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-containerinstances-bundle:<version>` |
-| Primary Guide | [Open guide](../../../installation.md) |
+| Setup Guide | [Open guide](../../../installation.md) |
 
 ## Exposed Resources
 
-| Resource | API Version | Summary | Sample | API Spec |
-| --- | --- | --- | --- | --- |
-| `containerinstances/ContainerInstance` | `containerinstances.oracle.com/v1beta1` | Manage OCI Container Instance workloads. | [Sample](../../samples/containerinstances/v1beta1/containerinstance.md) | [Reference](../../api/containerinstances/v1beta1/index.md#kind-containerinstance) |
+| Resource | API Version | Summary | Guide | Sample | API Spec |
+| --- | --- | --- | --- | --- | --- |
+| `containerinstances/ContainerInstance` | `containerinstances.oracle.com/v1beta1` | Manage OCI Container Instance workloads. | [Guide](../../../guides/containerinstances/containerinstance.md) | [Sample](../../samples/containerinstances/v1beta1/containerinstance.md) | [Reference](../../api/containerinstances/v1beta1/index.md#kind-containerinstance) |

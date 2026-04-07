@@ -87,6 +87,31 @@ func TestKindOverridesReferToCheckedInKinds(t *testing.T) {
 	}
 }
 
+func TestResourceGuideOverlaysReferToCheckedInKinds(t *testing.T) {
+	t.Parallel()
+
+	root := repoRoot(t)
+	catalog, err := sitegen.LoadResourceGuideCatalog(filepath.Join(root, "docs", "site-data", "resource-guides.yaml"))
+	if err != nil {
+		t.Fatalf("LoadResourceGuideCatalog() error = %v", err)
+	}
+
+	apiKinds, err := loadAPIKinds(filepath.Join(root, "api"))
+	if err != nil {
+		t.Fatalf("loadAPIKinds() error = %v", err)
+	}
+
+	for _, resource := range catalog.Resources {
+		kindsByVersion, ok := apiKinds[resource.Group]
+		if !ok {
+			t.Fatalf("resource guide overlay references unknown group %q", resource.Group)
+		}
+		if !containsAnyVersion(kindsByVersion, resource.Kind) {
+			t.Fatalf("resource guide overlay references unknown kind %q for group %q", resource.Kind, resource.Group)
+		}
+	}
+}
+
 func TestReleaseManifestsMatchCheckedInPackageScope(t *testing.T) {
 	t.Parallel()
 

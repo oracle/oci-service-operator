@@ -1,0 +1,171 @@
+schemaVersion: v1alpha1
+resources:
+  - group: database
+    kind: AutonomousDatabase
+    title: Oracle Autonomous Database Service
+    introduction: |
+      [Oracle Autonomous Database Service](https://docs.oracle.com/en-us/iaas/Content/Database/Concepts/adboverview.htm) is a fully managed, preconfigured database environment. It delivers automated patching, upgrades, and tuning while handling routine maintenance on the OCI side.
+
+      The published v2 surface uses `apiVersion: database.oracle.com/v1beta1` and `kind: AutonomousDatabase`. The legacy handwritten `AutonomousDatabases` compatibility resource is no longer part of the supported surface.
+    preSections:
+      - title: OCI Permission Requirement
+        body: |
+          **Instance Principal**
+
+          The OCI Service Operator dynamic group should have `manage` permission for the `autonomous-database` resource type.
+
+          ```plain
+          Allow dynamic-group <OSOK_DYNAMIC_GROUP> to manage autonomous-database in compartment <COMPARTMENT_NAME>
+          ```
+
+          **User Principal**
+
+          The OCI Service Operator user should have `manage` permission for the `autonomous-database` resource type.
+
+          ```plain
+          Allow group <OSOK_GROUP> to manage autonomous-database in compartment <COMPARTMENT_NAME>
+          ```
+    postSections:
+      - title: Update Behavior
+        body: |
+          Update the same `AutonomousDatabase` resource by changing OCI-supported mutable fields on the generated spec and reapplying the manifest with `kubectl apply -f <UPDATE_YAML>.yaml`.
+
+          The v2 surface keeps Secret-backed `spec.adminPassword.secret.secretName` and also supports `spec.secretId` for OCI Vault-backed password material.
+      - title: Existing Resource and Wallet Notes
+        body: |
+          The retired bind-and-wallet shortcut from the compatibility runtime is not part of the generated v2 path. Use the generated `AutonomousDatabase` resource for lifecycle management, then use the dedicated wallet resources when wallet artifacts are required.
+
+          Checked-in wallet samples:
+
+          - `config/samples/database_v1beta1_autonomousdatabasewallet.yaml`
+          - `config/samples/database_v1beta1_autonomousdatabaseregionalwallet.yaml`
+
+  - group: mysql
+    kind: DbSystem
+    title: Oracle MySQL Database Service
+    introduction: |
+      [Oracle MySQL Database Service](https://www.oracle.com/mysql/) is a fully managed OCI service for provisioning and operating MySQL DB Systems.
+
+      The generator-owned v2 mysql API uses `apiVersion: mysql.oracle.com/v1beta1` and `kind: DbSystem`. The older mysql compatibility surface is no longer published.
+    preSections:
+      - title: Pre-requisites for Setting up MySQL DB Systems
+        body: |
+          If this is your first time using MySQL Database Service, make sure the tenancy administrator has finished the OCI network and policy setup first.
+
+          ### Create VCN and Subnets
+
+          - Follow the [Virtual Networking Quickstart](https://docs.oracle.com/en-us/iaas/Content/Network/Tasks/quickstartnetworking.htm) to create a VCN and subnets.
+          - Prefer placing the MySQL DB System in the same VCN as the Kubernetes cluster.
+          - Review the [MySQL networking setup guide](https://docs.oracle.com/en-us/iaas/mysql-database/doc/networking-setup-mysql-db-systems.html#MYAAS-GUID-2B4F78DD-72D3-45BA-8F6A-AC5E3A11B729).
+
+          ### Create Policies
+
+          When using Instance Principals:
+
+          ```plain
+          Allow dynamic-group <OSOK_DYNAMIC_GROUP> to {SUBNET_READ, SUBNET_ATTACH, SUBNET_DETACH, VCN_READ, COMPARTMENT_INSPECT} in [ tenancy | compartment <compartment_name> | compartment id <compartment_ocid> ]
+          Allow dynamic-group <OSOK_DYNAMIC_GROUP> to manage mysql-family in [ tenancy | compartment <compartment_name> | compartment id <compartment_ocid> ]
+          Allow dynamic-group <OSOK_DYNAMIC_GROUP> to use tag-namespaces in tenancy
+          ```
+
+          When using User Principals:
+
+          ```plain
+          Allow group <OSOK_GROUP> to {SUBNET_READ, SUBNET_ATTACH, SUBNET_DETACH, VCN_READ, COMPARTMENT_INSPECT} in [ tenancy | compartment <compartment_name> | compartment id <compartment_ocid> ]
+          Allow group <OSOK_GROUP> to manage mysql-family in [ tenancy | compartment <compartment_name> | compartment id <compartment_ocid> ]
+          Allow group <OSOK_GROUP> to use tag-namespaces in tenancy
+          ```
+    postSections:
+      - title: Update Behavior
+        body: |
+          Update the same `DbSystem` object by modifying supported mutable fields and reapplying the manifest with `kubectl apply -f <UPDATE_YAML>.yaml`.
+
+          Keep admin credential references in their secret-backed form instead of sending literal values in the CR.
+      - title: Kubernetes Secrets
+        body: |
+          - `spec.adminUsername.secret.secretName` must reference a Secret in the same namespace with a `username` entry.
+          - `spec.adminPassword.secret.secretName` must reference a Secret in the same namespace with a `password` entry.
+          - OSOK mirrors only referenced Secret names into status for drift tracking; it does not write secret payloads into the CR status.
+          - Once the `DbSystem` reaches `Active`, OSOK manages a same-name Secret containing observed endpoint data such as `InternalFQDN`, `MySQLPort`, `MySQLXProtocolPort`, `PrivateIPAddress`, `AvailabilityDomain`, `FaultDomain`, and `Endpoints`.
+
+  - group: queue
+    kind: Queue
+    title: Oracle Cloud Infrastructure Queue
+    introduction: |
+      The current OSOK Queue rollout promotes the top-level OCI `Queue` resource under `apiVersion: queue.oracle.com/v1beta1` and `kind: Queue`.
+
+      The published reconcile path is work-request-aware: create, update, and delete all reconcile against OCI work requests, Queue identity is recovered from work-request resources, and status mirrors both live Queue fields and work-request tracking data.
+    postSections:
+      - title: Update Behavior
+        body: |
+          Update the same `Queue` object by modifying supported mutable fields and reapplying the manifest.
+
+          `spec.compartmentId` and `spec.retentionInSeconds` are treated as create-only in this rollout. If they drift from the live OCI Queue, OSOK rejects the update instead of silently recreating the Queue.
+      - title: Endpoint Secret
+        body: |
+          Once the Queue reaches `Active` and `status.messagesEndpoint` is present, OSOK manages a same-name Secret in the Queue namespace with one key:
+
+          - `endpoint`
+
+          Ownership is guarded through the `queue.oracle.com/queue-uid=<queue UID>` label. OSOK adopts only an unlabeled same-name Secret whose data already matches the desired endpoint payload.
+      - title: Out of Scope
+        body: |
+          This rollout is intentionally limited to `Queue`.
+
+          The following Queue-family resources remain out of scope:
+
+          - `Channel`
+          - `Message`
+          - `Stats`
+          - `WorkRequest`
+          - `WorkRequestError`
+          - `WorkRequestLog`
+
+  - group: streaming
+    kind: Stream
+    title: Oracle Streaming Service
+    introduction: |
+      [Oracle Streaming](https://docs.oracle.com/en-us/iaas/Content/Streaming/Concepts/streamingoverview.htm) provides a managed OCI service for ingesting and consuming high-volume event streams in real time.
+
+      The current supported surface uses `apiVersion: streaming.oracle.com/v1beta1` and `kind: Stream`.
+    preSections:
+      - title: Create Policies
+        body: |
+          **Instance Principal**
+
+          The OCI Service Operator dynamic group should have `manage` permission for the `stream-family` and `streampools` resource types.
+
+          ```plain
+          Allow dynamic-group <OSOK_DYNAMIC_GROUP> to manage stream-family in compartment <COMPARTMENT_NAME>
+          Allow dynamic-group <OSOK_DYNAMIC_GROUP> to manage streampools in compartment <COMPARTMENT_NAME>
+          ```
+
+          **User Principal**
+
+          The OCI Service Operator user should have `manage` permission for the `stream-family` and `streampools` resource types.
+
+          ```plain
+          Allow group <SERVICE_BROKER_GROUP> to manage stream-family in compartment <COMPARTMENT_NAME>
+          Allow group <SERVICE_BROKER_GROUP> to manage streampools in compartment <COMPARTMENT_NAME>
+          ```
+    postSections:
+      - title: Current v2 Notes
+        body: |
+          - The generated v2 `Stream` contract does not expose the retired bind-by-id field from the older API.
+          - Author new manifests only against `streaming.oracle.com/v1beta1`.
+          - In-place updates are limited to `spec.streamPoolId`, `spec.freeformTags`, and `spec.definedTags`.
+          - Changes to `spec.name`, `spec.partitions`, and `spec.retentionInHours` are not applied in place.
+      - title: Access Information
+        body: |
+          When a `Stream` becomes active, OSOK creates a same-name Secret in the resource namespace containing one key:
+
+          - `endpoint`
+
+          The same endpoint is also mirrored on the CR at `status.messagesEndpoint`.
+      - title: Delete a Stream
+        body: |
+          Delete the `Stream` CR to delete the OCI stream and clean up the endpoint Secret.
+
+          ```sh
+          kubectl delete stream <CR_OBJECT_NAME>
+          ```

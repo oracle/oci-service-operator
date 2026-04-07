@@ -12,7 +12,7 @@ Manage OCI API Gateway gateways and deployments from Kubernetes.
 | Install Namespace | `oci-service-operator-apigateway-system` |
 | Controller Image Pattern | `ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-apigateway:<version>` |
 | Bundle Image Pattern | `ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-apigateway-bundle:<version>` |
-| Primary Guide | [Open guide](../../../installation.md) |
+| Setup Guide | [Open guide](../../../installation.md) |
 
 ## Notes
 
@@ -20,7 +20,7 @@ Manage OCI API Gateway gateways and deployments from Kubernetes.
 
 ## Exposed Resources
 
-| Resource | API Version | Summary | Sample | API Spec |
-| --- | --- | --- | --- | --- |
-| `apigateway/ApiGateway` | `apigateway.oracle.com/v1beta1` | Manage OCI API Gateway gateway resources. | — | [Reference](../../api/apigateway/v1beta1/index.md#kind-apigateway) |
-| `apigateway/ApiGatewayDeployment` | `apigateway.oracle.com/v1beta1` | Manage OCI API Gateway deployment routes and backend bindings. | — | [Reference](../../api/apigateway/v1beta1/index.md#kind-apigatewaydeployment) |
+| Resource | API Version | Summary | Guide | Sample | API Spec |
+| --- | --- | --- | --- | --- | --- |
+| `apigateway/ApiGateway` | `apigateway.oracle.com/v1beta1` | Manage OCI API Gateway gateway resources. | [Guide](../../../guides/apigateway/apigateway.md) | — | [Reference](../../api/apigateway/v1beta1/index.md#kind-apigateway) |
+| `apigateway/ApiGatewayDeployment` | `apigateway.oracle.com/v1beta1` | Manage OCI API Gateway deployment routes and backend bindings. | [Guide](../../../guides/apigateway/apigatewaydeployment.md) | — | [Reference](../../api/apigateway/v1beta1/index.md#kind-apigatewaydeployment) |

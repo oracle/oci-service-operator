@@ -12,7 +12,7 @@ Manage OCI Redis clusters from Kubernetes.
 | Install Namespace | `oci-service-operator-redis-system` |
 | Controller Image Pattern | `ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-redis:<version>` |
 | Bundle Image Pattern | `ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-redis-bundle:<version>` |
-| Primary Guide | [Open guide](../../../installation.md) |
+| Setup Guide | [Open guide](../../../installation.md) |
 
 ## Notes
 
@@ -20,6 +20,6 @@ Manage OCI Redis clusters from Kubernetes.
 
 ## Exposed Resources
 
-| Resource | API Version | Summary | Sample | API Spec |
-| --- | --- | --- | --- | --- |
-| `redis/RedisCluster` | `redis.oracle.com/v1beta1` | Manage OCI Redis clusters. | [Sample](../../samples/redis/v1beta1/rediscluster.md) | [Reference](../../api/redis/v1beta1/index.md#kind-rediscluster) |
+| Resource | API Version | Summary | Guide | Sample | API Spec |
+| --- | --- | --- | --- | --- | --- |
+| `redis/RedisCluster` | `redis.oracle.com/v1beta1` | Manage OCI Redis clusters. | [Guide](../../../guides/redis/rediscluster.md) | [Sample](../../samples/redis/v1beta1/rediscluster.md) | [Reference](../../api/redis/v1beta1/index.md#kind-rediscluster) |

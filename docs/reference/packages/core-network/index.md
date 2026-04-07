@@ -12,7 +12,7 @@ Manage OCI core networking resources from Kubernetes.
 | Install Namespace | `oci-service-operator-core-network-system` |
 | Controller Image Pattern | `ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-core-network:<version>` |
 | Bundle Image Pattern | `ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-core-network-bundle:<version>` |
-| Primary Guide | [Open guide](../../../installation.md) |
+| Setup Guide | [Open guide](../../../installation.md) |
 
 ## Notes
 
@@ -20,14 +20,14 @@ Manage OCI core networking resources from Kubernetes.
 
 ## Exposed Resources
 
-| Resource | API Version | Summary | Sample | API Spec |
-| --- | --- | --- | --- | --- |
-| `core/Drg` | `core.oracle.com/v1beta1` | — | [Sample](../../samples/core/v1beta1/drg.md) | [Reference](../../api/core/v1beta1/index.md#kind-drg) |
-| `core/InternetGateway` | `core.oracle.com/v1beta1` | — | [Sample](../../samples/core/v1beta1/internetgateway.md) | [Reference](../../api/core/v1beta1/index.md#kind-internetgateway) |
-| `core/NatGateway` | `core.oracle.com/v1beta1` | — | [Sample](../../samples/core/v1beta1/natgateway.md) | [Reference](../../api/core/v1beta1/index.md#kind-natgateway) |
-| `core/NetworkSecurityGroup` | `core.oracle.com/v1beta1` | — | [Sample](../../samples/core/v1beta1/networksecuritygroup.md) | [Reference](../../api/core/v1beta1/index.md#kind-networksecuritygroup) |
-| `core/RouteTable` | `core.oracle.com/v1beta1` | — | [Sample](../../samples/core/v1beta1/routetable.md) | [Reference](../../api/core/v1beta1/index.md#kind-routetable) |
-| `core/SecurityList` | `core.oracle.com/v1beta1` | — | [Sample](../../samples/core/v1beta1/securitylist.md) | [Reference](../../api/core/v1beta1/index.md#kind-securitylist) |
-| `core/ServiceGateway` | `core.oracle.com/v1beta1` | — | [Sample](../../samples/core/v1beta1/servicegateway.md) | [Reference](../../api/core/v1beta1/index.md#kind-servicegateway) |
-| `core/Subnet` | `core.oracle.com/v1beta1` | — | [Sample](../../samples/core/v1beta1/subnet.md) | [Reference](../../api/core/v1beta1/index.md#kind-subnet) |
-| `core/Vcn` | `core.oracle.com/v1beta1` | — | [Sample](../../samples/core/v1beta1/vcn.md) | [Reference](../../api/core/v1beta1/index.md#kind-vcn) |
+| Resource | API Version | Summary | Guide | Sample | API Spec |
+| --- | --- | --- | --- | --- | --- |
+| `core/Drg` | `core.oracle.com/v1beta1` | — | [Guide](../../../guides/core/drg.md) | [Sample](../../samples/core/v1beta1/drg.md) | [Reference](../../api/core/v1beta1/index.md#kind-drg) |
+| `core/InternetGateway` | `core.oracle.com/v1beta1` | — | [Guide](../../../guides/core/internetgateway.md) | [Sample](../../samples/core/v1beta1/internetgateway.md) | [Reference](../../api/core/v1beta1/index.md#kind-internetgateway) |
+| `core/NatGateway` | `core.oracle.com/v1beta1` | — | [Guide](../../../guides/core/natgateway.md) | [Sample](../../samples/core/v1beta1/natgateway.md) | [Reference](../../api/core/v1beta1/index.md#kind-natgateway) |
+| `core/NetworkSecurityGroup` | `core.oracle.com/v1beta1` | — | [Guide](../../../guides/core/networksecuritygroup.md) | [Sample](../../samples/core/v1beta1/networksecuritygroup.md) | [Reference](../../api/core/v1beta1/index.md#kind-networksecuritygroup) |
+| `core/RouteTable` | `core.oracle.com/v1beta1` | — | [Guide](../../../guides/core/routetable.md) | [Sample](../../samples/core/v1beta1/routetable.md) | [Reference](../../api/core/v1beta1/index.md#kind-routetable) |
+| `core/SecurityList` | `core.oracle.com/v1beta1` | — | [Guide](../../../guides/core/securitylist.md) | [Sample](../../samples/core/v1beta1/securitylist.md) | [Reference](../../api/core/v1beta1/index.md#kind-securitylist) |
+| `core/ServiceGateway` | `core.oracle.com/v1beta1` | — | [Guide](../../../guides/core/servicegateway.md) | [Sample](../../samples/core/v1beta1/servicegateway.md) | [Reference](../../api/core/v1beta1/index.md#kind-servicegateway) |
+| `core/Subnet` | `core.oracle.com/v1beta1` | — | [Guide](../../../guides/core/subnet.md) | [Sample](../../samples/core/v1beta1/subnet.md) | [Reference](../../api/core/v1beta1/index.md#kind-subnet) |
+| `core/Vcn` | `core.oracle.com/v1beta1` | — | [Guide](../../../guides/core/vcn.md) | [Sample](../../samples/core/v1beta1/vcn.md) | [Reference](../../api/core/v1beta1/index.md#kind-vcn) |

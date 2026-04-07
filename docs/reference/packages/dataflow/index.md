@@ -12,10 +12,10 @@ Manage OCI Data Flow applications from Kubernetes.
 | Install Namespace | `oci-service-operator-dataflow-system` |
 | Controller Image Pattern | `ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-dataflow:<version>` |
 | Bundle Image Pattern | `ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-dataflow-bundle:<version>` |
-| Primary Guide | [Open guide](../../../installation.md) |
+| Setup Guide | [Open guide](../../../installation.md) |
 
 ## Exposed Resources
 
-| Resource | API Version | Summary | Sample | API Spec |
-| --- | --- | --- | --- | --- |
-| `dataflow/Application` | `dataflow.oracle.com/v1beta1` | Manage OCI Data Flow applications. | [Sample](../../samples/dataflow/v1beta1/application.md) | [Reference](../../api/dataflow/v1beta1/index.md#kind-application) |
+| Resource | API Version | Summary | Guide | Sample | API Spec |
+| --- | --- | --- | --- | --- | --- |
+| `dataflow/Application` | `dataflow.oracle.com/v1beta1` | Manage OCI Data Flow applications. | [Guide](../../../guides/dataflow/application.md) | [Sample](../../samples/dataflow/v1beta1/application.md) | [Reference](../../api/dataflow/v1beta1/index.md#kind-application) |

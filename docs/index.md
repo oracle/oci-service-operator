@@ -18,9 +18,11 @@ surface, and resource-specific guidance.
 
 ## Start Here
 
-- Use the [User Guide](user-guide.md) for the primary end-to-end quickstart.
 - Use [Installation](installation.md) to install a published package bundle and
   configure authentication.
+- Use [Quick start with KRO](user-guide.md) for the end-to-end MySQL example
+  that assumes the installation prerequisites are already complete and adds kro
+  for the example workflow.
 - Use [Supported Resources](reference/index.md) to browse the generated catalog
   of shipped packages, resource kinds, samples, and API entry points.
 - Use [API Reference](reference/api/index.md) for generated group/version pages
@@ -43,8 +45,8 @@ surface, and resource-specific guidance.
 
 Start with the core user flow:
 
-- [User Guide](user-guide.md)
 - [Installation](installation.md)
+- [Quick start with KRO](user-guide.md)
 - [Supported Resources](reference/index.md)
 - [API Reference](reference/api/index.md)
 

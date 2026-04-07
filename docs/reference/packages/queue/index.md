@@ -12,10 +12,10 @@ Manage OCI Queue service queues from Kubernetes.
 | Install Namespace | `oci-service-operator-queue-system` |
 | Controller Image Pattern | `ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-queue:<version>` |
 | Bundle Image Pattern | `ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-queue-bundle:<version>` |
-| Primary Guide | [Open guide](../../../queue.md) |
+| Setup Guide | [Open guide](../../../queue.md) |
 
 ## Exposed Resources
 
-| Resource | API Version | Summary | Sample | API Spec |
-| --- | --- | --- | --- | --- |
-| `queue/Queue` | `queue.oracle.com/v1beta1` | Manage OCI Queue service queues. | [Sample](../../samples/queue/v1beta1/queue.md) | [Reference](../../api/queue/v1beta1/index.md#kind-queue) |
+| Resource | API Version | Summary | Guide | Sample | API Spec |
+| --- | --- | --- | --- | --- | --- |
+| `queue/Queue` | `queue.oracle.com/v1beta1` | Manage OCI Queue service queues. | [Guide](../../../queue.md) | [Sample](../../samples/queue/v1beta1/queue.md) | [Reference](../../api/queue/v1beta1/index.md#kind-queue) |

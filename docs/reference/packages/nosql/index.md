@@ -12,10 +12,10 @@ Manage OCI NoSQL tables from Kubernetes.
 | Install Namespace | `oci-service-operator-nosql-system` |
 | Controller Image Pattern | `ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-nosql:<version>` |
 | Bundle Image Pattern | `ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-nosql-bundle:<version>` |
-| Primary Guide | [Open guide](../../../installation.md) |
+| Setup Guide | [Open guide](../../../installation.md) |
 
 ## Exposed Resources
 
-| Resource | API Version | Summary | Sample | API Spec |
-| --- | --- | --- | --- | --- |
-| `nosql/Table` | `nosql.oracle.com/v1beta1` | Manage OCI NoSQL tables. | [Sample](../../samples/nosql/v1beta1/table.md) | [Reference](../../api/nosql/v1beta1/index.md#kind-table) |
+| Resource | API Version | Summary | Guide | Sample | API Spec |
+| --- | --- | --- | --- | --- | --- |
+| `nosql/Table` | `nosql.oracle.com/v1beta1` | Manage OCI NoSQL tables. | [Guide](../../../guides/nosql/table.md) | [Sample](../../samples/nosql/v1beta1/table.md) | [Reference](../../api/nosql/v1beta1/index.md#kind-table) |

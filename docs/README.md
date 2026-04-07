@@ -1,8 +1,8 @@
 # OCI Service Operator for Kubernetes
 
 - [Introduction](#introduction)
-- [User Guide](user-guide.md)
 - [Installation](installation.md#installation)
+- [Quick start with KRO](user-guide.md)
 - [Supported Resources](reference/index.md#supported-resources)
 - [Oracle Autonomous Database Service](adb.md#oracle-autonomous-database-service)
 - [Oracle MySQL Database Service](mysql.md#oracle-mysql-database-service)
@@ -44,10 +44,11 @@ System, and Streaming flows. The pre-v2 manual compatibility guides were
 removed because they no longer match the generated-runtime contract. Start
 with:
 
-- `docs/user-guide.md` as the primary end-to-end quickstart for OSOK users
-- `config/samples/` for concrete manifests
 - `docs/installation.md` for published bundle naming, package namespaces, and
   `v2.0.0-alpha` install and upgrade commands
+- `docs/user-guide.md` for the KRO-based end-to-end MySQL example that assumes
+  the installation prerequisites are already complete
+- `config/samples/` for concrete manifests
 - `docs/reference/index.md` for the generated package and resource catalog
 - `docs/installation.md#controller-manager-config` for the default manager
   deployment contract

@@ -21,4 +21,6 @@ spec-field backlog is resolved, set
 `DOCS_VERIFY_STRICT_PUBLIC_DESCRIPTIONS=true` in CI to promote those warnings to
 hard failures.
 
-The main customer quickstart remains the [User Guide](../user-guide.md).
+The main customer quickstart remains [Quick start with KRO](../user-guide.md),
+which now sits after [Installation](../installation.md) in the customer entry
+path.

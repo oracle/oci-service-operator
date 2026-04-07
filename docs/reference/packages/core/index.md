@@ -12,7 +12,7 @@ Manage OCI Compute and core networking resources from Kubernetes.
 | Install Namespace | `oci-service-operator-core-system` |
 | Controller Image Pattern | `ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-core:<version>` |
 | Bundle Image Pattern | `ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-core-bundle:<version>` |
-| Primary Guide | [Open guide](../../../installation.md) |
+| Setup Guide | [Open guide](../../../installation.md) |
 
 ## Notes
 
@@ -21,6 +21,6 @@ Manage OCI Compute and core networking resources from Kubernetes.
 
 ## Exposed Resources
 
-| Resource | API Version | Summary | Sample | API Spec |
-| --- | --- | --- | --- | --- |
-| `core/Instance` | `core.oracle.com/v1beta1` | — | [Sample](../../samples/core/v1beta1/instance.md) | [Reference](../../api/core/v1beta1/index.md#kind-instance) |
+| Resource | API Version | Summary | Guide | Sample | API Spec |
+| --- | --- | --- | --- | --- | --- |
+| `core/Instance` | `core.oracle.com/v1beta1` | — | [Guide](../../../guides/core/instance.md) | [Sample](../../samples/core/v1beta1/instance.md) | [Reference](../../api/core/v1beta1/index.md#kind-instance) |

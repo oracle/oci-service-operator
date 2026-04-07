@@ -12,7 +12,7 @@ Manage OCI Object Storage buckets from Kubernetes.
 | Install Namespace | `oci-service-operator-objectstorage-system` |
 | Controller Image Pattern | `ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-objectstorage:<version>` |
 | Bundle Image Pattern | `ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-objectstorage-bundle:<version>` |
-| Primary Guide | [Open guide](../../../installation.md) |
+| Setup Guide | [Open guide](../../../installation.md) |
 
 ## Notes
 
@@ -20,6 +20,6 @@ Manage OCI Object Storage buckets from Kubernetes.
 
 ## Exposed Resources
 
-| Resource | API Version | Summary | Sample | API Spec |
-| --- | --- | --- | --- | --- |
-| `objectstorage/Bucket` | `objectstorage.oracle.com/v1beta1` | Manage OCI Object Storage buckets. | [Sample](../../samples/objectstorage/v1beta1/bucket.md) | [Reference](../../api/objectstorage/v1beta1/index.md#kind-bucket) |
+| Resource | API Version | Summary | Guide | Sample | API Spec |
+| --- | --- | --- | --- | --- | --- |
+| `objectstorage/Bucket` | `objectstorage.oracle.com/v1beta1` | Manage OCI Object Storage buckets. | [Guide](../../../guides/objectstorage/bucket.md) | [Sample](../../samples/objectstorage/v1beta1/bucket.md) | [Reference](../../api/objectstorage/v1beta1/index.md#kind-bucket) |
