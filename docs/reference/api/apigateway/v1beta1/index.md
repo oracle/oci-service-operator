@@ -18,7 +18,7 @@ This content is generated from the checked-in CRD schemas in `config/crd/bases/`
 <a id="resources"></a>
 ## Resources
 
-| Kind | Scope | Sample | Released packages |
+| Kind | Scope | Sample | Packages |
 | --- | --- | --- | --- |
 | [ApiGateway](#kind-apigateway) | Namespaced | - | API Gateway (`v2.0.0-alpha`) |
 | [ApiGatewayDeployment](#kind-apigatewaydeployment) | Namespaced | - | API Gateway (`v2.0.0-alpha`) |
@@ -32,7 +32,7 @@ Manage OCI API Gateway gateway resources.
 - `Scope`: `Namespaced`
 - `APIVersion`: `apigateway.oracle.com/v1beta1`
 - `Sample`: No checked-in sample manifest currently exists.
-- `Released packages`: API Gateway (`v2.0.0-alpha`)
+- `Packages`: API Gateway (`v2.0.0-alpha`)
 
 <a id="kind-apigateway-spec"></a>
 ### Spec
@@ -98,7 +98,7 @@ Manage OCI API Gateway deployment routes and backend bindings.
 - `Scope`: `Namespaced`
 - `APIVersion`: `apigateway.oracle.com/v1beta1`
 - `Sample`: No checked-in sample manifest currently exists.
-- `Released packages`: API Gateway (`v2.0.0-alpha`)
+- `Packages`: API Gateway (`v2.0.0-alpha`)
 
 <a id="kind-apigatewaydeployment-spec"></a>
 ### Spec

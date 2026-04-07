@@ -18,7 +18,7 @@ This content is generated from the checked-in CRD schemas in `config/crd/bases/`
 <a id="resources"></a>
 ## Resources
 
-| Kind | Scope | Sample | Released packages |
+| Kind | Scope | Sample | Packages |
 | --- | --- | --- | --- |
 | [DbSystem](#kind-dbsystem) | Namespaced | [Sample](../../../samples/psql/v1beta1/dbsystem.md) | PostgreSQL (`v2.0.0-alpha`) |
 
@@ -31,7 +31,7 @@ Manage OCI PostgreSQL DB Systems.
 - `Scope`: `Namespaced`
 - `APIVersion`: `psql.oracle.com/v1beta1`
 - `Sample`: [Sample](../../../samples/psql/v1beta1/dbsystem.md) (`config/samples/psql_v1beta1_dbsystem.yaml`)
-- `Released packages`: PostgreSQL (`v2.0.0-alpha`)
+- `Packages`: PostgreSQL (`v2.0.0-alpha`)
 
 <a id="kind-dbsystem-spec"></a>
 ### Spec

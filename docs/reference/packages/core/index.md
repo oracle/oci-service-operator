@@ -16,22 +16,11 @@ Manage OCI Compute and core networking resources from Kubernetes.
 
 ## Notes
 
-- Local package scaffolding exists, but the current checked-in release history does not mark core as a published customer-facing package.
-- Use the core-network split package for the checked-in public networking surface until a core-specific release manifest is added.
+- Core Compute currently focuses on Instance while the core-network split package carries the released networking surface.
 - No checked-in release manifest currently lists this package; the resource scope below reflects the current repository package metadata.
-- This package is currently hidden from the Supported Resources landing page until a checked-in release manifest promotes it to the customer-visible surface.
 
 ## Exposed Resources
 
 | Resource | API Version | Summary | Sample | API Spec |
 | --- | --- | --- | --- | --- |
-| `core/Drg` | `core.oracle.com/v1beta1` | — | [Sample](../../samples/core/v1beta1/drg.md) | [Reference](../../api/core/v1beta1/index.md#kind-drg) |
 | `core/Instance` | `core.oracle.com/v1beta1` | — | [Sample](../../samples/core/v1beta1/instance.md) | [Reference](../../api/core/v1beta1/index.md#kind-instance) |
-| `core/InternetGateway` | `core.oracle.com/v1beta1` | — | [Sample](../../samples/core/v1beta1/internetgateway.md) | [Reference](../../api/core/v1beta1/index.md#kind-internetgateway) |
-| `core/NatGateway` | `core.oracle.com/v1beta1` | — | [Sample](../../samples/core/v1beta1/natgateway.md) | [Reference](../../api/core/v1beta1/index.md#kind-natgateway) |
-| `core/NetworkSecurityGroup` | `core.oracle.com/v1beta1` | — | [Sample](../../samples/core/v1beta1/networksecuritygroup.md) | [Reference](../../api/core/v1beta1/index.md#kind-networksecuritygroup) |
-| `core/RouteTable` | `core.oracle.com/v1beta1` | — | [Sample](../../samples/core/v1beta1/routetable.md) | [Reference](../../api/core/v1beta1/index.md#kind-routetable) |
-| `core/SecurityList` | `core.oracle.com/v1beta1` | — | [Sample](../../samples/core/v1beta1/securitylist.md) | [Reference](../../api/core/v1beta1/index.md#kind-securitylist) |
-| `core/ServiceGateway` | `core.oracle.com/v1beta1` | — | [Sample](../../samples/core/v1beta1/servicegateway.md) | [Reference](../../api/core/v1beta1/index.md#kind-servicegateway) |
-| `core/Subnet` | `core.oracle.com/v1beta1` | — | [Sample](../../samples/core/v1beta1/subnet.md) | [Reference](../../api/core/v1beta1/index.md#kind-subnet) |
-| `core/Vcn` | `core.oracle.com/v1beta1` | — | [Sample](../../samples/core/v1beta1/vcn.md) | [Reference](../../api/core/v1beta1/index.md#kind-vcn) |

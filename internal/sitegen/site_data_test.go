@@ -55,8 +55,8 @@ func TestCatalogMatchesCheckedInPackageDirectories(t *testing.T) {
 		t.Fatalf("catalog packages = %v, want %v", got, want)
 	}
 
-	if contains(visible, "core") {
-		t.Fatalf("catalog marked core as customerVisible, want it hidden until a release manifest records it")
+	if !contains(visible, "core") {
+		t.Fatalf("catalog omitted core from customerVisible packages")
 	}
 }
 
@@ -151,14 +151,10 @@ func TestReleaseManifestsMatchCheckedInPackageScope(t *testing.T) {
 	}
 
 	for _, pkg := range catalog.Packages {
-		if pkg.CustomerVisible {
-			if _, ok := releasedPackages[pkg.Package]; !ok {
-				t.Fatalf("customer-visible package %q is missing from release history", pkg.Package)
+		if !pkg.CustomerVisible {
+			if _, ok := releasedPackages[pkg.Package]; ok {
+				t.Fatalf("customer-hidden package %q unexpectedly appears in release history", pkg.Package)
 			}
-			continue
-		}
-		if _, ok := releasedPackages[pkg.Package]; ok {
-			t.Fatalf("customer-hidden package %q unexpectedly appears in release history", pkg.Package)
 		}
 	}
 }

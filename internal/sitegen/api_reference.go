@@ -13,8 +13,8 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
-	"time"
 
+	generatorcfg "github.com/oracle/oci-service-operator/internal/generator"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"sigs.k8s.io/yaml"
 )
@@ -121,12 +121,6 @@ type kindCopy struct {
 	Description string
 }
 
-type latestReleasedPackage struct {
-	ManifestVersion string
-	PublishedAt     time.Time
-	Package         ReleasePackage
-}
-
 // BuildAPIReferenceSite renders the API reference site in memory.
 func BuildAPIReferenceSite(opts APIReferenceBuildOptions) (*APIReferenceSite, error) {
 	opts, err := normalizeAPIReferenceOptions(opts)
@@ -171,11 +165,26 @@ func loadAPIReferencePages(opts APIReferenceBuildOptions) ([]*apiReferencePage, 
 	if err != nil {
 		return nil, err
 	}
+	metadataByPackage, err := LoadPackageMetadataDir(filepath.Join(opts.RepoRoot, "packages"))
+	if err != nil {
+		return nil, err
+	}
+	cfg, err := generatorcfg.LoadConfig(filepath.Join(opts.RepoRoot, "internal", "generator", "config", "services.yaml"))
+	if err != nil {
+		return nil, err
+	}
+	apiKinds, err := LoadAPIKinds(filepath.Join(opts.RepoRoot, "api"))
+	if err != nil {
+		return nil, err
+	}
 	kindCopies, err := buildKindCopyIndex(catalog)
 	if err != nil {
 		return nil, err
 	}
-	pagePackages, kindPackages := buildReleaseExposureIndexes(catalog, releases)
+	pagePackages, kindPackages, err := buildPackageExposureIndexes(catalog, releases, metadataByPackage, cfg, apiKinds)
+	if err != nil {
+		return nil, err
+	}
 
 	resources, err := loadAPIReferenceResources(filepath.Join(opts.RepoRoot, "config", "crd", "bases"))
 	if err != nil {
@@ -289,32 +298,42 @@ func mergeKindCopy(dst *kindCopy, override KindOverride) error {
 	return nil
 }
 
-func buildReleaseExposureIndexes(
+func buildPackageExposureIndexes(
 	catalog *Catalog,
 	releases []*ReleaseManifest,
-) (map[groupVersionKey][]packageExposure, map[groupVersionKindKey][]packageExposure) {
-	catalogByPackage := make(map[string]CatalogPackage, len(catalog.Packages))
-	for _, pkg := range catalog.Packages {
-		catalogByPackage[pkg.Package] = pkg
-	}
-
-	latestByPackage := latestReleasedPackages(releases)
+	metadataByPackage map[string]*PackageMetadata,
+	cfg *generatorcfg.Config,
+	apiKinds map[string]map[string][]string,
+) (map[groupVersionKey][]packageExposure, map[groupVersionKindKey][]packageExposure, error) {
+	latestByPackage := latestReleasesByPackage(releases)
 	pageIndex := make(map[groupVersionKey]map[string]*packageExposure)
 	kindIndex := make(map[groupVersionKindKey]map[string]*packageExposure)
 
-	for packageName, latest := range latestByPackage {
-		exposure := packageExposure{
-			Package:       packageName,
-			DisplayName:   packageName,
-			SupportStatus: "-",
-			LatestVersion: latest.ManifestVersion,
-		}
-		if catalogEntry, ok := catalogByPackage[packageName]; ok {
-			exposure.DisplayName = catalogEntry.DisplayName
-			exposure.SupportStatus = catalogEntry.SupportStatus
+	for _, pkg := range catalog.Packages {
+		if !pkg.CustomerVisible {
+			continue
 		}
 
-		for _, group := range latest.Package.Groups {
+		metadata, ok := metadataByPackage[pkg.Package]
+		if !ok {
+			return nil, nil, fmt.Errorf("catalog package %q is missing package metadata", pkg.Package)
+		}
+		releaseInfo := latestByPackage[pkg.Package]
+		scope, err := resolvePackageScope(pkg.Package, metadata, releaseInfo, cfg, apiKinds)
+		if err != nil {
+			return nil, nil, fmt.Errorf("resolve package scope for %q: %w", pkg.Package, err)
+		}
+
+		exposure := packageExposure{
+			Package:       pkg.Package,
+			DisplayName:   pkg.DisplayName,
+			SupportStatus: pkg.SupportStatus,
+		}
+		if releaseInfo != nil {
+			exposure.LatestVersion = releaseInfo.manifest.Version
+		}
+
+		for _, group := range scope {
 			pageKey := groupVersionKey{Group: group.Group, Version: group.Version}
 			pageExposure := ensurePageExposure(pageIndex, pageKey, exposure)
 			pageExposure.Resources = append(pageExposure.Resources, group.Kinds...)
@@ -330,31 +349,7 @@ func buildReleaseExposureIndexes(
 		}
 	}
 
-	return flattenPageExposureIndex(pageIndex), flattenKindExposureIndex(kindIndex)
-}
-
-func latestReleasedPackages(releases []*ReleaseManifest) map[string]latestReleasedPackage {
-	out := make(map[string]latestReleasedPackage)
-	for _, manifest := range releases {
-		for _, releasedPackage := range manifest.Packages {
-			current, exists := out[releasedPackage.Package]
-			if exists {
-				if current.PublishedAt.After(manifest.PublishedAt) {
-					continue
-				}
-				if current.PublishedAt.Equal(manifest.PublishedAt) && current.ManifestVersion >= manifest.Version {
-					continue
-				}
-			}
-			packageCopy := releasedPackage
-			out[releasedPackage.Package] = latestReleasedPackage{
-				ManifestVersion: manifest.Version,
-				PublishedAt:     manifest.PublishedAt,
-				Package:         packageCopy,
-			}
-		}
-	}
-	return out
+	return flattenPageExposureIndex(pageIndex), flattenKindExposureIndex(kindIndex), nil
 }
 
 func ensurePageExposure(
@@ -842,7 +837,8 @@ func renderAPIReferenceLanding(pages []*apiReferencePage) string {
 	b.WriteString("\n\n# API Reference\n\n")
 	b.WriteString(generatorOwnershipNote())
 	b.WriteString("\n\n")
-	b.WriteString("| API version | Resources | Latest released packages |\n")
+	b.WriteString("This landing page is generated from the checked-in package and release inventory. It lists customer-visible package exposures for each API version and shows the latest recorded release for each package when available.\n\n")
+	b.WriteString("| API version | Resources | Packages |\n")
 	b.WriteString("| --- | --- | --- |\n")
 	for _, page := range pages {
 		apiVersionLink := fmt.Sprintf("[%s/%s](%s)", page.FullGroup, page.Version, path.Join(page.Group, page.Version, "index.md"))
@@ -874,7 +870,7 @@ func renderLandingPackages(packages []packageExposure) string {
 	}
 	parts := make([]string, 0, len(packages))
 	for _, pkg := range packages {
-		parts = append(parts, fmt.Sprintf("%s (%s)", packageDisplayName(pkg), codeSpan(pkg.LatestVersion)))
+		parts = append(parts, fmt.Sprintf("%s (%s)", packageDisplayName(pkg), codeSpan(displayReleaseVersion(pkg.LatestVersion))))
 	}
 	return strings.Join(parts, ", ")
 }
@@ -893,7 +889,7 @@ func renderAPIReferencePage(page *apiReferencePage) string {
 
 	b.WriteString("<a id=\"packages\"></a>\n## Packages\n\n")
 	if len(page.Packages) == 0 {
-		fmt.Fprintf(&b, "No released package currently exposes `%s/%s`.\n\n", page.FullGroup, page.Version)
+		fmt.Fprintf(&b, "No customer-visible package currently exposes `%s/%s`.\n\n", page.FullGroup, page.Version)
 	} else {
 		b.WriteString("| Package | Support | Latest release | Resources |\n")
 		b.WriteString("| --- | --- | --- | --- |\n")
@@ -903,7 +899,7 @@ func renderAPIReferencePage(page *apiReferencePage) string {
 				"| %s | %s | %s | %s |\n",
 				escapeTableText(packageDisplayName(pkg)),
 				escapeTableText(dashIfEmpty(pkg.SupportStatus)),
-				codeSpan(pkg.LatestVersion),
+				codeSpan(displayReleaseVersion(pkg.LatestVersion)),
 				renderPackageResourceLinks(pkg.Resources),
 			)
 		}
@@ -911,7 +907,7 @@ func renderAPIReferencePage(page *apiReferencePage) string {
 	}
 
 	b.WriteString("<a id=\"resources\"></a>\n## Resources\n\n")
-	b.WriteString("| Kind | Scope | Sample | Released packages |\n")
+	b.WriteString("| Kind | Scope | Sample | Packages |\n")
 	b.WriteString("| --- | --- | --- | --- |\n")
 	for _, resource := range page.Resources {
 		fmt.Fprintf(
@@ -942,7 +938,7 @@ func renderAPIReferenceResource(b *strings.Builder, page *apiReferencePage, outp
 	fmt.Fprintf(b, "- `Scope`: %s\n", codeSpan(resource.Scope))
 	fmt.Fprintf(b, "- `APIVersion`: %s\n", codeSpan(page.FullGroup+"/"+page.Version))
 	fmt.Fprintf(b, "- `Sample`: %s\n", renderSampleBullet(outputPath, resource.Sample))
-	fmt.Fprintf(b, "- `Released packages`: %s\n\n", renderResourcePackageBullet(resource.Packages))
+	fmt.Fprintf(b, "- `Packages`: %s\n\n", renderResourcePackageBullet(resource.Packages))
 
 	renderSchemaSection(b, resource.Kind, "Spec", resource.SpecSection, 0)
 	renderSchemaSection(b, resource.Kind, "Status", resource.StatusSection, 0)
@@ -1018,14 +1014,14 @@ func renderResourcePackageCell(packages []packageExposure) string {
 	}
 	parts := make([]string, 0, len(packages))
 	for _, pkg := range packages {
-		parts = append(parts, fmt.Sprintf("%s (%s)", packageDisplayName(pkg), codeSpan(pkg.LatestVersion)))
+		parts = append(parts, fmt.Sprintf("%s (%s)", packageDisplayName(pkg), codeSpan(displayReleaseVersion(pkg.LatestVersion))))
 	}
 	return strings.Join(parts, ", ")
 }
 
 func renderResourcePackageBullet(packages []packageExposure) string {
 	if len(packages) == 0 {
-		return "Not currently exposed by a released package."
+		return "Not currently exposed by a customer-visible package."
 	}
 	return renderResourcePackageCell(packages)
 }

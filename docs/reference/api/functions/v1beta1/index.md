@@ -18,7 +18,7 @@ This content is generated from the checked-in CRD schemas in `config/crd/bases/`
 <a id="resources"></a>
 ## Resources
 
-| Kind | Scope | Sample | Released packages |
+| Kind | Scope | Sample | Packages |
 | --- | --- | --- | --- |
 | [Application](#kind-application) | Namespaced | [Sample](../../../samples/functions/v1beta1/application.md) | Functions (`v2.0.0-alpha`) |
 | [Function](#kind-function) | Namespaced | [Sample](../../../samples/functions/v1beta1/function.md) | Functions (`v2.0.0-alpha`) |
@@ -32,7 +32,7 @@ Manage OCI Functions application containers.
 - `Scope`: `Namespaced`
 - `APIVersion`: `functions.oracle.com/v1beta1`
 - `Sample`: [Sample](../../../samples/functions/v1beta1/application.md) (`config/samples/functions_v1beta1_application.yaml`)
-- `Released packages`: Functions (`v2.0.0-alpha`)
+- `Packages`: Functions (`v2.0.0-alpha`)
 
 <a id="kind-application-spec"></a>
 ### Spec
@@ -185,7 +185,7 @@ Manage OCI Functions function definitions and images.
 - `Scope`: `Namespaced`
 - `APIVersion`: `functions.oracle.com/v1beta1`
 - `Sample`: [Sample](../../../samples/functions/v1beta1/function.md) (`config/samples/functions_v1beta1_function.yaml`)
-- `Released packages`: Functions (`v2.0.0-alpha`)
+- `Packages`: Functions (`v2.0.0-alpha`)
 
 <a id="kind-function-spec"></a>
 ### Spec

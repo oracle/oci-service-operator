@@ -39,18 +39,23 @@ func TestBuildReferenceSiteUsesReleaseAndPackageFallbackData(t *testing.T) {
 	}
 
 	core := findPackage(t, site.Packages, "core")
-	if core.CustomerVisible {
-		t.Fatalf("core customerVisible = true, want false")
+	if !core.CustomerVisible {
+		t.Fatalf("core customerVisible = false, want true")
 	}
 	if core.LatestReleaseVersion != "" {
 		t.Fatalf("core latest release = %q, want empty", core.LatestReleaseVersion)
 	}
+	if len(core.Resources) != 1 {
+		t.Fatalf("core resources = %d, want 1", len(core.Resources))
+	}
 	if !hasKind(core.Resources, "Instance") {
 		t.Fatalf("core resources do not include Instance")
 	}
-	if !hasKind(core.Resources, "SecurityList") {
-		t.Fatalf("core resources do not include SecurityList")
+	if hasKind(core.Resources, "SecurityList") {
+		t.Fatalf("core resources unexpectedly include SecurityList")
 	}
+
+	findPackage(t, site.PublicPackages, "core")
 }
 
 func TestGenerateReferenceDocsMatchesCheckedInOutputs(t *testing.T) {
@@ -116,6 +121,7 @@ func checkedInGeneratedPaths(root string) ([]string, error) {
 	}); err != nil {
 		return nil, err
 	}
+	paths = append(paths, "mkdocs.yml")
 
 	return paths, nil
 }

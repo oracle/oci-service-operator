@@ -18,7 +18,7 @@ This content is generated from the checked-in CRD schemas in `config/crd/bases/`
 <a id="resources"></a>
 ## Resources
 
-| Kind | Scope | Sample | Released packages |
+| Kind | Scope | Sample | Packages |
 | --- | --- | --- | --- |
 | [ContainerInstance](#kind-containerinstance) | Namespaced | [Sample](../../../samples/containerinstances/v1beta1/containerinstance.md) | Container Instances (`v2.0.0-alpha`) |
 
@@ -31,7 +31,7 @@ Manage OCI Container Instance workloads.
 - `Scope`: `Namespaced`
 - `APIVersion`: `containerinstances.oracle.com/v1beta1`
 - `Sample`: [Sample](../../../samples/containerinstances/v1beta1/containerinstance.md) (`config/samples/containerinstances_v1beta1_containerinstance.yaml`)
-- `Released packages`: Container Instances (`v2.0.0-alpha`)
+- `Packages`: Container Instances (`v2.0.0-alpha`)
 
 <a id="kind-containerinstance-spec"></a>
 ### Spec

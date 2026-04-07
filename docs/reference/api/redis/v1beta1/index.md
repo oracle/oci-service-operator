@@ -18,7 +18,7 @@ This content is generated from the checked-in CRD schemas in `config/crd/bases/`
 <a id="resources"></a>
 ## Resources
 
-| Kind | Scope | Sample | Released packages |
+| Kind | Scope | Sample | Packages |
 | --- | --- | --- | --- |
 | [RedisCluster](#kind-rediscluster) | Namespaced | [Sample](../../../samples/redis/v1beta1/rediscluster.md) | Redis (`v2.0.0-alpha`) |
 
@@ -31,7 +31,7 @@ Manage OCI Redis clusters.
 - `Scope`: `Namespaced`
 - `APIVersion`: `redis.oracle.com/v1beta1`
 - `Sample`: [Sample](../../../samples/redis/v1beta1/rediscluster.md) (`config/samples/redis_v1beta1_rediscluster.yaml`)
-- `Released packages`: Redis (`v2.0.0-alpha`)
+- `Packages`: Redis (`v2.0.0-alpha`)
 
 <a id="kind-rediscluster-spec"></a>
 ### Spec

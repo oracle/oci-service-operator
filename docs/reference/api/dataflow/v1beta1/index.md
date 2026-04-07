@@ -18,7 +18,7 @@ This content is generated from the checked-in CRD schemas in `config/crd/bases/`
 <a id="resources"></a>
 ## Resources
 
-| Kind | Scope | Sample | Released packages |
+| Kind | Scope | Sample | Packages |
 | --- | --- | --- | --- |
 | [Application](#kind-application) | Namespaced | [Sample](../../../samples/dataflow/v1beta1/application.md) | Data Flow (`v2.0.0-alpha`) |
 
@@ -31,7 +31,7 @@ Manage OCI Data Flow applications.
 - `Scope`: `Namespaced`
 - `APIVersion`: `dataflow.oracle.com/v1beta1`
 - `Sample`: [Sample](../../../samples/dataflow/v1beta1/application.md) (`config/samples/dataflow_v1beta1_application.yaml`)
-- `Released packages`: Data Flow (`v2.0.0-alpha`)
+- `Packages`: Data Flow (`v2.0.0-alpha`)
 
 <a id="kind-application-spec"></a>
 ### Spec

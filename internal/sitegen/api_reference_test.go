@@ -28,6 +28,7 @@ func TestBuildAPIReferenceSiteQueuePage(t *testing.T) {
 	}
 
 	assertContains(t, site.LandingPage.Content, "[queue.oracle.com/v1beta1](queue/v1beta1/index.md)")
+	assertContains(t, site.LandingPage.Content, "Core Compute (`Not yet released`), Core Networking (`v2.0.0-alpha`)")
 
 	page := generatedPage(t, site, "queue/v1beta1/index.md")
 	assertContains(t, page.Content, "# queue.oracle.com/v1beta1")
@@ -38,6 +39,10 @@ func TestBuildAPIReferenceSiteQueuePage(t *testing.T) {
 	assertContains(t, page.Content, "queue_v1beta1_queue.yaml")
 	assertContains(t, page.Content, "<a id=\"kind-queue-spec\"></a>")
 	assertContains(t, page.Content, "This content is generated from the checked-in CRD schemas")
+
+	corePage := generatedPage(t, site, "core/v1beta1/index.md")
+	assertContains(t, corePage.Content, "| Core Compute | preview | `Not yet released` | [Instance](#kind-instance) |")
+	assertContains(t, corePage.Content, "| [Instance](#kind-instance) | Namespaced | [Sample](../../../samples/core/v1beta1/instance.md) | Core Compute (`Not yet released`) |")
 }
 
 func TestGenerateAPIReferenceSiteWritesRenderedPages(t *testing.T) {

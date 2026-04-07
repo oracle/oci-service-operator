@@ -18,7 +18,7 @@ This content is generated from the checked-in CRD schemas in `config/crd/bases/`
 <a id="resources"></a>
 ## Resources
 
-| Kind | Scope | Sample | Released packages |
+| Kind | Scope | Sample | Packages |
 | --- | --- | --- | --- |
 | [AutonomousDatabase](#kind-autonomousdatabase) | Namespaced | [Sample](../../../samples/database/v1beta1/autonomousdatabase.md) | Autonomous Database (`v2.0.0-alpha`) |
 
@@ -31,7 +31,7 @@ Manage OCI Autonomous Database instances.
 - `Scope`: `Namespaced`
 - `APIVersion`: `database.oracle.com/v1beta1`
 - `Sample`: [Sample](../../../samples/database/v1beta1/autonomousdatabase.md) (`config/samples/database_v1beta1_autonomousdatabase.yaml`)
-- `Released packages`: Autonomous Database (`v2.0.0-alpha`)
+- `Packages`: Autonomous Database (`v2.0.0-alpha`)
 
 <a id="kind-autonomousdatabase-spec"></a>
 ### Spec

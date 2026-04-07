@@ -18,7 +18,7 @@ This content is generated from the checked-in CRD schemas in `config/crd/bases/`
 <a id="resources"></a>
 ## Resources
 
-| Kind | Scope | Sample | Released packages |
+| Kind | Scope | Sample | Packages |
 | --- | --- | --- | --- |
 | [OpensearchCluster](#kind-opensearchcluster) | Namespaced | [Sample](../../../samples/opensearch/v1beta1/opensearchcluster.md) | OpenSearch (`v2.0.0-alpha`) |
 
@@ -31,7 +31,7 @@ Manage OCI OpenSearch clusters.
 - `Scope`: `Namespaced`
 - `APIVersion`: `opensearch.oracle.com/v1beta1`
 - `Sample`: [Sample](../../../samples/opensearch/v1beta1/opensearchcluster.md) (`config/samples/opensearch_v1beta1_opensearchcluster.yaml`)
-- `Released packages`: OpenSearch (`v2.0.0-alpha`)
+- `Packages`: OpenSearch (`v2.0.0-alpha`)
 
 <a id="kind-opensearchcluster-spec"></a>
 ### Spec

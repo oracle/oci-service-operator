@@ -4,11 +4,13 @@
 
 This content is generated from the checked-in CRD schemas in `config/crd/bases/`. If a description is missing or incorrect, fix the source comments or generator inputs and rerun `make generate manifests`; do not hand-edit `config/crd/bases/*.yaml`.
 
-| API version | Resources | Latest released packages |
+This landing page is generated from the checked-in package and release inventory. It lists customer-visible package exposures for each API version and shows the latest recorded release for each package when available.
+
+| API version | Resources | Packages |
 | --- | --- | --- |
 | [apigateway.oracle.com/v1beta1](apigateway/v1beta1/index.md) | [ApiGateway](apigateway/v1beta1/index.md#kind-apigateway), [ApiGatewayDeployment](apigateway/v1beta1/index.md#kind-apigatewaydeployment) | API Gateway (`v2.0.0-alpha`) |
 | [containerinstances.oracle.com/v1beta1](containerinstances/v1beta1/index.md) | [ContainerInstance](containerinstances/v1beta1/index.md#kind-containerinstance) | Container Instances (`v2.0.0-alpha`) |
-| [core.oracle.com/v1beta1](core/v1beta1/index.md) | [Drg](core/v1beta1/index.md#kind-drg), [Instance](core/v1beta1/index.md#kind-instance), [InternetGateway](core/v1beta1/index.md#kind-internetgateway), [NatGateway](core/v1beta1/index.md#kind-natgateway), [NetworkSecurityGroup](core/v1beta1/index.md#kind-networksecuritygroup), [RouteTable](core/v1beta1/index.md#kind-routetable), [SecurityList](core/v1beta1/index.md#kind-securitylist), [ServiceGateway](core/v1beta1/index.md#kind-servicegateway), [Subnet](core/v1beta1/index.md#kind-subnet), [Vcn](core/v1beta1/index.md#kind-vcn) | Core Networking (`v2.0.0-alpha`) |
+| [core.oracle.com/v1beta1](core/v1beta1/index.md) | [Drg](core/v1beta1/index.md#kind-drg), [Instance](core/v1beta1/index.md#kind-instance), [InternetGateway](core/v1beta1/index.md#kind-internetgateway), [NatGateway](core/v1beta1/index.md#kind-natgateway), [NetworkSecurityGroup](core/v1beta1/index.md#kind-networksecuritygroup), [RouteTable](core/v1beta1/index.md#kind-routetable), [SecurityList](core/v1beta1/index.md#kind-securitylist), [ServiceGateway](core/v1beta1/index.md#kind-servicegateway), [Subnet](core/v1beta1/index.md#kind-subnet), [Vcn](core/v1beta1/index.md#kind-vcn) | Core Compute (`Not yet released`), Core Networking (`v2.0.0-alpha`) |
 | [database.oracle.com/v1beta1](database/v1beta1/index.md) | [AutonomousDatabase](database/v1beta1/index.md#kind-autonomousdatabase) | Autonomous Database (`v2.0.0-alpha`) |
 | [dataflow.oracle.com/v1beta1](dataflow/v1beta1/index.md) | [Application](dataflow/v1beta1/index.md#kind-application) | Data Flow (`v2.0.0-alpha`) |
 | [functions.oracle.com/v1beta1](functions/v1beta1/index.md) | [Application](functions/v1beta1/index.md#kind-application), [Function](functions/v1beta1/index.md#kind-function) | Functions (`v2.0.0-alpha`) |

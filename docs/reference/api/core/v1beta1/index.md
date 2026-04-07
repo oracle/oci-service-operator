@@ -13,15 +13,16 @@ This content is generated from the checked-in CRD schemas in `config/crd/bases/`
 
 | Package | Support | Latest release | Resources |
 | --- | --- | --- | --- |
+| Core Compute | preview | `Not yet released` | [Instance](#kind-instance) |
 | Core Networking | preview | `v2.0.0-alpha` | [Drg](#kind-drg), [InternetGateway](#kind-internetgateway), [NatGateway](#kind-natgateway), [NetworkSecurityGroup](#kind-networksecuritygroup), [RouteTable](#kind-routetable), [SecurityList](#kind-securitylist), [ServiceGateway](#kind-servicegateway), [Subnet](#kind-subnet), [Vcn](#kind-vcn) |
 
 <a id="resources"></a>
 ## Resources
 
-| Kind | Scope | Sample | Released packages |
+| Kind | Scope | Sample | Packages |
 | --- | --- | --- | --- |
 | [Drg](#kind-drg) | Namespaced | [Sample](../../../samples/core/v1beta1/drg.md) | Core Networking (`v2.0.0-alpha`) |
-| [Instance](#kind-instance) | Namespaced | [Sample](../../../samples/core/v1beta1/instance.md) | - |
+| [Instance](#kind-instance) | Namespaced | [Sample](../../../samples/core/v1beta1/instance.md) | Core Compute (`Not yet released`) |
 | [InternetGateway](#kind-internetgateway) | Namespaced | [Sample](../../../samples/core/v1beta1/internetgateway.md) | Core Networking (`v2.0.0-alpha`) |
 | [NatGateway](#kind-natgateway) | Namespaced | [Sample](../../../samples/core/v1beta1/natgateway.md) | Core Networking (`v2.0.0-alpha`) |
 | [NetworkSecurityGroup](#kind-networksecuritygroup) | Namespaced | [Sample](../../../samples/core/v1beta1/networksecuritygroup.md) | Core Networking (`v2.0.0-alpha`) |
@@ -40,7 +41,7 @@ Drg is the Schema for the drgs API.
 - `Scope`: `Namespaced`
 - `APIVersion`: `core.oracle.com/v1beta1`
 - `Sample`: [Sample](../../../samples/core/v1beta1/drg.md) (`config/samples/core_v1beta1_drg.yaml`)
-- `Released packages`: Core Networking (`v2.0.0-alpha`)
+- `Packages`: Core Networking (`v2.0.0-alpha`)
 
 <a id="kind-drg-spec"></a>
 ### Spec
@@ -139,7 +140,7 @@ Instance is the Schema for the instances API.
 - `Scope`: `Namespaced`
 - `APIVersion`: `core.oracle.com/v1beta1`
 - `Sample`: [Sample](../../../samples/core/v1beta1/instance.md) (`config/samples/core_v1beta1_instance.yaml`)
-- `Released packages`: Not currently exposed by a released package.
+- `Packages`: Core Compute (`Not yet released`)
 
 <a id="kind-instance-spec"></a>
 ### Spec
@@ -632,7 +633,7 @@ InternetGateway is the Schema for the internetgateways API.
 - `Scope`: `Namespaced`
 - `APIVersion`: `core.oracle.com/v1beta1`
 - `Sample`: [Sample](../../../samples/core/v1beta1/internetgateway.md) (`config/samples/core_v1beta1_internetgateway.yaml`)
-- `Released packages`: Core Networking (`v2.0.0-alpha`)
+- `Packages`: Core Networking (`v2.0.0-alpha`)
 
 <a id="kind-internetgateway-spec"></a>
 ### Spec
@@ -706,7 +707,7 @@ NatGateway is the Schema for the natgateways API.
 - `Scope`: `Namespaced`
 - `APIVersion`: `core.oracle.com/v1beta1`
 - `Sample`: [Sample](../../../samples/core/v1beta1/natgateway.md) (`config/samples/core_v1beta1_natgateway.yaml`)
-- `Released packages`: Core Networking (`v2.0.0-alpha`)
+- `Packages`: Core Networking (`v2.0.0-alpha`)
 
 <a id="kind-natgateway-spec"></a>
 ### Spec
@@ -783,7 +784,7 @@ NetworkSecurityGroup is the Schema for the networksecuritygroups API.
 - `Scope`: `Namespaced`
 - `APIVersion`: `core.oracle.com/v1beta1`
 - `Sample`: [Sample](../../../samples/core/v1beta1/networksecuritygroup.md) (`config/samples/core_v1beta1_networksecuritygroup.yaml`)
-- `Released packages`: Core Networking (`v2.0.0-alpha`)
+- `Packages`: Core Networking (`v2.0.0-alpha`)
 
 <a id="kind-networksecuritygroup-spec"></a>
 ### Spec
@@ -853,7 +854,7 @@ RouteTable is the Schema for the routetables API.
 - `Scope`: `Namespaced`
 - `APIVersion`: `core.oracle.com/v1beta1`
 - `Sample`: [Sample](../../../samples/core/v1beta1/routetable.md) (`config/samples/core_v1beta1_routetable.yaml`)
-- `Released packages`: Core Networking (`v2.0.0-alpha`)
+- `Packages`: Core Networking (`v2.0.0-alpha`)
 
 <a id="kind-routetable-spec"></a>
 ### Spec
@@ -957,7 +958,7 @@ SecurityList is the Schema for the securitylists API.
 - `Scope`: `Namespaced`
 - `APIVersion`: `core.oracle.com/v1beta1`
 - `Sample`: [Sample](../../../samples/core/v1beta1/securitylist.md) (`config/samples/core_v1beta1_securitylist.yaml`)
-- `Released packages`: Core Networking (`v2.0.0-alpha`)
+- `Packages`: Core Networking (`v2.0.0-alpha`)
 
 <a id="kind-securitylist-spec"></a>
 ### Spec
@@ -1439,7 +1440,7 @@ ServiceGateway is the Schema for the servicegateways API.
 - `Scope`: `Namespaced`
 - `APIVersion`: `core.oracle.com/v1beta1`
 - `Sample`: [Sample](../../../samples/core/v1beta1/servicegateway.md) (`config/samples/core_v1beta1_servicegateway.yaml`)
-- `Released packages`: Core Networking (`v2.0.0-alpha`)
+- `Packages`: Core Networking (`v2.0.0-alpha`)
 
 <a id="kind-servicegateway-spec"></a>
 ### Spec
@@ -1537,7 +1538,7 @@ Subnet is the Schema for the subnets API.
 - `Scope`: `Namespaced`
 - `APIVersion`: `core.oracle.com/v1beta1`
 - `Sample`: [Sample](../../../samples/core/v1beta1/subnet.md) (`config/samples/core_v1beta1_subnet.yaml`)
-- `Released packages`: Core Networking (`v2.0.0-alpha`)
+- `Packages`: Core Networking (`v2.0.0-alpha`)
 
 <a id="kind-subnet-spec"></a>
 ### Spec
@@ -1631,7 +1632,7 @@ Vcn is the Schema for the vcns API.
 - `Scope`: `Namespaced`
 - `APIVersion`: `core.oracle.com/v1beta1`
 - `Sample`: [Sample](../../../samples/core/v1beta1/vcn.md) (`config/samples/core_v1beta1_vcn.yaml`)
-- `Released packages`: Core Networking (`v2.0.0-alpha`)
+- `Packages`: Core Networking (`v2.0.0-alpha`)
 
 <a id="kind-vcn-spec"></a>
 ### Spec

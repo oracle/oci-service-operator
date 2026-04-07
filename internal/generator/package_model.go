@@ -106,7 +106,7 @@ func buildPackageOutputModel(service ServiceConfig, resources []ResourceModel) P
 		service.Group,
 		fmt.Sprintf("iad.ocir.io/oracle/oci-service-operator-%s:latest", service.Group),
 		fmt.Sprintf("../../../config/manager/%s", service.Group),
-		"",
+		primaryPackageKindFilter(service, resources),
 	)
 }
 
@@ -172,6 +172,45 @@ func buildPackageOutputModelFor(service ServiceConfig, outputName string, defaul
 	}
 
 	return output
+}
+
+func primaryPackageKindFilter(service ServiceConfig, resources []ResourceModel) string {
+	if len(service.PackageSplits) == 0 {
+		return ""
+	}
+
+	splitKinds := make(map[string]struct{})
+	for _, split := range service.PackageSplits {
+		for _, rawKind := range split.IncludeKinds {
+			kind := strings.TrimSpace(rawKind)
+			if kind == "" {
+				continue
+			}
+			splitKinds[kind] = struct{}{}
+		}
+	}
+	if len(splitKinds) == 0 {
+		return ""
+	}
+
+	kinds := make([]string, 0, len(resources))
+	seen := make(map[string]struct{}, len(resources))
+	for _, resource := range resources {
+		if _, splitOwned := splitKinds[resource.Kind]; splitOwned {
+			continue
+		}
+		if _, exists := seen[resource.Kind]; exists {
+			continue
+		}
+		seen[resource.Kind] = struct{}{}
+		kinds = append(kinds, resource.Kind)
+	}
+	if len(kinds) == 0 {
+		return ""
+	}
+
+	sort.Strings(kinds)
+	return strings.Join(kinds, ",")
 }
 
 //nolint:gocognit,gocyclo // Registration generation validates several coupled controller and service-manager cases.

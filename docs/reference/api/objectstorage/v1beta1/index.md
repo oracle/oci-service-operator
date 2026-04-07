@@ -18,7 +18,7 @@ This content is generated from the checked-in CRD schemas in `config/crd/bases/`
 <a id="resources"></a>
 ## Resources
 
-| Kind | Scope | Sample | Released packages |
+| Kind | Scope | Sample | Packages |
 | --- | --- | --- | --- |
 | [Bucket](#kind-bucket) | Namespaced | [Sample](../../../samples/objectstorage/v1beta1/bucket.md) | Object Storage (`v2.0.0-alpha`) |
 
@@ -31,7 +31,7 @@ Manage OCI Object Storage buckets.
 - `Scope`: `Namespaced`
 - `APIVersion`: `objectstorage.oracle.com/v1beta1`
 - `Sample`: [Sample](../../../samples/objectstorage/v1beta1/bucket.md) (`config/samples/objectstorage_v1beta1_bucket.yaml`)
-- `Released packages`: Object Storage (`v2.0.0-alpha`)
+- `Packages`: Object Storage (`v2.0.0-alpha`)
 
 <a id="kind-bucket-spec"></a>
 ### Spec

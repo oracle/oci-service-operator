@@ -18,7 +18,7 @@ This content is generated from the checked-in CRD schemas in `config/crd/bases/`
 <a id="resources"></a>
 ## Resources
 
-| Kind | Scope | Sample | Released packages |
+| Kind | Scope | Sample | Packages |
 | --- | --- | --- | --- |
 | [Queue](#kind-queue) | Namespaced | [Sample](../../../samples/queue/v1beta1/queue.md) | Queue (`v2.0.0-alpha`) |
 
@@ -31,7 +31,7 @@ Manage OCI Queue service queues.
 - `Scope`: `Namespaced`
 - `APIVersion`: `queue.oracle.com/v1beta1`
 - `Sample`: [Sample](../../../samples/queue/v1beta1/queue.md) (`config/samples/queue_v1beta1_queue.yaml`)
-- `Released packages`: Queue (`v2.0.0-alpha`)
+- `Packages`: Queue (`v2.0.0-alpha`)
 
 <a id="kind-queue-spec"></a>
 ### Spec

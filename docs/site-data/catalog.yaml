@@ -33,11 +33,10 @@ packages:
     displayName: Core Compute
     summary: Manage OCI Compute and core networking resources from Kubernetes.
     supportStatus: preview
-    customerVisible: false
+    customerVisible: true
     guidePath: docs/installation.md
     packageNotes:
-      - Local package scaffolding exists, but the current checked-in release history does not mark core as a published customer-facing package.
-      - Use the core-network split package for the checked-in public networking surface until a core-specific release manifest is added.
+      - Core Compute currently focuses on Instance while the core-network split package carries the released networking surface.
 
   - package: core-network
     displayName: Core Networking

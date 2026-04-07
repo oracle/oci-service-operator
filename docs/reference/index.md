@@ -28,6 +28,20 @@ Package page: [Container Instances](packages/containerinstances/index.md)
 | --- | --- | --- | --- | --- | --- | --- |
 | [Container Instances](packages/containerinstances/index.md) | `containerinstances/ContainerInstance` | `containerinstances.oracle.com/v1beta1` | Preview | `v2.0.0-alpha` | [Sample](samples/containerinstances/v1beta1/containerinstance.md) | [Reference](api/containerinstances/v1beta1/index.md#kind-containerinstance) |
 
+## Core Compute
+
+Manage OCI Compute and core networking resources from Kubernetes.
+
+Package page: [Core Compute](packages/core/index.md)
+
+Notes:
+- Core Compute currently focuses on Instance while the core-network split package carries the released networking surface.
+- No checked-in release manifest currently lists this package; the resource scope below reflects the current repository package metadata.
+
+| Package | Group/Kind | API Version | Support Status | Latest Released Version | Sample | API Spec |
+| --- | --- | --- | --- | --- | --- | --- |
+| [Core Compute](packages/core/index.md) | `core/Instance` | `core.oracle.com/v1beta1` | Preview | `Not yet released` | [Sample](samples/core/v1beta1/instance.md) | [Reference](api/core/v1beta1/index.md#kind-instance) |
+
 ## Core Networking
 
 Manage OCI core networking resources from Kubernetes.
@@ -188,6 +202,3 @@ Notes:
 | --- | --- | --- | --- | --- | --- | --- |
 | [Streaming](packages/streaming/index.md) | `streaming/Stream` | `streaming.oracle.com/v1beta1` | Preview | `v2.0.0-alpha` | [Sample](samples/streaming/v1beta1/stream.md) | [Reference](api/streaming/v1beta1/index.md#kind-stream) |
 
-## Repository-only Packages
-
-Additional generated package pages exist for package directories that are not yet marked customer-visible in the checked-in release history. They stay out of the main customer catalog until a release manifest promotes them.
