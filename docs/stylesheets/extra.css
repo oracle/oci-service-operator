@@ -1,5 +1,5 @@
 :root {
-  --osok-content-max: min(96rem, calc(100vw - 16.5rem));
+  --osok-content-max: min(95rem, calc(100vw - 17.5rem));
 }
 
 [data-md-color-scheme="default"] {
@@ -133,7 +133,7 @@ input {
 
 .md-content {
   background: var(--osok-surface);
-  padding-right: 0.85rem;
+  padding-right: 1.35rem;
 }
 
 .md-content__inner {
@@ -364,7 +364,7 @@ input {
   .md-content {
     margin-left: 0;
     padding-left: 1.35rem;
-    padding-right: 1rem;
+    padding-right: 1.85rem;
   }
 
   .md-content__inner {
