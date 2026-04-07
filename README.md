@@ -16,60 +16,25 @@ OSOK is based on the [Operator Framework](https://operatorframework.io/), an ope
 
 ## Start Here
 
-The primary user-facing getting-started reference is
-[docs/user-guide.md](docs/user-guide.md). It walks through an end-to-end OSOK
-plus kro example that provisions an OCI MySQL DB System from one user-facing
-custom resource.
+The customer docs are organized for the GitHub Pages site at
+[oracle.github.io/oci-service-operator](https://oracle.github.io/oci-service-operator/).
+The checked-in source for that site lives under [docs/](docs/).
 
-**Supported API Groups**
+For the quickest repo-local path, start with:
 
-OSOK now has two related surfaces that are easy to confuse:
-
-- `internal/generator/config/services.yaml` is the generator source of truth and
-  defines the default-active generated surface.
-- `packages/` plus
-  `.github/workflows/publish-service-packages.yml` define the package-local OLM
-  bundles that are currently published.
-
-The default-active generated surface in this checkout is:
-
-- whole-service: `containerengine`, `core`, `dataflow`, `functions`, `mysql`,
-  `nosql`, `psql`, `queue`, `vault`
-- focused-kind: `containerinstances/ContainerInstance`,
-  `database/AutonomousDatabase`, `identity/Compartment`,
-  `objectstorage/Bucket`, `opensearch/OpensearchCluster`,
-  `redis/RedisCluster`, `streaming/Stream`
-
-The current subpackage publish workflow builds controller and bundle images for:
-`apigateway`, `containerengine`, `containerinstances`, `core-network`,
-`database`, `dataflow`, `functions`, `identity`, `mysql`, `nosql`,
-`objectstorage`, `opensearch`, `psql`, `queue`, `redis`, `streaming`, and
-`vault`.
-
-A few names are intentionally package-oriented instead of matching
-`services.yaml` one-for-one:
-
-- `core-network` is a split package carved from selected `core` networking
-  kinds.
-- `database`, `identity`, `objectstorage`, `opensearch`, `redis`, and
-  `streaming` publish focused bundles even though their default-active scope is
-  narrower than the full OCI service.
-- `apigateway` is published from `packages/apigateway`, even though it is not
-  part of the current default-active `services.yaml` surface.
-
-The workflow's default `subpackages=all` batch intentionally excludes `core`,
-so do not assume a published `oci-service-operator-core-bundle:v2.0.0-alpha`
-image unless it was released separately.
-
-See [docs/services.md](docs/services.md#services) for the supported service map
-and [config/samples](config/samples) for generated manifest examples.
+- [User Guide](docs/user-guide.md)
+- [Installation](docs/installation.md#installation)
+- [Supported Resources](docs/reference/index.md)
+- [API Reference](docs/reference/api/index.md)
+- [Contributor Docs](docs/contributor/index.md)
 
 ## Installation
 
 Start with the [User Guide](docs/user-guide.md) for the quickest single-resource
 quickstart. Use the [Installation](docs/installation.md#installation) guide for
-OLM prerequisites, authentication setup, and the published per-package bundle
-commands.
+OLM prerequisites, authentication setup, and published per-package bundle
+commands. Use [Supported Resources](docs/reference/index.md) for the generated
+package and kind inventory behind the current docs set.
 
 ## Controller Manager Config
 
@@ -90,47 +55,23 @@ deployment wiring details.
 
 ## Documentation
 
-See the [Documentation](docs/README.md#oci-service-operator-for-kubernetes) for
-the full docs index. The primary quickstart is
-[docs/user-guide.md](docs/user-guide.md).
-
-## Published Bundles
-
-The repo still carries monolithic bundle targets in the `Makefile`, but the
-current GitHub publish workflow is centered on per-package OLM bundles in GHCR.
-
-Bundle images use:
-
-```text
-ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-<GROUP>-bundle:v2.0.0-alpha
-```
-
-The matching controller images use:
-
-```text
-ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-<GROUP>:v2.0.0-alpha
-```
-
-Example:
-
-```bash
-docker pull ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-mysql-bundle:v2.0.0-alpha
-```
-
-See [docs/installation.md](docs/installation.md#deploy-oci-service-operator-for-kubernetes)
-for install and upgrade commands and [docs/services.md](docs/services.md#published-subpackage-bundles)
-for the published package list.
+See the [docs site](https://oracle.github.io/oci-service-operator/) for the
+customer-facing layout and [docs/index.md](docs/index.md) for the checked-in
+source landing page.
 
 ## Samples
 
-Samples for managing OCI Services/Resources using `oci-service-operator`, can be found [here](config/samples).
+Samples for managing OCI Services/Resources using `oci-service-operator` can be
+found in [config/samples](config/samples).
 
 ## Changes
 
 See [CHANGELOG](CHANGELOG.md).
 
 ## Contributing
-`oci-service-operator` project welcomes contributions from the community. Before submitting a pull request, please [review our contribution guide](./CONTRIBUTING.md).
+
+`oci-service-operator` welcomes contributions from the community. Before
+submitting a pull request, review the [contribution guide](./CONTRIBUTING.md).
 
 ## Security
 

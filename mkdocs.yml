@@ -1,0 +1,56 @@
+site_name: OCI Service Operator for Kubernetes
+site_description: Customer-facing documentation for OCI Service Operator for Kubernetes.
+site_url: https://oracle.github.io/oci-service-operator/
+repo_url: https://github.com/oracle/oci-service-operator
+repo_name: oracle/oci-service-operator
+docs_dir: docs
+site_dir: site
+exclude_docs: README.md
+not_in_nav: |
+  reference/api/*/*/index.md
+  reference/packages/*/index.md
+  reference/samples/**/*.md
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - content.code.copy
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Get Started:
+      - get-started/index.md
+      - User Guide: user-guide.md
+      - Installation: installation.md
+  - Guides:
+      - guides/index.md
+      - Autonomous Database: adb.md
+      - MySQL DB Systems: mysql.md
+      - Queue: queue.md
+      - Streaming: oss.md
+      - Troubleshooting: TROUBLESHOOT.md
+  - Supported Resources:
+      - reference/index.md
+      - Current Services Overview: services.md
+  - API Reference:
+      - reference/api/index.md
+  - Contributor Docs:
+      - contributor/index.md
+      - Generator Contract: api-generator-contract.md
+      - GitHub Pages Handoff: contributor/github-pages-handoff.md
+      - Validator Guide: validator-guide.md

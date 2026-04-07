@@ -1,0 +1,196 @@
+# Customer-facing docs metadata that should not be inferred from rollout config
+# or release history alone.
+schemaVersion: v1alpha1
+packages:
+  - package: apigateway
+    displayName: API Gateway
+    summary: Manage OCI API Gateway gateways and deployments from Kubernetes.
+    supportStatus: preview
+    customerVisible: true
+    guidePath: docs/installation.md
+    packageNotes:
+      - Published from the checked-in package overlay even though apigateway is outside the current default-active generator surface.
+    kindOverrides:
+      - group: apigateway
+        kind: ApiGateway
+        summary: Manage OCI API Gateway gateway resources.
+      - group: apigateway
+        kind: ApiGatewayDeployment
+        summary: Manage OCI API Gateway deployment routes and backend bindings.
+
+  - package: containerinstances
+    displayName: Container Instances
+    summary: Manage OCI Container Instances from Kubernetes.
+    supportStatus: preview
+    customerVisible: true
+    guidePath: docs/installation.md
+    kindOverrides:
+      - group: containerinstances
+        kind: ContainerInstance
+        summary: Manage OCI Container Instance workloads.
+
+  - package: core
+    displayName: Core Compute
+    summary: Manage OCI Compute and core networking resources from Kubernetes.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Local package scaffolding exists, but the current checked-in release history does not mark core as a published customer-facing package.
+      - Use the core-network split package for the checked-in public networking surface until a core-specific release manifest is added.
+
+  - package: core-network
+    displayName: Core Networking
+    summary: Manage OCI core networking resources from Kubernetes.
+    supportStatus: preview
+    customerVisible: true
+    guidePath: docs/installation.md
+    packageNotes:
+      - Split package carved from selected core networking kinds.
+
+  - package: database
+    displayName: Autonomous Database
+    summary: Manage OCI Autonomous Databases from Kubernetes.
+    supportStatus: preview
+    customerVisible: true
+    guidePath: docs/adb.md
+    packageNotes:
+      - Current package scope is intentionally limited to AutonomousDatabase.
+    kindOverrides:
+      - group: database
+        kind: AutonomousDatabase
+        summary: Manage OCI Autonomous Database instances.
+
+  - package: dataflow
+    displayName: Data Flow
+    summary: Manage OCI Data Flow applications from Kubernetes.
+    supportStatus: preview
+    customerVisible: true
+    guidePath: docs/installation.md
+    kindOverrides:
+      - group: dataflow
+        kind: Application
+        summary: Manage OCI Data Flow applications.
+
+  - package: functions
+    displayName: Functions
+    summary: Manage OCI Functions applications and functions from Kubernetes.
+    supportStatus: preview
+    customerVisible: true
+    guidePath: docs/installation.md
+    kindOverrides:
+      - group: functions
+        kind: Application
+        summary: Manage OCI Functions application containers.
+      - group: functions
+        kind: Function
+        summary: Manage OCI Functions function definitions and images.
+
+  - package: identity
+    displayName: Identity
+    summary: Manage OCI Identity compartments from Kubernetes.
+    supportStatus: preview
+    customerVisible: true
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to Compartment.
+    kindOverrides:
+      - group: identity
+        kind: Compartment
+        summary: Manage OCI IAM compartments.
+
+  - package: mysql
+    displayName: MySQL
+    summary: Manage OCI MySQL DB Systems from Kubernetes.
+    supportStatus: preview
+    customerVisible: true
+    guidePath: docs/mysql.md
+    kindOverrides:
+      - group: mysql
+        kind: DbSystem
+        summary: Manage OCI MySQL DB Systems.
+
+  - package: nosql
+    displayName: NoSQL
+    summary: Manage OCI NoSQL tables from Kubernetes.
+    supportStatus: preview
+    customerVisible: true
+    guidePath: docs/installation.md
+    kindOverrides:
+      - group: nosql
+        kind: Table
+        summary: Manage OCI NoSQL tables.
+
+  - package: objectstorage
+    displayName: Object Storage
+    summary: Manage OCI Object Storage buckets from Kubernetes.
+    supportStatus: preview
+    customerVisible: true
+    guidePath: docs/oss.md
+    packageNotes:
+      - Current package scope is intentionally limited to Bucket.
+    kindOverrides:
+      - group: objectstorage
+        kind: Bucket
+        summary: Manage OCI Object Storage buckets.
+
+  - package: opensearch
+    displayName: OpenSearch
+    summary: Manage OCI OpenSearch clusters from Kubernetes.
+    supportStatus: preview
+    customerVisible: true
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to OpensearchCluster.
+    kindOverrides:
+      - group: opensearch
+        kind: OpensearchCluster
+        summary: Manage OCI OpenSearch clusters.
+
+  - package: psql
+    displayName: PostgreSQL
+    summary: Manage OCI PostgreSQL DB Systems from Kubernetes.
+    supportStatus: preview
+    customerVisible: true
+    guidePath: docs/installation.md
+    kindOverrides:
+      - group: psql
+        kind: DbSystem
+        summary: Manage OCI PostgreSQL DB Systems.
+
+  - package: queue
+    displayName: Queue
+    summary: Manage OCI Queue service queues from Kubernetes.
+    supportStatus: preview
+    customerVisible: true
+    guidePath: docs/queue.md
+    kindOverrides:
+      - group: queue
+        kind: Queue
+        summary: Manage OCI Queue service queues.
+
+  - package: redis
+    displayName: Redis
+    summary: Manage OCI Redis clusters from Kubernetes.
+    supportStatus: preview
+    customerVisible: true
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to RedisCluster.
+    kindOverrides:
+      - group: redis
+        kind: RedisCluster
+        summary: Manage OCI Redis clusters.
+
+  - package: streaming
+    displayName: Streaming
+    summary: Manage OCI Streaming streams from Kubernetes.
+    supportStatus: preview
+    customerVisible: true
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to Stream.
+    kindOverrides:
+      - group: streaming
+        kind: Stream
+        summary: Manage OCI Streaming streams.

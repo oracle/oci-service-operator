@@ -169,6 +169,24 @@ lint: ## Run golangci-lint against handwritten repo code.
 	}
 	golangci-lint run ./...
 
+DOCS_PYTHON ?= python3
+DOCS_SITE_DIR ?= site
+DOCS_OUTPUT_ROOT ?= .
+DOCS_VERIFY_STRICT_PUBLIC_DESCRIPTIONS ?=
+DOCS_VERIFY_STRICT_PUBLIC_DESCRIPTIONS_ARG = $(if $(filter 1 true TRUE yes YES,$(DOCS_VERIFY_STRICT_PUBLIC_DESCRIPTIONS)),--strict-public-descriptions,)
+
+docs-generate: ## Regenerate checked-in docs/reference outputs from repo metadata and CRD schemas.
+	go run ./cmd/sitegen reference --repo-root . --output-root $(DOCS_OUTPUT_ROOT)
+
+docs-build: ## Build the MkDocs site locally with strict validation.
+	$(DOCS_PYTHON) -m mkdocs build --strict --site-dir $(DOCS_SITE_DIR)
+
+docs-serve: ## Serve the MkDocs site locally for preview.
+	$(DOCS_PYTHON) -m mkdocs serve
+
+docs-verify: manifests docs-build ## Verify docs drift, built-site links/anchors, and description coverage.
+	go run ./cmd/sitegen verify --repo-root . --site-dir $(DOCS_SITE_DIR) $(DOCS_VERIFY_STRICT_PUBLIC_DESCRIPTIONS_ARG)
+
 SCHEMA_VALIDATOR_PROVIDER_PATH ?= .
 SCHEMA_VALIDATOR_FORMAT ?= json
 SCHEMA_VALIDATOR_REPORT ?= validator-report.json

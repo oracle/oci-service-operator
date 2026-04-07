@@ -257,22 +257,7 @@ kubectl get secret mysql-demo -n demo -o jsonpath='{.data.PrivateIPAddress}' | b
 That Secret is the handoff point for any workload that needs to connect to the
 MySQL DB System later.
 
-## 8. Release-Aligned Notes for This Guide
-
-This guide reflects the current OSOK surface in this branch:
-
-- The MySQL custom resource is `apiVersion: mysql.oracle.com/v1beta1` with
-  `kind: DbSystem`.
-- The MySQL spec field is `configurationId`, not the older nested
-  `configuration.Id` shape.
-- Admin credentials are passed through
-  `spec.adminUsername.secret.secretName` and
-  `spec.adminPassword.secret.secretName`.
-- After the `DbSystem` becomes active, OSOK creates a same-name Secret with
-  connection data such as `PrivateIPAddress`, `MySQLPort`,
-  `MySQLXProtocolPort`, and related endpoint metadata.
-
-## 9. Basic Cleanup
+## 8. Basic Cleanup
 
 Delete the instance first so kro and OSOK can tear down the managed resources:
 
@@ -291,3 +276,15 @@ If you installed kro only for this demo:
 ```bash
 helm uninstall kro -n kro-system
 ```
+
+## 9. Keep Exploring
+
+After this quickstart, continue with:
+
+- [Supported Resources](reference/index.md) for the generated package and kind
+  catalog.
+- [API Reference](reference/api/index.md) for generated field tables and sample
+  links.
+- [Installation](installation.md) for the broader auth and bundle deployment
+  paths.
+- [MySQL DB Systems](mysql.md) for the service-specific MySQL guide.

@@ -17,3 +17,4 @@ bundle/
 vendor/**/Dockerfile
 
 symphony/worktrees
+site/
