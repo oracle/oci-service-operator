@@ -129,6 +129,29 @@ func TestGenerateReferenceDocsIncludesResourceGuidePages(t *testing.T) {
 	}
 }
 
+func TestGenerateReferenceDocsGroupsResourceGuideSidebarUnderUmbrella(t *testing.T) {
+	t.Parallel()
+
+	root := repoRoot(t)
+	tempDir := t.TempDir()
+
+	if _, err := sitegen.GenerateReferenceDocs(sitegen.GenerateOptions{
+		Root:       root,
+		OutputRoot: tempDir,
+	}); err != nil {
+		t.Fatalf("GenerateReferenceDocs() error = %v", err)
+	}
+
+	mkdocsConfig, err := os.ReadFile(filepath.Join(tempDir, "mkdocs.yml"))
+	if err != nil {
+		t.Fatalf("ReadFile(mkdocs.yml) error = %v", err)
+	}
+	config := string(mkdocsConfig)
+
+	assertContains(t, config, "  - Resource Guides:\n      - guides/index.md\n      - Troubleshooting: TROUBLESHOOT.md\n")
+	assertContains(t, config, "      - By Service and Resource:\n          - apigateway:\n              - ApiGateway: guides/apigateway/apigateway.md\n")
+}
+
 func checkedInGeneratedPaths(root string) ([]string, error) {
 	var paths []string
 

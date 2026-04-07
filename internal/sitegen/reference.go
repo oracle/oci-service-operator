@@ -382,15 +382,16 @@ func renderMkDocsResourceGuideNav(packages []ReferencePackage) string {
 	}
 
 	var b strings.Builder
+	b.WriteString("      - By Service and Resource:\n")
 	currentService := ""
 	for _, entry := range entries {
 		if entry.Service != currentService {
 			currentService = entry.Service
-			b.WriteString("      - ")
+			b.WriteString("          - ")
 			b.WriteString(entry.Service)
 			b.WriteString(":\n")
 		}
-		b.WriteString("          - ")
+		b.WriteString("              - ")
 		b.WriteString(entry.Resource)
 		b.WriteString(": ")
 		b.WriteString(strings.TrimPrefix(entry.GuidePath, "docs/"))
