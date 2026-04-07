@@ -11,6 +11,13 @@ not_in_nav: |
 
 theme:
   name: material
+  font:
+    text: IBM Plex Sans
+    code: IBM Plex Mono
+  palette:
+    - scheme: default
+      primary: custom
+      accent: custom
   features:
     - navigation.sections
     - navigation.indexes
@@ -28,6 +35,9 @@ markdown_extensions:
   - tables
   - toc:
       permalink: true
+
+extra_css:
+  - stylesheets/extra.css
 
 nav:
   - Home: index.md
