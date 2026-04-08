@@ -10,6 +10,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/dataflow"
 	"github.com/oracle/oci-go-sdk/v65/functions"
 	"github.com/oracle/oci-go-sdk/v65/identity"
+	"github.com/oracle/oci-go-sdk/v65/keymanagement"
 	"github.com/oracle/oci-go-sdk/v65/mysql"
 	"github.com/oracle/oci-go-sdk/v65/nosql"
 	"github.com/oracle/oci-go-sdk/v65/objectstorage"
@@ -86,6 +87,12 @@ var seedTargets = []Target{
 	newTarget("identity", "CreateCompartmentDetails", reflect.TypeOf(identity.CreateCompartmentDetails{})),
 	newTarget("identity", "UpdateCompartmentDetails", reflect.TypeOf(identity.UpdateCompartmentDetails{})),
 	newTarget("identity", "Compartment", reflect.TypeOf(identity.Compartment{})),
+
+	// Key Management CRD support
+	newTarget("keymanagement", "CreateVaultDetails", reflect.TypeOf(keymanagement.CreateVaultDetails{})),
+	newTarget("keymanagement", "UpdateVaultDetails", reflect.TypeOf(keymanagement.UpdateVaultDetails{})),
+	newTarget("keymanagement", "Vault", reflect.TypeOf(keymanagement.Vault{})),
+	newTarget("keymanagement", "VaultSummary", reflect.TypeOf(keymanagement.VaultSummary{})),
 
 	// Core VCN CRD support
 	newTarget("core", "CreateDrgDetails", reflect.TypeOf(core.CreateDrgDetails{})),

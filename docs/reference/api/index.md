@@ -15,6 +15,7 @@ This landing page is generated from the checked-in package and release inventory
 | [dataflow.oracle.com/v1beta1](dataflow/v1beta1/index.md) | [Application](dataflow/v1beta1/index.md#kind-application) | Data Flow (`v2.0.0-alpha`) |
 | [functions.oracle.com/v1beta1](functions/v1beta1/index.md) | [Application](functions/v1beta1/index.md#kind-application), [Function](functions/v1beta1/index.md#kind-function) | Functions (`v2.0.0-alpha`) |
 | [identity.oracle.com/v1beta1](identity/v1beta1/index.md) | [Compartment](identity/v1beta1/index.md#kind-compartment) | Identity (`v2.0.0-alpha`) |
+| [keymanagement.oracle.com/v1beta1](keymanagement/v1beta1/index.md) | [Vault](keymanagement/v1beta1/index.md#kind-vault) | - |
 | [mysql.oracle.com/v1beta1](mysql/v1beta1/index.md) | [DbSystem](mysql/v1beta1/index.md#kind-dbsystem) | MySQL (`v2.0.0-alpha`) |
 | [nosql.oracle.com/v1beta1](nosql/v1beta1/index.md) | [Table](nosql/v1beta1/index.md#kind-table) | NoSQL (`v2.0.0-alpha`) |
 | [objectstorage.oracle.com/v1beta1](objectstorage/v1beta1/index.md) | [Bucket](objectstorage/v1beta1/index.md#kind-bucket) | Object Storage (`v2.0.0-alpha`) |

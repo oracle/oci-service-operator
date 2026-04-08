@@ -29,4 +29,5 @@ resources:
 - functions_v1beta1_function.yaml
 - objectstorage_v1beta1_bucket.yaml
 - containerinstances_v1beta1_containerinstance.yaml
+- keymanagement_v1beta1_vault.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

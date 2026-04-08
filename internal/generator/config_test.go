@@ -1123,12 +1123,12 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	cfg := loadCheckedInConfig(t)
 
 	activeServices := serviceNames(cfg.DefaultActiveServices())
-	wantActiveServices := []string{"containerinstances", "core", "database", "dataflow", "functions", "identity", "mysql", "nosql", "objectstorage", "opensearch", "psql", "queue", "redis", "streaming"}
+	wantActiveServices := []string{"containerinstances", "core", "database", "dataflow", "functions", "identity", "keymanagement", "mysql", "nosql", "objectstorage", "opensearch", "psql", "queue", "redis", "streaming"}
 	if !slices.Equal(activeServices, wantActiveServices) {
 		t.Fatalf("DefaultActiveServices() = %v, want %v", activeServices, wantActiveServices)
 	}
 
-	services := requireServices(t, cfg, "containerengine", "containerinstances", "core", "database", "dataflow", "functions", "identity", "mysql", "nosql", "objectstorage", "opensearch", "psql", "queue", "redis", "streaming", "vault")
+	services := requireServices(t, cfg, "containerengine", "containerinstances", "core", "database", "dataflow", "functions", "identity", "keymanagement", "mysql", "nosql", "objectstorage", "opensearch", "psql", "queue", "redis", "streaming", "vault")
 	assertServiceSelection(t, services["containerengine"], false, SelectionModeAll, nil)
 	assertServiceSelection(t, services["containerinstances"], true, SelectionModeExplicit, []string{"ContainerInstance"})
 	assertServiceSelection(t, services["core"], true, SelectionModeExplicit, []string{"Instance"})
@@ -1136,6 +1136,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["dataflow"], true, SelectionModeExplicit, []string{"Application"})
 	assertServiceSelection(t, services["functions"], true, SelectionModeExplicit, []string{"Application", "Function"})
 	assertServiceSelection(t, services["identity"], true, SelectionModeExplicit, []string{"Compartment"})
+	assertServiceSelection(t, services["keymanagement"], true, SelectionModeExplicit, []string{"Vault"})
 	assertServiceSelection(t, services["mysql"], true, SelectionModeExplicit, []string{"DbSystem"})
 	assertServiceSelection(t, services["nosql"], true, SelectionModeExplicit, []string{"Table"})
 	assertServiceSelection(t, services["objectstorage"], true, SelectionModeExplicit, []string{"Bucket"})
@@ -1151,7 +1152,7 @@ func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
 	t.Parallel()
 
 	cfg := loadCheckedInConfig(t)
-	services := serviceConfigsByName(t, cfg, "containerinstances", "database", "mysql", "nosql", "psql", "streaming", "core", "identity", "redis")
+	services := serviceConfigsByName(t, cfg, "containerinstances", "database", "mysql", "nosql", "psql", "streaming", "core", "identity", "keymanagement", "redis")
 
 	assertServiceGenerationStrategies(t, services["database"], generationStrategyExpectations{
 		controller:     GenerationStrategyGenerated,
@@ -1224,12 +1225,13 @@ func TestCheckedInConfigCoordinatesPrimaryPortPackagePaths(t *testing.T) {
 	t.Parallel()
 
 	cfg := loadCheckedInConfig(t)
-	services := serviceConfigsByName(t, cfg, "containerinstances", "core", "database", "identity", "mysql", "objectstorage", "opensearch", "psql", "redis")
+	services := serviceConfigsByName(t, cfg, "containerinstances", "core", "database", "identity", "keymanagement", "mysql", "objectstorage", "opensearch", "psql", "redis")
 
 	assertContainerInstancesRuntimeRolloutMetadata(t, services["containerinstances"])
 	assertPrimaryPortOverride(t, services["core"], "Instance", "instance", "core/instance")
 	assertDatabaseRuntimeRolloutMetadata(t, services["database"])
 	assertPrimaryPortOverride(t, services["identity"], "Compartment", "compartment", "identity/compartment")
+	assertPrimaryPortOverride(t, services["keymanagement"], "Vault", "", "keymanagement/vault")
 	assertMySQLRuntimeRolloutMetadata(t, services["mysql"])
 	assertPrimaryPortOverride(t, services["objectstorage"], "Bucket", "objectstoragebucket", "objectstorage/bucket")
 	assertOpensearchRuntimeRolloutMetadata(t, services["opensearch"])

@@ -202,3 +202,6 @@ Notes:
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [Streaming](packages/streaming/index.md) | `streaming/Stream` | `streaming.oracle.com/v1beta1` | Preview | `v2.0.0-alpha` | [Guide](../oss.md) | [Sample](samples/streaming/v1beta1/stream.md) | [Reference](api/streaming/v1beta1/index.md#kind-stream) |
 
+## Repository-only Packages
+
+Additional generated package pages exist for package directories that are not yet marked customer-visible in the checked-in release history. They stay out of the main customer catalog until a release manifest promotes them.

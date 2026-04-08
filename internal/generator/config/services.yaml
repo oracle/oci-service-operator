@@ -511,8 +511,10 @@ services:
     phase: security-and-identity
     packageProfile: controller-backed
     selection:
-      enabled: false
-      mode: all
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Vault
     observedState:
       excludedFieldPaths:
         PreCoUserCredential:
@@ -527,6 +529,40 @@ services:
       webhooks:
         strategy: none
       resources:
+        - kind: Vault
+          specFields:
+            - name: DeletionScheduleDays
+              type: int32
+              tag: 'json:"deletionScheduleDays,omitempty,omitzero"'
+              comments:
+                - The number of days to retain the Vault after OCI deletion has been scheduled.
+                - Set a value from 7 to 30 to control the retention window used when Vault deletion is scheduled.
+              markers:
+                - +kubebuilder:validation:Optional
+                - +kubebuilder:validation:Minimum=7
+                - +kubebuilder:validation:Maximum=30
+          statusFields:
+            - name: RequestedDeletionScheduleDays
+              type: int32
+              tag: 'json:"requestedDeletionScheduleDays,omitempty,omitzero"'
+              comments:
+                - The retention period in days last applied when Vault deletion was scheduled.
+          sample:
+            body: |-
+              #
+              # Replace the OCI identifiers below before running e2e.
+              # Set `deletionScheduleDays` to a value from 7 to 30 to control OCI deletion retention.
+              #
+              apiVersion: keymanagement.oracle.com/v1beta1
+              kind: Vault
+              metadata:
+                name: vault-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                displayName: vault-sample
+                vaultType: DEFAULT
+          serviceManager:
+            packagePath: keymanagement/vault
         - kind: Key
           controller:
             strategy: none
