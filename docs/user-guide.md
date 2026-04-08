@@ -1,64 +1,66 @@
-# OSOK User Guide: Provision OCI MySQL with kro
+# Quick Start with KRO
 
-> **Important:** Use this guide in a test or non-production environment first.
+> **Important:** Complete [Installation](installation.md) first.
 >
-> This is the primary getting-started guide for OSOK users. It is a focused
-> quickstart, not the full service catalog or the full OSOK install reference.
+> This quick start assumes OLM, the OSOK MySQL bundle, and OCI authentication
+> are already installed and working in a test or non-production environment.
+>
+> This example also requires [kro](https://kro.run/). kro is not a general
+> OSOK prerequisite, but it is required for this specific example because the
+> walkthrough exposes the OSOK MySQL `DbSystem` behind a single
+> `OsokMysqlSystem` API.
 
-## What This Guide Shows
+## What This Quick Start Is For
 
-This guide demonstrates how to use:
+This quick start is a focused end-to-end example for users who want one
+concrete workflow from an installed controller to a provisioned OCI resource.
+It shows how to:
 
-- OSOK to provision an OCI MySQL DB System from Kubernetes
-- kro to wrap the required Kubernetes and OSOK resources behind one user-facing
-  API
-- a single custom resource YAML to request the MySQL infrastructure
+- confirm the OSOK MySQL installation path used for the example
+- install kro for the example flow
+- define an `OsokMysqlSystem` API with a `ResourceGraphDefinition`
+- create one `OsokMysqlSystem` custom resource
+- let kro and OSOK provision an OCI MySQL DB System
+- verify the resulting connection Secret and clean the stack up
 
-Once the `ResourceGraphDefinition` is installed, a user can request an OCI
-MySQL DB System with one custom resource manifest.
+This guide intentionally stays narrow. Use [Installation](installation.md),
+[MySQL DB Systems](mysql.md), and [Supported Resources](reference/index.md) for
+the broader OSOK surface.
 
-## Scope
+## End-to-End Example
 
-- This is a starter workflow for a single infrastructure example.
-- It intentionally focuses on OCI MySQL infrastructure only.
-- It does not replace the detailed references in [installation.md](installation.md),
-  [mysql.md](mysql.md), or [services.md](services.md).
+### 1. Confirm the Installation Prerequisites
 
-## Prerequisites
+This example assumes you already have:
 
-- A Kubernetes cluster in OCI, such as OKE, with `kubectl` access from your
-  client machine.
-- `helm` and `operator-sdk` installed locally.
-- A test OCI environment where you can create Dynamic Groups, Policies, and
-  MySQL DB Systems.
-- A private subnet that the MySQL DB System can use.
-- A MySQL configuration OCID that matches the MySQL shape and version you want
-  to use.
+- a Kubernetes cluster in OCI, such as OKE, with `kubectl` access
+- `helm` and `operator-sdk` installed locally
+- a test OCI environment where you can create Dynamic Groups, Policies, and
+  MySQL DB Systems
+- a private subnet that the MySQL DB System can use
+- a MySQL configuration OCID that matches the MySQL shape and version you want
+  to use
 
-## 1. Install OSOK for MySQL
-
-This guide assumes the published MySQL package bundle, not the monolithic
-operator bundle.
-
-Follow [installation.md](installation.md#deploy-oci-service-operator-for-kubernetes)
-and use the MySQL package bundle for this walkthrough:
+For this walkthrough, use the MySQL package bundle from
+[Installation](installation.md#deploy-oci-service-operator-for-kubernetes):
 
 ```bash
 operator-sdk run bundle ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-mysql-bundle:v2.0.0-alpha
 ```
 
-Use the authentication path from [installation.md](installation.md):
+Use one of the authentication paths from [Installation](installation.md):
 
-- Prefer [Instance Principal](installation.md#enable-instance-principal) when
-  the cluster runs in OCI.
-- Use [User Principal](installation.md#enable-user-principal) or
-  [Security Token](installation.md#enable-security-token) only if that matches
-  your environment.
+- [Instance Principal](installation.md#enable-instance-principal) when the
+  cluster runs in OCI
+- [User Principal](installation.md#enable-user-principal) when the controller
+  runs outside OCI
+- [Security Token](installation.md#enable-security-token) when that matches
+  your external-OCI workflow
 
-For this guide, the MySQL controller runs in the
+For this example, the MySQL controller runs in the
 `oci-service-operator-mysql-system` namespace.
 
-## 2. Install kro
+### 2. Install kro for This Example
 
 Install kro with Helm:
 
@@ -79,15 +81,15 @@ For a pinned version or a raw-manifest install, use the official kro install
 guide:
 [Installing kro](https://kro.run/docs/getting-started/Installation).
 
-This quickstart assumes kro's default test-oriented install path. If you run
-kro with stricter aggregated RBAC, grant kro access to the resources used in
-this guide: the generated `OsokMysqlSystem` instances, `Secrets`, and
+This example assumes kro's default test-oriented install path. If you run kro
+with stricter aggregated RBAC, grant kro access to the resources used here: the
+generated `OsokMysqlSystem` instances, `Secrets`, and
 `dbsystems.mysql.oracle.com`. See the official kro access-control guide:
 [Access Control](https://kro.run/docs/advanced/access-control).
 
-## 3. Configure OCI Permissions for MySQL
+### 3. Configure OCI Permissions for MySQL
 
-This guide assumes OSOK is running on OKE with Instance Principals.
+This walkthrough assumes OSOK is running on OKE with Instance Principals.
 
 Create a Dynamic Group that matches the Kubernetes worker nodes in the cluster
 compartment:
@@ -105,9 +107,9 @@ Allow dynamic-group <OSOK_DYNAMIC_GROUP> to use tag-namespaces in tenancy
 ```
 
 If you need broader scope, adapt those statements for tenancy-wide permissions.
-For more details, see [mysql.md](mysql.md#pre-requisites-for-setting-up-mysql-db-systems).
+For more details, see [MySQL DB Systems](mysql.md#pre-requisites-for-setting-up-mysql-db-systems).
 
-## 4. Gather the OCI Inputs
+### 4. Gather the OCI Inputs
 
 Before applying the kro definition, gather:
 
@@ -120,7 +122,7 @@ Before applying the kro definition, gather:
 The checked-in OSOK MySQL sample uses `MySQL.2` as an example shape, but you
 should replace that with a shape supported in your tenancy.
 
-## 5. Apply the ResourceGraphDefinition
+### 5. Apply the ResourceGraphDefinition
 
 Save the following file as `osok-mysql-rgd.yaml` and apply it once as a
 cluster-level platform definition:
@@ -194,10 +196,10 @@ kubectl apply -f osok-mysql-rgd.yaml
 kubectl get rgd osok-mysql-system
 ```
 
-When the `ResourceGraphDefinition` is active, kro has created a new
+When the `ResourceGraphDefinition` becomes active, kro has created a new
 `OsokMysqlSystem` API in the cluster.
 
-## 6. Create the MySQL Infrastructure with One YAML
+### 6. Create the MySQL Infrastructure with One YAML
 
 Save the following as `osok-mysql-system.yaml`:
 
@@ -225,12 +227,12 @@ kubectl create namespace demo
 kubectl apply -f osok-mysql-system.yaml
 ```
 
-For this quickstart, the MySQL admin password is supplied on the custom
+For this quick start, the MySQL admin password is supplied on the custom
 resource for simplicity. For a production-grade design, move the credentials to
 a pre-created Secret and model that Secret as an external dependency instead of
 storing the password in the instance spec.
 
-## 7. Verify Progress
+### 7. Verify the End-to-End Result
 
 MySQL provisioning takes the longest. Watch the stack with:
 
@@ -254,25 +256,17 @@ kubectl get secret mysql-demo -n demo
 kubectl get secret mysql-demo -n demo -o jsonpath='{.data.PrivateIPAddress}' | base64 --decode && echo
 ```
 
-That Secret is the handoff point for any workload that needs to connect to the
+At the end of this flow you should have:
+
+- one `OsokMysqlSystem` resource managed by kro
+- one `DbSystem` resource reconciled by OSOK
+- one OCI MySQL DB System in the target compartment
+- one same-name Kubernetes Secret created by OSOK with the connection details
+
+That Secret is the handoff point for workloads that need to connect to the
 MySQL DB System later.
 
-## 8. Release-Aligned Notes for This Guide
-
-This guide reflects the current OSOK surface in this branch:
-
-- The MySQL custom resource is `apiVersion: mysql.oracle.com/v1beta1` with
-  `kind: DbSystem`.
-- The MySQL spec field is `configurationId`, not the older nested
-  `configuration.Id` shape.
-- Admin credentials are passed through
-  `spec.adminUsername.secret.secretName` and
-  `spec.adminPassword.secret.secretName`.
-- After the `DbSystem` becomes active, OSOK creates a same-name Secret with
-  connection data such as `PrivateIPAddress`, `MySQLPort`,
-  `MySQLXProtocolPort`, and related endpoint metadata.
-
-## 9. Basic Cleanup
+### 8. Basic Cleanup
 
 Delete the instance first so kro and OSOK can tear down the managed resources:
 
@@ -286,8 +280,20 @@ If you also want to remove the generated API:
 kubectl delete rgd osok-mysql-system
 ```
 
-If you installed kro only for this demo:
+If you installed kro only for this example:
 
 ```bash
 helm uninstall kro -n kro-system
 ```
+
+## Keep Exploring
+
+After this quick start, continue with:
+
+- [Installation](installation.md) for the broader auth and bundle deployment
+  paths
+- [Supported Resources](reference/index.md) for the generated package and kind
+  catalog
+- [API Reference](reference/api/index.md) for generated field tables and sample
+  links
+- [MySQL DB Systems](mysql.md) for the service-specific MySQL guide

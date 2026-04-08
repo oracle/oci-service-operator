@@ -1827,6 +1827,11 @@ func TestExplicitCoreRuntimeArtifactsGenerateFromConfig(t *testing.T) {
 		"sourceDetails:",
 		"imageId:",
 	})
+
+	coreMetadata := readFile(t, filepath.Join(outputRoot, "packages", "core", "metadata.env"))
+	assertContains(t, coreMetadata, []string{
+		"CRD_KIND_FILTER=Instance",
+	})
 }
 
 func TestCheckedInStreamingPreservesStreamNamePrinterColumn(t *testing.T) {

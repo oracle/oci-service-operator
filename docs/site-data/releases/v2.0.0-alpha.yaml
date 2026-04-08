@@ -1,0 +1,154 @@
+# Checked-in release history for the customer-facing docs surface.
+schemaVersion: v1alpha1
+version: v2.0.0-alpha
+publishedAt: 2026-04-03T18:53:16-05:00
+commit: 2886d336eca49ef7790248edd19279b5a325fa92
+notes:
+  - Bootstrap release manifest for the v2.0.0-alpha docs surface.
+  - Packages listed here match the checked-in package directories and current GHCR naming convention; core is intentionally omitted because the default publish batch excludes it.
+  - Image references keep the <REPOSITORY_OWNER> placeholder used by the publish workflow and install docs.
+packages:
+  - package: apigateway
+    controllerImage: ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-apigateway:v2.0.0-alpha
+    bundleImage: ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-apigateway-bundle:v2.0.0-alpha
+    groups:
+      - group: apigateway
+        version: v1beta1
+        kinds:
+          - ApiGateway
+          - ApiGatewayDeployment
+
+  - package: containerinstances
+    controllerImage: ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-containerinstances:v2.0.0-alpha
+    bundleImage: ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-containerinstances-bundle:v2.0.0-alpha
+    groups:
+      - group: containerinstances
+        version: v1beta1
+        kinds:
+          - ContainerInstance
+
+  - package: core-network
+    controllerImage: ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-core-network:v2.0.0-alpha
+    bundleImage: ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-core-network-bundle:v2.0.0-alpha
+    groups:
+      - group: core
+        version: v1beta1
+        kinds:
+          - Drg
+          - InternetGateway
+          - NatGateway
+          - NetworkSecurityGroup
+          - RouteTable
+          - SecurityList
+          - ServiceGateway
+          - Subnet
+          - Vcn
+
+  - package: database
+    controllerImage: ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-database:v2.0.0-alpha
+    bundleImage: ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-database-bundle:v2.0.0-alpha
+    groups:
+      - group: database
+        version: v1beta1
+        kinds:
+          - AutonomousDatabase
+
+  - package: dataflow
+    controllerImage: ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-dataflow:v2.0.0-alpha
+    bundleImage: ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-dataflow-bundle:v2.0.0-alpha
+    groups:
+      - group: dataflow
+        version: v1beta1
+        kinds:
+          - Application
+
+  - package: functions
+    controllerImage: ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-functions:v2.0.0-alpha
+    bundleImage: ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-functions-bundle:v2.0.0-alpha
+    groups:
+      - group: functions
+        version: v1beta1
+        kinds:
+          - Application
+          - Function
+
+  - package: identity
+    controllerImage: ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-identity:v2.0.0-alpha
+    bundleImage: ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-identity-bundle:v2.0.0-alpha
+    groups:
+      - group: identity
+        version: v1beta1
+        kinds:
+          - Compartment
+
+  - package: mysql
+    controllerImage: ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-mysql:v2.0.0-alpha
+    bundleImage: ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-mysql-bundle:v2.0.0-alpha
+    groups:
+      - group: mysql
+        version: v1beta1
+        kinds:
+          - DbSystem
+
+  - package: nosql
+    controllerImage: ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-nosql:v2.0.0-alpha
+    bundleImage: ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-nosql-bundle:v2.0.0-alpha
+    groups:
+      - group: nosql
+        version: v1beta1
+        kinds:
+          - Table
+
+  - package: objectstorage
+    controllerImage: ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-objectstorage:v2.0.0-alpha
+    bundleImage: ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-objectstorage-bundle:v2.0.0-alpha
+    groups:
+      - group: objectstorage
+        version: v1beta1
+        kinds:
+          - Bucket
+
+  - package: opensearch
+    controllerImage: ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-opensearch:v2.0.0-alpha
+    bundleImage: ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-opensearch-bundle:v2.0.0-alpha
+    groups:
+      - group: opensearch
+        version: v1beta1
+        kinds:
+          - OpensearchCluster
+
+  - package: psql
+    controllerImage: ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-psql:v2.0.0-alpha
+    bundleImage: ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-psql-bundle:v2.0.0-alpha
+    groups:
+      - group: psql
+        version: v1beta1
+        kinds:
+          - DbSystem
+
+  - package: queue
+    controllerImage: ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-queue:v2.0.0-alpha
+    bundleImage: ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-queue-bundle:v2.0.0-alpha
+    groups:
+      - group: queue
+        version: v1beta1
+        kinds:
+          - Queue
+
+  - package: redis
+    controllerImage: ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-redis:v2.0.0-alpha
+    bundleImage: ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-redis-bundle:v2.0.0-alpha
+    groups:
+      - group: redis
+        version: v1beta1
+        kinds:
+          - RedisCluster
+
+  - package: streaming
+    controllerImage: ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-streaming:v2.0.0-alpha
+    bundleImage: ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-streaming-bundle:v2.0.0-alpha
+    groups:
+      - group: streaming
+        version: v1beta1
+        kinds:
+          - Stream
