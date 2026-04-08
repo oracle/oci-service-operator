@@ -2321,6 +2321,87 @@ func TestServiceClientCreateOrUpdateReusesExistingListMatchBeforeCreate(t *testi
 	}
 }
 
+func TestServiceClientCreateOrUpdateSkipsPreCreateListResolutionWhenRequested(t *testing.T) {
+	t.Parallel()
+
+	createCalled := false
+	listCalled := false
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Semantics: &Semantics{
+			List: &ListSemantics{
+				ResponseItemsField: "Items",
+				MatchFields:        []string{"name", "compartmentId"},
+			},
+			Lifecycle: LifecycleSemantics{
+				ProvisioningStates: []string{"CREATING"},
+				UpdatingStates:     []string{"UPDATING"},
+				ActiveStates:       []string{"ACTIVE"},
+			},
+			Delete: DeleteSemantics{
+				Policy:         "best-effort",
+				PendingStates:  []string{"DELETING"},
+				TerminalStates: []string{"DELETED"},
+			},
+		},
+		Create: &Operation{
+			NewRequest: func() any { return &fakeCreateThingRequest{} },
+			Call: func(_ context.Context, _ any) (any, error) {
+				createCalled = true
+				return fakeCreateThingResponse{
+					Thing: fakeThing{
+						Id:             "ocid1.thing.oc1..created",
+						Name:           "wanted",
+						CompartmentId:  "ocid1.compartment.oc1..match",
+						LifecycleState: "ACTIVE",
+					},
+				}, nil
+			},
+		},
+		List: &Operation{
+			NewRequest: func() any { return &fakeListThingRequest{} },
+			Call: func(_ context.Context, _ any) (any, error) {
+				listCalled = true
+				return fakeListThingResponse{
+					Collection: fakeThingCollection{
+						Items: []fakeThingSummary{
+							{
+								Id:             "ocid1.thing.oc1..existing",
+								Name:           "wanted",
+								CompartmentId:  "ocid1.compartment.oc1..match",
+								LifecycleState: "ACTIVE",
+							},
+						},
+					},
+				}, nil
+			},
+			Fields: []RequestField{
+				{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
+				{FieldName: "Name", RequestName: "name", Contribution: "query"},
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Spec: fakeSpec{
+			CompartmentId: "ocid1.compartment.oc1..match",
+			Name:          "wanted",
+		},
+	}
+
+	response, err := client.CreateOrUpdate(WithSkipExistingBeforeCreate(context.Background()), resource, ctrl.Request{})
+	requireCreateOrUpdateSuccess(t, response, err)
+	if listCalled {
+		t.Fatal("CreateOrUpdate() should skip list-before-create resolution when requested")
+	}
+	if !createCalled {
+		t.Fatal("CreateOrUpdate() should call Create() when list-before-create resolution is skipped")
+	}
+	requireStatusOCID(t, resource, "ocid1.thing.oc1..created")
+}
+
 func TestServiceClientCreateOrUpdateSkipsUpdateAfterListReuseWhenMutableStateMatches(t *testing.T) {
 	t.Parallel()
 
