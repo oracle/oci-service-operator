@@ -566,6 +566,61 @@ func TestCreateOrUpdate_RecreatesOnExplicitNotFound(t *testing.T) {
 	assert.NotEqual(t, oldCreatedAt, *resource.Status.OsokStatus.CreatedAt)
 }
 
+func TestCreateOrUpdate_ExplicitNotFoundRecreateIgnoresListBeforeCreate(t *testing.T) {
+	getCalls := 0
+	createCalls := 0
+	listCalls := 0
+	manager := newTestManager(&fakeVcnOCIClient{
+		getFn: func(_ context.Context, req coresdk.GetVcnRequest) (coresdk.GetVcnResponse, error) {
+			getCalls++
+			switch getCalls {
+			case 1:
+				assert.Equal(t, "ocid1.vcn.oc1..existing", *req.VcnId)
+				return coresdk.GetVcnResponse{}, fakeServiceError{
+					statusCode: 404,
+					code:       "NotFound",
+					message:    "missing",
+				}
+			case 2:
+				assert.Equal(t, "ocid1.vcn.oc1..recreated", *req.VcnId)
+				return coresdk.GetVcnResponse{
+					Vcn: makeSDKVcn("ocid1.vcn.oc1..recreated", "test-vcn", coresdk.VcnLifecycleStateAvailable),
+				}, nil
+			default:
+				t.Fatalf("unexpected GetVcn call %d for %v", getCalls, req.VcnId)
+				return coresdk.GetVcnResponse{}, nil
+			}
+		},
+		listFn: func(_ context.Context, _ coresdk.ListVcnsRequest) (coresdk.ListVcnsResponse, error) {
+			listCalls++
+			return coresdk.ListVcnsResponse{
+				Items: []coresdk.Vcn{
+					makeSDKVcn("ocid1.vcn.oc1..same-name", "test-vcn", coresdk.VcnLifecycleStateAvailable),
+				},
+			}, nil
+		},
+		createFn: func(_ context.Context, _ coresdk.CreateVcnRequest) (coresdk.CreateVcnResponse, error) {
+			createCalls++
+			return coresdk.CreateVcnResponse{
+				Vcn: makeSDKVcn("ocid1.vcn.oc1..recreated", "test-vcn", coresdk.VcnLifecycleStateAvailable),
+			}, nil
+		},
+	})
+
+	resource := makeSpecVcn()
+	resource.Status.Id = "ocid1.vcn.oc1..existing"
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.vcn.oc1..existing")
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.Equal(t, 2, getCalls)
+	assert.Equal(t, 1, createCalls)
+	assert.Equal(t, 0, listCalls)
+	assert.Equal(t, shared.OCID("ocid1.vcn.oc1..recreated"), resource.Status.OsokStatus.Ocid)
+}
+
 func TestCreateOrUpdate_RecreateClearsStaleNestedOsokStatusMetadata(t *testing.T) {
 	manager := newTestManager(&fakeVcnOCIClient{
 		getFn: func(_ context.Context, _ coresdk.GetVcnRequest) (coresdk.GetVcnResponse, error) {

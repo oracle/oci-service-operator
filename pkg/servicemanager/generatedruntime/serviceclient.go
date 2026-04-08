@@ -40,6 +40,10 @@ var (
 	autonomousDatabaseBaseType = reflect.TypeOf((*databasesdk.CreateAutonomousDatabaseBase)(nil)).Elem()
 )
 
+type createContextKey string
+
+const skipExistingBeforeCreateContextKey createContextKey = "generatedruntime/skip-existing-before-create"
+
 type Operation struct {
 	NewRequest func() any
 	Call       func(context.Context, any) (any, error)
@@ -170,6 +174,13 @@ func NewServiceClient[T any](cfg Config[T]) ServiceClient[T] {
 		cfg.InitError = errors.Join(cfg.InitError, err)
 	}
 	return ServiceClient[T]{config: cfg}
+}
+
+func WithSkipExistingBeforeCreate(ctx context.Context) context.Context {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	return context.WithValue(ctx, skipExistingBeforeCreateContextKey, true)
 }
 
 func (c ServiceClient[T]) CreateOrUpdate(ctx context.Context, resource T, req ctrl.Request) (servicemanager.OSOKResponse, error) {
@@ -621,6 +632,9 @@ func (c ServiceClient[T]) resolveDeleteID(ctx context.Context, resource T) (stri
 }
 
 func (c ServiceClient[T]) resolveExistingBeforeCreate(ctx context.Context, resource T) (any, error) {
+	if skipExistingBeforeCreate(ctx) {
+		return nil, nil
+	}
 	if !c.shouldResolveExistingBeforeCreate() {
 		return nil, nil
 	}
@@ -633,6 +647,14 @@ func (c ServiceClient[T]) resolveExistingBeforeCreate(ctx context.Context, resou
 		return nil, nil
 	}
 	return nil, err
+}
+
+func skipExistingBeforeCreate(ctx context.Context) bool {
+	if ctx == nil {
+		return false
+	}
+	skip, _ := ctx.Value(skipExistingBeforeCreateContextKey).(bool)
+	return skip
 }
 
 func (c ServiceClient[T]) shouldResolveExistingBeforeCreate() bool {

@@ -19,6 +19,7 @@ import (
 	corev1beta1 "github.com/oracle/oci-service-operator/api/core/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/errorutil"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
+	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/oracle/oci-service-operator/pkg/util"
 	v1 "k8s.io/api/core/v1"
@@ -70,6 +71,7 @@ func (c *vcnGeneratedParityClient) CreateOrUpdate(
 	}
 
 	trackedID := currentVcnID(resource)
+	explicitRecreate := false
 	if trackedID != "" {
 		if c.initErr != nil {
 			return c.fail(resource, c.initErr)
@@ -79,11 +81,13 @@ func (c *vcnGeneratedParityClient) CreateOrUpdate(
 		if err != nil {
 			if isReadNotFoundOCI(err) {
 				c.clearTrackedIdentity(resource)
+				explicitRecreate = true
 			} else {
 				return c.fail(resource, normalizeOCIError(err))
 			}
 		} else if current.LifecycleState == coresdk.VcnLifecycleStateTerminated {
 			c.clearTrackedIdentity(resource)
+			explicitRecreate = true
 		} else {
 			c.normalizeEquivalentCreateOnlyLists(resource, current)
 			if !vcnLifecycleIsRetryable(current.LifecycleState) {
@@ -97,7 +101,12 @@ func (c *vcnGeneratedParityClient) CreateOrUpdate(
 	previousStatus := resource.Status
 	c.clearProjectedStatus(resource)
 
-	response, err := c.delegate.CreateOrUpdate(ctx, resource, req)
+	delegateCtx := ctx
+	if explicitRecreate {
+		delegateCtx = generatedruntime.WithSkipExistingBeforeCreate(delegateCtx)
+	}
+
+	response, err := c.delegate.CreateOrUpdate(delegateCtx, resource, req)
 	if err != nil {
 		c.restoreStatus(resource, previousStatus)
 	}
