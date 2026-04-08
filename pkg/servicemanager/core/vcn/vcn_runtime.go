@@ -31,145 +31,87 @@ const vcnRequeueDuration = time.Minute
 type vcnOCIClient interface {
 	CreateVcn(ctx context.Context, request coresdk.CreateVcnRequest) (coresdk.CreateVcnResponse, error)
 	GetVcn(ctx context.Context, request coresdk.GetVcnRequest) (coresdk.GetVcnResponse, error)
+	ListVcns(ctx context.Context, request coresdk.ListVcnsRequest) (coresdk.ListVcnsResponse, error)
 	UpdateVcn(ctx context.Context, request coresdk.UpdateVcnRequest) (coresdk.UpdateVcnResponse, error)
 	DeleteVcn(ctx context.Context, request coresdk.DeleteVcnRequest) (coresdk.DeleteVcnResponse, error)
 }
 
-type vcnRuntimeClient struct {
-	manager *VcnServiceManager
-	client  vcnOCIClient
-	initErr error
+type vcnGeneratedParityClient struct {
+	manager  *VcnServiceManager
+	delegate VcnServiceClient
+	client   vcnOCIClient
+	initErr  error
 }
 
 func init() {
+	generatedFactory := newVcnServiceClient
 	newVcnServiceClient = func(manager *VcnServiceManager) VcnServiceClient {
+		delegate := generatedFactory(manager)
 		sdkClient, err := coresdk.NewVirtualNetworkClientWithConfigurationProvider(manager.Provider)
-		runtimeClient := &vcnRuntimeClient{
-			manager: manager,
-			client:  sdkClient,
+		parityClient := &vcnGeneratedParityClient{
+			manager:  manager,
+			delegate: delegate,
+			client:   sdkClient,
 		}
 		if err != nil {
-			runtimeClient.initErr = fmt.Errorf("initialize Vcn OCI client: %w", err)
+			parityClient.initErr = fmt.Errorf("initialize Vcn OCI client: %w", err)
 		}
-		return runtimeClient
+		return parityClient
 	}
 }
 
-func (c *vcnRuntimeClient) CreateOrUpdate(ctx context.Context, resource *corev1beta1.Vcn, _ ctrl.Request) (servicemanager.OSOKResponse, error) {
-	if c.initErr != nil {
-		return c.fail(resource, c.initErr)
+func (c *vcnGeneratedParityClient) CreateOrUpdate(
+	ctx context.Context,
+	resource *corev1beta1.Vcn,
+	req ctrl.Request,
+) (servicemanager.OSOKResponse, error) {
+	if c.delegate == nil {
+		return servicemanager.OSOKResponse{IsSuccessful: false}, fmt.Errorf("vcn parity delegate is not configured")
 	}
 
-	trackedID := strings.TrimSpace(string(resource.Status.OsokStatus.Ocid))
-	if trackedID == "" {
-		return c.create(ctx, resource)
-	}
+	trackedID := currentVcnID(resource)
+	if trackedID != "" {
+		if c.initErr != nil {
+			return c.fail(resource, c.initErr)
+		}
 
-	current, err := c.get(ctx, trackedID)
-	if err != nil {
-		if isReadNotFoundOCI(err) {
+		current, err := c.get(ctx, trackedID)
+		if err != nil {
+			if isReadNotFoundOCI(err) {
+				c.clearTrackedIdentity(resource)
+			} else {
+				return c.fail(resource, normalizeOCIError(err))
+			}
+		} else if current.LifecycleState == coresdk.VcnLifecycleStateTerminated {
 			c.clearTrackedIdentity(resource)
-			return c.create(ctx, resource)
+		} else {
+			c.normalizeEquivalentCreateOnlyLists(resource, current)
+			if !vcnLifecycleIsRetryable(current.LifecycleState) {
+				if err := validateCreateOnlyDrift(resource.Spec, current); err != nil {
+					return c.fail(resource, err)
+				}
+			}
 		}
-		return c.fail(resource, normalizeOCIError(err))
 	}
 
-	if err := c.projectStatus(resource, current); err != nil {
-		return c.fail(resource, err)
-	}
+	previousStatus := resource.Status
+	c.clearProjectedStatus(resource)
 
-	switch current.LifecycleState {
-	case coresdk.VcnLifecycleStateTerminated:
-		c.clearTrackedIdentity(resource)
-		return c.create(ctx, resource)
-	case coresdk.VcnLifecycleStateProvisioning, coresdk.VcnLifecycleStateUpdating, coresdk.VcnLifecycleStateTerminating:
-		return c.applyLifecycle(resource, current)
-	}
-
-	updateRequest, updateNeeded, err := c.buildUpdateRequest(resource, current)
+	response, err := c.delegate.CreateOrUpdate(ctx, resource, req)
 	if err != nil {
-		return c.fail(resource, err)
+		c.restoreStatus(resource, previousStatus)
 	}
-
-	if updateNeeded {
-		response, err := c.client.UpdateVcn(ctx, updateRequest)
-		if err != nil {
-			return c.fail(resource, normalizeOCIError(err))
-		}
-		current = response.Vcn
-	}
-
-	if err := c.projectStatus(resource, current); err != nil {
-		return c.fail(resource, err)
-	}
-	return c.applyLifecycle(resource, current)
+	return response, err
 }
 
-func (c *vcnRuntimeClient) Delete(ctx context.Context, resource *corev1beta1.Vcn) (bool, error) {
-	if c.initErr != nil {
-		return false, c.initErr
+func (c *vcnGeneratedParityClient) Delete(ctx context.Context, resource *corev1beta1.Vcn) (bool, error) {
+	if c.delegate == nil {
+		return false, fmt.Errorf("vcn parity delegate is not configured")
 	}
-
-	trackedID := strings.TrimSpace(string(resource.Status.OsokStatus.Ocid))
-	if trackedID == "" {
-		c.markDeleted(resource, "OCI resource identifier is not recorded")
-		return true, nil
-	}
-
-	deleteRequest := coresdk.DeleteVcnRequest{
-		VcnId: common.String(trackedID),
-	}
-	if _, err := c.client.DeleteVcn(ctx, deleteRequest); err != nil {
-		if isDeleteNotFoundOCI(err) {
-			c.markDeleted(resource, "OCI resource no longer exists")
-			return true, nil
-		}
-		return false, normalizeOCIError(err)
-	}
-
-	current, err := c.get(ctx, trackedID)
-	if err != nil {
-		if isDeleteNotFoundOCI(err) {
-			c.markDeleted(resource, "OCI resource deleted")
-			return true, nil
-		}
-		return false, normalizeOCIError(err)
-	}
-
-	if err := c.projectStatus(resource, current); err != nil {
-		return false, err
-	}
-	switch current.LifecycleState {
-	case coresdk.VcnLifecycleStateTerminated, coresdk.VcnLifecycleStateTerminating:
-		c.markTerminating(resource, current)
-		return false, nil
-	default:
-		c.markTerminating(resource, current)
-		return false, nil
-	}
+	return c.delegate.Delete(ctx, resource)
 }
 
-func (c *vcnRuntimeClient) create(ctx context.Context, resource *corev1beta1.Vcn) (servicemanager.OSOKResponse, error) {
-	if err := validateCreateInputs(resource.Spec); err != nil {
-		return c.fail(resource, err)
-	}
-
-	request := coresdk.CreateVcnRequest{
-		CreateVcnDetails: buildCreateVcnDetails(resource.Spec),
-	}
-
-	response, err := c.client.CreateVcn(ctx, request)
-	if err != nil {
-		return c.fail(resource, normalizeOCIError(err))
-	}
-
-	if err := c.projectStatus(resource, response.Vcn); err != nil {
-		return c.fail(resource, err)
-	}
-	return c.applyLifecycle(resource, response.Vcn)
-}
-
-func (c *vcnRuntimeClient) get(ctx context.Context, ocid string) (coresdk.Vcn, error) {
+func (c *vcnGeneratedParityClient) get(ctx context.Context, ocid string) (coresdk.Vcn, error) {
 	response, err := c.client.GetVcn(ctx, coresdk.GetVcnRequest{
 		VcnId: common.String(ocid),
 	})
@@ -179,94 +121,79 @@ func (c *vcnRuntimeClient) get(ctx context.Context, ocid string) (coresdk.Vcn, e
 	return response.Vcn, nil
 }
 
-func (c *vcnRuntimeClient) buildUpdateRequest(resource *corev1beta1.Vcn, current coresdk.Vcn) (coresdk.UpdateVcnRequest, bool, error) {
-	if current.Id == nil || strings.TrimSpace(*current.Id) == "" {
-		return coresdk.UpdateVcnRequest{}, false, fmt.Errorf("current Vcn does not expose an OCI identifier")
+func (c *vcnGeneratedParityClient) normalizeEquivalentCreateOnlyLists(resource *corev1beta1.Vcn, current coresdk.Vcn) {
+	if resource == nil {
+		return
 	}
 
-	if err := validateCreateOnlyDrift(resource.Spec, current); err != nil {
-		return coresdk.UpdateVcnRequest{}, false, err
+	if normalizedStringSlicesEqual(current.CidrBlocks, resource.Spec.CidrBlocks) {
+		resource.Spec.CidrBlocks = append([]string(nil), current.CidrBlocks...)
 	}
 
-	updateDetails := coresdk.UpdateVcnDetails{}
-	updateNeeded := false
-
-	if resource.Spec.DisplayName != "" && !stringPtrEqual(current.DisplayName, resource.Spec.DisplayName) {
-		updateDetails.DisplayName = common.String(resource.Spec.DisplayName)
-		updateNeeded = true
+	if normalizedStringSlicesEqual(current.Ipv6PrivateCidrBlocks, resource.Spec.Ipv6PrivateCidrBlocks) {
+		resource.Spec.Ipv6PrivateCidrBlocks = append([]string(nil), current.Ipv6PrivateCidrBlocks...)
 	}
 
-	if resource.Spec.FreeformTags != nil && !reflect.DeepEqual(current.FreeformTags, resource.Spec.FreeformTags) {
-		updateDetails.FreeformTags = resource.Spec.FreeformTags
-		updateNeeded = true
+	if normalizedStringSlicesEqual(current.Byoipv6CidrBlocks, desiredByoipv6Blocks(resource.Spec.Byoipv6CidrDetails)) {
+		resource.Spec.Byoipv6CidrDetails = reorderByoipv6Details(resource.Spec.Byoipv6CidrDetails, current.Byoipv6CidrBlocks)
 	}
-
-	if resource.Spec.DefinedTags != nil {
-		desiredDefinedTags := *util.ConvertToOciDefinedTags(&resource.Spec.DefinedTags)
-		if !reflect.DeepEqual(current.DefinedTags, desiredDefinedTags) {
-			updateDetails.DefinedTags = desiredDefinedTags
-			updateNeeded = true
-		}
-	}
-
-	if !updateNeeded {
-		return coresdk.UpdateVcnRequest{}, false, nil
-	}
-
-	return coresdk.UpdateVcnRequest{
-		VcnId:            current.Id,
-		UpdateVcnDetails: updateDetails,
-	}, true, nil
 }
 
-func buildCreateVcnDetails(spec corev1beta1.VcnSpec) coresdk.CreateVcnDetails {
-	createDetails := coresdk.CreateVcnDetails{
-		CompartmentId: common.String(spec.CompartmentId),
+func (c *vcnGeneratedParityClient) clearProjectedStatus(resource *corev1beta1.Vcn) {
+	if resource == nil {
+		return
 	}
 
-	if spec.CidrBlock != "" {
-		createDetails.CidrBlock = common.String(spec.CidrBlock)
+	resource.Status = corev1beta1.VcnStatus{
+		OsokStatus: resource.Status.OsokStatus,
+		Id:         resource.Status.Id,
 	}
-	if len(spec.CidrBlocks) > 0 {
-		createDetails.CidrBlocks = spec.CidrBlocks
-	}
-	if len(spec.Ipv6PrivateCidrBlocks) > 0 {
-		createDetails.Ipv6PrivateCidrBlocks = spec.Ipv6PrivateCidrBlocks
-	}
-	if spec.IsOracleGuaAllocationEnabled {
-		createDetails.IsOracleGuaAllocationEnabled = common.Bool(spec.IsOracleGuaAllocationEnabled)
-	}
-	if len(spec.Byoipv6CidrDetails) > 0 {
-		createDetails.Byoipv6CidrDetails = convertByoipv6CidrDetails(spec.Byoipv6CidrDetails)
-	}
-	if spec.DefinedTags != nil {
-		createDetails.DefinedTags = *util.ConvertToOciDefinedTags(&spec.DefinedTags)
-	}
-	if spec.DisplayName != "" {
-		createDetails.DisplayName = common.String(spec.DisplayName)
-	}
-	if spec.DnsLabel != "" {
-		createDetails.DnsLabel = common.String(spec.DnsLabel)
-	}
-	if spec.FreeformTags != nil {
-		createDetails.FreeformTags = spec.FreeformTags
-	}
-	if spec.IsIpv6Enabled {
-		createDetails.IsIpv6Enabled = common.Bool(spec.IsIpv6Enabled)
-	}
-
-	return createDetails
 }
 
-func convertByoipv6CidrDetails(details []corev1beta1.VcnByoipv6CidrDetail) []coresdk.Byoipv6CidrDetails {
-	converted := make([]coresdk.Byoipv6CidrDetails, 0, len(details))
-	for _, detail := range details {
-		converted = append(converted, coresdk.Byoipv6CidrDetails{
-			Byoipv6RangeId: common.String(detail.Byoipv6RangeId),
-			Ipv6CidrBlock:  common.String(detail.Ipv6CidrBlock),
-		})
+func (c *vcnGeneratedParityClient) restoreStatus(resource *corev1beta1.Vcn, previous corev1beta1.VcnStatus) {
+	if resource == nil {
+		return
 	}
-	return converted
+
+	failedStatus := resource.Status.OsokStatus
+	resource.Status = previous
+	resource.Status.OsokStatus = failedStatus
+}
+
+func (c *vcnGeneratedParityClient) fail(resource *corev1beta1.Vcn, err error) (servicemanager.OSOKResponse, error) {
+	status := &resource.Status.OsokStatus
+	status.Message = err.Error()
+	status.Reason = string(shared.Failed)
+	updatedAt := metav1.NewTime(time.Now())
+	status.UpdatedAt = &updatedAt
+	resource.Status.OsokStatus = util.UpdateOSOKStatusCondition(resource.Status.OsokStatus, shared.Failed, v1.ConditionFalse, "", err.Error(), c.manager.Log)
+	return servicemanager.OSOKResponse{IsSuccessful: false}, err
+}
+
+func (c *vcnGeneratedParityClient) clearTrackedIdentity(resource *corev1beta1.Vcn) {
+	resource.Status.Id = ""
+	resource.Status.OsokStatus = shared.OSOKStatus{}
+}
+
+func currentVcnID(resource *corev1beta1.Vcn) string {
+	if resource == nil {
+		return ""
+	}
+	if ocid := strings.TrimSpace(string(resource.Status.OsokStatus.Ocid)); ocid != "" {
+		return ocid
+	}
+	return strings.TrimSpace(resource.Status.Id)
+}
+
+func vcnLifecycleIsRetryable(state coresdk.VcnLifecycleStateEnum) bool {
+	switch state {
+	case coresdk.VcnLifecycleStateProvisioning,
+		coresdk.VcnLifecycleStateUpdating,
+		coresdk.VcnLifecycleStateTerminating:
+		return true
+	default:
+		return false
+	}
 }
 
 func validateCreateOnlyDrift(spec corev1beta1.VcnSpec, current coresdk.Vcn) error {
@@ -303,6 +230,33 @@ func validateCreateOnlyDrift(spec corev1beta1.VcnSpec, current coresdk.Vcn) erro
 	return fmt.Errorf("Vcn create-only field drift is not supported: %s", strings.Join(unsupported, ", "))
 }
 
+func reorderByoipv6Details(details []corev1beta1.VcnByoipv6CidrDetail, currentBlocks []string) []corev1beta1.VcnByoipv6CidrDetail {
+	if len(details) == 0 {
+		return nil
+	}
+
+	ordered := make([]corev1beta1.VcnByoipv6CidrDetail, 0, len(details))
+	used := make([]bool, len(details))
+	for _, currentBlock := range currentBlocks {
+		for index, detail := range details {
+			if used[index] || strings.TrimSpace(detail.Ipv6CidrBlock) != strings.TrimSpace(currentBlock) {
+				continue
+			}
+			ordered = append(ordered, detail)
+			used[index] = true
+			break
+		}
+	}
+
+	for index, detail := range details {
+		if used[index] {
+			continue
+		}
+		ordered = append(ordered, detail)
+	}
+	return ordered
+}
+
 func desiredByoipv6Blocks(details []corev1beta1.VcnByoipv6CidrDetail) []string {
 	blocks := make([]string, 0, len(details))
 	for _, detail := range details {
@@ -311,13 +265,6 @@ func desiredByoipv6Blocks(details []corev1beta1.VcnByoipv6CidrDetail) []string {
 		}
 	}
 	return blocks
-}
-
-func validateCreateInputs(spec corev1beta1.VcnSpec) error {
-	if strings.TrimSpace(spec.CidrBlock) != "" && len(normalizeStringSlice(spec.CidrBlocks)) > 0 {
-		return fmt.Errorf("Vcn create input cannot set both cidrBlock and cidrBlocks")
-	}
-	return nil
 }
 
 func normalizedStringSlicesEqual(left []string, right []string) bool {
@@ -335,116 +282,6 @@ func normalizeStringSlice(values []string) []string {
 	}
 	sort.Strings(normalized)
 	return normalized
-}
-
-func (c *vcnRuntimeClient) applyLifecycle(resource *corev1beta1.Vcn, current coresdk.Vcn) (servicemanager.OSOKResponse, error) {
-	status := &resource.Status.OsokStatus
-	now := time.Now()
-	if status.CreatedAt == nil && current.Id != nil && strings.TrimSpace(*current.Id) != "" {
-		createdAt := metav1Time(now)
-		status.CreatedAt = &createdAt
-	}
-	updatedAt := metav1Time(now)
-	status.UpdatedAt = &updatedAt
-	if current.Id != nil {
-		status.Ocid = shared.OCID(*current.Id)
-	}
-
-	message := lifecycleMessage(current)
-	status.Message = message
-
-	switch current.LifecycleState {
-	case coresdk.VcnLifecycleStateAvailable:
-		status.Reason = string(shared.Active)
-		resource.Status.OsokStatus = util.UpdateOSOKStatusCondition(resource.Status.OsokStatus, shared.Active, v1.ConditionTrue, "", message, c.manager.Log)
-		return servicemanager.OSOKResponse{IsSuccessful: true}, nil
-	case coresdk.VcnLifecycleStateProvisioning:
-		status.Reason = string(shared.Provisioning)
-		resource.Status.OsokStatus = util.UpdateOSOKStatusCondition(resource.Status.OsokStatus, shared.Provisioning, v1.ConditionTrue, "", message, c.manager.Log)
-		return servicemanager.OSOKResponse{IsSuccessful: true, ShouldRequeue: true, RequeueDuration: vcnRequeueDuration}, nil
-	case coresdk.VcnLifecycleStateUpdating:
-		status.Reason = string(shared.Updating)
-		resource.Status.OsokStatus = util.UpdateOSOKStatusCondition(resource.Status.OsokStatus, shared.Updating, v1.ConditionTrue, "", message, c.manager.Log)
-		return servicemanager.OSOKResponse{IsSuccessful: true, ShouldRequeue: true, RequeueDuration: vcnRequeueDuration}, nil
-	case coresdk.VcnLifecycleStateTerminating:
-		status.Reason = string(shared.Terminating)
-		resource.Status.OsokStatus = util.UpdateOSOKStatusCondition(resource.Status.OsokStatus, shared.Terminating, v1.ConditionTrue, "", message, c.manager.Log)
-		return servicemanager.OSOKResponse{IsSuccessful: true, ShouldRequeue: true, RequeueDuration: vcnRequeueDuration}, nil
-	default:
-		return c.fail(resource, fmt.Errorf("Vcn lifecycle state %q is not modeled for create or update", current.LifecycleState))
-	}
-}
-
-func (c *vcnRuntimeClient) fail(resource *corev1beta1.Vcn, err error) (servicemanager.OSOKResponse, error) {
-	status := &resource.Status.OsokStatus
-	status.Message = err.Error()
-	status.Reason = string(shared.Failed)
-	updatedAt := metav1Time(time.Now())
-	status.UpdatedAt = &updatedAt
-	resource.Status.OsokStatus = util.UpdateOSOKStatusCondition(resource.Status.OsokStatus, shared.Failed, v1.ConditionFalse, "", err.Error(), c.manager.Log)
-	return servicemanager.OSOKResponse{IsSuccessful: false}, err
-}
-
-func (c *vcnRuntimeClient) markDeleted(resource *corev1beta1.Vcn, message string) {
-	status := &resource.Status.OsokStatus
-	now := metav1Time(time.Now())
-	status.DeletedAt = &now
-	status.UpdatedAt = &now
-	status.Message = message
-	status.Reason = string(shared.Terminating)
-	resource.Status.OsokStatus = util.UpdateOSOKStatusCondition(resource.Status.OsokStatus, shared.Terminating, v1.ConditionTrue, "", message, c.manager.Log)
-}
-
-func (c *vcnRuntimeClient) clearTrackedIdentity(resource *corev1beta1.Vcn) {
-	resource.Status.Id = ""
-	resource.Status.OsokStatus = shared.OSOKStatus{}
-}
-
-func (c *vcnRuntimeClient) markTerminating(resource *corev1beta1.Vcn, current coresdk.Vcn) {
-	status := &resource.Status.OsokStatus
-	now := metav1Time(time.Now())
-	status.UpdatedAt = &now
-	status.Message = lifecycleMessage(current)
-	status.Reason = string(shared.Terminating)
-	resource.Status.OsokStatus = util.UpdateOSOKStatusCondition(resource.Status.OsokStatus, shared.Terminating, v1.ConditionTrue, "", status.Message, c.manager.Log)
-}
-
-func (c *vcnRuntimeClient) projectStatus(resource *corev1beta1.Vcn, current coresdk.Vcn) error {
-	resource.Status = corev1beta1.VcnStatus{
-		OsokStatus:            resource.Status.OsokStatus,
-		CidrBlock:             stringValue(current.CidrBlock),
-		CidrBlocks:            append([]string(nil), current.CidrBlocks...),
-		CompartmentId:         stringValue(current.CompartmentId),
-		Id:                    stringValue(current.Id),
-		LifecycleState:        string(current.LifecycleState),
-		Byoipv6CidrBlocks:     append([]string(nil), current.Byoipv6CidrBlocks...),
-		Ipv6PrivateCidrBlocks: append([]string(nil), current.Ipv6PrivateCidrBlocks...),
-		DefaultDhcpOptionsId:  stringValue(current.DefaultDhcpOptionsId),
-		DefaultRouteTableId:   stringValue(current.DefaultRouteTableId),
-		DefaultSecurityListId: stringValue(current.DefaultSecurityListId),
-		DefinedTags:           convertOCIToStatusDefinedTags(current.DefinedTags),
-		DisplayName:           stringValue(current.DisplayName),
-		DnsLabel:              stringValue(current.DnsLabel),
-		FreeformTags:          cloneStringMap(current.FreeformTags),
-		Ipv6CidrBlocks:        append([]string(nil), current.Ipv6CidrBlocks...),
-		TimeCreated:           sdkTimeString(current.TimeCreated),
-		VcnDomainName:         stringValue(current.VcnDomainName),
-	}
-	return nil
-}
-
-func lifecycleMessage(current coresdk.Vcn) string {
-	name := ""
-	if current.DisplayName != nil {
-		name = *current.DisplayName
-	}
-	if name == "" && current.Id != nil {
-		name = *current.Id
-	}
-	if name == "" {
-		name = "Vcn"
-	}
-	return fmt.Sprintf("Vcn %s is %s", name, current.LifecycleState)
 }
 
 func normalizeOCIError(err error) error {
@@ -473,54 +310,4 @@ func stringPtrEqual(actual *string, expected string) bool {
 		return strings.TrimSpace(expected) == ""
 	}
 	return *actual == expected
-}
-
-func metav1Time(t time.Time) metav1.Time {
-	return metav1.NewTime(t)
-}
-
-func stringValue(value *string) string {
-	if value == nil {
-		return ""
-	}
-	return *value
-}
-
-func sdkTimeString(value *common.SDKTime) string {
-	if value == nil {
-		return ""
-	}
-	return value.Time.Format(time.RFC3339Nano)
-}
-
-func cloneStringMap(input map[string]string) map[string]string {
-	if len(input) == 0 {
-		return nil
-	}
-	cloned := make(map[string]string, len(input))
-	for key, value := range input {
-		cloned[key] = value
-	}
-	return cloned
-}
-
-func convertOCIToStatusDefinedTags(input map[string]map[string]interface{}) map[string]shared.MapValue {
-	if len(input) == 0 {
-		return nil
-	}
-	converted := make(map[string]shared.MapValue, len(input))
-	for namespace, values := range input {
-		if len(values) == 0 {
-			continue
-		}
-		tagValues := make(shared.MapValue, len(values))
-		for key, value := range values {
-			tagValues[key] = fmt.Sprint(value)
-		}
-		converted[namespace] = tagValues
-	}
-	if len(converted) == 0 {
-		return nil
-	}
-	return converted
 }
