@@ -1212,6 +1212,7 @@ func TestCheckedInConfigPromotesFormalSpecReferences(t *testing.T) {
 	assertFormalSpecFor(t, services["containerinstances"], "ContainerInstance", "")
 	assertFormalSpecFor(t, services["identity"], "Compartment", "compartment")
 	assertFormalSpecFor(t, services["core"], "Instance", "instance")
+	assertFormalSpecFor(t, services["core"], "Vcn", "vcn")
 	assertFormalSpecFor(t, services["database"], "AutonomousDatabase", "databaseautonomousdatabase")
 	assertFormalSpecFor(t, services["mysql"], "DbSystem", "dbsystem")
 	assertFormalSpecFor(t, services["objectstorage"], "Bucket", "objectstoragebucket")
@@ -1592,8 +1593,9 @@ func assertCoreRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
 		registration:   GenerationStrategyGenerated,
 		webhook:        GenerationStrategyNone,
 	})
-	assertResourceOverrideCount(t, service, 1)
+	assertResourceOverrideCount(t, service, 2)
 	assertPrimaryPortOverride(t, service, "Instance", "instance", "core/instance")
+	assertFormalSpecFor(t, service, "Vcn", "vcn")
 	assertPackageSplitContainsKind(t, service, "core-network", "Drg")
 }
 

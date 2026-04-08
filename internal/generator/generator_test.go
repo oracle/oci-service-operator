@@ -1765,6 +1765,7 @@ func TestExplicitCoreRuntimeArtifactsGenerateFromConfig(t *testing.T) {
 		t.Fatalf("core SelectedKinds() = %v, want instance plus core-network split kinds", got)
 	}
 	assertServiceFormalSpec(t, &coreService, "Instance", "instance")
+	assertServiceFormalSpec(t, &coreService, "Vcn", "vcn")
 
 	outputRoot := t.TempDir()
 	seedSamplesKustomization(t, outputRoot)
@@ -1818,6 +1819,32 @@ func TestExplicitCoreRuntimeArtifactsGenerateFromConfig(t *testing.T) {
 		`DeleteFollowUp: generatedruntime.FollowUpSemantics{`,
 		`Fields: []generatedruntime.RequestField{{FieldName: "LaunchInstanceDetails", RequestName: "LaunchInstanceDetails", Contribution: "body", PreferResourceID: false}},`,
 		`Fields: []generatedruntime.RequestField{{FieldName: "InstanceId", RequestName: "instanceId", Contribution: "path", PreferResourceID: true}},`,
+	})
+
+	vcnServiceClient := readFile(t, filepath.Join(outputRoot, "pkg", "servicemanager", "core", "vcn", "vcn_serviceclient.go"))
+	assertContains(t, vcnServiceClient, []string{
+		"Semantics: &generatedruntime.Semantics{",
+		`FormalService:     "core"`,
+		`FormalSlug:        "vcn"`,
+		`ProvisioningStates: []string{"PROVISIONING"}`,
+		`UpdatingStates:     []string{"UPDATING"}`,
+		`ActiveStates:       []string{"AVAILABLE"}`,
+		`PendingStates:  []string{"TERMINATED", "TERMINATING"}`,
+		`TerminalStates: []string{"NOT_FOUND"}`,
+		`ResponseItemsField: "Items"`,
+		`MatchFields:        []string{"compartmentId", "displayName", "id", "state"}`,
+		`Mutable:       []string{"definedTags", "displayName", "freeformTags"}`,
+		`ForceNew:      []string{"byoipv6CidrDetails", "cidrBlock", "cidrBlocks", "compartmentId", "dnsLabel", "ipv6PrivateCidrBlocks", "isIpv6Enabled", "isOracleGuaAllocationEnabled"}`,
+		`ConflictsWith: map[string][]string{"cidrBlock": []string{"cidrBlocks"}, "cidrBlocks": []string{"cidrBlock"}}`,
+		`Helper: "tfresource.WaitForWorkRequestWithErrorHandling"`,
+		`MethodName: "ListVcn"`,
+		`RequestTypeName: "core.ListVcnRequest"`,
+		`ResponseTypeName: "core.ListVcnResponse"`,
+		`Fields: []generatedruntime.RequestField{{FieldName: "CreateVcnDetails", RequestName: "CreateVcnDetails", Contribution: "body", PreferResourceID: false}},`,
+		`Fields: []generatedruntime.RequestField{{FieldName: "VcnId", RequestName: "vcnId", Contribution: "path", PreferResourceID: true}},`,
+		`CreateFollowUp: generatedruntime.FollowUpSemantics{`,
+		`UpdateFollowUp: generatedruntime.FollowUpSemantics{`,
+		`DeleteFollowUp: generatedruntime.FollowUpSemantics{`,
 	})
 
 	instanceSample := readFile(t, filepath.Join(outputRoot, "config", "samples", "core_v1beta1_instance.yaml"))

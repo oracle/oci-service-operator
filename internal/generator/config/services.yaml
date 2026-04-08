@@ -231,6 +231,8 @@ services:
                   imageId: ocid1.image.oc1..exampleuniqueID
           serviceManager:
             packagePath: core/instance
+        - kind: Vcn
+          formalSpec: vcn
     observedState:
       sdkAliases:
         AllDrgAttachment:
