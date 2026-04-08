@@ -28,6 +28,7 @@ resources:
 - bases/functions.oracle.com_applications.yaml
 - bases/functions.oracle.com_functions.yaml
 - bases/identity.oracle.com_compartments.yaml
+- bases/keymanagement.oracle.com_vaults.yaml
 - bases/mysql.oracle.com_dbsystems.yaml
 - bases/nosql.oracle.com_tables.yaml
 - bases/objectstorage.oracle.com_buckets.yaml

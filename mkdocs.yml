@@ -135,6 +135,7 @@ nav:
           - dataflow.oracle.com/v1beta1: reference/api/dataflow/v1beta1/index.md
           - functions.oracle.com/v1beta1: reference/api/functions/v1beta1/index.md
           - identity.oracle.com/v1beta1: reference/api/identity/v1beta1/index.md
+          - keymanagement.oracle.com/v1beta1: reference/api/keymanagement/v1beta1/index.md
           - mysql.oracle.com/v1beta1: reference/api/mysql/v1beta1/index.md
           - nosql.oracle.com/v1beta1: reference/api/nosql/v1beta1/index.md
           - objectstorage.oracle.com/v1beta1: reference/api/objectstorage/v1beta1/index.md

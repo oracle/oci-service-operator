@@ -98,6 +98,19 @@ packages:
         kind: Compartment
         summary: Manage OCI IAM compartments.
 
+  - package: keymanagement
+    displayName: Key Management
+    summary: Manage OCI Vault resources from Kubernetes.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to Vault while the remaining keymanagement kinds stay out of the generatedruntime rollout.
+    kindOverrides:
+      - group: keymanagement
+        kind: Vault
+        summary: Manage OCI Vault resources and their scheduled deletion lifecycle.
+
   - package: mysql
     displayName: MySQL
     summary: Manage OCI MySQL DB Systems from Kubernetes.

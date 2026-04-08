@@ -1,0 +1,32 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - keymanagement.oracle.com
+  resources:
+  - vaults
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - keymanagement.oracle.com
+  resources:
+  - vaults/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - keymanagement.oracle.com
+  resources:
+  - vaults/status
+  verbs:
+  - get
+  - patch
+  - update

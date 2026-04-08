@@ -9,6 +9,7 @@ import (
 	dataflowv1beta1 "github.com/oracle/oci-service-operator/api/dataflow/v1beta1"
 	functionsv1beta1 "github.com/oracle/oci-service-operator/api/functions/v1beta1"
 	identityv1beta1 "github.com/oracle/oci-service-operator/api/identity/v1beta1"
+	keymanagementv1beta1 "github.com/oracle/oci-service-operator/api/keymanagement/v1beta1"
 	mysqlv1beta1 "github.com/oracle/oci-service-operator/api/mysql/v1beta1"
 	nosqlv1beta1 "github.com/oracle/oci-service-operator/api/nosql/v1beta1"
 	objectstoragev1beta1 "github.com/oracle/oci-service-operator/api/objectstorage/v1beta1"
@@ -252,6 +253,25 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "identity.Compartment",
+			},
+		},
+	},
+	{
+		Name:       "KeyManagementVault",
+		SpecType:   reflect.TypeOf(keymanagementv1beta1.VaultSpec{}),
+		StatusType: reflect.TypeOf(keymanagementv1beta1.VaultStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "keymanagement.CreateVaultDetails",
+			},
+			{
+				SDKStruct: "keymanagement.UpdateVaultDetails",
+			},
+			{
+				SDKStruct: "keymanagement.Vault",
+			},
+			{
+				SDKStruct: "keymanagement.VaultSummary",
 			},
 		},
 	},
