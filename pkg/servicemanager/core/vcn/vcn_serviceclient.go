@@ -80,7 +80,7 @@ var newVcnServiceClient = func(manager *VcnServiceManager) VcnServiceClient {
 				Strategy: "confirm-delete",
 				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
 			},
-			AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{{Phase: "list", MethodName: "ListVcn", RequestTypeName: "core.ListVcnRequest", ResponseTypeName: "core.ListVcnResponse"}},
+			AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
 			Unsupported:         []generatedruntime.UnsupportedSemantic{},
 		},
 		Create: &generatedruntime.Operation{
