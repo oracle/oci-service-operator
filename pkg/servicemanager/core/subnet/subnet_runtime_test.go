@@ -489,6 +489,18 @@ func TestCreateOrUpdate_DoesNotUpdateWhileTerminating(t *testing.T) {
 	assertNoUpdateWhileLifecycleRetryable(t, coresdk.SubnetLifecycleStateTerminating)
 }
 
+func TestCreateOrUpdate_DefersCreateOnlyDriftWhileProvisioning(t *testing.T) {
+	assertCreateOnlyDriftDeferredWhileLifecycleRetryable(t, coresdk.SubnetLifecycleStateProvisioning)
+}
+
+func TestCreateOrUpdate_DefersCreateOnlyDriftWhileUpdating(t *testing.T) {
+	assertCreateOnlyDriftDeferredWhileLifecycleRetryable(t, coresdk.SubnetLifecycleStateUpdating)
+}
+
+func TestCreateOrUpdate_DefersCreateOnlyDriftWhileTerminating(t *testing.T) {
+	assertCreateOnlyDriftDeferredWhileLifecycleRetryable(t, coresdk.SubnetLifecycleStateTerminating)
+}
+
 func TestCreateOrUpdate_FailsWhenObservedTerminated(t *testing.T) {
 	updateCalls := 0
 	manager := newTestManager(&fakeSubnetOCIClient{
@@ -758,6 +770,45 @@ func assertNoUpdateWhileLifecycleRetryable(t *testing.T, state coresdk.SubnetLif
 	assert.True(t, resp.ShouldRequeue)
 	assert.Equal(t, 0, updateCalls)
 	assert.Equal(t, string(state), resource.Status.LifecycleState)
+}
+
+func assertCreateOnlyDriftDeferredWhileLifecycleRetryable(t *testing.T, state coresdk.SubnetLifecycleStateEnum) {
+	t.Helper()
+
+	expectedReason := shared.Terminating
+	switch state {
+	case coresdk.SubnetLifecycleStateProvisioning:
+		expectedReason = shared.Provisioning
+	case coresdk.SubnetLifecycleStateUpdating:
+		expectedReason = shared.Updating
+	}
+
+	updateCalls := 0
+	manager := newTestManager(&fakeSubnetOCIClient{
+		getFn: func(_ context.Context, _ coresdk.GetSubnetRequest) (coresdk.GetSubnetResponse, error) {
+			return coresdk.GetSubnetResponse{
+				Subnet: makeSDKSubnet("ocid1.subnet.oc1..existing", "test-subnet", state),
+			}, nil
+		},
+		updateFn: func(_ context.Context, _ coresdk.UpdateSubnetRequest) (coresdk.UpdateSubnetResponse, error) {
+			updateCalls++
+			return coresdk.UpdateSubnetResponse{}, nil
+		},
+	})
+
+	resource := makeSpecSubnet()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.subnet.oc1..existing")
+	resource.Spec.DnsLabel = ""
+	resource.Spec.ProhibitInternetIngress = false
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.True(t, resp.ShouldRequeue)
+	assert.Equal(t, 0, updateCalls)
+	assert.Equal(t, string(state), resource.Status.LifecycleState)
+	assert.Equal(t, string(expectedReason), resource.Status.OsokStatus.Reason)
 }
 
 func TestIsSubnetReadNotFoundOCI_RejectsAuthAmbiguity(t *testing.T) {
