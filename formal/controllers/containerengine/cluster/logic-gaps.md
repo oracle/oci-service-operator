@@ -8,6 +8,31 @@ gaps: []
 
 # Logic Gaps
 
-This scaffold row tracks the published Cluster API shape for containerengine. Replace this
-placeholder with repo-authored semantics and explicit stop conditions before
-adding formalSpec or promoting runtime ownership.
+No open logic gaps remain for the seeded `containerengine/Cluster` row after the
+scaffold placeholder was replaced with repo-authored lifecycle, mutation, and
+list-lookup semantics.
+
+## Current seeded contract
+
+- `Cluster` keeps the generated `ClusterServiceManager` shell today; this row
+  seeds the controller contract that the generated-service-manager path must
+  honor.
+- OCI lifecycle classification is explicit: `CREATING` and `UPDATING` requeue,
+  `ACTIVE` settles success, `FAILED` is terminal without requeue, and delete
+  confirmation observes `DELETING` until `DELETED`.
+- Mutation policy is explicit: only `UpdateClusterDetails` fields are mutable
+  in place. That mutable surface is `name`, `kubernetesVersion`,
+  `definedTags`, `freeformTags`, `imagePolicyConfig`, `type`,
+  `options.admissionControllerOptions`, `options.persistentVolumeConfig`, and
+  `options.serviceLbConfig`. Fields omitted from `UpdateClusterDetails`
+  remain create-only drift and never open implicit replacement.
+- Pre-create lookup semantics are explicit: `ListClusters` searches by
+  `compartmentId`, `name`, and reusable lifecycle state, and only a single
+  exact-name match in `ACTIVE`, `CREATING`, or `UPDATING` is safe to reuse.
+  `FAILED`, `DELETING`, and `DELETED` candidates are never reusable.
+- Create, update, and delete are work-request-backed at the API boundary
+  because their SDK responses return `opc-work-request-id`, but the seeded
+  lifecycle contract is still expressed in observed Cluster states rather than
+  separate work-request status objects.
+- Kubernetes secret reads and writes are out of scope for `Cluster`; the row
+  keeps `secret_side_effects = none`.

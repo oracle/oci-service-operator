@@ -90,8 +90,10 @@ services:
     phase: networking-and-infrastructure
     packageProfile: controller-backed
     selection:
-      enabled: false
-      mode: all
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Cluster
     generation:
       controller:
         strategy: generated
@@ -101,6 +103,11 @@ services:
         strategy: generated
       webhooks:
         strategy: none
+      resources:
+        - kind: Cluster
+          formalSpec: cluster
+          serviceManager:
+            packagePath: containerengine/cluster
     observedState:
       sdkAliases:
         WorkRequestLog:

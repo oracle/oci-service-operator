@@ -4,6 +4,7 @@ import (
 	"path"
 	"reflect"
 
+	"github.com/oracle/oci-go-sdk/v65/containerengine"
 	"github.com/oracle/oci-go-sdk/v65/containerinstances"
 	"github.com/oracle/oci-go-sdk/v65/core"
 	"github.com/oracle/oci-go-sdk/v65/database"
@@ -82,6 +83,12 @@ var seedTargets = []Target{
 	newTarget("psql", "DbSystem", reflect.TypeOf(psql.DbSystem{})),
 	newTarget("psql", "DbSystemCollection", reflect.TypeOf(psql.DbSystemCollection{})),
 	newTarget("psql", "DbSystemSummary", reflect.TypeOf(psql.DbSystemSummary{})),
+
+	// Container Engine CRD support
+	newTarget("containerengine", "CreateClusterDetails", reflect.TypeOf(containerengine.CreateClusterDetails{})),
+	newTarget("containerengine", "UpdateClusterDetails", reflect.TypeOf(containerengine.UpdateClusterDetails{})),
+	newTarget("containerengine", "Cluster", reflect.TypeOf(containerengine.Cluster{})),
+	newTarget("containerengine", "ClusterSummary", reflect.TypeOf(containerengine.ClusterSummary{})),
 
 	// Identity CRD support
 	newTarget("identity", "CreateCompartmentDetails", reflect.TypeOf(identity.CreateCompartmentDetails{})),

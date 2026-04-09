@@ -1123,13 +1123,13 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	cfg := loadCheckedInConfig(t)
 
 	activeServices := serviceNames(cfg.DefaultActiveServices())
-	wantActiveServices := []string{"containerinstances", "core", "database", "dataflow", "functions", "identity", "keymanagement", "mysql", "nosql", "objectstorage", "opensearch", "psql", "queue", "redis", "streaming"}
+	wantActiveServices := []string{"containerengine", "containerinstances", "core", "database", "dataflow", "functions", "identity", "keymanagement", "mysql", "nosql", "objectstorage", "opensearch", "psql", "queue", "redis", "streaming"}
 	if !slices.Equal(activeServices, wantActiveServices) {
 		t.Fatalf("DefaultActiveServices() = %v, want %v", activeServices, wantActiveServices)
 	}
 
 	services := requireServices(t, cfg, "containerengine", "containerinstances", "core", "database", "dataflow", "functions", "identity", "keymanagement", "mysql", "nosql", "objectstorage", "opensearch", "psql", "queue", "redis", "streaming", "vault")
-	assertServiceSelection(t, services["containerengine"], false, SelectionModeAll, nil)
+	assertServiceSelection(t, services["containerengine"], true, SelectionModeExplicit, []string{"Cluster"})
 	assertServiceSelection(t, services["containerinstances"], true, SelectionModeExplicit, []string{"ContainerInstance"})
 	assertServiceSelection(t, services["core"], true, SelectionModeExplicit, []string{"Instance"})
 	assertServiceSelection(t, services["database"], true, SelectionModeExplicit, []string{"AutonomousDatabase"})
@@ -1152,7 +1152,7 @@ func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
 	t.Parallel()
 
 	cfg := loadCheckedInConfig(t)
-	services := serviceConfigsByName(t, cfg, "containerinstances", "database", "mysql", "nosql", "psql", "streaming", "core", "identity", "keymanagement", "redis")
+	services := serviceConfigsByName(t, cfg, "containerengine", "containerinstances", "database", "mysql", "nosql", "psql", "streaming", "core", "identity", "keymanagement", "redis")
 
 	assertServiceGenerationStrategies(t, services["database"], generationStrategyExpectations{
 		controller:     GenerationStrategyGenerated,
@@ -1173,6 +1173,7 @@ func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
 		webhook:        GenerationStrategyManual,
 	})
 
+	assertContainerengineRuntimeRolloutMetadata(t, services["containerengine"])
 	assertDatabaseRuntimeRolloutMetadata(t, services["database"])
 	assertContainerInstancesRuntimeRolloutMetadata(t, services["containerinstances"])
 	assertMySQLRuntimeRolloutMetadata(t, services["mysql"])
@@ -1208,7 +1209,8 @@ func TestCheckedInConfigPromotesFormalSpecReferences(t *testing.T) {
 	t.Parallel()
 
 	cfg := loadCheckedInConfig(t)
-	services := serviceConfigsByName(t, cfg, "containerinstances", "identity", "core", "database", "mysql", "objectstorage", "opensearch", "psql", "streaming", "redis")
+	services := serviceConfigsByName(t, cfg, "containerengine", "containerinstances", "identity", "core", "database", "mysql", "objectstorage", "opensearch", "psql", "streaming", "redis")
+	assertFormalSpecFor(t, services["containerengine"], "Cluster", "cluster")
 	assertFormalSpecFor(t, services["containerinstances"], "ContainerInstance", "")
 	assertFormalSpecFor(t, services["identity"], "Compartment", "compartment")
 	for _, formal := range []struct {
@@ -1240,8 +1242,9 @@ func TestCheckedInConfigCoordinatesPrimaryPortPackagePaths(t *testing.T) {
 	t.Parallel()
 
 	cfg := loadCheckedInConfig(t)
-	services := serviceConfigsByName(t, cfg, "containerinstances", "core", "database", "identity", "keymanagement", "mysql", "objectstorage", "opensearch", "psql", "redis")
+	services := serviceConfigsByName(t, cfg, "containerengine", "containerinstances", "core", "database", "identity", "keymanagement", "mysql", "objectstorage", "opensearch", "psql", "redis")
 
+	assertContainerengineRuntimeRolloutMetadata(t, services["containerengine"])
 	assertContainerInstancesRuntimeRolloutMetadata(t, services["containerinstances"])
 	assertPrimaryPortOverride(t, services["core"], "Instance", "instance", "core/instance")
 	assertDatabaseRuntimeRolloutMetadata(t, services["database"])
@@ -1641,6 +1644,22 @@ func assertContainerInstancesRuntimeRolloutMetadata(t *testing.T, service *Servi
 	})
 	assertResourceOverrideCount(t, service, 1)
 	assertPrimaryPortOverride(t, service, "ContainerInstance", "", "containerinstance")
+}
+
+func assertContainerengineRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
+	t.Helper()
+
+	if service.PackageProfile != PackageProfileControllerBacked {
+		t.Fatalf("containerengine packageProfile = %q, want %q", service.PackageProfile, PackageProfileControllerBacked)
+	}
+	assertServiceGenerationStrategies(t, service, generationStrategyExpectations{
+		controller:     GenerationStrategyGenerated,
+		serviceManager: GenerationStrategyGenerated,
+		registration:   GenerationStrategyGenerated,
+		webhook:        GenerationStrategyNone,
+	})
+	assertResourceOverrideCount(t, service, 1)
+	assertPrimaryPortOverride(t, service, "Cluster", "cluster", "containerengine/cluster")
 }
 
 func assertPackageSplitContainsKind(t *testing.T, service *ServiceConfig, splitName string, wantKind string) {

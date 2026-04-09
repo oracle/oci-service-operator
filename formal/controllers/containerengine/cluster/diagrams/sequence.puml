@@ -38,10 +38,10 @@ group Lookup and bind
 alt tracked or explicit OCI identity already exists
 ServiceManager -> OCI: GetCluster
 else tracked identity is missing
-ServiceManager -> OCI: ListCluster(filters: compartment_id,\nstate)
+ServiceManager -> OCI: ListClusters(filters:\ncompartment_id, lifecycle_state,\nname)
 alt reusable OCI resource is not found
 ServiceManager -> OCI: CreateCluster
-loop create pending PROVISIONING
+loop create pending CREATING, UPDATING
 ServiceManager -> OCI: GetCluster
 end
 else reusable OCI resource already exists
@@ -52,9 +52,9 @@ end
 alt delete requested
 group Delete
 ServiceManager -> OCI: DeleteCluster
-ServiceManager -> OCI: confirm delete via GetCluster or\nListCluster
+ServiceManager -> OCI: confirm delete via GetCluster or\nListClusters
 loop delete pending DELETING
-ServiceManager -> OCI: GetCluster or ListCluster
+ServiceManager -> OCI: GetCluster or ListClusters
 end
 alt cleanup or finalizer release is blocked
 ServiceManager --> BaseReconciler: retain delete state and retry
@@ -63,25 +63,34 @@ ServiceManager --> BaseReconciler: release finalizer after delete completion
 end
 end
 else OCI state is retryable
-ServiceManager --> BaseReconciler: requeue while OCI remains in\nPROVISIONING, UPDATING, DELETING
+ServiceManager --> BaseReconciler: requeue while OCI remains in\nCREATING, UPDATING, DELETING
 else live state requires field-aware\ndrift evaluation
 group Drift handling
 note over ServiceManager,OCI
-Supported update surface: display_name
+Supported update surface: defined_tags,
+freeform_tags,
+image_policy_config.is_policy_enabled,
+image_policy_config.key_details.kms_key_id
+(+8 more)
 Reject before mutate: force-new fields
-compartment_id
-Lookup filters: compartment_id, state
+cluster_pod_network_options.cni_type,
+cluster_pod_network_options.json_data,
+compartment_id,
+endpoint_config.is_public_ip_enabled (+9
+more)
+Lookup filters: compartment_id,
+lifecycle_state, name
 end note
 opt force-new or conflicting drift is detected
 ServiceManager --> BaseReconciler: reject before OCI mutation
 end
 opt supported mutable drift is detected
-ServiceManager -> OCI: Apply UpdateCluster only for mutable\nfields display_name
+ServiceManager -> OCI: Apply UpdateCluster only for mutable\nfields defined_tags, freeform_tags,\nimage_policy_config.is_policy_enabled,\nimage_policy_config.key_details.kms_key_id\n(+8 more)
 loop update pending UPDATING
 ServiceManager -> OCI: GetCluster
 end
 end
-ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=template action=CREATED;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
+ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=cluster action=CREATED;\nupdate=tfresource.UpdateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=cluster action=UPDATED;\ndelete=tfresource.DeleteResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=cluster action=DELETED
 end
 ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
 end
@@ -108,14 +117,20 @@ archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
-provider states: create PROVISIONING; update
-UPDATING; delete DELETING
-supported drift: display_name
+provider states: create CREATING, UPDATING;
+update UPDATING; delete DELETING
+supported drift: defined_tags, freeform_tags,
+image_policy_config.is_policy_enabled,
+image_policy_config.key_details.kms_key_id (+8
+more)
 reject before mutate: force-new fields
-compartment_id
+cluster_pod_network_options.cni_type,
+cluster_pod_network_options.json_data,
+compartment_id,
+endpoint_config.is_public_ip_enabled (+9 more)
 create-only fields: none
-list lookup: scaffold_containerengine_cluster
-filters compartment_id, state
+list lookup: oci_containerengine_clusters
+filters compartment_id, lifecycle_state, name
 conflicts: none
 open gaps: none
 Scaffold metadata only; replace with
